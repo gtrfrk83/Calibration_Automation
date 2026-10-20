@@ -1,0 +1,37 @@
+# Calibration Suite: project notes
+
+Tkinter calibration suite. `Calibration_Procedure_Manager.py` (v64) launches one procedure per instrument from `Procedures/`.
+Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance-verification tables; shared engines hold the UI and run logic.
+
+## Layout
+- `Procedures/`: launchers (one per instrument), checkpoints are written here at run time (git-ignored).
+- `specs/`: `*_pv.json` test points and limits, plus the `build_*.py` scripts that wrote them. See `specs/README.txt`.
+- `drivers/`: instrument drivers, transports (VISA / pyserial), simulators (`simulated.py`). See `drivers/README.txt`.
+- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 87V, Klein MM325), `mdo4000c_verification.py`.
+- `labregistry.py` / `labregistry_ui.py`: per-asset report history and drift (`lab_registry.sqlite3`, not in the repo).
+- `report_pdf.py` / `report_dialog.py`: PDF "Calibration Data" reports.
+- `diagrams/`: hook-up PNGs. 34970A/34972A naming is in `diagrams/README_dacq.txt`.
+
+## Procedures
+WaveSurfer WS4104HD, Fluke 87V, Agilent 34401A, Fluke 8846A (verification + adjustment), Keysight 34460A/61A/65A/70A,
+Tektronix MDO4000C, Fluke 110/113/114/115/116/117, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB).
+
+## Standing rules
+- Display-only SI scaling. `calibration_procedures.sqlite3` schema is never changed (read only).
+- Instrument commands, limits, pass/fail and safety prompts are unchanged unless requested.
+- Never write passwords to logs. Writes: set, read back, compare; never retry a write.
+- Outputs to standby/off after each point.
+- Read limit tables from rendered page images, not extracted text.
+- No cover sheets, no standards-due tracking (handled by other software).
+
+## Open items: Keysight 34970A / 34972A (not yet run on hardware)
+- Unverified SCPI: `FREQ:APER`, AC bandwidth on the current channel, reading with `ROUT:SCAN` + `READ?`.
+- Calibrator external-sense / 2-wire settings are front-panel instructions, not commands.
+- Some calibrators may refuse 300 V at 50 kHz / 300 kHz; the run stops on a rejection.
+- Manual's DC current table says "Channel 209"; the procedure uses 221 (current channel).
+- Limits were transcribed from page images; compare a few rows against the manual.
+- Hook-up diagrams still to be supplied.
+
+## Testing
+Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.
+Simulated bench: `drivers/simulated.py` (`make_dacq_bench`, `make_dmm_bench`, `make_bench`).
