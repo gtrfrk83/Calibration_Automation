@@ -1,0 +1,44 @@
+Instrument drivers
+==================
+One driver per instrument MODEL. Procedures call intent-level methods
+(fluke.set_dc_volts(0.006), scope.set_vertical_scale(1, 0.01)); the command strings live only here.
+
+  transport.py          USB / GPIB / RS-232 through VISA, or RS-232 through pyserial; command log
+  base.py               Instrument base class: logging, model check, read-only retry, cleanup
+  fluke_5560a.py        Fluke 5560A calibrator (SCOPE DCV / MEASR / LEVSINE, normal V / A / ohm outputs, OPER, STBY)
+  scpi_dmm.py           Fluke 8846A and Agilent 34401A (CONF / READ?, remote/local; 8846A also has the
+                        calibration-adjustment commands - the password is masked in the command log)
+  lecroy_ws4104hd.py    LeCroy WaveSurfer 4104HD (VBS automation: scale, offset, coupling, P1, timebase)
+  simulated.py          Simulated 5560A + scope that talk to each other (no hardware needed)
+  selftest.py           Safe hardware check:  python -m drivers.selftest --sim
+                        python -m drivers.selftest --fluke ASRL9::INSTR --baud 9600 --scope USB0::...::INSTR
+  _template.py          Starting point for a new model
+
+Rules every driver follows
+  * Every setting is written, read back and compared; a mismatch raises InstrumentError.
+  * Writes are never retried automatically (their effect is unknown after a failure).
+    Only read-only queries may be retried (query_retry).
+  * cleanup() leaves outputs off / standby and never raises; procedures call it in a finally block.
+  * Every command and reply is recorded in a CommandLog. The WaveSurfer DCV test appends it to
+    ~/.calibration_suite/command_log.txt so each reading can be traced to the exact commands sent.
+
+Addresses
+  USB     USB0::0x05FF::0x1023::<serial>::0::INSTR
+  GPIB    GPIB0::6::INSTR
+  RS-232  ASRL9::INSTR   (COM9)   - pass baud/parity etc: open_visa('ASRL9::INSTR', baud=9600)
+  (pyserial instead of VISA:  SerialTransport('COM9', SerialSettings(baud=9600)))
+
+Adding a model
+  1. Copy _template.py to <maker>_<model>.py; set MODEL and IDN_MATCH.
+  2. Add one method per thing a procedure needs. Cite the manual page in the docstring.
+  3. Add the model to __init__.py, and a simulator class to simulated.py that understands the same strings.
+  4. Add it to selftest.py with only safe checks (identify, set + read back with sources off).
+  5. Run the self-test on the real instrument and read the command log before using it in a procedure.
+
+Status
+  Every procedure now talks to instruments only through these drivers: the WaveSurfer tabs, the
+  34401A and 8846A verification apps, and the 8846A adjustment app. Each run appends its exact
+  commands to ~/.calibration_suite/command_log.txt (passwords are masked).
+  Fluke 5560A in NORMAL mode (DMM procedures) does not read back OPER/STBY by default, matching the
+  original procedures; use operate()/standby() instead of operate_unverified()/standby_quiet()
+  once you have confirmed the readback on your calibrator.

@@ -1,0 +1,15 @@
+{
+  "_note": "Expanded uncertainties for the stimulus and reference instruments that are NOT in the 5560A A2LA scope. Fill in the values from your own scope of accreditation or the instrument specifications. uncertainty = rel x |reading| + abs. A blank (null) entry is reported as N/A. Points with no input signal are always N/A.",
+  "PHASE":    {"rel": null, "abs": null, "unit": "dB"},
+  "ABSAMP":   {"rel": null, "abs": null, "unit": "dB"},
+  "IMD":      {"rel": null, "abs": null, "unit": "dB"},
+  "XTALK":    {"rel": null, "abs": null, "unit": "dB"},
+  "TPAFUNC":  {"rel": null, "abs": null, "unit": "dB"},
+  "REFFREQ":  {"rel": null, "abs": null, "unit": "s"},
+  "DELTA":    {"rel": null, "abs": null, "unit": "s"},
+  "AFGFREQ":  {"rel": null, "abs": null, "unit": "Hz"},
+  "AFGAMP":   {"rel": null, "abs": null, "unit": "V"},
+  "AFGOFF":   {"rel": null, "abs": null, "unit": "V"},
+  "DVMAC":    {"rel": null, "abs": null, "unit": "V"},
+  "DVMFREQ":  {"rel": null, "abs": null, "unit": "Hz"}
+}

@@ -1,0 +1,1740 @@
+{
+ "schema": 2,
+ "options": {"hookup_meter": "fluke110"},
+ "kind": "manual-reading",
+ "source": {
+  "document": "Fluke 110/113/114/115/116/117 True-rms Multimeter - Calibration Information",
+  "pages": "7-13 (printed): functional checks p. 7, Table 3 pp. 8-10, Table 4 p. 11, VoltAlert pp. 12-13",
+  "note": "Display-reading limits as printed; 12-month calibration interval. The \"C\" version of each model uses the same steps. Calibrator: Fluke 5522A or equivalent."
+ },
+ "models": {
+  "110": {
+   "name": "Fluke 110",
+   "table": "3"
+  },
+  "113": {
+   "name": "Fluke 113",
+   "table": "4"
+  },
+  "114": {
+   "name": "Fluke 114",
+   "table": "3"
+  },
+  "115": {
+   "name": "Fluke 115",
+   "table": "3"
+  },
+  "116": {
+   "name": "Fluke 116",
+   "table": "3"
+  },
+  "117": {
+   "name": "Fluke 117",
+   "table": "3"
+  }
+ },
+ "steps": [
+  {
+   "table": "F",
+   "step": 1,
+   "section": "Functional checks",
+   "switch": "Display test",
+   "range": "",
+   "models": [
+    "110",
+    "113",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Display test",
+   "setup": "110/114/115/116/117: push the yellow button and turn the rotary switch to the display-test (all segments) position. 113: push the yellow button and turn the switch to the CHEK position. Compare the display with Figure 3 of the manual.",
+   "question": "All display segments are clear and have good contrast.",
+   "setup_key": "NONE",
+   "id": "F-1"
+  },
+  {
+   "table": "F",
+   "step": 2,
+   "section": "Functional checks",
+   "switch": "Backlight",
+   "range": "",
+   "models": [
+    "110",
+    "113",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Backlight test",
+   "setup": "Press the backlight button.",
+   "question": "The backlight turns on.",
+   "setup_key": "NONE",
+   "id": "F-2"
+  },
+  {
+   "table": "F",
+   "step": 3,
+   "section": "Functional checks",
+   "switch": "Keypad",
+   "range": "",
+   "models": [
+    "110",
+    "113",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Keypad test",
+   "setup": "110/114/115/116/117: turn the rotary switch to the yellow-button position, then push each button separately. 113: turn the meter to Ω, then push each button separately. To reset, turn the meter off and back on.",
+   "question": "Every button push beeps and activates a display annunciator.",
+   "setup_key": "NONE",
+   "id": "F-3"
+  },
+  {
+   "table": "3",
+   "step": 1,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600.0",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "0.0",
+   "high": "0.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "id": "3-1"
+  },
+  {
+   "table": "3",
+   "step": 2,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600.0",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "495.3",
+   "high": "504.7",
+   "test": "numeric",
+   "applied": {
+    "value": 500,
+    "frequency": null
+   },
+   "nominal": 500,
+   "id": "3-2"
+  },
+  {
+   "table": "3",
+   "step": 3,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6.000 k",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "4.954",
+   "high": "5.046",
+   "test": "numeric",
+   "applied": {
+    "value": 5000.0,
+    "frequency": null
+   },
+   "nominal": 5000.0,
+   "id": "3-3"
+  },
+  {
+   "table": "3",
+   "step": 4,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "60.00 k",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "49.54",
+   "high": "50.46",
+   "test": "numeric",
+   "applied": {
+    "value": 50000.0,
+    "frequency": null
+   },
+   "nominal": 50000.0,
+   "id": "3-4"
+  },
+  {
+   "table": "3",
+   "step": 5,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600.0 k",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "495.4",
+   "high": "504.6",
+   "test": "numeric",
+   "applied": {
+    "value": 500000.0,
+    "frequency": null
+   },
+   "nominal": 500000.0,
+   "id": "3-5"
+  },
+  {
+   "table": "3",
+   "step": 6,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6.000 M",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "4.954",
+   "high": "5.046",
+   "test": "numeric",
+   "applied": {
+    "value": 5000000.0,
+    "frequency": null
+   },
+   "nominal": 5000000.0,
+   "id": "3-6"
+  },
+  {
+   "table": "3",
+   "step": 7,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "40.00 M",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "9.48",
+   "high": "10.52",
+   "test": "numeric",
+   "applied": {
+    "value": 10000000.0,
+    "frequency": null
+   },
+   "nominal": 10000000.0,
+   "id": "3-7"
+  },
+  {
+   "table": "3",
+   "step": 8,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "40.00 M",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "28.48",
+   "high": "31.52",
+   "test": "numeric",
+   "applied": {
+    "value": 30000000.0,
+    "frequency": null
+   },
+   "nominal": 30000000.0,
+   "id": "3-8"
+  },
+  {
+   "table": "3",
+   "step": 9,
+   "section": "Continuity",
+   "switch": "Continuity",
+   "range": "600 Ω",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "on",
+   "applied": {
+    "value": 20,
+    "frequency": null
+   },
+   "nominal": 20,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "question": "The beeper is ON (sounding).",
+   "id": "3-9"
+  },
+  {
+   "table": "3",
+   "step": 10,
+   "section": "Continuity",
+   "switch": "Continuity",
+   "range": "600 Ω",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "off",
+   "applied": {
+    "value": 250,
+    "frequency": null
+   },
+   "nominal": 250,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "question": "The beeper is OFF (silent).",
+   "id": "3-10"
+  },
+  {
+   "table": "3",
+   "step": 11,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.947",
+   "high": "5.053",
+   "test": "numeric",
+   "applied": {
+    "value": 5,
+    "frequency": 45
+   },
+   "nominal": 5,
+   "id": "3-11"
+  },
+  {
+   "table": "3",
+   "step": 12,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.897",
+   "high": "5.103",
+   "test": "numeric",
+   "applied": {
+    "value": 5,
+    "frequency": 1000.0
+   },
+   "nominal": 5,
+   "id": "3-12"
+  },
+  {
+   "table": "3",
+   "step": 13,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.47",
+   "high": "50.53",
+   "test": "numeric",
+   "applied": {
+    "value": 50,
+    "frequency": 45
+   },
+   "nominal": 50,
+   "id": "3-13"
+  },
+  {
+   "table": "3",
+   "step": 14,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "48.97",
+   "high": "51.03",
+   "test": "numeric",
+   "applied": {
+    "value": 50,
+    "frequency": 1000.0
+   },
+   "nominal": 50,
+   "id": "3-14"
+  },
+  {
+   "table": "3",
+   "step": 15,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "593.7",
+   "high": "606.3",
+   "test": "numeric",
+   "applied": {
+    "value": 600,
+    "frequency": 45
+   },
+   "nominal": 600,
+   "id": "3-15"
+  },
+  {
+   "table": "3",
+   "step": 16,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "587.7",
+   "high": "612.3",
+   "test": "numeric",
+   "applied": {
+    "value": 600,
+    "frequency": 1000.0
+   },
+   "nominal": 600,
+   "id": "3-16"
+  },
+  {
+   "table": "3",
+   "step": 17,
+   "section": "AC volts + Hz",
+   "switch": "V~ Hz  (AC volts + frequency)",
+   "range": "6.000 V",
+   "models": [
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "49.93",
+   "high": "50.07",
+   "test": "numeric",
+   "applied": {
+    "value": 2,
+    "frequency": 50000.0
+   },
+   "nominal": 50000.0,
+   "note": "The meter displays FREQUENCY on this step. With a Fluke 9100 the calibrator frequency mode must be used.",
+   "id": "3-17"
+  },
+  {
+   "table": "3",
+   "step": 18,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "6.000 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-0.002",
+   "high": "0.002",
+   "test": "numeric",
+   "applied": {
+    "value": 0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "id": "3-18"
+  },
+  {
+   "table": "3",
+   "step": 19,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "6.000 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.973",
+   "high": "5.027",
+   "test": "numeric",
+   "applied": {
+    "value": 5,
+    "frequency": null
+   },
+   "nominal": 5,
+   "id": "3-19"
+  },
+  {
+   "table": "3",
+   "step": 20,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "60.00 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.73",
+   "high": "50.27",
+   "test": "numeric",
+   "applied": {
+    "value": 50,
+    "frequency": null
+   },
+   "nominal": 50,
+   "id": "3-20"
+  },
+  {
+   "table": "3",
+   "step": 21,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "596.8",
+   "high": "603.2",
+   "test": "numeric",
+   "applied": {
+    "value": 600,
+    "frequency": null
+   },
+   "nominal": 600,
+   "id": "3-21"
+  },
+  {
+   "table": "3",
+   "step": 22,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-603.2",
+   "high": "-596.8",
+   "test": "numeric",
+   "applied": {
+    "value": -600,
+    "frequency": null
+   },
+   "nominal": -600,
+   "id": "3-22"
+  },
+  {
+   "table": "3",
+   "step": 23,
+   "section": "AC millivolts",
+   "switch": "mV~  (AC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "5.6",
+   "high": "6.4",
+   "test": "numeric",
+   "applied": {
+    "value": 0.006,
+    "frequency": 45
+   },
+   "nominal": 0.006,
+   "id": "3-23"
+  },
+  {
+   "table": "3",
+   "step": 24,
+   "section": "AC millivolts",
+   "switch": "mV~  (AC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "587.7",
+   "high": "612.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.6,
+    "frequency": 1000.0
+   },
+   "nominal": 0.6,
+   "id": "3-24"
+  },
+  {
+   "table": "3",
+   "step": 25,
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "9.7",
+   "high": "10.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.01,
+    "frequency": null
+   },
+   "nominal": 0.01,
+   "id": "3-25"
+  },
+  {
+   "table": "3",
+   "step": 26,
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "110",
+    "114",
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "596.8",
+   "high": "603.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0.6,
+    "frequency": null
+   },
+   "nominal": 0.6,
+   "id": "3-26"
+  },
+  {
+   "table": "3",
+   "step": 27,
+   "section": "Diode",
+   "switch": "Diode",
+   "range": "2.000 V",
+   "models": [
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "1.881",
+   "high": "1.919",
+   "test": "numeric",
+   "applied": {
+    "value": 1.9,
+    "frequency": null
+   },
+   "nominal": 1.9,
+   "id": "3-27"
+  },
+  {
+   "table": "3",
+   "step": 28,
+   "section": "Capacitance",
+   "switch": "Capacitance",
+   "range": "1000 nF",
+   "models": [
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "NONE",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "0",
+   "high": "2",
+   "test": "numeric",
+   "nominal": 0.0,
+   "setup_key": "NONE",
+   "setup": "Remove the test leads / calibrator connections from the meter and leave the capacitance input OPEN. The calibrator stays in STANDBY.",
+   "id": "3-28"
+  },
+  {
+   "table": "3",
+   "step": 29,
+   "section": "Capacitance",
+   "switch": "Capacitance",
+   "range": "9999 µF",
+   "models": [
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "881",
+   "high": "919",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0009,
+    "frequency": null
+   },
+   "nominal": 0.0009,
+   "settle": 15,
+   "id": "3-29"
+  },
+  {
+   "table": "3",
+   "step": 30,
+   "section": "LoZ capacitance",
+   "switch": "LoZ capacitance",
+   "range": "10.00 µF",
+   "models": [
+    "115",
+    "116",
+    "117"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "7.18",
+   "high": "10.82",
+   "test": "numeric",
+   "applied": {
+    "value": 9e-06,
+    "frequency": null
+   },
+   "nominal": 9e-06,
+   "settle": 15,
+   "id": "3-30"
+  },
+  {
+   "table": "3",
+   "step": 31,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps)",
+   "range": "10.00 A",
+   "models": [
+    "115",
+    "117"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.87",
+   "high": "10.13",
+   "test": "numeric",
+   "applied": {
+    "value": 10,
+    "frequency": null
+   },
+   "nominal": 10,
+   "group": "AMP10",
+   "settle": 5,
+   "id": "3-31"
+  },
+  {
+   "table": "3",
+   "step": 32,
+   "section": "AC amps",
+   "switch": "A~  (AC amps)",
+   "range": "6.000 A",
+   "models": [
+    "115",
+    "117"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "4.922",
+   "high": "5.078",
+   "test": "numeric",
+   "applied": {
+    "value": 5,
+    "frequency": 45
+   },
+   "nominal": 5,
+   "group": "AMP10",
+   "settle": 5,
+   "id": "3-32"
+  },
+  {
+   "table": "3",
+   "step": 33,
+   "section": "DC µA",
+   "switch": "µA",
+   "range": "600.0 µA",
+   "models": [
+    "116"
+   ],
+   "kind": "DCI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "593.8",
+   "high": "606.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0006,
+    "frequency": null
+   },
+   "nominal": 0.0006,
+   "group": "UAMP",
+   "id": "3-33"
+  },
+  {
+   "table": "3",
+   "step": 34,
+   "section": "AC µA",
+   "switch": "µA",
+   "range": "600.0 µA",
+   "models": [
+    "116"
+   ],
+   "kind": "ACI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "590.7",
+   "high": "609.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0006,
+    "frequency": 45
+   },
+   "nominal": 0.0006,
+   "group": "UAMP",
+   "note": "The manual labels this step \"DC µAmps\" but the applied signal is 600 µA AC at 45 Hz; select AC on the meter.",
+   "id": "3-34"
+  },
+  {
+   "table": "3",
+   "step": 35,
+   "section": "Temperature",
+   "switch": "Temperature",
+   "range": "",
+   "models": [
+    "116"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Temperature, open input",
+   "setup_key": "NONE",
+   "setup": "Select Temperature with the thermocouple removed (open input). The calibrator stays in STANDBY.",
+   "question": "The display reads \"OPEn\".",
+   "id": "3-35"
+  },
+  {
+   "table": "3",
+   "step": 36,
+   "section": "Temperature",
+   "switch": "Temperature",
+   "range": "",
+   "models": [
+    "116"
+   ],
+   "kind": "TEMP",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "C",
+   "low": "-1.0",
+   "high": "1.0",
+   "test": "numeric",
+   "applied": {
+    "value": 0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "group": "TEMP",
+   "settle": 30,
+   "note": "Connect the K-type thermocouple between the meter and the calibrator; allow the junctions to stabilise (this can take several minutes).",
+   "id": "3-36"
+  },
+  {
+   "table": "3",
+   "step": 37,
+   "section": "Temperature",
+   "switch": "Temperature",
+   "range": "",
+   "models": [
+    "116"
+   ],
+   "kind": "TEMP",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "C",
+   "low": "395.0",
+   "high": "405.0",
+   "test": "numeric",
+   "applied": {
+    "value": 400,
+    "frequency": null
+   },
+   "nominal": 400.0,
+   "group": "TEMP",
+   "settle": 30,
+   "note": "Connect the K-type thermocouple between the meter and the calibrator; allow the junctions to stabilise.",
+   "id": "3-37"
+  },
+  {
+   "table": "3",
+   "step": 38,
+   "section": "AUTO-V LoZ",
+   "switch": "AUTO-V LoZ",
+   "range": "",
+   "models": [
+    "114",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "0.2",
+   "high": "0.8",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": 45
+   },
+   "nominal": 0.5,
+   "annunciator": true,
+   "id": "3-38"
+  },
+  {
+   "table": "3",
+   "step": 39,
+   "section": "AUTO-V LoZ",
+   "switch": "AUTO-V LoZ",
+   "range": "",
+   "models": [
+    "114",
+    "116",
+    "117"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "0.2",
+   "high": "0.8",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": null
+   },
+   "nominal": 0.5,
+   "annunciator": true,
+   "note": "Applied 0.5 V at 0 Hz (DC).",
+   "id": "3-39"
+  },
+  {
+   "table": "3",
+   "step": 40,
+   "section": "AUTO-V LoZ",
+   "switch": "AUTO-V LoZ",
+   "range": "",
+   "models": [
+    "114",
+    "116",
+    "117"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "489.7",
+   "high": "510.3",
+   "test": "numeric",
+   "applied": {
+    "value": 500,
+    "frequency": 500
+   },
+   "nominal": 500,
+   "id": "3-40"
+  },
+  {
+   "table": "3",
+   "step": 41,
+   "section": "VoltAlert",
+   "switch": "VoltAlert  (Hi)",
+   "range": "",
+   "models": [
+    "117"
+   ],
+   "kind": "ACV",
+   "test": "visual",
+   "group": "VOLTALERT",
+   "applied": {
+    "value": 10,
+    "frequency": 60
+   },
+   "nominal": 10,
+   "base_unit": "V",
+   "display_unit": "V",
+   "factor": 1.0,
+   "voltalert": true,
+   "setup": "Remove the meter from its holster. Keep it away from electrical noise (fluorescent or dimming lights, motors). Select VoltAlert and confirm \"Hi\" is shown, the beeper is silent and the red LED is off. Connect a double banana plug to the calibrator voltage output.",
+   "checks": [
+    {
+     "output": true,
+     "question": "With 10 V 60 Hz on: hold the top of the meter, centred, on the banana plug HI terminal - the beeper sounds continuously and the red LED lights. (Adjust position slightly if needed.)"
+    },
+    {
+     "output": false,
+     "question": "Calibrator in STANDBY: the beeper is silent and the red LED is off."
+    }
+   ],
+   "id": "3-41"
+  },
+  {
+   "table": "3",
+   "step": 42,
+   "section": "VoltAlert",
+   "switch": "VoltAlert  (Lo)",
+   "range": "",
+   "models": [
+    "117"
+   ],
+   "kind": "ACV",
+   "test": "visual",
+   "group": "VOLTALERT",
+   "applied": {
+    "value": 30,
+    "frequency": 60
+   },
+   "nominal": 30,
+   "base_unit": "V",
+   "display_unit": "V",
+   "factor": 1.0,
+   "voltalert": true,
+   "setup": "Press the range button so the display shows the Lo range. Keep the meter out of its holster and away from electrical noise.",
+   "checks": [
+    {
+     "output": true,
+     "question": "With 30 V 60 Hz on: hold the top of the meter, centred, on the banana plug HI terminal - the beeper sounds continuously and the red LED lights."
+    },
+    {
+     "output": false,
+     "question": "Calibrator in STANDBY: the beeper is silent and the red LED is off."
+    }
+   ],
+   "id": "3-42"
+  },
+  {
+   "table": "4",
+   "step": 1,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)  [113: CHEK / Ω position]",
+   "range": "600.0",
+   "models": [
+    "113"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "0.0",
+   "high": "0.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "note": "2-wire compensation applies on this step.",
+   "id": "4-1"
+  },
+  {
+   "table": "4",
+   "step": 2,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)  [113: CHEK / Ω position]",
+   "range": "600.0",
+   "models": [
+    "113"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "495.3",
+   "high": "504.7",
+   "test": "numeric",
+   "applied": {
+    "value": 500,
+    "frequency": null
+   },
+   "nominal": 500,
+   "id": "4-2"
+  },
+  {
+   "table": "4",
+   "step": 3,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)  [113: CHEK / Ω position]",
+   "range": "6.000 k",
+   "models": [
+    "113"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "4.954",
+   "high": "5.046",
+   "test": "numeric",
+   "applied": {
+    "value": 5000.0,
+    "frequency": null
+   },
+   "nominal": 5000.0,
+   "id": "4-3"
+  },
+  {
+   "table": "4",
+   "step": 4,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)  [113: CHEK / Ω position]",
+   "range": "60.00 k",
+   "models": [
+    "113"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "49.54",
+   "high": "50.46",
+   "test": "numeric",
+   "applied": {
+    "value": 50000.0,
+    "frequency": null
+   },
+   "nominal": 50000.0,
+   "id": "4-4"
+  },
+  {
+   "table": "4",
+   "step": 5,
+   "section": "Continuity",
+   "switch": "V CHEK  Continuity",
+   "range": "",
+   "models": [
+    "113"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "on",
+   "applied": {
+    "value": 20,
+    "frequency": null
+   },
+   "nominal": 20,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "question": "The beeper is ON (sounding).",
+   "id": "4-5"
+  },
+  {
+   "table": "4",
+   "step": 6,
+   "section": "Continuity",
+   "switch": "V CHEK  Continuity",
+   "range": "",
+   "models": [
+    "113"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "off",
+   "applied": {
+    "value": 250,
+    "frequency": null
+   },
+   "nominal": 250,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "question": "The beeper is OFF (silent).",
+   "id": "4-6"
+  },
+  {
+   "table": "4",
+   "step": 7,
+   "section": "Diode",
+   "switch": "V CHEK  Diode test",
+   "range": "",
+   "models": [
+    "113"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "1.859",
+   "high": "1.941",
+   "test": "numeric",
+   "applied": {
+    "value": 1.9,
+    "frequency": null
+   },
+   "nominal": 1.9,
+   "id": "4-7"
+  },
+  {
+   "table": "4",
+   "step": 8,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "6.000 V",
+   "models": [
+    "113"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "0.095",
+   "high": "0.105",
+   "test": "numeric",
+   "applied": {
+    "value": 0.1,
+    "frequency": null
+   },
+   "nominal": 0.1,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-8"
+  },
+  {
+   "table": "4",
+   "step": 9,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "6.000 V",
+   "models": [
+    "113"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.897",
+   "high": "5.103",
+   "test": "numeric",
+   "applied": {
+    "value": 5,
+    "frequency": null
+   },
+   "nominal": 5,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-9"
+  },
+  {
+   "table": "4",
+   "step": 10,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "6.000 V",
+   "models": [
+    "113"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-5.103",
+   "high": "-4.897",
+   "test": "numeric",
+   "applied": {
+    "value": -5,
+    "frequency": null
+   },
+   "nominal": -5,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-10"
+  },
+  {
+   "table": "4",
+   "step": 11,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "6.000 V",
+   "models": [
+    "113"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.897",
+   "high": "5.103",
+   "test": "numeric",
+   "applied": {
+    "value": 5,
+    "frequency": 45
+   },
+   "nominal": 5,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-11"
+  },
+  {
+   "table": "4",
+   "step": 12,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "6.000 V",
+   "models": [
+    "113"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.797",
+   "high": "5.203",
+   "test": "numeric",
+   "applied": {
+    "value": 5,
+    "frequency": 1000.0
+   },
+   "nominal": 5,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-12"
+  },
+  {
+   "table": "4",
+   "step": 13,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "60.00 V",
+   "models": [
+    "113"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "48.97",
+   "high": "51.03",
+   "test": "numeric",
+   "applied": {
+    "value": 50,
+    "frequency": null
+   },
+   "nominal": 50,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-13"
+  },
+  {
+   "table": "4",
+   "step": 14,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "60.00 V",
+   "models": [
+    "113"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-51.03",
+   "high": "-48.97",
+   "test": "numeric",
+   "applied": {
+    "value": -50,
+    "frequency": null
+   },
+   "nominal": -50,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-14"
+  },
+  {
+   "table": "4",
+   "step": 15,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "60.00 V",
+   "models": [
+    "113"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "48.97",
+   "high": "51.03",
+   "test": "numeric",
+   "applied": {
+    "value": 50,
+    "frequency": 500
+   },
+   "nominal": 50,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-15"
+  },
+  {
+   "table": "4",
+   "step": 16,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "60.00 V",
+   "models": [
+    "113"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "47.97",
+   "high": "52.03",
+   "test": "numeric",
+   "applied": {
+    "value": 50,
+    "frequency": 1000.0
+   },
+   "nominal": 50,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-16"
+  },
+  {
+   "table": "4",
+   "step": 17,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "600.0 V",
+   "models": [
+    "113"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "587.7",
+   "high": "612.3",
+   "test": "numeric",
+   "applied": {
+    "value": 600,
+    "frequency": null
+   },
+   "nominal": 600,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-17"
+  },
+  {
+   "table": "4",
+   "step": 18,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "600.0 V",
+   "models": [
+    "113"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-612.3",
+   "high": "-587.7",
+   "test": "numeric",
+   "applied": {
+    "value": -600,
+    "frequency": null
+   },
+   "nominal": -600,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-18"
+  },
+  {
+   "table": "4",
+   "step": 19,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "600.0 V",
+   "models": [
+    "113"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "587.7",
+   "high": "612.3",
+   "test": "numeric",
+   "applied": {
+    "value": 600,
+    "frequency": 45
+   },
+   "nominal": 600,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-19"
+  },
+  {
+   "table": "4",
+   "step": 20,
+   "section": "V CHEK volts",
+   "switch": "V CHEK  Volts",
+   "range": "600.0 V",
+   "models": [
+    "113"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "575.7",
+   "high": "624.3",
+   "test": "numeric",
+   "applied": {
+    "value": 600,
+    "frequency": 1000.0
+   },
+   "nominal": 600,
+   "note": "Select the range manually with the RANGE button.",
+   "id": "4-20"
+  },
+  {
+   "table": "4",
+   "step": 21,
+   "section": "Capacitance",
+   "switch": "Capacitance",
+   "range": "1000 nF",
+   "models": [
+    "113"
+   ],
+   "kind": "NONE",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "0",
+   "high": "2",
+   "test": "numeric",
+   "nominal": 0.0,
+   "setup_key": "NONE",
+   "setup": "Remove the test leads / calibrator connections from the meter and leave the capacitance input OPEN. The calibrator stays in STANDBY.",
+   "id": "4-21"
+  },
+  {
+   "table": "4",
+   "step": 22,
+   "section": "Capacitance",
+   "switch": "Capacitance",
+   "range": "9999 µF",
+   "models": [
+    "113"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "881",
+   "high": "919",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0009,
+    "frequency": null
+   },
+   "nominal": 0.0009,
+   "settle": 15,
+   "id": "4-22"
+  }
+ ]
+}

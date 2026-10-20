@@ -1,0 +1,729 @@
+{
+ "schema": 3,
+ "kind": "handheld-manual",
+ "source": {
+  "document": "Klein Tools MM325 Digital Multimeter Instruction Manual",
+  "pages": "3 (specifications), 5-10 (operation)",
+  "cite": "Klein Tools MM325 Instruction Manual, pp. 3 and 5-10",
+  "limits": "Manufacturer accuracy, +/-(% of reading + digits), one point per range at 90 % of range",
+  "note": "One test point per range at 90 % of the range; every AC point at 60 Hz. Limits are the manual's accuracy statement (+/-(% of reading + digits), 18 to 28 C) evaluated at the applied value. Diode test and continuity have no stated tolerance and are not included. Calibrator: Fluke 5560A (or 5522A)."
+ },
+ "options": {
+  "range_prompt": true,
+  "point_percent": 90,
+  "ac_frequency_hz": 60,
+  "hv_threshold_v": 60,
+  "hookup_meter": "mm325"
+ },
+ "models": {
+  "MM325": {
+   "name": "Klein Tools MM325",
+   "brand": "Klein",
+   "model_note": "manual-ranging digital multimeter, 600 V CAT III"
+  }
+ },
+ "dial": {
+  "image": "diagrams/mm325_dial.png",
+  "size": [
+   400,
+   400
+  ],
+  "center": [
+   200,
+   200
+  ],
+  "knob_radius": 84,
+  "positions": {
+   "OFF": {
+    "label": "OFF",
+    "x": 200.0,
+    "y": 42.0,
+    "angle": 0,
+    "group": "off"
+   },
+   "ACV_600": {
+    "label": "600",
+    "x": 248.8,
+    "y": 49.7,
+    "angle": 18,
+    "group": "acv"
+   },
+   "ACV_200": {
+    "label": "200",
+    "x": 292.9,
+    "y": 72.2,
+    "angle": 36,
+    "group": "acv"
+   },
+   "DIODE": {
+    "label": "diode",
+    "x": 327.8,
+    "y": 107.1,
+    "angle": 54,
+    "group": "diode"
+   },
+   "CONT": {
+    "label": "cont",
+    "x": 350.3,
+    "y": 151.2,
+    "angle": 72,
+    "group": "diode"
+   },
+   "OHM_2k": {
+    "label": "2k",
+    "x": 358.0,
+    "y": 200.0,
+    "angle": 90,
+    "group": "ohm"
+   },
+   "OHM_20k": {
+    "label": "20k",
+    "x": 350.3,
+    "y": 248.8,
+    "angle": 108,
+    "group": "ohm"
+   },
+   "OHM_200k": {
+    "label": "200k",
+    "x": 327.8,
+    "y": 292.9,
+    "angle": 126,
+    "group": "ohm"
+   },
+   "OHM_2M": {
+    "label": "2M",
+    "x": 292.9,
+    "y": 327.8,
+    "angle": 144,
+    "group": "ohm"
+   },
+   "A_10": {
+    "label": "10",
+    "x": 248.8,
+    "y": 350.3,
+    "angle": 162,
+    "group": "amp"
+   },
+   "A_200m": {
+    "label": "200m",
+    "x": 200.0,
+    "y": 358.0,
+    "angle": 180,
+    "group": "amp"
+   },
+   "A_20m": {
+    "label": "20m",
+    "x": 151.2,
+    "y": 350.3,
+    "angle": 198,
+    "group": "amp"
+   },
+   "A_200u": {
+    "label": "200µ",
+    "x": 107.1,
+    "y": 327.8,
+    "angle": 216,
+    "group": "amp"
+   },
+   "BATT_1.5V": {
+    "label": "1.5V",
+    "x": 72.2,
+    "y": 292.9,
+    "angle": 234,
+    "group": "batt"
+   },
+   "BATT_9V": {
+    "label": "9V",
+    "x": 49.7,
+    "y": 248.8,
+    "angle": 252,
+    "group": "batt"
+   },
+   "DCV_200m": {
+    "label": "200m",
+    "x": 42.0,
+    "y": 200.0,
+    "angle": 270,
+    "group": "dcv"
+   },
+   "DCV_2": {
+    "label": "2",
+    "x": 49.7,
+    "y": 151.2,
+    "angle": 288,
+    "group": "dcv"
+   },
+   "DCV_20": {
+    "label": "20",
+    "x": 72.2,
+    "y": 107.1,
+    "angle": 306,
+    "group": "dcv"
+   },
+   "DCV_200": {
+    "label": "200",
+    "x": 107.1,
+    "y": 72.2,
+    "angle": 324,
+    "group": "dcv"
+   },
+   "DCV_600": {
+    "label": "600",
+    "x": 151.2,
+    "y": 49.7,
+    "angle": 342,
+    "group": "dcv"
+   }
+  }
+ },
+ "steps": [
+  {
+   "table": "1",
+   "step": 1,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "200.0 mV",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "178.8",
+   "high": "181.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0.18,
+    "frequency": null
+   },
+   "nominal": 0.18,
+   "group": "VOHM",
+   "settle": 3,
+   "dial": "DCV_200m",
+   "ref": "p. 3",
+   "accuracy": "±(0.5 % of reading + 3 digits)",
+   "tol_text": "±(0.5 % × 180 mV + 3 × 0.1 mV) = ±1.2 mV",
+   "id": "1-1",
+   "dial_text": "V⎓ (DC volts)  -  position labelled \"200m\""
+  },
+  {
+   "table": "1",
+   "step": 2,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "2000 mV",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "1788",
+   "high": "1812",
+   "test": "numeric",
+   "applied": {
+    "value": 1.8,
+    "frequency": null
+   },
+   "nominal": 1.8,
+   "group": "VOHM",
+   "settle": 3,
+   "dial": "DCV_2",
+   "ref": "p. 3",
+   "accuracy": "±(0.5 % of reading + 3 digits)",
+   "tol_text": "±(0.5 % × 1800 mV + 3 × 1 mV) = ±12 mV",
+   "id": "1-2",
+   "dial_text": "V⎓ (DC volts)  -  position labelled \"2\""
+  },
+  {
+   "table": "1",
+   "step": 3,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "20.00 V",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "17.88",
+   "high": "18.12",
+   "test": "numeric",
+   "applied": {
+    "value": 18.0,
+    "frequency": null
+   },
+   "nominal": 18.0,
+   "group": "VOHM",
+   "settle": 3,
+   "dial": "DCV_20",
+   "ref": "p. 3",
+   "accuracy": "±(0.5 % of reading + 3 digits)",
+   "tol_text": "±(0.5 % × 18 V + 3 × 0.01 V) = ±0.12 V",
+   "id": "1-3",
+   "dial_text": "V⎓ (DC volts)  -  position labelled \"20\""
+  },
+  {
+   "table": "1",
+   "step": 4,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "200.0 V",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "178.26",
+   "high": "181.74",
+   "test": "numeric",
+   "applied": {
+    "value": 180.0,
+    "frequency": null
+   },
+   "nominal": 180.0,
+   "group": "VOHM",
+   "settle": 3,
+   "dial": "DCV_200",
+   "ref": "p. 3",
+   "accuracy": "±(0.8 % of reading + 3 digits)",
+   "tol_text": "±(0.8 % × 180 V + 3 × 0.1 V) = ±1.74 V",
+   "id": "1-4",
+   "dial_text": "V⎓ (DC volts)  -  position labelled \"200\""
+  },
+  {
+   "table": "1",
+   "step": 5,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600 V",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "532.68",
+   "high": "547.32",
+   "test": "numeric",
+   "applied": {
+    "value": 540.0,
+    "frequency": null
+   },
+   "nominal": 540.0,
+   "group": "VOHM",
+   "settle": 3,
+   "dial": "DCV_600",
+   "ref": "p. 3",
+   "accuracy": "±(0.8 % of reading + 3 digits)",
+   "tol_text": "±(0.8 % × 540 V + 3 × 1 V) = ±7.32 V",
+   "id": "1-5",
+   "dial_text": "V⎓ (DC volts)  -  position labelled \"600\""
+  },
+  {
+   "table": "1",
+   "step": 6,
+   "section": "AC volts",
+   "switch": "V~  (AC volts, 50 to 60 Hz)",
+   "range": "200.0 V",
+   "models": [
+    "MM325"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "177.9",
+   "high": "182.1",
+   "test": "numeric",
+   "applied": {
+    "value": 180.0,
+    "frequency": 60
+   },
+   "nominal": 180.0,
+   "group": "VOHM",
+   "settle": 5,
+   "dial": "ACV_200",
+   "ref": "p. 3",
+   "accuracy": "±(1.0 % of reading + 3 digits)",
+   "tol_text": "±(1.0 % × 180 V + 3 × 0.1 V) = ±2.1 V",
+   "id": "1-6",
+   "dial_text": "V~ (AC volts)  -  position labelled \"200\"",
+   "note": "The AC specification applies from 50 to 60 Hz (manual p. 3); every AC point is run at 60 Hz."
+  },
+  {
+   "table": "1",
+   "step": 7,
+   "section": "AC volts",
+   "switch": "V~  (AC volts, 50 to 60 Hz)",
+   "range": "600 V",
+   "models": [
+    "MM325"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "528.52",
+   "high": "551.48",
+   "test": "numeric",
+   "applied": {
+    "value": 540.0,
+    "frequency": 60
+   },
+   "nominal": 540.0,
+   "group": "VOHM",
+   "settle": 5,
+   "dial": "ACV_600",
+   "ref": "p. 3",
+   "accuracy": "±(1.2 % of reading + 5 digits)",
+   "tol_text": "±(1.2 % × 540 V + 5 × 1 V) = ±11.48 V",
+   "id": "1-7",
+   "dial_text": "V~ (AC volts)  -  position labelled \"600\""
+  },
+  {
+   "table": "1",
+   "step": 8,
+   "section": "Battery test",
+   "switch": "BATT  (battery test)",
+   "range": "9 V",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "7.999",
+   "high": "8.201",
+   "test": "numeric",
+   "applied": {
+    "value": 8.1,
+    "frequency": null
+   },
+   "nominal": 8.1,
+   "group": "VOHM",
+   "settle": 3,
+   "dial": "BATT_9V",
+   "ref": "p. 3",
+   "accuracy": "±(1.0 % of reading + 2 digits)",
+   "tol_text": "±(1.0 % × 8.1 V + 2 × 0.01 V) = ±0.101 V",
+   "id": "1-8",
+   "dial_text": "BATT (battery test)  -  position labelled \"9V\"",
+   "note": "The meter loads the source with about 450 Ω (about 18 mA at 8.1 V, manual p. 3). The calibrator must be able to source this current."
+  },
+  {
+   "table": "1",
+   "step": 9,
+   "section": "Battery test",
+   "switch": "BATT  (battery test)",
+   "range": "1.5 V",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "1.3345",
+   "high": "1.3655",
+   "test": "numeric",
+   "applied": {
+    "value": 1.35,
+    "frequency": null
+   },
+   "nominal": 1.35,
+   "group": "VOHM",
+   "settle": 3,
+   "dial": "BATT_1.5V",
+   "ref": "p. 3",
+   "accuracy": "±(1.0 % of reading + 2 digits)",
+   "tol_text": "±(1.0 % × 1.35 V + 2 × 0.001 V) = ±0.0155 V",
+   "id": "1-9",
+   "dial_text": "BATT (battery test)  -  position labelled \"1.5V\"",
+   "note": "The meter loads the source with about 100 Ω (about 13.5 mA at 1.35 V, manual p. 3)."
+  },
+  {
+   "table": "1",
+   "step": 10,
+   "section": "Resistance",
+   "switch": "Ω  (resistance)",
+   "range": "200.0 Ω",
+   "models": [
+    "MM325"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "178.26",
+   "high": "181.74",
+   "test": "numeric",
+   "applied": {
+    "value": 180.0,
+    "frequency": null
+   },
+   "nominal": 180.0,
+   "group": "VOHM",
+   "settle": 4,
+   "dial": "CONT",
+   "ref": "p. 3",
+   "accuracy": "±(0.8 % of reading + 3 digits)",
+   "tol_text": "±(0.8 % × 180 Ω + 3 × 0.1 Ω) = ±1.74 Ω",
+   "id": "1-10",
+   "dial_text": "Ω / continuity position (•))) - the 200 Ω range",
+   "note": "The manual lists a 200.0 Ω range (p. 3) but the dial (p. 5) has no 200 Ω label. Use the continuity position, which reads resistance (p. 10). If your meter has a separate 200 Ω position, use that. If the display does not show about 180.0, skip the point and tell your supervisor."
+  },
+  {
+   "table": "1",
+   "step": 11,
+   "section": "Resistance",
+   "switch": "Ω  (resistance)",
+   "range": "2000 Ω",
+   "models": [
+    "MM325"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "1782.6",
+   "high": "1817.4",
+   "test": "numeric",
+   "applied": {
+    "value": 1800.0,
+    "frequency": null
+   },
+   "nominal": 1800.0,
+   "group": "VOHM",
+   "settle": 4,
+   "dial": "OHM_2k",
+   "ref": "p. 3",
+   "accuracy": "±(0.8 % of reading + 3 digits)",
+   "tol_text": "±(0.8 % × 1800 Ω + 3 × 1 Ω) = ±17.4 Ω",
+   "id": "1-11",
+   "dial_text": "Ω (resistance)  -  position labelled \"2k\"",
+   "note": "Two-wire connection: the lead resistance adds to the reading."
+  },
+  {
+   "table": "1",
+   "step": 12,
+   "section": "Resistance",
+   "switch": "Ω  (resistance)",
+   "range": "20.00 kΩ",
+   "models": [
+    "MM325"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "17.826",
+   "high": "18.174",
+   "test": "numeric",
+   "applied": {
+    "value": 18000.0,
+    "frequency": null
+   },
+   "nominal": 18000.0,
+   "group": "VOHM",
+   "settle": 4,
+   "dial": "OHM_20k",
+   "ref": "p. 3",
+   "accuracy": "±(0.8 % of reading + 3 digits)",
+   "tol_text": "±(0.8 % × 18 kΩ + 3 × 0.01 kΩ) = ±0.174 kΩ",
+   "id": "1-12",
+   "dial_text": "Ω (resistance)  -  position labelled \"20k\""
+  },
+  {
+   "table": "1",
+   "step": 13,
+   "section": "Resistance",
+   "switch": "Ω  (resistance)",
+   "range": "200.0 kΩ",
+   "models": [
+    "MM325"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "178.26",
+   "high": "181.74",
+   "test": "numeric",
+   "applied": {
+    "value": 180000.0,
+    "frequency": null
+   },
+   "nominal": 180000.0,
+   "group": "VOHM",
+   "settle": 5,
+   "dial": "OHM_200k",
+   "ref": "p. 3",
+   "accuracy": "±(0.8 % of reading + 3 digits)",
+   "tol_text": "±(0.8 % × 180 kΩ + 3 × 0.1 kΩ) = ±1.74 kΩ",
+   "id": "1-13",
+   "dial_text": "Ω (resistance)  -  position labelled \"200k\""
+  },
+  {
+   "table": "1",
+   "step": 14,
+   "section": "Resistance",
+   "switch": "Ω  (resistance)",
+   "range": "2000 kΩ",
+   "models": [
+    "MM325"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "1779",
+   "high": "1821",
+   "test": "numeric",
+   "applied": {
+    "value": 1800000.0,
+    "frequency": null
+   },
+   "nominal": 1800000.0,
+   "group": "VOHM",
+   "settle": 6,
+   "dial": "OHM_2M",
+   "ref": "p. 3",
+   "accuracy": "±(1.0 % of reading + 3 digits)",
+   "tol_text": "±(1.0 % × 1800 kΩ + 3 × 1 kΩ) = ±21 kΩ",
+   "id": "1-14",
+   "dial_text": "Ω (resistance)  -  position labelled \"2M\""
+  },
+  {
+   "table": "1",
+   "step": 15,
+   "section": "DC current",
+   "switch": "A⎓  (DC current)",
+   "range": "200.0 µA",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCI",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "177.7",
+   "high": "182.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.00018,
+    "frequency": null
+   },
+   "nominal": 0.00018,
+   "group": "UAMP",
+   "settle": 4,
+   "dial": "A_200u",
+   "ref": "p. 3",
+   "accuracy": "±(1.0 % of reading + 5 digits)",
+   "tol_text": "±(1.0 % × 180 µA + 5 × 0.1 µA) = ±2.3 µA",
+   "id": "1-15",
+   "dial_text": "A⎓ (DC current)  -  position labelled \"200µ\""
+  },
+  {
+   "table": "1",
+   "step": 16,
+   "section": "DC current",
+   "switch": "A⎓  (DC current)",
+   "range": "20.00 mA",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "17.77",
+   "high": "18.23",
+   "test": "numeric",
+   "applied": {
+    "value": 0.018,
+    "frequency": null
+   },
+   "nominal": 0.018,
+   "group": "UAMP",
+   "settle": 4,
+   "dial": "A_20m",
+   "ref": "p. 3",
+   "accuracy": "±(1.0 % of reading + 5 digits)",
+   "tol_text": "±(1.0 % × 18 mA + 5 × 0.01 mA) = ±0.23 mA",
+   "id": "1-16",
+   "dial_text": "A⎓ (DC current)  -  position labelled \"20m\""
+  },
+  {
+   "table": "1",
+   "step": 17,
+   "section": "DC current",
+   "switch": "A⎓  (DC current)",
+   "range": "200.0 mA",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "177.7",
+   "high": "182.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.18,
+    "frequency": null
+   },
+   "nominal": 0.18,
+   "group": "UAMP",
+   "settle": 4,
+   "dial": "A_200m",
+   "ref": "p. 3",
+   "accuracy": "±(1.0 % of reading + 5 digits)",
+   "tol_text": "±(1.0 % × 180 mA + 5 × 0.1 mA) = ±2.3 mA",
+   "id": "1-17",
+   "dial_text": "A⎓ (DC current)  -  position labelled \"200m\""
+  },
+  {
+   "table": "1",
+   "step": 18,
+   "section": "DC current",
+   "switch": "A⎓  (DC current)",
+   "range": "10.00 A",
+   "models": [
+    "MM325"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "8.77",
+   "high": "9.23",
+   "test": "numeric",
+   "applied": {
+    "value": 9.0,
+    "frequency": null
+   },
+   "nominal": 9.0,
+   "group": "AMP10",
+   "settle": 2,
+   "dial": "A_10",
+   "ref": "p. 3",
+   "accuracy": "±(2.0 % of reading + 5 digits)",
+   "tol_text": "±(2.0 % × 9 A + 5 × 0.01 A) = ±0.23 A",
+   "id": "1-18",
+   "dial_text": "A⎓ (DC current)  -  position labelled \"10\"",
+   "note": "Meter limit: above 6 A, measure for no more than 30 s, then rest the meter for 10 minutes (manual p. 9). The output switches off after 30 s.",
+   "max_on_s": 30,
+   "recovery_s": 600
+  }
+ ]
+}

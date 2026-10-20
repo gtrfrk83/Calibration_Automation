@@ -1,0 +1,1247 @@
+{
+ "schema": 1,
+ "manufacturer": "Keysight",
+ "model": "34972A",
+ "title": "34972A Internal DMM Performance Verification",
+ "idn_match": [
+  "34972A"
+ ],
+ "interface": "usb",
+ "source": {
+  "document": "Keysight 34970A/34972A Data Acquisition / Switch Unit Service Guide",
+  "pages": "80-87 (Internal DMM Verification Tests)",
+  "note": "Limits are the published error from nominal. The default is the 1-year limit (calibration interval). The 24-hour limits apply only within 24 hours of an adjustment."
+ },
+ "periods": [
+  "24h",
+  "90d",
+  "1y"
+ ],
+ "default_period": "1y",
+ "equipment": {
+  "multiplexer": "Keysight 34901A 20-channel multiplexer in slot 200 (34902A: no current tests)",
+  "calibrator": "Fluke 5560A or 5522A (manual lists the 5700A)",
+  "zero": "Low-thermal copper shorts on the input channels"
+ },
+ "channels": {
+  "34901A": {
+   "short": 9,
+   "input": 10,
+   "current": 21,
+   "pair_offset": 10
+  },
+  "34902A": {
+   "short": 7,
+   "input": 8,
+   "current": null,
+   "pair_offset": 8
+  }
+ },
+ "general": [
+  "Ambient 18-28 C (ideally 23 +/- 1 C), humidity below 80 %.",
+  "Warm up 2 hours with a copper short connected and the multiplexer installed before verification.",
+  "Use shielded twisted-pair PTFE cable, as short as possible; connect the shield to the source LO and the calibrator LO to earth ground except where noted.",
+  "Select 6.5 digit resolution (10 PLC) for DC, resistance and frequency tests; AC tests use the 3 Hz slow filter.",
+  "Allow source settling before every reading."
+ ],
+ "sections": [
+  {
+   "id": "zero_short",
+   "title": "Zero offset: shorted input",
+   "page": "80-81",
+   "setup": "Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.",
+   "source": "none",
+   "points": [
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 0.1,
+     "limits": {
+      "24h": 3.5e-06,
+      "90d": 4e-06,
+      "1y": 4e-06
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 1,
+     "limits": {
+      "24h": 6e-06,
+      "90d": 7e-06,
+      "1y": 7e-06
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 10,
+     "limits": {
+      "24h": 3.9999999999999996e-05,
+      "90d": 4.9999999999999996e-05,
+      "1y": 4.9999999999999996e-05
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 100,
+     "limits": {
+      "24h": 0.0006,
+      "90d": 0.0006,
+      "1y": 0.0006
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 300,
+     "limits": {
+      "24h": 0.006,
+      "90d": 0.009000000000000001,
+      "1y": 0.009000000000000001
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 100,
+     "limits": {
+      "24h": 0.0035,
+      "90d": 0.004,
+      "1y": 0.004
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 1000.0,
+     "limits": {
+      "24h": 0.006,
+      "90d": 0.01,
+      "1y": 0.01
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 10000.0,
+     "limits": {
+      "24h": 0.05,
+      "90d": 0.1,
+      "1y": 0.1
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 100000.0,
+     "limits": {
+      "24h": 0.5,
+      "90d": 1,
+      "1y": 1
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 1000000.0,
+     "limits": {
+      "24h": 10,
+      "90d": 10,
+      "1y": 10
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 10000000.0,
+     "limits": {
+      "24h": 100,
+      "90d": 100,
+      "1y": 100
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 100000000.0,
+     "limits": {
+      "24h": 10000.0,
+      "90d": 10000.0,
+      "1y": 10000.0
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10
+    }
+   ]
+  },
+  {
+   "id": "zero_open",
+   "title": "Zero offset: current open",
+   "page": "80",
+   "setup": "Current input channel left OPEN. The calibrator is not used.",
+   "source": "none",
+   "points": [
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.01,
+     "limits": {
+      "24h": 1e-06,
+      "90d": 2e-06,
+      "1y": 2e-06
+     },
+     "quick": false,
+     "group": "ZERO_OPEN",
+     "role": "current",
+     "input": "open",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.1,
+     "limits": {
+      "24h": 4e-06,
+      "90d": 4.9999999999999996e-06,
+      "1y": 4.9999999999999996e-06
+     },
+     "quick": false,
+     "group": "ZERO_OPEN",
+     "role": "current",
+     "input": "open",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 1,
+     "limits": {
+      "24h": 5.9999999999999995e-05,
+      "90d": 9.999999999999999e-05,
+      "1y": 9.999999999999999e-05
+     },
+     "quick": false,
+     "group": "ZERO_OPEN",
+     "role": "current",
+     "input": "open",
+     "plc": 10
+    }
+   ]
+  },
+  {
+   "id": "dcv",
+   "title": "DC volts gain",
+   "page": "82",
+   "setup": "Calibrator voltage output to the input channel HI / LO.",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "DCV",
+     "nominal": -10,
+     "range": 10,
+     "limits": {
+      "24h": 0.00018999999999999998,
+      "90d": 0.00025,
+      "1y": 0.00039999999999999996
+     },
+     "quick": false,
+     "group": "DCV",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "24h": 6.5e-06,
+      "90d": 8e-06,
+      "1y": 9e-06
+     },
+     "quick": false,
+     "group": "DCV",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 2.6e-05,
+      "90d": 3.7e-05,
+      "1y": 4.7e-05
+     },
+     "quick": false,
+     "group": "DCV",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 10,
+     "range": 10,
+     "limits": {
+      "24h": 0.00018999999999999998,
+      "90d": 0.00025,
+      "1y": 0.00039999999999999996
+     },
+     "quick": false,
+     "group": "DCV",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 100,
+     "range": 100,
+     "limits": {
+      "24h": 0.0026000000000000003,
+      "90d": 0.0040999999999999995,
+      "1y": 0.0050999999999999995
+     },
+     "quick": false,
+     "group": "DCV",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 300,
+     "range": 300,
+     "limits": {
+      "24h": 0.012,
+      "90d": 0.0195,
+      "1y": 0.0225
+     },
+     "quick": false,
+     "group": "DCV",
+     "role": "input",
+     "plc": 10
+    }
+   ]
+  },
+  {
+   "id": "ohm4",
+   "title": "4-wire ohms gain",
+   "page": "82",
+   "setup": "Calibrator resistance output, 4-wire: force to the input channel, sense to its 4-wire partner channel.",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "OHM4",
+     "nominal": 100,
+     "range": 100,
+     "limits": {
+      "24h": 0.006500000000000001,
+      "90d": 0.012,
+      "1y": 0.014
+     },
+     "quick": false,
+     "group": "OHM4",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 1000.0,
+     "range": 1000.0,
+     "limits": {
+      "24h": 0.026000000000000002,
+      "90d": 0.09,
+      "1y": 0.11
+     },
+     "quick": false,
+     "group": "OHM4",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 10000.0,
+     "range": 10000.0,
+     "limits": {
+      "24h": 0.25,
+      "90d": 0.9,
+      "1y": 1.1
+     },
+     "quick": false,
+     "group": "OHM4",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 100000.0,
+     "range": 100000.0,
+     "limits": {
+      "24h": 2.5,
+      "90d": 9,
+      "1y": 11
+     },
+     "quick": false,
+     "group": "OHM4",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 1000000.0,
+     "range": 1000000.0,
+     "limits": {
+      "24h": 30,
+      "90d": 90,
+      "1y": 110
+     },
+     "quick": false,
+     "group": "OHM4",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 10000000.0,
+     "range": 10000000.0,
+     "limits": {
+      "24h": 1600.0,
+      "90d": 2100.0,
+      "1y": 4100.0
+     },
+     "quick": false,
+     "group": "OHM4",
+     "role": "input",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 100000000.0,
+     "range": 100000000.0,
+     "limits": {
+      "24h": 310000.0,
+      "90d": 810000.0,
+      "1y": 810000.0
+     },
+     "quick": false,
+     "group": "OHM4",
+     "role": "input",
+     "plc": 10,
+     "note": "Verify only, no adjustment required (manual footnote c)."
+    }
+   ]
+  },
+  {
+   "id": "dci",
+   "title": "DC current gain",
+   "page": "83",
+   "setup": "Calibrator current output to the current input channel.",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "DCI",
+     "nominal": 0.01,
+     "range": 0.01,
+     "limits": {
+      "24h": 1.5e-06,
+      "90d": 4.9999999999999996e-06,
+      "1y": 7e-06
+     },
+     "quick": false,
+     "group": "DCI",
+     "role": "current",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "24h": 1.4e-05,
+      "90d": 3.5e-05,
+      "1y": 5.4999999999999995e-05
+     },
+     "quick": false,
+     "group": "DCI",
+     "role": "current",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.00056,
+      "90d": 0.0009,
+      "1y": 0.0011
+     },
+     "quick": false,
+     "group": "DCI",
+     "role": "current",
+     "plc": 10
+    }
+   ]
+  },
+  {
+   "id": "acv",
+   "title": "AC volts gain",
+   "page": "84",
+   "setup": "Calibrator AC voltage output to the input channel HI / LO. 3 Hz AC filter (7 s per reading).",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "24h": 7e-05,
+      "90d": 8.999999999999999e-05,
+      "1y": 9.999999999999999e-05
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "24h": 0.00015,
+      "90d": 0.00015999999999999999,
+      "1y": 0.00016999999999999999
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 50000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.0007,
+      "90d": 0.0009,
+      "1y": 0.001
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.0015,
+      "90d": 0.0016,
+      "1y": 0.0017
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 50000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10,
+     "range": 10,
+     "limits": {
+      "24h": 0.007,
+      "90d": 0.009000000000000001,
+      "1y": 0.01
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10,
+     "range": 10,
+     "limits": {
+      "24h": 0.015,
+      "90d": 0.016,
+      "1y": 0.017
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 50000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10,
+     "range": 10,
+     "limits": {
+      "24h": 0.007,
+      "90d": 0.009000000000000001,
+      "1y": 0.01
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 10,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 0.01,
+     "range": 0.1,
+     "limits": {
+      "24h": 3.4e-05,
+      "90d": 4.4999999999999996e-05,
+      "1y": 4.6e-05
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3,
+     "note": "Isolate the calibrator output from earth ground for this point (manual footnote b)."
+    },
+    {
+     "kind": "ACV",
+     "nominal": 100,
+     "range": 100,
+     "limits": {
+      "24h": 0.07,
+      "90d": 0.09,
+      "1y": 0.1
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 100,
+     "range": 100,
+     "limits": {
+      "24h": 0.15,
+      "90d": 0.16,
+      "1y": 0.17
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 50000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 300,
+     "range": 300,
+     "limits": {
+      "24h": 0.27,
+      "90d": 0.39,
+      "1y": 0.42
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACV",
+     "nominal": 300,
+     "range": 300,
+     "limits": {
+      "24h": 0.6,
+      "90d": 0.6900000000000001,
+      "1y": 0.72
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 50000.0,
+     "filter_hz": 3,
+     "note": "Some calibrators struggle to drive the DMM and cable load at this V-Hz product; use short, low-capacitance cable. The manual says verification can be done at >195 V rms and new limits computed from the Chapter 1 specification."
+    }
+   ]
+  },
+  {
+   "id": "aci",
+   "title": "AC current gain",
+   "page": "85",
+   "setup": "Calibrator AC current output to the current input channel. 3 Hz AC filter (7 s per reading).",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "ACI",
+     "nominal": 0.01,
+     "range": 0.01,
+     "limits": {
+      "24h": 1.4e-05,
+      "90d": 1.4e-05,
+      "1y": 1.4e-05
+     },
+     "quick": false,
+     "group": "ACI",
+     "role": "current",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "24h": 0.0006,
+      "90d": 0.0006,
+      "1y": 0.0006
+     },
+     "quick": false,
+     "group": "ACI",
+     "role": "current",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.01,
+     "range": 1,
+     "limits": {
+      "24h": 0.00141,
+      "90d": 0.00141,
+      "1y": 0.00141
+     },
+     "quick": false,
+     "group": "ACI",
+     "role": "current",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    },
+    {
+     "kind": "ACI",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.0014,
+      "90d": 0.0014,
+      "1y": 0.0014
+     },
+     "quick": false,
+     "group": "ACI",
+     "role": "current",
+     "frequency": 1000.0,
+     "filter_hz": 3
+    }
+   ]
+  },
+  {
+   "id": "freq",
+   "title": "Frequency gain",
+   "page": "86",
+   "setup": "Calibrator AC voltage at the stated level and frequency to the input channel HI / LO.",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "FREQ",
+     "nominal": 100,
+     "range": 0.1,
+     "limits": {
+      "24h": 0.06,
+      "90d": 0.1,
+      "1y": 0.1
+     },
+     "quick": false,
+     "group": "FREQ",
+     "role": "input",
+     "amplitude": 0.01,
+     "note": "Isolate the calibrator output from earth ground for this point (manual footnote b)."
+    },
+    {
+     "kind": "FREQ",
+     "nominal": 100000.0,
+     "range": 1,
+     "limits": {
+      "24h": 6,
+      "90d": 10,
+      "1y": 10
+     },
+     "quick": false,
+     "group": "FREQ",
+     "role": "input",
+     "amplitude": 1
+    }
+   ]
+  },
+  {
+   "id": "zero_ohm2",
+   "title": "2-wire ohms zero (optional)",
+   "page": "81",
+   "setup": "Short on the input channel. The calibrator is not used.",
+   "source": "none",
+   "points": [
+    {
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 100,
+     "limits": {
+      "24h": 4.0035,
+      "90d": 4.004,
+      "1y": 4.004
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 1000.0,
+     "limits": {
+      "24h": 4.006,
+      "90d": 4.01,
+      "1y": 4.01
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 10000.0,
+     "limits": {
+      "24h": 4.05,
+      "90d": 4.1,
+      "1y": 4.1
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 100000.0,
+     "limits": {
+      "24h": 4.5,
+      "90d": 5.0,
+      "1y": 5.0
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 1000000.0,
+     "limits": {
+      "24h": 14.0,
+      "90d": 14.0,
+      "1y": 14.0
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 10000000.0,
+     "limits": {
+      "24h": 104.0,
+      "90d": 104.0,
+      "1y": 104.0
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 100000000.0,
+     "limits": {
+      "24h": 10004.0,
+      "90d": 10004.0,
+      "1y": 10004.0
+     },
+     "quick": false,
+     "group": "ZERO_SHORT",
+     "role": "short",
+     "input": "short",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.",
+     "opt": "ohm2"
+    }
+   ],
+   "optional": true
+  },
+  {
+   "id": "ohm2",
+   "title": "2-wire ohms gain (optional)",
+   "page": "83",
+   "setup": "Calibrator resistance output, 2-wire, to the input channel HI / LO (34901A channel 10 / 34902A channel 8 recommended).",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "OHM2",
+     "nominal": 100,
+     "range": 100,
+     "limits": {
+      "24h": 1.0065,
+      "90d": 1.012,
+      "1y": 1.014
+     },
+     "quick": false,
+     "group": "OHM2",
+     "role": "input",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 1000.0,
+     "range": 1000.0,
+     "limits": {
+      "24h": 1.026,
+      "90d": 1.09,
+      "1y": 1.11
+     },
+     "quick": false,
+     "group": "OHM2",
+     "role": "input",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 10000.0,
+     "range": 10000.0,
+     "limits": {
+      "24h": 1.25,
+      "90d": 1.9,
+      "1y": 2.1
+     },
+     "quick": false,
+     "group": "OHM2",
+     "role": "input",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 100000.0,
+     "range": 100000.0,
+     "limits": {
+      "24h": 3.5,
+      "90d": 10.0,
+      "1y": 12.0
+     },
+     "quick": false,
+     "group": "OHM2",
+     "role": "input",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 1000000.0,
+     "range": 1000000.0,
+     "limits": {
+      "24h": 31.0,
+      "90d": 91.0,
+      "1y": 111.0
+     },
+     "quick": false,
+     "group": "OHM2",
+     "role": "input",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 10000000.0,
+     "range": 10000000.0,
+     "limits": {
+      "24h": 1601.0,
+      "90d": 2101.0,
+      "1y": 4101.0
+     },
+     "quick": false,
+     "group": "OHM2",
+     "role": "input",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
+     "opt": "ohm2"
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 100000000.0,
+     "range": 100000000.0,
+     "limits": {
+      "24h": 310001.0,
+      "90d": 810001.0,
+      "1y": 810001.0
+     },
+     "quick": false,
+     "group": "OHM2",
+     "role": "input",
+     "plc": 10,
+     "note": "2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.",
+     "opt": "ohm2"
+    }
+   ],
+   "optional": true
+  },
+  {
+   "id": "opt_ac",
+   "title": "Optional AC tests",
+   "page": "87",
+   "setup": "Calibrator AC voltage output to the input channel HI / LO.",
+   "source": "calibrator",
+   "points": [
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.0007,
+      "90d": 0.0009,
+      "1y": 0.001
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 20,
+     "filter_hz": 3,
+     "opt": "ac"
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.0007,
+      "90d": 0.0009,
+      "1y": 0.001
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 20000.0,
+     "filter_hz": 3,
+     "opt": "ac"
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.0063,
+      "90d": 0.0068,
+      "1y": 0.0068
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 100000.0,
+     "filter_hz": 3,
+     "opt": "ac"
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.045,
+      "90d": 0.045,
+      "1y": 0.045
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 200000.0,
+     "filter_hz": 3,
+     "opt": "ac"
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.045,
+      "90d": 0.045,
+      "1y": 0.045
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 250000.0,
+     "filter_hz": 3,
+     "opt": "ac"
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 1,
+     "limits": {
+      "24h": 0.045,
+      "90d": 0.045,
+      "1y": 0.045
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 300000.0,
+     "filter_hz": 3,
+     "opt": "ac"
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10,
+     "range": 10,
+     "limits": {
+      "24h": 0.007,
+      "90d": 0.009000000000000001,
+      "1y": 0.01
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3,
+     "opt": "ac"
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1,
+     "range": 10,
+     "limits": {
+      "24h": 0.0034,
+      "90d": 0.0045000000000000005,
+      "1y": 0.0046
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3,
+     "opt": "ac"
+    },
+    {
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 10,
+     "limits": {
+      "24h": 0.013000000000000001,
+      "90d": 0.014,
+      "1y": 0.014060000000000001
+     },
+     "quick": false,
+     "group": "ACV",
+     "role": "input",
+     "frequency": 1000.0,
+     "filter_hz": 3,
+     "opt": "ac"
+    }
+   ],
+   "optional": true
+  }
+ ]
+}

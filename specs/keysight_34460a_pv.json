@@ -1,0 +1,1282 @@
+{
+ "schema": 1,
+ "manufacturer": "Keysight",
+ "model": "34460A",
+ "title": "34460A Performance Verification",
+ "idn_match": [
+  "34460A"
+ ],
+ "source": {
+  "document": "Keysight Truevolt Series DMM Operating and Service Guide",
+  "pages": "501-520 (tables pp. 504-520)",
+  "note": "Limits are the published error from nominal. The default is the 1-year limit (calibration interval). The manual says to compare acceptance results against the 90-day limits and to use the 24-hour limits only within 24 hours of an adjustment."
+ },
+ "periods": [
+  "24h",
+  "90d",
+  "1y",
+  "2y"
+ ],
+ "default_period": "1y",
+ "front_rear_switch": false,
+ "equipment": {
+  "zero": "Keysight 34172B low-thermal short",
+  "dc_ac_source": "Fluke 5720A",
+  "high_current": "Fluke 5725A",
+  "frequency": "Keysight 33500B generator",
+  "capacitance": "SCA-1uF capacitance standard"
+ },
+ "general": [
+  "Select 10 PLC for DC volts, DC current and resistance tests.",
+  "Warm up 90 minutes with a copper short connected before verification.",
+  "Allow source settling before every reading."
+ ],
+ "sections": [
+  {
+   "id": "zero",
+   "title": "Zero offset",
+   "page": "504",
+   "setup": "Fit the 34172B low-thermal short (input OPEN for current ranges).",
+   "points": [
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.0001,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 2e-08,
+      "90d": 2.5e-08,
+      "1y": 2.5e-08,
+      "2y": 2.5e-08
+     },
+     "quick": true,
+     "typical": false,
+     "input": "open",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.001,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 6e-08,
+      "90d": 6e-08,
+      "1y": 6e-08,
+      "2y": 6e-08
+     },
+     "quick": false,
+     "typical": false,
+     "input": "open",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.01,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 2e-06,
+      "90d": 2e-06,
+      "1y": 2e-06,
+      "2y": 2e-06
+     },
+     "quick": false,
+     "typical": false,
+     "input": "open",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.1,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 4e-06,
+      "90d": 5e-06,
+      "1y": 5e-06,
+      "2y": 5e-06
+     },
+     "quick": false,
+     "typical": false,
+     "input": "open",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 1.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 6e-05,
+      "90d": 0.0001,
+      "1y": 0.0001,
+      "2y": 0.0001
+     },
+     "quick": false,
+     "typical": false,
+     "input": "open",
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 3.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 0.0006,
+      "90d": 0.0006,
+      "1y": 0.0006,
+      "2y": 0.0006
+     },
+     "quick": false,
+     "typical": false,
+     "input": "open",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 0.1,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 6e-06,
+      "90d": 6.5e-06,
+      "1y": 6.5e-06,
+      "2y": 6.5e-06
+     },
+     "quick": true,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 1.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 9e-06,
+      "90d": 1e-05,
+      "1y": 1e-05,
+      "2y": 1e-05
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 10.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 4e-05,
+      "90d": 5e-05,
+      "1y": 5e-05,
+      "2y": 5e-05
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 100.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 0.0006,
+      "90d": 0.0006,
+      "1y": 0.0006,
+      "2y": 0.0006
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 1000.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 0.006,
+      "90d": 0.01,
+      "1y": 0.01,
+      "2y": 0.01
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 100.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 0.006,
+      "90d": 0.007,
+      "1y": 0.007,
+      "2y": 0.007
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 1000.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 0.008,
+      "90d": 0.01,
+      "1y": 0.01,
+      "2y": 0.01
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 10000.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 0.05,
+      "90d": 0.1,
+      "1y": 0.1,
+      "2y": 0.1
+     },
+     "quick": true,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 100000.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 0.5,
+      "90d": 1.0,
+      "1y": 1.0,
+      "2y": 1.0
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 1000000.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 10.0,
+      "90d": 10.0,
+      "1y": 10.0,
+      "2y": 10.0
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 10000000.0,
+     "terminal": "FRONT",
+     "limits": {
+      "24h": 100.0,
+      "90d": 100.0,
+      "1y": 100.0,
+      "2y": 100.0
+     },
+     "quick": false,
+     "typical": false,
+     "input": "short",
+     "plc": 10
+    }
+   ],
+   "source": "none"
+  },
+  {
+   "id": "dcv",
+   "title": "DC volts gain",
+   "page": "508",
+   "setup": "Calibrator voltage output to the front HI / LO input terminals.",
+   "points": [
+    {
+     "kind": "DCV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "24h": 1e-05,
+      "90d": 1.35e-05,
+      "1y": 1.55e-05,
+      "2y": 1.8e-05
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": -0.1,
+     "range": 0.1,
+     "limits": {
+      "24h": 1e-05,
+      "90d": 1.35e-05,
+      "1y": 1.55e-05,
+      "2y": 1.8e-05
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 1.0,
+     "range": 1.0,
+     "limits": {
+      "24h": 3.9e-05,
+      "90d": 7e-05,
+      "1y": 9e-05,
+      "2y": 0.000115
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": -1.0,
+     "range": 1.0,
+     "limits": {
+      "24h": 3.9e-05,
+      "90d": 7e-05,
+      "1y": 9e-05,
+      "2y": 0.000115
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 4.0,
+     "range": 10.0,
+     "limits": {
+      "24h": 0.00014,
+      "90d": 0.00025,
+      "1y": 0.00035,
+      "2y": 0.00045
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "limits": {
+      "24h": 0.00029,
+      "90d": 0.00055,
+      "1y": 0.0008,
+      "2y": 0.0011
+     },
+     "quick": true,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": -10.0,
+     "range": 10.0,
+     "limits": {
+      "24h": 0.00029,
+      "90d": 0.00055,
+      "1y": 0.0008,
+      "2y": 0.0011
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 100.0,
+     "range": 100.0,
+     "limits": {
+      "24h": 0.0036,
+      "90d": 0.0071,
+      "1y": 0.0091,
+      "2y": 0.0116
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": -100.0,
+     "range": 100.0,
+     "limits": {
+      "24h": 0.0036,
+      "90d": 0.0071,
+      "1y": 0.0091,
+      "2y": 0.0116
+     },
+     "quick": true,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": 1000.0,
+     "range": 1000.0,
+     "limits": {
+      "24h": 0.036,
+      "90d": 0.075,
+      "1y": 0.095,
+      "2y": 0.12
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCV",
+     "nominal": -500.0,
+     "range": 1000.0,
+     "limits": {
+      "24h": 0.021,
+      "90d": 0.0425,
+      "1y": 0.0525,
+      "2y": 0.0625
+     },
+     "quick": false,
+     "plc": 10
+    }
+   ],
+   "source": "calibrator"
+  },
+  {
+   "id": "dci",
+   "title": "DC current gain",
+   "page": "508",
+   "setup": "Calibrator current output to the front current (A) input and LO.",
+   "points": [
+    {
+     "kind": "DCI",
+     "nominal": 2.0,
+     "range": 3.0,
+     "limits": {
+      "24h": 0.0042,
+      "90d": 0.0046,
+      "1y": 0.0046,
+      "2y": 0.0052
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 1.0,
+     "range": 1.0,
+     "limits": {
+      "24h": 0.00056,
+      "90d": 0.0009,
+      "1y": 0.0011,
+      "2y": 0.0013
+     },
+     "quick": true,
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "24h": 1.4e-05,
+      "90d": 3.5e-05,
+      "1y": 5.5e-05,
+      "2y": 6.5e-05
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.01,
+     "range": 0.01,
+     "limits": {
+      "24h": 2.7e-06,
+      "90d": 5e-06,
+      "1y": 7e-06,
+      "2y": 8e-06
+     },
+     "quick": true,
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.001,
+     "range": 0.001,
+     "limits": {
+      "24h": 1.3e-07,
+      "90d": 3.6e-07,
+      "1y": 5.6e-07,
+      "2y": 6.6e-07
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.0001,
+     "range": 0.0001,
+     "limits": {
+      "24h": 3e-08,
+      "90d": 6.5e-08,
+      "1y": 7.5e-08,
+      "2y": 8.5e-08
+     },
+     "quick": false,
+     "plc": 10
+    }
+   ],
+   "source": "calibrator"
+  },
+  {
+   "id": "res",
+   "title": "Resistance gain",
+   "page": "509",
+   "setup": "Calibrator resistance output: 4-wire force/sense leads for 4-wire points, 2-wire leads for 2-wire points.",
+   "points": [
+    {
+     "kind": "OHM4",
+     "nominal": 100.0,
+     "range": 100.0,
+     "limits": {
+      "24h": 0.01,
+      "90d": 0.018,
+      "1y": 0.021,
+      "2y": 0.024
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 1000.0,
+     "range": 1000.0,
+     "limits": {
+      "24h": 0.038,
+      "90d": 0.12,
+      "1y": 0.15,
+      "2y": 0.18
+     },
+     "quick": true,
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 10000.0,
+     "range": 10000.0,
+     "limits": {
+      "24h": 0.35,
+      "90d": 1.2,
+      "1y": 1.5,
+      "2y": 1.8
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 100000.0,
+     "range": 100000.0,
+     "limits": {
+      "24h": 3.5,
+      "90d": 12.0,
+      "1y": 15.0,
+      "2y": 18.0
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 1000000.0,
+     "range": 1000000.0,
+     "limits": {
+      "24h": 40.0,
+      "90d": 120.0,
+      "1y": 150.0,
+      "2y": 180.0
+     },
+     "quick": false,
+     "plc": 10
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 10000000.0,
+     "range": 10000000.0,
+     "limits": {
+      "24h": 1600.0,
+      "90d": 2100.0,
+      "1y": 4100.0,
+      "2y": 6100.0
+     },
+     "quick": true,
+     "plc": 10
+    },
+    {
+     "kind": "OHM2",
+     "nominal": 100000000.0,
+     "range": 100000000.0,
+     "limits": {
+      "24h": 310000.0,
+      "90d": 810000.0,
+      "1y": 810000.0,
+      "2y": 810000.0
+     },
+     "quick": false,
+     "plc": 10
+    }
+   ],
+   "source": "calibrator"
+  },
+  {
+   "id": "freq",
+   "title": "Frequency accuracy",
+   "page": "513",
+   "setup": "Voltage source at the stated Vrms and frequency to the input terminals. CONF:FREQ DEF,MIN with 3 Hz filter and 1 s aperture.",
+   "points": [
+    {
+     "kind": "FREQ",
+     "nominal": 10.0,
+     "range": 1.0,
+     "amplitude": 0.1,
+     "limits": {
+      "24h": 0.003,
+      "90d": 0.003,
+      "1y": 0.003,
+      "2y": 0.0035
+     },
+     "quick": false,
+     "plc": null,
+     "frequency": null,
+     "filter_hz": null
+    },
+    {
+     "kind": "FREQ",
+     "nominal": 300000.0,
+     "range": 0.1,
+     "amplitude": 0.01,
+     "limits": {
+      "24h": 60.0,
+      "90d": 240.0,
+      "1y": 360.0,
+      "2y": 510.0
+     },
+     "quick": true,
+     "plc": null,
+     "frequency": null,
+     "filter_hz": null
+    }
+   ],
+   "source": "generator"
+  },
+  {
+   "id": "acv",
+   "title": "AC volts",
+   "page": "514",
+   "setup": "Calibrator AC voltage output to the front HI / LO input terminals.",
+   "points": [
+    {
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 9e-05,
+      "90d": 0.00011,
+      "1y": 0.00012,
+      "2y": 0.00013
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "frequency": 50000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.00017,
+      "90d": 0.00019,
+      "1y": 0.0002,
+      "2y": 0.00021
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "frequency": 300000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.0045,
+      "90d": 0.0045,
+      "1y": 0.0045,
+      "2y": 0.0045
+     },
+     "quick": true,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1.0,
+     "range": 1.0,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.0009,
+      "90d": 0.0011,
+      "1y": 0.0012,
+      "2y": 0.0013
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1.0,
+     "range": 1.0,
+     "frequency": 50000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.0017,
+      "90d": 0.0019,
+      "1y": 0.002,
+      "2y": 0.0021
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1.0,
+     "range": 1.0,
+     "frequency": 300000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.045,
+      "90d": 0.045,
+      "1y": 0.045,
+      "2y": 0.045
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 0.03,
+     "range": 10.0,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.002,
+      "90d": 0.003,
+      "1y": 0.003,
+      "2y": 0.003
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1.0,
+     "range": 10.0,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.0027,
+      "90d": 0.0038,
+      "1y": 0.0039,
+      "2y": 0.004
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "frequency": 10.0,
+     "filter_hz": 3,
+     "limits": {
+      "24h": 0.009,
+      "90d": 0.011,
+      "1y": 0.012,
+      "2y": 0.013
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "frequency": 100.0,
+     "filter_hz": 20,
+     "limits": {
+      "24h": 0.009,
+      "90d": 0.011,
+      "1y": 0.012,
+      "2y": 0.013
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "frequency": 20000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.009,
+      "90d": 0.011,
+      "1y": 0.012,
+      "2y": 0.013
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "frequency": 50000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.017,
+      "90d": 0.019,
+      "1y": 0.02,
+      "2y": 0.021
+     },
+     "quick": true,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "frequency": 100000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.066,
+      "90d": 0.071,
+      "1y": 0.071,
+      "2y": 0.071
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "frequency": 300000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.45,
+      "90d": 0.45,
+      "1y": 0.45,
+      "2y": 0.45
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 100.0,
+     "range": 100.0,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.09,
+      "90d": 0.11,
+      "1y": 0.12,
+      "2y": 0.13
+     },
+     "quick": true,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 100.0,
+     "range": 100.0,
+     "frequency": 50000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.17,
+      "90d": 0.19,
+      "1y": 0.2,
+      "2y": 0.21
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 70.0,
+     "range": 100.0,
+     "frequency": 300000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 3.3,
+      "90d": 3.3,
+      "1y": 3.3,
+      "2y": 3.3
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 750.0,
+     "range": 750.0,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.675,
+      "90d": 0.825,
+      "1y": 0.9,
+      "2y": 0.975
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 210.0,
+     "range": 750.0,
+     "frequency": 50000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.573,
+      "90d": 0.669,
+      "1y": 0.69,
+      "2y": 0.711
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACV",
+     "nominal": 70.0,
+     "range": 750.0,
+     "frequency": 300000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 6.6,
+      "90d": 6.6,
+      "1y": 6.6,
+      "2y": 6.6
+     },
+     "quick": false,
+     "plc": null
+    }
+   ],
+   "source": "calibrator"
+  },
+  {
+   "id": "aci",
+   "title": "AC current",
+   "page": "516",
+   "setup": "Calibrator AC current output to the front current (A) input and LO.",
+   "points": [
+    {
+     "kind": "ACI",
+     "nominal": 2.0,
+     "range": 3.0,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.0058,
+      "90d": 0.0058,
+      "1y": 0.0058,
+      "2y": 0.0058
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 2.0,
+     "range": 3.0,
+     "frequency": 5000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.0058,
+      "90d": 0.0058,
+      "1y": 0.0058,
+      "2y": 0.0058
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 1.0,
+     "range": 1.0,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.0014,
+      "90d": 0.0014,
+      "1y": 0.0014,
+      "2y": 0.0014
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 1.0,
+     "range": 1.0,
+     "frequency": 5000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.0014,
+      "90d": 0.0014,
+      "1y": 0.0014,
+      "2y": 0.0014
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.1,
+     "range": 0.1,
+     "frequency": 10.0,
+     "filter_hz": 3,
+     "limits": {
+      "24h": 0.00014,
+      "90d": 0.00014,
+      "1y": 0.00014,
+      "2y": 0.00014
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.1,
+     "range": 0.1,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.00014,
+      "90d": 0.00014,
+      "1y": 0.00014,
+      "2y": 0.00014
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.1,
+     "range": 0.1,
+     "frequency": 5000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 0.00014,
+      "90d": 0.00014,
+      "1y": 0.00014,
+      "2y": 0.00014
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.0001,
+     "range": 0.01,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 4.1e-06,
+      "90d": 4.1e-06,
+      "1y": 4.1e-06,
+      "2y": 4.1e-06
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.001,
+     "range": 0.01,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 5e-06,
+      "90d": 5e-06,
+      "1y": 5e-06,
+      "2y": 5e-06
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.01,
+     "range": 0.01,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 1.4e-05,
+      "90d": 1.4e-05,
+      "1y": 1.4e-05,
+      "2y": 1.4e-05
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.01,
+     "range": 0.01,
+     "frequency": 5000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 1.4e-05,
+      "90d": 1.4e-05,
+      "1y": 1.4e-05,
+      "2y": 1.4e-05
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.001,
+     "range": 0.001,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 1.4e-06,
+      "90d": 1.4e-06,
+      "1y": 1.4e-06,
+      "2y": 1.4e-06
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.001,
+     "range": 0.001,
+     "frequency": 5000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 1.4e-06,
+      "90d": 1.4e-06,
+      "1y": 1.4e-06,
+      "2y": 1.4e-06
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.0001,
+     "range": 0.0001,
+     "frequency": 1000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 1.4e-07,
+      "90d": 1.4e-07,
+      "1y": 1.4e-07,
+      "2y": 1.4e-07
+     },
+     "quick": false,
+     "plc": null
+    },
+    {
+     "kind": "ACI",
+     "nominal": 0.0001,
+     "range": 0.0001,
+     "frequency": 5000.0,
+     "filter_hz": 200,
+     "limits": {
+      "24h": 1.4e-07,
+      "90d": 1.4e-07,
+      "1y": 1.4e-07,
+      "2y": 1.4e-07
+     },
+     "quick": true,
+     "plc": null
+    }
+   ],
+   "source": "calibrator"
+  },
+  {
+   "id": "cap",
+   "title": "Capacitance (optional)",
+   "page": "520",
+   "setup": "Optional test. Connect a 1 uF capacitance standard (the manual uses an SCA-1uF) to the front input terminals.",
+   "points": [
+    {
+     "kind": "CAP",
+     "nominal": 1e-06,
+     "range": 1e-06,
+     "limits": {
+      "24h": 5e-09,
+      "90d": 5e-09,
+      "1y": 5e-09,
+      "2y": 5e-09
+     },
+     "quick": false,
+     "plc": null,
+     "frequency": null,
+     "filter_hz": null,
+     "note": "Single limit given in the manual (no time-period columns)."
+    },
+    {
+     "kind": "CAP",
+     "nominal": 1e-06,
+     "range": 1e-05,
+     "limits": {
+      "24h": 1.4e-08,
+      "90d": 1.4e-08,
+      "1y": 1.4e-08,
+      "2y": 1.4e-08
+     },
+     "quick": false,
+     "plc": null,
+     "frequency": null,
+     "filter_hz": null,
+     "note": "Single limit given in the manual (no time-period columns)."
+    }
+   ],
+   "source": "manual",
+   "optional": true
+  }
+ ]
+}
