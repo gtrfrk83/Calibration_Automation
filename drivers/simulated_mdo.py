@@ -37,23 +37,50 @@ class SimRF(_SimBase):
     def __init__(self, bench, key):
         super().__init__(bench, 'SIM-96270A')
         self.key = key
-        self.st = dict(f=1e6, p=-10.0, on=False)
+        # Starts in a non-default state (VRMS units, a power offset) so the driver's connect() has to put it right.
+        # stuck_on: fault injection - the output ignores OUTP OFF.
+        self.st = dict(f=1e6, p=-10.0, on=False, inst='SINE', unit='VRMS', poffs=True, foffs=False, errors=[], stuck_on=False)
         setattr(bench, key, self.st)
 
+    MIN_DBM, MAX_DBM = -130.0, 24.0       # simulator only; the real limits depend on frequency and output route
+
     def handle(self, cmd):
-        u = cmd.upper()
-        if u == '*IDN?': return 'FLUKE,96270A,SIM0001,1.0'
-        if u == '*CLS': return None
+        """Commands separated by ';' are handled in order; a leading ':' resets to the root, as in the manual's examples."""
+        reply = None
+        for part in cmd.split(';'):
+            r = self._one(part.strip().lstrip(':'))
+            if r is not None: reply = r
+        return reply
+
+    def _one(self, u0):
+        st, u = self.st, u0.upper()
+        if u == '*IDN?': return 'Fluke,96270A,SIM0001,1.00'
+        if u == '*CLS': st['errors'].clear(); return None
+        if u in ('SYST:ERR?', 'SYSTEM:ERROR?'): return st['errors'].pop(0) if st['errors'] else '0'
+        m = re.match(r'INST(?:RUMENT)?(?::SEL(?:ECT)?)?\s+(\w+)$', u)
+        if m: st['inst'] = m.group(1); st['on'] = st['on'] and st['stuck_on']; return None
+        if re.match(r'INST(?:RUMENT)?(?::SEL(?:ECT)?)?\?$', u): return st['inst']
+        m = re.match(r'UNIT:POW(?:ER)?\s+(\w+)$', u)
+        if m: st['unit'] = m.group(1); return None
+        if re.match(r'UNIT:POW(?:ER)?\?$', u): return st['unit']
+        m = re.match(r'(POW|FREQ)\w*:OFFS\w*:STAT\w*\s+(\S+)$', u)
+        if m: st['poffs' if m.group(1) == 'POW' else 'foffs'] = m.group(2) in ('1', 'ON'); return None
+        m = re.match(r'(POW|FREQ)\w*:OFFS\w*:STAT\w*\?$', u)
+        if m: return '1' if st['poffs' if m.group(1) == 'POW' else 'foffs'] else '0'
         m = re.match(r'FREQ\w*\s+([-+0-9.eE]+)$', u)
-        if m: self.st['f'] = float(m.group(1)); return None
-        if u.startswith('FREQ') and u.endswith('?'): return f"{self.st['f']:.9g}"
+        if m: st['f'] = float(m.group(1)); return None
+        if re.match(r'FREQ\w*\?$', u): return f"{st['f']:.12E}"
         m = re.match(r'POW\w*\s+([-+0-9.eE]+)$', u)
-        if m: self.st['p'] = float(m.group(1)); return None
-        if u.startswith('POW') and u.endswith('?'): return f"{self.st['p']:.4f}"
-        if u in ('OUTPUT ON', 'OUTP ON'): self.st['on'] = True; return None
-        if u in ('OUTPUT OFF', 'OUTP OFF'): self.st['on'] = False; return None
-        if u.startswith('OUTP') and u.endswith('?'): return '1' if self.st['on'] else '0'
-        raise TransportError(f'simulated 96270A: unknown command {cmd!r}')
+        if m:
+            v = float(m.group(1))
+            if st['unit'] != 'DBM' or not self.MIN_DBM <= v <= self.MAX_DBM:
+                st['errors'].append('-222,"Data out of range"'); return None
+            st['p'] = v; return None
+        if re.match(r'POW\w*\?$', u): return f"{st['p']:.12E}"
+        m = re.match(r'OUTP(?:UT)?(?::STAT(?:E)?)?\s+(\S+)$', u)
+        if m: st['on'] = m.group(1) in ('1', 'ON') or st['stuck_on']; return None
+        if re.match(r'OUTP(?:UT)?(?::STAT(?:E)?)?\?$', u): return '1' if st['on'] else '0'
+        raise TransportError(f'simulated 96270A: unknown command {u0!r}')
 
     def query(self, text): self.write(text); return self.read()
 

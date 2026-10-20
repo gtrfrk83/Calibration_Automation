@@ -208,6 +208,7 @@ Procedures/Tektronix_MDO4000C_Verification.py   (engine: mdo4000c_verification.p
   printed (a few single-digit differences exist between channels in the manual); the 50 ohm impedance test is run on every channel
   as the test record lists it; the 5 mV/div 50 ohm bandwidth point on the MDO4104C uses 500 MHz (footnote p. 99).
   NOT verified on real hardware: the Tektronix RF / digital-waveform / DVM / AFG / diagnostics SCPI strings (collected in
-  drivers/tektronix_mdo4000c.py, RF{} at the top), the 96270A command names (RF_CMD in drivers/reference_instruments.py) and the
-  5560A SCOPE SQUARE mode. Every write is checked through the instrument's event queue, so a wrong command stops the run with the
+  drivers/tektronix_mdo4000c.py, RF{} at the top) and the 5560A SCOPE SQUARE mode. The 96270A commands (RF_CMD in
+  drivers/reference_instruments.py) were checked against the 96000 Series Remote Programmers Manual (Rev. 2) but have not yet
+  been run on a real 96270A. Every write is checked through the instrument's event queue, so a wrong command stops the run with the
   instrument's message. Run the simulated bench (drivers/simulated_mdo.py) or demo mode first.

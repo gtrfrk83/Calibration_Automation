@@ -32,6 +32,11 @@ Tektronix MDO4000C, Fluke 110/113/114/115/116/117, Klein MM325, Keysight 34970A 
 - Limits were transcribed from page images; compare a few rows against the manual.
 - Hook-up diagrams still to be supplied.
 
+## Open items: Fluke 96270A driver (checked against the manual, not yet run on hardware)
+- On connect the driver selects INST SINE, UNIT:POW DBM, turns power/frequency offsets off and the output off, reading each back.
+- Frequency and level go in one message (`FREQ ...;:POW ...`) so the source applies its frequency/power coupling.
+- Output route (`OUTP:ROUT` HEAD / MICRowave) and sensor leveling (`OUTP:LEV`) are left as set on the front panel.
+
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.
 Simulated bench: `drivers/simulated.py` (`make_dacq_bench`, `make_dmm_bench`, `make_bench`).
