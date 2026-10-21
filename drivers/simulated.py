@@ -216,8 +216,9 @@ class SimDmmTransport(_SimBase):
             return None
         if u == 'SYST:REM': self.remote = True; return None
         if u == 'SYST:LOC': self.remote = False; return None
-        if u.startswith('CONF:'): self.function = u[5:].split()[0]; return None
-        if u.startswith('DET:BAND'): return None
+        if u.startswith('CONF:'): self.function = u[5:].split()[0]; self.band = 20.0; return None   # CONF resets the AC filter
+        if u == 'DET:BAND?': return f"{getattr(self, 'band', 20.0):+.6E}"
+        if u.startswith('DET:BAND '): self.band = float(u.split()[1]); return None
         m = re.match(r'CAL:SEC:STAT (ON|OFF),(\w+)$', u)
         if m: self.secure = m.group(1) == 'ON'; return None
         if u == 'CAL:SEC:STAT?': return '+1' if getattr(self, 'secure', True) else '+0'

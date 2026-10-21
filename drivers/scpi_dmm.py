@@ -66,6 +66,17 @@ class Fluke8846A(ScpiDmm):
     IDN_MATCH = ('8846',)
 
 
+    def set_ac_filter(self, hz: float = 3.0):
+        """DET:BAND <hz> (3, 20 or 200), then read it back with DET:BAND? and compare. UNVERIFIED on hardware:
+        the command and its reply format come from the 8845A/8846A programming manual, not from a bench run.
+        CONF:VOLT:AC resets the filter, so call this after configure(). A write is never retried."""
+        if hz not in (3, 20, 200):
+            raise InstrumentError(f'AC filter must be 3, 20 or 200 Hz, not {hz}')
+        self.write(f'DET:BAND {hz:g}')
+        got = float(self.query('DET:BAND?').strip().split(',')[0])
+        if abs(got - hz) > 1e-6 * max(hz, 1):
+            raise InstrumentError(f'{self.MODEL} AC filter reads back {got:g} Hz, expected {hz:g} Hz')
+
     # ---- calibration / adjustment interface (Fluke 8845A/8846A Calibration Manual) ------------------
     # Safety-critical: these change the meter's calibration. Replies are checked exactly as the
     # adjustment procedure does, and the password never appears in the command log.
