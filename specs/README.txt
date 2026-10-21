@@ -14,6 +14,9 @@ Included
   fluke_110_series_pv.json  Fluke 110/113/114/115/116/117 Calibration Information, Tables 3-4 (schema 2: manual-reading; limits are the
                             exact printed display-reading strings, each step lists the models it applies to)
   fluke_87v_pv.json         Fluke 87 Series V, 51 points (schema 2, written by build_87v_spec.py from the MDD datasheet)
+  keysight_33210a_pv.json / _33220a_ / _33250a_   function generators (schema 4, written by build_fgen_spec.py from the page images of
+                            each Service Guide's Chapter 4): 39 / 54 / 54 points; periods 90d / 1y (they differ only for the timebase)
+  fgen_332xx_reference_cmc.json  editable uncertainties for the generator procedure (RF flatness has no A2LA entry; blank = N/A)
   klein_mm325_pv.json       Klein Tools MM325 instruction manual (schema 3, written by build_mm325.py): one point per range at 90 %, AC at 60 Hz;
                             adds groups{} (cable-change prompts + hook-up diagram), dial{} (picture and position of every range) and options{}
                             (range_prompt, hv_threshold_v); per step: dial, dial_text, tol_text, max_on_s / recovery_s (10 A duty limit)
@@ -65,3 +68,16 @@ tektronix_mdo4000c_pv.json (schema 2)
   delta-time tables were parsed from the manual text, every channel table as printed.
 mdo4000c_reference_cmc.json
   Editable uncertainties for the 96270A, function generator and reference meters (rel x reading + abs). Blank = N/A on the report.
+
+Schema 4 (function generators: keysight_33210a/33220a/33250a_pv.json)
+  periods / default_period      ["90d","1y"] / "1y"
+  sections[]                    id, title, page (printed), kind, group (wiring prompt: NONE / COUNTER / STD / POWER / POWER_ATT), setup, points[]
+  points[]
+    kind                        SELFTEST | TIMEBASE | ACAMP | LFFLAT | FLAT
+    function, frequency         SIN / SQU; Hz
+    amplitude, amp_unit, load   the generator setting as printed (VRMS / VPP / DBM) and output setup (INF = High Z, or 50)
+    nominal, unit, limits       expected reading in V, Hz or dB and the +/- limit per period (SELFTEST: 0 = pass)
+    range_db                    FLAT only: attenuator range 0 / 10 / 20
+    ref                         worksheet reference recorded by this point (1k_0dB, 100k_10dB ...)
+    quick, typical, note        Q mark; the manual calls the limit a guideline (33250A square wave)
+  references.offset_N           which two references make the N dB flatness offset (worksheet step 5)

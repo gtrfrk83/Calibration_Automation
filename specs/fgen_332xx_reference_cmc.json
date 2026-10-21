@@ -1,0 +1,7 @@
+{
+  "_note": "Expanded uncertainties (k = 2) for the 33210A / 33220A / 33250A procedure that are NOT taken from the laboratory A2LA scope. AC amplitude and low-frequency flatness use the scope's AC Voltage - Measure entry and the timebase uses Frequency - Measure; set a value here to override them. RF flatness (power meter) has no scope entry, so it shows N/A until FLAT is filled in. uncertainty = rel x |reading| + abs, in the unit given. A blank (null) entry falls back to the scope, or N/A.",
+  "FLAT":     {"rel": null, "abs": null, "unit": "dB"},
+  "ACAMP":    {"rel": null, "abs": null, "unit": "V"},
+  "LFFLAT":   {"rel": null, "abs": null, "unit": "V"},
+  "TIMEBASE": {"rel": null, "abs": null, "unit": "Hz"}
+}

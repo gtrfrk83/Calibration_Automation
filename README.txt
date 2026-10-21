@@ -1,4 +1,4 @@
-CALIBRATION SUITE - restyled (Manager v63)
+CALIBRATION SUITE - restyled (Manager v65)
 ==========================================
 
 Folder layout (same as before, plus one new file):
@@ -211,3 +211,31 @@ Procedures/Tektronix_MDO4000C_Verification.py   (engine: mdo4000c_verification.p
   drivers/tektronix_mdo4000c.py, RF{} at the top), the 96270A command names (RF_CMD in drivers/reference_instruments.py) and the
   5560A SCOPE SQUARE mode. Every write is checked through the instrument's event queue, so a wrong command stops the run with the
   instrument's message. Run the simulated bench (drivers/simulated_mdo.py) or demo mode first.
+
+Keysight 33210A / Agilent 33220A / Agilent 33250A function generators
+---------------------------------------------------------------------
+Procedures/Keysight_33210A_Verification.py, Agilent_33220A_Verification.py, Agilent_33250A_Verification.py
+  (engine: fgen_verification.py; specs: specs/keysight_33210a_pv.json / _33220a_ / _33250a_, written by specs/build_fgen_spec.py)
+  Automated performance verification from Chapter 4 of each Service Guide (33210A pp. 62-77, 33220A pp. 58-72, 33250A pp. 53-67):
+  self-test, internal timebase, AC amplitude (High Z, 1 kHz), low-frequency flatness (100 kHz), and 0 / +10 / +20 dB range flatness
+  (39 points for the 33210A, 54 for the 33220A and 33250A; Quick check = the manual's Q points). Default limits 1 year; the
+  33210A / 33220A timebase is +/-100 Hz at 90 days and +/-200 Hz at 1 year, the 33250A +/-20 Hz.
+  Instruments: the generator (USB / GPIB / LAN; RS-232 on the 33250A), a Fluke 5790B (GPIB, USB, LAN or RS-232) for AC amplitude
+  and low-frequency flatness in place of the 3458A the manual lists, a frequency counter and an RF power meter with sensor and a
+  -20 dB attenuator. Leave the counter or power meter address blank to type its readings when asked.
+  Worksheet maths (manual p. 63 / 67 / 59): offset_N = 10 log(5 V100k^2) - 10 log(5 V1k^2) from the 5790B readings at 670 mV, 2 V and
+  7 V; each flatness point = P(f) - P(100 kHz) + offset_N, which is what the power meter shows in Relative Power mode with that
+  offset entered. The 100 kHz reference is read at the start of each flatness section in every run. Flatness points need their
+  reference points recorded first; re-running a reference point warns that the flatness results using it must be re-run.
+  Safety: the generator output is OFF while every setting is made (APPLy is not used because it turns the output on), switched ON
+  only to measure and OFF after every point and before every wiring prompt, each switch confirmed with OUTP?. The +20 dB range
+  (+23.9 dBm) stops if the power meter reads above +10 dBm at the 100 kHz reference (attenuator missing).
+  5790B loading: the 7 V range input is 50 kOhm (5790B manual Table 4-4), so the 7 Vrms points read about 0.1 % lower than with
+  the manual's 1 MOhm DMM (about 10 % of the +/-70.7 mV limit). No correction is applied; the point details say so.
+  Uncertainty: AC amplitude / LF flatness use the A2LA scope's AC Voltage - Measure entry, the timebase Frequency - Measure; RF
+  flatness uses specs/fgen_332xx_reference_cmc.json and shows blank until you fill it in.
+  Hook-up diagrams (optional): diagrams/hook_332xx_<GROUP>.png with GROUP = NONE, COUNTER, STD, POWER, POWER_ATT; shown in the wiring
+  prompt when present.
+  NOT verified on real hardware: every command in drivers/fluke_5790b.py and drivers/keysight_332xx.py (taken from the manuals), the
+  counter and power-meter queries (drivers.ReferenceMeter: MEASure:FREQuency? and MEASure:POWer?, no manuals supplied), and the
+  33250A RS-232 line endings. Run demo mode and the simulated bench (drivers/simulated_fgen.py) first.

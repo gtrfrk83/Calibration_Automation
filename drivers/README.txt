@@ -10,6 +10,10 @@ One driver per instrument MODEL. Procedures call intent-level methods
                         calibration-adjustment commands - the password is masked in the command log)
   lecroy_ws4104hd.py    LeCroy WaveSurfer 4104HD (VBS automation: scale, offset, coupling, P1, timebase)
   simulated.py          Simulated 5560A + scope that talk to each other (no hardware needed)
+  fluke_5790b.py        Fluke 5790B AC Measurement Standard (INPUT, EXTRIG, RANGE, MEAS? with settle wait, ERR?)
+  keysight_332xx.py     Keysight/Agilent 33210A, 33220A, 33250A generators under test (settings one at a time with the
+                        output OFF - never APPLy -, OUTP? confirmed, *TST? self-test)
+  simulated_fgen.py     Simulated generator + 5790B + counter + power meter bench for fgen_verification.py
   selftest.py           Safe hardware check:  python -m drivers.selftest --sim
                         python -m drivers.selftest --fluke ASRL9::INSTR --baud 9600 --scope USB0::...::INSTR
   _template.py          Starting point for a new model

@@ -14,6 +14,9 @@ from .keysight_dacq import Keysight34970A, Keysight34972A, KeysightDacq, channel
 from .scpi_dmm import Agilent34401A, Fluke8846A, ScpiDmm
 from .tektronix_mdo4000c import TektronixMDO4000C
 from .reference_instruments import AgilentAFG, Fluke96270A, ReferenceMeter
+from .fluke_5790b import SERIAL_DEFAULT as FLUKE_5790B_SERIAL
+from .fluke_5790b import Fluke5790B
+from .keysight_332xx import Keysight332xx, Keysight33210A, Keysight33220A, Keysight33250A
 from .transport import CommandLog, SerialSettings, SerialTransport, Transport, TransportError, VisaTransport, bus_of
 
 
