@@ -284,6 +284,8 @@ class Runner:
         self.cfg = app.cfg
         self._wired = None
         self._scope_ctx = None
+        self._sine = None                       # (vpp, Hz) currently output by the calibrator, None when unknown or in standby
+        self._start = {}                        # source level that worked for a trigger stage on an earlier channel
 
     # ---- plumbing ------------------------------------------------------------------------------------------------------------
     def check(self):
@@ -325,6 +327,7 @@ class Runner:
         try:
             return fn(p)
         finally:
+            self._sine = None
             self.io.all_outputs_off()
             if p['stim'] == 'cal':
                 self.io.cal.standby()           # confirmed: SafetyError if the calibrator does not report standby
@@ -358,6 +361,7 @@ class Runner:
     def select_levsine(self):
         cal = self.io.cal
         cal.standby_quiet()
+        self._sine = None
         cal.drain_errors()
         cal.select_scope_levsine()
         cal.check_error('SCOPE LEVSINE')
@@ -389,6 +393,9 @@ class Runner:
         if vpp > SOURCE_LIMITS['vpp_max'] or hz < SOURCE_LIMITS['f_min']:
             raise drivers.InstrumentError(f'{vpp:g} V p-p at {hz:g} Hz is outside the leveled-sine range used here')
         cal = self.io.cal
+        if self._sine == (vpp, hz) and cal.is_operating():
+            return vpp                          # already output and operating at exactly this setting: no rewrite, no settling wait
+        self._sine = None
         cal.set_levsine(vpp, hz)
         cal.check_error(f'levsine {vpp:g} V p-p {hz:g} Hz')
         amp, freq = parse_out_reply(cal.query('OUT?'))
@@ -398,9 +405,10 @@ class Runner:
             raise drivers.InstrumentError(f'Calibrator setting mismatch: asked {vpp:g} V p-p, {hz:g} Hz; OUT? reports {amp:g} V, {freq:g} Hz')
         cal.operate()
         pause(settle)
+        self._sine = (amp, hz)
         return amp
 
-    def tune_sine(self, ch, hz, start_vpp, target_pp, low=None, high=None, tol=0.05, tries=5):
+    def tune_sine(self, ch, hz, start_vpp, target_pp, low=None, high=None, tol=0.05, tries=5, count=16):
         """Closed loop: change the calibrator level until the scope's own Pk-Pk reading is in [low, high] (default target +/- tol).
         Each change is a new, read-back setting (not a retry). Returns (source vpp, measured)."""
         low = target_pp * (1 - tol) if low is None else low
@@ -409,7 +417,7 @@ class Runner:
         for _ in range(tries):
             self.check()
             vpp = self.set_sine(vpp, hz)            # the level the calibrator reports (it rounds to its resolution)
-            measured = scope.measure('PK2pk', ch)
+            measured = scope.measure('PK2pk', ch, count=count)
             if low <= measured <= high:
                 return vpp, measured
             nxt = vpp * target_pp / max(measured, 1e-9)
@@ -545,7 +553,6 @@ class Runner:
             found = edge_times(times, volts, slope)
             if found:
                 crossings.append(min(found, key=abs))
-            pause(0.2)
         period = 1.0 / freq
         spread = (max(crossings) - min(crossings)) if len(crossings) == STABLE_CAPTURES else float('inf')
         stable = locked and spread <= STABLE_JITTER_PERIODS * period
@@ -576,7 +583,10 @@ class Runner:
             last_pp = last_pp if st['meas_vpp'] == 'LAST' else st['meas_vpp']
             s.timebase(st['hscale'])
             s.trigger_edge(f'CH{ch}', st['slope'], 'AUTO', coupling='DC')        # measure the amplitude with the scope free-running
-            src, meas = self.tune_sine(ch, last_f, src if st['meas_vpp'] == 'LAST' else last_pp, last_pp, tol=0.10)
+            key = (st['step'], last_f, last_pp)
+            start = src if st['meas_vpp'] == 'LAST' else self._start.get(key, last_pp)
+            src, meas = self.tune_sine(ch, last_f, start, last_pp, tol=0.10, count=3)     # Sample mode: no averaging to wait for
+            self._start[key] = src
             ok, detail = self.check_stable(ch, last_f, st['slope'])
             results.append(dict(step=st['step'], stable=ok, measured_vpp=meas, source_vpp=src, **detail))
         self.io.cal.standby_quiet()
@@ -603,11 +613,13 @@ class Runner:
             s.timebase(st['hscale'])
             s.trigger_edge('EXT', st['slope'], 'AUTO', coupling='DC')
             if 'ch1_vpp' in st:
-                src, meas = self.tune_sine(1, last_f, st['ch1_vpp'] * 1.5, st['ch1_vpp'], tol=0.10)
+                key = (st['step'], last_f)
+                src, meas = self.tune_sine(1, last_f, self._start.get(key, st['ch1_vpp'] * 1.5), st['ch1_vpp'], tol=0.10, count=3)
+                self._start[key] = src
             else:
                 src = src if st.get('src_vpp') == 'LAST' else st['src_vpp']
                 self.set_sine(src, last_f)
-                meas = s.measure('PK2pk', 1)
+                meas = s.measure('PK2pk', 1, count=3)
             row = dict(step=st['step'], source_vpp=src, ch1_vpp=meas, freq=last_f)
             if st['check']:
                 ok, detail = self.check_stable(1, last_f, st['slope'], strict_level=False)
