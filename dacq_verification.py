@@ -602,7 +602,7 @@ class App:
         for p in POINTS:
             r = self.results.get(str(p['id']))
             if not r: continue
-            rows.append(report_pdf.point_row(p, r['reading'], r['result'] == 'FAIL', section=self.report_section(p)))
+            rows.append(report_pdf.point_row(p, r['reading'], r['result'] == 'FAIL', section=self.report_section(p), standard=self.cal_key))
         return rows
 
     def export_pdf(self):
@@ -620,7 +620,7 @@ class App:
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Keysight {MODEL}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Limits applied', self.period.get()),
                                                                  ('Source', f'Keysight 34970A/34972A Service Guide, pp. 80-87 (Internal DMM Verification)')],
-                                             demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows))
+                                             demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, self.cal_key))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
         except Exception as exc:

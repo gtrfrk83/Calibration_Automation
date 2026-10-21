@@ -146,7 +146,7 @@ def uncertainty_note(rows, standard=None) -> str:
     return note
 
 
-def point_row(p, reading, failed, section='', mixed=False):
+def point_row(p, reading, failed, section='', mixed=False, standard=None):
     """Report row for a verification point dict (kind, nominal, range, unit, error or low/high, frequency ...)."""
     zero = p.get('zero_offset') or p.get('source') == 'none'
     low = p['low'] if 'low' in p else p['nominal'] - p['error']
@@ -154,7 +154,7 @@ def point_row(p, reading, failed, section='', mixed=False):
     q = dict(p, mixed=mixed)
     freq = None if (zero or p['kind'] == 'FREQ') else p.get('frequency')
     return cert_row(point_description(q), p['nominal'], low, high, p['unit'], reading, failed, section=section, frequency=freq,
-                    uncertainty=point_uncertainty(p))
+                    uncertainty=point_uncertainty(p, standard))
 
 
 def cert_row(description, nominal, low, high, unit, reading=None, failed=False, as_left='Same', uncertainty='',

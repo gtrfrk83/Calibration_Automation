@@ -62,6 +62,15 @@ class T(unittest.TestCase):
         sm.set_standard_field(self.a.id, 'divisor', None, path=DB)
         self.assertTrue(sm.import_data(sm.export_data(self.a.id, path=DB), path=DB))
 
+    def test_report_rows_use_calibrator(self):
+        import report_pdf
+        p = dict(kind='DCV', nominal=10, unit='V', range=None, frequency=None, error=1e-3)
+        cmc = report_pdf.point_row(p, 10, False)['Uncertainty']
+        with_cal = report_pdf.point_row(p, 10, False, standard='5522A')['Uncertainty']
+        self.assertNotEqual(cmc, with_cal)
+        zero = dict(p, nominal=0, source='none')
+        self.assertEqual(report_pdf.point_row(zero, 0, False, standard='5522A')['Uncertainty'], '')
+
     def test_bad_db_never_raises(self):
         self.assertEqual(sm.standards(path='/nonexistent/x.sqlite3'), [])
         self.assertIsNone(sm.standard('5522A', '/nonexistent/x.sqlite3'))

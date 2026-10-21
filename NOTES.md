@@ -70,6 +70,7 @@ Simulated bench: `drivers/simulated.py` (`make_dacq_bench`, `make_dmm_bench`, `m
   u(resolution) = calibrator last digit / sqrt(12), EMU = k * RSS, k = 2.  Reported = larger of budget and A2LA scope CMC, rounded UP (never below either).
   `audit(reported, budget)` returns OK / UNDER CMC / UNDER BUDGET / NOT IN SCOPE.
 - `report_pdf.point_uncertainty(p, standard=None)` uses the budget when the calibrator model is passed (handheld_dmm passes 5522A / 5560A from its calibrator
-  choice).  The Truevolt, dacq, MDO4000C, FGEN and WaveSurfer engines are still CMC-only.
+  choice; truevolt_verification, Procedures/Agilent_34401A.py and Procedures/Fluke_8846A_Verification.py pass 5560A; dacq_verification passes the selected
+  calibrator).  Every multimeter procedure now uses the budget.  The MDO4000C, FGEN and WaveSurfer (oscilloscope / generator) engines are still CMC-only.
 - "Standards Specs" tab: divisor, assets, calibrator resolution per range (logged in spec_changes), sheet issues, "Check an EMU".
 - Tests: `python -m unittest tests.test_specmanager`.
