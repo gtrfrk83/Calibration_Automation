@@ -20,6 +20,9 @@ Included
   fluke_287_289_pv.json     Fluke 287 / 289 Calibration Manual pp. 14-20 (schema 2, written by build_28x_spec.py from the page images):
                             functional checks, Table 3, Table 4; per point 'ir' (reading unit, range code, rel, lowpass, functions),
                             'rel_zero', 'prompt', 'ramp'; options.table_order runs Table 3 before Table 4
+                            options.auto_ramp (handheld-meter specs; default true): false = voltages above 100 V are set straight to
+                            the test value instead of in 50 V steps 5 s apart. It is false in the 87V, 110-series, 287/289 and MM325 specs;
+                            a per-point 'ramp' list still runs regardless.
   klein_mm325_pv.json       Klein Tools MM325 instruction manual (schema 3, written by build_mm325.py): one point per range at 90 %, AC at 60 Hz;
                             adds groups{} (cable-change prompts + hook-up diagram), dial{} (picture and position of every range) and options{}
                             (range_prompt, hv_threshold_v); per step: dial, dial_text, tol_text, max_on_s / recovery_s (10 A duty limit)
