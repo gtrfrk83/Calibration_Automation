@@ -114,7 +114,7 @@ class SimFlukeTransport(_SimBase):
         if u == 'SCOPE OFF': f['scope'], f['func'] = 'OFF', 'NONE'; return None
         if u == 'SCOPE?': return f['scope']
         if u == 'FUNC?': return f['func']
-        if u.startswith('OUT_IMP '): f['imp'] = cmd.split()[1].upper(); return None
+        if u.startswith('OUT_IMP '): f['imp'] = '1M' if '1M' in cmd.split()[1].upper() else '50'; return None
         if u == 'OUT_IMP?': return '1000000,OHM' if f['imp'] == '1M' else '50,OHM'
         if u.startswith('TC_TYPE '): f['tc'] = cmd.split()[1].upper(); return None
         m = re.match(r'OUT\s+([-+0-9.eE]+)(V|A|OHM|F|NF|UF|CEL)(?:,\s*([0-9.]+)\s*(HZ|KHZ|MHZ|GHZ))?$', u)

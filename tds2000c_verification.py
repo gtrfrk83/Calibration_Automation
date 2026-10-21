@@ -331,8 +331,27 @@ class Runner:
         cal = self.io.cal
         cal.standby_quiet()
         cal.drain_errors()                      # an error left from earlier is never blamed on this setup (it is in the command log)
-        cal.select_scope_dcv('1M')
-        cal.check_error('SCOPE DCV / OUT_IMP 1M')   # name the setup command if it was the one rejected
+        if self.io.is_5560:
+            # The 5560A rejects 'OUT_IMP 1M' (-117, seen on the bench) and answers OUT_IMP? with Z1M, so the impedance is only READ here:
+            # SCOPE DCV output is 1 MOhm and the reply must say so. (Fluke5560A.select_scope_dcv is shared and left unchanged.)
+            cal.write('SCOPE DCV')
+            cal.check_error('SCOPE DCV')
+            function = cal.query('FUNC?').strip().upper()
+            mode = cal.query('SCOPE?').strip().upper()
+            if function != 'SDCV' or mode != 'VOLT':
+                raise drivers.InstrumentError(f'5560A did not select SCOPE DCV: FUNC?={function!r}, SCOPE?={mode!r}')
+            is_1m = lambda r: '1M' in r or r.startswith('1000000')
+            imp = cal.query('OUT_IMP?').strip().upper()
+            if not is_1m(imp):                  # only if it is not already 1 MOhm (e.g. left at 50 Ohm): one write, read back, never repeated
+                cal.write('OUT_IMP Z1M')        # argument form taken from the reply 'Z1M'; UNVERIFIED on the 5560A
+                cal.check_error('OUT_IMP Z1M')
+                imp = cal.query('OUT_IMP?').strip().upper()
+                if not is_1m(imp):
+                    raise drivers.InstrumentError(f'5560A SCOPE output impedance is {imp!r}, not 1 MOhm; set it on the calibrator front panel')
+            cal.check_error('OUT_IMP?')
+        else:
+            cal.select_scope_dcv('1M')
+            cal.check_error('SCOPE VOLT / OUT_IMP 1M')   # 5520A/5522A path (unverified): name the command if it is rejected
 
     def apply_dc(self, volts, settle=2.0):
         cal = self.io.cal
