@@ -25,6 +25,7 @@ from tkinter import ttk, messagebox, filedialog, simpledialog
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, report and drivers sit next to the Manager
 import ui_theme as ui
+import datamode
 import drivers
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
@@ -423,35 +424,38 @@ def _db_row(p, r, failed, sec, unc):
             'As Left': 'Same', 'Uncertainty': unc}
 
 
-def certificate_rows(results):
+def certificate_row(p, r):
+    """The report row of one recorded point (r = its record), or None."""
     import report_pdf
+    failed = r['result'] == 'FAIL'
+    sec = p['section_title']
+    if p['kind'] == 'SELFTEST':
+        return {'Section': sec, 'Description': p['desc'], 'Nominal': 'Pass', 'Tolerance -': 'N/A', 'Tolerance +': 'N/A', 'UOM': '',
+                'As Found': 'Pass' if r['reading'] == 0 else 'Fail', 'OOT': 'OOT' if failed else '', 'As Left': 'Same', 'Uncertainty': ''}
+    unc, _src = point_uncertainty(p)
+    if p['unit'] == 'dB':
+        return _db_row(p, r, failed, sec, unc)
+    desc = p['desc'] + (' (typical)' if p.get('typical') else '')
+    if p['kind'] == 'TIMEBASE' and r.get('raw', {}).get('reference'):
+        desc += f"; counter timebase {r['raw']['reference']}"
+    return report_pdf.cert_row(desc, p['nominal'], p['nominal'] - p['error'], p['nominal'] + p['error'], p['unit'],
+                               r['reading'], failed, section=sec, uncertainty=unc)
+
+
+def certificate_rows(results):
+    """Rows for one result set (As Found only); the window builds As Found + As Left rows with App.certificate_rows."""
     rows = []
     for p in POINTS:
         r = results.get(str(p['id']))
-        if not r:
-            continue
-        failed = r['result'] == 'FAIL'
-        sec = p['section_title']
-        if p['kind'] == 'SELFTEST':
-            rows.append({'Section': sec, 'Description': p['desc'], 'Nominal': 'Pass', 'Tolerance -': 'N/A', 'Tolerance +': 'N/A', 'UOM': '',
-                         'As Found': 'Pass' if r['reading'] == 0 else 'Fail', 'OOT': 'OOT' if failed else '', 'As Left': 'Same', 'Uncertainty': ''})
-            continue
-        unc, _src = point_uncertainty(p)
-        if p['unit'] == 'dB':
-            rows.append(_db_row(p, r, failed, sec, unc))
-            continue
-        desc = p['desc'] + (' (typical)' if p.get('typical') else '')
-        if p['kind'] == 'TIMEBASE' and r.get('raw', {}).get('reference'):
-            desc += f"; counter timebase {r['raw']['reference']}"
-        rows.append(report_pdf.cert_row(desc, p['nominal'], p['nominal'] - p['error'], p['nominal'] + p['error'], p['unit'],
-                                        r['reading'], failed, section=sec, uncertainty=unc))
+        if r:
+            rows.append(certificate_row(p, r))
     return rows
 
 
 # ================================================================================================================
 # application
 # ================================================================================================================
-class App:
+class App(datamode.DataModeMixin):
     WIRING = {
         'NONE': ('Self-test', [('Disconnect', 'Remove any cable from the generator OUTPUT. No connections are needed for the self-test.')]),
         'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter channel 1 input with a 50 ohm BNC cable.'),
@@ -480,7 +484,7 @@ class App:
         self.results = {}; self.pref_cache = {}; self.conditions_ok = False
         ui.apply_theme(root)
         root.title(f'{SPEC["manufacturer"]} {MODEL} | Performance Verification' + (' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1320, 840, min_w=1080, min_h=640)
+        ui.fit_window(root, 1320, 840, min_w=900, min_h=640)
         self.settings = ui.Settings(f'fgen_{MODEL}')
         g = self.settings.get
         self.asset = tk.StringVar(); self.serial = tk.StringVar()
@@ -521,7 +525,7 @@ class App:
         self._busy = value
         if hasattr(self, 'btn_run'):
             idle = 'disabled' if value else 'normal'
-            for b in (self.btn_run, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find):
+            for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
                 b.configure(state=idle)
             self.btn_stop.configure(state='normal' if value else 'disabled')
             for c in (self.period_combo, self.set_combo, self.ref_combo) + ((self.method_combo,) if hasattr(self, 'method_combo') else ()):
@@ -588,16 +592,18 @@ class App:
                             'Power-meter flatness: the +20 dB range needs the -20 dB attenuator in front of the sensor.', 'info', title='Hardware mode').pack(fill='x', pady=(12, 0))
         ttk.Label(body, text=src['note'], style='Small.TLabel', wraplength=1180, justify='left').pack(anchor='w', pady=(6, 0))
 
+        self.build_mode_bar(body)
         tools = ttk.Frame(body); tools.pack(fill='x', pady=(8, 6))
         self.btn_run = ttk.Button(tools, text='▶  Run All Pending', style='Accent.TButton', command=self.run_all); self.btn_run.pack(side='left')
-        self.btn_rerun = ttk.Button(tools, text='Rerun Selected', command=self.rerun); self.btn_rerun.pack(side='left', padx=8)
+        self.btn_section = ttk.Button(tools, text='Run Shown Section', command=self.run_section); self.btn_section.pack(side='left', padx=8)
+        self.btn_rerun = ttk.Button(tools, text='Rerun Selected', command=self.rerun); self.btn_rerun.pack(side='left')
         self.btn_stop = ttk.Button(tools, text='■  Stop After This Point', style='Danger.TButton', command=self.request_stop, state='disabled'); self.btn_stop.pack(side='left')
         self.set_combo = ttk.Combobox(tools, textvariable=self.test_set, values=['Full verification', 'Quick check (Q points only)'], width=26, state='readonly')
         self.set_combo.pack(side='left', padx=(18, 6)); self.set_combo.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
-        ttk.Button(tools, text='Export Report (PDF)', command=self.export_pdf).pack(side='right', padx=(8, 0))
-        ttk.Button(tools, text='Export CSV', command=self.export_csv).pack(side='right', padx=(8, 0))
-        self.btn_load = ttk.Button(tools, text='Load progress', command=self.load); self.btn_load.pack(side='right', padx=(8, 0))
-        ttk.Button(tools, text='Save progress', command=self.save).pack(side='right', padx=(8, 0))
+        ui.dock_button(root, 'Save progress', self.save)                       # file actions live in the bottom bar
+        self.btn_load = ui.dock_button(root, 'Load progress', self.load)
+        ui.dock_button(root, 'Export CSV', self.export_csv)
+        ui.dock_button(root, 'Export Report (PDF)', self.export_pdf)
 
         sumrow = ttk.Frame(body); sumrow.pack(fill='x', pady=(2, 8))
         self.summary = ui.Summary(sumrow); self.summary.pack(side='left', fill='x', expand=True)
@@ -605,7 +611,7 @@ class App:
         ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='left')
         c1 = ttk.Combobox(filt, textvariable=self.show_section, values=['All sections'] + [s['title'] for s in SPEC['sections']], width=24, state='readonly')
         c1.pack(side='left', padx=6)
-        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=['All points', 'Not tested', 'Passed', 'Failed (OOT)'], width=13, state='readonly'); c2.pack(side='left')
+        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly'); c2.pack(side='left')
         for c in (c1, c2): c.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
 
         info = ttk.LabelFrame(body, text='Selected test point', padding=(12, 8)); info.pack(side='bottom', fill='x', pady=(10, 0))
@@ -628,6 +634,7 @@ class App:
         if st == 'Not tested' and res: return False
         if st == 'Passed' and res != 'PASS': return False
         if st == 'Failed (OOT)' and res != 'FAIL': return False
+        if not self.status_visible(str(p['id']), st): return False
         return True
 
     def _row(self, p):
@@ -662,8 +669,9 @@ class App:
 
     def on_period(self, save=True):
         apply_period(POINTS, PERIODS[self.period.get()])
-        for key, rec in self.results.items():
-            rec['result'] = judge(POINTS[int(key) - 1], rec['reading'])
+        for records in (self.found, self.left):      # As Found and As Left are re-judged against the newly selected limits
+            for key, rec in records.items():
+                rec['result'] = judge(POINTS[int(key) - 1], rec['reading'])
         if save: self._save_settings()
         self.refresh()
 
@@ -685,6 +693,7 @@ class App:
         rec = self.results.get(str(p['id']), {})
         if rec.get('raw'):
             lines.append('Recorded: ' + ', '.join(f'{k} = {v:.6g}' if isinstance(v, float) else f'{k} = {v}' for k, v in rec['raw'].items()))
+        if self.found_left_text(p): lines.append(self.found_left_text(p))
         self.detail.set('\n'.join(lines))
 
     # ------------------------------------------------------------------ connection
@@ -744,6 +753,7 @@ class App:
     # ------------------------------------------------------------------ running
     def request_stop(self): self.stop = True; self.status.set('Stopping after current test point.')
     def run_all(self): self.execute([p for p in self.active_points() if str(p['id']) not in self.results])
+    def run_section(self): self.run_shown_section()
 
     def rerun(self):
         sel = self.tree.selection()
@@ -753,6 +763,7 @@ class App:
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        if not self.confirm_found_overwrite(points): return
         if not self.demo and self.io is None: self.test_connections()
         if not self.demo and self.io is None: return
         if not self.demo and not self.conditions_ok and not ui.confirm_steps(self.root, 'Test conditions', 'Before you start',
@@ -779,7 +790,7 @@ class App:
         if self.io is not None:
             self.io.flat_method = self.method()
         done = [p for p in POINTS if p['kind'] == 'FLAT' and str(p['id']) in self.results
-                and self.results[str(p['id'])].get('raw', {}).get('method', 'POWER') != self.method()]
+                and self.results[str(p['id'])].get('raw', {}).get('method', 'POWER') != self.method()]      # (the set being collected)
         self.status.set(f'Flatness will be measured with: {self.flat_method.get()}.'
                         + (f' {len(done)} recorded flatness point(s) used the other method; rerun them if they should match.' if done else ''))
 
@@ -836,7 +847,7 @@ class App:
             stale = [q for q in POINTS if q['kind'] == 'FLAT' and q['range_db'] == rng and str(q['id']) in self.results
                      and self.results[str(q['id'])].get('raw', {}).get('method', 'POWER') == 'POWER']
         self.results[str(p['id'])] = dict(reading=reading, result=judge(p, reading), raw=raw, synthetic=synthetic,
-                                          period=PERIODS[self.period.get()], timestamp=datetime.now().isoformat(timespec='seconds'))
+                                          period=PERIODS[self.period.get()], timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label)
         self._update_row(p); self.save(silent=True)
         if stale:
             messagebox.showwarning('Flatness reference changed',
@@ -851,7 +862,7 @@ class App:
     def save(self, silent=False):
         path = self._checkpoint_path()
         path.write_text(json.dumps(dict(model=MODEL, asset=self.asset.get(), serial=self.serial.get(), demo=self.demo,
-                                        period=self.period.get(), results=self.results), indent=2))
+                                        period=self.period.get(), **self.save_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
@@ -860,14 +871,22 @@ class App:
         data = json.loads(Path(path).read_text())
         if data.get('model') not in (None, MODEL):
             messagebox.showerror('Checkpoint', f'This checkpoint is for a {data.get("model")}, not a {MODEL}.'); return
-        if any(v.get('synthetic') for v in data.get('results', {}).values()) and not self.demo:
+        if self.file_has_synthetic(data) and not self.demo:
             if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
-        self.period.set(data.get('period', self.period.get())); self.results = data.get('results', {})
-        self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.results)} point(s) restored.')
+        self.period.set(data.get('period', self.period.get())); self.load_results(data)
+        self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
+
+    def certificate_rows(self):
+        """Report rows: As Found for every recorded point; As Left where the point was measured again after an adjustment, else 'Same'."""
+        rows = []
+        for p in POINTS:
+            row = self.found_left_row(p, lambda r: certificate_row(p, r))
+            if row: rows.append(row)
+        return rows
 
     def export_pdf(self):
-        rows = certificate_rows(self.results)
+        rows = self.certificate_rows()
         if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
         try: import report_pdf, report_dialog
         except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
@@ -876,8 +895,8 @@ class App:
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
         path = filedialog.asksaveasfilename(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
         if not path: return
-        demo = self.demo or any(v.get('synthetic') for v in self.results.values())
-        used = sorted({v.get('raw', {}).get('method', 'POWER') for k, v in self.results.items() if POINTS[int(k) - 1]['kind'] == 'FLAT'})
+        demo = self.any_synthetic()
+        used = sorted({v.get('raw', {}).get('method', 'POWER') for records in (self.found, self.left) for k, v in records.items() if POINTS[int(k) - 1]['kind'] == 'FLAT'})
         how = {'WBND': 'Flatness measured on the Fluke 5790B WIDEBAND input relative to 1 kHz (5790B Operators Manual pp. 4-31, 4-32) '
                        'instead of the manual\'s power meter method.',
                'POWER': 'Flatness measured with a power meter: 100 kHz reference plus the worksheet offset (manual method).'}
@@ -899,19 +918,20 @@ class App:
     def export_csv(self):
         path = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=[('CSV', '*.csv')], initialfile=f'{MODEL}_verification.csv')
         if not path: return
-        demo = 'YES' if self.demo or any(v.get('synthetic') for v in self.results.values()) else 'NO'
+        demo = 'YES' if self.any_synthetic() else 'NO'
         with open(path, 'w', newline='', encoding='utf-8-sig') as f:
             w = csv.writer(f)
             w.writerow(['Instrument ID', self.asset.get(), 'Serial Number', self.serial.get()])
             w.writerow(['SOURCE', f'{SPEC["source"]["document"]}, pp. {SPEC["source"]["pages"]}'])
             w.writerow(['LIMITS APPLIED', self.period.get()]); w.writerow(['DEMO DATA', demo]); w.writerow([])
             w.writerow(['#', 'Section', 'Description', 'Nominal', 'Low', 'High', 'Unit', 'Reading', 'Status', 'Quick check', 'Manual page',
-                        'Worksheet values', 'Timestamp', 'Synthetic'])
+                        'Worksheet values', 'Timestamp', 'Synthetic', 'As Left', 'As Left status'])
             for p in POINTS:
-                r = self.results.get(str(p['id']), {}); n = p['nominal']; e = p['error']
+                r = self.found.get(str(p['id']), {}); n = p['nominal']; e = p['error']; lr = self.left.get(str(p['id']), {})
                 lo, hi = ('', '') if p['kind'] == 'SELFTEST' else (n - e, n + e)
                 w.writerow([p['id'], p['section_title'], p['desc'], 'Pass' if p['kind'] == 'SELFTEST' else n, lo, hi, p['unit'], r.get('reading', ''),
-                            r.get('result', ''), 'Q' if p['quick'] else '', p['page'], json.dumps(r.get('raw', {})), r.get('timestamp', ''), r.get('synthetic', '')])
+                            r.get('result', ''), 'Q' if p['quick'] else '', p['page'], json.dumps(r.get('raw', {})), r.get('timestamp', ''), r.get('synthetic', ''),
+                            lr.get('reading', 'Same' if r else ''), lr.get('result', '')])
         self.status.set(f'Exported {path}')
 
     def on_close(self):

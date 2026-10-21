@@ -200,6 +200,10 @@ def apply_theme(root):
     round_button('TButton', dict(normal=('#FFFFFF', '#D2D2D7'), hover=('#F0F0F5', '#C7C7CC'),
                                   pressed=('#E3E3E8', '#BCBCC2'), disabled=('#F5F5F7', '#E3E3E8')),
                  C['text'], C['faint'])
+    round_button('Compact.TButton', dict(normal=('#FFFFFF', '#D2D2D7'), hover=('#F0F0F5', '#C7C7CC'),
+                                         pressed=('#E3E3E8', '#BCBCC2'), disabled=('#F5F5F7', '#E3E3E8')),
+                 C['text'], C['faint'])
+    s.configure('Compact.TButton', padding=(px(10), px(2)), font=f_small)         # small file-action buttons (Save / Load / Export)
     round_button('Accent.TButton', dict(normal=(C['primary'], C['primary']), hover=(C['primary_hi'], C['primary_hi']),
                                         pressed=(C['primary_lo'], C['primary_lo']), disabled=('#A9CFFF', '#A9CFFF')),
                  '#FFFFFF', '#FFFFFF')
@@ -338,6 +342,34 @@ def fit_window(win, width, height, min_w=800, min_h=500):
     y = max(0, (sh - h) // 3)
     win.geometry(f'{w}x{h}+{x}+{y}')
     win.minsize(min(px(min_w), w), min(px(min_h), h))
+    win.after(400, lambda: keep_table_rows(win))
+
+
+def _all_widgets(widget):
+    for w in widget.winfo_children():
+        yield w
+        yield from _all_widgets(w)
+
+
+def keep_table_rows(win, rows=5):
+    """Stop the window shrinking so far that the results table is squeezed away: the minimum height leaves room for `rows` table rows."""
+    try:
+        win.update_idletasks()
+        trees = [w for w in _all_widgets(win) if isinstance(w, ttk.Treeview)]
+        if not trees:
+            return
+        tree = max(trees, key=lambda t: int(t.cget('height')))
+        shown = int(tree.cget('height'))
+        if shown <= rows:
+            return
+        row_h = tree.winfo_reqheight() / (shown + 1)             # the +1 is the heading line
+        need = int(win.winfo_reqheight() - (shown - rows) * row_h)
+        need = min(need, win.winfo_screenheight() - px(110))
+        min_w, min_h = win.minsize()
+        if need > min_h:
+            win.minsize(min_w, need)
+    except tk.TclError:
+        pass
 
 
 def center_on(win, parent):
@@ -580,13 +612,15 @@ class Banner(ttk.Frame):
         super().__init__(parent)
         bar = ttk.Frame(self, style='Banner.TFrame', padding=(px(22), px(16)))
         bar.pack(fill='x')
+        self.right = ttk.Frame(bar, style='Banner.TFrame')       # packed first so the status pills are never squeezed out
+        self.right.pack(side='right', anchor='n')
         left = ttk.Frame(bar, style='Banner.TFrame')
         left.pack(side='left', fill='x', expand=True)
         ttk.Label(left, text=title, style='BannerTitle.TLabel').pack(anchor='w')
         self.subtitle = tk.StringVar(value=subtitle)
-        ttk.Label(left, textvariable=self.subtitle, style='BannerSub.TLabel').pack(anchor='w', pady=(2, 0))
-        self.right = ttk.Frame(bar, style='Banner.TFrame')
-        self.right.pack(side='right')
+        sub = ttk.Label(left, textvariable=self.subtitle, style='BannerSub.TLabel', justify='left')
+        sub.pack(anchor='w', pady=(2, 0))
+        left.bind('<Configure>', lambda e: sub.configure(wraplength=max(px(200), e.width - px(8))), add='+')    # long subtitles wrap
         tk.Frame(self, height=1, background=C['border']).pack(fill='x')
 
     def add_pill(self, text, kind='info'):
@@ -613,27 +647,53 @@ class Notice(ttk.Frame):
 
 
 class StatusBar(ttk.Frame):
-    """Bottom strip: coloured dot + message. Colour follows the wording of the message."""
+    """Bottom strip: coloured dot + message, with small action buttons at the right (add_button / dock_button).
+    Colour follows the wording of the message."""
 
     def __init__(self, parent, variable=None, right=''):
-        super().__init__(parent, style='Bar.TFrame', padding=(px(14), px(6)))
+        super().__init__(parent, style='Bar.TFrame', padding=(px(14), px(5)))
         tk.Frame(self, height=1, background=C['border']).place(x=0, y=0, relwidth=1)
         self.var = variable or tk.StringVar()
+        self._buttons = []
         self.dot = ttk.Label(self, text='●', style='DotInfo.TLabel')
-        self.dot.pack(side='left')
         self.msg = ttk.Label(self, textvariable=self.var, style='Bar.TLabel')
-        self.msg.pack(side='left', padx=(8, 0), fill='x', expand=True)
         self.right = ttk.Label(self, text=right, style='BarMuted.TLabel')
-        self.right.pack(side='right')
+        self._layout()
         self.msg.bind('<Configure>', lambda e: self.msg.configure(wraplength=max(px(200), e.width)))
         self.var.trace_add('write', lambda *_: self._recolor())
         self._recolor()
+        try:
+            parent._cal_statusbar = self            # lets a procedure dock buttons here: ui.dock_button(root, ...)
+        except AttributeError:
+            pass
+
+    def _layout(self):
+        """Pack order matters: the buttons and version text are packed before the (stretching) message, so a long message wraps
+        instead of squeezing them."""
+        for w in (self.dot, self.right, *self._buttons, self.msg):
+            w.pack_forget()
+        self.dot.pack(side='left')
+        self.right.pack(side='right', padx=(10, 0))
+        for b in reversed(self._buttons):           # the first button added ends up leftmost
+            b.pack(side='right', padx=(6, 0))
+        self.msg.pack(side='left', padx=(8, 0), fill='x', expand=True)
+
+    def add_button(self, text, command, style='Compact.TButton'):
+        b = ttk.Button(self, text=text, command=command, style=style)
+        self._buttons.append(b)
+        self._layout()
+        return b
 
     def _recolor(self):
         self.dot.configure(style=f'Dot{status_kind(self.var.get()).title()}.TLabel')
 
     def set(self, text):
         self.var.set(text)
+
+
+def dock_button(root, text, command):
+    """A small button at the right of the window's bottom bar (Save progress, Load progress, Export ...). Returns the button."""
+    return root._cal_statusbar.add_button(text, command)
 
 
 class Summary(ttk.Frame):
@@ -846,6 +906,113 @@ _BUTTON_RULES = (
 )
 
 
+def _pad_pair(value):
+    """A pack/grid padx value as (before, after) pixels; accepts 8, (8, 0), '8' and '{8 0}'."""
+    try:
+        parts = [int(float(x)) for x in str(value).replace('{', ' ').replace('}', ' ').replace(',', ' ').replace('(', ' ').replace(')', ' ').split()]
+    except ValueError:
+        parts = []
+    if not parts:
+        return 0, 0
+    return (parts[0], parts[-1]) if len(parts) > 1 else (parts[0], parts[0])
+
+
+def flow_row(frame, vgap=6):
+    """Make a packed toolbar row wrap onto more lines when the window is narrow, so no button is ever squeezed or clipped.
+
+    On one line the row looks as before (left group at the left, right group flush right).  When it does not fit, the left group flows
+    onto further lines at full button size and the right group (Save / Load / Export ...) drops to its own line, flush right.
+    Only plain rows are converted: three or more widgets, at least two buttons, all packed to the left or right, none expanding, and the
+    row itself packed to fill the width.  Returns True when the row was converted."""
+    if getattr(frame, '_cal_flow', None) is not None:
+        return False
+    try:
+        infos = [(w, w.pack_info()) for w in frame.pack_slaves()]
+        own = frame.pack_info()
+    except tk.TclError:
+        return False
+    if len(infos) < 3 or sum(isinstance(w, ttk.Button) for w, _i in infos) < 2 or str(own.get('fill')) not in ('x', 'both'):
+        return False
+    for _w, i in infos:
+        if str(i.get('side')) not in ('left', 'right') or str(i.get('expand')) not in ('0', '') or str(i.get('fill')) != 'none':
+            return False
+    left = [(w, i) for w, i in infos if str(i['side']) == 'left']
+    right = [(w, i) for w, i in infos if str(i['side']) == 'right'][::-1]      # the first widget packed right is the rightmost
+    left = [(w,) + _pad_pair(i.get('padx', 0)) for w, i in left]
+    right = [(w,) + _pad_pair(i.get('padx', 0)) for w, i in right]
+    for w, _i in infos:
+        w.pack_forget()
+    state = {'width': 0}
+
+    def need(item):
+        return item[0].winfo_reqwidth() + item[1] + item[2]
+
+    def flow(items, width, rows):
+        """Append items to rows, starting a new row when one does not fit."""
+        row, used = [], 0
+        for item in items:
+            n = need(item) - (item[1] if not row else 0)
+            if row and used + n > width:
+                rows.append(row); row, used = [], 0
+                n = need(item) - item[1]
+            row.append(item); used += n
+        if row:
+            rows.append(row)
+
+    def layout(width):
+        rows = []                                              # each row: (items, flush_right)
+        left_total, right_total = sum(need(i) for i in left), sum(need(i) for i in right)
+        if left_total + right_total <= width:
+            rows.append((left, right))
+        else:
+            parts = []
+            flow(left, width, parts)
+            rows += [(r, []) for r in parts]
+            if right:
+                if right_total <= width:
+                    rows.append(([], right))
+                else:
+                    parts = []
+                    flow(right, width, parts)
+                    rows += [(r, []) for r in parts]
+        y = 0
+        for lefts, rights in rows:
+            height = max([i[0].winfo_reqheight() for i in lefts + rights] or [0])
+            x = 0
+            for k, (w, a, b) in enumerate(lefts):
+                x += a if (k or len(rows) == 1) else 0
+                w.place(x=x, y=y + (height - w.winfo_reqheight()) // 2)
+                x += w.winfo_reqwidth() + b
+            x = width - sum(need(i) for i in rights)
+            for w, a, b in rights:
+                x += a
+                w.place(x=x, y=y + (height - w.winfo_reqheight()) // 2)
+                x += w.winfo_reqwidth() + b
+            y += height + vgap
+        frame.configure(height=max(1, y - vgap))
+
+    def on_configure(event):
+        if event.widget is frame and event.width > 40 and event.width != state['width']:
+            state['width'] = event.width
+            layout(event.width)
+
+    def relayout():
+        if state['width']:
+            layout(state['width'])
+
+    frame._cal_flow = relayout
+    frame.bind('<Configure>', on_configure, add='+')
+    layout(10 ** 5)                      # first pass, before the real width is known
+    return True
+
+
+def reflow(frame):
+    """Lay a wrapping toolbar out again (after a button's text or visibility changed)."""
+    fn = getattr(frame, '_cal_flow', None)
+    if fn:
+        fn()
+
+
 def polish(root):
     """Finish-up pass for big existing windows: wraps long labels to the window width,
     colours Run/Stop buttons, and scales table columns on high-DPI screens."""
@@ -869,6 +1036,8 @@ def polish(root):
                 if SCALE > 1.05:
                     for col in w['columns']:
                         w.column(col, width=px(int(w.column(col, 'width'))), minwidth=px(int(w.column(col, 'minwidth'))))
+            elif isinstance(w, ttk.Frame) and type(w) is ttk.Frame:
+                flow_row(w)                      # button rows wrap instead of squeezing their buttons
         except (tk.TclError, ValueError):
             continue
 

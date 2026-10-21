@@ -1,11 +1,16 @@
-CALIBRATION SUITE - restyled (Manager v69)
+CALIBRATION SUITE - restyled (Manager v70)
 ==========================================
+
+NEW in v70: As Found / As Left toggle in every verification procedure, 'Run Shown Section' button, shorter buttons that wrap in
+small windows, and Save / Load progress / Export buttons moved to the bottom bar. New file: datamode.py (copy it beside ui_theme.py).
+If nothing was adjusted, leave the toggle on As Found: the report prints 'Same' under As Left as before.
 
 Folder layout (same as before, plus one new file):
 
   Calibration_Procedure_Manager.py   <- start here
   mdd_importer_v49.py                (unchanged)
-  ui_theme.py                        (NEW - shared look and feel; must sit next to the Manager)
+  ui_theme.py                        (shared look and feel; must sit next to the Manager)
+  datamode.py                        (NEW - As Found / As Left toggle; must sit next to the Manager)
   labregistry.py, labregistry_ui.py  (NEW - asset history; lab_registry.sqlite3 is created beside them on first use)
   Procedures\
       Agilent_34401A.py              v54

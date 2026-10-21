@@ -30,6 +30,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import hookups
 import ui_theme as ui
+import datamode
 import drivers
 
 SPEC_PATH = HERE / 'specs' / 'fluke_110_series_pv.json'
@@ -447,7 +448,7 @@ def ask_range(parent, p, total, dial, standby_text):
 
 
 # ============================================================================ application
-class App:
+class App(datamode.DataModeMixin):
     def __init__(self, root, model, demo=False, spec=None, io_factory=None, meter_factory=None):
         self.root, self.model, self.demo = root, model, demo
         self.meter, self.meter_factory = None, meter_factory
@@ -461,7 +462,7 @@ class App:
         self.results = {}
         ui.apply_theme(root)
         root.title(f'{self.info["name"]} | Performance Verification' + (' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1320, 800, min_w=1080, min_h=640)
+        ui.fit_window(root, 1320, 800, min_w=1000, min_h=640)
         self.brand = self.info.get('brand', 'Fluke')
         self.last_high_current = None
         self.settings = ui.Settings(f'{self.brand.lower()}{model}')
@@ -494,7 +495,7 @@ class App:
         self._busy = value
         if hasattr(self, 'btn_run'):
             idle = 'disabled' if value else 'normal'
-            for b in (self.btn_run, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find):
+            for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
                 b.configure(state=idle)
             self.btn_stop.configure(state='normal' if value else 'disabled')
 
@@ -572,18 +573,20 @@ class App:
                             'Wiring and high-voltage confirmations are required.' + extra + ' Check the meter fuses and battery before starting.', 'info', title='Hardware mode').pack(fill='x', pady=(12, 0))
         ttk.Label(body, text=src['note'], style='Small.TLabel', wraplength=1100, justify='left').pack(anchor='w', pady=(6, 0))
 
+        self.build_mode_bar(body)
         tools = ttk.Frame(body)
         tools.pack(fill='x', pady=(8, 6))
         self.btn_run = ttk.Button(tools, text='▶  Run All Pending', style='Accent.TButton', command=self.run_all)
         self.btn_run.pack(side='left')
+        self.btn_section = ttk.Button(tools, text='Run Shown Section', command=self.run_section)
+        self.btn_section.pack(side='left', padx=8)
         self.btn_rerun = ttk.Button(tools, text='Rerun Selected', command=self.rerun)
-        self.btn_rerun.pack(side='left', padx=8)
+        self.btn_rerun.pack(side='left')
         self.btn_stop = ttk.Button(tools, text='■  Stop After This Point', style='Danger.TButton', command=self.request_stop, state='disabled')
         self.btn_stop.pack(side='left')
-        ttk.Button(tools, text='Export Report (PDF)', command=self.export_pdf).pack(side='right', padx=(8, 0))
-        self.btn_load = ttk.Button(tools, text='Load progress', command=self.load)
-        self.btn_load.pack(side='right', padx=(8, 0))
-        ttk.Button(tools, text='Save progress', command=self.save).pack(side='right', padx=(8, 0))
+        ui.dock_button(root, 'Save progress', self.save)                       # file actions live in the bottom bar
+        self.btn_load = ui.dock_button(root, 'Load progress', self.load)
+        ui.dock_button(root, 'Export Report (PDF)', self.export_pdf)
 
         sumrow = ttk.Frame(body)
         sumrow.pack(fill='x', pady=(2, 8))
@@ -595,7 +598,7 @@ class App:
         sections = ['All sections'] + list(dict.fromkeys(p['section'] for p in self.points))
         c1 = ttk.Combobox(filt, textvariable=self.show_section, values=sections, width=22, state='readonly')
         c1.pack(side='left', padx=6)
-        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=['All points', 'Not tested', 'Passed', 'Failed (OOT)'], width=13, state='readonly')
+        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly')
         c2.pack(side='left')
         for c in (c1, c2):
             c.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
@@ -624,6 +627,8 @@ class App:
         if st == 'Passed' and res != 'PASS':
             return False
         if st == 'Failed (OOT)' and res != 'FAIL':
+            return False
+        if not self.status_visible(p['id'], st):
             return False
         return True
 
@@ -672,7 +677,7 @@ class App:
         extra = ('  |  ' + p['note']) if p.get('note') else ''
         limit = f'\nLimit: {p["tol_text"]}' if p.get('tol_text') else ''
         self.detail.set(f'{describe(p)}\nAccept: {self.accept_text(p)}  |  Meter: {p["switch"]}' + (f', {p["range"]} range' if p['range'] else '') + limit +
-                        f'\nSetup: {self.setup_text(p)}{extra}')
+                        f'\nSetup: {self.setup_text(p)}{extra}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     def hookup_meter(self):
         return self.spec.get('options', {}).get('hookup_meter')
@@ -819,6 +824,9 @@ class App:
     def run_all(self):
         self.execute([p for p in self.points if p['id'] not in self.results])
 
+    def run_section(self):
+        self.run_shown_section(self.points)
+
     def rerun(self):
         sel = self.tree.selection()
         if sel:
@@ -831,6 +839,8 @@ class App:
             return
         if not self.asset.get().strip():
             messagebox.showwarning('Instrument ID', 'Enter an instrument ID.')
+            return
+        if not self.confirm_found_overwrite(points):
             return
         if not self.demo and not self.manual_cal and self.io is None:
             self.test_connection()
@@ -1176,6 +1186,7 @@ class App:
     def _store(self, p, **fields):
         fields.setdefault('synthetic', False)
         fields['timestamp'] = datetime.now().isoformat(timespec='seconds')
+        fields['data'] = self.mode_label
         self.results[p['id']] = fields
         self._update_row(p)
         self.save(silent=True)
@@ -1202,7 +1213,7 @@ class App:
     def save(self, silent=False):
         path = self._checkpoint_path()
         try:
-            path.write_text(json.dumps(dict(model=self.model, asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, results=self.results), indent=2))
+            path.write_text(json.dumps(dict(model=self.model, asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, **self.save_fields()), indent=2))
         except OSError as exc:
             if not silent:
                 self.status.set(f'Could not save progress: {exc}')
@@ -1218,57 +1229,61 @@ class App:
         if data.get('model') != self.model:
             messagebox.showerror('Wrong model', f'This checkpoint is for the Fluke {data.get("model")}.')
             return
-        if any(v.get('synthetic') for v in data.get('results', {}).values()) and not self.demo:
+        if self.file_has_synthetic(data) and not self.demo:
             if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):
                 return
         self.asset.set(data.get('asset', ''))
         self.serial.set(data.get('serial', ''))
-        self.results = data.get('results', {})
+        self.load_results(data)
         self.refresh()
-        self.status.set(f'Loaded progress: {len(self.results)} point(s) restored.')
+        self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
 
     # ------------------------------------------------------------------ report
-    def certificate_rows(self):
+    def certificate_row(self, p, r):
+        """The report row of one recorded point (r = its record)."""
         import report_pdf
+        failed = r['result'] == 'FAIL'
+        if p['test'] == 'numeric':
+            factor = Decimal(str(p['factor']))
+            clean = lambda d: float(f'{float(d * factor):.9g}')
+            unit = SYMBOL[p['base_unit']]
+            unc = ''
+            if p['kind'] in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP') and p.get('applied') and not p.get('no_uncertainty'):
+                unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
+                                                        frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None),
+                                                        standard=self.calibrator_model())
+            a = p.get('applied') or {}
+            freq = a.get('frequency') if p['kind'] in ('ACV', 'ACI') and p['display_unit'] != 'kHz' else None
+            row = report_pdf.cert_row(f'{p["range"]} range' if p['range'] else describe(p), p['nominal'], clean(Decimal(p['low'])), clean(Decimal(p['high'])),
+                                      unit, reading=r['reading'] if r['reading'] is not None else None, failed=failed, section=p['section'],
+                                      frequency=freq, uncertainty=unc)
+            if r['reading'] is None:           # overload
+                row['As Found'] = r.get('entered', '')
+            if p.get('annunciator') and r.get('annunciator') is not None:
+                row['As Found'] += '  (AC annunciator ' + ('on' if r['annunciator'] else 'OFF') + ')'
+            if p['kind'] == 'ACV' and p['display_unit'] == 'kHz':
+                row['Description'] = f'{p["range"]} range (2 V applied)'
+            if p['base_unit'] in ('C', 'degF'):        # temperatures are never SI-prefixed (no 'k°C')
+                d = max(len(x.split('.')[1]) if '.' in x else 0 for x in (p['low'], p['high']))
+                row.update({'Nominal': f'{p["nominal"]:.{d}f} {unit}', 'Tolerance -': p['low'], 'Tolerance +': p['high'], 'UOM': unit})
+                if r['reading'] is not None:
+                    row['As Found'] = r.get('entered', f'{r["reading"]:.{d}f}')
+        else:
+            unc = ''
+            if p['test'] == 'beeper':
+                unc = report_pdf.point_uncertainty(dict(kind='OHM2', nominal=p['applied']['value'], frequency=None, unit='ohm', range=None))
+            row = {'Section': p['section'], 'Description': report_pdf.ascii_unit(describe(p)),
+                   'Nominal': report_pdf.ascii_unit(output_text(p)) if p.get('applied') else '', 'Tolerance -': '', 'Tolerance +': '', 'UOM': '',
+                   'As Found': r.get('entered', ''), 'OOT': 'OOT' if failed else '', 'As Left': 'Same', 'Uncertainty': unc}
+        return row
+
+    def certificate_rows(self):
+        """As Found for every recorded point; As Left where it was measured again after an adjustment, else 'Same'."""
         rows = []
         for p in self.points:
-            r = self.results.get(p['id'])
-            if not r:
-                continue
-            failed = r['result'] == 'FAIL'
-            if p['test'] == 'numeric':
-                factor = Decimal(str(p['factor']))
-                clean = lambda d: float(f'{float(d * factor):.9g}')
-                unit = SYMBOL[p['base_unit']]
-                unc = ''
-                if p['kind'] in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP') and p.get('applied') and not p.get('no_uncertainty'):
-                    unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
-                                                            frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None),
-                                                            standard=self.calibrator_model())
-                a = p.get('applied') or {}
-                freq = a.get('frequency') if p['kind'] in ('ACV', 'ACI') and p['display_unit'] != 'kHz' else None
-                row = report_pdf.cert_row(f'{p["range"]} range' if p['range'] else describe(p), p['nominal'], clean(Decimal(p['low'])), clean(Decimal(p['high'])),
-                                          unit, reading=r['reading'] if r['reading'] is not None else None, failed=failed, section=p['section'],
-                                          frequency=freq, uncertainty=unc)
-                if r['reading'] is None:           # overload
-                    row['As Found'] = r.get('entered', '')
-                if p.get('annunciator') and r.get('annunciator') is not None:
-                    row['As Found'] += '  (AC annunciator ' + ('on' if r['annunciator'] else 'OFF') + ')'
-                if p['kind'] == 'ACV' and p['display_unit'] == 'kHz':
-                    row['Description'] = f'{p["range"]} range (2 V applied)'
-                if p['base_unit'] in ('C', 'degF'):        # temperatures are never SI-prefixed (no 'k°C')
-                    d = max(len(x.split('.')[1]) if '.' in x else 0 for x in (p['low'], p['high']))
-                    row.update({'Nominal': f'{p["nominal"]:.{d}f} {unit}', 'Tolerance -': p['low'], 'Tolerance +': p['high'], 'UOM': unit})
-                    if r['reading'] is not None:
-                        row['As Found'] = r.get('entered', f'{r["reading"]:.{d}f}')
-            else:
-                unc = ''
-                if p['test'] == 'beeper':
-                    unc = report_pdf.point_uncertainty(dict(kind='OHM2', nominal=p['applied']['value'], frequency=None, unit='ohm', range=None))
-                row = {'Section': p['section'], 'Description': report_pdf.ascii_unit(describe(p)),
-                       'Nominal': report_pdf.ascii_unit(output_text(p)) if p.get('applied') else '', 'Tolerance -': '', 'Tolerance +': '', 'UOM': '',
-                       'As Found': r.get('entered', ''), 'OOT': 'OOT' if failed else '', 'As Left': 'Same', 'Uncertainty': unc}
-            rows.append(row)
+            row = self.found_left_row(p, lambda r: self.certificate_row(p, r))
+            if row:
+                rows.append(row)
         return rows
 
     def export_pdf(self):
@@ -1289,7 +1304,7 @@ class App:
         path = filedialog.asksaveasfilename(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
         if not path:
             return
-        demo = self.demo or any(v.get('synthetic') for v in self.results.values())
+        demo = self.any_synthetic()
         src = self.spec['source']
         try:
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', self.info['name']), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
@@ -1314,8 +1329,9 @@ class App:
         """How the numeric readings were collected (IR and / or typed), for the report footer."""
         if not self.ir:
             return ''
-        ir = sum(1 for r in self.results.values() if r.get('source') == 'IR' and r.get('reading', 0) is not None)
-        typed = sum(1 for r in self.results.values() if r.get('source') == 'typed')
+        every = list(self.all_records())
+        ir = sum(1 for r in every if r.get('source') == 'IR' and r.get('reading', 0) is not None)
+        typed = sum(1 for r in every if r.get('source') == 'typed')
         if not (ir or typed):
             return ''
         parts = ([f'{ir} reading(s) read from the meter over its IR interface, with the function, range and REL / Low Pass state checked'] if ir else []) + \

@@ -58,8 +58,24 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Frequency and level go in one message (`FREQ ...;:POW ...`) so the source applies its frequency/power coupling.
 - Output route (`OUTP:ROUT` HEAD / MICRowave) and sensor leveling (`OUTP:LEV`) are left as set on the front panel.
 
+## As Found / As Left, Run Shown Section, bottom-bar buttons (v70)
+- `datamode.py` is shared by every verification procedure (the Truevolt, DAQ, function generator, MDO4000C and handheld engines, the 34401A and
+  8846A, and the WaveSurfer). A "Collecting data" toggle (As Found | As Left) picks the set being recorded; both sets are stored and saved
+  (progress files gain `left_results`; WaveSurfer keeps As Left in `*_AsLeft.json` files beside its As Found ones). Files saved before this
+  feature load unchanged. A loaded file starts on As Found. The toggle is locked while a run is active.
+- As Left readings are taken by re-running the points through the same procedure; nothing is adjusted by the program. If nothing was adjusted the
+  As Left set stays empty and the report prints "Same", exactly as before. Re-measured points print the As Left reading (red OOT if still out).
+- Measuring As Found again after As Left readings exist asks first (it would replace the original reading with one from the adjusted instrument).
+- "Run Shown Section" runs the points not yet measured in the section chosen in the Show box (needs a section or status chosen, so it never starts a
+  whole run by accident). The Show status box also has "As Found failed" for choosing the points to re-run As Left.
+- WaveSurfer: the engine records each function in order, so As Left is run per function (Show = one function, Run Shown Section). Re-measuring only
+  some points inside one function is done with Rerun Selected.
+- Toolbars wrap instead of squeezing; Save / Load progress and the export buttons live in the bottom bar (`ui.dock_button`). Windows keep room for 5 table rows.
+- Not verified: lab_registry history still records only As Found; no instrument commands, limits or pass/fail logic were changed.
+
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.
+Real-window tests (need a display; `xvfb-run -a python -m unittest tests.test_asleft tests.test_specmanager`).
 Simulated bench: `drivers/simulated.py` (`make_dacq_bench`, `make_dmm_bench`, `make_bench`).
 
 ## Standards specification manager and uncertainty budget

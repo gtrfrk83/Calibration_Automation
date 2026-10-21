@@ -242,6 +242,16 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
         else:
             story.append(Paragraph(f'RESULT: PASS — all {total} points within tolerance', verdict_pass))
         story.append(Spacer(1, 6))
+    left_rows = [r for r in rows if str(r.get('As Left') or '') not in ('', 'Same')]      # points measured again after an adjustment
+    if left_rows:
+        left_bad = [r for r in left_rows if r.get('As Left OOT')]
+        if left_bad:
+            story.append(Paragraph(f'AS LEFT: OUT OF TOLERANCE — {len(left_bad)} of {len(left_rows)} points measured after adjustment '
+                                   'are still outside limits', verdict_fail))
+        else:
+            story.append(Paragraph(f'AS LEFT: PASS — all {len(left_rows)} points measured after adjustment are within tolerance', verdict_pass))
+        story.append(Paragraph("Points without an As Left reading were not adjusted (shown as 'Same').", meta))
+        story.append(Spacer(1, 6))
 
     # Standards used and the signature block are on the lab's cover certificate, so they are not printed here.
 
@@ -249,8 +259,9 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     right = {'Nominal', 'Tolerance -', 'Tolerance +', 'As Found', 'Uncertainty'}
     centre = {'UOM', 'OOT', 'As Left'}
 
-    def style_for(col, base):
-        return ParagraphStyle(f'a_{col}_{base.name}', parent=base, alignment=2 if col in right else 1 if col in centre else 0)
+    def style_for(col, base, align=None):
+        return ParagraphStyle(f'a_{col}_{base.name}_{align}', parent=base,
+                              alignment=align if align is not None else 2 if col in right else 1 if col in centre else 0)
 
     has_uncertainty = any(r.get('Uncertainty') for r in rows)
     data = [[Paragraph(c, style_for(c, head_style)) for c in COLUMNS]]
@@ -266,6 +277,11 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
             value = row.get(col, '')
             if col == 'Uncertainty' and not value and has_uncertainty:
                 value = 'N/A'          # the scope of accreditation has no entry for this point
+            if col == 'As Left' and str(value) not in ('', 'Same'):          # an As Left reading: right aligned like As Found, red if still OOT
+                if row.get('As Left OOT'):
+                    value = f'{value} OOT'
+                cells.append(Paragraph(clean(value), style_for(col, red if row.get('As Left OOT') else small, 2)))
+                continue
             cells.append(Paragraph(clean(value), style_for(col, red if col == 'OOT' and value else small)))
         data.append(cells)
         i = len(data) - 1
@@ -276,6 +292,9 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
         shade += 1
 
     widths = [2.3, 0.95, 0.66, 0.66, 0.5, 0.66, 0.34, 0.5, 0.74]
+    if left_rows:                                      # room for the As Left readings
+        widths[0] -= 0.34
+        widths[7] += 0.34
     scale = (W - 2 * margin) / (sum(widths) * inch)
     widths = [w * inch * scale for w in widths]
     table = LongTable(data, colWidths=widths, repeatRows=1)

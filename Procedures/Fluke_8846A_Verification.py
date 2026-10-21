@@ -10,6 +10,7 @@ from tkinter import ttk, messagebox, filedialog
 HERE=Path(__file__).resolve().parent
 sys.path.append(str(HERE.parent))  # shared ui_theme.py sits next to the Manager
 import ui_theme as ui
+import datamode
 import drivers
 DATA=HERE/'8846A_results.json'
 POINTS=[]
@@ -103,7 +104,7 @@ class IO:
         self.standby()
         return reading
 
-class App:
+class App(datamode.DataModeMixin):
     SETUP_TEXT = {
         'VOLTAGE': '5560A voltage output to the meter HI / LO terminals',
         'CURRENT': '5560A current output to the meter current (A) input and LO',
@@ -117,7 +118,7 @@ class App:
         self.results={}
         ui.apply_theme(root)
         root.title('Fluke 8846A | Performance Verification v58'+(' [DEMO]' if demo else ''))
-        ui.fit_window(root,1280,800,min_w=1060,min_h=620)
+        ui.fit_window(root, 1280, 800, min_w=900, min_h=620)
         self.settings=ui.Settings('8846A')
         self.asset=tk.StringVar();self.serial=tk.StringVar()
         self.dmm_port=tk.StringVar(value=self.settings.get('dmm_port','COM3'))
@@ -149,7 +150,7 @@ class App:
 
     def _sync_buttons(self):
         idle='disabled' if self._busy else 'normal'
-        for b in (self.btn_run,self.btn_rerun,self.btn_test,self.btn_load,self.btn_refresh_ports):b.configure(state=idle)
+        for b in (self.btn_run,self.btn_section,self.btn_rerun,self.btn_test,self.btn_load,self.btn_refresh_ports,*self.mode_buttons):b.configure(state=idle)
         self.btn_stop.configure(state='normal' if self._busy else 'disabled')
         for c in (self.dmm_combo,self.fluke_combo):c.configure(state='disabled' if self._busy else 'normal')
 
@@ -175,15 +176,16 @@ class App:
         conn=ttk.LabelFrame(top,text='Instrument connections',padding=12)
         conn.grid(row=0,column=1,sticky='nsew')
         ttk.Label(conn,text='8846A port').grid(row=0,column=0,sticky='w',pady=3)
-        self.dmm_combo=ttk.Combobox(conn,textvariable=self.dmm_port,width=10,state='normal')
-        self.dmm_combo.grid(row=0,column=1,padx=(8,20),pady=3)
+        self.dmm_combo=ttk.Combobox(conn,textvariable=self.dmm_port,width=8,state='normal')
+        self.dmm_combo.grid(row=0,column=1,padx=(6,10),pady=3)
         ttk.Label(conn,text='Fluke 5560A port').grid(row=0,column=2,sticky='w',pady=3)
-        self.fluke_combo=ttk.Combobox(conn,textvariable=self.fluke_port,width=10,state='normal')
-        self.fluke_combo.grid(row=0,column=3,padx=(8,20),pady=3)
-        self.btn_refresh_ports=ttk.Button(conn,text='Refresh ports',command=self.refresh_ports)
-        self.btn_refresh_ports.grid(row=0,column=4,padx=(0,8))
-        self.btn_test=ttk.Button(conn,text='Test connections',command=self.test_connections)
-        self.btn_test.grid(row=0,column=5)
+        self.fluke_combo=ttk.Combobox(conn,textvariable=self.fluke_port,width=8,state='normal')
+        self.fluke_combo.grid(row=0,column=3,padx=(6,10),pady=3)
+        btns=ttk.Frame(conn);btns.grid(row=2,column=0,columnspan=6,sticky='w',pady=(8,0))      # below the ports so a narrow window never cuts them off
+        self.btn_refresh_ports=ttk.Button(btns,text='Refresh ports',command=self.refresh_ports)
+        self.btn_refresh_ports.pack(side='left',padx=(0,8))
+        self.btn_test=ttk.Button(btns,text='Test connections',command=self.test_connections)
+        self.btn_test.pack(side='left')
         ttk.Label(conn,text='Serial settings').grid(row=1,column=0,sticky='w',pady=(6,0),padx=(0,10))
         row=ttk.Frame(conn);row.grid(row=1,column=1,columnspan=5,sticky='w',pady=(6,0))
         for text,var,values in (('Baud',self.baud,['9600','4800','2400','1200','600','300']),('Parity',self.parity,['Even','Odd','None']),('Data bits',self.bits,['7','8'])):
@@ -197,14 +199,16 @@ class App:
             ui.Notice(body,'The program pauses and asks you to confirm the wiring before every new setup and before any high-voltage point. Stay at the bench while a run is in progress.','info',title='Hardware mode').pack(fill='x',pady=(12,0))
 
         ttk.Label(body,text='Optional DC-ratio, rear-terminal and split-lead tests need a separate setup and are not included. AC, frequency and capacitance points are guided review only.',style='Small.TLabel').pack(anchor='w',pady=(6,0))
+        self.build_mode_bar(body)
         tools=ttk.Frame(body);tools.pack(fill='x',pady=(8,6))
         self.btn_run=ttk.Button(tools,text='▶  Run All Pending',style='Accent.TButton',command=self.run_all);self.btn_run.pack(side='left')
-        self.btn_rerun=ttk.Button(tools,text='Rerun Selected',command=self.rerun);self.btn_rerun.pack(side='left',padx=8)
+        self.btn_section=ttk.Button(tools,text='Run Shown Section',command=self.run_section);self.btn_section.pack(side='left',padx=8)
+        self.btn_rerun=ttk.Button(tools,text='Rerun Selected',command=self.rerun);self.btn_rerun.pack(side='left')
         self.btn_stop=ttk.Button(tools,text='■  Stop After This Point',style='Danger.TButton',command=self.request_stop,state='disabled');self.btn_stop.pack(side='left')
-        for text,cb in (('Export Report (PDF)',self.export_pdf),('Export Excel (.xlsx)',self.export_excel),):
-            ttk.Button(tools,text=text,command=cb).pack(side='right',padx=(8,0))
-        self.btn_load=ttk.Button(tools,text='Load progress',command=self.load);self.btn_load.pack(side='right',padx=(8,0))
-        ttk.Button(tools,text='Save progress',command=self.save).pack(side='right',padx=(8,0))
+        ui.dock_button(root,'Save progress',self.save)                       # file actions live in the bottom bar
+        self.btn_load=ui.dock_button(root,'Load progress',self.load)
+        ui.dock_button(root,'Export Excel (.xlsx)',self.export_excel)
+        ui.dock_button(root,'Export Report (PDF)',self.export_pdf)
 
         sumrow=ttk.Frame(body);sumrow.pack(fill='x',pady=(2,8))
         self.summary=ui.Summary(sumrow);self.summary.pack(side='left',fill='x',expand=True)
@@ -215,7 +219,7 @@ class App:
             if s not in sections:sections.append(s)
         ttk.Label(filt,text='Show',style='Muted.TLabel').pack(side='left')
         c1=ttk.Combobox(filt,textvariable=self.show_section,values=sections,width=15,state='readonly');c1.pack(side='left',padx=6)
-        c2=ttk.Combobox(filt,textvariable=self.show_status,values=['All points','Not tested','Passed','Failed (OOT)'],width=13,state='readonly');c2.pack(side='left')
+        c2=ttk.Combobox(filt,textvariable=self.show_status,values=datamode.STATUS_FILTERS,width=14,state='readonly');c2.pack(side='left')
         for c in (c1,c2):c.bind('<<ComboboxSelected>>',lambda _e:self.refresh())
 
         info=ttk.LabelFrame(body,text='Selected test point',padding=(12,8));info.pack(side='bottom',fill='x',pady=(10,0))
@@ -239,6 +243,7 @@ class App:
         if st=='Not tested' and res:return False
         if st=='Passed' and res!='PASS':return False
         if st=='Failed (OOT)' and res!='FAIL':return False
+        if not self.status_visible(str(p['id']),st):return False
         return True
 
     def _row(self,p):
@@ -330,11 +335,13 @@ class App:
         self.settings.save()
     def request_stop(self):self.stop=True;self.status.set('Stopping after current test point.')
     def run_all(self):self.execute([p for p in POINTS if str(p['id']) not in self.results])
+    def run_section(self):self.run_shown_section(POINTS)
     def rerun(self):
         selected=self.tree.selection()
         if selected:self.execute([POINTS[int(selected[0])-1]])
         else:messagebox.showinfo('Selection','Select a test point first.')
     def execute(self,points):
+        if not self.confirm_found_overwrite(points):return
         if self.busy or not points:return
         if not self.asset.get().strip():messagebox.showwarning('Instrument ID','Enter an instrument ID.');return
         if not self.demo and self.io is None:self.test_connections()
@@ -400,19 +407,19 @@ class App:
     def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));messagebox.showerror('Measurement stopped',str(exc))
     def _record(self,p,reading,synthetic):
         result='PASS' if p['low']<=reading<=p['high'] else 'FAIL'
-        self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'))
+        self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label)
         self._update_row(p);self.save(silent=True)
     def save(self,silent=False):
         path=HERE/f'8846A_{"".join(c if c.isalnum() or c in "-_" else "_" for c in self.asset.get()) or "UNASSIGNED"}_checkpoint.json'
-        path.write_text(json.dumps(dict(asset=self.asset.get(),serial=self.serial.get(),demo=self.demo,results=self.results),indent=2))
+        path.write_text(json.dumps(dict(asset=self.asset.get(),serial=self.serial.get(),demo=self.demo,**self.save_fields()),indent=2))
         if not silent:self.status.set(f'Saved {path.name}')
     def load(self):
         path=filedialog.askopenfilename(filetypes=[('Checkpoint','*.json')]);
         if not path:return
         data=json.loads(Path(path).read_text())
-        if any(v.get('synthetic') for v in data.get('results',{}).values()) and not self.demo:
+        if self.file_has_synthetic(data) and not self.demo:
             if not messagebox.askyesno('Synthetic data','Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):return
-        self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.results=data.get('results',{});self.refresh();self.status.set(f'Loaded progress: {len(self.results)} point(s) restored.')
+        self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.load_results(data);self.refresh();self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
     @staticmethod
     def report_section(p):
         import report_pdf
@@ -426,9 +433,8 @@ class App:
         import report_pdf
         rows=[]
         for p in POINTS:
-            r=self.results.get(str(p['id']))
-            if not r:continue
-            rows.append(report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard='5560A'))
+            row=self.found_left_row(p,lambda r:report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard='5560A'))
+            if row:rows.append(row)
         return rows
     def export_pdf(self):
         rows=self.certificate_rows()
@@ -440,7 +446,7 @@ class App:
         asset=''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
         path=filedialog.asksaveasfilename(defaultextension='.pdf',filetypes=[('PDF report','*.pdf')],initialfile=ui.report_filename(asset))
         if not path:return
-        demo=self.demo or any(v.get('synthetic') for v in self.results.values())
+        demo=self.any_synthetic()
         try:
             report_pdf.write_calibration_pdf(path,rows,header=[('Instrument','Fluke 8846A'),('Instrument ID',self.asset.get()),('Serial',self.serial.get()),('Source','Fluke 8845A/8846A Calibration Manual, Appendix A Table A-2 - 1-year verification')],demo=demo,details=details,footer_note=report_pdf.uncertainty_note(rows,'5560A'))
         except ImportError:
@@ -453,10 +459,10 @@ class App:
         if not path:return
         with open(path,'w',newline='',encoding='utf-8-sig') as file:
             writer=csv.writer(file);writer.writerow(['Instrument ID',self.asset.get(),'Serial Number',self.serial.get()]);writer.writerow(['SOURCE','Fluke 8845A/8846A Calibration Manual Appendix A Table A-2; 1-year verification']);writer.writerow(['DEMO DATA','YES' if self.demo or any(v.get('synthetic') for v in self.results.values()) else 'NO']);writer.writerow([])
-            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic'])
+            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic','As Left','As Left status'])
             for p in POINTS:
-                r=self.results.get(str(p['id']),{});n=p['nominal'];e=p['error']
-                writer.writerow(['ZERO '+p['kind'] if p.get('zero_offset') else p['kind'],p['description'],n,p['low'],p['high'],p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic','')])
+                r=self.found.get(str(p['id']),{});lr=self.left.get(str(p['id']),{});n=p['nominal'];e=p['error']
+                writer.writerow(['ZERO '+p['kind'] if p.get('zero_offset') else p['kind'],p['description'],n,p['low'],p['high'],p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic',''),lr.get('reading','Same' if r else ''),lr.get('result','')])
         self.status.set(f'Exported 1-year verification: {path}')
     def export_excel(self):
         """Export a formatted, sectioned verification report. No synthetic results are certified."""
@@ -482,14 +488,14 @@ class App:
         ws['A2'].font=Font(name='Aptos',size=11,italic=True,color=navy)
         ws.merge_cells('A3:I3');ws['A3']=f'Instrument ID: {self.asset.get().strip() or "NOT ENTERED"}    |    Serial Number: {self.serial.get().strip() or "NOT ENTERED"}'
         ws['A3'].font=Font(name='Aptos',size=11,bold=True,color=navy)
-        synthetic=self.demo or any(v.get('synthetic') for v in self.results.values())
+        synthetic=self.any_synthetic()
         ws.merge_cells('A4:I4');ws['A4']='DEMO / SYNTHETIC RESULTS — NOT FOR CERTIFICATION' if synthetic else 'Measured results only; blank cells indicate untested points'
         ws['A4'].font=Font(name='Aptos',bold=True,color='9C1C1C' if synthetic else navy)
-        done=sum(bool(self.results.get(str(p['id']),{}).get('result')) for p in POINTS)
-        fails=sum(self.results.get(str(p['id']),{}).get('result')=='FAIL' for p in POINTS)
+        done=sum(bool(self.found.get(str(p['id']),{}).get('result')) for p in POINTS)
+        fails=sum(self.found.get(str(p['id']),{}).get('result')=='FAIL' for p in POINTS)
         ws.merge_cells('A5:I5');ws['A5']=f'Test points: {len(POINTS)}    Completed: {done}    OOT: {fails}    Exported: {datetime.now():%Y-%m-%d %H:%M}'
         ws['A5'].font=Font(name='Aptos',bold=True,color=navy)
-        heads=['Description','Nominal','Tolerance −','Tolerance +','UOM','As Found','OOT','Result','Timestamp']
+        heads=['Description','Nominal','Tolerance −','Tolerance +','UOM','As Found','OOT','Result','Timestamp','As Left']
         row=7; last=None
         for p in POINTS:
             section={'DCV':'DC VOLTAGE','ACV':'AC VOLTAGE','FREQ':'FREQUENCY',
@@ -497,17 +503,18 @@ class App:
                      'CAP':'CAPACITANCE','DCI':'DC CURRENT','ACI':'AC CURRENT'}.get(p['kind'],p['kind'])
             if section!=last:
                 if last is not None:row+=1
-                ws.merge_cells(start_row=row,start_column=1,end_row=row,end_column=9)
+                ws.merge_cells(start_row=row,start_column=1,end_row=row,end_column=10)
                 cell=ws.cell(row,1,section);cell.font=Font(name='Aptos',size=12,bold=True,color='FFFFFF')
                 cell.fill=PatternFill('solid',fgColor=navy);ws.row_dimensions[row].height=23;row+=1
                 for j,h in enumerate(heads,1):
                     c=ws.cell(row,j,h);c.font=Font(name='Aptos',bold=True,color=navy)
                     c.fill=PatternFill('solid',fgColor=teal);c.alignment=Alignment(wrap_text=True)
                 ws.row_dimensions[row].height=24;row+=1;last=section
-            r=self.results.get(str(p['id']),{})
+            r=self.found.get(str(p['id']),{});lr=self.left.get(str(p['id']),{})
             vals=[p['description'],p['nominal'],p['low'],p['high'],p['unit'],
                   r.get('reading'), 'OOT' if r.get('result')=='FAIL' else '',
-                  r.get('result',''),r.get('timestamp','')]
+                  r.get('result',''),r.get('timestamp',''),
+                  (lr.get('reading') if lr else ('Same' if r else ''))]
             for j,value in enumerate(vals,1):
                 c=ws.cell(row,j,value)
                 c.font=Font(name='Aptos',size=10,bold=(j in (7,8) and r.get('result')=='FAIL'))
@@ -516,7 +523,7 @@ class App:
                 if r.get('result')=='FAIL' and j in (6,7,8):c.fill=PatternFill('solid',fgColor=red)
                 if j in (2,3,4,6):c.number_format='0.##########'
             row+=1
-        for j,w in enumerate([48,17,17,17,12,17,10,12,22],1):ws.column_dimensions[get_column_letter(j)].width=w
+        for j,w in enumerate([48,17,17,17,12,17,10,12,22,17],1):ws.column_dimensions[get_column_letter(j)].width=w
         ws.freeze_panes='B9';ws.sheet_properties.pageSetUpPr.fitToPage=True
         ws.page_setup.orientation='landscape';ws.page_setup.paperSize=ws.PAPERSIZE_A3
         ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0
