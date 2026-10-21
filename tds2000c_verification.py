@@ -326,7 +326,9 @@ class Runner:
     def dc_source(self):
         cal = self.io.cal
         cal.standby_quiet()
+        cal.drain_errors()                      # an error left from earlier is never blamed on this setup (it is in the command log)
         cal.select_scope_dcv('1M')
+        cal.check_error('SCOPE DCV / OUT_IMP 1M')   # name the setup command if it was the one rejected
 
     def apply_dc(self, volts, settle=2.0):
         cal = self.io.cal
