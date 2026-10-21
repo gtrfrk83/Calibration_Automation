@@ -392,10 +392,13 @@ class Runner:
         cal.set_levsine(vpp, hz)
         cal.check_error(f'levsine {vpp:g} V p-p {hz:g} Hz')
         amp, freq = parse_out_reply(cal.query('OUT?'))
-        if not (math.isclose(amp, vpp, rel_tol=1e-4, abs_tol=1e-6) and math.isclose(freq, hz, rel_tol=1e-4)):
+        # The calibrator keeps limited digits (it answered 1.19 V for 1.19048 V at 200 MHz), so the amplitude must agree within its resolution
+        # (1 % or 2 mV); the frequency stays tight. The amplitude it reports is returned and used as the real source level.
+        if not (math.isclose(amp, vpp, rel_tol=1e-2, abs_tol=2e-3) and math.isclose(freq, hz, rel_tol=1e-4)):
             raise drivers.InstrumentError(f'Calibrator setting mismatch: asked {vpp:g} V p-p, {hz:g} Hz; OUT? reports {amp:g} V, {freq:g} Hz')
         cal.operate()
         pause(settle)
+        return amp
 
     def tune_sine(self, ch, hz, start_vpp, target_pp, low=None, high=None, tol=0.05, tries=5):
         """Closed loop: change the calibrator level until the scope's own Pk-Pk reading is in [low, high] (default target +/- tol).
@@ -405,7 +408,7 @@ class Runner:
         vpp, scope = start_vpp, self.io.scope
         for _ in range(tries):
             self.check()
-            self.set_sine(vpp, hz)
+            vpp = self.set_sine(vpp, hz)            # the level the calibrator reports (it rounds to its resolution)
             measured = scope.measure('PK2pk', ch)
             if low <= measured <= high:
                 return vpp, measured
