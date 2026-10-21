@@ -131,7 +131,7 @@ class RMSNoiseApp:
     def __init__(self, root):
         self.root = root
         ui.apply_theme(root)
-        root.title('WaveSurfer 4104HD | Calibration Verification v55')
+        root.title('WaveSurfer 4104HD | Calibration Verification v56')
         ui.fit_window(root, 1300, 880, min_w=1020, min_h=640)
         self.events = queue.Queue()
         self.stop_event = threading.Event()
@@ -428,7 +428,7 @@ class RMSNoiseApp:
         self._idle = 0
         self._shown = None
         self._last_status = {}
-        ui.StatusBar(root, self.msg, right='v55').pack(side='bottom', fill='x')
+        ui.StatusBar(root, self.msg, right='v56').pack(side='bottom', fill='x')
         body = ttk.Frame(root, padding=(18, 14, 18, 10))
         body.pack(fill='both', expand=True)
         top = ttk.Frame(body)
@@ -3260,6 +3260,14 @@ class RMSNoiseApp:
                 value,unit,_=sc.oscilloscope('offset',volts=r['nominal_v'])
             elif kind=='bandwidth':
                 value,unit,_=sc.oscilloscope('bandwidth',volts_pp=r['amplitude_vpp'],frequency=r['high_hz'])
+            elif kind=='trigger':
+                # Based on the DC voltage the Fluke sources for the point: the two bracket steps (20 mV short of and 20 mV past the
+                # level) decide pass/fail, so the larger of the two is used (the CMC grows with the level). Absolute volts, 1 MOhm.
+                if 'short_v' in r and 'past_v' in r:
+                    sourced=max(abs(r['short_v']),abs(r['past_v']))
+                else:
+                    sourced=abs(r['level_v'])+TRIG_LIMIT_V          # results saved before the sourced steps were recorded
+                value,unit,_=sc.oscilloscope('offset',volts=sourced,impedance='1M')
             else:
                 return ''
         except (KeyError,TypeError,ZeroDivisionError):

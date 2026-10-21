@@ -12,7 +12,7 @@ Folder layout (same as before, plus one new file):
       Fluke_8846A_Verification.py    v58
       Fluke_8846A_Adjustment.py      v57
       Fluke_87V.py                   v52
-      WaveSurfer_WS4104HD.py         v55
+      WaveSurfer_WS4104HD.py         v56
 
 Install: copy these files over the old ones (keep your calibration_procedures.sqlite3,
 Backups\ and any checkpoint files). The database layout is unchanged.
@@ -46,6 +46,12 @@ interval entered for that instrument; overdue rows are red). Demo reports are ne
 Launching a procedure from the Instruments tab now fills in the Instrument ID, and typing a known ID fills an empty Serial number and shows
 the last report / next due date in the status bar.
 
+WaveSurfer v56: the trigger level uncertainty is now the laboratory's DC voltage CMC (A2LA scope, 1 MOhm: 0.06 % of the level + 40 uV)
+  at the DC voltage the Fluke sources for the point. The two bracket steps (20 mV short of and 20 mV past the trigger level) decide
+  pass/fail, so the larger of the two is used: 52 uV for the 0 mV points, 232 uV for the +/-300 mV points. It is the uncertainty of the
+  sourced voltage only; it does not include the scope's trigger noise or resolution, so it is much smaller than the figures on the
+  old data sheet (11 mV and 17 mV).
+
 WaveSurfer v55: the time base test reported '5560A rejected the setting (SCOPE MARKER): -117'. ERR? returns the OLDEST
   error, and nothing had read the 5560A queue before, so an error left from an earlier session was blamed on SCOPE MARKER
   (the 5560A reports SCOPE? = MARKER in time-marker mode). The queue is now read out first (read-only ERR?, every reply in the
@@ -60,7 +66,7 @@ WaveSurfer v53: two new functions in the results table, with limits from the HAZ
   Trigger level (24 points): CH1-CH4 x 0 / +300 / -300 mV x positive and negative slope, +/-20 mV, at 100 mV/div DC 1 MOhm 20 MHz BW. Bracket
   test: the scope is armed in Single at the level, the Fluke steps from 100 mV before the level to 20 mV short (must not trigger) and then 20 mV
   past (must trigger); the technician answers both prompts. The report shows 'Within +/-20 mV' (no trigger voltage is measured). The Fluke output
-  is at most 0.4 V and returns to STBY after every point. Uncertainty is left blank for both (no A2LA scope entry).
+  is at most 0.4 V and returns to STBY after every point. Time base uncertainty is left blank (no A2LA scope entry).
   NOT yet verified on hardware: 5560A SCOPE MARKER / OUT <period>S and the scope VBS Trigger.Edge.Slope, Trigger.Edge.Level and TriggerMode.
   Each is read back, and the output is never enabled after a rejected or unexpected reply. Check the first point of each on screen.
   Input impedance fix: the channel points passed 'C1' to the VBS scale setter, which asked the scope for app.Acquisition.CC1 and failed with
