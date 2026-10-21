@@ -47,6 +47,7 @@ def setup_key(p):
     if p.get('zero_offset'):return 'ZERO_OPEN' if p['kind'] in ('DCI','CAP') else 'ZERO_SHORT'
     return p['wiring']
 POINTS.sort(key=lambda q:(0,_ZERO_ORDER[q['kind']]) if q.get('zero_offset') else (1,0))   # stable: gain points keep their order
+BY_ID={q['id']:q for q in POINTS}      # the list is no longer in id order (zero block first): always look points up by id
 # The manual also specifies optional DC ratio, rear-terminal and split-lead tests.
 # Those require distinct setups/measurement commands and are not executed here.
 
@@ -395,7 +396,7 @@ class App:
     def on_select(self,_event=None):
         sel=self.tree.selection()
         if not sel:return
-        p=POINTS[int(sel[0])-1]
+        p=BY_ID[int(sel[0])]
         setup=('Zero offset: select the '+p['terminal']+' terminals and fit the short (open for current) - the 5560A stays in STANDBY.'
                if p.get('zero_offset') else self.SETUP_TEXT.get(p['wiring'],p['wiring']))
         _v,_r,_u=ui.si_row([p["low"],p["high"]],p['unit'])
@@ -429,7 +430,7 @@ class App:
     def run_all(self):self.execute([p for p in POINTS if str(p['id']) not in self.results])
     def rerun(self):
         selected=self.tree.selection()
-        if selected:self.execute([POINTS[int(selected[0])-1]])
+        if selected:self.execute([BY_ID[int(selected[0])]])
         else:messagebox.showinfo('Selection','Select a test point first.')
     def execute(self,points):
         if self.busy or not points:return
