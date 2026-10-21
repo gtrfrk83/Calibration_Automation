@@ -54,6 +54,7 @@ class Shell:
         self.demo = demo
         self.on_section = on_section
         self.sections = []                 # [(name, passed, failed, total)]
+        self._action_texts = []
         self.current = 'All sections'
         self._compact = None
         self._rows = {}
@@ -89,6 +90,7 @@ class Shell:
         self.notice_holder = ttk.Frame(self.strip_holder)           # As Left / demo / hardware notices
         self.notice_holder.pack(fill='x')
         self.section_picker = None
+        self.layout_hook = None            # called with True/False when the window crosses the small-window width
 
         # ---- bottom bars are packed before the body so they are never squeezed out -------------------------
         self.status_var = tk.StringVar()
@@ -123,7 +125,7 @@ class Shell:
         top.pack(fill='x', padx=ui.px(16), pady=(ui.px(12), ui.px(6)))
         tk.Label(top, text='Connections & settings', background=C['card'], foreground=C['text'],
                  font=('TkDefaultFont', max(9, int(ui.SCALE * 11)), 'bold')).pack(side='left')
-        tk.Button(top, text='✕', command=self.close_drawer, relief='flat', borderwidth=0, background=C['card'], foreground=C['muted'],
+        tk.Button(top, text='Close', command=self.close_drawer, relief='flat', borderwidth=0, background=C['card'], foreground=C['muted'],
                   activebackground=C['head_hi'], activeforeground=C['text'], cursor='hand2').pack(side='right')
         tk.Frame(self.drawer, height=1, background=C['border']).pack(fill='x')
         self.drawer_body = ttk.Frame(self.drawer, padding=(ui.px(16), ui.px(10)))
@@ -156,16 +158,21 @@ class Shell:
         return self.summary
 
     def notice(self, text, kind='info', title=None):
-        n = ui.Notice(self.notice_holder, text, kind, title=title)
+        n = ui.Notice(self.notice_holder, (f'{title}:  ' if title else '') + text, kind)
         n.pack(fill='x', pady=(6, 0))
         return n
 
     # ------------------------------------------------------------------ action bar
-    def add_action(self, text, command, accent=False, danger=False, side='left', **kw):
+    def add_action(self, text, command, accent=False, danger=False, side='left', short=None, **kw):
         style = 'Danger.TButton' if danger else ('Accent.TButton' if accent else 'TButton')
         parent = self.actions_right if side == 'right' else self.actions_left
         b = ttk.Button(parent, text=text, command=command, style=style, **kw)
         b.pack(side='left', padx=(0 if side == 'left' and not parent.winfo_children()[:-1] else 8, 0))
+        self._action_texts.append((b, text, short or text))
+        if self._compact:
+            b.configure(text=short or text)
+            if style == 'TButton':
+                b.configure(style='Compact.TButton')
         return b
 
     # ------------------------------------------------------------------ sections (sidebar / drop-down)
@@ -189,9 +196,11 @@ class Shell:
             row = tk.Frame(self._side_list, background=bg, cursor='hand2')
             row.pack(fill='x', padx=ui.px(8), pady=1)
             dotc = C['bad_dot'] if bad else (C['good_dot'] if tot and ok == tot else (C['info_dot'] if ok else C['neutral_dot']))
-            dot = tk.Label(row, text='●', background=bg, foreground=dotc)
-            dot.pack(side='left', padx=(ui.px(8), ui.px(6)), pady=ui.px(5))
-            label = tk.Label(row, text=name.title() if name.isupper() else name, background=bg, anchor='w',
+            d = ui.px(9)
+            dot = tk.Canvas(row, width=d + 2, height=d + 2, background=bg, highlightthickness=0, borderwidth=0)
+            dot.create_oval(1, 1, d, d, fill=dotc, outline='')                   # drawn, not a font glyph, so it looks the same everywhere
+            dot.pack(side='left', padx=(ui.px(10), ui.px(8)), pady=ui.px(7))
+            label = tk.Label(row, text=name, background=bg, anchor='w',
                              foreground=C['text'] if sel else C['muted'])
             label.pack(side='left', fill='x', expand=True)
             count = tk.Label(row, text=f'{ok + bad}/{tot}', background=bg, foreground=C['bad'] if bad else C['faint'])
@@ -257,10 +266,16 @@ class Shell:
         else:
             self._side_sep_hide(False)
             self.sidebar.pack(side='left', fill='y', before=self.content)
-        if self.section_picker is not None:
-            if compact:
-                self.section_picker.grid() if self.section_picker.winfo_manager() == 'grid' else None
-            self.section_picker.master.event_generate('<<ShellLayout>>')
+        for b, full, short in self._action_texts:           # shorter button texts in a small window
+            b.configure(text=short if compact else full)
+            if str(b.cget('style')) == 'TButton':
+                b.configure(style='Compact.TButton' if compact else 'TButton')
+        summary = getattr(self, 'summary', None)
+        if summary is not None:                              # the pass / fail / remaining badges give way to the bar
+            for pill in (summary.rem, summary.fail, summary.ok):
+                pill.pack_forget() if compact else pill.pack(side='right', padx=(6, 0))
+        if self.layout_hook:
+            self.layout_hook(compact)
 
     def _side_sep_hide(self, hide):
         for w in self.body.winfo_children():

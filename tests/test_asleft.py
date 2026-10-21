@@ -272,8 +272,12 @@ class OlderProcedures(unittest.TestCase):
                 self.assertEqual(app.results, {})
                 sec = next(p for p in h.mod.POINTS)['kind']
                 values = [w for w in app.root.winfo_children()]  # noqa: F841
-                combo = [w for w in _walk(app.root) if isinstance(w, ttk.Combobox) and w.cget('textvariable') == str(app.show_section)][0]
-                app.show_section.set(combo['values'][1])
+                combos = [w for w in _walk(app.root) if isinstance(w, ttk.Combobox) and w.cget('textvariable') == str(app.show_section)]
+                if combos:
+                    app.show_section.set(combos[0]['values'][1])
+                else:                                                   # redesigned window: the sidebar picks the section
+                    app.shell.choose_section(app.shell.sections[0][0])
+                    self.assertEqual(app.show_section.get(), app.shell.sections[0][0])
                 app.run_section(); pump(h.root, lambda: not app.busy)
                 self.assertTrue(app.left)
                 self.assertLess(len(app.left), n)
@@ -379,8 +383,12 @@ class EveryEngine(unittest.TestCase):
                 n = len(app.found)
                 self.assertGreater(n, 0)
                 app.set_data_mode('left')
-                combo = [w for w in _walk(app.root) if isinstance(w, ttk.Combobox) and w.cget('textvariable') == str(app.show_section)][0]
-                app.show_section.set(combo['values'][1])
+                combos = [w for w in _walk(app.root) if isinstance(w, ttk.Combobox) and w.cget('textvariable') == str(app.show_section)]
+                if combos:
+                    app.show_section.set(combos[0]['values'][1])
+                else:                                                   # redesigned window: the sidebar picks the section
+                    app.shell.choose_section(app.shell.sections[0][0])
+                    self.assertEqual(app.show_section.get(), app.shell.sections[0][0])
                 app.run_section(); pump(h.root, lambda: not app.busy, 120)
                 self.assertTrue(app.left, name)
                 self.assertEqual(len(app.found), n)

@@ -128,6 +128,26 @@ class DataModeMixin:
         self.mode_notice = None
         return bar
 
+    def build_mode_segment(self, parent, notice_holder=None):
+        """The redesigned toggle: a compact  Collecting [ As Found | As Left ]  switch for the shell's top strip.  It keeps the same
+        attributes as build_mode_bar (mode_var, mode_buttons, mode_hint, mode_notice_holder), so everything else works unchanged;
+        the hint becomes a tooltip and the As Left warning becomes a one-line amber notice under the strip."""
+        self.mode_var = tk.StringVar(value=self._mode)
+        box = ttk.Frame(parent)
+        box.pack(side='left', padx=(0, 14))
+        ttk.Label(box, text='Collecting').pack(side='left', padx=(0, 8))
+        self.mode_buttons = []
+        for mode, style in ((FOUND, 'Seg.Toolbutton'), (LEFT, 'SegLeft.Toolbutton')):
+            b = ttk.Radiobutton(box, text=LABEL[mode], value=mode, variable=self.mode_var, command=self._mode_clicked, style=style)
+            b.pack(side='left')
+            self.mode_buttons.append(b)
+        self.mode_hint = tk.StringVar(value=HINT_FOUND)
+        ui.Tooltip(box, lambda: self.mode_hint.get())
+        self.mode_notice_holder = notice_holder if notice_holder is not None else ttk.Frame(parent)
+        self.mode_notice = None
+        self.mode_notice_short = True
+        return box
+
     def _mode_clicked(self):
         self.set_data_mode(self.mode_var.get(), from_ui=True)
 
@@ -166,8 +186,10 @@ class DataModeMixin:
             self.mode_notice.destroy()
             self.mode_notice = None
         if self._mode == LEFT:
-            self.mode_notice = ui.Notice(holder, 'Readings taken now are saved as AS LEFT. Use this only after the instrument was adjusted. '
-                                                 'Switch back to As Found to review the original readings.', 'warn', title='Collecting As Left data')
+            short = getattr(self, 'mode_notice_short', False)
+            self.mode_notice = ui.Notice(holder, ('Collecting AS LEFT: readings are saved beside the As Found values, which stay locked. Use after an adjustment only.' if short else
+                                                  'Readings taken now are saved as AS LEFT. Use this only after the instrument was adjusted. '
+                                                  'Switch back to As Found to review the original readings.'), 'warn', title=None if short else 'Collecting As Left data')
             self.mode_notice.pack(fill='x', pady=(6, 0))
 
     def _relabel_reading_column(self):
