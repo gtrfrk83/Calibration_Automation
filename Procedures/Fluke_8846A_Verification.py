@@ -38,6 +38,11 @@ for kind, block in TEST_TABLES.items():
         POINTS[-1]['zero_offset']=(nominal==0 and kind in ('DCV','DCI','OHM4','OHM2','CAP'))
         POINTS[-1]['terminal']='FRONT'
         POINTS[-1]['source']='Fluke Calibration Manual Appendix A, Table A-2 (1-year)'
+# Point 107 (ACI 100 uA @ 10 Hz) is an optional manual-table test and is deleted at the technician's request.
+# The other points keep their ids (no renumbering), so existing checkpoints still match.
+REMOVED_POINTS=[q['id'] for q in POINTS if q['kind']=='ACI' and q['nominal']==100e-6 and q['frequency']==10]
+assert len(REMOVED_POINTS)==1,'expected exactly one ACI 100 uA @ 10 Hz point'
+POINTS[:]=[q for q in POINTS if q['id'] not in REMOVED_POINTS]
 # All zero-offset points form ONE block at the start of the run (one section in the list and the report).
 # Shorted-input zeros first, then the open-input ones (DCI, CAP), so the technician fits each fixture once.
 # Point ids are left unchanged so existing checkpoint files still match their points.
@@ -291,7 +296,7 @@ class App:
 
     def _sync_buttons(self):
         idle='disabled' if self._busy else 'normal'
-        for b in (self.btn_run,self.btn_rerun,self.btn_test,self.btn_load,self.btn_refresh_ports):b.configure(state=idle)
+        for b in (self.btn_run,self.btn_rerun,self.btn_override,self.btn_test,self.btn_load,self.btn_refresh_ports):b.configure(state=idle)
         self.btn_stop.configure(state='normal' if self._busy else 'disabled')
         for c in (self.dmm_combo,self.fluke_combo):c.configure(state='disabled' if self._busy else 'normal')
 
@@ -342,6 +347,7 @@ class App:
         tools=ttk.Frame(body);tools.pack(fill='x',pady=(8,6))
         self.btn_run=ttk.Button(tools,text='▶  Run All Pending',style='Accent.TButton',command=self.run_all);self.btn_run.pack(side='left')
         self.btn_rerun=ttk.Button(tools,text='Rerun Selected',command=self.rerun);self.btn_rerun.pack(side='left',padx=8)
+        self.btn_override=ttk.Button(tools,text='Override Reading…',command=self.override_reading);self.btn_override.pack(side='left',padx=(0,8))
         self.btn_stop=ttk.Button(tools,text='■  Stop After This Point',style='Danger.TButton',command=self.request_stop,state='disabled');self.btn_stop.pack(side='left')
         for text,cb in (('Export Report (PDF)',self.export_pdf),('Export Excel (.xlsx)',self.export_excel),):
             ttk.Button(tools,text=text,command=cb).pack(side='right',padx=(8,0))
@@ -387,7 +393,7 @@ class App:
         rec=self.results.get(str(p['id']),{});res=rec.get('result','')
         reading=rec.get('reading','')
         vals,reads,unit_text=ui.si_row([p['nominal'],p["low"],p["high"]],p['unit'],[reading] if reading!='' else [])
-        shown={'PASS':'✔ PASS','FAIL':'✖ FAIL'}.get(res,'—')
+        shown={'PASS':'✔ PASS','FAIL':'✖ FAIL'}.get(res,'—')+(' ✎' if rec.get('manual') else '')   # ✎ = typed by hand
         return (p['id'],self._section(p),p['description'],ui.si(p["range"],p["unit"]),vals[0],
                 vals[1],vals[2],reads[0] if reads else '',unit_text,shown),(res.lower() or 'pending',)
 
@@ -444,7 +450,13 @@ class App:
         setup=('Zero offset: select the '+p['terminal']+' terminals and fit the short (open for current) - the 5560A stays in STANDBY.'
                if p.get('zero_offset') else self.SETUP_TEXT.get(setup_key(p),p['wiring']))
         _v,_r,_u=ui.si_row([p["low"],p["high"]],p['unit'])
-        self.detail.set(f'{p["description"]}\nAcceptable reading: {_v[0]} to {_v[1]} {_u}     |     Setup: {setup}')
+        note=''
+        _rec=self.results.get(str(p['id']),{})
+        if _rec.get('manual'):
+            _o=_rec.get('original')
+            _ot='no automatic reading' if _o in (None,'') else 'automatic reading '+ui.si_row([p['nominal'],p['low'],p['high']],p['unit'],[_o])[1][0]+' '+_u
+            note=f'\nMANUAL OVERRIDE: {_ot}; reason: {_rec.get("reason","")}'
+        self.detail.set(f'{p["description"]}\nAcceptable reading: {_v[0]} to {_v[1]} {_u}     |     Setup: {setup}'+note)
 
     def test_connections(self):
         if self.demo:messagebox.showinfo('Demo mode','Demo mode uses no hardware, so there is nothing to connect.');return
@@ -548,6 +560,70 @@ class App:
         self._record(p,reading,False)
         self.root.after(50,lambda:self._next(points,i+1,setup_key(p)))
     def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));messagebox.showerror('Measurement stopped',str(exc)+'\n\nThe commands sent are saved in ~/.calibration_suite/command_log.txt')
+    # ---- manual override ------------------------------------------------------------------------
+    @staticmethod
+    def _display_scale(p):
+        """(divisor, unit text) the list uses for this point, so a typed reading is in the unit the technician sees."""
+        return ui.si_scale(max(abs(p['nominal']),abs(p['low']),abs(p['high'])),p['unit'])
+    def apply_override(self,p,text,reason):
+        """Record a reading typed by the technician (in the list's display unit) for point p. It is judged against the limits
+        exactly like an automatic reading and stored with manual=True, the automatic reading it replaced, the reason and the time.
+        Raises ValueError (with a message for the technician) if the text or the reason is not acceptable."""
+        reason=(reason or '').strip()
+        if not reason:raise ValueError('Enter a reason for the override.')
+        try:shown=float((text or '').strip().replace(' ',''))
+        except ValueError:raise ValueError('Enter the reading as a number, in the unit shown.') from None
+        if not math.isfinite(shown):raise ValueError('Enter the reading as a number, in the unit shown.')
+        reading=shown*self._display_scale(p)[0]
+        prior=self.results.get(str(p['id']),{})
+        original=prior.get('original') if prior.get('manual') else prior.get('reading')   # always the AUTOMATIC reading, if there was one
+        rec=dict(reading=reading,result='PASS' if p['low']<=reading<=p['high'] else 'FAIL',synthetic=self.demo,
+                 timestamp=datetime.now().isoformat(timespec='seconds'),manual=True,original=original,reason=reason)
+        self.results[str(p['id'])]=rec
+        self._audit_override(p,rec)
+        self._update_row(p);self.save(silent=True)
+        return rec
+    def _audit_override(self,p,rec):
+        """One line per override in the command log and in ~/.calibration_suite/override_log.txt."""
+        line=(f'OVERRIDE point {p["id"]} {p["description"]}: automatic {rec["original"]!r} -> typed {rec["reading"]:.9g} {p["unit"]} '
+              f'({rec["result"]}); reason: {rec["reason"]}')
+        try:
+            if self.io is not None:self.io.log.add('NOTE',line,'8846A')
+        except Exception:pass
+        try:
+            folder=Path.home()/'.calibration_suite';folder.mkdir(parents=True,exist_ok=True)
+            with open(folder/'override_log.txt','a',encoding='utf-8') as f:
+                f.write(f'{rec["timestamp"]}  asset {self.asset.get().strip() or "?"}  {line}\n')
+        except OSError:pass
+    def override_reading(self):
+        sel=self.tree.selection()
+        if not sel:messagebox.showinfo('Selection','Select a test point first.');return
+        if self.busy:return
+        p=BY_ID[int(sel[0])]
+        scale,unit_text=self._display_scale(p)
+        prior=self.results.get(str(p['id']),{})
+        vals,reads,_u=ui.si_row([p['nominal'],p['low'],p['high']],p['unit'],[prior['reading']] if prior.get('reading') not in (None,'') else [])
+        win=tk.Toplevel(self.root);win.title('Override reading');win.transient(self.root);win.resizable(False,False)
+        frm=ttk.Frame(win,padding=16);frm.pack(fill='both',expand=True)
+        ttk.Label(frm,text=p['description']).grid(row=0,column=0,columnspan=3,sticky='w')
+        ttk.Label(frm,text=f'Acceptable reading: {vals[1]} to {vals[2]} {unit_text}').grid(row=1,column=0,columnspan=3,sticky='w',pady=(2,0))
+        if reads:ttk.Label(frm,text=f'Current reading: {reads[0]} {unit_text}'+(' (typed by hand)' if prior.get('manual') else '')).grid(row=2,column=0,columnspan=3,sticky='w')
+        reading_var=tk.StringVar();reason_var=tk.StringVar();error_var=tk.StringVar()
+        ttk.Label(frm,text='Reading:').grid(row=3,column=0,sticky='w',pady=(12,0))
+        entry=ttk.Entry(frm,textvariable=reading_var,width=18);entry.grid(row=3,column=1,sticky='w',pady=(12,0),padx=6)
+        ttk.Label(frm,text=unit_text).grid(row=3,column=2,sticky='w',pady=(12,0))
+        ttk.Label(frm,text='Reason:').grid(row=4,column=0,sticky='w',pady=(8,0))
+        ttk.Entry(frm,textvariable=reason_var,width=44).grid(row=4,column=1,columnspan=2,sticky='we',pady=(8,0),padx=6)
+        ttk.Label(frm,textvariable=error_var,foreground='#9C1C1C').grid(row=5,column=0,columnspan=3,sticky='w',pady=(8,0))
+        def ok(_e=None):
+            try:self.apply_override(p,reading_var.get(),reason_var.get())
+            except ValueError as exc:error_var.set(str(exc));return
+            win.destroy();self.on_select()
+        buttons=ttk.Frame(frm);buttons.grid(row=6,column=0,columnspan=3,sticky='e',pady=(12,0))
+        ttk.Button(buttons,text='Cancel',command=win.destroy).pack(side='right')
+        ttk.Button(buttons,text='Use this reading',style='Accent.TButton',command=ok).pack(side='right',padx=(0,8))
+        win.bind('<Return>',ok);win.bind('<Escape>',lambda _e:win.destroy())
+        win.grab_set();entry.focus_set()
     def _record(self,p,reading,synthetic):
         result='PASS' if p['low']<=reading<=p['high'] else 'FAIL'
         self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'))
@@ -563,6 +639,7 @@ class App:
         if any(v.get('synthetic') for v in data.get('results',{}).values()) and not self.demo:
             if not messagebox.askyesno('Synthetic data','Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):return
         self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.results=data.get('results',{})
+        self.results={k:v for k,v in self.results.items() if int(k) in BY_ID}     # drop results of deleted points
         for _id,_r in self.results.items():     # same test as _record(), against the current limits (the zero limits were corrected)
             _p=BY_ID.get(int(_id))
             if _p is not None and isinstance(_r.get('reading'),(int,float)):_r['result']='PASS' if _p['low']<=_r['reading']<=_p['high'] else 'FAIL'
@@ -607,10 +684,10 @@ class App:
         if not path:return
         with open(path,'w',newline='',encoding='utf-8-sig') as file:
             writer=csv.writer(file);writer.writerow(['Instrument ID',self.asset.get(),'Serial Number',self.serial.get()]);writer.writerow(['SOURCE','Fluke 8845A/8846A Calibration Manual Appendix A Table A-2; 1-year verification']);writer.writerow(['DEMO DATA','YES' if self.demo or any(v.get('synthetic') for v in self.results.values()) else 'NO']);writer.writerow([])
-            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic'])
+            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic','Manual override','Original reading','Override reason'])
             for p in POINTS:
                 r=self.results.get(str(p['id']),{});n=p['nominal'];e=p['error']
-                writer.writerow(['ZERO '+p['kind'] if p.get('zero_offset') else p['kind'],p['description'],n,p['low'],p['high'],p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic','')])
+                writer.writerow(['ZERO '+p['kind'] if p.get('zero_offset') else p['kind'],p['description'],n,p['low'],p['high'],p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic',''),'MANUAL' if r.get('manual') else '',r.get('original','') if r.get('manual') else '',r.get('reason','') if r.get('manual') else ''])
         self.status.set(f'Exported 1-year verification: {path}')
     def export_excel(self):
         """Export a formatted, sectioned verification report. No synthetic results are certified."""
@@ -629,21 +706,21 @@ class App:
         if not path:return
         wb=Workbook(); ws=wb.active;ws.title='Calibration Data'
         navy='17365D'; teal='DCEAF4'; light='F1F5FA'; red='FCE8E6'
-        ws.merge_cells('A1:I1'); ws['A1']='FLUKE 8846A | PERFORMANCE VERIFICATION'
+        ws.merge_cells('A1:J1'); ws['A1']='FLUKE 8846A | PERFORMANCE VERIFICATION'
         ws['A1'].font=Font(name='Aptos Display',size=17,bold=True,color='FFFFFF')
         ws['A1'].fill=PatternFill('solid',fgColor=navy);ws['A1'].alignment=Alignment(vertical='center');ws.row_dimensions[1].height=36
-        ws.merge_cells('A2:I2');ws['A2']='1-Year Verification  |  Manufacturer Appendix A, Table A-2'
+        ws.merge_cells('A2:J2');ws['A2']='1-Year Verification  |  Manufacturer Appendix A, Table A-2'
         ws['A2'].font=Font(name='Aptos',size=11,italic=True,color=navy)
-        ws.merge_cells('A3:I3');ws['A3']=f'Instrument ID: {self.asset.get().strip() or "NOT ENTERED"}    |    Serial Number: {self.serial.get().strip() or "NOT ENTERED"}'
+        ws.merge_cells('A3:J3');ws['A3']=f'Instrument ID: {self.asset.get().strip() or "NOT ENTERED"}    |    Serial Number: {self.serial.get().strip() or "NOT ENTERED"}'
         ws['A3'].font=Font(name='Aptos',size=11,bold=True,color=navy)
         synthetic=self.demo or any(v.get('synthetic') for v in self.results.values())
-        ws.merge_cells('A4:I4');ws['A4']='DEMO / SYNTHETIC RESULTS — NOT FOR CERTIFICATION' if synthetic else 'Measured results only; blank cells indicate untested points'
+        ws.merge_cells('A4:J4');ws['A4']='DEMO / SYNTHETIC RESULTS — NOT FOR CERTIFICATION' if synthetic else 'Measured results only; blank cells indicate untested points'
         ws['A4'].font=Font(name='Aptos',bold=True,color='9C1C1C' if synthetic else navy)
         done=sum(bool(self.results.get(str(p['id']),{}).get('result')) for p in POINTS)
         fails=sum(self.results.get(str(p['id']),{}).get('result')=='FAIL' for p in POINTS)
-        ws.merge_cells('A5:I5');ws['A5']=f'Test points: {len(POINTS)}    Completed: {done}    OOT: {fails}    Exported: {datetime.now():%Y-%m-%d %H:%M}'
+        ws.merge_cells('A5:J5');ws['A5']=f'Test points: {len(POINTS)}    Completed: {done}    OOT: {fails}    Exported: {datetime.now():%Y-%m-%d %H:%M}'
         ws['A5'].font=Font(name='Aptos',bold=True,color=navy)
-        heads=['Description','Nominal','Tolerance −','Tolerance +','UOM','As Found','OOT','Result','Timestamp']
+        heads=['Description','Nominal','Tolerance −','Tolerance +','UOM','As Found','OOT','Result','Timestamp','Manual override']
         row=7; last=None
         for p in POINTS:
             section={'DCV':'DC VOLTAGE','ACV':'AC VOLTAGE','FREQ':'FREQUENCY',
@@ -651,7 +728,7 @@ class App:
                      'CAP':'CAPACITANCE','DCI':'DC CURRENT','ACI':'AC CURRENT'}.get(p['kind'],p['kind'])
             if section!=last:
                 if last is not None:row+=1
-                ws.merge_cells(start_row=row,start_column=1,end_row=row,end_column=9)
+                ws.merge_cells(start_row=row,start_column=1,end_row=row,end_column=10)
                 cell=ws.cell(row,1,section);cell.font=Font(name='Aptos',size=12,bold=True,color='FFFFFF')
                 cell.fill=PatternFill('solid',fgColor=navy);ws.row_dimensions[row].height=23;row+=1
                 for j,h in enumerate(heads,1):
@@ -661,7 +738,8 @@ class App:
             r=self.results.get(str(p['id']),{})
             vals=[p['description'],p['nominal'],p['low'],p['high'],p['unit'],
                   r.get('reading'), 'OOT' if r.get('result')=='FAIL' else '',
-                  r.get('result',''),r.get('timestamp','')]
+                  r.get('result',''),r.get('timestamp',''),
+                  (f'MANUAL: {r.get("reason","")} (automatic reading: {r.get("original") if r.get("original") not in (None,"") else "none"})' if r.get('manual') else '')]
             for j,value in enumerate(vals,1):
                 c=ws.cell(row,j,value)
                 c.font=Font(name='Aptos',size=10,bold=(j in (7,8) and r.get('result')=='FAIL'))
@@ -670,7 +748,7 @@ class App:
                 if r.get('result')=='FAIL' and j in (6,7,8):c.fill=PatternFill('solid',fgColor=red)
                 if j in (2,3,4,6):c.number_format='0.##########'
             row+=1
-        for j,w in enumerate([48,17,17,17,12,17,10,12,22],1):ws.column_dimensions[get_column_letter(j)].width=w
+        for j,w in enumerate([48,17,17,17,12,17,10,12,22,46],1):ws.column_dimensions[get_column_letter(j)].width=w
         ws.freeze_panes='B9';ws.sheet_properties.pageSetUpPr.fitToPage=True
         ws.page_setup.orientation='landscape';ws.page_setup.paperSize=ws.PAPERSIZE_A3
         ws.page_setup.fitToWidth=1;ws.page_setup.fitToHeight=0
