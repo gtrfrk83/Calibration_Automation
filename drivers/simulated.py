@@ -95,6 +95,9 @@ class SimFlukeTransport(_SimBase):
         f = self.bench.fluke
         u = cmd.upper()
         if u == '*IDN?': return f'FLUKE,{self.model},SIM0001,1.0'
+        if u in getattr(self, 'reject', ()):
+            self.errors = getattr(self, 'errors', []) + ['-117,"Wrong type of parameter(s)"']
+            return None
         if u == 'SCOPE MARKER': f['scope'], f['func'] = 'MARKER', 'SMARK'; return None
         m = re.match(r'OUT\s+([0-9.eE+-]+)S$', u)
         if m and f['scope'] == 'MARKER':
@@ -121,8 +124,14 @@ class SimFlukeTransport(_SimBase):
                 f['freq'] = float(m.group(3)) * {'HZ': 1, 'KHZ': 1e3, 'MHZ': 1e6, 'GHZ': 1e9}[m.group(4)]
             return None
         if u == 'OUT?': return f"{f['volts']:.9f},V,{f['freq']:.1f},HZ"
-        if u == '*CLS': self.next_error = '0,"No error"'; return None
-        if u == 'ERR?': return getattr(self, 'next_error', '0,"No error"')
+        if u == '*CLS': self.errors = []; self.next_error = None; return None
+        if u == 'ERR?':
+            queue = getattr(self, 'errors', [])
+            if getattr(self, 'next_error', None):          # older tests set one error directly
+                queue.insert(0, self.next_error); self.next_error = None
+            self.errors = queue
+            return queue.pop(0) if queue else '0,"No error"'
+
         if u == '*TRG':
             term = getattr(self.bench, 'mdo', {}).get('term')
             ohms = {'1M': 1.0004e6, '250k': 250.2e3, '50': 50.01}.get(term, f['ohms'])

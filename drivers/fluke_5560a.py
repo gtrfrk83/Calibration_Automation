@@ -47,6 +47,7 @@ class Fluke5560A(Instrument):
             self.standby_confirmed = False
 
     standby_confirmed = False
+    stale_errors = ()
 
     # ---- SCOPE function ------------------------------------------------------------------------
     def scope_off(self):
@@ -112,7 +113,20 @@ class Fluke5560A(Instrument):
     # 'SCOPE MARKER' and 'OUT <period>S' follow the 5520A/5522A SC-option command set. Each call is checked
     # through the error queue and read back; the output is never enabled after a rejection or an unexpected
     # reply, and the raw reply is put in the error so the command set can be confirmed on the bench.
+    def drain_errors(self, limit=20):
+        """Read-only: empty the error queue (ERR? removes the oldest each time) and return what was in it, so an error left
+        over from an earlier session is never blamed on the next command. Every reply is in the command log."""
+        stale = []
+        for _ in range(limit):
+            reply = self.read_error()
+            if reply.split(',')[0].strip() in ('0', '+0'):
+                return stale
+            stale.append(reply)
+        raise InstrumentError(f'5560A error queue did not empty after {limit} reads: {stale[-3:]}')
+
     def select_scope_marker(self):
+        """SCOPE? reports MARKER in time-marker mode (confirmed from the 5560A front panel, 2026-10-21)."""
+        self.stale_errors = self.drain_errors()
         self.write('SCOPE MARKER')
         self.check_error('SCOPE MARKER')
         mode = self.query('SCOPE?').strip().upper()
