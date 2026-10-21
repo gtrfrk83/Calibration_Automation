@@ -163,6 +163,10 @@ def cert_row(description, nominal, low, high, unit, reading=None, failed=False, 
     }
 
 
+# Shown on the lab's cover certificate instead, so left off this report. They are still passed in (and kept in the asset history).
+HEADER_HIDDEN = {'Limits applied', 'Source', 'Procedure', 'Technician', 'Temperature', 'Humidity'}
+
+
 def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note=''):
     """Write the report; returns the number of data rows.
 
@@ -203,7 +207,7 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     info = header + [('Procedure', details.get('procedure')), ('Technician', details.get('technician')),
                      ('Temperature', details.get('temperature')), ('Humidity', details.get('humidity')),
                      ('Report date', datetime.now().strftime('%Y-%m-%d %H:%M'))]
-    info = [(k, v) for k, v in info if v not in (None, '')]
+    info = [(k, v) for k, v in info if v not in (None, '') and k not in HEADER_HIDDEN]
     story = [Paragraph(f'<u>{clean(title)}</u>', title_style), Spacer(1, 6)]
     # two items per line keeps long source citations from running off the page
     pairs = [info[i:i + 3] for i in range(0, len(info), 3)]
