@@ -44,7 +44,7 @@ class SimBench:
         engine = s.get('app.Measure.P1.ParamEngine', 'Mean').lower()
         if engine == 'standarddeviation':
             return 1.38e-4
-        if engine == 'freq':
+        if engine in ('freq', 'frequency'):
             if not f['operate'] or f['scope'] != 'MARKER' or not f.get('period'):
                 return 0.0
             return self.timebase_ratio / f['period']
@@ -158,6 +158,8 @@ class SimScopeTransport(_SimBase):
             path, value = m.group(1), m.group(2).strip().strip('"')
             if self.bad_path(path):
                 return None          # MAUI ignores a write to a property that does not exist
+            if path == 'app.Measure.P1.ParamEngine' and value.casefold() == 'freq':
+                value = 'Frequency'  # the 4104HD reports the long engine name (seen on the bench, 2026-10-21)
             try:
                 s[path] = float(value)
             except ValueError:

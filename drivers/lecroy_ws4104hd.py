@@ -222,11 +222,14 @@ class WaveSurfer4104HD(Instrument):
         """engine: 'Mean', 'StandardDeviation' (RMS noise), 'PkPk' or 'Freq' (time base). Verified by readback."""
         want = engine.casefold()
         current = self.vbs_get(f'{P1}.ParamEngine')
-        if current.casefold() != want:
+        if current.casefold() not in {want} | {'pkpk': {'peaktopeak'}, 'freq': {'frequency'}}.get(want, set()):
             self.write(f"""VBS '{P1}.ParamEngine="{engine}" ' """)
             time.sleep(0.5)
             current = self.vbs_get(f'{P1}.ParamEngine')
-        accepted = {want} | ({'peaktopeak'} if want == 'pkpk' else set())
+        # MAUI may report the long engine name after the short one is written (PkPk -> PeakToPeak, Freq -> Frequency,
+        # the latter seen on the 4104HD).
+        aliases = {'pkpk': {'peaktopeak'}, 'freq': {'frequency'}}
+        accepted = {want} | aliases.get(want, set())
         if current.casefold() not in accepted:
             raise InstrumentError(f'P1 engine {current!r}, expected {engine}')
         target = f'C{channel}'

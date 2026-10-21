@@ -131,7 +131,7 @@ class RMSNoiseApp:
     def __init__(self, root):
         self.root = root
         ui.apply_theme(root)
-        root.title('WaveSurfer 4104HD | Calibration Verification v53')
+        root.title('WaveSurfer 4104HD | Calibration Verification v54')
         ui.fit_window(root, 1300, 880, min_w=1020, min_h=640)
         self.events = queue.Queue()
         self.stop_event = threading.Event()
@@ -428,7 +428,7 @@ class RMSNoiseApp:
         self._idle = 0
         self._shown = None
         self._last_status = {}
-        ui.StatusBar(root, self.msg, right='v53').pack(side='bottom', fill='x')
+        ui.StatusBar(root, self.msg, right='v54').pack(side='bottom', fill='x')
         body = ttk.Frame(root, padding=(18, 14, 18, 10))
         body.pack(fill='both', expand=True)
         top = ttk.Frame(body)
