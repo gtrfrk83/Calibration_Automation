@@ -2,7 +2,7 @@
 against the laboratory's A2LA scope CMC (uncertainty.Scope).
 
 Same method as the laboratory's uncertainty wizard:
-    u(standard)   = published accuracy / coverage divisor        (2.0 when the sheet gives no confidence level, 1.96 for 95 %)
+    u(standard)   = published accuracy / coverage divisor        (2.0 when the sheet gives no confidence level or says 95 %)
     u(resolution) = last digit of the calibrator setting / sqrt(12)
     EMU           = k * sqrt(sum((sensitivity * u)^2)),  k = 2
 The reported value is never below the scope CMC and is rounded UP, so it can never be reported smaller than the budget.
