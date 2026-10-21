@@ -50,10 +50,28 @@ POINTS.sort(key=lambda q:(0,_ZERO_ORDER[q['kind']]) if q.get('zero_offset') else
 # The manual also specifies optional DC ratio, rear-terminal and split-lead tests.
 # Those require distinct setups/measurement commands and are not executed here.
 
+class LiveLog(drivers.CommandLog):
+    """CommandLog that also appends every command to ~/.calibration_suite/command_log_live.txt the moment it is
+    sent or received, so a hung instrument leaves the last command on disk (the normal log is saved on error / close)."""
+    def add(self,direction,text,instrument=''):
+        super().add(direction,text,instrument)
+        try:
+            folder=Path.home()/'.calibration_suite';folder.mkdir(parents=True,exist_ok=True)
+            with open(folder/'command_log_live.txt','a',encoding='utf-8') as f:
+                f.write(f'{datetime.now().strftime("%H:%M:%S.%f")[:-3]}  {instrument:<6} {direction}  {text}\n')
+        except OSError:pass
+
+def waiting_text(log,p,elapsed):
+    """Status-bar text while a point is running: what the program is waiting on (the last command on the wire)."""
+    if not log.entries:return f'Running {p["id"]}: starting ...'
+    _t,inst,direction,text=log.entries[-1]
+    what=f'sent {inst} {text}' if direction=='>>' else f'got reply from {inst}'
+    return f'Running {p["id"]} ({elapsed:.0f} s): last {what}' + (' - no reply yet' if direction=='>>' and text.rstrip().endswith('?') else '')
+
 class IO:
     """Bench I/O for this procedure: the DMM and the Fluke 5560A, both through the instrument drivers."""
     def __init__(self, dmm_port, fluke_port, baud, parity, bits):
-        self.log=drivers.CommandLog()
+        self.log=LiveLog()
         self.dmm=drivers.Fluke8846A(drivers.open_visa(f'ASRL{dmm_port}::INSTR',timeout=20,baud=baud,data_bits=bits,
             parity=parity.lower(),stop_bits=1,write_termination='\n',read_termination='\n'),self.log,label='8846A')
         self.fluke=drivers.Fluke5560A(drivers.open_visa(f'ASRL{fluke_port}::INSTR',timeout=20,baud=9600,
@@ -468,7 +486,14 @@ class App:
                     try:self.io.standby()
                     except Exception:pass
                     self.root.after(0,lambda:self._error(exc))
-            threading.Thread(target=work,daemon=True).start()
+            worker=threading.Thread(target=work,daemon=True);worker.start()
+            self._watch(p,worker,time.monotonic())
+    def _watch(self,p,worker,t0):
+        """Every 2 s while a point runs: show the last command sent, so a hang is visible in the status bar."""
+        if not worker.is_alive() or not self.busy:return
+        elapsed=time.monotonic()-t0
+        if elapsed>=4 and self.io is not None:self.status.set(waiting_text(self.io.log,p,elapsed))
+        self.root.after(2000,lambda:self._watch(p,worker,t0))
     def _done(self,points,i,p,reading):
         self._record(p,reading,False)
         self.root.after(50,lambda:self._next(points,i+1,setup_key(p)))
