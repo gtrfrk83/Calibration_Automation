@@ -5,7 +5,7 @@ Test points and limits come from specs/tektronix_mdo4000c_pv.json (MDO4000C Seri
 only the points that apply are listed and run.
 
 Stimulus:   Fluke 5560A (SCOPE DCV / LEVSINE / MEASR / square) for the analog tests, Fluke 96270A for the RF tests (a second RF
-            source for the intermodulation test), Agilent 33220A or 32250A for the time mark and for the delta-time points the
+            source for the intermodulation test), Agilent 33220A or 33250A for the time mark and for the delta-time points the
             5560A cannot make. The AFG tests read the oscilloscope's AFG with a SCPI DMM / counter (or typed readings).
 Never run unattended: the program stops and asks for every cable, terminator or instrument change, and for every
 front-panel-only step. Writes are never retried; all settings are read back; outputs go to standby / off after every point.
@@ -517,7 +517,7 @@ class Runner:
         return inst
 
     def do_reffreq(self, p):
-        gen = self.need(self.io.gen, 'the function generator (33220A / 32250A)')
+        gen = self.need(self.io.gen, 'the function generator (33220A / 33250A)')
         self.wire(('REF',), 'Reference frequency error', [('Disconnect', 'Remove other cables from the oscilloscope inputs.'),
                   ('Connect', 'Function generator output to CH1 with a 50 Ω cable (the program sets a 2.5 Hz square wave = 400 ms mark period, 2 V p-p).'),
                   ('Accuracy', 'The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already.')])
@@ -953,7 +953,7 @@ class App:
         conn = ttk.LabelFrame(top, text='Instrument connections  (the oscilloscope is connected by USB)', padding=10); conn.grid(row=0, column=1, sticky='nsew')
         conn.columnconfigure(1, weight=1); conn.columnconfigure(3, weight=1)
         rows = [('scope', 'MDO4000C (USB)'), ('cal', 'Fluke 5560A'), ('rf1', 'Fluke 96270A (RF)'), ('rf2', 'RF source 2 (IMD only)'),
-                ('gen', 'Agilent 33220A / 32250A'), ('dmm', 'Reference DMM (AFG amp/offset)'), ('counter', 'Counter (AFG freq)'), ('power', 'Power meter (optional)')]
+                ('gen', 'Agilent 33220A / 33250A'), ('dmm', 'Reference DMM (AFG amp/offset)'), ('counter', 'Counter (AFG freq)'), ('power', 'Power meter (optional)')]
         self.addr_boxes = {}
         for i, (key, label) in enumerate(rows):
             r, c = i // 2, (i % 2) * 2

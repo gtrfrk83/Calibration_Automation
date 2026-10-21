@@ -185,7 +185,7 @@ Procedures/Tektronix_MDO4000C_Verification.py   (engine: mdo4000c_verification.p
   spectrum-analyzer option (None / SA3 / SA6) and ticks AFG, DVM, digital channels and TPA-N-PRE attached ("Read options from
   scope" pre-fills them from *OPT?); only the points that apply are listed and run (476 to 731 points, depending on the choice).
   Stimulus: Fluke 5560A (SCOPE DCV / LEVSINE / MEASR / square) for the analog tests; Fluke 96270A for the RF tests (phase noise,
-  absolute amplitude, crosstalk, TPA check; a second RF source for third-order intermodulation); Agilent 33220A or 32250A for the
+  absolute amplitude, crosstalk, TPA check; a second RF source for third-order intermodulation); Agilent 33220A or 33250A for the
   400 ms time mark and for delta-time / DVM-frequency points the 5560A cannot make (below 50 kHz or above its leveled-sine limits:
   SOURCE_5560A in the engine). If the 5560A rejects a setting the program falls back to the generator, else the point is
   SKIPPED with the reason (never guessed). AFG tests read the AFG with a SCPI DMM / counter, or the technician types the reading.

@@ -1,4 +1,4 @@
-"""Software stand-ins for the MDO4000C bench (oscilloscope, 96270A, 33220A/32250A, reference meters), linked to the simulated 5560A.
+"""Software stand-ins for the MDO4000C bench (oscilloscope, 96270A, 33220A/33250A, reference meters), linked to the simulated 5560A.
 
 make_mdo_bench() returns the transports IO(...) accepts, so the whole procedure can run end to end with no hardware. The simulated
 oscilloscope "measures" what the simulated 5560A / RF sources / generator are outputting, with small deterministic errors.
@@ -59,8 +59,8 @@ class SimRF(_SimBase):
 
 
 class SimGen(_SimBase):
-    """33220A / 32250A."""
-    def __init__(self, bench, model='32250A'):
+    """33220A / 33250A."""
+    def __init__(self, bench, model='33250A'):
         super().__init__(bench, 'SIM-AFG')
         self.model = model
         self.st = bench.gen = dict(f=1e3, v=1.0, fn='SIN', on=False, load=50)
@@ -300,7 +300,7 @@ class SimMdo(_SimBase):
         return [0.0 if i * 2e-9 < edge_at else 2.0 for i in range(1000)]
 
 
-def make_mdo_bench(gen_model='32250A'):
+def make_mdo_bench(gen_model='33250A'):
     """Returns (bench, transports) for IO(addrs, transports=...). Keys: scope, cal, rf1, rf2, gen, dmm, counter, power."""
     bench = SimBench()
     bench.mdo_state = MdoState()

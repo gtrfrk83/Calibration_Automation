@@ -1,7 +1,7 @@
 """Stimulus and reference instruments used with the MDO4000C procedure.
 
 Fluke96270A      RF reference source (RF section: phase noise, amplitude, IMD, crosstalk, TPA functional check)
-AgilentAFG       Agilent/Keysight 33220A (20 MHz) and 32250A (250 MHz) function / arbitrary generators
+AgilentAFG       Agilent/Keysight 33220A (20 MHz) and 33250A (80 MHz) function / arbitrary generators
 ReferenceMeter   any SCPI DMM or frequency counter (AFG frequency / amplitude / offset checks)
 
 Every setter reads the value back and compares it; none of them is retried. RF and generator outputs are switched OFF at cleanup.
@@ -52,16 +52,16 @@ class Fluke96270A(Instrument):
 
 
 class AgilentAFG(Instrument):
-    MODEL = 'Agilent 33220A / 32250A'
-    IDN_MATCH = ('33220', '32250')
+    MODEL = 'Agilent 33220A / 33250A'
+    IDN_MATCH = ('33220', '33250')
     DEFAULT_TIMEOUT = 10.0
-    MAX_SINE_HZ = {'33220': 20e6, '32250': 250e6}
+    MAX_SINE_HZ = {'33220': 20e6, '33250': 80e6}     # sine ranges: 33220A / 33250A Service Guide specifications
 
     def connect(self):
         self.open(verify_model=True)
         self.write('*CLS')
         self.idn = self.identify()
-        self.kind = '32250' if '32250' in self.idn else '33220'
+        self.kind = '33250' if '33250' in self.idn else '33220'
         return self
 
     @property
