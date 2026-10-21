@@ -175,11 +175,19 @@ class Fluke5560A(Instrument):
     # These send exactly the commands the DMM verification procedures use. By default OPER / STBY
     # are NOT read back (verify=False) to match those procedures' proven behaviour on RS-232 links;
     # pass verify=True once the readback has been confirmed on your 5560A.
-    def set_output_volts(self, volts, frequency_hz=None):
-        self.write(f'OUT {volts:.9g}V' + (f',{frequency_hz:.9g}Hz' if frequency_hz else ''))
+    @staticmethod
+    def _freq_suffix(frequency_hz, dc):
+        """An OUT with no frequency keeps the previous one, so after an AC point it stays AC.
+        dc=True sends ',0Hz' to select DC explicitly (callers that pass nothing keep the old command)."""
+        if frequency_hz:
+            return f',{frequency_hz:.9g}Hz'
+        return ',0Hz' if dc else ''
 
-    def set_output_amps(self, amps, frequency_hz=None):
-        self.write(f'OUT {amps:.9g}A' + (f',{frequency_hz:.9g}Hz' if frequency_hz else ''))
+    def set_output_volts(self, volts, frequency_hz=None, dc=False):
+        self.write(f'OUT {volts:.9g}V' + self._freq_suffix(frequency_hz, dc))
+
+    def set_output_amps(self, amps, frequency_hz=None, dc=False):
+        self.write(f'OUT {amps:.9g}A' + self._freq_suffix(frequency_hz, dc))
 
     def set_output_ohms(self, ohms):
         self.write(f'OUT {ohms:.9g}OHM')
