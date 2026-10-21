@@ -21,16 +21,18 @@ from tkinter import filedialog, messagebox, ttk
 
 import ui_theme as ui
 from mdd_importer_v49 import parse_mdd, import_mdd, init_datasheet_db
+import appdata
+import suite_info
 import labregistry
 import labregistry_ui
 import specmanager_ui
 
 BASE = Path(__file__).resolve().parent
-DB = BASE / 'calibration_procedures.sqlite3'
+DB = appdata.db_path('calibration_procedures.sqlite3')     # the person's own data folder (see appdata.py)
 BUILTIN = 'Procedures/WaveSurfer_WS4104HD.py'
 PROCEDURES = BASE / 'Procedures'
 BACKUPS = BASE / 'Backups'
-VERSION = 'v70'
+VERSION = suite_info.full_version()
 STABLE = {
  'WaveSurfer WS4104HD Verification': 'WaveSurfer_WS4104HD.py',
  'Fluke 87V Guided Verification': 'Fluke_87V.py',
@@ -178,7 +180,7 @@ class Manager:
     def __init__(self, root):
         self.root = root
         ui.apply_theme(root)
-        root.title('Calibration Procedure Manager | ' + VERSION)
+        root.title('Calibration Procedure Manager')
         ui.fit_window(root, 1260, 740, min_w=1000, min_h=580)
         self.demo = tk.BooleanVar(value=False)
         self.status = tk.StringVar(value='Select a procedure, then press Run Procedure.')
@@ -907,9 +909,19 @@ class Manager:
             self.status.set(f'Launched {name} for instrument {asset}' + (' in demo mode.' if demo else '.') + ' The Instrument ID and serial number are filled in.')
 
 
+def check_environment(root):
+    """Tell the person, in plain words, about add-on packages that are missing (demo mode and the Manager still work without them)."""
+    import diagnostics
+    missing = diagnostics.missing_packages()
+    if missing:
+        messagebox.showwarning('Some add-ons are missing', diagnostics.explain_missing(missing), parent=root)
+
+
 if __name__ == '__main__':
+    appdata.migrate_legacy_progress()
     init_db()
     ui.enable_hidpi()
     root = tk.Tk()
     Manager(root)
+    root.after(600, lambda: check_environment(root))
     root.mainloop()

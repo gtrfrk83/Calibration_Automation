@@ -95,12 +95,22 @@ def _rounded_image(root, r, fill, border, bg, bw=1):
     return img
 
 
+def _dress(root):
+    try:
+        import branding
+        branding.dress(root)
+    except ImportError:
+        pass
+
+
 def apply_theme(root):
     """Style every ttk widget in the application. Call once, right after tk.Tk()."""
     global FAMILY, MONO, SCALE
     style = ttk.Style(root)
     if 'clam' in style.theme_names():
         style.theme_use('clam')
+    if isinstance(root, tk.Tk):                         # main windows only: title pattern, icon, Help menu, friendly error window
+        root.after(250, lambda: _dress(root))
     try:
         SCALE = max(1.0, float(root.winfo_fpixels('1i')) / 96.0)
     except tk.TclError:
@@ -657,6 +667,11 @@ class StatusBar(ttk.Frame):
         self._buttons = []
         self.dot = ttk.Label(self, text='●', style='DotInfo.TLabel')
         self.msg = ttk.Label(self, textvariable=self.var, style='Bar.TLabel')
+        try:                                           # every window shows the same suite version (a spec/procedure note may come first)
+            import suite_info
+            right = suite_info.full_version() if (not right or right.startswith('v')) else f'{right}  |  {suite_info.full_version()}'
+        except ImportError:
+            pass
         self.right = ttk.Label(self, text=right, style='BarMuted.TLabel')
         self._layout()
         self.msg.bind('<Configure>', lambda e: self.msg.configure(wraplength=max(px(200), e.width)))

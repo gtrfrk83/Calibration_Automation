@@ -10,6 +10,7 @@ from tkinter import ttk, messagebox, filedialog
 HERE=Path(__file__).resolve().parent
 sys.path.append(str(HERE.parent))  # shared ui_theme.py sits next to the Manager
 import ui_theme as ui
+import appdata
 import datamode
 import drivers
 DATA=HERE/'34401A_results.json'
@@ -417,7 +418,7 @@ class App(datamode.DataModeMixin):
         self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label)
         self._update_row(p);self.save(silent=True)
     def save(self,silent=False):
-        path=HERE/f'34401A_{"".join(c if c.isalnum() or c in "-_" else "_" for c in self.asset.get()) or "UNASSIGNED"}_checkpoint.json'
+        path=appdata.progress_path(f'34401A_{"".join(c if c.isalnum() or c in "-_" else "_" for c in self.asset.get()) or "UNASSIGNED"}_checkpoint.json')
         path.write_text(json.dumps(dict(asset=self.asset.get(),serial=self.serial.get(),demo=self.demo,**self.save_fields()),indent=2))
         if not silent:self.status.set(f'Saved {path.name}')
     def load(self):

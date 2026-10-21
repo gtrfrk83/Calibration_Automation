@@ -27,7 +27,8 @@ from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DB = HERE / 'lab_registry.sqlite3'
+import appdata  # noqa: E402
+DB = appdata.db_path('lab_registry.sqlite3')
 SPEC_DIR = HERE / 'specs' / 'standards'
 
 # ------------------------------------------------------------------------------------------------------------ units

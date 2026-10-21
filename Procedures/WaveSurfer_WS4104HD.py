@@ -17,6 +17,7 @@ from tkinter import filedialog, messagebox, ttk
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))  # shared ui_theme.py sits next to the Manager
 import ui_theme as ui
+import appdata
 import datamode
 import drivers
 
@@ -140,7 +141,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.connected = False
         self.rows = []
         self.run_config = None
-        self.checkpoint_path = Path(__file__).with_name('rms_noise_checkpoint_v5.json')
+        self.checkpoint_path = appdata.progress_path('rms_noise_checkpoint_v5.json')
         self.instrument_id = tk.StringVar(value='')
         self.serial = tk.StringVar(value='')
         self.visa_address = tk.StringVar(value=DEFAULT_ADDRESS)
@@ -159,7 +160,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.dc_config = None
         self.noise_retest_index = None
         self.noise_retest_result = None
-        self.dc_checkpoint = Path(__file__).with_name('dcv_checkpoint_v6.json')
+        self.dc_checkpoint = appdata.progress_path('dcv_checkpoint_v6.json')
         self.fluke_address = tk.StringVar(value='ASRL9::INSTR')
         self.fluke_baud = tk.StringVar(value='9600')
         self.dc_status = tk.StringVar(value='DC voltage verification ready')
@@ -177,7 +178,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.offset_batch = False
         self.offset_ok = False
         self.offset_connected_channel = None
-        self.offset_checkpoint = Path(__file__).with_name('offset_mean_checkpoint_v28.json')
+        self.offset_checkpoint = appdata.progress_path('offset_mean_checkpoint_v28.json')
         self.offset_status = tk.StringVar(value='Ready — 0 of 16 offset points')
         self.offset_settle = tk.StringVar(value='3.0')
         self.bw_rows = []
@@ -185,7 +186,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.bw_batch = False
         self.bw_ok = False
         self.bw_connected_channel = None
-        self.bw_checkpoint = Path(__file__).with_name('bandwidth_checkpoint_v29.json')
+        self.bw_checkpoint = appdata.progress_path('bandwidth_checkpoint_v29.json')
         self.bw_status = tk.StringVar(value='Ready — 0 of 24 bandwidth points')
         self.bw_settle = tk.StringVar(value='3.0')
         self.tb_rows = []
@@ -209,7 +210,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.imp_batch_success = False
         self.imp_connection_confirmed = False
         self.imp_connected_input = None
-        self.imp_checkpoint = Path(__file__).with_name('impedance_checkpoint_v11.json')
+        self.imp_checkpoint = appdata.progress_path('impedance_checkpoint_v11.json')
         self.imp_status = tk.StringVar(value='Ready — 0 of 28 impedance points')
         self.imp_settle = tk.StringVar(value='2.0')
         self.imp_samples = tk.StringVar(value='3')
@@ -469,7 +470,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.build_mode_bar(body)
         tools = ttk.Frame(body)
         tools.pack(fill='x', pady=(10, 6))
-        self.btn_run = ttk.Button(tools, text='\u25b6  Run Pending', style='Accent.TButton', command=self.run_pending)
+        self.btn_run = ttk.Button(tools, text='\u25b6  Run All Pending', style='Accent.TButton', command=self.run_pending)
         self.btn_run.pack(side='left')
         self.btn_section = ttk.Button(tools, text='Run Shown Section', command=self.run_section)
         self.btn_section.pack(side='left', padx=8)
@@ -877,7 +878,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         """Results are saved per Instrument ID, e.g. dcv_checkpoint_v6_WS-77_A.json, like the other procedures."""
         self._ckpt_key = key
         for attr, base in self.CKPT_BASE.items():
-            setattr(self, attr, Path(__file__).with_name(f'{base}_{key}.json'))
+            setattr(self, attr, appdata.progress_path(f'{base}_{key}.json'))
         self.__dict__.pop('_found_paths', None)
 
     def sync_asset(self):

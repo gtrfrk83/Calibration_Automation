@@ -1,0 +1,32 @@
+CALIBRATION SUITE - QUICK START (v70 Beta)
+===========================================
+
+Starting
+  Double-click Start_Calibration_Suite.bat (or run:  py -3 Calibration_Procedure_Manager.py).
+  If add-on packages are missing, a message tells you exactly what to type to install them.
+
+Your data
+  Your databases and saved progress are in your own data folder (Help > Open my data folder), normally
+  C:\Users\<you>\AppData\Local\CalibrationSuite-Beta\
+  The beta never touches the released copy. To try the beta with the released copy's data:
+  Help > Import data from another copy...  and choose the released copy's folder. Files are COPIED; the original is not changed.
+
+Running a verification
+  1. Pick the procedure in the Manager (or double-click the instrument in Instruments) and press Run procedure.
+     "Try in demo mode" needs no instruments; its reports are stamped DEMO DATA.
+  2. Enter the Instrument ID and serial number, check the connections, press Test connections.
+  3. Run All Pending. The program stops and asks you to confirm wiring before each new set-up. Outputs go to standby after every point.
+  4. Save progress (Ctrl+S) any time; Load progress (Ctrl+O) to carry on later.
+  5. Export Report (PDF) (Ctrl+P): the "Calibration Data" report, named <asset>-<date>.
+
+As Found and As Left
+  "Collecting data" = As Found: the first measurements, before any adjustment.
+  If the instrument was adjusted, switch to As Left and run the points again. The As Found readings are kept.
+  If nothing was adjusted, stay on As Found: the report prints "Same" under As Left.
+  Run Shown Section: choose a section in the Show box, then press it to measure just that section.
+
+If something goes wrong
+  A plain message appears and a diagnostic log is saved (Help > Save diagnostic log for support). Send that file to your lab support contact.
+  Saved results are not affected. Passwords are never written to logs.
+
+Keys:  Ctrl+S save progress   Ctrl+O load progress   Ctrl+P export PDF   F1 About

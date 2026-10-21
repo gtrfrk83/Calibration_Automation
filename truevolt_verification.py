@@ -19,6 +19,7 @@ sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Man
 import ui_theme as ui
 import procspec
 import drivers
+import appdata
 import datamode
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
@@ -452,7 +453,7 @@ class App(datamode.DataModeMixin):
     # ------------------------------------------------------------------ files
     def _checkpoint_path(self):
         name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        return HERE / 'Procedures' / f'{MODEL}_{name}_checkpoint.json'
+        return appdata.progress_path(f'{MODEL}_{name}_checkpoint.json')
 
     def save(self, silent=False):
         path = self._checkpoint_path()

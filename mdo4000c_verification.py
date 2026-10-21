@@ -20,6 +20,7 @@ from tkinter import ttk, messagebox, filedialog
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import ui_theme as ui
+import appdata
 import datamode
 import drivers
 
@@ -1233,7 +1234,7 @@ class App(datamode.DataModeMixin):
     # ---- files -------------------------------------------------------------------------------------------------------------------------------
     def _checkpoint_path(self):
         name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        return HERE / 'Procedures' / f'MDO{self.cfg.model}_{name}_checkpoint.json'
+        return appdata.progress_path(f'MDO{self.cfg.model}_{name}_checkpoint.json')
 
     def save(self, silent=False):
         path = self._checkpoint_path()

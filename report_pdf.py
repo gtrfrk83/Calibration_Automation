@@ -334,7 +334,12 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
             self.line(margin, H - 0.42 * inch, W - margin, H - 0.42 * inch)
             self.line(margin, 0.5 * inch, W - margin, 0.5 * inch)
             self.setFont(REG, 7)
-            self.drawRightString(W - margin, 0.34 * inch, f'Page {self._pageNumber} of {count}')
+            try:
+                import suite_info
+                software = f'{suite_info.NAME} {suite_info.full_version()}   |   '
+            except ImportError:
+                software = ''
+            self.drawRightString(W - margin, 0.34 * inch, f'{software}Page {self._pageNumber} of {count}')
             self.drawString(margin, 0.34 * inch, f'Instrument ID: {instrument_id or "-"}   |   {title}')
             if demo:
                 self.setFillColorRGB(0.85, 0.2, 0.2); self.setFont(BOLD, 8)

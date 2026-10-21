@@ -19,6 +19,7 @@ from tkinter import ttk, messagebox, filedialog
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
 import ui_theme as ui
+import appdata
 import datamode
 import procspec
 import drivers
@@ -576,7 +577,7 @@ class App(datamode.DataModeMixin):
     # ------------------------------------------------------------------ files
     def _checkpoint_path(self):
         name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        return HERE / 'Procedures' / f'{MODEL}_{name}_checkpoint.json'
+        return appdata.progress_path(f'{MODEL}_{name}_checkpoint.json')
 
     def save(self, silent=False):
         path = self._checkpoint_path()

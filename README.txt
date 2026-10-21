@@ -1,5 +1,8 @@
-CALIBRATION SUITE - restyled (Manager v70)
+CALIBRATION SUITE - restyled (Manager v70 Beta 1)
 ==========================================
+
+BETA 1: own data folder (see USER_GUIDE.txt), Help menu, friendly error window with diagnostic log, icon, Start_Calibration_Suite.bat.
+New files to copy with it: suite_info.py, appdata.py, diagnostics.py, branding.py, assets\\, USER_GUIDE.txt.
 
 NEW in v70: As Found / As Left toggle in every verification procedure, 'Run Shown Section' button, shorter buttons that wrap in
 small windows, and Save / Load progress / Export buttons moved to the bottom bar. New file: datamode.py (copy it beside ui_theme.py).

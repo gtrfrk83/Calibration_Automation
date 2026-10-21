@@ -18,8 +18,9 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DB = HERE / 'lab_registry.sqlite3'
-MAIN_DB = HERE / 'calibration_procedures.sqlite3'
+import appdata  # noqa: E402
+DB = appdata.db_path('lab_registry.sqlite3')
+MAIN_DB = appdata.db_path('calibration_procedures.sqlite3')
 
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS runs (

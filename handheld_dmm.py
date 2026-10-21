@@ -30,6 +30,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import hookups
 import ui_theme as ui
+import appdata
 import datamode
 import drivers
 
@@ -1208,7 +1209,7 @@ class App(datamode.DataModeMixin):
     # ------------------------------------------------------------------ files
     def _checkpoint_path(self):
         name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        return HERE / 'Procedures' / f'{self.brand}{self.model}_{name}_checkpoint.json'
+        return appdata.progress_path(f'{self.brand}{self.model}_{name}_checkpoint.json')
 
     def save(self, silent=False):
         path = self._checkpoint_path()
