@@ -1,4 +1,4 @@
-"""WaveSurfer 4104HD verification GUI — RMS noise and controlled DC voltage.
+"""WaveSurfer 4104HD verification GUI — RMS noise, DC voltage, input impedance, offset, bandwidth, time base and trigger level.
 
 Requires: pip install pyvisa; a working VISA backend (e.g. NI-VISA). Instrument commands live in ../drivers.
 The 2.75-division normalization is user-reported as verified with Teledyne.
@@ -22,10 +22,25 @@ import drivers
 DEFAULT_ADDRESS = 'USB0::0x05FF::0x1023::LCRY4903C19426::0::INSTR'
 SCALES = [0.002, 0.005, 0.010, 0.020, 0.050, 0.100, 0.200, 0.500, 1.000]
 LIMITS = [30, 38, 44, 48, 51, 52, 48, 51, 52]
+# Time base and trigger level limits: HAZ-OSC-02 data sheet pages 10-11, read from the rendered page images.
+TIMEBASE_LIMIT_HZ = 0.350        # error 0.00 Hz, -0.350 to +0.350 Hz
+TB_SCALE = 0.200                 # V/div for the time-marker input (DC 50 Ohm)
+TB_TRIGGER_V = 0.100             # trigger level on the marker
+TB_READ_GAP_S = 0.5
+TRIG_LEVELS = (0.0, 0.300, -0.300)
+TRIG_LIMIT_V = 0.020             # +/-20 mV
+TRIG_SCALE = 0.100               # 100 mV/div, DC 1 MOhm
+TRIG_START_V = 0.100             # the Fluke starts 100 mV before the level
+TRIG_HSCALE = 1e-3
+
+
+class OperatorCancelled(Exception):
+    """The technician chose Cancel at a prompt inside a measurement."""
 
 
 FIELDS=('Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','As Left','Uncertainty')
-SECTIONS=[('RMS NOISE','noise'),('DC VOLTAGE / GAIN','dcv'),('INPUT IMPEDANCE','impedance'),('VERTICAL OFFSET / P1 MEAN','offset'),('ANALOG BANDWIDTH / LEVSINE','bandwidth')]
+SECTIONS=[('RMS NOISE','noise'),('DC VOLTAGE / GAIN','dcv'),('INPUT IMPEDANCE','impedance'),('VERTICAL OFFSET / P1 MEAN','offset'),('ANALOG BANDWIDTH / LEVSINE','bandwidth'),
+          ('TIME BASE ACCURACY','timebase'),('TRIGGER LEVEL ACCURACY','trigger')]
 
 def make_report(groups, output_path, synthetic=False, instrument_id=""):
     from openpyxl import Workbook
@@ -116,7 +131,7 @@ class RMSNoiseApp:
     def __init__(self, root):
         self.root = root
         ui.apply_theme(root)
-        root.title('WaveSurfer 4104HD | Calibration Verification v52')
+        root.title('WaveSurfer 4104HD | Calibration Verification v53')
         ui.fit_window(root, 1300, 880, min_w=1020, min_h=640)
         self.events = queue.Queue()
         self.stop_event = threading.Event()
@@ -172,6 +187,21 @@ class RMSNoiseApp:
         self.bw_checkpoint = Path(__file__).with_name('bandwidth_checkpoint_v29.json')
         self.bw_status = tk.StringVar(value='Ready — 0 of 24 bandwidth points')
         self.bw_settle = tk.StringVar(value='3.0')
+        self.tb_rows = []
+        self.tb_running = False
+        self.tb_retest_index = None
+        self.tb_status = tk.StringVar(value='Ready \u2014 0 of 1 time base point')
+        self.tb_settle = tk.StringVar(value='3.0')
+        self.tb_samples = tk.StringVar(value='5')
+        self.tb_period_us = tk.StringVar(value='10')
+        self.trig_rows = []
+        self.trig_running = False
+        self.trig_batch = False
+        self.trig_ok = False
+        self.trig_retest_index = None
+        self.trig_connected_channel = None
+        self.trig_status = tk.StringVar(value='Ready \u2014 0 of 24 trigger level points')
+        self.trig_settle = tk.StringVar(value='1.0')
         self.imp_rows = []
         self.imp_running = False
         self.imp_batch = False
@@ -188,7 +218,7 @@ class RMSNoiseApp:
         # All test views live in one root window. Test dialogs for cable changes
         # and safety confirmations remain modal by design.
         banner = ui.Banner(self.root, 'WaveSurfer 4104HD  -  Calibration Verification',
-                           'Teledyne LeCroy  |  USBTMC / PyVISA  |  RMS noise, DC voltage, input impedance, offset and bandwidth')
+                           'Teledyne LeCroy  |  USBTMC / PyVISA  |  RMS noise, DC voltage, input impedance, offset, bandwidth, time base and trigger level')
         banner.pack(fill='x')
         if '--demo' in sys.argv:
             banner.add_pill('DEMO MODE  -  synthetic data', 'warn')
@@ -207,6 +237,10 @@ class RMSNoiseApp:
         self.load_offset_checkpoint()
         self.show_bandwidth()
         self.load_bandwidth_checkpoint()
+        self.show_timebase()
+        self.load_timebase_checkpoint()
+        self.show_trigger()
+        self.load_trigger_checkpoint()
         self.root.after(100, self.process_events)
         self.load_checkpoint()
         self.load_dc_checkpoint()
@@ -218,6 +252,8 @@ class RMSNoiseApp:
         self.refresh_impedance_table()
         self.refresh_offset()
         self.refresh_bandwidth()
+        self.refresh_timebase()
+        self.refresh_trigger()
         self.dc_status.set(f'{len(self.dc_rows)} of 80 DCV points recorded. Automatic Fluke control is OFF until enabled.')
         self.imp_status.set(f'{len(self.imp_rows)} of 28 impedance points recorded.')
         self.root.protocol('WM_DELETE_WINDOW', self.on_close)
@@ -308,7 +344,7 @@ class RMSNoiseApp:
 
     # ======================================================================== one results table, filterable by function
     FUNCS = (('noise', 'RMS noise'), ('dcv', 'DC voltage'), ('impedance', 'Input impedance'),
-             ('offset', 'Offset (P1 mean)'), ('bandwidth', 'Bandwidth (LEVSINE)'))
+             ('offset', 'Offset (P1 mean)'), ('bandwidth', 'Bandwidth (LEVSINE)'), ('timebase', 'Time base'), ('trigger', 'Trigger level'))
     FUNC_NAME = dict(FUNCS)
     FUNC_NOTE = {
         'noise': 'RMS noise: external 50 \u03a9 termination on the channel under test; all channels ON, DC 1 M\u03a9, full bandwidth, 1 ms/div. The program sets P1 to StdDev of that channel and compares the noise level (dB) with the minimum limit.',
@@ -316,16 +352,20 @@ class RMSNoiseApp:
         'impedance': 'Input impedance: Fluke SCOPE measurement output (MEASR) to the channel input. The Fluke output is confirmed OFF before cables are moved.',
         'offset': 'Offset: P1 MEAN at the specified vertical offsets with the Fluke SCOPE DC output. This checks the sourced voltage at that offset, not waveform centring accuracy.',
         'bandwidth': 'Bandwidth: Fluke LEVSINE into the scope 50 \u03a9 input (no extra termination). 50 kHz reference against 1 GHz, scope P1 PkPk. The first point is a hardware pilot, then run again to continue.',
+        'timebase': 'Time base: Fluke SCOPE time marker (period in Test settings, default 10 \u00b5s) into CH1 with a 50 \u03a9 cable; the program sets DC 50 \u03a9, full bandwidth and P1 Freq, averages the readings and compares the frequency error with \u00b10.350 Hz. The Fluke returns to STBY after the point.',
+        'trigger': 'Trigger level: Fluke SCOPE output to the channel, 100 mV/div, DC 1 M\u03a9, 20 MHz BW. The scope is armed in Single at the level; the Fluke steps to 20 mV short of the level (must not trigger) and 20 mV past it (must trigger). You confirm both on screen; STBY after every point.',
     }
 
     def _rows_of(self, kind):
-        return {'noise': self.rows, 'dcv': self.dc_rows, 'impedance': self.imp_rows, 'offset': self.offset_rows, 'bandwidth': self.bw_rows}[kind]
+        return {'noise': self.rows, 'dcv': self.dc_rows, 'impedance': self.imp_rows, 'offset': self.offset_rows, 'bandwidth': self.bw_rows,
+                'timebase': self.tb_rows, 'trigger': self.trig_rows}[kind]
 
     def _planned(self, kind):
         return len(self.noise_plan()) if kind == 'noise' else len(self._plan_points(kind))
 
     def _plan_points(self, kind):
-        return {'dcv': self.dcv_points, 'impedance': self.impedance_points, 'offset': self.offset_points, 'bandwidth': self.bandwidth_points}[kind]()
+        return {'dcv': self.dcv_points, 'impedance': self.impedance_points, 'offset': self.offset_points, 'bandwidth': self.bandwidth_points,
+                'timebase': self.timebase_points, 'trigger': self.trigger_points}[kind]()
 
     def _pending(self, kind):
         return len(self._rows_of(kind)) < self._planned(kind)
@@ -366,6 +406,17 @@ class RMSNoiseApp:
             add('bandwidth', i, r, channel=f"CH{src['channel']}", range=self.range_text(src['scale_v_div']),
                 test=f'Full BW, {amp} {vunit} 50 kHz vs 1 GHz', nominal='0', low='-3.000', high='+3.000',
                 found=f"{r['response_db']:+.3f}" if r else '', unit='dB')
+        for i, p in enumerate(self.timebase_points()):
+            r = self.tb_rows[i] if i < len(self.tb_rows) else None
+            src = r or p
+            add('timebase', i, r, channel='CH1', range=f"{src['marker_period_s']*1e6:g} \u00b5s marker",
+                test=f"Frequency error at {src['nominal_hz']/1e3:g} kHz", nominal='0.000', low=f"{src['lower_hz']:+.3f}",
+                high=f"{src['upper_hz']:+.3f}", found=f"{r['error_hz']:+.4f}" if r else '', unit='Hz')
+        for i, p in enumerate(self.trigger_points()):
+            r = self.trig_rows[i] if i < len(self.trig_rows) else None
+            add('trigger', i, r, channel=f"CH{p['channel']}", range=self.range_text(p['scale_v_div']),
+                test=f"Trigger level, {p['slope'].lower()} slope", nominal=f"{p['level_v']*1000:+.2f}", low=f"{p['lower_v']*1000:+.2f}",
+                high=f"{p['upper_v']*1000:+.2f}", found=r['outcome'] if r else '', unit='mV')
         return out
 
     def build_unified(self):
@@ -377,7 +428,7 @@ class RMSNoiseApp:
         self._idle = 0
         self._shown = None
         self._last_status = {}
-        ui.StatusBar(root, self.msg, right='v52').pack(side='bottom', fill='x')
+        ui.StatusBar(root, self.msg, right='v53').pack(side='bottom', fill='x')
         body = ttk.Frame(root, padding=(18, 14, 18, 10))
         body.pack(fill='both', expand=True)
         top = ttk.Frame(body)
@@ -510,7 +561,8 @@ class RMSNoiseApp:
     # ---- which function is busy
     def _batch_busy(self):
         return any((self.running, self.dc_running, getattr(self, 'dc_batch', False), self.imp_running, getattr(self, 'imp_batch', False),
-                    self.offset_running, getattr(self, 'offset_batch', False), self.bw_running, getattr(self, 'bw_batch', False)))
+                    self.offset_running, getattr(self, 'offset_batch', False), self.bw_running, getattr(self, 'bw_batch', False),
+                    getattr(self, 'tb_running', False), getattr(self, 'trig_running', False), getattr(self, 'trig_batch', False)))
 
     def _dialog_open(self):
         return any(isinstance(w, tk.Toplevel) for w in self.root.winfo_children())
@@ -523,7 +575,8 @@ class RMSNoiseApp:
         if kind == 'noise':
             (self.resume_test if (self.rows or self.run_config) else self.start_test)()
         else:
-            {'dcv': self.start_dcv_batch, 'impedance': self.start_impedance_batch, 'offset': self.start_offset, 'bandwidth': self.start_bandwidth}[kind]()
+            {'dcv': self.start_dcv_batch, 'impedance': self.start_impedance_batch, 'offset': self.start_offset, 'bandwidth': self.start_bandwidth,
+             'timebase': self.start_timebase, 'trigger': self.start_trigger}[kind]()
 
     def run_pending(self):
         if self._batch_busy():
@@ -555,6 +608,8 @@ class RMSNoiseApp:
             self.stop_offset()
         if self.bw_running or getattr(self, 'bw_batch', False):
             self.stop_bandwidth()
+        if self.trig_running or self.trig_batch:
+            self.stop_trigger()
         self.msg.set('Stopping after the current point. Completed points are saved.')
 
     def rerun_selected(self):
@@ -565,14 +620,15 @@ class RMSNoiseApp:
             messagebox.showinfo('Select a result', 'Select one completed test point in the table.', parent=self.root)
             return
         e = self._entries_cache[sel[0]]
-        tree = {'noise': self.tree, 'dcv': self.dc_tree, 'impedance': self.imp_tree, 'offset': self.offset_tree, 'bandwidth': self.bw_tree}[e['kind']]
+        tree = {'noise': self.tree, 'dcv': self.dc_tree, 'impedance': self.imp_tree, 'offset': self.offset_tree, 'bandwidth': self.bw_tree,
+                'timebase': self.tb_tree, 'trigger': self.trig_tree}[e['kind']]
         kids = tree.get_children()
         if not e['done'] or e['idx'] >= len(kids):
             messagebox.showinfo('Not tested yet', 'That point has not been measured yet. Use Run Pending, or pick a recorded point to rerun.', parent=self.root)
             return
         tree.selection_set(kids[e['idx']])
         {'noise': self.retest_noise, 'dcv': self.retest_selected_dcv, 'impedance': self.retest_impedance,
-         'offset': self.retest_offset, 'bandwidth': self.retest_bandwidth}[e['kind']]()
+         'offset': self.retest_offset, 'bandwidth': self.retest_bandwidth, 'timebase': self.retest_timebase, 'trigger': self.retest_trigger}[e['kind']]()
 
     def clear_function(self):
         kind = self._selected_kind()
@@ -593,10 +649,18 @@ class RMSNoiseApp:
             self.offset_rows.clear()
             self.offset_checkpoint.unlink(missing_ok=True)
             self.refresh_offset()
-        else:
+        elif kind == 'bandwidth':
             self.bw_rows.clear()
             self.bw_checkpoint.unlink(missing_ok=True)
             self.refresh_bandwidth()
+        elif kind == 'timebase':
+            self.tb_rows.clear()
+            self.tb_checkpoint.unlink(missing_ok=True)
+            self.refresh_timebase()
+        else:
+            self.trig_rows.clear()
+            self.trig_checkpoint.unlink(missing_ok=True)
+            self.refresh_trigger()
         self.refresh_unified(force=True)
 
     def _unified_tick(self):
@@ -607,7 +671,7 @@ class RMSNoiseApp:
             self.btn_rerun.configure(state='disabled' if busy else 'normal')
             self.btn_stop.configure(state='normal' if busy else 'disabled')
             self.btn_clear.configure(state='disabled' if busy else 'normal')
-            for name in ('status', 'dc_status', 'imp_status', 'offset_status', 'bw_status', 'progress_text'):
+            for name in ('status', 'dc_status', 'imp_status', 'offset_status', 'bw_status', 'tb_status', 'trig_status', 'progress_text'):
                 var = getattr(self, name, None)
                 if var is not None and var.get() != self._last_status.get(name):
                     if name in self._last_status and var.get():
@@ -649,7 +713,10 @@ class RMSNoiseApp:
                 ('  Settle after OPER (s)', self.dc_settle, 'entry'), ('  Automatic Fluke output', self.dc_auto_fluke, 'check'), ('  Scope P1 MEAN acquisition', self.dc_p1_mode, 'check'),
                 ('Input impedance', None, None), ('  Settle (s)', self.imp_settle, 'entry'), ('  Samples', self.imp_samples, 'entry'),
                 ('Offset', None, None), ('  Settle (s)', self.offset_settle, 'entry'),
-                ('Bandwidth', None, None), ('  Settle (s)', self.bw_settle, 'entry'))
+                ('Bandwidth', None, None), ('  Settle (s)', self.bw_settle, 'entry'),
+                ('Time base', None, None), ('  Marker period (\u00b5s)', self.tb_period_us, 'entry'), ('  Settle after OPER (s)', self.tb_settle, 'entry'),
+                ('  P1 Freq readings', self.tb_samples, 'entry'),
+                ('Trigger level', None, None), ('  Settle after each step (s)', self.trig_settle, 'entry'))
         for r, (label, var, kind) in enumerate(rows):
             if kind is None:
                 ttk.Label(grid, text=label, style='Bold.TLabel').grid(row=r, column=0, sticky='w', pady=(10, 2))
@@ -672,7 +739,8 @@ class RMSNoiseApp:
 
     # ======================================================================== per-asset checkpoints
     CKPT_BASE = {'checkpoint_path': 'rms_noise_checkpoint_v5', 'dc_checkpoint': 'dcv_checkpoint_v6', 'offset_checkpoint': 'offset_mean_checkpoint_v28',
-                 'bw_checkpoint': 'bandwidth_checkpoint_v29', 'imp_checkpoint': 'impedance_checkpoint_v11'}
+                 'bw_checkpoint': 'bandwidth_checkpoint_v29', 'imp_checkpoint': 'impedance_checkpoint_v11',
+                 'tb_checkpoint': 'timebase_checkpoint_v1', 'trig_checkpoint': 'trigger_level_checkpoint_v1'}
 
     def _asset_key(self):
         return ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.instrument_id.get().strip()) or 'UNASSIGNED'
@@ -699,11 +767,15 @@ class RMSNoiseApp:
         self._ckpt_id = self.instrument_id.get().strip()
         self.rows, self.run_config = [], None
         self.dc_rows, self.imp_rows, self.offset_rows, self.bw_rows = [], [], [], []
+        self.tb_rows, self.trig_rows = [], []
+        self.tb_retest_index = self.trig_retest_index = None
         self.dc_retest_index = self.noise_retest_index = self.noise_retest_result = None
         if key != 'UNASSIGNED':
             self._adopt_legacy_results(key)
         self.load_offset_checkpoint()
         self.load_bandwidth_checkpoint()
+        self.load_timebase_checkpoint()
+        self.load_trigger_checkpoint()
         self.load_checkpoint()
         self.load_dc_checkpoint()
         self.load_impedance_checkpoint()
@@ -717,8 +789,10 @@ class RMSNoiseApp:
         self.refresh_impedance_table()
         self.refresh_offset()
         self.refresh_bandwidth()
+        self.refresh_timebase()
+        self.refresh_trigger()
         self.refresh_unified(force=True)
-        have = sum(len(r) for r in (self.rows, self.dc_rows, self.imp_rows, self.offset_rows, self.bw_rows))
+        have = sum(len(r) for r in (self.rows, self.dc_rows, self.imp_rows, self.offset_rows, self.bw_rows, self.tb_rows, self.trig_rows))
         self.msg.set(f'Instrument {self._ckpt_id or key}: restored {have} saved result(s).' if have else f'Instrument {self._ckpt_id or key}: no saved results yet.')
         return True
 
@@ -745,7 +819,9 @@ class RMSNoiseApp:
                      (self.dc_window, 'DC Voltage', len(self.dc_rows), 80),
                      (self.imp_window, 'Input Impedance', len(self.imp_rows), 28),
                      (self.offset_tab, 'Offset / P1 Mean', len(self.offset_rows), 16),
-                     (self.bw_tab, 'Bandwidth / LEVSINE', len(self.bw_rows), 24))
+                     (self.bw_tab, 'Bandwidth / LEVSINE', len(self.bw_rows), 24),
+                     (self.tb_tab, 'Time Base', len(self.tb_rows), 1),
+                     (self.trig_tab, 'Trigger Level', len(self.trig_rows), 24))
             for tab, name, done, total in items:
                 text = f'  {name}  \u2714  ' if done and done >= total else f'  {name}  {done}/{total}  ' if done else f'  {name}  '
                 if self.tabs.tab(tab, 'text') != text:
@@ -1081,6 +1157,36 @@ class RMSNoiseApp:
             while True:
                 event = self.events.get_nowait()
                 kind = event[0]
+                if kind == 'ask':
+                    _k, title, question, reply = event
+                    reply.put(messagebox.askyesnocancel(title, question, parent=self.root))
+                elif kind == 'tb_result':
+                    self.record_timebase(event[1], event[2])
+                elif kind in ('tb_error', 'tb_safety'):
+                    self.tb_retest_index = None
+                    if kind == 'tb_error':
+                        self.tb_status.set('ERROR: ' + event[1])
+                    messagebox.showerror('Time base error' if kind == 'tb_error' else 'Fluke output safety', event[1], parent=self.root)
+                elif kind == 'tb_idle':
+                    self.tb_running = False
+                elif kind == 'trig_result':
+                    self.record_trigger(event[1], event[2])
+                    self.trig_ok = True
+                elif kind in ('trig_error', 'trig_safety', 'trig_cancel'):
+                    self.trig_retest_index = None
+                    self.trig_batch = False
+                    self.trig_ok = False
+                    if kind == 'trig_cancel':
+                        self.trig_status.set(event[1])
+                    else:
+                        if kind == 'trig_error':
+                            self.trig_status.set('ERROR: ' + event[1])
+                        messagebox.showerror('Trigger level error' if kind == 'trig_error' else 'Fluke output safety', event[1], parent=self.root)
+                elif kind == 'trig_idle':
+                    self.trig_running = False
+                    if self.trig_batch and self.trig_ok:
+                        self.trig_ok = False
+                        self.root.after(250, self.next_trigger)
                 if kind == 'bw_result':
                     self.record_bandwidth(event[1],event[2],event[3])
                     self.bw_ok = True
@@ -1243,6 +1349,9 @@ class RMSNoiseApp:
         self.refresh_noise_grid()
 
     def on_close(self):
+        if self.tb_running or self.trig_running:
+            messagebox.showwarning('Measurement running', 'Finish the current point (answer any trigger question) and wait for Fluke STBY confirmation before closing.')
+            return
         if self.bw_running:
             messagebox.showwarning('Bandwidth running',
                 'Wait for Fluke STBY confirmation before closing.')
@@ -1891,7 +2000,8 @@ class RMSNoiseApp:
             ch = point['channel']
             if ch.startswith('C'):
                 scope.set_coupling_legacy(ch, point['coupling'])
-                scope.set_vertical_scale(ch, point['scale_v_div'], settle=0.0)
+                # The point names the channel 'C1'..'C4' (classic command form); the VBS setter takes the number.
+                scope.set_vertical_scale(int(ch[1:]), point['scale_v_div'], settle=0.0)
             # For EXT/EXT5, manual setup is required; do not silently treat EXT5 as a separate port.
             fluke.select_scope_measure_resistance()
             time.sleep(settle)
@@ -1921,7 +2031,7 @@ class RMSNoiseApp:
             self.events.put(('imp_idle',))
 
     def _retest_index(self, tree, rows, label, parent):
-        if any((self.running, self.dc_running, self.imp_running, self.offset_running, self.bw_running)):
+        if any((self.running, self.dc_running, self.imp_running, self.offset_running, self.bw_running, self.tb_running, self.trig_running)):
             messagebox.showwarning('Busy', 'Finish the current measurement first.', parent=parent)
             return None
         selected = tree.selection()
@@ -2568,9 +2678,465 @@ class RMSNoiseApp:
 
 
 
+    # ======================================================================== time base accuracy (one point)
+    # Limit from the HAZ-OSC-02 data sheet, page 10 (read from the rendered page image): error 0.00 Hz, -0.350 to +0.350 Hz.
+    # The sheet does not state the stimulus. The technician recalled a time marker; the marker period is a Test setting
+    # (default 10 us = 100 kHz, where +/-0.35 Hz is +/-3.5 ppm) and is saved with the result and printed on the report.
+    def _tb_period(self):
+        try:
+            us = float(self.tb_period_us.get())
+        except ValueError:
+            return None
+        return us * 1e-6 if math.isfinite(us) and 0.001 <= us <= 1e6 else None
+
+    def timebase_points(self):
+        period = self._tb_period() or 10e-6
+        return [dict(channel=1, marker_period_s=period, nominal_hz=1.0 / period, scale_v_div=TB_SCALE,
+                     lower_hz=-TIMEBASE_LIMIT_HZ, upper_hz=TIMEBASE_LIMIT_HZ)]
+
+    def show_timebase(self):
+        self.tb_tab = ttk.Frame(self.tabs)
+        self.tabs.add(self.tb_tab, text='Time Base')
+        outer = ttk.Frame(self.tb_tab, padding=14)
+        outer.pack(fill='both', expand=True)
+        ttk.Label(outer, textvariable=self.tb_status).pack(anchor='w', pady=5)
+        cols = ('period', 'nominal', 'mean', 'error', 'low', 'high', 'unit', 'result')
+        self.tb_tree = ttk.Treeview(outer, columns=cols, show='headings', height=2)
+        for key, title, width in (('period', 'Marker', 90), ('nominal', 'Nominal', 110), ('mean', 'P1 Freq mean', 130), ('error', 'Error', 100),
+                                  ('low', 'Lower limit', 100), ('high', 'Upper limit', 100), ('unit', 'Units', 60), ('result', 'Result', 80)):
+            self.tb_tree.heading(key, text=title)
+            self.tb_tree.column(key, width=width, anchor='center')
+        self.tb_tree.pack(fill='both', expand=True)
+
+    def _tb_settings(self):
+        try:
+            settle, samples, baud = float(self.tb_settle.get()), int(self.tb_samples.get()), int(self.fluke_baud.get())
+            if not (.5 <= settle <= 60 and 1 <= samples <= 50 and baud > 0) or self._tb_period() is None:
+                raise ValueError()
+        except ValueError:
+            messagebox.showerror('Time base settings', 'Settle must be 0.5-60 s, samples 1-50, the marker period a positive number of '
+                                 'microseconds and the baud numeric (Test settings).', parent=self.root)
+            return None
+        return settle, samples, baud
+
+    def _tb_confirm(self, title, heading, point):
+        period, nominal = point['marker_period_s'], point['nominal_hz']
+        return ui.confirm_steps(self.root, title, heading,
+            [('Standby', 'Confirm the Fluke is in STBY.'),
+             ('Connect', 'Fluke SCOPE output to CH1 with a 50 Ω cable. Remove other cables and any feedthrough terminator.'),
+             ('Automatic', 'The program sets CH1 to DC 50 Ω, full bandwidth and P1 Freq, then outputs the time marker.')],
+            facts=[('Marker period', f'{period*1e6:g} µs'), ('Frequency', f'{nominal/1e3:g} kHz'),
+                   ('Limit', f'±{TIMEBASE_LIMIT_HZ:.3f} Hz')],
+            caution='First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the '
+                    'output if the calibrator rejects them. Check the marker period against your procedure (Test settings).',
+            ok='Connected and safe — run')
+
+    def start_timebase(self):
+        if self._batch_busy():
+            messagebox.showwarning('Busy', 'Another instrument operation is running.', parent=self.root)
+            return
+        if self.tb_rows:
+            messagebox.showinfo('Complete', 'The time base point is recorded. Use Rerun Selected to measure it again.', parent=self.root)
+            return
+        cfg = self._tb_settings()
+        if cfg is None:
+            return
+        point = self.timebase_points()[0]
+        if not self._tb_confirm('Time base accuracy', 'Connect the Fluke SCOPE output to CH1', point):
+            self.tb_status.set('Time base not run - connection not confirmed')
+            return
+        self._run_timebase(point, cfg)
+
+    def retest_timebase(self):
+        idx = self._retest_index(self.tb_tree, self.tb_rows, 'time base', self.tb_tab)
+        if idx is None:
+            return
+        cfg = self._tb_settings()
+        if cfg is None:
+            return
+        point = self.timebase_points()[0]
+        if not self._tb_confirm('Confirm time base retest', 'Retest the time base point', point):
+            return
+        self.tb_retest_index = idx
+        self._run_timebase(point, cfg)
+
+    def _run_timebase(self, point, cfg):
+        settle, samples, baud = cfg
+        self.tb_running = True
+        self.tb_status.set(f'Running time base: {point["marker_period_s"]*1e6:g} µs marker on CH1')
+        threading.Thread(target=self.timebase_worker, args=(point, settle, samples, self.fluke_address.get().strip(), baud,
+                                                            self.visa_address.get().strip()), daemon=True).start()
+
+    def timebase_worker(self, point, settle, samples, fluke_addr, baud, scope_addr):
+        log = drivers.CommandLog()
+        fluke = scope = None
+        stage = 'opening instruments'
+        try:
+            fluke, scope = self.open_bench(fluke_addr, baud, scope_addr, log, scope_timeout=15)
+            stage = 'Fluke serial connection / identity'
+            fluke.open()
+            stage = 'Fluke standby'
+            fluke.standby()
+            stage = 'Scope USB connection and read-only handshake'
+            scope.open()
+            scope.handshake()
+            ch, period = point['channel'], point['marker_period_s']
+            stage = 'Scope scale and zero offset'
+            scope.set_vertical_scale(ch, point['scale_v_div'])
+            scope.ensure_zero_offset(ch)
+            stage = 'Scope DC 50 Ω and full bandwidth'
+            scope.set_coupling(ch, 'DC50')
+            scope.set_bandwidth_limit(ch, 'Full')
+            stage = 'Scope edge trigger (CH1, positive, Auto)'
+            scope.set_edge_trigger_source(ch)
+            scope.set_trigger_slope('Positive')
+            scope.set_trigger_level(TB_TRIGGER_V)
+            scope.set_trigger_mode('Auto')
+            stage = 'Scope horizontal scale (about 100 marker periods on screen)'
+            scope.set_timebase(10 * period)
+            stage = 'Scope P1 Freq'
+            scope.configure_p1(ch, 'Freq', show=False)
+            stage = 'Fluke SCOPE MARKER'
+            fluke.select_scope_marker()
+            stage = 'Fluke marker period'
+            fluke.set_marker_period(period)
+            stage = 'Fluke OPER'
+            fluke.operate()
+            stage = 'Settling, discarding first P1 read'
+            time.sleep(settle)
+            scope.read_p1()
+            stage = 'P1 Freq readings'
+            readings = []
+            for _ in range(samples):
+                time.sleep(TB_READ_GAP_S)
+                readings.append(scope.read_p1())
+            stage = 'Fluke standby after point'
+            fluke.standby()
+            mean = sum(readings) / len(readings)
+            if not 0.99 * point['nominal_hz'] <= mean <= 1.01 * point['nominal_hz']:
+                raise RuntimeError(f'P1 Freq averaged {mean:.9g} Hz, more than 1 % away from {point["nominal_hz"]:.9g} Hz '
+                                   '(wrong marker period, no signal, cable or P1 setup). No result recorded.')
+            self.events.put(('tb_result', point, readings))
+        except Exception as exc:
+            self.events.put(('tb_error', f'Failure at {stage}: {type(exc).__name__}: {exc}\n'
+                             'Verify Fluke STBY on the front panel before touching cables.'))
+        finally:
+            if not self.finish_bench(fluke, scope, log, f'Time base {point["marker_period_s"]*1e6:g} us marker'):
+                self.events.put(('tb_safety', 'Fluke standby NOT confirmed. Inspect the Fluke front panel; do not disconnect until STBY.'))
+            self.events.put(('tb_idle',))
+
+    def record_timebase(self, point, readings):
+        mean = sum(readings) / len(readings)
+        error = mean - point['nominal_hz']
+        spread = (sum((x - mean) ** 2 for x in readings) / (len(readings) - 1)) ** .5 if len(readings) > 1 else 0.0
+        row = dict(point, readings_hz=readings, mean_hz=mean, error_hz=error, stdev_hz=spread,
+                   result='PASS' if point['lower_hz'] <= error <= point['upper_hz'] else 'FAIL',
+                   method=f'Fluke 5560A SCOPE MARKER {point["marker_period_s"]*1e6:g} us into DC 50 Ohm; scope P1 Freq, mean of {len(readings)}',
+                   timestamp=datetime.now().isoformat(timespec='seconds'),
+                   note='Limits from HAZ-OSC-02 data sheet; no guard band')
+        idx = self.tb_retest_index
+        if idx is not None:
+            previous = self.tb_rows[idx]
+            row['retest_history'] = previous.get('retest_history', []) + [{
+                'timestamp': previous.get('timestamp'), 'result': previous.get('result'),
+                'previous_row': {k: v for k, v in previous.items() if k != 'retest_history'}}]
+            self.tb_rows[idx] = row
+            self.tb_retest_index = None
+        else:
+            self.tb_rows.append(row)
+        self.save_timebase_checkpoint()
+        self.refresh_timebase()
+
+    def refresh_timebase(self):
+        items = []
+        for i, p in enumerate(self.timebase_points()):
+            r = self.tb_rows[i] if i < len(self.tb_rows) else None
+            src = r or p
+            values = (f'{src["marker_period_s"]*1e6:g} µs', f'{src["nominal_hz"]:.9g}',
+                      f'{r["mean_hz"]:.9g}' if r else '', f'{r["error_hz"]:+.4f}' if r else '',
+                      f'{src["lower_hz"]:+.3f}', f'{src["upper_hz"]:+.3f}', 'Hz', r['result'] if r else '—')
+            items.append((values, self._tag(len(self.tb_rows), i, r['result'] if r else None)))
+        self._set_grid(self.tb_tree, items, active=len(self.tb_rows))
+        self.tb_status.set(f'{len(self.tb_rows)} of 1 time base point recorded')
+
+    def save_timebase_checkpoint(self):
+        temp = self.tb_checkpoint.with_suffix('.tmp')
+        temp.write_text(json.dumps(self.tb_rows, indent=2), encoding='utf-8')
+        temp.replace(self.tb_checkpoint)
+
+    def load_timebase_checkpoint(self):
+        if not self.tb_checkpoint.exists():
+            return
+        try:
+            rows = json.loads(self.tb_checkpoint.read_text(encoding='utf-8'))
+            if not isinstance(rows, list) or len(rows) > 1:
+                raise ValueError('Invalid checkpoint length')
+            for row in rows:
+                if not isinstance(row, dict) or row.get('channel') != 1 or not row.get('marker_period_s') \
+                        or row.get('lower_hz') != -TIMEBASE_LIMIT_HZ or row.get('upper_hz') != TIMEBASE_LIMIT_HZ:
+                    raise ValueError('Checkpoint point mismatch')
+            self.tb_rows = rows
+            self.refresh_timebase()
+        except Exception as exc:
+            messagebox.showwarning('Time base checkpoint', f'Could not load the saved time base result: {exc}', parent=self.root)
+
+    # ======================================================================== trigger level accuracy (24 points, bracket test)
+    # Limits from the HAZ-OSC-02 data sheet, pages 10-11 (rendered page images): CH1-CH4 x 0 / +300 / -300 mV x positive and
+    # negative slope, level +/-20 mV. Method agreed with the technician: scope armed in Single at the level, the Fluke steps
+    # SCOPE DCV from 100 mV before the level to 20 mV short of it (must NOT trigger), then to 20 mV past it (must trigger).
+    # The operator answers both questions. A pass shows the trigger fired within +/-20 mV; no voltage is measured.
+    @staticmethod
+    def trigger_points():
+        return [dict(channel=ch, scale_v_div=TRIG_SCALE, level_v=level, slope=slope,
+                     lower_v=round(level - TRIG_LIMIT_V, 6), upper_v=round(level + TRIG_LIMIT_V, 6))
+                for ch in range(1, 5) for level in TRIG_LEVELS for slope in ('Positive', 'Negative')]
+
+    @staticmethod
+    def trigger_outcome(row):
+        if row.get('triggered_short'):
+            return 'Triggered 20 mV early'
+        if row.get('triggered_past') is False:
+            return 'No trigger 20 mV past'
+        return 'Within ±20 mV'
+
+    def show_trigger(self):
+        self.trig_tab = ttk.Frame(self.tabs)
+        self.tabs.add(self.trig_tab, text='Trigger Level')
+        outer = ttk.Frame(self.trig_tab, padding=14)
+        outer.pack(fill='both', expand=True)
+        ttk.Label(outer, textvariable=self.trig_status).pack(anchor='w', pady=5)
+        cols = ('ch', 'level', 'slope', 'low', 'high', 'outcome', 'result')
+        self.trig_tree = ttk.Treeview(outer, columns=cols, show='headings')
+        for key, title, width in (('ch', 'Channel', 80), ('level', 'Level (mV)', 100), ('slope', 'Slope', 90), ('low', 'Lower (mV)', 100),
+                                  ('high', 'Upper (mV)', 100), ('outcome', 'Outcome', 170), ('result', 'Result', 80)):
+            self.trig_tree.heading(key, text=title)
+            self.trig_tree.column(key, width=width, anchor='center')
+        self.trig_tree.pack(fill='both', expand=True)
+
+    def _trig_settings(self):
+        try:
+            settle, baud = float(self.trig_settle.get()), int(self.fluke_baud.get())
+            if not (.2 <= settle <= 30 and baud > 0):
+                raise ValueError()
+        except ValueError:
+            messagebox.showerror('Trigger level settings', 'Settle must be 0.2-30 s and the baud numeric (Test settings).', parent=self.root)
+            return None
+        return settle, baud
+
+    def start_trigger(self):
+        if self._batch_busy():
+            messagebox.showwarning('Busy', 'Another instrument operation is running.', parent=self.root)
+            return
+        if len(self.trig_rows) >= len(self.trigger_points()):
+            messagebox.showinfo('Complete', 'All 24 trigger level points are recorded.', parent=self.root)
+            return
+        if self._trig_settings() is None:
+            return
+        if not ui.confirm_steps(self.root, 'Trigger level test method', 'Trigger level accuracy — you confirm each trigger',
+            [('Setup', 'The program sets the channel to 100 mV/div, DC 1 MΩ, 20 MHz BW, edge trigger on that channel at the test level, '
+                       'and arms a Single acquisition.'),
+             ('Step 1', 'The Fluke steps to 20 mV SHORT of the level. You answer whether the scope triggered (it should not).'),
+             ('Step 2', 'The Fluke steps to 20 mV PAST the level. You answer whether the scope triggered (it should).'),
+             ('Triggered means', 'the trigger status changes from armed/Single to Stopped and a trace is captured.')],
+            caution='The Fluke SCOPE DC output is enabled (at most 0.4 V) while you answer, and returns to STBY after every point. '
+                    'The scope trigger commands are not yet verified on a 4104HD: check the first point on screen.',
+            ok='Understood — start'):
+            return
+        self.trig_batch = True
+        self.trig_ok = False
+        self.trig_connected_channel = None
+        self.next_trigger()
+
+    def stop_trigger(self):
+        self.trig_batch = False
+        self.trig_ok = False
+        self.trig_status.set('Stopped after the current point; saved results retained.')
+
+    def next_trigger(self):
+        if not self.trig_batch or self.trig_running:
+            return
+        points = self.trigger_points()
+        idx = len(self.trig_rows)
+        if idx >= len(points):
+            self.trig_batch = False
+            self.trig_status.set('Complete — 24 of 24 trigger level points')
+            messagebox.showinfo('Complete', 'All 24 trigger level points recorded.', parent=self.root)
+            return
+        point = points[idx]
+        ch = point['channel']
+        if self.trig_connected_channel != ch:
+            if not ui.confirm_steps(self.root, 'Trigger level cable connection', f'Connect the Fluke SCOPE output to CH{ch}',
+                [('Standby', 'Confirm the Fluke is in STBY.'),
+                 ('Connect', f'Fluke SCOPE output to CH{ch} (1 MΩ input, no terminator). Disconnect other sources.')],
+                facts=[('Point', f'{idx+1} of 24'), ('Channel', f'CH{ch}')],
+                caution='Press OK only after the connection is safe.', ok='Connected and safe — continue'):
+                self.trig_batch = False
+                self.trig_status.set('Paused — awaiting safe cable connection')
+                return
+            self.trig_connected_channel = ch
+        self._run_trigger(idx, point)
+
+    def retest_trigger(self):
+        idx = self._retest_index(self.trig_tree, self.trig_rows, 'trigger level', self.trig_tab)
+        if idx is None:
+            return
+        if self._trig_settings() is None:
+            return
+        point = self.trigger_points()[idx]
+        if not ui.confirm_steps(self.root, 'Confirm trigger level retest', f'Retest trigger level point {idx+1} of 24',
+            [('Connection', f'Confirm the Fluke SCOPE output is connected to CH{point["channel"]}.'),
+             ('You confirm', 'You will be asked twice whether the scope triggered.')],
+            facts=[('Channel', f'CH{point["channel"]}'), ('Level', f'{point["level_v"]*1000:+.0f} mV'), ('Slope', point['slope'])],
+            caution='The prior result is replaced only when the retest completes.', ok='Ready — retest'):
+            return
+        self.trig_batch = False
+        self.trig_retest_index = idx
+        self._run_trigger(idx, point)
+
+    def _run_trigger(self, idx, point):
+        settle, baud = self._trig_settings()
+        self.trig_running = True
+        self.trig_status.set(f'Running {idx+1}/24: CH{point["channel"]} | {point["level_v"]*1000:+.0f} mV | {point["slope"]} slope')
+        threading.Thread(target=self.trigger_worker, args=(point, settle, self.fluke_address.get().strip(), baud,
+                                                           self.visa_address.get().strip()), daemon=True).start()
+
+    def ask_operator(self, title, question):
+        """From a worker thread: show a Yes / No / Cancel question on the Tk thread and wait for the answer."""
+        reply = queue.Queue()
+        self.events.put(('ask', title, question, reply))
+        return reply.get()
+
+    def trigger_worker(self, point, settle, fluke_addr, baud, scope_addr):
+        log = drivers.CommandLog()
+        fluke = scope = None
+        stage = 'opening instruments'
+        ch, level, slope = point['channel'], point['level_v'], point['slope']
+        sign = 1 if slope == 'Positive' else -1
+        start, short, past = (round(level - sign * TRIG_START_V, 6), round(level - sign * TRIG_LIMIT_V, 6),
+                              round(level + sign * TRIG_LIMIT_V, 6))
+        title = f'Trigger level CH{ch} {level*1000:+.0f} mV {slope.lower()} slope'
+        try:
+            fluke, scope = self.open_bench(fluke_addr, baud, scope_addr, log, scope_timeout=15)
+            stage = 'Fluke serial connection / identity'
+            fluke.open()
+            stage = 'Fluke standby'
+            fluke.standby()
+            stage = 'Scope USB connection and read-only handshake'
+            scope.open()
+            scope.handshake()
+            stage = 'Scope scale, DC 1 MΩ / 20 MHz and zero offset'
+            scope.set_vertical_scale(ch, point['scale_v_div'])
+            scope.configure_dc_input(ch)
+            scope.ensure_zero_offset(ch)
+            scope.set_timebase(TRIG_HSCALE)
+            stage = 'Scope edge trigger source, slope and level'
+            scope.set_edge_trigger_source(ch)
+            scope.set_trigger_slope(slope)
+            level_readback = scope.set_trigger_level(level)
+            stage = f'Fluke SCOPE DCV {start*1000:+.0f} mV (100 mV before the level) and OPER'
+            fluke.apply_scope_dc(start)
+            time.sleep(settle)
+            stage = 'Scope arm Single'
+            armed = scope.set_trigger_mode('Single', accept=('Stopped',))
+            if armed.casefold() == 'stopped':
+                raise RuntimeError('The scope triggered as soon as it was armed, before the Fluke stepped. No result recorded.')
+            time.sleep(0.5)
+            stage = f'Fluke step to {short*1000:+.0f} mV (20 mV short of the level)'
+            fluke.set_dc_volts(short)
+            if not fluke.is_operating():
+                raise RuntimeError('The Fluke left OPERATE when the level changed.')
+            time.sleep(settle)
+            stage = 'Operator: trigger before the level?'
+            triggered_short = self.ask_operator(title,
+                f'The Fluke now outputs {short*1000:+.0f} mV, 20 mV short of the {level*1000:+.0f} mV trigger level '
+                f'({slope.lower()} slope).\n\nDid the scope TRIGGER (status changed to Stopped, trace captured)?\n\n'
+                'Yes = it triggered   No = still armed   Cancel = abandon this point')
+            triggered_past = None
+            if triggered_short is None:
+                raise OperatorCancelled()
+            if not triggered_short:
+                stage = f'Fluke step to {past*1000:+.0f} mV (20 mV past the level)'
+                fluke.set_dc_volts(past)
+                if not fluke.is_operating():
+                    raise RuntimeError('The Fluke left OPERATE when the level changed.')
+                time.sleep(settle)
+                stage = 'Operator: trigger past the level?'
+                triggered_past = self.ask_operator(title,
+                    f'The Fluke now outputs {past*1000:+.0f} mV, 20 mV past the {level*1000:+.0f} mV trigger level '
+                    f'({slope.lower()} slope).\n\nDid the scope TRIGGER now?\n\n'
+                    'Yes = it triggered   No = still armed   Cancel = abandon this point')
+                if triggered_past is None:
+                    raise OperatorCancelled()
+            stage = 'Fluke standby after point'
+            fluke.standby()
+            self.events.put(('trig_result', point, dict(start_v=start, short_v=short, past_v=past, level_readback_v=level_readback,
+                                                        triggered_short=bool(triggered_short), triggered_past=triggered_past)))
+        except OperatorCancelled:
+            self.events.put(('trig_cancel', 'Point abandoned at the operator prompt. Nothing was recorded.'))
+        except Exception as exc:
+            self.events.put(('trig_error', f'Failure at {stage}: {type(exc).__name__}: {exc}\n'
+                             'Verify Fluke STBY on the front panel before touching cables.'))
+        finally:
+            if not self.finish_bench(fluke, scope, log, f'Trigger CH{ch} {level*1000:+.0f} mV {slope}'):
+                self.events.put(('trig_safety', 'Fluke standby NOT confirmed. Inspect the Fluke front panel; do not disconnect until STBY.'))
+            self.events.put(('trig_idle',))
+
+    def record_trigger(self, point, info):
+        passed = not info['triggered_short'] and info['triggered_past'] is True
+        row = dict(point, **info, result='PASS' if passed else 'FAIL',
+                   method='Bracket: Fluke 5560A SCOPE DCV stepped to 20 mV short of and 20 mV past the level; scope Single edge trigger; operator confirmed',
+                   timestamp=datetime.now().isoformat(timespec='seconds'),
+                   note='Limits from HAZ-OSC-02 data sheet; pass/fail by bracket, no trigger voltage measured')
+        row['outcome'] = self.trigger_outcome(row)
+        idx = self.trig_retest_index
+        if idx is not None:
+            previous = self.trig_rows[idx]
+            row['retest_history'] = previous.get('retest_history', []) + [{
+                'timestamp': previous.get('timestamp'), 'result': previous.get('result'),
+                'previous_row': {k: v for k, v in previous.items() if k != 'retest_history'}}]
+            self.trig_rows[idx] = row
+            self.trig_retest_index = None
+        else:
+            self.trig_rows.append(row)
+        self.save_trigger_checkpoint()
+        self.refresh_trigger()
+
+    def refresh_trigger(self):
+        done = len(self.trig_rows)
+        items = []
+        for i, p in enumerate(self.trigger_points()):
+            r = self.trig_rows[i] if i < done else None
+            values = (f'CH{p["channel"]}', f'{p["level_v"]*1000:+.2f}', p['slope'], f'{p["lower_v"]*1000:+.2f}', f'{p["upper_v"]*1000:+.2f}',
+                      r['outcome'] if r else '', r['result'] if r else '—')
+            items.append((values, self._tag(done, i, r['result'] if r else None)))
+        self._set_grid(self.trig_tree, items, active=done)
+        self.trig_status.set(f'{done} of 24 trigger level points recorded')
+
+    def save_trigger_checkpoint(self):
+        temp = self.trig_checkpoint.with_suffix('.tmp')
+        temp.write_text(json.dumps(self.trig_rows, indent=2), encoding='utf-8')
+        temp.replace(self.trig_checkpoint)
+
+    def load_trigger_checkpoint(self):
+        if not self.trig_checkpoint.exists():
+            return
+        try:
+            rows = json.loads(self.trig_checkpoint.read_text(encoding='utf-8'))
+            points = self.trigger_points()
+            if not isinstance(rows, list) or len(rows) > len(points):
+                raise ValueError('Invalid checkpoint length')
+            for i, row in enumerate(rows):
+                if not isinstance(row, dict) or any(row.get(k) != points[i][k] for k in ('channel', 'level_v', 'slope', 'lower_v', 'upper_v')):
+                    raise ValueError(f'Checkpoint point {i+1} mismatch')
+            self.trig_rows = rows
+            self.refresh_trigger()
+        except Exception as exc:
+            messagebox.showwarning('Trigger level checkpoint', f'Could not load saved trigger level results: {exc}', parent=self.root)
+
+
     def load_demo_data(self):
         """Synthetic, memory-only export test data; no VISA, no checkpoint writes."""
-        if any((self.rows,self.dc_rows,self.imp_rows,self.offset_rows,self.bw_rows)):
+        if any((self.rows,self.dc_rows,self.imp_rows,self.offset_rows,self.bw_rows,self.tb_rows,self.trig_rows)):
             messagebox.showwarning('Demo data',
                 'Existing calibration results are loaded. Demo data will not be mixed with them. '
                 'Use a separate empty folder to launch --demo.')
@@ -2633,13 +3199,30 @@ class RMSNoiseApp:
                 synthetic=True,timestamp=stamp)
             self.bw_rows.append(p)
         self.refresh_bandwidth()
+        for point in self.timebase_points():
+            p=dict(point)
+            readings=[p['nominal_hz']*(1+1.1e-7)+.004*((k%3)-1) for k in range(5)]
+            mean=sum(readings)/len(readings)
+            p.update(readings_hz=readings,mean_hz=mean,error_hz=mean-p['nominal_hz'],stdev_hz=.004,
+                result='PASS' if p['lower_hz']<=mean-p['nominal_hz']<=p['upper_hz'] else 'FAIL',synthetic=True,timestamp=stamp)
+            self.tb_rows.append(p)
+        self.refresh_timebase()
+        for i,point in enumerate(self.trigger_points()):
+            p=dict(point,triggered_short=(i==9),triggered_past=None if i==9 else True,synthetic=True,timestamp=stamp)
+            p['result']='FAIL' if i==9 else 'PASS'
+            p['outcome']=self.trigger_outcome(p)
+            self.trig_rows.append(p)
+        self.refresh_trigger()
         self.status.set('DEMO MODE — Synthetic data only; no instrument measurements')
         self.dc_status.set('DEMO DATA — 80 synthetic DCV points')
         self.imp_status.set('DEMO DATA — 28 synthetic impedance points')
         self.offset_status.set('DEMO DATA — 16 synthetic offset points')
         self.bw_status.set('DEMO DATA — 24 synthetic bandwidth points')
+        self.tb_status.set('DEMO DATA — 1 synthetic time base point')
+        self.trig_status.set('DEMO DATA — 24 synthetic trigger level points')
         messagebox.showinfo('Demo export ready',
-            'Loaded 184 SYNTHETIC results in memory across five functions. '
+            f'Loaded {sum(len(r) for r in (self.rows,self.dc_rows,self.imp_rows,self.offset_rows,self.bw_rows,self.tb_rows,self.trig_rows))} '
+            'SYNTHETIC results in memory across seven functions. '
             'Use Export Report (PDF). '
             'No checkpoint files were written. Do not use as calibration evidence.')
 
@@ -2688,6 +3271,8 @@ class RMSNoiseApp:
             'impedance': self.imp_rows,
             'offset': self.offset_rows,
             'bandwidth': self.bw_rows,
+            'timebase': self.tb_rows,
+            'trigger': self.trig_rows,
         }[kind]
         result=[]
         for r in data:
@@ -2725,6 +3310,22 @@ class RMSNoiseApp:
                 upper=self.cert_number(r['upper_v'],6)
                 uom='V'
                 measured=self.cert_number(r['measured_v'],6)
+            elif kind=='timebase':
+                desc=(f'Time Base Accuracy, {r["marker_period_s"]*1e6:g} us marker '
+                      f'({self.cert_number(r["nominal_hz"]/1e3,6)} kHz)')
+                nominal='0'
+                lower=self.cert_number(r['lower_hz'],3)
+                upper=self.cert_number(r['upper_hz'],3)
+                uom='Hz'
+                measured=self.cert_number(r['error_hz'],4)
+            elif kind=='trigger':
+                level_mv='0' if r['level_v']==0 else f'{r["level_v"]*1000:+.0f}'
+                desc=f'{channel} Trigger Level {level_mv} mV @ {"Pos" if r["slope"]=="Positive" else "Neg"} slope'
+                nominal=self.cert_number(r['level_v']*1000,3)
+                lower=self.cert_number(r['lower_v']*1000,3)
+                upper=self.cert_number(r['upper_v']*1000,3)
+                uom='mV'
+                measured=r.get('outcome') or self.trigger_outcome(r)
             else:
                 desc=f'{channel} FULL BW {scale}'
                 amp=r['amplitude_vpp']
@@ -2771,7 +3372,8 @@ class RMSNoiseApp:
 
     def write_certificate_pdf(self, filename, sections, details=None):
         """'Calibration Data' PDF: laid out as a printable report."""
-        titles={'noise':'RMS Noise','dcv':'DC Gain (1 MOhm)','impedance':'Input Impedance','offset':'DC Offset','bandwidth':'Bandwidth'}
+        titles={'noise':'RMS Noise','dcv':'DC Gain (1 MOhm)','impedance':'Input Impedance','offset':'DC Offset','bandwidth':'Bandwidth',
+                'timebase':'Time Base Accuracy','trigger':'Trigger Level Accuracy'}
         rows=[]
         for kind in sections:
             for row in self.certificate_rows(kind,with_uncertainty=True):
@@ -2806,7 +3408,7 @@ class RMSNoiseApp:
     def export_pdf_report(self):
         if not self.sync_asset():
             return
-        sections=[k for k in ('noise','dcv','impedance','offset','bandwidth') if self.certificate_rows(k)]
+        sections=[k for k in ('noise','dcv','impedance','offset','bandwidth','timebase','trigger') if self.certificate_rows(k)]
         if not sections:
             messagebox.showinfo('No results','No recorded calibration data to export.')
             return
@@ -2828,7 +3430,7 @@ class RMSNoiseApp:
     def export_professional_excel(self):
         if not self.sync_asset():
             return
-        sections=('noise','dcv','impedance','offset','bandwidth')
+        sections=('noise','dcv','impedance','offset','bandwidth','timebase','trigger')
         groups={k:self.certificate_rows(k) for k in sections}
         if not any(groups.values()):
             messagebox.showinfo('No results','No calibration results to export.')

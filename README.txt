@@ -12,7 +12,7 @@ Folder layout (same as before, plus one new file):
       Fluke_8846A_Verification.py    v58
       Fluke_8846A_Adjustment.py      v57
       Fluke_87V.py                   v52
-      WaveSurfer_WS4104HD.py         v52
+      WaveSurfer_WS4104HD.py         v53
 
 Install: copy these files over the old ones (keep your calibration_procedures.sqlite3,
 Backups\ and any checkpoint files). The database layout is unchanged.
@@ -45,6 +45,19 @@ tolerance used; 'Open report PDF' opens the saved file. The Instruments tab gain
 interval entered for that instrument; overdue rows are red). Demo reports are never recorded; exporting the same file again replaces its record.
 Launching a procedure from the Instruments tab now fills in the Instrument ID, and typing a known ID fills an empty Serial number and shows
 the last report / next due date in the status bar.
+
+WaveSurfer v53: two new functions in the results table, with limits from the HAZ-OSC-02 data sheet (pages 10-11, read from the page images).
+  Time base (1 point): Fluke 5560A SCOPE MARKER into CH1 at DC 50 Ohm, scope P1 Freq averaged; frequency error limit +/-0.350 Hz. The marker
+  period is in Test settings (default 10 us = 100 kHz; the data sheet does not state it) and is saved with the result and printed on the report.
+  Trigger level (24 points): CH1-CH4 x 0 / +300 / -300 mV x positive and negative slope, +/-20 mV, at 100 mV/div DC 1 MOhm 20 MHz BW. Bracket
+  test: the scope is armed in Single at the level, the Fluke steps from 100 mV before the level to 20 mV short (must not trigger) and then 20 mV
+  past (must trigger); the technician answers both prompts. The report shows 'Within +/-20 mV' (no trigger voltage is measured). The Fluke output
+  is at most 0.4 V and returns to STBY after every point. Uncertainty is left blank for both (no A2LA scope entry).
+  NOT yet verified on hardware: 5560A SCOPE MARKER / OUT <period>S and the scope VBS Trigger.Edge.Slope, Trigger.Edge.Level and TriggerMode.
+  Each is read back, and the output is never enabled after a rejected or unexpected reply. Check the first point of each on screen.
+  Input impedance fix: the channel points passed 'C1' to the VBS scale setter, which asked the scope for app.Acquisition.CC1 and failed with
+  "could not convert string to float". The setter now takes the channel number and refuses anything other than 1-4; a non-numeric scope reply
+  now gives a clear error naming the property.
 
 WaveSurfer v52: the scope now waits 0.4 s after each coupling and bandwidth-limit change before its next command (a query sent
 immediately after the relay change could leave the USB session stuck with VI_ERROR_IO while the scope itself kept working).
