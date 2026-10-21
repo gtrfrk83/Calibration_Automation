@@ -75,8 +75,8 @@ for ch in (1, 2, 3, 4):
 # ---- analog bandwidth (p. 4-5; test record "Channel n Bandwidth": 2.12 V minimum, no maximum) -----------------------------------------
 for ch in (1, 2, 3, 4):
     add('bw', 'BW', f'CH{ch} bandwidth: 3 V p-p at 50 kHz reference, Vpk-pk at model frequency', 2.12, 2.12, None, 'V', ch=ch, models=models_for(ch),
-        vscale=0.5, ref_hz=50e3, ref_target=3.0, ref_low=2.98, ref_high=3.02, hscale_ref=10e-3, hscale=10e-9,
-        note='Model frequency: 40/50/60/70/100/200 MHz by model (specs models_info). 50 ohm feedthrough termination at the scope input.')
+        vscale=0.5, ref_hz=50e3, ref_target=3.0, ref_low=2.98, ref_high=3.02, hscale_ref=10e-6, hscale=10e-9,
+        note='Reference level is set at 10 us/div (5 cycles of 50 kHz on screen) instead of the manual 10 ms/div so the whole wave is displayed (deviation requested by the lab; the measured Pk-Pk limits are unchanged). Model frequency: 40/50/60/70/100/200 MHz by model (specs models_info). 50 ohm feedthrough termination at the scope input.')
 
 # ---- sample rate and delay time accuracy (p. 4-6 / 4-7) ------------------------------------------------------------------------------
 add('timebase', 'TIMEBASE', 'Time base: rising edge of the 10 ms marker at center screen (divisions)', 0.0, -2.0, 2.0, 'div', ch=1,
