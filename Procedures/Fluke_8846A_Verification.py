@@ -76,12 +76,16 @@ class IO:
             try:obj.close()
             except Exception:pass
         self.save_log()
+    _saved=0
     def save_log(self):
-        """Append the exact commands sent to ~/.calibration_suite/command_log.txt."""
+        """Append the commands sent since the last save to ~/.calibration_suite/command_log.txt (each command once)."""
         try:
+            new=self.log.lines()[self._saved:]
+            if not new:return
             folder=Path.home()/'.calibration_suite';folder.mkdir(parents=True,exist_ok=True)
             with open(folder/'command_log.txt','a',encoding='utf-8') as f:
-                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  8846A session\n'+'\n'.join(self.log.lines())+'\n')
+                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  8846A session\n'+'\n'.join(new)+'\n')
+            self._saved+=len(new)
         except OSError:pass
     # ---- settling --------------------------------------------------------------------------------
     # A flat 2 s after OPER was too short for the 5560A to ramp to 100 V / 1000 V, for high resistance
@@ -136,6 +140,12 @@ class IO:
                 return history[-1]
             time.sleep(self.READ_INTERVAL)
     def measure(self,p):
+        try:
+            return self._measure(p)
+        except Exception:
+            self.save_log()      # a failed point leaves its commands on disk straight away, without closing the program
+            raise
+    def _measure(self,p):
         k=p['kind'];v=p['nominal'];r=p['range'];f=p['frequency']
         self.standby()
         if p.get('zero_offset'):
@@ -462,7 +472,7 @@ class App:
     def _done(self,points,i,p,reading):
         self._record(p,reading,False)
         self.root.after(50,lambda:self._next(points,i+1,setup_key(p)))
-    def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));messagebox.showerror('Measurement stopped',str(exc))
+    def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));messagebox.showerror('Measurement stopped',str(exc)+'\n\nThe commands sent are saved in ~/.calibration_suite/command_log.txt')
     def _record(self,p,reading,synthetic):
         result='PASS' if p['low']<=reading<=p['high'] else 'FAIL'
         self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'))
