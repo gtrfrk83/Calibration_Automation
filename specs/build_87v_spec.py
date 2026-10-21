@@ -154,7 +154,7 @@ def build(mdd: Path):
     h = parsed['header']
     return dict(
         schema=2, kind='manual-reading',
-        options=dict(hookup_meter='fluke87v', hv_threshold_v=60),
+        options=dict(hookup_meter='fluke87v', hv_threshold_v=60, auto_ramp=False),
         source=dict(document='Fluke 87 Series V Multimeter - Cal Processor datasheet ' + (h.get('Procedure_Name') or 'ATS-1040').strip() + ' (365 days)',
                     pages='MDD points 1-51', cite='Fluke 87 Series V calibration datasheet (MDD), 365 day interval',
                     limits='Limits as printed in the MDD datasheet (365 day)',

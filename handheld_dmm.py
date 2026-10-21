@@ -118,7 +118,8 @@ class Cancelled(Exception):
 
 class IO:
     """The calibrator: set the output for a point, confirm it was accepted, and never leave it energised."""
-    RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the manual's "ramp up in 50 V increments, 5 s apart"
+    RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the 110-series manual's "ramp up in 50 V increments, 5 s apart"
+    auto_ramp = True                                          # off when the spec says options.auto_ramp = false (e.g. 87V)
 
     def __init__(self, model_name, address, baud=9600, transport=None):
         self.log = drivers.CommandLog()
@@ -168,7 +169,7 @@ class IO:
         steps = [v]
         if ramp:                                   # a ramp the meter's manual prescribes (e.g. 60 V then 120 V)
             steps = [float(x) for x in ramp]
-        elif abs(v) > self.RAMP_ABOVE:
+        elif self.auto_ramp and abs(v) > self.RAMP_ABOVE:
             n = int(abs(v) // self.RAMP_STEP)
             steps = [math.copysign(self.RAMP_STEP * i, v) for i in range(1, n + 1)]
             if abs(steps[-1]) < abs(v):
@@ -725,6 +726,7 @@ class App:
             self.io = self.io_factory()
         else:
             self.io = IO(self.cal_mode.get(), self._address(), int(self.cal_baud.get()))
+        self.io.auto_ramp = self._auto_ramp()
         self._set_conn(True)
         self._save_settings()
 
@@ -869,6 +871,9 @@ class App:
         caution = None if p['group'] == 'NONE' else 'Continue only after physically verifying the connections.'
         return ui.confirm_steps(self.root, 'Check the setup', f'Set up for {p["section"]}', steps, facts=facts, caution=caution, ok='Done - continue')
 
+    def _auto_ramp(self):
+        return self.spec.get('options', {}).get('auto_ramp', True)
+
     def _high_voltage(self, p):
         a = p.get('applied')
         threshold = self.spec.get('options', {}).get('hv_threshold_v', 500)
@@ -941,7 +946,8 @@ class App:
             return
         if self._high_voltage(p):
             if not messagebox.askyesno('HIGH VOLTAGE', f'This point outputs {abs(p["applied"]["value"]):g} V'
-                                       + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal else '') +
+                                       + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and self._auto_ramp()
+                                          and not p.get('ramp') and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
                                        '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False
                 self.status.set('Stopped before a high-voltage point.')

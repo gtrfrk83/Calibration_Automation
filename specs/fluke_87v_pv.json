@@ -3,7 +3,8 @@
  "kind": "manual-reading",
  "options": {
   "hookup_meter": "fluke87v",
-  "hv_threshold_v": 60
+  "hv_threshold_v": 60,
+  "auto_ramp": false
  },
  "source": {
   "document": "Fluke 87 Series V Multimeter - Cal Processor datasheet ATS-1040 (365 days)",
