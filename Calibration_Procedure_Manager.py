@@ -230,10 +230,10 @@ class Manager:
             self.status.set('Register the instruments you calibrate, assign a procedure, and launch it from here.')
         elif tab is self.history_frame:
             self.history_panel.refresh()
+            self.status.set('Every exported PDF report is recorded here. Double-click a test point to see its drift across reports.')
         elif tab is self.specs_frame:
             self.specs_panel.refresh()
             self.status.set('Published specifications of the calibrators used as standards; they set the lowest uncertainty that may be reported.')
-            self.status.set('Every exported PDF report is recorded here. Double-click a test point to see its drift across reports.')
         elif tab is self.datasheets_frame:
             self.status.set('Import Cal Processor .MDD datasheets as read-only templates.')
         else:
