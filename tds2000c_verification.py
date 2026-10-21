@@ -409,7 +409,12 @@ class Runner:
             measured = scope.measure('PK2pk', ch)
             if low <= measured <= high:
                 return vpp, measured
-            vpp = vpp * target_pp / measured
+            nxt = vpp * target_pp / max(measured, 1e-9)
+            if nxt > SOURCE_LIMITS['vpp_max'] or nxt < 0.5 * vpp / 10:
+                raise drivers.InstrumentError(
+                    f'CH{ch} reads {measured:.4g} V p-p with the calibrator at {vpp:g} V p-p, {hz:g} Hz (wanted {low:g} to {high:g} V). '
+                    f'Reaching it would need {nxt:g} V p-p, so the run stops: check the cable/terminator, the scope channel, and that the calibrator output is on')
+            vpp = nxt
         raise drivers.InstrumentError(f'Could not set the scope reading to {low:g}-{high:g} V p-p at {hz:g} Hz (last: {measured:g} V from {vpp:g} V p-p source)')
 
     # ---- self test / self calibration -----------------------------------------------------------------------------------------------
