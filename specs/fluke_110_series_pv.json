@@ -1,6 +1,6 @@
 {
  "schema": 2,
- "options": {"hookup_meter": "fluke110"},
+ "options": {"hookup_meter": "fluke110", "auto_ramp": false},
  "kind": "manual-reading",
  "source": {
   "document": "Fluke 110/113/114/115/116/117 True-rms Multimeter - Calibration Information",

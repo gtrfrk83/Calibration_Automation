@@ -158,8 +158,9 @@ specs/fluke_110_series_pv.json
 Procedures/Fluke_110_Verification.py ... Fluke_117_Verification.py   one launcher per model (28 / 25 / 31 / 35 / 41 / 40 points).
                   Demo with:  python Procedures/Fluke_117_Verification.py --demo
 Safety: calibrator to STANDBY before every setup and after every reading; error queue read after every programmed output
-and the output is never enabled after a rejection; voltages above 100 V are ramped in 50 V steps 5 s apart (the 110-series
-manual's footnote; a spec can turn this off with options.auto_ramp = false, as the Fluke 87V spec does); wiring confirmation when the connection changes; extra confirmation at 500 V and above.
+and the output is never enabled after a rejection; high voltages go straight to the test value; the old 50 V steps 5 s apart (110-series
+manual footnote) are off in every handheld spec via options.auto_ramp = false (set true to bring it back);
+per-point ramps in a spec, such as the 287/289 60 V then 120 V step, still run; wiring confirmation when the connection changes; extra confirmation at 500 V and above.
 Not verified on real hardware: capacitance (OUT <n>NF/UF), thermocouple simulation (TC_TYPE K / OUT <t>CEL) and 10 A / uA
 outputs. If the calibrator rejects a command the run stops with its error text; use Manual mode for that point.
 The report's uncertainty comes from the scope's Generate entries; points the scope does not cover (temperature, display
