@@ -52,6 +52,12 @@ class ScpiDmm(Instrument):
     def configure_frequency(self):
         self.write('CONF:FREQ')
 
+    def check_errors(self, context: str = ''):
+        """SYST:ERR? (read-only). Raises if the meter's error queue is not empty, so a rejected command stops the run."""
+        reply = self.query('SYST:ERR?').strip()
+        if reply.split(',')[0].strip() not in ('0', '+0', '-0'):
+            raise InstrumentError(f'{self.MODEL} reported an error{" after " + context if context else ""}: {reply}')
+
     def read(self) -> float:
         """READ? -> first field as a float; rejects non-finite or overload (9.9E37) values."""
         raw = self.query('READ?').strip().split(',')[0]
@@ -65,6 +71,15 @@ class Fluke8846A(ScpiDmm):
     MODEL = 'Fluke 8846A'
     IDN_MATCH = ('8846',)
 
+
+    def configure_frequency_point(self, voltage_range: float):
+        """CONF:FREQ, 3 Hz low-frequency limit, 1 s gate, input voltage range (same sequence as the Keysight
+        procedures). UNVERIFIED on the 8846A: the commands are the 34401A / Truevolt set; the caller checks
+        SYST:ERR? afterwards so a rejection stops the run."""
+        self.write('CONF:FREQ')
+        self.write('FREQ:RANG:LOW 3')
+        self.write('FREQ:APER 1')
+        self.write(f'FREQ:VOLT:RANG {voltage_range:g}')
 
     def set_ac_filter(self, hz: float = 3.0):
         """DET:BAND <hz> (3, 20 or 200), then read it back with DET:BAND? and compare. UNVERIFIED on hardware:

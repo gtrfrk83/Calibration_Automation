@@ -88,6 +88,7 @@ class IO:
     # (cable capacitance x MOhm) and for the high current points, so READ? caught the output mid-settle.
     # Now: a minimum wait that scales with the point, then READ? repeated (read-only query) until
     # STABLE_COUNT consecutive readings agree within STABLE_FRACTION of the tolerance band.
+    FREQ_LEVEL_V=1.0     # 1 V rms source level for every frequency point (technician's choice; not from the manual)
     STABLE_COUNT=3
     STABLE_FRACTION=0.10
     READ_INTERVAL=0.5
@@ -109,10 +110,12 @@ class IO:
             if v>=1:return 4.0         # 1 A to 10 A: shunt / lead thermal settling
             if r<=1e-3:return 4.0      # 100 uA / 1 mA ranges: slow, high-impedance
             return 3.0
-        return 8.0 if k=='ACV' else 3.5 if k.startswith('AC') else 2.0   # ACV: 3 Hz filter settling, ~7 s per reading
+        if k=='FREQ':return 3.0        # 1 s gate
+        if k=='CAP':return 8.0 if r>=1e-3 else 3.0
+        return 8.0 if k in ('ACV','ACI') else 2.0   # AC: 3 Hz filter settling, ~7 s per reading
     @classmethod
     def settle_timeout(cls,p):
-        if p['kind']=='ACV':return 90.0         # 3 Hz filter: several 7 s readings
+        if p['kind'] in ('ACV','ACI'):return 90.0         # 3 Hz filter: several 7 s readings
         if p.get('zero_offset'):return 15.0     # tiny tolerance band: don't let meter noise stall 27 zero points for 30 s each
         return max(30.0,cls.settle(p)*4)
     def settled_read(self,p,min_wait):
@@ -140,22 +143,24 @@ class IO:
             # input. The 5560A must remain in STBY and is never used as a zero source.
             self.dmm.configure(k,r)
             return self.settled_read(p,max(1.5,self.settle(p)-1.0))
-        if k in ('CAP','FREQ'):
-            raise RuntimeError(f'{k} source/measurement commands must be verified at the lab before enabling hardware automation. Point is retained for guided review.')
         if k in ('DCV','ACV','DCI','ACI'):
             self.dmm.configure(k,r)
-            if k=='ACI':
-                raise RuntimeError('AC filter and Fluke source setup must be lab-verified before automatic output is enabled.')
-            if k=='ACV':
+            if k in ('ACV','ACI'):
                 self.dmm.set_ac_filter(3)     # slow 3 Hz filter, set by the program (read back and compared); no manual step
             if k.endswith('V'):self.fluke.set_output_volts(v,f)
             else:self.fluke.set_output_amps(v,f)
         elif k in ('OHM2','OHM4'):
             self.dmm.configure(k,r)
             self.fluke.set_output_ohms(v)
-        else:
-            self.dmm.configure_frequency()
-            self.fluke.set_output_volts(p["amplitude"],f)
+        elif k=='CAP':
+            self.dmm.configure(k,r)
+            self.fluke.set_output_capacitance(v)
+        else:                                  # FREQ: nominal is the frequency, range is the meter's voltage range
+            self.dmm.configure_frequency_point(r)
+            self.fluke.set_output_volts(self.FREQ_LEVEL_V,v)
+        if k in ('FREQ','CAP','ACI'):          # newly automated and unverified: a rejected command must stop the run
+            self.dmm.check_errors('configuring '+p['description'])
+            self.fluke.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
         self.fluke.operate_unverified()
         try:
             reading=self.settled_read(p,self.settle(p))

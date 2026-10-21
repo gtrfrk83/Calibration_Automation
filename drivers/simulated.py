@@ -238,6 +238,10 @@ class SimDmmTransport(_SimBase):
             return f"{f['volts'] * 1.000002:+.9E}"
         if u == 'READ?':
             f = self.bench.fluke
+            if f['operate'] and self.function.startswith('FREQ'):
+                return f"{f['freq'] * 1.0000002:+.9E}"
+            if f['operate'] and self.function.startswith('CAP'):
+                return f"{f['volts'] * {'NF': 1e-9, 'UF': 1e-6}.get(f.get('unit'), 1.0) * 1.00002:+.9E}"
             return f"{(f['volts'] * 1.00002 if f['operate'] else 1.2e-7):+.9E}"
         raise TransportError(f'simulated DMM: unknown command {cmd!r}')
 
