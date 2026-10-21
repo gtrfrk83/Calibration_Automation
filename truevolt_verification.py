@@ -124,8 +124,8 @@ class IO(procmods_engine.ProcModsMixin):
             time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.manual', 2.0))
             return self.dmm.read()
         k, v, f = p['kind'], p['nominal'], p.get('frequency')
-        if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f)
-        elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f)
+        if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f, dc=k == 'DCV')
+        elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f, dc=k == 'DCI')
         elif k in ('OHM2', 'OHM4'): self.cal.set_output_ohms(v)
         elif k == 'FREQ': self.cal.set_output_volts(p['amplitude'], v)
         self.cal.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
