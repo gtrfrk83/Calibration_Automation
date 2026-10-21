@@ -116,7 +116,7 @@ class RMSNoiseApp:
     def __init__(self, root):
         self.root = root
         ui.apply_theme(root)
-        root.title('WaveSurfer 4104HD | Calibration Verification v51')
+        root.title('WaveSurfer 4104HD | Calibration Verification v52')
         ui.fit_window(root, 1300, 880, min_w=1020, min_h=640)
         self.events = queue.Queue()
         self.stop_event = threading.Event()
@@ -377,7 +377,7 @@ class RMSNoiseApp:
         self._idle = 0
         self._shown = None
         self._last_status = {}
-        ui.StatusBar(root, self.msg, right='v51').pack(side='bottom', fill='x')
+        ui.StatusBar(root, self.msg, right='v52').pack(side='bottom', fill='x')
         body = ttk.Frame(root, padding=(18, 14, 18, 10))
         body.pack(fill='both', expand=True)
         top = ttk.Frame(body)
@@ -1540,8 +1540,9 @@ class RMSNoiseApp:
             fluke, scope = self.open_bench(fluke_addr, baud, scope_addr, log)
             stage = 'Fluke serial open / identity'
             fluke.open()
-            stage = 'scope USB open'
+            stage = 'scope USB open and read-only handshake'
             scope.open()
+            scope.handshake()
             ch, scale, nominal = point['channel'], point['scale_v_div'], point['nominal_v']
             # Configure the scope before energizing the calibrator output.
             stage = 'scope vertical scale write / readback'
@@ -1580,6 +1581,7 @@ class RMSNoiseApp:
         try:
             _f,scope=self.open_bench(None,0,self.visa_address.get().strip(),log)
             scope.open()
+            scope.handshake()
             ch=point['channel']
             scope.set_vertical_scale(ch,point['scale_v_div'],settle=0.0)
             scope.configure_dc_input(ch)

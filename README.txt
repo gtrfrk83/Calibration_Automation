@@ -12,7 +12,7 @@ Folder layout (same as before, plus one new file):
       Fluke_8846A_Verification.py    v58
       Fluke_8846A_Adjustment.py      v57
       Fluke_87V.py                   v52
-      WaveSurfer_WS4104HD.py         v51
+      WaveSurfer_WS4104HD.py         v52
 
 Install: copy these files over the old ones (keep your calibration_procedures.sqlite3,
 Backups\ and any checkpoint files). The database layout is unchanged.
@@ -45,6 +45,11 @@ tolerance used; 'Open report PDF' opens the saved file. The Instruments tab gain
 interval entered for that instrument; overdue rows are red). Demo reports are never recorded; exporting the same file again replaces its record.
 Launching a procedure from the Instruments tab now fills in the Instrument ID, and typing a known ID fills an empty Serial number and shows
 the last report / next due date in the status bar.
+
+WaveSurfer v52: the scope now waits 0.4 s after each coupling and bandwidth-limit change before its next command (a query sent
+immediately after the relay change could leave the USB session stuck with VI_ERROR_IO while the scope itself kept working).
+If a read-only scope query still fails, the session gets a device clear before the 2nd try and is closed and reopened before
+the 3rd; both steps appear in the command log. Writes are never repeated. Commands, limits, pass/fail and safety prompts are unchanged.
 
 WaveSurfer results are now saved per Instrument ID (dcv_checkpoint_v6_<ID>.json etc., like the other procedures). Press Enter or leave
 the Instrument ID box to switch to that instrument's saved results; Run Pending, Rerun, Clear and the exports do this first, so a report
