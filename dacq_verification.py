@@ -156,8 +156,8 @@ class IO:
             self.dmm.check_errors('reading ' + p['description'])
             return reading
         k, v, f = p['kind'], p['nominal'], p.get('frequency')
-        if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f)
-        elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f)
+        if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f, dc=k == 'DCV')
+        elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f, dc=k == 'DCI')
         elif k in ('OHM2', 'OHM4'): self.cal.set_output_ohms(v)
         elif k == 'FREQ': self.cal.set_output_volts(p['amplitude'], v)
         self.cal.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
