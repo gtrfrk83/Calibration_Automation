@@ -158,9 +158,12 @@ def parse_out_reply(reply):
             freq = float(parts[2]) * mult
         else:
             raise ValueError
-        if parts[1] not in ('V', 'MV'):
+        unit = parts[1]                                   # the 5560A answers a leveled sine as '3.000E+00,VPP,0E+00,0,5.0E+04'
+        if unit.endswith('PP'):
+            unit = unit[:-2]
+        if unit not in ('V', 'MV'):
             raise ValueError
-        return amp * (1e-3 if parts[1] == 'MV' else 1.0), freq
+        return amp * (1e-3 if unit == 'MV' else 1.0), freq
     except (ValueError, KeyError, IndexError):
         raise drivers.InstrumentError(f'Unexpected calibrator OUT? reply {reply!r}')
 
