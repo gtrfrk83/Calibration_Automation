@@ -38,6 +38,15 @@ for kind, block in TEST_TABLES.items():
         POINTS[-1]['zero_offset']=(nominal==0 and kind in ('DCV','DCI','OHM4','OHM2','CAP'))
         POINTS[-1]['terminal']='FRONT'
         POINTS[-1]['source']='Fluke Calibration Manual Appendix A, Table A-2 (1-year)'
+# All zero-offset points form ONE block at the start of the run (one section in the list and the report).
+# Shorted-input zeros first, then the open-input ones (DCI, CAP), so the technician fits each fixture once.
+# Point ids are left unchanged so existing checkpoint files still match their points.
+_ZERO_ORDER={'DCV':0,'OHM2':1,'OHM4':2,'DCI':3,'CAP':4}
+def setup_key(p):
+    """What the technician must have connected: one key for the whole zero block's shorted inputs, one for open inputs."""
+    if p.get('zero_offset'):return 'ZERO_OPEN' if p['kind'] in ('DCI','CAP') else 'ZERO_SHORT'
+    return p['wiring']
+POINTS.sort(key=lambda q:(0,_ZERO_ORDER[q['kind']]) if q.get('zero_offset') else (1,0))   # stable: gain points keep their order
 # The manual also specifies optional DC ratio, rear-terminal and split-lead tests.
 # Those require distinct setups/measurement commands and are not executed here.
 
@@ -74,6 +83,54 @@ class IO:
             with open(folder/'command_log.txt','a',encoding='utf-8') as f:
                 f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  8846A session\n'+'\n'.join(self.log.lines())+'\n')
         except OSError:pass
+    # ---- settling --------------------------------------------------------------------------------
+    # A flat 2 s after OPER was too short for the 5560A to ramp to 100 V / 1000 V, for high resistance
+    # (cable capacitance x MOhm) and for the high current points, so READ? caught the output mid-settle.
+    # Now: a minimum wait that scales with the point, then READ? repeated (read-only query) until
+    # STABLE_COUNT consecutive readings agree within STABLE_FRACTION of the tolerance band.
+    STABLE_COUNT=3
+    STABLE_FRACTION=0.10
+    READ_INTERVAL=0.5
+    @staticmethod
+    def settle(p):
+        """Minimum wait in seconds before the first reading is considered."""
+        k,r,v=p['kind'],p['range'],abs(p['nominal'])
+        if k in ('OHM2','OHM4'):
+            if r>=1e9:return 15.0
+            if r>=1e8:return 10.0
+            if r>=1e7:return 6.0
+            if r>=1e6:return 4.0
+            return 3.0
+        if k=='DCV':
+            if v>=500:return 6.0       # 5560A high-voltage ramp
+            if v>=50:return 4.0
+            return 2.5
+        if k=='DCI':
+            if v>=1:return 4.0         # 1 A to 10 A: shunt / lead thermal settling
+            if r<=1e-3:return 4.0      # 100 uA / 1 mA ranges: slow, high-impedance
+            return 3.0
+        return 3.5 if k.startswith('AC') else 2.0
+    @classmethod
+    def settle_timeout(cls,p):
+        if p.get('zero_offset'):return 15.0     # tiny tolerance band: don't let meter noise stall 27 zero points for 30 s each
+        return max(30.0,cls.settle(p)*4)
+    def settled_read(self,p,min_wait):
+        """Wait min_wait, then READ? until the last STABLE_COUNT readings agree within the
+        stability window. On timeout the last reading is returned (as before) and a note is logged."""
+        time.sleep(min_wait)
+        window=max(p['high']-p['low'],0.0)*self.STABLE_FRACTION
+        end=time.monotonic()+self.settle_timeout(p)
+        history=[]
+        while True:
+            history.append(self.dmm.read())
+            recent=history[-self.STABLE_COUNT:]
+            if len(recent)==self.STABLE_COUNT and max(recent)-min(recent)<=window:
+                return history[-1]
+            if time.monotonic()>end:
+                self.log.add('NOTE',f'reading did not settle within {self.settle_timeout(p):g} s '
+                             f'(last {len(recent)}: {", ".join(f"{x:.9g}" for x in recent)}); last reading used','8846A')
+                return history[-1]
+            time.sleep(self.READ_INTERVAL)
     def measure(self,p):
         k=p['kind'];v=p['nominal'];r=p['range'];f=p['frequency']
         self.standby()
@@ -81,8 +138,7 @@ class IO:
             # Zero-offset verification requires a physical copper short or OPEN current
             # input. The 5560A must remain in STBY and is never used as a zero source.
             self.dmm.configure(k,r)
-            time.sleep(1.5)
-            return self.dmm.read()
+            return self.settled_read(p,max(1.5,self.settle(p)-1.0))
         if k in ('CAP','FREQ'):
             raise RuntimeError(f'{k} source/measurement commands must be verified at the lab before enabling hardware automation. Point is retained for guided review.')
         if k in ('DCV','ACV','DCI','ACI'):
@@ -98,9 +154,10 @@ class IO:
             self.dmm.configure_frequency()
             self.fluke.set_output_volts(p["amplitude"],f)
         self.fluke.operate_unverified()
-        time.sleep(3.5 if k.startswith('AC') else 2)
-        reading=self.dmm.read()
-        self.standby()
+        try:
+            reading=self.settled_read(p,self.settle(p))
+        finally:
+            self.standby()               # output to standby even if a read fails
         return reading
 
 class App:
@@ -230,7 +287,7 @@ class App:
 
     @staticmethod
     def _section(p):
-        return 'ZERO '+p['terminal'] if p.get('zero_offset') else p['kind']
+        return 'ZERO OFFSET' if p.get('zero_offset') else p['kind']
 
     def _visible(self,p):
         res=self.results.get(str(p['id']),{}).get('result','')
@@ -345,7 +402,7 @@ class App:
         if i>=len(points) or self.stop:
             self.busy=False;self.save();self.status.set('Run stopped by the operator. Progress is saved.' if self.stop else 'Run complete. Save progress or export a report.');return
         p=points[i]
-        if p['wiring']!=previous:
+        if setup_key(p)!=previous:
             if not self.demo and p.get('zero_offset'):
                 self.io.standby()
                 location=p['terminal']
@@ -383,7 +440,7 @@ class App:
         if self.demo:
             # Synthetic reading explicitly labeled; deterministic for reproducibility.
             reading=(p['low']+p['high'])/2+(p['high']-p['low'])/2*math.sin(p['id']*1.71)*0.38
-            self._record(p,reading,True);self.root.after(50,lambda:self._next(points,i+1,p['wiring']))
+            self._record(p,reading,True);self.root.after(50,lambda:self._next(points,i+1,setup_key(p)))
         else:
             def work():
                 try:
@@ -396,7 +453,7 @@ class App:
             threading.Thread(target=work,daemon=True).start()
     def _done(self,points,i,p,reading):
         self._record(p,reading,False)
-        self.root.after(50,lambda:self._next(points,i+1,p['wiring']))
+        self.root.after(50,lambda:self._next(points,i+1,setup_key(p)))
     def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));messagebox.showerror('Measurement stopped',str(exc))
     def _record(self,p,reading,synthetic):
         result='PASS' if p['low']<=reading<=p['high'] else 'FAIL'
