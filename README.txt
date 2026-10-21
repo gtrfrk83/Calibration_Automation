@@ -135,14 +135,14 @@ checks) show N/A. Fuse test and battery replacement (p. 2-4) are not points.
 
 PDF reports
 -----------
-report_pdf.py writes the 'Calibration Data' report: header strip (instrument, ID, serial, date), an overall PASS / OUT OF TOLERANCE verdict listing any out-of-tolerance points, a
-'Standards used' block, the table grouped by section (Description, Nominal, Tolerance -/+, UOM, As Found, OOT,
-As Left, Uncertainty) with shaded rows and red-tinted OOT rows, a Performed by / Reviewed by / Date block, and
-'Page x of y' plus the instrument ID on every page. Demo data gets a diagonal watermark.
+report_pdf.py writes the 'Calibration Data' report: header strip (instrument, ID, serial, date), an overall PASS / OUT OF TOLERANCE verdict
+listing any out-of-tolerance points, the table grouped by section (Description, Nominal, Tolerance -/+, UOM, As Found, OOT,
+As Left, Uncertainty) with shaded rows and red-tinted OOT rows, and 'Page x of y' plus the instrument ID on every page. Demo data gets a diagonal watermark.
 report_dialog.py asks for technician, temperature, humidity and up to three standards (remembered between runs).
 The DMM procedures and the WaveSurfer have an 'Export Report (PDF)' button.
 Header: Instrument, Instrument ID, Serial and report date only. Limits applied, Source, Procedure, Technician, Temperature and
-Humidity are on the lab's cover certificate, so they are left off (report_pdf.HEADER_HIDDEN); they are still saved in the asset history.
+Humidity are on the lab's cover certificate, so they are left off (report_pdf.HEADER_HIDDEN); so are the standards used and the
+Performed by / Reviewed by / Date block. Everything entered in the report dialog is still saved in the asset history.
 Needs reportlab:  py -m pip install reportlab   (embeds Arial when present so the micro sign always prints).
 As Left shows 'Same' (no adjustment made). Uncertainty is blank until per-range uncertainties are supplied.
 

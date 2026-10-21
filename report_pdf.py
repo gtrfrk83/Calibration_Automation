@@ -4,8 +4,8 @@
     write_calibration_pdf('report.pdf', rows, header=[('Instrument', 'WaveSurfer 4104HD'), ('Instrument ID', 'A123')],
                           details=report_dialog.ask_details(root))
 
-Layout: title, header strip, overall verdict, standards used, grouped table (shaded rows, out-of-tolerance rows tinted
-red), signature block, 'Page x of y' with the instrument ID on every page.  Needs reportlab (py -m pip install reportlab).
+Layout: title, header strip, overall verdict, grouped table (shaded rows, out-of-tolerance rows tinted red),
+'Page x of y' with the instrument ID on every page.  Needs reportlab (py -m pip install reportlab).
 """
 from __future__ import annotations
 
@@ -165,6 +165,7 @@ def cert_row(description, nominal, low, high, unit, reading=None, failed=False, 
 
 # Shown on the lab's cover certificate instead, so left off this report. They are still passed in (and kept in the asset history).
 HEADER_HIDDEN = {'Limits applied', 'Source', 'Procedure', 'Technician', 'Temperature', 'Humidity'}
+# The standards-used table and the Performed by / Reviewed by / Date block are on the cover certificate too, so they are not drawn.
 
 
 def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note=''):
@@ -227,16 +228,7 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
             story.append(Paragraph(f'RESULT: PASS — all {total} points within tolerance', verdict_pass))
         story.append(Spacer(1, 6))
 
-    # ---- standards used -------------------------------------------------------------------------------
-    standards = [s for s in details.get('standards', []) if any(s.get(k) for k in ('description', 'serial', 'due'))]
-    if standards:
-        story.append(Paragraph('<b>Standards used</b>', meta))
-        srows = [[Paragraph(h, head_style) for h in ('Standard', 'Serial number', 'Calibration due')]]
-        srows += [[Paragraph(clean(s.get('description')), small), Paragraph(clean(s.get('serial')), small), Paragraph(clean(s.get('due')), small)] for s in standards]
-        st = Table(srows, colWidths=[3.4 * inch, 2.0 * inch, 1.6 * inch], hAlign='LEFT')
-        st.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, 0), 0.6, colors.black), ('TOPPADDING', (0, 0), (-1, -1), 1.2),
-                                ('BOTTOMPADDING', (0, 0), (-1, -1), 1.2), ('LEFTPADDING', (0, 0), (-1, -1), 3)]))
-        story += [st, Spacer(1, 8)]
+    # Standards used and the signature block are on the lab's cover certificate, so they are not printed here.
 
     # ---- table with section headings ------------------------------------------------------------------
     right = {'Nominal', 'Tolerance -', 'Tolerance +', 'As Found', 'Uncertainty'}
@@ -284,16 +276,6 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     story.append(table)
     if footer_note:
         story += [Spacer(1, 8), Paragraph(clean(footer_note), meta)]
-
-    # ---- signature block ------------------------------------------------------------------------------
-    line = '_' * 34
-    sig = Table([[Paragraph('Performed by', small), Paragraph('Reviewed by', small), Paragraph('Date', small)],
-                 [Paragraph(f'{clean(details.get("technician"))}<br/>{line}' if details.get('technician') else line, small),
-                  Paragraph(line, small), Paragraph('_' * 20, small)]],
-                colWidths=[2.6 * inch, 2.6 * inch, 1.8 * inch], hAlign='LEFT')
-    sig.setStyle(TableStyle([('TOPPADDING', (0, 0), (-1, -1), 2), ('LEFTPADDING', (0, 0), (-1, -1), 0), ('VALIGN', (0, 1), (-1, 1), 'BOTTOM'),
-                             ('BOTTOMPADDING', (0, 0), (-1, 0), 14)]))
-    story.append(KeepTogether([Spacer(1, 22), sig]))
 
     # ---- page furniture -------------------------------------------------------------------------------
     class Numbered(rl_canvas.Canvas):
