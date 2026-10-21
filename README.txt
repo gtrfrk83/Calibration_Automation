@@ -12,7 +12,7 @@ Folder layout (same as before, plus one new file):
       Fluke_8846A_Verification.py    v58
       Fluke_8846A_Adjustment.py      v57
       Fluke_87V.py                   v52
-      WaveSurfer_WS4104HD.py         v53
+      WaveSurfer_WS4104HD.py         v54
 
 Install: copy these files over the old ones (keep your calibration_procedures.sqlite3,
 Backups\ and any checkpoint files). The database layout is unchanged.
@@ -45,6 +45,9 @@ tolerance used; 'Open report PDF' opens the saved file. The Instruments tab gain
 interval entered for that instrument; overdue rows are red). Demo reports are never recorded; exporting the same file again replaces its record.
 Launching a procedure from the Instruments tab now fills in the Instrument ID, and typing a known ID fills an empty Serial number and shows
 the last report / next due date in the status bar.
+
+WaveSurfer v54: the time base test stopped at 'P1 engine Frequency, expected Freq'. The 4104HD reports the frequency
+  measurement by its long name; 'Frequency' is now accepted, as 'PeakToPeak' already was for PkPk. Nothing else changed.
 
 WaveSurfer v53: two new functions in the results table, with limits from the HAZ-OSC-02 data sheet (pages 10-11, read from the page images).
   Time base (1 point): Fluke 5560A SCOPE MARKER into CH1 at DC 50 Ohm, scope P1 Freq averaged; frequency error limit +/-0.350 Hz. The marker
