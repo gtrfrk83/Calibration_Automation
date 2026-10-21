@@ -135,8 +135,7 @@ checks) show N/A. Fuse test and battery replacement (p. 2-4) are not points.
 
 PDF reports
 -----------
-report_pdf.py writes the 'Calibration Data' report: header strip (instrument, ID, serial, procedure, technician,
-temperature, humidity, date), an overall PASS / OUT OF TOLERANCE verdict listing any out-of-tolerance points, a
+report_pdf.py writes the 'Calibration Data' report: header strip (instrument, ID, serial, date), an overall PASS / OUT OF TOLERANCE verdict listing any out-of-tolerance points, a
 'Standards used' block, the table grouped by section (Description, Nominal, Tolerance -/+, UOM, As Found, OOT,
 As Left, Uncertainty) with shaded rows and red-tinted OOT rows, a Performed by / Reviewed by / Date block, and
 'Page x of y' plus the instrument ID on every page. Demo data gets a diagonal watermark.
