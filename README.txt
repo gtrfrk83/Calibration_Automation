@@ -1,4 +1,4 @@
-CALIBRATION SUITE - restyled (Manager v66)
+CALIBRATION SUITE - restyled (Manager v67)
 ==========================================
 
 Folder layout (same as before, plus one new file):
@@ -222,7 +222,9 @@ Procedures/Keysight_33210A_Verification.py, Agilent_33220A_Verification.py, Agil
   33210A / 33220A timebase is +/-100 Hz at 90 days and +/-200 Hz at 1 year, the 33250A +/-20 Hz.
   Instruments: the generator (USB / GPIB / LAN; RS-232 on the 33250A), a Fluke 5790B (GPIB, USB, LAN or RS-232) for AC amplitude
   and low-frequency flatness in place of the 3458A the manual lists, a frequency counter, and for flatness either the 5790B
-  WIDEBAND input or an RF power meter with sensor and a -20 dB attenuator. Leave the counter or power meter address blank to type
+  WIDEBAND input or an RF power meter with sensor and a -20 dB attenuator. A 53131A / 53132A counter is recognised from *IDN?
+  and set up by the program (drivers/keysight_5313x.py: channel 1, 50 ohm, AC, 1 s gate, expected frequency, each read back);
+  the timebase result records which counter and which timebase (internal / external Ref In) were used. Leave the counter or power meter address blank to type
   its readings when asked.
   Flatness method ('Flatness with', 33210A and 33220A; default 5790B wideband): the 5790B WIDEBAND input (option /3, /5 or /AF,
   50 ohm, up to 7 V) measures each point directly relative to 1 kHz at the same dBm setting with the range locked:
@@ -246,5 +248,6 @@ Procedures/Keysight_33210A_Verification.py, Agilent_33220A_Verification.py, Agil
   prompt when present.
   NOT verified on real hardware: every command in drivers/fluke_5790b.py and drivers/keysight_332xx.py (taken from the manuals; the
   WBAF? reply format is not documented - the manual has no detail page for it), the
-  counter and power-meter queries (drivers.ReferenceMeter: MEASure:FREQuency? and MEASure:POWer?, no manuals supplied), and the
+  power-meter query (drivers.ReferenceMeter: MEASure:POWer?, no manual supplied), any counter other than a 53131A / 53132A
+  (generic MEASure:FREQuency?), and the
   33250A RS-232 line endings. Run demo mode and the simulated bench (drivers/simulated_fgen.py) first.

@@ -192,12 +192,24 @@ class IO:
             self.uut.connect()
             self.std = drivers.Fluke5790B(tr('std', **self._serial(addrs, 'std')), self.log, label='5790B')
             self.std.connect()
-            for key, label in (('counter', 'Counter'), ('power', 'PowerMeter')):
-                if key in t or (addrs.get(key) or '').strip():
-                    inst = drivers.ReferenceMeter(tr(key), self.log, label=label); inst.connect(); setattr(self, key, inst)
+            if 'counter' in t or (addrs.get('counter') or '').strip():
+                self.counter = self._connect_counter(tr)
+            if 'power' in t or (addrs.get('power') or '').strip():
+                self.power = drivers.ReferenceMeter(tr('power'), self.log, label='PowerMeter'); self.power.connect()
         except Exception:
             self.close(); raise
         self.ident = self.uut.idn
+
+    def _connect_counter(self, tr):
+        """A 53131A / 53132A gets its own driver (input, gate and reference set and read back); any other counter is used
+        through the generic ReferenceMeter (MEASure:FREQuency?), with its input set up by the technician."""
+        try:
+            return drivers.Keysight5313x(tr('counter'), self.log, label='Counter').connect()
+        except drivers.InstrumentError as exc:
+            if 'Expected' not in str(exc):
+                raise
+        meter = drivers.ReferenceMeter(tr('counter'), self.log, label='Counter'); meter.connect()
+        return meter
 
     @staticmethod
     def _serial(addrs, key):
@@ -246,13 +258,19 @@ class IO:
             raise drivers.InstrumentError('Reading not entered; run stopped.')
         return float(v)
 
-    def _frequency(self):
-        if self.counter:
-            f = self.counter.frequency()
-            if not 1e6 < f < 1e8:
-                raise drivers.InstrumentError(f'Counter reads {f:g} Hz: check the cable and the counter input (50 ohm, channel 1).')
-            return f
-        return self._manual('Read the frequency counter (generator: 10 MHz sine, 1 Vpp).', 'Hz')
+    def _frequency(self, expected_hz):
+        """Returns (Hz, raw). A 53131A / 53132A is set to channel 1, 50 ohm, AC coupled, 1 s gate, expected frequency."""
+        if self.counter is None:
+            return self._manual('Read the frequency counter (generator: 10 MHz sine, 1 Vpp).', 'Hz'), dict(counter='typed')
+        raw = {}
+        if isinstance(self.counter, drivers.Keysight5313x):
+            self.counter.configure_frequency(channel=1, gate_s=1.0, impedance=50, coupling='AC', expected_hz=expected_hz)
+            src, auto = self.counter.reference()
+            raw = dict(counter=self.counter.idn.split(',')[1].strip(), reference=src + (' (auto)' if auto else ''), gate_s=1.0)
+        f = self.counter.frequency()
+        if not 1e6 < f < 1e8:
+            raise drivers.InstrumentError(f'Counter reads {f:g} Hz: check the cable and the counter input (50 ohm, channel 1).')
+        return f, raw
 
     def _power(self, what):
         if self.power:
@@ -282,7 +300,7 @@ class IO:
             return (0 if passed else 1), dict(detail=detail)
         if k == 'TIMEBASE':
             self._out(p)
-            return self._frequency(), {}
+            return self._frequency(p['frequency'])
         if k in ('ACAMP', 'LFFLAT'):
             self.std.select_input(self.std_input)
             self.std.set_external_trigger(True)
@@ -425,9 +443,12 @@ def certificate_rows(results):
 class App:
     WIRING = {
         'NONE': ('Self-test', [('Disconnect', 'Remove any cable from the generator OUTPUT. No connections are needed for the self-test.')]),
-        'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter input with a 50 ohm BNC cable.'),
-                                                      ('Counter', 'Counter input terminated at 50 ohm (manual step 1). Use an external reference '
-                                                                  'on the counter if it has one.')]),
+        'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter channel 1 input with a 50 ohm BNC cable.'),
+                                                      ('Counter', '53131A / 53132A: the program sets channel 1 to 50 ohm, AC, 1 s gate. Any other '
+                                                                  'counter: terminate its input at 50 ohm (manual step 1).'),
+                                                      ('Reference', 'The manual asks for 0.1 ppm (53131A Opt 010). Without the high-stability '
+                                                                    'timebase, feed a 10 MHz house reference to Ref In; the reading records which '
+                                                                    'timebase was used.')]),
         'STD': ('Connect the Fluke 5790B', [('Connect', 'Generator OUTPUT to the 5790B {input} with a short RG-58 BNC cable '
                                                         '(type N input: N(m) to BNC(f) adapter; binding posts: BNC to dual banana).'),
                                             ('5790B', 'No other cables on the 5790B inputs. Guard and ground as your lab practice.')]),

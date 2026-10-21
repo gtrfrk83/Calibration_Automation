@@ -40,6 +40,8 @@ class FgenBench(SimBench):
         self.connected = 'std'          # which reference the generator output is cabled to: std / wbnd / counter / power
         self.gain = 1.0012              # generator amplitude error
         self.ppm = 1.3e-6               # generator timebase error
+        self.ppm_counter = 0.05e-6      # counter internal timebase error
+        self.counter_model = '53132A'   # any other name: a generic counter that answers only MEAS:FREQ?
 
     # ---- the generator's real output -------------------------------------------------------------------
     def flat_db(self, f):
@@ -172,17 +174,58 @@ class SimStd(_SimBase):
 
 
 class SimCounter(_SimBase):
+    """53131A / 53132A (bench.counter_model); any other model name answers only the generic MEAS:FREQ? query."""
     def __init__(self, bench):
         super().__init__(bench, 'SIM-COUNTER')
+        bench.counter = self.st = dict(func='FREQ', imp=1e6, coup='AC', start='IMM', stop='TIM', gate=0.1, exp=None,
+                                       rosc='INT', auto=True, ext_ref=False, errors=[])
+
+    def _reading(self):
+        b, s = self.bench, self.st
+        if not b.gen['on'] or b.connected != 'counter' or (s['func'] != 'FREQ'):
+            s['errors'].append('-230,"Data corrupt or stale"'); return '+9.91000000000E+37'
+        if s['exp'] is not None and abs(b.gen['freq'] / s['exp'] - 1) > 0.1:
+            s['errors'].append('-230,"Data corrupt or stale"'); return '+9.91000000000E+37'
+        ppm = 0.02e-6 if s['rosc'] == 'EXT' else b.ppm_counter
+        return f"{b.gen['freq'] * (1 + b.ppm) * (1 + ppm):+.15E}"
 
     def handle(self, cmd):
-        b, u = self.bench, cmd.upper()
-        if u == '*IDN?': return 'HEWLETT-PACKARD,53131A,0,4806'
-        if u == '*CLS': return None
+        b, s, u = self.bench, self.st, cmd.upper().lstrip(':')
+        if u == '*IDN?': return f'HEWLETT-PACKARD,{b.counter_model},0,4806'
+        if u == '*CLS': s['errors'].clear(); return None
         if u in ('MEASURE:FREQUENCY?', 'MEAS:FREQ?'):
-            if not b.gen['on'] or b.connected != 'counter':
-                return '+9.91000000000E+37'
-            return f"{b.gen['freq'] * (1 + b.ppm):+.11E}"
+            return self._reading()
+        if b.counter_model not in ('53131A', '53132A'):
+            raise TransportError(f'simulated counter: unknown command {cmd!r}')
+        if u == 'SYST:ERR?': return s['errors'].pop(0) if s['errors'] else '+0,"No error"'
+        if u == '*TST?': return '+0'
+        m = re.match(r'FUNC\s+"FREQ\s*(\d?)"$', u)
+        if m: s['func'] = 'FREQ' if m.group(1) in ('', '1') else f'FREQ {m.group(1)}'; return None
+        if u == 'FUNC?': return f'"{s["func"]}"'
+        m = re.match(r'INP1:IMP\s+(\S+)$', u)
+        if m: s['imp'] = float(m.group(1)); return None
+        if u == 'INP1:IMP?': return f"{s['imp']:+.5E}"
+        m = re.match(r'INP1:COUP\s+(AC|DC)$', u)
+        if m: s['coup'] = m.group(1); return None
+        if u == 'INP1:COUP?': return s['coup']
+        m = re.match(r'FREQ:ARM:STAR:SOUR\s+(\w+)$', u)
+        if m: s['start'] = m.group(1)[:3]; return None
+        if u == 'FREQ:ARM:STAR:SOUR?': return s['start']
+        m = re.match(r'FREQ:ARM:STOP:SOUR\s+(\w+)$', u)
+        if m: s['stop'] = m.group(1)[:3]; return None
+        if u == 'FREQ:ARM:STOP:SOUR?': return s['stop']
+        m = re.match(r'FREQ:ARM:STOP:TIM\s+(\S+)$', u)
+        if m: s['gate'] = float(m.group(1)); return None
+        if u == 'FREQ:ARM:STOP:TIM?': return f"{s['gate']:+.5E}"
+        m = re.match(r'FREQ:EXP1\s+(\S+)$', u)
+        if m: s['exp'] = float(m.group(1)); return None
+        if u == 'FREQ:EXP1?': return f"{s['exp']:+.14E}" if s['exp'] is not None else '+9.91000000000E+37'
+        m = re.match(r'ROSC:SOUR\s+(INT|EXT)$', u)
+        if m: s['rosc'] = m.group(1); s['auto'] = False; return None
+        if u == 'ROSC:SOUR?': return s['rosc'] if not s['auto'] else ('EXT' if s['ext_ref'] else 'INT')
+        if u == 'ROSC:SOUR:AUTO?': return '1' if s['auto'] else '0'
+        if u == 'ROSC:EXT:FREQ?': return '+1.00000E+07' if (s['rosc'] == 'EXT' and s['ext_ref']) else '+9.91000E+37'
+        if u == 'READ?': return self._reading()
         raise TransportError(f'simulated counter: unknown command {cmd!r}')
 
 

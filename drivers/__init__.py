@@ -17,6 +17,7 @@ from .reference_instruments import AgilentAFG, Fluke96270A, ReferenceMeter
 from .fluke_5790b import SERIAL_DEFAULT as FLUKE_5790B_SERIAL
 from .fluke_5790b import Fluke5790B
 from .keysight_332xx import Keysight332xx, Keysight33210A, Keysight33220A, Keysight33250A
+from .keysight_5313x import Keysight5313x, Keysight53131A, Keysight53132A
 from .transport import CommandLog, SerialSettings, SerialTransport, Transport, TransportError, VisaTransport, bus_of
 
 

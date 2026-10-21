@@ -14,7 +14,9 @@ One driver per instrument MODEL. Procedures call intent-level methods
                         *OPT? wideband option check)
   keysight_332xx.py     Keysight/Agilent 33210A, 33220A, 33250A generators under test (settings one at a time with the
                         output OFF - never APPLy -, OUTP? confirmed, *TST? self-test)
-  simulated_fgen.py     Simulated generator + 5790B + counter + power meter bench for fgen_verification.py
+  keysight_5313x.py     Agilent / HP 53131A and 53132A counters (frequency: input, gate, expected frequency, reference
+                        oscillator, READ?; *TST?)
+  simulated_fgen.py     Simulated generator + 5790B + counter (53131A / 53132A or generic) + power meter bench for fgen_verification.py
   selftest.py           Safe hardware check:  python -m drivers.selftest --sim
                         python -m drivers.selftest --fluke ASRL9::INSTR --baud 9600 --scope USB0::...::INSTR
   _template.py          Starting point for a new model

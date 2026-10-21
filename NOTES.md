@@ -1,6 +1,6 @@
 # Calibration Suite: project notes
 
-Tkinter calibration suite. `Calibration_Procedure_Manager.py` (v66) launches one procedure per instrument from `Procedures/`.
+Tkinter calibration suite. `Calibration_Procedure_Manager.py` (v67) launches one procedure per instrument from `Procedures/`.
 Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance-verification tables; shared engines hold the UI and run logic.
 
 ## Layout
@@ -35,7 +35,9 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 
 ## Open items: 33210A / 33220A / 33250A and the Fluke 5790B driver (not yet run on hardware)
 - Unverified: all 5790B commands (INPUT, EXTRIG, RANGE/RANGE?, MEAS?, ERR?) and all generator commands, taken from the manuals;
-  counter `MEASure:FREQuency?` and power meter `MEASure:POWer?` (generic ReferenceMeter, no manuals supplied); 33250A RS-232 line endings.
+  53131A/53132A driver (drivers/keysight_5313x.py, from the Programming Guide); power meter `MEASure:POWer?` and other counters
+  `MEASure:FREQuency?` (generic ReferenceMeter, no manuals supplied); 33250A RS-232 line endings.
+- The MDO4000C procedure still uses the generic ReferenceMeter for its counter (AFG frequency check).
 - 5790B 7 V range is 50 kOhm: 7 Vrms points read about 0.1 % low versus the manual's 3458A. Not corrected.
 - Power sensor cal factor vs frequency is not set by the program (the manual does not set it either).
 - The manual's 80 % guard band (no adjustment made) is not applied.
