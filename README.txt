@@ -142,7 +142,8 @@ report_dialog.py asks for technician, temperature, humidity and up to three stan
 The DMM procedures and the WaveSurfer have an 'Export Report (PDF)' button.
 Header: Instrument, Instrument ID, Serial and report date only. Limits applied, Source, Procedure, Technician, Temperature and
 Humidity are on the lab's cover certificate, so they are left off (report_pdf.HEADER_HIDDEN); so are the standards used and the
-Performed by / Reviewed by / Date block. Everything entered in the report dialog is still saved in the asset history.
+Performed by / Reviewed by / Date block and the footnote under the table (uncertainty source, method notes). Everything entered in
+the report dialog is still saved in the asset history.
 Needs reportlab:  py -m pip install reportlab   (embeds Arial when present so the micro sign always prints).
 As Left shows 'Same' (no adjustment made). Uncertainty is blank until per-range uncertainties are supplied.
 

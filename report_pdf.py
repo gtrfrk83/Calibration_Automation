@@ -166,6 +166,7 @@ def cert_row(description, nominal, low, high, unit, reading=None, failed=False, 
 # Shown on the lab's cover certificate instead, so left off this report. They are still passed in (and kept in the asset history).
 HEADER_HIDDEN = {'Limits applied', 'Source', 'Procedure', 'Technician', 'Temperature', 'Humidity'}
 # The standards-used table and the Performed by / Reviewed by / Date block are on the cover certificate too, so they are not drawn.
+# So is the footnote under the table (footer_note is accepted and ignored).
 
 
 def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note=''):
@@ -274,8 +275,7 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
                   ('TOPPADDING', (0, i), (-1, i), 2), ('BOTTOMPADDING', (0, i), (-1, i), 1.5)]
     table.setStyle(TableStyle(style))
     story.append(table)
-    if footer_note:
-        story += [Spacer(1, 8), Paragraph(clean(footer_note), meta)]
+    # footer_note (uncertainty source, method notes) is not printed: that information is on the lab's cover certificate.
 
     # ---- page furniture -------------------------------------------------------------------------------
     class Numbered(rl_canvas.Canvas):
