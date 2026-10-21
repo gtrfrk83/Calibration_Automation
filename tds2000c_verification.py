@@ -2,11 +2,10 @@
 
 Test points and limits come from specs/tektronix_tds2000c_pv.json (built by specs/build_tds2000c_spec.py from the page images).
 The sections run in the manual's order: self test, self calibration, DC gain, bandwidth, sample rate / delay time, edge trigger,
-external edge trigger, vertical position.
+external edge trigger.
 
 Stimulus: ONE instrument, the scope option of a Fluke 5560A, 5522A or 5520A (SCOPE DC volts, leveled sine, time marker). It replaces the
-manual's DC source, leveled sine generator and time-mark generator.  The manual's vertical-position voltmeter is replaced by the calibrator
-setpoint unless a reference DMM address is entered.  The oscilloscope is on USB.
+manual's DC source, leveled sine generator and time-mark generator.  The oscilloscope is on USB.
 
 Never run unattended: the program stops and asks for every cable, terminator and splitter change.  Writes are never retried; settings are
 read back; the calibrator is put in STANDBY (and that is confirmed) after every point.
@@ -112,24 +111,6 @@ def demo_reading(p):
     return lo + (0.15 * abs(lo) if lo else 0.012) * (1 + 0.3 * s)
 
 
-def vpos_worksheet(rows):
-    """Appendix A spreadsheet, per row dict(a, b, c): d = b - c, f = |b| * gain + offset, e = -f, g = MIN(d - e, f - d). Returns the full rows
-    and the minimum margin (cell I16 = MIN(G7:G97))."""
-    return rows, min(r['g'] for r in rows)
-
-
-def vpos_row(a, b, c, spec):
-    offset_v = spec['vscale'] * spec['offset_div'] + spec['offset_extra']
-    d = b - c
-    f = abs(b) * spec['gain_err'] + offset_v
-    return dict(a=a, b=b, c=c, d=d, e=-f, f=f, g=min(d + f, f - d))
-
-
-def vpos_voltages(spec):
-    n = int(round(2 * spec['v_max'] / spec['v_step'])) + 1
-    return [round(spec['v_max'] - i * spec['v_step'], 6) + 0.0 for i in range(n)]
-
-
 def edge_times(times, volts, slope, level=None):
     """Interpolated times at which the waveform crosses `level` (default: mid-level between its extremes) in the given direction."""
     lo, hi = min(volts), max(volts)
@@ -195,10 +176,6 @@ def uncertainty_text(p, raw):
             ua = [abs(sc.oscilloscope('dcv', volts=abs(p[n]), impedance='1M')[0] or 0) / 100 * abs(p[n]) for n in ('vneg', 'vpos')]
             if all(ua):
                 return uncertainty.format_value(math.hypot(*ua), 'V')
-        if p['kind'] == 'VPOS':
-            v, u, _ = sc.oscilloscope('dcv', volts=p['v_max'], impedance='1M')
-            if v is not None:
-                return uncertainty.format_value(v / 100 * p['v_max'] if u == '%' else v, 'V')
         if p['kind'] == 'BW':
             v, u, _ = sc.oscilloscope('bandwidth', volts_pp=raw.get('src_vpp', 3.0), frequency=raw.get('freq', 50e6))
             if v is not None:
@@ -212,12 +189,12 @@ def uncertainty_text(p, raw):
 # bench I/O
 # ======================================================================================================================
 class IO:
-    """The oscilloscope (USB), the calibrator, and an optional reference DMM."""
+    """The oscilloscope (USB) and the calibrator."""
 
     def __init__(self, addrs, transports=None):
         self.log = drivers.CommandLog()
         self.addrs = addrs
-        self.scope = self.cal = self.dmm = None
+        self.scope = self.cal = None
         t = transports or {}
 
         def tr(name, **kw):
@@ -230,8 +207,6 @@ class IO:
             else:
                 self.cal = drivers.Fluke5522AScope(tr('cal', baud=int(addrs.get('cal_baud', 9600))), self.log, label='5520A/5522A')
             self.cal.open(verify_model=True); self.cal.clear_status()
-            if 'dmm' in t or addrs.get('dmm', '').strip():
-                self.dmm = drivers.ReferenceMeter(tr('dmm'), self.log, label='RefDMM'); self.dmm.connect()
         except Exception:
             self.close(); raise
         self.ident = self.scope.idn
@@ -245,7 +220,7 @@ class IO:
 
     def close(self):
         self.all_outputs_off()
-        for inst in (self.scope, self.cal, self.dmm):
+        for inst in (self.scope, self.cal):
             if inst:
                 try: inst.close()
                 except Exception: pass
@@ -630,41 +605,6 @@ class Runner:
         self.io.cal.standby_quiet()
         return (1.0 if all(r['stable'] for r in results) else 0.0), dict(stages=results)
 
-    # ---- vertical position -----------------------------------------------------------------------------------------------------------------------
-    def do_vpos(self, p):
-        ch = p['ch']
-        dmm = self.io.dmm
-        steps = [('Disconnect', 'Remove other cables from the oscilloscope inputs.'),
-                 ('Connect', f'Calibrator SCOPE output to CH{ch} with the BNC cable (SCOPE volts, 1 MOhm).')]
-        if dmm:
-            steps.append(('Reference DMM', f'Connect the reference DMM in parallel at CH{ch} (BNC tee or dual-banana adapter); set it to DC volts.'))
-        self.wire(('VPOS', ch), f'Vertical position accuracy - CH{ch}', steps, group='DCV')
-        s = self.io.scope
-        s.default_setup(); self._scope_ctx = ('VPOS', ch)
-        for n in range(1, s.channels + 1):
-            s.channel(n, vscale=p['vscale'], position=0.0, probe=1)
-        s.select_only(ch)
-        s.acquire_mode('SAMple')
-        s.trigger_edge('EXT', 'RISe', 'AUTO', coupling='DC')
-        s.measure_setup('MEAN', ch)
-        s.check_errors('vertical position setup')
-        self.dc_source()
-        rows = []
-        for i, v in enumerate(vpos_voltages(p)):
-            self.check()
-            self.status(f'CH{ch} vertical position {i + 1}/91: {v:+.2f} V')
-            s.position(ch, -v / p['vscale'])
-            self.apply_dc(v, settle=1.5)
-            s.wait_acquisitions(3)
-            c = s.meas_value()
-            b = dmm.dc() if dmm else v
-            rows.append(vpos_row(v, b, c, p))
-        self.io.cal.standby_quiet()
-        s.position(ch, 0.0)
-        rows, margin = vpos_worksheet(rows)
-        return margin, dict(rows=rows, reference='reference DMM' if dmm else 'calibrator setpoint', points=len(rows))
-
-
 # ======================================================================================================================
 # the application window
 # ======================================================================================================================
@@ -684,7 +624,7 @@ class App:
         g = self.settings.get
         self.asset, self.serial = tk.StringVar(), tk.StringVar()
         self.v_model = tk.StringVar(value=g('model', '2024C'))
-        self.addr = {k: tk.StringVar(value=g(k, d)) for k, d in (('scope', ''), ('cal', 'COM9'), ('cal_baud', '9600'), ('cal_model', CAL_CHOICES[0]), ('dmm', ''))}
+        self.addr = {k: tk.StringVar(value=g(k, d)) for k, d in (('scope', ''), ('cal', 'COM9'), ('cal_baud', '9600'), ('cal_model', CAL_CHOICES[0]))}
         self.status = tk.StringVar()
         self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
         self.show_section = tk.StringVar(value='All sections')
@@ -751,7 +691,7 @@ class App:
         conn = ttk.LabelFrame(top, text='Instrument connections  (the oscilloscope is connected by USB)', padding=10); conn.grid(row=0, column=1, sticky='nsew')
         conn.columnconfigure(1, weight=1)
         self.addr_boxes = {}
-        rows = [('scope', 'TDS2000C (USB)'), ('cal', 'Calibrator (COM or GPIB)'), ('dmm', 'Reference DMM (optional)')]
+        rows = [('scope', 'TDS2000C (USB)'), ('cal', 'Calibrator (COM or GPIB)')]
         for i, (key, label) in enumerate(rows):
             ttk.Label(conn, text=label).grid(row=i, column=0, sticky='w', pady=2, padx=(0, 6))
             cb = ttk.Combobox(conn, textvariable=self.addr[key], state='normal', width=40); cb.grid(row=i, column=1, sticky='ew', pady=2)
@@ -763,8 +703,7 @@ class App:
         ttk.Combobox(bar, textvariable=self.addr['cal_model'], values=CAL_CHOICES, width=12, state='readonly').pack(side='left')
         ttk.Label(bar, text='baud', style='Muted.TLabel').pack(side='left', padx=(12, 4))
         ttk.Combobox(bar, textvariable=self.addr['cal_baud'], values=['9600', '19200', '4800', '2400', '1200'], width=7, state='readonly').pack(side='left')
-        ttk.Label(conn, text='All outputs (DC volts, leveled sine, time marker) come from the calibrator scope option. Without a reference DMM the vertical-position '
-                             'reference is the calibrator setpoint.', style='Muted.TLabel', wraplength=640, justify='left').grid(row=4, column=0, columnspan=2, sticky='w')
+        ttk.Label(conn, text='All outputs (DC volts, leveled sine, time marker) come from the calibrator scope option.', style='Muted.TLabel', wraplength=640, justify='left').grid(row=4, column=0, columnspan=2, sticky='w')
 
         ui.Notice(body, 'The program stops and asks you to confirm every cable, terminator and splitter change before the next point. '
                         'Stay at the bench; the calibrator is returned to STANDBY after every point.' if not self.demo else
@@ -776,7 +715,7 @@ class App:
         self.btn_rerun = ttk.Button(tools, text='Rerun Selected', command=self.rerun); self.btn_rerun.pack(side='left')
         self.btn_stop = ttk.Button(tools, text='■  Stop After This Point', style='Danger.TButton', command=self.request_stop, state='disabled'); self.btn_stop.pack(side='left', padx=8)
         ttk.Button(tools, text='Export Report (PDF)', command=self.export_pdf).pack(side='right', padx=(8, 0))
-        ttk.Button(tools, text='Export CSV + worksheet', command=self.export_csv).pack(side='right', padx=(8, 0))
+        ttk.Button(tools, text='Export CSV', command=self.export_csv).pack(side='right', padx=(8, 0))
         self.btn_load = ttk.Button(tools, text='Load progress', command=self.load); self.btn_load.pack(side='right', padx=(8, 0))
         ttk.Button(tools, text='Save progress', command=self.save).pack(side='right', padx=(8, 0))
 
@@ -892,7 +831,7 @@ class App:
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
         self._set_conn(True); self._save_addrs()
         self.status.set('Connected: ' + self.io.ident + '. Calibrator in standby.')
-        messagebox.showinfo('Connected', f'Oscilloscope: {self.io.ident}\nCalibrator: {self.io.cal.idn}\nReference DMM: {"yes" if self.io.dmm else "none (calibrator setpoint used)"}')
+        messagebox.showinfo('Connected', f'Oscilloscope: {self.io.ident}\nCalibrator: {self.io.cal.idn}')
 
     def disconnect(self):
         if self.io: self.io.close(); self.io = None
@@ -1063,9 +1002,8 @@ class App:
         if not path: return
         demo = self.demo or any(v.get('synthetic') for v in self.results.values())
         skipped = sum(1 for v in self.results.values() if v.get('result') == 'SKIP')
-        ref = next((v['raw'].get('reference') for v in self.results.values() if v.get('raw', {}).get('reference')), None)
         note = ('Uncertainty: DC points use the laboratory A2LA scope (calibrator CMC); points the scope does not cover show N/A.'
-                + (f' Vertical position reference: {ref}.' if ref else '') + (f' {skipped} point(s) were skipped.' if skipped else ''))
+                + (f' {skipped} point(s) were skipped.' if skipped else ''))
         try:
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix TDS{self.cfg.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Source', 'TDS2000C / TDS1000C-EDU Service Manual 077-0446-01, Chapter 4')],
@@ -1087,12 +1025,6 @@ class App:
                 r = self.results.get(str(p['id']), {})
                 w.writerow([p['id'], SECTION_TITLE[p['section']], p['desc'], p['low'], p['high'], p['unit'], r.get('reading', ''), r.get('result', ''),
                             r.get('uncertainty', ''), r.get('timestamp', ''), r.get('synthetic', '')])
-            for p in self.active_points():                 # the Appendix A spreadsheet, one block per channel
-                rows = self.results.get(str(p['id']), {}).get('raw', {}).get('rows')
-                if rows:
-                    w.writerow([]); w.writerow([f'Vertical position worksheet CH{p["ch"]}  (A test V, B reference V, C scope V, D error, E lower, F upper, G margin)'])
-                    w.writerow(['A', 'B', 'C', 'D', 'E', 'F', 'G'])
-                    for r in rows: w.writerow([r[k] for k in 'abcdefg'])
         self.status.set(f'Exported {path}')
 
     def on_close(self):

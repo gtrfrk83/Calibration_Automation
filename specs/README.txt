@@ -87,6 +87,6 @@ Schema 4 (function generators: keysight_33210a/33220a/33250a_pv.json)
   flatness_methods              WBND (5790B wideband, relative to 1 kHz) and/or POWER (manual method); the first is the default
 
 tektronix_tds2000c_pv.json  (built by build_tds2000c_spec.py)
-  points: section, kind (SELFTEST SELFCAL GAIN BW TIMEBASE TRIG EXTTRIG VPOS), ch, nominal/low/high (None = one-sided), unit, stim (cal|none),
-          models (omitted = all), passfail (low = high = 1), per-kind parameters (vscale, vpos/vneg, ref_hz, stages, v_max ...)
+  points: section, kind (SELFTEST SELFCAL GAIN BW TIMEBASE TRIG EXTTRIG), ch, nominal/low/high (None = one-sided), unit, stim (cal|none),
+          models (omitted = all), passfail (low = high = 1), per-kind parameters (vscale, vpos/vneg, ref_hz, stages ...)
   models_info: channels, bw_mhz, bw_test_hz, trig_hz per model

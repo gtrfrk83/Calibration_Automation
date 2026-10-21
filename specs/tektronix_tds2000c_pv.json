@@ -112,11 +112,6 @@
    "id": "exttrig",
    "title": "External edge trigger sensitivity",
    "page": "4-9"
-  },
-  {
-   "id": "vpos",
-   "title": "Vertical position accuracy",
-   "page": "4-10"
   }
  ],
  "points": [
@@ -761,92 +756,6 @@
    ],
    "note": "CH1 and EXT TRIG both fed from a power splitter, 50 ohm feedthrough terminators on both inputs.",
    "id": 24
-  },
-  {
-   "section": "vpos",
-   "kind": "VPOS",
-   "desc": "CH1 vertical position accuracy, minimum margin (91 points, +1.8 V to -1.8 V)",
-   "ch": 1,
-   "nominal": 0.0,
-   "low": 0.0,
-   "high": null,
-   "unit": "V",
-   "stim": "cal",
-   "vscale": 0.05,
-   "v_max": 1.8,
-   "v_step": 0.04,
-   "gain_err": 0.01,
-   "offset_div": 0.1,
-   "offset_extra": 0.005,
-   "note": "Limit per point = 1 % of |reference| + 10 mV (Appendix A). Reference = the calibrator setpoint unless a reference DMM is configured.",
-   "id": 25
-  },
-  {
-   "section": "vpos",
-   "kind": "VPOS",
-   "desc": "CH2 vertical position accuracy, minimum margin (91 points, +1.8 V to -1.8 V)",
-   "ch": 2,
-   "nominal": 0.0,
-   "low": 0.0,
-   "high": null,
-   "unit": "V",
-   "stim": "cal",
-   "vscale": 0.05,
-   "v_max": 1.8,
-   "v_step": 0.04,
-   "gain_err": 0.01,
-   "offset_div": 0.1,
-   "offset_extra": 0.005,
-   "note": "Limit per point = 1 % of |reference| + 10 mV (Appendix A). Reference = the calibrator setpoint unless a reference DMM is configured.",
-   "id": 26
-  },
-  {
-   "section": "vpos",
-   "kind": "VPOS",
-   "desc": "CH3 vertical position accuracy, minimum margin (91 points, +1.8 V to -1.8 V)",
-   "ch": 3,
-   "nominal": 0.0,
-   "low": 0.0,
-   "high": null,
-   "unit": "V",
-   "stim": "cal",
-   "models": [
-    "2004C",
-    "2014C",
-    "2024C"
-   ],
-   "vscale": 0.05,
-   "v_max": 1.8,
-   "v_step": 0.04,
-   "gain_err": 0.01,
-   "offset_div": 0.1,
-   "offset_extra": 0.005,
-   "note": "Limit per point = 1 % of |reference| + 10 mV (Appendix A). Reference = the calibrator setpoint unless a reference DMM is configured.",
-   "id": 27
-  },
-  {
-   "section": "vpos",
-   "kind": "VPOS",
-   "desc": "CH4 vertical position accuracy, minimum margin (91 points, +1.8 V to -1.8 V)",
-   "ch": 4,
-   "nominal": 0.0,
-   "low": 0.0,
-   "high": null,
-   "unit": "V",
-   "stim": "cal",
-   "models": [
-    "2004C",
-    "2014C",
-    "2024C"
-   ],
-   "vscale": 0.05,
-   "v_max": 1.8,
-   "v_step": 0.04,
-   "gain_err": 0.01,
-   "offset_div": 0.1,
-   "offset_extra": 0.005,
-   "note": "Limit per point = 1 % of |reference| + 10 mV (Appendix A). Reference = the calibrator setpoint unless a reference DMM is configured.",
-   "id": 28
   }
  ]
 }

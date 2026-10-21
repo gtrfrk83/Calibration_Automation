@@ -67,7 +67,7 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - "Stable trigger" is judged by engine criteria (trigger Normal, >= 5 acquisitions/s, edge position spread <= 0.2 period over 8 records); the manual's check is visual.
 - SETLevel with an EXT trigger source may be rejected; that is tolerated on the external-trigger points only.
 - Average-mode NUMACq counting and the 0.05 div position readback tolerance are unverified.
-- Vertical position: the manual's DC supply + DVM is replaced by the calibrator DC output; without a reference DMM the calibrator setpoint is the "DVM" value (stated in the report).
+- Vertical position accuracy (manual p. 4-10 to 4-13) is not part of this procedure (removed at the lab's request).
 - Manual prints "TDS2004B" in the bandwidth list; TDS2004C is used. USB VISA address of the scope is entered by hand.
 
 ## Testing

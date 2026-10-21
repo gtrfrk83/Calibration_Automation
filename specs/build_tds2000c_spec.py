@@ -2,7 +2,7 @@
 "Performance Verification" (printed pp. 4-1 to 4-13, Appendix A pp. A-1 to A-4).
 
 Every limit was read from the RENDERED PAGE IMAGES (test record p. 4-2, DC gain table p. 4-4, bandwidth p. 4-5, time base p. 4-6/4-7,
-trigger p. 4-7/4-8/4-9/4-10, vertical position p. 4-10..4-13 and the Appendix A spreadsheet equations), not from extracted text.
+trigger p. 4-7/4-8/4-9/4-10), not from extracted text.
 
 Point fields (base units): section, kind, desc, ch, nominal, low, high (None = one-sided), unit, stim ('cal' = calibrator scope option,
 'none' = no input), models (omitted = all), plus per-kind parameters.  Pass/fail points (passfail=True) carry low = high = 1.
@@ -36,8 +36,8 @@ HZ200 = [m for m, v in MODELS.items() if v['bw_mhz'] == 200]
 
 TITLES = {'selftest': 'Self test and self calibration', 'gain': 'DC gain accuracy', 'bw': 'Analog bandwidth',
           'timebase': 'Sample rate and delay time accuracy', 'trig': 'Edge trigger sensitivity',
-          'exttrig': 'External edge trigger sensitivity', 'vpos': 'Vertical position accuracy'}
-PAGES = {'selftest': '4-3', 'gain': '4-3', 'bw': '4-5', 'timebase': '4-6', 'trig': '4-7', 'exttrig': '4-9', 'vpos': '4-10'}
+          'exttrig': 'External edge trigger sensitivity'}
+PAGES = {'selftest': '4-3', 'gain': '4-3', 'bw': '4-5', 'timebase': '4-6', 'trig': '4-7', 'exttrig': '4-9'}
 points = []
 
 
@@ -110,16 +110,7 @@ add('exttrig', 'EXTTRIG', 'External edge trigger sensitivity (stable trigger)', 
     vscale=0.1, stages=EXT_STAGES,
     note='CH1 and EXT TRIG both fed from a power splitter, 50 ohm feedthrough terminators on both inputs.')
 
-# ---- vertical position accuracy (p. 4-10..4-13, Appendix A spreadsheet) ----------------------------------------------------------------
-# 91 test voltages per channel, +1.80 V down to -1.80 V in 0.04 V steps (spreadsheet rows 7..97; rows outside +/-1.8 V are marked as outside
-# the specification).  Per row:  D = B - C (error), F = |B| * gain_err + offset_v, E = -F, G = MIN(D - E, F - D).
-# offset_v = I2 * I4 + I5 = volts/div * offset_div + offset_extra = 0.05 * 0.1 + 0.005 = 0.010 V; gain_err = 1 % (cells I8 / I6).
-# The test record's per-channel result is the minimum margin (cell I16 = MIN(G7:G97)); it must be >= 0.
-VPOS = dict(vscale=0.05, v_max=1.8, v_step=0.04, gain_err=0.01, offset_div=0.1, offset_extra=0.005)
-for ch in (1, 2, 3, 4):
-    add('vpos', 'VPOS', f'CH{ch} vertical position accuracy, minimum margin (91 points, +1.8 V to -1.8 V)', 0.0, 0.0, None, 'V', ch=ch,
-        models=models_for(ch), **VPOS,
-        note='Limit per point = 1 % of |reference| + 10 mV (Appendix A). Reference = the calibrator setpoint unless a reference DMM is configured.')
+# Vertical position accuracy (p. 4-10 to 4-13, Appendix A) is intentionally NOT part of this procedure (removed at the lab's request).
 
 for i, p in enumerate(points, 1):
     p['id'] = i
