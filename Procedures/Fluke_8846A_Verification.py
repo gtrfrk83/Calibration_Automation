@@ -54,6 +54,12 @@ def setup_key(p):
     if p['kind'] in ('DCI','ACI') and abs(p['nominal'])>=HIGH_CURRENT_A:return 'CURRENT_HIGH'
     return p['wiring']
 POINTS.sort(key=lambda q:(0,_ZERO_ORDER[q['kind']]) if q.get('zero_offset') else (1,0))   # stable: gain points keep their order
+# Zero-offset limits for resistance and capacitance are symmetric (+/- the table value), like the DCV / DCI zero points:
+# the table was transcribed as 0 to +limit, which failed small negative readings (e.g. -2 mOhm against a 100 mOhm limit).
+# The upper limits are unchanged and have not been re-checked against the manual page.
+for _q in POINTS:
+    if _q.get('zero_offset') and _q['kind'] in ('OHM2','OHM4','CAP') and _q['low']==0:
+        _q['low']=-_q['high']
 BY_ID={q['id']:q for q in POINTS}      # the list is no longer in id order (zero block first): always look points up by id
 # The manual also specifies optional DC ratio, rear-terminal and split-lead tests.
 # Those require distinct setups/measurement commands and are not executed here.
@@ -556,7 +562,11 @@ class App:
         data=json.loads(Path(path).read_text())
         if any(v.get('synthetic') for v in data.get('results',{}).values()) and not self.demo:
             if not messagebox.askyesno('Synthetic data','Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):return
-        self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.results=data.get('results',{});self.refresh();self.status.set(f'Loaded progress: {len(self.results)} point(s) restored.')
+        self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.results=data.get('results',{})
+        for _id,_r in self.results.items():     # same test as _record(), against the current limits (the zero limits were corrected)
+            _p=BY_ID.get(int(_id))
+            if _p is not None and isinstance(_r.get('reading'),(int,float)):_r['result']='PASS' if _p['low']<=_r['reading']<=_p['high'] else 'FAIL'
+        self.refresh();self.status.set(f'Loaded progress: {len(self.results)} point(s) restored.')
     @staticmethod
     def report_section(p):
         import report_pdf
