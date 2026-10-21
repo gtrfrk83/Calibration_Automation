@@ -110,23 +110,37 @@ def scope():
     return _SCOPE['scope']
 
 
-def point_uncertainty(p) -> str:
-    """CMC for a verification point (a measuring instrument under test), formatted for the report; '' if not covered."""
+def point_uncertainty(p, standard=None) -> str:
+    """Uncertainty for a verification point, formatted for the report; '' if the scope does not cover it.
+    Without `standard` this is the scope CMC.  With the calibrator that applied the point (model text such as '5522A', see specmanager) the
+    value is the larger of the budget built from that standard's published specification and the CMC, rounded up: never below the CMC."""
     sc = scope()
     if sc is None or p.get('source') == 'none':      # zero-offset points (short / open input) use no source, so no source CMC applies
         return ''
     import uncertainty
+    unit = 'ohm' if p['kind'].startswith('OHM') else p['unit']
+    if standard:
+        try:
+            import uncertainty_budget
+            b = uncertainty_budget.build(p['kind'], p['nominal'], unit, standard=standard, frequency=p.get('frequency'), scope=sc, range_value=p.get('range'))
+            if b.reported is not None:
+                return uncertainty.format_value(b.reported, unit)
+        except Exception:
+            pass                                        # fall back to the CMC rather than lose the report
     value = sc.dmm(p['kind'], p['nominal'], p.get('range'), p.get('frequency'))
-    return uncertainty.format_value(value, 'ohm' if p['kind'].startswith('OHM') else p['unit']) if value is not None else ''
+    return uncertainty.format_value(value, unit) if value is not None else ''
 
 
-def uncertainty_note(rows) -> str:
+def uncertainty_note(rows, standard=None) -> str:
     """Footer text: where the uncertainties come from, and how many points the scope does not cover."""
     sc = scope()
     if sc is None or not any(r.get('Uncertainty') for r in rows):
         return ''
     blank = sum(1 for r in rows if not r.get('Uncertainty'))
     note = sc.citation
+    if standard:
+        note += (f' Where the published specification of the {standard} calibrator (divided by its coverage divisor, with the calibrator resolution) '
+                 'gives a larger uncertainty than the CMC, the larger value is reported.')
     if blank:
         note += f' {blank} of {len(rows)} points show no uncertainty because the scope of accreditation does not cover them.'
     return note

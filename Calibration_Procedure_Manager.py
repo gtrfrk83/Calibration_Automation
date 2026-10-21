@@ -23,6 +23,7 @@ import ui_theme as ui
 from mdd_importer_v49 import parse_mdd, import_mdd, init_datasheet_db
 import labregistry
 import labregistry_ui
+import specmanager_ui
 
 BASE = Path(__file__).resolve().parent
 DB = BASE / 'calibration_procedures.sqlite3'
@@ -195,11 +196,13 @@ class Manager:
         self.library_frame = ttk.Frame(self.notebook, padding=16)
         self.instruments_frame = ttk.Frame(self.notebook, padding=16)
         self.history_frame = ttk.Frame(self.notebook, padding=16)
+        self.specs_frame = ttk.Frame(self.notebook, padding=16)
         self.datasheets_frame = ttk.Frame(self.notebook, padding=16)
         self.development_frame = ttk.Frame(self.notebook, padding=16)
         self.notebook.add(self.library_frame, text='  Procedures  ')
         self.notebook.add(self.instruments_frame, text='  Instruments  ')
         self.notebook.add(self.history_frame, text='  Asset History  ')
+        self.notebook.add(self.specs_frame, text='  Standards Specs  ')
         self.notebook.add(self.datasheets_frame, text='  Datasheets (.MDD)  ')
         self.notebook.add(self.development_frame, text='  Procedure Development  ')
         self.build_library_tab()
@@ -208,6 +211,8 @@ class Manager:
         self.build_instruments_tab()
         self.history_panel = labregistry_ui.HistoryPanel(self.history_frame)
         self.history_panel.pack(fill='both', expand=True)
+        self.specs_panel = specmanager_ui.SpecManagerPanel(self.specs_frame)
+        self.specs_panel.pack(fill='both', expand=True)
         ui.polish(root)
         self.notebook.bind('<<NotebookTabChanged>>', self._tab_changed)
         self.refresh()
@@ -225,6 +230,9 @@ class Manager:
             self.status.set('Register the instruments you calibrate, assign a procedure, and launch it from here.')
         elif tab is self.history_frame:
             self.history_panel.refresh()
+        elif tab is self.specs_frame:
+            self.specs_panel.refresh()
+            self.status.set('Published specifications of the calibrators used as standards; they set the lowest uncertainty that may be reported.')
             self.status.set('Every exported PDF report is recorded here. Double-click a test point to see its drift across reports.')
         elif tab is self.datasheets_frame:
             self.status.set('Import Cal Processor .MDD datasheets as read-only templates.')

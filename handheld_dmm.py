@@ -1243,7 +1243,8 @@ class App:
                 unc = ''
                 if p['kind'] in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP') and p.get('applied') and not p.get('no_uncertainty'):
                     unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
-                                                            frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None))
+                                                            frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None),
+                                                            standard=self.calibrator_model())
                 a = p.get('applied') or {}
                 freq = a.get('frequency') if p['kind'] in ('ACV', 'ACI') and p['display_unit'] != 'kHz' else None
                 row = report_pdf.cert_row(f'{p["range"]} range' if p['range'] else describe(p), p['nominal'], clean(Decimal(p['low'])), clean(Decimal(p['high'])),
@@ -1295,7 +1296,7 @@ class App:
                                                                  ('Limits applied', src.get('limits', 'Manufacturer display-reading limits (12 month)')),
                                                                  ('Source', src.get('cite') or f'{src["document"]}, pp. {src["pages"].split(" ")[0]}')],
                                              title=f'{self.info["name"]} Performance Verification', demo=demo, details=details,
-                                             footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows), self.source_note()) if x))
+                                             footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows, self.calibrator_model()), self.source_note()) if x))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab')
             return
@@ -1303,6 +1304,11 @@ class App:
             messagebox.showerror('PDF export error', str(exc))
             return
         self.status.set(f'Exported {len(rows)} rows: {path}')
+
+    def calibrator_model(self):
+        """Model of the calibrator in use ('5560A' / '5522A'), for the uncertainty budget."""
+        text = self.cal_mode.get()
+        return '5522A' if '5522A' in text else '5560A' if '5560A' in text else None
 
     def source_note(self):
         """How the numeric readings were collected (IR and / or typed), for the report footer."""
