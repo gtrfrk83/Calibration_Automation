@@ -340,15 +340,7 @@ class Runner:
             mode = cal.query('SCOPE?').strip().upper()
             if function != 'SDCV' or mode != 'VOLT':
                 raise drivers.InstrumentError(f'5560A did not select SCOPE DCV: FUNC?={function!r}, SCOPE?={mode!r}')
-            is_1m = lambda r: '1M' in r or r.startswith('1000000')
-            imp = cal.query('OUT_IMP?').strip().upper()
-            if not is_1m(imp):                  # only if it is not already 1 MOhm (e.g. left at 50 Ohm): one write, read back, never repeated
-                cal.write('OUT_IMP Z1M')        # argument form taken from the reply 'Z1M'; UNVERIFIED on the 5560A
-                cal.check_error('OUT_IMP Z1M')
-                imp = cal.query('OUT_IMP?').strip().upper()
-                if not is_1m(imp):
-                    raise drivers.InstrumentError(f'5560A SCOPE output impedance is {imp!r}, not 1 MOhm; set it on the calibrator front panel')
-            cal.check_error('OUT_IMP?')
+            self.ensure_imp_5560('1M')
         else:
             cal.select_scope_dcv('1M')
             cal.check_error('SCOPE VOLT / OUT_IMP 1M')   # 5520A/5522A path (unverified): name the command if it is rejected
@@ -363,13 +355,31 @@ class Runner:
     def select_levsine(self):
         cal = self.io.cal
         cal.standby_quiet()
+        cal.drain_errors()
         cal.select_scope_levsine()
         cal.check_error('SCOPE LEVSINE')
         mode = cal.query('SCOPE?').strip().upper()
         if 'LEV' not in mode:
             raise drivers.InstrumentError(f'Calibrator did not confirm leveled sine: SCOPE?={mode!r}')
-        cal.write('OUT_IMP 50')
-        cal.check_error('OUT_IMP 50')
+        if self.io.is_5560:
+            self.ensure_imp_5560('50')          # 'OUT_IMP 50' is rejected (-117) on the 5560A: read first, write Z50 only if needed
+        else:
+            cal.write('OUT_IMP 50')
+            cal.check_error('OUT_IMP 50')
+
+    def ensure_imp_5560(self, want):
+        """5560A SCOPE output impedance: read OUT_IMP?; only if it is not already `want` ('1M' or '50') write 'OUT_IMP Z1M' / 'Z50' ONCE (argument form
+        taken from the reply 'Z1M'; UNVERIFIED), check the error queue and read back. Never repeated."""
+        cal = self.io.cal
+        ok = (lambda r: '1M' in r or r.startswith('1000000')) if want == '1M' else (lambda r: r.endswith('Z50') or r.startswith(('50', 'Z50')))
+        imp = cal.query('OUT_IMP?').strip().upper()
+        if not ok(imp):
+            cal.write(f'OUT_IMP Z{want}')
+            cal.check_error(f'OUT_IMP Z{want}')
+            imp = cal.query('OUT_IMP?').strip().upper()
+            if not ok(imp):
+                raise drivers.InstrumentError(f'5560A SCOPE output impedance is {imp!r}, not {want}; set it on the calibrator front panel')
+        cal.check_error('OUT_IMP?')
 
     def set_sine(self, vpp, hz, settle=2.0):
         """Set amplitude and frequency, read OUT? back and compare, then operate. A rejected or mismatched setting stops the run."""
