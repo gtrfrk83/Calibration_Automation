@@ -251,8 +251,12 @@ class IO:
     def save_log(self):
         try:
             folder = Path.home() / '.calibration_suite'; folder.mkdir(parents=True, exist_ok=True)
+            lines = self.log.lines()
+            new, self._saved = lines[getattr(self, '_saved', 0):], len(lines)      # only what has not been written yet
+            if not new:
+                return
             with open(folder / 'command_log.txt', 'a', encoding='utf-8') as f:
-                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  TDS2000C session\n' + '\n'.join(self.log.lines()) + '\n')
+                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  TDS2000C session\n' + '\n'.join(new) + '\n')
         except OSError:
             pass
 
@@ -925,6 +929,8 @@ class App:
             error = exc
         finally:
             try: self.io.all_outputs_off()
+            except Exception: pass
+            try: self.io.save_log()          # the log is on disk after every run or error, not only when the window closes
             except Exception: pass
         self.post('done', error)
 
