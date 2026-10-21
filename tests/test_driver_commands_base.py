@@ -264,7 +264,7 @@ class Describe(unittest.TestCase):
         by = {}
         for c in reg.values():
             by[(c.risk, c.verified)] = by.get((c.risk, c.verified), 0) + 1
-        self.assertEqual(len(reg), 31)
+        self.assertEqual(len(reg), 33)
         self.assertEqual(sum(1 for c in reg.values() if not c.verified), 11)
         self.assertEqual(sum(1 for c in reg.values() if c.risk == 'output'), 3)
         self.assertEqual(sum(1 for c in reg.values() if c.risk == 'locked'), 3)
