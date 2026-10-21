@@ -12,7 +12,7 @@ Folder layout (same as before, plus one new file):
       Fluke_8846A_Verification.py    v58
       Fluke_8846A_Adjustment.py      v57
       Fluke_87V.py                   v52
-      WaveSurfer_WS4104HD.py         v54
+      WaveSurfer_WS4104HD.py         v55
 
 Install: copy these files over the old ones (keep your calibration_procedures.sqlite3,
 Backups\ and any checkpoint files). The database layout is unchanged.
@@ -45,6 +45,11 @@ tolerance used; 'Open report PDF' opens the saved file. The Instruments tab gain
 interval entered for that instrument; overdue rows are red). Demo reports are never recorded; exporting the same file again replaces its record.
 Launching a procedure from the Instruments tab now fills in the Instrument ID, and typing a known ID fills an empty Serial number and shows
 the last report / next due date in the status bar.
+
+WaveSurfer v55: the time base test reported '5560A rejected the setting (SCOPE MARKER): -117'. ERR? returns the OLDEST
+  error, and nothing had read the 5560A queue before, so an error left from an earlier session was blamed on SCOPE MARKER
+  (the 5560A reports SCOPE? = MARKER in time-marker mode). The queue is now read out first (read-only ERR?, every reply in the
+  command log, old errors saved with the result); only a fresh error after SCOPE MARKER stops the test.
 
 WaveSurfer v54: the time base test stopped at 'P1 engine Frequency, expected Freq'. The 4104HD reports the frequency
   measurement by its long name; 'Frequency' is now accepted, as 'PeakToPeak' already was for PkPk. Nothing else changed.

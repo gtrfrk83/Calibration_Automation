@@ -131,7 +131,7 @@ class RMSNoiseApp:
     def __init__(self, root):
         self.root = root
         ui.apply_theme(root)
-        root.title('WaveSurfer 4104HD | Calibration Verification v54')
+        root.title('WaveSurfer 4104HD | Calibration Verification v55')
         ui.fit_window(root, 1300, 880, min_w=1020, min_h=640)
         self.events = queue.Queue()
         self.stop_event = threading.Event()
@@ -428,7 +428,7 @@ class RMSNoiseApp:
         self._idle = 0
         self._shown = None
         self._last_status = {}
-        ui.StatusBar(root, self.msg, right='v54').pack(side='bottom', fill='x')
+        ui.StatusBar(root, self.msg, right='v55').pack(side='bottom', fill='x')
         body = ttk.Frame(root, padding=(18, 14, 18, 10))
         body.pack(fill='both', expand=True)
         top = ttk.Frame(body)
@@ -1161,7 +1161,7 @@ class RMSNoiseApp:
                     _k, title, question, reply = event
                     reply.put(messagebox.askyesnocancel(title, question, parent=self.root))
                 elif kind == 'tb_result':
-                    self.record_timebase(event[1], event[2])
+                    self.record_timebase(event[1], event[2], event[3] if len(event) > 3 else ())
                 elif kind in ('tb_error', 'tb_safety'):
                     self.tb_retest_index = None
                     if kind == 'tb_error':
@@ -2816,7 +2816,7 @@ class RMSNoiseApp:
             if not 0.99 * point['nominal_hz'] <= mean <= 1.01 * point['nominal_hz']:
                 raise RuntimeError(f'P1 Freq averaged {mean:.9g} Hz, more than 1 % away from {point["nominal_hz"]:.9g} Hz '
                                    '(wrong marker period, no signal, cable or P1 setup). No result recorded.')
-            self.events.put(('tb_result', point, readings))
+            self.events.put(('tb_result', point, readings, list(fluke.stale_errors)))
         except Exception as exc:
             self.events.put(('tb_error', f'Failure at {stage}: {type(exc).__name__}: {exc}\n'
                              'Verify Fluke STBY on the front panel before touching cables.'))
@@ -2825,7 +2825,7 @@ class RMSNoiseApp:
                 self.events.put(('tb_safety', 'Fluke standby NOT confirmed. Inspect the Fluke front panel; do not disconnect until STBY.'))
             self.events.put(('tb_idle',))
 
-    def record_timebase(self, point, readings):
+    def record_timebase(self, point, readings, stale_errors=()):
         mean = sum(readings) / len(readings)
         error = mean - point['nominal_hz']
         spread = (sum((x - mean) ** 2 for x in readings) / (len(readings) - 1)) ** .5 if len(readings) > 1 else 0.0
@@ -2834,6 +2834,8 @@ class RMSNoiseApp:
                    method=f'Fluke 5560A SCOPE MARKER {point["marker_period_s"]*1e6:g} us into DC 50 Ohm; scope P1 Freq, mean of {len(readings)}',
                    timestamp=datetime.now().isoformat(timespec='seconds'),
                    note='Limits from HAZ-OSC-02 data sheet; no guard band')
+        if stale_errors:
+            row['fluke_errors_cleared_before_marker'] = list(stale_errors)   # from earlier sessions, read out before SCOPE MARKER
         idx = self.tb_retest_index
         if idx is not None:
             previous = self.tb_rows[idx]
