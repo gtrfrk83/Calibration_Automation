@@ -597,13 +597,13 @@ class StandardSpec:
 
     # coverage divisor that turns the printed accuracy into a standard uncertainty (k = 1)
     def divisor(self):
-        """Coverage divisor.  An explicit value set by the person wins; 95 % -> 1.96; 99 % -> 2.576; not specified -> 2.0 (what the
+        """Coverage divisor.  An explicit value set by the person wins; 95 % -> 2.0 (the laboratory's convention); 99 % -> 2.576; not specified -> 2.0 (what the
         laboratory's uncertainty software does with a standard whose sheet gives no confidence level).  Returns (divisor, source text)."""
         d = self.info.get('divisor')
         if d:
             return float(d), 'set in the specification manager'
         c = self.info.get('confidence_pct')
-        table = {68.27: 1.0, 90.0: 1.645, 95.0: 1.96, 95.45: 2.0, 99.0: 2.576, 99.73: 3.0}
+        table = {68.27: 1.0, 90.0: 1.645, 95.0: 2.0, 95.45: 2.0, 99.0: 2.576, 99.73: 3.0}
         if c is not None:
             near = min(table, key=lambda x: abs(x - c))
             if abs(near - c) < 0.01:

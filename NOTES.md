@@ -66,7 +66,7 @@ Simulated bench: `drivers/simulated.py` (`make_dacq_bench`, `make_dmm_bench`, `m
 - `specs/build_standard_spec.py <SpecTrack pdf>` reads a manufacturer accuracy sheet into `specs/standards/<maker>_<model>_standard.json` (with a `problems` list
   from `specmanager.validate_data`).  `specmanager.seed()` loads those files into **lab_registry.sqlite3** (tables standards, standard_assets, spec_rows,
   spec_changes); calibration_procedures.sqlite3 is untouched.  All values are SI base units; scaling is display-only.
-- `uncertainty_budget.py`: u(standard) = published accuracy / divisor (2.0 when the sheet gives no confidence level, 1.96 for 95 %, editable per standard),
+- `uncertainty_budget.py`: u(standard) = published accuracy / divisor (2.0 when the sheet gives no confidence level or says 95 % (laboratory convention), 2.576 for 99 %, editable per standard),
   u(resolution) = calibrator last digit / sqrt(12), EMU = k * RSS, k = 2.  Reported = larger of budget and A2LA scope CMC, rounded UP (never below either).
   `audit(reported, budget)` returns OK / UNDER CMC / UNDER BUDGET / NOT IN SCOPE.
 - `report_pdf.point_uncertainty(p, standard=None)` uses the budget when the calibrator model is passed (handheld_dmm passes 5522A / 5560A from its calibrator

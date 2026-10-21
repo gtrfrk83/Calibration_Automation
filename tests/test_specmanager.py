@@ -26,7 +26,7 @@ class T(unittest.TestCase):
 
     def test_divisor(self):
         self.assertEqual(self.a.divisor()[0], 2.0)
-        self.assertEqual(self.b.divisor()[0], 1.96)
+        self.assertEqual(self.b.divisor()[0], 2.0)
 
     def test_wizard_example(self):                       # 100 mV on the 5522A: 1.5 uV standard, 28.9 nV resolution, EMU 3 uV
         b = ub.build('DCV', 0.1, 'V', standard=self.a, scope=self.sc)
