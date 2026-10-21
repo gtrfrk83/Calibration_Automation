@@ -73,13 +73,19 @@ class Fluke8846A(ScpiDmm):
 
 
     def configure_frequency_point(self, voltage_range: float):
-        """CONF:FREQ, 3 Hz low-frequency limit, 1 s gate, input voltage range (same sequence as the Keysight
-        procedures). UNVERIFIED on the 8846A: the commands are the 34401A / Truevolt set; the caller checks
-        SYST:ERR? afterwards so a rejection stops the run."""
+        """Frequency function: CONF:FREQ, the 3 Hz filter (sets the lowest frequency; DET:BAND is the command the
+        8846A already accepts and reads back for the AC points), 1 s gate, input voltage range.
+        UNVERIFIED on the 8846A: FREQ:APER and FREQ:VOLT:RANG come from the 34401A / Truevolt sets. The error
+        queue is cleared first and read after EACH command, so a rejection names the exact command. Writes are not retried."""
+        self.write('*CLS')
         self.write('CONF:FREQ')
-        self.write('FREQ:RANG:LOW 3')
+        self.check_errors('CONF:FREQ')
+        self.set_ac_filter(3)
+        self.check_errors('DET:BAND 3')
         self.write('FREQ:APER 1')
+        self.check_errors('FREQ:APER 1')
         self.write(f'FREQ:VOLT:RANG {voltage_range:g}')
+        self.check_errors(f'FREQ:VOLT:RANG {voltage_range:g}')
 
     def set_ac_filter(self, hz: float = 3.0):
         """DET:BAND <hz> (3, 20 or 200), then read it back with DET:BAND? and compare. UNVERIFIED on hardware:
