@@ -20,6 +20,7 @@ class SimBench:
         self.fail_next = None        # set to a substring to make the next matching command time out
         self.timebase_ratio = 1 + 1.2e-7     # simulated scope time base error (frequency reads high by 0.12 ppm)
         self.trigger_error_v = 0.0           # simulated trigger level error (actual threshold = set level + this)
+        self.lead_ohms = 0.0                 # series lead resistance added to simulated 8846A / 34401A resistance readings (opt-in)
 
     def output_v(self):
         f = self.fluke
@@ -216,7 +217,12 @@ class SimDmmTransport(_SimBase):
             return None
         if u == 'SYST:REM': self.remote = True; return None
         if u == 'SYST:LOC': self.remote = False; return None
-        if u.startswith('CONF:'): self.function = u[5:].split()[0]; self.band = 20.0; return None   # CONF resets the AC filter
+        if u.startswith('CONF:'): self.function = u[5:].split()[0]; self.band = 20.0; self.null_on = False; return None   # CONF resets the AC filter
+        if u == 'CALC:FUNC NULL': return None
+        if u.startswith('CALC:NULL:OFFS '): self.null_offset = float(u.split()[1]); return None
+        if u == 'CALC:NULL:OFFS?': return f"{getattr(self, 'null_offset', 0.0):+.9E}"
+        if u.startswith('CALC:STAT '): self.null_on = u.split()[1] == 'ON'; return None
+        if u == 'CALC:STAT?': return '1' if getattr(self, 'null_on', False) else '0'
         if u == 'DET:BAND?': return f"{getattr(self, 'band', 20.0):+.6E}"
         if u.startswith('DET:BAND '): self.band = float(u.split()[1]); return None
         m = re.match(r'CAL:SEC:STAT (ON|OFF),(\w+)$', u)
@@ -242,7 +248,12 @@ class SimDmmTransport(_SimBase):
                 return f"{f['freq'] * 1.0000002:+.9E}"
             if f['operate'] and self.function.startswith('CAP'):
                 return f"{f['volts'] * {'NF': 1e-9, 'UF': 1e-6}.get(f.get('unit'), 1.0) * 1.00002:+.9E}"
-            return f"{(f['volts'] * 1.00002 if f['operate'] else 1.2e-7):+.9E}"
+            val = f['volts'] * 1.00002 if f['operate'] else 1.2e-7
+            if f['operate'] and self.function.startswith('RES'):
+                val += self.bench.lead_ohms
+            if getattr(self, 'null_on', False):
+                val -= getattr(self, 'null_offset', 0.0)
+            return f"{val:+.9E}"
         raise TransportError(f'simulated DMM: unknown command {cmd!r}')
 
 

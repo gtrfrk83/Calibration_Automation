@@ -43,6 +43,11 @@ for kind, block in TEST_TABLES.items():
 # Point ids are left unchanged so existing checkpoint files still match their points.
 HIGH_CURRENT_A=3.0     # at or above this the calibrator output is on its high-current terminals (the table has only 1.9 A and 10 A around it)
 _ZERO_ORDER={'DCV':0,'OHM2':1,'OHM4':2,'DCI':3,'CAP':4}
+def needs_null(p):
+    """Points measured as: 0 ohm output, null the meter, then the test value. 2-wire 100 ohm only (the table's limits
+    for that point have no lead-resistance allowance). Add (kind, range, nominal) tuples here to extend it."""
+    return (p['kind'],p['range'],p['nominal']) in NULL_POINTS and not p.get('zero_offset')
+NULL_POINTS={('OHM2',100,100)}
 def setup_key(p):
     """What the technician must have connected: one key for the whole zero block's shorted inputs, one for open inputs."""
     if p.get('zero_offset'):return 'ZERO_OPEN' if p['kind'] in ('DCI','CAP') else 'ZERO_SHORT'
@@ -166,6 +171,35 @@ class IO:
         except Exception:
             self.save_log()      # a failed point leaves its commands on disk straight away, without closing the program
             raise
+    def _measure_nulled(self,p):
+        """2-wire 100 ohm point: the calibrator outputs 0 ohm, the meter is nulled on that reading (offset set, read back
+        and compared), the calibrator then goes to the test value and the reading is taken. The null is always turned off
+        again and the output always goes to standby. The 5560A 0 ohm output and the meter null commands are unverified."""
+        zp=next(q for q in POINTS if q.get('zero_offset') and q['kind']==p['kind'] and q['range']==p['range'])
+        self.fluke.clear_status()                       # only this point's own commands can trip the error check
+        self.fluke.set_output_ohms(0)
+        self.fluke.check_error('0 ohm for '+p['description'])
+        self.fluke.operate_unverified()
+        nulled=done=False
+        try:
+            zero=self.settled_read(zp,self.settle(p))   # settles to the zero point's own stability window
+            nulled=True                                 # set before the call so a half-applied null is always switched off
+            self.dmm.null_on(zero)
+            left=self.dmm.read()
+            if abs(left)>5*zp['high']:                  # a null that took effect leaves ~0; one that did not leaves the lead resistance
+                raise RuntimeError(f'After nulling, 0 ohm reads {left:.6g} ohm (limit {5*zp["high"]:.3g}); the null did not take effect. Point not measured.')
+            self.fluke.set_output_ohms(p['nominal'])
+            self.fluke.check_error(p['description'])
+            reading=self.settled_read(p,self.settle(p))
+            done=True
+        finally:
+            self.standby()
+            if nulled:
+                try:self.dmm.null_off()
+                except Exception as exc:
+                    self.log.add('NOTE',f'null off failed: {exc}','8846A')
+                    if done:raise               # never let this hide the error that stopped the point
+        return reading
     def _measure(self,p):
         k=p['kind'];v=p['nominal'];r=p['range'];f=p['frequency']
         self.standby()
@@ -186,6 +220,7 @@ class IO:
             else:self.fluke.set_output_amps(v,f)
         elif k in ('OHM2','OHM4'):
             self.dmm.configure(k,r)
+            if needs_null(p):return self._measure_nulled(p)
             self.fluke.set_output_ohms(v)
         elif k=='CAP':
             self.dmm.configure(k,r)

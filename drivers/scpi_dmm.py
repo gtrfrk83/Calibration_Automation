@@ -87,6 +87,30 @@ class Fluke8846A(ScpiDmm):
         self.write(f'FREQ:VOLT:RANG {voltage_range:g}')
         self.check_errors(f'FREQ:VOLT:RANG {voltage_range:g}')
 
+    def null_on(self, offset: float):
+        """Null the present function: CALC:FUNC NULL, CALC:NULL:OFFS <offset>, CALC:STAT ON. The offset and the state are
+        read back and compared, and SYST:ERR? is read after each command, so a rejected or ignored command stops the run.
+        UNVERIFIED on the 8846A (command set taken from the 34401A / Truevolt family). Writes are not retried."""
+        self.write('*CLS')
+        self.write('CALC:FUNC NULL')
+        self.check_errors('CALC:FUNC NULL')
+        self.write(f'CALC:NULL:OFFS {offset:.9g}')
+        self.check_errors('CALC:NULL:OFFS')
+        got = float(self.query('CALC:NULL:OFFS?').strip().split(',')[0])
+        if abs(got - offset) > 1e-6 * max(abs(offset), 1e-3):
+            raise InstrumentError(f'{self.MODEL} null offset reads back {got:.9g}, expected {offset:.9g}')
+        self.write('CALC:STAT ON')
+        self.check_errors('CALC:STAT ON')
+        if self.query('CALC:STAT?').strip().lstrip('+') not in ('1', '1.0'):
+            raise InstrumentError(f'{self.MODEL} did not report the null function on')
+
+    def null_off(self):
+        """CALC:STAT OFF, checked with SYST:ERR? and CALC:STAT?, so the null never carries over to another point."""
+        self.write('CALC:STAT OFF')
+        self.check_errors('CALC:STAT OFF')
+        if self.query('CALC:STAT?').strip().lstrip('+') not in ('0', '0.0'):
+            raise InstrumentError(f'{self.MODEL} did not report the null function off')
+
     def set_ac_filter(self, hz: float = 3.0):
         """DET:BAND <hz> (3, 20 or 200), then read it back with DET:BAND? and compare. UNVERIFIED on hardware:
         the command and its reply format come from the 8845A/8846A programming manual, not from a bench run.
