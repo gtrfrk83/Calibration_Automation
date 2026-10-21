@@ -171,6 +171,10 @@ class IO:
             # input. The 5560A must remain in STBY and is never used as a zero source.
             self.dmm.configure(k,r)
             return self.settled_read(p,max(1.5,self.settle(p)-1.0))
+        if k in ('FREQ','CAP','ACI'):
+            # These points read the 5560A error queue before OPER. Earlier points (AC volts etc.) never read it, so an
+            # old rejection can still be sitting there and would be blamed on this point: clear it first (*CLS).
+            self.fluke.clear_status()
         if k in ('DCV','ACV','DCI','ACI'):
             self.dmm.configure(k,r)
             if k in ('ACV','ACI'):
