@@ -6,6 +6,7 @@ an RF power meter, all speaking the same command strings as the real instruments
 The bench links them: the 5790B, counter and power meter "measure" whatever the simulated generator is putting out, with small
 deterministic errors, the 5790B input impedance (10 MOhm on 2.2 V and below, 50 kOhm on 7 V and above, as in the 5790B
 Operators Manual Table 4-4) and an optional -20 dB attenuator in front of the power sensor.
+Wideband: bench.connected = 'wbnd' with the 5790B on WBND (50 ohm); bench.std_option = '0' for a 5790B without the option.
 Faults to try: bench.gen['stuck_on'] (output ignores OUTP OFF), bench.gen['selftest_fail'], bench.attenuator = False on the
 +20 dB range, bench.std_unsettled (number of MEAS? replies flagged unsettled before a valid one).
 """
@@ -32,9 +33,11 @@ class FgenBench(SimBench):
         self.gen = dict(func='SIN', freq=1e3, amp=0.1, unit='VPP', load=50.0, offs=0.0, auto=True, on=False, errors=[],
                         stuck_on=False, selftest_fail=False)
         self.std = dict(input='INPUT1', extrig=False, range=7.0, auto=True, errors=[], unsettled_left=0)
+        self.std_option = 'WBND'        # *OPT? reply: '0' (none), WBND (30 MHz), WBEX / WBAF (50 MHz)
+        self.wbaf_on = False
         self.std_unsettled = 2
         self.attenuator = False
-        self.connected = 'std'          # which reference the generator output is cabled to: std / counter / power
+        self.connected = 'std'          # which reference the generator output is cabled to: std / wbnd / counter / power
         self.gain = 1.0012              # generator amplitude error
         self.ppm = 1.3e-6               # generator timebase error
 
@@ -128,9 +131,14 @@ class SimStd(_SimBase):
         b, s, u = self.bench, self.bench.std, cmd.upper()
         if u == '*IDN?': return 'FLUKE,5790B,SIM0001, v1.08+v1.01 FPGAv4'
         if u == '*CLS': s['errors'].clear(); return None
+        if u == '*OPT?': return b.std_option
+        if u == 'WBAF?': return '1' if b.wbaf_on else '0'
         if u == 'ERR?': return s['errors'].pop(0) if s['errors'] else '0,"No Error"'
         m = re.match(r'INPUT\s+(\w+)$', u)
-        if m: s['input'] = m.group(1); return None
+        if m:
+            if m.group(1) == 'WBND' and b.std_option == '0':
+                s['errors'].append('303,"Option not installed"'); return None
+            s['input'] = m.group(1); return None
         if u == 'INPUT?': return s['input']
         m = re.match(r'EXTRIG\s+(\w+)$', u)
         if m: s['extrig'] = m.group(1) in ('ON', '1'); return None
@@ -149,9 +157,12 @@ class SimStd(_SimBase):
             if s['unsettled_left'] > 0:
                 s['unsettled_left'] -= 1
                 return f'{0.0:.7E},{b.gen["freq"]:.6E},4'
-            if b.connected != 'std' or s['input'] != 'INPUT1':
+            wide = s['input'] == 'WBND'
+            if (b.connected, s['input']) not in (('std', 'INPUT1'), ('wbnd', 'WBND')):
                 return f'{1e-6:.7E},{0.0:.6E},1'
-            v = b.vrms_into(std_impedance(s['range']))
+            v = b.vrms_into(50.0 if wide else std_impedance(s['range']))
+            if wide and s['range'] > 7.0:
+                return f'{v:.7E},{b.gen["freq"]:.6E},7'
             if v > s['range'] * 1.01:
                 return f'{v:.7E},{b.gen["freq"]:.6E},6'
             if b.gen['freq'] < 10 or v == 0:

@@ -12,6 +12,10 @@
   "conditions": "21 to 25 C (23 C +/-2 C), humidity below 80 %, 1 hour warm-up",
   "note": "Limits are the manufacturer verification limits as printed (Q = quick verification). The manual notes that if no adjustment is made the limits must be guard-banded to no more than 80 % of the Chapter 1 specifications; that guard band is not applied here. Equipment: the manual lists a Keysight 3458A DMM for the AC amplitude and low-frequency flatness tests; this procedure uses a Fluke 5790B. Power meter E4418B with 8482A sensor and 8491A Opt 020 attenuator; frequency counter 53131A Opt 010."
  },
+ "flatness_methods": [
+  "WBND",
+  "POWER"
+ ],
  "periods": [
   "90d",
   "1y"

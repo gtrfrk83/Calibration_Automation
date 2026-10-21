@@ -1,4 +1,4 @@
-CALIBRATION SUITE - restyled (Manager v65)
+CALIBRATION SUITE - restyled (Manager v66)
 ==========================================
 
 Folder layout (same as before, plus one new file):
@@ -221,9 +221,17 @@ Procedures/Keysight_33210A_Verification.py, Agilent_33220A_Verification.py, Agil
   (39 points for the 33210A, 54 for the 33220A and 33250A; Quick check = the manual's Q points). Default limits 1 year; the
   33210A / 33220A timebase is +/-100 Hz at 90 days and +/-200 Hz at 1 year, the 33250A +/-20 Hz.
   Instruments: the generator (USB / GPIB / LAN; RS-232 on the 33250A), a Fluke 5790B (GPIB, USB, LAN or RS-232) for AC amplitude
-  and low-frequency flatness in place of the 3458A the manual lists, a frequency counter and an RF power meter with sensor and a
-  -20 dB attenuator. Leave the counter or power meter address blank to type its readings when asked.
-  Worksheet maths (manual p. 63 / 67 / 59): offset_N = 10 log(5 V100k^2) - 10 log(5 V1k^2) from the 5790B readings at 670 mV, 2 V and
+  and low-frequency flatness in place of the 3458A the manual lists, a frequency counter, and for flatness either the 5790B
+  WIDEBAND input or an RF power meter with sensor and a -20 dB attenuator. Leave the counter or power meter address blank to type
+  its readings when asked.
+  Flatness method ('Flatness with', 33210A and 33220A; default 5790B wideband): the 5790B WIDEBAND input (option /3, /5 or /AF,
+  50 ohm, up to 7 V) measures each point directly relative to 1 kHz at the same dBm setting with the range locked:
+  20 log(V(f) / V(1 kHz)), the method in the 5790B Operators Manual pp. 4-31 / 4-32. One cable for all three ranges, no attenuator
+  (+23.9 dBm is 3.5 V rms), no power meter and no worksheet offsets. The program checks *OPT? for the option and that the /AF
+  50 MHz cable correction is off (WBAF?, read only). Wideband flatness spec (pp. 1-20 to 1-22, 1 year, relative to 1 kHz):
+  0.03 to 0.05 % to 2 MHz, 0.1 % to 10 MHz, 0.15 % to 20 MHz (0.013 dB) on the 700 mV to 7 V ranges used here. The 33250A
+  (80 MHz) keeps the power meter. Each flatness result records the method; the report header and footnote state it.
+  Power-meter method - worksheet maths (manual p. 63 / 67 / 59): offset_N = 10 log(5 V100k^2) - 10 log(5 V1k^2) from the 5790B readings at 670 mV, 2 V and
   7 V; each flatness point = P(f) - P(100 kHz) + offset_N, which is what the power meter shows in Relative Power mode with that
   offset entered. The 100 kHz reference is read at the start of each flatness section in every run. Flatness points need their
   reference points recorded first; re-running a reference point warns that the flatness results using it must be re-run.
@@ -234,8 +242,9 @@ Procedures/Keysight_33210A_Verification.py, Agilent_33220A_Verification.py, Agil
   the manual's 1 MOhm DMM (about 10 % of the +/-70.7 mV limit). No correction is applied; the point details say so.
   Uncertainty: AC amplitude / LF flatness use the A2LA scope's AC Voltage - Measure entry, the timebase Frequency - Measure; RF
   flatness uses specs/fgen_332xx_reference_cmc.json and shows blank until you fill it in.
-  Hook-up diagrams (optional): diagrams/hook_332xx_<GROUP>.png with GROUP = NONE, COUNTER, STD, POWER, POWER_ATT; shown in the wiring
+  Hook-up diagrams (optional): diagrams/hook_332xx_<GROUP>.png with GROUP = NONE, COUNTER, STD, WBND, POWER, POWER_ATT; shown in the wiring
   prompt when present.
-  NOT verified on real hardware: every command in drivers/fluke_5790b.py and drivers/keysight_332xx.py (taken from the manuals), the
+  NOT verified on real hardware: every command in drivers/fluke_5790b.py and drivers/keysight_332xx.py (taken from the manuals; the
+  WBAF? reply format is not documented - the manual has no detail page for it), the
   counter and power-meter queries (drivers.ReferenceMeter: MEASure:FREQuency? and MEASure:POWer?, no manuals supplied), and the
   33250A RS-232 line endings. Run demo mode and the simulated bench (drivers/simulated_fgen.py) first.

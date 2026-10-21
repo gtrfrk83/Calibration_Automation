@@ -34,6 +34,8 @@ KINDS = ('SELFTEST', 'TIMEBASE', 'ACAMP', 'LFFLAT', 'FLAT')
 REF_CMC_PATH = HERE / 'specs' / 'fgen_332xx_reference_cmc.json'
 STD_INPUTS = {'INPUT 1 (type N)': 'INPUT1', 'INPUT 2 (binding posts)': 'INPUT2'}
 FLAT_REF_HZ = 100e3
+WBND_REF_HZ = 1e3          # wideband flatness is measured relative to 1 kHz (5790B manual pp. 4-31, 4-32)
+FLAT_METHODS = {'WBND': '5790B wideband input (relative to 1 kHz)', 'POWER': 'Power meter (manual method)'}
 SETTLE = {'TIMEBASE': 2.0, 'ACAMP': 1.0, 'LFFLAT': 1.0, 'FLAT': 1.5}
 
 
@@ -125,6 +127,18 @@ def judge(p, reading):
     return 'PASS' if abs(reading - p['nominal']) <= p['error'] else 'FAIL'
 
 
+def point_group(p, method):
+    """Wiring group: wideband flatness uses one connection (5790B WIDEBAND) for all three ranges, no attenuator."""
+    return 'WBND' if p['kind'] == 'FLAT' and method == 'WBND' else p['group']
+
+
+def setup_text(p, method):
+    if p['kind'] == 'FLAT' and method == 'WBND':
+        return ('Generator OUTPUT to the 5790B WIDEBAND input (50 ohm) with a 3 ft RG-58 cable and an N(m)-BNC(f) adapter. Output setup 50 ohm. '
+                'Flatness = 20 log(V(f) / V(1 kHz)) at the same setting, 5790B range locked (5790B manual pp. 4-31, 4-32).')
+    return p['setup']
+
+
 def flat_offset(results, range_db):
     """Worksheet step 5 (100kHz_NdB_offset) in dB from the recorded 5790B readings, or raise NeedReference."""
     hi, lo = f'100k_{range_db}dB', f'1k_{range_db}dB'
@@ -159,10 +173,14 @@ class IO:
     """The generator under test, the 5790B, and (optionally) a counter and a power meter. A reference left without an
     address is read by the technician: ask_number(prompt, unit) is called and must return a float (or None to stop)."""
 
-    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1'):
+    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER'):
         self.log = drivers.CommandLog()
         self.ask_number = ask_number
         self.std_input = std_input
+        if flat_method not in SPEC.get('flatness_methods', ['POWER']):
+            raise ValueError(f'{MODEL}: flatness method {flat_method} is not available (spec allows {SPEC.get("flatness_methods")})')
+        self.flat_method = flat_method
+        self.wideband = None
         self.uut = self.std = self.counter = self.power = None
         t = transports or {}
 
@@ -270,10 +288,9 @@ class IO:
             self.std.set_external_trigger(True)
             self.std.set_range_for(p['nominal'])
             self._out(p)
-            volts, freq = self.std.measure()
-            if not math.isclose(freq, p['frequency'], rel_tol=0.01):
-                raise drivers.InstrumentError(f'5790B measured {freq:g} Hz, expected {p["frequency"]:g} Hz: check the cable to the 5790B.')
-            return volts, dict(freq_hz=freq)
+            return self._std_volts(p['frequency']), {}
+        if k == 'FLAT' and self.flat_method == 'WBND':
+            return self._flat_wideband(p, pref_cache)
         if k == 'FLAT':
             offset = flat_offset(results, p['range_db'])
             key = p['section']
@@ -292,8 +309,43 @@ class IO:
             pref = pref_cache[key]
             self._out(p)
             pf = self._power(f'{p["desc"]}')
-            return (pf - pref) + offset, dict(p_ref_dbm=pref, p_dbm=pf, offset_db=offset)
+            return (pf - pref) + offset, dict(method='POWER', p_ref_dbm=pref, p_dbm=pf, offset_db=offset)
         raise drivers.InstrumentError(f'No executor for {k}')
+
+    def _std_volts(self, expected_hz, where=''):
+        where = where or ('the WIDEBAND input' if self.std.last_input == 'WBND' else self.std.last_input)
+        try:
+            volts, freq = self.std.measure()
+        except drivers.InstrumentError as exc:
+            raise drivers.InstrumentError(f'{exc} - check the cable to the 5790B {where}.') from exc
+        if not math.isclose(freq, expected_hz, rel_tol=0.01):
+            raise drivers.InstrumentError(f'5790B measured {freq:g} Hz, expected {expected_hz:g} Hz: check the cable to the 5790B {where}.')
+        return volts
+
+    def _flat_wideband(self, p, ref_cache):
+        """Flatness on the 5790B WIDEBAND input (50 ohm), relative to 1 kHz at the same setting and on the same locked range:
+        20 log10(V(f) / V(1 kHz)). The 1 kHz reading is taken at the start of each section in every run."""
+        if self.wideband is None:
+            self.wideband = self.std.require_wideband(max(q['frequency'] for q in POINTS if q['kind'] == 'FLAT'))
+        expected = math.sqrt(10 ** (p['amplitude'] / 10) * 1e-3 * 50.0)      # dBm into 50 ohm -> V rms
+        if expected > 7.0:
+            raise drivers.SafetyError(f'{p["amplitude"]:+.2f} dBm is {expected:.2f} V rms, above the 5790B wideband 7 V range.')
+        self.std.select_input('WBND')
+        self.std.set_external_trigger(True)
+        rng = self.std.set_range_for(expected)
+        key = p['section']
+        if key not in ref_cache:
+            self._out(p, WBND_REF_HZ)
+            v1k = self._std_volts(WBND_REF_HZ)
+            self.uut.output(False)
+            if abs(v1k / expected - 1) > 0.2:
+                raise drivers.InstrumentError(f'5790B wideband reads {v1k:.4g} V at 1 kHz, expected about {expected:.4g} V '
+                                              f'({p["amplitude"]:+.2f} dBm into 50 ohm): check the cable to the WIDEBAND input and the output setup.')
+            ref_cache[key] = v1k
+        v1k = ref_cache[key]
+        self._out(p)
+        vf = self._std_volts(p['frequency'])
+        return 20 * math.log10(vf / v1k), dict(method='WBND', v_1k=v1k, v_f=vf, std_range_v=rng)
 
 
 def demo_reading(p):
@@ -381,6 +433,10 @@ class App:
                                             ('5790B', 'No other cables on the 5790B inputs. Guard and ground as your lab practice.')]),
         'POWER': ('Connect the power sensor', [('Power meter', 'Zero and calibrate the power meter with the sensor, then connect the sensor.'),
                                                ('Connect', 'Generator OUTPUT to the power sensor (N(m) to BNC(f) adapter), no attenuator.')]),
+        'WBND': ('Connect the 5790B WIDEBAND input', [('Connect', 'Generator OUTPUT to the 5790B WIDEBAND input (type N, 50 ohm) with a 3 ft '
+                                                                 'RG-58 cable and an N(m) to BNC(f) adapter. No attenuator.'),
+                                                      ('5790B', 'Nothing connected to INPUT 1 / INPUT 2. The program selects the WIDEBAND input; '
+                                                                'the 50 MHz cable correction (/AF option) must be off.')]),
         'POWER_ATT': ('Fit the -20 dB attenuator', [('Attenuator', 'Fit the -20 dB attenuator (8491A Opt 020 or equivalent) between the generator '
                                                                    'OUTPUT and the power sensor.'),
                                                     ('Why', 'The +20 dB range points output +23.9 dBm (about 245 mW), above the 8482A sensor maximum.')]),
@@ -399,6 +455,9 @@ class App:
         self.addr = {k: tk.StringVar(value=g(k, d)) for k, d in (('uut', 'USB0::0x0957::0x0407::MY00000000::INSTR'), ('std', 'GPIB0::8::INSTR'),
                                                                    ('counter', ''), ('power', ''), ('std_baud', '9600'), ('uut_baud', '57600'))}
         self.std_input = tk.StringVar(value=g('std_input', 'INPUT 1 (type N)'))
+        methods = SPEC.get('flatness_methods', ['POWER'])
+        saved = g('flat_method', FLAT_METHODS[methods[0]])
+        self.flat_method = tk.StringVar(value=saved if saved in [FLAT_METHODS[m] for m in methods] else FLAT_METHODS[methods[0]])
         self.period = tk.StringVar(value=g('period', PERIOD_LABEL[SPEC['default_period']]))
         self.test_set = tk.StringVar(value='Full verification')
         self.status = tk.StringVar()
@@ -431,7 +490,7 @@ class App:
             for b in (self.btn_run, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find):
                 b.configure(state=idle)
             self.btn_stop.configure(state='normal' if value else 'disabled')
-            for c in (self.period_combo, self.set_combo):
+            for c in (self.period_combo, self.set_combo) + ((self.method_combo,) if hasattr(self, 'method_combo') else ()):
                 c.configure(state='disabled' if value else 'readonly')
 
     # ------------------------------------------------------------------ layout
@@ -473,6 +532,13 @@ class App:
         ttk.Combobox(row, textvariable=self.std_input, values=list(STD_INPUTS), width=20, state='readonly').pack(side='left', padx=(5, 8))
         ttk.Label(row, text='Baud', style='Muted.TLabel').pack(side='left')
         ttk.Combobox(row, textvariable=self.addr['std_baud'], values=['9600', '19200', '38400', '57600', '115200'], width=7, state='readonly').pack(side='left', padx=(5, 0))
+        if len(SPEC.get('flatness_methods', ['POWER'])) > 1:
+            mrow = ttk.Frame(conn); mrow.grid(row=3, column=2, columnspan=2, sticky='w')
+            ttk.Label(mrow, text='Flatness with', style='Muted.TLabel').pack(side='left')
+            self.method_combo = ttk.Combobox(mrow, textvariable=self.flat_method, values=[FLAT_METHODS[m] for m in SPEC['flatness_methods']],
+                                             width=36, state='readonly')
+            self.method_combo.pack(side='left', padx=(5, 0))
+            self.method_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_method())
         ttk.Label(conn, text='Leave the counter or power meter blank to type its readings. Examples: USB0::0x0957::0x0407::<serial>::INSTR   '
                              'GPIB0::10::INSTR   TCPIP0::192.168.1.20::INSTR   COM9', style='Muted.TLabel').grid(row=4, column=1, columnspan=3, sticky='w')
 
@@ -480,7 +546,7 @@ class App:
             ui.Notice(body, 'Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode').pack(fill='x', pady=(12, 0))
         else:
             ui.Notice(body, 'The program switches the generator output OFF after every point and asks you to confirm the wiring before every new setup. '
-                            'The +20 dB range needs the -20 dB attenuator in front of the power sensor.', 'info', title='Hardware mode').pack(fill='x', pady=(12, 0))
+                            'Power-meter flatness: the +20 dB range needs the -20 dB attenuator in front of the sensor.', 'info', title='Hardware mode').pack(fill='x', pady=(12, 0))
         ttk.Label(body, text=src['note'], style='Small.TLabel', wraplength=1180, justify='left').pack(anchor='w', pady=(6, 0))
 
         tools = ttk.Frame(body); tools.pack(fill='x', pady=(8, 6))
@@ -576,7 +642,7 @@ class App:
             lines.append('5790B note: the 7 V range input is 50 kOhm (Table 4-4). With the generator\'s 50 ohm source this reads about 0.1 % '
                          'lower than a 1 MOhm DMM such as the 3458A the manual lists.')
         if p.get('ref'): lines.append(f'Worksheet reference: {p["ref"].replace("k_", "kHz_")}_reference (used for the flatness offsets).')
-        lines.append('Setup: ' + p['setup'])
+        lines.append('Setup: ' + setup_text(p, self.method()))
         rec = self.results.get(str(p['id']), {})
         if rec.get('raw'):
             lines.append('Recorded: ' + ', '.join(f'{k} = {v:.6g}' if isinstance(v, float) else f'{k} = {v}' for k, v in rec['raw'].items()))
@@ -600,7 +666,8 @@ class App:
         self.status.set('Connecting ...'); self.root.update_idletasks()
         try:
             self.disconnect()
-            self.io = IO(self._addrs(), ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()])
+            self.io = IO(self._addrs(), ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()],
+                         flat_method=self.method())
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
@@ -623,6 +690,7 @@ class App:
     def _save_settings(self):
         for k, v in self.addr.items(): self.settings.set(k, v.get())
         self.settings.set('std_input', self.std_input.get()); self.settings.set('period', self.period.get())
+        self.settings.set('flat_method', self.flat_method.get())
         self.settings.save()
 
     def ask_number_threadsafe(self, prompt, unit):
@@ -658,10 +726,23 @@ class App:
         self.stop = False; self.busy = True; self.pref_cache = {}
         self._next(points, 0, None)
 
+    def method(self):
+        return next(k for k, v in FLAT_METHODS.items() if v == self.flat_method.get())
+
+    def on_method(self):
+        self._save_settings()
+        if self.io is not None:
+            self.io.flat_method = self.method()
+        done = [p for p in POINTS if p['kind'] == 'FLAT' and str(p['id']) in self.results
+                and self.results[str(p['id'])].get('raw', {}).get('method', 'POWER') != self.method()]
+        self.status.set(f'Flatness will be measured with: {self.flat_method.get()}.'
+                        + (f' {len(done)} recorded flatness point(s) used the other method; rerun them if they should match.' if done else ''))
+
     def _prompt_setup(self, p):
-        title, steps = self.WIRING[p['group']]
+        group = point_group(p, self.method())
+        title, steps = self.WIRING[group]
         steps = [(a, b.format(input=self.std_input.get())) for a, b in steps]
-        image = HERE / 'diagrams' / f'hook_332xx_{p["group"]}.png'
+        image = HERE / 'diagrams' / f'hook_332xx_{group}.png'
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['section_title']), ('Manual page', p['page'])]
         return ui.confirm_steps(self.root, 'Rewire / verify - generator output is OFF', title,
                                 [('Output OFF', f'The {MODEL} output has been switched OFF (confirmed).')] + steps,
@@ -673,7 +754,7 @@ class App:
             self.busy = False; self.save()
             self.status.set('Run stopped by the operator. Progress is saved.' if self.stop else 'Run complete. Save progress or export a report.'); return
         p = points[i]
-        key = p['group']
+        key = point_group(p, self.method())
         if not self.demo and key != previous:
             try: self.io.all_off()
             except Exception as exc: self._error(exc); return
@@ -683,6 +764,7 @@ class App:
         if self.tree.exists(str(p['id'])): self.tree.selection_set(str(p['id'])); self.tree.see(str(p['id']))
         if self.demo:
             reading, raw = demo_reading(p)
+            if p['kind'] == 'FLAT': raw = dict(raw, method=self.method())
             self._record(p, reading, raw, True); self.root.after(30, lambda: self._next(points, i + 1, key))
             return
 
@@ -706,7 +788,8 @@ class App:
         stale = []
         if p.get('ref'):
             rng = int(p['ref'].split('_')[1].rstrip('dB'))
-            stale = [q for q in POINTS if q['kind'] == 'FLAT' and q['range_db'] == rng and str(q['id']) in self.results]
+            stale = [q for q in POINTS if q['kind'] == 'FLAT' and q['range_db'] == rng and str(q['id']) in self.results
+                     and self.results[str(q['id'])].get('raw', {}).get('method', 'POWER') == 'POWER']
         self.results[str(p['id'])] = dict(reading=reading, result=judge(p, reading), raw=raw, synthetic=synthetic,
                                           period=PERIODS[self.period.get()], timestamp=datetime.now().isoformat(timespec='seconds'))
         self._update_row(p); self.save(silent=True)
@@ -749,12 +832,17 @@ class App:
         path = filedialog.asksaveasfilename(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
         if not path: return
         demo = self.demo or any(v.get('synthetic') for v in self.results.values())
+        used = sorted({v.get('raw', {}).get('method', 'POWER') for k, v in self.results.items() if POINTS[int(k) - 1]['kind'] == 'FLAT'})
+        how = {'WBND': 'Flatness measured on the Fluke 5790B WIDEBAND input relative to 1 kHz (5790B Operators Manual pp. 4-31, 4-32) '
+                       'instead of the manual\'s power meter method.',
+               'POWER': 'Flatness measured with a power meter: 100 kHz reference plus the worksheet offset (manual method).'}
         note = ('Uncertainty: AC amplitude and low-frequency flatness use the laboratory A2LA scope, AC Voltage - Measure; the timebase uses '
                 'Frequency - Measure; RF flatness uses specs/fgen_332xx_reference_cmc.json and is blank where no value is set. '
-                'AC amplitude reference standard: Fluke 5790B (the manual lists a 3458A DMM).')
+                'AC amplitude reference standard: Fluke 5790B (the manual lists a 3458A DMM). ' + ' '.join(how[m] for m in used))
         try:
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'{SPEC["manufacturer"]} {MODEL}'), ('Instrument ID', self.asset.get()),
                                                                  ('Serial', self.serial.get()), ('Limits applied', self.period.get()),
+                                                                 ('Flatness method', ', '.join(FLAT_METHODS[m] for m in used) or 'not tested'),
                                                                  ('Source', f'{SPEC["source"]["document"]}, {SPEC["source"]["chapter"]}, pp. {SPEC["source"]["pages"]}')],
                                              demo=demo, details=details, footer_note=note, title='Calibration Data')
         except ImportError:

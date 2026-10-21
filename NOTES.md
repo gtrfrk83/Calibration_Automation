@@ -1,6 +1,6 @@
 # Calibration Suite: project notes
 
-Tkinter calibration suite. `Calibration_Procedure_Manager.py` (v65) launches one procedure per instrument from `Procedures/`.
+Tkinter calibration suite. `Calibration_Procedure_Manager.py` (v66) launches one procedure per instrument from `Procedures/`.
 Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance-verification tables; shared engines hold the UI and run logic.
 
 ## Layout
@@ -39,7 +39,9 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - 5790B 7 V range is 50 kOhm: 7 Vrms points read about 0.1 % low versus the manual's 3458A. Not corrected.
 - Power sensor cal factor vs frequency is not set by the program (the manual does not set it either).
 - The manual's 80 % guard band (no adjustment made) is not applied.
-- Hook-up diagrams still to be supplied: diagrams/hook_332xx_<NONE|COUNTER|STD|POWER|POWER_ATT>.png.
+- 33210A / 33220A flatness defaults to the 5790B WIDEBAND input, relative to 1 kHz (5790B manual pp. 4-31/4-32); power meter selectable.
+  33250A keeps the power meter (80 MHz). WBAF? reply format undocumented in the 5790B manual.
+- Hook-up diagrams still to be supplied: diagrams/hook_332xx_<NONE|COUNTER|STD|WBND|POWER|POWER_ATT>.png.
 
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.

@@ -23,6 +23,11 @@ Printed-table quirks, applied as noted:
   * 33250A pp. 63-67 do not repeat the "Relative Power" step the other two manuals give; the same method is used for all three.
   * Timebase limit: 33210A / 33220A +/-100 Hz within 90 days of calibration, +/-200 Hz within one year (footnote); 33250A +/-20 Hz.
 
+Flatness methods (flatness_methods): POWER is the manual's method (power meter, 100 kHz reference plus the worksheet offset).
+WBND (33210A and 33220A only) measures on the Fluke 5790B WIDEBAND input, 50 ohm, directly relative to 1 kHz - the method in the
+5790B Operators Manual pp. 4-31 / 4-32; the generator manuals define flatness relative to 1 kHz. The 33250A reaches 80 MHz, beyond
+the wideband option (30 or 50 MHz), so it keeps the power meter.
+
 Run:  python specs/build_fgen_spec.py
 """
 from __future__ import annotations
@@ -50,7 +55,7 @@ MODELS = {
         # (frequency Hz, error dB, quick)  - the same table is printed for the 0, +10 and +20 dB ranges
         flatness=[(100e3, 0.1, True), (200e3, 0.2, False), (500e3, 0.2, False), (2e6, 0.2, False), (3e6, 0.2, False),
                   (4e6, 0.2, True), (5e6, 0.2, False), (8e6, 0.3, False), (10e6, 0.3, True)],
-        square_typical=False),
+        square_typical=False, flatness_methods=['WBND', 'POWER']),
     '33220A': dict(
         brand='Agilent', doc='Agilent 33220A 20 MHz Function / Arbitrary Waveform Generator Service Guide',
         pages=dict(equipment=58, considerations=59, selftest=60, worksheet=63, timebase=64, acamp=65, lf=66,
@@ -60,7 +65,7 @@ MODELS = {
         flatness=[(100e3, 0.1, True), (200e3, 0.15, False), (500e3, 0.15, False), (2e6, 0.15, False), (3e6, 0.15, False),
                   (4e6, 0.15, True), (5e6, 0.15, False), (8e6, 0.3, False), (10e6, 0.3, True), (12.5e6, 0.3, False),
                   (14e6, 0.3, False), (16e6, 0.3, False), (17.5e6, 0.3, False), (20e6, 0.3, True)],
-        square_typical=False),
+        square_typical=False, flatness_methods=['WBND', 'POWER']),
     '33250A': dict(
         brand='Agilent', doc='Agilent 33250A 80 MHz Function / Arbitrary Waveform Generator Service Guide',
         pages=dict(equipment=53, considerations=54, selftest=56, worksheet=59, timebase=60, acamp=61, lf=62,
@@ -70,7 +75,7 @@ MODELS = {
         flatness=[(100e3, 0.086, True), (200e3, 0.086, False), (500e3, 0.086, False), (1.5e6, 0.086, False), (5e6, 0.086, False),
                   (10e6, 0.086, True), (25e6, 0.177, False), (40e6, 0.177, False), (50e6, 0.177, True), (60e6, 0.423, False),
                   (65e6, 0.423, False), (70e6, 0.423, False), (75e6, 0.423, False), (80e6, 0.423, True)],
-        square_typical=True),
+        square_typical=True, flatness_methods=['POWER']),     # 80 MHz is beyond the 5790B wideband (30 / 50 MHz)
 }
 
 PERIODS = ['90d', '1y']
@@ -132,6 +137,7 @@ def build(model):
                              'that guard band is not applied here. Equipment: the manual lists a Keysight 3458A DMM for the AC amplitude '
                              'and low-frequency flatness tests; this procedure uses a Fluke 5790B. Power meter E4418B with 8482A sensor and '
                              '8491A Opt 020 attenuator; frequency counter 53131A Opt 010.')),
+        'flatness_methods': m['flatness_methods'],
         'periods': PERIODS,
         'default_period': '1y',
         'references': {

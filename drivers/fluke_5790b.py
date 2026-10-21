@@ -2,7 +2,9 @@
 
 Commands are from the 5790B Operators Manual (June 2015), Chapter 6 Remote Commands:
   *IDN? (p. 6-19)  ERR? (p. 6-46)  EXTRIG / EXTRIG? (pp. 6-46, 6-47)  INPUT / INPUT? (p. 6-49)
-  MEAS? (p. 6-53)  RANGE / RANGE? (pp. 6-54, 6-55)  *CLS (p. 6-11)
+  MEAS? (p. 6-53)  RANGE / RANGE? (pp. 6-54, 6-55)  *CLS (p. 6-11)  *OPT? (p. 6-21)
+Wideband (options /3, /5, /AF): WBND input, 50 ohm, 600 uV to 7 V, 10 Hz to 30 or 50 MHz (pp. 4-31, 4-32), 10 V rms maximum
+non-destructive input; flatness is specified relative to 1 kHz (Absolute Wideband Specifications, pp. 1-20 to 1-22).
 Input impedance (Table 4-4, p. 4-9): INPUT 1 / INPUT 2 are 10 MOhm on the 2.2 V range and below, 50 kOhm on the
 7 V to 220 V ranges. RS-232 defaults (pp. 5-5, 5-6): 9600 baud, 8 data bits, 1 stop bit, no parity, XON/XOFF, CR LF;
 set Remote IF to Computer (Setup Menu > System Settings > Remote Port > RS-232 Setup), not the default Terminal, and make
@@ -33,6 +35,7 @@ class Fluke5790B(Instrument):
     MODEL = 'Fluke 5790B'
     IDN_MATCH = ('5790B',)
     DEFAULT_TIMEOUT = 30.0
+    last_input = ''
 
     def connect(self):
         """Open, check the model (a 5790B set to emulate a 5790A identifies as a 5790A), clear status."""
@@ -71,6 +74,7 @@ class Fluke5790B(Instrument):
         if got != name:
             raise InstrumentError(f'5790B input set {name}, reports {got}')
         self.check_error(f'input {name}')
+        self.last_input = name
 
     def set_external_trigger(self, on=True):
         """EXTRIG ON: each MEAS? starts a fresh measurement (p. 6-46)."""
@@ -101,6 +105,30 @@ class Fluke5790B(Instrument):
         if not self.range_info()[3]:
             raise InstrumentError('5790B did not confirm autoranging')
         self.check_error('autorange')
+
+    # ---- wideband option ------------------------------------------------------------------------------
+    WIDEBAND_MAX_HZ = {'WBND': 30e6, 'WBEX': 50e6, 'WBAF': 50e6}   # *OPT? replies (p. 6-21); 0 = no wideband
+
+    def wideband_option(self):
+        """*OPT? -> 'WBND' (30 MHz), 'WBEX' / 'WBAF' (50 MHz), or '' when no wideband module is installed."""
+        reply = self.query('*OPT?').strip().strip('"').upper()
+        return next((o for o in self.WIDEBAND_MAX_HZ if o in reply), '')
+
+    def require_wideband(self, max_hz):
+        """Raise unless a wideband module covering max_hz is installed and the /AF 50 MHz cable correction is off.
+        The correction (WBAF, summary p. 6-14; no detail page in the manual) is only read, never set."""
+        opt = self.wideband_option()
+        if not opt:
+            raise InstrumentError('This 5790B has no wideband option (*OPT? reports none). Use the power-meter method for flatness.')
+        if self.WIDEBAND_MAX_HZ[opt] < max_hz:
+            raise InstrumentError(f'The 5790B wideband option ({opt}) covers {self.WIDEBAND_MAX_HZ[opt] / 1e6:g} MHz; '
+                                  f'the flatness test needs {max_hz / 1e6:g} MHz.')
+        if opt == 'WBAF':
+            state = self.query('WBAF?').strip().upper()
+            if state not in ('0', 'OFF'):
+                raise InstrumentError(f'The 5790B 50 MHz cable correction is on (WBAF? -> {state}). It applies only to the 50 MHz '
+                                      'spot calibration; turn it off (wideband menu, 50 MHz Cable Correction) and continue.')
+        return opt
 
     # ---- measurement ---------------------------------------------------------------------------------
     def measure(self, timeout=60.0, poll=1.0):

@@ -80,4 +80,5 @@ Schema 4 (function generators: keysight_33210a/33220a/33250a_pv.json)
     range_db                    FLAT only: attenuator range 0 / 10 / 20
     ref                         worksheet reference recorded by this point (1k_0dB, 100k_10dB ...)
     quick, typical, note        Q mark; the manual calls the limit a guideline (33250A square wave)
-  references.offset_N           which two references make the N dB flatness offset (worksheet step 5)
+  references.offset_N           which two references make the N dB flatness offset (worksheet step 5; power-meter method)
+  flatness_methods              WBND (5790B wideband, relative to 1 kHz) and/or POWER (manual method); the first is the default

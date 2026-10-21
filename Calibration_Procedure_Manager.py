@@ -29,7 +29,7 @@ DB = BASE / 'calibration_procedures.sqlite3'
 BUILTIN = 'Procedures/WaveSurfer_WS4104HD.py'
 PROCEDURES = BASE / 'Procedures'
 BACKUPS = BASE / 'Backups'
-VERSION = 'v65'
+VERSION = 'v66'
 STABLE = {
  'WaveSurfer WS4104HD Verification': 'WaveSurfer_WS4104HD.py',
  'Fluke 87V Guided Verification': 'Fluke_87V.py',
@@ -58,7 +58,7 @@ VERSIONS = {'WaveSurfer_WS4104HD.py': '51', 'Fluke_87V.py': '53', 'Agilent_34401
             'Fluke_8846A_Verification.py': '59', 'Fluke_8846A_Adjustment.py': '57',
             'Keysight_34465A_Verification.py': '3', 'Keysight_34460A_Verification.py': '2', 'Keysight_34461A_Verification.py': '2', 'Keysight_34470A_Verification.py': '2', 'Keysight_34970A_Verification.py': '1', 'Keysight_34972A_Verification.py': '1',
             'Tektronix_MDO4000C_Verification.py': '2', 'Fluke_110_Verification.py': '2', 'Fluke_113_Verification.py': '2', 'Fluke_114_Verification.py': '2', 'Fluke_115_Verification.py': '2', 'Fluke_116_Verification.py': '2', 'Fluke_117_Verification.py': '2', 'Klein_MM325_Verification.py': '2',
-            'Keysight_33210A_Verification.py': '1', 'Agilent_33220A_Verification.py': '1', 'Agilent_33250A_Verification.py': '1'}
+            'Keysight_33210A_Verification.py': '2', 'Agilent_33220A_Verification.py': '2', 'Agilent_33250A_Verification.py': '1'}
 ALL_CATEGORIES = 'All categories'
 
 
