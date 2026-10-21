@@ -1,6 +1,6 @@
 # Calibration Suite: project notes
 
-Tkinter calibration suite. `Calibration_Procedure_Manager.py` (v68) launches one procedure per instrument from `Procedures/`.
+Tkinter calibration suite. `Calibration_Procedure_Manager.py` (v69) launches one procedure per instrument from `Procedures/`.
 Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance-verification tables; shared engines hold the UI and run logic.
 
 ## Layout
@@ -15,7 +15,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 ## Procedures
 WaveSurfer WS4104HD, Fluke 87V, Agilent 34401A, Fluke 8846A (verification + adjustment), Keysight 34460A/61A/65A/70A,
 Tektronix MDO4000C, Fluke 110/113/114/115/116/117, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
-Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard).
+Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard), Fluke 287 / 289 (typed or IR readings).
 
 ## Standing rules
 - Display-only SI scaling. `calibration_procedures.sqlite3` schema is never changed (read only).
@@ -45,6 +45,13 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - 33210A / 33220A flatness defaults to the 5790B WIDEBAND input, relative to 1 kHz (5790B manual pp. 4-31/4-32); power meter selectable.
   33250A keeps the power meter (80 MHz). WBAF? reply format undocumented in the 5790B manual.
 - Hook-up diagrams still to be supplied: diagrams/hook_332xx_<NONE|COUNTER|STD|WBND|POWER|POWER_ATT>.png.
+
+## Open items: Fluke 287 / 289 (not yet run on hardware)
+- IR protocol from Fluke's unsupported remote spec; QDDA function / range codes used for the set-up check unverified (400 mA and
+  diode ranges not checked). 'Type the reading instead' is the fallback if a check is wrong.
+- Calibrator 2-wire COMP is set by the technician (prompted); capacitance and thermocouple outputs unverified on the 5560A.
+- Steps 25, 29, 41 are set on the calibrator by hand (levsine 950 kHz, 15 % duty square, square + offset).
+- Handheld reports are titled '<model> Performance Verification', not 'Calibration Data' (existing engine behaviour, unchanged).
 
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.

@@ -16,6 +16,9 @@ One driver per instrument MODEL. Procedures call intent-level methods
                         output OFF - never APPLy -, OUTP? confirmed, *TST? self-test)
   keysight_5313x.py     Agilent / HP 53131A and 53132A counters (frequency: input, gate, expected frequency, reference
                         oscillator, READ?; *TST?)
+  fluke_28x.py          Fluke 287 / 289 over the IR cable: ID, QM, QDDA (two-line CMD_ACK protocol), display parser, set-up check,
+                        stable reading; read-only (no reset commands)
+  simulated_28x.py      Simulated 287 / 289 on the IR cable (function, range, REL, Low Pass, drift, overload)
   simulated_fgen.py     Simulated generator + 5790B + counter (53131A / 53132A or generic) + power meter bench for fgen_verification.py
   selftest.py           Safe hardware check:  python -m drivers.selftest --sim
                         python -m drivers.selftest --fluke ASRL9::INSTR --baud 9600 --scope USB0::...::INSTR

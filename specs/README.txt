@@ -17,6 +17,9 @@ Included
   keysight_33210a_pv.json / _33220a_ / _33250a_   function generators (schema 4, written by build_fgen_spec.py from the page images of
                             each Service Guide's Chapter 4): 39 / 54 / 54 points; periods 90d / 1y (they differ only for the timebase)
   fgen_332xx_reference_cmc.json  editable uncertainties for the generator procedure (RF flatness has no A2LA entry; blank = N/A)
+  fluke_287_289_pv.json     Fluke 287 / 289 Calibration Manual pp. 14-20 (schema 2, written by build_28x_spec.py from the page images):
+                            functional checks, Table 3, Table 4; per point 'ir' (reading unit, range code, rel, lowpass, functions),
+                            'rel_zero', 'prompt', 'ramp'; options.table_order runs Table 3 before Table 4
   klein_mm325_pv.json       Klein Tools MM325 instruction manual (schema 3, written by build_mm325.py): one point per range at 90 %, AC at 60 Hz;
                             adds groups{} (cable-change prompts + hook-up diagram), dial{} (picture and position of every range) and options{}
                             (range_prompt, hv_threshold_v); per step: dial, dial_text, tol_text, max_on_s / recovery_s (10 A duty limit)

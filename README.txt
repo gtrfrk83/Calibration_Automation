@@ -1,4 +1,4 @@
-CALIBRATION SUITE - restyled (Manager v68)
+CALIBRATION SUITE - restyled (Manager v69)
 ==========================================
 
 Folder layout (same as before, plus one new file):
@@ -254,3 +254,24 @@ Procedures/Keysight_33210A_Verification.py, Agilent_33220A_Verification.py, Agil
   power-meter query (drivers.ReferenceMeter: MEASure:POWer?, no manual supplied), any counter other than a 53131A / 53132A
   (generic MEASure:FREQuency?), and the
   33250A RS-232 line endings. Run demo mode and the simulated bench (drivers/simulated_fgen.py) first.
+
+Fluke 287 / 289 (handheld engine, with optional IR readings)
+------------------------------------------------------------
+Procedures/Fluke_287_Verification.py and Fluke_289_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_287_289_pv.json,
+  built by specs/build_28x_spec.py from the 287/289 Calibration Manual, Performance Tests pp. 14-20: functional checks, Table 3
+  temperature, Table 4; 72 points for the 289, 67 for the 287 - the 287 has no Low Pass, LoΩ or LoZ steps).
+  The calibrator (5560A / 5522A, or by hand) is set for you, as in the other handheld procedures. 'Meter reading':
+    Type the reading          - you read the display and type it in (no cable needed).
+    Read over IR              - with the Fluke IR-to-USB cable (P/N 2166275) on the meter's IR port, COM port in 'IR cable port'.
+                                For each point the program reads the display (QDDA), checks the reading unit, the range named in the
+                                table, REL on / off, Low Pass on / off and, for temperature, that the offset is 000.0; waits for three
+                                readings within 2 display counts; records the value at the meter's resolution, judged exactly like a
+                                typed value. A wrong set-up puts the calibrator in STANDBY and shows what to fix: Re-check, Type the
+                                reading instead, Skip or Stop. The IR port functional check is done automatically from ID.
+  REL offsets (the table's grey rows) are prompts: steps 2, 11 and 46 apply 0 mV / 0 ohm and ask you to press REL when stable; step 42
+  zeroes with the leads removed. Steps 25, 29 and 41 (950 kHz levsine, 15 % duty square, square with offset) are set on the calibrator
+  by hand. Ohms steps 10-14 and LoΩ: set 2-wire COMP on the calibrator yourself (prompted). LoZ 120 V is reached through 60 V.
+  The report footer says how many readings came over IR and how many were typed.
+  The IR interface only reads: the program never sends the reset commands (DS, RI, RMP), so it never changes the meter's settings or memory.
+  NOT verified on real hardware: the IR protocol (Fluke states it does not support that document), the QDDA function / range codes used
+  for the checks, and the calibrator outputs for capacitance and thermocouple.

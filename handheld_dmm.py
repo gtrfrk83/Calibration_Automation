@@ -1,7 +1,9 @@
-"""Manual-reading verification engine for handheld meters that have no remote interface.
+"""Verification engine for handheld meters: the calibrator output is set for you and the meter reading is typed in or, for meters
+with an IR interface (Fluke 287 / 289, spec option "ir": "fluke28x"), read over the IR cable.
 
 The calibrator output is set automatically (Fluke 5560A or 5522A over RS-232, or by hand if you prefer);
-the technician reads the meter display and types the value in. Test points and limits are NOT in this file:
+the technician reads the meter display and types the value in - or chooses "Read over IR", where the program reads the display,
+checks the meter's function, range and REL / Low Pass state against the point, waits for a stable reading and records it. Test points and limits are NOT in this file:
 they come from a spec JSON (specs/fluke_110_series_pv.json), extracted from the manufacturer's tables.
 
     import handheld_dmm
@@ -31,6 +33,7 @@ import ui_theme as ui
 import drivers
 
 SPEC_PATH = HERE / 'specs' / 'fluke_110_series_pv.json'
+READ_TYPED, READ_IR = 'Type the reading', 'Read over IR (Fluke IR cable)'
 CAL_CHOICES = ['Fluke 5560A  (automatic output)', 'Fluke 5522A  (automatic output)', 'Manual  (5560A front panel)', 'Manual  (5522A front panel)']
 OLD_CAL_CHOICES = {'Manual  (I set the calibrator)': 'Manual  (5560A front panel)'}
 
@@ -54,7 +57,7 @@ def load_spec(path=SPEC_PATH):
 
 def points_for(spec, model):
     """The model's steps in manual order (functional checks first), numbered 1..n."""
-    order = {'F': 0}
+    order = spec.get('options', {}).get('table_order') or {'F': 0}     # opt-in: run whole tables in this order (e.g. F, 3, 4)
     chosen = [dict(s) for s in spec['steps'] if model in s['models']]
     chosen.sort(key=lambda s: (order.get(s['table'], 1), s['step']))
     for n, p in enumerate(chosen, 1):
@@ -161,9 +164,11 @@ class IO:
                 raise Cancelled()
             time.sleep(min(0.25, max(0.0, end - time.monotonic())))
 
-    def _volts(self, v, f, context, cancel):
+    def _volts(self, v, f, context, cancel, ramp=None):
         steps = [v]
-        if abs(v) > self.RAMP_ABOVE:
+        if ramp:                                   # a ramp the meter's manual prescribes (e.g. 60 V then 120 V)
+            steps = [float(x) for x in ramp]
+        elif abs(v) > self.RAMP_ABOVE:
             n = int(abs(v) // self.RAMP_STEP)
             steps = [math.copysign(self.RAMP_STEP * i, v) for i in range(1, n + 1)]
             if abs(steps[-1]) < abs(v):
@@ -183,7 +188,7 @@ class IO:
         context = describe(p)
         self.standby()
         if kind in ('DCV', 'ACV'):
-            self._volts(v, f, context, cancel)
+            self._volts(v, f, context, cancel, ramp=p.get('ramp'))
         else:
             if kind in ('DCI', 'ACI'):
                 self.cal.set_output_amps(v, f)
@@ -310,6 +315,76 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
     return result
 
 
+# ============================================================================ the IR set-up / reading problem dialog
+def ask_ir_problem(parent, p, total, problems, shown):
+    """The meter (read over IR) is not set up as the point needs, or the reading did not settle.
+    Returns 'retry', 'type' (type this reading instead), 'skip' or 'stop'."""
+    result = {'v': 'stop'}
+    win = ui.dialog(parent, f'Point {p["n"]} of {total} - check the meter')
+    win.resizable(False, False)
+    outer = ttk.Frame(win, padding=(ui.px(22), ui.px(16), ui.px(22), ui.px(14)))
+    outer.pack(fill='both', expand=True)
+    ttk.Label(outer, text=f'Point {p["n"]} of {total}  -  {p["section"]}', style='Small.TLabel').pack(anchor='w')
+    ttk.Label(outer, text='The meter is not ready for this point', style='Section.TLabel').pack(anchor='w', pady=(2, 8))
+    for line in problems:
+        ttk.Label(outer, text='•  ' + line, style='Bold.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w')
+    ttk.Label(outer, text='METER SHOULD BE', style='MetricCap.TLabel').pack(anchor='w', pady=(10, 0))
+    ttk.Label(outer, text=f'{p["switch"]}' + (f', range {p["range"]}' if p['range'] else ''), wraplength=ui.px(520), justify='left').pack(anchor='w')
+    if shown:
+        ttk.Label(outer, text='METER REPORTS', style='MetricCap.TLabel').pack(anchor='w', pady=(8, 0))
+        ttk.Label(outer, text=shown, style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w')
+    ttk.Label(outer, text='The calibrator is in STANDBY. Fix the meter and press Re-check: the output is set again and the meter re-read.',
+              style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(10, 0))
+
+    def done(value):
+        result['v'] = value
+        win.destroy()
+    bar = ttk.Frame(outer)
+    bar.pack(fill='x', pady=(14, 0))
+    ok = ttk.Button(bar, text='Re-check  (Enter)', style='Accent.TButton', command=lambda: done('retry'))
+    ok.pack(side='right')
+    ttk.Button(bar, text='Type the reading instead', command=lambda: done('type')).pack(side='right', padx=(0, 8))
+    ttk.Button(bar, text='Skip point', command=lambda: done('skip')).pack(side='right', padx=(0, 8))
+    ttk.Button(bar, text='Stop run', style='Danger.TButton', command=lambda: done('stop')).pack(side='left')
+    win.bind('<Return>', lambda _e: done('retry'))
+    win.protocol('WM_DELETE_WINDOW', lambda: done('stop'))
+    ui.center_on(win, parent.winfo_toplevel())
+    ok.focus_set()
+    win.wait_window()
+    return result['v']
+
+
+def ir_text(p, r):
+    """The meter reading converted to the point's display unit, at the meter's own resolution (what a technician would type)."""
+    if r.overload:
+        return 'OL'
+    shift = round(math.log10(10 ** r.mult / p['factor']))
+    return f'{r.value / p["factor"]:.{max(r.decimals - shift, 0)}f}'
+
+
+def ir_read(meter, p, cancel=None):
+    """(text, Reading, Display, history) for point p, or raises SetupProblem with what to fix. Pure I/O - no Tk."""
+    want = p['ir']
+    disp = meter.display()
+    problems = drivers.fluke_28x.check_setup(disp, want)
+    if problems:
+        raise SetupProblem(problems, disp.summary())
+    try:
+        r, disp, history = meter.stable_reading(want['unit'], cancel=cancel, timeout=p.get('ir_timeout', 45.0))
+    except drivers.InstrumentError as exc:
+        raise SetupProblem([str(exc)], '')
+    problems = drivers.fluke_28x.check_setup(disp, want)       # the set-up must still be right at the moment of the reading
+    if problems:
+        raise SetupProblem(problems, disp.summary())
+    return ir_text(p, r), r, disp, history
+
+
+class SetupProblem(Exception):
+    def __init__(self, problems, shown):
+        super().__init__('; '.join(problems))
+        self.problems, self.shown = problems, shown
+
+
 # ============================================================================ the range-selection dialog
 def ask_range(parent, p, total, dial, standby_text):
     """'Turn the dial to ...' with a picture of the dial and the target position marked.
@@ -373,8 +448,10 @@ def ask_range(parent, p, total, dial, standby_text):
 
 # ============================================================================ application
 class App:
-    def __init__(self, root, model, demo=False, spec=None, io_factory=None):
+    def __init__(self, root, model, demo=False, spec=None, io_factory=None, meter_factory=None):
         self.root, self.model, self.demo = root, model, demo
+        self.meter, self.meter_factory = None, meter_factory
+        self._stage = {'id': None, 'done': set()}
         self.spec = spec or load_spec()
         self.info = self.spec['models'][model]
         self.points = points_for(self.spec, model)
@@ -393,6 +470,10 @@ class App:
         self.cal_mode = tk.StringVar(value=OLD_CAL_CHOICES.get(_saved, _saved))
         self.cal_addr = tk.StringVar(value=self.settings.get('cal_addr', 'COM9'))
         self.cal_baud = tk.StringVar(value=self.settings.get('cal_baud', '9600'))
+        self.ir = self.spec.get('options', {}).get('ir')
+        saved = self.settings.get('read_mode', READ_TYPED)
+        self.read_mode = tk.StringVar(value=saved if saved in (READ_TYPED, READ_IR) else READ_TYPED)
+        self.ir_addr = tk.StringVar(value=self.settings.get('ir_addr', 'COM5'))
         self.status = tk.StringVar()
         self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
         self.show_section, self.show_status = tk.StringVar(value='All sections'), tk.StringVar(value='All points')
@@ -420,6 +501,10 @@ class App:
     @property
     def manual_cal(self):
         return self.cal_mode.get().startswith('Manual')
+
+    @property
+    def use_ir(self):
+        return bool(self.ir) and self.read_mode.get() == READ_IR
 
     # ------------------------------------------------------------------ layout
     def _build_ui(self):
@@ -466,6 +551,18 @@ class App:
         ttk.Combobox(row, textvariable=self.cal_baud, values=['9600', '19200', '4800', '2400', '1200'], width=7, state='readonly').pack(side='left', padx=(5, 0))
         ttk.Label(conn, text='Examples: COM9   ASRL9::INSTR   GPIB0::6::INSTR.  In Manual mode the program tells you what to set and you press OPERATE yourself.',
                   style='Muted.TLabel').grid(row=2, column=1, columnspan=3, sticky='w')
+        if self.ir:
+            ttk.Label(conn, text='Meter reading').grid(row=3, column=0, sticky='w', pady=(8, 3))
+            ttk.Combobox(conn, textvariable=self.read_mode, values=[READ_TYPED, READ_IR], state='readonly', width=34).grid(
+                row=3, column=1, sticky='w', padx=(8, 12), pady=(8, 3))
+            irrow = ttk.Frame(conn)
+            irrow.grid(row=3, column=2, columnspan=2, sticky='w', pady=(8, 3))
+            ttk.Label(irrow, text='IR cable port', style='Muted.TLabel').pack(side='left')
+            ttk.Entry(irrow, textvariable=self.ir_addr, width=9).pack(side='left', padx=(5, 8))
+            self.btn_ir = ttk.Button(irrow, text='Test IR', command=self.test_ir)
+            self.btn_ir.pack(side='left')
+            ttk.Label(conn, text='Read over IR needs the Fluke IR-to-USB cable on the meter\'s IR port (115200 baud). Without it, choose Type the reading.',
+                      style='Muted.TLabel').grid(row=4, column=1, columnspan=3, sticky='w')
 
         if self.demo:
             ui.Notice(body, 'Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode').pack(fill='x', pady=(12, 0))
@@ -655,14 +752,62 @@ class App:
         if self.io:
             self.io.close()
             self.io = None
+        self.disconnect_meter()
         self._set_conn(None)
+
+    def _ir_address(self):
+        t = self.ir_addr.get().strip()
+        if '::' in t:
+            return t
+        t = t.upper().replace('COM', '')
+        if not t.isdigit():
+            raise ValueError('Enter the IR cable COM port (e.g. COM5).')
+        return f'ASRL{int(t)}::INSTR'
+
+    def connect_meter(self):
+        self.disconnect_meter()
+        if self.meter_factory:
+            self.meter = self.meter_factory()
+        else:
+            s = drivers.fluke_28x.SERIAL_DEFAULT
+            t = drivers.open_visa(self._ir_address(), timeout=3, baud=s.baud, data_bits=s.data_bits, parity=s.parity, stop_bits=s.stop_bits,
+                                  write_termination=s.write_termination, read_termination=s.read_termination, flow_control=s.flow_control)
+            self.meter = drivers.Fluke28x(t, drivers.CommandLog(), label=f'Fluke{self.model}').connect()
+        if self.meter.model != self.model:
+            got = self.meter.idn
+            self.disconnect_meter()
+            raise drivers.InstrumentError(f'The IR cable reaches a Fluke {got.split(",")[0].split()[-1]}, but this procedure is for the Fluke {self.model}.')
+        self._save_settings()
+
+    def disconnect_meter(self):
+        if self.meter:
+            self.meter.log.append_default(f'Fluke {self.model} IR session')     # the exact queries and replies, as evidence
+            try:
+                self.meter.close()
+            except Exception:
+                pass
+            self.meter = None
+
+    def test_ir(self):
+        if self.demo:
+            messagebox.showinfo('Demo mode', 'Demo mode uses no hardware.')
+            return
+        try:
+            self.connect_meter()
+        except Exception as exc:
+            self.status.set('IR connection error: ' + str(exc))
+            messagebox.showerror('IR connection', str(exc))
+            return
+        self.read_mode.set(READ_IR)
+        self.status.set('Meter on the IR cable: ' + self.meter.idn)
+        messagebox.showinfo('IR connection', f'{self.meter.idn}\nReadings will be collected over IR.')
 
     def _set_conn(self, ok):
         self.conn_pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Demo - no hardware' if self.demo else 'Manual calibrator' if self.manual_cal else 'Not connected',
                            'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
-        for key, var in (('cal_mode', self.cal_mode), ('cal_addr', self.cal_addr), ('cal_baud', self.cal_baud)):
+        for key, var in (('cal_mode', self.cal_mode), ('cal_addr', self.cal_addr), ('cal_baud', self.cal_baud), ('read_mode', self.read_mode), ('ir_addr', self.ir_addr)):
             self.settings.set(key, var.get())
         self.settings.save()
 
@@ -690,6 +835,10 @@ class App:
         if not self.demo and not self.manual_cal and self.io is None:
             self.test_connection()
             if self.io is None:
+                return
+        if not self.demo and self.use_ir and self.meter is None:
+            self.test_ir()
+            if self.meter is None:
                 return
         self.stop = False
         self.busy = True
@@ -777,6 +926,19 @@ class App:
         if choice == 'skip':
             self.root.after(30, lambda: self._next(points, i + 1, key))
             return
+        if self._stage['id'] != p['id']:
+            self._stage = {'id': p['id'], 'done': set()}
+        if p.get('prompt') and 'prompt' not in self._stage['done']:
+            if not ui.confirm_steps(self.root, 'Meter setup', p['section'], [('Meter', p['prompt'])],
+                                    facts=[('Point', f'{p["n"]} of {len(self.points)}'), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))],
+                                    ok='Done - continue'):
+                self.busy = False
+                self.status.set('Paused at the meter setup.')
+                return
+            self._stage['done'].add('prompt')
+        if p.get('rel_zero') and 'rel' not in self._stage['done']:
+            self._rel_zero(points, i, p, key)
+            return
         if self._high_voltage(p):
             if not messagebox.askyesno('HIGH VOLTAGE', f'This point outputs {abs(p["applied"]["value"]):g} V'
                                        + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal else '') +
@@ -803,6 +965,55 @@ class App:
             self._poll(points, i, p, key, state)
         else:
             self._ask(points, i, p, key)
+
+    def _rel_zero(self, points, i, p, key):
+        """The table's REL offset: apply the zero input (or none), have the technician press REL, then continue with the point."""
+        z = p['rel_zero']
+        zero_point = dict(p, applied=dict(value=z['value'], frequency=None), ramp=None) if z.get('value') is not None else None
+
+        def ask():
+            if zero_point is not None and self.manual_cal:
+                steps = [('Calibrator', f'Set {output_text(zero_point)} and press OPERATE.'), ('REL', z['text'])]
+            else:
+                steps = [('REL', z['text'])]
+            ok = ui.confirm_steps(self.root, 'Set the REL offset', f'{p["section"]}: REL offset',
+                                  steps, facts=[('Point', f'{p["n"]} of {len(self.points)}'),
+                                                ('Calibrator output', output_text(zero_point) if zero_point else 'none (STANDBY)')],
+                                  caution='The program checks over IR that REL is on.' if self.use_ir else None, ok='REL set - continue')
+            if self.io and not self.manual_cal:
+                self._safe_standby()
+            if not ok:
+                self.busy = False
+                self.status.set('Paused at the REL offset.')
+                return
+            self._stage['done'].add('rel')
+            self.root.after(30, lambda: self._next(points, i, key))
+
+        if zero_point is None or self.manual_cal or not self.io:
+            ask()
+            return
+        self.status.set(f'Point {p["n"]}/{len(self.points)}: REL offset - setting the calibrator to {output_text(zero_point)} ...')
+        state = {'done': False, 'exc': None}
+
+        def work():
+            try:
+                self.io.apply(zero_point, cancel=lambda: self.stop)
+            except BaseException as exc:
+                state['exc'] = exc
+                self._safe_standby()
+            state['done'] = True
+
+        def wait():
+            if not state['done']:
+                self.root.after(40, wait)
+            elif isinstance(state['exc'], Cancelled):
+                self._ask_abort()
+            elif state['exc'] is not None:
+                self._error(state['exc'])
+            else:
+                ask()
+        threading.Thread(target=work, daemon=True).start()
+        wait()
 
     def _poll(self, points, i, p, key, state):
         """The worker thread only sets flags; every Tk call happens here on the main thread."""
@@ -833,7 +1044,19 @@ class App:
 
     def _ask(self, points, i, p, key):
         total = len(self.points)
+        if p['test'] == 'numeric' and self.use_ir and p.get('ir') and not self._stage.get('typed'):
+            self._ask_ir(points, i, p, key)
+            return
         self.status.set(f'Point {p["n"]}/{total}: waiting for the meter reading.')
+        if p.get('ir_auto') == 'id' and self.use_ir and self.meter:
+            try:
+                idn = self.meter.identify()
+            except Exception as exc:
+                idn = f'no reply ({exc})'
+            ok = idn.upper().startswith(f'FLUKE {self.model}')
+            self._store(p, entered=f'ID: {idn}', reading=None, result='PASS' if ok else 'FAIL', source='IR')
+            self.root.after(30, lambda: self._next(points, i + 1, key))
+            return
         if p['test'] == 'numeric':
             def validate(text):
                 judge_numeric(p, text)
@@ -848,7 +1071,8 @@ class App:
                 self.last_high_current = time.monotonic()
             if r['action'] == 'record':
                 result, base = judge_numeric(p, r['text'], r['ann'])
-                self._store(p, entered=r['text'].strip(), reading=base, result=result, annunciator=r['ann'] if p.get('annunciator') else None)
+                self._store(p, entered=r['text'].strip(), reading=base, result=result, annunciator=r['ann'] if p.get('annunciator') else None,
+                            source='typed')
         elif p.get('checks'):
             answers = []
             r = dict(action='record')
@@ -873,6 +1097,75 @@ class App:
         if r['action'] == 'stop':
             self.stop = True
         self.root.after(30, lambda: self._next(points, i + 1, key))
+
+    def _ask_ir(self, points, i, p, key):
+        """Read the point over IR on a worker thread; on a set-up problem put the calibrator in STANDBY and ask the technician."""
+        total = len(self.points)
+        self.status.set(f'Point {p["n"]}/{total}: reading the meter over IR (waiting for a stable reading) ...')
+        state = {'done': False, 'exc': None, 'out': None}
+
+        def work():
+            try:
+                state['out'] = ir_read(self.meter, p, cancel=lambda: self.stop)
+            except BaseException as exc:
+                state['exc'] = exc
+            state['done'] = True
+
+        def wait():
+            if not state['done']:
+                self.root.after(60, wait)
+                return
+            exc = state['exc']
+            if exc is None:
+                text, r, disp, history = state['out']
+                result, base = judge_numeric(p, text)
+                self._store(p, entered=text, reading=base, result=result, source='IR',
+                            ir=dict(display=disp.summary(), unit=r.unit, last=[x.display_text() for x in history[-5:]]))
+                if self.io and not self.manual_cal:
+                    self._safe_standby()
+                self.root.after(30, lambda: self._next(points, i + 1, key))
+                return
+            if self.io and not self.manual_cal:
+                self._safe_standby()
+            if isinstance(exc, SetupProblem):
+                problems, shown = exc.problems, exc.shown
+            elif isinstance(exc, drivers.InstrumentError):
+                problems, shown = [str(exc)], ''
+            else:
+                self._error(exc)
+                return
+            choice = ask_ir_problem(self.root, p, total, problems, shown)
+            if choice == 'stop':
+                self.busy = False
+                self.status.set('Stopped. The calibrator is in STANDBY. Progress is saved.')
+                self.save()
+            elif choice == 'skip':
+                self.root.after(30, lambda: self._next(points, i + 1, key))
+            elif choice == 'type':
+                self._stage['typed'] = True
+                self._reapply(points, i, p, key)
+            else:
+                self._reapply(points, i, p, key)
+
+        threading.Thread(target=work, daemon=True).start()
+        wait()
+
+    def _reapply(self, points, i, p, key):
+        """Set the output again (it was put in STANDBY while the meter was fixed) and go back to reading the point."""
+        if p.get('applied') and self.io and not self.manual_cal:
+            state = {'done': False, 'exc': None}
+
+            def work():
+                try:
+                    self.io.apply(p, cancel=lambda: self.stop)
+                except BaseException as exc:
+                    state['exc'] = exc
+                    self._safe_standby()
+                state['done'] = True
+            threading.Thread(target=work, daemon=True).start()
+            self._poll(points, i, p, key, state)
+        else:
+            self._ask(points, i, p, key)
 
     def _safe_standby(self):
         try:
@@ -962,6 +1255,11 @@ class App:
                     row['As Found'] += '  (AC annunciator ' + ('on' if r['annunciator'] else 'OFF') + ')'
                 if p['kind'] == 'ACV' and p['display_unit'] == 'kHz':
                     row['Description'] = f'{p["range"]} range (2 V applied)'
+                if p['base_unit'] in ('C', 'degF'):        # temperatures are never SI-prefixed (no 'k°C')
+                    d = max(len(x.split('.')[1]) if '.' in x else 0 for x in (p['low'], p['high']))
+                    row.update({'Nominal': f'{p["nominal"]:.{d}f} {unit}', 'Tolerance -': p['low'], 'Tolerance +': p['high'], 'UOM': unit})
+                    if r['reading'] is not None:
+                        row['As Found'] = r.get('entered', f'{r["reading"]:.{d}f}')
             else:
                 unc = ''
                 if p['test'] == 'beeper':
@@ -996,7 +1294,8 @@ class App:
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', self.info['name']), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Limits applied', src.get('limits', 'Manufacturer display-reading limits (12 month)')),
                                                                  ('Source', src.get('cite') or f'{src["document"]}, pp. {src["pages"].split(" ")[0]}')],
-                                             title=f'{self.info["name"]} Performance Verification', demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows))
+                                             title=f'{self.info["name"]} Performance Verification', demo=demo, details=details,
+                                             footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows), self.source_note()) if x))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab')
             return
@@ -1004,6 +1303,18 @@ class App:
             messagebox.showerror('PDF export error', str(exc))
             return
         self.status.set(f'Exported {len(rows)} rows: {path}')
+
+    def source_note(self):
+        """How the numeric readings were collected (IR and / or typed), for the report footer."""
+        if not self.ir:
+            return ''
+        ir = sum(1 for r in self.results.values() if r.get('source') == 'IR' and r.get('reading', 0) is not None)
+        typed = sum(1 for r in self.results.values() if r.get('source') == 'typed')
+        if not (ir or typed):
+            return ''
+        parts = ([f'{ir} reading(s) read from the meter over its IR interface, with the function, range and REL / Low Pass state checked'] if ir else []) + \
+                ([f'{typed} typed in by the technician from the display'] if typed else [])
+        return 'Meter readings: ' + '; '.join(parts) + '.'
 
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'):
