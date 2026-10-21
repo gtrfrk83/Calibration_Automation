@@ -319,7 +319,11 @@ class App(datamode.DataModeMixin):
 
     def update_summary(self):
         vals=[self.results.get(str(p['id']),{}).get('result','') for p in POINTS]
-        self.summary.update_counts(len(POINTS),vals.count('PASS'),vals.count('FAIL'))
+        if self.is_left:                                   # As Left: progress is about the points that failed As Found
+            redo=[str(p['id']) for p in POINTS if self.found.get(str(p['id']),{}).get('result')=='FAIL']
+            done=[k for k in redo if k in self.left]
+            self.summary.set_rerun(len(redo),len(done),sum(self.left[k].get('result')=='PASS' for k in done),sum(self.left[k].get('result')=='FAIL' for k in done))
+        else:self.summary.update_counts(len(POINTS),vals.count('PASS'),vals.count('FAIL'))
         if hasattr(self,'_section_names'):self._update_sections()
 
     def on_select(self,_event=None):

@@ -48,6 +48,65 @@ def segment_styles(root):
               foreground=[('selected', fg), ('disabled', C['faint'])])
 
 
+class ProgressPanel(ttk.Frame):
+    """Progress ring + headline + badges.  Same update_counts() as ui.Summary, plus set_rerun() for As Left runs:
+
+        As Found:  (81/135 tested)   81 of 135 tested     [58 pass] [23 fail] [54 remaining]
+        As Left:   (  1/1  re-run)   1 of 1 re-run done   [1 now in limits] [0 still out]
+    """
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.size = ui.px(68)
+        self.canvas = tk.Canvas(self, width=self.size, height=self.size, background=ui.C['bg'], highlightthickness=0, borderwidth=0)
+        self.canvas.pack(side='left', padx=(0, 12))
+        col = ttk.Frame(self)
+        col.pack(side='left', fill='x', expand=True)
+        self.text = tk.StringVar(value='Nothing tested yet')
+        ttk.Label(col, textvariable=self.text, style='Bold.TLabel').pack(anchor='w')
+        self.badges = ttk.Frame(col)
+        self.badges.pack(anchor='w', pady=(4, 0))
+        self.ok = ui.Pill(self.badges, '0 pass', 'neutral')
+        self.fail = ui.Pill(self.badges, '0 fail', 'neutral')
+        self.rem = ui.Pill(self.badges, '0 remaining', 'neutral')
+        for pill in (self.ok, self.fail, self.rem):
+            pill.pack(side='left', padx=(0, 6))
+        self._draw(0, 1, '0/0', 'tested', ui.C['primary'])
+
+    def _draw(self, done, total, big, small, color):
+        c = self.canvas
+        c.delete('all')
+        c.configure(background=ui.C['bg'])
+        w = ui.px(6)
+        box = (w, w, self.size - w, self.size - w)
+        c.create_oval(*box, outline=ui.C['border_strong'], width=w)
+        frac = (done / total) if total else 0
+        if frac >= 0.999:
+            c.create_oval(*box, outline=color, width=w)
+        elif frac > 0:
+            c.create_arc(*box, start=90, extent=-360 * frac, style='arc', outline=color, width=w)
+        mid = self.size / 2
+        c.create_text(mid, mid - ui.px(5), text=big, fill=ui.C['text'], font=('TkDefaultFont', max(8, int(ui.SCALE * 11)), 'bold'))
+        c.create_text(mid, mid + ui.px(10), text=small, fill=ui.C['muted'], font=('TkDefaultFont', max(6, int(ui.SCALE * 7))))
+
+    def update_counts(self, total, passed, failed):
+        done = passed + failed
+        left = total - done
+        self.text.set(f'{done} of {total} tested')
+        self.ok.set(f'{passed} pass', 'good' if passed else 'neutral')
+        self.fail.set(f'{failed} fail', 'bad' if failed else 'neutral')
+        self.rem.set('All points tested' if left == 0 and total else f'{left} remaining', 'good' if left == 0 and total and not failed else 'neutral')
+        self._draw(done, total, f'{done}/{total}', 'tested', ui.C['bad'] if failed and not left else ui.C['primary'])
+
+    def set_rerun(self, total, done, in_limits, still_out):
+        """As Left: the points to re-measure are the ones that failed As Found."""
+        self.text.set(f'{done} of {total} re-run done' if total else 'Nothing failed As Found: nothing to re-run')
+        self.ok.set(f'{in_limits} now in limits', 'good' if in_limits else 'neutral')
+        self.fail.set(f'{still_out} still out', 'bad' if still_out else 'neutral')
+        self.rem.set(f'{total - done} to re-run' if total - done else 'All re-run', 'neutral' if total - done else 'good')
+        self._draw(done, total, f'{done}/{total}', 're-run', ui.C['warn'])
+
+
 class Shell:
     def __init__(self, root, title, subtitle='', demo=False, on_section=None, version=''):
         self.root = root
@@ -153,8 +212,8 @@ class Shell:
             self.id_entry.focus_set()
 
     def build_progress(self):
-        self.summary = ui.Summary(self.strip)
-        self.summary.pack(side='right', fill='x', expand=True, padx=(14, 0))
+        self.summary = ProgressPanel(self.strip)
+        self.summary.pack(side='right', padx=(14, 0))
         return self.summary
 
     def notice(self, text, kind='info', title=None):
@@ -272,8 +331,7 @@ class Shell:
                 b.configure(style='Compact.TButton' if compact else 'TButton')
         summary = getattr(self, 'summary', None)
         if summary is not None:                              # the pass / fail / remaining badges give way to the bar
-            for pill in (summary.rem, summary.fail, summary.ok):
-                pill.pack_forget() if compact else pill.pack(side='right', padx=(6, 0))
+            summary.badges.pack_forget() if compact else summary.badges.pack(anchor='w', pady=(4, 0))
         if self.layout_hook:
             self.layout_hook(compact)
 
