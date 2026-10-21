@@ -108,6 +108,38 @@ class Fluke5560A(Instrument):
     def set_square(self, vpp: float, frequency_hz: float):
         self.write(f'OUT {vpp:.9g}V,{self._freq_text(frequency_hz)}')
 
+    # ---- SCOPE time markers (time base test) -- NOT yet verified on a 5560A ----------------------------
+    # 'SCOPE MARKER' and 'OUT <period>S' follow the 5520A/5522A SC-option command set. Each call is checked
+    # through the error queue and read back; the output is never enabled after a rejection or an unexpected
+    # reply, and the raw reply is put in the error so the command set can be confirmed on the bench.
+    def select_scope_marker(self):
+        self.write('SCOPE MARKER')
+        self.check_error('SCOPE MARKER')
+        mode = self.query('SCOPE?').strip().upper()
+        if 'MARK' not in mode:
+            raise InstrumentError(f'Fluke did not confirm SCOPE MARKER: SCOPE?={mode!r}')
+
+    def set_marker_period(self, seconds: float):
+        """Time-marker period. OUT? may report the period (S) or the frequency (HZ); anything else stops the test."""
+        self.write(f'OUT {seconds:.9g}S')
+        self.check_error(f'marker period {seconds:g} s')
+        reply = self.query('OUT?').strip()
+        parts = [p.strip().upper() for p in reply.split(',')]
+        try:
+            value = float(parts[0])
+        except (ValueError, IndexError):
+            raise InstrumentError(f'Unexpected Fluke OUT? reply in marker mode: {reply!r}')
+        unit = parts[1] if len(parts) > 1 else ''
+        if unit in ('S', 'SEC'):
+            period = value
+        elif unit == 'HZ' and value > 0:
+            period = 1.0 / value
+        else:
+            raise InstrumentError(f'Unexpected Fluke OUT? reply in marker mode: {reply!r} (expected a period in S or a frequency in HZ)')
+        if not math.isclose(period, seconds, rel_tol=1e-6):
+            raise InstrumentError(f'Fluke marker period mismatch: {period:g} s vs {seconds:g} s')
+        return period
+
     def select_scope_measure_resistance(self):
         self.write('SCOPE MEASR')
         mode = self.query('SCOPE?').strip().upper()

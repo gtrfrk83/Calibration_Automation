@@ -18,12 +18,36 @@ class SimBench:
         self.scope = {}
         self.gain_error, self.offset_v = gain_error, offset_v
         self.fail_next = None        # set to a substring to make the next matching command time out
+        self.timebase_ratio = 1 + 1.2e-7     # simulated scope time base error (frequency reads high by 0.12 ppm)
+        self.trigger_error_v = 0.0           # simulated trigger level error (actual threshold = set level + this)
+
+    def output_v(self):
+        f = self.fluke
+        return f['volts'] if f['operate'] and f['scope'] == 'VOLT' else 0.0
+
+    def output_changed(self, old, new):
+        """Edge trigger in Single mode: a crossing of (level + error) in the selected slope stops the acquisition."""
+        s = self.scope
+        if str(s.get('app.Acquisition.TriggerMode', '')).casefold() != 'single':
+            return
+        if str(s.get('app.Acquisition.Trigger.Type', 'Edge')).casefold() != 'edge':
+            return
+        threshold = float(s.get('app.Acquisition.Trigger.Edge.Level', 0.0)) + self.trigger_error_v
+        slope = str(s.get('app.Acquisition.Trigger.Edge.Slope', 'Positive')).casefold()
+        rising = old < threshold <= new
+        falling = old > threshold >= new
+        if (slope == 'positive' and rising) or (slope == 'negative' and falling):
+            s['app.Acquisition.TriggerMode'] = 'Stopped'
 
     def p1_value(self):
         f, s = self.fluke, self.scope
         engine = s.get('app.Measure.P1.ParamEngine', 'Mean').lower()
         if engine == 'standarddeviation':
             return 1.38e-4
+        if engine == 'freq':
+            if not f['operate'] or f['scope'] != 'MARKER' or not f.get('period'):
+                return 0.0
+            return self.timebase_ratio / f['period']
         if not f['operate']:
             return 0.0
         if engine == 'mean':
@@ -62,9 +86,20 @@ class SimFlukeTransport(_SimBase):
         self.model = model
 
     def handle(self, cmd):
+        before = self.bench.output_v()
+        reply = self._handle(cmd)
+        self.bench.output_changed(before, self.bench.output_v())
+        return reply
+
+    def _handle(self, cmd):
         f = self.bench.fluke
         u = cmd.upper()
         if u == '*IDN?': return f'FLUKE,{self.model},SIM0001,1.0'
+        if u == 'SCOPE MARKER': f['scope'], f['func'] = 'MARKER', 'SMARK'; return None
+        m = re.match(r'OUT\s+([0-9.eE+-]+)S$', u)
+        if m and f['scope'] == 'MARKER':
+            f['period'] = float(m.group(1)); return None
+        if u == 'OUT?' and f['scope'] == 'MARKER': return f"{f.get('period', 0.0):.9E},S"
         if u == 'STBY': f['operate'] = False; return None
         if u == 'OPER': f['operate'] = True; return None
         if u == 'OPER?': return '1' if f['operate'] else '0'
@@ -110,14 +145,19 @@ class SimScopeTransport(_SimBase):
         m = re.match(r"""VBS\?\s+"return=(.+)"$""", cmd)
         if m:
             path = m.group(1)
+            bad = self.bad_path(path)
+            if bad:
+                return f"VBS Object doesn't support this property or method: '{bad}'"
             if path == 'app.Measure.P1.Out.Result.Value':
                 return f'VBS {self.bench.p1_value():.9g}'
-            if re.search(r'\.(VerScale|VerOffset|HorScale)$', path):
+            if re.search(r'\.(VerScale|VerOffset|HorScale|Level)$', path):
                 return f'VBS {s.get(path, 0.0)}'
             return f"VBS {s.get(path, 'Mean')}"
         m = re.match(r"""VBS\s+'(\S+?)=(.*?)\s*'$""", cmd)
         if m:
             path, value = m.group(1), m.group(2).strip().strip('"')
+            if self.bad_path(path):
+                return None          # MAUI ignores a write to a property that does not exist
             try:
                 s[path] = float(value)
             except ValueError:
@@ -128,6 +168,14 @@ class SimScopeTransport(_SimBase):
         m = re.match(r'(C\d):CPL\?$', cmd)
         if m: return f"{m.group(1)}:CPL {s.get(m.group(1) + ':CPL', 'D1M')}"
         raise TransportError(f'simulated scope: unknown command {cmd!r}')
+
+    @staticmethod
+    def bad_path(path):
+        """Channel objects are C1..C4 only; return the offending object path (as MAUI names it) or None."""
+        m = re.match(r'(app\.Acquisition\.C\w*)\.', path)
+        if m and not re.fullmatch(r'app\.Acquisition\.C[1-4]', m.group(1)):
+            return m.group(1)
+        return None
 
     def query(self, text):
         self.write(text)

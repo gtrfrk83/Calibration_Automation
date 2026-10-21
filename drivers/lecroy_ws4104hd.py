@@ -4,6 +4,12 @@ Settings are written through the VBS automation interface, which is what the wor
     write:  VBS 'app.Acquisition.C1.VerScale=0.01'
     read:   VBS? "return=app.Acquisition.C1.VerScale"
 Every setter reads back and compares. Writes are never retried; read-only queries are.
+
+Timing (v52): MAUI acts on VBS writes in the background, so a query sent right after a coupling or
+bandwidth change can arrive while the front-end relays are switching. If that read fails, the USB
+session is left out of step even though the scope itself is fine, and a plain retry on the same
+session fails the same way. So relay changes get RELAY_SETTLE before the next command, and failed
+read-only queries recover the session (device clear, then close/reopen) before retrying.
 """
 from __future__ import annotations
 
@@ -11,6 +17,7 @@ import math
 import time
 
 from .base import Instrument, InstrumentError
+from .transport import TransportError
 
 P1 = 'app.Measure.P1'
 
@@ -19,17 +26,54 @@ class WaveSurfer4104HD(Instrument):
     MODEL = 'LeCroy WaveSurfer 4104HD'
     IDN_MATCH = ('LECROY', 'TELEDYNE')
     DEFAULT_TIMEOUT = 10.0
+    RELAY_SETTLE = 0.4      # s after a coupling / bandwidth-limit write (front-end relays switch)
 
     # ---- VBS primitives ------------------------------------------------------------------------
     @staticmethod
     def _parse(reply: str) -> str:
         return reply.strip().removeprefix('VBS').strip().strip('"\'')
 
+    # ---- read-only retries with USB session recovery ---------------------------------------------
+    def _recover_clear(self):
+        self.log.add('--', 'read failed: device clear before retry', self.label)
+        self.t.clear()
+
+    def _recover_reopen(self):
+        self.log.add('--', 'read failed: closing and reopening the USB session before retry', self.label)
+        self.t.close()
+        time.sleep(1.0)
+        self.t.open()
+        self.t.set_timeout(self.DEFAULT_TIMEOUT)
+
+    def query_retry(self, cmd: str, attempts=3, delay=0.5) -> str:
+        """Read-only queries only (writes never come through here and are never replayed).
+        Before the 2nd attempt the session gets a device clear; before the 3rd it is closed and reopened."""
+        recoveries = (self._recover_clear, self._recover_reopen)
+        last = None
+        for n in range(attempts):
+            try:
+                return self.query(cmd)
+            except TransportError as exc:
+                last = exc
+                if n + 1 < attempts:
+                    time.sleep(delay * (n + 1))
+                    try:
+                        recoveries[min(n, len(recoveries) - 1)]()
+                    except TransportError as rexc:
+                        last = rexc
+        raise InstrumentError(f'{cmd!r} failed after {attempts} attempts '
+                              f'(device clear and session reopen tried): {last}') from last
+
     def vbs_get(self, path: str) -> str:
         return self._parse(self.query_retry(f'VBS? "return={path}"'))
 
     def vbs_get_float(self, path: str) -> float:
-        value = float(self.vbs_get(path))
+        reply = self.vbs_get(path)
+        try:
+            value = float(reply)
+        except ValueError:
+            # MAUI answers a bad property path with text such as "Object doesn't support this property or method".
+            raise InstrumentError(f'{path}: scope did not return a number: {reply!r}') from None
         if not math.isfinite(value):
             raise InstrumentError(f'{path} returned a non-finite value')
         return value
@@ -63,7 +107,11 @@ class WaveSurfer4104HD(Instrument):
     # ---- vertical ------------------------------------------------------------------------
     @staticmethod
     def _ch(channel) -> str:
-        return f'app.Acquisition.C{channel}'
+        """channel: 1-4 (int or digit string). 'C1'-style names are refused so a path can never become 'CC1'."""
+        text = str(channel).strip()
+        if text not in ('1', '2', '3', '4'):
+            raise InstrumentError(f'Channel must be 1-4, got {channel!r}')
+        return f'app.Acquisition.C{text}'
 
     def set_vertical_scale(self, channel, volts_per_div, settle=0.35):
         path = f'{self._ch(channel)}.VerScale'
@@ -95,11 +143,11 @@ class WaveSurfer4104HD(Instrument):
 
     def set_coupling(self, channel, coupling):
         """coupling: DC1M, DC50, AC1M (VBS names)."""
-        self._set_text_verified(f'{self._ch(channel)}.Coupling', coupling)
+        self._set_text_verified(f'{self._ch(channel)}.Coupling', coupling, settle=self.RELAY_SETTLE)
 
     def set_bandwidth_limit(self, channel, limit):
         """limit: 'Full', '20MHz', ..."""
-        self._set_text_verified(f'{self._ch(channel)}.BandwidthLimit', limit)
+        self._set_text_verified(f'{self._ch(channel)}.BandwidthLimit', limit, settle=self.RELAY_SETTLE)
 
     def set_coupling_legacy(self, channel_name, coupling):
         """Classic remote command, e.g. 'C1:CPL D50' (used by the impedance test; value is D50/D1M/A1M)."""
@@ -111,7 +159,9 @@ class WaveSurfer4104HD(Instrument):
     def configure_dc_input(self, channel):
         """DC 1 MOhm + 20 MHz bandwidth limit - the input state for DCV and offset tests."""
         self.write(f"VBS '{self._ch(channel)}.Coupling=\"DC1M\" '")
+        time.sleep(self.RELAY_SETTLE)
         self.write(f"VBS '{self._ch(channel)}.BandwidthLimit=\"20MHz\" '")
+        time.sleep(self.RELAY_SETTLE)
         coupling = self.vbs_get(f'{self._ch(channel)}.Coupling')
         bandwidth = self.vbs_get(f'{self._ch(channel)}.BandwidthLimit')
         if coupling.casefold() != 'dc1m' or bandwidth.casefold() != '20mhz':
@@ -134,9 +184,42 @@ class WaveSurfer4104HD(Instrument):
         if source.strip().upper() != f'C{channel}':
             raise InstrumentError(f'Trigger source {source!r} does not match CH{channel}')
 
+    # ---- edge trigger slope / level / mode (trigger level and time base tests) ----------------------------
+    # NOT yet verified on a 4104HD: Trigger.Edge.Slope ("Positive"/"Negative"), Trigger.Edge.Level (volts) and
+    # Acquisition.TriggerMode ("Auto"/"Normal"/"Single"/"Stopped") are the MAUI automation names. Each is read back.
+    TRIGGER = 'app.Acquisition.Trigger'
+
+    def set_trigger_slope(self, slope):
+        """slope: 'Positive' or 'Negative'."""
+        self._set_text_verified(f'{self.TRIGGER}.Edge.Slope', slope, settle=0.3)
+
+    def set_trigger_level(self, volts, tolerance=0.002):
+        """Returns the level the scope reports (it may round to its trigger DAC step)."""
+        path = f'{self.TRIGGER}.Edge.Level'
+        self.vbs_set_number(path, f'{volts:.6g}')
+        time.sleep(0.3)
+        actual = self.vbs_get_float(path)
+        if not math.isclose(actual, volts, abs_tol=tolerance):
+            raise InstrumentError(f'Trigger level: requested {volts:+.4f} V, scope reports {actual:+.4f} V')
+        return actual
+
+    def set_trigger_mode(self, mode, accept=None):
+        """mode: 'Auto', 'Normal' or 'Single'. After 'Single' the scope may already report 'Stopped' if it
+        triggered at once, so the accepted readbacks can be widened with `accept`."""
+        self.vbs_set_text('app.Acquisition.TriggerMode', mode)
+        time.sleep(0.3)
+        got = self.vbs_get('app.Acquisition.TriggerMode')
+        allowed = {mode.casefold()} | {a.casefold() for a in (accept or ())}
+        if got.casefold() not in allowed:
+            raise InstrumentError(f'Trigger mode: set {mode!r} but scope reports {got!r}')
+        return got
+
+    def trigger_mode(self) -> str:
+        return self.vbs_get('app.Acquisition.TriggerMode')
+
     # ---- measurement P1 ------------------------------------------------------------------------
     def configure_p1(self, channel, engine, show=True):
-        """engine: 'Mean', 'StandardDeviation' (RMS noise) or 'PkPk'. Verified by readback."""
+        """engine: 'Mean', 'StandardDeviation' (RMS noise), 'PkPk' or 'Freq' (time base). Verified by readback."""
         want = engine.casefold()
         current = self.vbs_get(f'{P1}.ParamEngine')
         if current.casefold() != want:
@@ -157,7 +240,7 @@ class WaveSurfer4104HD(Instrument):
             self.write(f"VBS '{P1}.View=True ' ")
 
     def read_p1(self) -> float:
-        """Current P1 value (volts for Mean / StandardDeviation / PkPk)."""
+        """Current P1 value (volts for Mean / StandardDeviation / PkPk, hertz for Freq)."""
         return self.vbs_get_float(f'{P1}.Out.Result.Value')
 
     def read_p1_settled(self, settle_s, discard_gap_s=0.5):
