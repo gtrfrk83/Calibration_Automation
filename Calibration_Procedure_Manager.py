@@ -29,7 +29,7 @@ DB = BASE / 'calibration_procedures.sqlite3'
 BUILTIN = 'Procedures/WaveSurfer_WS4104HD.py'
 PROCEDURES = BASE / 'Procedures'
 BACKUPS = BASE / 'Backups'
-VERSION = 'v67'
+VERSION = 'v68'
 STABLE = {
  'WaveSurfer WS4104HD Verification': 'WaveSurfer_WS4104HD.py',
  'Fluke 87V Guided Verification': 'Fluke_87V.py',

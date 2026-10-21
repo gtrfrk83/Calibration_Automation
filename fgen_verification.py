@@ -35,6 +35,7 @@ REF_CMC_PATH = HERE / 'specs' / 'fgen_332xx_reference_cmc.json'
 STD_INPUTS = {'INPUT 1 (type N)': 'INPUT1', 'INPUT 2 (binding posts)': 'INPUT2'}
 FLAT_REF_HZ = 100e3
 WBND_REF_HZ = 1e3          # wideband flatness is measured relative to 1 kHz (5790B manual pp. 4-31, 4-32)
+COUNTER_REFS = {'External 10 MHz (GPS)': 'EXT', 'Internal timebase': 'INT'}
 FLAT_METHODS = {'WBND': '5790B wideband input (relative to 1 kHz)', 'POWER': 'Power meter (manual method)'}
 SETTLE = {'TIMEBASE': 2.0, 'ACAMP': 1.0, 'LFFLAT': 1.0, 'FLAT': 1.5}
 
@@ -173,7 +174,7 @@ class IO:
     """The generator under test, the 5790B, and (optionally) a counter and a power meter. A reference left without an
     address is read by the technician: ask_number(prompt, unit) is called and must return a float (or None to stop)."""
 
-    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER'):
+    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT'):
         self.log = drivers.CommandLog()
         self.ask_number = ask_number
         self.std_input = std_input
@@ -181,6 +182,7 @@ class IO:
             raise ValueError(f'{MODEL}: flatness method {flat_method} is not available (spec allows {SPEC.get("flatness_methods")})')
         self.flat_method = flat_method
         self.wideband = None
+        self.counter_ref = counter_ref
         self.uut = self.std = self.counter = self.power = None
         t = transports or {}
 
@@ -260,13 +262,20 @@ class IO:
 
     def _frequency(self, expected_hz):
         """Returns (Hz, raw). A 53131A / 53132A is set to channel 1, 50 ohm, AC coupled, 1 s gate, expected frequency."""
+        ext = self.counter_ref == 'EXT'
         if self.counter is None:
-            return self._manual('Read the frequency counter (generator: 10 MHz sine, 1 Vpp).', 'Hz'), dict(counter='typed')
-        raw = {}
+            where = 'on its external 10 MHz (GPS) reference' if ext else 'on its internal timebase'
+            return (self._manual(f'Read the frequency counter {where} (generator: 10 MHz sine, 1 Vpp).', 'Hz'),
+                    dict(counter='typed', reference=('EXT (operator)' if ext else 'INT (operator)')))
+        raw = dict(reference='not checked (generic counter)')
         if isinstance(self.counter, drivers.Keysight5313x):
+            ref_hz = self.counter.set_reference(self.counter_ref)          # EXT: selected, checked now, and re-checked every reading
             self.counter.configure_frequency(channel=1, gate_s=1.0, impedance=50, coupling='AC', expected_hz=expected_hz)
             src, auto = self.counter.reference()
-            raw = dict(counter=self.counter.idn.split(',')[1].strip(), reference=src + (' (auto)' if auto else ''), gate_s=1.0)
+            if src != self.counter_ref:
+                raise drivers.InstrumentError(f'Counter timebase is {src}, expected {self.counter_ref}.')
+            raw = dict(counter=self.counter.idn.split(',')[1].strip(), gate_s=1.0,
+                       reference=f'EXT {ref_hz / 1e6:g} MHz (checked)' if ext else 'INT')
         f = self.counter.frequency()
         if not 1e6 < f < 1e8:
             raise drivers.InstrumentError(f'Counter reads {f:g} Hz: check the cable and the counter input (50 ohm, channel 1).')
@@ -432,6 +441,8 @@ def certificate_rows(results):
             rows.append(_db_row(p, r, failed, sec, unc))
             continue
         desc = p['desc'] + (' (typical)' if p.get('typical') else '')
+        if p['kind'] == 'TIMEBASE' and r.get('raw', {}).get('reference'):
+            desc += f"; counter timebase {r['raw']['reference']}"
         rows.append(report_pdf.cert_row(desc, p['nominal'], p['nominal'] - p['error'], p['nominal'] + p['error'], p['unit'],
                                         r['reading'], failed, section=sec, uncertainty=unc))
     return rows
@@ -446,9 +457,9 @@ class App:
         'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter channel 1 input with a 50 ohm BNC cable.'),
                                                       ('Counter', '53131A / 53132A: the program sets channel 1 to 50 ohm, AC, 1 s gate. Any other '
                                                                   'counter: terminate its input at 50 ohm (manual step 1).'),
-                                                      ('Reference', 'The manual asks for 0.1 ppm (53131A Opt 010). Without the high-stability '
-                                                                    'timebase, feed a 10 MHz house reference to Ref In; the reading records which '
-                                                                    'timebase was used.')]),
+                                                      ('Reference', 'External timebase (default): the 10 MHz GPS reference on the counter\'s '
+                                                                    'rear-panel Ref In. A 53131A / 53132A is switched to EXT and the reference is '
+                                                                    'checked before and during the reading (the manual asks for 0.1 ppm).')]),
         'STD': ('Connect the Fluke 5790B', [('Connect', 'Generator OUTPUT to the 5790B {input} with a short RG-58 BNC cable '
                                                         '(type N input: N(m) to BNC(f) adapter; binding posts: BNC to dual banana).'),
                                             ('5790B', 'No other cables on the 5790B inputs. Guard and ground as your lab practice.')]),
@@ -476,6 +487,8 @@ class App:
         self.addr = {k: tk.StringVar(value=g(k, d)) for k, d in (('uut', 'USB0::0x0957::0x0407::MY00000000::INSTR'), ('std', 'GPIB0::8::INSTR'),
                                                                    ('counter', ''), ('power', ''), ('std_baud', '9600'), ('uut_baud', '57600'))}
         self.std_input = tk.StringVar(value=g('std_input', 'INPUT 1 (type N)'))
+        cr = g('counter_ref', 'External 10 MHz (GPS)')
+        self.counter_ref = tk.StringVar(value=cr if cr in COUNTER_REFS else 'External 10 MHz (GPS)')
         methods = SPEC.get('flatness_methods', ['POWER'])
         saved = g('flat_method', FLAT_METHODS[methods[0]])
         self.flat_method = tk.StringVar(value=saved if saved in [FLAT_METHODS[m] for m in methods] else FLAT_METHODS[methods[0]])
@@ -511,7 +524,7 @@ class App:
             for b in (self.btn_run, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find):
                 b.configure(state=idle)
             self.btn_stop.configure(state='normal' if value else 'disabled')
-            for c in (self.period_combo, self.set_combo) + ((self.method_combo,) if hasattr(self, 'method_combo') else ()):
+            for c in (self.period_combo, self.set_combo, self.ref_combo) + ((self.method_combo,) if hasattr(self, 'method_combo') else ()):
                 c.configure(state='disabled' if value else 'readonly')
 
     # ------------------------------------------------------------------ layout
@@ -553,6 +566,11 @@ class App:
         ttk.Combobox(row, textvariable=self.std_input, values=list(STD_INPUTS), width=20, state='readonly').pack(side='left', padx=(5, 8))
         ttk.Label(row, text='Baud', style='Muted.TLabel').pack(side='left')
         ttk.Combobox(row, textvariable=self.addr['std_baud'], values=['9600', '19200', '38400', '57600', '115200'], width=7, state='readonly').pack(side='left', padx=(5, 0))
+        crow = ttk.Frame(conn); crow.grid(row=2, column=2, columnspan=2, sticky='w')
+        ttk.Label(crow, text='Timebase', style='Muted.TLabel').pack(side='left')
+        self.ref_combo = ttk.Combobox(crow, textvariable=self.counter_ref, values=list(COUNTER_REFS), width=22, state='readonly')
+        self.ref_combo.pack(side='left', padx=(5, 0))
+        self.ref_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_counter_ref())
         if len(SPEC.get('flatness_methods', ['POWER'])) > 1:
             mrow = ttk.Frame(conn); mrow.grid(row=3, column=2, columnspan=2, sticky='w')
             ttk.Label(mrow, text='Flatness with', style='Muted.TLabel').pack(side='left')
@@ -688,7 +706,7 @@ class App:
         try:
             self.disconnect()
             self.io = IO(self._addrs(), ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()],
-                         flat_method=self.method())
+                         flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()])
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
@@ -711,7 +729,7 @@ class App:
     def _save_settings(self):
         for k, v in self.addr.items(): self.settings.set(k, v.get())
         self.settings.set('std_input', self.std_input.get()); self.settings.set('period', self.period.get())
-        self.settings.set('flat_method', self.flat_method.get())
+        self.settings.set('flat_method', self.flat_method.get()); self.settings.set('counter_ref', self.counter_ref.get())
         self.settings.save()
 
     def ask_number_threadsafe(self, prompt, unit):
@@ -749,6 +767,12 @@ class App:
 
     def method(self):
         return next(k for k, v in FLAT_METHODS.items() if v == self.flat_method.get())
+
+    def on_counter_ref(self):
+        self._save_settings()
+        if self.io is not None:
+            self.io.counter_ref = COUNTER_REFS[self.counter_ref.get()]
+        self.status.set(f'Counter timebase: {self.counter_ref.get()}.')
 
     def on_method(self):
         self._save_settings()

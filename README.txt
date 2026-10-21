@@ -1,4 +1,4 @@
-CALIBRATION SUITE - restyled (Manager v67)
+CALIBRATION SUITE - restyled (Manager v68)
 ==========================================
 
 Folder layout (same as before, plus one new file):
@@ -224,7 +224,10 @@ Procedures/Keysight_33210A_Verification.py, Agilent_33220A_Verification.py, Agil
   and low-frequency flatness in place of the 3458A the manual lists, a frequency counter, and for flatness either the 5790B
   WIDEBAND input or an RF power meter with sensor and a -20 dB attenuator. A 53131A / 53132A counter is recognised from *IDN?
   and set up by the program (drivers/keysight_5313x.py: channel 1, 50 ohm, AC, 1 s gate, expected frequency, each read back);
-  the timebase result records which counter and which timebase (internal / external Ref In) were used. Leave the counter or power meter address blank to type
+  Counter timebase ('Timebase', default External 10 MHz (GPS)): the program selects EXT, tests Ref In with ROSC:EXT:CHEC ONCE
+  (error +2009 stops the run: no valid reference), leaves CHECk ON so a reference lost during the reading also stops it, and
+  confirms 10 MHz with ROSC:EXT:FREQ?. The timebase row on the report states the counter timebase used. Choose Internal
+  timebase only when no external reference is fitted. A generic counter's timebase is not checked (recorded as such). Leave the counter or power meter address blank to type
   its readings when asked.
   Flatness method ('Flatness with', 33210A and 33220A; default 5790B wideband): the 5790B WIDEBAND input (option /3, /5 or /AF,
   50 ohm, up to 7 V) measures each point directly relative to 1 kHz at the same dBm setting with the range locked:

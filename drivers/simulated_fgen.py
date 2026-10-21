@@ -178,7 +178,7 @@ class SimCounter(_SimBase):
     def __init__(self, bench):
         super().__init__(bench, 'SIM-COUNTER')
         bench.counter = self.st = dict(func='FREQ', imp=1e6, coup='AC', start='IMM', stop='TIM', gate=0.1, exp=None,
-                                       rosc='INT', auto=True, ext_ref=False, errors=[])
+                                       rosc='INT', auto=True, ext_ref=True, ext_lost=False, check='ON', errors=[])
 
     def _reading(self):
         b, s = self.bench, self.st
@@ -186,6 +186,8 @@ class SimCounter(_SimBase):
             s['errors'].append('-230,"Data corrupt or stale"'); return '+9.91000000000E+37'
         if s['exp'] is not None and abs(b.gen['freq'] / s['exp'] - 1) > 0.1:
             s['errors'].append('-230,"Data corrupt or stale"'); return '+9.91000000000E+37'
+        if s['rosc'] == 'EXT' and s['check'] == 'ON' and (s['ext_lost'] or not s['ext_ref']):
+            s['errors'].append('+2009,"No valid external timebase"')
         ppm = 0.02e-6 if s['rosc'] == 'EXT' else b.ppm_counter
         return f"{b.gen['freq'] * (1 + b.ppm) * (1 + ppm):+.15E}"
 
@@ -224,6 +226,16 @@ class SimCounter(_SimBase):
         if m: s['rosc'] = m.group(1); s['auto'] = False; return None
         if u == 'ROSC:SOUR?': return s['rosc'] if not s['auto'] else ('EXT' if s['ext_ref'] else 'INT')
         if u == 'ROSC:SOUR:AUTO?': return '1' if s['auto'] else '0'
+        m = re.match(r'ROSC:EXT:CHEC\s+(ON|OFF|ONCE)$', u)
+        if m:
+            if m.group(1) == 'ONCE':
+                if s['rosc'] != 'EXT': s['errors'].append('-221,"Settings conflict"')
+                elif not s['ext_ref']: s['errors'].append('+2009,"No valid external timebase"')
+                s['check'] = 'OFF'
+            else:
+                s['check'] = m.group(1)
+            return None
+        if u == 'ROSC:EXT:CHEC?': return s['check']
         if u == 'ROSC:EXT:FREQ?': return '+1.00000E+07' if (s['rosc'] == 'EXT' and s['ext_ref']) else '+9.91000E+37'
         if u == 'READ?': return self._reading()
         raise TransportError(f'simulated counter: unknown command {cmd!r}')
