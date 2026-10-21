@@ -59,6 +59,12 @@ COMMANDS = {
                      verified=True, ref=_REF),
     'out.volts.hz': Cmd('OUT {volts:.9g}V,{hz:.9g}Hz', 'Program a voltage and frequency (NORMAL terminals)',
                         placeholders={'volts': _f(1.0), 'hz': _f(1000.0)}, kind='set', verified=True, ref=_REF),
+    'out.volts.dc': Cmd('OUT {volts:.9g}V,0Hz', 'Program a DC voltage with an explicit 0 Hz (NORMAL terminals)',
+                        'Explicit 0 Hz so the output leaves AC; accepted by the 5560A (confirmed on hardware 2026-10-21)',
+                        placeholders={'volts': _f(1.0)}, kind='set', verified=True, ref=_REF),
+    'out.amps.dc': Cmd('OUT {amps:.9g}A,0Hz', 'Program a DC current with an explicit 0 Hz (NORMAL terminals)',
+                       'Explicit 0 Hz so the output leaves AC',
+                       placeholders={'amps': _f(0.001)}, kind='set', verified=False, ref=_REF),
     'out.amps': Cmd('OUT {amps:.9g}A', 'Program a current (NORMAL terminals)', placeholders={'amps': _f(0.001)}, kind='set',
                     verified=True, ref=_REF),
     'out.amps.hz': Cmd('OUT {amps:.9g}A,{hz:.9g}Hz', 'Program a current and frequency (NORMAL terminals)',
@@ -248,15 +254,21 @@ class Fluke5560A(Instrument):
     # These send exactly the commands the DMM verification procedures use. By default OPER / STBY
     # are NOT read back (verify=False) to match those procedures' proven behaviour on RS-232 links;
     # pass verify=True once the readback has been confirmed on your 5560A.
-    def set_output_volts(self, volts, frequency_hz=None):
+    def set_output_volts(self, volts, frequency_hz=None, dc=False):
+        """An OUT with no frequency keeps the previous one, so after an AC point it stays AC.
+        dc=True sends ',0Hz' to select DC explicitly (callers that pass nothing keep the old command)."""
         if frequency_hz:
             self.send('out.volts.hz', volts=volts, hz=frequency_hz)
+        elif dc:
+            self.send('out.volts.dc', volts=volts)
         else:
             self.send('out.volts', volts=volts)
 
-    def set_output_amps(self, amps, frequency_hz=None):
+    def set_output_amps(self, amps, frequency_hz=None, dc=False):
         if frequency_hz:
             self.send('out.amps.hz', amps=amps, hz=frequency_hz)
+        elif dc:
+            self.send('out.amps.dc', amps=amps)
         else:
             self.send('out.amps', amps=amps)
 

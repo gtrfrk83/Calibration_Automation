@@ -172,7 +172,7 @@ class IO(procmods_engine.ProcModsMixin):
                 raise Cancelled()
             time.sleep(min(0.25, max(0.0, end - time.monotonic())))
 
-    def _volts(self, v, f, context, cancel, ramp=None):
+    def _volts(self, v, f, context, cancel, ramp=None, dc=False):
         steps = [v]
         if ramp:                                   # a ramp the meter's manual prescribes (e.g. 60 V then 120 V)
             steps = [float(x) for x in ramp]
@@ -182,7 +182,7 @@ class IO(procmods_engine.ProcModsMixin):
             if abs(steps[-1]) < abs(v):
                 steps.append(v)
         for i, level in enumerate(steps):
-            self.cal.set_output_volts(level, f)
+            self.cal.set_output_volts(level, f, dc=dc)
             self.cal.check_error(context)
             if i == 0:
                 self.cal.operate_unverified()
@@ -196,10 +196,10 @@ class IO(procmods_engine.ProcModsMixin):
         context = describe(p)
         self.standby()
         if kind in ('DCV', 'ACV'):
-            self._volts(v, f, context, cancel, ramp=p.get('ramp'))
+            self._volts(v, f, context, cancel, ramp=p.get('ramp'), dc=kind == 'DCV')
         else:
             if kind in ('DCI', 'ACI'):
-                self.cal.set_output_amps(v, f)
+                self.cal.set_output_amps(v, f, dc=kind == 'DCI')
             elif kind == 'OHM':
                 self.cal.set_output_ohms(v)
             elif kind == 'CAP':
