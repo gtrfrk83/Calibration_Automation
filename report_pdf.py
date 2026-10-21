@@ -113,7 +113,7 @@ def scope():
 def point_uncertainty(p) -> str:
     """CMC for a verification point (a measuring instrument under test), formatted for the report; '' if not covered."""
     sc = scope()
-    if sc is None or p.get('source') == 'none':      # zero-offset points (short / open input) use no source, so no source CMC applies
+    if sc is None or p.get('zero_offset') or p.get('source') == 'none':      # zero-offset points (short / open input) use no source, so no source CMC applies and no uncertainty is shown
         return ''
     import uncertainty
     value = sc.dmm(p['kind'], p['nominal'], p.get('range'), p.get('frequency'))
