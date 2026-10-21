@@ -41,10 +41,12 @@ for kind, block in TEST_TABLES.items():
 # All zero-offset points form ONE block at the start of the run (one section in the list and the report).
 # Shorted-input zeros first, then the open-input ones (DCI, CAP), so the technician fits each fixture once.
 # Point ids are left unchanged so existing checkpoint files still match their points.
+HIGH_CURRENT_A=3.0     # at or above this the calibrator output is on its high-current terminals (the table has only 1.9 A and 10 A around it)
 _ZERO_ORDER={'DCV':0,'OHM2':1,'OHM4':2,'DCI':3,'CAP':4}
 def setup_key(p):
     """What the technician must have connected: one key for the whole zero block's shorted inputs, one for open inputs."""
     if p.get('zero_offset'):return 'ZERO_OPEN' if p['kind'] in ('DCI','CAP') else 'ZERO_SHORT'
+    if p['kind'] in ('DCI','ACI') and abs(p['nominal'])>=HIGH_CURRENT_A:return 'CURRENT_HIGH'
     return p['wiring']
 POINTS.sort(key=lambda q:(0,_ZERO_ORDER[q['kind']]) if q.get('zero_offset') else (1,0))   # stable: gain points keep their order
 BY_ID={q['id']:q for q in POINTS}      # the list is no longer in id order (zero block first): always look points up by id
@@ -205,6 +207,7 @@ class App:
     SETUP_TEXT = {
         'VOLTAGE': '5560A voltage output to the meter HI / LO terminals',
         'CURRENT': '5560A current output to the meter current (A) input and LO',
+        'CURRENT_HIGH': '5560A HIGH-current output terminals (AUX) to the meter 10 A input and LO',
         'RESISTANCE_2W': '2-wire resistance leads from the 5560A',
         'RESISTANCE_4W': '4-wire force and sense leads from the 5560A',
         'CAPACITANCE': 'Capacitance fixture (confirm OPEN compensation per manual)',
@@ -398,7 +401,7 @@ class App:
         if not sel:return
         p=BY_ID[int(sel[0])]
         setup=('Zero offset: select the '+p['terminal']+' terminals and fit the short (open for current) - the 5560A stays in STANDBY.'
-               if p.get('zero_offset') else self.SETUP_TEXT.get(p['wiring'],p['wiring']))
+               if p.get('zero_offset') else self.SETUP_TEXT.get(setup_key(p),p['wiring']))
         _v,_r,_u=ui.si_row([p["low"],p["high"]],p['unit'])
         self.detail.set(f'{p["description"]}\nAcceptable reading: {_v[0]} to {_v[1]} {_u}     |     Setup: {setup}')
 
@@ -458,11 +461,12 @@ class App:
                     ok='Set up \u2014 measure'):
                     self.busy=False;self.status.set('Paused for zero-offset setup');return
             elif not self.demo:
-                msg={'VOLTAGE':'Connect 5560A voltage output to 8846A HI/LO voltage terminals. Verify safe leads and ranges.',
-                     'CURRENT':'Put calibrator in STANDBY. Move leads to 8846A CURRENT input and LO. Check fuses and current ratings.',
+                msg={'CURRENT_HIGH':'Put calibrator in STANDBY. Move the calibrator leads from its LOW-current output terminals to its HIGH-current output terminals (AUX), and the meter leads to the 10 A input. Check fuses, lead rating and current ratings before continuing.',
+                     'VOLTAGE':'Connect 5560A voltage output to 8846A HI/LO voltage terminals. Verify safe leads and ranges.',
+                     'CURRENT':'Put calibrator in STANDBY. Move leads to 8846A CURRENT input and LO (and, if coming from the 10 A points, back to the calibrator\'s LOW-current output terminals). Check fuses and current ratings.',
                      'RESISTANCE_2W':'Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling.',
                      'RESISTANCE_4W':'Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals.',
-                     'CAPACITANCE':'Put calibrator in STANDBY. Connect capacitance fixture; verify OPEN compensation and meter setup per manual.'}[p['wiring']]
+                     'CAPACITANCE':'Put calibrator in STANDBY. Connect capacitance fixture; verify OPEN compensation and meter setup per manual.'}[setup_key(p)]
                 if not ui.confirm_steps(self.root,'Rewire / verify before enabling output',f'Connect for {p["kind"]} tests',
                     [('Wiring',msg)],
                     facts=[('Next point',f'{p["id"]} of {len(POINTS)}'),('Test',p['description'])],
