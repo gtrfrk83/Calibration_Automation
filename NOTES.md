@@ -58,6 +58,18 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Frequency and level go in one message (`FREQ ...;:POW ...`) so the source applies its frequency/power coupling.
 - Output route (`OUTP:ROUT` HEAD / MICRowave) and sensor leveling (`OUTP:LEV`) are left as set on the front panel.
 
+## Open items: Tektronix TDS2000C / TDS1000C-EDU (checked on the simulated bench only, not run on hardware or a real UI)
+- Source: Service Manual 077-0446-01 Chapter 4 + Appendix A; commands from the TBS1000-B/TDS2000-B-C/... Programmer manual. Limits read from page images.
+- Fluke 5520A/5522A scope option: `SCOPE VOLT`, `SCOPE LEVSINE`, `SCOPE MARKER`, `OUT_IMP 1M|50`, the `SCOPE?` reply text and `OUT?` in levsine/marker modes are
+  NOT confirmed (the 5520A Programmers Guide gives the commands SCOPE, SCOPE?, OUT_IMP, TMWAVE and the 5-field OUT? layout only). The 5560A path reuses existing driver commands.
+- Time base test: edge time is read from the waveform (t = XZEro + n*XINcr, relative to the trigger point). A guard raises an error if the record centre is
+  more than 1.5 div from the 10 ms delay; the XZEro / HORizontal:POSition convention is unverified.
+- "Stable trigger" is judged by engine criteria (trigger Normal, >= 5 acquisitions/s, edge position spread <= 0.2 period over 8 records); the manual's check is visual.
+- SETLevel with an EXT trigger source may be rejected; that is tolerated on the external-trigger points only.
+- Average-mode NUMACq counting and the 0.05 div position readback tolerance are unverified.
+- Vertical position: the manual's DC supply + DVM is replaced by the calibrator DC output; without a reference DMM the calibrator setpoint is the "DVM" value (stated in the report).
+- Manual prints "TDS2004B" in the bandwidth list; TDS2004C is used. USB VISA address of the scope is entered by hand.
+
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.
 Simulated bench: `drivers/simulated.py` (`make_dacq_bench`, `make_dmm_bench`, `make_bench`).

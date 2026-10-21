@@ -107,6 +107,7 @@ class SimFlukeTransport(_SimBase):
         if u == 'OPER': f['operate'] = True; return None
         if u == 'OPER?': return '1' if f['operate'] else '0'
         if u == 'SCOPE DCV': f['scope'], f['func'] = 'VOLT', 'SDCV'; return None
+        if u == 'SCOPE VOLT': f['scope'], f['func'] = 'VOLT', 'SDCV'; return None      # 5520A / 5522A scope option
         if u == 'SCOPE SQUARE': f['scope'], f['func'] = 'SQUARE', 'SSQU'; return None
         if u == 'SCOPE LEVSINE': f['scope'], f['func'] = 'LEVSINE', 'SLEV'; return None
         if u == 'SCOPE MEASR': f['scope'], f['func'] = 'MEASR', 'SMEAS'; return None

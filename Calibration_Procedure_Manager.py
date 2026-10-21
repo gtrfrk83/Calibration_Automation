@@ -43,6 +43,7 @@ STABLE = {
  'Keysight 34970A Performance Verification (RS-232)': 'Keysight_34970A_Verification.py',
  'Keysight 34972A Performance Verification (USB)': 'Keysight_34972A_Verification.py',
  'Tektronix MDO4000C Performance Verification': 'Tektronix_MDO4000C_Verification.py',
+ 'Tektronix TDS2000C Performance Verification': 'Tektronix_TDS2000C_Verification.py',
  'Fluke 110 Performance Verification': 'Fluke_110_Verification.py',
  'Fluke 113 Performance Verification': 'Fluke_113_Verification.py',
  'Fluke 114 Performance Verification': 'Fluke_114_Verification.py',
@@ -59,7 +60,7 @@ STABLE = {
 VERSIONS = {'WaveSurfer_WS4104HD.py': '51', 'Fluke_87V.py': '53', 'Agilent_34401A.py': '55',
             'Fluke_8846A_Verification.py': '59', 'Fluke_8846A_Adjustment.py': '57',
             'Keysight_34465A_Verification.py': '3', 'Keysight_34460A_Verification.py': '2', 'Keysight_34461A_Verification.py': '2', 'Keysight_34470A_Verification.py': '2', 'Keysight_34970A_Verification.py': '1', 'Keysight_34972A_Verification.py': '1',
-            'Tektronix_MDO4000C_Verification.py': '2', 'Fluke_110_Verification.py': '2', 'Fluke_113_Verification.py': '2', 'Fluke_114_Verification.py': '2', 'Fluke_115_Verification.py': '2', 'Fluke_116_Verification.py': '2', 'Fluke_117_Verification.py': '2', 'Klein_MM325_Verification.py': '2',
+            'Tektronix_MDO4000C_Verification.py': '2', 'Tektronix_TDS2000C_Verification.py': '1', 'Fluke_110_Verification.py': '2', 'Fluke_113_Verification.py': '2', 'Fluke_114_Verification.py': '2', 'Fluke_115_Verification.py': '2', 'Fluke_116_Verification.py': '2', 'Fluke_117_Verification.py': '2', 'Klein_MM325_Verification.py': '2',
             'Keysight_33210A_Verification.py': '2', 'Agilent_33220A_Verification.py': '2', 'Agilent_33250A_Verification.py': '1',
             'Fluke_287_Verification.py': '1', 'Fluke_289_Verification.py': '1'}
 ALL_CATEGORIES = 'All categories'
@@ -114,6 +115,7 @@ def init_db():
             ('Keysight 34970A Performance Verification (RS-232)','Keysight','34970A','Data Acquisition / Switch Unit','Keysight_34970A_Verification.py'),
             ('Keysight 34972A Performance Verification (USB)','Keysight','34972A','Data Acquisition / Switch Unit','Keysight_34972A_Verification.py'),
             ('Tektronix MDO4000C Performance Verification','Tektronix','MDO4024C/4034C/4054C/4104C','Oscilloscope','Tektronix_MDO4000C_Verification.py'),
+            ('Tektronix TDS2000C Performance Verification','Tektronix','TDS2000C / TDS1000C-EDU','Oscilloscope','Tektronix_TDS2000C_Verification.py'),
             ('Fluke 110 Performance Verification','Fluke','110','Digital Multimeter','Fluke_110_Verification.py'),
             ('Fluke 113 Performance Verification','Fluke','113','Digital Multimeter','Fluke_113_Verification.py'),
             ('Fluke 114 Performance Verification','Fluke','114','Digital Multimeter','Fluke_114_Verification.py'),

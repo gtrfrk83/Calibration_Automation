@@ -8,11 +8,13 @@ Add a model by copying drivers/TEMPLATE.md's checklist - see README.txt in this 
 from .base import Instrument, InstrumentError, SafetyError
 from .fluke_5560a import SERIAL_DEFAULT as FLUKE_5560A_SERIAL
 from .fluke_5560a import Fluke5522A, Fluke5560A
+from .fluke_5522a_scope import Fluke5522AScope
 from .lecroy_ws4104hd import WaveSurfer4104HD
 from .keysight_truevolt import Keysight34460A, Keysight34461A, Keysight34465A, Keysight34470A, KeysightTruevolt
 from .keysight_dacq import Keysight34970A, Keysight34972A, KeysightDacq, channel_for, pair_channel
 from .scpi_dmm import Agilent34401A, Fluke8846A, ScpiDmm
 from .tektronix_mdo4000c import TektronixMDO4000C
+from .tektronix_tds2000c import TektronixTDS2000C
 from .reference_instruments import AgilentAFG, Fluke96270A, ReferenceMeter
 from .fluke_5790b import SERIAL_DEFAULT as FLUKE_5790B_SERIAL
 from .fluke_5790b import Fluke5790B
