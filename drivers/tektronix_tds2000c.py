@@ -248,3 +248,33 @@ class TektronixTDS2000C(Instrument):
         volts = [(d - yoff) * ymult + yzero for d in dl]
         self.check_errors(f'waveform CH{ch}')
         return times, volts
+
+    def waveform_burst(self, ch, count, half_points=1250):
+        """`count` successive records of CH<ch>, each only the window of 2*half_points points around the middle of the 2500-point record
+        (the trigger point), for repeatability checks. The scale preamble and the source are read ONCE and errors are checked once at the end;
+        only CURVe? is repeated. Times are relative to the window centre (t = (n - half_points) * XINcr), so they do not depend on how
+        XZEro is reported for a partial record. Returns [(times, volts), ...]."""
+        half = max(60, min(1250, int(half_points)))
+        start, stop = 1251 - half, 1250 + half
+        for cmd in (f'DATa:SOUrce CH{ch}', 'DATa:ENCdg ASCIi', 'DATa:WIDth 1', f'DATa:STARt {start}', f'DATa:STOP {stop}'):
+            self.write(cmd)
+        xinc = _last_number(self.query('WFMPre:XINcr?'))
+        ymult = _last_number(self.query('WFMPre:YMUlt?'))
+        yoff = _last_number(self.query('WFMPre:YOFf?'))
+        yzero = _last_number(self.query('WFMPre:YZEro?'))
+        if xinc <= 0 or ymult == 0:
+            raise InstrumentError(f'Waveform scale not usable (XINcr {xinc:g}, YMUlt {ymult:g})')
+        out = []
+        for _ in range(count):
+            raw = self.query('CURVe?').strip()
+            if raw.upper().startswith('CURVE'):
+                raw = raw[5:]
+            try:
+                dl = [float(x) for x in raw.replace(';', ',').split(',') if x.strip()]
+            except ValueError:
+                raise InstrumentError(f'Unreadable waveform data from CURVe?: {raw[:60]!r}')
+            if len(dl) < 2 * half * 0.9:
+                raise InstrumentError(f'Waveform window not usable ({len(dl)} points, expected {2 * half})')
+            out.append(([(i - half) * xinc for i in range(len(dl))], [(d - yoff) * ymult + yzero for d in dl]))
+        self.check_errors(f'waveform CH{ch}')
+        return out

@@ -217,6 +217,8 @@ class SimTds(_SimBase):
         if u == 'MEASUREMENT:IMMED:VALUE?': return self._e(self._meas_value())
         m = re.match(r'DATA:SOURCE (\w+)$', u)
         if m: s.data_src = m.group(1); return None
+        m = re.match(r'DATA:(START|STOP) (\d+)$', u)
+        if m: setattr(s, 'data_' + m.group(1).lower(), int(m.group(2))); return None
         if u.startswith('DATA:'): return None
         ch = s.ch[int(s.data_src[-1])] if s.data_src.startswith('CH') else s.ch[1]
         if u == 'WFMPRE:XINCR?': return self._e(self._xinc())
@@ -224,7 +226,9 @@ class SimTds(_SimBase):
         if u == 'WFMPRE:YMULT?': return self._e(ch['scale'] / 25.0)
         if u == 'WFMPRE:YOFF?': return self._e(ch['pos'] * 25.0)
         if u == 'WFMPRE:YZERO?': return self._e(0.0)
-        if u == 'CURVE?': return 'CURVE ' + ','.join(str(x) for x in self._curve())
+        if u == 'CURVE?':
+            full = self._curve(); a, b = getattr(s, 'data_start', 1), getattr(s, 'data_stop', len(full))
+            return 'CURVE ' + ','.join(str(x) for x in full[a - 1:b])
         raise TransportError(f'simulated TDS2000C: unknown command {cmd!r}')
 
     def query(self, text):

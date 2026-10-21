@@ -529,7 +529,7 @@ class Runner:
         return err_div, dict(edge_s=mean_edge, spread_s=max(edges) - min(edges), delay_s=p['delay'], ppm=(mean_edge - p['delay']) / p['delay'] * 1e6)
 
     # ---- trigger sensitivity ---------------------------------------------------------------------------------------------------------------------
-    def check_stable(self, wave_ch, freq, slope, strict_level=True):
+    def check_stable(self, wave_ch, freq, slope, hscale, strict_level=True):
         """Engine criteria for 'stable trigger' (the manual says only 'check that triggering is stable'):
         trigger mode Normal, Set To 50 %, acquisitions keep completing, and the edge position in STABLE_CAPTURES successive records
         stays within STABLE_JITTER_PERIODS of a period.  Returns (stable, details)."""
@@ -548,8 +548,8 @@ class Runner:
         n0 = s.num_acq(); pause(1.0); n1 = s.num_acq()
         locked = (n1 - n0) >= STABLE_MIN_ACQ
         crossings = []
-        for _ in range(STABLE_CAPTURES):
-            times, volts = s.waveform(wave_ch)
+        ppc = 2500.0 / max(freq * 10 * hscale, 1e-12)          # record points per signal cycle (10 divisions on screen)
+        for times, volts in s.waveform_burst(wave_ch, STABLE_CAPTURES, half_points=math.ceil(ppc) + 2):    # +/- one cycle around the trigger point
             found = edge_times(times, volts, slope)
             if found:
                 crossings.append(min(found, key=abs))
@@ -587,7 +587,7 @@ class Runner:
             start = src if st['meas_vpp'] == 'LAST' else self._start.get(key, last_pp)
             src, meas = self.tune_sine(ch, last_f, start, last_pp, tol=0.10, count=3)     # Sample mode: no averaging to wait for
             self._start[key] = src
-            ok, detail = self.check_stable(ch, last_f, st['slope'])
+            ok, detail = self.check_stable(ch, last_f, st['slope'], st['hscale'])
             results.append(dict(step=st['step'], stable=ok, measured_vpp=meas, source_vpp=src, **detail))
         self.io.cal.standby_quiet()
         return (1.0 if all(r['stable'] for r in results) else 0.0), dict(stages=results)
@@ -622,7 +622,7 @@ class Runner:
                 meas = s.measure('PK2pk', 1, count=3)
             row = dict(step=st['step'], source_vpp=src, ch1_vpp=meas, freq=last_f)
             if st['check']:
-                ok, detail = self.check_stable(1, last_f, st['slope'], strict_level=False)
+                ok, detail = self.check_stable(1, last_f, st['slope'], st['hscale'], strict_level=False)
                 row.update(stable=ok, **detail)
             else:
                 row['stable'] = True
