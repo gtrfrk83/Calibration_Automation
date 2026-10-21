@@ -298,7 +298,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         ttk.Label(config, text='Min limits (dB), comma-separated, in scale order:').grid(row=1, column=0, columnspan=4, sticky='w', pady=(12, 0))
         ttk.Entry(config, textvariable=self.limit_text).grid(row=1, column=4, columnspan=4, sticky='ew', pady=(12, 0), padx=6)
         ttk.Label(config, text='P1 StdDev and source are set automatically for RMS noise. All channels ON; DC 1 MΩ; full bandwidth; 1 ms/div; external 50 Ω termination.', wraplength=1050).grid(row=2, column=0, columnspan=8, sticky='w', pady=(10, 0))
-        ttk.Label(config, text='Formula: 20 log10((factor × V/div)/RMS). User reports Teledyne verification; confirm limits, setup and decision rule before calibration release.', foreground='#a34b00', wraplength=1050).grid(row=3, column=0, columnspan=8, sticky='w', pady=(5, 0))
+        ttk.Label(config, text='Formula: 20 log10((factor × V/div)/RMS). User reports Teledyne verification; confirm limits, setup and decision rule before calibration release.', foreground=ui.C['warn'], wraplength=1050).grid(row=3, column=0, columnspan=8, sticky='w', pady=(5, 0))
         # Collapse the tall setup panel by default so the results table
         # remains visible even on smaller laptop displays.
         self.show_settings = tk.BooleanVar(value=False)
@@ -330,9 +330,9 @@ class RMSNoiseApp(datamode.DataModeMixin):
         ]:
             self.tree.heading(col, text=label)
             self.tree.column(col, width=width, anchor='center', stretch=True)
-        self.tree.tag_configure('pass', foreground='#17652b')
-        self.tree.tag_configure('fail', foreground='#a11b1b')
-        self.tree.tag_configure('error', foreground='#a34b00')
+        self.tree.tag_configure('pass', foreground=ui.C['good'])
+        self.tree.tag_configure('fail', foreground=ui.C['bad'])
+        self.tree.tag_configure('error', foreground=ui.C['warn'])
         self.tree.pack( side='left', fill='both', expand=True)
         scrollbar = ttk.Scrollbar(frame, orient='vertical', command=self.tree.yview)
         scrollbar.pack(side='right', fill='y')
@@ -505,8 +505,8 @@ class RMSNoiseApp(datamode.DataModeMixin):
                                    anchors={'function': 'w', 'channel': 'w', 'range': 'w', 'test': 'w', 'nominal': 'e', 'low': 'e', 'high': 'e', 'found': 'e', 'unit': 'w'},
                                    stretch={k: False for k in cols if k != 'test'})
         self.utree.tag_configure('pending', foreground=ui.C['muted'])
-        self.utree.tag_configure('pass', foreground='#17652b')
-        self.utree.tag_configure('fail', foreground='#a11b1b')
+        self.utree.tag_configure('pass', foreground=ui.C['good'])
+        self.utree.tag_configure('fail', foreground=ui.C['bad'])
         self.utree.bind('<<TreeviewSelect>>', self.on_unified_select)
         self.refresh_unified(force=True)
         self.root.after(500, self._unified_tick)
@@ -1561,8 +1561,8 @@ class RMSNoiseApp(datamode.DataModeMixin):
         for key,label,width in [('channel','Channel',80),('scale','Range',100),('nominal','Nominal',105),('observed','Measured',110),('low','Lower limit',105),('high','Upper limit',105),('error','Error',105),('units','Units',70),('result','Result',90)]:
             self.dc_tree.heading(key, text=label)
             self.dc_tree.column(key, width=width, anchor='center')
-        self.dc_tree.tag_configure('pass', foreground='#17652b')
-        self.dc_tree.tag_configure('fail', foreground='#a11b1b')
+        self.dc_tree.tag_configure('pass', foreground=ui.C['good'])
+        self.dc_tree.tag_configure('fail', foreground=ui.C['bad'])
         self.dc_tree.pack(side='left', fill='both', expand=True)
         scroll=ttk.Scrollbar(holder, orient='vertical', command=self.dc_tree.yview)
         scroll.pack(side='right', fill='y')
@@ -1985,8 +1985,8 @@ class RMSNoiseApp(datamode.DataModeMixin):
             ('low', 'Lower limit', 105), ('high', 'Upper limit', 105), ('units', 'Units', 65), ('result', 'Result', 75)):
             self.imp_tree.heading(key, text=title)
             self.imp_tree.column(key, width=width, anchor='center', stretch=True)
-        self.imp_tree.tag_configure('pass', foreground='#17652b')
-        self.imp_tree.tag_configure('fail', foreground='#a11b1b')
+        self.imp_tree.tag_configure('pass', foreground=ui.C['good'])
+        self.imp_tree.tag_configure('fail', foreground=ui.C['bad'])
         self.imp_tree.pack(side='left', fill='both', expand=True)
         bar = ttk.Scrollbar(table, orient='vertical', command=self.imp_tree.yview)
         bar.pack(side='right', fill='y')

@@ -12,3 +12,6 @@ def window_title(procedure: str) -> str:
     """e.g. 'Calibration Suite  |  Fluke 8846A Verification  |  v70 Beta 1'"""
     parts = [NAME, procedure, full_version()]
     return '  |  '.join(p for p in parts if p)
+
+
+DEFAULT_THEME = 'dark' if EDITION else 'light'     # the beta looks like the redesign; the released working copy stays light

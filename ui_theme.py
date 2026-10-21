@@ -13,7 +13,7 @@ from pathlib import Path
 from tkinter import ttk
 
 # ----------------------------------------------------------------------------- palette
-C = dict(
+LIGHT = dict(
     bg='#F5F5F7', card='#FFFFFF', bar='#EDEDF2', border='#D8D8DE', border_strong='#C7C7CC',
     text='#1D1D1F', muted='#6E6E73', faint='#A1A1A6',
     navy='#1D1D1F', navy_hi='#3A3A3C', accent_line='#007AFF',
@@ -24,7 +24,65 @@ C = dict(
     warn='#9A5B00', warn_bg='#FFF3DC', warn_dot='#FF9500',
     info='#0A5FD6', info_bg='#E5F0FF', info_dot='#007AFF',
     neutral='#55555A', neutral_bg='#E8E8ED', neutral_dot='#A1A1A6',
+    field='#FFFFFF', table='#FFFFFF', on_primary='#FFFFFF', primary_off='#A9CFFF',
+    btn=('#FFFFFF', '#D2D2D7'), btn_hi=('#F0F0F5', '#C7C7CC'), btn_lo=('#E3E3E8', '#BCBCC2'), btn_off=('#F5F5F7', '#E3E3E8'),
+    danger='#FF3B30', danger_hi='#E0281D', danger_lo='#C21A10', danger_off='#FFB3AE',
+    combo_btn='#EAEFF5', combo_btn_hi='#DCE5F0', trough='#E3E3E8', scroll='#D1D1D6', scroll_hi='#A1A1A6', scroll_lo='#8E8E93',
+    tip='#3A3A3C', row_even='#FFFFFF',
 )
+
+# Flat warm-charcoal dark theme with one blue accent (the beta's default look).
+DARK = dict(
+    bg='#262624', card='#2B2A28', bar='#262624', border='#3B3A37', border_strong='#4A4945',
+    text='#ECE9E1', muted='#A09D95', faint='#6F6D67',
+    navy='#ECE9E1', navy_hi='#BFBCB4', accent_line='#4C9BF5',
+    primary='#4C9BF5', primary_hi='#6AAEF7', primary_lo='#3B82E0',
+    select='#2A3A52', row_alt='#2F2E2B', head='#262624', head_hi='#33322F',
+    good='#34D399', good_bg='#08301F', good_dot='#34D399',
+    bad='#F87171', bad_bg='#3A1010', bad_dot='#F87171',
+    warn='#FBBF24', warn_bg='#2A2108', warn_dot='#FBBF24',
+    info='#9CC7FB', info_bg='#1D3556', info_dot='#4C9BF5',
+    neutral='#A09D95', neutral_bg='#33322F', neutral_dot='#6F6D67',
+    field='#1F1E1D', table='#2B2A28', on_primary='#FFFFFF', primary_off='#2B4766',
+    btn=('#2D2C2A', '#44433F'), btn_hi=('#363532', '#555450'), btn_lo=('#262624', '#555450'), btn_off=('#262624', '#33322F'),
+    danger='#C0392B', danger_hi='#D64535', danger_lo='#A12F23', danger_off='#4A2522',
+    combo_btn='#33322F', combo_btn_hi='#3B3A37', trough='#33322F', scroll='#555450', scroll_hi='#6F6D67', scroll_lo='#8A8780',
+    tip='#44433F', row_even='#2B2A28',
+)
+PALETTES = {'light': LIGHT, 'dark': DARK}
+C = dict(LIGHT)                    # the live palette: modules read ui.C at use time; use_palette() changes it in place
+THEME = 'light'
+
+
+def theme_choice() -> str:
+    """Which palette to use: CALSUITE_THEME, else the person's saved choice (Help > Appearance), else the edition's default."""
+    import os
+    name = os.environ.get('CALSUITE_THEME', '').strip().lower()
+    if name not in PALETTES:
+        try:
+            name = str(Settings('appearance').get('theme', '')).lower()
+        except Exception:
+            name = ''
+    if name not in PALETTES:
+        try:
+            import suite_info
+            name = getattr(suite_info, 'DEFAULT_THEME', 'light')
+        except ImportError:
+            name = 'light'
+    return name if name in PALETTES else 'light'
+
+
+def use_palette(name: str):
+    global THEME
+    THEME = name if name in PALETTES else 'light'
+    C.clear()
+    C.update(PALETTES[THEME])
+
+
+def is_dark() -> bool:
+    return THEME == 'dark'
+
+
 KINDS = ('good', 'bad', 'warn', 'info', 'neutral')
 
 FAMILY = 'TkDefaultFont'
@@ -106,6 +164,7 @@ def _dress(root):
 def apply_theme(root):
     """Style every ttk widget in the application. Call once, right after tk.Tk()."""
     global FAMILY, MONO, SCALE
+    use_palette(theme_choice())
     style = ttk.Style(root)
     if 'clam' in style.theme_names():
         style.theme_use('clam')
@@ -207,18 +266,15 @@ def apply_theme(root):
             ('Button.padding', {'sticky': 'nswe', 'children': [('Button.label', {'sticky': 'nswe'})]})]})])
         s.configure(name, padding=(px(16), px(5)), foreground=fg, anchor='center', relief='flat', borderwidth=0)
         s.map(name, foreground=[('disabled', disabled_fg)])
-    round_button('TButton', dict(normal=('#FFFFFF', '#D2D2D7'), hover=('#F0F0F5', '#C7C7CC'),
-                                  pressed=('#E3E3E8', '#BCBCC2'), disabled=('#F5F5F7', '#E3E3E8')),
-                 C['text'], C['faint'])
-    round_button('Compact.TButton', dict(normal=('#FFFFFF', '#D2D2D7'), hover=('#F0F0F5', '#C7C7CC'),
-                                         pressed=('#E3E3E8', '#BCBCC2'), disabled=('#F5F5F7', '#E3E3E8')),
-                 C['text'], C['faint'])
+    plain = dict(normal=C['btn'], hover=C['btn_hi'], pressed=C['btn_lo'], disabled=C['btn_off'])
+    round_button('TButton', plain, C['text'], C['faint'])
+    round_button('Compact.TButton', plain, C['text'], C['faint'])
     s.configure('Compact.TButton', padding=(px(10), px(2)), font=f_small)         # small file-action buttons (Save / Load / Export)
     round_button('Accent.TButton', dict(normal=(C['primary'], C['primary']), hover=(C['primary_hi'], C['primary_hi']),
-                                        pressed=(C['primary_lo'], C['primary_lo']), disabled=('#A9CFFF', '#A9CFFF')),
-                 '#FFFFFF', '#FFFFFF')
-    round_button('Danger.TButton', dict(normal=('#FF3B30', '#FF3B30'), hover=('#E0281D', '#E0281D'),
-                                        pressed=('#C21A10', '#C21A10'), disabled=('#FFB3AE', '#FFB3AE')),
+                                        pressed=(C['primary_lo'], C['primary_lo']), disabled=(C['primary_off'], C['primary_off'])),
+                 C['on_primary'], C['on_primary'])
+    round_button('Danger.TButton', dict(normal=(C['danger'],) * 2, hover=(C['danger_hi'],) * 2,
+                                        pressed=(C['danger_lo'],) * 2, disabled=(C['danger_off'],) * 2),
                  '#FFFFFF', '#FFFFFF')
     s.configure('Quiet.TButton', padding=(8, 5), relief='flat', borderwidth=0, background=C['bg'],
                 foreground=C['primary'], focuscolor=C['bg'], lightcolor=C['bg'], darkcolor=C['bg'], bordercolor=C['bg'])
@@ -227,19 +283,19 @@ def apply_theme(root):
 
     # inputs
     for name in ('TEntry', 'TSpinbox'):
-        s.configure(name, padding=(6, 5), fieldbackground='#FFFFFF', foreground=C['text'],
+        s.configure(name, padding=(6, 5), fieldbackground=C['field'], foreground=C['text'],
                     bordercolor=C['border_strong'], lightcolor=C['border_strong'], darkcolor=C['border_strong'])
         s.map(name, bordercolor=[('focus', C['primary'])], lightcolor=[('focus', C['primary'])],
               darkcolor=[('focus', C['primary'])], fieldbackground=[('disabled', C['bar']), ('readonly', C['bar'])])
-    s.configure('TCombobox', padding=(6, 5), fieldbackground='#FFFFFF', foreground=C['text'], arrowcolor=C['muted'],
-                background='#EAEFF5', bordercolor=C['border_strong'], lightcolor=C['border_strong'],
+    s.configure('TCombobox', padding=(6, 5), fieldbackground=C['field'], foreground=C['text'], arrowcolor=C['muted'],
+                background=C['combo_btn'], bordercolor=C['border_strong'], lightcolor=C['border_strong'],
                 darkcolor=C['border_strong'], arrowsize=px(14))
-    s.map('TCombobox', fieldbackground=[('disabled', C['bar']), ('readonly', '#FFFFFF')],
-          selectbackground=[('readonly', '#FFFFFF')], selectforeground=[('readonly', C['text'])],
+    s.map('TCombobox', fieldbackground=[('disabled', C['bar']), ('readonly', C['field'])],
+          selectbackground=[('readonly', C['field'])], selectforeground=[('readonly', C['text'])],
           bordercolor=[('focus', C['primary'])], lightcolor=[('focus', C['primary'])],
-          darkcolor=[('focus', C['primary'])], background=[('active', '#DCE5F0')])
+          darkcolor=[('focus', C['primary'])], background=[('active', C['combo_btn_hi'])])
     root.option_add('*TCombobox*Listbox.font', 'TkDefaultFont')
-    root.option_add('*TCombobox*Listbox.background', '#FFFFFF')
+    root.option_add('*TCombobox*Listbox.background', C['field'])
     root.option_add('*TCombobox*Listbox.foreground', C['text'])
     root.option_add('*TCombobox*Listbox.selectBackground', C['select'])
     root.option_add('*TCombobox*Listbox.selectForeground', C['text'])
@@ -248,7 +304,7 @@ def apply_theme(root):
     for name in ('TCheckbutton', 'TRadiobutton'):
         s.configure(name, background=C['bg'], padding=(2, 3))
         s.map(name, background=[('active', C['bg'])],
-              indicatorcolor=[('selected', C['primary']), ('pressed', C['primary_lo']), ('!selected', '#FFFFFF')])
+              indicatorcolor=[('selected', C['primary']), ('pressed', C['primary_lo']), ('!selected', C['field'])])
 
     # containers
     s.configure('TLabelframe', background=C['bg'], bordercolor=C['border'], lightcolor=C['border'],
@@ -259,27 +315,27 @@ def apply_theme(root):
     s.configure('TNotebook.Tab', padding=(22, 10), background=C['bar'], foreground=C['muted'],
                 bordercolor=C['border'], lightcolor=C['bar'], darkcolor=C['bar'], font='CalBold')
     s.map('TNotebook.Tab', background=[('selected', C['primary']), ('active', C['head_hi'])],
-          foreground=[('selected', '#FFFFFF')], lightcolor=[('selected', C['primary'])],
+          foreground=[('selected', C['on_primary'])], lightcolor=[('selected', C['primary'])],
           darkcolor=[('selected', C['primary'])], expand=[('selected', (0, 0, 0, 0))])
     s.configure('TPanedwindow', background=C['bar'])
 
     # progress + scrollbars (slim, no arrow buttons - like macOS)
-    s.configure('Horizontal.TProgressbar', troughcolor='#E3E3E8', background=C['primary'],
-                bordercolor='#E3E3E8', lightcolor=C['primary'], darkcolor=C['primary'], thickness=px(8))
-    s.configure('Good.Horizontal.TProgressbar', troughcolor='#E3E3E8', background=C['good_dot'],
-                bordercolor='#E3E3E8', lightcolor=C['good_dot'], darkcolor=C['good_dot'], thickness=px(8))
+    s.configure('Horizontal.TProgressbar', troughcolor=C['trough'], background=C['primary'],
+                bordercolor=C['trough'], lightcolor=C['primary'], darkcolor=C['primary'], thickness=px(8))
+    s.configure('Good.Horizontal.TProgressbar', troughcolor=C['trough'], background=C['good_dot'],
+                bordercolor=C['trough'], lightcolor=C['good_dot'], darkcolor=C['good_dot'], thickness=px(8))
     for orient, sticky in (('Vertical', 'ns'), ('Horizontal', 'ew')):
         s.layout(f'{orient}.TScrollbar', [(f'{orient}.Scrollbar.trough', {'sticky': sticky, 'children': [
             (f'{orient}.Scrollbar.thumb', {'expand': '1', 'sticky': 'nswe'})]})])
-        s.configure(f'{orient}.TScrollbar', background='#D1D1D6', troughcolor=C['card'], bordercolor=C['card'],
-                    lightcolor='#D1D1D6', darkcolor='#D1D1D6', relief='flat', width=px(11), gripcount=0)
-        s.map(f'{orient}.TScrollbar', background=[('active', '#A1A1A6'), ('pressed', '#8E8E93')],
-              lightcolor=[('active', '#A1A1A6')], darkcolor=[('active', '#A1A1A6')])
+        s.configure(f'{orient}.TScrollbar', background=C['scroll'], troughcolor=C['card'], bordercolor=C['card'],
+                    lightcolor=C['scroll'], darkcolor=C['scroll'], relief='flat', width=px(11), gripcount=0)
+        s.map(f'{orient}.TScrollbar', background=[('active', C['scroll_hi']), ('pressed', C['scroll_lo'])],
+              lightcolor=[('active', C['scroll_hi'])], darkcolor=[('active', C['scroll_hi'])])
 
     # tables
-    s.configure('Treeview', background='#FFFFFF', fieldbackground='#FFFFFF', foreground=C['text'],
+    s.configure('Treeview', background=C['table'], fieldbackground=C['table'], foreground=C['text'],
                 rowheight=row_h, borderwidth=0, relief='flat', bordercolor=C['border'],
-                lightcolor='#FFFFFF', darkcolor='#FFFFFF')
+                lightcolor=C['table'], darkcolor=C['table'])
     s.configure('Treeview.Heading', background=C['head'], foreground=C['muted'], font=f_bold,
                 relief='flat', padding=(8, 8), bordercolor=C['border'], lightcolor=C['head'], darkcolor=C['head'])
     s.map('Treeview.Heading', background=[('active', C['head_hi'])])
@@ -303,7 +359,7 @@ def style_result_tags(tree, zebra=False):
     tree.tag_configure('pending', foreground=C['muted'])
     tree.tag_configure('next', background=C['info_bg'], foreground=C['info'])
     if zebra:
-        tree.tag_configure('even', background='#FFFFFF')
+        tree.tag_configure('even', background=C['row_even'])
         tree.tag_configure('odd', background=C['row_alt'])
 
 
@@ -875,7 +931,7 @@ class Tooltip:
         x = self.widget.winfo_rootx() + 12
         y = self.widget.winfo_rooty() + self.widget.winfo_height() + 6
         self.tip.wm_geometry(f'+{x}+{y}')
-        tk.Label(self.tip, text=self.text, background='#3A3A3C', foreground='#FFFFFF', padx=8, pady=4,
+        tk.Label(self.tip, text=self.text, background=C['tip'], foreground='#FFFFFF', padx=8, pady=4,
                  font='TkDefaultFont', justify='left', wraplength=px(360)).pack()
 
     def _hide(self, _e=None):
