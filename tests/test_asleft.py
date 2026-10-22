@@ -322,7 +322,7 @@ class WaveSurferAsLeft(unittest.TestCase):
         self.assertTrue(app.is_left)
         self.assertEqual(app.dc_rows, [])
         self.assertEqual(len(app._stored_rows('found', 'dcv')), n)
-        self.assertEqual(app.utree.heading('found')['text'], 'As left')
+        self.assertEqual(app.utree.heading('left')['text'], '● As Left')
         import copy
         app.dc_rows.append(copy.deepcopy(app._stored_rows('found', 'dcv')[0]))
         rows = app.certificate_rows('dcv')

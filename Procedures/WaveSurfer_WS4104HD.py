@@ -17,6 +17,7 @@ from tkinter import filedialog, messagebox, ttk
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))  # shared ui_theme.py sits next to the Manager
 import ui_theme as ui
+import ui_shell
 import appdata
 import datamode
 import drivers
@@ -219,12 +220,10 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self._set_ckpt_paths('UNASSIGNED')
         # All test views live in one root window. Test dialogs for cable changes
         # and safety confirmations remain modal by design.
-        banner = ui.Banner(self.root, 'WaveSurfer 4104HD  -  Calibration Verification',
-                           'Teledyne LeCroy  |  USBTMC / PyVISA  |  RMS noise, DC voltage, input impedance, offset, bandwidth, time base and trigger level')
-        banner.pack(fill='x')
-        if '--demo' in sys.argv:
-            banner.add_pill('DEMO MODE  -  synthetic data', 'warn')
-        self.conn_pill = banner.add_pill('Scope: not connected', 'neutral')
+        self.shell = ui_shell.Shell(self.root, 'WaveSurfer 4104HD  -  Calibration Verification',
+                                    'Teledyne LeCroy  |  USBTMC / PyVISA  |  RMS noise, DC voltage, input impedance, offset, bandwidth, time base and trigger level',
+                                    demo='--demo' in sys.argv, on_section=self._pick_function, version='v56')
+        self.conn_pill = self.shell.add_chip('Scope: not connected', 'neutral')
         # The five measurement sections are built inside a notebook that is never shown: it holds each section's settings, checkpoints and
         # workers. What the technician sees is the single results table below (build_unified), filterable by function.
         self.tabs = ttk.Notebook(self.root)
@@ -421,92 +420,80 @@ class RMSNoiseApp(datamode.DataModeMixin):
                 high=f"{p['upper_v']*1000:+.2f}", found=r['outcome'] if r else '', unit='mV')
         return out
 
+    def _pick_function(self, name):
+        self.show_function.set('All functions' if name == 'All sections' else name)
+        self.refresh_unified(force=True)
+
     def build_unified(self):
         root = self.root
-        self.msg = tk.StringVar(value='Step 1: enter the Instrument ID. Step 2: check the connections. Step 3: Run Pending.')
+        sh = self.shell
+        self.msg = sh.status_var
+        self.msg.set('Step 1: enter the Instrument ID. Step 2: check the connections. Step 3: Run Pending.')
         self.show_function = tk.StringVar(value='All functions')
         self.show_status = tk.StringVar(value='All points')
         self.chain = []
         self._idle = 0
         self._shown = None
         self._last_status = {}
-        ui.StatusBar(root, self.msg, right='v56').pack(side='bottom', fill='x')
-        body = ttk.Frame(root, padding=(18, 14, 18, 10))
-        body.pack(fill='both', expand=True)
-        top = ttk.Frame(body)
-        top.pack(fill='x')
-        top.columnconfigure(1, weight=1)
-        dut = ttk.LabelFrame(top, text='Instrument under test', padding=12)
-        dut.grid(row=0, column=0, sticky='nsew', padx=(0, 12))
-        ttk.Label(dut, text='Instrument ID *').grid(row=0, column=0, sticky='w', pady=3)
-        e = ttk.Entry(dut, textvariable=self.instrument_id, width=22)
-        e.grid(row=0, column=1, padx=(10, 0), pady=3)
+        # strip: identity, As Found | As Left, progress ring
+        box = ttk.Frame(sh.strip)
+        box.pack(side='left')
+        ttk.Label(box, text='Instrument ID *').pack(side='left')
+        e = ttk.Entry(box, textvariable=self.instrument_id, width=16)
+        e.pack(side='left', padx=(6, 12))
         e.focus_set()
         e.bind('<FocusOut>', lambda _e: self.sync_asset())
         e.bind('<Return>', lambda _e: self.sync_asset())
-        ttk.Label(dut, text='Serial number').grid(row=1, column=0, sticky='w', pady=3)
-        ttk.Entry(dut, textvariable=self.serial, width=22).grid(row=1, column=1, padx=(10, 0), pady=3)
-        ttk.Label(dut, text='Model').grid(row=2, column=0, sticky='w', pady=3)
-        ttk.Label(dut, text='Teledyne LeCroy WaveSurfer 4104HD', style='Bold.TLabel').grid(row=2, column=1, sticky='w', padx=(10, 0))
-        conn = ttk.LabelFrame(top, text='Connections', padding=12)
-        conn.grid(row=0, column=1, sticky='nsew')
-        conn.columnconfigure(1, weight=1)
-        ttk.Label(conn, text='Scope VISA address').grid(row=0, column=0, sticky='w', pady=3)
-        ttk.Entry(conn, textvariable=self.visa_address).grid(row=0, column=1, sticky='ew', padx=(8, 12), pady=3)
-        self.btn_scope = ttk.Button(conn, text='Test scope', command=self.test_connection)
-        self.btn_scope.grid(row=0, column=2)
-        ttk.Label(conn, text='Fluke 5560A VISA').grid(row=1, column=0, sticky='w', pady=3)
-        fl = ttk.Frame(conn)
-        fl.grid(row=1, column=1, sticky='w', padx=(8, 12), pady=3)
-        ttk.Entry(fl, textvariable=self.fluke_address, width=20).pack(side='left')
-        ttk.Label(fl, text='Baud', style='Muted.TLabel').pack(side='left', padx=(12, 5))
-        ttk.Entry(fl, textvariable=self.fluke_baud, width=8).pack(side='left')
-        ttk.Button(conn, text='Test Fluke', command=self.test_fluke).grid(row=1, column=2)
-        ttk.Button(conn, text='Test settings...', command=self.show_settings_dialog).grid(row=2, column=2, pady=(6, 0))
-        ttk.Label(conn, text='Settle times, samples, channels and limits are in Test settings. Fluke output stays in STANDBY between points.',
-                  style='Muted.TLabel').grid(row=2, column=0, columnspan=2, sticky='w', pady=(6, 0))
+        ttk.Label(box, text='Serial').pack(side='left')
+        ttk.Entry(box, textvariable=self.serial, width=14).pack(side='left', padx=(6, 14))
+        self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
+        self.summary = sh.build_progress()
         if '--demo' in sys.argv:
-            ui.Notice(body, 'Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode').pack(fill='x', pady=(12, 0))
-        self.build_mode_bar(body)
-        tools = ttk.Frame(body)
-        tools.pack(fill='x', pady=(10, 6))
-        self.btn_run = ttk.Button(tools, text='\u25b6  Run All Pending', style='Accent.TButton', command=self.run_pending)
-        self.btn_run.pack(side='left')
-        self.btn_section = ttk.Button(tools, text='Run Shown Section', command=self.run_section)
-        self.btn_section.pack(side='left', padx=8)
-        self.btn_rerun = ttk.Button(tools, text='Rerun Selected', command=self.rerun_selected)
-        self.btn_rerun.pack(side='left')
-        self.btn_stop = ttk.Button(tools, text='\u25a0  Stop After This Point', style='Danger.TButton', command=self.stop_all, state='disabled')
-        self.btn_stop.pack(side='left')
-        ui.dock_button(root, 'Export Excel (.xlsx)', self.export_professional_excel)         # file actions live in the bottom bar
-        ui.dock_button(root, 'Export Report (PDF)', self.export_pdf_report)
-        self.btn_clear = ttk.Button(tools, text='Clear function results', command=self.clear_function)
-        self.btn_clear.pack(side='right', padx=(8, 0))
-        sumrow = ttk.Frame(body)
-        sumrow.pack(fill='x', pady=(2, 8))
-        self.summary = ui.Summary(sumrow)
-        self.summary.pack(side='left', fill='x', expand=True)
-        filt = ttk.Frame(sumrow)
-        filt.pack(side='right', padx=(24, 0))
-        ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='left')
-        c1 = ttk.Combobox(filt, textvariable=self.show_function, values=['All functions'] + [n for _k, n in self.FUNCS], width=22, state='readonly')
-        c1.pack(side='left', padx=6)
-        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly')
-        c2.pack(side='left')
-        for c in (c1, c2):
-            c.bind('<<ComboboxSelected>>', lambda _e: self.refresh_unified(force=True))
-        info = ttk.LabelFrame(body, text='Selected test point', padding=(12, 8))
-        info.pack(side='bottom', fill='x', pady=(10, 0))
+            sh.notice('Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode')
+
+        # connections drawer
+        d = sh.drawer_body
+        d.columnconfigure(1, weight=1)
+        ttk.Label(d, text='Model').grid(row=0, column=0, sticky='w', pady=4)
+        ttk.Label(d, text='Teledyne LeCroy WaveSurfer 4104HD', style='Bold.TLabel').grid(row=0, column=1, sticky='w', padx=(10, 0))
+        ttk.Separator(d).grid(row=1, column=0, columnspan=2, sticky='ew', pady=(8, 10))
+        ttk.Label(d, text='Scope VISA address').grid(row=2, column=0, sticky='w', pady=4)
+        ttk.Entry(d, textvariable=self.visa_address, width=34).grid(row=2, column=1, sticky='ew', padx=(10, 0), pady=4)
+        self.btn_scope = ttk.Button(d, text='Test scope', command=self.test_connection)
+        self.btn_scope.grid(row=3, column=1, sticky='w', padx=(10, 0), pady=(0, 8))
+        ttk.Label(d, text='Fluke 5560A VISA').grid(row=4, column=0, sticky='w', pady=4)
+        ttk.Entry(d, textvariable=self.fluke_address, width=34).grid(row=4, column=1, sticky='ew', padx=(10, 0), pady=4)
+        ttk.Label(d, text='Fluke baud').grid(row=5, column=0, sticky='w', pady=4)
+        ttk.Entry(d, textvariable=self.fluke_baud, width=10).grid(row=5, column=1, sticky='w', padx=(10, 0), pady=4)
+        ttk.Button(d, text='Test Fluke', command=self.test_fluke).grid(row=6, column=1, sticky='w', padx=(10, 0), pady=(0, 8))
+        ttk.Separator(d).grid(row=7, column=0, columnspan=2, sticky='ew', pady=(4, 10))
+        ttk.Button(d, text='Test settings...', command=self.show_settings_dialog).grid(row=8, column=0, columnspan=2, sticky='w')
+        ttk.Label(d, text='Settle times, samples, channels and limits are in Test settings. Fluke output stays in STANDBY between points.',
+                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=9, column=0, columnspan=2, sticky='w', pady=(8, 0))
+
+        # action bar
+        self.btn_run = sh.add_action('\u25b6  Run All Pending', self.run_pending, accent=True, short='\u25b6  Run')
+        self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
+        self.btn_rerun = sh.add_action('Rerun Selected', self.rerun_selected, short='Rerun')
+        self.btn_stop = sh.add_action('\u25a0  Stop', self.stop_all, danger=True, short='\u25a0 Stop', state='disabled')
+        sh.add_action('Export Report (PDF)', self.export_pdf_report, side='right', short='PDF')
+        sh.add_action('Export Excel (.xlsx)', self.export_professional_excel, side='right', short='Excel')
+        self.btn_clear = sh.add_action('Clear function results', self.clear_function, side='right', short='Clear')
+
+        body = sh.content
+        info = ttk.Frame(body)
+        info.pack(side='bottom', fill='x', pady=(8, 0))
         self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
-        ttk.Label(info, textvariable=self.detail, wraplength=1000, justify='left').pack(anchor='w', fill='x')
-        cols = ('n', 'function', 'channel', 'range', 'test', 'nominal', 'low', 'high', 'found', 'unit', 'result')
-        self.utree = ui.make_table(body, cols, ('#', 'Function', 'Channel', 'Range', 'Test', 'Nominal', 'Low limit', 'High limit', 'As found', 'Units', 'Result'),
-                                   (46, 130, 70, 100, 250, 100, 90, 90, 100, 56, 86), height=12,
-                                   anchors={'function': 'w', 'channel': 'w', 'range': 'w', 'test': 'w', 'nominal': 'e', 'low': 'e', 'high': 'e', 'found': 'e', 'unit': 'w'},
-                                   stretch={k: False for k in cols if k != 'test'})
-        self.utree.tag_configure('pending', foreground=ui.C['muted'])
-        self.utree.tag_configure('pass', foreground=ui.C['good'])
-        self.utree.tag_configure('fail', foreground=ui.C['bad'])
+        ttk.Label(info, textvariable=self.detail, wraplength=1000, justify='left', style='Muted.TLabel').pack(anchor='w', fill='x')
+        filt = ttk.Frame(body)
+        filt.pack(side='top', fill='x', pady=(0, 6))
+        ttk.Label(filt, text='Test points', style='Bold.TLabel').pack(side='left')
+        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly')
+        c2.pack(side='right')
+        ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='right', padx=(0, 6))
+        c2.bind('<<ComboboxSelected>>', lambda _e: self.refresh_unified(force=True))
+        self.utree = ui_shell.results_table(self, body, name_width=380, error=False)
+        ui_shell.small_window(self, self.utree, filt)
         self.utree.bind('<<TreeviewSelect>>', self.on_unified_select)
         self.refresh_unified(force=True)
         self.root.after(500, self._unified_tick)
@@ -540,11 +527,6 @@ class RMSNoiseApp(datamode.DataModeMixin):
 
     def any_synthetic(self):
         return bool(getattr(self, 'demo_mode', False)) or '--demo' in sys.argv
-
-    def _relabel_reading_column(self):
-        utree = self.__dict__.get('utree')
-        if utree is not None:
-            utree.heading('found', text='As left' if self._mode == datamode.LEFT else 'As found')
 
     def _use_checkpoint_paths(self):
         """As Left results are saved in their own files beside the As Found ones (same name + _AsLeft)."""
@@ -644,20 +626,51 @@ class RMSNoiseApp(datamode.DataModeMixin):
                 return False
         return True
 
+    def _entries_for(self, mode):
+        """entries() for As Found or As Left, whichever mode is on screen (the other mode's rows are swapped in for a moment)."""
+        if mode == self._mode:
+            return self.entries()
+        snap = self._sets.get(mode)
+        if not snap:
+            return []
+        saved = {a: getattr(self, a) for a in self._SET_ATTRS}
+        try:
+            for a, v in snap.items():
+                setattr(self, a, v)
+            return self.entries()
+        finally:
+            for a, v in saved.items():
+                setattr(self, a, v)
+
     def refresh_unified(self, force=False):
         allp = self.entries()
+        other = self._entries_for(datamode.FOUND if self.is_left else datamode.LEFT)
+        found_e, left_e = (other, allp) if self.is_left else (allp, other)
         numbering = {(e['kind'], e['idx']): n for n, e in enumerate(allp, 1)}
+        lookup = lambda lst: {(e['kind'], e['idx']): e for e in lst}
+        fmap, lmap = lookup(found_e), lookup(left_e)
+        with_unit = lambda v, u: f'{v} {u}'.strip() if v not in ('', None) else ''
         shown = [e for e in allp if self._visible_entry(e)]
+        all_funcs = self.show_function.get() == 'All functions'
         items = []
         for e in shown:
+            key = (e['kind'], e['idx'])
             tag = 'pass' if e['result'] == 'PASS' else 'fail' if e['result'] == 'FAIL' else 'pending'
             mark = {'PASS': '\u2714 PASS', 'FAIL': '\u2716 FAIL'}.get(e['result'], '\u2014')
-            items.append((f"{e['kind']}:{e['idx']}", (numbering[(e['kind'], e['idx'])], self.FUNC_NAME[e['kind']], e['channel'], e['range'], e['test'], e['nominal'],
-                                                      e['low'], e['high'], e['found'], e['unit'], mark), (tag,)))
+            u = e['unit']
+            low, high = with_unit(e['low'], u), with_unit(e['high'], u)
+            limits = f'{low} \u2026 {high}' if e['high'] else (f'\u2265 {low}' if e['low'] else '')
+            fe, le = fmap.get(key), lmap.get(key)
+            found = with_unit(fe['found'], u) if fe and fe['done'] else ''
+            left = with_unit(le['found'], u) if le and le['done'] else ('Same' if (self.is_left and fe and fe['done']) else '')
+            name = f"{e['channel']}   {e['range']}   {e['test']}"
+            if all_funcs:
+                name = f"{self.FUNC_NAME[e['kind']]}  \u00b7  {name}"
+            items.append((f"{e['kind']}:{e['idx']}", (numbering[key], name, with_unit(e['nominal'], u), low, high, limits, found, '', left, mark), (tag,)))
         total = len(allp)
         passed = sum(1 for e in allp if e['result'] == 'PASS')
         failed = sum(1 for e in allp if e['result'] == 'FAIL')
-        sig = (tuple(items), total)
+        sig = (tuple(items), total, tuple((e['kind'], e['done'], e['result']) for e in other))
         if force or sig != self._shown:
             self._shown = sig
             keep = self.utree.selection()
@@ -667,7 +680,17 @@ class RMSNoiseApp(datamode.DataModeMixin):
             for k in keep:
                 if self.utree.exists(k):
                     self.utree.selection_set(k)
-            self.summary.update_counts(total, passed, failed)
+            if self.is_left:                                    # As Left: progress is about the points that failed As Found
+                redo = [k for k, e in fmap.items() if e['result'] == 'FAIL']
+                done = [k for k in redo if lmap.get(k) and lmap[k]['done']]
+                self.summary.set_rerun(len(redo), len(done), sum(lmap[k]['result'] == 'PASS' for k in done), sum(lmap[k]['result'] == 'FAIL' for k in done))
+            else:
+                self.summary.update_counts(total, passed, failed)
+            rows = []
+            for kind, name in self.FUNCS:
+                es = [e for e in allp if e['kind'] == kind]
+                rows.append((name, sum(e['result'] == 'PASS' for e in es), sum(e['result'] == 'FAIL' for e in es), len(es)))
+            self.shell.set_sections(rows)
         self._entries_cache = {f"{e['kind']}:{e['idx']}": e for e in allp}
 
     def on_unified_select(self, _event=None):
