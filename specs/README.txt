@@ -23,11 +23,15 @@ Included
   fluke_287_289_pv.json     Fluke 287 / 289 Calibration Manual pp. 14-20 (schema 2, written by build_28x_spec.py from the page images):
                             functional checks, Table 3, Table 4; per point 'ir' (reading unit, range code, rel, lowpass, functions),
                             'rel_zero', 'prompt', 'ramp'; options.table_order runs Table 3 before Table 4
+  fluke_77iv_pv.json        Fluke Model 77 Series IV Calibration Information, Table 2 (printed pp. 12-13), 35 steps (schema 2, written by build_77_spec.py from the page images):
+                            33 numeric readings + 2 continuity (beeper) checks; ids 2-1 .. 2-35; the meter is autoranging so each step's 'range' is the range the reading falls in (p. 5).
+                            Step 8 (AC volts, 50 mV, 45 Hz) prints 0.47 / 0.53 V ac; 0.047 / 0.053 V ac is used (printed text kept in step.printed_limits). build_77_spec.py
+                            checks every limit against the +/-(% of reading + counts) accuracy table (p. 5) and fails if one disagrees.
   klein_mm325_pv.json       Klein Tools MM325 instruction manual (schema 3, written by build_mm325.py): one point per range at 90 %, AC at 60 Hz;
                             adds groups{} (cable-change prompts + hook-up diagram), dial{} (picture and position of every range) and options{}
                             (range_prompt, hv_threshold_v); per step: dial, dial_text, tol_text, max_on_s / recovery_s (10 A duty limit)
 
-Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, fluke_87v, fluke_287_289, klein_mm325)
+Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, fluke_87v, fluke_287_289, klein_mm325, fluke_77iv)
   options.auto_ramp         default true: a DC/AC volts point above 100 V is reached in 50 V steps, 5 s apart (the 110-series manual). false = one
                             OUT command straight to the test value. Off in the 87V, 287/289 and MM325 specs (and their builders). A per-point
                             'ramp' list the manual prescribes (287/289 point 4-64: 60 V then 120 V) is always followed. The 110-series spec leaves
@@ -37,6 +41,13 @@ Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, f
                             turn the meter, with the calibrator in standby. Points of group NONE (functional checks, hand-set points) get none
                             (they carry their own prompt and set the function); with options.range_prompt (MM325) the dial prompt shown at every
                             point takes its place. On in all four handheld specs.
+
+  options.report_title      optional (Fluke 77 IV: 'Calibration Data'): the PDF title; without it the report is titled '<model> Performance Verification' as before.
+  options.hv_threshold_v    DC / AC volts points at or above this level get the HIGH VOLTAGE confirmation (default 500; 87V / 287 / MM325 60; 77 IV 30, the manual's shock-hazard level).
+  source.report_note        optional text stored with the issued report (snapshot / footer note) - the 77 IV spec states its step-8 correction there.
+  step.report_desc          optional: the report row's Description (77 IV: '99.99 kHz range (5 V applied)' for the frequency step, which would otherwise print the 110-series
+                            '(2 V applied)' text, and '6.000 V range (limits corrected)' for step 8).
+  step.printed_limits       optional record of limits as printed when the spec uses corrected ones (not read by the engine).
 
 Square-wave sources in handheld specs (additive; handheld_dmm.py, procspec.validate_manual_reading)
   step.kind                 DUTY    square-wave source, the meter reads the duty cycle (%) (87V 1-16)

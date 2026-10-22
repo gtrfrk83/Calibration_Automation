@@ -7,7 +7,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 - `Procedures/`: launchers (one per instrument), checkpoints are written here at run time (git-ignored).
 - `specs/`: `*_pv.json` test points and limits, plus the `build_*.py` scripts that wrote them. See `specs/README.txt`.
 - `drivers/`: instrument drivers, transports (VISA / pyserial), simulators (`simulated.py`). See `drivers/README.txt`.
-- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 87V, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A).
+- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 77 IV, 87V, 287/289, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A).
 - `labregistry.py` / `labregistry_ui.py`: per-asset report history and drift (`lab_registry.sqlite3`, not in the repo).
 - `report_pdf.py` / `report_dialog.py`: PDF "Calibration Data" reports.
   Optional TAR / TUR columns: two independent checkboxes (TAR, TUR) in `report_dialog.ask_details` (`details["show_tar"]`, `["show_tur"]`, `["show_tar_tur"]` = `report_pdf.TarTur`, default off, remembered in `~/.calibration_suite/report_tartur.json`); `report_pdf.apply_tar_tur`. TAR / TUR appear on the PDF data file only (there is no CSV export). Off = the PDF is unchanged.
@@ -15,7 +15,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 
 ## Procedures
 WaveSurfer WS4104HD, Fluke 87V, Agilent 34401A, Fluke 8846A (verification + adjustment), Keysight 34460A/61A/65A/70A,
-Tektronix MDO4000C, Tektronix TDS2000C / TDS1000C-EDU, Fluke 110/113/114/115/116/117, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
+Tektronix MDO4000C, Tektronix TDS2000C / TDS1000C-EDU, Fluke 110/113/114/115/116/117, Fluke 77 Series IV, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
 Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard), Fluke 287 / 289 (typed or IR readings).
 
 ## Standing rules
@@ -158,6 +158,28 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
   p. 5-28, p-p amplitude pp. 4-42 / 1-24) are marked verified; the 5560A equivalents are NOT (5560A manual not read) and the remote OUT? reply for a square wave
   (p-p vs rms, field layout) is not documented, so the point stops if OUT? disagrees. Uncertainty / TAR / TUR are blank for these square-wave points.
 - build_87v_spec.py was edited by hand and not re-run (the MDD file is not available); fluke_87v_pv.json was changed by the same rules.
+
+## Fluke 77 Series IV notes (branch `fluke-77`; checked on the simulated bench only, never run on hardware or a real UI)
+- Source: Model 77 Series IV Calibration Information (20 pp.), Table 2 Performance Tests, printed pp. 12-13 (35 steps); spec table pp. 4-6. Limits were read from rendered page images (260 dpi) twice;
+  `specs/build_77_spec.py` additionally checks each limit against the accuracy table (+/-(% of reading + counts x resolution), to half a display step) and refuses to write the spec on a disagreement.
+- ONE printed limit is corrected: step 8 (AC volts 50 mV, 45 Hz) prints 0.47 / 0.53 V ac; 0.047 / 0.053 V ac is used (2 % + 2 counts of 0.001 V, the manual's own method). Recorded in the spec
+  (`printed_limits`, `source.report_note`), the on-screen note and the report row ("6.000 V range (limits corrected)"). Lab owner to confirm.
+- 35 steps: ohms 5, continuity 2 (beeper, 25 / 250 ohm), AC volts 9, AC volts frequency 1, DC volts 4, DC mV 3, capacitance 1, AC mA 3, AC A 2, DC mA 3, DC A 2. Manual order is kept (5 cable changes: VOHM, 400 mA, 10 A, 400 mA, 10 A).
+  Calibrator: 5522A or 5560A (Table 1 names a 5500A); only existing driver commands are used (OUT ...OHM / V / A with explicit ,0Hz on DC / NF); no new command and no registry change.
+- Standing rules as in the other handhelds: `,0Hz` on every DC point, HV straight to the test value (the manual prescribes no ramp; `options.auto_ramp` false), function prompt on every function change (11 in a run),
+  reading padded to the display resolution (`pad_reading`), reset before the first point, standby after each point, typed readings. HIGH VOLTAGE confirmation from 30 V (`hv_threshold_v` 30: p. 2 warns above 30 V ac rms / 60 V dc).
+  Not applicable to the 77 IV: AUTO-V LoZ, temperature, square-wave sources (duty / peak), IR readings, REL.
+- Shared-engine additions (additive; every other handheld is unchanged): `options.report_title` (77 IV: 'Calibration Data', so the report follows the project rule; the other handhelds keep
+  '<model> Performance Verification'), `step.report_desc`, `source.report_note` (see specs/README.txt), the `fluke77` meter in `hookups.py` and `specs/build_hookups.py` (6 diagrams, only the 77 files were drawn).
+  Editing `handheld_dmm.py` / `hookups.py` changes the fingerprint of every procedure that uses them, so the verified Fluke 117 will show 'Changed since verification' (verified.py); its behaviour did not change.
+- Verified from the lab's photos of the real case plus the manual: the jacks are a 2 x 2 block, top-left '400 mA', bottom-left '10A' (the two FUSED inputs), top-right 'V Ω' (red), bottom-right 'COM' (black); the dial has Hz V~, V⎓, mV⎓, Ω / capacitance, continuity / diode, mA and A positions plus OFF,
+  and a YELLOW button (orange symbols: Hz, capacitance, diode, DC on the mA and A positions). Function prompts name the dial position as printed and repeat the manual's own wording 'Press the YELLOW button to access this function' (Table 2 footnote 1: V~ Hz, capacitance, diode, DC mA, DC A);
+  AC volts, continuity, AC mA and AC A carry no yellow-button step in the manual, so none is invented (the AC mA / A notes only say the display should show AC).
+- Unverified: the exact yellow-button toggle behaviour (the manual does not describe it beyond footnote 1);
+  calibrator capacitance output (`OUT <n>NF`, unverified on both calibrators) and DC current (`OUT <n>A,0Hz` unverified on the 5560A); whether a 5522A / 5560A can make 9 A at 1 kHz (the calibrator refuses what it cannot; TAR is 0.9:1 there).
+- Existing quirk found, not changed: the shared engine prints '(2 V applied)' on every kHz frequency row of the 110-series and 87V reports whatever the applied level is (the 77 IV uses `report_desc`).
+- Tests: `tests/test_77_points.py` (spec vs an independent second transcription of Table 2, specification check, step 8, padding, prompt sequences, wire commands on both simulated calibrators, full run on the bench, PDF, demo),
+  plus the 77 IV in `tests/test_handheld_options.py`. The Tk windows were not viewed (no tkinter here).
 
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.

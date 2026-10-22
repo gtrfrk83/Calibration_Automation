@@ -143,7 +143,7 @@ Procedures/Keysight_34970A_Verification.py  (RS-232)   and   Keysight_34972A_Ver
 
 Fluke 110 / 113 / 114 / 115 / 116 / 117 handheld meters (manual-reading procedures)
 -------------------------------------------------------------------------------
-Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Klein MM325)
+Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Klein MM325)
   hookups.py holds the connection tables; specs/build_hookups.py (needs Pillow) draws diagrams/hook_<meter>_<calibrator>_<group>.png
   (24 pictures). The text and picture follow the Calibrator selector, because the two calibrators wire differently:
       voltage / ohms        5560A: OUTPUT V/ohm HI / LO            5522A: NORMAL HI / LO
@@ -218,6 +218,21 @@ Procedures/Klein_MM325_Verification.py   (engine: handheld_dmm.py; spec: specs/k
   200 ohm position (p. 5): the procedure uses the continuity position for it - confirm on your meter (specs/build_mm325.py, NOTES).
   Rebuild the spec and diagrams after editing the point table:  python3 specs/build_mm325.py   (needs Pillow; the procedure does not).
   Demo with:  python Procedures/Klein_MM325_Verification.py --demo
+
+Fluke Model 77 Series IV (autoranging handheld multimeter)
+----------------------------------------------------------
+Procedures/Fluke_77IV_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_77iv_pv.json built by specs/build_77_spec.py; diagrams: diagrams/hook_fluke77_*)
+  35 steps = Table 2 "Performance Tests" of the Model 77 Series IV Calibration Information (printed pp. 12-13): ohms 5 (500 ohm ... 40 Mohm), continuity 2
+  (25 ohm beeper on / 250 ohm beeper off), AC volts 9 (50 mV 45 Hz; 5 / 50 / 500 / 1000 V at 45 Hz and 1 kHz), AC volts frequency 1 (5 V 50 kHz),
+  DC volts 4 (5 / 300 / 1000 / -1000 V), DC millivolts 3 (30 / -300 / 600 mV), capacitance 1 (900 nF), AC milliamps 3, AC amps 2, DC milliamps 3, DC amps 2.
+  Limits are the table's own (read from the page images, then checked against the accuracy table on p. 5); ONE is corrected: step 8 prints 0.47 to 0.53 V ac for a
+  50 mV input, the procedure uses 0.047 to 0.053 V ac and says so (spec note, on-screen note, report row "(limits corrected)").
+  Calibrator: Fluke 5522A or 5560A (the manual names a 5500A), automatic or Manual. The meter has no remote interface: you type the display reading.
+  Prompts: a hook-up dialog with diagram at every cable change (volts / ohms / capacitance, 400 mA input, 10 A input), and "Change the function" every time the
+  rotary switch or YELLOW button has to change function (11 times in a full run). Confirmation before every output of 30 V or more (the manual's shock-hazard level, p. 2);
+  high voltages go straight to the test value (no ramp). Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf.
+  Not included: the calibration ADJUSTMENT (Table 3, pp. 14-16), fuse test, diode test (it has no step in Table 2).
+  Rebuild the spec after editing the table:  python3 specs/build_77_spec.py     Demo with:  python Procedures/Fluke_77IV_Verification.py --demo
 
 Tektronix TDS2000C / TDS1000C-EDU
 ---------------------------------
