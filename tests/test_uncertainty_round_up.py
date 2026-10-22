@@ -48,5 +48,40 @@ class RoundUp(unittest.TestCase):
         self.assertGreater(checked, 1000)
 
 
+class ReferenceFloor(unittest.TestCase):
+    """An editable reference value may never be reported below the A2LA scope."""
+
+    def setUp(self):
+        import sys
+        from unittest import mock
+        names = ('tkinter', 'tkinter.ttk', 'tkinter.messagebox', 'tkinter.simpledialog', 'tkinter.filedialog', 'tkinter.font', 'tkinter.scrolledtext')
+        self._saved = {n: sys.modules.get(n) for n in names}
+        if not HAVE_UI:
+            for n in names:
+                sys.modules[n] = mock.MagicMock()
+        import fgen_verification
+        self.fg = fgen_verification
+        self._orig = fgen_verification._ref_cmc
+
+    def tearDown(self):
+        import sys
+        self.fg._ref_cmc = self._orig
+        if not HAVE_UI:
+            for n, m in self._saved.items():
+                sys.modules.pop(n, None) if m is None else sys.modules.__setitem__(n, m)
+
+    def test_tiny_reference_value_is_raised_to_scope(self):
+        p = {'kind': 'TIMEBASE', 'nominal': 10e6, 'unit': 'Hz'}
+        self.fg._ref_cmc = lambda: {'TIMEBASE': {'rel': 0, 'abs': 1e-9, 'unit': 'Hz'}}
+        text, _ = self.fg.point_uncertainty(p)
+        self.assertEqual(text, '71 µHz')              # scope: 7.1e-12 x 10 MHz
+
+    def test_larger_reference_value_is_kept(self):
+        p = {'kind': 'ACAMP', 'nominal': 1.0, 'frequency': 1000.0, 'unit': 'V'}
+        self.fg._ref_cmc = lambda: {'ACAMP': {'rel': 0, 'abs': 1.0, 'unit': 'V'}}
+        text, _ = self.fg.point_uncertainty(p)
+        self.assertEqual(text, '1.0 V')
+
+
 if __name__ == '__main__':
     unittest.main()

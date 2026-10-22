@@ -212,6 +212,10 @@ def uncertainty_text(p, raw):
     if ref and (ref.get('rel') is not None or ref.get('abs') is not None):
         reading = abs(raw.get('reading', p['nominal']))
         value = (ref.get('rel') or 0) * reading + (ref.get('abs') or 0)
+        if k == 'DVMFREQ' and sc is not None and ref.get('unit', p['unit']) == 'Hz':
+            floor = sc.dmm('FREQ', p['nominal'], None, None, basis='measure')     # never below the A2LA frequency CMC
+            if floor is not None and value < floor:
+                value = floor
         return f'{uncertainty.round_up(value):.2g} {ref.get("unit", p["unit"])}'.strip()
     return 'N/A'
 

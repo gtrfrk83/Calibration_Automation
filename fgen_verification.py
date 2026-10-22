@@ -395,18 +395,23 @@ def _ref_cmc():
 def point_uncertainty(p):
     """(text, source) - the editable reference file first, then the laboratory scope (Measure entries), else ''."""
     import uncertainty
-    entry = _ref_cmc().get(p['kind']) or {}
-    if entry.get('rel') is not None or entry.get('abs') is not None:
-        value = (entry.get('rel') or 0) * abs(p['nominal'] if p['kind'] != 'FLAT' else 1.0) + (entry.get('abs') or 0)
-        return uncertainty.format_value(value, entry.get('unit', p['unit'])), 'reference file'
+    scope_value, scope_unit = None, None
     if p['kind'] in ('ACAMP', 'LFFLAT', 'TIMEBASE'):
         import report_pdf
         sc = report_pdf.scope()
         if sc is not None:
             kind = 'FREQ' if p['kind'] == 'TIMEBASE' else 'ACV'
-            value = sc.dmm(kind, p['nominal'], None, None if kind == 'FREQ' else p['frequency'], basis='measure')
-            if value is not None:
-                return uncertainty.format_value(value, 'Hz' if kind == 'FREQ' else 'V'), 'scope'
+            scope_value = sc.dmm(kind, p['nominal'], None, None if kind == 'FREQ' else p['frequency'], basis='measure')
+            scope_unit = 'Hz' if kind == 'FREQ' else 'V'
+    entry = _ref_cmc().get(p['kind']) or {}
+    if entry.get('rel') is not None or entry.get('abs') is not None:
+        value = (entry.get('rel') or 0) * abs(p['nominal'] if p['kind'] != 'FLAT' else 1.0) + (entry.get('abs') or 0)
+        unit = entry.get('unit', p['unit'])
+        if scope_value is not None and unit == scope_unit and value < scope_value:
+            value = scope_value          # an editable reference value may never be reported below the A2LA scope
+        return uncertainty.format_value(value, unit), 'reference file'
+    if scope_value is not None:
+        return uncertainty.format_value(scope_value, scope_unit), 'scope'
     return '', ''
 
 
