@@ -567,6 +567,10 @@ def export_data(standard_id, path=None):
 
 
 # ------------------------------------------------------------------------------------------------------------ lookup
+# Thermocouple simulation resolution (degC) where the manufacturer's document states it and the sheet's own degC rows carry none.  A value edited in the
+# Standards Specs manager (row 'resolution') always wins.  A model that is not listed has no TC resolution component (the budget says so in its notes).
+TC_RESOLUTION = {'5522A': (0.01, '5522A Operators Manual p. 1-17, Temperature Calibration (Thermocouple), note [2]: resolution is 0.01 degC')}
+
 DEFAULT_VARIANT = {   # preferred / excluded words in the function's bracket text, per kind (the person can pass variant= to override)
     'ACV': dict(prefer=('sinewave',), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated')),
     'ACI': dict(prefer=('lcomp off',), exclude=('non-sinewave', 'squarewave', 'trianglewave')),
@@ -663,11 +667,35 @@ class StandardSpec:
             hits = preferred or hits
         return max(hits, key=lambda h: h.limit)
 
+    def lookup_temperature(self, celsius, tc='K', direction='output', period=None):
+        """Thermocouple SIMULATION accuracy (degC) of the standard at one temperature, for thermocouple type `tc` (default K).
+        Own lookup because lookup() works on magnitudes (a negative temperature would match the wrong band) and the sheets also carry the same
+        table in degF.  Only rows in degC, in the thermocouple function of that type, in the given direction (the calibrator SOURCES: 'output') and
+        with the period asked for (default: the standard's, '1 yr') are used.  Bands are closed signed intervals; at a border the LARGER limit is
+        used (the same rule as lookup() and the scope CMC).  Never extrapolates: a temperature outside every band returns None."""
+        period = period or self.period
+        want = re.compile(rf'type\s*{re.escape(str(tc).strip())}\b', re.I)
+        hits = []
+        for r in self.rows:
+            if r['kind'] != 'TEMP' or r['direction'] != direction or r['unit'] != 'degC' or r['amp_lo'] is None or r['amp_hi'] is None:
+                continue
+            if not want.search(r['variant'] + ' ' + r['function']):
+                continue
+            if not (min(r['amp_lo'], r['amp_hi']) <= celsius <= max(r['amp_lo'], r['amp_hi'])):
+                continue
+            spec = next((x for x in r['specs'] if x['period'] == period and not x.get('error')), None)
+            if spec is not None:
+                hits.append(Hit(r, spec, celsius))
+        return max(hits, key=lambda h: h.limit) if hits else None
+
     def resolution(self, hit):
         """(resolution in SI, source text) of the calibrator at this point, from the row's own value (edited) or the printed range digits."""
         r = hit.row
         if r.get('resolution'):
             return float(r['resolution']), ('edited in the manager' if r.get('res_src') == 'edited' else 'last digit of the printed range')
+        if r.get('kind') == 'TEMP' and r.get('unit') == 'degC' and self.model in TC_RESOLUTION:       # the sheet carries no digits for degC rows
+            res, src = TC_RESOLUTION[self.model]
+            return res, src
         return None, 'resolution of this range is not recorded'
 
 

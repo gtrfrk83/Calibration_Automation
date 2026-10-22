@@ -71,7 +71,10 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
     if scope is not None:
         b.cmc = scope.dmm(kind, nominal, range_value, frequency)
     if standard is not None:
-        hit = standard.lookup('OHM' if kind in ('OHM2', 'OHM4') else kind, nominal, frequency=frequency)
+        if kind == 'TEMP':        # thermocouple simulation (Type K): the calibrator's degC specification, never the magnitude lookup
+            hit = standard.lookup_temperature(nominal)
+        else:
+            hit = standard.lookup('OHM' if kind in ('OHM2', 'OHM4') else kind, nominal, frequency=frequency)
         b.hit = hit
         if hit is None:
             b.notes.append(f'{standard.model}: no specification row covers this point')

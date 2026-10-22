@@ -15,6 +15,8 @@ Ratios are shown rounded DOWN to 0.1 (never overstated), e.g. '4.2:1'; above 100
 never 0 or infinity.  Blank (with a reason) for: zero-offset / no-source points, points the scope of accreditation does not cover,
 tolerance and uncertainty in different units (% or dB tolerances are not converted), and any error (this module never raises).
 TAR is blank when no calibrator model is given or no specification row covers the point; TUR may still be shown in that case.
+Temperature (TEMP, thermocouple simulation, degC): the scope file has no temperature CMC, so with a calibrator model the ratios come from its Type K simulation
+specification alone (uncertainty_budget, no CMC floor); without a model, outside its range, or for a degF tolerance they are blank.
 """
 from __future__ import annotations
 
@@ -80,7 +82,9 @@ def _compute(p, low, high, standard, scope):
         return _blank('scope of accreditation not available', tolerance=tol)
     freq = p.get('frequency')
     cmc = sc.dmm(kind, p['nominal'], p.get('range'), freq)
-    if cmc is None:
+    # TEMP (thermocouple simulation): the scope file has no temperature CMC, so with a calibrator the ratios come from its own degC specification
+    # alone (no CMC floor is invented; a CMC entry, if the lab adds one, is used as everywhere else).  Without a calibrator: blank, as before.
+    if cmc is None and not (kind == 'TEMP' and standard):
         return _blank('point is not covered by the scope of accreditation', tolerance=tol)
     ounit = 'ohm' if kind.startswith('OHM') else unit
 
@@ -99,8 +103,8 @@ def _compute(p, low, high, standard, scope):
                 acc = b.hit.limit
             else:
                 reason = 'no specification row of the calibrator covers this point: TAR blank'
-    if u is None:
-        u = uncertainty.round_up(cmc)                                # the printed value when no budget is available
+    if u is None and cmc is not None:
+        u = uncertainty.round_up(cmc)                              # the printed value when no budget is available
     tur = tol / u if u and u > 0 else None
     tar = tol / acc if acc and acc > 0 else None
     return dict(tar=tar, tur=tur, tolerance=tol, accuracy=acc, uncertainty=u,
