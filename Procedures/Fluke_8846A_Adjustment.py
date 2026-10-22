@@ -7,7 +7,6 @@ The verified open-step subset is provided; other adjustment stages are intention
 review-only until the exact revision-specific tables and 5560A commands are validated.
 """
 import argparse
-import csv
 import datetime as dt
 import json
 import re
@@ -15,7 +14,7 @@ import sqlite3
 import sys
 import tkinter as tk
 from pathlib import Path
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox
 
 BASE = Path(__file__).resolve().parent
 sys.path.append(str(BASE.parent))  # shared ui_theme.py sits next to the Manager
@@ -142,8 +141,6 @@ class App:
         self.btn_start.pack(side='left')
         self.btn_resume = ttk.Button(row2, text='Resume existing record', command=self.resume)
         self.btn_resume.pack(side='left', padx=8)
-        self.btn_export = ttk.Button(row2, text='Export audit log (CSV)', command=self.export)
-        self.btn_export.pack(side='left')
 
         hintrow = ttk.Frame(body)
         hintrow.pack(fill='x', pady=(12, 6))
@@ -220,7 +217,6 @@ class App:
         en(self.btn_connect, not self.unlocked and not self.demo)
         en(self.btn_start, ready)
         en(self.btn_resume, True)
-        en(self.btn_export, self.run_id is not None)
         en(self.btn_review, self.run_id is not None)
         en(self.btn_unlock, self.run_id is not None and ready and not self.unlocked)
         en(self.btn_exec, self.unlocked and self.run_id is not None and eligible)
@@ -419,19 +415,6 @@ class App:
                 messagebox.showerror('Relock/close error',f'{e}\nMeter may remain unlocked.');return
         self.meter=None;self.unlocked=False;self.committed=False
         self.status.set('Disconnected / demo lock reset');self._sync()
-
-    def export(self):
-        if self.run_id is None:
-            messagebox.showwarning('Select record','Start or resume a record first.');return
-        path=filedialog.asksaveasfilename(defaultextension='.csv',filetypes=[('CSV','*.csv')],
-                initialfile=f'8846A_adjustment_run_{self.run_id}.csv')
-        if not path:return
-        rows=self.conn.execute('SELECT event_time,step_index,action,detail,outcome FROM adjustment_events WHERE run_id=? ORDER BY id',(self.run_id,)).fetchall()
-        with open(path,'w',newline='',encoding='utf-8-sig') as f:
-            writer=csv.writer(f);writer.writerow(['Run ID','Instrument ID','Serial','Technician','Time','Step','Action','Detail','Outcome'])
-            for t,idx,action,detail,outcome in rows:
-                writer.writerow([self.run_id,self.asset.get(),self.serial.get(),self.tech.get(),t,idx if idx is not None else '',action,detail,outcome])
-        messagebox.showinfo('Export',f'Exported {len(rows)} audit events.')
 
     def close(self):
         if self.meter and self.unlocked:
