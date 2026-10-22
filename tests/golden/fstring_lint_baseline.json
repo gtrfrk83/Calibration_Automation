@@ -30,12 +30,12 @@
    "helper_f": 0,
    "query_f": 0,
    "query_retry_f": 0,
-   "write_f": 3
+   "write_f": 0
   },
   "keysight_332xx": {
    "concat_f": 0,
    "format_f": 0,
-   "helper_f": 5,
+   "helper_f": 0,
    "query_f": 0,
    "query_retry_f": 0,
    "write_f": 0
@@ -43,7 +43,7 @@
   "keysight_5313x": {
    "concat_f": 0,
    "format_f": 0,
-   "helper_f": 6,
+   "helper_f": 0,
    "query_f": 0,
    "query_retry_f": 0,
    "write_f": 0
@@ -74,11 +74,11 @@
   },
   "reference_instruments": {
    "concat_f": 0,
-   "format_f": 1,
+   "format_f": 0,
    "helper_f": 0,
    "query_f": 0,
    "query_retry_f": 0,
-   "write_f": 4
+   "write_f": 0
   },
   "scpi_dmm": {
    "concat_f": 2,
