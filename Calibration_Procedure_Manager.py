@@ -302,7 +302,7 @@ class Manager:
         split.rowconfigure(0, weight=1)
         cols = ('name', 'manufacturer', 'model', 'category', 'ready', 'verified')
         self.table = ui.make_table(split, cols, ('Procedure', 'Manufacturer', 'Model', 'Category', 'Status', 'Verified on hardware'),
-                                   (260, 130, 110, 170, 150, 210), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w', 'verified': 'w'},
+                                   (235, 90, 80, 150, 80, 200), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w', 'verified': 'w'},
                                    zebra=True, pack=False, stretch={'manufacturer': False, 'model': False, 'category': False, 'ready': False, 'verified': False})
         self.table.master.grid(row=0, column=0, sticky='nsew')
         self.table.tag_configure('missing', foreground=ui.C['bad'])

@@ -1443,6 +1443,7 @@ class GridEditorWindow(tk.Toplevel):
             self.bind(seq, lambda _e, fn=fn: (fn(), 'break')[1])
         ui.fit_window(self, 1340, 900, min_w=1000, min_h=700)
         self.sync()
+        self.refresh()                                       # header pills, title, Undo / Redo state before the first edit
 
     # ---- building
     def _build_header(self, parent):

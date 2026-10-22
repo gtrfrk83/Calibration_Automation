@@ -32,14 +32,14 @@ class HistoryPanel(ttk.Frame):
 
         cols = ('asset', 'model', 'serial', 'runs', 'last', 'result', 'due')
         self.assets = ui.make_table(self, cols, ('Instrument ID', 'Instrument', 'Serial number', 'Reports', 'Last report', 'Last result', 'Next due'),
-                                    (150, 250, 140, 70, 120, 130, 120), height=6, anchors={'asset': 'w', 'model': 'w', 'serial': 'w'}, pack=False)
+                                    (150, 250, 140, 70, 120, 130, 120), height=4, anchors={'asset': 'w', 'model': 'w', 'serial': 'w'}, pack=False)
         self.assets.master.pack(fill='x')
         _tags(self.assets)
         self.assets.bind('<<TreeviewSelect>>', lambda _e: self.show_runs())
         ttk.Label(self, text='Reports for the selected instrument (newest first)', style='Bold.TLabel').pack(anchor='w', pady=(10, 3))
         rcols = ('date', 'procedure', 'tech', 'points', 'failed', 'file')
         self.runs = ui.make_table(self, rcols, ('Report date', 'Procedure', 'Technician', 'Points', 'Out of tol.', 'Report file'),
-                                  (150, 330, 130, 70, 90, 330), height=4, anchors={'procedure': 'w', 'tech': 'w', 'file': 'w'}, pack=False)
+                                  (150, 330, 130, 70, 90, 330), height=3, anchors={'procedure': 'w', 'tech': 'w', 'file': 'w'}, pack=False)
         self.runs.master.pack(fill='x')
         _tags(self.runs)
         self.runs.bind('<<TreeviewSelect>>', lambda _e: self.show_points())
@@ -53,11 +53,13 @@ class HistoryPanel(ttk.Frame):
         pcols = ('section', 'desc', 'nominal', 'low', 'high', 'found', 'unit', 'result', 'pct')
         self.points = ui.make_table(self, pcols, ('Section', 'Test point', 'Nominal', 'Low limit', 'High limit', 'As found', 'Units', 'Result', '% of tol.'),
                                     (130, 300, 120, 90, 90, 100, 60, 70, 80), height=8,
-                                    anchors={'section': 'w', 'desc': 'w', 'nominal': 'e', 'low': 'e', 'high': 'e', 'found': 'e', 'unit': 'w', 'pct': 'e'})
+                                    anchors={'section': 'w', 'desc': 'w', 'nominal': 'e', 'low': 'e', 'high': 'e', 'found': 'e', 'unit': 'w', 'pct': 'e'},
+                                    pack=False)                                   # packed after the button row so the buttons are never pushed out
         _tags(self.points)
         self.points.bind('<Double-1>', lambda _e: self.show_drift())
         buttons = ttk.Frame(self)
-        buttons.pack(fill='x', pady=(10, 0))
+        buttons.pack(side='bottom', fill='x', pady=(10, 0))
+        self.points.master.pack(fill='both', expand=True)
         self.btn_drift = ttk.Button(buttons, text='Drift of selected point...', style='Accent.TButton', command=self.show_drift)
         self.btn_drift.pack(side='left')
         self.btn_open = ttk.Button(buttons, text='Open report PDF', command=self.open_report)

@@ -286,7 +286,7 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
 
 
 ## Live procedure editor (branch live-editor)
-"Edit point" (formerly "Edit procedure"; see the next section) in every running procedure window opens the per-point window; the whole-procedure procmods editor (ModifyWindow in live mode) is behind its "All procedure changes..." button. Logic is in
+"Edit point" (formerly "Edit procedure"; see the next section) in every running procedure window opens the per-point window; the whole-procedure procmods editor (ModifyWindow) is no longer reachable from a running procedure (the point window's "All procedure changes..." button was removed; the module is kept). Logic is in
 procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods of procmods_engine.ProcModsMixin; tests: tests/test_beta_live_editor*.py.
 - Edits are saved at once but applied only at the next point boundary (`pm_step`, or `pm_live_boundary` for WaveSurfer). The point in flight is never changed. Outputs go to standby first (a failed standby stops the run and leaves the edits saved); the instrument reset is not re-run.
 - Every edit is an event in the run's audit trail (`live_edits` in the checkpoint; who/when/old/new/before_point) and a normal override, or run-only ("this run only"). Developer-mode gate, locked/risk commands, verified flags and HMAC limit rules are unchanged. Live editing is blocked while a pinned progress file or a factory run is active.
@@ -326,7 +326,7 @@ procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods
 ## Per-point editor (branch point-editor)
 Right-click a test point in any engine's point list -> Edit opens a small window for THAT point (procmods_point_ui.PointWindow; logic in tkinter-free
 procmods_point_model.PointEditModel; tests: tests/test_point_editor_*.py). The toolbar button is now "Edit point" and opens the same window for the selected row;
-the old whole-procedure editor is reached from the window's "All procedure changes..." button (one editor, not two). The menu item is disabled, with the reason,
+the point window has no button for the old whole-procedure editor any more (removed on request; the module stays). Layout: grid, bounded command table (5 rows), scrolling details area, footer always visible, default 980x960 (clamped to the screen), minimum 720x560, resizable; viewed on real Tk 9 under Xvfb in light and dark. The menu item is disabled, with the reason,
 on a verified/locked procedure and while that point is being measured. Storage, scopes, audit trail, next-point-boundary rule and redo are the existing
 procmods / procmods_live layer; nothing in calibration_procedures.sqlite3 changes.
 - Commands panel: the commands the engine will send for this point, in send order, with this point's values filled in. Derived by a DRY RUN of the engine's own
@@ -369,3 +369,11 @@ procmods / procmods_live layer; nothing in calibration_procedures.sqlite3 change
   reaches `_error` with its message, busy cleared, on the simulated benches). Not covered by the behavioural test: mdo, tds2000c, handheld, WaveSurfer (the scan
   found no occurrence there).
 
+
+## Looking at the windows on a real Tk (Linux sandbox)
+- `uv python install 3.13` (python-build-standalone from GitHub; includes tkinter) + `xvfb-run -a -s "-screen 0 1600x1000x24" <that python> script.py`; screenshots with
+  `PIL.ImageGrab.grab(bbox=..., xdisplay=os.environ['DISPLAY'])`. pip/PyPI is not reachable there: borrow Pillow/reportlab by putting the system `dist-packages` of the
+  SAME minor Python on PYTHONPATH. `tests/real_tk_checks.py` + `tests/test_beta_real_tk_windows.py` drive the point window, Edit point, Mark verified / Unlock, the Datasheet
+  Builder grid and Asset History Regenerate PDF on a real Tk (skipped without tkinter / a display). The older stub-based tests are designed for NO tkinter: do not run the
+  whole suite under a real Tk.
+- Point window layout (procmods_point_ui.py): grid; command table 5 rows then scrolls; details (selected command, add a line, developer fields) scroll; footer always visible.
