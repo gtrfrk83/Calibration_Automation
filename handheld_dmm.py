@@ -37,7 +37,9 @@ import datamode
 import drivers
 import procmods_engine
 import reset_startup
+import run_queue_engine
 import virtualbench
+from run_queue_ui import ask_readings          # the one-window reading entry for a run queue (several meters, one point)
 
 SPEC_PATH = HERE / 'specs' / 'fluke_110_series_pv.json'
 READ_TYPED, READ_IR = 'Type the reading', 'Read over IR (Fluke IR cable)'
@@ -591,7 +593,7 @@ def ask_range(parent, p, total, dial, standby_text):
 
 
 # ============================================================================ application
-class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engine.QueueMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def __init__(self, root, model, demo=False, spec=None, io_factory=None, meter_factory=None, fast_demo=False):
         self.root, self.model, self.demo = root, model, demo
         self.init_virtual(demo, fast_demo)
@@ -650,6 +652,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     @busy.setter
     def busy(self, value):
         self._busy = value
+        if not value and self._q is not None:
+            self._queue_aborted()                  # a run queue was paused / failed: keep every meter's progress
         if hasattr(self, 'btn_run'):
             idle = 'disabled' if value else 'normal'
             for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
@@ -673,6 +677,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                                          demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
         self.status = sh.status_var
         self.conn_pill = sh.add_chip(self.chip_text() if self.demo else 'Not connected', 'neutral')
+        if self.queue_supported():
+            self.queue_pill = ui.Pill(sh.chip_frame, '', 'info')           # 'Run queue: n meters', shown only while a queue of two or more is set
         sh.build_identity(self.asset, self.serial)
         self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
         self.summary = sh.build_progress()
@@ -714,6 +720,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             ttk.Label(d, text='The calibrator is a virtual 5522A / 5560A (simulated). Press Test connection to connect it; no cable or address is needed. '
                               'The "Fill with a simulated reading" button in the reading window enters a made-up value; you may type your own.',
                       style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=13, column=0, columnspan=2, sticky='w', pady=(6, 0))
+        if self.queue_supported():
+            self.build_queue_drawer(d, 14)
         btns = sh.drawer_footer
         self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
         self.btn_test = ttk.Button(btns, text='Test connection', command=self.test_connection, style='Accent.TButton'); self.btn_test.pack(side='left')
@@ -1008,7 +1016,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.status.set('Stopping after the current test point.')
 
     def run_all(self):
-        self.execute([p for p in self.points if p['id'] not in self.results])
+        self.execute(self.queue_pending(self.points) if self.queue_wants_run() else [p for p in self.points if p['id'] not in self.results])
 
     def run_section(self):
         self.run_shown_section(self.points)
@@ -1016,6 +1024,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def rerun(self):
         sel = self.tree.selection()
         if sel:
+            self._queue_force = True                       # a run queue measures the chosen point again on every meter
             self.execute([self.by_id[sel[0]]])
         else:
             messagebox.showinfo('Selection', 'Select a test point first.')
@@ -1023,6 +1032,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def execute(self, points):
         if self.busy or not points:
             return
+        if self.queue_wants_run():                         # two or more meters in the run queue (run_queue_engine.py); one meter runs below, as always
+            return self.queue_execute(points)
+        self.__dict__.pop('_queue_force', None)
         if not self.asset.get().strip():
             messagebox.showwarning('Instrument ID', 'Enter an instrument ID.')
             return
@@ -1064,7 +1076,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 steps = [(lead, detail.replace('The program switches the output off after 30 s.', 'Switch the calibrator to STANDBY after 30 s.')) for lead, detail in steps]
             facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
             image = group['diagram'] if group.get('diagram') and Path(group['diagram']).is_absolute() else (HERE / group['diagram'] if group.get('diagram') else None)
-            return ui.confirm_steps(self.root, 'Change the cables', group['title'], steps, facts=facts, caution=group.get('caution'),
+            return ui.confirm_steps(self.root, 'Change the cables', group['title'], steps + self._qsteps(), facts=self._qfacts(facts), caution=group.get('caution'),
                                     ok='Connections checked - continue', image=image if image and image.is_file() else None)
         steps = []
         if p['group'] == 'NONE':
@@ -1076,7 +1088,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 steps.append(('This test', p['setup']))
         facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
         caution = None if p['group'] == 'NONE' else 'Continue only after physically verifying the connections.'
-        return ui.confirm_steps(self.root, 'Check the setup', f'Set up for {p["section"]}', steps, facts=facts, caution=caution, ok='Done - continue')
+        return ui.confirm_steps(self.root, 'Check the setup', f'Set up for {p["section"]}', steps + self._qsteps(), facts=self._qfacts(facts), caution=caution, ok='Done - continue')
 
     def _auto_ramp(self):
         return bool(self.spec.get('options', {}).get('auto_ramp', True))
@@ -1104,9 +1116,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                    else 'The calibrator output is OFF (standby) while you turn the rotary switch.')
         facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
         if not ui.confirm_steps(self.root, 'Change the function', p['section'],
-                                [('Rotary switch', f'Turn the meter to: {p["switch"]}'), ('Standby', standby)],
-                                facts=facts, ok='Done - continue', layout='function_change',
-                                card=function_change_card(p, len(self.points), standby)):
+                                [('Rotary switch', f'Turn the meter to: {p["switch"]}'), ('Standby', standby)] + self._qsteps(),
+                                facts=self._qfacts(facts), ok='Done - continue', layout='function_change',
+                                card=function_change_card(p, len(self.points), standby + self._qnote())):
             return False
         self._last_switch = p['switch']
         return True
@@ -1117,7 +1129,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return 'ok'
         text = ('Put the calibrator in STANDBY while you turn the dial. The program sets the output after you continue.' if self.manual_cal
                 else 'The calibrator output is OFF (standby) while you turn the dial. The program sets the output after you continue.')
-        return ask_range(self.root, p, len(self.points), self.spec['dial'], text)
+        return ask_range(self.root, p, len(self.points), self.spec['dial'], text + self._qnote())
 
     def _rest_remaining(self, p):
         """Seconds the meter must still rest before a high-current point (0 when none is needed)."""
@@ -1127,6 +1139,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return max(0.0, rest - (time.monotonic() - self.last_high_current))
 
     def _next(self, points, i, previous):
+        if (i >= len(points) or self.stop) and self._q is not None:
+            self._queue_unit_done()                        # a run queue: this unit is finished, go on to the next one
+            return
         if i >= len(points) or self.stop:
             self.busy = False
             self.save()
@@ -1145,8 +1160,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.tree.exists(p['id']):
             self.tree.selection_set(p['id'])
             self.tree.see(p['id'])
+        if self._q is not None:
+            self._queue_tick(p)
         if self.fast_demo:
-            self._record_demo(p)
+            self._fast_demo_record(p)
             self.root.after(20, lambda: self._next(points, i + 1, key))
             return
         if self.io:
@@ -1178,8 +1195,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self._stage['id'] != p['id']:
             self._stage = {'id': p['id'], 'done': set()}
         if p.get('prompt') and 'prompt' not in self._stage['done']:
-            if not ui.confirm_steps(self.root, 'Meter setup', p['section'], [('Meter', p['prompt'])],
-                                    facts=[('Point', f'{p["n"]} of {len(self.points)}'), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))],
+            if not ui.confirm_steps(self.root, 'Meter setup', p['section'], [('Meter', p['prompt'])] + self._qsteps(),
+                                    facts=self._qfacts([('Point', f'{p["n"]} of {len(self.points)}'), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]),
                                     ok='Done - continue'):
                 self.busy = False
                 self.status.set('Paused at the meter setup.')
@@ -1189,9 +1206,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             self._rel_zero(points, i, p, key)
             return
         if self._high_voltage(p):
-            if not messagebox.askyesno('HIGH VOLTAGE', f'This point outputs {abs(p["applied"]["value"]):g} V'
+            if not messagebox.askyesno('HIGH VOLTAGE', self._q_hv_text(f'This point outputs {abs(p["applied"]["value"]):g} V'
                                        + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and self._auto_ramp() and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
-                                       '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
+                                       '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?')):
                 self.busy = False
                 self.status.set('Stopped before a high-voltage point.')
                 return
@@ -1226,8 +1243,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             else:
                 steps = [('REL', z['text'])]
             ok = ui.confirm_steps(self.root, 'Set the REL offset', f'{p["section"]}: REL offset',
-                                  steps, facts=[('Point', f'{p["n"]} of {len(self.points)}'),
-                                                ('Calibrator output', output_text(zero_point) if zero_point else 'none (STANDBY)')],
+                                  steps + self._qsteps(), facts=self._qfacts([('Point', f'{p["n"]} of {len(self.points)}'),
+                                                ('Calibrator output', output_text(zero_point) if zero_point else 'none (STANDBY)')]),
                                   caution='The program checks over IR that REL is on.' if self.use_ir else None, ok='REL set - continue')
             if self.io and not self.manual_cal:
                 self._safe_standby()
@@ -1304,6 +1321,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return dict(demo_fill=lambda: virtualbench.plausible_text(p['low'], p['high'], p['n'], self.virtual_failures()))
 
     def _ask(self, points, i, p, key):
+        if self._q_shared() and len(self._q.unit.needs.get(str(p['id']), self._q.unit.meters)) > 1:
+            self._ask_shared(points, i, p, key)            # a run queue, several meters wired together: one window reads them all
+            return
         total = len(self.points)
         if p['test'] == 'numeric' and self.use_ir and p.get('ir') and not self._stage.get('typed'):
             self._ask_ir(points, i, p, key)
@@ -1464,8 +1484,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             self._store(p, entered=entered, reading=None, result='PASS', synthetic=True)
 
     # ------------------------------------------------------------------ files
-    def _checkpoint_path(self):
-        name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
+    def _checkpoint_path(self, asset=None):
+        name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in (self.asset.get() if asset is None else asset)) or 'UNASSIGNED'
         return appdata.progress_path(f'{self.brand}{self.model}_{name}_checkpoint.json')
 
     def save(self, silent=False):
@@ -1502,6 +1522,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.serial.set(data.get('serial', ''))
         self.load_results(data)
         self.pm_on_checkpoint(data)                                     # a saved modification snapshot is used unless the store has changed
+        self.queue_sync_after_load()                                    # a run queue keeps one result set per meter
         self.refresh()
         self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
 
@@ -1587,6 +1608,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return blank
 
     def export_pdf(self):
+        if self.queue_offer_all_reports():                  # a run queue: one report per meter (run_queue_engine.py)
+            return
         rows, pts = self.certificate_rows_and_points()
         if not rows:
             messagebox.showinfo('No results', 'No recorded results to export yet.')

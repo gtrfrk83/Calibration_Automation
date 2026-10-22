@@ -57,6 +57,13 @@ class VHarness(Harness):
             typed = demo_fill()
         return dict(action='record', text='', ann=False, yes=bool(True if typed is None else typed))
 
+    def _ask_readings(self, parent, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                      source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading=''):
+        if demo_fill is not None:
+            self.fills.append(p['id'])
+        return super()._ask_readings(parent, p, total, out_text, out_note, accept, meters, unit=unit, judge=judge, limit_s=limit_s, on_expire=on_expire,
+                                     device=device, source=source, demo_fill=demo_fill, tol_text=tol_text, phase=phase, heading=heading)
+
     def pump(self, seconds=120):
         end = time.time() + seconds
         app = self.app

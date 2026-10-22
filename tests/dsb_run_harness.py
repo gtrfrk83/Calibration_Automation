@@ -27,11 +27,26 @@ if not isinstance(getattr(_tk, 'TclError', None), type) or not issubclass(_tk.Tc
 
 import drivers  # noqa: E402
 import handheld_dmm as hh  # noqa: E402
+import run_queue_engine  # noqa: E402
 import tds2000c_verification as tds  # noqa: E402
 import ui_shell  # noqa: E402
 import ui_theme as ui  # noqa: E402
 import labregistry  # noqa: E402
 import dsb_runtime as rt  # noqa: E402
+
+
+class _FakeProgress:
+    """Stands in for run_queue_ui.QueueProgress: records what the engine shows."""
+
+    def __init__(self, harness):
+        self.h = harness
+        self.closed = False
+
+    def update(self, heading, fraction, rows, finished=False, note=''):
+        self.h.progress_log.append(('update', heading, fraction, [dict(r) for r in rows], finished))
+
+    def close(self):
+        self.closed = True
 
 
 class FakeRoot:
@@ -58,6 +73,12 @@ class Harness:
         self.default_reading = None         # callable(p) -> text for points not in `readings`
         self.on_confirm = None              # callable(title, heading, steps, facts) -> bool|None, may act on the simulated bench
         self.box_answer = {'askyesno': True, 'askyesnocancel': True}
+        self.queue_readings = {}            # (asset, point id) -> text | callable(p) the operator types for that meter in a run-queue reading window
+        self.queue_default = None           # callable(p, asset) -> text for the meters / points not in queue_readings
+        self.queue_no_reading = set()       # (asset, point id) the operator marks 'No reading'
+        self.queue_action = {}              # point id -> 'skip' | 'stop' in the run-queue reading window
+        self.progress_log = []              # ('update', heading, fraction, rows, finished) of the run-queue progress window
+        self.fill = getattr(self, 'fill', False)
         self.root = FakeRoot()
         self.app = None
 
@@ -69,7 +90,8 @@ class Harness:
         for obj, name, val in ((ui, 'apply_theme', mock.MagicMock()), (ui, 'fit_window', mock.MagicMock()), (ui, 'polish', mock.MagicMock()),
                                (ui_shell, 'Shell', mock.MagicMock()), (ui_shell, 'results_table', mock.MagicMock()),
                                (ui_shell, 'small_window', mock.MagicMock()), (labregistry, 'attach', mock.MagicMock()),
-                               (ui, 'confirm_steps', self._confirm), (hh, 'ask_reading', self._ask_reading),
+                               (ui, 'confirm_steps', self._confirm), (hh, 'ask_reading', self._ask_reading), (hh, 'ask_readings', self._ask_readings),
+                               (run_queue_engine.QueueMixin, 'queue_progress_factory', staticmethod(lambda *a, _h=self, **k: _FakeProgress(_h))),
                                (tds, 'SLEEP_SCALE', 0), (hh.IO, '_wait', staticmethod(lambda seconds, cancel=None: None))):
             p = mock.patch.object(obj, name, val)
             p.start()
@@ -122,6 +144,37 @@ class Harness:
             return dict(action='record', text=val, ann=False, yes=None)
         ans = self.readings.get(p['id'], True)
         return dict(action='record', text='', ann=False, yes=bool(ans))
+
+    def _ask_readings(self, parent, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                      source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading=''):
+        """The run-queue reading window: one box per meter.  The scripted operator types queue_readings[(asset, point id)], else the per-point
+        reading / default reading of a single-meter run, else (virtual bench) presses 'Fill with a simulated reading'."""
+        self.dialogs.append(('readings', p['id'], [m[0] for m in meters]))
+        action = self.queue_action.get(p['id'])
+        if action:
+            return dict(action=action, texts={}, no_reading=[])
+        texts, none = {}, []
+        for idx, (key, _label, _serial) in enumerate(meters):
+            if (key, p['id']) in self.queue_no_reading:
+                texts[key] = None
+                none.append(key)
+                continue
+            val = self.queue_readings.get((key, p['id']))
+            if val is None and self.queue_default:
+                val = self.queue_default(p, key)
+            if val is None:
+                val = self.readings.get(p['id'])
+            if val is None and self.default_reading:
+                val = self.default_reading(p)
+            if callable(val):
+                val = val(p)
+            if val is None and self.fill and demo_fill is not None:
+                val = demo_fill(idx)
+            if val is None:
+                return dict(action='stop', texts={}, no_reading=[])
+            judge(key, val)
+            texts[key] = val
+        return dict(action='record', texts=texts, no_reading=none)
 
     # ---- app -----------------------------------------------------------------------------------------------------------------------------
     def make_app(self, spec, demo=False, io=None, period=None):
