@@ -188,3 +188,15 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
 - Not verified: every automation status marked 'unverified' in `datasheet_builder_match.DRIVER_TABLE` (capacitance / thermocouple outputs, 5522A scope option,
   5790B, 53131A/53132A); the example accuracy numbers in tests/dsb_fixtures.py are illustrative, not any manufacturer's.
 - Tests: `tests/test_datasheet_builder*.py`.
+
+## Datasheet Builder runtime (stage C, branch dsb-run)
+- A saved user-built datasheet is listed by the Manager as its own row (`dsb_manager.user_rows()`, iid `ds:<uid>`, tag `user-built`; nothing is written to
+  calibration_procedures.sqlite3) and launched through `Procedures/User_Datasheet.py --spec <file>` -> `dsb_runtime.main()`.
+- `dsb_runtime.DsbApp` extends the handheld engine (handheld_dmm.App) with the spec injected, so reset-before-tests, standby after each point, function
+  prompts, direct HV, explicit 0 Hz DC, reading padding, TAR/TUR, procmods, checkpoint/resume, As Found / As Left and the PDF are the engine's own.
+  `handheld_dmm.py` got additive hooks only (build_points, reading_labels, checkpoint_problem, report_title/header/details, dsb_out/dsb_desc/dsb_device).
+- `DsbIO` opens the standards: 5560A / 5522A (sources, scope option for scope points), 5790B and 53131A/53132A (measure generator outputs).
+  Per point `route_for` picks the assigned standard when connected and able (driver_table / automation_status), else the engine's calibrator, else by hand.
+  Writes are the drivers' set / read back / compare, never retried; outputs go to standby after each point.
+- datasheet_builder.save() writes the runnable spec without a matcher plan, so `with_plan()` runs the matcher at load time (read only).
+- Tests: tests/test_dsb_runtime.py (units), tests/test_dsb_runtime_bench.py (simulated benches; tkinter stubbed, harness in tests/dsb_run_harness.py).

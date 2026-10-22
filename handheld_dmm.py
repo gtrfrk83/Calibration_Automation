@@ -48,8 +48,12 @@ WIRING = {
     'UAMP': 'Calibrator in STANDBY, then reconfigure: calibrator current output to the meter µA / mA input and COM terminals.',
     'TEMP': 'K-type thermocouple (mini-plug on both ends) between the calibrator thermocouple output and the meter temperature input, using the Fluke 80AK adapter. Allow the junctions to stabilise.',
     'VOLTALERT': 'Double banana plug on the calibrator voltage output; the meter is held against the plug (see the point instructions).',
+    # user-built datasheets (dsb_runtime.py): the calibrator's SCOPE BNC output
+    'SCOPE_DC': 'Calibrator SCOPE output (SCOPE voltage, 1 MΩ output impedance) to the oscilloscope input with the BNC cable. No terminator.',
+    'SCOPE_SINE': 'Calibrator SCOPE output (leveled sine, 50 Ω) to the oscilloscope input through the 50 Ω BNC cable and a 50 Ω feedthrough terminator at the scope input.',
+    'SCOPE_MARKER': 'Calibrator SCOPE output (time marker) to the oscilloscope input with the BNC cable and a 50 Ω feedthrough terminator at the scope input.',
 }
-SYMBOL = {'ohm': 'Ω', 'V': 'V', 'A': 'A', 'F': 'F', 'Hz': 'Hz', 'C': '°C', 'degF': '°F', 'S': 'S', '%': '%'}
+SYMBOL = {'ohm': 'Ω', 'V': 'V', 'A': 'A', 'F': 'F', 'Hz': 'Hz', 'C': '°C', 'degF': '°F', 'S': 'S', '%': '%', 's': 's', 'dB': 'dB'}
 
 
 def load_spec(path=SPEC_PATH):
@@ -79,6 +83,8 @@ def _fmt(value, unit):
 
 
 def output_text(p):
+    if p.get('dsb_out'):                       # user-built datasheets: the runtime words the output itself (scope / generator points)
+        return p['dsb_out']
     a = p.get('applied')
     if not a:
         return 'No calibrator output (STANDBY)'
@@ -93,6 +99,8 @@ def output_text(p):
 
 
 def describe(p):
+    if p.get('dsb_desc'):                      # user-built datasheets: a description that also carries the frequency / level
+        return p['dsb_desc']
     if p['test'] == 'beeper':
         return f'Continuity, {output_text(p)}: beeper {p["expect"].upper()}'
     if p['test'] == 'visual':
@@ -244,7 +252,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
 
 # ============================================================================ the reading dialog
 def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
-                limit_s=None, on_expire=None):
+                limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT'):
     """One modal dialog. mode 'numeric' (type the display) or 'yesno' (answer a question).
     Returns dict(action='record'|'skip'|'stop', text=, ann=, yes=)."""
     result = dict(action='stop', text='', ann=False, yes=None)
@@ -255,7 +263,7 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
     ttk.Label(outer, text=f'Point {p["n"]} of {total}  -  {p["section"]}' + (f'  -  {phase}' if phase else ''), style='Small.TLabel').pack(anchor='w')
     ttk.Label(outer, text=describe(p), style='Section.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(2, 10))
     if p.get('applied') or p['group'] != 'NONE':
-        ttk.Label(outer, text='CALIBRATOR OUTPUT', style='MetricCap.TLabel').pack(anchor='w')
+        ttk.Label(outer, text=source, style='MetricCap.TLabel').pack(anchor='w')
         ttk.Label(outer, text=out_text, style='Reading.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w')
         ttk.Label(outer, text=out_note, style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(0, 10))
     counter = tk.StringVar()
@@ -281,8 +289,8 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
             except tk.TclError:
                 pass
         tick()
-    ttk.Label(outer, text='METER', style='MetricCap.TLabel').pack(anchor='w')
-    meter = f'Rotary switch / function: {p["switch"]}' + (f'\nRange: {p["range"]}' if p['range'] else '')
+    ttk.Label(outer, text=device, style='MetricCap.TLabel').pack(anchor='w')
+    meter = p.get('dsb_device') or (f'Rotary switch / function: {p["switch"]}' + (f'\nRange: {p["range"]}' if p['range'] else ''))
     ttk.Label(outer, text=meter, wraplength=ui.px(520), justify='left').pack(anchor='w')
     if p.get('note'):
         ttk.Label(outer, text=p['note'], style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(2, 0))
@@ -296,7 +304,7 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
     ann = tk.BooleanVar(value=False)
     error = tk.StringVar(value='')
     if mode == 'numeric':
-        ttk.Label(outer, text='METER READING', style='MetricCap.TLabel').pack(anchor='w', pady=(10, 0))
+        ttk.Label(outer, text=device + ' READING', style='MetricCap.TLabel').pack(anchor='w', pady=(10, 0))
         row = ttk.Frame(outer)
         row.pack(fill='x', pady=(2, 0))
         text = tk.StringVar()
@@ -490,7 +498,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self._stage = {'id': None, 'done': set()}
         self.spec = spec or load_spec()
         self.info = self.spec['models'][model]
-        self.points = points_for(self.spec, model)
+        self.points = self.build_points()
         self.by_id = {p['id']: p for p in self.points}
         self.pm_init('handheld', model, demo=demo, lists=[self.points], on_change=self._pm_points_changed)   # procedure modifications
         self.io, self._busy, self.stop = None, False, False
@@ -501,7 +509,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         ui.fit_window(root, 1320, 800, min_w=1000, min_h=640)
         self.brand = self.info.get('brand', 'Fluke')
         self.last_high_current = None
-        self.settings = ui.Settings(f'{self.brand.lower()}{model}')
+        self.settings = ui.Settings(self.settings_name())
         self.asset, self.serial = tk.StringVar(), tk.StringVar()
         _saved = self.settings.get('cal_mode', CAL_CHOICES[0])
         self.cal_mode = tk.StringVar(value=OLD_CAL_CHOICES.get(_saved, _saved))
@@ -521,6 +529,13 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         root.bind('<Control-s>', lambda _e: self.save())
         import labregistry
         labregistry.attach(root, self.asset, self.serial, self.status.set)
+
+    def build_points(self):
+        """The point list of this run (a hook: user-built datasheets, dsb_runtime.py, add their scope / generator points)."""
+        return points_for(self.spec, self.model)
+
+    def settings_name(self):
+        return f'{self.brand.lower()}{self.model}'
 
     def _pm_points_changed(self):
         """The point list was patched in place (procedure modifications): the lookup by id must follow."""
@@ -1102,6 +1117,10 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             return 'Set this on the calibrator and press OPERATE, then read the meter.'
         return 'Output is ON - allow the reading to settle, then read the meter.' if on else 'Output is in STANDBY.'
 
+    def reading_labels(self, p):
+        """Extra keyword arguments for ask_reading (a hook: user-built datasheets say 'oscilloscope' / 'measuring standard' instead of 'meter')."""
+        return {}
+
     def _ask(self, points, i, p, key):
         total = len(self.points)
         if p['test'] == 'numeric' and self.use_ir and p.get('ir') and not self._stage.get('typed'):
@@ -1126,7 +1145,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 used = (time.monotonic() - on_at) if on_at else 0.0
                 limit = dict(limit_s=max(1.0, p['max_on_s'] - used), on_expire=self._safe_standby if self.io and not self.manual_cal else None)
             r = ask_reading(self.root, p, total, output_text(p), self._out_note(p, True), self.accept_text(p), 'numeric',
-                            unit=p['display_unit'], annunciator=False, validate=validate, **limit)     # the annunciator is a separate confirmation below
+                            unit=p['display_unit'], annunciator=False, validate=validate, **limit, **self.reading_labels(p))     # the annunciator is a separate confirmation below
             if p.get('recovery_s'):
                 self.last_high_current = time.monotonic()
             if r['action'] == 'record':
@@ -1145,14 +1164,15 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 if not chk['output'] and self.io and not self.manual_cal:
                     self.io.standby()
                 note = self._out_note(p, chk['output']) if not self.manual_cal else ('Output ON.' if chk['output'] else 'Put the calibrator in STANDBY.')
-                r = ask_reading(self.root, p, total, output_text(p), note, chk['question'], 'yesno', question=chk['question'], phase=f'check {n} of {len(p["checks"])}')
+                r = ask_reading(self.root, p, total, output_text(p), note, chk['question'], 'yesno', question=chk['question'], phase=f'check {n} of {len(p["checks"])}',
+                                **self.reading_labels(p))
                 if r['action'] != 'record':
                     break
                 answers.append(r['yes'])
             if r['action'] == 'record':
                 self._store(p, entered='Pass' if all(answers) else 'Fail', reading=None, result='PASS' if all(answers) else 'FAIL', answers=answers)
         else:
-            r = ask_reading(self.root, p, total, output_text(p), self._out_note(p, True), p['question'], 'yesno', question=p['question'])
+            r = ask_reading(self.root, p, total, output_text(p), self._out_note(p, True), p['question'], 'yesno', question=p['question'], **self.reading_labels(p))
             if r['action'] == 'record':
                 ok = r['yes'] if p['test'] == 'visual' else (r['yes'])
                 self._store(p, entered=('Pass' if ok else 'Fail') if p['test'] == 'visual' else
@@ -1277,6 +1297,10 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if not silent:
             self.status.set(f'Saved {path.name}')
 
+    def checkpoint_problem(self, data):
+        """A reason this progress file must not be loaded, or None (a hook: user-built datasheets check the datasheet and its version)."""
+        return None
+
     def load(self):
         path = filedialog.askopenfilename(filetypes=[('Checkpoint', '*.json')])
         if not path:
@@ -1284,6 +1308,10 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         data = json.loads(Path(path).read_text())
         if data.get('model') != self.model:
             messagebox.showerror('Wrong model', f'This checkpoint is for the Fluke {data.get("model")}.')
+            return
+        problem = self.checkpoint_problem(data)
+        if problem:
+            messagebox.showerror('Wrong datasheet', problem)
             return
         if self.file_has_synthetic(data) and not self.demo:
             if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):
@@ -1384,13 +1412,12 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             return
         demo = self.any_synthetic()
         src = self.spec['source']
+        details = self.report_details(details)
         try:
             if details.get('show_tar_tur'):
                 rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [self.certificate_fields(p) for p in pts])
-            report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', self.info['name']), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
-                                                                 ('Limits applied', src.get('limits', 'Manufacturer display-reading limits (12 month)')),
-                                                                 ('Source', src.get('cite') or f'{src["document"]}, pp. {src["pages"].split(" ")[0]}')],
-                                             title=f'{self.info["name"]} Performance Verification', demo=demo, details=details,
+            report_pdf.write_calibration_pdf(path, rows, header=self.report_header(src),
+                                             title=self.report_title(), demo=demo, details=details,
                                              footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows, self.calibrator_model()), self.source_note()) if x))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab')
@@ -1399,6 +1426,18 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             messagebox.showerror('PDF export error', str(exc))
             return
         self.status.set(f'Exported {len(rows)} rows: {path}')
+
+    def report_title(self):
+        return f'{self.info["name"]} Performance Verification'
+
+    def report_header(self, src):
+        return [('Instrument', self.info['name']), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
+                ('Limits applied', src.get('limits', 'Manufacturer display-reading limits (12 month)')),
+                ('Source', src.get('cite') or f'{src["document"]}, pp. {src["pages"].split(" ")[0]}')]
+
+    def report_details(self, details):
+        """The report-details dict (a hook: user-built datasheets add the standards that were actually used)."""
+        return details
 
     def calibrator_model(self):
         """Model of the calibrator in use ('5560A' / '5522A'), for the uncertainty budget."""
