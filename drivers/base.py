@@ -20,6 +20,8 @@ Command API (stable; every driver follows it):
     describe_commands() -> [dict]                  merged registry for the UI
     command_overrides_active() -> [uid]            overrides in effect (for the report / log banner)
     rejected_commands() -> [(key, uid, [problems])]
+    set_point(point_key)                           select the test point whose point-specific overrides apply to the commands that follow
+                                                   (None = no point); run_extras(phase) sends the extra command lines typed for that point
 
 Reset to default settings (Stage 7 rule; see drivers/README.txt "Adding a model"):
     COMMANDS['reset']                              a LOCKED command (risk 'locked', never overridable): *RST or the model's equivalent
@@ -34,6 +36,8 @@ from __future__ import annotations
 
 import dataclasses
 import time
+
+import math
 
 import cmdreg
 
@@ -65,6 +69,10 @@ class ResetReport:
         lines = [head] + [f'  {"ok " if s.ok else "ERR"} {s.name}' + (f': {s.detail}' if s.detail else '') for s in self.steps]
         lines += [f'  warning: {w}' for w in self.warnings]
         return '\n'.join(lines)
+
+
+def cmdreg_isclose(a, b) -> bool:
+    return math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-12)
 
 
 class InstrumentError(RuntimeError):
@@ -157,6 +165,9 @@ class Instrument:
     # ---- command registry (COMMANDS) -------------------------------------------------------------------
     _cmd_ov: dict | None = None            # {key: (override text, uid)} - instance state, created by use_commands
     _cmd_rejected: list | None = None      # [(key, uid, [problems])]
+    _cmd_pt: dict | None = None            # {point key: {key: (override text, uid)}} - overrides typed for ONE test point
+    _extras: dict | None = None            # {point key: [{'phase', 'n', 'template', 'readback', 'expect', 'uid'}]} - extra command lines
+    _pt_key: str | None = None             # the test point being measured (set_point); None between points
 
     def _registry(self) -> dict:
         reg = self.__dict__.get('_reg_cache')
@@ -177,19 +188,20 @@ class Instrument:
         self._cmd_rejected.append((key, uid, msgs))
         self.log.add('!!', f'OVERRIDE REJECTED {self._uid_text(uid)} {key}: ' + '; '.join(msgs), self.label)
 
-    def use_commands(self, templates: dict | None, uids: dict | None = None) -> list:
+    def use_commands(self, templates: dict | None, uids: dict | None = None, points: dict | None = None, point_uids: dict | None = None,
+                     extras: dict | None = None) -> list:
         """Install override templates {key: text}. A value may also be (text, uid) or {'template': text, 'uid': uid}; `uids`
         {key: uid} supplies the uid otherwise. Each one is re-validated against the merged registry (cmdreg.validate); failures are
-        dropped, recorded (rejected_commands) and logged as OVERRIDE REJECTED - never raised. Replaces any earlier set."""
+        dropped, recorded (rejected_commands) and logged as OVERRIDE REJECTED - never raised. Replaces any earlier set.
+        `points` {point key: {key: text}} (+ `point_uids`) are the overrides typed for ONE test point: they are checked the same way and
+        win over the driver-wide ones while that point is selected (set_point).  `extras` {point key: [extra line, ...]} are the extra
+        command lines for a point (run_extras)."""
         self._cmd_ov, self._cmd_rejected = {}, []
+        self._cmd_pt, self._extras = {}, {}
         reg = self._registry()
         dname = type(self).__name__
-        for key, val in dict(templates or {}).items():
-            uid = (uids or {}).get(key)
-            if isinstance(val, dict):
-                uid, val = val.get('uid', uid), val.get('template')
-            elif isinstance(val, (tuple, list)) and len(val) == 2:
-                val, uid = val
+
+        def check(key, val, uid):
             cmd = reg.get(key)
             ok, why = cmdreg.is_overridable(cmd)
             if cmd is None:
@@ -200,7 +212,17 @@ class Instrument:
                 probs = cmdreg.validate(val, cmd, dname)
             if probs:
                 self._reject(key, uid, probs)
-            elif val != cmd.template:                           # identical to the factory text: nothing to override
+                return None
+            return cmd
+
+        for key, val in dict(templates or {}).items():
+            uid = (uids or {}).get(key)
+            if isinstance(val, dict):
+                uid, val = val.get('uid', uid), val.get('template')
+            elif isinstance(val, (tuple, list)) and len(val) == 2:
+                val, uid = val
+            cmd = check(key, val, uid)
+            if cmd is not None and val != cmd.template:         # identical to the factory text: nothing to override
                 self._cmd_ov[key] = (val, uid)
         effective = {k: t for k, (t, _u) in self._cmd_ov.items()}
         bundle = cmdreg.validate_bundle(effective, reg) if effective else []
@@ -208,7 +230,66 @@ class Instrument:
             for key, (_t, uid) in list(self._cmd_ov.items()):
                 self._reject(key, uid, bundle)
             self._cmd_ov = {}
+        for pkey, table in dict(points or {}).items():
+            for key, val in (dict(table) if isinstance(table, dict) else {}).items():
+                uid = ((point_uids or {}).get(pkey) or {}).get(key)
+                cmd = check(key, val, uid)
+                if cmd is not None and val != cmd.template:
+                    self._cmd_pt.setdefault(pkey, {})[key] = (val, uid)
+            eff = {**effective, **{k: t for k, (t, _u) in self._cmd_pt.get(pkey, {}).items()}}
+            bundle = cmdreg.validate_bundle(eff, reg) if self._cmd_pt.get(pkey) else []
+            if bundle:
+                for key, (_t, uid) in list(self._cmd_pt[pkey].items()):
+                    self._reject(key, uid, bundle)
+                del self._cmd_pt[pkey]
+        for pkey, lines in dict(extras or {}).items():
+            self._extras[pkey] = [dict(x) for x in lines if isinstance(x, dict)] if isinstance(lines, (list, tuple)) else []
         return list(self._cmd_rejected)
+
+    # ---- test point context: point-specific overrides and extra command lines (procmods "Edit point") --------------------
+    def set_point(self, point_key):
+        """Select the test point whose point-specific overrides apply to the commands that follow (None: none). The engine's point
+        routine does this at its start and clears it at its end (procmods_engine.point_commands)."""
+        self._pt_key = point_key
+
+    def point_overrides_active(self, point_key=None) -> list:
+        """uids of the point-specific command overrides for a point (default: the selected one), in registry order."""
+        table = (self._cmd_pt or {}).get(point_key if point_key is not None else self._pt_key) or {}
+        return [self._uid_text(table[k][1]) for k in self._registry() if k in table]
+
+    def run_extras(self, phase: str):
+        """Send the extra command lines typed for the selected point and `phase` ('before' / 'after'), in order, each ONCE (never retried).
+        A write is read back and compared with the reply the line was made with; a mismatch raises InstrumentError.  Every line is logged
+        with its uid and 'UNVERIFIED'."""
+        for x in (self._extras or {}).get(self._pt_key, []):
+            if x.get('phase') == phase:
+                self._send_extra(x)
+
+    @staticmethod
+    def _extra_same(reply, expect) -> bool:
+        a, b = str(reply).strip().strip('"\'').strip().upper(), str(expect).strip().strip('"\'').strip().upper()
+        if a == b:
+            return True
+        try:
+            return cmdreg_isclose(float(a), float(b))
+        except ValueError:
+            return False
+
+    def _send_extra(self, x):
+        text, uid = x['template'], self._uid_text(x.get('uid'))
+        probs = cmdreg.validate(text, None, type(self).__name__)
+        if probs:                                               # re-checked at send time, like every override
+            self._reject('extra', x.get('uid'), probs)
+            return
+        tag = f'  [EXTRA {uid} UNVERIFIED]'
+        if '?' in text.split(None, 1)[0]:
+            self.query(text, log_as=text + tag)
+            return
+        self.write(text, log_as=text + tag)
+        reply = self.query(x['readback'], log_as=x['readback'] + tag)
+        if not self._extra_same(reply, x['expect']):
+            raise InstrumentError(f'{self.label}: extra command {text!r} was not confirmed: {x["readback"]!r} answered {reply.strip()!r}, '
+                                  f'expected {x["expect"]!r}')
 
     def rejected_commands(self) -> list:
         return list(self._cmd_rejected or [])
@@ -228,21 +309,23 @@ class Instrument:
             raise InstrumentError(f'{self.label}: {key!r} is a query; use ask()')
         if how != 'send' and cmd.kind != 'query':
             raise InstrumentError(f'{self.label}: {key!r} is not a query ({cmd.kind}); it cannot be asked or retried')
-        ov = (self._cmd_ov or {}).get(key)
+        table = (self._cmd_pt or {}).get(self._pt_key) if self._pt_key is not None else None
+        src = table if table and key in table else self._cmd_ov if self._cmd_ov and key in self._cmd_ov else None     # the point's own first
+        ov = src[key] if src is not None else None
         if ov is not None:
             text, uid = ov
             ok, why = cmdreg.is_overridable(cmd)
             probs = cmdreg.validate(text, cmd, type(self).__name__) if ok else [cmdreg.Problem('locked', f'{key} is not editable: {why}')]
             if probs:                                           # re-validated at send time: fall back to the factory text
                 self._reject(key, uid, probs)
-                del self._cmd_ov[key]
+                del src[key]
             else:
                 try:
                     wire = cmdreg.render(dataclasses.replace(cmd, template=text), vals)
                     return wire, wire + '  [OVERRIDE ' + self._uid_text(uid) + ']'
                 except cmdreg.CmdError as e:
                     self._reject(key, uid, [cmdreg.Problem('placeholder.missing', str(e))])
-                    del self._cmd_ov[key]
+                    del src[key]
         wire = cmdreg.render(cmd, vals)
         if cmd.secret:                                          # the value goes on the wire, never in the log
             masked = {n: (self.SECRET_MASK if getattr(p, 'type', '') == 'secret' else vals.get(n)) for n, p in cmd.placeholders.items()}

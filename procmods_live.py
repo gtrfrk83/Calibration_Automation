@@ -93,6 +93,8 @@ def _value_text(e):
     v = e.get('value') or {}
     k = e.get('kind')
     if k == 'command':
+        if v.get('extra') and v.get('readback'):
+            return f'{v.get("template", "")}  (read back with {v["readback"]}, expects {v.get("expect", "")})'
         return v.get('template', '')
     if k == 'param':
         return str(v.get('value'))
@@ -101,7 +103,9 @@ def _value_text(e):
     if k == 'text':
         return v.get('text', '')
     if k == 'limit':
-        return ', '.join(f'{a}={v[a]}' for a in ('error', 'low', 'high') if v.get(a) is not None)
+        bits = [f'{a}={v[a]}' for a in ('error', 'low', 'high') if v.get(a) is not None]
+        bits += [f'{a}={v[a]}' for a in ('nominal', 'new_unit', 'description') if v.get(a) is not None]
+        return ', '.join(bits)
     return ''
 
 
@@ -109,13 +113,44 @@ def _factory_text(e):
     v = e.get('value') or {}
     f = v.get('factory')
     if e.get('kind') == 'limit' and isinstance(f, dict):
-        return ', '.join(f'{a}={f[a]}' for a in ('error', 'low', 'high') if f.get(a) is not None)
+        bits = [f'{a}={f[a]}' for a in ('error', 'low', 'high') if f.get(a) is not None]
+        bits += [f'{a}={d}' for a, d in (f.get('def') or {}).items()]
+        return ', '.join(bits)
     return '' if f is None else str(f)
 
 
-def diff_sets(old, new) -> list:
+def point_key_of(kind, target) -> str:
+    """The point key an override concerns ('' = it is not about one point)."""
+    t = str(target)
+    if kind == 'limit' or kind == 'point':
+        return t
+    if kind == 'command':
+        return t.partition('@')[2]
+    if kind == 'param':
+        return t.partition('@')[2]
+    if kind == 'text':
+        return t.partition(':')[2]
+    return ''
+
+
+def _point_part(e, point_id) -> dict:
+    key = point_key_of(e.get('kind'), e.get('target'))
+    if not key:
+        return {}
+    out = {'point_key': key}
+    if point_id is not None:
+        try:
+            pid = point_id(key)
+        except Exception:
+            pid = None
+        if pid is not None:
+            out['point_id'] = pid
+    return out
+
+
+def diff_sets(old, new, point_id=None) -> list:
     """What differs between two OverrideSets (active entries): [{'action': 'added'|'changed'|'removed', kind, target, label, scope, old, new,
-    reason, author, at, uid}].  `old` / `new` may be None or empty."""
+    reason, author, at, uid, point_key, point_id}].  `old` / `new` may be None or empty.  `point_id(key)` names the point of a per-point change."""
     a, b = _by_uid(old), _by_uid(new)
     out = []
     old_by_target = {(e['kind'], e['target']): e for e in a.values()}
@@ -127,31 +162,36 @@ def diff_sets(old, new) -> list:
         out.append({'action': 'changed' if before else 'added', 'kind': e['kind'], 'target': e['target'],
                     'label': (e.get('value') or {}).get('label') or e['target'], 'scope': e.get('scope', ''),
                     'old': _value_text(before) if before else _factory_text(e), 'new': _value_text(e), 'reason': e.get('reason', ''),
-                    'author': e.get('author', ''), 'at': e.get('created_at', ''), 'uid': uid})
+                    'author': e.get('author', ''), 'at': e.get('created_at', ''), 'uid': uid, **_point_part(e, point_id)})
     for uid, e in a.items():
         if uid in b or (e['kind'], e['target']) in new_by_target:
             continue
         out.append({'action': 'removed', 'kind': e['kind'], 'target': e['target'], 'label': (e.get('value') or {}).get('label') or e['target'],
                     'scope': e.get('scope', ''), 'old': _value_text(e), 'new': _factory_text(e), 'reason': e.get('reason', ''),
-                    'author': e.get('author', ''), 'at': e.get('created_at', ''), 'uid': uid})
+                    'author': e.get('author', ''), 'at': e.get('created_at', ''), 'uid': uid, **_point_part(e, point_id)})
     return out
 
 
-def make_event(old, new, *, rev=0, before=None, demo=False, standby=None, now=None) -> dict | None:
+def make_event(old, new, *, rev=0, before=None, demo=False, standby=None, now=None, point_id=None, redo=None) -> dict | None:
     """The audit record of one application at a boundary; None when the effective set did not change."""
-    changes = diff_sets(old, new)
+    changes = diff_sets(old, new, point_id)
     if not changes:
         return None
-    return {'at': _iso(now), 'rev': rev, 'hash': new.hash if new else '', 'before_point': (before or {}).get('id'),
-            'before_desc': (before or {}).get('desc', ''), 'demo': bool(demo), 'standby_confirmed': standby, 'changes': changes}
+    ev = {'at': _iso(now), 'rev': rev, 'hash': new.hash if new else '', 'before_point': (before or {}).get('id'),
+          'before_desc': (before or {}).get('desc', ''), 'demo': bool(demo), 'standby_confirmed': standby, 'changes': changes}
+    if redo:
+        ev['redo'] = list(redo)                       # points measured again because of this change
+    return ev
 
 
 def event_line(ev) -> str:
     """One line for the command log / status bar."""
-    parts = [f'{c["action"]} {c["label"]}: {c["old"]} -> {c["new"]}' for c in ev['changes']]
+    parts = [f'{c["action"]} {c["label"]}' + (f' [point {c["point_id"]}]' if c.get('point_id') is not None else '') + f': {c["old"]} -> {c["new"]}'
+             for c in ev['changes']]
     when = (f'applied before point {ev["before_point"]}' if ev.get('before_point') is not None
             else 'applied while no point was running (effective with the next point / Run)')
-    return f'LIVE EDIT rev {ev["rev"]}' + (' [DEMO]' if ev.get('demo') else '') + f' {when}: ' + '; '.join(parts)
+    return (f'LIVE EDIT rev {ev["rev"]}' + (' [DEMO]' if ev.get('demo') else '') + f' {when}: ' + '; '.join(parts)
+            + (f'; redo of point(s) {", ".join(str(i) for i in ev["redo"])}' if ev.get('redo') else ''))
 
 
 # ------------------------------------------------------------------------------------------------------------ the model's view of a run

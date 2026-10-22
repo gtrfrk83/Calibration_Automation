@@ -418,6 +418,7 @@ class Runner:
         pause(seconds)
 
     # ---- top-level dispatch -----------------------------------------------------------------------------------------------
+    @procmods_engine.point_commands(io_of=lambda runner: runner.io)
     def run_point(self, p):
         global PM_PAUSE_SCALE
         PM_PAUSE_SCALE = self.io.pm_param('mdo.pause_scale', 1.0)       # procedure modification; 1.0 unless one is stored
@@ -1043,7 +1044,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
-        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
+        self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
 
         body = sh.content
         info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
@@ -1114,6 +1115,46 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def pm_driver_classes(self):
         return (drivers.TektronixMDO4000C, drivers.Fluke5560A, drivers.Fluke96270A, drivers.AgilentAFG, drivers.ReferenceMeter)
+
+    def pm_point_fields(self, view):
+        out = super().pm_point_fields(view)
+        out['nominal']['note'] = ('The nominal is only the value the reading is judged against; the signals this procedure sources are set '
+                                  'from the point\'s own settings, which this window does not change.')
+        return out
+
+    def pm_plan_point(self, p):
+        """The commands Runner.run_point sends for point p: a dry run on the simulated bench (procmods_plan).  The prompts of the point ask the
+        scripted answer 'yes' and typed readings answer the point's nominal; optional instruments are present when they have an address (all of
+        them when none has: the plan then assumes the full bench)."""
+        import procmods_plan
+        from drivers.simulated_mdo import make_mdo_bench
+        addrs = self.addrs()
+        optional = ('rf1', 'rf2', 'gen', 'dmm', 'counter', 'power')
+        have = [k for k in optional if (addrs.get(k) or '').strip()]
+
+        def build(mods):
+            _bench, t = make_mdo_bench()
+            if have:
+                t = {k: v for k, v in t.items() if k not in optional or k in have}
+            return IO(dict(cal_baud=int(addrs.get('cal_baud') or 9600)), transports=t, mods=mods)
+
+        class PlanApp:
+            stop = False
+
+            def __init__(s, io):
+                s.io, s.cfg = io, self.cfg
+
+            def request(s, kind, payload=None):
+                return payload['p']['nominal'] if kind == 'manual' else True
+
+            def post(s, *a, **k):
+                pass
+        global PM_PAUSE_SCALE
+        keep = PM_PAUSE_SCALE                              # run_point sets this module-level wait scale: put it back, a run may be using it
+        try:
+            return procmods_plan.run_plan(self.pm_state, build, lambda io: Runner(PlanApp(io)).run_point(p))
+        finally:
+            PM_PAUSE_SCALE = keep
 
     def pm_refresh_view(self):
         self.post('refresh')                                  # called from the worker thread: the table is rebuilt on the main thread

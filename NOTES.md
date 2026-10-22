@@ -249,7 +249,7 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
 
 
 ## Live procedure editor (branch live-editor)
-"Edit procedure" in every running procedure window opens the existing procmods editor (procmods_ui.LiveHook -> ModifyWindow in live mode). Logic is in
+"Edit point" (formerly "Edit procedure"; see the next section) in every running procedure window opens the per-point window; the whole-procedure procmods editor (ModifyWindow in live mode) is behind its "All procedure changes..." button. Logic is in
 procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods of procmods_engine.ProcModsMixin; tests: tests/test_beta_live_editor*.py.
 - Edits are saved at once but applied only at the next point boundary (`pm_step`, or `pm_live_boundary` for WaveSurfer). The point in flight is never changed. Outputs go to standby first (a failed standby stops the run and leaves the edits saved); the instrument reset is not re-run.
 - Every edit is an event in the run's audit trail (`live_edits` in the checkpoint; who/when/old/new/before_point) and a normal override, or run-only ("this run only"). Developer-mode gate, locked/risk commands, verified flags and HMAC limit rules are unchanged. Live editing is blocked while a pinned progress file or a factory run is active.
@@ -285,4 +285,36 @@ procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods
   is pressed again. 'Unlock for editing' (typed reason) remains for an unchanged procedure. User-built procedures are synced by the Procedures list (their spec path is known there).
   When you add a procedure to `Procedures/`, add its `verified.FILES` entry (`tests/test_verified_model.py` fails otherwise). The suite never blocks an update.
 - Not in the PDF reports. Tests: `tests/test_verified_model.py`, `test_verified_editors.py`, `test_verified_ui.py` (the windows have never been viewed).
+
+## Per-point editor (branch point-editor)
+Right-click a test point in any engine's point list -> Edit opens a small window for THAT point (procmods_point_ui.PointWindow; logic in tkinter-free
+procmods_point_model.PointEditModel; tests: tests/test_point_editor_*.py). The toolbar button is now "Edit point" and opens the same window for the selected row;
+the old whole-procedure editor is reached from the window's "All procedure changes..." button (one editor, not two). The menu item is disabled, with the reason,
+on a verified/locked procedure and while that point is being measured. Storage, scopes, audit trail, next-point-boundary rule and redo are the existing
+procmods / procmods_live layer; nothing in calibration_procedures.sqlite3 changes.
+- Commands panel: the commands the engine will send for this point, in send order, with this point's values filled in. Derived by a DRY RUN of the engine's own
+  point routine (`pm_plan_point`, procmods_plan.py) on throw-away drivers over simulator transports with a private clone of the override state; waits are skipped
+  (thread-aware `dry_clock`); the live app, io, override state and clock are untouched. So the list cannot drift from the engine (tests compare it with the
+  golden transcripts). Per row: registry key, rendered text, read-back query, risk class, verified/UNVERIFIED, changed-from-default marker, Restore default.
+- Editable: NORMAL-risk commands. A command is edited as its TEMPLATE (cmdreg.validate requires the placeholders to be kept); locked/output rows are read-only with
+  the reason. Stored as kind 'command', target `Driver:key@<pointkey>` (this point only; wins over a driver-wide override). Extra lines before/after the point:
+  target `Driver:+before1@pk` / `+after2@pk`, at most `procmods_pointdef.MAX_EXTRA`; a write needs a read-back query and the expected reply; sent once, read back,
+  compared, never retried; a mismatch stops the point (outputs to standby). Extra lines are logged `[EXTRA ... UNVERIFIED]`. Everything typed is UNVERIFIED.
+- Developer mode (existing gate, devmode.py unchanged: passphrase, PBKDF2, 15-minute idle auto-lock, lock-out; UI `procmods_ui.shared_lock` / `UnlockDialog`): the
+  window's toggle only asks that gate. While locked, the limit/nominal/unit/description fields are read-only and typed commands are refused by the store
+  (`_need_dev`). When on: tolerance (low/high or +/- error), unit, nominal, description. Stored inside the HMAC-protected 'limit' value (`nominal`, `new_unit`,
+  `description`, `fields`). Decimal parsing, display-only SI scaling, low<=nominal<=high unless one-sided, valid units, typed reason, acknowledgement that
+  pass/fail changes. A tolerance change on a point with a reading forces a redo; unit/description alone do not.
+- Scopes: this run only (default; the only one in demo, marked DEMO) / this asset / this model. Audit event carries who, when, old, new, reason, point id,
+  effective-from (`[point X]`, redo list in `live_edits`).
+- Engine support: truevolt, dacq, a34401, 8846A verification, fgen, MDO4000C, handheld family: commands + fields. Handheld points with no calibrator output or
+  a Manual calibrator: fields only (no commands, a note says why). 8846A AC / capacitance / frequency points: partial commands plus the refusal the procedure
+  raises. fgen FLAT / TIMEBASE and MDO: the plan depends on the chosen method / group (MDO shows the scope default-setup block as for the first point of a group).
+  DsbApp: source points only. WaveSurfer: no per-point commands (its measurements are driven from the section code, not a point routine): tolerance only.
+  Not wired: TDS2000C, Fluke_8846A_Adjustment.
+- "Test command": no engine supplies one, so the window says "not tested".
+- Unverified: the Tk windows (never viewed, only constructed under tests/_tk_stub.py); every typed command; the dry-run plan is made on the simulator and does not
+  predict real replies; fgen / MDO nominal semantics.
+- Pre-existing, not changed: truevolt_verification `work()` builds `lambda: self._error(exc)` outside the `except` block, which raises NameError when it runs, so a
+  failed point (including a read-back mismatch of an extra line) never reaches `_error`. Flagged for Mike; the other engines were not checked.
 

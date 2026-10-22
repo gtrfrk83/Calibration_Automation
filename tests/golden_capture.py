@@ -66,7 +66,9 @@ COVERAGE = {
             covered=['open', 'close', 'identify', 'write', 'query', 'query_retry', 'cleanup', 'reset_to_defaults'],
             no_command=['close_to',                                         # pure arithmetic helper
                         'send', 'ask',                                      # generic registry front ends: every driver case goes through them
-                        'use_commands', 'rejected_commands', 'command_overrides_active', 'describe_commands']),   # no wire traffic
+                        'use_commands', 'rejected_commands', 'command_overrides_active', 'describe_commands',   # no wire traffic
+                        'set_point', 'point_overrides_active',              # point selection (no wire traffic)
+                        'run_extras']),                                     # sends ONLY operator-typed extra lines: none exist in a factory run (tests/test_point_editor_*.py)
     },
     'fluke_5560a': {
         'Fluke5560A': dict(

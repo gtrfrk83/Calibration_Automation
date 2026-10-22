@@ -2,7 +2,7 @@
 
 Each engine's real App runs on its simulated bench.  While the first point is being measured the scripted technician uses the editor
 (procmods_ui_model, built by the engine's pm_live_context) to skip the third point and add a note for the second.  Proved per engine:
-the 'Edit procedure' action is attached, the edit reaches the point after the one in flight (before_point), the skipped point is never
+the 'Edit point' action is attached, the edit reaches the point after the one in flight (before_point), the skipped point is never
 measured, the note is shown once, nothing is applied to the point in flight, and the reset-to-defaults sequence is not repeated.
 """
 import re
@@ -85,8 +85,8 @@ class EngineLive:
         return self.h.edit(model, 'live test')
 
     def check_edit_action(self):
-        calls = [c for c in self.app.shell.add_action.call_args_list if c.args and c.args[0] == 'Edit procedure']
-        self.assertEqual(len(calls), 1, 'every window has exactly one Edit procedure control')
+        calls = [c for c in self.app.shell.add_action.call_args_list if c.args and c.args[0] == 'Edit point']
+        self.assertEqual(len(calls), 1, 'every window has exactly one Edit point control')
         self.assertIsNotNone(self.app.__dict__.get('_pm_live_hook'))
         self.assertEqual(calls[0].kwargs.get('short'), 'Edit')
 

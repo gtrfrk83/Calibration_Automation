@@ -160,6 +160,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p['kind'] in ('DCI', 'OHM2'): return self.pm_param('dacq.settle.dci_ohm2', 3.0)
         return self.pm_param('dacq.settle.default', 2.0)
 
+    @procmods_engine.point_commands()
     def measure(self, p):
         self.standby()
         ch = self.channel(p)
@@ -354,6 +355,18 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         return (p['id'], p['description'], *cells), tags
 
     def pm_driver_classes(self): return (getattr(drivers, f'Keysight{MODEL}'), *[cls for _n, cls in CALIBRATORS.values()])
+
+    def pm_plan_point(self, p):
+        """The commands IO.measure sends for point p: a dry run of that routine on the simulated bench (procmods_plan)."""
+        import procmods_plan
+        from drivers.simulated import make_dacq_bench
+        cal_model = self.cal_model.get() if self.cal_model.get() in CALIBRATORS else 'Fluke 5560A'
+        module, slot = self.module.get(), int(self.slot.get())
+
+        def build(mods):
+            _bench, ft, dt = make_dacq_bench(MODEL, CALIBRATORS[cal_model][0], {slot: module})
+            return IO('sim', 'sim', cal_model, 9600, module, slot, transports=(dt, ft), mods=mods)
+        return procmods_plan.run_plan(self.pm_state, build, lambda io: io.measure(p))
 
     def refresh(self):
         keep = self.tree.selection()

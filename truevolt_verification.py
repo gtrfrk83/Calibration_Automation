@@ -116,6 +116,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return self.pm_param('truevolt.settle.ohm_high', 4.0)
         return self.pm_param('truevolt.settle.default', 2.0)
 
+    @procmods_engine.point_commands()
     def measure(self, p):
         self.standby()
         self.check_terminals(p)
@@ -266,6 +267,17 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         ui.polish(root)
 
     def pm_driver_classes(self): return (getattr(drivers, f'Keysight{MODEL}'), drivers.Fluke5560A)
+
+    def pm_plan_point(self, p):
+        """The commands IO.measure sends for point p: a dry run of that routine on the simulated bench (procmods_plan)."""
+        import procmods_plan
+        from drivers.simulated import make_dmm_bench
+
+        def build(mods):
+            _bench, ft, dt = make_dmm_bench(MODEL)
+            dt.terminals = 'REAR' if p.get('terminal') == 'REAR' else 'FRON'          # the Front/Rear switch the technician would set
+            return IO('sim', 'sim', transports=(dt, ft), mods=mods)
+        return procmods_plan.run_plan(self.pm_state, build, lambda io: io.measure(p))
 
     # ------------------------------------------------------------------ table
     def _visible(self, p):

@@ -1,5 +1,5 @@
 """Tk wiring of 'Verified on hardware' under the tkinter stub: the Procedures list column / card / buttons (Calibration_Procedure_Manager), the two dialogs
-(verified_ui), the running window's disabled 'Edit procedure' control (procmods_ui.LiveHook) and the header chip (ui_shell).
+(verified_ui), the running window's disabled 'Edit point' control (procmods_ui.LiveHook) and the header chip (ui_shell).
 
 Only proves that the wiring runs and calls the model: it does NOT show what the windows look like (Tk windows have never been viewed here).
 Run:  python -m unittest tests.test_verified_ui"""
@@ -72,7 +72,7 @@ class Var:
 
 @unittest.skipUnless(STUBBED, 'real tkinter present: these stub tests would need a display')
 class LiveHookTests(unittest.TestCase):
-    """The running window: the 'Edit procedure' control is shown disabled with the reason while the procedure is verified and locked."""
+    """The running window: the 'Edit point' control is shown disabled with the reason while the procedure is verified and locked."""
 
     def setUp(self):
         import procmods_ui

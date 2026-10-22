@@ -313,6 +313,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         return self.pm_param(f'fgen.settle.{k.lower()}', SETTLE[k]) if k in SETTLE else self.pm_param('fgen.settle.other', 1.0)
 
     # ---- one point -----------------------------------------------------------------------------------------
+    @procmods_engine.point_commands()
     def measure(self, p, results, pref_cache):
         """Returns (reading, raw dict). The generator output is OFF when this returns or raises."""
         try:
@@ -645,7 +646,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
-        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
+        self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
 
         body = sh.content
         info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
@@ -687,6 +688,38 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         return (p['id'], name, *cells), tags
 
     def pm_driver_classes(self): return (getattr(drivers, f'Keysight{MODEL}'), drivers.Fluke5790B, drivers.Keysight5313x, drivers.ReferenceMeter)
+
+    def pm_point_fields(self, view):
+        out = super().pm_point_fields(view)
+        out['nominal']['note'] = ('The nominal is the value the reading is judged against (and the 5790B range is chosen from it). The generator '
+                                  'output is set from the amplitude and frequency of the point, which this window does not change.')
+        return out
+
+    def pm_plan_point(self, p):
+        """The commands IO.measure sends for point p: a dry run of that routine on the simulated bench (procmods_plan).  Readings the
+        technician types (power meter, counter) are answered with the value the point expects; earlier readings the flatness offset needs are
+        stood in by the nominal.  Only the commands are of interest, never the values."""
+        import procmods_plan
+        from drivers.simulated_fgen import make_fgen_bench
+
+        def ask(prompt, unit):
+            if unit == 'dBm':
+                return p.get('amplitude', 0.0) - (20.0 if p.get('range_db') == 20 else 0.0)
+            if unit == 'Hz':
+                return p.get('frequency', 1e7)
+            return p.get('nominal', 0.0)
+
+        def build(mods):
+            bench, t = make_fgen_bench(MODEL)
+            addrs = self._addrs()
+            t = {k: v for k, v in t.items() if k in ('uut', 'std') or (addrs.get(k) or '').strip()}        # a reference with no address is typed by hand
+            if p['kind'] in ('ACAMP', 'LFFLAT'): bench.connected = 'std'
+            elif p['kind'] == 'FLAT': bench.connected = 'wbnd' if self.method() == 'WBND' else 'power'
+            else: bench.connected = 'counter'
+            return IO({}, transports=t, ask_number=ask, std_input=STD_INPUTS[self.std_input.get()], flat_method=self.method(),
+                      counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=mods)
+        stand_in = {str(q['id']): {'reading': q['nominal']} for q in POINTS if q.get('ref')}
+        return procmods_plan.run_plan(self.pm_state, build, lambda io: io.measure(p, stand_in, {}))
 
     def pm_point_title(self, p): return f'{p.get("section_title", "")} - {p.get("desc", "")}'.strip(' -')
 

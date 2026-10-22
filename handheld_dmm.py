@@ -154,6 +154,12 @@ def judge_numeric(p, text, annunciator=True):
 
 
 # ============================================================================ calibrator I/O
+def pm_same(a, b):
+    """Decimal-safe equality of two numbers (procmods_pointdef)."""
+    import procmods_pointdef
+    return procmods_pointdef.same_decimal(a, b)
+
+
 class Cancelled(Exception):
     pass
 
@@ -238,6 +244,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             if len(steps) > 1 and i < len(steps) - 1:
                 self._wait(self.pm_param('handheld.ramp_delay', self.RAMP_DELAY), cancel)
 
+    @procmods_engine.point_commands()
     def apply(self, p, cancel=None):
         """Program and enable the output for point p, then wait for it to settle."""
         a = p['applied']
@@ -634,7 +641,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
-        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
+        self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
 
         body = sh.content
         info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
@@ -684,6 +691,49 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         return (p['n'], f'{describe(p)}   ({step})', out, low, high, (low + ' … ' + high) if numeric else '', found, '', left, shown), (res.lower() or 'pending',)
 
     def pm_driver_classes(self): return (drivers.Fluke5560A, drivers.Fluke5522A)
+
+    def pm_point_fields(self, view):
+        """Developer-mode fields of a handheld point.  The nominal (base units) is what the calibrator is told to output and what the reading
+        is judged against; the limits are strings in the display unit (the unit shown is tied to that scaling, so it is not editable); the
+        description is the line shown to the technician (a user-datasheet point already has one; a built-in one is worded from its section)."""
+        out = super().pm_point_fields(view)
+        a = view.get('applied')
+        if not a or 'nominal' not in view:
+            out['nominal'] = {'paths': [], 'reason': 'this point sources nothing, so it has no nominal', 'note': ''}
+        elif view.get('ramp'):
+            out['nominal'] = {'paths': [], 'reason': 'this point follows a ramp the meter\'s manual prescribes; its steps are not recomputed', 'note': ''}
+        elif not pm_same(a.get('value'), view.get('nominal')):
+            out['nominal'] = {'paths': [], 'reason': 'the value this point sources differs from its nominal', 'note': ''}
+        else:
+            out['nominal'] = {'paths': ['nominal', 'applied.value'], 'reason': '',
+                              'note': 'In base units (V, A, ohm, F ...). This sets the output the calibrator is told to make and the value the reading '
+                                      'is judged against; the high-voltage prompts and the ramp rules still apply to the new value.'}
+        out['unit'] = {'paths': [], 'reason': 'the unit is tied to the scaling of the limits (mV, kohm ...) and is not editable', 'note': ''}
+        out['description'] = {'paths': ['dsb_desc'], 'reason': '', 'note': 'The line shown to the technician for this point.'}
+        return out
+
+    def pm_plan_point(self, p):
+        """The commands IO.apply sends for point p, then the STANDBY the run sends once the reading is typed: a dry run on the simulated bench
+        (procmods_plan).  The meter under test has no remote interface here (the technician types the reading), so only the calibrator has commands."""
+        import procmods_plan
+        from drivers.simulated import make_bench, SimFlukeTransport
+        if not p.get('applied'):
+            return procmods_plan.Plan(note='This point has no calibrator output (nothing is sourced), so no instrument command is sent for it.')
+        if self.manual_cal:
+            return procmods_plan.Plan(note='The calibrator is set to Manual: the technician sets its output by hand, so no instrument command is sent.')
+        model = '5522A' if '5522' in self.cal_mode.get() else '5560A'
+        auto_ramp = self._auto_ramp()
+
+        def build(mods):
+            bench, _a, _b = make_bench()
+            io = IO(self.cal_mode.get(), 'sim', transport=SimFlukeTransport(bench, model), mods=mods)
+            io.auto_ramp = auto_ramp
+            return io
+
+        def run(io):
+            io.apply(p)
+            io.standby()                                   # what the run does once the reading has been typed
+        return procmods_plan.run_plan(self.pm_state, build, run)
 
     def pm_point_title(self, p): return describe(p)
 

@@ -501,7 +501,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         sh.add_action('Export Report (PDF)', self.export_pdf_report, side='right', short='PDF')
         sh.add_action('Export Excel (.xlsx)', self.export_professional_excel, side='right', short='Excel')
         self.btn_clear = sh.add_action('Clear function results', self.clear_function, side='right', short='Clear')
-        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
+        self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
 
         body = sh.content
         info = ttk.Frame(body)
@@ -1077,6 +1077,82 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         return dict(section=section, kind=section.upper(), nominal=(p.get(nom) if nom else None), low=p[lo], high=p[hi], unit=unit,
                     ch=p.get('channel'), range=p.get('scale_v_div'), stim='|'.join(str(p[f]) for f in rest) or None,
                     desc=p.get('description'))
+
+    # ---- the point editor (procmods_point_model).  The WaveSurfer has no point list with ids: a point is 'section:index' (the row's position
+    # in its table), the section computes its steps itself, so the window shows no command list and edits the TOLERANCE only.
+    PM_SECTION_TITLES = {'dcv': 'DC voltage', 'impedance': 'Input impedance', 'offset': 'DC offset', 'bandwidth': 'Bandwidth',
+                         'timebase': 'Time base', 'trigger': 'Trigger'}
+
+    def _pm_split(self, pid):
+        sec, _, i = str(pid).partition(':')
+        if sec not in PM_SECTIONS or not i.isdigit():
+            return None, -1
+        return sec, int(i)
+
+    def pm_point_title(self, p):
+        if not isinstance(p, dict) or 'section' not in p:
+            return super().pm_point_title(p)
+        bits = [self.PM_SECTION_TITLES.get(p['section'], p['section'])]
+        if p.get('ch') is not None:
+            bits.append(f'CH{p["ch"]}')
+        if p.get('desc'):
+            bits.append(str(p['desc']))
+        if p.get('range') is not None:
+            bits.append(f'{p["range"]:g} V/div')
+        if p.get('nominal') is not None:
+            bits.append(f'nominal {p["nominal"]:g} {p.get("unit", "")}'.rstrip())
+        return ', '.join(bits)
+
+    def pm_find_point(self, pid):
+        """The point as it is now (with any tolerance override applied), as a procmods view dict carrying its id."""
+        sec, i = self._pm_split(pid)
+        if sec is None:
+            return None
+        pts = getattr(self, PM_POINT_METHODS[sec])()
+        if not 0 <= i < len(pts):
+            return None
+        return dict(self._pm_view(sec, pts[i]), id=str(pid))
+
+    def pm_factory_point(self, pid):
+        sec, i = self._pm_split(pid)
+        if sec is None:
+            return None, None
+        views = self.pm_limit_views()
+        flat = [v for name in PM_SECTIONS for v in views[name]]
+        keys = procmods.point_keys(flat)
+        at = sum(len(views[name]) for name in PM_SECTIONS if list(PM_SECTIONS).index(name) < list(PM_SECTIONS).index(sec))
+        if not 0 <= i < len(views[sec]):
+            return None, None
+        return dict(views[sec][i], id=str(pid)), keys[at + i]
+
+    def pm_point_fields(self, view):
+        why = 'The WaveSurfer procedure applies a change of tolerance only (its points are computed by each section).'
+        return {n: {'paths': [], 'reason': why, 'note': ''} for n in ('nominal', 'unit', 'description')}
+
+    def pm_plan_point(self, p):
+        import procmods_plan
+        return procmods_plan.Plan(error='The WaveSurfer sections send their commands from the section routine, not point by point, so the '
+                                        'commands of a single point cannot be shown before the section is run.')
+
+    def pm_point_busy(self, pid):
+        sec, i = self._pm_split(pid)
+        if sec is None:
+            return ''
+        have = {'dcv': (len(self.dc_rows), self.dc_running), 'impedance': (len(self.imp_rows), self.imp_running),
+                'offset': (len(self.offset_rows), self.offset_running), 'bandwidth': (len(self.bw_rows), self.bw_running),
+                'timebase': (len(self.tb_rows), self.tb_running), 'trigger': (len(self.trig_rows), self.trig_running)}
+        done, flying = have[sec]
+        if flying and i == done:
+            return f'This point is being measured now ({self.PM_SECTION_TITLES[sec]} point {i + 1}); its limit cannot change until the run moves on.'
+        return ''
+
+    def pm_point_has_reading(self, pid):
+        sec, i = self._pm_split(pid)
+        if sec is None:
+            return False
+        rows = {'dcv': self.dc_rows, 'impedance': self.imp_rows, 'offset': self.offset_rows, 'bandwidth': self.bw_rows,
+                'timebase': self.tb_rows, 'trigger': self.trig_rows}[sec]
+        return i < len(rows)
 
     def pm_limit_views(self):
         """{section: [views of the FACTORY points]} - what the tolerance editor must key and check its overrides against."""
@@ -1785,6 +1861,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         holder.pack(fill='both', expand=True)
         cols=('channel','scale','nominal','observed','low','high','error','units','result')
         self.dc_tree = ttk.Treeview(holder, columns=cols, show='headings')
+        self.pm_bind_tree(self.dc_tree, lambda iid, t=self.dc_tree: 'dcv:%d' % t.index(iid))      # right-click > Edit (tolerance only here)
         for key,label,width in [('channel','Channel',80),('scale','Range',100),('nominal','Nominal',105),('observed','Measured',110),('low','Lower limit',105),('high','Upper limit',105),('error','Error',105),('units','Units',70),('result','Result',90)]:
             self.dc_tree.heading(key, text=label)
             self.dc_tree.column(key, width=width, anchor='center')
@@ -2230,6 +2307,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         table.pack(fill='both', expand=True)
         cols = ('point', 'channel', 'coupling', 'scale', 'nominal', 'measured', 'low', 'high', 'units', 'result')
         self.imp_tree = ttk.Treeview(table, columns=cols, show='headings')
+        self.pm_bind_tree(self.imp_tree, lambda iid, t=self.imp_tree: 'impedance:%d' % t.index(iid))      # right-click > Edit (tolerance only here)
         for key, title, width in (
             ('point', '#', 45), ('channel', 'Input', 75), ('coupling', 'Coupling', 90),
             ('scale', 'Range', 100), ('nominal', 'Nominal', 100), ('measured', 'Measured', 110),
@@ -2602,6 +2680,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.offset_progress.pack(fill='x', pady=5)
         columns = ('ch','scale','offset','source','mean','error','low','high','units','result')
         self.offset_tree = ttk.Treeview(outer, columns=columns, show='headings')
+        self.pm_bind_tree(self.offset_tree, lambda iid, t=self.offset_tree: 'offset:%d' % t.index(iid))      # right-click > Edit (tolerance only here)
         for key, title, width in (
             ('ch','Channel',80),('scale','Range',100),('offset','Scope offset',110),
             ('source','Fluke source',110),('mean','P1 Mean',110),
@@ -2827,6 +2906,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.bw_progress.pack(fill='x',pady=5)
         cols=('channel','scale','amplitude','ref','high','vunit','db','dunit','result')
         self.bw_tree=ttk.Treeview(outer,columns=cols,show='headings')
+        self.pm_bind_tree(self.bw_tree, lambda iid, t=self.bw_tree: 'bandwidth:%d' % t.index(iid))      # right-click > Edit (tolerance only here)
         for k,label,w in (
             ('channel','Channel',85),('scale','Range',100),('amplitude','Stimulus',105),
             ('ref','50 kHz',105),('high','1 GHz',105),('vunit','Units',70),
@@ -3082,6 +3162,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         ttk.Label(outer, textvariable=self.tb_status).pack(anchor='w', pady=5)
         cols = ('period', 'nominal', 'mean', 'error', 'low', 'high', 'unit', 'result')
         self.tb_tree = ttk.Treeview(outer, columns=cols, show='headings', height=2)
+        self.pm_bind_tree(self.tb_tree, lambda iid, t=self.tb_tree: 'timebase:%d' % t.index(iid))      # right-click > Edit (tolerance only here)
         for key, title, width in (('period', 'Marker', 90), ('nominal', 'Nominal', 110), ('mean', 'P1 Freq mean', 130), ('error', 'Error', 100),
                                   ('low', 'Lower limit', 100), ('high', 'Upper limit', 100), ('unit', 'Units', 60), ('result', 'Result', 80)):
             self.tb_tree.heading(key, text=title)
@@ -3291,6 +3372,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         ttk.Label(outer, textvariable=self.trig_status).pack(anchor='w', pady=5)
         cols = ('ch', 'level', 'slope', 'low', 'high', 'outcome', 'result')
         self.trig_tree = ttk.Treeview(outer, columns=cols, show='headings')
+        self.pm_bind_tree(self.trig_tree, lambda iid, t=self.trig_tree: 'trigger:%d' % t.index(iid))      # right-click > Edit (tolerance only here)
         for key, title, width in (('ch', 'Channel', 80), ('level', 'Level (mV)', 100), ('slope', 'Slope', 90), ('low', 'Lower (mV)', 100),
                                   ('high', 'Upper (mV)', 100), ('outcome', 'Outcome', 170), ('result', 'Result', 80)):
             self.trig_tree.heading(key, text=title)

@@ -208,6 +208,7 @@ class Draft:
     point: dict | None = None
     tested: dict | None = None
     uid: str | None = None                              # for 'reset': the stored override (or run entry) uid
+    forces_redo: bool | None = None                     # limit drafts: None/True = a point with a reading must be redone; False = unit / description only
 
 
 @dataclass
@@ -708,7 +709,8 @@ class ProcModsModel:
         if not self.live_mode:
             return []
         locked = self.ctx.live.locked_keys()
-        return [(t, d.label or t) for (kind, t), d in self.drafts.items() if kind == 'limit' and d.action == 'set' and t in locked]
+        return [(t, d.label or t) for (kind, t), d in self.drafts.items()
+                if kind == 'limit' and d.action == 'set' and d.forces_redo is not False and t in locked]
 
     def point_key_for_id(self, pid):
         """The procmods key of the factory point with this engine id (None if unknown)."""

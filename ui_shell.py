@@ -457,6 +457,9 @@ def results_table(app, parent, name_width=300, nominal_title='Nominal', error=Tr
         tree.heading('left', text='● As Left' if app.is_left else 'As Left')
     app._relabel_reading_column = relabel
     relabel()
+    bind = getattr(app, 'pm_bind_tree', None)              # procedures with procedure modifications: right-click a point > Edit
+    if bind is not None:
+        bind(tree)
     return tree
 
 
