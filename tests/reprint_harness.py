@@ -167,10 +167,16 @@ def differences(original, reprint, note_prefix):
         return [f'page count {len(sa)} != {len(sb)}']
     for n, (a, b) in enumerate(zip(sa, sb), 1):
         a = a.rstrip()
+        if note_prefix is None:                                 # a reprint of the saved record has no note: the page must be identical
+            if b.rstrip() != a:
+                problems.append(f'page {n}: content stream differs from the original')
+            continue
         if not b.startswith(a):
             problems.append(f'page {n}: content stream is not the original plus an appended note')
         elif note_prefix.encode() not in b[len(a):] or b[len(a):].count(b'Tj') != 1:
             problems.append(f'page {n}: the appended part is not exactly one text line with the note')
+    if note_prefix is None:
+        note_prefix = '\0'
     raw = lambda path: subprocess.run(['pdftotext', '-raw', str(path), '-'], capture_output=True, text=True).stdout   # content order; -layout
     keep = lambda text: '\n'.join(line for line in text.split('\n') if line.strip() and not line.lstrip().startswith(note_prefix))   # aligns columns by page extent
     ta, tb = keep(raw(original)), keep(raw(reprint))
