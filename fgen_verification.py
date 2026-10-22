@@ -17,7 +17,7 @@ Hardware I/O is off in demo mode, and demo results are labelled as demo data eve
     import fgen_verification
     fgen_verification.main('33220A')       # what Procedures/Keysight_33220A_Verification.py does
 """
-import csv, json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog, simpledialog
@@ -395,9 +395,8 @@ def _ref_cmc():
         return {}
 
 
-def point_uncertainty(p):
-    """(text, source) - the editable reference file first, then the laboratory scope (Measure entries), else ''."""
-    import uncertainty
+def uncertainty_value(p):
+    """(value, unit, source) behind point_uncertainty: the unrounded uncertainty in `unit`, or (None, None, '') when there is none."""
     scope_value, scope_unit = None, None
     if p['kind'] in ('ACAMP', 'LFFLAT', 'TIMEBASE'):
         import report_pdf
@@ -412,10 +411,43 @@ def point_uncertainty(p):
         unit = entry.get('unit', p['unit'])
         if scope_value is not None and unit == scope_unit and value < scope_value:
             value = scope_value          # an editable reference value may never be reported below the A2LA scope
-        return uncertainty.format_value(value, unit), 'reference file'
+        return value, unit, 'reference file'
     if scope_value is not None:
-        return uncertainty.format_value(scope_value, scope_unit), 'scope'
-    return '', ''
+        return scope_value, scope_unit, 'scope'
+    return None, None, ''
+
+
+def point_uncertainty(p):
+    """(text, source) - the editable reference file first, then the laboratory scope (Measure entries), else ''."""
+    import uncertainty
+    value, unit, source = uncertainty_value(p)
+    if value is None:
+        return '', ''
+    return uncertainty.format_value(value, unit), source
+
+
+def tar_tur_fields(p, r=None):
+    """dict(TAR, TUR) strings for one point, used only when the report asks for them.
+    TUR = tolerance / the uncertainty printed in the Uncertainty column (same numeric value, rounded up as printed), only when the
+    tolerance and the uncertainty are in the same unit; blank for the self test, '(typical)' points (a typical value is not a limit)
+    and points with no printed uncertainty.  TAR only for AC amplitude and low-frequency flatness, which are read on the Fluke 5790B
+    (the only reference this program uses for them): the 5790B specmanager row at that voltage and frequency, in volts.  The time base
+    (counter) and RF flatness (power meter / relative 5790B wideband, in dB) have no matching specification row: TAR blank."""
+    import tartur
+    try:
+        if p['kind'] == 'SELFTEST' or p.get('typical'):
+            return dict(TAR='', TUR='')
+        import uncertainty
+        value, unit, _src = uncertainty_value(p)
+        u = uu = None
+        if value is not None:
+            u, uu = uncertainty.round_up(value), unit
+        acc = au = None
+        if p['kind'] in ('ACAMP', 'LFFLAT'):
+            acc, au = tartur.standard_accuracy('5790B', 'ACV', p['nominal'], frequency=p['frequency'], direction='input')
+        return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['nominal'] - p['error'], p['nominal'] + p['error']), p['unit'], acc, au, u, uu))
+    except Exception:
+        return dict(TAR='', TUR='')
 
 
 def display_ref(p):
@@ -594,7 +626,6 @@ class App(datamode.DataModeMixin):
         self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
         self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
-        sh.add_action('Export CSV', self.export_csv, side='right', short='CSV')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
 
@@ -868,14 +899,19 @@ class App(datamode.DataModeMixin):
 
     def certificate_rows(self):
         """Report rows: As Found for every recorded point; As Left where the point was measured again after an adjustment, else 'Same'."""
-        rows = []
+        return [row for _p, row in self.certificate_pairs()]
+
+    def certificate_pairs(self):
+        """(point, report row) in the order certificate_rows() lists them."""
+        pairs = []
         for p in POINTS:
             row = self.found_left_row(p, lambda r: certificate_row(p, r))
-            if row: rows.append(row)
-        return rows
+            if row: pairs.append((p, row))
+        return pairs
 
     def export_pdf(self):
-        rows = self.certificate_rows()
+        pairs = self.certificate_pairs()
+        rows = [row for _p, row in pairs]
         if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
         try: import report_pdf, report_dialog
         except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
@@ -893,6 +929,8 @@ class App(datamode.DataModeMixin):
                 'Frequency - Measure; RF flatness uses specs/fgen_332xx_reference_cmc.json and is blank where no value is set. '
                 'AC amplitude reference standard: Fluke 5790B (the manual lists a 3458A DMM). ' + ' '.join(how[m] for m in used))
         try:
+            if details.get('show_tar_tur'):
+                rows = report_pdf.apply_tar_tur(rows, True, [tar_tur_fields(p) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'{SPEC["manufacturer"]} {MODEL}'), ('Instrument ID', self.asset.get()),
                                                                  ('Serial', self.serial.get()), ('Limits applied', self.period.get()),
                                                                  ('Flatness method', ', '.join(FLAT_METHODS[m] for m in used) or 'not tested'),
@@ -903,25 +941,6 @@ class App(datamode.DataModeMixin):
         except Exception as exc:
             messagebox.showerror('PDF export error', str(exc)); return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-
-    def export_csv(self):
-        path = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=[('CSV', '*.csv')], initialfile=f'{MODEL}_verification.csv')
-        if not path: return
-        demo = 'YES' if self.any_synthetic() else 'NO'
-        with open(path, 'w', newline='', encoding='utf-8-sig') as f:
-            w = csv.writer(f)
-            w.writerow(['Instrument ID', self.asset.get(), 'Serial Number', self.serial.get()])
-            w.writerow(['SOURCE', f'{SPEC["source"]["document"]}, pp. {SPEC["source"]["pages"]}'])
-            w.writerow(['LIMITS APPLIED', self.period.get()]); w.writerow(['DEMO DATA', demo]); w.writerow([])
-            w.writerow(['#', 'Section', 'Description', 'Nominal', 'Low', 'High', 'Unit', 'Reading', 'Status', 'Quick check', 'Manual page',
-                        'Worksheet values', 'Timestamp', 'Synthetic', 'As Left', 'As Left status'])
-            for p in POINTS:
-                r = self.found.get(str(p['id']), {}); n = p['nominal']; e = p['error']; lr = self.left.get(str(p['id']), {})
-                lo, hi = ('', '') if p['kind'] == 'SELFTEST' else (n - e, n + e)
-                w.writerow([p['id'], p['section_title'], p['desc'], 'Pass' if p['kind'] == 'SELFTEST' else n, lo, hi, p['unit'], r.get('reading', ''),
-                            r.get('result', ''), 'Q' if p['quick'] else '', p['page'], json.dumps(r.get('raw', {})), r.get('timestamp', ''), r.get('synthetic', ''),
-                            lr.get('reading', 'Same' if r else ''), lr.get('result', '')])
-        self.status.set(f'Exported {path}')
 
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return

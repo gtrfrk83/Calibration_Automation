@@ -12,7 +12,7 @@ front-panel-only step. Writes are never retried; all settings are read back; out
 """
 from __future__ import annotations
 
-import csv, json, math, queue, sys, threading, time, tkinter as tk
+import json, math, queue, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
@@ -180,11 +180,12 @@ def reference_cmc():
     return _REF['v']
 
 
-def uncertainty_text(p, raw):
-    """Expanded uncertainty for a point, or 'N/A'. Points with no stimulus are always N/A; stimulus points use the lab's A2LA scope
-    (5560A) or the editable reference table for the 96270A / function generator / reference meters; blank entries are N/A."""
+def uncertainty_parts(p, raw):
+    """The number behind uncertainty_text: (value, unit, style) or None when the text is 'N/A'.  value is the unrounded uncertainty
+    in `unit` ('ohm', '%', 'V', 'ratio' for the bandwidth gain, or the unit of the reference-file entry); style says how
+    uncertainty_text prints it ('si' = uncertainty.format_value, 'bw' = plain 2 significant figures, 'ref' = number and unit)."""
     if p['stim'] == 'none' or p.get('passfail'):
-        return 'N/A'
+        return None
     import report_pdf, uncertainty
     sc = report_pdf.scope()
     k = p['kind']
@@ -192,25 +193,25 @@ def uncertainty_text(p, raw):
         if sc is not None:
             if k == 'IMP':
                 v, u, _ = sc.oscilloscope('impedance', ohms=p['nominal'])
-                return uncertainty.format_value(v, 'ohm') if v is not None else 'N/A'
+                return (v, 'ohm', 'si') if v is not None else None
             if k == 'GAIN':
                 ua = [abs(sc.oscilloscope('dcv', volts=abs(p[n]), impedance=p['term'])[0] or 0) / 100 * abs(p[n]) for n in ('vneg', 'vpos')]
                 if all(ua):
-                    return uncertainty.format_value(100 * math.hypot(*ua) / abs(p['vdiff']), '%')
+                    return 100 * math.hypot(*ua) / abs(p['vdiff']), '%', 'si'
             if k == 'OFFSET':
                 v, u, _ = sc.oscilloscope('offset', volts=abs(p['offset']), impedance=p['term'])
-                return uncertainty.format_value(v, 'V') if v is not None else 'N/A'
+                return (v, 'V', 'si') if v is not None else None
             if k == 'BW':
                 v, u, _ = sc.oscilloscope('bandwidth', volts_pp=p['vin_pp'], frequency=p['freq'])
                 if v is not None:
                     ratio = 10 ** (v / 20) - 1
-                    return f'{uncertainty.round_up(ratio * max(raw.get("gain", raw.get("reading", 1)), 0.707)):.2g}'
+                    return ratio * max(raw.get("gain", raw.get("reading", 1)), 0.707), 'ratio', 'bw'
             if k == 'DVMDC':
                 v, u, _ = sc.oscilloscope('dcv', volts=abs(p['nominal']), impedance='1M')
                 if v is not None:
-                    return uncertainty.format_value(v / 100 * abs(p['nominal']) if u == '%' else v, 'V')
+                    return (v / 100 * abs(p['nominal']) if u == '%' else v), 'V', 'si'
     except Exception:
-        return 'N/A'
+        return None
     ref = reference_cmc().get(k)
     if ref and (ref.get('rel') is not None or ref.get('abs') is not None):
         reading = abs(raw.get('reading', p['nominal']))
@@ -219,8 +220,58 @@ def uncertainty_text(p, raw):
             floor = sc.dmm('FREQ', p['nominal'], None, None, basis='measure')     # never below the A2LA frequency CMC
             if floor is not None and value < floor:
                 value = floor
-        return f'{uncertainty.round_up(value):.2g} {ref.get("unit", p["unit"])}'.strip()
-    return 'N/A'
+        return value, ref.get('unit', p['unit']), 'ref'
+    return None
+
+
+def format_uncertainty(parts):
+    """The printed text of uncertainty_parts()."""
+    import uncertainty
+    value, unit, style = parts
+    if style == 'si':
+        return uncertainty.format_value(value, unit)
+    if style == 'bw':
+        return f'{uncertainty.round_up(value):.2g}'
+    return f'{uncertainty.round_up(value):.2g} {unit}'.strip()
+
+
+def uncertainty_text(p, raw):
+    """Expanded uncertainty for a point, or 'N/A'. Points with no stimulus are always N/A; stimulus points use the lab's A2LA scope
+    (5560A) or the editable reference table for the 96270A / function generator / reference meters; blank entries are N/A."""
+    parts = uncertainty_parts(p, raw)
+    if parts is None:
+        return 'N/A'
+    if parts[2] == 'ref':
+        return format_uncertainty(parts)
+    try:
+        return format_uncertainty(parts)
+    except Exception:
+        return 'N/A'
+
+
+def tar_tur_fields(p, r):
+    """dict(TAR, TUR) strings for one recorded point (r = its record), used only when the report asks for them.
+    TUR = tolerance / the uncertainty printed in the Uncertainty column, only when both are in the same unit and the printed text is
+    the one uncertainty_parts() gives now (a stored text from another scope version gives a blank).  TAR only for the points the
+    Fluke 5560A sources as DC volts (DC offset, DVM DC): its specmanager DCV row at that voltage, in volts; blank for every other test
+    (gain is a %, the others are measurements or non-DC / leveled-sine / square stimulus with no matching specification row)."""
+    import tartur
+    try:
+        if p.get('passfail') or p.get('stim') == 'none':
+            return dict(TAR='', TUR='')
+        raw = r.get('raw', {})
+        text = r.get('uncertainty') or uncertainty_text(p, raw)
+        parts = uncertainty_parts(p, raw)
+        u = uu = None
+        if parts is not None and text != 'N/A' and format_uncertainty(parts) == text:
+            import uncertainty
+            u, uu = uncertainty.round_up(parts[0]), parts[1]
+        acc = au = None
+        if p['kind'] in ('OFFSET', 'DVMDC') and p['stim'] == 'cal':
+            acc, au = tartur.standard_accuracy('5560A', 'DCV', abs(p['offset'] if p['kind'] == 'OFFSET' else p['nominal']))
+        return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['low'], p['high']), p['unit'], acc, au, u, uu))
+    except Exception:
+        return dict(TAR='', TUR='')
 
 
 # ======================================================================================================================
@@ -975,7 +1026,6 @@ class App(datamode.DataModeMixin):
         self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
         self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
-        sh.add_action('Export CSV', self.export_csv, side='right', short='CSV')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
 
@@ -1275,14 +1325,29 @@ class App(datamode.DataModeMixin):
 
     def certificate_rows(self):
         """As Found for every recorded point; As Left where it was measured again after an adjustment, else 'Same'."""
-        rows = []
+        return [row for _p, row in self.certificate_pairs()]
+
+    def certificate_pairs(self):
+        """(point, report row) in the order certificate_rows() lists them."""
+        pairs = []
         for p in POINTS:
             row = self.found_left_row(p, lambda r: self.certificate_row(p, r))
-            if row: rows.append(row)
-        return rows
+            if row: pairs.append((p, row))
+        return pairs
+
+    def tar_tur_for(self, p):
+        """TAR / TUR strings of one point (the As Found record when it was measured, else the As Left one); only called when the report shows them."""
+        key = str(p['id'])
+        r = self.found.get(key)
+        if not r or r.get('result') not in ('PASS', 'FAIL'):
+            r = self.left.get(key) or {}
+        if r.get('result') not in ('PASS', 'FAIL'):
+            return dict(TAR='', TUR='')
+        return tar_tur_fields(p, r)
 
     def export_pdf(self):
-        rows = self.certificate_rows()
+        pairs = self.certificate_pairs()
+        rows = [row for _p, row in pairs]
         if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
         try: import report_pdf, report_dialog
         except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
@@ -1298,6 +1363,8 @@ class App(datamode.DataModeMixin):
         note = ('Uncertainty: points without an input signal show N/A. Analog points use the laboratory A2LA scope (Fluke 5560A CMC); RF, function-generator and meter points '
                 'use the entries in specs/mdo4000c_reference_cmc.json and show N/A where none is set.' + (f' {skipped} point(s) were skipped (instrument not available).' if skipped else ''))
         try:
+            if details.get('show_tar_tur'):
+                rows = report_pdf.apply_tar_tur(rows, True, [self.tar_tur_for(p) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix MDO{c.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Options', opts), ('Source', 'MDO4000C Specifications and Performance Verification, 077-1178-01 Rev B')],
                                              demo=demo, details=details, footer_note=note, title='Calibration Data')
@@ -1306,19 +1373,6 @@ class App(datamode.DataModeMixin):
         except Exception as exc:
             messagebox.showerror('PDF export error', str(exc)); return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-
-    def export_csv(self):
-        path = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=[('CSV', '*.csv')], initialfile=f'MDO{self.cfg.model}_verification.csv')
-        if not path: return
-        with open(path, 'w', newline='', encoding='utf-8-sig') as f:
-            w = csv.writer(f)
-            w.writerow(['Instrument ID', self.asset.get(), 'Serial', self.serial.get(), 'Config', json.dumps(self.cfg.as_dict())]); w.writerow([])
-            w.writerow(['#', 'Section', 'Description', 'Low', 'High', 'Unit', 'Reading', 'Result', 'Uncertainty', 'Worksheet values', 'Timestamp', 'Synthetic', 'As Left', 'As Left result'])
-            for p in self.active_points():
-                r = self.found.get(str(p['id']), {}); lr = self.left.get(str(p['id']), {})
-                w.writerow([p['id'], SECTION_TITLE[p['section']], p['desc'], p['low'], p['high'], p['unit'], r.get('reading', ''), r.get('result', ''), r.get('uncertainty', ''),
-                            json.dumps(r.get('raw', {})), r.get('timestamp', ''), r.get('synthetic', ''), lr.get('reading', 'Same' if r else ''), lr.get('result', '')])
-        self.status.set(f'Exported {path}')
 
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return

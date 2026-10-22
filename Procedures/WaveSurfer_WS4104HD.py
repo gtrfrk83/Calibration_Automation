@@ -3383,12 +3383,11 @@ class RMSNoiseApp(datamode.DataModeMixin):
             return f'{scale*1000:g}mV/Div'
         return f'{scale:g}V/Div'
 
-    def scope_uncertainty(self, kind, r):
-        """CMC from the laboratory's A2LA scope for one result ('' when the scope has no entry, e.g. RMS noise)."""
+    def scope_uncertainty_value(self, kind, r):
+        """(value, unit) of the scope CMC for one result - the number behind scope_uncertainty - or None when the scope has no entry."""
         sc=__import__('report_pdf').scope()
         if sc is None:
-            return ''
-        import uncertainty
+            return None
         try:
             if kind=='dcv':
                 value,unit,_=sc.oscilloscope('offset',volts=r['nominal_v'],impedance='1M')   # absolute volts, as the row is in volts
@@ -3407,10 +3406,49 @@ class RMSNoiseApp(datamode.DataModeMixin):
                     sourced=abs(r['level_v'])+TRIG_LIMIT_V          # results saved before the sourced steps were recorded
                 value,unit,_=sc.oscilloscope('offset',volts=sourced,impedance='1M')
             else:
-                return ''
+                return None
         except (KeyError,TypeError,ZeroDivisionError):
-            return ''
-        return uncertainty.format_value(value,unit) if value is not None else ''
+            return None
+        return (value,unit) if value is not None else None
+
+    def scope_uncertainty(self, kind, r):
+        """CMC from the laboratory's A2LA scope for one result ('' when the scope has no entry, e.g. RMS noise)."""
+        import uncertainty
+        parts=self.scope_uncertainty_value(kind,r)
+        return uncertainty.format_value(parts[0],parts[1]) if parts is not None else ''
+
+    # Tolerance (half the width of the limits, in the unit of the row's base values) per kind: (low key, high key, unit)
+    _TOL_KEYS={'dcv':('lower_v','upper_v','V'),'impedance':('lower_ohm','upper_ohm','ohm'),'offset':('lower_v','upper_v','V'),
+               'bandwidth':('lower_db','upper_db','dB'),'trigger':('lower_v','upper_v','V')}
+
+    def tar_tur_fields(self, kind, r):
+        """dict(TAR, TUR) strings for one result record, used only when the report asks for them.
+        TUR = tolerance / the scope CMC printed in the Uncertainty column (same value, rounded up), only when both are in the same unit
+        (volts, ohm, dB): DC gain, impedance, offset, bandwidth and trigger level.  RMS noise and time base have no printed uncertainty: blank.
+        TAR only where the Fluke 5560A sources plain DC volts (DC gain, offset, trigger level): its specmanager DCV row at that voltage,
+        in volts.  Impedance (a measurement) and bandwidth (leveled sine, tolerance in dB) have no matching specification row: TAR blank."""
+        import tartur, uncertainty
+        try:
+            keys=self._TOL_KEYS.get(kind)
+            if keys is None:
+                return dict(TAR='',TUR='')
+            parts=self.scope_uncertainty_value(kind,r)
+            u=uu=None
+            if parts is not None:
+                u,uu=uncertainty.round_up(parts[0]),parts[1]
+            acc=au=None
+            if kind in ('dcv','offset'):
+                acc,au=tartur.standard_accuracy('5560A','DCV',abs(r['nominal_v']))
+            elif kind=='trigger':
+                if 'short_v' in r and 'past_v' in r:
+                    sourced=max(abs(r['short_v']),abs(r['past_v']))
+                else:
+                    sourced=abs(r['level_v'])+TRIG_LIMIT_V
+                acc,au=tartur.standard_accuracy('5560A','DCV',sourced)
+            tol=tartur.half_width(r[keys[0]],r[keys[1]])
+            return tartur.ratio_fields(tartur.from_values(tol,keys[2],acc,au,u,uu))
+        except Exception:
+            return dict(TAR='',TUR='')
 
     def certificate_rows(self, kind, with_uncertainty=False):
         """Report rows: the As Found readings, with the As Left reading beside any point that was measured again after an adjustment
@@ -3431,6 +3469,12 @@ class RMSNoiseApp(datamode.DataModeMixin):
             row['Seq.'] = len(out) + 1
             out.append(row)
         return out
+
+    def certificate_source_records(self, kind):
+        """The stored result record behind each row of certificate_rows(kind), in the same order (As Found, else the As Left one)."""
+        found=self._stored_rows(datamode.FOUND,kind)
+        left=self._stored_rows(datamode.LEFT,kind)
+        return [found[i] if i < len(found) else left[i] for i in range(max(len(found),len(left)))]
 
     def _cert_records(self, kind, data, with_uncertainty=False):
         result=[]
@@ -3534,6 +3578,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         titles={'noise':'RMS Noise','dcv':'DC Gain (1 MOhm)','impedance':'Input Impedance','offset':'DC Offset','bandwidth':'Bandwidth',
                 'timebase':'Time Base Accuracy','trigger':'Trigger Level Accuracy'}
         rows=[]
+        sources=[]
         for kind in sections:
             for row in self.certificate_rows(kind,with_uncertainty=True):
                 row=dict(row)
@@ -3541,6 +3586,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
                     row['As Left']='Same'
                 row['Section']=titles[kind]
                 rows.append(row)
+            sources.extend((kind,r) for r in self.certificate_source_records(kind))
         if not rows:
             messagebox.showinfo('No results','No recorded calibration data to export.')
             return 0
@@ -3550,6 +3596,8 @@ class RMSNoiseApp(datamode.DataModeMixin):
                 details=report_dialog.ask_details(self.root,'WaveSurfer 4104HD verification')
                 if details is None:
                     return 0
+            if details.get('show_tar_tur'):
+                rows=report_pdf.apply_tar_tur(rows,True,[self.tar_tur_fields(k,r) for k,r in sources])
             count=report_pdf.write_calibration_pdf(
                 filename,rows,header=[('Instrument','Teledyne LeCroy WaveSurfer 4104HD'),
                                       ('Instrument ID',self.instrument_id.get().strip() or 'NOT ENTERED'),
