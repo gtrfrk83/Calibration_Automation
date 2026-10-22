@@ -43,6 +43,12 @@ def _scope(scope):
         return None
 
 
+# The unit the standard's accuracy and the scope CMC are expressed in, per point kind. A tolerance in any other unit (the handheld frequency
+# and period points are sourced as ACV but read in Hz) is blank, never divided by an uncertainty in a different unit.
+NATURAL_UNITS = {'DCV': {'V'}, 'ACV': {'V'}, 'DCI': {'A'}, 'ACI': {'A'}, 'FREQ': {'Hz'}, 'CAP': {'F'},
+                 'OHM': {'ohm', 'Ohm', '\u03a9'}, 'OHM2': {'ohm', 'Ohm', '\u03a9'}, 'OHM4': {'ohm', 'Ohm', '\u03a9'}}
+
+
 def compute(p, low, high, standard=None, scope=None):
     """Return dict(tar, tur, tolerance, accuracy, uncertainty, reason).  Numbers are floats in base units or None; never raises."""
     try:
@@ -59,6 +65,9 @@ def _compute(p, low, high, standard, scope):
     kind, unit = p['kind'], p['unit']
     if unit in NO_UNITS:
         return _blank(f'tolerance is in {unit}, not in the unit of the uncertainty: not converted')
+    natural = NATURAL_UNITS.get(kind)
+    if natural is not None and unit not in natural:           # e.g. an ACV source whose reading is a frequency (handheld Hz points)
+        return _blank(f'tolerance is in {unit}, but a {kind} uncertainty is not: not converted')
     if not (_num(low) and _num(high)):
         return _blank('one-sided or missing limits: no tolerance')
     tol = (high - low) / 2.0

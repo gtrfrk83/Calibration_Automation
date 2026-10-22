@@ -109,5 +109,19 @@ class T(unittest.TestCase):
         self.assertNotIn('\n', t)
 
 
+class NaturalUnitGuard(unittest.TestCase):
+    """Verifier finding: handheld frequency points are sourced as ACV but read in Hz; the tolerance (Hz) must never be divided by a volts uncertainty."""
+
+    def test_hz_tolerance_on_an_acv_source_is_blank(self):
+        q = dict(kind='ACV', nominal=2.0, frequency=50e3, unit='Hz', range=None)
+        self.assertEqual(tartur.row_fields(q, 49930.0, 50070.0, standard='5522A'), {'TAR': '', 'TUR': ''})
+        self.assertEqual(tartur.compute(q, 49930.0, 50070.0, standard='5522A')['tar'], None)
+
+    def test_matching_units_still_give_ratios(self):
+        q = dict(kind='ACV', nominal=2.0, frequency=1e3, unit='V', range=None)
+        out = tartur.row_fields(q, 1.99, 2.01, standard='5522A')
+        self.assertTrue(out['TAR'].endswith(':1') and out['TUR'].endswith(':1'))
+
+
 if __name__ == '__main__':
     unittest.main()
