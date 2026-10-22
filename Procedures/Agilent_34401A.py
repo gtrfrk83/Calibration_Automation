@@ -105,8 +105,8 @@ class IO(procmods_engine.ProcModsMixin):
             self.dmm.configure(k,r)
             if k.startswith('AC'):
                 self.dmm.set_ac_filter_slow()  # DET:BAND 3 - slow AC filter
-            if k.endswith('V'):self.fluke.set_output_volts(v,f)
-            else:self.fluke.set_output_amps(v,f)
+            if k.endswith('V'):self.fluke.set_output_volts(v,f,dc=k=='DCV')
+            else:self.fluke.set_output_amps(v,f,dc=k=='DCI')
         elif k in ('OHM2','OHM4'):
             self.dmm.configure(k,r)
             self.fluke.set_output_ohms(v)
