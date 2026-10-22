@@ -85,7 +85,7 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - tests: `tests/__init__.py` points CALSUITE_DATA at a throw-away folder, so tests never touch real data. `tests/test_beta.py`.
 
 ## Redesigned test window (beta only)
-- `ui_theme.py`: palettes `LIGHT` and `DARK` (flat warm charcoal, one blue accent); `use_palette()` mutates `ui.C` in place, `apply_theme()` picks it
+- `ui_theme.py`: palettes `LIGHT` and `DARK` (flat warm charcoal, one clay-orange accent); `use_palette()` mutates `ui.C` in place, `apply_theme()` picks it
   (`CALSUITE_THEME`, else Help > Appearance, else `suite_info.DEFAULT_THEME`: dark in the beta, light in the released copy). Colours come from tokens, never hex.
 - `ui_shell.py`: `Shell` (header with chips + Connections button, top strip with ID / serial / As Found | As Left / progress ring, section sidebar with status dots,
   slide-in Connections drawer with a pinned footer, action bar, status bar), `ProgressPanel` (ring; re-run progress in As Left), `results_table()` and
