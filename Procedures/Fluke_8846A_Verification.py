@@ -414,14 +414,17 @@ class App(datamode.DataModeMixin):
         return bool(p.get('zero_offset'))
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
+        return self.certificate_rows_and_points()[0]
+    def certificate_rows_and_points(self):
+        """(rows, points): the report rows and, parallel to them, the spec point each came from (for the optional TAR / TUR fields)."""
         import report_pdf
-        rows=[]
+        rows=[];pts=[]
         for p in POINTS:
             row=self.found_left_row(p,lambda r:report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard='5560A'))
-            if row:rows.append(row)
-        return rows
+            if row:rows.append(row);pts.append(p)
+        return rows,pts
     def export_pdf(self):
-        rows=self.certificate_rows()
+        rows,pts=self.certificate_rows_and_points()
         if not rows:messagebox.showinfo('No results','No recorded results to export yet.');return
         try:import report_pdf,report_dialog
         except ImportError as exc:messagebox.showerror('Report export',str(exc));return
@@ -432,6 +435,9 @@ class App(datamode.DataModeMixin):
         if not path:return
         demo=self.any_synthetic()
         try:
+            if details.get('show_tar_tur'):
+                import tartur_wiring
+                rows=report_pdf.apply_tar_tur(rows,details.get('show_tar_tur'),[tartur_wiring.point_fields(p,'5560A') for p in pts])
             report_pdf.write_calibration_pdf(path,rows,header=[('Instrument','Fluke 8846A'),('Instrument ID',self.asset.get()),('Serial',self.serial.get()),('Source','Fluke 8845A/8846A Calibration Manual, Appendix A Table A-2 - 1-year verification')],demo=demo,details=details,footer_note=report_pdf.uncertainty_note(rows,'5560A'))
         except ImportError:
             messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab');return
@@ -441,12 +447,14 @@ class App(datamode.DataModeMixin):
     def export(self):
         path=filedialog.asksaveasfilename(defaultextension='.csv',filetypes=[('CSV','*.csv')],initialfile='8846A_verification.csv')
         if not path:return
+        import report_pdf,tartur_wiring
+        show=report_pdf.csv_show_tar_tur()
         with open(path,'w',newline='',encoding='utf-8-sig') as file:
             writer=csv.writer(file);writer.writerow(['Instrument ID',self.asset.get(),'Serial Number',self.serial.get()]);writer.writerow(['SOURCE','Fluke 8845A/8846A Calibration Manual Appendix A Table A-2; 1-year verification']);writer.writerow(['DEMO DATA','YES' if self.demo or any(v.get('synthetic') for v in self.results.values()) else 'NO']);writer.writerow([])
-            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic','As Left','As Left status'])
+            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic','As Left','As Left status']+report_pdf.csv_columns(show))
             for p in POINTS:
                 r=self.found.get(str(p['id']),{});lr=self.left.get(str(p['id']),{});n=p['nominal'];e=p['error']
-                writer.writerow(['ZERO '+p['kind'] if p.get('zero_offset') else p['kind'],p['description'],n,p['low'],p['high'],p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic',''),lr.get('reading','Same' if r else ''),lr.get('result','')])
+                writer.writerow(['ZERO '+p['kind'] if p.get('zero_offset') else p['kind'],p['description'],n,p['low'],p['high'],p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic',''),lr.get('reading','Same' if r else ''),lr.get('result','')]+report_pdf.csv_cells(show,tartur_wiring.point_fields(p,'5560A') if show and (r or lr) else None))
         self.status.set(f'Exported 1-year verification: {path}')
     def export_excel(self):
         """Export a formatted, sectioned verification report. No synthetic results are certified."""
