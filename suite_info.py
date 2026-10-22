@@ -1,7 +1,7 @@
 """One place for the suite's name, version and edition, so every window and report shows the same thing."""
 NAME = 'Calibration Suite'
 VERSION = 'v70'
-EDITION = 'Beta 1'            # '' for the released working copy; the beta keeps its own data folder (see appdata.py)
+EDITION = 'Beta 2'            # '' for the released working copy; the beta keeps its own data folder (see appdata.py)
 
 
 def full_version() -> str:

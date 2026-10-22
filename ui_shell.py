@@ -9,7 +9,7 @@
     | * Ohms   |                                                         | Connections &   ||   drawer (slides in)
     +----------+--------------------------------------------------------------------- ------+
     | [Run All Pending] [Run Shown Section] [Rerun] [Stop]            [Save][Load][Export]  |   action bar
-    | status message                                                              v70 Beta 1|   status bar
+    | status message                                                              v70 Beta 2|   status bar
     +---------------------------------------------------------------------------------------+
 
 Below ~1100 px wide the sidebar folds into a Section drop-down and the strip tightens, so the window still works at 900 x 700.

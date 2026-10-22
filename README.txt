@@ -1,4 +1,4 @@
-CALIBRATION SUITE - restyled (Manager v70 Beta 1)
+CALIBRATION SUITE - restyled (Manager v70 Beta 2)
 ==========================================
 
 BETA 1: own data folder (see USER_GUIDE.txt), Help menu, friendly error window with diagnostic log, icon, Start_Calibration_Suite.bat.

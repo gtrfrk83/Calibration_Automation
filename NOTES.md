@@ -73,7 +73,7 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Toolbars wrap instead of squeezing; Save / Load progress and the export buttons live in the bottom bar (`ui.dock_button`). Windows keep room for 5 table rows.
 - Not verified: lab_registry history still records only As Found; no instrument commands, limits or pass/fail logic were changed.
 
-## Beta edition (v70 Beta 1) - branch `beta`
+## Beta edition (v70 Beta 2) - branch `beta`
 - `suite_info.py` holds name / version / edition; every window title, status bar and the PDF footer use it. Set `EDITION = ''` for a release.
 - `appdata.py`: databases and saved progress live in a per-user data folder (`%LOCALAPPDATA%\\CalibrationSuite-Beta`), separate from the program files and
   from the released copy. Copy-only: `import_from()` (Help > Import data from another copy) backs up any file it replaces. `CALSUITE_DATA` overrides the

@@ -20,7 +20,7 @@ _TRAILING_VERSION = re.compile(r'\s*[|\-]?\s*\bv\d+(\.\d+)*(\s+Beta\s*\d*)?\s*$'
 
 
 def tidy_title(raw: str) -> str:
-    """'WaveSurfer 4104HD | Calibration Verification v56' -> 'Calibration Suite  |  WaveSurfer 4104HD | Calibration Verification  |  v70 Beta 1'.
+    """'WaveSurfer 4104HD | Calibration Verification v56' -> 'Calibration Suite  |  WaveSurfer 4104HD | Calibration Verification  |  v70 Beta 2'.
     Demo windows keep their warning wording; a title already in the suite pattern is left alone."""
     if not raw or raw.startswith(suite_info.NAME):
         return raw
