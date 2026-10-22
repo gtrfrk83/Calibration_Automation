@@ -126,3 +126,81 @@ def row_fields(p, low, high, standard=None):
         return dict(TAR=format_ratio(r['tar']), TUR=format_ratio(r['tur']))
     except Exception:
         return dict(TAR='', TUR='')
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------
+# Generic helpers for engines whose uncertainty does not come from report_pdf.point_uncertainty (oscilloscope and function generator
+# procedures).  They never convert units: a ratio is produced only when its two quantities are expressed in the same unit string.
+# compute / format_ratio / definition_text / row_fields above are unchanged.
+# ---------------------------------------------------------------------------------------------------------------------------------
+def half_width(low, high):
+    """UUT tolerance T = (high - low) / 2, or None for one-sided / missing / zero-width / reversed limits."""
+    try:
+        if _num(low) and _num(high) and high > low:
+            return (high - low) / 2.0
+    except Exception:
+        pass
+    return None
+
+
+def from_values(tolerance, unit, accuracy=None, accuracy_unit=None, uncertainty=None, uncertainty_unit=None):
+    """Same dict as compute(), from numbers the caller already has.  Never raises, never converts units.
+
+    tolerance   half-width T of the UUT limits, in `unit` (see half_width)
+    accuracy    published accuracy A of the standard at the point, in `accuracy_unit`; TAR = T / A only when accuracy_unit == unit
+    uncertainty the expanded uncertainty exactly as printed in the Uncertainty column (already rounded UP by the caller),
+                in `uncertainty_unit`; TUR = T / U only when uncertainty_unit == unit
+    A ratio whose inputs are missing, not positive, not finite or in different units is None (blank on the report)."""
+    try:
+        if not unit or not _num(tolerance) or not tolerance > 0:
+            return _blank('no usable tolerance (one-sided, zero-width or no unit)')
+        reasons = []
+        tur = tar = acc = u = None
+        if uncertainty is None:
+            reasons.append('no printed uncertainty: TUR blank')
+        elif not (_num(uncertainty) and uncertainty > 0):
+            reasons.append('uncertainty not usable: TUR blank')
+        elif uncertainty_unit != unit:
+            reasons.append(f'tolerance in {unit}, uncertainty in {uncertainty_unit}: TUR blank, not converted')
+        else:
+            u = float(uncertainty)
+            tur = tolerance / u
+        if accuracy is None:
+            reasons.append('no standard specification for this point: TAR blank')
+        elif not (_num(accuracy) and accuracy > 0):
+            reasons.append('accuracy not usable: TAR blank')
+        elif accuracy_unit != unit:
+            reasons.append(f'tolerance in {unit}, standard specification in {accuracy_unit}: TAR blank, not converted')
+        else:
+            acc = float(accuracy)
+            tar = tolerance / acc
+        return dict(tar=tar, tur=tur, tolerance=float(tolerance), accuracy=acc, uncertainty=u, reason='; '.join(reasons))
+    except Exception as e:
+        return _blank(f'not computed: {type(e).__name__}: {e}')
+
+
+def ratio_fields(result):
+    """dict(TAR=str, TUR=str) from a compute() / from_values() dict; blanks on any problem (the strings row_fields produces)."""
+    try:
+        return dict(TAR=format_ratio(result['tar']), TUR=format_ratio(result['tur']))
+    except Exception:
+        return dict(TAR='', TUR='')
+
+
+def standard_accuracy(model, kind, value, frequency=None, direction='output'):
+    """(limit, unit) of the published specification (specmanager lookup, default period) of calibrator `model` at one point,
+    or (None, None) when the model or a covering row is missing.  limit is the absolute +/- figure Hit.limit gives, unit the row's own unit."""
+    try:
+        import specmanager as sm
+        std = sm.standard(model)
+        if std is None:
+            sm.seed()
+            std = sm.standard(model)
+        if std is None:
+            return None, None
+        hit = std.lookup(kind, value, frequency=frequency, direction=direction)
+        if hit is None:
+            return None, None
+        return hit.limit, hit.row['unit']
+    except Exception:
+        return None, None
