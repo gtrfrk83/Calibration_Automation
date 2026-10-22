@@ -1,0 +1,761 @@
+{
+ "schema": 2,
+ "manufacturer": "Tektronix",
+ "model": "TDS2000C / TDS1000C-EDU",
+ "models": [
+  "1001C-EDU",
+  "2001C",
+  "1002C-EDU",
+  "2002C",
+  "2004C",
+  "1012C-EDU",
+  "2012C",
+  "2014C",
+  "2022C",
+  "2024C"
+ ],
+ "models_info": {
+  "1001C-EDU": {
+   "channels": 2,
+   "bw_mhz": 40,
+   "bw_test_hz": 40000000.0,
+   "trig_hz": 40000000.0
+  },
+  "2001C": {
+   "channels": 2,
+   "bw_mhz": 50,
+   "bw_test_hz": 50000000.0,
+   "trig_hz": 50000000.0
+  },
+  "1002C-EDU": {
+   "channels": 2,
+   "bw_mhz": 60,
+   "bw_test_hz": 60000000.0,
+   "trig_hz": 60000000.0
+  },
+  "2002C": {
+   "channels": 2,
+   "bw_mhz": 70,
+   "bw_test_hz": 70000000.0,
+   "trig_hz": 70000000.0
+  },
+  "2004C": {
+   "channels": 4,
+   "bw_mhz": 70,
+   "bw_test_hz": 70000000.0,
+   "trig_hz": 70000000.0
+  },
+  "1012C-EDU": {
+   "channels": 2,
+   "bw_mhz": 100,
+   "bw_test_hz": 100000000.0,
+   "trig_hz": 100000000.0
+  },
+  "2012C": {
+   "channels": 2,
+   "bw_mhz": 100,
+   "bw_test_hz": 100000000.0,
+   "trig_hz": 100000000.0
+  },
+  "2014C": {
+   "channels": 4,
+   "bw_mhz": 100,
+   "bw_test_hz": 100000000.0,
+   "trig_hz": 100000000.0
+  },
+  "2022C": {
+   "channels": 2,
+   "bw_mhz": 200,
+   "bw_test_hz": 200000000.0,
+   "trig_hz": 100000000.0
+  },
+  "2024C": {
+   "channels": 4,
+   "bw_mhz": 200,
+   "bw_test_hz": 200000000.0,
+   "trig_hz": 100000000.0
+  }
+ },
+ "title": "TDS2000C and TDS1000C-EDU Series Performance Verification",
+ "source": {
+  "document": "TDS2000C and TDS1000C-EDU Series Digital Storage Oscilloscopes Service Manual (077-0446-01)",
+  "pages": "Chapter 4 pp. 4-1 to 4-13, Appendix A pp. A-1 to A-4",
+  "note": "Limits read from rendered page images. Equipment table p. 4-1 (DC source 17.5 mV to 7 V +/-0.5 %, leveled sine 50 kHz and 200 MHz +/-3 %, 10 ms time mark +/-10 ppm) is met here by the calibrator scope option."
+ },
+ "sections": [
+  {
+   "id": "selftest",
+   "title": "Self test and self calibration",
+   "page": "4-3"
+  },
+  {
+   "id": "gain",
+   "title": "DC gain accuracy",
+   "page": "4-3"
+  },
+  {
+   "id": "bw",
+   "title": "Analog bandwidth",
+   "page": "4-5"
+  },
+  {
+   "id": "timebase",
+   "title": "Sample rate and delay time accuracy",
+   "page": "4-6"
+  },
+  {
+   "id": "trig",
+   "title": "Edge trigger sensitivity",
+   "page": "4-7"
+  },
+  {
+   "id": "exttrig",
+   "title": "External edge trigger sensitivity",
+   "page": "4-9"
+  }
+ ],
+ "points": [
+  {
+   "section": "selftest",
+   "kind": "SELFTEST",
+   "desc": "Self test (power-on diagnostics, no errors)",
+   "ch": null,
+   "nominal": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "",
+   "stim": "none",
+   "passfail": true,
+   "note": "p. 4-3: \"Verify that no error messages are displayed\". Read back with DIAg:RESUlt:FLAg?. The scope must have run 20 minutes first.",
+   "id": 1
+  },
+  {
+   "section": "selftest",
+   "kind": "SELFCAL",
+   "desc": "Self calibration (Utility > Do Self Cal passed)",
+   "ch": null,
+   "nominal": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "",
+   "stim": "none",
+   "passfail": true,
+   "note": "p. 4-3: disconnect all probes and cables first; repeat if the ambient temperature changes by 5 degC or more.",
+   "id": 2
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH1 DC gain, 5 mV/div",
+   "ch": 1,
+   "nominal": 0.035,
+   "low": 0.0336,
+   "high": 0.0364,
+   "unit": "V",
+   "stim": "cal",
+   "vscale": 0.005,
+   "vpos": 0.0175,
+   "vneg": -0.0175,
+   "vdiff": 0.035,
+   "id": 3
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH1 DC gain, 200 mV/div",
+   "ch": 1,
+   "nominal": 1.4,
+   "low": 1.358,
+   "high": 1.442,
+   "unit": "V",
+   "stim": "cal",
+   "vscale": 0.2,
+   "vpos": 0.7,
+   "vneg": -0.7,
+   "vdiff": 1.4,
+   "id": 4
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH1 DC gain, 2 V/div",
+   "ch": 1,
+   "nominal": 14.0,
+   "low": 13.58,
+   "high": 14.42,
+   "unit": "V",
+   "stim": "cal",
+   "vscale": 2.0,
+   "vpos": 7.0,
+   "vneg": -7.0,
+   "vdiff": 14.0,
+   "id": 5
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH2 DC gain, 5 mV/div",
+   "ch": 2,
+   "nominal": 0.035,
+   "low": 0.0336,
+   "high": 0.0364,
+   "unit": "V",
+   "stim": "cal",
+   "vscale": 0.005,
+   "vpos": 0.0175,
+   "vneg": -0.0175,
+   "vdiff": 0.035,
+   "id": 6
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH2 DC gain, 200 mV/div",
+   "ch": 2,
+   "nominal": 1.4,
+   "low": 1.358,
+   "high": 1.442,
+   "unit": "V",
+   "stim": "cal",
+   "vscale": 0.2,
+   "vpos": 0.7,
+   "vneg": -0.7,
+   "vdiff": 1.4,
+   "id": 7
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH2 DC gain, 2 V/div",
+   "ch": 2,
+   "nominal": 14.0,
+   "low": 13.58,
+   "high": 14.42,
+   "unit": "V",
+   "stim": "cal",
+   "vscale": 2.0,
+   "vpos": 7.0,
+   "vneg": -7.0,
+   "vdiff": 14.0,
+   "id": 8
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH3 DC gain, 5 mV/div",
+   "ch": 3,
+   "nominal": 0.035,
+   "low": 0.0336,
+   "high": 0.0364,
+   "unit": "V",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "vscale": 0.005,
+   "vpos": 0.0175,
+   "vneg": -0.0175,
+   "vdiff": 0.035,
+   "id": 9
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH3 DC gain, 200 mV/div",
+   "ch": 3,
+   "nominal": 1.4,
+   "low": 1.358,
+   "high": 1.442,
+   "unit": "V",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "vscale": 0.2,
+   "vpos": 0.7,
+   "vneg": -0.7,
+   "vdiff": 1.4,
+   "id": 10
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH3 DC gain, 2 V/div",
+   "ch": 3,
+   "nominal": 14.0,
+   "low": 13.58,
+   "high": 14.42,
+   "unit": "V",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "vscale": 2.0,
+   "vpos": 7.0,
+   "vneg": -7.0,
+   "vdiff": 14.0,
+   "id": 11
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH4 DC gain, 5 mV/div",
+   "ch": 4,
+   "nominal": 0.035,
+   "low": 0.0336,
+   "high": 0.0364,
+   "unit": "V",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "vscale": 0.005,
+   "vpos": 0.0175,
+   "vneg": -0.0175,
+   "vdiff": 0.035,
+   "id": 12
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH4 DC gain, 200 mV/div",
+   "ch": 4,
+   "nominal": 1.4,
+   "low": 1.358,
+   "high": 1.442,
+   "unit": "V",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "vscale": 0.2,
+   "vpos": 0.7,
+   "vneg": -0.7,
+   "vdiff": 1.4,
+   "id": 13
+  },
+  {
+   "section": "gain",
+   "kind": "GAIN",
+   "desc": "CH4 DC gain, 2 V/div",
+   "ch": 4,
+   "nominal": 14.0,
+   "low": 13.58,
+   "high": 14.42,
+   "unit": "V",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "vscale": 2.0,
+   "vpos": 7.0,
+   "vneg": -7.0,
+   "vdiff": 14.0,
+   "id": 14
+  },
+  {
+   "section": "bw",
+   "kind": "BW",
+   "desc": "CH1 bandwidth: 3 V p-p at 50 kHz reference, Vpk-pk at model frequency",
+   "ch": 1,
+   "nominal": 2.12,
+   "low": 2.12,
+   "high": null,
+   "unit": "V",
+   "stim": "cal",
+   "vscale": 0.5,
+   "ref_hz": 50000.0,
+   "ref_target": 3.0,
+   "ref_low": 2.98,
+   "ref_high": 3.02,
+   "hscale_ref": 1e-05,
+   "hscale": 1e-08,
+   "note": "Reference level is set at 10 us/div (5 cycles of 50 kHz on screen) instead of the manual 10 ms/div so the whole wave is displayed (deviation requested by the lab; the measured Pk-Pk limits are unchanged). Model frequency: 40/50/60/70/100/200 MHz by model (specs models_info). 50 ohm feedthrough termination at the scope input.",
+   "id": 15
+  },
+  {
+   "section": "bw",
+   "kind": "BW",
+   "desc": "CH2 bandwidth: 3 V p-p at 50 kHz reference, Vpk-pk at model frequency",
+   "ch": 2,
+   "nominal": 2.12,
+   "low": 2.12,
+   "high": null,
+   "unit": "V",
+   "stim": "cal",
+   "vscale": 0.5,
+   "ref_hz": 50000.0,
+   "ref_target": 3.0,
+   "ref_low": 2.98,
+   "ref_high": 3.02,
+   "hscale_ref": 1e-05,
+   "hscale": 1e-08,
+   "note": "Reference level is set at 10 us/div (5 cycles of 50 kHz on screen) instead of the manual 10 ms/div so the whole wave is displayed (deviation requested by the lab; the measured Pk-Pk limits are unchanged). Model frequency: 40/50/60/70/100/200 MHz by model (specs models_info). 50 ohm feedthrough termination at the scope input.",
+   "id": 16
+  },
+  {
+   "section": "bw",
+   "kind": "BW",
+   "desc": "CH3 bandwidth: 3 V p-p at 50 kHz reference, Vpk-pk at model frequency",
+   "ch": 3,
+   "nominal": 2.12,
+   "low": 2.12,
+   "high": null,
+   "unit": "V",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "vscale": 0.5,
+   "ref_hz": 50000.0,
+   "ref_target": 3.0,
+   "ref_low": 2.98,
+   "ref_high": 3.02,
+   "hscale_ref": 1e-05,
+   "hscale": 1e-08,
+   "note": "Reference level is set at 10 us/div (5 cycles of 50 kHz on screen) instead of the manual 10 ms/div so the whole wave is displayed (deviation requested by the lab; the measured Pk-Pk limits are unchanged). Model frequency: 40/50/60/70/100/200 MHz by model (specs models_info). 50 ohm feedthrough termination at the scope input.",
+   "id": 17
+  },
+  {
+   "section": "bw",
+   "kind": "BW",
+   "desc": "CH4 bandwidth: 3 V p-p at 50 kHz reference, Vpk-pk at model frequency",
+   "ch": 4,
+   "nominal": 2.12,
+   "low": 2.12,
+   "high": null,
+   "unit": "V",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "vscale": 0.5,
+   "ref_hz": 50000.0,
+   "ref_target": 3.0,
+   "ref_low": 2.98,
+   "ref_high": 3.02,
+   "hscale_ref": 1e-05,
+   "hscale": 1e-08,
+   "note": "Reference level is set at 10 us/div (5 cycles of 50 kHz on screen) instead of the manual 10 ms/div so the whole wave is displayed (deviation requested by the lab; the measured Pk-Pk limits are unchanged). Model frequency: 40/50/60/70/100/200 MHz by model (specs models_info). 50 ohm feedthrough termination at the scope input.",
+   "id": 18
+  },
+  {
+   "section": "timebase",
+   "kind": "TIMEBASE",
+   "desc": "Time base: rising edge of the 10 ms marker at center screen (divisions)",
+   "ch": 1,
+   "nominal": 0.0,
+   "low": -2.0,
+   "high": 2.0,
+   "unit": "div",
+   "stim": "cal",
+   "period": 0.01,
+   "vscale": 0.5,
+   "hscale_set": 0.001,
+   "delay": 0.01,
+   "hscale_meas": 2.5e-07,
+   "note": "1 division of displacement = 25 ppm time base error (p. 4-7 note). Edge position measured from the acquired waveform, not by eye.",
+   "id": 19
+  },
+  {
+   "section": "trig",
+   "kind": "TRIG",
+   "desc": "CH1 edge trigger sensitivity (stable trigger)",
+   "ch": 1,
+   "nominal": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "",
+   "stim": "cal",
+   "passfail": true,
+   "vscale": 0.5,
+   "stages": [
+    {
+     "step": "5-7",
+     "freq": "10M",
+     "meas_vpp": 0.5,
+     "hscale": 2.5e-08,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "8-11",
+     "freq": "F",
+     "meas_vpp": 0.75,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "12",
+     "freq": "200M",
+     "meas_vpp": 1.0,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true,
+     "models": [
+      "2022C",
+      "2024C"
+     ]
+    },
+    {
+     "step": "13-15",
+     "freq": "LAST",
+     "meas_vpp": "LAST",
+     "hscale": 2.5e-09,
+     "slope": "FALL",
+     "check": true
+    }
+   ],
+   "note": "Pass = stable trigger at every stage (engine criteria: trigger state, acquisitions counting, edge position repeatable).",
+   "id": 20
+  },
+  {
+   "section": "trig",
+   "kind": "TRIG",
+   "desc": "CH2 edge trigger sensitivity (stable trigger)",
+   "ch": 2,
+   "nominal": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "",
+   "stim": "cal",
+   "passfail": true,
+   "vscale": 0.5,
+   "stages": [
+    {
+     "step": "5-7",
+     "freq": "10M",
+     "meas_vpp": 0.5,
+     "hscale": 2.5e-08,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "8-11",
+     "freq": "F",
+     "meas_vpp": 0.75,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "12",
+     "freq": "200M",
+     "meas_vpp": 1.0,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true,
+     "models": [
+      "2022C",
+      "2024C"
+     ]
+    },
+    {
+     "step": "13-15",
+     "freq": "LAST",
+     "meas_vpp": "LAST",
+     "hscale": 2.5e-09,
+     "slope": "FALL",
+     "check": true
+    }
+   ],
+   "note": "Pass = stable trigger at every stage (engine criteria: trigger state, acquisitions counting, edge position repeatable).",
+   "id": 21
+  },
+  {
+   "section": "trig",
+   "kind": "TRIG",
+   "desc": "CH3 edge trigger sensitivity (stable trigger)",
+   "ch": 3,
+   "nominal": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "passfail": true,
+   "vscale": 0.5,
+   "stages": [
+    {
+     "step": "5-7",
+     "freq": "10M",
+     "meas_vpp": 0.5,
+     "hscale": 2.5e-08,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "8-11",
+     "freq": "F",
+     "meas_vpp": 0.75,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "12",
+     "freq": "200M",
+     "meas_vpp": 1.0,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true,
+     "models": [
+      "2022C",
+      "2024C"
+     ]
+    },
+    {
+     "step": "13-15",
+     "freq": "LAST",
+     "meas_vpp": "LAST",
+     "hscale": 2.5e-09,
+     "slope": "FALL",
+     "check": true
+    }
+   ],
+   "note": "Pass = stable trigger at every stage (engine criteria: trigger state, acquisitions counting, edge position repeatable).",
+   "id": 22
+  },
+  {
+   "section": "trig",
+   "kind": "TRIG",
+   "desc": "CH4 edge trigger sensitivity (stable trigger)",
+   "ch": 4,
+   "nominal": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "",
+   "stim": "cal",
+   "models": [
+    "2004C",
+    "2014C",
+    "2024C"
+   ],
+   "passfail": true,
+   "vscale": 0.5,
+   "stages": [
+    {
+     "step": "5-7",
+     "freq": "10M",
+     "meas_vpp": 0.5,
+     "hscale": 2.5e-08,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "8-11",
+     "freq": "F",
+     "meas_vpp": 0.75,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "12",
+     "freq": "200M",
+     "meas_vpp": 1.0,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true,
+     "models": [
+      "2022C",
+      "2024C"
+     ]
+    },
+    {
+     "step": "13-15",
+     "freq": "LAST",
+     "meas_vpp": "LAST",
+     "hscale": 2.5e-09,
+     "slope": "FALL",
+     "check": true
+    }
+   ],
+   "note": "Pass = stable trigger at every stage (engine criteria: trigger state, acquisitions counting, edge position repeatable).",
+   "id": 23
+  },
+  {
+   "section": "exttrig",
+   "kind": "EXTTRIG",
+   "desc": "External edge trigger sensitivity (stable trigger)",
+   "ch": 1,
+   "nominal": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "",
+   "stim": "cal",
+   "passfail": true,
+   "vscale": 0.1,
+   "stages": [
+    {
+     "step": "5-6",
+     "freq": "10M",
+     "src_vpp": 0.3,
+     "hscale": 2.5e-08,
+     "slope": "RISe",
+     "check": false,
+     "note": "about 200 mV p-p on CH1"
+    },
+    {
+     "step": "7-9",
+     "freq": "F",
+     "src_vpp": 0.3,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "10-11",
+     "freq": "200M",
+     "ch1_vpp": 0.35,
+     "hscale": 5e-09,
+     "slope": "RISe",
+     "check": false,
+     "models": [
+      "2022C",
+      "2024C"
+     ]
+    },
+    {
+     "step": "12-13",
+     "freq": "LAST",
+     "src_vpp": "LAST",
+     "hscale": 2.5e-09,
+     "slope": "RISe",
+     "check": true
+    },
+    {
+     "step": "14-15",
+     "freq": "LAST",
+     "src_vpp": "LAST",
+     "hscale": 2.5e-09,
+     "slope": "FALL",
+     "check": true
+    }
+   ],
+   "note": "CH1 and EXT TRIG both fed from a power splitter, 50 ohm feedthrough terminators on both inputs.",
+   "id": 24
+  }
+ ]
+}

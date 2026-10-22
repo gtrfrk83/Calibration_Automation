@@ -7,7 +7,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 - `Procedures/`: launchers (one per instrument), checkpoints are written here at run time (git-ignored).
 - `specs/`: `*_pv.json` test points and limits, plus the `build_*.py` scripts that wrote them. See `specs/README.txt`.
 - `drivers/`: instrument drivers, transports (VISA / pyserial), simulators (`simulated.py`). See `drivers/README.txt`.
-- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 87V, Klein MM325), `mdo4000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A).
+- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 87V, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A).
 - `labregistry.py` / `labregistry_ui.py`: per-asset report history and drift (`lab_registry.sqlite3`, not in the repo).
 - `report_pdf.py` / `report_dialog.py`: PDF "Calibration Data" reports.
   Optional TAR / TUR columns: two independent checkboxes (TAR, TUR) in `report_dialog.ask_details` (`details["show_tar"]`, `["show_tur"]`, `["show_tar_tur"]` = `report_pdf.TarTur`, default off, remembered in `~/.calibration_suite/report_tartur.json`); `report_pdf.apply_tar_tur`. TAR / TUR appear on the PDF data file only (there is no CSV export). Off = the PDF is unchanged.
@@ -15,7 +15,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 
 ## Procedures
 WaveSurfer WS4104HD, Fluke 87V, Agilent 34401A, Fluke 8846A (verification + adjustment), Keysight 34460A/61A/65A/70A,
-Tektronix MDO4000C, Fluke 110/113/114/115/116/117, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
+Tektronix MDO4000C, Tektronix TDS2000C / TDS1000C-EDU, Fluke 110/113/114/115/116/117, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
 Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard), Fluke 287 / 289 (typed or IR readings).
 
 ## Standing rules
@@ -109,6 +109,21 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Converted: 8846A, 34401A, Truevolt, DACQ, function generators, MDO4000C, handheld DMMs, WaveSurfer (sidebar = its seven functions). Instrument commands, limits,
   pass/fail logic and safety prompts were not touched; only widgets were rearranged. `Fluke_8846A_Adjustment.py` and the Manager keep their layouts (they pick up the dark palette).
 - Tests: `tests/test_shell.py` (sidebar / drawer / small window / As Left columns), the toolbar-fit tests in `tests/test_asleft.py` run at 900 / 1000 / 1400 px.
+
+## Open items: Tektronix TDS2000C / TDS1000C-EDU (checked on the simulated bench only, not run on hardware or a real UI)
+- Source: Service Manual 077-0446-01 Chapter 4 + Appendix A; commands from the TBS1000-B/TDS2000-B-C/... Programmer manual. Limits read from page images.
+- Fluke 5520A/5522A scope option: `SCOPE VOLT`, `SCOPE LEVSINE`, `SCOPE MARKER`, `OUT_IMP 1M|50`, the `SCOPE?` reply text and `OUT?` in levsine/marker modes are
+  NOT confirmed (the 5520A Programmers Guide gives the commands SCOPE, SCOPE?, OUT_IMP, TMWAVE and the 5-field OUT? layout only). The 5560A path reuses existing driver commands.
+- Time base test: edge time is read from the waveform (t = XZEro + n*XINcr, relative to the trigger point). A guard raises an error if the record centre is
+  more than 1.5 div from the 10 ms delay; the XZEro / HORizontal:POSition convention is unverified.
+- "Stable trigger" is judged by engine criteria (trigger Normal, >= 5 acquisitions/s, edge position spread <= 0.2 period over 8 records); the manual's check is visual.
+- SETLevel with an EXT trigger source may be rejected; that is tolerated on the external-trigger points only.
+- Average-mode NUMACq counting and the 0.05 div position readback tolerance are unverified.
+- Vertical position accuracy (manual p. 4-10 to 4-13) is not part of this procedure (removed at the lab's request).
+- Manual prints "TDS2004B" in the bandwidth list; TDS2004C is used. USB VISA address of the scope is entered by hand.
+- The TDS driver (`drivers/tektronix_tds2000c.py`) and `drivers/fluke_5522a_scope.py` still send through legacy write/query (not yet on the command registry);
+  their wire text is locked by `tests/golden/tektronix_tds2000c.json`, `fluke_5522a_scope.json` and `engine_tds2000c.json`.
+- No procedure modifications (procmods) are wired into this engine yet. TAR/TUR: TUR only on the DC gain points (volts); TAR is blank.
 
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.

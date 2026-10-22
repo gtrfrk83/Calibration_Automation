@@ -16,6 +16,14 @@
    "query_retry_f": 0,
    "write_f": 0
   },
+  "fluke_5522a_scope": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 1
+  },
   "fluke_5560a": {
    "concat_f": 0,
    "format_f": 0,
@@ -95,6 +103,14 @@
    "query_f": 0,
    "query_retry_f": 0,
    "write_f": 0
+  },
+  "tektronix_tds2000c": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 6,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 4
   }
  },
  "schema": 1

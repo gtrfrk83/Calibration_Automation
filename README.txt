@@ -219,6 +219,16 @@ Procedures/Klein_MM325_Verification.py   (engine: handheld_dmm.py; spec: specs/k
   Rebuild the spec and diagrams after editing the point table:  python3 specs/build_mm325.py   (needs Pillow; the procedure does not).
   Demo with:  python Procedures/Klein_MM325_Verification.py --demo
 
+Tektronix TDS2000C / TDS1000C-EDU
+---------------------------------
+Procedures/Tektronix_TDS2000C_Verification.py   (engine: tds2000c_verification.py; spec: specs/tektronix_tds2000c_pv.json)
+  Automated performance verification from the TDS2000C and TDS1000C-EDU Service Manual (077-0446-01), Chapter 4: self test, self
+  calibration, DC gain, analog bandwidth, sample rate / delay time, edge trigger, external edge trigger (vertical position accuracy is
+  not included). Ten models (2-channel and 4-channel); the oscilloscope is connected by USB. Stimulus: the scope option of one Fluke
+  5560A, 5522A or 5520A (DC volts, leveled sine, time marker). The program asks before every cable, terminator or splitter change; the
+  calibrator goes to standby after every point. Hook-up pictures: diagrams/README_tds2000c.txt.
+  Demo with:  python Procedures/Tektronix_TDS2000C_Verification.py --demo
+
 Tektronix MDO4000C (MDO4024C / 4034C / 4054C / 4104C)
 -----------------------------------------------------
 Procedures/Tektronix_MDO4000C_Verification.py   (engine: mdo4000c_verification.py; spec: specs/tektronix_mdo4000c_pv.json)
