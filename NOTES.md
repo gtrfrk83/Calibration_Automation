@@ -244,6 +244,23 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
 - `report_pdf.point_uncertainty(p, standard=None)` uses the budget when the calibrator model is passed (handheld_dmm passes 5522A / 5560A from its calibrator
   choice; truevolt_verification, Procedures/Agilent_34401A.py and Procedures/Fluke_8846A_Verification.py pass 5560A; dacq_verification passes the selected
   calibrator).  Every multimeter procedure now uses the budget.  The MDO4000C, FGEN and WaveSurfer (oscilloscope / generator) engines are still CMC-only.
+- Temperature (thermocouple simulation) uncertainty and TAR / TUR, all handheld multimeters (110-series 116, 87V, 287/289, 170-series 179; the Fluke 77 and Klein MM325 have no temperature point):
+  the handheld engine sources Type K from the 5522A / 5560A (`TC_TYPE K` + `OUT <t>CEL`, through the 80AK adapter) and the report row now gets an Uncertainty and TAR / TUR from the
+  calibrator's published 1-year Type K SIMULATION specification in degC (`specs/standards/fluke_5522a_standard.json` / `fluke_5560a_standard.json`, kind TEMP, direction output, loaded
+  into lab_registry.sqlite3 as for every other kind; no new data file).  `specmanager.StandardSpec.lookup_temperature(celsius, tc='K')` is the lookup (signed closed bands, degC rows only, larger
+  limit on a border, never extrapolates; the generic `lookup()` works on magnitudes and would mix in the degF rows, so TEMP does not use it).  `uncertainty_budget.build` routes kind TEMP to it:
+  u = spec / 2 (+ resolution / sqrt(12) when known), EMU = 2 * RSS, rounded UP to 2 sig. figs.  Printed like '0.17 degC' (`uncertainty.format_value`, never SI-prefixed).  TAR = (high - low) / 2 / spec in degC;
+  TUR = the same tolerance / the printed uncertainty.  Outside the calibrator's range (-200 to 1372 degC), with no calibrator chosen, or for a degF point: Uncertainty / TAR / TUR print N/A.
+  `Temperature, open input` (functional check, no source) stays N/A.  `handheld_dmm.App.has_uncertainty` decides which points carry an uncertainty; `temperature_note()` adds the basis to the stored footer note.
+  Manual values (5522A Operators Manual R0, Ch. 1 'Temperature Calibration (Thermocouple)', printed p. 1-17 = PDF page 37, read from the page image twice), Type K, degC, 90 day / 1 year:
+  -200..-100 0.25 / 0.33, -100..-25 0.14 / 0.18, -25..120 0.12 / 0.16, 120..1000 0.19 / 0.26, 1000..1372 0.30 / 0.40; resolution 0.01 degC (note 2) is used for the 5522A (`specmanager.TC_RESOLUTION`; a value edited in
+  Standards Specs wins); note 3: 'does not include thermocouple error'.  5560A (1 year): 0.22 / 0.10 / 0.09 / 0.16 / 0.27 from the laboratory's own sheet, NOT checked against the 5560A manual (not available); no TC resolution on file for it.
+  A2LA: the shipped scope file (a2la_1888_03_cmc.json, Section V pp. 8-32 and XII) has no temperature entry, so NO CMC applies and none is invented: the budget alone is reported.  If the lab's scope lists
+  a temperature CMC, add an entry {basis 'generate', kind 'TEMP', bands [{lo, hi (signed degC), rel, abs}]} to that file: `Scope.dmm('TEMP', t)` then floors the reported value as for every other kind (tests cover it).
+  Spec condition: the manual's table states none for the reference junction ('tcal +/- 5 degC', 'source/measure', excludes thermocouple error).  The procedure never sends `TC_REF`, so the calibrator is at its reset
+  default INT (internal isothermal block, p. 6-35; p. 4-37: use INT for alloy-wire thermocouples, EXT at 0 degC gives the best accuracy); no TC offset is used (TC_OFFSET is for measure mode only).  The printed figures are applied as published.
+  `tests/test_beta_temp_uncertainty.py` (hand-computed 5522A / 5560A values, out-of-range N/A, PDF rows, demo marking); `tests/test_tartur_wiring_dmm.py::Exports::test_off_identical_to_baseline` now allows the 287 Temperature rows to differ
+  from the baseline (Uncertainty only), like the 87V rows before; every non-temperature row is byte-identical.  `tests/dmm_export_harness.py` knows 'Fluke 116' / 'Fluke 179' (not in ENGINES) and a `cal_mode` argument.
 - "Standards Specs" tab: divisor, assets, calibrator resolution per range (logged in spec_changes), sheet issues, "Check an EMU".
 - Tests: `python -m unittest tests.test_specmanager`.
 

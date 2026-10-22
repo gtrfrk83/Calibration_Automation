@@ -58,6 +58,9 @@ class Scope:
             return None
         if entry.get('basis') == 'generate':
             range_value = None            # Generate bands are by the generated value, never by the DMM range
+        if kind == 'TEMP':      # signed bands in degC; the shipped scope file has no temperature entry, so this returns None (nothing is assumed) until the lab adds one
+            hits = [_u(b, nominal) for b in entry['bands'] if _inside(nominal, b['lo'], b['hi'])]
+            return max(hits) if hits else None
         value = abs(nominal)
         if kind == 'ACV':
             return self._ac(entry, value, value, frequency, by_range=False)
@@ -133,6 +136,8 @@ def format_value(value, unit, sig=2):
         return f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f} %' if value else '0 %'
     if unit == 'dB':
         return f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f} dB' if value else '0 dB'
+    if unit in ('C', 'degC', '\u00b0C'):       # temperatures are never SI-prefixed (no 'm\u00b0C'): 0.17 \u00b0C
+        return f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f} \u00b0C' if value else '0 \u00b0C'
     import ui_theme as ui
     number, symbol = ui.si_one(value, 'Ω' if unit == 'ohm' else unit, sig=sig)
     return f'{number} {symbol}'.replace('Ω', 'Ohm')
