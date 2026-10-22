@@ -130,6 +130,9 @@ FILES = {
     'Fluke_287_Verification.py': _files('Fluke_287_Verification.py', _HH, ['fluke_5560a', 'fluke_28x'], ['fluke_287_289_pv.json']),
     'Fluke_289_Verification.py': _files('Fluke_289_Verification.py', _HH, ['fluke_5560a', 'fluke_28x'], ['fluke_287_289_pv.json']),
     'Fluke_77IV_Verification.py': _files('Fluke_77IV_Verification.py', _HH, ['fluke_5560a'], ['fluke_77iv_pv.json']),
+    'Fluke_175_Verification.py': _files('Fluke_175_Verification.py', _HH, ['fluke_5560a'], ['fluke_170_series_pv.json']),
+    'Fluke_177_Verification.py': _files('Fluke_177_Verification.py', _HH, ['fluke_5560a'], ['fluke_170_series_pv.json']),
+    'Fluke_179_Verification.py': _files('Fluke_179_Verification.py', _HH, ['fluke_5560a'], ['fluke_170_series_pv.json']),
 }
 USER_CODE = ['Procedures/User_Datasheet.py', 'dsb_runtime.py']      # a user-built procedure: its runnable spec is the rest of its definition
 

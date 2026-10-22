@@ -1,0 +1,3088 @@
+{
+ "schema": 2,
+ "kind": "manual-reading",
+ "options": {
+  "hookup_meter": "fluke170",
+  "hv_threshold_v": 30,
+  "auto_ramp": false,
+  "function_prompt": true,
+  "report_title": "Calibration Data"
+ },
+ "source": {
+  "document": "Fluke 175, 177, 179 True-rms Multimeters - Calibration Information",
+  "pages": "8-13 (printed): Table 1 p. 8, procedure p. 9, Table 2 pp. 10-11, Table 3 pp. 12-13",
+  "cite": "Fluke 175, 177, 179 Calibration Information, Table 2 (175) pp. 10-11 and Table 3 (177 / 179) pp. 12-13; three printed values corrected (see Source)",
+  "limits": "Manufacturer limits, Tables 2 and 3; three corrections, see Source",
+  "report_note": "Limits are those of the manufacturer's tables (Fluke 175 / 177 / 179 Calibration Information, Table 2 pp. 10-11 for the 175, Table 3 pp. 12-13 for the 177 / 179) with three corrections to misprints: 175 ohms 500 ohm upper limit (printed 504.7 kOhm, used 504.7 ohm); 177 / 179 AC volts 5 V 45 Hz upper limit (printed 5.103 V, used 5.053 V, 1.0 % + 3 counts); 177 / 179 DC volts frequency (printed 3 V 45 kHz with the limits 45.06 and 44.94 Hz; used 3 V at 45 Hz, 44.94 to 45.06 Hz).",
+  "note": "Table 2 (175: 52 rows) and Table 3 (177 / 179: 51 rows, plus 3 temperature rows for the 179 only): 175 / 177 / 179 Calibration Information pp. 10-13. The tables have no step numbers: steps are numbered in table order. THREE printed values are corrected (each flagged on the point and on the report): 175 ohms 500 ohm upper limit printed 504.7 kOhm (judged 504.7 ohm); 177/179 AC volts 5 V 45 Hz upper limit printed 5.103 V (judged 5.053 V, 1.0 % + 3 counts); 177/179 DC volts frequency printed \"3 V 45 kHz, 45.06 / 44.94 Hz\" (judged 3 V at 45 Hz, 44.94 to 45.06 Hz). Ranges are not named in the manual: each shown range is the one the reading falls in (from the published 170 Series resolutions). The manual names a Fluke 5500A; the procedure drives a Fluke 5522A or 5560A (or you set the calibrator by hand). High-voltage points go straight to the test value (the manual prescribes no ramp). The meters have no remote interface: you type the display reading."
+ },
+ "models": {
+  "175": {
+   "name": "Fluke 175",
+   "brand": "Fluke",
+   "model_note": "Fluke 175 true-rms digital multimeter (6000 counts): Table 2, 52 points"
+  },
+  "177": {
+   "name": "Fluke 177",
+   "brand": "Fluke",
+   "model_note": "Fluke 177 true-rms digital multimeter (6000 counts): Table 3, 51 points"
+  },
+  "179": {
+   "name": "Fluke 179",
+   "brand": "Fluke",
+   "model_note": "Fluke 179 true-rms digital multimeter (6000 counts): Table 3 plus temperature, 54 points"
+  }
+ },
+ "steps": [
+  {
+   "table": "2",
+   "step": 1,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 mV",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "296.7",
+   "high": "303.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.3,
+    "frequency": 45.0
+   },
+   "nominal": 0.3,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 296.7 to 303.3 mV   (published specification: ±(1.0 % of reading + 3 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T2 #1",
+   "id": "2-1"
+  },
+  {
+   "table": "2",
+   "step": 2,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 mV",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "494.7",
+   "high": "505.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": 500.0
+   },
+   "nominal": 0.5,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 494.7 to 505.3 mV   (published specification: ±(1.0 % of reading + 3 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T2 #2",
+   "id": "2-2"
+  },
+  {
+   "table": "2",
+   "step": 3,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 mV",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "489.7",
+   "high": "510.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": 1000.0
+   },
+   "nominal": 0.5,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 489.7 to 510.3 mV   (published specification: ±(2.0 % of reading + 3 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T2 #3",
+   "id": "2-3"
+  },
+  {
+   "table": "2",
+   "step": 4,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.947",
+   "high": "5.053",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 45.0
+   },
+   "nominal": 5.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 4.947 to 5.053 V   (published specification: ±(1.0 % of reading + 3 counts of 0.001 V))",
+   "group": "VOHM",
+   "ref": "T2 #4",
+   "id": "2-4"
+  },
+  {
+   "table": "2",
+   "step": 5,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.947",
+   "high": "5.053",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 500.0
+   },
+   "nominal": 5.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 4.947 to 5.053 V   (published specification: ±(1.0 % of reading + 3 counts of 0.001 V))",
+   "group": "VOHM",
+   "ref": "T2 #5",
+   "id": "2-5"
+  },
+  {
+   "table": "2",
+   "step": 6,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.897",
+   "high": "5.103",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 1000.0
+   },
+   "nominal": 5.0,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 4.897 to 5.103 V   (published specification: ±(2.0 % of reading + 3 counts of 0.001 V))",
+   "group": "VOHM",
+   "ref": "T2 #6",
+   "id": "2-6"
+  },
+  {
+   "table": "2",
+   "step": 7,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.47",
+   "high": "50.53",
+   "test": "numeric",
+   "applied": {
+    "value": 50.0,
+    "frequency": 45.0
+   },
+   "nominal": 50.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 49.47 to 50.53 V   (published specification: ±(1.0 % of reading + 3 counts of 0.01 V))",
+   "group": "VOHM",
+   "ref": "T2 #7",
+   "id": "2-7"
+  },
+  {
+   "table": "2",
+   "step": 8,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.47",
+   "high": "50.53",
+   "test": "numeric",
+   "applied": {
+    "value": 50.0,
+    "frequency": 500.0
+   },
+   "nominal": 50.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 49.47 to 50.53 V   (published specification: ±(1.0 % of reading + 3 counts of 0.01 V))",
+   "group": "VOHM",
+   "ref": "T2 #8",
+   "id": "2-8"
+  },
+  {
+   "table": "2",
+   "step": 9,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "48.97",
+   "high": "51.03",
+   "test": "numeric",
+   "applied": {
+    "value": 50.0,
+    "frequency": 1000.0
+   },
+   "nominal": 50.0,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 48.97 to 51.03 V   (published specification: ±(2.0 % of reading + 3 counts of 0.01 V))",
+   "group": "VOHM",
+   "ref": "T2 #9",
+   "id": "2-9"
+  },
+  {
+   "table": "2",
+   "step": 10,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "296.7",
+   "high": "303.3",
+   "test": "numeric",
+   "applied": {
+    "value": 300.0,
+    "frequency": 45.0
+   },
+   "nominal": 300.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 296.7 to 303.3 V   (published specification: ±(1.0 % of reading + 3 counts of 0.1 V))",
+   "group": "VOHM",
+   "ref": "T2 #10",
+   "id": "2-10"
+  },
+  {
+   "table": "2",
+   "step": 11,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "494.7",
+   "high": "505.3",
+   "test": "numeric",
+   "applied": {
+    "value": 500.0,
+    "frequency": 500.0
+   },
+   "nominal": 500.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 494.7 to 505.3 V   (published specification: ±(1.0 % of reading + 3 counts of 0.1 V))",
+   "group": "VOHM",
+   "ref": "T2 #11",
+   "id": "2-11"
+  },
+  {
+   "table": "2",
+   "step": 12,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "489.7",
+   "high": "510.3",
+   "test": "numeric",
+   "applied": {
+    "value": 500.0,
+    "frequency": 1000.0
+   },
+   "nominal": 500.0,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 489.7 to 510.3 V   (published specification: ±(2.0 % of reading + 3 counts of 0.1 V))",
+   "group": "VOHM",
+   "ref": "T2 #12",
+   "id": "2-12"
+  },
+  {
+   "table": "2",
+   "step": 13,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "987",
+   "high": "1013",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 45.0
+   },
+   "nominal": 1000.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 987 to 1013 V   (published specification: ±(1.0 % of reading + 3 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T2 #13",
+   "id": "2-13"
+  },
+  {
+   "table": "2",
+   "step": 14,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "987",
+   "high": "1013",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 500.0
+   },
+   "nominal": 1000.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 987 to 1013 V   (published specification: ±(1.0 % of reading + 3 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T2 #14",
+   "id": "2-14"
+  },
+  {
+   "table": "2",
+   "step": 15,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "977",
+   "high": "1023",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 1000.0
+   },
+   "nominal": 1000.0,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 977 to 1023 V   (published specification: ±(2.0 % of reading + 3 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T2 #15",
+   "id": "2-15"
+  },
+  {
+   "table": "2",
+   "step": 16,
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "range": "99.99 Hz",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "44.94",
+   "high": "45.06",
+   "test": "numeric",
+   "applied": {
+    "value": 1.0,
+    "frequency": 45.0
+   },
+   "nominal": 45.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 2: 44.94 to 45.06 Hz   (published specification: ±(0.1 % of reading + 1 count of 0.01 Hz))",
+   "no_uncertainty": true,
+   "report_desc": "99.99 Hz range (1 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 1 V at 45 Hz). Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #16",
+   "id": "2-16"
+  },
+  {
+   "table": "2",
+   "step": 17,
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "range": "999.9 Hz",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "printed_text": {
+    "low": "899",
+    "high": "901",
+    "note": "printed with fewer decimals than the display resolution; same value"
+   },
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "899.0",
+   "high": "901.0",
+   "test": "numeric",
+   "applied": {
+    "value": 1.0,
+    "frequency": 900.0
+   },
+   "nominal": 900.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 2: 899.0 to 901.0 Hz   (published specification: ±(0.1 % of reading + 1 count of 0.1 Hz))",
+   "no_uncertainty": true,
+   "report_desc": "999.9 Hz range (1 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 1 V at 900 Hz). Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #17",
+   "id": "2-17"
+  },
+  {
+   "table": "2",
+   "step": 18,
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "range": "9.999 kHz",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "printed_text": {
+    "low": "8.99",
+    "high": "9.01",
+    "note": "printed with fewer decimals than the display resolution; same value"
+   },
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "8.990",
+   "high": "9.010",
+   "test": "numeric",
+   "applied": {
+    "value": 1.0,
+    "frequency": 9000.0
+   },
+   "nominal": 9000.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 2: 8.990 to 9.010 kHz   (published specification: ±(0.1 % of reading + 1 count of 0.001 kHz))",
+   "no_uncertainty": true,
+   "report_desc": "9.999 kHz range (1 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 1 V at 9000 Hz). Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #18",
+   "id": "2-18"
+  },
+  {
+   "table": "2",
+   "step": 19,
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "range": "99.99 kHz",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "49.94",
+   "high": "50.06",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 50000.0
+   },
+   "nominal": 50000.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 2: 49.94 to 50.06 kHz   (published specification: ±(0.1 % of reading + 1 count of 0.01 kHz))",
+   "no_uncertainty": true,
+   "report_desc": "99.99 kHz range (5 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 5 V at 50000 Hz). Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #19",
+   "id": "2-19"
+  },
+  {
+   "table": "2",
+   "step": 20,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "6.000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.990",
+   "high": "5.010",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": null
+   },
+   "nominal": 5.0,
+   "accuracy": "±(0.15 % of reading + 2 counts)",
+   "tol_text": "Table 2: 4.990 to 5.010 V   (published specification: ±(0.15 % of reading + 2 counts of 0.001 V))",
+   "group": "VOHM",
+   "ref": "T2 #20",
+   "id": "2-20"
+  },
+  {
+   "table": "2",
+   "step": 21,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "60.00 V",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "printed_text": {
+    "low": "49.90",
+    "high": "50.1",
+    "note": "printed with fewer decimals than the display resolution; same value"
+   },
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.90",
+   "high": "50.10",
+   "test": "numeric",
+   "applied": {
+    "value": 50.0,
+    "frequency": null
+   },
+   "nominal": 50.0,
+   "accuracy": "±(0.15 % of reading + 2 counts)",
+   "tol_text": "Table 2: 49.90 to 50.10 V   (published specification: ±(0.15 % of reading + 2 counts of 0.01 V))",
+   "group": "VOHM",
+   "ref": "T2 #21",
+   "id": "2-21"
+  },
+  {
+   "table": "2",
+   "step": 22,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "299.3",
+   "high": "300.7",
+   "test": "numeric",
+   "applied": {
+    "value": 300.0,
+    "frequency": null
+   },
+   "nominal": 300.0,
+   "accuracy": "±(0.15 % of reading + 2 counts)",
+   "tol_text": "Table 2: 299.3 to 300.7 V   (published specification: ±(0.15 % of reading + 2 counts of 0.1 V))",
+   "group": "VOHM",
+   "ref": "T2 #22",
+   "id": "2-22"
+  },
+  {
+   "table": "2",
+   "step": 23,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "1000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "996",
+   "high": "1004",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": null
+   },
+   "nominal": 1000.0,
+   "accuracy": "±(0.15 % of reading + 2 counts)",
+   "tol_text": "Table 2: 996 to 1004 V   (published specification: ±(0.15 % of reading + 2 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T2 #23",
+   "id": "2-23"
+  },
+  {
+   "table": "2",
+   "step": 24,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "1000 V",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-1004",
+   "high": "-996",
+   "test": "numeric",
+   "applied": {
+    "value": -1000.0,
+    "frequency": null
+   },
+   "nominal": -1000.0,
+   "accuracy": "±(0.15 % of reading + 2 counts)",
+   "tol_text": "Table 2: -1004 to -996 V   (published specification: ±(0.15 % of reading + 2 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T2 #24",
+   "id": "2-24"
+  },
+  {
+   "table": "2",
+   "step": 25,
+   "section": "DC volts frequency",
+   "switch": "V⎓ Hz  (DC volts frequency; press the YELLOW button)",
+   "range": "99.99 Hz",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "44.94",
+   "high": "45.06",
+   "test": "numeric",
+   "applied": {
+    "value": 3.0,
+    "frequency": 45.0
+   },
+   "nominal": 45.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 2: 44.94 to 45.06 Hz   (published specification: ±(0.1 % of reading + 1 count of 0.01 Hz))",
+   "no_uncertainty": true,
+   "report_desc": "99.99 Hz range (3 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 3 V at 45 Hz). Table footnote 1: press the YELLOW button to access this function. \"DC Volts Frequency\": the calibrator applies an AC voltage (Table 3 \"3 V\" / \"30 V\" at the stated frequency) with the meter in DC volts, frequency.",
+   "ref": "T2 #25",
+   "id": "2-25"
+  },
+  {
+   "table": "2",
+   "step": 26,
+   "section": "DC volts frequency",
+   "switch": "V⎓ Hz  (DC volts frequency; press the YELLOW button)",
+   "range": "99.99 kHz",
+   "models": [
+    "175"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "49.94",
+   "high": "50.06",
+   "test": "numeric",
+   "applied": {
+    "value": 30.0,
+    "frequency": 50000.0
+   },
+   "nominal": 50000.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 2: 49.94 to 50.06 kHz   (published specification: ±(0.1 % of reading + 1 count of 0.01 kHz))",
+   "no_uncertainty": true,
+   "report_desc": "99.99 kHz range (30 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 30 V at 50000 Hz). Table footnote 1: press the YELLOW button to access this function. \"DC Volts Frequency\": the calibrator applies an AC voltage (Table 3 \"3 V\" / \"30 V\" at the stated frequency) with the meter in DC volts, frequency.",
+   "ref": "T2 #26",
+   "id": "2-26"
+  },
+  {
+   "table": "2",
+   "step": 27,
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "29.8",
+   "high": "30.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0.03,
+    "frequency": null
+   },
+   "nominal": 0.03,
+   "accuracy": "±(0.15 % of reading + 2 counts)",
+   "tol_text": "Table 2: 29.8 to 30.2 mV   (published specification: ±(0.15 % of reading + 2 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T2 #27",
+   "id": "2-27"
+  },
+  {
+   "table": "2",
+   "step": 28,
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "-300.7",
+   "high": "-299.3",
+   "test": "numeric",
+   "applied": {
+    "value": -0.3,
+    "frequency": null
+   },
+   "nominal": -0.3,
+   "accuracy": "±(0.15 % of reading + 2 counts)",
+   "tol_text": "Table 2: -300.7 to -299.3 mV   (published specification: ±(0.15 % of reading + 2 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T2 #28",
+   "id": "2-28"
+  },
+  {
+   "table": "2",
+   "step": 29,
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "598.9",
+   "high": "601.1",
+   "test": "numeric",
+   "applied": {
+    "value": 0.6,
+    "frequency": null
+   },
+   "nominal": 0.6,
+   "accuracy": "±(0.15 % of reading + 2 counts)",
+   "tol_text": "Table 2: 598.9 to 601.1 mV   (published specification: ±(0.15 % of reading + 2 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T2 #29",
+   "id": "2-29"
+  },
+  {
+   "table": "2",
+   "step": 30,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600.0 Ω",
+   "models": [
+    "175"
+   ],
+   "kind": "OHM",
+   "printed_limits": {
+    "low": "495.3",
+    "high": "504.7",
+    "unit": "Ω (the upper limit is printed with the unit kΩ)",
+    "note": "as printed in Table 2 (p. 11)"
+   },
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "495.3",
+   "high": "504.7",
+   "test": "numeric",
+   "applied": {
+    "value": 500.0,
+    "frequency": null
+   },
+   "nominal": 500.0,
+   "accuracy": "±(0.9 % of reading + 2 counts)",
+   "tol_text": "Table 2: 495.3 to 504.7 Ω   (published specification: ±(0.9 % of reading + 2 counts of 0.1 Ω))",
+   "report_desc": "600.0 Ohm range (limits corrected)",
+   "group": "VOHM",
+   "note": "LIMIT UNIT CORRECTED: Table 2 prints the upper limit as 504.7 kΩ; the lower limit (495.3 Ω), the 177/179 table and the accuracy (0.9 % + 2 counts of 0.1 Ω = 4.7 Ω) all say 504.7 Ω. The limits do not include test lead resistance (table note 2).",
+   "ref": "T2 #30",
+   "id": "2-30"
+  },
+  {
+   "table": "2",
+   "step": 31,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6.000 kΩ",
+   "models": [
+    "175"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "4.954",
+   "high": "5.046",
+   "test": "numeric",
+   "applied": {
+    "value": 5000.0,
+    "frequency": null
+   },
+   "nominal": 5000.0,
+   "accuracy": "±(0.9 % of reading + 1 count)",
+   "tol_text": "Table 2: 4.954 to 5.046 kΩ   (published specification: ±(0.9 % of reading + 1 count of 0.001 kΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T2 #31",
+   "id": "2-31"
+  },
+  {
+   "table": "2",
+   "step": 32,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "60.00 kΩ",
+   "models": [
+    "175"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "49.54",
+   "high": "50.46",
+   "test": "numeric",
+   "applied": {
+    "value": 50000.0,
+    "frequency": null
+   },
+   "nominal": 50000.0,
+   "accuracy": "±(0.9 % of reading + 1 count)",
+   "tol_text": "Table 2: 49.54 to 50.46 kΩ   (published specification: ±(0.9 % of reading + 1 count of 0.01 kΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T2 #32",
+   "id": "2-32"
+  },
+  {
+   "table": "2",
+   "step": 33,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600.0 kΩ",
+   "models": [
+    "175"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "495.4",
+   "high": "504.6",
+   "test": "numeric",
+   "applied": {
+    "value": 500000.0,
+    "frequency": null
+   },
+   "nominal": 500000.0,
+   "accuracy": "±(0.9 % of reading + 1 count)",
+   "tol_text": "Table 2: 495.4 to 504.6 kΩ   (published specification: ±(0.9 % of reading + 1 count of 0.1 kΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T2 #33",
+   "id": "2-33"
+  },
+  {
+   "table": "2",
+   "step": 34,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6.000 MΩ",
+   "models": [
+    "175"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "4.954",
+   "high": "5.046",
+   "test": "numeric",
+   "applied": {
+    "value": 5000000.0,
+    "frequency": null
+   },
+   "nominal": 5000000.0,
+   "accuracy": "±(0.9 % of reading + 1 count)",
+   "tol_text": "Table 2: 4.954 to 5.046 MΩ   (published specification: ±(0.9 % of reading + 1 count of 0.001 MΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T2 #34",
+   "id": "2-34"
+  },
+  {
+   "table": "2",
+   "step": 35,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "50.00 MΩ",
+   "models": [
+    "175"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "18.68",
+   "high": "19.32",
+   "test": "numeric",
+   "applied": {
+    "value": 19000000.0,
+    "frequency": null
+   },
+   "nominal": 19000000.0,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 2: 18.68 to 19.32 MΩ   (published specification: ±(1.5 % of reading + 3 counts of 0.01 MΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T2 #35",
+   "id": "2-35"
+  },
+  {
+   "table": "2",
+   "step": 36,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (press the YELLOW button)",
+   "range": "1000 nF",
+   "models": [
+    "175"
+   ],
+   "kind": "CAP",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "887",
+   "high": "913",
+   "test": "numeric",
+   "applied": {
+    "value": 9e-07,
+    "frequency": null
+   },
+   "nominal": 9e-07,
+   "accuracy": "±(1.2 % of reading + 2 counts)",
+   "tol_text": "Table 2: 887 to 913 nF   (published specification: ±(1.2 % of reading + 2 counts of 1 nF))",
+   "group": "VOHM",
+   "settle": 10,
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 900 nF (the 5500A \"Apply\" capacitance).",
+   "ref": "T2 #36",
+   "id": "2-36"
+  },
+  {
+   "table": "2",
+   "step": 37,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (press the YELLOW button)",
+   "range": "10.00 µF",
+   "models": [
+    "175"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "8.87",
+   "high": "9.13",
+   "test": "numeric",
+   "applied": {
+    "value": 9e-06,
+    "frequency": null
+   },
+   "nominal": 9e-06,
+   "accuracy": "±(1.2 % of reading + 2 counts)",
+   "tol_text": "Table 2: 8.87 to 9.13 µF   (published specification: ±(1.2 % of reading + 2 counts of 0.01 µF))",
+   "group": "VOHM",
+   "settle": 10,
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 9 µF (the 5500A \"Apply\" capacitance).",
+   "ref": "T2 #37",
+   "id": "2-37"
+  },
+  {
+   "table": "2",
+   "step": 38,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (press the YELLOW button)",
+   "range": "100.0 µF",
+   "models": [
+    "175"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "88.7",
+   "high": "91.3",
+   "test": "numeric",
+   "applied": {
+    "value": 9e-05,
+    "frequency": null
+   },
+   "nominal": 9e-05,
+   "accuracy": "±(1.2 % of reading + 2 counts)",
+   "tol_text": "Table 2: 88.7 to 91.3 µF   (published specification: ±(1.2 % of reading + 2 counts of 0.1 µF))",
+   "group": "VOHM",
+   "settle": 10,
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 90 µF (the 5500A \"Apply\" capacitance).",
+   "ref": "T2 #38",
+   "id": "2-38"
+  },
+  {
+   "table": "2",
+   "step": 39,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (press the YELLOW button)",
+   "range": "9999 µF",
+   "models": [
+    "175"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "887",
+   "high": "913",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0009,
+    "frequency": null
+   },
+   "nominal": 0.0009,
+   "accuracy": "±(1.2 % of reading + 2 counts)",
+   "tol_text": "Table 2: 887 to 913 µF   (published specification: ±(1.2 % of reading + 2 counts of 1 µF))",
+   "group": "VOHM",
+   "settle": 10,
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 900 µF (the 5500A \"Apply\" capacitance).",
+   "ref": "T2 #39",
+   "id": "2-39"
+  },
+  {
+   "table": "2",
+   "step": 40,
+   "section": "Continuity",
+   "switch": "Continuity  •)))",
+   "range": "600 Ω",
+   "models": [
+    "175"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "on",
+   "applied": {
+    "value": 25,
+    "frequency": null
+   },
+   "nominal": 25,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "question": "The beeper is ON (sounding).",
+   "group": "VOHM",
+   "ref": "T2 #40",
+   "id": "2-40"
+  },
+  {
+   "table": "2",
+   "step": 41,
+   "section": "Continuity",
+   "switch": "Continuity  •)))",
+   "range": "600 Ω",
+   "models": [
+    "175"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "off",
+   "applied": {
+    "value": 250,
+    "frequency": null
+   },
+   "nominal": 250,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "question": "The beeper is OFF (silent).",
+   "group": "VOHM",
+   "ref": "T2 #41",
+   "id": "2-41"
+  },
+  {
+   "table": "2",
+   "step": 42,
+   "section": "Diode",
+   "switch": "Diode  ▶|  (press the YELLOW button)",
+   "range": "2.400 V",
+   "models": [
+    "175"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "1.978",
+   "high": "2.022",
+   "test": "numeric",
+   "applied": {
+    "value": 2.0,
+    "frequency": null
+   },
+   "nominal": 2.0,
+   "accuracy": "±(1.0 % of reading + 2 counts)",
+   "tol_text": "Table 2: 1.978 to 2.022 V   (published specification: ±(1.0 % of reading + 2 counts of 0.001 V))",
+   "group": "VOHM",
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 2.0 V (DC) to the VΩ input in diode test; the table lists the displayed voltage.",
+   "ref": "T2 #42",
+   "id": "2-42"
+  },
+  {
+   "table": "2",
+   "step": 43,
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "60.00 mA",
+   "models": [
+    "175"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "2.92",
+   "high": "3.08",
+   "test": "numeric",
+   "applied": {
+    "value": 0.003,
+    "frequency": 45.0
+   },
+   "nominal": 0.003,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 2: 2.92 to 3.08 mA   (published specification: ±(1.5 % of reading + 3 counts of 0.01 mA))",
+   "group": "UAMP",
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T2 #43",
+   "id": "2-43"
+  },
+  {
+   "table": "2",
+   "step": 44,
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "60.00 mA",
+   "models": [
+    "175"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "49.22",
+   "high": "50.78",
+   "test": "numeric",
+   "applied": {
+    "value": 0.05,
+    "frequency": 1000.0
+   },
+   "nominal": 0.05,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 2: 49.22 to 50.78 mA   (published specification: ±(1.5 % of reading + 3 counts of 0.01 mA))",
+   "group": "UAMP",
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T2 #44",
+   "id": "2-44"
+  },
+  {
+   "table": "2",
+   "step": 45,
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "400.0 mA",
+   "models": [
+    "175"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "393.7",
+   "high": "406.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.4,
+    "frequency": 1000.0
+   },
+   "nominal": 0.4,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 2: 393.7 to 406.3 mA   (published specification: ±(1.5 % of reading + 3 counts of 0.1 mA))",
+   "group": "UAMP",
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T2 #45",
+   "id": "2-45"
+  },
+  {
+   "table": "2",
+   "step": 46,
+   "section": "AC amps",
+   "switch": "A~  (AC amps)",
+   "range": "6.000 A",
+   "models": [
+    "175"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "3.937",
+   "high": "4.063",
+   "test": "numeric",
+   "applied": {
+    "value": 4.0,
+    "frequency": 45.0
+   },
+   "nominal": 4.0,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 2: 3.937 to 4.063 A   (published specification: ±(1.5 % of reading + 3 counts of 0.001 A))",
+   "group": "AMP10",
+   "settle": 5,
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T2 #46",
+   "id": "2-46"
+  },
+  {
+   "table": "2",
+   "step": 47,
+   "section": "AC amps",
+   "switch": "A~  (AC amps)",
+   "range": "10.00 A",
+   "models": [
+    "175"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "8.83",
+   "high": "9.17",
+   "test": "numeric",
+   "applied": {
+    "value": 9.0,
+    "frequency": 1000.0
+   },
+   "nominal": 9.0,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 2: 8.83 to 9.17 A   (published specification: ±(1.5 % of reading + 3 counts of 0.01 A))",
+   "group": "AMP10",
+   "settle": 5,
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T2 #47",
+   "id": "2-47"
+  },
+  {
+   "table": "2",
+   "step": 48,
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "range": "60.00 mA",
+   "models": [
+    "175"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "2.94",
+   "high": "3.06",
+   "test": "numeric",
+   "applied": {
+    "value": 0.003,
+    "frequency": null
+   },
+   "nominal": 0.003,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 2.94 to 3.06 mA   (published specification: ±(1.0 % of reading + 3 counts of 0.01 mA))",
+   "group": "UAMP",
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #48",
+   "id": "2-48"
+  },
+  {
+   "table": "2",
+   "step": 49,
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "range": "60.00 mA",
+   "models": [
+    "175"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "49.47",
+   "high": "50.53",
+   "test": "numeric",
+   "applied": {
+    "value": 0.05,
+    "frequency": null
+   },
+   "nominal": 0.05,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 49.47 to 50.53 mA   (published specification: ±(1.0 % of reading + 3 counts of 0.01 mA))",
+   "group": "UAMP",
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #49",
+   "id": "2-49"
+  },
+  {
+   "table": "2",
+   "step": 50,
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "range": "400.0 mA",
+   "models": [
+    "175"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "-404.3",
+   "high": "-395.7",
+   "test": "numeric",
+   "applied": {
+    "value": -0.4,
+    "frequency": null
+   },
+   "nominal": -0.4,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: -404.3 to -395.7 mA   (published specification: ±(1.0 % of reading + 3 counts of 0.1 mA))",
+   "group": "UAMP",
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #50",
+   "id": "2-50"
+  },
+  {
+   "table": "2",
+   "step": 51,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps; press the YELLOW button)",
+   "range": "6.000 A",
+   "models": [
+    "175"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "3.957",
+   "high": "4.043",
+   "test": "numeric",
+   "applied": {
+    "value": 4.0,
+    "frequency": null
+   },
+   "nominal": 4.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: 3.957 to 4.043 A   (published specification: ±(1.0 % of reading + 3 counts of 0.001 A))",
+   "group": "AMP10",
+   "settle": 5,
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #51",
+   "id": "2-51"
+  },
+  {
+   "table": "2",
+   "step": 52,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps; press the YELLOW button)",
+   "range": "10.00 A",
+   "models": [
+    "175"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-9.12",
+   "high": "-8.88",
+   "test": "numeric",
+   "applied": {
+    "value": -9.0,
+    "frequency": null
+   },
+   "nominal": -9.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 2: -9.12 to -8.88 A   (published specification: ±(1.0 % of reading + 3 counts of 0.01 A))",
+   "group": "AMP10",
+   "settle": 5,
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T2 #52",
+   "id": "2-52"
+  },
+  {
+   "table": "3",
+   "step": 1,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 mV",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "296.7",
+   "high": "303.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.3,
+    "frequency": 45.0
+   },
+   "nominal": 0.3,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 296.7 to 303.3 mV   (published specification: ±(1.0 % of reading + 3 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T3 #1",
+   "id": "3-1"
+  },
+  {
+   "table": "3",
+   "step": 2,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 mV",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "494.7",
+   "high": "505.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": 500.0
+   },
+   "nominal": 0.5,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 494.7 to 505.3 mV   (published specification: ±(1.0 % of reading + 3 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T3 #2",
+   "id": "3-2"
+  },
+  {
+   "table": "3",
+   "step": 3,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 mV",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "489.7",
+   "high": "510.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": 1000.0
+   },
+   "nominal": 0.5,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 489.7 to 510.3 mV   (published specification: ±(2.0 % of reading + 3 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T3 #3",
+   "id": "3-3"
+  },
+  {
+   "table": "3",
+   "step": 4,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "printed_limits": {
+    "low": "4.947",
+    "high": "5.103",
+    "unit": "V",
+    "note": "as printed in Table 3 (p. 12)"
+   },
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.947",
+   "high": "5.053",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 45.0
+   },
+   "nominal": 5.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 4.947 to 5.053 V   (published specification: ±(1.0 % of reading + 3 counts of 0.001 V))",
+   "report_desc": "6.000 V range (limits corrected)",
+   "group": "VOHM",
+   "note": "LIMIT CORRECTED: Table 3 prints the upper limit of 5 V at 45 Hz as 5.103 V ac, which is not symmetric about 5 V; the lower limit (4.947 V), the 175 table and the accuracy (1.0 % + 3 counts of 0.001 V = 0.053 V) give 5.053 V ac.",
+   "ref": "T3 #4",
+   "id": "3-4"
+  },
+  {
+   "table": "3",
+   "step": 5,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.947",
+   "high": "5.053",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 500.0
+   },
+   "nominal": 5.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 4.947 to 5.053 V   (published specification: ±(1.0 % of reading + 3 counts of 0.001 V))",
+   "group": "VOHM",
+   "ref": "T3 #5",
+   "id": "3-5"
+  },
+  {
+   "table": "3",
+   "step": 6,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "6.000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.897",
+   "high": "5.103",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 1000.0
+   },
+   "nominal": 5.0,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 4.897 to 5.103 V   (published specification: ±(2.0 % of reading + 3 counts of 0.001 V))",
+   "group": "VOHM",
+   "ref": "T3 #6",
+   "id": "3-6"
+  },
+  {
+   "table": "3",
+   "step": 7,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.47",
+   "high": "50.53",
+   "test": "numeric",
+   "applied": {
+    "value": 50.0,
+    "frequency": 45.0
+   },
+   "nominal": 50.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 49.47 to 50.53 V   (published specification: ±(1.0 % of reading + 3 counts of 0.01 V))",
+   "group": "VOHM",
+   "ref": "T3 #7",
+   "id": "3-7"
+  },
+  {
+   "table": "3",
+   "step": 8,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.47",
+   "high": "50.53",
+   "test": "numeric",
+   "applied": {
+    "value": 50.0,
+    "frequency": 500.0
+   },
+   "nominal": 50.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 49.47 to 50.53 V   (published specification: ±(1.0 % of reading + 3 counts of 0.01 V))",
+   "group": "VOHM",
+   "ref": "T3 #8",
+   "id": "3-8"
+  },
+  {
+   "table": "3",
+   "step": 9,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "60.00 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "48.97",
+   "high": "51.03",
+   "test": "numeric",
+   "applied": {
+    "value": 50.0,
+    "frequency": 1000.0
+   },
+   "nominal": 50.0,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 48.97 to 51.03 V   (published specification: ±(2.0 % of reading + 3 counts of 0.01 V))",
+   "group": "VOHM",
+   "ref": "T3 #9",
+   "id": "3-9"
+  },
+  {
+   "table": "3",
+   "step": 10,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "296.7",
+   "high": "303.3",
+   "test": "numeric",
+   "applied": {
+    "value": 300.0,
+    "frequency": 45.0
+   },
+   "nominal": 300.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 296.7 to 303.3 V   (published specification: ±(1.0 % of reading + 3 counts of 0.1 V))",
+   "group": "VOHM",
+   "ref": "T3 #10",
+   "id": "3-10"
+  },
+  {
+   "table": "3",
+   "step": 11,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "494.7",
+   "high": "505.3",
+   "test": "numeric",
+   "applied": {
+    "value": 500.0,
+    "frequency": 500.0
+   },
+   "nominal": 500.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 494.7 to 505.3 V   (published specification: ±(1.0 % of reading + 3 counts of 0.1 V))",
+   "group": "VOHM",
+   "ref": "T3 #11",
+   "id": "3-11"
+  },
+  {
+   "table": "3",
+   "step": 12,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "489.7",
+   "high": "510.3",
+   "test": "numeric",
+   "applied": {
+    "value": 500.0,
+    "frequency": 1000.0
+   },
+   "nominal": 500.0,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 489.7 to 510.3 V   (published specification: ±(2.0 % of reading + 3 counts of 0.1 V))",
+   "group": "VOHM",
+   "ref": "T3 #12",
+   "id": "3-12"
+  },
+  {
+   "table": "3",
+   "step": 13,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "987",
+   "high": "1013",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 45.0
+   },
+   "nominal": 1000.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 987 to 1013 V   (published specification: ±(1.0 % of reading + 3 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T3 #13",
+   "id": "3-13"
+  },
+  {
+   "table": "3",
+   "step": 14,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "987",
+   "high": "1013",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 500.0
+   },
+   "nominal": 1000.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 987 to 1013 V   (published specification: ±(1.0 % of reading + 3 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T3 #14",
+   "id": "3-14"
+  },
+  {
+   "table": "3",
+   "step": 15,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "1000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "977",
+   "high": "1023",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 1000.0
+   },
+   "nominal": 1000.0,
+   "accuracy": "±(2.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 977 to 1023 V   (published specification: ±(2.0 % of reading + 3 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T3 #15",
+   "id": "3-15"
+  },
+  {
+   "table": "3",
+   "step": 16,
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "range": "99.99 Hz",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "44.94",
+   "high": "45.06",
+   "test": "numeric",
+   "applied": {
+    "value": 1.0,
+    "frequency": 45.0
+   },
+   "nominal": 45.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 3: 44.94 to 45.06 Hz   (published specification: ±(0.1 % of reading + 1 count of 0.01 Hz))",
+   "no_uncertainty": true,
+   "report_desc": "99.99 Hz range (1 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 1 V at 45 Hz). Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #16",
+   "id": "3-16"
+  },
+  {
+   "table": "3",
+   "step": 17,
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "range": "999.9 Hz",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "printed_text": {
+    "low": "899",
+    "high": "901",
+    "note": "printed with fewer decimals than the display resolution; same value"
+   },
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "899.0",
+   "high": "901.0",
+   "test": "numeric",
+   "applied": {
+    "value": 1.0,
+    "frequency": 900.0
+   },
+   "nominal": 900.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 3: 899.0 to 901.0 Hz   (published specification: ±(0.1 % of reading + 1 count of 0.1 Hz))",
+   "no_uncertainty": true,
+   "report_desc": "999.9 Hz range (1 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 1 V at 900 Hz). Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #17",
+   "id": "3-17"
+  },
+  {
+   "table": "3",
+   "step": 18,
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "range": "9.999 kHz",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "printed_text": {
+    "low": "8.99",
+    "high": "9.01",
+    "note": "printed with fewer decimals than the display resolution; same value"
+   },
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "8.990",
+   "high": "9.010",
+   "test": "numeric",
+   "applied": {
+    "value": 1.0,
+    "frequency": 9000.0
+   },
+   "nominal": 9000.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 3: 8.990 to 9.010 kHz   (published specification: ±(0.1 % of reading + 1 count of 0.001 kHz))",
+   "no_uncertainty": true,
+   "report_desc": "9.999 kHz range (1 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 1 V at 9000 Hz). Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #18",
+   "id": "3-18"
+  },
+  {
+   "table": "3",
+   "step": 19,
+   "section": "AC volts frequency",
+   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "range": "99.99 kHz",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "49.94",
+   "high": "50.06",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 50000.0
+   },
+   "nominal": 50000.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 3: 49.94 to 50.06 kHz   (published specification: ±(0.1 % of reading + 1 count of 0.01 kHz))",
+   "no_uncertainty": true,
+   "report_desc": "99.99 kHz range (5 V applied)",
+   "group": "VOHM",
+   "note": "The meter displays FREQUENCY on this step (the calibrator applies 5 V at 50000 Hz). Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #19",
+   "id": "3-19"
+  },
+  {
+   "table": "3",
+   "step": 20,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "6.000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.993",
+   "high": "5.007",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": null
+   },
+   "nominal": 5.0,
+   "accuracy": "±(0.09 % of reading + 2 counts)",
+   "tol_text": "Table 3: 4.993 to 5.007 V   (published specification: ±(0.09 % of reading + 2 counts of 0.001 V))",
+   "group": "VOHM",
+   "ref": "T3 #20",
+   "id": "3-20"
+  },
+  {
+   "table": "3",
+   "step": 21,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "60.00 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.93",
+   "high": "50.07",
+   "test": "numeric",
+   "applied": {
+    "value": 50.0,
+    "frequency": null
+   },
+   "nominal": 50.0,
+   "accuracy": "±(0.09 % of reading + 2 counts)",
+   "tol_text": "Table 3: 49.93 to 50.07 V   (published specification: ±(0.09 % of reading + 2 counts of 0.01 V))",
+   "group": "VOHM",
+   "ref": "T3 #21",
+   "id": "3-21"
+  },
+  {
+   "table": "3",
+   "step": 22,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "299.5",
+   "high": "300.5",
+   "test": "numeric",
+   "applied": {
+    "value": 300.0,
+    "frequency": null
+   },
+   "nominal": 300.0,
+   "accuracy": "±(0.09 % of reading + 2 counts)",
+   "tol_text": "Table 3: 299.5 to 300.5 V   (published specification: ±(0.09 % of reading + 2 counts of 0.1 V))",
+   "group": "VOHM",
+   "ref": "T3 #22",
+   "id": "3-22"
+  },
+  {
+   "table": "3",
+   "step": 23,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "1000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "997",
+   "high": "1003",
+   "test": "numeric",
+   "applied": {
+    "value": 1000.0,
+    "frequency": null
+   },
+   "nominal": 1000.0,
+   "accuracy": "±(0.1 % of reading + 2 counts)",
+   "tol_text": "Table 3: 997 to 1003 V   (published specification: ±(0.1 % of reading + 2 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T3 #23",
+   "id": "3-23"
+  },
+  {
+   "table": "3",
+   "step": 24,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "1000 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-1003",
+   "high": "-997",
+   "test": "numeric",
+   "applied": {
+    "value": -1000.0,
+    "frequency": null
+   },
+   "nominal": -1000.0,
+   "accuracy": "±(0.1 % of reading + 2 counts)",
+   "tol_text": "Table 3: -1003 to -997 V   (published specification: ±(0.1 % of reading + 2 counts of 1 V))",
+   "group": "VOHM",
+   "ref": "T3 #24",
+   "id": "3-24"
+  },
+  {
+   "table": "3",
+   "step": 25,
+   "section": "DC volts frequency",
+   "switch": "V⎓ Hz  (DC volts frequency; press the YELLOW button)",
+   "range": "99.99 Hz",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACV",
+   "printed_limits": {
+    "low": "45.06",
+    "high": "44.94",
+    "unit": "Hz",
+    "applied": "3 V 45 kHz",
+    "note": "as printed in Table 3 (p. 12): lower and upper columns swapped, input given as 45 kHz"
+   },
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "44.94",
+   "high": "45.06",
+   "test": "numeric",
+   "applied": {
+    "value": 3.0,
+    "frequency": 45.0
+   },
+   "nominal": 45.0,
+   "accuracy": "±(0.1 % of reading + 1 count)",
+   "tol_text": "Table 3: 44.94 to 45.06 Hz   (published specification: ±(0.1 % of reading + 1 count of 0.01 Hz))",
+   "no_uncertainty": true,
+   "report_desc": "99.99 Hz range (3 V applied, limits corrected)",
+   "group": "VOHM",
+   "note": "PRINTED ROW CORRECTED: Table 3 prints \"3 V 45 kHz\" with the limits 45.06 Hz (lower column) and 44.94 Hz (upper column). A 45 kHz input cannot read 45 Hz and the columns are swapped: the 175 table prints 3 V 45 Hz, 44.94 / 45.06 Hz. The input is 3 V at 45 Hz, judged 44.94 .. 45.06 Hz. The meter displays FREQUENCY on this step (the calibrator applies 3 V at 45 Hz). Table footnote 1: press the YELLOW button to access this function. \"DC Volts Frequency\": the calibrator applies an AC voltage (Table 3 \"3 V\" / \"30 V\" at the stated frequency) with the meter in DC volts, frequency.",
+   "ref": "T3 #25",
+   "id": "3-25"
+  },
+  {
+   "table": "3",
+   "step": 26,
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "29.8",
+   "high": "30.2",
+   "test": "numeric",
+   "applied": {
+    "value": 0.03,
+    "frequency": null
+   },
+   "nominal": 0.03,
+   "accuracy": "±(0.09 % of reading + 2 counts)",
+   "tol_text": "Table 3: 29.8 to 30.2 mV   (published specification: ±(0.09 % of reading + 2 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T3 #26",
+   "id": "3-26"
+  },
+  {
+   "table": "3",
+   "step": 27,
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "-300.5",
+   "high": "-299.5",
+   "test": "numeric",
+   "applied": {
+    "value": -0.3,
+    "frequency": null
+   },
+   "nominal": -0.3,
+   "accuracy": "±(0.09 % of reading + 2 counts)",
+   "tol_text": "Table 3: -300.5 to -299.5 mV   (published specification: ±(0.09 % of reading + 2 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T3 #27",
+   "id": "3-27"
+  },
+  {
+   "table": "3",
+   "step": 28,
+   "section": "DC millivolts",
+   "switch": "mV⎓  (DC millivolts)",
+   "range": "600.0 mV",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "599.3",
+   "high": "600.7",
+   "test": "numeric",
+   "applied": {
+    "value": 0.6,
+    "frequency": null
+   },
+   "nominal": 0.6,
+   "accuracy": "±(0.09 % of reading + 2 counts)",
+   "tol_text": "Table 3: 599.3 to 600.7 mV   (published specification: ±(0.09 % of reading + 2 counts of 0.1 mV))",
+   "group": "VOHM",
+   "ref": "T3 #28",
+   "id": "3-28"
+  },
+  {
+   "table": "3",
+   "step": 29,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600.0 Ω",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "495.3",
+   "high": "504.7",
+   "test": "numeric",
+   "applied": {
+    "value": 500.0,
+    "frequency": null
+   },
+   "nominal": 500.0,
+   "accuracy": "±(0.9 % of reading + 2 counts)",
+   "tol_text": "Table 3: 495.3 to 504.7 Ω   (published specification: ±(0.9 % of reading + 2 counts of 0.1 Ω))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T3 #29",
+   "id": "3-29"
+  },
+  {
+   "table": "3",
+   "step": 30,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6.000 kΩ",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "4.954",
+   "high": "5.046",
+   "test": "numeric",
+   "applied": {
+    "value": 5000.0,
+    "frequency": null
+   },
+   "nominal": 5000.0,
+   "accuracy": "±(0.9 % of reading + 1 count)",
+   "tol_text": "Table 3: 4.954 to 5.046 kΩ   (published specification: ±(0.9 % of reading + 1 count of 0.001 kΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T3 #30",
+   "id": "3-30"
+  },
+  {
+   "table": "3",
+   "step": 31,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "60.00 kΩ",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "49.54",
+   "high": "50.46",
+   "test": "numeric",
+   "applied": {
+    "value": 50000.0,
+    "frequency": null
+   },
+   "nominal": 50000.0,
+   "accuracy": "±(0.9 % of reading + 1 count)",
+   "tol_text": "Table 3: 49.54 to 50.46 kΩ   (published specification: ±(0.9 % of reading + 1 count of 0.01 kΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T3 #31",
+   "id": "3-31"
+  },
+  {
+   "table": "3",
+   "step": 32,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "600.0 kΩ",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "OHM",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "495.4",
+   "high": "504.6",
+   "test": "numeric",
+   "applied": {
+    "value": 500000.0,
+    "frequency": null
+   },
+   "nominal": 500000.0,
+   "accuracy": "±(0.9 % of reading + 1 count)",
+   "tol_text": "Table 3: 495.4 to 504.6 kΩ   (published specification: ±(0.9 % of reading + 1 count of 0.1 kΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T3 #32",
+   "id": "3-32"
+  },
+  {
+   "table": "3",
+   "step": 33,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "6.000 MΩ",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "4.954",
+   "high": "5.046",
+   "test": "numeric",
+   "applied": {
+    "value": 5000000.0,
+    "frequency": null
+   },
+   "nominal": 5000000.0,
+   "accuracy": "±(0.9 % of reading + 1 count)",
+   "tol_text": "Table 3: 4.954 to 5.046 MΩ   (published specification: ±(0.9 % of reading + 1 count of 0.001 MΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T3 #33",
+   "id": "3-33"
+  },
+  {
+   "table": "3",
+   "step": 34,
+   "section": "Ohms",
+   "switch": "Ω  (Ohms)",
+   "range": "50.00 MΩ",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "OHM",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "18.68",
+   "high": "19.32",
+   "test": "numeric",
+   "applied": {
+    "value": 19000000.0,
+    "frequency": null
+   },
+   "nominal": 19000000.0,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 3: 18.68 to 19.32 MΩ   (published specification: ±(1.5 % of reading + 3 counts of 0.01 MΩ))",
+   "group": "VOHM",
+   "note": "The limits do not include test lead resistance (table note 2).",
+   "ref": "T3 #34",
+   "id": "3-34"
+  },
+  {
+   "table": "3",
+   "step": 35,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (press the YELLOW button)",
+   "range": "1000 nF",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "CAP",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "887",
+   "high": "913",
+   "test": "numeric",
+   "applied": {
+    "value": 9e-07,
+    "frequency": null
+   },
+   "nominal": 9e-07,
+   "accuracy": "±(1.2 % of reading + 2 counts)",
+   "tol_text": "Table 3: 887 to 913 nF   (published specification: ±(1.2 % of reading + 2 counts of 1 nF))",
+   "group": "VOHM",
+   "settle": 10,
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 900 nF (the 5500A \"Apply\" capacitance).",
+   "ref": "T3 #35",
+   "id": "3-35"
+  },
+  {
+   "table": "3",
+   "step": 36,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (press the YELLOW button)",
+   "range": "10.00 µF",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "8.87",
+   "high": "9.13",
+   "test": "numeric",
+   "applied": {
+    "value": 9e-06,
+    "frequency": null
+   },
+   "nominal": 9e-06,
+   "accuracy": "±(1.2 % of reading + 2 counts)",
+   "tol_text": "Table 3: 8.87 to 9.13 µF   (published specification: ±(1.2 % of reading + 2 counts of 0.01 µF))",
+   "group": "VOHM",
+   "settle": 10,
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 9 µF (the 5500A \"Apply\" capacitance).",
+   "ref": "T3 #36",
+   "id": "3-36"
+  },
+  {
+   "table": "3",
+   "step": 37,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (press the YELLOW button)",
+   "range": "100.0 µF",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "88.7",
+   "high": "91.3",
+   "test": "numeric",
+   "applied": {
+    "value": 9e-05,
+    "frequency": null
+   },
+   "nominal": 9e-05,
+   "accuracy": "±(1.2 % of reading + 2 counts)",
+   "tol_text": "Table 3: 88.7 to 91.3 µF   (published specification: ±(1.2 % of reading + 2 counts of 0.1 µF))",
+   "group": "VOHM",
+   "settle": 10,
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 90 µF (the 5500A \"Apply\" capacitance).",
+   "ref": "T3 #37",
+   "id": "3-37"
+  },
+  {
+   "table": "3",
+   "step": 38,
+   "section": "Capacitance",
+   "switch": "Capacitance  ⊣⊢  (press the YELLOW button)",
+   "range": "9999 µF",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "CAP",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "887",
+   "high": "913",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0009,
+    "frequency": null
+   },
+   "nominal": 0.0009,
+   "accuracy": "±(1.2 % of reading + 2 counts)",
+   "tol_text": "Table 3: 887 to 913 µF   (published specification: ±(1.2 % of reading + 2 counts of 1 µF))",
+   "group": "VOHM",
+   "settle": 10,
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 900 µF (the 5500A \"Apply\" capacitance).",
+   "ref": "T3 #38",
+   "id": "3-38"
+  },
+  {
+   "table": "3",
+   "step": 39,
+   "section": "Continuity",
+   "switch": "Continuity  •)))",
+   "range": "600 Ω",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "on",
+   "applied": {
+    "value": 25,
+    "frequency": null
+   },
+   "nominal": 25,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "question": "The beeper is ON (sounding).",
+   "group": "VOHM",
+   "ref": "T3 #39",
+   "id": "3-39"
+  },
+  {
+   "table": "3",
+   "step": 40,
+   "section": "Continuity",
+   "switch": "Continuity  •)))",
+   "range": "600 Ω",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "OHM",
+   "test": "beeper",
+   "expect": "off",
+   "applied": {
+    "value": 250,
+    "frequency": null
+   },
+   "nominal": 250,
+   "base_unit": "ohm",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "question": "The beeper is OFF (silent).",
+   "group": "VOHM",
+   "ref": "T3 #40",
+   "id": "3-40"
+  },
+  {
+   "table": "3",
+   "step": 41,
+   "section": "Diode",
+   "switch": "Diode  ▶|  (press the YELLOW button)",
+   "range": "2.400 V",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "1.978",
+   "high": "2.022",
+   "test": "numeric",
+   "applied": {
+    "value": 2.0,
+    "frequency": null
+   },
+   "nominal": 2.0,
+   "accuracy": "±(1.0 % of reading + 2 counts)",
+   "tol_text": "Table 3: 1.978 to 2.022 V   (published specification: ±(1.0 % of reading + 2 counts of 0.001 V))",
+   "group": "VOHM",
+   "note": "Table footnote 1: press the YELLOW button to access this function. Apply 2.0 V (DC) to the VΩ input in diode test; the table lists the displayed voltage.",
+   "ref": "T3 #41",
+   "id": "3-41"
+  },
+  {
+   "table": "3",
+   "step": 42,
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "60.00 mA",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "2.92",
+   "high": "3.08",
+   "test": "numeric",
+   "applied": {
+    "value": 0.003,
+    "frequency": 45.0
+   },
+   "nominal": 0.003,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 3: 2.92 to 3.08 mA   (published specification: ±(1.5 % of reading + 3 counts of 0.01 mA))",
+   "group": "UAMP",
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T3 #42",
+   "id": "3-42"
+  },
+  {
+   "table": "3",
+   "step": 43,
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "60.00 mA",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "49.22",
+   "high": "50.78",
+   "test": "numeric",
+   "applied": {
+    "value": 0.05,
+    "frequency": 1000.0
+   },
+   "nominal": 0.05,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 3: 49.22 to 50.78 mA   (published specification: ±(1.5 % of reading + 3 counts of 0.01 mA))",
+   "group": "UAMP",
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T3 #43",
+   "id": "3-43"
+  },
+  {
+   "table": "3",
+   "step": 44,
+   "section": "AC milliamps",
+   "switch": "mA~  (AC milliamps)",
+   "range": "400.0 mA",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "393.7",
+   "high": "406.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.4,
+    "frequency": 1000.0
+   },
+   "nominal": 0.4,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 3: 393.7 to 406.3 mA   (published specification: ±(1.5 % of reading + 3 counts of 0.1 mA))",
+   "group": "UAMP",
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T3 #44",
+   "id": "3-44"
+  },
+  {
+   "table": "3",
+   "step": 45,
+   "section": "AC amps",
+   "switch": "A~  (AC amps)",
+   "range": "6.000 A",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "3.937",
+   "high": "4.063",
+   "test": "numeric",
+   "applied": {
+    "value": 4.0,
+    "frequency": 45.0
+   },
+   "nominal": 4.0,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 3: 3.937 to 4.063 A   (published specification: ±(1.5 % of reading + 3 counts of 0.001 A))",
+   "group": "AMP10",
+   "settle": 5,
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T3 #45",
+   "id": "3-45"
+  },
+  {
+   "table": "3",
+   "step": 46,
+   "section": "AC amps",
+   "switch": "A~  (AC amps)",
+   "range": "10.00 A",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "8.83",
+   "high": "9.17",
+   "test": "numeric",
+   "applied": {
+    "value": 9.0,
+    "frequency": 1000.0
+   },
+   "nominal": 9.0,
+   "accuracy": "±(1.5 % of reading + 3 counts)",
+   "tol_text": "Table 3: 8.83 to 9.17 A   (published specification: ±(1.5 % of reading + 3 counts of 0.01 A))",
+   "group": "AMP10",
+   "settle": 5,
+   "note": "Table gives no yellow-button step for AC current: the display should show AC (~). Avoid coupled noise on AC current by either shorting the VΩ input to COM or leaving the VΩ input unconnected (manual p. 9). The meter shows LEAd when the switch moves to or from the mA / A position (p. 2): check the leads are in the right jacks.",
+   "ref": "T3 #46",
+   "id": "3-46"
+  },
+  {
+   "table": "3",
+   "step": 47,
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "range": "60.00 mA",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "2.94",
+   "high": "3.06",
+   "test": "numeric",
+   "applied": {
+    "value": 0.003,
+    "frequency": null
+   },
+   "nominal": 0.003,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 2.94 to 3.06 mA   (published specification: ±(1.0 % of reading + 3 counts of 0.01 mA))",
+   "group": "UAMP",
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #47",
+   "id": "3-47"
+  },
+  {
+   "table": "3",
+   "step": 48,
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "range": "60.00 mA",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "49.47",
+   "high": "50.53",
+   "test": "numeric",
+   "applied": {
+    "value": 0.05,
+    "frequency": null
+   },
+   "nominal": 0.05,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 49.47 to 50.53 mA   (published specification: ±(1.0 % of reading + 3 counts of 0.01 mA))",
+   "group": "UAMP",
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #48",
+   "id": "3-48"
+  },
+  {
+   "table": "3",
+   "step": 49,
+   "section": "DC milliamps",
+   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "range": "400.0 mA",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCI",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "-404.3",
+   "high": "-395.7",
+   "test": "numeric",
+   "applied": {
+    "value": -0.4,
+    "frequency": null
+   },
+   "nominal": -0.4,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: -404.3 to -395.7 mA   (published specification: ±(1.0 % of reading + 3 counts of 0.1 mA))",
+   "group": "UAMP",
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #49",
+   "id": "3-49"
+  },
+  {
+   "table": "3",
+   "step": 50,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps; press the YELLOW button)",
+   "range": "6.000 A",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "3.957",
+   "high": "4.043",
+   "test": "numeric",
+   "applied": {
+    "value": 4.0,
+    "frequency": null
+   },
+   "nominal": 4.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: 3.957 to 4.043 A   (published specification: ±(1.0 % of reading + 3 counts of 0.001 A))",
+   "group": "AMP10",
+   "settle": 5,
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #50",
+   "id": "3-50"
+  },
+  {
+   "table": "3",
+   "step": 51,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps; press the YELLOW button)",
+   "range": "10.00 A",
+   "models": [
+    "177",
+    "179"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-9.12",
+   "high": "-8.88",
+   "test": "numeric",
+   "applied": {
+    "value": -9.0,
+    "frequency": null
+   },
+   "nominal": -9.0,
+   "accuracy": "±(1.0 % of reading + 3 counts)",
+   "tol_text": "Table 3: -9.12 to -8.88 A   (published specification: ±(1.0 % of reading + 3 counts of 0.01 A))",
+   "group": "AMP10",
+   "settle": 5,
+   "note": "Table footnote 1: press the YELLOW button to access this function.",
+   "ref": "T3 #51",
+   "id": "3-51"
+  },
+  {
+   "table": "3",
+   "step": 52,
+   "section": "Temperature",
+   "switch": "Temperature  (179 only; press the YELLOW button)",
+   "range": "Type K",
+   "models": [
+    "179"
+   ],
+   "kind": "TEMP",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "degC",
+   "low": "-1.0",
+   "high": "1.0",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "accuracy": "±(1.0 % of reading + 1.0 °C)",
+   "tol_text": "Table 3: -1.0 to 1.0 °C   (published specification: ±(1.0 % of reading + 1.0 °C))",
+   "settle": 30,
+   "group": "TEMP",
+   "note": "Table 3 notes 1, 3, 4: press the YELLOW button to access temperature; be sure to use the correct cable (K-type thermocouple, mini-plug on both ends, through the Fluke 80AK adapter, Table 1); the meter and the thermocouple adapter must be at the same temperature (allow 20 minutes). The calibrator sources degrees C: set the meter to °C.",
+   "ref": "T3 #52",
+   "id": "3-52",
+   "prompt": "Table 3 note 4: to ensure accuracy, the meter and the thermocouple adapter must be at the same temperature. Allow 20 minutes before performing the temperature points. Use the correct cable (K-type thermocouple, mini-plug on both ends, with the Fluke 80AK adapter). Press the YELLOW button for temperature and set the meter to °C."
+  },
+  {
+   "table": "3",
+   "step": 53,
+   "section": "Temperature",
+   "switch": "Temperature  (179 only; press the YELLOW button)",
+   "range": "Type K",
+   "models": [
+    "179"
+   ],
+   "kind": "TEMP",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "degC",
+   "low": "-41.4",
+   "high": "-38.6",
+   "test": "numeric",
+   "applied": {
+    "value": -40.0,
+    "frequency": null
+   },
+   "nominal": -40.0,
+   "accuracy": "±(1.0 % of reading + 1.0 °C)",
+   "tol_text": "Table 3: -41.4 to -38.6 °C   (published specification: ±(1.0 % of reading + 1.0 °C))",
+   "settle": 30,
+   "group": "TEMP",
+   "note": "Table 3 notes 1, 3, 4: press the YELLOW button to access temperature; be sure to use the correct cable (K-type thermocouple, mini-plug on both ends, through the Fluke 80AK adapter, Table 1); the meter and the thermocouple adapter must be at the same temperature (allow 20 minutes). The calibrator sources degrees C: set the meter to °C.",
+   "ref": "T3 #53",
+   "id": "3-53"
+  },
+  {
+   "table": "3",
+   "step": 54,
+   "section": "Temperature",
+   "switch": "Temperature  (179 only; press the YELLOW button)",
+   "range": "Type K",
+   "models": [
+    "179"
+   ],
+   "kind": "TEMP",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "degC",
+   "low": "395.0",
+   "high": "405.0",
+   "test": "numeric",
+   "applied": {
+    "value": 400.0,
+    "frequency": null
+   },
+   "nominal": 400.0,
+   "accuracy": "±(1.0 % of reading + 1.0 °C)",
+   "tol_text": "Table 3: 395.0 to 405.0 °C   (published specification: ±(1.0 % of reading + 1.0 °C))",
+   "settle": 30,
+   "group": "TEMP",
+   "note": "Table 3 notes 1, 3, 4: press the YELLOW button to access temperature; be sure to use the correct cable (K-type thermocouple, mini-plug on both ends, through the Fluke 80AK adapter, Table 1); the meter and the thermocouple adapter must be at the same temperature (allow 20 minutes). The calibrator sources degrees C: set the meter to °C.",
+   "ref": "T3 #54",
+   "id": "3-54"
+  }
+ ]
+}
