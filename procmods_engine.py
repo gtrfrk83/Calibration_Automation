@@ -34,11 +34,14 @@ Guarantees
 """
 from __future__ import annotations
 
+import contextlib
 import copy
+import functools
 import threading
 
 import procmods
 import procmods_live
+import procmods_pointdef as pdef
 
 LiveApplyError = procmods_live.LiveApplyError           # engines catch it as procmods_engine.LiveApplyError
 
@@ -174,6 +177,8 @@ class ModsState:
         self.run_entries: list = []              # "this run only" overrides (never written to the store); live edits add to it
         self.run_asset = ''                      # the Instrument ID they were made for
         self.live = procmods_live.LiveState()    # live editing inside a running procedure (procmods_live)
+        self.plan_mode = False                   # a private clone used for a dry run (procmods_plan): keeps the REAL instrument's identity
+        self._keymap: dict = {}                  # id(current point object) -> (object, factory point key): patched copies keep their key
         self._lock = threading.RLock()
 
     # ---- resolving ---------------------------------------------------------------------------------------------------------
@@ -249,7 +254,7 @@ class ModsState:
         overrides.  Call after connect(): that is when *IDN? is known."""
         with self._lock:
             self.insts = [i for i in insts if i is not None]
-            idn = getattr(self.insts[0], 'idn', '') if self.insts else ''
+            idn = getattr(self.insts[0], 'idn', '') if self.insts and not self.plan_mode else ''
             if idn and idn != self.idn:
                 self.load(idn=idn)                                       # re-resolve with fw_match evaluated (also rebinds)
             else:
@@ -261,24 +266,50 @@ class ModsState:
         with self._lock:
             self._bind_commands([inst], reset=False)
 
+    def clone_for_plan(self):
+        """A private ModsState for a dry run (procmods_plan): the SAVED changes resolved afresh (so a change saved but not yet applied at a
+        point boundary is in the plan), this run's own entries, no point lists, the real instrument's identity.  Never shares mutable state
+        with this one except the read-only point key map."""
+        with self._lock:
+            c = ModsState(self.engine, self.model, demo=self.demo, store=self._store(), devmode=self.devmode, shape=self.shape,
+                          proc_key=self.proc_key)
+            c.plan_mode = True
+            c.run_entries = list(self.run_entries)
+            c.run_asset = self.run_asset
+            c.idn, c.asset = self.idn, self.asset
+            c.factory_only, c.pinned, c.pinned_asset = self.factory_only, self.pinned, self.pinned_asset
+            c._keymap = self._keymap
+            if self.pinned:
+                c.oset = self.oset
+            else:
+                c.load(asset=self.asset)
+            return c
+
     def _bind_commands(self, insts=None, reset=True):
         if reset:
             self.rejected = []
         for inst in (self.insts if insts is None else insts):
             try:
                 has = bool(self.oset.entries())                           # candidates, even if none is active before the idn is known
-                oset = self.oset.with_idn(getattr(inst, 'idn', '') or None) if has else self.oset
+                oset = self.oset.with_idn((self.idn if self.plan_mode else getattr(inst, 'idn', '')) or None) if has else self.oset
                 names = [c.__name__ for c in type(inst).__mro__]
                 templates = oset.commands_for(inst) if has else {}
                 uids = {}
                 for e in (oset.active('command') if has else []):
+                    if '@' in e['target']:
+                        continue                                              # typed for one point: bound below
                     name, _, key = e['target'].partition(':')
                     if name in names and templates.get(key) == e['value'].get('template'):
                         uids[key] = e['uid']
                 for uid, probs in (oset.rejected_commands(inst) if has else []):
                     self.rejected.append((type(inst).__name__, '', uid, list(probs)))
                     self.warnings.append(f'command override {uid} not applied: ' + '; '.join(map(str, probs)))
-                for key, uid, probs in inst.use_commands(templates, uids):
+                pt_t, pt_u, pt_rej = oset.point_commands_for(inst) if has else ({}, {}, [])
+                for uid, probs in pt_rej:
+                    self.rejected.append((type(inst).__name__, '', uid, list(probs)))
+                    self.warnings.append(f'point command override {uid} not applied: ' + '; '.join(map(str, probs)))
+                extras = oset.extras_for(inst) if has else {}
+                for key, uid, probs in inst.use_commands(templates, uids, points=pt_t, point_uids=pt_u, extras=extras):
                     self.rejected.append((type(inst).__name__, key, uid, list(probs)))
             except Exception as exc:                                     # never stop a run over an override
                 self.warnings.append(f'could not bind command overrides to {type(inst).__name__} ({type(exc).__name__})')
@@ -290,11 +321,27 @@ class ModsState:
     def patch(self, views):
         """(patched copies of `views`, set of indices whose limits were overridden).  procmods.apply_points guards the limit fields."""
         out = procmods.apply_points(views, self.oset)
-        return out, {i for i, q in enumerate(out) if q.get('limit_modified')}
+        return out, {i: set(q.get('limit_fields') or ()) for i, q in enumerate(out) if q.get('limit_modified')}
 
     def register(self, points, on_change=None):
         self.lists.setdefault(id(points), [points, list(points), set(), on_change])
+        self._remap()
         return points
+
+    def _remap(self):
+        """Remember the factory key of every point now in the registered lists (a patched copy has other nominal / limits than the factory
+        point its key comes from; the per-point commands are selected by that key)."""
+        km = {}
+        for ent in self.lists.values():
+            for cur, key in zip(ent[0], procmods.point_keys(ent[1])):
+                km[id(cur)] = (cur, key)
+        self._keymap = km
+
+    def key_of(self, p):
+        """The factory key (procmods.point_key / point_keys, with '#n' for duplicates) of a point of a registered list; falls back to
+        point_key(p) for anything else."""
+        hit = self._keymap.get(id(p))
+        return hit[1] if hit is not None and hit[0] is p else procmods.point_key(p)
 
     def apply(self, points):
         """Put the active overrides on this live list IN PLACE (entries are replaced by patched copies; originals are kept for revert)."""
@@ -303,6 +350,7 @@ class ModsState:
             self._revert_entry(ent)
             orig = ent[1] = list(points)
             if not (self.oset and self._active_edits()):
+                self._remap()
                 self._changed(ent)
                 return points
             views = [self.view(p) for p in orig]
@@ -314,6 +362,7 @@ class ModsState:
                 self.warnings.append(f'override {uid} for {key} no longer fits the spec and was not applied')
             points[:] = fixed
             ent[2] = lim
+            self._remap()
             self._changed(ent)
             return points
 
@@ -322,6 +371,7 @@ class ModsState:
             ent = self.lists.get(id(points))
             if ent:
                 self._revert_entry(ent)
+                self._remap()
 
     @staticmethod
     def _revert_entry(ent):
@@ -360,8 +410,9 @@ class ModsState:
     def _unview(self, orig, patched, limited):
         if self.shape == 'band' and 'error' in orig and 'low' in orig and 'high' in orig:
             patched = dict(patched)
+            moved = limited and any(patched.get(k) != orig.get(k) for k in ('low', 'high', 'nominal'))     # a description / unit change keeps 'error'
             patched['error'] = (max(abs(patched['high'] - patched['nominal']), abs(patched['nominal'] - patched['low']))
-                                if limited else orig['error'])
+                                if moved else orig['error'])
         return patched
 
     # ---- the record --------------------------------------------------------------------------------------------------------
@@ -436,6 +487,24 @@ class ModsState:
                 log.add('--', f'FACTORY RUN: {self.suppressed} stored modification(s) switched off for this run', 'procmods')
         except Exception:
             pass
+
+
+def point_commands(io_of=None):
+    """Decorator for an engine's per-point routine (`IO.measure(self, p, ...)`, `IO.apply(self, p, ...)`, `Runner.run_point(self, p)`): while the
+    routine runs, the point-specific command overrides of that point apply and its extra command lines are sent (before the routine's own
+    commands, and after them when the routine finished without an error).  Nothing is selected or sent when no override is stored, so an
+    unmodified run is byte-identical.  `io_of(self)` returns the IO object when the routine is not a method of the IO itself."""
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrapper(self, p, *a, **k):
+            io = io_of(self) if io_of else self
+            scope = getattr(io, 'pm_point_scope', None)
+            if scope is None or getattr(io, 'pm_state', None) is None:
+                return fn(self, p, *a, **k)
+            with scope(p):
+                return fn(self, p, *a, **k)
+        return wrapper
+    return deco
 
 
 # --------------------------------------------------------------------------------------------------------------------------------
@@ -575,6 +644,110 @@ class ProcModsMixin:
                 return r
             inst.open = opened
             st.bind_one(inst)
+
+    # ---- one test point: its commands, point-specific overrides, extra lines (procmods_point_model / procmods_point_ui) -----------------
+    def pm_point_key(self, p):
+        """The factory key of a point of a registered list (stable even when the point was patched), else procmods.point_key(p)."""
+        st = self.pm_state
+        return st.key_of(p) if st is not None else procmods.point_key(p)
+
+    def pm_scope_drivers(self) -> list:
+        """The drivers that take part in a point (the IO's pm_drivers()); [] when there are none."""
+        fn = getattr(self, 'pm_drivers', None)
+        try:
+            return [d for d in (fn() if fn else ()) if d is not None]
+        except Exception:
+            return []
+
+    @contextlib.contextmanager
+    def pm_point_scope(self, p):
+        """See point_commands().  Select the point on every driver, send its 'before' lines, run the body, send its 'after' lines (only when the
+        body did not raise), and always deselect the point."""
+        st = self.pm_state
+        drivers = self.pm_scope_drivers()
+        if st is None or not drivers or not hasattr(drivers[0], 'set_point'):
+            yield
+            return
+        key = st.key_of(p)
+        for d in drivers:
+            d.set_point(key)
+        try:
+            for d in drivers:
+                d.run_extras('before')
+            yield
+            for d in drivers:
+                d.run_extras('after')
+        finally:
+            for d in drivers:
+                d.set_point(None)
+
+    def pm_find_point(self, pid):
+        """The live point (as the run uses it) with this id, from the registered lists; None if unknown.  The id may be text (a table row id)."""
+        st = self.pm_state
+        if st is not None:
+            for ent in st.lists.values():
+                for q in ent[0]:
+                    if str(procmods_live.point_id(q)) == str(pid):
+                        return q
+        return None
+
+    def pm_factory_point(self, pid):
+        """The same point as procmods sees it BEFORE any override (the view the override keys, checks and hashes come from), with its key."""
+        st = self.pm_state
+        if st is not None:
+            for ent in st.lists.values():
+                keys = procmods.point_keys(ent[1])
+                for q, k in zip(ent[1], keys):
+                    if str(procmods_live.point_id(q)) == str(pid):
+                        return st.view(q), k
+        return None, None
+
+    def pm_point_fields(self, view) -> dict:
+        """Which fields of a point the developer-mode editor may change, and how: {'nominal' | 'unit' | 'description': {'paths': [...],
+        'reason': '' | why it cannot be edited, 'note': text shown beside the field}}.  Engines override where a field is not what it seems
+        (the handheld nominal also sets the calibrator output; the generator and oscilloscope nominals are only the value a reading is judged
+        against)."""
+        out = {}
+        out['nominal'] = {'paths': ['nominal'], 'reason': '' if pdef.has_path(view, 'nominal') else 'this point has no nominal value', 'note': ''}
+        out['unit'] = {'paths': ['unit'], 'reason': '' if pdef.has_path(view, 'unit') else 'this point has no unit', 'note': ''}
+        dp = next((x for x in ('description', 'desc') if pdef.has_path(view, x)), None)
+        out['description'] = {'paths': [dp] if dp else [], 'reason': '' if dp else 'this point has no description', 'note': ''}
+        return out
+
+    def pm_plan_point(self, p):
+        """procmods_plan.Plan of the commands the engine sends for point `p` (a dry run of its own point routine on the simulated bench with the
+        saved changes bound).  Engines that can run their point routine headless override this; the default says it cannot."""
+        import procmods_plan
+        return procmods_plan.Plan(error='this procedure cannot show the commands of a single point before it is run')
+
+    def pm_point_busy(self, pid) -> str:
+        """Why point `pid` cannot be edited right now: it is the point the run is on ('' = it can).  A point is in progress from the moment the
+        run reaches it (pm_step) until the run moves to the next one or stops: its commands are being sent and must not change."""
+        st = self.pm_state
+        if st is None or not self.pm_is_running():
+            return ''
+        cur = st.live.cursor
+        if cur is not None and str(cur[2]) == str(pid):
+            return (f'Point {pid} is being measured now: its commands are being sent and cannot change. '
+                    'Open it again when the run has moved on to the next point (or stopped).')
+        return ''
+
+    def pm_point_has_reading(self, pid) -> bool:
+        return str(pid) in self.pm_measured_ids()
+
+    def pm_trees(self) -> list:
+        """The point lists (Treeview widgets) of this window that get the right-click 'Edit' menu."""
+        t = self.__dict__.get('tree')
+        return [t] if t is not None else []
+
+    def pm_bind_tree(self, tree):
+        """Called by ui_shell.results_table: give the point list its right-click menu.  Never breaks the window."""
+        try:
+            import procmods_point_ui
+            procmods_point_ui.attach_tree_menu(self, tree)
+        except Exception as exc:
+            if self.pm_state is not None:
+                self.pm_state.warnings.append(f'the point list menu could not be attached ({type(exc).__name__})')
 
     # ---- live editing inside a running procedure (procmods_live) --------------------------------------------------------------
     # Engines call pm_step() once per point (new point only) and pm_live_attach(shell) once when the window is built.  They may override

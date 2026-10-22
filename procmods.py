@@ -55,6 +55,7 @@ from pathlib import Path
 
 import cmdreg
 import devmode as _devmode
+import procmods_pointdef as pdef
 
 KINDS = ('command', 'param', 'point', 'text', 'limit')
 SCOPES = ('run', 'asset', 'model')
@@ -220,7 +221,7 @@ LIMIT_FIELDS = ('limits', 'error', 'low', 'high', 'tol_text', 'tolerance', 'tol'
                 'display_unit', 'source', 'terminal', 'input', 'section', 'id', 'stim', 'ch', 'accuracy', 'switch', 'table', 'step',
                 'desc', 'description')
 LIMIT_PATCH_FIELDS = ('error', 'low', 'high')                      # the only limit fields a valid limit override may change
-LIMIT_MARKERS = ('limit_modified', 'limit_factory')
+LIMIT_MARKERS = ('limit_modified', 'limit_factory', 'limit_fields')
 _KEY_FIELDS = ('section', 'kind', 'nominal', 'range', 'frequency', 'filter_hz', 'terminal', 'input', 'amplitude', 'switch', 'ch', 'stim',
                'table', 'step', 'desc')
 _HASH_FIELDS = _KEY_FIELDS + ('limits', 'low', 'high', 'tol_text', 'unit', 'setup', 'applied', 'terminal', 'source', 'amplitude')
@@ -275,23 +276,40 @@ def _same_num(a, b):
     return a == b if x is None or y is None else x == y
 
 
-def _factory_matches(p, fac):
+def _factory_matches(p, fac, fields=None):
     if not isinstance(fac, dict):
+        return False
+    if fac.get('def') and not point_definition_matches(p, fac['def'], fields):
         return False
     if fac.get('mode') == 'error':
         return 'error' in p and _same_num(p['error'], fac.get('error'))
     return all(_same_num(p.get(k), fac.get(k)) for k in ('low', 'high'))
 
 
+def point_definition_matches(p, fdef, fields) -> bool:
+    """The point still has the nominal / unit / description a definition override was made against (a changed spec makes it stale)."""
+    for name, old in (fdef or {}).items():
+        paths = (fields or {}).get(name) or ()
+        if not paths:
+            return False
+        cur = pdef.get_path(p, paths[0])
+        if cur is None and paths[0] in pdef.CREATABLE:
+            cur = ''
+        if not (pdef.same_decimal(cur, old) if name == 'nominal' else cur == old):
+            return False
+    return True
+
+
 def check_limit_value(p, value) -> list:
-    """Problems with a proposed limit value for point p (mode matches the point, finite, low < high, nominal inside)."""
+    """Problems with a proposed limit value for point p (mode matches the point, finite, low < high, nominal inside).  Numbers are compared as
+    Decimal (the text a person typed), never as binary floats.  A value may also carry a new 'nominal': the check then uses it."""
     probs = []
     fac = limit_factory(p)
     mode = value.get('mode')
     if mode != fac['mode']:
         return [f'this point has {"a +/- error" if fac["mode"] == "error" else "low/high limits"}; use mode {fac["mode"]!r}']
     if mode == 'error':
-        e = _num(value.get('error'))
+        e = pdef.parse_decimal(value.get('error'))
         if e is None or e <= 0:
             probs.append('the +/- error must be a positive number')
         return probs
@@ -300,18 +318,87 @@ def check_limit_value(p, value) -> list:
         if fac[name] is None:
             if new is not None:
                 probs.append(f'this point has no {name} limit; one cannot be added')
-        elif _num(new) is None:
+        elif pdef.parse_decimal(new) is None:
             probs.append(f'{name} must be a finite number')
     if not probs and fac['low'] is not None and fac['high'] is not None:
-        if not _num(lo) < _num(hi):
+        dlo, dhi = pdef.parse_decimal(lo), pdef.parse_decimal(hi)
+        if not dlo < dhi:
             probs.append('low must be below high')
-        nom = _num(p.get('nominal'))
-        fac_ = _num(p.get('factor'))
+        nom = pdef.parse_decimal(value['nominal'] if value.get('nominal') is not None else p.get('nominal'))
+        fac_ = pdef.parse_decimal(p.get('factor'))
         if nom is not None and fac_:
             nom = nom / fac_                                     # handheld steps: nominal in base units, limits in display units
-        if nom is not None and not _num(lo) <= nom <= _num(hi):
+        if nom is not None and not dlo <= nom <= dhi:
             probs.append('the nominal value must lie between low and high')
     return probs
+
+
+def definition_changes(value, point=None) -> list:
+    """[(what, old, new)] of the point-definition part of a limit override's value (nominal / unit / description) that differs from the
+    factory values recorded in value['factory']['def'] (or from `point` when given)."""
+    out = []
+    fdef = ((value or {}).get('factory') or {}).get('def') or {}
+    for key, name in pdef.DEF_FIELDS.items():
+        if (value or {}).get(key) is None:
+            continue
+        old = fdef.get(name)
+        new = value[key]
+        same = pdef.same_decimal(old, new) if key == 'nominal' else old == new
+        if not same:
+            out.append((name, old, new))
+    return out
+
+
+def tolerance_changed(value) -> bool:
+    fac = (value or {}).get('factory') or {}
+    return any(not _same_num(value.get(k), fac.get(k)) for k in ('error', 'low', 'high') if k in value or k in fac)
+
+
+def check_point_definition(p, value) -> list:
+    """Problems with the point-definition keys of a limit value ('nominal', 'new_unit', 'description' plus the 'fields' map naming the point
+    fields to patch).  Nothing to check when the value carries none of them."""
+    probs = []
+    keys = [k for k in pdef.DEF_KEYS if value.get(k) is not None]
+    if not keys:
+        return probs
+    fields = value.get('fields')
+    if not isinstance(fields, dict):
+        return ['the point fields to change are not named']
+    for key in keys:
+        name = pdef.DEF_FIELDS[key]
+        paths = fields.get(name)
+        if not isinstance(paths, (list, tuple)) or not paths:
+            probs.append(f'no point field is named for the {name}')
+            continue
+        for path in paths:
+            if path not in pdef.FIELD_PATHS:
+                probs.append(f'{path} cannot be changed')
+            elif not pdef.has_path(p, path) and path not in pdef.CREATABLE:
+                probs.append(f'this point has no field {path}')
+    if probs:
+        return probs
+    if value.get('nominal') is not None:
+        if pdef.parse_decimal(value['nominal']) is None:
+            probs.append('the nominal value must be a finite number')
+        elif 'applied.value' in fields.get('nominal', ()) and not pdef.same_decimal(pdef.get_path(p, 'applied.value'), p.get('nominal')):
+            probs.append('the value this point sources differs from its nominal; the nominal cannot be changed here')
+    if value.get('new_unit') is not None:
+        probs += pdef.check_unit(p.get('unit', ''), value['new_unit'])
+    if value.get('description') is not None:
+        probs += pdef.check_description(value['description'])
+    return probs
+
+
+def point_definition_factory(p, fields) -> dict:
+    """The factory nominal / unit / description of point p (what a definition override replaces), as recorded with the override."""
+    out = {}
+    for name, paths in (fields or {}).items():
+        if paths and pdef.has_path(p, paths[0]):
+            v = pdef.get_path(p, paths[0])
+            out[name] = pdef.dec_text(v) if name == 'nominal' else v
+        elif paths and paths[0] in pdef.CREATABLE:
+            out[name] = ''
+    return out
 
 
 def _apply_limit(p, value):
@@ -319,13 +406,38 @@ def _apply_limit(p, value):
     p['limit_factory'] = copy.deepcopy(fac)
     p['limit_modified'] = True
     if value['mode'] == 'error':
-        p['error'] = float(_num(value['error']))
-        return
-    for k in ('low', 'high'):
-        new = value.get(k)
-        if new is None or p.get(k) is None:
+        p['error'] = float(pdef.to_float(value['error']))
+    else:
+        for k in ('low', 'high'):
+            new = value.get(k)
+            if new is None or p.get(k) is None:
+                continue
+            p[k] = str(new) if isinstance(p[k], str) else float(pdef.to_float(new))
+    _apply_definition(p, value)
+
+
+def _apply_definition(p, value):
+    """The nominal / unit / description part of a limit override (developer mode): patch exactly the fields named in value['fields']."""
+    fields = value.get('fields') or {}
+    patched = []
+    for key, name in pdef.DEF_FIELDS.items():
+        new = value.get(key)
+        if new is None:
             continue
-        p[k] = str(new) if isinstance(p[k], str) else float(_num(new))
+        for path in fields.get(name) or ():
+            if path not in pdef.FIELD_PATHS or (not pdef.has_path(p, path) and path not in pdef.CREATABLE):
+                continue
+            old = pdef.get_path(p, path)
+            if key == 'nominal':
+                put = pdef.dec_text(new) if isinstance(old, str) else pdef.to_float(new)
+                if isinstance(old, int) and not isinstance(old, bool) and float(put).is_integer():
+                    put = int(put)
+            else:
+                put = new
+            pdef.set_path(p, path, put)
+            patched.append(path.split('.')[0])
+    if patched:
+        p['limit_fields'] = sorted(set(patched))
 
 
 def _tolerance_text(fac, value, unit=''):
@@ -376,6 +488,65 @@ def _need_dev(session, dm):
         raise OverrideError('this developer-mode session belongs to a different settings file')
 
 
+MAX_EXTRA_TEXT = 128
+_EXTRA_PLUMBING = re.compile(r'(?:^|[\s:;])(?:SYST(?:EM)?:ERR|ERR\?|\*ESR|\*ESE|\*SRE|\*CLS|\*STB)', re.I)    # error-queue / status plumbing stays locked
+
+
+def _check_extra_command(tgt, value, driver_name, probs) -> dict:
+    """Validate an extra command line (an override of kind 'command' whose key is '+before<n>' / '+after<n>') and return its stored value.
+    Rules: one plain command (no placeholders, no ';' chain), the generic cmdreg rules (printable ASCII, no *RST / *SAV / *RCL / calibration /
+    service / security / factory commands, no output-enable), a WRITE must name the query that reads it back and the reply that proves it
+    (set, read back, compare; the line is sent once and never retried), a QUERY needs neither.  It is always UNVERIFIED (never tested)."""
+    tpl = value.get('template')
+    phase, n = tgt['extra']
+    if n > MAX_EXTRA:
+        probs.append(f'at most {MAX_EXTRA} extra command lines per point, driver and phase')
+    if not isinstance(tpl, str) or not tpl.strip():
+        probs.append('the command is empty')
+        return {'template': tpl, 'extra': True, 'phase': phase}
+    if len(tpl) > MAX_EXTRA_TEXT:
+        probs.append(f'the command is longer than {MAX_EXTRA_TEXT} characters')
+    if '{' in tpl or '}' in tpl:
+        probs.append('braces are not allowed in an extra command (it has no placeholders)')
+    if ';' in tpl:
+        probs.append('one command per line (no ";")')
+    for t in (tpl, value.get('readback')):
+        if isinstance(t, str) and _EXTRA_PLUMBING.search(t):
+            probs.append('error-queue and status commands (SYST:ERR?, ERR?, *CLS, *ESR? ...) are locked: the procedure reads them itself')
+            break
+    probs += [str(p) for p in cmdreg.validate(tpl, None, driver_name)]
+    out = {'template': tpl, 'extra': True, 'phase': phase}
+    is_query = '?' in tpl.split(None, 1)[0] if tpl.split() else False
+    rb, expect = value.get('readback'), value.get('expect')
+    if is_query:
+        if rb or expect:
+            probs.append('a query has no read-back')
+    else:
+        if '?' in tpl:
+            probs.append('a write must not contain a query')
+        if not isinstance(rb, str) or not rb.strip() or '?' not in rb:
+            probs.append('a write needs the query that reads it back (it must contain "?")')
+        else:
+            if len(rb) > MAX_EXTRA_TEXT or '{' in rb or ';' in rb:
+                probs.append('the read-back query must be one short plain query')
+            probs += [str(p) for p in cmdreg.validate(rb, None, driver_name)]
+        if not isinstance(expect, str) or not expect.strip():
+            probs.append('a write needs the reply that proves it was accepted')
+        elif len(expect) > 64 or any(not 32 <= ord(c) < 127 for c in expect):
+            probs.append('the expected reply must be short printable ASCII')
+        out.update(readback=(rb or '').strip(), expect=(expect or '').strip())
+    return out
+
+
+def _extra_problems(tgt, value, driver_name) -> list:
+    probs = []
+    try:
+        _check_extra_command(tgt, dict(value or {}), driver_name, probs)
+    except Exception as ex:
+        probs.append(f'could not check ({type(ex).__name__})')
+    return probs
+
+
 def build_entry(kind, target, value, scope, reason, *, model='', asset_id='', author=None, cmd=None, driver_name=None, point=None,
                 factory=None, factory_hash='', label='', fw_match=None, expires_at=None, tested=None, session=None, devmode=None,
                 now=None, uid=None, version=1, supersedes=None, enabled=1, allow_run=False):
@@ -403,17 +574,24 @@ def build_entry(kind, target, value, scope, reason, *, model='', asset_id='', au
     v = {}
     if kind == 'command':
         tpl = value.get('template')
-        if cmd is None:
-            probs.append('the factory command is needed to check an edited command')
+        tgt = pdef.parse_command_target(target)
+        if tgt['extra'] is not None:                      # an extra command line typed for one point (before / after its own commands)
+            v, factory = _check_extra_command(tgt, value, driver_name, probs), None
+            label = label or f'Extra command {tgt["extra"][0]} {tgt["extra"][1]}'
         else:
-            probs += [str(p) for p in cmdreg.validate(tpl, cmd, driver_name)]
-            if tpl == cmd.template:
-                probs.append('identical to the factory command; nothing to override')
-            if cmd.secret:
-                probs.append('commands with secret values are not editable')
-            factory = cmd.template
-            label = label or cmd.name
-        v = {'template': tpl}
+            if tgt['point'] is not None and not tgt['point']:
+                probs.append('the point is missing from the command target')
+            if cmd is None:
+                probs.append('the factory command is needed to check an edited command')
+            else:
+                probs += [str(p) for p in cmdreg.validate(tpl, cmd, driver_name)]
+                if tpl == cmd.template:
+                    probs.append('identical to the factory command; nothing to override')
+                if cmd.secret:
+                    probs.append('commands with secret values are not editable')
+                factory = cmd.template
+                label = label or cmd.name
+            v = {'template': tpl}
     elif kind == 'param':
         name = str(target).partition('@')[0]
         v = {'value': value.get('value')}
@@ -436,14 +614,18 @@ def build_entry(kind, target, value, scope, reason, *, model='', asset_id='', au
             probs.append('the point is needed to check a tolerance change')
         else:
             v = {k: value.get(k) for k in ('mode', 'error', 'low', 'high') if k in value}
-            probs += check_limit_value(point, v)
+            for k in pdef.DEF_KEYS + ('fields',):                     # developer mode: nominal / unit / description of the point
+                if value.get(k) is not None:
+                    v[k] = copy.deepcopy(value[k])
+            probs += check_limit_value(point, {**v, 'nominal': v.get('nominal')} if v.get('nominal') is not None else v)
+            probs += check_point_definition(point, v)
             factory_hash = point_hash(point)
             v['factory'] = limit_factory(point)
+            if isinstance(v.get('fields'), dict):
+                v['factory']['def'] = point_definition_factory(point, v['fields'])
             v['unit'] = point.get('unit', '')
-            if not probs and canon({k: v.get(k) for k in ('error', 'low', 'high')}) == canon(
-                    {k: v['factory'].get(k) for k in ('error', 'low', 'high')}) and all(
-                    _same_num(v.get(k), v['factory'].get(k)) for k in ('error', 'low', 'high')):
-                probs.append('identical to the manufacturer tolerance; nothing to override')
+            if not probs and not tolerance_changed(v) and not definition_changes(v):
+                probs.append('identical to the manufacturer tolerance and point definition; nothing to override')
     if probs:
         raise OverrideError(probs)
     if factory is not None and kind in ('command', 'param', 'text') and not factory_hash:
@@ -748,6 +930,8 @@ class OverrideSet:
             names, reg, dname = [c.__name__ for c in cls.__mro__], registry or cmdreg.merge_commands(cls), cls.__name__
         out, rejected, rank = {}, [], {}
         for e in self.active('command'):
+            if '@' in e['target']:
+                continue                                  # a command typed for ONE point: point_commands_for() / extras_for()
             name, _, key = e['target'].partition(':')
             if name not in names:
                 continue
@@ -769,6 +953,65 @@ class OverrideSet:
                 rejected.append(('bundle', [str(b) for b in bad]))
                 out = {}
         return out, rejected
+
+    def point_commands_for(self, driver, registry=None):
+        """({point key: {command key: template}}, {point key: {command key: uid}}, rejected) for the commands typed for ONE point
+        (targets 'Driver:key@<point key>').  Validated exactly like the driver-wide ones (registry, locked/output/secret refusal, stale
+        factory); a point's set of templates is also checked against the read-back pairs together with the driver-wide templates."""
+        if isinstance(driver, str):
+            names, reg, dname = [driver], registry, driver
+        else:
+            cls = driver if isinstance(driver, type) else type(driver)
+            names, reg, dname = [c.__name__ for c in cls.__mro__], registry or cmdreg.merge_commands(cls), cls.__name__
+        base = self._command_eval(driver, registry)[0]
+        tpls, uids, rejected, rank = {}, {}, [], {}
+        for e in self.active('command'):
+            t = pdef.parse_command_target(e['target'])
+            if t['point'] is None or t['extra'] is not None or t['driver'] not in names:
+                continue
+            tpl, key, pk = e['value'].get('template'), t['key'], t['point']
+            if reg is not None:
+                cmd = reg.get(key)
+                probs = [str(x) for x in cmdreg.validate(tpl, cmd, dname)] if cmd else ['unknown command']
+                if cmd and not probs and e['factory_hash'] and e['factory_hash'] != fh(cmd.template):
+                    probs = ['stale: the factory command changed since this override was made']
+                if probs:
+                    rejected.append((e['uid'], probs))
+                    continue
+            r = names.index(t['driver'])
+            if (pk, key) not in rank or r < rank[(pk, key)]:
+                rank[(pk, key)] = r
+                tpls.setdefault(pk, {})[key] = tpl
+                uids.setdefault(pk, {})[key] = e['uid']
+        if reg is not None:
+            for pk in list(tpls):
+                bad = cmdreg.validate_bundle({**base, **tpls[pk]}, reg)
+                if bad:
+                    rejected.append((f'bundle@{pk}', [str(b) for b in bad]))
+                    del tpls[pk], uids[pk]
+        return tpls, uids, rejected
+
+    def extras_for(self, driver):
+        """{point key: [{'phase', 'n', 'template', 'readback', 'expect', 'uid'}]} - the extra command lines typed for this driver, ordered
+        (before 1..n, then after 1..n).  They are re-checked with the same rules as when they were made."""
+        cls = driver if isinstance(driver, type) else type(driver) if not isinstance(driver, str) else None
+        names = [c.__name__ for c in cls.__mro__] if cls is not None else [driver]
+        dname = cls.__name__ if cls is not None else driver
+        out = {}
+        for e in self.active('command'):
+            t = pdef.parse_command_target(e['target'])
+            if t['extra'] is None or t['point'] is None or t['driver'] not in names:
+                continue
+            v, probs = e['value'], []
+            probs = _extra_problems(t, v, dname)
+            if probs:
+                continue
+            phase, n = t['extra']
+            out.setdefault(t['point'], []).append({'phase': phase, 'n': n, 'template': v.get('template'), 'readback': v.get('readback', ''),
+                                                   'expect': v.get('expect', ''), 'uid': e['uid']})
+        for lst in out.values():
+            lst.sort(key=lambda x: (pdef.PHASES.index(x['phase']), x['n']))
+        return out
 
     def param(self, name, default=None, point_key=None):
         for target in ([f'{name}@{point_key}'] if point_key else []) + [name]:
@@ -852,22 +1095,33 @@ def _bytes(v):
 
 def assert_limits_unchanged(orig, patched, limit_ok=()):
     """Every point: all limit fields (and every field outside the mutable set) byte-identical, except error/low/high of the indices
-    in `limit_ok` (points with a valid limit override).  Raises LimitsChangedError."""
+    in `limit_ok` (points with a valid limit override).  `limit_ok` may also be a dict {index: top-level fields a developer-mode point
+    definition override changed (nominal / unit / description / applied)}: those fields are then allowed to differ as well, and for 'applied'
+    only its 'value' may.  Raises LimitsChangedError."""
     if len(orig) != len(patched):
         raise LimitsChangedError('point count changed')
     per_point = {s['field'] for s in PARAMS.values() if s['per_point']}
+    extra = limit_ok if isinstance(limit_ok, dict) else {}
     for i, (a, b) in enumerate(zip(orig, patched)):
-        mutable = _MUTABLE_BASE | per_point | (set(LIMIT_PATCH_FIELDS) if i in limit_ok else set())
+        ok = i in limit_ok
+        allowed = set(extra.get(i) or ()) if ok else set()
+        mutable = _MUTABLE_BASE | per_point | (set(LIMIT_PATCH_FIELDS) if ok else set()) | allowed
         for k in set(a) | set(b):
             if k in mutable:
                 continue
             if _bytes(a.get(k, '\0missing')) != _bytes(b.get(k, '\0missing')):
                 raise LimitsChangedError(f'point {i}: field {k!r} changed')
         for k in LIMIT_FIELDS:
-            if k in LIMIT_PATCH_FIELDS and i in limit_ok:
+            if (k in LIMIT_PATCH_FIELDS and ok) or k in allowed:
                 continue
             if _bytes(a.get(k, '\0missing')) != _bytes(b.get(k, '\0missing')):
                 raise LimitsChangedError(f'point {i}: limit field {k!r} changed')
+        if 'applied' in allowed:
+            x, y = dict(a.get('applied') or {}), dict(b.get('applied') or {})
+            x.pop('value', None)
+            y.pop('value', None)
+            if _bytes(x) != _bytes(y):
+                raise LimitsChangedError(f'point {i}: applied changed beyond its value')
 
 
 def check_points(points, oset) -> dict:
@@ -883,7 +1137,7 @@ def check_points(points, oset) -> dict:
                 orphan.append((e['uid'], t))
             elif e['factory_hash'] and e['factory_hash'] != point_hash(p):
                 stale.append((e['uid'], t))
-            elif e['kind'] == 'limit' and not _factory_matches(p, e['value'].get('factory')):
+            elif e['kind'] == 'limit' and not _factory_matches(p, e['value'].get('factory'), e['value'].get('fields')):
                 stale.append((e['uid'], t))
         elif e['kind'] == 'param' and '@' in t:
             p = byk.get(t.partition('@')[2])
@@ -909,7 +1163,7 @@ def apply_points(points, oset) -> list:
     by = {}
     for e in act:
         by.setdefault(e['kind'], {})[e['target']] = e
-    out, limit_ok = [], set()
+    out, limit_ok = [], {}
     for i, (p, k) in enumerate(zip(points, keys)):
         q = copy.deepcopy(p)
         used = []
@@ -920,7 +1174,7 @@ def apply_points(points, oset) -> list:
         e = by.get('limit', {}).get(k)
         if e:
             _apply_limit(q, e['value'])
-            limit_ok.add(i)
+            limit_ok[i] = set(q.get('limit_fields') or ())
             used.append(e['uid'])
         for t, e in by.get('param', {}).items():
             name, _, pk = t.partition('@')
@@ -1068,7 +1322,9 @@ def _validate_import_entry(e, registries, session, dm):
         if not str(e.get('reason') or '').strip():
             probs.append('no reason')
         k, v = e['kind'], e.get('value') or {}
-        if k == 'command':
+        if k == 'command' and '@' in str(e.get('target')):
+            probs.append('commands typed for one point are not imported (they belong to the run and point they were made for)')
+        elif k == 'command':
             name, _, key = e['target'].partition(':')
             cmd = ((registries or {}).get(name) or {}).get(key)
             if cmd is None:
@@ -1082,6 +1338,8 @@ def _validate_import_entry(e, registries, session, dm):
         elif k == 'text':
             probs += _check_text(e['target'], v.get('text'))
         elif k == 'limit':
+            if any(v.get(x) is not None for x in pdef.DEF_KEYS):
+                probs.append('point-definition changes (nominal, unit, description) are not imported')
             if v.get('mode') == 'error':
                 n = _num(v.get('error'))
                 if n is None or n <= 0:
@@ -1187,8 +1445,8 @@ def _stale_uids(oset, points=None, driver_registries=None, defaults=None):
         c = check_points(points, oset)
         stale |= {u for u, _ in c['stale'] + c['orphan']}
     for e in oset.active('command'):
-        name, _, key = e['target'].partition(':')
-        cmd = ((driver_registries or {}).get(name) or {}).get(key)
+        t = pdef.parse_command_target(e['target'])
+        cmd = ((driver_registries or {}).get(t['driver']) or {}).get(t['key'])
         if cmd and e['factory_hash'] and e['factory_hash'] != fh(cmd.template):
             stale.add(e['uid'])
     for e in oset.active('param'):
@@ -1275,6 +1533,20 @@ def point_rows(points, oset, filter='all', search='') -> list:
     return out
 
 
+def _limit_change_text(v):
+    """(manufacturer, used) text of a limit override: the tolerance, plus any nominal / unit / description change (developer mode)."""
+    fac = v.get('factory') or {}
+    try:
+        man, used = _tolerance_text(fac, v, v.get('unit', '')) if tolerance_changed(v) or not definition_changes(v) else ('', '')
+    except (TypeError, ValueError):
+        man, used = '', ''
+    defs = definition_changes(v)
+    if defs:
+        man = '; '.join(x for x in (man, *[f'{w} {o}' for w, o, _n in defs]) if x)
+        used = '; '.join(x for x in (used, *[f'{w} {n}' for w, _o, n in defs]) if x)
+    return man, used
+
+
 def changes(oset, points=None, driver_registries=None, defaults=None) -> list:
     """The Changes tab / diff: one dict per override candidate with factory vs current text and its status (stale is added when the
     spec / registries / defaults are supplied)."""
@@ -1291,7 +1563,7 @@ def changes(oset, points=None, driver_registries=None, defaults=None) -> list:
         elif e['kind'] == 'text':
             f, cur = v.get('factory'), v.get('text')
         else:
-            f, cur = _tolerance_text(v.get('factory'), v, v.get('unit', ''))
+            f, cur = _limit_change_text(v)
         out.append({'uid': e['uid'], 'kind': e['kind'], 'target': e['target'], 'label': v.get('label') or e['target'], 'factory': f,
                     'current': cur, 'scope': e['scope'], 'applies_to': _scope_text(e), 'reason': e['reason'], 'author': e['author'],
                     'at': e['created_at'], 'status': 'stale' if e['uid'] in stale and e['status'] == 'active' else e['status'],
@@ -1309,7 +1581,15 @@ def modifications_summary(oset) -> list:
         v, k = e['value'], e['kind']
         label = v.get('label') or e['target']
         man = used = ''
-        if k == 'command':
+        tol = False
+        if k == 'command' and v.get('extra'):
+            at = e['target'].partition('@')[2]
+            text = f'Extra command line ({v.get("phase")} point {at}) on {pdef.parse_command_target(e["target"])["driver"]}: {v.get("template")}'
+            if v.get('readback'):
+                text += f' (read back with {v.get("readback")}, expected {v.get("expect")})'
+        elif k == 'command' and '@' in e['target']:
+            text = f'Command "{label}" for point {e["target"].partition("@")[2]}: {v.get("factory")} -> {v.get("template")}'
+        elif k == 'command':
             text = f'Command "{label}": {v.get("factory")} -> {v.get("template")}'
         elif k == 'param':
             text = f'Setting "{label}"{"" if "@" not in e["target"] else " (point " + e["target"].partition("@")[2] + ")"}: {v.get("factory")} -> {v.get("value")}'
@@ -1318,8 +1598,17 @@ def modifications_summary(oset) -> list:
         elif k == 'text':
             text = f'Text "{label}" changed'
         else:
-            man, used = _tolerance_text(v.get('factory'), v, v.get('unit', ''))
-            text = f'Tolerance for {label}: manufacturer {man}, used {used}'
+            defs = definition_changes(v)
+            tc = tolerance_changed(v)
+            tol = tc or any(w == 'nominal' for w, _o, _n in defs)         # a changed nominal moves what the reading is judged against
+            man, used = _limit_change_text(v)
+            if tc:
+                text = f'Tolerance for {label}: manufacturer {_tolerance_text(v.get("factory"), v.get("factory"), v.get("unit", ""))[0]}, used ' \
+                       f'{_tolerance_text(v.get("factory"), v, v.get("unit", ""))[1]}'
+                if defs:
+                    text += '; ' + '; '.join(f'{w} {o} -> {n}' for w, o, n in defs)
+            else:
+                text = f'Point definition for {label}: ' + '; '.join(f'{w} {o} -> {n}' for w, o, n in defs)
         fac = used_v = ''
         if k == 'command':
             fac, used_v = v.get('factory'), v.get('template')
@@ -1331,8 +1620,8 @@ def modifications_summary(oset) -> list:
                     'version': e.get('version'),
                     'text': text, 'reason': e['reason'], 'author': e['author'], 'date': e['created_at'][:10],
                     'unverified': _unverified(e), 'affects_conditions': bool(v.get('affects_conditions')),
-                    'applies_to': _scope_text(e), 'kind': k, 'uid': e['uid'], 'limit': k == 'limit',
-                    'manufacturer_tolerance': man, 'tolerance_used': used, 'tolerances_modified': k == 'limit',
+                    'applies_to': _scope_text(e), 'kind': k, 'uid': e['uid'], 'limit': tol,
+                    'manufacturer_tolerance': man, 'tolerance_used': used, 'tolerances_modified': tol,
                     'imported_by': imported_by(e)})
     return out
 
@@ -1351,5 +1640,10 @@ def modifications_for_report(run_id, store=None) -> list:
 
 
 def tolerances_modified(oset) -> bool:
-    """True when any limit override is in effect (the report prints the 'tolerances modified' header line)."""
-    return oset.has_limits
+    """True when a tolerance (or a nominal, which moves what the reading is judged against) was modified (the report prints the
+    'tolerances modified' header line).  A limit override that only changes a unit or a description does not count."""
+    for e in oset.active('limit'):
+        v = e['value']
+        if tolerance_changed(v) or any(w == 'nominal' for w, _o, _n in definition_changes(v)):
+            return True
+    return False
