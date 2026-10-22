@@ -283,6 +283,7 @@ def build_steps():
                     word = f'{word} of {res} {unit}'
                 step['tol_text'] = f'{where.split(" (")[0]}: {low_used} to {high_used} {unit}   (published specification: ±({pct} % of reading + {word}))'
                 if extra.get('hzread'):
+                    step['no_freq_suffix'] = True              # the report Nominal of a frequency reading carries no 'at f Hz' (opt-in; handheld_dmm.certificate_row)
                     step['no_uncertainty'] = True            # the reading is a frequency: the calibrator's voltage uncertainty does not apply (see NOTES.md)
                     step['report_desc'] = f'{rng} range ({clean(value):g} V applied)'
                     notes.append(f'The meter displays FREQUENCY on this step (the calibrator applies {clean(value):g} V at {clean(freq):g} Hz). ' + NOTE_YELLOW)

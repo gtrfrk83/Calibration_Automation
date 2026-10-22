@@ -53,6 +53,7 @@ Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, f
                             '(2 V applied)' text, and '6.000 V range (limits corrected)' for step 8).
   step.printed_limits       optional record of limits as printed when the spec uses corrected ones (not read by the engine).
   step.printed_text         optional (Fluke 170 series): the printed limit text when the spec writes the same numbers at the display resolution (50.1 -> 50.10); not read by the engine.
+  step.no_freq_suffix       optional true (Fluke 170 series Hz-unit frequency rows): the report Nominal has no 'at f Hz' suffix.
   step.no_uncertainty       optional true (Fluke 170 series frequency rows): the report row gets no Uncertainty (and TAR / TUR stay blank); the 77 IV / 110 / 87V frequency steps do not set it (existing behaviour, unchanged).
 
 Square-wave sources in handheld specs (additive; handheld_dmm.py, procspec.validate_manual_reading)
