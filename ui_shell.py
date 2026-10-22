@@ -166,15 +166,21 @@ class Shell:
         # ---- body: sidebar | content -------------------------------------------------------------------------
         self.body = ttk.Frame(root)
         self.body.pack(fill='both', expand=True)
-        self.sidebar = tk.Frame(self.body, background=C['bg'], width=ui.px(206))
+        self.sidebar = tk.Frame(self.body, background=C['bg'], width=ui.px(224))
         self.sidebar.pack(side='left', fill='y')
         self.sidebar.pack_propagate(False)
         tk.Frame(self.body, width=1, background=C['border']).pack(side='left', fill='y')
         self._side_title = tk.Label(self.sidebar, text='SECTIONS', background=C['bg'], foreground=C['faint'], anchor='w',
                                     font=('TkDefaultFont', max(7, int(ui.SCALE * 8)), 'bold'))
         self._side_title.pack(fill='x', padx=ui.px(16), pady=(ui.px(14), ui.px(6)))
-        self._side_list = tk.Frame(self.sidebar, background=C['bg'])
-        self._side_list.pack(fill='both', expand=True)
+        self._side_canvas = tk.Canvas(self.sidebar, background=C['bg'], highlightthickness=0, borderwidth=0)
+        self._side_canvas.pack(fill='both', expand=True)
+        self._side_list = tk.Frame(self._side_canvas, background=C['bg'])               # many sections: the list scrolls
+        side_win = self._side_canvas.create_window(0, 0, window=self._side_list, anchor='nw')
+        self._side_list.bind('<Configure>', lambda e: self._side_canvas.configure(scrollregion=self._side_canvas.bbox('all')))
+        self._side_canvas.bind('<Configure>', lambda e: self._side_canvas.itemconfigure(side_win, width=e.width))
+        self._side_canvas.bind('<Enter>', lambda e: self._side_canvas.bind_all('<MouseWheel>', self._side_wheel))
+        self._side_canvas.bind('<Leave>', lambda e: self._side_canvas.unbind_all('<MouseWheel>'))
         self.content = ttk.Frame(self.body, padding=(ui.px(16), ui.px(8), ui.px(16), ui.px(8)))
         self.content.pack(side='left', fill='both', expand=True)
 
@@ -187,8 +193,21 @@ class Shell:
         tk.Button(top, text='Close', command=self.close_drawer, relief='flat', borderwidth=0, background=C['card'], foreground=C['muted'],
                   activebackground=C['head_hi'], activeforeground=C['text'], cursor='hand2').pack(side='right')
         tk.Frame(self.drawer, height=1, background=C['border']).pack(fill='x')
-        self.drawer_body = ttk.Frame(self.drawer, padding=(ui.px(16), ui.px(10)))
-        self.drawer_body.pack(fill='both', expand=True)
+        self.drawer_footer = ttk.Frame(self.drawer, padding=(ui.px(16), ui.px(10)))         # pinned: Test connections stays in reach however long the form is
+        self.drawer_footer.pack(side='bottom', fill='x')
+        tk.Frame(self.drawer, height=1, background=C['border']).pack(side='bottom', fill='x')
+        holder = tk.Frame(self.drawer, background=C['card'])
+        holder.pack(fill='both', expand=True)
+        self._dcanvas = tk.Canvas(holder, background=C['card'], highlightthickness=0, borderwidth=0)
+        dscroll = ttk.Scrollbar(holder, orient='vertical', command=self._dcanvas.yview)
+        self._dcanvas.configure(yscrollcommand=lambda lo, hi: (dscroll.set(lo, hi), dscroll.pack_forget() if float(lo) <= 0 and float(hi) >= 1
+                                                               else dscroll.pack(side='right', fill='y', before=self._dcanvas)))
+        self._dcanvas.pack(side='left', fill='both', expand=True)
+        self.drawer_body = ttk.Frame(self._dcanvas, padding=(ui.px(16), ui.px(10)))      # the connection widgets go in here; it scrolls if the window is short
+        win = self._dcanvas.create_window(0, 0, window=self.drawer_body, anchor='nw')
+        self.drawer_body.bind('<Configure>', lambda e: self._dcanvas.configure(scrollregion=self._dcanvas.bbox('all')))
+        self._dcanvas.bind('<Configure>', lambda e: self._dcanvas.itemconfigure(win, width=e.width))
+        self._dcanvas.bind('<MouseWheel>', lambda e: self._dcanvas.yview_scroll(-1 if e.delta > 0 else 1, 'units'))
         root.bind('<Escape>', lambda _e: self.close_drawer(), add='+')
         root.bind('<Configure>', self._on_configure, add='+')
         root.after(60, self._apply_layout)
@@ -239,8 +258,10 @@ class Shell:
         """rows: [(name, passed, failed, total)] for the real sections; 'All sections' is added on top."""
         self.sections = list(rows)
         names = ['All sections'] + [r[0] for r in rows]
-        if self.current not in names:
+        if self.current not in names:                      # the section went away (options changed): fall back to all, and tell the procedure
             self.current = 'All sections'
+            if self.on_section:
+                self.root.after_idle(lambda: self.on_section('All sections'))
         total = sum(r[3] for r in rows)
         passed = sum(r[1] for r in rows)
         failed = sum(r[2] for r in rows)
@@ -259,7 +280,7 @@ class Shell:
             dot = tk.Canvas(row, width=d + 2, height=d + 2, background=bg, highlightthickness=0, borderwidth=0)
             dot.create_oval(1, 1, d, d, fill=dotc, outline='')                   # drawn, not a font glyph, so it looks the same everywhere
             dot.pack(side='left', padx=(ui.px(10), ui.px(8)), pady=ui.px(7))
-            label = tk.Label(row, text=name, background=bg, anchor='w',
+            label = tk.Label(row, text=self._fit(name), background=bg, anchor='w',
                              foreground=C['text'] if sel else C['muted'])
             label.pack(side='left', fill='x', expand=True)
             count = tk.Label(row, text=f'{ok + bad}/{tot}', background=bg, foreground=C['bad'] if bad else C['faint'])
@@ -270,6 +291,22 @@ class Shell:
         if self.section_picker is not None:
             self.section_picker.configure(values=names)
             self.section_picker.set(self.current)
+
+    def _side_wheel(self, event):
+        lo, hi = self._side_canvas.yview()
+        if lo > 0 or hi < 1:
+            self._side_canvas.yview_scroll(-1 if event.delta > 0 else 1, 'units')
+
+    def _fit(self, text):
+        """Shorten a long section name with an ellipsis so it never runs into the x/y count."""
+        import tkinter.font as tkfont
+        font = tkfont.nametofont('TkDefaultFont')
+        room = ui.px(224) - ui.px(16) - ui.px(30) - ui.px(58)
+        if font.measure(text) <= room:
+            return text
+        while text and font.measure(text + '…') > room:
+            text = text[:-1]
+        return text.rstrip() + '…'
 
     def choose_section(self, name, notify=True):
         self.current = name
@@ -344,3 +381,51 @@ class Shell:
         if not hide and getattr(self, '_sep', None) is not None:
             self._sep.pack(side='left', fill='y', before=self.content)
             self._sep = None
+
+
+# ---------------------------------------------------------------------------------------------- results table
+FULL_COLUMNS = ('n', 'description', 'nominal', 'low', 'high', 'found', 'error', 'left', 'result')
+SMALL_COLUMNS = ('n', 'description', 'nominal', 'limits', 'found', 'left', 'result')
+
+
+def results_table(app, parent, name_width=300, nominal_title='Nominal', error=True):
+    """The full-width results table shared by the procedures.  Row cells come from DataModeMixin.shell_cells(); the first cell is the
+    point number and the second the description:   values = (id, description, *app.shell_cells(...))
+    Wires the small-window layout (merged Limits column) and the 'As Found / As Left' headings.  Returns the Treeview."""
+    cols = ('n', 'description', 'nominal', 'low', 'high', 'limits', 'found', 'error', 'left', 'result')
+    heads = ('#', 'Description', nominal_title, 'Low limit', 'High limit', 'Limits', 'As Found', 'Error', 'As Left', 'Result')
+    tree = ui.make_table(parent, cols, heads, (44, name_width, 100, 100, 100, 170, 110, 100, 110, 90), height=12,
+                         anchors={'description': 'w', 'nominal': 'e', 'low': 'e', 'high': 'e', 'limits': 'e', 'found': 'e', 'error': 'e', 'left': 'e'},
+                         stretch={c: False for c in cols if c != 'description'})
+    tree._cols_full = FULL_COLUMNS if error else tuple(c for c in FULL_COLUMNS if c != 'error')
+    tree._cols_small = SMALL_COLUMNS
+    tree.configure(displaycolumns=tree._cols_full)
+    tree.tag_configure('pending', foreground=ui.C['muted'])
+    tree._shell_name_width = name_width
+
+    def relabel():
+        tree.heading('found', text='As Found' if app.is_left else '● As Found')
+        tree.heading('left', text='● As Left' if app.is_left else 'As Left')
+    app._relabel_reading_column = relabel
+    relabel()
+    return tree
+
+
+def small_window(app, tree, filter_bar, picker=None, extra=None):
+    """Hook the small-window behaviour: merged Limits column, section drop-down in filter_bar, then extra(compact) if given."""
+    picker = picker or app.shell.build_section_picker(filter_bar)
+
+    def layout(compact):
+        tree.configure(displaycolumns=tree._cols_small if compact else tree._cols_full)
+        tree.column('description', width=ui.px(200 if compact else tree._shell_name_width))
+        tree.column('limits', width=ui.px(160))
+        for col in ('found', 'left'):
+            tree.column(col, width=ui.px(100 if compact else 110))
+        if compact:
+            picker.pack(side='right', padx=(0, 14))
+        else:
+            picker.pack_forget()
+        if extra:
+            extra(compact)
+    app.shell.layout_hook = layout
+    return picker

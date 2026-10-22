@@ -204,6 +204,64 @@ class DataModeMixin:
         except tk.TclError:
             pass
 
+
+    # ---- the redesigned window (ui_shell) --------------------------------------------------------------------
+    def shell_cells(self, key, nominal, low, high, unit, fmt=None):
+        """The cells of one results-table row in the redesigned window:  nominal, low, high, limits, as found, error, as left, result
+        (every number carries its unit, scaled for display only), and the row tag.  Which reading is the 'error' follows the mode
+        being collected; in As Left mode the points that were not re-measured show 'Same'."""
+        key = str(key)
+        rec, f, l = self.results.get(key, {}), self.found.get(key), self.left.get(key)
+
+        def num(r):
+            try:
+                return float(r.get('reading', ''))
+            except (TypeError, ValueError, AttributeError):
+                return None
+        show = fmt or (lambda v: ui.si(v, unit))          # fmt: a procedure's own number formatter (plain dB, %, ratio ...)
+        fv, lv, av = num(f or {}), num(l or {}), num(rec)
+        found = show(fv) if fv is not None else ((f or {}).get('entered', '') if f else '')
+        left = show(lv) if lv is not None else ('Same' if (self.is_left and f) else '')
+        err = ''
+        if av is not None and nominal is not None:
+            e = av - nominal
+            err = ('+' + show(e)) if e > 0 else show(e)
+        res = rec.get('result', '')
+        shown = {'PASS': '✔ PASS', 'FAIL': '✖ FAIL'}.get(res, '—')
+        lo_t = 'N/A' if low is None else show(low)               # one-sided limits
+        hi_t = 'N/A' if high is None else show(high)
+        limits = lo_t + ' … ' + hi_t if (low is not None and high is not None) else (('≥ ' + lo_t) if high is None else ('≤ ' + hi_t))
+        nom_t = '' if nominal is None else show(nominal)
+        return (nom_t, lo_t, hi_t, limits, found, err, left, shown), (res.lower() or 'pending',)
+
+    def update_shell_progress(self, points):
+        """Feed the progress ring: tested / pass / fail in As Found, re-run progress in As Left."""
+        summary = self.shell.summary
+        if self.is_left:
+            redo = [str(p['id']) for p in points if self.found.get(str(p['id']), {}).get('result') == 'FAIL']
+            done = [k for k in redo if k in self.left]
+            summary.set_rerun(len(redo), len(done), sum(self.left[k].get('result') == 'PASS' for k in done),
+                              sum(self.left[k].get('result') == 'FAIL' for k in done))
+        else:
+            vals = [self.results.get(str(p['id']), {}).get('result', '') for p in points]
+            summary.update_counts(len(points), vals.count('PASS'), vals.count('FAIL'))
+
+    def update_shell_sections(self, points, section_of):
+        """Sidebar rows (status dot and x/y count per section) in the order the sections first appear."""
+        order, groups = [], {}
+        for p in points:
+            s = section_of(p)
+            if s not in groups:
+                groups[s] = []
+                order.append(s)
+            groups[s].append(self.results.get(str(p['id']), {}).get('result', ''))
+        self.shell.set_sections([(s, groups[s].count('PASS'), groups[s].count('FAIL'), len(groups[s])) for s in order])
+
+    def pick_section(self, name):
+        """Sidebar / drop-down choice."""
+        self.show_section.set(name)
+        self.refresh()
+
     # ---- running ------------------------------------------------------------------------------------------
     def confirm_found_overwrite(self, points) -> bool:
         """Re-measuring As Found after As Left readings exist replaces the original reading of an instrument that has since been

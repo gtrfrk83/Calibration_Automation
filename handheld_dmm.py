@@ -30,6 +30,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import hookups
 import ui_theme as ui
+import ui_shell
 import appdata
 import datamode
 import drivers
@@ -512,107 +513,69 @@ class App(datamode.DataModeMixin):
     def _build_ui(self):
         root = self.root
         src = self.spec['source']
-        banner = ui.Banner(root, f'{self.info["name"]}  -  Performance Verification',
-                           f'Manual-reading procedure: the calibrator output is set for you, you read the meter  |  {len(self.points)} points  |  {src["document"]}')
-        banner.pack(fill='x')
-        banner.add_pill('DEMO MODE  -  simulated readings' if self.demo else 'HARDWARE MODE', 'warn' if self.demo else 'info')
-        self.conn_pill = banner.add_pill('Demo - no hardware' if self.demo else 'Not connected', 'neutral')
-        ui.StatusBar(root, self.status, right='spec v1').pack(side='bottom', fill='x')
-        body = ttk.Frame(root, padding=(18, 14, 18, 10))
-        body.pack(fill='both', expand=True)
-
-        top = ttk.Frame(body)
-        top.pack(fill='x')
-        top.columnconfigure(1, weight=1)
-        dut = ttk.LabelFrame(top, text='Instrument under test', padding=12)
-        dut.grid(row=0, column=0, sticky='nsew', padx=(0, 12))
-        ttk.Label(dut, text='Instrument ID *').grid(row=0, column=0, sticky='w', pady=3)
-        e = ttk.Entry(dut, textvariable=self.asset, width=22)
-        e.grid(row=0, column=1, padx=(10, 0), pady=3)
-        e.focus_set()
-        ttk.Label(dut, text='Serial number').grid(row=1, column=0, sticky='w', pady=3)
-        ttk.Entry(dut, textvariable=self.serial, width=22).grid(row=1, column=1, padx=(10, 0), pady=3)
-        ttk.Label(dut, text='Model').grid(row=2, column=0, sticky='w', pady=3)
-        ttk.Label(dut, text=self.info['name'] + '  (' + self.info.get('model_note', 'the "C" version uses the same steps') + ')', style='Bold.TLabel').grid(row=2, column=1, sticky='w', padx=(10, 0))
-
-        conn = ttk.LabelFrame(top, text='Calibrator', padding=12)
-        conn.grid(row=0, column=1, sticky='nsew')
-        conn.columnconfigure(1, weight=1)
-        ttk.Label(conn, text='Calibrator').grid(row=0, column=0, sticky='w', pady=3)
-        ttk.Combobox(conn, textvariable=self.cal_mode, values=CAL_CHOICES, state='readonly', width=34).grid(row=0, column=1, sticky='w', padx=(8, 12), pady=3)
-        self.btn_test = ttk.Button(conn, text='Test connection', command=self.test_connection)
-        self.btn_test.grid(row=0, column=3)
-        ttk.Label(conn, text='Address').grid(row=1, column=0, sticky='w', pady=3)
-        self.cal_entry = ttk.Combobox(conn, textvariable=self.cal_addr, state='normal')
-        self.cal_entry.grid(row=1, column=1, sticky='ew', padx=(8, 12), pady=3)
-        self.btn_find = ttk.Button(conn, text='Find instruments', command=self.find_instruments)
-        self.btn_find.grid(row=1, column=2, padx=(0, 8))
-        row = ttk.Frame(conn)
-        row.grid(row=1, column=3, sticky='w')
-        ttk.Label(row, text='Baud', style='Muted.TLabel').pack(side='left')
-        ttk.Combobox(row, textvariable=self.cal_baud, values=['9600', '19200', '4800', '2400', '1200'], width=7, state='readonly').pack(side='left', padx=(5, 0))
-        ttk.Label(conn, text='Examples: COM9   ASRL9::INSTR   GPIB0::6::INSTR.  In Manual mode the program tells you what to set and you press OPERATE yourself.',
-                  style='Muted.TLabel').grid(row=2, column=1, columnspan=3, sticky='w')
-        if self.ir:
-            ttk.Label(conn, text='Meter reading').grid(row=3, column=0, sticky='w', pady=(8, 3))
-            ttk.Combobox(conn, textvariable=self.read_mode, values=[READ_TYPED, READ_IR], state='readonly', width=34).grid(
-                row=3, column=1, sticky='w', padx=(8, 12), pady=(8, 3))
-            irrow = ttk.Frame(conn)
-            irrow.grid(row=3, column=2, columnspan=2, sticky='w', pady=(8, 3))
-            ttk.Label(irrow, text='IR cable port', style='Muted.TLabel').pack(side='left')
-            ttk.Entry(irrow, textvariable=self.ir_addr, width=9).pack(side='left', padx=(5, 8))
-            self.btn_ir = ttk.Button(irrow, text='Test IR', command=self.test_ir)
-            self.btn_ir.pack(side='left')
-            ttk.Label(conn, text='Read over IR needs the Fluke IR-to-USB cable on the meter\'s IR port (115200 baud). Without it, choose Type the reading.',
-                      style='Muted.TLabel').grid(row=4, column=1, columnspan=3, sticky='w')
-
+        sh = self.shell = ui_shell.Shell(root, f'{self.info["name"]}  -  Performance Verification',
+                                         f'Manual-reading procedure: the calibrator output is set for you, you read the meter  |  {len(self.points)} points  |  {src["document"]}',
+                                         demo=self.demo, on_section=self.pick_section, version='spec v1')
+        self.status = sh.status_var
+        self.conn_pill = sh.add_chip('Demo - no hardware' if self.demo else 'Not connected', 'neutral')
+        sh.build_identity(self.asset, self.serial)
+        self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
+        self.summary = sh.build_progress()
         if self.demo:
-            ui.Notice(body, 'Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode').pack(fill='x', pady=(12, 0))
+            sh.notice('Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode')
         else:
             extra = ' You are prompted to turn the dial to each range and to change cables, with a hook-up diagram.' if self.spec.get('options', {}).get('range_prompt') else ''
-            ui.Notice(body, 'For each point the calibrator is programmed and enabled, then you read the meter and type the value exactly as displayed (without the unit). '
-                            'Wiring and high-voltage confirmations are required.' + extra + ' Check the meter fuses and battery before starting.', 'info', title='Hardware mode').pack(fill='x', pady=(12, 0))
-        ttk.Label(body, text=src['note'], style='Small.TLabel', wraplength=1100, justify='left').pack(anchor='w', pady=(6, 0))
+            sh.notice('For each point the calibrator is programmed and enabled, then you read the meter and type the value exactly as displayed (without the unit). '
+                      'Wiring and high-voltage confirmations are required.' + extra + ' Check the meter fuses and battery before starting.', 'info')
 
-        self.build_mode_bar(body)
-        tools = ttk.Frame(body)
-        tools.pack(fill='x', pady=(8, 6))
-        self.btn_run = ttk.Button(tools, text='▶  Run All Pending', style='Accent.TButton', command=self.run_all)
-        self.btn_run.pack(side='left')
-        self.btn_section = ttk.Button(tools, text='Run Shown Section', command=self.run_section)
-        self.btn_section.pack(side='left', padx=8)
-        self.btn_rerun = ttk.Button(tools, text='Rerun Selected', command=self.rerun)
-        self.btn_rerun.pack(side='left')
-        self.btn_stop = ttk.Button(tools, text='■  Stop After This Point', style='Danger.TButton', command=self.request_stop, state='disabled')
-        self.btn_stop.pack(side='left')
-        ui.dock_button(root, 'Save progress', self.save)                       # file actions live in the bottom bar
-        self.btn_load = ui.dock_button(root, 'Load progress', self.load)
-        ui.dock_button(root, 'Export Report (PDF)', self.export_pdf)
+        d = sh.drawer_body; d.columnconfigure(1, weight=1)
+        ttk.Label(d, text='Model').grid(row=0, column=0, sticky='w', pady=4)
+        ttk.Label(d, text=self.info['name'], style='Bold.TLabel').grid(row=0, column=1, sticky='w', padx=(10, 0))
+        ttk.Label(d, text=self.info.get('model_note', 'the "C" version uses the same steps'), style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=1, column=0, columnspan=2, sticky='w')
+        ttk.Separator(d).grid(row=2, column=0, columnspan=2, sticky='ew', pady=(10, 10))
+        ttk.Label(d, text='Calibrator').grid(row=3, column=0, sticky='w', pady=4)
+        ttk.Combobox(d, textvariable=self.cal_mode, values=CAL_CHOICES, state='readonly', width=34).grid(row=3, column=1, sticky='ew', padx=(10, 0), pady=4)
+        ttk.Label(d, text='Address').grid(row=4, column=0, sticky='w', pady=4)
+        self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
+        self.cal_entry.grid(row=4, column=1, sticky='ew', padx=(10, 0), pady=4)
+        ttk.Label(d, text='Baud').grid(row=5, column=0, sticky='w', pady=4)
+        ttk.Combobox(d, textvariable=self.cal_baud, values=['9600', '19200', '4800', '2400', '1200'], width=9, state='readonly').grid(row=5, column=1, sticky='w', padx=(10, 0), pady=4)
+        ttk.Label(d, text='Examples: COM9   ASRL9::INSTR   GPIB0::6::INSTR.  In Manual mode the program tells you what to set and you press OPERATE yourself.',
+                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=6, column=0, columnspan=2, sticky='w', pady=(6, 0))
+        if self.ir:
+            ttk.Separator(d).grid(row=7, column=0, columnspan=2, sticky='ew', pady=(12, 10))
+            ttk.Label(d, text='Meter reading').grid(row=8, column=0, sticky='w', pady=4)
+            ttk.Combobox(d, textvariable=self.read_mode, values=[READ_TYPED, READ_IR], state='readonly', width=34).grid(row=8, column=1, sticky='ew', padx=(10, 0), pady=4)
+            ttk.Label(d, text='IR cable port').grid(row=9, column=0, sticky='w', pady=4)
+            irrow = ttk.Frame(d); irrow.grid(row=9, column=1, sticky='w', padx=(10, 0))
+            ttk.Entry(irrow, textvariable=self.ir_addr, width=9).pack(side='left', padx=(0, 8))
+            self.btn_ir = ttk.Button(irrow, text='Test IR', command=self.test_ir); self.btn_ir.pack(side='left')
+            ttk.Label(d, text='Read over IR needs the Fluke IR-to-USB cable on the meter\'s IR port (115200 baud). Without it, choose Type the reading.',
+                      style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=10, column=0, columnspan=2, sticky='w', pady=(6, 0))
+        btns = sh.drawer_footer
+        self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
+        self.btn_test = ttk.Button(btns, text='Test connection', command=self.test_connection, style='Accent.TButton'); self.btn_test.pack(side='left')
 
-        sumrow = ttk.Frame(body)
-        sumrow.pack(fill='x', pady=(2, 8))
-        self.summary = ui.Summary(sumrow)
-        self.summary.pack(side='left', fill='x', expand=True)
-        filt = ttk.Frame(sumrow)
-        filt.pack(side='right', padx=(24, 0))
-        ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='left')
-        sections = ['All sections'] + list(dict.fromkeys(p['section'] for p in self.points))
-        c1 = ttk.Combobox(filt, textvariable=self.show_section, values=sections, width=22, state='readonly')
-        c1.pack(side='left', padx=6)
-        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly')
-        c2.pack(side='left')
-        for c in (c1, c2):
-            c.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
+        self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
+        self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
+        self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
+        self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
+        sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
+        self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
+        sh.add_action('Save progress', self.save, side='right', short='Save')
 
-        info = ttk.LabelFrame(body, text='Selected test point', padding=(12, 8))
-        info.pack(side='bottom', fill='x', pady=(10, 0))
-        ttk.Label(info, textvariable=self.detail, wraplength=1000, justify='left').pack(anchor='w', fill='x')
-        cols = ('n', 'step', 'section', 'description', 'output', 'low', 'high', 'reading', 'units', 'result')
-        self.tree = ui.make_table(body, cols, ('#', 'Manual step', 'Section', 'Description', 'Calibrator output', 'Low limit', 'High limit', 'Reading', 'Units', 'Result'),
-                                  (40, 84, 130, 270, 170, 84, 84, 90, 54, 84), height=12,
-                                  anchors={'description': 'w', 'section': 'w', 'output': 'w', 'low': 'e', 'high': 'e', 'reading': 'e', 'units': 'w', 'step': 'w'},
-                                  stretch={k: False for k in cols if k != 'description'})
-        self.tree.tag_configure('pending', foreground=ui.C['muted'])
+        body = sh.content
+        info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
+        ttk.Label(info, textvariable=self.detail, wraplength=1000, justify='left', style='Muted.TLabel').pack(anchor='w', fill='x')
+        ttk.Label(info, text=src['note'], style='Small.TLabel', wraplength=1000, justify='left').pack(anchor='w', pady=(4, 0))
+        filt = ttk.Frame(body); filt.pack(side='top', fill='x', pady=(0, 6))
+        ttk.Label(filt, text='Test points', style='Bold.TLabel').pack(side='left')
+        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly'); c2.pack(side='right')
+        ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='right', padx=(0, 6))
+        c2.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
+        self.tree = ui_shell.results_table(self, body, name_width=330, nominal_title='Calibrator output', error=False)
+        self.tree.column('nominal', width=ui.px(150))
+        ui_shell.small_window(self, self.tree, filt)
         self.tree.bind('<<TreeviewSelect>>', self.on_select)
         self.refresh()
         ui.polish(root)
@@ -634,14 +597,19 @@ class App(datamode.DataModeMixin):
         return True
 
     def _row(self, p):
-        rec = self.results.get(p['id'], {})
+        key = p['id']
+        rec, f, l = self.results.get(key, {}), self.found.get(key), self.left.get(key)
         res = rec.get('result', '')
         shown = {'PASS': '✔ PASS', 'FAIL': '✖ FAIL'}.get(res, '—')
-        step = p.get('ref') or ('p. 7' if p['table'] == 'F' else f'T{p["table"]} #{p["step"]}')
         numeric = p['test'] == 'numeric'
-        values = (p['n'], step, p['section'], describe(p), output_text(p) if p.get('applied') else '—',
-                  p['low'] if numeric else '', p['high'] if numeric else '', rec.get('entered', ''), p['display_unit'] if numeric else '', shown)
-        return values, (res.lower() or 'pending',)
+        unit = p['display_unit'] if numeric else ''
+        with_unit = lambda v: (f'{v} {unit}'.strip() if v not in ('', None) else '')
+        found = with_unit((f or {}).get('entered', '')) if f else ''
+        left = with_unit(l.get('entered', '')) if l else ('Same' if (self.is_left and f) else '')
+        low, high = (with_unit(p['low']), with_unit(p['high'])) if numeric else ('', '')
+        step = p.get('ref') or ('p. 7' if p['table'] == 'F' else f'T{p["table"]} #{p["step"]}')
+        out = output_text(p) if p.get('applied') else '—'
+        return (p['n'], f'{describe(p)}   ({step})', out, low, high, (low + ' … ' + high) if numeric else '', found, '', left, shown), (res.lower() or 'pending',)
 
     def refresh(self):
         keep = self.tree.selection()
@@ -661,8 +629,8 @@ class App(datamode.DataModeMixin):
         self.update_summary()
 
     def update_summary(self):
-        vals = [self.results.get(p['id'], {}).get('result', '') for p in self.points]
-        self.summary.update_counts(len(self.points), vals.count('PASS'), vals.count('FAIL'))
+        self.update_shell_progress(self.points)
+        self.update_shell_sections(self.points, lambda p: p['section'])
 
     def accept_text(self, p):
         if p['test'] == 'numeric':

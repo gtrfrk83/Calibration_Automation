@@ -179,7 +179,7 @@ class App(datamode.DataModeMixin):
         for r,(text,var,values) in enumerate((('Baud',self.baud,['9600','4800','2400','1200','600','300']),('Parity',self.parity,['Even','Odd','None']),('Data bits',self.bits,['7','8'])),start=2):
             ttk.Label(conn,text=text).grid(row=r,column=0,sticky='w',pady=4)
             ttk.Combobox(conn,textvariable=var,values=values,width=10,state='readonly').grid(row=r,column=1,sticky='w',padx=(10,0),pady=4)
-        btns=ttk.Frame(conn);btns.grid(row=5,column=0,columnspan=2,sticky='w',pady=(12,0))
+        btns = sh.drawer_footer
         self.btn_refresh_ports=ttk.Button(btns,text='Refresh ports',command=self.refresh_ports)
         self.btn_refresh_ports.pack(side='left',padx=(0,8))
         self.btn_test=ttk.Button(btns,text='Test connections',command=self.test_connections,style='Accent.TButton')
@@ -206,46 +206,19 @@ class App(datamode.DataModeMixin):
         c2=ttk.Combobox(filt,textvariable=self.show_status,values=datamode.STATUS_FILTERS,width=14,state='readonly');c2.pack(side='right')
         ttk.Label(filt,text='Show',style='Muted.TLabel').pack(side='right',padx=(0,6))
         c2.bind('<<ComboboxSelected>>',lambda _e:self.refresh())
-        picker=sh.build_section_picker(filt)
-        def layout(compact):
-            full=('n','description','nominal','low','high','found','error','left','result')
-            small=('n','description','nominal','limits','found','left','result')
-            self.tree.configure(displaycolumns=small if compact else full)
-            for col,w in (('description',200 if compact else 300),('limits',160),('found',100 if compact else 110),('left',100 if compact else 110)):self.tree.column(col,width=ui.px(w))
-            if compact:picker.pack(side='right',padx=(0,14))
-            else:picker.pack_forget()
-        sh.layout_hook=layout
         sections=[]
         for p in POINTS:
             s=self._section(p)
             if s not in sections:sections.append(s)
         self._section_names=sections
-        cols=('n','description','nominal','low','high','limits','found','error','left','result')
-        self.tree=ui.make_table(body,cols,('#','Description','Nominal','Low limit','High limit','Limits','As Found','Error','As Left','Result'),
-                                (44,300,100,100,100,170,110,100,110,90),anchors={'description':'w','nominal':'e','low':'e','high':'e','limits':'e','found':'e','error':'e','left':'e'},height=12,
-                                stretch={'n':False,'nominal':False,'low':False,'high':False,'limits':False,'found':False,'error':False,'left':False,'result':False})
-        self.tree.tag_configure('pending',foreground=ui.C['muted'])
+        self.tree=ui_shell.results_table(self,body)
+        ui_shell.small_window(self,self.tree,filt)
         self.tree.bind('<<TreeviewSelect>>',self.on_select)
-        self._relabel_reading_column()
         self._update_sections()
         ui.polish(root)
 
-    def pick_section(self,name):
-        self.show_section.set(name);self.refresh()
-
     def _update_sections(self):
-        rows=[]
-        for s in self._section_names:
-            pts=[p for p in POINTS if self._section(p)==s]
-            res=[self.results.get(str(p['id']),{}).get('result','') for p in pts]
-            rows.append((s,res.count('PASS'),res.count('FAIL'),len(pts)))
-        self.shell.set_sections(rows)
-
-    def _relabel_reading_column(self):
-        tree=getattr(self,'tree',None)
-        if tree is None:return
-        tree.heading('found',text=('As Found' if self.is_left else '● As Found'))
-        tree.heading('left',text=('● As Left' if self.is_left else 'As Left'))
+        self.update_shell_sections(POINTS,self._section)
 
     @staticmethod
     def _section(p):
@@ -262,18 +235,8 @@ class App(datamode.DataModeMixin):
         return True
 
     def _row(self,p):
-        key=str(p['id']);rec=self.results.get(key,{});res=rec.get('result','')
-        unit=p['unit'];f=self.found.get(key);l=self.left.get(key)
-        show=lambda v:ui.si(v,unit)
-        found=show(f['reading']) if f and f.get('reading','')!='' else ''
-        if l and l.get('reading','')!='':left=show(l['reading'])
-        else:left='Same' if (self.is_left and f) else ''
-        err=''
-        if rec and rec.get('reading','')!='':
-            e=rec['reading']-p['nominal']
-            err=('+' if e>0 else '')+show(e) if e else show(0)
-        shown={'PASS':'✔ PASS','FAIL':'✖ FAIL'}.get(res,'—')
-        return (p['id'],p['description'],show(p['nominal']),show(p['low']),show(p['high']),show(p['low'])+' … '+show(p['high']),found,err,left,shown),(res.lower() or 'pending',)
+        cells,tags=self.shell_cells(p['id'],p['nominal'],p['low'],p['high'],p['unit'])
+        return (p['id'],p['description'],*cells),tags
 
     def refresh_ports(self):
         # Keep user-entered COM numbers; detection is advisory and may be unavailable in demo mode.
@@ -318,12 +281,7 @@ class App(datamode.DataModeMixin):
         self.update_summary()
 
     def update_summary(self):
-        vals=[self.results.get(str(p['id']),{}).get('result','') for p in POINTS]
-        if self.is_left:                                   # As Left: progress is about the points that failed As Found
-            redo=[str(p['id']) for p in POINTS if self.found.get(str(p['id']),{}).get('result')=='FAIL']
-            done=[k for k in redo if k in self.left]
-            self.summary.set_rerun(len(redo),len(done),sum(self.left[k].get('result')=='PASS' for k in done),sum(self.left[k].get('result')=='FAIL' for k in done))
-        else:self.summary.update_counts(len(POINTS),vals.count('PASS'),vals.count('FAIL'))
+        self.update_shell_progress(POINTS)
         if hasattr(self,'_section_names'):self._update_sections()
 
     def on_select(self,_event=None):

@@ -197,9 +197,11 @@ class TruevoltAsLeft(unittest.TestCase):
 
     def test_table_heading_follows_mode(self):
         self.app.set_data_mode('left')
-        self.assertEqual(self.app.tree.heading('reading')['text'], 'As Left reading')
+        self.assertEqual(self.app.tree.heading('left')['text'], '● As Left')          # the dot marks the column being collected
+        self.assertEqual(self.app.tree.heading('found')['text'], 'As Found')
         self.app.set_data_mode('found')
-        self.assertEqual(self.app.tree.heading('reading')['text'], 'Reading')
+        self.assertEqual(self.app.tree.heading('found')['text'], '● As Found')
+        self.assertEqual(self.app.tree.heading('left')['text'], 'As Left')
 
 
 def all_buttons(widget):
