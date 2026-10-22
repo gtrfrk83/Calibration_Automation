@@ -191,6 +191,7 @@ class Context:
     is_running: object = None                           # callable -> bool
     author: str = ''
     run_entries: list = field(default_factory=list)     # in-memory 'run' scope entries (the engine passes them to resolve())
+    live: object = None                                 # procmods_live.LiveBridge when the editor is opened INSIDE a procedure window
 
 
 @dataclass
@@ -248,6 +249,8 @@ class ProcModsModel:
         self.test_results: dict = {}
         self._testing = False
         self.oset = None
+        self.last_applied = []                           # labels of what the last apply() wrote (live mode)
+        self.last_kinds = set()
         self.refresh()
 
     # ------------------------------------------------------------------ state
@@ -262,8 +265,24 @@ class ProcModsModel:
             return True                                  # cannot tell: treat as running (read-only)
 
     @property
+    def live_mode(self) -> bool:
+        """True when the editor was opened inside a procedure window (procmods_live): edits are allowed during a run and take effect at the
+        next point boundary.  False for the Manager's window, which still cannot edit a running procedure."""
+        return self.ctx.live is not None
+
+    def where(self) -> dict:
+        try:
+            return self.ctx.live.where() if self.live_mode else {'running': self.running(), 'current': None, 'next': None}
+        except Exception:
+            return {'running': True, 'current': None, 'next': None}
+
+    @property
     def read_only_reason(self) -> str:
-        if self.running():
+        if self.live_mode:
+            why = self.ctx.live.blocked_reason()
+            if why:
+                return why
+        elif self.running():
             return 'A run is in progress. Stop the run to edit.'
         if not self.lock.unlocked:
             return 'Read-only. Unlock developer mode to make changes.'
@@ -290,6 +309,8 @@ class ProcModsModel:
     def set_scope(self, scope):
         if scope not in pm.SCOPES:
             raise ValueError('unknown scope')
+        if self.live_mode and self.ctx.demo and scope != 'run':
+            raise ValueError('In demo mode an edit made inside the procedure applies to this run only (it is never written to the saved overrides)')
         if scope == 'asset' and not self.ctx.asset_id:
             raise ValueError('enter an instrument ID first')
         if scope == 'model' and not self.ctx.model:
@@ -328,7 +349,7 @@ class ProcModsModel:
             e = next((x for x in self.oset.active('text') if x['target'] == key), None)
             cur = self.oset.text(key, factory)
             state = 'locked' if locked else 'modified' if e and cur != factory else 'factory'
-            row = {'key': key, 'name': key, 'factory': factory, 'current': cur, 'state': state, 'modified': state == 'modified',
+            row = {'key': key, 'name': self._text_name(key), 'factory': factory, 'current': cur, 'state': state, 'modified': state == 'modified',
                    'locked': locked, 'lock_reason': 'Safety prompt: locked' if locked else '', 'unverified': False,
                    'uid': e['uid'] if e else None}
             if needle and needle not in f'{key} {factory} {cur}'.casefold():
@@ -339,6 +360,14 @@ class ProcModsModel:
                 continue
             out.append(row)
         return self._decorate(out, 'text')
+
+    def _text_name(self, key) -> str:
+        kind, _, name = key.partition(':')
+        if kind in ('setup', 'note'):
+            for p, k in zip(self.ctx.points, pm.point_keys(self.ctx.points)):
+                if k == name:
+                    return ('Note for: ' if kind == 'note' else 'Setup text for: ') + str(p.get('description') or p.get('desc') or k)
+        return key
 
     def tolerances(self, filter='all', search=''):
         out = []
@@ -384,7 +413,8 @@ class ProcModsModel:
         return n
 
     def visible_tabs(self) -> list:
-        have = {'Commands': bool(self.ctx.registries), 'Settings': bool(self.ctx.defaults), 'Points': bool(self.ctx.points),
+        have = {'Commands': bool(self.ctx.registries), 'Settings': bool(self.ctx.defaults),
+                'Points': bool(self.ctx.points) and (not self.live_mode or bool(self.ctx.live.supports_skip)),
                 'Text': bool(self.ctx.texts), 'Tolerances': bool(self.ctx.points), 'Changes': True}
         return [t for t in TABS if have[t]]
 
@@ -487,6 +517,11 @@ class ProcModsModel:
         p = self._point(point_key)
         if p is None:
             return ['unknown point']
+        if self.live_mode and not self.ctx.live.supports_skip:
+            return ['This procedure cannot skip a single point while it is open (its results are saved by position).']
+        if skip and self.live_mode and point_key in self.ctx.live.locked_keys():
+            return ['This point already has a reading (or is in progress): skipping it now would leave a reading in the report for a skipped '
+                    'point. Redo it, or clear its reading first.']
         k = ('point', point_key)
         if not skip:
             if self.oset.point_override(point_key):
@@ -575,6 +610,8 @@ class ProcModsModel:
         name, key, cmd = self._cmd(target)
         if cmd is None:
             return False, 'unknown command'
+        if self.running():
+            return False, 'Commands cannot be tested while a run is in progress (the instruments are in use).'
         if self.ctx.demo:
             return False, 'Not available in demo mode.'
         if self.ctx.test_command is None or self.idn() in (None, ''):
@@ -641,9 +678,53 @@ class ProcModsModel:
             return []
         return [p for p in self.pending() if p['action'] == 'set']
 
-    def apply(self, confirmed=False) -> ApplyResult:
+    # ------------------------------------------------------------------ live editing (procmods_live)
+    def limit_redo_needed(self) -> list:
+        """[(point key, label)] of staged tolerance changes on points that already have a reading or are in progress: such a change is
+        accepted only together with a redo of the point (otherwise the report would print a tolerance the reading was not judged against)."""
+        if not self.live_mode:
+            return []
+        locked = self.ctx.live.locked_keys()
+        return [(t, d.label or t) for (kind, t), d in self.drafts.items() if kind == 'limit' and d.action == 'set' and t in locked]
+
+    def point_key_for_id(self, pid):
+        """The procmods key of the factory point with this engine id (None if unknown)."""
+        for p, k in zip(self.ctx.points, pm.point_keys(self.ctx.points)):
+            if str(p.get('id', p.get('n'))) == str(pid):
+                return k
+        return None
+
+    def redo_offer(self):
+        """After a live apply: {'key', 'id', 'desc'} of the point in progress when the change could have affected it (a command, setting,
+        setup text or tolerance changed), else None.  The operator decides; nothing is redone automatically."""
+        if not self.live_mode or not self.ctx.live.supports_redo:
+            return None
+        w = self.where()
+        cur = w.get('current')
+        if not w.get('running') or not cur or not (self.last_kinds & {'command', 'param', 'limit', 'text'}):
+            return None
+        key = self.point_key_for_id(cur['id'])
+        return {'key': key, 'id': cur['id'], 'desc': cur['desc']} if key else None
+
+    def limit_blocked(self) -> str:
+        """Live mode, procedure that cannot redo a single point: a tolerance cannot change for a point that already has a reading."""
+        need = self.limit_redo_needed()
+        if need and not self.ctx.live.supports_redo:
+            return ('The tolerance of ' + ', '.join(lab for _k, lab in need) + ' cannot be changed now: it already has a reading (or is in progress) '
+                    'and this procedure cannot redo a single point from the editor. Clear that reading with Rerun Selected first.')
+        return ''
+
+    def applies_from_text(self) -> str:
+        from procmods_live import where_text
+        return where_text(self.where()) if self.live_mode else ''
+
+    def apply(self, confirmed=False, redo=None) -> ApplyResult:
         """Write every staged item once.  Raises OverrideError when read-only or a reason is missing, NeedsConfirmation for asset /
-        model scope until confirmed=True.  A failed item is reported and left staged; nothing is retried."""
+        model scope until confirmed=True.  A failed item is reported and left staged; nothing is retried.
+
+        Inside a procedure (live mode) the written edits are only SAVED here: the procedure applies them at its next point boundary
+        (ctx.live.saved).  `redo`: point keys to measure again with the new settings (ctx.live.request_redo); a staged tolerance change on a
+        point that already has a reading is refused unless that point is in `redo`."""
         self._need_edit()
         miss = self.missing_reasons()
         if miss:
@@ -651,9 +732,19 @@ class ProcModsModel:
         need = self.scope_confirmation_needed()
         if need and not confirmed:
             raise NeedsConfirmation(need)
+        redo = list(redo or [])
+        short = [(k, lab) for k, lab in self.limit_redo_needed() if k not in redo]
+        if short and not self.ctx.live.supports_redo:
+            raise pm.OverrideError(self.limit_blocked() or 'tolerance change refused')
+        if short:
+            raise pm.OverrideError('the tolerance of ' + ', '.join(lab for _k, lab in short) + ' already has a reading (or is in progress): '
+                                   'change it only together with a redo of that point')
+        if redo and self.live_mode and not self.ctx.live.supports_redo:
+            raise pm.OverrideError('this procedure cannot redo a single point from the editor; use its own Rerun')
         result = ApplyResult()
         session = self.lock.session
         author = self.ctx.author or None
+        labels, kinds = [], set()
         for (kind, target), d in list(self.drafts.items()):
             reason = self.reasons[(kind, target)].strip()
             try:
@@ -662,11 +753,18 @@ class ProcModsModel:
                 else:
                     self._write_set(d, reason, session, author)
                 result.done.append(f'{kind}:{target}')
+                labels.append(('reset ' if d.action == 'reset' else '') + f'{kind} {d.label or target}')
+                kinds.add('note' if kind == 'text' and str(target).startswith('note:') else kind)
                 del self.drafts[(kind, target)]
                 self.reasons.pop((kind, target), None)
             except pm.OverrideError as ex:
                 result.errors.append((f'{kind}:{target}', '; '.join(ex.problems)))
         self.refresh()
+        if self.live_mode and result.done:
+            self.last_applied, self.last_kinds = list(labels), kinds
+            if redo:
+                self.ctx.live.request_redo(redo)
+            self.ctx.live.saved(labels)
         return result
 
     def _write_reset(self, d, session, author):

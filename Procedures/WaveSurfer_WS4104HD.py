@@ -501,6 +501,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         sh.add_action('Export Report (PDF)', self.export_pdf_report, side='right', short='PDF')
         sh.add_action('Export Excel (.xlsx)', self.export_professional_excel, side='right', short='Excel')
         self.btn_clear = sh.add_action('Clear function results', self.clear_function, side='right', short='Clear')
+        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
 
         body = sh.content
         info = ttk.Frame(body)
@@ -975,6 +976,62 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         except Exception as exc:
             if self.pm_state is not None:
                 self.pm_state.warnings.append(f'procedure modifications could not be loaded ({type(exc).__name__})')
+
+    # ---- live editing (procmods_live).  The WaveSurfer has no point list: every section computes its points on demand, so the edits are
+    # applied between two points of a section (the head of next_dcv / next_impedance / next_offset / next_bandwidth / next_trigger) by
+    # swapping the resolved override set; the point in progress keeps what it started with.  A section's settle / sample boxes follow the
+    # modified default unless the technician typed something else.  RMS noise and the single time-base point run as one batch: an edit
+    # reaches them at their next start.  Not offered: skipping a point and 'redo' from the editor (use Rerun Selected).
+    def _pm_boundary(self, what):
+        """True = go on.  False = saved edits could not be applied safely (outputs not confirmed): the section stops."""
+        try:
+            self.pm_live_boundary({'id': what, 'desc': f'next {what} point'})
+            self._pm_defaults()
+            self._pm_write_sidecar()
+            return True
+        except procmods_engine.LiveApplyError as exc:
+            messagebox.showerror('Edits not applied', str(exc), parent=self.root)
+            return False
+
+    def pm_driver_classes(self):
+        return (drivers.WaveSurfer4104HD, drivers.Fluke5560A)
+
+    def pm_supports_skip(self):
+        return False
+
+    def pm_supports_redo(self):
+        return False
+
+    def pm_title(self):
+        return 'WaveSurfer 4104HD'
+
+    def pm_context_points(self):
+        views = self.pm_limit_views()
+        return [v for sec in PM_SECTIONS for v in views[sec]]
+
+    def pm_texts(self, points):
+        return {}
+
+    def pm_refresh_view(self):
+        self._pm_defaults()
+        self._refresh_all_results()
+
+    def pm_live_locked_keys(self):
+        """Points of a section are recorded by position: the first len(rows) have a reading, the next one is in flight while it runs."""
+        import procmods
+        views = self.pm_limit_views()
+        pts = [v for sec in PM_SECTIONS for v in views[sec]]
+        keys = procmods.point_keys(pts)
+        have = {'dcv': (len(self.dc_rows), self.dc_running), 'impedance': (len(self.imp_rows), self.imp_running),
+                'offset': (len(self.offset_rows), self.offset_running), 'bandwidth': (len(self.bw_rows), self.bw_running),
+                'timebase': (len(self.tb_rows), self.tb_running), 'trigger': (len(self.trig_rows), self.trig_running)}
+        out, at = set(), 0
+        for sec in PM_SECTIONS:
+            n = len(views[sec])
+            done, flying = have[sec]
+            out.update(keys[at:at + min(n, done + (1 if flying else 0))])
+            at += n
+        return out
 
     def _pm_defaults(self):
         """Move each entry box to its (modified) default, but only if the technician has not typed something else there."""
@@ -1823,6 +1880,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if self.running or self.dc_running or self.imp_running:
             messagebox.showwarning('Busy', 'Another measurement is in progress.')
             return
+        if not self._pm_boundary('DC voltage'):
+            self.dc_batch = False
+            return
         points = self.dcv_points()
         i = len(self.dc_rows)
         if i >= len(points):
@@ -2228,6 +2288,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if self.running or self.dc_running or self.imp_running:
             messagebox.showwarning('Busy', 'Wait for the current test to finish.', parent=self.root)
             return
+        if not self._pm_boundary('input impedance'):
+            self.imp_batch = False
+            return
         points = self.impedance_points()
         index = len(self.imp_rows)
         if index >= len(points):
@@ -2585,6 +2648,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def next_offset(self):
         if not self.offset_batch or self.offset_running:
             return
+        if not self._pm_boundary('offset'):
+            self.offset_batch = False
+            return
         points = self.offset_points()
         idx = len(self.offset_rows)
         if idx >= len(points):
@@ -2806,6 +2872,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def next_bandwidth(self):
         if not self.bw_batch or self.bw_running:
+            return
+        if not self._pm_boundary('bandwidth'):
+            self.bw_batch = False
             return
         idx=len(self.bw_rows)
         if idx>=24:
@@ -3269,6 +3338,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def next_trigger(self):
         if not self.trig_batch or self.trig_running:
+            return
+        if not self._pm_boundary('trigger level'):
+            self.trig_batch = False
             return
         points = self.trigger_points()
         idx = len(self.trig_rows)

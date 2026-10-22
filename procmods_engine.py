@@ -38,6 +38,9 @@ import copy
 import threading
 
 import procmods
+import procmods_live
+
+LiveApplyError = procmods_live.LiveApplyError           # engines catch it as procmods_engine.LiveApplyError
 
 # --------------------------------------------------------------------------------------------------------------------------------
 # What each engine is called in the override store (scope 'model' entries use this string; 'asset' entries use the instrument ID)
@@ -167,6 +170,9 @@ class ModsState:
         self.warnings: list = []
         self.rejected: list = []                 # (driver, key, uid, [problems])
         self.lists: dict = {}                    # id(list) -> [list, originals, limit_idx]
+        self.run_entries: list = []              # "this run only" overrides (never written to the store); live edits add to it
+        self.run_asset = ''                      # the Instrument ID they were made for
+        self.live = procmods_live.LiveState()    # live editing inside a running procedure (procmods_live)
         self._lock = threading.RLock()
 
     # ---- resolving ---------------------------------------------------------------------------------------------------------
@@ -181,12 +187,19 @@ class ModsState:
             if asset is not None:
                 if self.pinned and str(asset or '').strip().casefold() != self.pinned_asset.casefold():
                     self.pinned = False                       # another instrument: the saved snapshot of the last one does not apply
-                self.asset = str(asset or '').strip()
+                new_asset = str(asset or '').strip()
+                if self.run_entries and self.run_asset and new_asset.casefold() != self.run_asset.casefold():
+                    self.run_entries.clear()                  # "this run only" edits belong to the instrument they were made for
+                    self.run_asset = ''
+                    self.live.start_run()
+                self.asset = new_asset
             if idn:
                 self.idn = idn
             if factory_only is not None:
                 self.factory_only = bool(factory_only)
             self.warnings = []
+            if run_entries is None:
+                run_entries = self.run_entries
             if self.pinned and not self.factory_only and not run_entries:
                 if idn:
                     self.oset = self.oset.with_idn(idn)
@@ -357,6 +370,44 @@ class ModsState:
             self.snapshot = procmods.build_snapshot(self.oset, self.snapshot) if self.oset else self.snapshot
             return self.oset
 
+    # ---- live editing (procmods_live) --------------------------------------------------------------------------------------
+    def live_blocked_reason(self) -> str:
+        """Why the editor cannot change this run (empty = it can)."""
+        if self.pinned:
+            return ('This run continues under the modifications saved in its progress file. Stop the run and press Run again (or load the '
+                    'progress file and choose the current settings) before editing.')
+        if self.factory_only:
+            return 'This run was started as a FACTORY run (stored modifications switched off). Stop it and start a normal run to edit.'
+        return ''
+
+    def commit_live(self, *, standby=None, before=None, log=None, asset=None):
+        """Apply the edits saved since the last boundary.  Call ONLY between two points.  `standby()` (the engine's own, once, never retried)
+        runs first; if it raises nothing is applied and the edits stay pending.  Re-resolves the store + this run's entries, patches the point
+        lists, rebinds the command overrides (no instrument reset), appends a revision to the snapshot and records a live_edits event.
+        Returns the event (None when the effective set did not change)."""
+        with self._lock:
+            if not self.live.dirty:
+                return None
+            if standby is not None:
+                standby()
+            old = self.oset
+            self.load(asset=asset)
+            if self.oset or self.snapshot:
+                self.snapshot = procmods.build_snapshot(self.oset, self.snapshot)
+            ev = procmods_live.make_event(old, self.oset, rev=self.rev() or len((self.snapshot or {}).get('revs') or []), before=before,
+                                          demo=self.demo, standby=standby is not None)
+            self.live.dirty, self.live.dirty_at, self.live.pending = False, None, []
+            if ev is not None:
+                self.live.events.append(ev)
+                if log is not None:
+                    try:
+                        log.add('--', procmods_live.event_line(ev), 'procmods')
+                        for line in self.warnings:
+                            log.add('!!', 'OVERRIDE ' + line, 'procmods')
+                    except Exception:
+                        pass
+            return ev
+
     def rev(self):
         revs = (self.snapshot or {}).get('revs') or []
         return revs[-1]['rev'] if revs and self.oset else 0
@@ -410,20 +461,44 @@ class ProcModsMixin:
         if st is None:
             return points
         factory_only = bool(factory_only) or bool(self.__dict__.pop('pm_factory_run', False))   # 'Run factory' is one-shot
+        was_dirty, before_set = st.live.dirty, st.oset
         st.begin_run(asset=asset, factory_only=factory_only, run_entries=run_entries)
+        st.live.start_run(None)
         io = self.__dict__.get('io')
         if io is not None and getattr(io, 'pm_state', None) is not st and hasattr(io, 'pm_attach'):
             io.pm_attach(st, *getattr(io, 'pm_drivers', lambda: ())())
         if io is not None:
             st.banner(getattr(io, 'log', None))
         if points is None:
+            self._pm_begin_event(was_dirty, before_set, factory_only, None)
             return None
         live = {}
         for ent in st.lists.values():
             for p in ent[0]:
                 live[p.get('id')] = p
         mapped = [live.get(p.get('id'), p) for p in points]
-        return [p for p in mapped if not p.get('skip')] or None
+        out = [p for p in mapped if not p.get('skip')] or None
+        st.live.start_run(out)                                       # live editing: this is the list the run walks
+        self._pm_begin_event(was_dirty, before_set, factory_only, out[0] if out else None)
+        return out
+
+    def _pm_begin_event(self, was_dirty, before_set, factory_only, first):
+        """Edits saved during the previous run / a pause are applied by this Run: record that like any other live application."""
+        st = self.pm_state
+        if not was_dirty or factory_only:
+            return
+        io = self.__dict__.get('io')
+        ev = procmods_live.make_event(before_set, st.oset, rev=st.rev(), before={'id': procmods_live.point_id(first), 'desc': self.pm_point_title(first)}
+                                      if first else None, demo=st.demo, standby=False)
+        if ev is None:
+            return
+        st.live.events.append(ev)
+        log = getattr(io, 'log', None) if io is not None else None
+        if log is not None:
+            try:
+                log.add('--', procmods_live.event_line(ev), 'procmods')
+            except Exception:
+                pass
 
     def pm_limit_points(self):
         """The factory points as the override layer sees them: create limit / point / text overrides against THESE (for an engine that
@@ -489,17 +564,297 @@ class ProcModsMixin:
             inst.open = opened
             st.bind_one(inst)
 
+    # ---- live editing inside a running procedure (procmods_live) --------------------------------------------------------------
+    # Engines call pm_step() once per point (new point only) and pm_live_attach(shell) once when the window is built.  They may override
+    # pm_driver_classes / pm_refresh_view / pm_standby / pm_measured_ids / pm_point_title / pm_show_note / pm_asset_text.
+    def pm_is_running(self) -> bool:
+        return bool(getattr(self, 'busy', False))
+
+    def pm_asset_text(self) -> str:
+        for name in ('asset', 'instrument_id'):
+            v = getattr(self, name, None)
+            try:
+                if v is not None:
+                    return str(v.get()).strip()
+            except Exception:
+                pass
+        st = self.pm_state
+        return st.asset if st else ''
+
+    def pm_author(self) -> str:
+        """Who is making the edit: the operating-system user, plus the technician name the report dialog remembers (if any)."""
+        who = procmods.default_author()
+        try:
+            import ui_theme
+            tech = str(ui_theme.Settings('report_details').get('technician', '') or '').strip()
+        except Exception:
+            tech = ''
+        return f'{who} (technician {tech})' if tech and tech.casefold() != who.casefold() else who
+
+    def pm_driver_classes(self) -> tuple:
+        """The driver classes whose command registry the editor lists (engines override)."""
+        return ()
+
+    def pm_point_title(self, p) -> str:
+        return procmods_live.describe_point(p)
+
+    def pm_refresh_view(self):
+        fn = getattr(self, 'refresh', None)
+        if callable(fn):
+            fn()
+
+    def _pm_view_changed(self):
+        try:
+            self.pm_refresh_view()
+        except Exception:
+            pass
+        hook = self.__dict__.get('_pm_live_hook')
+        if hook is not None:
+            try:
+                hook.refresh()
+            except Exception:
+                pass
+
+    def pm_standby(self):
+        """Put every output in standby, once (the engine's own call; never retried).  Raises if it fails."""
+        io = getattr(self, 'io', None)
+        if io is None or getattr(self, 'demo', False):
+            return
+        for name in ('standby', 'all_off', 'all_outputs_off'):
+            fn = getattr(io, name, None)
+            if callable(fn):
+                fn()
+                return
+
+    def pm_measured_ids(self) -> set:
+        """ids of the points that have a reading in the data set being collected (As Found or As Left)."""
+        res = getattr(self, 'results', None)
+        try:
+            return {str(k) for k, v in (res or {}).items() if v}
+        except Exception:
+            return set()
+
+    def _pm_live_lookup(self, pid):
+        st = self.pm_state
+        if st is not None:
+            for ent in st.lists.values():
+                for q in ent[0]:
+                    if procmods_live.point_id(q) == pid:
+                        return q
+        return None
+
+    def pm_live_where(self) -> dict:
+        """{'running', 'current': {'id', 'desc'} | None, 'next': {...} | None}: which point is in progress and which one a saved change reaches."""
+        st = self.pm_state
+        running = self.pm_is_running()
+        out = {'running': running, 'current': None, 'next': None}
+        if st is None or not running:
+            return out
+        live, run = st.live, st.live.run_points
+        if run is None:
+            out['generic'] = True                       # an engine without a point list (WaveSurfer): the next point of the running function
+            return out
+        i = live.index
+        if 0 <= i < len(run):
+            cur = run[i]
+            out['current'] = {'id': procmods_live.point_id(cur), 'desc': self.pm_point_title(cur)}
+        for q in run[i + 1:]:
+            q = self._pm_live_lookup(procmods_live.point_id(q)) or q
+            if not q.get('skip'):
+                out['next'] = {'id': procmods_live.point_id(q), 'desc': self.pm_point_title(q)}
+                break
+        return out
+
+    def pm_live_locked_keys(self) -> set:
+        """Point keys that already have a reading, or are in progress: a live edit may not skip them and may change their tolerance only
+        together with a redo."""
+        st = self.pm_state
+        if st is None:
+            return set()
+        pts = self.pm_context_points()
+        measured = self.pm_measured_ids()
+        cur = st.live.cursor[2] if (st.live.cursor and self.pm_is_running()) else None
+        keys = procmods.point_keys(pts)
+        return {k for p, k in zip(pts, keys) if str(procmods_live.point_id(p)) in measured or (cur is not None and procmods_live.point_id(p) == cur)}
+
+    def pm_live_blocked(self) -> str:
+        st = self.pm_state
+        return st.live_blocked_reason() if st else 'procedure modifications are not available in this procedure'
+
+    def pm_live_saved(self, texts=()):
+        """The editor wrote edits (store or this run's entries).  Inside a run they wait for the next point boundary; between runs they take
+        effect now."""
+        st = self.pm_state
+        if st is None:
+            return
+        st.live.mark_saved('; '.join(texts))
+        if st.run_entries:
+            st.run_asset = self.pm_asset_text() or st.run_asset
+        if not self.pm_is_running():
+            try:
+                self._pm_commit(None)
+            except procmods_live.LiveApplyError:
+                pass                                         # stays pending; the message is in st.warnings and the next Run applies it
+
+    def _pm_commit(self, before):
+        """Apply the saved edits (called ONLY between two points / between runs).  Raises LiveApplyError when standby cannot be confirmed."""
+        st = self.pm_state
+        if st is None or not st.live.dirty:
+            return None
+        io = self.__dict__.get('io')
+        log = getattr(io, 'log', None) if io is not None else None
+        try:
+            ev = st.commit_live(standby=None if getattr(self, 'demo', False) else self.pm_standby, before=before, log=log,
+                                asset=self.pm_asset_text() or None)
+        except Exception as exc:
+            msg = ('The saved edits were NOT applied because the outputs could not be confirmed in standby '
+                   f'({type(exc).__name__}: {exc}). Check the instruments; the edits stay saved and apply at the next point / Run.')
+            st.warnings.append(msg)
+            raise procmods_live.LiveApplyError(msg) from exc
+        self._pm_view_changed()
+        return ev
+
+    def pm_request_redo(self, keys):
+        """Measure these points (factory point keys) again with the settings in effect at the next boundary."""
+        st = self.pm_state
+        if st is None:
+            return
+        pts = self.pm_context_points()
+        byk = dict(zip(procmods.point_keys(pts), pts))
+        ids = [procmods_live.point_id(byk[k]) for k in keys if k in byk]
+        st.live.request_redo(ids)
+
+    def pm_show_note(self, p):
+        """The technician note of a point, shown once per run when the point is reached (informational; no safety prompt is touched)."""
+        try:
+            from tkinter import messagebox
+            messagebox.showinfo(f'Note for point {procmods_live.point_id(p)}', str(p.get('tech_note')), parent=getattr(self, 'root', None))
+        except Exception:
+            pass
+
+    def pm_step(self, points, i, previous):
+        """Call at the top of every point of a run loop: `p, previous = self.pm_step(points, i, previous)`.
+
+        Returns (p, previous): p is the LIVE point (patched copy) to run; None when a live edit now skips it (go on to i + 1).  Raises
+        procmods_live.LiveApplyError when saved edits could not be applied safely (the engine reports it through its normal error path).
+        Applies the edits saved since the last point, puts a requested redo in front of the queue (and clears `previous` so the setup prompt
+        is shown again), shows a new technician note.  The point that is already in progress (re-entry of the same index) is returned as is."""
+        st = self.pm_state
+        p = points[i]
+        if st is None:
+            return p, previous
+        live = st.live
+        key = (id(points), i, procmods_live.point_id(p))
+        if live.cursor == key:
+            return p, previous                                    # same point again (a prompt stage): never changed in flight
+        live.run_points, live.index, live.cursor = points, i, key
+        if live.dirty:
+            self._pm_commit({'id': procmods_live.point_id(p), 'desc': self.pm_point_title(p)})
+        if live.redo:
+            again, live.redo = list(live.redo), []
+            redo = []
+            for rid in again:
+                q = self._pm_live_lookup(rid)
+                if q is not None and rid != procmods_live.point_id(p) and not q.get('skip'):
+                    redo.append(q)
+            if redo:
+                points[i:i] = redo
+                p, previous = points[i], None
+                live.cursor = (id(points), i, procmods_live.point_id(p))
+                io = self.__dict__.get('io')
+                log = getattr(io, 'log', None) if io is not None else None
+                if log is not None:
+                    try:
+                        log.add('--', 'LIVE EDIT redo: point(s) ' + ', '.join(str(procmods_live.point_id(q)) for q in redo)
+                                + ' measured again; the previous reading is replaced when the new one is recorded', 'procmods')
+                    except Exception:
+                        pass
+        q = self._pm_live_lookup(procmods_live.point_id(p))
+        if q is not None and q is not p:
+            points[i] = p = q
+        if p.get('skip'):
+            return None, previous
+        pid = procmods_live.point_id(p)
+        if p.get('tech_note') and pid not in live.noted:
+            live.noted.add(pid)
+            self.pm_show_note(p)
+        return p, previous
+
+    def pm_live_boundary(self, before=None):
+        """For an engine without a point list (the WaveSurfer): call between two points.  Applies the saved edits."""
+        st = self.pm_state
+        if st is not None and st.live.dirty:
+            self._pm_commit(before)
+
+    def pm_texts(self, points) -> dict:
+        """Factory text items for the editor's Text tab: 'setup:<key>' (where the spec has a setup text) and 'note:<key>' (a technician note)."""
+        out = {}
+        for p, k in zip(points, procmods.point_keys(points)):
+            if isinstance(p.get('setup'), str) and p['setup'].strip():
+                out[f'setup:{k}'] = p['setup']
+            out[f'note:{k}'] = ''
+        return out
+
+    def pm_supports_skip(self) -> bool:
+        return True
+
+    def pm_supports_redo(self) -> bool:
+        return True
+
+    def pm_context_points(self) -> list:
+        """The FACTORY points the editor keys its overrides on (engines whose points are not in registered lists override)."""
+        st = self.pm_state
+        return st.factory_points() if st else []
+
+    def pm_title(self) -> str:
+        st = self.pm_state
+        return f'{st.model} procedure' if st else 'procedure'
+
+    def pm_live_context(self):
+        """procmods_ui_model.Context for the editor window, built fresh each time it opens (current asset, connection and run state)."""
+        import cmdreg
+        import procmods_ui_model as M
+        st = self.pm_state
+        pts = [p if (p.get('description') or p.get('desc')) else dict(p, description=self.pm_point_title(p)) for p in self.pm_context_points()]
+        regs = {}
+        for cls in self.pm_driver_classes():
+            try:
+                regs[cls.__name__] = cmdreg.merge_commands(cls)
+            except Exception:
+                pass
+        bridge = procmods_live.LiveBridge(where=self.pm_live_where, locked_keys=self.pm_live_locked_keys, blocked=self.pm_live_blocked,
+                                          saved=self.pm_live_saved, redo=self.pm_request_redo, running=self.pm_is_running,
+                                          supports_skip=self.pm_supports_skip(), supports_redo=self.pm_supports_redo(), pending=lambda: [x['text'] for x in st.live.pending])
+        return M.Context(title=self.pm_title(), model=st.model, asset_id=self.pm_asset_text() or st.asset, demo=bool(getattr(self, 'demo', False)),
+                         registries=regs, points=pts, defaults=defaults_for(st.engine), texts=self.pm_texts(pts), store=st._store(),
+                         idn=lambda: st.idn, is_running=self.pm_is_running, author=self.pm_author(), run_entries=st.run_entries, live=bridge)
+
+    def pm_live_attach(self, shell=None):
+        """Give this procedure window the 'Edit procedure' action (it stays usable during a run).  Never breaks the window."""
+        try:
+            import procmods_ui
+            hook = procmods_ui.attach_live(self, shell if shell is not None else getattr(self, 'shell', None))
+            self.__dict__['_pm_live_hook'] = hook
+            return hook
+        except Exception as exc:
+            if self.pm_state is not None:
+                self.pm_state.warnings.append(f'the in-run procedure editor could not be attached ({type(exc).__name__})')
+            return None
+
     # ---- checkpoints and results -------------------------------------------------------------------------------------------
     def pm_checkpoint_fields(self) -> dict:
         """Merge into the progress file.  {} when the run is unmodified, so unmodified checkpoints are unchanged."""
         st = self.pm_state
         if st is None:
             return {}
-        if st.oset and st.snapshot:
-            return {'overrides': copy.deepcopy(st.snapshot)}
-        if st.factory_only and st.suppressed:
-            return {'overrides': {'revs': [], 'hash': '', 'factory_run': True, 'suppressed': st.suppressed}}
-        return {}
+        out = {}
+        if (st.oset and st.snapshot) or (st.snapshot and st.live.events):      # live edits that removed the last override stay on record
+            out['overrides'] = copy.deepcopy(st.snapshot)
+        elif st.factory_only and st.suppressed:
+            out['overrides'] = {'revs': [], 'hash': '', 'factory_run': True, 'suppressed': st.suppressed}
+        if out and st.live.events:
+            out['live_edits'] = copy.deepcopy(st.live.events)
+        return out
 
     def pm_result_fields(self) -> dict:
         st = self.pm_state
@@ -511,6 +866,8 @@ class ProcModsMixin:
         {'action': 'none'|'same'|'saved'|'current', 'diff': ...}."""
         st = self.pm_state
         snap = (data or {}).get('overrides') if isinstance(data, dict) else None
+        if st is not None and isinstance(data, dict) and isinstance(data.get('live_edits'), list):
+            st.live.events = [e for e in data['live_edits'] if isinstance(e, dict)]      # the audit trail of edits made during the run
         if st is None or not snap or not snap.get('revs'):
             return {'action': 'none', 'diff': None}
         if not procmods.verify_snapshot(snap):
@@ -575,7 +932,7 @@ def applied_modifications(run) -> list:
 
 def applied_info(run) -> dict:
     """{'modifications': applied_modifications(run), 'hash', 'rev', 'tolerances_modified', 'factory_run', 'suppressed', 'tampered': [...],
-    'warnings': [...], 'rejected': [...]} - what a report needs to say about the modifications and about overrides that were not applied."""
+    'warnings': [...], 'rejected': [...]; plus 'live_edits': [...] only if edits were made during the run} - what a report needs to say about the modifications and about overrides that were not applied."""
     st = run if isinstance(run, ModsState) else getattr(run, 'pm_state', None)
     oset = _oset_of(run)
     info = {'modifications': procmods.modifications_summary(oset) if oset else [], 'hash': oset.hash if oset else '', 'rev': 0,
@@ -584,4 +941,6 @@ def applied_info(run) -> dict:
     if isinstance(st, ModsState):
         info.update(rev=st.rev(), factory_run=st.factory_only and bool(st.suppressed), suppressed=st.suppressed,
                     tampered=[(e['uid'], e['target']) for e in st.oset.tampered()], warnings=list(st.warnings), rejected=list(st.rejected))
+        if st.live.events:                                  # only when edits were made during the run: otherwise the record is unchanged
+            info['live_edits'] = copy.deepcopy(st.live.events)
     return info

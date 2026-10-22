@@ -226,4 +226,23 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
 - Tests: `tests/test_reprint_*.py` (named to sort after test_beta because they install tests/_tk_stub.py); `tests/reprint_harness.py` runs the engines' real export code on the simulated benches.
 
 
+## Live procedure editor (branch live-editor)
+"Edit procedure" in every running procedure window opens the existing procmods editor (procmods_ui.LiveHook -> ModifyWindow in live mode). Logic is in
+procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods of procmods_engine.ProcModsMixin; tests: tests/test_beta_live_editor*.py.
+- Edits are saved at once but applied only at the next point boundary (`pm_step`, or `pm_live_boundary` for WaveSurfer). The point in flight is never changed. Outputs go to standby first (a failed standby stops the run and leaves the edits saved); the instrument reset is not re-run.
+- Every edit is an event in the run's audit trail (`live_edits` in the checkpoint; who/when/old/new/before_point) and a normal override, or run-only ("this run only"). Developer-mode gate, locked/risk commands, verified flags and HMAC limit rules are unchanged. Live editing is blocked while a pinned progress file or a factory run is active.
+- Limits: allowed with the existing rules (devmode, reason, HMAC). The tolerance of a point that already has a reading changes only together with a redo of that point.
+- Redo uses the engine's own queue (no automatic write retries). WaveSurfer has no skip and no redo. Demo edits are marked DEMO and stay run-only.
+- Covered: truevolt, dacq, fgen, handheld family (incl. DsbApp by inheritance), 34401A, 8846A verification, MDO4000C, WaveSurfer. Not wired: TDS2000C (no procmods layer), Fluke_8846A_Adjustment.
+- Unverified: the Tk windows (never viewed); live command edits (no engine supplies a test_command); the simulator accepts command shape only.
 - 5522A OUT? reply for a square wave (observed on the bench): `2.000000E+00,VPP,0E+00,0,6.000E+01` for 2 Vpp at 60 Hz = amplitude, unit VPP, 0, 0, frequency. The square-wave read-back requires unit VPP.
+## Datasheet Builder grid editor (branch dsb-grid-ui)
+- The editor window is now one spreadsheet-like grid (`datasheet_builder_ui.GridEditorWindow`, drawn on a Canvas by `SheetCanvas`) instead of the seven-step wizard: columns STEP NUM, FUNCTION TESTED,
+  NOMINAL VALUE, AS FOUND, AS LEFT, Out of Tol, CALIBRATION TOLERANCE; an Edit Cell bar above it; the spec boxes (Select Spec Types, entry fields, Calc / Recalc, Test Point Definitions) below; a tool column at
+  the right (symbols, Ins. Header, Warnings, row remark, Run this row, Lock Status). As Found / As Left stay blank: the printed sheet is a template, never a record (the preview says so).
+- All grid logic is in `datasheet_builder_ui_model.GridModel` (a subclass of EditorModel; tkinter-free): rows, selection, keys, cell edits, the boxes -> tolerance (Decimal expression model), multiple test points,
+  undo (the EditorModel snapshot gate), print view / PDF. `GridGeometry` holds the pixel maths. The older detail pages (Ranges, Specification table, Sections, Details, Standards and automation) open from More.
+- Core change, additive only: `Point.spec` (optional list-of-one `SpecEntry` that governs that one point; written to JSON only when set). `Function.governing(point)` picks it, `limit_for` / `tol_text` / `export_spec`
+  use it, and the function-level 'no_spec' error is raised only for points that have neither their own spec nor a function table entry. Old files (no `spec`) load and export unchanged; the schema id stays 'dsb-1'.
+- Rows are created in an auto-made range (the next decade up from the nominal); Meas Res / Auto Res / Display Decs write `Range.resolution`.
+- Tests: tests/test_dsb_grid_model.py (no tkinter), tests/test_dsb_ui_widgets.py (tests/_tk_stub.py; the stub now has a real `TclError`). The window has never been viewed on a real display.

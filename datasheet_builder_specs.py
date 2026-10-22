@@ -211,7 +211,7 @@ def export_spec(ds, period=None, plan=None, uid=None, include_datasheet=True):
             hand += not ready
             lim = lims[period]
             step['ref'] = f'{ds.title or ds.model} v{ds.version}'
-            printed = next(iter(fn.spec_for(p.range_id, p.frequency)[1] or [None]), None)
+            printed = next(iter(fn.governing(p) or [None]), None)
             if printed is not None:
                 text = printed.printed.get(period) or printed.exprs[period].text(fn.unit) if period in printed.exprs else ''
                 if text:

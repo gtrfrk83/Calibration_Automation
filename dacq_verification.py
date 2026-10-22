@@ -320,6 +320,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
+        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
 
         body = sh.content
         info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
@@ -351,6 +352,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def _row(self, p):
         cells, tags = self.shell_cells(p['id'], p['nominal'], p['nominal'] - p['error'], p['nominal'] + p['error'], p['unit'])
         return (p['id'], p['description'], *cells), tags
+
+    def pm_driver_classes(self): return (getattr(drivers, f'Keysight{MODEL}'), *[cls for _n, cls in CALIBRATORS.values()])
 
     def refresh(self):
         keep = self.tree.selection()
@@ -534,6 +537,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             self.busy = False; self.save()
             self.status.set('Run stopped by the operator. Progress is saved.' if self.stop else 'Run complete. Save progress or export a report.'); return
         p = points[i]
+        try: p, previous = self.pm_step(points, i, previous)          # live edits: applied here, between two points (procmods_live)
+        except procmods_engine.LiveApplyError as exc: self._error(exc); return
+        if p is None: self.root.after(30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
         key = p['group']
         if not self.demo and key != previous and not self._prompt_setup(p):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
