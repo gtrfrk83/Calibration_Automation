@@ -56,6 +56,34 @@ Verified on hardware (Procedures list)
   "system", with the changed files) and the column shows "Changed since verification - needs hardware re-verification" until someone runs it on the hardware and
   presses "Mark verified on hardware..." again. Updates are never blocked. "Unlock for editing" (with a reason) is for when nothing has changed.
 
+Importing a procedure package (Procedures list)
+  A package is a zip file that carries one procedure (its launcher, test points and limits, driver, hook-up diagrams, tests) from another copy of the suite
+  or from a colleague. It holds PYTHON PROGRAM CODE that will run on this computer, so only import packages from the lab's own library folder.
+  Library folder: on the Procedure Development tab, under "Procedure packages", press "Choose folder..." and pick the shared folder where the lab keeps its
+  packages (a network drive, for example). It is empty until you set it. The file picker of the import then opens there.
+  To import: press "Import procedure package..." (top right of the Procedures list) and pick the zip. A window shows what it is BEFORE anything is written:
+  the name and version, who it says made it, where the file is (and whether that is inside the library folder), every file in it and whether the file is new,
+  replaces an installed file or is identical, whether the procedure is verified on hardware and locked right now, and what the package would do about that.
+  Tick "I know where this package came from and I want to install it", then press "Install package". Cancel installs nothing.
+  A package is refused (with the reasons listed, and no Install button) if a file's checksum does not match, a file is missing or not listed, a path tries to
+  leave the suite folders, a file is outside Procedures / specs / drivers / diagrams / tests, a program or database file type is not allowed, a Python file is
+  not valid Python, it needs a newer suite, or it needs files this copy does not have.
+  Every installed file that replaces one is first copied to Backups\packages\<folder>\<name>_backup_v01 (v02, v03 ... next time). If anything fails part way,
+  the files already written are put back. The import (which package, when, by whom, the files) is recorded in the lab registry (Asset History database).
+  A new procedure appears in the Procedures list straight away. Nothing is hidden or hosted: the package is just a file in a folder.
+  Verified on hardware: if the package REPLACES files of a procedure that is verified and locked, the window warns you and, once installed, the procedure is
+  unlocked (recorded as "package import") and needs hardware re-verification. The only exception is a package that carries a verified mark (date and name of
+  the person who verified it, plus a fingerprint of the files) whose fingerprint matches the files now installed and where this copy has no saved procedure
+  changes for that model: then the procedure is marked verified and locked again with that date and name. The mark shows that the files are the ones that were
+  verified; nobody here has re-checked an instrument. Other locked procedures that use a replaced shared file (a driver, an engine) show "Changed since
+  verification" as usual, and the window names them.
+  Making a package (on the computer that has the procedure): python tools\make_package.py <procedure id> --out <library folder>
+  (python tools\make_package.py --list shows the ids). Add --verified-mark to attach the verified mark, --include <file> to ship an extra file.
+
+  Files that decide "Changed since verification": each procedure lists, in Procedures\<id>.procedure.json, exactly the files it depends on. Editing the
+  test points of one Fluke 110-series model, or the hook-up text of another meter, no longer unlocks the others. A shared engine or driver (for example
+  handheld_dmm.py, drivers\fluke_5560a.py) still unlocks every procedure that runs on it.
+
 Editing one test point (right-click > Edit)
   In a running procedure, right-click a test point and choose Edit (or select a point and press "Edit point"). A small window opens for that point only.
   It is disabled, with the reason, on a procedure that is verified on hardware and locked, and while that point is being measured.

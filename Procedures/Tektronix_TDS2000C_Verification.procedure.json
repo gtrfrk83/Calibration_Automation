@@ -1,0 +1,53 @@
+{
+ "schema": 1,
+ "id": "Tektronix_TDS2000C_Verification",
+ "name": "Tektronix TDS2000C / TDS1000C-EDU Performance Verification",
+ "manufacturer": "Tektronix",
+ "model": "TDS2000C/TDS1000C-EDU",
+ "category": "Oscilloscope",
+ "version": "1",
+ "order": 13,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Tektronix_TDS2000C_Verification.py",
+ "engine": [
+  "tds2000c_verification.py"
+ ],
+ "drivers": [
+  "tektronix_tds2000c",
+  "fluke_5522a_scope",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/tektronix_tds2000c_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Tektronix_TDS2000C_Verification.py",
+   "tds2000c_verification.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/tektronix_tds2000c.py",
+   "drivers/fluke_5522a_scope.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/tektronix_tds2000c_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_tds2000c"
+  ]
+ },
+ "seed_verified": true,
+ "seed_order": 1,
+ "own_files": [
+  "Procedures/Tektronix_TDS2000C_Verification.py",
+  "Procedures/Tektronix_TDS2000C_Verification.procedure.json",
+  "specs/tektronix_tds2000c_pv.json",
+  "drivers/tektronix_tds2000c.py",
+  "drivers/fluke_5522a_scope.py",
+  "tests/test_tds2000c.py"
+ ]
+}

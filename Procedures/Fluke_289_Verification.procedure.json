@@ -1,0 +1,44 @@
+{
+ "schema": 1,
+ "id": "Fluke_289_Verification",
+ "name": "Fluke 289 Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "289",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 25,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_289_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a",
+  "fluke_28x"
+ ],
+ "specs": [
+  "specs/fluke_287_289_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_289_Verification.py",
+   "handheld_dmm.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py",
+   "drivers/fluke_28x.py"
+  ],
+  "spec": [
+   "specs/fluke_287_289_pv.json#289"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": []
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_289_Verification.py",
+  "Procedures/Fluke_289_Verification.procedure.json"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "schema": 1,
+ "id": "Fluke_8846A_Verification",
+ "name": "Fluke 8846A Performance Verification (1-Year)",
+ "manufacturer": "Fluke",
+ "model": "8846A",
+ "category": "Digital Multimeter",
+ "version": "59",
+ "order": 3,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_8846A_Verification.py",
+ "engine": [],
+ "drivers": [
+  "scpi_dmm",
+  "fluke_5560a"
+ ],
+ "specs": [],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_8846A_Verification.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/scpi_dmm.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": []
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": []
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_8846A_Verification.py",
+  "Procedures/Fluke_8846A_Verification.procedure.json"
+ ]
+}

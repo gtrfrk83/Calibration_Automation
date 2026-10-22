@@ -597,7 +597,8 @@ class EndToEnd(unittest.TestCase):
 
 class Registered(unittest.TestCase):
     def test_launchers_manager_and_verified_registration(self):
-        manager = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
+        from tests._registry_text import manager_text            # the Manager finds procedures by scanning Procedures/*.procedure.json
+        manager = manager_text()
         import verified
         for m in MODELS:
             name = f'Fluke_{m}_Verification.py'

@@ -31,6 +31,9 @@ import procmods_ui
 import procmods_ui_model
 import datasheet_builder_ui
 import dsb_manager      # user-built datasheets are listed (not stored) in the Procedures table
+import packages          # procedure packages: export / inspect / install a procedure as a zip (packages.py)
+import packages_ui
+import procscan         # the procedures register themselves: Procedures/<id>.procedure.json (procscan.py)
 import verified         # 'Verified on hardware': the Procedures list marks, shows and locks verified procedures
 import verified_ui
 
@@ -40,47 +43,20 @@ BUILTIN = 'Procedures/WaveSurfer_WS4104HD.py'
 PROCEDURES = BASE / 'Procedures'
 BACKUPS = BASE / 'Backups'
 VERSION = suite_info.full_version()
-STABLE = {
- 'WaveSurfer WS4104HD Verification': 'WaveSurfer_WS4104HD.py',
- 'Fluke 87V Guided Verification': 'Fluke_87V.py',
- 'Agilent 34401A Performance Verification': 'Agilent_34401A.py',
- 'Fluke 8846A Performance Verification (1-Year)': 'Fluke_8846A_Verification.py',
- 'Fluke 8846A Guided Adjustment': 'Fluke_8846A_Adjustment.py',
- 'Fluke 8808A Performance Verification (RS-232)': 'Fluke_8808A_Verification.py',
- 'Keysight 34465A Performance Verification': 'Keysight_34465A_Verification.py',
- 'Keysight 34460A Performance Verification': 'Keysight_34460A_Verification.py',
- 'Keysight 34461A Performance Verification': 'Keysight_34461A_Verification.py',
- 'Keysight 34470A Performance Verification': 'Keysight_34470A_Verification.py',
- 'Keysight 34970A Performance Verification (RS-232)': 'Keysight_34970A_Verification.py',
- 'Keysight 34972A Performance Verification (USB)': 'Keysight_34972A_Verification.py',
- 'Tektronix MDO4000C Performance Verification': 'Tektronix_MDO4000C_Verification.py',
- 'Tektronix TDS2000C / TDS1000C-EDU Performance Verification': 'Tektronix_TDS2000C_Verification.py',
- 'Fluke 110 Performance Verification': 'Fluke_110_Verification.py',
- 'Fluke 113 Performance Verification': 'Fluke_113_Verification.py',
- 'Fluke 114 Performance Verification': 'Fluke_114_Verification.py',
- 'Fluke 115 Performance Verification': 'Fluke_115_Verification.py',
- 'Fluke 116 Performance Verification': 'Fluke_116_Verification.py',
- 'Fluke 117 Performance Verification': 'Fluke_117_Verification.py',
- 'Klein Tools MM325 Performance Verification': 'Klein_MM325_Verification.py',
- 'Keysight 33210A Performance Verification': 'Keysight_33210A_Verification.py',
- 'Agilent 33220A Performance Verification': 'Agilent_33220A_Verification.py',
- 'Agilent 33250A Performance Verification': 'Agilent_33250A_Verification.py',
- 'Fluke 287 Performance Verification': 'Fluke_287_Verification.py',
- 'Fluke 289 Performance Verification': 'Fluke_289_Verification.py',
- 'Fluke 77 Series IV Performance Verification': 'Fluke_77IV_Verification.py',
- 'Fluke 175 Performance Verification': 'Fluke_175_Verification.py',
- 'Fluke 177 Performance Verification': 'Fluke_177_Verification.py',
- 'Fluke 179 Performance Verification': 'Fluke_179_Verification.py',
- 'Keithley 2000 Performance Verification': 'Keithley_2000_Verification.py',
-}
-VERSIONS = {'WaveSurfer_WS4104HD.py': '51', 'Fluke_87V.py': '53', 'Agilent_34401A.py': '55',
-            'Fluke_8846A_Verification.py': '59', 'Fluke_8846A_Adjustment.py': '57', 'Fluke_8808A_Verification.py': '1',
-            'Keysight_34465A_Verification.py': '3', 'Keysight_34460A_Verification.py': '2', 'Keysight_34461A_Verification.py': '2', 'Keysight_34470A_Verification.py': '2', 'Keysight_34970A_Verification.py': '1', 'Keysight_34972A_Verification.py': '1',
-            'Tektronix_MDO4000C_Verification.py': '2', 'Tektronix_TDS2000C_Verification.py': '1', 'Fluke_110_Verification.py': '2', 'Fluke_113_Verification.py': '2', 'Fluke_114_Verification.py': '2', 'Fluke_115_Verification.py': '2', 'Fluke_116_Verification.py': '2', 'Fluke_117_Verification.py': '2', 'Klein_MM325_Verification.py': '2',
-            'Keysight_33210A_Verification.py': '2', 'Agilent_33220A_Verification.py': '2', 'Agilent_33250A_Verification.py': '1',
-            'Fluke_287_Verification.py': '1', 'Fluke_289_Verification.py': '1', 'Fluke_77IV_Verification.py': '1',
-            'Fluke_175_Verification.py': '1', 'Fluke_177_Verification.py': '1', 'Fluke_179_Verification.py': '1',
-            'Keithley_2000_Verification.py': '1'}
+# The procedures are found by scanning Procedures/ for their metadata sidecars (procscan.py); nothing is listed by hand any more.
+# STABLE {display name: launcher file} and VERSIONS {launcher file: version} keep their old shape for the code that reads them.
+STABLE, VERSIONS = {}, {}
+
+
+def scan_procedures():
+    """The registered procedures in list order, found by scanning Procedures/ (procscan.py).  Also refreshes STABLE and VERSIONS."""
+    found = procscan.procs(BASE)
+    stable, versions = procscan.legacy_tables(found)
+    STABLE.clear(); STABLE.update(stable)
+    VERSIONS.clear(); VERSIONS.update(versions)
+    return found
+
+
 ALL_CATEGORIES = 'All categories'
 
 
@@ -120,39 +96,7 @@ def init_db():
         )''')
         init_datasheet_db(conn)
         # Stable paths are relative to this manager, and remain unchanged after updates.
-        records = [
-            ('WaveSurfer WS4104HD Verification','Teledyne LeCroy','WS4104HD','Oscilloscope','WaveSurfer_WS4104HD.py'),
-            ('Fluke 87V Guided Verification','Fluke','87 Series V','Digital Multimeter','Fluke_87V.py'),
-            ('Agilent 34401A Performance Verification','Agilent','34401A','Digital Multimeter','Agilent_34401A.py'),
-            ('Fluke 8846A Performance Verification (1-Year)','Fluke','8846A','Digital Multimeter','Fluke_8846A_Verification.py'),
-            ('Fluke 8846A Guided Adjustment','Fluke','8846A','Digital Multimeter Adjustment','Fluke_8846A_Adjustment.py'),
-            ('Fluke 8808A Performance Verification (RS-232)','Fluke','8808A','Digital Multimeter','Fluke_8808A_Verification.py'),
-            ('Keysight 34465A Performance Verification','Keysight','34465A','Digital Multimeter','Keysight_34465A_Verification.py'),
-            ('Keysight 34460A Performance Verification','Keysight','34460A','Digital Multimeter','Keysight_34460A_Verification.py'),
-            ('Keysight 34461A Performance Verification','Keysight','34461A','Digital Multimeter','Keysight_34461A_Verification.py'),
-            ('Keysight 34470A Performance Verification','Keysight','34470A','Digital Multimeter','Keysight_34470A_Verification.py'),
-            ('Keysight 34970A Performance Verification (RS-232)','Keysight','34970A','Data Acquisition / Switch Unit','Keysight_34970A_Verification.py'),
-            ('Keysight 34972A Performance Verification (USB)','Keysight','34972A','Data Acquisition / Switch Unit','Keysight_34972A_Verification.py'),
-            ('Tektronix MDO4000C Performance Verification','Tektronix','MDO4024C/4034C/4054C/4104C','Oscilloscope','Tektronix_MDO4000C_Verification.py'),
-            ('Tektronix TDS2000C / TDS1000C-EDU Performance Verification','Tektronix','TDS2000C/TDS1000C-EDU','Oscilloscope','Tektronix_TDS2000C_Verification.py'),
-            ('Fluke 110 Performance Verification','Fluke','110','Digital Multimeter','Fluke_110_Verification.py'),
-            ('Fluke 113 Performance Verification','Fluke','113','Digital Multimeter','Fluke_113_Verification.py'),
-            ('Fluke 114 Performance Verification','Fluke','114','Digital Multimeter','Fluke_114_Verification.py'),
-            ('Fluke 115 Performance Verification','Fluke','115','Digital Multimeter','Fluke_115_Verification.py'),
-            ('Fluke 116 Performance Verification','Fluke','116','Digital Multimeter','Fluke_116_Verification.py'),
-            ('Fluke 117 Performance Verification','Fluke','117','Digital Multimeter','Fluke_117_Verification.py'),
-            ('Klein Tools MM325 Performance Verification','Klein Tools','MM325','Digital Multimeter','Klein_MM325_Verification.py'),
-            ('Keysight 33210A Performance Verification','Keysight','33210A','Function Generator','Keysight_33210A_Verification.py'),
-            ('Agilent 33220A Performance Verification','Agilent','33220A','Function Generator','Agilent_33220A_Verification.py'),
-            ('Agilent 33250A Performance Verification','Agilent','33250A','Function Generator','Agilent_33250A_Verification.py'),
-            ('Fluke 287 Performance Verification','Fluke','287','Digital Multimeter','Fluke_287_Verification.py'),
-            ('Fluke 289 Performance Verification','Fluke','289','Digital Multimeter','Fluke_289_Verification.py'),
-            ('Fluke 77 Series IV Performance Verification','Fluke','77 Series IV','Digital Multimeter','Fluke_77IV_Verification.py'),
-            ('Fluke 175 Performance Verification','Fluke','175','Digital Multimeter','Fluke_175_Verification.py'),
-            ('Fluke 177 Performance Verification','Fluke','177','Digital Multimeter','Fluke_177_Verification.py'),
-            ('Fluke 179 Performance Verification','Fluke','179','Digital Multimeter','Fluke_179_Verification.py'),
-            ('Keithley 2000 Performance Verification','Keithley','2000','Digital Multimeter','Keithley_2000_Verification.py'),
-        ]
+        records = [p.registration for p in scan_procedures()]      # (name, manufacturer, model, category, launcher file) in list order
         for name,mfr,model,category,filename in records:
             stable = str(Path('Procedures') / filename)
             if not (BASE / stable).is_file():
@@ -197,6 +141,9 @@ def script_file(script):
     if not path.is_absolute():
         path = BASE / path
     return path.resolve()
+
+
+scan_procedures()
 
 
 class Manager:
@@ -301,6 +248,7 @@ class Manager:
         ttk.Button(bar, text='Clear', style='Quiet.TButton', command=lambda: (self.search.set(''), self.category.set(ALL_CATEGORIES))).pack(side='left', padx=6)
         ttk.Button(bar, text='Remove from library', command=self.remove).pack(side='right')
         ttk.Button(bar, text='Register procedure...', command=self.add).pack(side='right', padx=8)
+        ttk.Button(bar, text='Import procedure package...', command=self.import_package).pack(side='right')
 
         split = ttk.Frame(outer)
         split.pack(fill='both', expand=True)
@@ -648,9 +596,57 @@ class Manager:
         ttk.Button(bar, text='Test in demo mode', command=self.test_demo).pack(side='left', padx=(0, 8))
         ttk.Button(bar, text='Install update (.py)...', style='Accent.TButton', command=self.install_update).pack(side='left', padx=(0, 8))
         ttk.Button(bar, text='Restore previous version...', command=self.restore_previous).pack(side='left')
+        lib = ttk.LabelFrame(frame, text='Procedure packages', padding=14)
+        lib.pack(fill='x', pady=(0, 10))
+        self.lib_folder = tk.StringVar()
+        ttk.Label(lib, text='Library folder (where the lab keeps its procedure packages; the "Import procedure package..." picker opens here):',
+                  style='Muted.TLabel', wraplength=900, justify='left').pack(anchor='w')
+        row = ttk.Frame(lib)
+        row.pack(fill='x', pady=(6, 0))
+        ttk.Label(row, textvariable=self.lib_folder, wraplength=620, justify='left').pack(side='left', fill='x', expand=True)
+        ttk.Button(row, text='Clear', command=lambda: self.set_library_folder('')).pack(side='right')
+        ttk.Button(row, text='Choose folder...', command=self.choose_library_folder).pack(side='right', padx=(0, 8))
+        self._show_library_folder()
         ttk.Label(frame, text='Saved backups of this procedure', style='Section.TLabel').pack(anchor='w', pady=(6, 6))
         self.backup_table = ui.make_table(frame, ('file', 'when'), ('Backup file', 'Saved'), (560, 200), anchors={'file': 'w', 'when': 'w'}, height=6, zebra=True)
         self.backup_empty = self._empty_state(self.backup_table, 'No backups yet - one is created automatically\nthe first time you install an update.')
+
+    # ------------------------------------------------------------------ procedure packages (packages.py)
+    def _show_library_folder(self):
+        folder = packages.get_library_dir()
+        self.lib_folder.set(folder if folder else '(not set: the picker opens in the folder you used last)')
+
+    def set_library_folder(self, folder):
+        try:
+            packages.set_library_dir(folder)
+        except OSError as exc:
+            messagebox.showerror('Library folder', f'The setting could not be saved ({exc}).', parent=self.root)
+        self._show_library_folder()
+
+    def choose_library_folder(self):
+        chosen = packages_ui.choose_library_folder(self.root)
+        if chosen is not None:
+            self._show_library_folder()
+
+    def import_package(self):
+        """Pick a package, show what it is and what it would do, and install it only after the person confirms."""
+        path = packages_ui.choose_package(self.root)
+        if not path:
+            return
+        reg, library = self._verified(), packages.get_library_dir()
+        preview = packages.inspect(path, BASE, reg, library)
+        if not packages_ui.ask_install(self.root, preview):
+            self.status.set('Package not imported.')
+            return
+        try:
+            result = packages.install(path, BASE, reg, expected_sha256=preview.zip_sha256, library_dir=library)
+        except packages.PackageError as exc:
+            messagebox.showerror('Import failed', str(exc), parent=self.root)
+            return
+        self.refresh()                                       # the scan finds a new procedure; a verified one that changed shows its state
+        self.refresh_development()
+        self.status.set(f'Imported {result.name} version {result.version} ({len(result.written)} file(s) written).')
+        packages_ui.show_result(self.root, result, preview)
 
     def _selected_record(self):
         sel = self.table.selection()
