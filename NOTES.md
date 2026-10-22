@@ -565,3 +565,6 @@ checkbox "Fast demo (no windows)"). Apps use `VirtualMixin`: `demo` (any demo), 
   (full path + sha256), and keeps Install disabled until a confirmation box is ticked. No hosting, no database of packages. Tests: `test_procscan`, `test_packages`, `test_fingerprint_isolation`, `test_packages_ui`, plus `checks_import_package` in
   `tests/real_tk_checks.py` (run by `test_beta_real_tk_windows`; screenshots when PKG_SHOTS is set).
 - UNVERIFIED / limits: nothing here sends an instrument command. The package windows were viewed on a real Tk under Xvfb only (Linux), never on Windows. Mark validity cannot prove a hardware run. Packaging of engines at the root and of a new `hookups.py` meter family is not supported.
+
+## 5560A SCOPE output impedance (fixed)
+`OUT_IMP` takes `Z50` or `Z1M` (5560A Remote Programmer's Manual, OUT_IMP page, supplied by Mike; same form as the 5522A manual p. 10-31). The shared driver used to send `OUT_IMP 1M` / `OUT_IMP 50`, which the 5560A rejects (-117). `outimp.set` is now `OUT_IMP Z{source_impedance}` and `select_scope_dcv` compares an `OUT_IMP?` reply of `Z50`/`Z1M` with what was written. Golden transcripts changed only on those lines (WaveSurfer DCV, MDO4000C, fluke_5560a). Shared driver: every procedure on it shows CHANGED since verification until re-marked.

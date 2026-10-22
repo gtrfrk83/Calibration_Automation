@@ -64,7 +64,7 @@
     "Fluke 5560A|<<|SDCV",
     "Fluke 5560A|>>|SCOPE?",
     "Fluke 5560A|<<|VOLT",
-    "Fluke 5560A|>>|OUT_IMP 1M",
+    "Fluke 5560A|>>|OUT_IMP Z1M",
     "Fluke 5560A|>>|OUT_IMP?",
     "Fluke 5560A|<<|1000000,OHM",
     "Fluke 5560A|>>|OUT 1.000000000V",
@@ -267,7 +267,7 @@
     ],
     [
      "W",
-     "OUT_IMP 1M"
+     "OUT_IMP Z1M"
     ],
     [
      "Q",
