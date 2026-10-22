@@ -12,10 +12,10 @@ Search order: hook_k2000_<cal>_<G>  ->  hook_k2000_<G>
 GROUP (one picture per separate hook-up; the numbers are the Calibration Manual figures)
   DCV       calibrator voltage to the 2000 INPUT HI / LO (Figure 1-1); low-thermal connections for the 100 mV and 1 V ranges; also the 0 mV REL zero
   ACV       calibrator AC voltage to the 2000 INPUT HI / LO (Figure 1-2); shielded cable
-  ACV700    700 V at 50 kHz from a 5725A amplifier system (optional point; the source is set by the technician; Figure 1-2)
   DCI       calibrator current to the 2000 AMPS and INPUT LO jacks (Figure 1-3)
   ACI       calibrator AC current to the 2000 AMPS and INPUT LO jacks (Figure 1-4)
   OHM4      4-wire resistance: force to INPUT HI / LO, sense to the SENSE Ohms 4 WIRE HI / LO jacks (Figure 1-5); calibrator external sense ON
-  OHM100M   100 Mohm: INPUT and SENSE jacks as in Figure 1-6, calibrator external sense OFF (2-wire output)
+  OHM100M   100 Mohm, pure 2-wire (lab decision): calibrator output to the 2000 INPUT HI / LO only, NO sense leads, calibrator external sense OFF
+            (5522A ZCOMP NONE; 5560A 2-wire mode); the 2000 is on its 2-wire resistance function. The manual's Figure 1-6 shows the SENSE jacks wired: do not copy that.
 
 The 2000 INPUTS switch must be on FRONT for every point; the program reads it (:SYST:FRSW?) before measuring.

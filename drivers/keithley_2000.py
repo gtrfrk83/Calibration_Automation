@@ -75,10 +75,10 @@ def _per_kind():
             out[f'nplc.query.{k}'] = Cmd(f':SENS:{n}:NPLC?', f'{kind} PLC query', 'Reads back the integration time (reply format UNVERIFIED)', kind='query', verified=False,
                                          ref=_pages(P_NPLC + ' (query stated, reply format not)'))
         else:
-            out[f'band.{k}'] = Cmd(f':SENS:{n}:DET:BAND {{hz:g}}', f'{kind} detector bandwidth', 'AC rate: 3 (slow), 30 (medium, factory) or 300 (fast); the NPLC setting is '
-                                   'valid for AC only at bandwidth 300',
-                                   placeholders={'hz': Placeholder('float', 'g', 30.0)}, kind='set', readback=f'band.query.{k}', verified=True,
-                                   ref=_pages(P_BAND + ' (:BANDwidth)') + f'; User Manual Table 2-2 (medium = DETector BANDwidth 30)')
+            out[f'band.{k}'] = Cmd(f':SENS:{n}:DET:BAND {{hz:g}}', f'{kind} detector bandwidth', 'AC rate: 3 (slow, 3 Hz to 300 kHz; used by this verification, lab decision), 30 (medium, factory) or '
+                                   '300 (fast); the NPLC setting is valid for AC only at bandwidth 300. The command is in the manual; the reply to the query is not stated',
+                                   placeholders={'hz': Placeholder('float', 'g', 3.0)}, kind='set', readback=f'band.query.{k}', verified=True,
+                                   ref=_pages(P_BAND + ' (:BANDwidth: 3 to 300e3, 3 = slow)') + f'; User Manual chapter 3 "Bandwidth" (slow = 3 Hz to 300 kHz); Table 3-1 (slow: BW=3)')
             out[f'band.query.{k}'] = Cmd(f':SENS:{n}:DET:BAND?', f'{kind} bandwidth query', 'Reads back the bandwidth (reply format UNVERIFIED)', kind='query', verified=False,
                                          ref=_pages(P_BAND + ' (query stated, reply format not)'))
         out[f'tcon.{k}'] = Cmd(f':SENS:{n}:AVER:TCON REP', f'{kind} filter type', 'REPeat filter: each :READ? is the average of the filter count of fresh conversions '
@@ -91,9 +91,10 @@ def _per_kind():
                                 ref=_pages(P_AVER_CT + ' (:COUNt)') + f'; {CM} p. 1-5')
         out[f'count.query.{k}'] = Cmd(f':SENS:{n}:AVER:COUN?', f'{kind} filter count query', 'Reply format UNVERIFIED', kind='query', verified=False,
                                       ref=_pages(P_AVER_CT + ' (query stated, reply format not)'))
-        out[f'filter.{k}'] = Cmd(f':SENS:{n}:AVER:STAT ON', f'{kind} filter on', 'Digital filter ON (CM p. 1-12 step 4 for resistance; the specification sheet condition '
-                                 '"MED (1 PLC) with filter of 10")', kind='set', readback=f'filter.query.{k}', verified=True,
-                                 ref=_pages(P_AVER_ST + ' (:STATe)') + f'; {CM} p. 1-12')
+        out[f'filter.{k}'] = Cmd(f':SENS:{n}:AVER:STAT {{state}}', f'{kind} digital filter state', 'Digital filter ON for DC volts, DC current and ohms (CM p. 1-12 step 4 for resistance; '
+                                 'the specification sheet condition "MED (1 PLC) with filter of 10"); OFF for AC volts and AC current (lab decision)',
+                                 placeholders={'state': Placeholder('enum', '', 'ON', enum=('ON', 'OFF'))}, kind='set', readback=f'filter.query.{k}', verified=True,
+                                 ref=_pages(P_AVER_ST + ' (:STATe <b>: 0 or OFF, 1 or ON)') + f'; {CM} p. 1-12')
         out[f'filter.query.{k}'] = Cmd(f':SENS:{n}:AVER:STAT?', f'{kind} filter state query', 'Reply format UNVERIFIED (0 / 1 expected)', kind='query', verified=False,
                                        ref=_pages(P_AVER_ST + ' (query stated, reply format not)'))
         out[f'rel.{k}'] = Cmd(f':SENS:{n}:REF:STAT {{state}}', f'{kind} REL (reference) state', 'REL is enabled only for DC volts (CM p. 1-7) and disabled for the AC '
@@ -170,7 +171,7 @@ class Keithley2000(Instrument):
     MODEL = 'Keithley 2000'
     IDN_MATCH = ('MODEL 2000',)
     COMMANDS = COMMANDS
-    DEFAULT_TIMEOUT = 30.0              # AC readings with the 10-reading filter at the medium rate take about 7 s (specification sheet: 1.4 readings/s)
+    DEFAULT_TIMEOUT = 30.0              # an AC reading at bandwidth 3 (slow, filter off) takes about 2 s (specification sheet: 2 s/reading); DC / ohms readings (10 conversions at 1 PLC) are far shorter
     SERIAL = SERIAL_DEFAULT
     DEFAULT_GPIB_ADDRESS = 16           # p. 4-12
 
@@ -249,8 +250,8 @@ class Keithley2000(Instrument):
 
     def configure_point(self, point: dict):
         """Function, manual range, speed (PLC / AC bandwidth), filter and REL for one verification point. Never autorange (CM p. 1-6).
-        point: kind, range (ohm / V / A), optional plc (default 1), optional ac_bandwidth (default 30), optional filter_count (default 10), optional rel (DCV only:
-        leave REL as it is)."""
+        point: kind, range (ohm / V / A), optional plc (default 1), optional ac_bandwidth (default 3, slow), optional filter_count (default 10). The digital filter
+        (REPeat, 10 readings) is ON for DC volts, DC current and ohms and OFF for AC volts and AC current (lab decision; `filter_on` in the point overrides)."""
         kind, rng = point['kind'], float(point['range'])
         if kind not in NODE:
             raise InstrumentError(f'{self.label}: no function for kind {kind!r}')
@@ -264,7 +265,7 @@ class Keithley2000(Instrument):
         reply = self.ask(f'auto.query.{k}')
         self._confirm('autorange off', not _flag(reply), reply)
         if kind in AC_KINDS:
-            hz = float(point.get('ac_bandwidth', 30))
+            hz = float(point.get('ac_bandwidth', 3))
             self.send(f'band.{k}', hz=hz)
             reply = self.ask(f'band.query.{k}')
             self._confirm(f'AC bandwidth {hz:g}', math.isclose(_number(reply), hz, rel_tol=1e-6), reply)
@@ -273,16 +274,18 @@ class Keithley2000(Instrument):
             self.send(f'nplc.{k}', nplc=nplc)
             reply = self.ask(f'nplc.query.{k}')
             self._confirm(f'{nplc:g} PLC', math.isclose(_number(reply), nplc, rel_tol=1e-6), reply)
-        self.send(f'tcon.{k}')
-        reply = self.ask(f'tcon.query.{k}')
-        self._confirm('the REPeat filter', _text(reply).startswith('REP'), reply)
-        count = int(point.get('filter_count') or 10)
-        self.send(f'count.{k}', count=count)
-        reply = self.ask(f'count.query.{k}')
-        self._confirm(f'filter count {count}', math.isclose(_number(reply), count, rel_tol=1e-9), reply)
-        self.send(f'filter.{k}')
+        filter_on = bool(point.get('filter_on', kind not in AC_KINDS))
+        if filter_on:
+            self.send(f'tcon.{k}')
+            reply = self.ask(f'tcon.query.{k}')
+            self._confirm('the REPeat filter', _text(reply).startswith('REP'), reply)
+            count = int(point.get('filter_count') or 10)
+            self.send(f'count.{k}', count=count)
+            reply = self.ask(f'count.query.{k}')
+            self._confirm(f'filter count {count}', math.isclose(_number(reply), count, rel_tol=1e-9), reply)
+        self.send(f'filter.{k}', state='ON' if filter_on else 'OFF')
         reply = self.ask(f'filter.query.{k}')
-        self._confirm('the filter on', _flag(reply), reply)
+        self._confirm('the filter on' if filter_on else 'the filter off', _flag(reply) == filter_on, reply)
         if kind != 'DCV':                                  # REL: on only for DC volts, after its zero step (acquire_reference); off everywhere else
             self.send(f'rel.{k}', state='OFF')
             reply = self.ask(f'rel.query.{k}')
