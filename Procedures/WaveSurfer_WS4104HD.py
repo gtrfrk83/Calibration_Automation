@@ -3780,7 +3780,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                                       ('Instrument ID',self.instrument_id.get().strip() or 'NOT ENTERED'),
                                       ('Serial',self.serial.get().strip())],
                 demo=self.any_synthetic(),details=details,
-                footer_note=report_pdf.uncertainty_note(rows),title='Calibration Data')
+                footer_note=report_pdf.uncertainty_note(rows),title='Calibration Data',
+                snapshot_context=report_pdf.context_for(self))
         except ImportError:
             messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab')
             return 0

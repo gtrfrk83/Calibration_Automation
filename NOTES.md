@@ -200,3 +200,18 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
   Writes are the drivers' set / read back / compare, never retried; outputs go to standby after each point.
 - datasheet_builder.save() writes the runnable spec without a matcher plan, so `with_plan()` runs the matcher at load time (read only).
 - Tests: tests/test_dsb_runtime.py (units), tests/test_dsb_runtime_bench.py (simulated benches; tkinter stubbed, harness in tests/dsb_run_harness.py).
+
+## Regenerate a report PDF from Asset History (branch reprint-pdf)
+- `report_snapshot.py` (UI-free): `report_pdf.write_calibration_pdf` (the one function every engine's PDF goes through) calls `report_snapshot.record_issued` after it writes a REAL
+  (non-demo) report that has an Asset History event; it stores header, title, details (technician, conditions, standards with cal info, TAR / TUR choice), the rows exactly as printed,
+  footer note, modifications list, printed issue date and version stamps as canonical JSON with a SHA-256, in the NEW table `report_snapshots` of lab_registry.sqlite3 (key = `runs.id`,
+  the history event; `ON DELETE CASCADE`). Engines pass the stamps with `snapshot_context=report_pdf.context_for(self)`. Nothing raises on a missing / damaged database; the PDF is unchanged.
+- Rows are stored as the display strings that were printed (report_pdf.cert_row already scaled them); no SI numbers exist at that boundary, so none are stored.
+- Asset History tab (`labregistry_ui.HistoryPanel`): button, right-click menu and double-click choice on a report row call `report_snapshot.regenerate`: verifies the hash (a mismatch is
+  refused, never replaced by a rebuild), asks where to save (default `asset-MM-DD-YYYY.pdf` with the ORIGINAL issue date), asks before replacing any existing file, writes through
+  `write_calibration_pdf(issued_at=..., reprint_note=..., record_history=False)`: original Report date kept, one footer line added, no new history event.
+- Events from before this feature (no snapshot) are rebuilt from the history rows only if those are complete (point count and fail count agree, every point has As Found and limits); the
+  PDF is then marked REBUILT on every page and leaves As Left, uncertainty, TAR/TUR and modifications blank (history does not store them). Otherwise a plain message says what is missing.
+- Not stored anywhere today (so not in any snapshot): procedure modifications are not printed by any engine (`modifications=` is never passed) - their summary is kept in the stamps only.
+- Tests: `tests/test_reprint_*.py` (named to sort after test_beta because they install tests/_tk_stub.py); `tests/reprint_harness.py` runs the engines' real export code on the simulated benches.
+

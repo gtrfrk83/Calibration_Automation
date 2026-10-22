@@ -1076,7 +1076,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin):
                 rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [self.tar_tur_for(p) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix TDS{self.cfg.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Source', 'TDS2000C / TDS1000C-EDU Service Manual 077-0446-01, Chapter 4')],
-                                             demo=demo, details=details, footer_note=note, title='Calibration Data')
+                                             demo=demo, details=details, footer_note=note, title='Calibration Data',
+                                             snapshot_context=report_pdf.context_for(self))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
         except Exception as exc:
