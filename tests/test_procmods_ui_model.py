@@ -349,10 +349,10 @@ class OtherTabTests(Base):
         self.assertEqual(m.stage_param('settle', 8), [])
         m.set_reason('param', 'settle', 'slow DUT')
         m.apply()
-        row = m.settings()[0]
+        row = [r for r in m.settings() if r['key'] == 'settle'][0]      # by key: other engines may register more settings
         self.assertEqual((row['factory'], row['current'], row['state']), (1.0, 8, 'modified'))
         self.assertTrue(row['affects_conditions'])
-        self.assertEqual(m.settings(filter='modified')[0]['key'], 'settle')
+        self.assertIn('settle', [r['key'] for r in m.settings(filter='modified')])
 
     def test_points_skip(self):
         m = self.model

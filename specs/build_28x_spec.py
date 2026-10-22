@@ -245,7 +245,7 @@ GROUPS = {
 spec = {
     'schema': 2,
     'kind': 'manual-reading',
-    'options': {'hv_threshold_v': 60, 'ir': 'fluke28x', 'table_order': {'F': 0, '3': 1, '4': 2}},
+    'options': {'hv_threshold_v': 60, 'auto_ramp': False, 'function_prompt': True, 'ir': 'fluke28x', 'table_order': {'F': 0, '3': 1, '4': 2}},
     'source': {'document': 'Fluke 287/289 True-rms Digital Multimeters Calibration Manual',
                'pages': '14-20 (printed): functional checks pp. 15-16, Table 3 p. 17, Table 4 pp. 17-20',
                'cite': 'Fluke 287/289 Calibration Manual, Performance Tests, pp. 14-20 (Tables 3 and 4)',
