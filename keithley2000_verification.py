@@ -36,11 +36,16 @@ PERIODS = {'1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
 CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp)}
 INTERFACES = ('GPIB', 'RS-232')
+CAL_INTERFACES = ('RS-232', 'GPIB')       # the calibrator: RS-232 is preselected (lab: the calibrators are usually hooked up over RS-232), GPIB stays selectable
+CAL_PORT_DEFAULT = {'RS-232': 'COM9', 'GPIB': 'GPIB0::4::INSTR'}   # editable; the GPIB address is only an example (UNVERIFIED, set the calibrator's real address)
+AC_SETTLE_DEFAULT_S = 20.0               # seconds from OPER to the first :READ? of an AC point (tunable: procedure modifications, 'k2000.settle.ac')
+# AC_SETTLE_NOTE: with the detector bandwidth at 3 (slow) one reading takes about 2 s (2000 specification sheet: 2 s/reading; User Manual ch. 3: the RMS value is calculated from
+# 1200 samples at 1 kHz = 1.2 s). Neither manual gives a settling time for the RMS converter at 3 Hz after a step in level / frequency. 20 s (the old 6 s was for bandwidth 30)
+# is a conservative ENGINEERING ESTIMATE, UNVERIFIED: tune it on the real meter ('k2000.settle.ac'; shorten it only after readings are seen to be stable).
 FLOW = {'None': 'none', 'XON/XOFF': 'xon_xoff'}
 HV_CONFIRM = 100.0                      # volts: a high-voltage confirmation before any DC / AC volts point of this size or more
 ZCOMP_LIMIT = 110e3                     # ohm: 5522A impedance compensation exists only below this (5522A Operators Manual p. 6-49)
-GROUP_TITLE = {'DCV': 'DC volts', 'ACV': 'AC volts', 'ACV700': 'AC volts, 700 V at 50 kHz', 'DCI': 'DC current', 'ACI': 'AC current',
-               'OHM4': '4-wire ohms', 'OHM100M': '100 Mohm (2-wire output)'}
+GROUP_TITLE = {'DCV': 'DC volts', 'ACV': 'AC volts', 'DCI': 'DC current', 'ACI': 'AC current', 'OHM4': '4-wire ohms', 'OHM100M': '100 Mohm (2-wire)'}
 
 
 def configure(model=MODEL):
@@ -72,10 +77,15 @@ def to_visa(text, interface='GPIB'):
     return f'ASRL{int(t)}::INSTR'
 
 
-def to_cal_visa(text):
+def to_cal_visa(text, interface='RS-232'):
+    """The calibrator's VISA address. RS-232 (the default): 'COM9' / '9' -> 'ASRL9::INSTR'. GPIB: '4' -> 'GPIB0::4::INSTR'. A full VISA resource passes through."""
     t = text.strip()
     if '::' in t or t.upper().startswith(('ASRL', 'USB', 'GPIB', 'TCPIP')):
         return t
+    if interface == 'GPIB':
+        if not t.isdigit() or not 0 <= int(t) <= 30:
+            raise ValueError('Enter the calibrator GPIB address (0 to 30) or a full VISA address (GPIB0::4::INSTR).')
+        return f'GPIB0::{int(t)}::INSTR'
     t = t.upper().replace('COM', '')
     if not t.isdigit():
         raise ValueError('Enter a COM port such as COM9.')
@@ -97,7 +107,8 @@ def judge(p, reading) -> bool:
 class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the Model 2000 under test and the calibrator, both through the instrument drivers."""
 
-    def __init__(self, dmm_address, cal_address, cal_model='Fluke 5560A', cal_baud=9600, interface='GPIB', serial=None, transports=None, mods=None, virtual=False):
+    def __init__(self, dmm_address, cal_address, cal_model='Fluke 5560A', cal_baud=9600, interface='GPIB', serial=None, transports=None, mods=None, virtual=False, cal_interface='RS-232'):
+        """interface = the Model 2000's (GPIB / RS-232, as before); cal_interface = the calibrator's (RS-232 by default, GPIB selectable)."""
         self.log = drivers.CommandLog()
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
@@ -107,7 +118,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         else:
             kw = (serial or {}) if interface != 'GPIB' else {}
             dmm_t = drivers.open_visa(to_visa(dmm_address, interface), timeout=30, **kw)
-            cal_t = drivers.open_visa(to_cal_visa(cal_address), timeout=20, baud=cal_baud)
+            cal_kw = dict(baud=cal_baud) if cal_interface != 'GPIB' else {}      # a baud rate only matters on RS-232
+            cal_t = drivers.open_visa(to_cal_visa(cal_address, cal_interface), timeout=20, **cal_kw)
         self.dmm = drivers.Keithley2000(dmm_t, self.log, label=MODEL)
         self.cal = cal_cls(cal_t, self.log, label=cal_name)
         try:
@@ -158,17 +170,19 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def settle(self, p):
         if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
         k = p['kind']
-        if p['source'] == 'manual': return self.pm_param('k2000.settle.manual', 2.0)
-        if k in ('ACV', 'ACI'): return self.pm_param('k2000.settle.ac', 6.0)
+        if k in ('ACV', 'ACI'): return self.pm_param('k2000.settle.ac', AC_SETTLE_DEFAULT_S)   # UNVERIFIED estimate for the 3 Hz detector (see AC_SETTLE_NOTE)
         if k in ('OHM2', 'OHM4'):
             return self.pm_param('k2000.settle.ohm_high', 5.0) if p['range'] >= 1e7 else self.pm_param('k2000.settle.ohm', 3.0)
         if k == 'DCI': return self.pm_param('k2000.settle.dci', 3.0)
         return self.pm_param('k2000.settle.default', 2.0)
 
     def meter_point(self, p):
-        """The point as the driver wants it: the spec's measurement conditions (speed, filter, AC bandwidth) filled in."""
+        """The point as the driver wants it: the spec's measurement conditions (speed, filter, AC bandwidth) filled in. The digital filter (REPEAT, 10 readings) is on
+        for DC volts, DC current and ohms and off for AC volts and AC current (spec measure.filter_state / ac_filter_state)."""
         m = SPEC['measure']
-        return dict(p, plc=p.get('plc') or m['nplc'], ac_bandwidth=m['ac_bandwidth'], filter_count=m['filter_count'])
+        ac = p['kind'] in ('ACV', 'ACI')
+        return dict(p, plc=p.get('plc') or m['nplc'], ac_bandwidth=m['ac_bandwidth'], filter_count=m['filter_count'],
+                    filter_on=(m['ac_filter_state'] if ac else m['filter_state']) == 'ON')
 
     def rel_zero(self):
         """DC volts REL (CM p. 1-7 steps 2-4): 100 mV range, calibrator at 0.00000 mV DC, let the reading settle, REL on. Done once after each reset."""
@@ -185,11 +199,11 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.dmm.check_errors('enabling REL')
 
     def compensation(self, p):
-        """Resistance points: the 5522A impedance compensation (WIRE4 below 110 kohm for the 4-wire points, NONE otherwise), set once and read back.
-        The 5560A has no such command in the project manuals: the operator sets its own 4-wire mode (the hook-up prompt says so)."""
+        """Resistance points: the 5522A impedance compensation (WIRE4 below 110 kohm for the 4-wire points, NONE for 110 kohm and up and for the 2-wire 100 Mohm point),
+        set once and read back. The 5560A has no such command in the project manuals: the operator sets its own 4-wire / 2-wire mode (the hook-up prompt says so)."""
         if not hasattr(self.cal, 'set_compensation'):
             return
-        mode = 'WIRE4' if (p['group'] == 'OHM4' and p['nominal'] < ZCOMP_LIMIT) else 'NONE'
+        mode = 'WIRE4' if (p['kind'] == 'OHM4' and p['nominal'] < ZCOMP_LIMIT) else 'NONE'
         self.cal.set_compensation(mode)
 
     @procmods_engine.point_commands()
@@ -201,20 +215,16 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 self.rel_zero()
             self.dmm.configure_point(self.meter_point(p))
             self.dmm.check_errors('configuring ' + p['description'])
-            if p['source'] == 'manual':        # 700 V at 50 kHz from a 5725A system set by the technician
-                time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
-                reading = self.dmm.read()
-            else:
-                k, v, f = p['kind'], p['nominal'], p.get('frequency')
-                if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f, dc=k == 'DCV')
-                elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f, dc=k == 'DCI')
-                elif k in ('OHM2', 'OHM4'):
-                    self.cal.set_output_ohms(v)
-                    self.compensation(p)
-                self.cal.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
-                self.cal.operate_unverified()
-                time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
-                reading = self.dmm.read()
+            k, v, f = p['kind'], p['nominal'], p.get('frequency')
+            if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f, dc=k == 'DCV')
+            elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f, dc=k == 'DCI')
+            elif k in ('OHM2', 'OHM4'):
+                self.cal.set_output_ohms(v)
+                self.compensation(p)
+            self.cal.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
+            self.cal.operate_unverified()
+            time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
+            reading = self.dmm.read()
             self.dmm.check_errors('reading ' + p['description'])
             return reading
         finally:
@@ -239,10 +249,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.dmm_term = tk.StringVar(value=s.get('dmm_term', 'LF'))
         self.dmm_flow = tk.StringVar(value=s.get('dmm_flow', 'None'))
         self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A'))
-        self.cal_addr = tk.StringVar(value=s.get('cal_addr', 'COM9'))
+        self.cal_interface = tk.StringVar(value=s.get('cal_interface', CAL_INTERFACES[0]))       # RS-232 preselected
+        if self.cal_interface.get() not in CAL_INTERFACES: self.cal_interface.set(CAL_INTERFACES[0])
+        self.cal_addr = tk.StringVar(value=s.get('cal_addr', CAL_PORT_DEFAULT[self.cal_interface.get()]))
+        self._cal_shown, self._cal_ports = self.cal_interface.get(), {}
         self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
         self.period = tk.StringVar(value=s.get('period', PERIOD_LABEL[SPEC['default_period']]))
-        self.include_700 = tk.BooleanVar(value=False)
         self.status = tk.StringVar()
         self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
         self.show_section = tk.StringVar(value='All sections')
@@ -261,8 +273,6 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
 
     def active(self, p):
-        if p['optional'] and not self.include_700.get(): return False
-        if p.get('variant') == 'alt219' and self.include_700.get(): return False      # 219 V at 50 kHz stands in for the 700 V step only when no 5725A is used
         if p.get('skip'): return False                               # a point skipped by a procedure modification
         return True
 
@@ -280,8 +290,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
             b.configure(state=idle)
         self.btn_stop.configure(state='normal' if self._busy else 'disabled')
-        for c in (self.period_combo, self.opt_check):
-            c.configure(state='disabled' if self._busy else ('readonly' if isinstance(c, ttk.Combobox) else 'normal'))
+        self.period_combo.configure(state='disabled' if self._busy else 'readonly')
 
     # ------------------------------------------------------------------ layout
     def _build_ui(self):
@@ -303,10 +312,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.period_combo = ttk.Combobox(d, textvariable=self.period, values=list(PERIODS), width=20, state='readonly')
         self.period_combo.grid(row=0, column=1, sticky='w', padx=(10, 0), pady=4)
         self.period_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_period())
-        self.opt_check = ttk.Checkbutton(d, text='Include 700 V at 50 kHz (5725A amplifier, source set by hand)', variable=self.include_700, command=self.refresh)
-        self.opt_check.grid(row=1, column=0, columnspan=2, sticky='w', pady=(2, 10))
-        ttk.Separator(d).grid(row=2, column=0, columnspan=2, sticky='ew', pady=(0, 10))
-        r = 3
+        ttk.Separator(d).grid(row=1, column=0, columnspan=2, sticky='ew', pady=(2, 10))
+        r = 2
         ttk.Label(d, text='2000 interface').grid(row=r, column=0, sticky='w', pady=4)
         iface = ttk.Combobox(d, textvariable=self.interface, values=list(INTERFACES), width=10, state='readonly')
         iface.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
@@ -323,10 +330,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                   style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=r, column=0, columnspan=2, sticky='w', pady=(2, 8)); r += 1
         ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
         ttk.Combobox(d, textvariable=self.cal_model, values=list(CALIBRATORS), width=14, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        ttk.Label(d, text='Calibrator port').grid(row=r, column=0, sticky='w', pady=4)
+        ttk.Label(d, text='Calibrator interface').grid(row=r, column=0, sticky='w', pady=4)
+        ci = ttk.Combobox(d, textvariable=self.cal_interface, values=list(CAL_INTERFACES), width=10, state='readonly')
+        ci.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        ci.bind('<<ComboboxSelected>>', lambda _e: self.on_cal_interface())
+        ttk.Label(d, text='Calibrator port / address').grid(row=r, column=0, sticky='w', pady=4)
         self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
         self.cal_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1
-        ttk.Label(d, text='Calibrator baud').grid(row=r, column=0, sticky='w', pady=4)
+        ttk.Label(d, text='Calibrator baud (RS-232 only)').grid(row=r, column=0, sticky='w', pady=4)
         ttk.Combobox(d, textvariable=self.cal_baud, values=['9600', '19200', '4800', '2400', '1200'], width=9, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
         btns = sh.drawer_footer
         self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
@@ -356,6 +367,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.update_shell_sections(POINTS, lambda p: p['section_title'])
         ui.polish(root)
 
+    def on_cal_interface(self):
+        """Calibrator interface changed: remember the port / address typed for the one just left, show the one for the new interface (RS-232 COM port or GPIB address)."""
+        new = self.cal_interface.get()
+        self._cal_ports[self._cal_shown] = self.cal_addr.get()
+        self._cal_shown = new
+        self.cal_addr.set(self._cal_ports.get(new, CAL_PORT_DEFAULT[new]))
+
     def pm_driver_classes(self): return (drivers.Keithley2000, *[cls for _n, cls in CALIBRATORS.values()])
 
     def pm_plan_point(self, p):
@@ -367,7 +385,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
         def build(mods):
             _bench, ft, dt = make_k2000_bench(CALIBRATORS[cal_model][0], bus)
-            return IO('sim', 'sim', cal_model, 9600, self.interface.get(), transports=(dt, ft), mods=mods)
+            return IO('sim', 'sim', cal_model, 9600, self.interface.get(), transports=(dt, ft), mods=mods, cal_interface=self.cal_interface.get())
         return procmods_plan.run_plan(self.pm_state, build, lambda io: io.measure(p))
 
     # ------------------------------------------------------------------ table
@@ -445,7 +463,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return (f'4-wire: calibrator {out} (force) to the 2000 INPUT HI / LO and the calibrator SENSE HI / LO to the 2000 SENSE Ohms 4 WIRE HI / LO (Figure 1-5); '
                     f'calibrator external sense ON. {comp}')
         if g == 'OHM100M':
-            return f'Calibrator {out} to the 2000 INPUT HI / LO and SENSE jacks as in Figure 1-6; calibrator external sense OFF (2-wire output); shielded cable. The program sets compensation NONE.'
+            comp = ('The program sets the 5522A impedance compensation (ZCOMP) to NONE.' if not five60 else
+                    'Set the 5560A to its 2-wire mode (external sense off); the program sends no compensation command to a 5560A.')
+            return (f'Pure 2-wire hook-up: calibrator {out} to the 2000 INPUT HI / LO only. NO sense leads: nothing on the 2000 SENSE Ohms 4 WIRE jacks and the calibrator '
+                    f'external sense OFF; shielded cable. The program selects the 2000 2-wire resistance function (not 4-wire). {comp}')
         return p['setup']
 
     # ------------------------------------------------------------------ connection
@@ -458,7 +479,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             self.status.set(f'Instrument search needs pyvisa and a VISA backend ({exc}). You can still type an address.'); return
         gpib = [r for r in found if r.upper().startswith('GPIB')]
         asrl = [r for r in found if r.upper().startswith('ASRL')]
-        self.dmm_entry['values'] = (gpib if self.interface.get() == 'GPIB' else asrl) or found; self.cal_entry['values'] = asrl or found
+        self.dmm_entry['values'] = (gpib if self.interface.get() == 'GPIB' else asrl) or found; self.cal_entry['values'] = (gpib if self.cal_interface.get() == 'GPIB' else asrl) or found
         self.status.set(f'{len(found)} VISA resource(s) found: ' + (', '.join(found) if found else 'none') + '. Pick the address for each instrument.')
 
     def _serial(self):
@@ -468,8 +489,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.virtual:          # demo: the real IO / driver code over a simulated 2000 and calibrator
             from drivers.simulated_k2000 import make_k2000_bench
             self._vb = make_k2000_bench(self.cal_key, 'RS232' if self.interface.get() == 'RS-232' else 'GPIB')
-            return IO('virtual', 'virtual', self.cal_model.get(), 9600, self.interface.get(), transports=(self._vb[2], self._vb[1]), mods=self.pm_state, virtual=True)
-        return IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), self.interface.get(), serial=self._serial(), mods=self.pm_state)
+            return IO('virtual', 'virtual', self.cal_model.get(), 9600, self.interface.get(), transports=(self._vb[2], self._vb[1]), mods=self.pm_state, virtual=True, cal_interface=self.cal_interface.get())
+        return IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), self.interface.get(), serial=self._serial(), mods=self.pm_state, cal_interface=self.cal_interface.get())
 
     def test_connections(self):
         if self.fast_demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
@@ -496,7 +517,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _save_settings(self):
         for key, var in (('interface', self.interface), ('dmm_addr', self.dmm_addr), ('dmm_baud', self.dmm_baud), ('dmm_term', self.dmm_term), ('dmm_flow', self.dmm_flow),
-                         ('cal_model', self.cal_model), ('cal_addr', self.cal_addr), ('cal_baud', self.cal_baud), ('period', self.period)):
+                         ('cal_model', self.cal_model), ('cal_interface', self.cal_interface), ('cal_addr', self.cal_addr), ('cal_baud', self.cal_baud), ('period', self.period)):
             self.settings.set(key, var.get())
         self.settings.save()
 
@@ -541,15 +562,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if image is None:
             facts.append(('Diagram', f'not installed (expected diagrams/hook_k2000_{self.cal_key}_{group}.png)'))
         self.io.standby()
-        if p['source'] == 'manual':
-            return ui.confirm_steps(self.root, 'Connect the standard', f'Connect for {GROUP_TITLE[group]}',
-                [('Connect', p['setup']), ('Stabilise', 'Put the standard in operate and allow it to settle, then continue; the program reads the 2000 itself.')],
-                facts=facts, caution='High voltage: CAT-rated leads, clearance and personnel safety.', ok='Source ready - measure', image=image)
         steps = [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p))]
         if group == 'DCV':
             steps.append(('REL zero', 'With the calibrator at 0.00000 mV DC the program enables REL on the 100 mV range and leaves it on for the DC volts points (p. 1-7).'))
         if p['kind'] in ('ACV', 'ACI'):
-            steps.append(('Speed', 'Each AC reading takes several seconds (10-reading filter); the program waits for it.'))
+            steps.append(('Speed', 'AC uses detector bandwidth 3 (slow) with the digital filter off: one reading takes about 2 s and the program waits '
+                                   f'{AC_SETTLE_DEFAULT_S:g} s (default, tunable) after the output is on for the detector to settle.'))
         return ui.confirm_steps(self.root, 'Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
             steps, facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image)
 
@@ -569,7 +587,6 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 self.busy = False; return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
         if self.tree.exists(str(p['id'])): self.tree.selection_set(str(p['id'])); self.tree.see(str(p['id']))
-        if self.virtual: self._virtual_operator(p)                       # the virtual operator does what the prompt asked
         if self.fast_demo:
             reading = p['nominal'] + p['error'] * math.sin(p['id'] * 1.71) * 0.38   # deterministic, labelled synthetic
             self._record(p, reading, True); self.root.after(30, lambda: self._next(points, i + 1, key))
@@ -584,11 +601,6 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
                     self.root.after(0, lambda err=err: self._error(err))
             threading.Thread(target=work, daemon=True).start()
-
-    def _virtual_operator(self, p):
-        """The one hook-up action no command can do: for the 700 V point the technician sets the 5725A system to 700 V, 50 kHz in operate; on the simulated bench
-        that is the external input of the simulated bench."""
-        virtualbench.operator_sets_up(self._vb, p, terminal=None, manual=p['source'] == 'manual', nominal=p['nominal'])
 
     def _done(self, points, i, p, reading, key):
         self._record(p, reading, bool(self.demo)); self.root.after(30, lambda: self._next(points, i + 1, key))
@@ -629,9 +641,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return p['section_title']
 
     def standard_for(self, p):
-        """The standard that applied a point, for the uncertainty / TAR / TUR: the selected calibrator, but not for the 700 V point (a 5725A system set by hand,
-        not one of the calibrators: only the scope CMC applies there)."""
-        return None if p['source'] == 'manual' else self.cal_key
+        """The standard that applied a point, for the uncertainty / TAR / TUR: the selected calibrator."""
+        return self.cal_key
 
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""

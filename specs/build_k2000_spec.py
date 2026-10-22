@@ -2,10 +2,10 @@
 
 Source: Keithley Model 2000 Multimeter Calibration Manual (2000-905-01 Rev. F, Aug 2007), Section 1 "Performance Verification":
     Table 1-2  DCV reading limits          printed p. 1-7
-    Table 1-3  ACV reading limits          printed p. 1-9   (note on the 219 V @ 50 kHz substitute)
+    Table 1-3  ACV reading limits          printed p. 1-9   (note on the 219 V @ 50 kHz substitute; the 700 V @ 50 kHz step is not built)
     Table 1-4  DCI limits                  printed p. 1-10
     Table 1-5  ACI limits                  printed p. 1-11
-    Table 1-6  Limits for resistance       printed p. 1-13  (procedure p. 1-12; 100 Mohm hook-up Figure 1-6)
+    Table 1-6  Limits for resistance       printed p. 1-13  (procedure p. 1-12; 100 Mohm hook-up Figure 1-6, built as a pure 2-wire point)
 Every limit below was read from the RENDERED PAGE IMAGES (pdftoppm), twice, not from extracted text (the extracted text corrupts the
 Omega and micro signs). The manual states ONE interval only: "1 year, 18-28 C", calculated from the one-year accuracy specification
 without test-equipment uncertainty (p. 1-5). That is the only period in the spec; the 90-day and 24-hour limits are not printed in the
@@ -134,23 +134,15 @@ def build():
         pts.append(pt('ACV', applied, rng, lo1, hi1, unit, 'ACV', pct(ACV_1K[0], ACV_1K[1], nom, rng), frequency=1000.0, range=float(rng)))
         pts.append(pt('ACV', applied, rng, lo5, hi5, unit, 'ACV', pct(ACV_50K[0], ACV_50K[1], nom, rng), frequency=50000.0, range=float(rng)))
     pts.append(pt('ACV', '700.000', '750', '699.355', '700.645', 'V', 'ACV', pct(ACV_1K[0], ACV_1K[1], 700, 750), frequency=1000.0, range=750.0))
-    # the substitute step the manual allows when the 5725A amplifier is not available (p. 1-9 footnote): used unless the operator ticks the 700 V box
+    # 219 V at 50 kHz is the step the manual substitutes for 700 V at 50 kHz (Table 1-3 footnote). The 700 V at 50 kHz step itself is NOT part of this procedure
+    # (lab decision): 219 V at 50 kHz is the only 750 V-range point at 50 kHz.
     pts.append(pt('ACV', '219', '750', '218.362', '219.638', 'V', 'ACV', pct(ACV_50K[0], ACV_50K[1], 219, 750), frequency=50000.0, range=750.0,
-                  variant='alt219',
-                  note='The manual substitutes 219 V at 50 kHz for the 700 V at 50 kHz step when the 5725A amplifier is not available (Table 1-3 footnote); '
-                       'its limits are printed 218.362 to 219.638 V.'))
+                  note='The manual substitutes 219 V at 50 kHz for the 700 V at 50 kHz step (Table 1-3 footnote); its limits are printed 218.362 to 219.638 V.'))
     sections.append(dict(
         id='acv', title='AC voltage', page='1-9 (Table 1-3)', group='ACV', source='calibrator', terminal='FRONT',
         setup='Connect the calibrator HI / LO to the 2000 INPUT HI / LO with shielded cable (Figure 1-2). ACV function, 100 mV range, REL disabled. '
-              'Source 1 kHz and 50 kHz for each range.',
+              'Source 1 kHz and 50 kHz for each range. Detector bandwidth 3 (slow), digital filter off.',
         points=pts))
-    sections.append(dict(
-        id='acv700', title='AC voltage 700 V at 50 kHz (5725A amplifier)', page='1-9 (Table 1-3)', group='ACV700', source='manual', optional=True,
-        terminal='FRONT',
-        setup='700.000 V at 50 kHz needs the Fluke 5725A amplifier with a 5700A-class calibrator (Figure 1-2): neither the 5522A nor the 5560A is '
-              'assumed to make it. Source 700.000 V, 50 kHz by hand, in operate, let it settle, then confirm; the program reads the 2000 itself.',
-        points=[pt('ACV', '700.000', '750', '698.785', '701.215', 'V', 'ACV700', pct(ACV_50K[0], ACV_50K[1], 700, 750), frequency=50000.0, range=750.0,
-                   variant='opt700')]))
 
     # ---- DC current ----
     pts = []
@@ -183,31 +175,35 @@ def build():
               'Select the 2000 4-wire resistance function (the manual says the Ohm4 key), 100 ohm range, FILTER on.',
         points=pts))
     sections.append(dict(
-        id='ohm100m', title='Resistance 100 Mohm', page='1-12 to 1-13 (Table 1-6)', group='OHM100M', source='calibrator', terminal='FRONT',
-        setup='Connect the 2000 INPUT and SENSE jacks to the calibrator as in Figure 1-6, with the calibrator external sense OFF (2-wire output); '
-              'shielded cables. The manual selects the 100 Mohm range of the same Ohm4 function.',
-        points=[pt('OHM4', '100', '100000000', '99.8470', '100.1530', 'Mohm', 'OHM100M', ppm(1500, 30, 100000000, 100000000), range=1e8, plc=1)]))
+        id='ohm100m', title='Resistance 100 Mohm (2-wire)', page='1-12 to 1-13 (Table 1-6)', group='OHM100M', source='calibrator', terminal='FRONT',
+        setup='Pure 2-wire hook-up (lab decision): calibrator 2-wire output to the 2000 INPUT HI / LO only, NO sense leads, calibrator external sense OFF '
+              '(5522A ZCOMP NONE; 5560A 2-wire mode); shielded cables. The 2000 is set to its 2-wire resistance function (:FUNC \'RESistance\') on the 100 Mohm range, filter on. '
+              'The limit is the one printed for 100 Mohm in Table 1-6 (the manual has no separate 2-wire table).',
+        points=[pt('OHM2', '100', '100000000', '99.8470', '100.1530', 'Mohm', 'OHM100M', ppm(1500, 30, 100000000, 100000000), range=1e8, plc=1,
+                   note='Measured with the 2000 2-wire resistance function (lab decision); the limit is the one printed for 100 Mohm in Table 1-6, which does not include the '
+                        '1 ohm of additional uncertainty the specification sheet adds for 2-wire ohms (note 15: negligible at 100 Mohm).')]))
 
     return dict(
         schema=1, manufacturer='Keithley', model='2000', title='Model 2000 Performance Verification', idn_match=['MODEL 2000'],
         source=dict(document=DOC, pages='1-3 to 1-13 (Tables 1-2 to 1-6)',
                     note='One interval only: 1 year, 18-28 C (the manual calculates the limits from the one-year accuracy specification and does not include '
-                         'calibrator uncertainty, p. 1-5; if a reading is slightly outside, the manual says to recalculate limits from the 2000 and the calibrator '
-                         'specifications). The 90-day and 24-hour limits are not printed in the verification tables.'),
+                         'calibrator uncertainty, p. 1-5). Only the 1-year limits are used (lab decision); the 90-day and 24-hour limits are not built. The manual\'s step "recalculate the '
+                         'limits from the actual calibrator values" is intentionally not implemented (lab decision): the printed limits are used.'),
         periods=[PERIOD], default_period=PERIOD, front_rear_switch=True,
         equipment=dict(dc_ac_source='Fluke 5700A or equivalent (Table 1-1); this procedure drives a Fluke 5522A or 5560A',
-                       high_voltage_ac='Fluke 5725A amplifier, only for 700 V at 50 kHz (otherwise 219 V at 50 kHz)', resistance='4-wire; 100 Mohm 2-wire'),
+                       resistance='4-wire 100 ohm to 10 Mohm; 100 Mohm 2-wire (lab decision)'),
         general=['Warm up the 2000 for at least one hour before the verification (p. 1-3); allow the test equipment its own warm-up time.',
                  'Ambient 18 to 28 C, relative humidity below 80 % (p. 1-3); line 100 / 120 / 220 / 240 V +/-10 %, 45 to 66 Hz or 360 to 440 Hz.',
-                 'Restore factory defaults first (Speed: medium, Filter: 10 readings, p. 1-5); front panel inputs selected with the INPUTS switch (p. 1-6).',
+                 'Restore factory defaults first (p. 1-5), then the program sets the conditions below for every point; front panel inputs selected with the INPUTS switch (p. 1-6).',
                  'Never use autorange: set the range for each test signal (p. 1-6). Calibrator in operate; always let the source signal settle before a reading.',
                  'Do not connect test equipment through a scanner or other switching equipment (p. 1-6).',
                  'Max common-mode voltage (INPUT LO to chassis) 500 V peak; do not exceed 1000 V peak between INPUT HI and LO, or 8 x 10^7 V-Hz (p. 1-8 caution).'],
         measure=dict(
-            nplc=1, filter_state='ON', filter_count=10, filter_type='REPeat', ac_bandwidth=30,
-            note='Speed medium = 1 PLC (DC, ohms, DC current) and detector bandwidth 30 (AC, "Medium" rate) with the digital filter on, 10 readings: the factory '
-                 'default operating conditions the manual restores (p. 1-5, Table 2-2 of the User Manual). The filter is the REPEAT (one-shot) type so each '
-                 ':READ? is ten fresh conversions; the specification sheet states MED (1 PLC) with a filter of 10 as its DC condition.'),
+            nplc=1, filter_state='ON', filter_count=10, filter_type='REPeat', ac_bandwidth=3, ac_filter_state='OFF',
+            note='DC volts, DC current and ohms: 1 PLC (medium), digital filter ON, 10 readings, REPEAT type (the manual\'s condition, p. 1-5; the specification sheet states '
+                 'MED (1 PLC) with a filter of 10 as its DC condition; each :READ? is ten fresh conversions). AC volts and AC current: detector bandwidth 3 (slow, lab '
+                 'decision: 3 Hz to 300 kHz, about 2 s per reading) and the digital filter OFF (lab decision, interpreted from "10-reading REPEAT filter on every function, '
+                 'including AC": No). The limits are the one-year limits printed in the tables, unchanged.'),
         prep=dict(dcv_rel_zero=dict(
             kind='DCV', range=0.1, nominal=0.0, page='1-7',
             text='Select DC volts, 100 mV range. Set the calibrator output to 0.00000 mV DC and allow the reading to settle, then enable the 2000 REL mode. '
