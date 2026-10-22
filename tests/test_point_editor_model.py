@@ -95,11 +95,10 @@ class Gate(Base):
         self.assertTrue(m.needs_unlock)
         self.assertFalse(m.editable)
         self.assertIn('developer mode', m.read_only_reason.lower())
-        self.assertTrue(all(not r.editable for r in m.rows))
         self.assertTrue(all(not f.editable for f in m.fields.values()))
-        self.assertTrue(m.stage_command(3, 'CONF:VOLT:AC {range:g}'))
         self.assertTrue(m.stage_field('error', '1'))
-        self.assertTrue(m.add_extra('Keysight34470A', 'before', 'FOO?'))
+        self.assertEqual(m.pm.drafts, {})
+        self.assertTrue(m.stage_command(self.row(m, 'oper.on').seq, 'OPER'), 'output commands stay read-only')
         self.assertEqual(m.pm.drafts, {})
 
     def test_unlocking_with_the_existing_gate_makes_it_editable(self):
@@ -244,6 +243,164 @@ class Commands(Base):
         m3 = self.model()
         self.assertEqual(self.row(m3, 'conf.acv').source, 'factory')
         self.assertFalse(self.row(m3, 'conf.acv').changed)
+
+
+class RunOnlyCommandsNeedNoPassphrase(Base):
+    """Mike: a typed / extra command that is RUN-ONLY must not need the developer passphrase.  Everything saved, and every limit /
+    nominal / unit / description edit, still does."""
+
+    def setUp(self):
+        super().setUp()
+        self.lock_dev()
+
+    def test_commands_are_editable_and_fields_are_not_while_locked(self):
+        m = self.model()
+        self.assertTrue(m.commands_editable)
+        self.assertTrue(self.row(m, 'conf.acv').editable)
+        self.assertFalse(self.row(m, 'oper.on').editable, 'output-risk commands stay read-only')
+        self.assertTrue(all(not f.editable for f in m.fields.values()))
+        self.assertFalse(m.editable)
+
+    def test_a_typed_command_is_applied_for_this_run_without_the_passphrase_and_nothing_is_stored(self):
+        m = self.model()
+        seq = self.row(m, 'conf.acv').seq
+        self.assertEqual(m.stage_command(seq, 'CONF:VOLT:AC {range:.3g}'), [])
+        self.assertIn('Enter the reason for the change.', m.blockers())
+        m.set_reason('lab trial')
+        self.assertEqual(m.blockers(), [])
+        res = m.apply()
+        self.assertTrue(res.ok, res.errors)
+        self.assertEqual(self.env.store.entries(), [], 'nothing reaches the persistent override store')
+        self.assertFalse(self.lock.unlocked, 'applying did not need or turn on developer mode')
+        e = self.app.pm_state.run_entries[0]
+        self.assertEqual((e['kind'], e['scope'], e['reason']), ('command', 'run', 'lab trial'))
+        self.assertTrue(e['author'])
+        self.assertTrue(e['created_at'])
+        self.assertIsNone(e['tested'], 'UNVERIFIED')
+        self.assertEqual(self.row(m, 'conf.acv').source, 'this point')
+        events = self.app.pm_state.live.events
+        self.assertTrue(events and any(c['kind'] == 'command' for ev in events for c in ev['changes']), 'the run audit trail has the edit')
+
+    def test_an_extra_line_is_sent_once_with_a_read_back_and_needs_no_passphrase(self):
+        m = self.model()
+        self.assertEqual(m.add_extra('Keysight34470A', 'after', 'SENS:VOLT:AC:BAND 20', 'SENS:VOLT:AC:BAND?', '20'), [])
+        self.assertTrue(m.add_extra('Keysight34470A', 'after', 'SENS:X 1'), 'a write still needs a read-back and the expected reply')
+        self.assertTrue(m.add_extra('Keysight34470A', 'after', '*RST'), 'forbidden commands are still refused')
+        m.set_reason('trial')
+        self.assertTrue(m.apply().ok)
+        self.assertEqual(self.env.store.entries(), [])
+        line = [r for r in m.rows if r.extra][0]
+        self.assertEqual((line.wire, line.readback_wire), ('SENS:VOLT:AC:BAND 20', 'SENS:VOLT:AC:BAND?'))
+        self.assertEqual(self.app.pm_state.run_entries[0]['value']['expect'], '20')
+
+    def test_a_run_only_edit_can_be_removed_again_without_the_passphrase(self):
+        m = self.model()
+        seq = self.row(m, 'conf.acv').seq
+        m.stage_command(seq, 'CONF:VOLT:AC {range:.3g}')
+        m.add_extra('Keysight34470A', 'after', 'FOO?')
+        m.set_reason('r')
+        self.assertTrue(m.apply().ok)
+        self.assertEqual(m.restore_command(self.row(m, 'conf.acv').seq), [])
+        self.assertEqual(m.remove_extra([r for r in m.rows if r.extra][0].seq), [])
+        m.set_reason('undo')
+        self.assertTrue(m.apply().ok)
+        self.assertEqual(self.app.pm_state.run_entries, [])
+        self.assertEqual(self.env.store.entries(), [])
+
+    def test_saving_for_the_instrument_or_the_model_still_needs_developer_mode(self):
+        m = self.model()
+        for scope in ('asset', 'model'):
+            with self.assertRaises(ValueError):
+                m.set_scope(scope)
+        self.assertEqual(m.scope, 'run')
+        avail = {v: a for v, _l, a, _w in m.scope_choices()}
+        self.assertEqual(avail, {'run': True, 'asset': False, 'model': False})
+        # the idle auto-lock arrives after a saved scope was chosen: back to this run only, and the store is untouched
+        self.lock.unlock(PASSPHRASE)
+        m = self.model()
+        m.set_scope('asset')
+        m.stage_command(self.row(m, 'conf.acv').seq, 'CONF:VOLT:AC {range:.3g}')
+        m.set_reason('r')
+        self.lock.lock()
+        m.load(plan=False)
+        self.assertEqual(m.scope, 'run')
+        self.assertEqual(self.env.store.entries(), [])
+
+    def test_the_store_itself_still_refuses_a_command_without_a_session(self):
+        m = self.model()
+        m.stage_command(self.row(m, 'conf.acv').seq, 'CONF:VOLT:AC {range:.3g}')
+        m.set_reason('r')
+        m.pm.scope = 'asset'                                   # bypass the model on purpose
+        with self.assertRaises(pm.OverrideError):
+            m.pm.apply(confirmed=True)
+        self.assertEqual(self.env.store.entries(), [])
+
+    def test_the_ungated_path_is_only_for_run_scope_commands(self):
+        cmd_row = self.row(self.model(), 'conf.acv')
+        for kind, value in (('limit', {'mode': 'error', 'error': 1}), ('param', {'value': 3}), ('text', {'text': 'x'}), ('point', {})):
+            with self.assertRaises(pm.OverrideError, msg=kind):
+                pm.make_run_entry(kind, 'k', value, 'r', session=None, devmode=self.env.dm, dev_gate=False)
+        with self.assertRaises(pm.OverrideError):
+            pm.build_entry('command', 'x', {'template': 'a'}, 'asset', 'r', asset_id='A', dev_gate=False, devmode=self.env.dm, session=None)
+        self.assertTrue(cmd_row)
+
+    def test_a_tolerance_change_is_staged_only_in_developer_mode_and_applies_only_with_it(self):
+        m = self.model()
+        self.assertTrue(m.stage_field('error', '0.001'))
+        self.lock.unlock(PASSPHRASE)
+        m = self.model()
+        self.assertEqual(m.stage_field('error', '0.001'), [])
+        m.stage_command(self.row(m, 'conf.acv').seq, 'CONF:VOLT:AC {range:.3g}')
+        m.set_reason('r')
+        m.acknowledge(True)
+        self.lock.lock()
+        self.assertTrue(any('Developer mode' in b for b in m.blockers()), 'mixed with a limit edit it is a gated change')
+        with self.assertRaises(pm.OverrideError):
+            m.apply()
+        self.assertEqual(self.app.pm_state.run_entries, [])
+
+    def test_restoring_a_saved_command_needs_developer_mode(self):
+        self.lock.unlock(PASSPHRASE)
+        m = self.model()
+        m.set_scope('model')
+        m.stage_command(self.row(m, 'conf.acv').seq, 'CONF:VOLT:AC {range:.3g}')
+        m.set_reason('keep')
+        self.assertTrue(m.apply(confirmed=True).ok)
+        self.lock.lock()
+        m2 = self.model()
+        r = self.row(m2, 'conf.acv')
+        self.assertEqual(r.source, 'this point')
+        self.assertTrue(m2.restore_command(r.seq))
+        self.assertEqual(m2.pm.drafts, {})
+        self.assertEqual(len(self.env.store.entries()), 1)
+
+    def test_a_verified_locked_procedure_still_refuses_everything(self):
+        self.app.pm_state._store().lock_reason = lambda model, key='': 'This procedure is verified on hardware and locked.'
+        m = self.model()
+        self.assertFalse(m.commands_editable)
+        self.assertTrue(m.stage_command(self.row(m, 'conf.acv').seq, 'CONF:VOLT:AC {range:.3g}'))
+        self.assertTrue(m.add_extra('Keysight34470A', 'after', 'FOO?'))
+        self.assertEqual(m.pm.drafts, {})
+
+    def test_the_run_only_entry_does_not_outlive_the_instrument_or_reach_a_fresh_window(self):
+        m = self.model()
+        m.stage_command(self.row(m, 'conf.acv').seq, 'CONF:VOLT:AC {range:.3g}')
+        m.set_reason('r')
+        self.assertTrue(m.apply().ok)
+        self.assertEqual(self.env.store.entries(), [])
+        self.assertEqual(pm.resolve(self.app.pm_state.model, 'A-100', store=self.env.store).active('command'), [], 'a new resolve sees nothing')
+        self.app.pm_state.load(asset='B-200')
+        self.assertEqual(self.app.pm_state.run_entries, [])
+        self.assertFalse(self.row(self.model(), 'conf.acv').changed)
+
+    def test_the_all_procedure_window_is_unchanged_and_still_gated(self):
+        ctx = self.app.pm_live_context()
+        ctx.store = self.env.store
+        pmm = PM.M.ProcModsModel(ctx, self.lock)
+        self.assertFalse(pmm.run_commands_ungated)
+        self.assertFalse(pmm.editable)
+        self.assertIn('developer mode', pmm.read_only_reason.lower())
+        self.assertFalse(pmm.run_only_commands())
 
 
 class ExtraLines(Base):

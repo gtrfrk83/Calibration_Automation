@@ -301,8 +301,17 @@ procmods / procmods_live layer; nothing in calibration_procedures.sqlite3 change
   target `Driver:+before1@pk` / `+after2@pk`, at most `procmods_pointdef.MAX_EXTRA`; a write needs a read-back query and the expected reply; sent once, read back,
   compared, never retried; a mismatch stops the point (outputs to standby). Extra lines are logged `[EXTRA ... UNVERIFIED]`. Everything typed is UNVERIFIED.
 - Developer mode (existing gate, devmode.py unchanged: passphrase, PBKDF2, 15-minute idle auto-lock, lock-out; UI `procmods_ui.shared_lock` / `UnlockDialog`): the
-  window's toggle only asks that gate. While locked, the limit/nominal/unit/description fields are read-only and typed commands are refused by the store
-  (`_need_dev`). When on: tolerance (low/high or +/- error), unit, nominal, description. Stored inside the HMAC-protected 'limit' value (`nominal`, `new_unit`,
+  window's toggle only asks that gate. While locked, the limit/nominal/unit/description fields are read-only and the saved scopes (this asset / this model)
+  are unavailable. **A RUN-ONLY command edit (typed command, extra line, or removing one made this run) needs NO passphrase (Mike, 'no' to 'should typed
+  commands need the passphrase even for a run-only edit'):** `PointEditModel` sets `ProcModsModel.run_commands_ungated`; `ProcModsModel.run_only_commands()` is true only
+  when scope is 'run' and every staged item is a kind 'command' (a reset only of an entry in `ctx.run_entries`); `_write_set` then calls
+  `procmods.make_run_entry(..., dev_gate=False)`, which `build_entry` honours ONLY for scope 'run' + kind 'command' (limit/param/text/point and every
+  stored scope still raise without a session). Run entries are in memory (`ctx.run_entries`), so `procmods.Store` is never touched and its `_need_dev` gate is
+  unchanged (tests/test_point_editor_store.py). Blocks that apply whatever the passphrase: verified/locked procedure, point in progress, locked/output-risk
+  commands, extra-line rules (write needs read-back + expected reply, sent once, never retried, UNVERIFIED), reason, audit event (who/when/old/new/reason),
+  DEMO marking. A mixed change (field edit + command) or a scope other than run still needs developer mode; if the idle auto-lock fires after a saved scope
+  was chosen the scope falls back to 'run' and Apply for field edits is blocked. The older all-procedure window (ModifyWindow) is still fully gated. Run-only
+  entries live until the instrument ID changes (`pm_state.load(asset=...)`) or the window closes, as before; they never reach the store or another window. When on: tolerance (low/high or +/- error), unit, nominal, description. Stored inside the HMAC-protected 'limit' value (`nominal`, `new_unit`,
   `description`, `fields`). Decimal parsing, display-only SI scaling, low<=nominal<=high unless one-sided, valid units, typed reason, acknowledgement that
   pass/fail changes. A tolerance change on a point with a reading forces a redo; unit/description alone do not.
 - Scopes: this run only (default; the only one in demo, marked DEMO) / this asset / this model. Audit event carries who, when, old, new, reason, point id,
@@ -315,6 +324,11 @@ procmods / procmods_live layer; nothing in calibration_procedures.sqlite3 change
 - "Test command": no engine supplies one, so the window says "not tested".
 - Unverified: the Tk windows (never viewed, only constructed under tests/_tk_stub.py); every typed command; the dry-run plan is made on the simulator and does not
   predict real replies; fgen / MDO nominal semantics.
-- Pre-existing, not changed: truevolt_verification `work()` builds `lambda: self._error(exc)` outside the `except` block, which raises NameError when it runs, so a
-  failed point (including a read-back mismatch of an extra line) never reaches `_error`. Flagged for Mike; the other engines were not checked.
+- FIXED (branch engine-err-fix): the `work()` worker threads used `except Exception as exc: ... root.after(0, lambda: self._error(exc))`; `exc` is deleted when the
+  except block ends, so the lambda raised NameError and a failed point (including a read-back mismatch of an extra line) never reached `_error`. Same bug in
+  truevolt, dacq, fgen, Agilent_34401A, Fluke_8846A_Verification. Fix: `err = exc` inside the block and `lambda err=err: self._error(err)`. Nothing else changed
+  (the standby-on-failure in the first four is as it was; fgen never had one). Guard: `tests/test_beta_except_closure.py` (AST scan of every repo .py except
+  tests/ and .claude/: no lambda / nested def inside an `except ... as NAME` may read NAME) and `tests/test_beta_except_closure_engines.py` (failed measure
+  reaches `_error` with its message, busy cleared, on the simulated benches). Not covered by the behavioural test: mdo, tds2000c, handheld, WaveSurfer (the scan
+  found no occurrence there).
 
