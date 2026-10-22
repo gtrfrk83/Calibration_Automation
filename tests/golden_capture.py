@@ -36,7 +36,8 @@ import drivers  # noqa: E402
 from drivers import (Agilent34401A, AgilentAFG, Fluke28x, Fluke5522A, Fluke5560A, Fluke5790B, Fluke8846A, Fluke96270A,  # noqa: E402
                      Instrument, InstrumentError, Keysight33210A, Keysight33220A, Keysight33250A, Keysight34460A, Keysight34461A,
                      Keysight34465A, Keysight34470A, Keysight34970A, Keysight34972A, Keysight53131A, Keysight53132A, ReferenceMeter,
-                     TektronixMDO4000C, Transport, TransportError, WaveSurfer4104HD)
+                     TektronixMDO4000C, TektronixTDS2000C, Transport, TransportError, WaveSurfer4104HD)
+from drivers import Fluke5522AScope  # noqa: E402
 from drivers import fluke_28x  # noqa: E402
 from drivers.keysight_332xx import Keysight332xx  # noqa: E402
 from drivers.keysight_5313x import Keysight5313x  # noqa: E402
@@ -48,6 +49,7 @@ from drivers.simulated_28x import SimFluke28x  # noqa: E402
 from drivers.simulated import SimBench  # noqa: E402
 from drivers.simulated_fgen import make_fgen_bench  # noqa: E402
 from drivers.simulated_mdo import make_mdo_bench  # noqa: E402
+from drivers.simulated_tds import make_tds_bench  # noqa: E402
 
 SCHEMA = 1
 SENTINEL_PASSWORD = 'GOLDEN_SENTINEL_PW'       # not a real password; asserted absent from every fixture
@@ -133,6 +135,17 @@ COVERAGE = {
                      'dvm_value', 'dvm_frequency', 'run_diagnostics', 'run_spc'],
             no_command=['rf_settle']),                                      # time.sleep only; the sleep is recorded by the engines' runs
     },
+    'tektronix_tds2000c': {
+        'TektronixTDS2000C': dict(
+            covered=['connect', 'opc', 'check_errors', 'cleanup', 'set_verified', 'set_enum_verified', 'default_setup', 'run_self_test', 'self_cal',
+                     'select_only', 'channel', 'position', 'acquire_mode', 'run', 'num_acq', 'wait_acquisitions', 'timebase',
+                     'horizontal_position', 'trigger_edge', 'trigger_mode', 'set_level_50', 'trigger_state', 'measure_setup', 'meas_value',
+                     'measure', 'waveform', 'waveform_burst'],
+            no_command=['model_from_idn']),                                 # static: parses the *IDN? text already read
+    },
+    'fluke_5522a_scope': {
+        'Fluke5522AScope': dict(covered=['select_scope_dcv'], no_command=[]),
+    },
     'reference_instruments': {
         'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup'], no_command=[]),
         'AgilentAFG': dict(covered=['connect', 'sine', 'square', 'output', 'cleanup'], no_command=['max_hz']),   # property
@@ -142,10 +155,10 @@ COVERAGE = {
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
-              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'reference_instruments']
+              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
-ENGINES = ('truevolt_34470A', 'dacq_34970A', 'dacq_34972A', 'fgen_33220A', 'mdo4000c', 'agilent_34401a', 'fluke_8846a', 'handheld_5522a',
+ENGINES = ('truevolt_34470A', 'dacq_34970A', 'dacq_34972A', 'fgen_33220A', 'mdo4000c', 'tds2000c', 'agilent_34401a', 'fluke_8846a', 'handheld_5522a',
            'wavesurfer_dcv')
 
 
@@ -894,10 +907,87 @@ def cases_reference(c):
     c.run('ReferenceMeter.frequency[overload]', over.frequency)
 
 
+def cases_tds(c):
+    bench, t = make_tds_bench('2024C')
+    m = c.inst(TektronixTDS2000C, t['scope'], opened=False, label='TDS2000C')
+    c.run('TektronixTDS2000C.connect', m.connect)
+    c.run('TektronixTDS2000C.opc[no timeout]', m.opc)
+    c.run('TektronixTDS2000C.opc[timeout]', m.opc, 60)
+    c.run('TektronixTDS2000C.check_errors[ok]', m.check_errors, 'ctx')
+    c.run('TektronixTDS2000C.default_setup', m.default_setup)
+    c.run('TektronixTDS2000C.select_only', m.select_only, 2)
+    c.run('TektronixTDS2000C.channel[all]', m.channel, 1, vscale=0.5, position=0.0, probe=1, coupling='DC', bw_limit=True)
+    c.run('TektronixTDS2000C.channel[defaults]', m.channel, 3)
+    c.run('TektronixTDS2000C.position', m.position, 1, 0.0)
+    c.run('TektronixTDS2000C.set_verified', m.set_verified, 'CH1:SCAle', 'CH1:SCAle?', 0.2)
+    c.run('TektronixTDS2000C.set_enum_verified', m.set_enum_verified, 'CH1:BANdwidth', 'CH1:BANdwidth?', 'OFF')
+    c.run('TektronixTDS2000C.acquire_mode[average]', m.acquire_mode, 'AVErage', 64)
+    c.run('TektronixTDS2000C.acquire_mode[sample]', m.acquire_mode, 'SAMple')
+    c.run('TektronixTDS2000C.run', m.run)
+    c.run('TektronixTDS2000C.num_acq', m.num_acq)
+    c.run('TektronixTDS2000C.wait_acquisitions', m.wait_acquisitions, 1, timeout=5.0, poll=0.0)
+    c.run('TektronixTDS2000C.timebase', m.timebase, 1e-3)
+    c.run('TektronixTDS2000C.horizontal_position', m.horizontal_position, 0.0)
+    c.run('TektronixTDS2000C.trigger_edge[level]', m.trigger_edge, 'CH1', slope='FALL', mode='NORMal', coupling='DC')
+    c.run('TektronixTDS2000C.trigger_edge[defaults]', m.trigger_edge, 'CH2')
+    c.run('TektronixTDS2000C.trigger_mode', m.trigger_mode, 'AUTO')
+    c.run('TektronixTDS2000C.set_level_50', m.set_level_50)
+    c.run('TektronixTDS2000C.trigger_state', m.trigger_state)
+    c.run('TektronixTDS2000C.measure_setup', m.measure_setup, 'PK2pk', 1)
+    c.run('TektronixTDS2000C.meas_value', m.meas_value)
+    c.run('TektronixTDS2000C.measure', m.measure, 'MEAN', 1, count=2, timeout=5.0)
+    c.run('TektronixTDS2000C.waveform', m.waveform, 1)
+    c.run('TektronixTDS2000C.waveform_burst', m.waveform_burst, 1, 2, 500)
+    c.run('TektronixTDS2000C.run_self_test', m.run_self_test)
+    c.run('TektronixTDS2000C.self_cal', m.self_cal)
+    c.run('TektronixTDS2000C.cleanup', m.cleanup)
+    # branches the simulator cannot reach
+    err = c.inst(TektronixTDS2000C, Scripted([(r'^\*ESR\?', '16'), (r'^EVMsg\?', '113,"Undefined header"')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.check_errors[command error]', err.check_errors, 'setup')
+    err2 = c.inst(TektronixTDS2000C, Scripted([(r'^\*ESR\?', '4')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.check_errors[no event text]', err2.check_errors)
+    flat = c.inst(TektronixTDS2000C, Scripted([(r'^CH1:SCAle\?', '0.9')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.set_verified[mismatch]', flat.set_verified, 'CH1:SCAle', 'CH1:SCAle?', 0.2)
+    flat2 = c.inst(TektronixTDS2000C, Scripted([(r'^CH1:BANdwidth\?', 'ON')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.set_enum_verified[mismatch]', flat2.set_enum_verified, 'CH1:BANdwidth', 'CH1:BANdwidth?', 'OFF')
+    bad = c.inst(TektronixTDS2000C, Scripted([(r'^MEASUrement:IMMed:VALue\?', '9.9E+37')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.meas_value[invalid]', bad.meas_value)
+    few = c.inst(TektronixTDS2000C, Scripted([(r'^ACQuire:NUMACq\?', '0')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.wait_acquisitions[too few]', few.wait_acquisitions, 5, timeout=0.0, poll=0.0)
+    short = c.inst(TektronixTDS2000C, Scripted([(r'^WFMPre:XINcr\?', '1E-9'), (r'^WFMPre:XZEro\?', '0'), (r'^WFMPre:YMUlt\?', '0.1'),
+                                                (r'^WFMPre:YOFf\?', '0'), (r'^WFMPre:YZEro\?', '0'), (r'^CURVe\?', 'CURVE 1,2,3')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.waveform[record too short]', short.waveform, 1)
+    badscale = c.inst(TektronixTDS2000C, Scripted([(r'^WFMPre:XINcr\?', '0'), (r'^WFMPre:YMUlt\?', '0.1'), (r'^WFMPre:YOFf\?', '0'), (r'^WFMPre:YZEro\?', '0')]),
+                      label='TDS2000C')
+    c.run('TektronixTDS2000C.waveform_burst[scale not usable]', badscale.waveform_burst, 1, 2)
+    failing = c.inst(TektronixTDS2000C, Scripted([(r'^DIAg:RESUlt:FLAg\?', 'FAIL'), (r'^DIAg:RESUlt:LOG\?', '"1 failed"')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.run_self_test[fails]', failing.run_self_test)
+    nolog = c.inst(TektronixTDS2000C, Scripted([(r'^DIAg:RESUlt:FLAg\?', 'PASS'), (r'^DIAg:RESUlt:LOG\?', TransportError('timeout'))]), label='TDS2000C')
+    c.run('TektronixTDS2000C.run_self_test[log query fails]', nolog.run_self_test)
+    badcal = c.inst(TektronixTDS2000C, Scripted([(r'^\*CAL\?', '1'), (r'^CALibrate:STATUS\?', 'FAIL')]), label='TDS2000C')
+    c.run('TektronixTDS2000C.self_cal[fails]', badcal.self_cal)
+    wrong = c.inst(TektronixTDS2000C, Scripted([(r'\*IDN\?', 'KEYSIGHT,34401A,1,1')]), opened=False, label='TDS2000C')
+    c.run('TektronixTDS2000C.connect[wrong model]', wrong.connect)
+
+
+def cases_5522a_scope(c):
+    bench, t = make_tds_bench('2024C', '5522A')
+    cal = c.inst(Fluke5522AScope, t['cal'], label='5522A')
+    c.run('Fluke5522AScope.select_scope_dcv[1M]', cal.select_scope_dcv, '1M')
+    c.run('Fluke5522AScope.select_scope_dcv[50]', cal.select_scope_dcv, '50')
+    noscope = c.inst(Fluke5522AScope, Scripted([(r'^ERR\?', '0,"No error"'), (r'^SCOPE\?', 'OFF')]), label='5522A')
+    c.run('Fluke5522AScope.select_scope_dcv[mode not confirmed]', noscope.select_scope_dcv, '1M')
+    badimp = c.inst(Fluke5522AScope, Scripted([(r'^ERR\?', '0,"No error"'), (r'^SCOPE\?', 'VOLT'), (r'^OUT_IMP\?', '50,OHM')]), label='5522A')
+    c.run('Fluke5522AScope.select_scope_dcv[impedance not confirmed]', badimp.select_scope_dcv, '1M')
+    junk = c.inst(Fluke5522AScope, Scripted([(r'^ERR\?', '0,"No error"'), (r'^SCOPE\?', 'VOLT'), (r'^OUT_IMP\?', 'Z1M')]), label='5522A')
+    c.run('Fluke5522AScope.select_scope_dcv[unreadable impedance]', junk.select_scope_dcv, '1M')
+
+
 DRIVER_CASES = {
     'base': cases_base, 'fluke_5560a': cases_fluke_5560a, 'scpi_dmm': cases_scpi_dmm, 'keysight_truevolt': cases_truevolt,
     'keysight_dacq': cases_dacq, 'keysight_332xx': cases_332xx, 'keysight_5313x': cases_5313x, 'fluke_5790b': cases_5790b,
-    'fluke_28x': cases_28x, 'lecroy_ws4104hd': cases_lecroy, 'tektronix_mdo4000c': cases_mdo, 'reference_instruments': cases_reference,
+    'fluke_28x': cases_28x, 'lecroy_ws4104hd': cases_lecroy, 'tektronix_mdo4000c': cases_mdo, 'tektronix_tds2000c': cases_tds, 'fluke_5522a_scope': cases_5522a_scope,
+    'reference_instruments': cases_reference,
 }
 
 

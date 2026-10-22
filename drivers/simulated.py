@@ -107,13 +107,14 @@ class SimFlukeTransport(_SimBase):
         if u == 'OPER': f['operate'] = True; return None
         if u == 'OPER?': return '1' if f['operate'] else '0'
         if u == 'SCOPE DCV': f['scope'], f['func'] = 'VOLT', 'SDCV'; return None
+        if u == 'SCOPE VOLT': f['scope'], f['func'] = 'VOLT', 'SDCV'; return None      # 5520A / 5522A scope option
         if u == 'SCOPE SQUARE': f['scope'], f['func'] = 'SQUARE', 'SSQU'; return None
         if u == 'SCOPE LEVSINE': f['scope'], f['func'] = 'LEVSINE', 'SLEV'; return None
         if u == 'SCOPE MEASR': f['scope'], f['func'] = 'MEASR', 'SMEAS'; return None
         if u == 'SCOPE OFF': f['scope'], f['func'] = 'OFF', 'NONE'; return None
         if u == 'SCOPE?': return f['scope']
         if u == 'FUNC?': return f['func']
-        if u.startswith('OUT_IMP '): f['imp'] = cmd.split()[1].upper(); return None
+        if u.startswith('OUT_IMP '): f['imp'] = '1M' if '1M' in cmd.split()[1].upper() else '50'; return None
         if u == 'OUT_IMP?': return '1000000,OHM' if f['imp'] == '1M' else '50,OHM'
         if u.startswith('TC_TYPE '): f['tc'] = cmd.split()[1].upper(); return None
         m = re.match(r'OUT\s+([-+0-9.eE]+)(V|A|OHM|F|NF|UF|CEL)(?:,\s*([0-9.]+)\s*(HZ|KHZ|MHZ|GHZ))?$', u)

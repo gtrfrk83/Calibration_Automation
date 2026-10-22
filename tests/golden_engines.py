@@ -26,6 +26,7 @@ from drivers.simulated import SimBench, SimFlukeTransport, make_bench, make_dacq
 from drivers.simulated_28x import SimFluke28x  # noqa: E402
 from drivers.simulated_fgen import make_fgen_bench  # noqa: E402
 from drivers.simulated_mdo import make_mdo_bench  # noqa: E402
+from drivers.simulated_tds import make_tds_bench  # noqa: E402
 from tests import golden_capture as gc  # noqa: E402
 
 
@@ -147,6 +148,38 @@ def run_mdo():
     for p in sample(pts, lambda p: p['kind'], 40):
         c.run(f'mdo4000c_verification.Runner.run_point[{pid(p)}]', runner.run_point, p, _log=io.log)
     c.run('mdo4000c_verification.IO.close', io.close, _log=io.log)
+    return c.entries
+
+
+def run_tds():
+    import tds2000c_verification as T
+    c = gc.Case('engine_tds2000c')
+    bench, t = make_tds_bench('2024C')
+    wrapped = {k: rec(v) for k, v in t.items() if k != 'dmm'}
+    r = Runner(c)
+    io = r.build('tds2000c_verification.IO.__init__', lambda: T.IO(dict(cal_baud=9600, cal_model='Fluke 5560A'), transports=wrapped))
+    cfg = T.Config('2024C')
+
+    class FakeApp:
+        stop = False
+
+        def __init__(self):
+            self.io, self.cfg = io, cfg
+
+        def request(self, kind, payload=None):
+            return True
+
+        def post(self, *a, **k):
+            pass
+
+        def cal_text(self):
+            return 'Fluke 5560A'
+
+    runner = T.Runner(FakeApp())
+    pts = [p for p in T.POINTS if cfg.applies(p) and p['kind'] != 'SELFCAL']          # the self calibration needs the probes disconnected
+    for p in sample(pts, lambda p: p['kind'], 12):
+        c.run(f'tds2000c_verification.Runner.run_point[{pid(p)}]', runner.run_point, p, _log=io.log)
+    c.run('tds2000c_verification.IO.close', io.close, _log=io.log)
     return c.entries
 
 
@@ -294,6 +327,7 @@ RUNS = {
     'dacq_34972A': lambda: run_dacq('34972A'),
     'fgen_33220A': run_fgen,
     'mdo4000c': run_mdo,
+    'tds2000c': run_tds,
     'agilent_34401a': run_agilent_34401a,
     'fluke_8846a': run_fluke_8846a,
     'handheld_5522a': run_handheld,

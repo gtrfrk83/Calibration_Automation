@@ -1,0 +1,227 @@
+{
+ "entries": [
+  {
+   "call": "'1M'",
+   "case": "Fluke5522AScope.select_scope_dcv[1M]",
+   "log": [
+    "5522A|>>|SCOPE VOLT",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|SCOPE?",
+    "5522A|<<|VOLT",
+    "5522A|>>|OUT_IMP 1M",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OUT_IMP?",
+    "5522A|<<|1000000,OHM"
+   ],
+   "method": "Fluke5522AScope.select_scope_dcv",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SCOPE VOLT"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP 1M"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ]
+   ]
+  },
+  {
+   "call": "'50'",
+   "case": "Fluke5522AScope.select_scope_dcv[50]",
+   "log": [
+    "5522A|>>|SCOPE VOLT",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|SCOPE?",
+    "5522A|<<|VOLT",
+    "5522A|>>|OUT_IMP 50",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OUT_IMP?",
+    "5522A|<<|50,OHM"
+   ],
+   "method": "Fluke5522AScope.select_scope_dcv",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SCOPE VOLT"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP 50"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "50,OHM"
+    ]
+   ]
+  },
+  {
+   "call": "'1M'",
+   "case": "Fluke5522AScope.select_scope_dcv[mode not confirmed]",
+   "log": [
+    "5522A|>>|SCOPE VOLT",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|SCOPE?",
+    "5522A|<<|OFF"
+   ],
+   "method": "Fluke5522AScope.select_scope_dcv",
+   "result": "raised InstrumentError: Calibrator SCOPE mode not confirmed: SCOPE?='OFF' (expected VOLT)",
+   "wire": [
+    [
+     "W",
+     "SCOPE VOLT"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "OFF"
+    ]
+   ]
+  },
+  {
+   "call": "'1M'",
+   "case": "Fluke5522AScope.select_scope_dcv[impedance not confirmed]",
+   "log": [
+    "5522A|>>|SCOPE VOLT",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|SCOPE?",
+    "5522A|<<|VOLT",
+    "5522A|>>|OUT_IMP 1M",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OUT_IMP?",
+    "5522A|<<|50,OHM"
+   ],
+   "method": "Fluke5522AScope.select_scope_dcv",
+   "result": "raised InstrumentError: Unexpected SCOPE output impedance: '50,OHM'",
+   "wire": [
+    [
+     "W",
+     "SCOPE VOLT"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP 1M"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "50,OHM"
+    ]
+   ]
+  },
+  {
+   "call": "'1M'",
+   "case": "Fluke5522AScope.select_scope_dcv[unreadable impedance]",
+   "log": [
+    "5522A|>>|SCOPE VOLT",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|SCOPE?",
+    "5522A|<<|VOLT",
+    "5522A|>>|OUT_IMP 1M",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OUT_IMP?",
+    "5522A|<<|Z1M"
+   ],
+   "method": "Fluke5522AScope.select_scope_dcv",
+   "result": "raised InstrumentError: Unexpected OUT_IMP? reply 'Z1M'",
+   "wire": [
+    [
+     "W",
+     "SCOPE VOLT"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP 1M"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "Z1M"
+    ]
+   ]
+  }
+ ],
+ "name": "fluke_5522a_scope",
+ "schema": 1
+}
