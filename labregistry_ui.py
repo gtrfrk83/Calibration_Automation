@@ -43,7 +43,7 @@ class HistoryPanel(ttk.Frame):
         self.runs.master.pack(fill='x')
         _tags(self.runs)
         self.runs.bind('<<TreeviewSelect>>', lambda _e: self.show_points())
-        self.runs.bind('<Double-1>', self._runs_double)                                   # choice: regenerate the PDF / open the saved one
+        self.runs.bind('<Double-1>', self._runs_double)                                   # regenerate the PDF
         for button in ('<Button-3>', '<Button-2>'):                                         # context menu (right click; middle button on macOS)
             self.runs.bind(button, self._runs_menu)
         head = ttk.Frame(self)
@@ -154,14 +154,10 @@ class HistoryPanel(ttk.Frame):
             messagebox.showinfo('Regenerate PDF', result.message, parent=parent)
 
     def _runs_double(self, event=None):
-        """Double-click on a report: choose between regenerating the PDF and opening the saved one."""
+        """Double-click on a report: regenerate the PDF."""
         if event is not None and not self.runs.identify_row(event.y):
             return
-        choice = choose_action(self.winfo_toplevel())
-        if choice == 'regenerate':
-            self.regenerate_pdf()
-        elif choice == 'open':
-            self.open_report()
+        self.regenerate_pdf()                                 # double-click goes straight to regenerate (Open stays on the button / menu)
 
     def _runs_menu(self, event):
         row = self.runs.identify_row(event.y)

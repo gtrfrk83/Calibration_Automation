@@ -300,16 +300,16 @@ class Regenerate(Base):
         text = R.pdf_text(out)
         self.assertIn('Report date: 2026-01-02 03:04', text)
         self.assertNotIn('2026-10-22 09:30', text)
-        self.assertIn('Reprinted 2026-10-22 from the saved record.', text)
+        self.assertNotIn('Reprinted', text)
         self.assertEqual(rs._restore(rs.load(self.rid).data['details'])['technician'], 'T. Tech')
 
-    def test_note_is_only_in_the_footer_and_metadata(self):
+    def test_snapshot_reprint_has_no_note(self):
         out = self.dir / 'new.pdf'
         choose, overwrite, _ = asking(out)
         rs.regenerate(self.rid, choose_path=choose, confirm_overwrite=overwrite, now=LATER)
-        self.assertEqual(R.differences(self.dir / 'orig.pdf', out, 'Reprinted'), [])
+        self.assertEqual(R.differences(self.dir / 'orig.pdf', out, None), [])
         from pypdf import PdfReader
-        self.assertIn('Reprinted 2026-10-22', str(PdfReader(str(out)).metadata.get('/Subject')))
+        self.assertNotIn('Reprinted', str(PdfReader(str(out)).metadata.get('/Subject')))
 
     def test_existing_file_is_never_replaced_without_asking(self):
         out = self.dir / 'there.pdf'
@@ -353,7 +353,7 @@ class Regenerate(Base):
         out = self.dir / 'r.pdf'
         choose, overwrite, _ = asking(out)
         rs.regenerate(self.rid, choose_path=choose, confirm_overwrite=overwrite)
-        self.assertEqual(R.differences(self.dir / 'orig.pdf', out, 'Reprinted'), [])
+        self.assertEqual(R.differences(self.dir / 'orig.pdf', out, None), [])
         self.assertIn('TUR', R.pdf_text(out))
         self.assertIn('3.1:1', R.pdf_text(out))
 
@@ -417,7 +417,7 @@ class Helpers(unittest.TestCase):
         self.assertEqual(rs.context_for(App())['spec'], stamp['spec'], 'deterministic')
 
     def test_reprint_note_wording(self):
-        self.assertEqual(rs.reprint_note(rs.SNAPSHOT, LATER), 'Reprinted 2026-10-22 from the saved record.')
+        self.assertIsNone(rs.reprint_note(rs.SNAPSHOT, LATER))
         self.assertTrue(rs.reprint_note(rs.REBUILT, LATER).startswith('REBUILT 2026-10-22 from history rows, no original snapshot'))
 
     def test_tar_tur_json_round_trip(self):

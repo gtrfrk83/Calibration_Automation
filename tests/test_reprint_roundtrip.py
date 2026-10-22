@@ -3,7 +3,7 @@
 For the handheld / user-datasheet engine (handheld_dmm.App via dsb_runtime.DsbApp on the simulated calibrators), the Truevolt 34470A engine and
 the TDS2000C scope engine: the original PDF is produced by the engine's own export_pdf() (so the Asset History event and the snapshot are written by
 the production code path), then regenerated from the saved record.  The reprint must have the same pages and the same text, and each page's content
-must be the original's plus exactly one appended footer line (the 'Reprinted ... from the saved record' note).  Clock pinned, reportlab invariant mode.
+must be the original's unchanged (no footer note).  Clock pinned, reportlab invariant mode.
 
 File name sorts AFTER test_beta on purpose: it installs tests/_tk_stub.py (no tkinter here), which would change test_beta if loaded earlier.
 Run:  python -m unittest tests.test_reprint_roundtrip
@@ -35,7 +35,7 @@ try:
 except Exception:
     HAVE = False
 
-NOTE = 'Reprinted '
+NOTE = None                                                       # a reprint of the saved record carries no note
 
 
 def regenerate(rid, out):
@@ -58,8 +58,7 @@ class RoundTrip(unittest.TestCase):
         self.assertTrue(res.ok, res.message)
         self.assertEqual(res.kind, rs.SNAPSHOT)
         self.assertEqual(R.differences(original, out, NOTE), [], f'{name}: reprint differs from the original')
-        self.assertIn('Reprinted', R.pdf_text(out))
-        self.assertNotIn('Reprinted', R.pdf_text(original))
+        self.assertNotIn('Reprinted', R.pdf_text(out))
         return out
 
     def test_truevolt_engine(self):

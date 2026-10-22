@@ -186,19 +186,18 @@ class Handlers(unittest.TestCase):
         self.assertIn('checksum', self.boxes.info_text())
         self.assertFalse((self.dir / 'x.pdf').exists())
 
-    def test_double_click_offers_the_choice(self):
+    def test_double_click_regenerates_directly(self):
         p = panel([str(self.rid)])
         p.runs.row_at = str(self.rid)
         p.regenerate_pdf, p.open_report = mock.MagicMock(), mock.MagicMock()
         event = mock.MagicMock(y=5)
-        for answer, regen, opened in (('regenerate', 1, 0), ('open', 0, 1), (None, 0, 0)):
-            p.regenerate_pdf.reset_mock(), p.open_report.reset_mock()
-            with mock.patch.object(lui, 'choose_action', lambda parent, a=answer: a):
-                p._runs_double(event)
-            self.assertEqual((p.regenerate_pdf.call_count, p.open_report.call_count), (regen, opened))
-        p.runs.row_at = ''                                                     # double-click on empty space: no question
-        with mock.patch.object(lui, 'choose_action', side_effect=AssertionError):
+        with mock.patch.object(lui, 'choose_action', side_effect=AssertionError):      # no question
             p._runs_double(event)
+        self.assertEqual((p.regenerate_pdf.call_count, p.open_report.call_count), (1, 0))
+        p.regenerate_pdf.reset_mock()
+        p.runs.row_at = ''                                                     # double-click on empty space: nothing
+        p._runs_double(event)
+        self.assertEqual(p.regenerate_pdf.call_count, 0)
 
     def test_context_menu_selects_the_row_and_pops_up(self):
         p = panel()

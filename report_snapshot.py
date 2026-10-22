@@ -364,13 +364,14 @@ def availability(run_id, db_path=None) -> tuple:
 
 
 # ------------------------------------------------------------------------------------------------------------ writing
-def reprint_note(kind, now=None) -> str:
-    """The one line added to the footer of every page of a reprint."""
+def reprint_note(kind, now=None):
+    """Footer line for a reprint: none for a reprint of the saved record (identical to the original);
+    a rebuilt-from-history reprint is always marked."""
     stamp = (now or datetime.now()).strftime('%Y-%m-%d')
     if kind == REBUILT:
         return (f'REBUILT {stamp} from history rows, no original snapshot (As Left, uncertainty, TAR/TUR and modifications were not stored). '
                 'Not the original report.')
-    return f'Reprinted {stamp} from the saved record.'
+    return None
 
 
 def reprint_filename(asset, issued_at, ext='.pdf') -> str:
