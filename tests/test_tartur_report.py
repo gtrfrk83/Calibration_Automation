@@ -193,5 +193,126 @@ class Pdf(unittest.TestCase):
         self.assertIn('3.1:1', text)
 
 
+TT = report_pdf.TarTur
+
+
+class Selection(unittest.TestCase):
+    """TAR and TUR are independent: both, TAR only, TUR only, neither."""
+
+    def test_tartur_truthiness_and_coercion(self):
+        self.assertFalse(TT(False, False))
+        self.assertTrue(TT(True, False))
+        self.assertTrue(TT(False, True))
+        self.assertEqual(report_pdf.as_tar_tur(True), TT(True, True))
+        self.assertEqual(report_pdf.as_tar_tur(False), TT(False, False))
+        self.assertEqual(report_pdf.as_tar_tur(None), TT(False, False))
+        self.assertEqual(report_pdf.as_tar_tur(TT(True, False)), TT(True, False))
+        self.assertEqual(report_pdf.details_tar_tur({'show_tar_tur': TT(False, True)}), TT(False, True))
+        self.assertEqual(report_pdf.details_tar_tur({'show_tar': True, 'show_tur': False}), TT(True, False))
+        self.assertEqual(report_pdf.details_tar_tur({}), TT(False, False))
+
+    def test_remembered_round_trip_each(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / 'x.json'
+            for v in (TT(True, False), TT(False, True), TT(True, True), TT(False, False)):
+                self.assertTrue(report_pdf.remember_show_tar_tur(v, p))
+                self.assertEqual(report_pdf.remembered_show_tar_tur(p), v)
+            report_pdf.remember_show_tar_tur(True, p)
+            self.assertEqual(report_pdf.remembered_show_tar_tur(p), TT(True, True))
+            self.assertEqual(json.loads(p.read_text()), {'show_tar': True, 'show_tur': True})
+
+    def test_old_format_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / 'x.json'
+            p.write_text('{"show_tar_tur": true}')
+            self.assertEqual(report_pdf.remembered_show_tar_tur(p), TT(True, True))
+            p.write_text('{"show_tar_tur": false}')
+            self.assertEqual(report_pdf.remembered_show_tar_tur(p), TT(False, False))
+        self.assertEqual(report_pdf.remembered_show_tar_tur('/nonexistent/zz.json'), TT(False, False))
+
+    def test_apply_selects_keys(self):
+        rows = sample_rows()
+        f = [{'TAR': '4:1', 'TUR': '3:1'}] * 3
+        self.assertEqual(sorted(k for k in report_pdf.apply_tar_tur(rows, TT(True, False), f)[0] if k in ('TAR', 'TUR')), ['TAR'])
+        self.assertEqual(sorted(k for k in report_pdf.apply_tar_tur(rows, TT(False, True), f)[0] if k in ('TAR', 'TUR')), ['TUR'])
+        self.assertEqual(sorted(k for k in report_pdf.apply_tar_tur(rows, True, f)[0] if k in ('TAR', 'TUR')), ['TAR', 'TUR'])
+        self.assertIs(report_pdf.apply_tar_tur(rows, TT(False, False), f), rows)
+
+    def test_csv_selection(self):
+        f = {'TAR': '4:1', 'TUR': '3:1'}
+        self.assertEqual(report_pdf.csv_columns(TT(True, False)), ['TAR'])
+        self.assertEqual(report_pdf.csv_cells(TT(True, False), f), ['4:1'])
+        self.assertEqual(report_pdf.csv_columns(TT(False, True)), ['TUR'])
+        self.assertEqual(report_pdf.csv_cells(TT(False, True), f), ['3:1'])
+        self.assertEqual(report_pdf.csv_columns(TT(True, True)), ['TAR', 'TUR'])
+        self.assertEqual(report_pdf.csv_cells(TT(True, True), f), ['4:1', '3:1'])
+        self.assertEqual(report_pdf.csv_columns(TT(False, False)), [])
+        self.assertEqual(report_pdf.csv_cells(TT(False, False), f), [])
+        self.assertEqual(report_pdf.csv_show_tar_tur(TT(False, True)), TT(False, True))
+        self.assertEqual(report_pdf.csv_show_tar_tur(True), TT(True, True))
+        with mock.patch.object(report_pdf, 'settings_path', return_value=Path('/nonexistent/q.json')):
+            self.assertEqual(report_pdf.csv_show_tar_tur(), TT(False, False))
+
+    def test_definition_wording(self):
+        both, tar, tur = (report_pdf.tar_tur_definition(TT(*x)) for x in ((1, 1), (1, 0), (0, 1)))
+        self.assertIn('TAR (', both); self.assertIn('TUR (', both)
+        self.assertIn('TAR (', tar); self.assertNotIn('TUR', tar)
+        self.assertIn('TUR (', tur); self.assertNotIn('TAR', tur)
+        self.assertEqual(report_pdf.tar_tur_definition(TT(False, False)), '')
+
+
+@unittest.skipUnless(HAVE_RL and Path('/usr/bin/pdftotext').exists(), 'reportlab / pdftotext not available')
+class PdfSelection(Pdf):
+    def fields(self):
+        return [{'TAR': '4.0:1', 'TUR': '3.1:1'}, {'TAR': '4.1:1', 'TUR': '2.2:1'}, None]
+
+    def text_for(self, name, sel, **kw):
+        p = self.path(name)
+        rows = report_pdf.apply_tar_tur(sample_rows(), TT(True, True), self.fields())      # rows carry both; selection is the flag
+        build(report_pdf, p, rows, details={'show_tar_tur': sel}, **kw)
+        return pdf_text(p)
+
+    def header_words(self, text):
+        return [w for w in text.split() if w in ('TAR', 'TUR')]
+
+    def test_tar_only(self):
+        t = self.text_for('a.pdf', TT(True, False))
+        self.assertIn('4.1:1', t); self.assertNotIn('3.1:1', t); self.assertNotIn('2.2:1', t)
+        self.assertIn('TAR (test accuracy ratio)', ' '.join(t.split()))
+        self.assertNotIn('TUR', t)
+
+    def test_tur_only(self):
+        t = self.text_for('b.pdf', TT(False, True))
+        self.assertIn('3.1:1', t); self.assertNotIn('4.1:1', t)
+        self.assertIn('TUR (test uncertainty ratio)', ' '.join(t.split()))
+        self.assertNotIn('TAR', t)
+
+    def test_both_order(self):
+        t = self.text_for('c.pdf', TT(True, True))
+        self.assertIn('Uncertainty TAR TUR', ' '.join(t.split()))
+        self.assertIn('4.1:1', t); self.assertIn('2.2:1', t)
+
+    def test_bool_true_is_both_and_false_is_baseline(self):
+        t = self.text_for('d.pdf', True)
+        self.assertIn('Uncertainty TAR TUR', ' '.join(t.split()))
+        if self.golden is not None:
+            a, b = self.path('base.pdf'), self.path('neither.pdf')
+            build(self.golden, a, sample_rows())
+            for sel in (TT(False, False), False, None):
+                build(report_pdf, b, report_pdf.apply_tar_tur(sample_rows(), TT(True, True), self.fields()), details={'show_tar_tur': sel})
+                self.assertEqual(a.read_bytes(), b.read_bytes())
+
+    def test_selected_kind_without_values_has_no_column(self):
+        rows = report_pdf.apply_tar_tur(sample_rows(), TT(True, True), [{'TAR': '4:1', 'TUR': ''}] * 3)
+        p = self.path('e.pdf')
+        build(report_pdf, p, rows, details={'show_tar_tur': TT(True, True)})
+        t = pdf_text(p)
+        self.assertIn('Uncertainty TAR', ' '.join(t.split()))
+        self.assertNotIn('TUR', t)
+
+    def test_demo_marking_with_single_column(self):
+        self.assertIn('DEMO DATA', self.text_for('f.pdf', TT(False, True), demo=True))
+
+
 if __name__ == '__main__':
     unittest.main()
