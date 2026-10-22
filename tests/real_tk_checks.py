@@ -298,9 +298,70 @@ def checks_manager_windows():
     check('no callback errors', not errs, errs)
     root.destroy()
 
+def checks_handheld_dialogs():
+    """The 'Change the function' window (layout C) and the reading window (layout C): nothing clips, Enter = OK / Record, Esc = Cancel."""
+    import handheld_dmm as HH
+    root = tk.Tk()
+    ui.apply_theme(root)
+    root.geometry('800x500+0+0')
+    pump(root)
+    spec = HH.load_spec('fluke_110_series_pv.json')
+    pts = HH.points_for(spec, '117')
+    pt = next(p for p in pts if p['section'] == 'AC volts')
+    p36 = next(p for p in pts if p['n'] == 36)
+
+    def drive(open_it, act):
+        """Run `open_it` (a modal call); after the window has shown, check it and call act(win)."""
+        seen = {}
+
+        def go():
+            win = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel)][0]
+            pump(root, 5)
+            bad = [c for c in walk(win) if c.winfo_ismapped() and not inside(win, c)]
+            seen['clipped'] = bad
+            seen['size'] = (win.winfo_width(), win.winfo_height(), win.winfo_reqwidth(), win.winfo_reqheight())
+            win.focus_force()
+            pump(root, 5)
+            act(win)
+            root.after(3000, lambda: [w.destroy() for w in root.winfo_children() if isinstance(w, tk.Toplevel)])      # never hang
+        root.after(400, go)
+        seen['result'] = open_it()
+        return seen
+
+    long_text = 'Standby text that is deliberately long so that it has to wrap onto a second and a third line inside the window. ' * 2
+    card = HH.function_change_card(pt, len(pts), long_text)
+    r = drive(lambda: ui.confirm_steps(root, 'Change the function', 'AC volts', [], layout='function_change', card=card, ok='Done - continue'),
+              lambda w: w.event_generate('<Return>'))
+    check('function window: nothing clipped', not r['clipped'], r['clipped'])
+    check('function window: Enter = Done', r['result'] is True)
+    r = drive(lambda: ui.confirm_steps(root, 'Change the function', 'AC volts', [], layout='function_change', card=card, ok='Done - continue'),
+              lambda w: w.event_generate('<Escape>'))
+    check('function window: Esc = Cancel', r['result'] is False)
+    r = drive(lambda: ui.confirm_steps(root, 'Change the function', 'AC volts', [], layout='function_change',
+                                       card=HH.function_change_card(pt, len(pts), 'x', standby_known=True)), lambda w: w.destroy())
+    check('function window: tick state draws', not r['clipped'])
+
+    def reading(p, **kw):
+        return lambda: HH.ask_reading(root, p, len(pts), HH.output_text(p), 'Output is ON - allow the reading to settle, then read the meter.',
+                                      '0.2 to 0.8 V  and the AC annunciator is ON', 'numeric', unit='V', **kw)
+
+    def typed(w):
+        entry = [c for c in walk(w) if isinstance(c, ttk.Entry)][0]
+        entry.insert(0, '0.5')
+        w.event_generate('<Return>')
+    r = drive(reading(p36, demo_fill=lambda: '0.5', limit_s=60.0, on_expire=lambda: None), typed)
+    check('reading window: nothing clipped (demo helper + timer)', not r['clipped'], r['clipped'])
+    check('reading window: Enter records the typed text', r['result']['action'] == 'record' and r['result']['text'] == '0.5', r['result'])
+    r = drive(reading(p36), lambda w: [b for b in walk(w) if isinstance(b, ttk.Button) and b.cget('text') == 'Skip point'][0].invoke())
+    check('reading window: Skip', r['result']['action'] == 'skip')
+    r = drive(reading(p36), lambda w: [b for b in walk(w) if isinstance(b, ttk.Button) and b.cget('text') == 'Stop run'][0].invoke())
+    check('reading window: Stop', r['result']['action'] == 'stop')
+    root.destroy()
+
 
 if __name__ == '__main__':
     try:
+        checks_handheld_dialogs()
         checks_point_window()
         checks_edit_point_button()
         checks_manager_windows()
