@@ -649,6 +649,7 @@ class Point:
     settings: dict = field(default_factory=dict)
     overrides: dict = field(default_factory=dict)    # {period id: {'low': str|None, 'high': str|None}}  (SI strings)
     note: str = ''
+    spec: Optional['SpecEntry'] = None       # this point's OWN specification (the datasheet grid's row tolerance); None = the function's spec table applies
 
     def __post_init__(self):
         self.nominal = dec(self.nominal, 'nominal')
@@ -656,16 +657,19 @@ class Point:
         self.amplitude = None if self.amplitude in (None, '') else dec(self.amplitude, 'amplitude')
 
     def to_dict(self):
-        return {'id': self.id, 'range_id': self.range_id, 'nominal': fmt(self.nominal),
-                'frequency': fmt(self.frequency) if self.frequency is not None else None,
-                'amplitude': fmt(self.amplitude) if self.amplitude is not None else None, 'label': self.label, 'origin': self.origin,
-                'edited': self.edited, 'enabled': self.enabled, 'settings': dict(self.settings), 'overrides': copy.deepcopy(self.overrides), 'note': self.note}
+        d = {'id': self.id, 'range_id': self.range_id, 'nominal': fmt(self.nominal),
+             'frequency': fmt(self.frequency) if self.frequency is not None else None,
+             'amplitude': fmt(self.amplitude) if self.amplitude is not None else None, 'label': self.label, 'origin': self.origin,
+             'edited': self.edited, 'enabled': self.enabled, 'settings': dict(self.settings), 'overrides': copy.deepcopy(self.overrides), 'note': self.note}
+        if self.spec is not None:                 # written only when set, so every file made before the datasheet grid is unchanged
+            d['spec'] = self.spec.to_dict()
+        return d
 
     @classmethod
     def from_dict(cls, d):
         return cls(d['id'], d['range_id'], d['nominal'], d.get('frequency'), d.get('amplitude'), d.get('label', ''), d.get('origin', 'user'),
                    bool(d.get('edited')), bool(d.get('enabled', True)), dict(d.get('settings') or {}), copy.deepcopy(d.get('overrides') or {}),
-                   d.get('note', ''))
+                   d.get('note', ''), SpecEntry.from_dict(d['spec']) if d.get('spec') else None)
 
 
 RULE_TYPES = ('percent_of_range', 'zero_and_full', 'fixed', 'linear', 'log', 'decade_125', 'frequency_sweep')
@@ -826,8 +830,16 @@ class Function:
         top = max(e.score for e in hits)
         return hits, [e for e in hits if e.score == top]
 
+    def governing(self, point):
+        """The specification entries that decide `point`: its own (Point.spec, the grid's row tolerance) when it has one, else the most specific
+        entries of the function's table ([] when none applies)."""
+        if point.spec is not None:
+            return [point.spec]
+        return self.spec_for(point.range_id, point.frequency)[1]
+
     def limit_for(self, point, period, ds=None):
-        """Limit of `point` for `period` (id).  A point override wins.  Raises DsError('no_spec' ...) when nothing applies (validate lists those first)."""
+        """Limit of `point` for `period` (id).  A point override wins, then the point's own specification, then the function's table.  Raises
+        DsError('no_spec' ...) when nothing applies (validate lists those first)."""
         rng = self.range(point.range_id)
         ov = point.overrides.get(period)
         rounding = (ds.options.get('limit_rounding', 'exact') if ds else 'exact')
@@ -837,7 +849,7 @@ class Function:
             return Limit(point.nominal, low, high, None if low is None else point.nominal - low, None if high is None else high - point.nominal,
                          'override', one_sided=low is None or high is None)
         ctx = Ctx(point.nominal, rng.full_scale if rng else None, rng.resolution if rng else None, point.frequency)
-        _, tops = self.spec_for(point.range_id, point.frequency)
+        tops = self.governing(point)
         if not tops:
             raise DsError('no_spec', f'{self.id}: no specification covers range {point.range_id!r} at frequency {fmt(point.frequency) if point.frequency is not None else "-"}')
         best = None
@@ -873,7 +885,7 @@ class Function:
 
     def tol_text(self, point, period, ds=None):
         """Human check text such as '±(0.05 % of reading + 0.01 % of range) = ±3.5 mV' for the point's governing entry."""
-        _, tops = self.spec_for(point.range_id, point.frequency)
+        tops = self.governing(point)
         if not tops or period not in tops[0].exprs:
             return ''
         lim = self.limit_for(point, period, ds)
@@ -1393,7 +1405,10 @@ def _validate_function(ds, fn, add, seen_f, all_ids):
     # specification table
     periods = ds.period_ids()
     if not info.get('passfail') and not fn.spec:
-        add('no_spec', f'{fn.name}: no specification entered, so no limits can be calculated.', where=w)
+        # a function with no table is fine when every enabled point carries its own specification or typed limits (the datasheet grid)
+        bare = [p for p in fn.points if p.enabled and p.spec is None and not all(any(v not in (None, '') for v in (p.overrides.get(per) or {}).values()) for per in periods)]
+        if bare or not fn.points:
+            add('no_spec', f'{fn.name}: no specification entered, so no limits can be calculated.', where=w)
     for i, e in enumerate(fn.spec):
         ew = f'{w}/spec{i + 1}'
         if e.range_id is not None and fn.range(e.range_id) is None:

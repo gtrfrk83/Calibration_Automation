@@ -288,11 +288,11 @@ class DatasheetList:
 
     # ---- actions
     def new(self):
-        return EditorModel(self.storage, matcher_factory=self.matcher_factory)
+        return GridModel(self.storage, matcher_factory=self.matcher_factory)
 
     def open(self, uid, version=None):
         """An EditorModel for the datasheet (latest or the given version), or None with `self.last_error` set."""
-        ed = EditorModel.open(self.storage, uid, version, matcher_factory=self.matcher_factory)
+        ed = GridModel.open(self.storage, uid, version, matcher_factory=self.matcher_factory)
         self.last_error = '' if ed else f'Could not read datasheet {uid}' + (f' version {version}' if version else '') + '.'
         return ed
 
@@ -670,6 +670,8 @@ class EditorModel:
                     e.exprs.pop(pid, None), e.exprs_minus.pop(pid, None), e.printed.pop(pid, None)
                 for p in fn.points:
                     p.overrides.pop(pid, None)
+                    if p.spec is not None:
+                        p.spec.exprs.pop(pid, None), p.spec.exprs_minus.pop(pid, None), p.spec.printed.pop(pid, None)
             return f'Period {pid} removed together with its specification text.'
         return self._do('remove period', act)
 
@@ -1649,3 +1651,1388 @@ class EditorModel:
             self.based_on = f'{uid} v{version}'
             return f'Loaded version {version}. Saving it creates a new version; nothing is overwritten.'
         return self._do('load version', act)
+
+
+# ------------------------------------------------------------------------------------------------------------------------------ the datasheet grid
+# One big sheet, one row per test point.  GridModel is an EditorModel (so every undo step, problem, save and standards-matching method is the same
+# code the rest of the builder uses) plus the sheet itself: rows, the selected cell, editing a cell, the spec boxes under the sheet, Calc.
+GRID_COLUMNS = (
+    dict(key='step', title='STEP NUM', width=84, edit=False, align='center'),
+    dict(key='function', title='FUNCTION TESTED', width=210, edit=True, align='w'),
+    dict(key='nominal', title='NOMINAL VALUE', width=190, edit=True, align='w'),
+    dict(key='found', title='AS FOUND', width=120, edit=False, align='center'),
+    dict(key='left', title='AS LEFT', width=120, edit=False, align='center'),
+    dict(key='oot', title='Out of Tol', width=64, edit=False, align='center'),
+    dict(key='tol', title='CALIBRATION TOLERANCE', width=250, edit=True, align='w'),
+)
+COL_KEYS = tuple(c['key'] for c in GRID_COLUMNS)
+EDIT_COLS = tuple(c['key'] for c in GRID_COLUMNS if c['edit'])
+MIN_ROWS = 16                      # the sheet always shows at least this many rows, so it looks like a blank datasheet
+SPARE_ROWS = 2                     # and always at least this many empty ones at the end
+MAX_MULTI = 500                    # most rows one "Multiple Test Points" can make at once
+SYMBOLS = ('±', '°', 'µ', '¹', '²', '³', '·')
+SPEC_ORDER = ('iv', 'fs', 'floor', 'db', 'calc')
+SPEC_TYPES = (('iv', '% of I.V. (reading)', 'A percentage of the value being tested (I.V. = input value; the manual may print it as %iV or % rdg).'),
+              ('fs', '% of F.S. (range)', 'A percentage of the full scale of the range the value is on.'),
+              ('floor', 'Floor (fixed value)', 'A fixed amount added to the tolerance, in the units shown in Units of Measure.'),
+              ('db', '± dB (log)', 'A tolerance printed in dB: it is turned into a ratio of the value (20 log for volts and amps, 10 log for power).'),
+              ('calc', 'Calculator', 'Type the whole accuracy statement yourself, as the manual prints it, for example 0.05 % of reading + 2 counts.'))
+SPEC_LABEL = {k: lab for k, lab, _t in SPEC_TYPES}
+MULTI_MODES = (('span', 'Lo to High', 'n points spread evenly from Nominal Value up to High (type how many in n).'),
+               ('pct', 'n %', 'A row every n % of the High value, starting at Nominal Value.'),
+               ('units', 'n Units', 'A row every n units (in the Units of Measure), starting at Nominal Value.'),
+               ('ppm', 'n ppm', 'A row every n ppm of the High value, starting at Nominal Value.'))
+UNIT_PREFIXES = {'V': ('µ', 'm', '', 'k'), 'A': ('µ', 'm', ''), 'ohm': ('m', '', 'k', 'M', 'G'), 'F': ('p', 'n', 'µ', 'm', ''), 'Hz': ('', 'k', 'M', 'G'),
+                 's': ('n', 'µ', 'm', '')}
+LOCK_MODES = (('edit', 'Edit Mode'), ('locked', 'Locked'))
+_NUMBER_ONLY = re.compile(r'^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$')
+_CODE_COL = {'no_spec': 'tol', 'expr_eval': 'tol', 'limit_inverted': 'tol', 'limit_value': 'tol', 'override_inverted': 'tol', 'spec_missing_period': 'tol',
+             'one_sided_needs_bound': 'tol', 'nominal_outside_limit': 'tol', 'limit_zero_width': 'tol', 'spec_border': 'tol', 'override_period': 'tol',
+             'no_frequency': 'nominal', 'no_amplitude': 'nominal', 'point_outside_range': 'nominal', 'dup_point': 'nominal', 'freq_not_allowed': 'nominal',
+             'point_range_unknown': 'nominal', 'dup_point_id': 'nominal'}
+
+
+def with_units(text, units):
+    """'5' + 'mV' -> '5 mV'; a text that already carries a unit is left alone."""
+    t = (text or '').strip()
+    if t and units and _NUMBER_ONLY.match(t):
+        return f'{t} {units}'
+    return t
+
+
+def unit_choices(unit):
+    """The unit spellings a person may pick for a function whose SI unit is `unit` ('V' -> µV, mV, V, kV)."""
+    sym = db.unit_symbol(unit)
+    if not sym:
+        return []
+    if unit in db._NO_PREFIX or unit not in UNIT_PREFIXES:
+        return [sym]
+    return [p + sym for p in UNIT_PREFIXES[unit]]
+
+
+def split_unit_text(text):
+    """'5.000 mV' -> ('5.000', 'mV'); a bare number -> (number, '')."""
+    m = re.match(r'^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*(.*?)\s*$', text or '')
+    return (m.group(1), m.group(2)) if m else ('', (text or '').strip())
+
+
+def prefix_of_units(units, unit):
+    """The SI prefix symbol of a unit spelling ('mV' with base 'V' -> 'm', 'V' -> '', 'kΩ' -> 'k'); '' when it has none or is not understood."""
+    sym = db.unit_symbol(unit)
+    u = (units or '').strip().replace('u', 'µ') if unit not in ('s', 'Hz') else (units or '').strip()
+    if sym and u.endswith(sym) and u[:-len(sym)] in dict(db._PREFIX_ORDER):
+        return u[:-len(sym)]
+    return ''
+
+
+def insert_at(text, pos, symbol):
+    """Insert `symbol` into `text` at `pos` (None = the end).  Returns (new text, new cursor position)."""
+    text = text or ''
+    pos = len(text) if pos is None or not 0 <= pos <= len(text) else pos
+    return text[:pos] + symbol + text[pos:], pos + len(symbol)
+
+
+def copy_spec(entry):
+    """A separate copy of a SpecEntry (so two rows never share one object)."""
+    return db.SpecEntry.from_dict(copy.deepcopy(entry.to_dict())) if entry is not None else None
+
+
+def _decimals_of(value):
+    """Digits after the point of an exact Decimal (0 for whole numbers)."""
+    v = db.dec(value).normalize()
+    return max(0, -v.as_tuple().exponent)
+
+
+def _same(a, b):
+    return (None if a in (None, '') else db.dec(a)) == (None if b in (None, '') else db.dec(b))
+
+
+class GridGeometry:
+    """Where the cells of the sheet are (pixels, no tkinter): the canvas uses it for drawing, scrolling and for 'which cell was clicked'.
+    The heading stays at the top; row r is `row_h` tall and sits at head_h + r * row_h - top (top = how far the rows are scrolled up)."""
+
+    def __init__(self, widths=None, row_h=30, head_h=40, num_w=44):
+        self.base = list(widths or [c['width'] for c in GRID_COLUMNS])
+        self.widths = list(self.base)
+        self.row_h, self.head_h, self.num_w = row_h, head_h, num_w
+
+    def fit(self, avail, lo=0.6, hi=1.8):
+        """Scale the column widths so the sheet fills `avail` pixels (within lo..hi of the design widths)."""
+        k = max(lo, min(hi, (avail - self.num_w) / sum(self.base)))
+        self.widths = [max(20, int(w * k)) for w in self.base]
+        return self.widths
+
+    def col_x(self, c):
+        return self.num_w + sum(self.widths[:c])
+
+    @property
+    def width(self):
+        return self.num_w + sum(self.widths)
+
+    def col_at(self, x):
+        """Column index at x, -1 for the row-number strip, None outside the sheet."""
+        if x < 0:
+            return None
+        if x < self.num_w:
+            return -1
+        x -= self.num_w
+        for i, w in enumerate(self.widths):
+            if x < w:
+                return i
+            x -= w
+        return None
+
+    def row_at(self, y, nrows, top=0):
+        """Row index at screen y, -1 for the heading, None below the last row."""
+        if y < 0:
+            return None
+        if y < self.head_h:
+            return -1
+        r = int((y - self.head_h + top) // self.row_h)
+        return r if 0 <= r < nrows else None
+
+    def box(self, r, c, top=0):
+        x = self.col_x(c)
+        y = self.head_h + r * self.row_h - top
+        return x, y, x + self.widths[c], y + self.row_h
+
+    def visible(self, top, height, nrows):
+        """(first, last) row indexes that show in a window `height` tall scrolled `top` pixels (last is exclusive)."""
+        first = max(0, int(top // self.row_h))
+        last = min(nrows, int((top + height - self.head_h) // self.row_h) + 1)
+        return first, max(first, last)
+
+    def max_top(self, nrows, height):
+        return max(0, nrows * self.row_h - (height - self.head_h))
+
+    def top_for(self, r, top, height):
+        """The scroll position that brings row r fully into view (unchanged when it already is)."""
+        room = height - self.head_h
+        if r * self.row_h < top:
+            return r * self.row_h
+        if (r + 1) * self.row_h > top + room:
+            return max(0, (r + 1) * self.row_h - room)
+        return top
+
+
+@dataclass
+class Resolved:
+    """What a typed function name means: a section already in the sheet (fid) or a new one of a kind."""
+    fid: str = ''
+    kind: str = ''
+
+
+class GridModel(EditorModel):
+    """The datasheet grid: everything the window needs, with no tkinter.
+
+        g = GridModel(Storage())                      # or GridModel.open(storage, uid)
+        g.rows()                                      # [dict(key, n, kind, step, function, nominal, found, left, oot, tol, problem, level, ...)]
+        g.select('b:0', 'nominal'); g.commit_cell('5 V')       # type a value in the first empty row
+        g.panel_state()                               # what the boxes under the sheet show for the selected row
+        g.calc_row(None, form)                        # Calc: apply the boxes to the row and work out its tolerance
+        g.undo()                                      # takes back the last edit
+
+    A row is a test point; a section heading is a function; an empty row is not stored until it has a value.  A row's tolerance is its own
+    specification (Point.spec) worked out by the same exact Decimal expressions as the rest of the builder; nothing here uses float for a limit.
+    """
+
+    def __init__(self, storage=None, ds=None, matcher_factory=None, based_on=None):
+        super().__init__(storage, ds, matcher_factory, based_on)
+        self.locked = False
+        self.sel_col = 'function'
+        self._sel_index = 0
+        self._rows_cache = None
+        self.extra_blank = 0
+        self.sel_key = ''
+        self.sel_key = self._default_key()
+
+    @classmethod
+    def open(cls, storage, uid, version=None, matcher_factory=None):
+        ds = storage.load(uid, version)
+        if ds is None:
+            return None
+        g = cls(storage, ds, matcher_factory=matcher_factory)
+        g.based_on = f'{uid} v{ds.version}'
+        return g
+
+    # ------------------------------------------------------------------------------------------------------------------ the rows
+    def _default_key(self):
+        rows = self.rows()
+        first = next((r for r in rows if r['kind'] == 'point'), None)
+        return (first or rows[0])['key']
+
+    def _problem_index(self):
+        by_point, by_func = {}, {}
+        for p in self.problems():
+            if p['point_id']:
+                by_point.setdefault(p['point_id'], []).append(p)
+            elif p['function_id']:
+                by_func.setdefault(p['function_id'], []).append(p)
+        return by_point, by_func
+
+    def rows(self):
+        """Every row of the sheet, top to bottom: a heading for each section, its test points, an empty row under an empty section, then empty rows
+        at the end.  Cached until the datasheet changes."""
+        stamp = (self._rev, self.period, self.extra_blank)
+        if self._rows_cache and self._rows_cache[0] == stamp:
+            return self._rows_cache[1]
+        by_point, by_func = self._problem_index()
+        out = []
+
+        def add(**kw):
+            for k, v in (('found', ''), ('left', ''), ('oot', ''), ('problem', ''), ('level', ''), ('bad', ()), ('enabled', True), ('remark', False),
+                         ('step', ''), ('function', ''), ('nominal', ''), ('tol', ''), ('pid', ''), ('fid', '')):
+                kw.setdefault(k, v)
+            kw['n'] = len(out) + 1
+            out.append(kw)
+
+        for fi, fn in enumerate(self.ds.functions, 1):
+            add(key=f'h:{fn.id}', kind='header', fid=fn.id, function=fn.name, **self._issue(by_func.get(fn.id, []), fn, None))
+            k = 0
+            for p in fn.points:
+                if p.enabled:
+                    k += 1
+                rng = fn.range(p.range_id)
+                add(key=f'p:{fn.id}:{p.id}', kind='point', fid=fn.id, pid=p.id, step=(f'{fi}-{k}' if p.enabled else '') + (' *' if p.note else ''),
+                    function=f'{fn.name}, {self.range_text(fn, rng)} range' if rng is not None and len(fn.ranges) > 1 else fn.name,
+                    nominal=self.nominal_text(fn, p), tol=self.tol_display(fn, p), enabled=p.enabled, remark=bool(p.note),
+                    **self._issue(by_point.get(p.id, []), fn, p))
+            if not fn.points:
+                add(key=f'e:{fn.id}', kind='blank', fid=fn.id)
+        for i in range(max(SPARE_ROWS, MIN_ROWS - len(out)) + self.extra_blank):
+            add(key=f'b:{i}', kind='blank')
+        self._rows_cache = (stamp, out)
+        return out
+
+    def _issue(self, probs, fn, p):
+        """The inline problem of a row: the first error, else the first warning, in plain words; plus which cells to mark."""
+        if not probs:
+            return {}
+        probs = sorted(probs, key=lambda d: d['level'] != 'error')
+        cols = {_CODE_COL.get(q['code'], 'function' if p is None else 'nominal') for q in probs}
+        return dict(problem=self.plain_problem(probs[0], fn), level=probs[0]['level'], bad=tuple(sorted(cols)))
+
+    def row(self, key=None):
+        key = key or self.sel_key
+        return next((r for r in self.rows() if r['key'] == key), None)
+
+    def row_index(self, key=None):
+        key = key or self.sel_key
+        return next((i for i, r in enumerate(self.rows()) if r['key'] == key), None)
+
+    def point_of(self, key=None):
+        """(function, point) of a test-point row, else (function or None, None)."""
+        r = self.row(key)
+        if r is None:
+            return None, None
+        fn = self.ds.function(r['fid']) if r['fid'] else None
+        return fn, (fn.point(r['pid']) if fn and r['pid'] else None)
+
+    def target_function(self):
+        """The section a new row goes into: the one picked, else the selected section, else the last one."""
+        fn = self.ds.function(self.fid) if self.fid else None
+        return fn or (self.ds.functions[-1] if self.ds.functions else None)
+
+    # ---- display of a point
+    def _prefix_for(self, fn, rng, values):
+        forced = _prefix_value(rng.display_unit or fn.display_unit) if rng is not None and (rng.display_unit or fn.display_unit) else ''
+        return shared_prefix(values, fn.unit, forced)
+
+    def fmt_value(self, fn, rng, value, prefix=None):
+        """'5.000 V': display only.  The digits are the exact value's; when the range has a resolution the number is padded with zeros to it."""
+        if value is None:
+            return ''
+        pre = self._prefix_for(fn, rng, [value]) if prefix is None else prefix
+        exp = dict(db._PREFIX_ORDER)[pre]
+        with db.localcontext() as c:
+            c.prec = db.PREC
+            need = _decimals_of(db.dec(value) / db.D(10) ** exp) if value != 0 else 0
+            res = _decimals_of(rng.resolution / db.D(10) ** exp) if rng is not None and rng.resolution else 0
+        return db.format_si(value, fn.unit, prefix=pre, decimals=max(need, res))
+
+    def nominal_text(self, fn, p):
+        """The nominal cell: '+5 V', '5 V @ 1 kHz', '1 kHz, level 1 V'.  parse_nominal reads the same grammar back."""
+        s = self.fmt_value(fn, fn.range(p.range_id), p.nominal)
+        if p.nominal > 0 and fn.unit:
+            s = '+' + s
+        if p.frequency is not None:
+            s += ' @ ' + db.format_si(p.frequency, 'Hz')
+        if p.amplitude is not None:
+            s += ', level ' + db.format_si(p.amplitude, 'V')
+        return s
+
+    def parse_nominal(self, fn, text):
+        """Read a nominal cell: '<value> [@ <frequency>] [, level <amplitude>]'.  Returns dict(nominal, frequency, amplitude) as text (None when absent)."""
+        t = (text or '').strip()
+        if not t:
+            raise db.DsError('nominal', 'Type the value to test, for example 5 V.')
+        level = None
+        m = re.search(r',\s*(?:level|lvl)?\s*(.+)$', t, re.I)
+        if m:
+            level, t = m.group(1).strip(), t[:m.start()].strip()
+        freq = None
+        if '@' in t:
+            t, freq = [x.strip() for x in t.split('@', 1)]
+            if not freq:
+                raise db.DsError('frequency', 'Type the frequency after the @, for example 5 V @ 1 kHz.')
+            db.parse_quantity(freq, 'Hz')
+        if level is not None:
+            db.parse_quantity(level)
+        db.parse_quantity(t, fn.unit or None)
+        return dict(nominal=t, frequency=freq, amplitude=level)
+
+    def tol_display(self, fn, p):
+        """The calibration tolerance cell: '±3.5 mV', '-3 mV / +4 mV', '4.99 V to 5.01 V (typed)', 'Pass / fail'; '' when no tolerance is set yet."""
+        if fn.info.get('passfail'):
+            return 'Pass / fail' if fn.kind != 'CONT' else ('Beeper on' if p.settings.get('expect', 'on') == 'on' else 'Beeper off')
+        try:
+            lim = fn.limit_for(p, self.period, self.ds)
+        except db.DsError:
+            return ''
+        rng = fn.range(p.range_id)
+        if lim.source == 'override':
+            pre = self._prefix_for(fn, rng, [v for v in (lim.low, lim.high, p.nominal) if v is not None])
+            lo = self.fmt_value(fn, rng, lim.low, pre) if lim.low is not None else 'open'
+            hi = self.fmt_value(fn, rng, lim.high, pre) if lim.high is not None else 'open'
+            return f'{lo} to {hi} (typed)'
+        if lim.one_sided:
+            tops = fn.governing(p)
+            if tops and tops[0].mode == 'low_only':
+                return f'at least {self.fmt_value(fn, rng, lim.low)}'
+            return f'at most {self.fmt_value(fn, rng, lim.high)}'
+        pre = self._prefix_for(fn, rng, [lim.plus, lim.minus])
+        if lim.plus == lim.minus:
+            return '±' + self.fmt_value(fn, rng, lim.plus, pre)
+        return f'-{self.fmt_value(fn, rng, lim.minus, pre)} / +{self.fmt_value(fn, rng, lim.plus, pre)}'
+
+    def tol_raw(self, fn, p):
+        """The text the Edit Cell bar shows for the tolerance cell: the statement that makes it (or the typed limits)."""
+        ov = p.overrides.get(self.period) or {}
+        if any(ov.get(k) not in (None, '') for k in ('low', 'high')):
+            rng = fn.range(p.range_id)
+            lo = db.dec(ov['low']) if ov.get('low') not in (None, '') else None
+            hi = db.dec(ov['high']) if ov.get('high') not in (None, '') else None
+            pre = self._prefix_for(fn, rng, [v for v in (lo, hi, p.nominal) if v is not None])
+            return f'{self.fmt_value(fn, rng, lo, pre) if lo is not None else ""} to {self.fmt_value(fn, rng, hi, pre) if hi is not None else ""}'.strip()
+        tops = fn.governing(p)
+        if tops and self.period in tops[0].exprs:
+            e = tops[0]
+            text = e.printed.get(self.period) or e.exprs[self.period].printed or e.exprs[self.period].text(fn.unit)
+            if self.period in e.exprs_minus:
+                text += f'   (minus side: {e.exprs_minus[self.period].printed or e.exprs_minus[self.period].text(fn.unit)})'
+            return text
+        return ''
+
+    # ---- plain wording for problems
+    def plain_problem(self, p, fn=None):
+        """One problem of validate() in the words the grid uses (what to do, not which part of the program complained)."""
+        code, msg = p['code'], p['message']
+        pid = p.get('point_id')
+        name = fn.name if fn else 'This section'
+        if code == 'no_spec':
+            return ('No tolerance yet: fill in the spec boxes below and press Calc, or type it in the CALIBRATION TOLERANCE cell.' if pid
+                    else f'{name}: add a test row and give it a tolerance.')
+        if code == 'expr_eval':
+            low = msg.lower()
+            if 'resolution' in low:
+                return 'Counts need the resolution: type Meas Res (or Display Decs) in the boxes below and press Calc.'
+            if 'full scale' in low:
+                return 'A percentage of F.S. needs the range: type the full scale in the F.S. box and press Calc.'
+            return msg
+        return {
+            'no_frequency': 'This function needs a frequency: type it after the value, like 5 V @ 1 kHz.',
+            'no_amplitude': 'This function needs the signal level: type it after the value, like 1 kHz, level 1 V.',
+            'point_outside_range': 'The value is bigger than the range it is on: type a larger full scale in the F.S. box and press Calc.',
+            'nominal_outside_limit': 'The nominal value is outside its own limits: check the tolerance.',
+            'dup_point': 'Two rows test exactly the same thing.',
+            'no_points': f'{name} has no test rows yet: click the empty row below it and type a value.',
+            'no_make': 'Type the make (manufacturer) in the box at the top.',
+            'no_model': 'Type the model in the box at the top.',
+            'no_title': 'Type a title in the box at the top (the procedure list shows it).',
+            'no_functions': 'Nothing to test yet: click FUNCTION TESTED in the first empty row and choose what the instrument measures or outputs.',
+            'no_ranges': f'{name} has no rows yet, so no range either: add a row.',
+        }.get(code, msg)
+
+    def problems(self):
+        """validate() as the base class shapes it, minus the 'section has no specification' message of a section whose rows already say so one by one."""
+        cached = getattr(self, '_grid_problems', None)
+        if cached and cached[0] == self._rev:
+            return cached[1]
+        out = []
+        for p in super().problems():
+            fn = self.ds.function(p['function_id']) if p['function_id'] else None
+            if p['code'] == 'no_spec' and not p['point_id'] and fn is not None and fn.points:
+                continue
+            out.append(p)
+        self._grid_problems = (self._rev, out)
+        return out
+
+    def problem_rows(self):
+        """Every problem for the problems window: dict(level, text, row, key, where, code)."""
+        idx = {r['key']: r['n'] for r in self.rows()}
+        out = []
+        for p in self.problems():
+            fn = self.ds.function(p['function_id']) if p['function_id'] else None
+            key = f'p:{fn.id}:{p["point_id"]}' if fn and p['point_id'] and fn.point(p['point_id']) else f'h:{fn.id}' if fn else ''
+            out.append(dict(level=p['level'], text=self.plain_problem(p, fn), row=idx.get(key), key=key, where=p['location'] or 'Whole datasheet', code=p['code']))
+        return out
+
+    def problem_summary(self):
+        c = self.problem_counts()
+        if not c['errors'] and not c['warnings']:
+            return 'No problems.'
+        bits = []
+        if c['errors']:
+            bits.append(f"{c['errors']} problem{'s' * (c['errors'] != 1)} to fix")
+        if c['warnings']:
+            bits.append(f"{c['warnings']} warning{'s' * (c['warnings'] != 1)}")
+        return ', '.join(bits) + '.'
+
+    # ------------------------------------------------------------------------------------------------------------------ selection and keys
+    def select(self, key=None, col=None):
+        """Select a cell by row key and column key.  An unknown key keeps the old row; returns the row."""
+        rows = self.rows()
+        if key is not None and any(r['key'] == key for r in rows):
+            self.sel_key = key
+        if col in COL_KEYS:
+            self.sel_col = col
+        i = self.row_index()
+        if i is None:                              # the row went away (deleted, undone): stay at the same place on the sheet
+            i = min(self._sel_index, len(rows) - 1)
+            self.sel_key = rows[i]['key']
+        self._sel_index = i
+        r = rows[i]
+        if r['fid'] and self.ds.function(r['fid']):
+            self.fid = r['fid']
+        return r
+
+    def select_at(self, r, c):
+        """Select by position (what a mouse click gives): row index, column index."""
+        rows = self.rows()
+        if not 0 <= r < len(rows) or not 0 <= c < len(COL_KEYS):
+            return None
+        return self.select(rows[r]['key'], COL_KEYS[c])
+
+    def selected_row(self):
+        return self.select()
+
+    def _ensure_row(self, i):
+        while i >= len(self.rows()):
+            self.extra_blank += 1
+
+    def move(self, dr=0, dc=0):
+        """Arrow keys.  Moving down from the last row adds an empty row.  Returns the new row."""
+        i = max(0, (self.row_index() if self.row_index() is not None else self._sel_index) + dr)
+        self._ensure_row(i)
+        j = max(0, min(len(COL_KEYS) - 1, COL_KEYS.index(self.sel_col) + dc))
+        return self.select(self.rows()[i]['key'], COL_KEYS[j])
+
+    def tab(self, back=False):
+        """Tab / Shift+Tab: the next cell you can type in (it skips the As Found, As Left and Out of Tol cells), wrapping to the next row."""
+        j = EDIT_COLS.index(self.sel_col) if self.sel_col in EDIT_COLS else (len(EDIT_COLS) - 1 if back else -1)
+        if back:
+            if j > 0:
+                return self.select(col=EDIT_COLS[j - 1])
+            if (self.row_index() or 0) > 0:
+                self.move(-1)
+            return self.select(col=EDIT_COLS[-1])
+        if 0 <= j < len(EDIT_COLS) - 1:
+            return self.select(col=EDIT_COLS[j + 1])
+        if j == -1:                                # from a read-only cell: the first cell you can type in, to its right if there is one
+            nxt = next((c for c in EDIT_COLS if COL_KEYS.index(c) > COL_KEYS.index(self.sel_col)), None)
+            if nxt:
+                return self.select(col=nxt)
+        self.move(1)
+        return self.select(col=EDIT_COLS[0])
+
+    def nav(self, keysym, shift=False):
+        """Keyboard navigation in the sheet.  Returns what the window should do next: 'moved', 'edit' (start editing the cell) or ''."""
+        table = {'Up': (-1, 0), 'Down': (1, 0), 'Left': (0, -1), 'Right': (0, 1), 'Prior': (-10, 0), 'Next': (10, 0)}
+        if keysym in table:
+            self.move(*table[keysym])
+            return 'moved'
+        if keysym in ('Tab', 'ISO_Left_Tab'):
+            self.tab(back=shift or keysym == 'ISO_Left_Tab')
+            return 'moved'
+        if keysym in ('Home', 'End'):
+            self.select(col=COL_KEYS[0] if keysym == 'Home' else COL_KEYS[-1])
+            return 'moved'
+        if keysym in ('Return', 'KP_Enter', 'F2'):
+            return 'edit'
+        return ''
+
+    # ------------------------------------------------------------------------------------------------------------------ cells
+    def cell_text(self, key=None, col=None):
+        """What the Edit Cell bar shows for a cell (the editable form: the tolerance cell shows its statement, not its result)."""
+        key, col = key or self.sel_key, col or self.sel_col
+        fn, p = self.point_of(key)
+        if col == 'function':
+            return fn.name if fn else ''
+        if col == 'nominal':
+            return self.nominal_text(fn, p) if p else ''
+        if col == 'tol':
+            return self.tol_raw(fn, p) if p else ''
+        return ''
+
+    def cell_editable(self, key=None, col=None):
+        """(ok, why_not) for typing in a cell."""
+        key, col = key or self.sel_key, col or self.sel_col
+        r = self.row(key)
+        if r is None:
+            return False, 'No such cell.'
+        if col in ('found', 'left', 'oot'):
+            return False, 'As Found, As Left and Out of Tol are filled in when the datasheet is used, so they stay blank here.'
+        if col == 'step':
+            return False, 'Step numbers are worked out from the order of the rows.'
+        if self.locked:
+            return False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.'
+        if r['kind'] == 'header' and col != 'function':
+            return False, 'This is a section heading. Only its name can be changed; click a test row to edit values.'
+        return True, ''
+
+    def set_locked(self, locked):
+        self.locked = bool(locked)
+        return Outcome(True, 'Locked: the sheet cannot be changed.' if self.locked else 'Edit Mode: you can change the sheet.')
+
+    # ---- functions
+    def function_choices(self):
+        """The list for the 'what does this row test' boxes: the sections already in the sheet, then every kind that can be added as a new section."""
+        out = [dict(label=f.name, fid=f.id, kind=f.kind) for f in self.ds.functions]
+        out += [dict(label=f'New section: {k["label"]}', fid='', kind=k['kind']) for k in self.kind_choices()]
+        return out
+
+    def resolve_function(self, text):
+        """What a typed function means: Resolved(fid) for a section already there, Resolved(kind=) for a new one.  DsError says what to type."""
+        t = (text or '').strip()
+        low = t.lower()
+        if not low:
+            raise db.DsError('function', 'Choose what this row tests, for example DC volts.')
+        for c in self.function_choices():
+            if c['label'].lower() == low:
+                return Resolved(c['fid'], '' if c['fid'] else c['kind'])
+        for f in self.ds.functions:
+            if low in (f.name.lower(), f.id.lower()):
+                return Resolved(f.id)
+        kinds = self.kind_choices()
+        for k in kinds:
+            if low in (k['kind'].lower(), k['name'].lower(), k['label'].lower()):
+                same = next((f for f in self.ds.functions if f.kind == k['kind']), None)
+                return Resolved(same.id) if same else Resolved('', k['kind'])
+        hits = [f for f in self.ds.functions if low in f.name.lower()]
+        khits = [k for k in kinds if low in k['name'].lower()]
+        if len(hits) == 1 and not khits or len(hits) == 1 and khits and khits[0]['kind'] == hits[0].kind and len(khits) == 1:
+            return Resolved(hits[0].id)
+        if not hits and len(khits) == 1:
+            return Resolved('', khits[0]['kind'])
+        names = [f.name for f in hits] + [k['name'] for k in khits if not any(f.kind == k['kind'] for f in hits)]
+        if names:
+            raise db.DsError('function', f'"{t}" could mean {", ".join(names[:4])}: type a little more of the name.')
+        raise db.DsError('function', f'"{t}" is not something the builder can test. Pick one from the list, for example DC volts, AC volts, 2-wire ohms, Frequency.')
+
+    def _function_for(self, res):
+        """The Function for a Resolved (adding a section when it is a new kind).  Call inside _do."""
+        if res.fid:
+            return self.ds.function(res.fid)
+        return self._new_section(res.kind)
+
+    def _new_section(self, kind):
+        fn = self.ds.add_function(kind)
+        for key, _label, _choices, default in SETTING_FIELDS.get(kind, []):
+            fn.settings[key] = default
+        fn.switch = fn.info.get('switch', '')
+        return fn
+
+    def set_target_function(self, text):
+        """The function box under the sheet while an empty row is selected: where the next new row goes."""
+        def act():
+            fn = self._function_for(self.resolve_function(text))
+            self.fid = fn.id
+            return f'New rows go under {fn.name}. Type a value in the NOMINAL VALUE cell.'
+        return self._do('choose function', act)
+
+    # ---- the cell edit gate
+    def commit_cell(self, text, key=None, col=None, move='down'):
+        """Enter in the Edit Cell bar: put `text` in the cell.  After a good edit the selection moves on: down (a row you just made in an empty row
+        goes to the next empty row), right, or stays.  Returns an Outcome."""
+        key, col = key or self.sel_key, col or self.sel_col
+        res = self.edit_cell(key, col, text)
+        if res.ok:
+            self._after_edit(key, col, res, move)
+        return res
+
+    def _after_edit(self, key, col, res, move):
+        newkey = res.detail if isinstance(res.detail, str) and res.detail[:2] in ('p:', 'h:') and self.row(res.detail) else key
+        if self.row(newkey) is None:
+            newkey = self.rows()[min(self._sel_index, len(self.rows()) - 1)]['key']
+        if move == 'down':
+            if key.startswith(('b:', 'e:')):
+                nxt = next((r for r in self.rows() if r['kind'] == 'blank'), None)
+                self.select(nxt['key'] if nxt else newkey, col)
+            else:
+                self.select(newkey, col)
+                self.move(1, 0)
+        elif move == 'right':
+            self.select(newkey, col)
+            self.tab()
+        else:
+            self.select(newkey, col)
+
+    def edit_cell(self, key, col, text):
+        """Change one cell.  One undo step.  Outcome.detail is the key of the row that was changed or created."""
+        ok, why = self.cell_editable(key, col)
+        if not ok:
+            return Outcome(False, why)
+        r = self.row(key)
+        text = (text or '').strip()
+        fn, p = self.point_of(key)
+        if r['kind'] == 'header':
+            return self._rename_section(fn, text)
+        if r['kind'] == 'blank':
+            if not text:
+                return Outcome(True, 'Nothing typed.')
+            if col == 'function':
+                return self.set_target_function(text)
+            if col == 'nominal':
+                return self._create_from_text(text)
+            return Outcome(False, 'Type the value to test in the NOMINAL VALUE cell first; the tolerance comes after.')
+        if col == 'function':
+            return self.move_point(key, text) if text else Outcome(False, 'A row has to test something. Choose a function, or delete the row.')
+        if col == 'nominal':
+            return self.clear_row(key) if not text else self._edit_nominal(fn, p, text)
+        if col == 'tol':
+            return self._edit_tol(fn, p, text)
+        return Outcome(False, 'That cell cannot be edited.')
+
+    def clear_cell(self, key=None, col=None):
+        """The Delete key: nominal clears the whole row, tolerance clears the tolerance, function does nothing."""
+        key, col = key or self.sel_key, col or self.sel_col
+        ok, why = self.cell_editable(key, col)
+        if not ok:
+            return Outcome(False, why)
+        r = self.row(key)
+        if r['kind'] == 'blank':
+            return Outcome(True, 'Nothing to clear.')
+        if r['kind'] == 'header':
+            return Outcome(False, 'To remove a whole section use Delete row on its heading (its rows go too; Undo brings them back).')
+        if col == 'nominal':
+            return self.clear_row(key)
+        if col == 'tol':
+            fn, p = self.point_of(key)
+            return self._edit_tol(fn, p, '')
+        return Outcome(False, 'The function of a row cannot be cleared: choose another function instead.')
+
+    def _rename_section(self, fn, text):
+        if not text:
+            return Outcome(False, 'A section needs a name.')
+        res = self.set_function(fn.id, name=text)
+        if res.ok:
+            res.message, res.detail = f'Section renamed to "{text}".', f'h:{fn.id}'
+        return res
+
+    # ---- rows
+    def _pick_range(self, fn, value, want_fs=None):
+        """The range a value goes on: a typed full scale, else the smallest range that holds it, else a new decade range (10 mV, 100 mV, 1 V, 10 V ...).
+        Returns (range, 'what was added' or '')."""
+        if want_fs is not None:
+            rng = next((r for r in fn.ranges if r.full_scale == want_fs), None)
+            if rng:
+                return rng, ''
+            rng = fn.add_range(want_fs)
+            return rng, f'The {self.range_text(fn, rng)} range was added.'
+        rng = fn.range_for(value)
+        if rng is not None:
+            return rng, ''
+        v = abs(db.dec(value))
+        if v == 0:
+            fs = db.D(1)
+        else:
+            e = v.adjusted()
+            fs = db.D(10) ** e if v == db.D(10) ** e else db.D(10) ** (e + 1)
+        rng = next((r for r in fn.ranges if r.full_scale == fs), None) or fn.add_range(fs)
+        return rng, f'The {self.range_text(fn, rng)} range was added for it (change it with the F.S. box).'
+
+    def _find_duplicate(self, fn, value, freq, amp, range_id=None):
+        f = db.parse_quantity(freq, 'Hz') if isinstance(freq, str) and freq else freq
+        a = db.parse_quantity(amp) if isinstance(amp, str) and amp else amp
+        for q in fn.points:
+            if q.nominal == db.dec(value) and _same(q.frequency, f) and _same(q.amplitude, a) and (range_id is None or q.range_id == range_id):
+                return q
+        return None
+
+    def _row_number(self, fn, p):
+        r = self.row(f'p:{fn.id}:{p.id}')
+        return r['n'] if r else 0
+
+    def _copy_spec_from_neighbour(self, fn, p):
+        """A new row starts with the tolerance of the nearest row above it in the section (rows of one function usually share one), else of the first
+        row below.  Returns True when it got one."""
+        i = fn.points.index(p)
+        src = next((q for q in reversed(fn.points[:i]) if q.spec is not None), None) or next((q for q in fn.points[i + 1:] if q.spec is not None), None)
+        if src is None:
+            return False
+        p.spec = copy_spec(src.spec)
+        return True
+
+    def _create_point(self, fn, nominal, freq=None, amp=None, want_fs=None, inherit=True):
+        """Add a test point to a function.  Call inside _do.  Returns (point, notes[])."""
+        value = db.parse_quantity(nominal, fn.unit or None) if isinstance(nominal, str) else db.dec(nominal)
+        rng, note = self._pick_range(fn, value, want_fs)
+        dup = self._find_duplicate(fn, value, freq, amp, rng.id)
+        if dup is not None:
+            raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, dup)}.')
+        p = db.add_point(fn, value, rng.id, freq or None, amp or None)
+        notes = [note] if note else []
+        if inherit and not fn.info.get('passfail') and self._copy_spec_from_neighbour(fn, p):
+            notes.append('It starts with the tolerance of the nearest row in this section (change it in the boxes below).')
+        return p, notes
+
+    def _create_from_text(self, text):
+        box = {}
+
+        def act():
+            fn = self.target_function()
+            if fn is None:
+                raise db.DsError('function', 'Choose what this row tests first: use the function box under the sheet, or type it in FUNCTION TESTED.')
+            parts = self.parse_nominal(fn, text)
+            p, notes = self._create_point(fn, parts['nominal'], parts['frequency'], parts['amplitude'])
+            self.fid = fn.id
+            box['key'] = f'p:{fn.id}:{p.id}'
+            return Outcome(True, f'Row added to {fn.name}. ' + ' '.join(notes), box['key'])
+        res = self._do('add row', act)
+        res.message = res.message.strip()
+        return res
+
+    def _edit_nominal(self, fn, p, text):
+        pid = p.id
+
+        def act():
+            parts = self.parse_nominal(fn, text)
+            value = db.parse_quantity(parts['nominal'], fn.unit or None)
+            q = self._find_duplicate(fn, value, parts['frequency'], parts['amplitude'])
+            if q is not None and q.id != pid:
+                raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, q)}.')
+            cur = fn.point(pid)
+            rng, note = fn.range(cur.range_id), ''
+            if rng is None or not self._holds(fn, rng, value):
+                rng, note = self._pick_range(fn, value)
+            db.edit_point(fn, pid, nominal=parts['nominal'], frequency=parts['frequency'] or '', amplitude=parts['amplitude'] or '', range_id=rng.id)
+            return Outcome(True, ('Value changed.' + (' ' + note if note else '') + (' The tolerance follows the new value.' if cur.spec is not None else '')),
+                           f'p:{fn.id}:{pid}')
+        return self._do('edit cell', act)
+
+    @staticmethod
+    def _holds(fn, rng, value):
+        info = fn.info
+        if info['unit'] in ('dB', ''):
+            return True
+        if info.get('value'):
+            return 0 < abs(value) <= rng.top
+        return rng.holds(value)
+
+    def clear_row(self, key=None):
+        """Delete the test point of a row (the Delete key on the NOMINAL VALUE cell, or the Delete row button); on a heading, the whole section."""
+        key = key or self.sel_key
+        fn, p = self.point_of(key)
+        r = self.row(key)
+        if self.locked:
+            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+        if r is None or r['kind'] == 'blank':
+            return Outcome(False, 'This row is empty already.')
+        if r['kind'] == 'header':
+            return self.remove_function(fn.id)
+        res = self.remove_point(fn.id, p.id)
+        if res.ok:
+            res.message = 'Row deleted. Undo brings it back.'
+        return res
+
+    def move_point(self, key, text):
+        """Change the function of a row: it moves to the section you name (a new section when none of that kind is there yet).  Only to a function in
+        the same unit, because the value and the tolerance are in that unit."""
+        fn, p = self.point_of(key)
+
+        def act():
+            target = self._function_for(self.resolve_function(text))
+            if target.id == fn.id:
+                return Outcome(True, 'It is in that section already.', key)
+            if target.unit != fn.unit:
+                raise db.DsError('function', f'{target.name} works in {db.unit_symbol(target.unit) or "no unit"} and this row is in {db.unit_symbol(fn.unit) or "no unit"}. '
+                                 'Add a new row under that function instead.')
+            q, _notes = self._create_point(target, p.nominal, p.frequency, p.amplitude, inherit=False)
+            q.spec, q.overrides, q.note, q.label, q.enabled = p.spec, p.overrides, p.note, p.label, p.enabled
+            q.settings = dict(p.settings)
+            q.edited = True
+            if p.id in self.ds.assignments:
+                self.ds.assignments[q.id] = self.ds.assignments.pop(p.id)
+            db.remove_point(fn, p.id)
+            self.fid = target.id
+            return Outcome(True, f'Moved to {target.name}.' + (f' {fn.name} has no rows left.' if not fn.points else ''), f'p:{target.id}:{q.id}')
+        return self._do('move row', act)
+
+    def add_section(self, text, after_key=None):
+        """Ins. Header: a new section (a function) after the selected row's section.  `text` names the function or kind."""
+        def act():
+            res = self.resolve_function(text)
+            kind = self.ds.function(res.fid).kind if res.fid else res.kind          # an existing name again means 'another section like it'
+            fn = self._new_section(kind)
+            r = self.row(after_key or self.sel_key)
+            after = self.ds.function(r['fid']) if r and r['fid'] else None
+            if after is not None and after is not fn:
+                fs = self.ds.functions
+                fs.remove(fn)
+                fs.insert(fs.index(after) + 1, fn)
+            self.fid = fn.id
+            return Outcome(True, f'Section "{fn.name}" added. Click the empty row under it and type a value.', f'h:{fn.id}')
+        return self._do('add section', act)
+
+    # ---- tolerance cell
+    def _build_entry(self, fn, p, plus_text, minus_text=''):
+        """The point's own SpecEntry with `plus_text` (and `minus_text` for an asymmetric tolerance) for the period on show; periods the point has no
+        text for yet get the same text, so a datasheet with several periods stays complete."""
+        old = p.spec
+        exprs = dict(old.exprs) if old else {}
+        minus = dict(old.exprs_minus) if old else {}
+        printed = dict(old.printed) if old else {}
+        per = self.period
+        exprs[per], printed[per] = db.parse_expr(plus_text, fn.unit), plus_text
+        if minus_text:
+            minus[per] = db.parse_expr(minus_text, fn.unit)
+        else:
+            minus.pop(per, None)
+        for other in self.ds.period_ids():
+            if other not in exprs:
+                exprs[other], printed[other] = exprs[per], plus_text
+                if minus_text:
+                    minus[other] = minus[per]
+        return db.SpecEntry(exprs, None, None, None, minus, printed, 'both', None)
+
+    def _set_spec(self, fn, p, plus_text, minus_text=''):
+        p.spec = self._build_entry(fn, p, plus_text, minus_text)
+        p.overrides.pop(self.period, None)                   # typed limits would win over the statement: the new statement replaces them
+        p.edited = True
+
+    def _edit_tol(self, fn, p, text):
+        pid = p.id
+
+        def act():
+            q = fn.point(pid)
+            if fn.info.get('passfail'):
+                raise db.DsError('tol', 'This function is pass / fail: there is no tolerance to type.')
+            t = text.strip()
+            if not t:
+                q.spec = None
+                q.overrides.pop(self.period, None)
+                return Outcome(True, 'Tolerance cleared.', f'p:{fn.id}:{pid}')
+            m = re.match(r'^(.+?)\s+to\s+(.+)$', t, re.I)
+            if m and '%' not in t and 'ppm' not in t.lower():
+                lo, hi = m.group(1).strip(), m.group(2).strip()
+                if split_unit_text(hi)[1] and not split_unit_text(lo)[1]:
+                    lo = f'{lo} {split_unit_text(hi)[1]}'
+                db.set_override(fn, pid, self.period, lo, hi)
+                return Outcome(True, 'Typed limits set: the row is checked against them instead of a calculated tolerance.', f'p:{fn.id}:{pid}')
+            self._set_spec(fn, q, t)
+            info = db.point_limits(self.ds, fn, q, self.period)
+            if info.get('error'):
+                raise db.DsError('tol', info['error'])
+            return Outcome(True, f'Tolerance set: {info["accept"]}.', f'p:{fn.id}:{pid}')
+        return self._do('edit cell', act)
+
+    # ------------------------------------------------------------------------------------------------------------------ the boxes under the sheet
+    @staticmethod
+    def blank_side():
+        return dict(iv='', iv_ppm=False, fs='', floor='', db='', calc='')
+
+    def blank_form(self, fn=None):
+        """What the boxes show for a new row: % of I.V. ticked, symmetric, one test point, Auto Res on."""
+        return dict(types=['iv'], plus=self.blank_side(), minus=self.blank_side(), asym=False, operand='+', fs_scale='', nominal='',
+                    units=db.unit_symbol(fn.unit) if fn else '', freq='', level='', expect='on', multi=False, multi_mode='span', multi_high='', multi_n='5',
+                    decs='', res='', auto_res=True, remark='', run=True)
+
+    def _side_from_expr(self, fn, expr):
+        """(types, side dict) for an expression the boxes can show (one term of each kind at most), else None."""
+        side, types = self.blank_side(), []
+        for t in expr.items:
+            if isinstance(t, db.Expr):
+                return None
+            slot = {'pct_reading': 'iv', 'ppm_reading': 'iv', 'pct_range': 'fs', 'abs': 'floor'}.get(t.kind) or ('db' if t.kind == 'db' and t.basis == 'amplitude' else None)
+            if slot is None or slot in types:
+                return None
+            types.append(slot)
+            if slot == 'iv':
+                side['iv'], side['iv_ppm'] = db.fmt(t.value), t.kind == 'ppm_reading'
+            elif slot == 'floor':
+                side['floor'] = db.format_si(t.value, fn.unit)
+            else:
+                side[slot] = db.fmt(t.value)
+        return (types, side) if expr.op == 'sum' else None
+
+    def _form_from_spec(self, fn, p, form):
+        """Fill the spec part of the boxes from the point's own specification (or the function's table, shown in Calculator)."""
+        per = self.period
+        e = p.spec
+        if e is None:
+            tops = fn.governing(p)
+            e = tops[0] if tops else None
+        if e is None or per not in e.exprs:
+            return form
+        plus = e.exprs[per]
+        minus = e.exprs_minus.get(per)
+        ps = self._side_from_expr(fn, plus)
+        ms = self._side_from_expr(fn, minus) if minus is not None else None
+        if ps is not None and (minus is None or ms is not None):
+            form['types'] = [t for t in SPEC_ORDER if t in set(ps[0]) | set(ms[0] if ms else ())]
+            form['plus'] = ps[1]
+            if ms:
+                form['minus'], form['asym'] = ms[1], True
+            return form
+        form['types'] = ['calc']
+        form['plus']['calc'] = (e.printed.get(per) or plus.printed or plus.text(fn.unit)).lstrip('±').strip()
+        if minus is not None:
+            form['minus']['calc'] = (minus.printed or minus.text(fn.unit)).lstrip('±').strip()
+            form['asym'] = True
+        return form
+
+    def panel_state(self, key=None):
+        """Everything the boxes under the sheet show for a row: the function, the unit choices, which fields apply, and the form filled from the row."""
+        key = key or self.sel_key
+        r = self.row(key) or self.selected_row()
+        fn, p = self.point_of(r['key'])
+        if fn is None and r['kind'] == 'blank':
+            fn = self.target_function()
+        st = dict(key=r['key'], kind=r['kind'], fid=fn.id if fn else '', function=fn.name if fn else '', unit=fn.unit if fn else '', symbol=db.unit_symbol(fn.unit) if fn else '',
+                  unit_choices=unit_choices(fn.unit) if fn else [], passfail=bool(fn and fn.info.get('passfail')), note='',
+                  fields=dict(frequency=bool(fn and (fn.info.get('ac') or fn.info['family'] == 'generator' or fn.info.get('value'))),
+                              amplitude=bool(fn and fn.info.get('amplitude')), expect=bool(fn and fn.kind == 'CONT')),
+                  new_row=r['kind'] == 'blank', can_edit=not self.locked and r['kind'] != 'header')
+        form = self.blank_form(fn)
+        if r['kind'] == 'header':
+            st['note'] = 'This is a section heading. Click a test row to see and change its tolerance.'
+        elif fn is None:
+            st['note'] = 'Choose what this row tests (the function box), then type the value to test.'
+        if p is not None:
+            rng = fn.range(p.range_id)
+            num, units = split_unit_text(self.fmt_value(fn, rng, p.nominal))
+            form.update(nominal=num, units=units or form['units'], freq=db.format_si(p.frequency, 'Hz') if p.frequency is not None else '',
+                        level=db.format_si(p.amplitude, 'V') if p.amplitude is not None else '', expect=p.settings.get('expect', 'on'), remark=p.note, run=p.enabled,
+                        fs_scale=self.fmt_value(fn, rng, rng.full_scale) if rng else '')
+            if rng is not None and rng.resolution:
+                pre = prefix_of_units(form['units'], fn.unit)
+                with db.localcontext() as c:
+                    c.prec = db.PREC
+                    form['decs'] = str(_decimals_of(rng.resolution / db.D(10) ** dict(db._PREFIX_ORDER)[pre]))
+                    form['res'] = self.fmt_value(fn, rng, rng.resolution, pre)
+            if not st['passfail']:
+                self._form_from_spec(fn, p, form)
+                if p.spec is None and fn.governing(p):
+                    st['note'] = 'This row follows the specification table (More > Specification table). Press Calc to give it a tolerance of its own.'
+                if any((p.overrides.get(self.period) or {}).get(k) not in (None, '') for k in ('low', 'high')):
+                    st['note'] = 'This row has typed limits (shown in the tolerance cell). Press Calc to replace them with a calculated tolerance.'
+        elif r['kind'] == 'blank' and fn is not None:
+            st['note'] = f'New row in {fn.name}.'
+        st['form'] = form
+        return st
+
+    # ---- building the tolerance from the boxes
+    def side_text(self, fn, side, types, units):
+        """The accuracy statement the ticked boxes make: '0.05 % of reading + 0.01 % of range + 20 µV'.  DsError says which box is empty."""
+        parts = []
+        for t in SPEC_ORDER:
+            if t not in types:
+                continue
+            v = str(side.get(t) or '').strip()
+            if not v:
+                raise db.DsError('spec_value', f'Type the {SPEC_LABEL[t]} value, or untick it.')
+            if t == 'iv':
+                parts.append(f'{re.sub(r"%|ppm", "", v, flags=re.I).strip()} {"ppm" if side.get("iv_ppm") else "%"} of reading')
+            elif t == 'fs':
+                parts.append(f'{v.replace("%", "").strip()} % of range')
+            elif t == 'floor':
+                parts.append(with_units(v, units))
+            elif t == 'db':
+                parts.append(f'{re.sub(r"dB", "", v, flags=re.I).strip()} dB')
+            else:
+                parts.append(v.lstrip('±').strip())
+        if not parts:
+            raise db.DsError('spec_type', 'Tick at least one of the Select Spec Types, then fill in its box.')
+        return ' + '.join(parts)
+
+    def form_spec_texts(self, fn, form):
+        """(plus text, minus text or '') from the form."""
+        types = [t for t in form.get('types', []) if t in SPEC_ORDER]
+        units = form.get('units') or db.unit_symbol(fn.unit)
+        plus = self.side_text(fn, form['plus'], types, units)
+        minus = self.side_text(fn, form['minus'], types, units) if form.get('asym') else ''
+        return plus, minus
+
+    def _resolution_from_form(self, fn, form, units, nominal_text):
+        """The resolution (SI) the Meas Res / Display Decs / Auto Res boxes ask for, or None to leave the range as it is."""
+        if form.get('auto_res', True):
+            decs = str(form.get('decs') or '').strip()
+            if not decs:
+                num = split_unit_text(nominal_text)[0]
+                decs = str(len(num.split('.')[1])) if '.' in num else ''
+            if not decs:
+                return None
+            if not decs.isdigit():
+                raise db.DsError('number', 'Display Decs must be a whole number of decimal places, for example 3.')
+            unit_text = split_unit_text(nominal_text)[1] or units
+            return resolution_from_decimals(prefix_of_units(unit_text, fn.unit), int(decs))
+        text = with_units(str(form.get('res') or ''), units)
+        return db.parse_quantity(text, fn.unit or None) if text else None
+
+    def _apply_row(self, fn, p, form, want_fs):
+        """Apply the boxes to an existing point: value, range, resolution, tolerance, remark, run flag.  Call inside _do."""
+        units = form.get('units') or db.unit_symbol(fn.unit)
+        nominal_text = with_units(form.get('nominal', ''), units)
+        parts = self.parse_nominal(fn, ' @ '.join(x for x in (nominal_text, with_units(form.get('freq', ''), 'Hz') if str(form.get('freq', '')).strip() else '') if x)
+                                   + (f', level {form["level"]}' if str(form.get('level', '')).strip() else ''))
+        value = db.parse_quantity(parts['nominal'], fn.unit or None)
+        q = self._find_duplicate(fn, value, parts['frequency'], parts['amplitude'])
+        if q is not None and q is not p:
+            raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, q)}.')
+        rng = fn.range(p.range_id)
+        note = ''
+        if want_fs is not None and (rng is None or rng.full_scale != want_fs):
+            rng, note = self._pick_range(fn, value, want_fs)
+        elif rng is None or not self._holds(fn, rng, value):
+            rng, note = self._pick_range(fn, value)
+        db.edit_point(fn, p.id, nominal=parts['nominal'], frequency=parts['frequency'] or '', amplitude=parts['amplitude'] or '', range_id=rng.id)
+        res = self._resolution_from_form(fn, form, units, nominal_text)
+        if res is not None:
+            rng.resolution = res
+        if fn.kind == 'CONT':
+            p.settings['expect'] = form.get('expect') or 'on'
+        p.note = str(form.get('remark', '')).strip()
+        p.enabled = bool(form.get('run', True))
+        p.edited = True
+        msg = note
+        if not fn.info.get('passfail'):
+            plus, minus = self.form_spec_texts(fn, form)
+            self._set_spec(fn, p, plus, minus)
+            info = db.point_limits(self.ds, fn, p, self.period)
+            if info.get('error'):
+                raise db.DsError('tol', info['error'])
+            msg = f'{info["accept"]}. {self.tol_display(fn, p)} is the tolerance. {note}'.strip()
+        return msg
+
+    @staticmethod
+    def _want_fs(fn, form, units):
+        if 'fs' not in form.get('types', []) or not str(form.get('fs_scale') or '').strip():
+            return None
+        return db.parse_quantity(with_units(str(form['fs_scale']), units), fn.unit or None)
+
+    def calc_row(self, key=None, form=None):
+        """Calc: apply the boxes under the sheet to the selected row (a row that does not exist yet is created from them) and work out its tolerance.
+        One undo step; on any problem nothing changes and the message says what to type."""
+        key = key or self.sel_key
+        r = self.row(key)
+        if self.locked:
+            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+        if r is None or r['kind'] == 'header':
+            return Outcome(False, 'Click a test row, or an empty row, first.')
+        if form is None:
+            form = self.panel_state(key)['form']
+        if form.get('multi'):
+            return self._calc_multi(key, form)
+        box = {}
+
+        def act():
+            fn, p = self.point_of(key)
+            if r['kind'] == 'blank':
+                fn = self.ds.function(r['fid']) if r['fid'] else self.target_function()
+                if fn is None:
+                    raise db.DsError('function', 'Choose what this row tests first: use the function box above the spec boxes.')
+                if not str(form.get('nominal', '')).strip():
+                    raise db.DsError('nominal', 'Type the Nominal Value (the value to test) first.')
+                units = form.get('units') or db.unit_symbol(fn.unit)
+                parts = self.parse_nominal(fn, ' @ '.join(x for x in (with_units(form['nominal'], units), with_units(form.get('freq', ''), 'Hz') if str(form.get('freq', '')).strip() else '') if x)
+                                           + (f', level {form["level"]}' if str(form.get('level', '')).strip() else ''))
+                p, notes = self._create_point(fn, parts['nominal'], parts['frequency'], parts['amplitude'], self._want_fs(fn, form, units), inherit=False)
+                self.fid = fn.id
+            units = form.get('units') or db.unit_symbol(fn.unit)
+            msg = self._apply_row(fn, p, form, self._want_fs(fn, form, units))
+            box['key'] = f'p:{fn.id}:{p.id}'
+            return Outcome(True, f'Row calculated: {msg}'.strip() if msg else 'Row saved.', box['key'])
+        res = self._do('calc row', act)
+        if res.ok:
+            self.select(res.detail)
+        return res
+
+    # ---- multiple test points
+    def multi_values(self, fn, form):
+        """The values 'Multiple Test Points' makes, exact Decimals: Nominal Value is the low end; High and n come from the boxes.  DsError when it cannot."""
+        units = form.get('units') or db.unit_symbol(fn.unit)
+        low = db.parse_quantity(with_units(str(form.get('nominal', '')), units), fn.unit or None)
+        high_text = str(form.get('multi_high', '')).strip()
+        if not high_text:
+            raise db.DsError('multi', 'Type the High value: the last value the rows should reach.')
+        high = db.parse_quantity(with_units(high_text, units), fn.unit or None)
+        if high <= low:
+            raise db.DsError('multi', 'High must be above the Nominal Value.')
+        n_text = str(form.get('multi_n', '')).strip()
+        mode = form.get('multi_mode', 'span')
+        if not n_text:
+            raise db.DsError('multi', 'Type n: how many points (Lo to High), or the size of the step.')
+        with db.localcontext() as c:
+            c.prec = db.PREC
+            if mode == 'span':
+                if not n_text.isdigit() or int(n_text) < 2:
+                    raise db.DsError('multi', 'For Lo to High, n is the number of points: a whole number of 2 or more.')
+                if int(n_text) > MAX_MULTI:
+                    raise db.DsError('multi', f'That would make {n_text} rows; {MAX_MULTI} is the most at once.')
+                values = db._steps_linear(low, high, count=int(n_text))
+            else:
+                n = db.dec(re.sub(r'[%a-z\s]', '', n_text, flags=re.I) if mode in ('pct', 'ppm') else n_text, 'n')
+                if mode == 'units':
+                    step = db.parse_quantity(with_units(n_text, units), fn.unit or None)
+                elif mode == 'pct':
+                    step = high * n / 100
+                else:
+                    step = high * n / 1000000
+                if step <= 0:
+                    raise db.DsError('multi', 'n must be above zero.')
+                if (high - low) / step > MAX_MULTI:
+                    raise db.DsError('multi', f'That step would make more than {MAX_MULTI} rows. Use a bigger step.')
+                values = db._steps_linear(low, high, step=step)
+        return values
+
+    def _calc_multi(self, key, form):
+        def act():
+            r = self.row(key)
+            fn = self.ds.function(r['fid']) if r['fid'] else self.target_function()
+            if fn is None:
+                raise db.DsError('function', 'Choose what these rows test first: use the function box above the spec boxes.')
+            units = form.get('units') or db.unit_symbol(fn.unit)
+            values = self.multi_values(fn, form)
+            freq = with_units(form.get('freq', ''), 'Hz') if str(form.get('freq', '')).strip() else None
+            level = str(form.get('level', '')).strip() or None
+            plus = minus = ''
+            if not fn.info.get('passfail'):
+                plus, minus = self.form_spec_texts(fn, form)
+            want_fs = self._want_fs(fn, form, units)
+            made, existed = [], 0
+            for v in values:
+                try:
+                    p, _notes = self._create_point(fn, v, freq, level, want_fs, inherit=False)
+                except db.DsError as exc:
+                    if exc.code == 'dup_point':
+                        existed += 1
+                        continue
+                    raise
+                made.append(p)
+            if not made:
+                raise db.DsError('multi', 'Every one of those rows is already on the sheet.')
+            res = self._resolution_from_form(fn, form, units, with_units(str(form.get('nominal', '')), units))
+            for p in made:
+                if res is not None:
+                    fn.range(p.range_id).resolution = res
+                if fn.kind == 'CONT':
+                    p.settings['expect'] = form.get('expect') or 'on'
+                if plus:
+                    self._set_spec(fn, p, plus, minus)
+                    info = db.point_limits(self.ds, fn, p, self.period)
+                    if info.get('error'):
+                        raise db.DsError('tol', info['error'])
+            self.fid = fn.id
+            first = made[0]
+            return Outcome(True, f'{len(made)} rows added to {fn.name}' + (f' ({existed} already on the sheet, left alone)' if existed else '') + '. Each has the tolerance from the boxes.' if plus
+                           else f'{len(made)} rows added to {fn.name}.', f'p:{fn.id}:{first.id}')
+        res = self._do('add test points', act)
+        if res.ok:
+            self.select(res.detail)
+        return res
+
+    # ---- the other buttons
+    def recalc_all(self):
+        """Recalc: run the test point calculator rules again and check every row.  Tolerances are always worked out from the row's spec, so they are
+        up to date already; this also tells you which rows still have a problem."""
+        res = self.recalculate()
+        if not res.ok:
+            return res
+        bad = [r for r in self.rows() if r['kind'] == 'point' and r['level'] == 'error']
+        n = sum(1 for r in self.rows() if r['kind'] == 'point')
+        text = f'{res.message} Checked {n} row{"s" * (n != 1)}: ' + (f'{len(bad)} still need attention (rows {", ".join(str(r["n"]) for r in bad[:8])}{" ..." if len(bad) > 8 else ""}).' if bad else 'all fine.')
+        return Outcome(True, text)
+
+    def copy_tolerance(self, key=None, scope='below'):
+        """Copy the tolerance of a row to the rows under it in the same section ('below'), or only to those that have none ('missing')."""
+        key = key or self.sel_key
+        fn, p = self.point_of(key)
+        if self.locked:
+            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+        if p is None:
+            return Outcome(False, 'Click a test row that has a tolerance first.')
+        if p.spec is None:
+            return Outcome(False, 'This row has no tolerance of its own to copy. Press Calc first.')
+
+        def act():
+            q0 = fn.point(p.id)
+            i = fn.points.index(q0)
+            n = 0
+            for q in fn.points[i + 1:]:
+                has = q.spec is not None or fn.spec_for(q.range_id, q.frequency)[1] or any(v not in (None, '') for ov in q.overrides.values() for v in ov.values())
+                if scope == 'missing' and has:
+                    continue
+                q.spec = copy_spec(q0.spec)
+                if scope != 'missing':
+                    q.overrides.clear()
+                q.edited = True
+                n += 1
+            if not n:
+                raise db.DsError('copy', 'There are no rows below this one in the section' + (' without a tolerance.' if scope == 'missing' else '.'))
+            return Outcome(True, f'The tolerance was copied to {n} row{"s" * (n != 1)} below.', key)
+        return self._do('copy tolerance', act)
+
+    def would_overwrite(self, key=None):
+        """How many rows below the selected one already have a tolerance of their own (the window asks before copying over them)."""
+        fn, p = self.point_of(key or self.sel_key)
+        if p is None:
+            return 0
+        i = fn.points.index(p)
+        return sum(1 for q in fn.points[i + 1:] if q.spec is not None or any(v not in (None, '') for ov in q.overrides.values() for v in ov.values()))
+
+    def set_remark(self, key, text):
+        fn, p = self.point_of(key)
+        if self.locked:
+            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+        if p is None:
+            return Outcome(False, 'Click a test row first.')
+
+        def act():
+            q = fn.point(p.id)
+            q.note = (text or '').strip()
+            q.edited = True
+            return 'Remark saved: the operator sees it with this row.' if q.note else 'Remark removed.'
+        return self._do('row remark', act)
+
+    def set_run(self, key, run):
+        fn, p = self.point_of(key)
+        if self.locked:
+            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+        if p is None:
+            return Outcome(False, 'Click a test row first.')
+        return self.set_point_enabled(fn.id, p.id, run)
+
+    def symbol_text(self, name, key=None):
+        """What a symbol button inserts: the symbol itself, or for 'Units' the unit symbol of the selected row's function."""
+        if name != 'Units':
+            return name
+        r = self.row(key)
+        fn = self.ds.function(r['fid']) if r and r['fid'] else self.target_function()
+        return db.unit_symbol(fn.unit) if fn else ''
+
+    def definition_rows(self, fid=None):
+        """The 'Test Point Definitions' list: the calculator rules of the section (each makes rows by itself), as 'label: what it makes'."""
+        fid = fid or self.fid
+        return [dict(id=r['id'], label=f'{r["label"]}: {r["text"]}' + ('' if r['enabled'] else ' (off)')) for r in self.rule_rows(fid)] if self.ds.function(fid) else []
+
+    # ---- messages in the grid's words
+    def add_function(self, kind, name='', direction=None):
+        res = super().add_function(kind, name, direction)
+        if res.ok:
+            res.message = f'Added the section "{self.fn().name}". Click the empty row under it and type a value.'
+        return res
+
+    def add_rule(self, fid, form, rule_id=None):
+        fn = self.ds.function(fid or self.fid)
+        if fn is not None and not fn.ranges:
+            return Outcome(False, 'This section has no ranges yet. Add a test row first (its range follows from its value), or open More > Ranges.')
+        return super().add_rule(fid, form, rule_id)
+
+    def run_match(self, period=None):
+        errs = [p for p in self.problems() if p['level'] == 'error']
+        if errs:
+            first = errs[0]
+            fn = self.ds.function(first['function_id']) if first['function_id'] else None
+            return Outcome(False, f'Fix the {len(errs)} problem{"s" * (len(errs) != 1)} on the sheet first: the limits must be known before a standard can be chosen. '
+                                  f'{self.plain_problem(first, fn)}', errs)
+        return super().run_match(period)
+
+    def add_period(self, pid, label=''):
+        """A new time period: every row that has its own tolerance gets the same text for it (change it with the Period box)."""
+        n = len(self._undo)
+        res = super().add_period(pid, label)
+        if not res.ok:
+            return res
+        before = self._undo[-1] if len(self._undo) > n else None
+
+        def act():
+            k = 0
+            for fn in self.ds.functions:
+                for p in fn.points:
+                    e = p.spec
+                    if e is not None and pid not in e.exprs and self.ds.default_period in e.exprs:
+                        e.exprs[pid], e.printed[pid] = e.exprs[self.ds.default_period], e.printed.get(self.ds.default_period, '')
+                        if self.ds.default_period in e.exprs_minus:
+                            e.exprs_minus[pid] = e.exprs_minus[self.ds.default_period]
+                        k += 1
+            return f'Period added. {k} row{"s" * (k != 1)} kept the same tolerance for it; change it per period with the Period box.' if k else res.message
+        more = self._do('add period', act)
+        if before is not None and len(self._undo) == n + 2:         # one Undo takes back both steps
+            self._undo[-1] = (before[0], before[1])
+            del self._undo[-2]
+        return more
+
+    # ---- save
+    def save_sheet(self, note='', as_draft=False):
+        """Save a new version.  With problems it is refused unless as_draft; the message says how many and what to do."""
+        counts = self.problem_counts()
+        if counts['errors'] and not as_draft:
+            first = next(p for p in self.problems() if p['level'] == 'error')
+            fn = self.ds.function(first['function_id']) if first['function_id'] else None
+            return Outcome(False, f'{counts["errors"]} problem{"s" * (counts["errors"] != 1)} to fix before this can run as a procedure. First one: {self.plain_problem(first, fn)} '
+                                  'You can still save it as a draft.', dict(needs_draft=True))
+        return self.save(note, as_draft=as_draft)
+
+    # ------------------------------------------------------------------------------------------------------------------ print / preview
+    def print_view(self):
+        """The blank datasheet as it would print: dict(title, subtitle, columns, rows).  As Found / As Left / Out of Tol stay empty (it is a template)."""
+        ds = self.ds
+        cols = [c['title'] for c in GRID_COLUMNS]
+        rows = []
+        for r in self.rows():
+            if r['kind'] == 'header':
+                rows.append(dict(kind='header', cells=[r['function']] + [''] * (len(cols) - 1)))
+            elif r['kind'] == 'point':
+                rows.append(dict(kind='point', cells=[r['step'].replace(' *', ''), r['function'], r['nominal'], '', '', '', r['tol']]))
+        per = next((p.label or p.id for p in ds.periods if p.id == self.period), self.period)
+        return dict(title=' '.join(x for x in (ds.make, ds.model) if x) or 'Datasheet', subtitle=f'{ds.title}  |  tolerances for {per}' if ds.title else f'tolerances for {per}',
+                    columns=cols, rows=rows, notice='BLANK DATASHEET TEMPLATE. It is not a calibration record: the As Found and As Left columns are empty.')
+
+    def write_sheet_pdf(self, path):
+        """Write print_view() as a PDF (reportlab).  Returns an Outcome."""
+        try:
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import letter, landscape
+            from reportlab.lib.styles import ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+            import report_pdf
+        except ImportError:
+            return Outcome(False, 'Printing needs the reportlab package (py -m pip install reportlab).')
+        view = self.print_view()
+        regular, bold, embedded = report_pdf._fonts()
+
+        def txt(s):
+            s = str(s)
+            return s if embedded else report_pdf.ascii_unit(s).replace('µ', 'u').replace('±', '+/-')
+        try:
+            doc = SimpleDocTemplate(str(path), pagesize=landscape(letter), leftMargin=0.5 * inch, rightMargin=0.5 * inch, topMargin=0.5 * inch, bottomMargin=0.5 * inch,
+                                    title=txt(view['title']))
+            h1 = ParagraphStyle('h1', fontName=bold, fontSize=15, leading=18)
+            small = ParagraphStyle('s', fontName=regular, fontSize=9, leading=11)
+            warn = ParagraphStyle('w', fontName=bold, fontSize=9, leading=11, textColor=colors.HexColor('#9A5B00'))
+            cell = ParagraphStyle('c', fontName=regular, fontSize=9, leading=11)
+            head = ParagraphStyle('hd', fontName=bold, fontSize=8, leading=10, alignment=1)
+            data = [[Paragraph(txt(c), head) for c in view['columns']]]
+            style = [('GRID', (0, 0), (-1, -1), 0.5, colors.black), ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#EDEDF2')), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]
+            for i, row in enumerate(view['rows'], 1):
+                data.append([Paragraph(txt(c), ParagraphStyle('b', parent=cell, fontName=bold) if row['kind'] == 'header' else cell) for c in row['cells']])
+                if row['kind'] == 'header':
+                    style += [('SPAN', (0, i), (-1, i)), ('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F5F5F7'))]
+            widths = [0.7 * inch, 2.2 * inch, 1.7 * inch, 1.2 * inch, 1.2 * inch, 0.6 * inch, 2.4 * inch]
+            table = Table(data, colWidths=widths, repeatRows=1)
+            table.setStyle(TableStyle(style))
+            doc.build([Paragraph(txt(view['title']), h1), Paragraph(txt(view['subtitle']), small), Paragraph(txt(view['notice']), warn), Spacer(1, 8), table])
+        except OSError as exc:
+            return Outcome(False, f'The PDF could not be written ({exc}).')
+        return Outcome(True, f'Blank datasheet saved to {path}.')
