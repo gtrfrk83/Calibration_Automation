@@ -23,6 +23,9 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Instrument commands, limits, pass/fail and safety prompts are unchanged unless requested.
 - Never write passwords to logs. Writes: set, read back, compare; never retry a write.
 - Outputs to standby/off after each point.
+- Handheld multimeters, manual entry: a typed reading is filled out with zeros to the test point's display resolution (typing 5 on a
+  5.000 V point stores and prints 5.000; more decimals than the resolution are kept as typed). Use `handheld_dmm.pad_reading` in any new
+  manual-entry procedure; `tests/test_pad_reading.py` covers it.
 - Multimeter procedures (any procedure that drives a calibrator to a DMM): every DC volts / DC amps output is sent with an explicit `,0Hz`
   (`set_output_volts(..., dc=True)` / `set_output_amps(..., dc=True)`). An OUT with no frequency keeps the previous one, so the
   calibrator errors going from an AC point to a DC point. `tests/test_dc_zero_hz.py` fails if a DMM engine drops it. Add this to

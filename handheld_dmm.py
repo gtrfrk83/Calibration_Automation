@@ -99,6 +99,29 @@ def describe(p):
     return f'{p["section"]}, {p["range"]} range' if p['range'] else p['section']
 
 
+def pad_reading(p, text):
+    """Rule: a typed reading is filled out to the point's display resolution with zeros (5 -> 5.000 on a 5.000 V point), so the
+    stored/printed reading matches the test point's resolution. The resolution is the most decimals in the point's limits.
+    Text that is not a plain number (OL) and readings typed with more decimals than the resolution are left as typed."""
+    t = text.strip().replace(',', '')
+    try:
+        Decimal(t)
+    except InvalidOperation:
+        return text.strip()
+    if t.upper() in ('NAN', 'INF', '-INF', 'INFINITY', '-INFINITY') or 'E' in t.upper():
+        return text.strip()
+    want = 0
+    for key in ('low', 'high'):
+        try:
+            want = max(want, max(0, -Decimal(p[key]).as_tuple().exponent))
+        except (KeyError, InvalidOperation, TypeError):
+            pass
+    whole, _, frac = t.partition('.')
+    if len(frac) >= want:
+        return t
+    return f'{whole}.{frac.ljust(want, "0")}' if want else whole
+
+
 def judge_numeric(p, text, annunciator=True):
     """('PASS'|'FAIL', value_in_base_units or None). Raises ValueError for text that is not a reading."""
     t = text.strip().replace(',', '')
@@ -1085,8 +1108,9 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             if p.get('recovery_s'):
                 self.last_high_current = time.monotonic()
             if r['action'] == 'record':
-                result, base = judge_numeric(p, r['text'], r['ann'])
-                self._store(p, entered=r['text'].strip(), reading=base, result=result, annunciator=r['ann'] if p.get('annunciator') else None,
+                entered = pad_reading(p, r['text'])
+                result, base = judge_numeric(p, entered, r['ann'])
+                self._store(p, entered=entered, reading=base, result=result, annunciator=r['ann'] if p.get('annunciator') else None,
                             source='typed')
         elif p.get('checks'):
             answers = []
