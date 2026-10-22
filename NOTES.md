@@ -226,3 +226,13 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
 - Not stored anywhere today (so not in any snapshot): procedure modifications are not printed by any engine (`modifications=` is never passed) - their summary is kept in the stamps only.
 - Tests: `tests/test_reprint_*.py` (named to sort after test_beta because they install tests/_tk_stub.py); `tests/reprint_harness.py` runs the engines' real export code on the simulated benches.
 
+
+## Live procedure editor (branch live-editor)
+"Edit procedure" in every running procedure window opens the existing procmods editor (procmods_ui.LiveHook -> ModifyWindow in live mode). Logic is in
+procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods of procmods_engine.ProcModsMixin; tests: tests/test_beta_live_editor*.py.
+- Edits are saved at once but applied only at the next point boundary (`pm_step`, or `pm_live_boundary` for WaveSurfer). The point in flight is never changed. Outputs go to standby first (a failed standby stops the run and leaves the edits saved); the instrument reset is not re-run.
+- Every edit is an event in the run's audit trail (`live_edits` in the checkpoint; who/when/old/new/before_point) and a normal override, or run-only ("this run only"). Developer-mode gate, locked/risk commands, verified flags and HMAC limit rules are unchanged. Live editing is blocked while a pinned progress file or a factory run is active.
+- Limits: allowed with the existing rules (devmode, reason, HMAC). The tolerance of a point that already has a reading changes only together with a redo of that point.
+- Redo uses the engine's own queue (no automatic write retries). WaveSurfer has no skip and no redo. Demo edits are marked DEMO and stay run-only.
+- Covered: truevolt, dacq, fgen, handheld family (incl. DsbApp by inheritance), 34401A, 8846A verification, MDO4000C, WaveSurfer. Not wired: TDS2000C (no procmods layer), Fluke_8846A_Adjustment.
+- Unverified: the Tk windows (never viewed); live command edits (no engine supplies a test_command); the simulator accepts command shape only.

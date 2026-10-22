@@ -209,6 +209,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         sh.add_action('Export Report (PDF)',self.export_pdf,side='right',short='PDF')
         self.btn_load=sh.add_action('Load progress',self.load,side='right',short='Load')
         sh.add_action('Save progress',self.save,side='right',short='Save')
+        self.pm_live_attach(sh)   # 'Edit procedure': the editor inside this window, usable during a run
 
         body=sh.content
         info=ttk.Frame(body);info.pack(side='bottom',fill='x',pady=(8,0))
@@ -270,6 +271,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             raise ValueError('Select a valid COM port, such as COM3, or enter its number.')
         return int(value)
 
+    def pm_driver_classes(self):return (drivers.Agilent34401A,drivers.Fluke5560A)
     def refresh(self):
         keep=self.tree.selection()
         self.tree.delete(*self.tree.get_children())
@@ -343,6 +345,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if i>=len(points) or self.stop:
             self.busy=False;self.save();self.status.set('Run stopped by the operator. Progress is saved.' if self.stop else 'Run complete. Save progress or export a report.');return
         p=points[i]
+        try:p,previous=self.pm_step(points,i,previous)          # live edits: applied here, between two points (procmods_live)
+        except procmods_engine.LiveApplyError as exc:self._error(exc);return
+        if p is None:self.root.after(30,lambda:self._next(points,i+1,previous));return     # skipped by an edit made during the run
         if p['wiring']!=previous:
             if not self.demo and p.get('zero_offset'):
                 self.io.standby()

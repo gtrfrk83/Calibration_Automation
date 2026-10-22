@@ -454,7 +454,7 @@ class TextTab(_Tab):
             self.lockmsg.set('')
             self.set_enabled([self.box, self.reason_entry, self.btn_undo, self.btn_reset], False)
             return
-        self.title.set(row['key'] + ('   [M]' if row['modified'] else ''))
+        self.title.set(row['name'] + ('   [M]' if row['modified'] else ''))
         self.factory.set(row['factory'])
         d = self.model.drafts.get(('text', row['key']))
         self.box.insert('1.0', d.value['text'] if d else row['current'])
@@ -622,7 +622,8 @@ class ModifyWindow(tk.Toplevel):
         self.lock = model.lock
         self.on_change = on_change
         ctx = model.ctx
-        self.title(f'Modify procedure: {ctx.title}' + (f' - asset {ctx.asset_id}' if ctx.asset_id else ''))
+        self.title(('Edit procedure' if model.live_mode else 'Modify procedure') + f': {ctx.title}'
+                   + (f' - asset {ctx.asset_id}' if ctx.asset_id else '') + (' [DEMO]' if ctx.demo else ''))
         self.geometry(f'{ui.px(1000)}x{ui.px(660)}')
         self.filter = tk.StringVar(value='all')
         self.search = tk.StringVar()
@@ -641,6 +642,8 @@ class ModifyWindow(tk.Toplevel):
         self.chip_mod.pack(side='right', padx=8)
         self.banner = tk.StringVar()
         ttk.Label(head, textvariable=self.banner, wraplength=ui.px(560), justify='left').pack(side='left')
+        self.info = tk.StringVar()                              # live mode: which point the saved changes start at (not an error: not red)
+        ttk.Label(self, textvariable=self.info, wraplength=ui.px(940), justify='left', padding=(14, 0, 14, 4)).pack(fill='x')
 
         bar = ttk.Frame(self, padding=(14, 2, 14, 4))
         bar.pack(fill='x')
@@ -712,6 +715,8 @@ class ModifyWindow(tk.Toplevel):
         self.lock.poll()
         if before != self.lock.state or self.lock.state in ('unlocked', 'lockout'):
             self.update_header()
+        elif self.model.live_mode:
+            self.update_info()                                 # the run moves on: keep 'starts at point N' current
         self.after(POLL_MS, self._poll)
 
     # -- refresh
@@ -719,6 +724,7 @@ class ModifyWindow(tk.Toplevel):
         m = self.model
         unlocked = self.lock.unlocked
         self.btn_lock.configure(text='Lock now' if unlocked else 'Unlock...')
+        self.update_info()
         (self.chip_dev.pack(side='right', padx=8) if unlocked else self.chip_dev.pack_forget())
         n = m.modified_count()
         self.chip_mod.set(M.chip_text(n), 'warn')
@@ -730,6 +736,20 @@ class ModifyWindow(tk.Toplevel):
             extra = ('  ' + self.lock.lockout_text()) if self.lock.state == 'lockout' else ''
             self.banner.set(m.read_only_reason + extra + '  Saved changes still apply when you run; "Run factory" is offered at the start of a run.')
         self.update_buttons()
+
+    def update_info(self):
+        """Live mode: say which point a saved change applies from, whether anything saved is still waiting, and what demo mode does."""
+        m = self.model
+        if not m.live_mode:
+            self.info.set('')
+            return
+        lines = [m.applies_from_text()]
+        waiting = m.ctx.live.pending()
+        if waiting:
+            lines.append('Saved, not in effect yet: ' + '; '.join(waiting))
+        if m.ctx.demo:
+            lines.append('DEMO: edits made here apply to this demo run only and are marked demo. Nothing is saved for later runs.')
+        self.info.set('\n'.join(lines))
 
     def update_buttons(self):
         m = self.model
@@ -777,12 +797,32 @@ class ModifyWindow(tk.Toplevel):
                                        f'runs:\n{lines}\n\nContinue?', parent=self):
                 return
             confirmed = True
+        redo = []
+        if m.limit_blocked():
+            self.message.set(m.limit_blocked())
+            return
+        need = m.limit_redo_needed()
+        if need:
+            names = ', '.join(lab for _k, lab in need)
+            if not messagebox.askyesno('Tolerance change needs a redo', f'The tolerance of {names} concerns a point that already has a reading '
+                                       'or is in progress. A tolerance can only be changed for a point that is measured again against it, '
+                                       'and the reading taken now will be replaced by the new one.\n\nSave the change and redo the point?', parent=self):
+                self.message.set('Not applied: the tolerance of a point that already has a reading changes only together with a redo.')
+                return
+            redo = [k for k, _lab in need]
         try:
-            res = m.apply(confirmed=confirmed)
+            res = m.apply(confirmed=confirmed, redo=redo)
         except pm.OverrideError as ex:
             self.message.set(str(ex))
             return
         self.message.set('; '.join(f'{k}: {msg}' for k, msg in res.errors))
+        if m.live_mode and res.done:
+            offer = m.redo_offer()
+            if offer and offer['key'] not in redo and messagebox.askyesno(
+                    'Measure this point again?', f'Saved. Point {offer["id"]} ({offer["desc"]}) is in progress and keeps the settings it started '
+                    f'with; the change starts at the next point.\n\nMeasure point {offer["id"]} again with the new settings after it finishes? '
+                    'The reading from the old settings will be replaced by the new one. Nothing is retried automatically.', parent=self):
+                m.ctx.live.request_redo([offer['key']])
         self.refresh()
 
     def cancel(self):
@@ -895,6 +935,53 @@ def attach_to_shell(shell, ctx_factory, lock: M.DevLock | None = None) -> ShellH
     """Give an engine the 'Modify procedure' action and the MODIFIED (n) / DEVELOPER MODE chips.  ctx_factory() returns a fresh
     procmods_ui_model.Context (so it always reflects the current asset, connection and run state)."""
     return ShellHook(shell, ctx_factory, lock or shared_lock())
+
+
+# ------------------------------------------------------------------------------------------------------------ inside a procedure window
+class LiveHook:
+    """The 'Edit procedure' action of a running procedure window (procmods_live).  Unlike the Manager's window, it stays usable during a run:
+    saved edits start at the next point.  `app` is an engine App (procmods_engine.ProcModsMixin)."""
+
+    LABEL = 'Edit procedure'
+
+    def __init__(self, app, shell, lock):
+        self.app, self.shell, self.lock = app, shell, lock
+        self.window = None
+        self.button = shell.add_action(self.LABEL, self.open, short='Edit')
+        lock.on_change(lambda _s: self._safe_refresh())
+        self.refresh()
+
+    def _safe_refresh(self):
+        try:
+            self.refresh()
+        except tk.TclError:
+            pass
+
+    def count(self) -> int:
+        st = self.app.pm_state
+        return len(st.oset.active()) if st is not None and st.oset else 0
+
+    def refresh(self):
+        """Header chips: MODIFIED (n) = what the running procedure uses, DEVELOPER MODE while unlocked."""
+        self.shell.set_modified(self.count())
+        self.shell.set_devmode(self.lock.unlocked)
+
+    def open(self):
+        if self.window is not None:
+            try:
+                if self.window.winfo_exists():
+                    self.window.lift()
+                    return self.window
+            except tk.TclError:
+                pass
+        ctx = self.app.pm_live_context()
+        self.window = open_modify_window(self.shell.root, ctx, self.lock, on_change=lambda _m: self.refresh())
+        return self.window
+
+
+def attach_live(app, shell, lock: M.DevLock | None = None) -> LiveHook:
+    """Add 'Edit procedure' to an engine's window (ProcModsMixin.pm_live_attach calls this once the shell is built)."""
+    return LiveHook(app, shell, lock or shared_lock())
 
 
 # ------------------------------------------------------------------------------------------------------------ Manager window

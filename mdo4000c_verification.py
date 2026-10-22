@@ -1043,6 +1043,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
+        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
 
         body = sh.content
         info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
@@ -1110,6 +1111,22 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def sections_now(self):
         return [p for p in POINTS if self.cfg.applies(p)]
+
+    def pm_driver_classes(self):
+        return (drivers.TektronixMDO4000C, drivers.Fluke5560A, drivers.Fluke96270A, drivers.AgilentAFG, drivers.ReferenceMeter)
+
+    def pm_refresh_view(self):
+        self.post('refresh')                                  # called from the worker thread: the table is rebuilt on the main thread
+
+    def pm_show_note(self, p):
+        """The worker thread cannot open a window: ask the main thread (the same 'ask' the procedure's own prompts use)."""
+        try:
+            self.request('ask', dict(title=f'Note for point {p["id"]}', heading=p['desc'], steps=[('Note', str(p.get('tech_note')))],
+                                     facts=[('Point', str(p['id']))], caution=None, ok='OK'))
+        except Stopped:
+            raise
+        except Exception:
+            pass
 
     def refresh(self):
         keep = self.tree.selection()
@@ -1202,6 +1219,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 kind, payload, box = self.q.get_nowait()
                 if kind == 'status': self.status.set(payload)
                 elif kind == 'row': self._update_row(POINTS[payload - 1])
+                elif kind == 'refresh': self.refresh()
                 elif kind == 'done': self._finished(payload)
                 elif kind == 'ask':
                     ok = ui.confirm_steps(self.root, payload['title'], payload['heading'], payload['steps'], facts=payload['facts'], caution=payload['caution'], ok=payload['ok'])
@@ -1262,8 +1280,12 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         try:
             self.post('status', 'Resetting instruments to default settings ...')
             self.reset_run()                               # every run (first, re-run, resume): before the first point; a failure ends the run here
-            for i, p in enumerate(points, 1):
+            i = 0
+            while i < len(points):
                 if self.stop: raise Stopped()
+                p, _previous = self.pm_step(points, i, None)      # live edits: applied here, between two points (procmods_live); LiveApplyError ends the run
+                i += 1
+                if p is None: continue                              # skipped by an edit made during the run
                 self.post('status', f'Running {i}/{len(points)}: {p["desc"]}')
                 try:
                     reading, raw = runner.run_point(p)

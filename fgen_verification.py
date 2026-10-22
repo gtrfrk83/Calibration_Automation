@@ -645,6 +645,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
+        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
 
         body = sh.content
         info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
@@ -684,6 +685,13 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             return (p['id'], name, 'Pass', '', '', '', word(f), '', left, shown), (res.lower() or 'pending',)
         cells, tags = self.shell_cells(p['id'], p['nominal'], p['nominal'] - p['error'], p['nominal'] + p['error'], p['unit'])
         return (p['id'], name, *cells), tags
+
+    def pm_driver_classes(self): return (getattr(drivers, f'Keysight{MODEL}'), drivers.Fluke5790B, drivers.Keysight5313x, drivers.ReferenceMeter)
+
+    def pm_point_title(self, p): return f'{p.get("section_title", "")} - {p.get("desc", "")}'.strip(' -')
+
+    def pm_standby(self):
+        if self.io is not None and not self.demo: self.io.all_off()
 
     def refresh(self):
         keep = self.tree.selection()
@@ -851,6 +859,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             self.busy = False; self.save()
             self.status.set('Run stopped by the operator. Progress is saved.' if self.stop else 'Run complete. Save progress or export a report.'); return
         p = points[i]
+        try: p, previous = self.pm_step(points, i, previous)          # live edits: applied here, between two points (procmods_live)
+        except procmods_engine.LiveApplyError as exc: self._error(exc); return
+        if p is None: self.root.after(30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
         key = point_group(p, self.method())
         if not self.demo and key != previous:
             try: self.io.all_off()
