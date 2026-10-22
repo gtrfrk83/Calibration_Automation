@@ -24,6 +24,7 @@ import appdata
 import datamode
 import procmods_engine
 import reset_startup
+import virtualbench
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
 PERIODS = {'24 hours': '24h', '90 days': '90d', '1 year': '1y', '2 years': '2y'}
@@ -55,8 +56,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the DMM under test and the Fluke 5560A, both through the instrument drivers."""
     SETTLE_AC = {3: 9.0, 20: 5.0, 200: 4.0}
 
-    def __init__(self, dmm_address, cal_address, cal_baud=9600, transports=None, mods=None):
+    def __init__(self, dmm_address, cal_address, cal_baud=9600, transports=None, mods=None, virtual=False):
         self.log = drivers.CommandLog()
+        self.virtual = bool(virtual)
+        if self.virtual: virtualbench.mark_log(self.log)
         if transports:
             dmm_t, cal_t = transports
         else:
@@ -91,7 +94,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.save_log()
 
     def save_log(self):
-        """Append the exact commands sent to ~/.calibration_suite/command_log.txt."""
+        """Append the exact commands sent to ~/.calibration_suite/command_log.txt (a virtual demo session writes nothing)."""
+        if virtualbench.log_is_virtual(self.log): return
         try:
             folder = Path.home() / '.calibration_suite'; folder.mkdir(parents=True, exist_ok=True)
             with open(folder / 'command_log.txt', 'a', encoding='utf-8') as f:
@@ -123,10 +127,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.dmm.configure_point(p)
         self.dmm.check_errors('configuring ' + p['description'])
         if p['source'] == 'none':          # copper short / open input: the calibrator stays in STANDBY
-            time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.zero', 1.5))
+            time.sleep(virtualbench.scaled(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.zero', 1.5), self.virtual))
             return self.dmm.read()
         if p['source'] == 'manual':        # e.g. a capacitance standard connected by the technician
-            time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.manual', 2.0))
+            time.sleep(virtualbench.scaled(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.manual', 2.0), self.virtual))
             return self.dmm.read()
         k, v, f = p['kind'], p['nominal'], p.get('frequency')
         if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f, dc=k == 'DCV')
@@ -135,13 +139,13 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         elif k == 'FREQ': self.cal.set_output_volts(p['amplitude'], v)
         self.cal.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
         self.cal.operate_unverified()
-        time.sleep(self.settle(p))
+        time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
         reading = self.dmm.read()
         self.standby()
         return reading
 
 
-class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     WIRING_TEXT = {
         'VOLT': 'Calibrator voltage output to the DMM front HI / LO input terminals.',
         'CURRENT': 'Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first.',
@@ -149,8 +153,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         'RES2': '2-wire: calibrator resistance leads to the DMM HI / LO input terminals.',
     }
 
-    def __init__(self, root, model, demo=False):
+    def __init__(self, root, model, demo=False, fast_demo=False):
         configure(model)
+        self.init_virtual(demo, fast_demo)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}
         self.pm_init('truevolt', MODEL, demo=demo, lists=[POINTS])     # procedure modifications: saved overrides for this model
@@ -171,7 +176,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.show_status = tk.StringVar(value='All points')
         self._build_ui()
         self.on_period(save=False)
-        self.status.set('DEMO MODE: no commands are sent to any instrument. Enter an Instrument ID, then press Run All.' if demo
+        self.status.set(virtualbench.status_text(self) if demo
                         else 'Step 1: enter the Instrument ID. Step 2: enter the instrument addresses and press Test Connections. Step 3: Run All.')
         root.protocol('WM_DELETE_WINDOW', self.on_close)
         root.bind('<Control-s>', lambda _e: self.save())
@@ -207,13 +212,13 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         root = self.root
         sh = self.shell = ui_shell.Shell(root, f'Keysight {MODEL}  -  Performance Verification',
                                          f'Test points from the Keysight Truevolt Operating and Service Guide, pp. {SPEC["source"]["pages"].split(" ")[0]}  |  {len(POINTS)} points in the spec',
-                                         demo=self.demo, on_section=self.pick_section, version='spec v1')
+                                         demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
         self.status = sh.status_var
-        self.conn_pill = sh.add_chip('Not connected', 'neutral')
+        self.conn_pill = sh.add_chip(self.chip_text() if self.demo else 'Not connected', 'neutral')
         sh.build_identity(self.asset, self.serial)
         self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
         self.summary = sh.build_progress()
-        if self.demo: sh.notice('Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode')
+        if self.demo: sh.notice(self.banner_text(), 'warn', title=virtualbench.BANNER_TITLE)
         else: sh.notice('The program pauses and asks you to confirm the wiring before every new setup and before any high-voltage point. Stay at the bench while a run is in progress.', 'info')
 
         # settings and connections live in the slide-in drawer
@@ -358,16 +363,22 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.status.set(f'{len(found)} VISA resource(s) found: ' + (', '.join(found) if found else 'none') + '. Pick the address for each instrument.')
 
     def test_connections(self):
-        if self.demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
+        if self.fast_demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
         self.status.set('Connecting ...'); self.root.update_idletasks()
         try:
-            self.disconnect(); self.io = IO(self.dmm_addr.get(), self.cal_addr.get(), int(self.cal_baud.get()), mods=self.pm_state)
+            self.disconnect()
+            if self.virtual:          # demo: the real IO / driver code over a simulated DMM and calibrator
+                self._vb = virtualbench.dmm_pair(MODEL)
+                self.io = IO('virtual', 'virtual', 9600, transports=(self._vb[2], self._vb[1]), mods=self.pm_state, virtual=True)
+            else: self.io = IO(self.dmm_addr.get(), self.cal_addr.get(), int(self.cal_baud.get()), mods=self.pm_state)
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
-        self._set_conn(True); self._save_settings()
-        self.status.set('Connected: ' + self.io.ident + '. Calibrator output is NOT enabled.')
-        messagebox.showinfo('Connected', f'{MODEL}: {self.io.ident}\nFluke 5560A: {self.io.cal.idn}\nCalibrator output is not enabled.')
+        self._set_conn(True)
+        if not self.demo: self._save_settings()
+        tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
+        self.status.set('Connected: ' + self.io.ident + tag + '. Calibrator output is NOT enabled.')
+        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'{MODEL}: {self.io.ident}\nFluke 5560A: {self.io.cal.idn}{tag}\nCalibrator output is not enabled.')
 
     def disconnect(self):
         if self.io: self.io.close(); self.io = None
@@ -375,7 +386,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def _set_conn(self, ok):
         if hasattr(self, 'conn_pill'):
-            self.conn_pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
+            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Not connected' if not self.demo else 'Demo - no hardware',
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -399,8 +410,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
         if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
-        if not self.demo and self.io is None: self.test_connections()
-        if not self.demo and self.io is None: return
+        if not self.fast_demo and self.io is None: self.test_connections()
+        if not self.fast_demo and self.io is None: return
         self.stop = False; self.busy = True
         self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
@@ -433,14 +444,15 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         except procmods_engine.LiveApplyError as exc: self._error(exc); return
         if p is None: self.root.after(30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
         key = procspec.wiring_key(p)
-        if not self.demo and key != previous and not self._prompt_setup(p):
+        if not self.fast_demo and key != previous and not self._prompt_setup(p):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
-        if not self.demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= 500:
+        if not self.fast_demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= 500:
             if not messagebox.askyesno('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False; return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
         if self.tree.exists(str(p['id'])): self.tree.selection_set(str(p['id'])); self.tree.see(str(p['id']))
-        if self.demo:
+        if self.virtual: virtualbench.operator_sets_up(self._vb, p, terminal=p.get('terminal'), manual=p['source'] == 'manual', nominal=p['nominal'])     # the virtual operator does what the prompt asked
+        if self.fast_demo:
             reading = p['nominal'] + p['error'] * math.sin(p['id'] * 1.71) * 0.38   # deterministic, labelled synthetic
             self._record(p, reading, True); self.root.after(30, lambda: self._next(points, i + 1, key))
         else:
@@ -456,7 +468,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             threading.Thread(target=work, daemon=True).start()
 
     def _done(self, points, i, p, reading, key):
-        self._record(p, reading, False); self.root.after(30, lambda: self._next(points, i + 1, key))
+        self._record(p, reading, bool(self.demo)); self.root.after(30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
         self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); messagebox.showerror('Measurement stopped', str(exc))
@@ -535,5 +547,6 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 def main(model, argv=None):
     argv = sys.argv if argv is None else argv
     root = tk.Tk()
-    App(root, model, demo='--demo' in argv)
+    demo, fast = virtualbench.flags(argv)
+    App(root, model, demo=demo, fast_demo=fast)
     root.mainloop()

@@ -157,7 +157,7 @@ class AppResetMixin:
 
     def reset_then(self, proceed):
         import threading
-        if self.demo:                                       # demo: no instruments, nothing to reset, nothing logged as evidence
+        if getattr(self, 'fast_demo', self.demo):           # fast demo: no instruments, nothing to reset, nothing logged as evidence (a virtual bench resets its simulated instruments)
             proceed(); return
         if not self.reset_notice_ok():
             return

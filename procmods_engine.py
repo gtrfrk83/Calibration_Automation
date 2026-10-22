@@ -831,7 +831,7 @@ class ProcModsMixin:
     def pm_standby(self):
         """Put every output in standby, once (the engine's own call; never retried).  Raises if it fails."""
         io = getattr(self, 'io', None)
-        if io is None or getattr(self, 'demo', False):
+        if io is None or getattr(self, 'fast_demo', getattr(self, 'demo', False)):
             return
         for name in ('standby', 'all_off', 'all_outputs_off'):
             fn = getattr(io, name, None)
@@ -917,7 +917,7 @@ class ProcModsMixin:
         io = self.__dict__.get('io')
         log = getattr(io, 'log', None) if io is not None else None
         try:
-            ev = st.commit_live(standby=None if getattr(self, 'demo', False) else self.pm_standby, before=before, log=log,
+            ev = st.commit_live(standby=None if getattr(self, 'fast_demo', getattr(self, 'demo', False)) else self.pm_standby, before=before, log=log,
                                 asset=self.pm_asset_text() or None)
         except Exception as exc:
             msg = ('The saved edits were NOT applied because the outputs could not be confirmed in standby '

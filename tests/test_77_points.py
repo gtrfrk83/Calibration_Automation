@@ -312,7 +312,7 @@ class EndToEnd(unittest.TestCase):
             bench, _a, _b = make_bench()
             io = h.IO(f'Fluke {model}', 'sim', transport=Spy(bench, model))
             io.auto_ramp = False
-        app = h.App(self.hn.root, MODEL, demo=demo, spec=h.load_spec(SPEC_NAME), io_factory=(lambda: io) if io else None)
+        app = h.App(self.hn.root, MODEL, demo=demo, spec=h.load_spec(SPEC_NAME), io_factory=(lambda: io) if io else None, fast_demo=demo)    # the quick demo; the virtual bench is tested in test_beta_virtual_bench.py
         app.asset.set('A-77')
         app.serial.set('S-77')
         app.cal_mode.set(h.CAL_CHOICES[1] if model == '5522A' else h.CAL_CHOICES[0])

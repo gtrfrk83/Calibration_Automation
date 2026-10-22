@@ -20,6 +20,8 @@ class SimBench:
         self.fail_next = None        # set to a substring to make the next matching command time out
         self.timebase_ratio = 1 + 1.2e-7     # simulated scope time base error (frequency reads high by 0.12 ppm)
         self.trigger_error_v = 0.0           # simulated trigger level error (actual threshold = set level + this)
+        self.freq_aware = False              # virtual bench: the plain 34401A / 8846A simulation also answers a FREQ function with the calibrator's frequency (off: the wire transcripts in tests/golden keep their recorded replies)
+        self.external_input = None           # virtual bench: a standard the operator connects (a value in the DMM's base unit); the DMM reads it whatever the calibrator does
 
     def output_v(self):
         f = self.fluke
@@ -256,6 +258,8 @@ class SimDmmTransport(_SimBase):
         if u == 'CAL:REC': return None
         if u == 'READ?' and self.model in TRUEVOLT:
             f = self.bench.fluke
+            if self.bench.external_input is not None:
+                return f"{self.bench.external_input:+.9E}"
             if not f['operate']:
                 return '+2.000000000E-12'
             if self.function.startswith('FREQ'):
@@ -265,6 +269,10 @@ class SimDmmTransport(_SimBase):
             return f"{f['volts'] * 1.000002:+.9E}"
         if u == 'READ?':
             f = self.bench.fluke
+            if self.bench.external_input is not None:
+                return f"{self.bench.external_input:+.9E}"
+            if self.bench.freq_aware and self.function.startswith('FREQ') and f['operate']:
+                return f"{f['freq'] * 1.0000002:+.9E}"
             return f"{(f['volts'] * 1.00002 if f['operate'] else 1.2e-7):+.9E}"
         raise TransportError(f'simulated DMM: unknown command {cmd!r}')
 
@@ -307,6 +315,8 @@ class SimDacqTransport(_SimBase):
             if self.scan is None:
                 self.errors.append('-221,"Settings conflict"'); return '+9.90000000E+37'
             f = self.bench.fluke
+            if self.bench.external_input is not None:
+                return f"{self.bench.external_input:+.9E}"
             if not f['operate']:
                 return '+2.000000000E-12'
             if self.function.startswith('FREQ'):

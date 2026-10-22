@@ -107,7 +107,7 @@ class Harness:
         return self.box_answer[kind] if kind in self.box_answer else True
 
     def _ask_reading(self, parent, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
-                     limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT'):
+                     limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None):
         self.dialogs.append(('reading', p['id'], mode, device))
         if mode == 'numeric':
             val = self.readings.get(p['id'])

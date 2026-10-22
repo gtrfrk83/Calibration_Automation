@@ -450,10 +450,13 @@ def center_on(win, parent):
         pass
 
 
+DEMO_SUFFIX = ''          # ' [DEMO]' while a demo runs on the virtual bench (virtualbench.VirtualMixin): every popup window says so
+
+
 def dialog(parent, title, modal=True):
     """A themed, centred, Esc-closable popup window."""
     win = tk.Toplevel(parent)
-    win.title(title)
+    win.title(title + DEMO_SUFFIX)
     win.configure(background=C['bg'])
     win.transient(parent)
     win.bind('<Escape>', lambda _e: win.destroy())

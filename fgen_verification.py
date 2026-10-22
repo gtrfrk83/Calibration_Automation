@@ -30,6 +30,7 @@ import appdata
 import datamode
 import procmods_engine
 import reset_startup
+import virtualbench
 import drivers
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
@@ -179,8 +180,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """The generator under test, the 5790B, and (optionally) a counter and a power meter. A reference left without an
     address is read by the technician: ask_number(prompt, unit) is called and must return a float (or None to stop)."""
 
-    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT', mods=None):
+    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT', mods=None, virtual=False):
         self.log = drivers.CommandLog()
+        self.virtual = bool(virtual)
+        if self.virtual: virtualbench.mark_log(self.log)
         self.ask_number = ask_number
         self.std_input = std_input
         if flat_method not in SPEC.get('flatness_methods', ['POWER']):
@@ -256,6 +259,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.save_log()
 
     def save_log(self):
+        if virtualbench.log_is_virtual(self.log): return          # a virtual (demo) session is never evidence
         try:
             folder = Path.home() / '.calibration_suite'; folder.mkdir(parents=True, exist_ok=True)
             with open(folder / 'command_log.txt', 'a', encoding='utf-8') as f:
@@ -305,7 +309,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def _out(self, p, frequency=None):
         self.uut.setup(p['function'], frequency or p['frequency'], p['amplitude'], p['amp_unit'], p['load'])
         self.uut.output(True)
-        time.sleep(self._settle(p))
+        time.sleep(virtualbench.scaled(self._settle(p), self.virtual))
 
     def _settle(self, p):
         if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
@@ -510,7 +514,7 @@ def certificate_rows(results):
 # ================================================================================================================
 # application
 # ================================================================================================================
-class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     WIRING = {
         'NONE': ('Self-test', [('Disconnect', 'Remove any cable from the generator OUTPUT. No connections are needed for the self-test.')]),
         'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter channel 1 input with a 50 ohm BNC cable.'),
@@ -533,8 +537,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                                                     ('Why', 'The +20 dB range points output +23.9 dBm (about 245 mW), above the 8482A sensor maximum.')]),
     }
 
-    def __init__(self, root, model, demo=False):
+    def __init__(self, root, model, demo=False, fast_demo=False):
         configure(model)
+        self.init_virtual(demo, fast_demo)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}; self.pref_cache = {}; self.conditions_ok = False
         self.pm_init('fgen', MODEL, demo=demo, lists=[POINTS])         # procedure modifications: saved overrides for this model
@@ -560,7 +565,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.show_status = tk.StringVar(value='All points')
         self._build_ui()
         self.on_period(save=False)
-        self.status.set('DEMO MODE: no commands are sent to any instrument. Enter an Instrument ID, then press Run All.' if demo else
+        self.status.set(virtualbench.status_text(self) if demo else
                         'Step 1: enter the Instrument ID. Step 2: enter the addresses and press Test Connections. Step 3: Run All.')
         root.protocol('WM_DELETE_WINDOW', self.on_close)
         root.bind('<Control-s>', lambda _e: self.save())
@@ -594,13 +599,13 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         src = SPEC['source']
         sh = self.shell = ui_shell.Shell(root, f'{SPEC["manufacturer"]} {MODEL}  -  Performance Verification',
                                          f'Test points from the {MODEL} Service Guide, {src["chapter"]}, pp. {src["pages"]}  |  {len(POINTS)} points in the spec',
-                                         demo=self.demo, on_section=self.pick_section, version='spec v4')
+                                         demo=self.demo, on_section=self.pick_section, version='spec v4', virtual=self.virtual)
         self.status = sh.status_var
-        self.conn_pill = sh.add_chip('Not connected', 'neutral')
+        self.conn_pill = sh.add_chip(self.chip_text() if self.demo else 'Not connected', 'neutral')
         sh.build_identity(self.asset, self.serial)
         self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
         self.summary = sh.build_progress()
-        if self.demo: sh.notice('Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode')
+        if self.demo: sh.notice(self.banner_text(), 'warn', title=virtualbench.BANNER_TITLE)
         else: sh.notice('The program switches the generator output OFF after every point and asks you to confirm the wiring before every new setup. '
                         'Power-meter flatness: the +20 dB range needs the -20 dB attenuator in front of the sensor.', 'info')
 
@@ -724,7 +729,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def pm_point_title(self, p): return f'{p.get("section_title", "")} - {p.get("desc", "")}'.strip(' -')
 
     def pm_standby(self):
-        if self.io is not None and not self.demo: self.io.all_off()
+        if self.io is not None and not self.fast_demo: self.io.all_off()
 
     def refresh(self):
         keep = self.tree.selection()
@@ -790,21 +795,32 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         return {k: v.get() for k, v in self.addr.items()}
 
     def test_connections(self):
-        if self.demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
+        if self.fast_demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
         self.status.set('Connecting ...'); self.root.update_idletasks()
         try:
             self.disconnect()
-            self.io = IO(self._addrs(), ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()],
-                         flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=self.pm_state)
+            if self.virtual:          # demo: the real IO / driver code over a simulated generator, 5790B and (when an address is given) counter / power meter
+                from drivers.simulated_fgen import make_fgen_bench
+                bench, t = make_fgen_bench(MODEL)
+                addrs = self._addrs()
+                t = {k: v for k, v in t.items() if k in ('uut', 'std') or (addrs.get(k) or '').strip()}        # a reference with no address is typed by hand, as in a real run
+                self._vb = (bench, None, None)
+                self.io = IO({}, transports=t, ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()],
+                             flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=self.pm_state, virtual=True)
+            else:
+                self.io = IO(self._addrs(), ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()],
+                             flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=self.pm_state)
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
-        self._set_conn(True); self._save_settings()
+        self._set_conn(True)
+        if not self.demo: self._save_settings()
         extra = '\n'.join(f'{n}: {o.idn}' for n, o in (('Counter', self.io.counter), ('Power meter', self.io.power)) if o)
         manual = [n for n, o in (('frequency counter', self.io.counter), ('power meter', self.io.power)) if not o]
-        self.status.set('Connected: ' + self.io.ident + '. Generator output is OFF.')
-        messagebox.showinfo('Connected', f'{MODEL}: {self.io.ident}\nFluke 5790B: {self.io.std.idn}\n{extra}\n'
-                            + (f'You will type the readings for: {", ".join(manual)}.\n' if manual else '') + 'Generator output is OFF.')
+        tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
+        self.status.set('Connected: ' + self.io.ident + tag + '. Generator output is OFF.')
+        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'{MODEL}: {self.io.ident}\nFluke 5790B: {self.io.std.idn}\n{extra}\n'
+                            + (f'You will type the readings for: {", ".join(manual)}.\n' if manual else '') + 'Generator output is OFF.' + tag)
 
     def disconnect(self):
         if self.io: self.io.close(); self.io = None
@@ -812,7 +828,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def _set_conn(self, ok):
         if hasattr(self, 'conn_pill'):
-            self.conn_pill.set('Connected' if ok else 'Connection failed' if ok is False else ('Demo - no hardware' if self.demo else 'Not connected'),
+            self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else ('Demo - no hardware' if self.demo else 'Not connected'),
                                'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -825,7 +841,11 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         """Called from the worker thread; asks on the main thread and waits."""
         box, done = {}, threading.Event()
         def ask():
-            try: box['v'] = simpledialog.askfloat('Type the reading', f'{prompt}\n\nReading in {unit}:', parent=self.root)
+            try:
+                if self.virtual:       # demo: the same window; the box holds a plausible simulated reading, which may be replaced
+                    box['v'] = simpledialog.askfloat('Type the reading' + ' [DEMO]', f'{prompt}\n\nReading in {unit}:\n\nDEMO: the box holds a simulated reading from the virtual bench; type your own if you like.',
+                                                     parent=self.root, initialvalue=virtualbench.fgen_typed_value(self._vb, unit))
+                else: box['v'] = simpledialog.askfloat('Type the reading', f'{prompt}\n\nReading in {unit}:', parent=self.root)
             finally: done.set()
         self.root.after(0, ask); done.wait()
         return box.get('v')
@@ -846,9 +866,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
         if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
-        if not self.demo and self.io is None: self.test_connections()
-        if not self.demo and self.io is None: return
-        if not self.demo and not self.conditions_ok and not ui.confirm_steps(self.root, 'Test conditions', 'Before you start',
+        if not self.fast_demo and self.io is None: self.test_connections()
+        if not self.fast_demo and self.io is None: return
+        if not self.fast_demo and not self.conditions_ok and not ui.confirm_steps(self.root, 'Test conditions', 'Before you start',
                 [('Warm-up', 'The generator has been powered on for at least 1 hour (manual, Test Considerations).'),
                  ('Environment', SPEC['source']['conditions'] + '.'),
                  ('Cables', 'Short RG-58 or equivalent 50 ohm cables only.')],
@@ -896,14 +916,15 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         except procmods_engine.LiveApplyError as exc: self._error(exc); return
         if p is None: self.root.after(30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
         key = point_group(p, self.method())
-        if not self.demo and key != previous:
+        if not self.fast_demo and key != previous:
             try: self.io.all_off()
             except Exception as exc: self._error(exc); return
             if not self._prompt_setup(p):
                 self.busy = False; self.status.set('Paused for wiring'); return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["section_title"]} - {p["desc"]}')
         if self.tree.exists(str(p['id'])): self.tree.selection_set(str(p['id'])); self.tree.see(str(p['id']))
-        if self.demo:
+        if self.virtual: virtualbench.fgen_operator_sets_up(self._vb, key)          # the virtual operator cables the output as the prompt said
+        if self.fast_demo:
             reading, raw = demo_reading(p)
             if p['kind'] == 'FLAT': raw = dict(raw, method=self.method())
             self._record(p, reading, raw, True); self.root.after(30, lambda: self._next(points, i + 1, key))
@@ -919,7 +940,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         threading.Thread(target=work, daemon=True).start()
 
     def _done(self, points, i, p, reading, raw, key):
-        self._record(p, reading, raw, False); self.root.after(30, lambda: self._next(points, i + 1, key))
+        self._record(p, reading, raw, bool(self.demo)); self.root.after(30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
         self.busy = False
@@ -1019,5 +1040,6 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 def main(model, argv=None):
     argv = sys.argv if argv is None else argv
     root = tk.Tk()
-    App(root, model, demo='--demo' in argv)
+    demo, fast = virtualbench.flags(argv)
+    App(root, model, demo=demo, fast_demo=fast)
     root.mainloop()
