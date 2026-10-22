@@ -1,8 +1,8 @@
-"""Headless driver for the multimeter engines' PDF / CSV export code (no tkinter, no instruments).
+"""Headless driver for the multimeter engines' PDF export code (no tkinter, no instruments).
 
 dump(root, outdir, show) imports each engine from the source tree `root` with tkinter stubbed, fills it with the readings its own --demo mode
 produces (deterministic, labelled synthetic; a few failing points are given an As Left reading), pins the clock, and runs the engine's real
-export_pdf() / export() with the file dialogs and the report dialog stubbed.  Returns {engine: {'pdf': Path, 'csv': Path | None}}.
+export_pdf() with the file dialogs and the report dialog stubbed.  Returns {engine: {'pdf': Path, 'rows': [...]}}.
 It is used by tests/test_tartur_wiring_dmm.py and, pointed at a baseline checkout, to prove toggle-off output is unchanged.
 """
 import contextlib
@@ -166,7 +166,7 @@ def dump(root, outdir, show, specs=ENGINES, home=None):
             _fresh(root)
             app, mod, points = build_engine(spec, root)
             tag = spec.replace(':', '_').replace(' ', '_')
-            pdf, csvp = outdir / f'{tag}.pdf', outdir / f'{tag}.csv'
+            pdf = outdir / f'{tag}.pdf'
             import report_dialog
             import report_pdf
             details = {'technician': 'T', 'temperature': '23', 'humidity': '40', 'standards': []}
@@ -181,11 +181,7 @@ def dump(root, outdir, show, specs=ENGINES, home=None):
                     pass
                 mod.ui.report_filename  # attribute exists
                 app.export_pdf()
-                res = {'pdf': pdf, 'csv': None}
-                if hasattr(app, 'export'):
-                    st.enter_context(mock.patch.object(mod.filedialog, 'asksaveasfilename', lambda **k: str(csvp)))
-                    app.export()
-                    res['csv'] = csvp
+                res = {'pdf': pdf}
             res['rows'] = app.certificate_rows()
             out[spec] = res
     finally:
@@ -200,4 +196,4 @@ if __name__ == '__main__':
     root, outdir, show = sys.argv[1], sys.argv[2], {'on': True, 'off': False, 'none': None}[sys.argv[3]]
     r = dump(root, outdir, show)
     for k, v in r.items():
-        print(k, len(v['rows']), v['pdf'].stat().st_size, v['csv'] and v['csv'].stat().st_size)
+        print(k, len(v['rows']), v['pdf'].stat().st_size)

@@ -199,7 +199,7 @@ Rules: the DMM reports use the scope's "Generate" entries (the calibrator that s
 only a Measure entry. uncertainty.Scope.dmm(..., basis='measure') gives the Measure value. Oscilloscope reports: oscilloscope DC / level-sine flatness
 entries for the WaveSurfer; Resistance - Measure for scope input impedance. A point on the boundary of two bands takes the
 LARGER CMC. Points the scope does not cover (RMS noise, DC current zero, 10 A AC) are left blank and counted in the footnote.
-The value is the CMC (k = 2) and excludes the unit under test. The CSV exports are unchanged.
+The value is the CMC (k = 2) and excludes the unit under test.
 To update after a scope revision: replace specs/a2la_1888_03_cmc.json (see specs/README.txt).
 
 Klein Tools MM325 (manual-ranging digital multimeter)
@@ -233,7 +233,7 @@ Procedures/Tektronix_MDO4000C_Verification.py   (engine: mdo4000c_verification.p
   SKIPPED with the reason (never guessed). AFG tests read the AFG with a SCPI DMM / counter, or the technician types the reading.
   Every cable, terminator, instrument or front-panel change is a prompt; DC points of 50 V and above and every RF output need a
   confirmation; all outputs go to standby / OFF after each point and on any error or Stop.
-  Math per point (worksheet values are kept in the checkpoint, CSV and the detail pane):
+  Math per point (worksheet values are kept in the checkpoint and the detail pane):
     DC gain      Vdiff = |Vneg_meas - Vpos_meas|; gain accuracy = (Vdiff - Vdiff_expected) / Vdiff_expected x 100 %
     Bandwidth    Gain = Vbw-pp / Vin-pp (Vin-pp at 50 kHz, Vbw-pp at the bandwidth frequency); must be >= 0.707
     Random noise RMS noise = SMV (sample mode) - AMV (16-average mode)

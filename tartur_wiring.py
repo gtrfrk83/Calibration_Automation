@@ -1,7 +1,7 @@
 """Glue between a verification engine's report points and tartur: the per-row TAR / TUR fields of an export.
 
 Used by the multimeter engines (truevolt, dacq, 34401A, 8846A).  Handhelds and others build their own limits and call tartur directly.
-Nothing here changes a report unless the 'Show TAR / TUR' choice is on; see report_pdf.apply_tar_tur / csv_columns / csv_cells.
+Nothing here changes a report unless the 'Show TAR / TUR' choice is on; see report_pdf.apply_tar_tur.
 """
 from __future__ import annotations
 

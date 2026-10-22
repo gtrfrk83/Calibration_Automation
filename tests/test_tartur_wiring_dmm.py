@@ -1,10 +1,9 @@
 """TAR / TUR wiring in the multimeter engines (truevolt, dacq, 34401A, 8846A, handheld family).
 
 * each engine's export path still calls the report helpers (fails if a wire is cut);
-* toggle off: PDF and CSV are byte-identical to origin/tartur-integration (same pinned clock), toggle on adds the columns;
+* toggle off: PDF is byte-identical to origin/tartur-integration (same pinned clock), toggle on adds the columns;
 * the limits and calibrator model fed to tartur are the ones the row's Tolerance / Uncertainty cells were built from.
 Engines are driven headlessly through tests/dmm_export_harness.py (tkinter stubbed, engines' own demo readings)."""
-import csv
 import re
 import subprocess
 import sys
@@ -28,7 +27,6 @@ HAVE_PDFTOTEXT = Path('/usr/bin/pdftotext').exists()
 
 POINT_ROW_ENGINES = {'truevolt_verification.py': "'5560A'", 'dacq_verification.py': 'self.cal_key', 'Procedures/Agilent_34401A.py': "'5560A'",
                      'Procedures/Fluke_8846A_Verification.py': "'5560A'"}
-CSV_ENGINES = ('truevolt_verification.py', 'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py')
 
 
 def src(rel):
@@ -59,18 +57,11 @@ class SourceWiring(unittest.TestCase):
         self.assertIn('standard=self.calibrator_model()', fields)
         self.assertIn('standard=self.calibrator_model()', s[s.index('def certificate_row('):s.index('def certificate_rows(')])
 
-    def test_csv_writers_extend_header_and_rows(self):
-        for rel in CSV_ENGINES:
-            s = src(rel)
-            body = s[s.index('def export(self)'):]
-            body = body[:body.index('def ', 10)] if 'def ' in body[10:] else body
-            for name in ('csv_show_tar_tur', 'csv_columns', 'csv_cells', 'point_fields'):
-                self.assertIn(name, body, f'{rel}: {name}')
-
     def test_helpers_exist(self):
         import report_pdf
-        for name in ('apply_tar_tur', 'csv_show_tar_tur', 'csv_columns', 'csv_cells'):
-            self.assertTrue(callable(getattr(report_pdf, name)))
+        self.assertTrue(callable(report_pdf.apply_tar_tur))
+        for name in ('csv_show_tar_tur', 'csv_columns', 'csv_cells'):
+            self.assertFalse(hasattr(report_pdf, name), name)
 
 
 class Limits(unittest.TestCase):
@@ -104,11 +95,6 @@ class Limits(unittest.TestCase):
         u = float(m.group(1)) * {None: 1, 'µ': 1e-6, 'm': 1e-3}[m.group(2)]
         want = tartur.format_ratio(0.0004 / u)
         self.assertEqual(tartur_wiring.point_fields(p, '5560A')['TUR'], want)
-
-
-def read_csv(path):
-    with open(path, encoding='utf-8-sig', newline='') as fh:
-        return list(csv.reader(fh))
 
 
 def run_dump(root, out, mode):
@@ -147,17 +133,16 @@ class Exports(unittest.TestCase):
 
     def test_all_engines_exported(self):
         self.assertEqual(len(self.files(self.off, '*.pdf')), 9)
-        self.assertEqual(len(self.files(self.off, '*.csv')), 4)
 
     def test_off_and_absent_key_are_identical(self):
-        for n in self.files(self.off, '*.pdf') + self.files(self.off, '*.csv'):
+        for n in self.files(self.off, '*.pdf'):
             self.assertEqual((self.off / n).read_bytes(), (self.none / n).read_bytes(), n)
 
     def test_off_identical_to_baseline(self):
         if self.base is None:
             self.skipTest('origin/tartur-integration not available')
-        names = self.files(self.base, '*.pdf') + self.files(self.base, '*.csv')
-        self.assertEqual(len(names), 13)
+        names = self.files(self.base, '*.pdf')
+        self.assertEqual(len(names), 9)
         for n in names:
             self.assertEqual((self.base / n).read_bytes(), (self.off / n).read_bytes(), n)
 
@@ -170,30 +155,6 @@ class Exports(unittest.TestCase):
             self.assertRegex(text, r'(?i)demo', n)                       # demo marking survives
             off = subprocess.run(['pdftotext', '-layout', str(self.off / n), '-'], capture_output=True, text=True).stdout
             self.assertNotIn('TUR', off, n)
-
-    def test_on_csv_extends_header_and_every_row(self):
-        for n in self.files(self.on, '*.csv'):
-            on = read_csv(self.on / n)
-            off = read_csv(self.off / n)
-            h = next(i for i, r in enumerate(on) if r and r[0] == 'Section')
-            self.assertEqual(on[h][-2:], ['TAR', 'TUR'], n)
-            self.assertEqual(on[:h], off[:h], n)
-            self.assertEqual(len(on), len(off), n)
-            filled = 0
-            for a, b in zip(on[h + 1:], off[h + 1:]):
-                self.assertEqual(a[:-2], b, n)                            # existing cells untouched
-                self.assertEqual(len(a), len(on[h]), n)
-                filled += bool(a[-1])
-            self.assertGreater(filled, 10, n)
-
-    def test_zero_offset_rows_stay_blank(self):
-        for n in ('truevolt_34461A.csv', 'agilent34401a.csv', 'fluke8846a.csv'):
-            rows = read_csv(self.on / n)
-            h = next(i for i, r in enumerate(rows) if r and r[0] == 'Section')
-            z = [r for r in rows[h + 1:] if r[0].upper().startswith('ZERO')]
-            self.assertTrue(z, n)
-            for r in z:
-                self.assertEqual(r[-2:], ['', ''], (n, r[:3]))
 
 
 if __name__ == '__main__':

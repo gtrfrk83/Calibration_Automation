@@ -137,22 +137,6 @@ def apply_tar_tur(rows, show, point_fields):
     return out
 
 
-def csv_show_tar_tur(show=None) -> TarTur:
-    """The selection for a CSV export: an explicit bool / TarTur if given, else the remembered dialog choice (a TarTur)."""
-    return remembered_show_tar_tur() if show is None else as_tar_tur(show)
-
-
-def csv_columns(show) -> list:
-    """Extra CSV header cells for the selected kinds (['TAR'], ['TUR'], ['TAR', 'TUR']); [] if none (file unchanged)."""
-    return [c for c, on in zip(TAR_TUR_COLUMNS, as_tar_tur(show)) if on]
-
-
-def csv_cells(show, fields) -> list:
-    """Extra CSV cells for one row from its tartur.row_fields dict (or None), for the selected kinds only; [] if none."""
-    fields = fields or {}
-    return [str(fields.get(c) or '') for c in csv_columns(show)]
-
-
 _FONT_CANDIDATES = (
     ('C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/arialbd.ttf'),
     ('/Library/Fonts/Arial.ttf', '/Library/Fonts/Arial Bold.ttf'),

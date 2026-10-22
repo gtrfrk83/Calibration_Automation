@@ -2,7 +2,7 @@
 Hardware I/O is OFF in demo mode. Never run unattended: wiring confirmations required.
 Source: Fluke 8845A/8846A Calibration Manual, Tables 3-4 and 3-18 (1-year).
 """
-import csv, json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
@@ -444,18 +444,6 @@ class App(datamode.DataModeMixin):
         except Exception as exc:
             messagebox.showerror('PDF export error',str(exc));return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-    def export(self):
-        path=filedialog.asksaveasfilename(defaultextension='.csv',filetypes=[('CSV','*.csv')],initialfile='8846A_verification.csv')
-        if not path:return
-        import report_pdf,tartur_wiring
-        show=report_pdf.csv_show_tar_tur()
-        with open(path,'w',newline='',encoding='utf-8-sig') as file:
-            writer=csv.writer(file);writer.writerow(['Instrument ID',self.asset.get(),'Serial Number',self.serial.get()]);writer.writerow(['SOURCE','Fluke 8845A/8846A Calibration Manual Appendix A Table A-2; 1-year verification']);writer.writerow(['DEMO DATA','YES' if self.demo or any(v.get('synthetic') for v in self.results.values()) else 'NO']);writer.writerow([])
-            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic','As Left','As Left status']+report_pdf.csv_columns(show))
-            for p in POINTS:
-                r=self.found.get(str(p['id']),{});lr=self.left.get(str(p['id']),{});n=p['nominal'];e=p['error']
-                writer.writerow(['ZERO '+p['kind'] if p.get('zero_offset') else p['kind'],p['description'],n,p['low'],p['high'],p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic',''),lr.get('reading','Same' if r else ''),lr.get('result','')]+report_pdf.csv_cells(show,tartur_wiring.point_fields(p,'5560A') if show and (r or lr) else None))
-        self.status.set(f'Exported 1-year verification: {path}')
     def export_excel(self):
         """Export a formatted, sectioned verification report. No synthetic results are certified."""
         try:

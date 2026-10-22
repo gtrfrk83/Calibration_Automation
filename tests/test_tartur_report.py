@@ -101,17 +101,6 @@ class Helpers(unittest.TestCase):
         out2 = report_pdf.apply_tar_tur(rows, True, lambda r: {'TAR': r['UOM']})
         self.assertEqual(out2[0]['TAR'], 'V')
 
-    def test_csv_helpers(self):
-        self.assertEqual(report_pdf.csv_columns(False), [])
-        self.assertEqual(report_pdf.csv_cells(False, {'TAR': '4:1'}), [])
-        self.assertEqual(report_pdf.csv_columns(True), ['TAR', 'TUR'])
-        self.assertEqual(report_pdf.csv_cells(True, {'TAR': '4:1', 'TUR': '3:1'}), ['4:1', '3:1'])
-        self.assertEqual(report_pdf.csv_cells(True, None), ['', ''])
-        row = ['a', 'b']
-        self.assertEqual(row + report_pdf.csv_cells(False, {'TAR': 'x'}), ['a', 'b'])
-        self.assertTrue(report_pdf.csv_show_tar_tur(True))
-        self.assertFalse(report_pdf.csv_show_tar_tur(False))
-
     def test_definition_never_empty(self):
         self.assertIn('TAR', report_pdf.tar_tur_definition())
 
@@ -237,21 +226,6 @@ class Selection(unittest.TestCase):
         self.assertEqual(sorted(k for k in report_pdf.apply_tar_tur(rows, TT(False, True), f)[0] if k in ('TAR', 'TUR')), ['TUR'])
         self.assertEqual(sorted(k for k in report_pdf.apply_tar_tur(rows, True, f)[0] if k in ('TAR', 'TUR')), ['TAR', 'TUR'])
         self.assertIs(report_pdf.apply_tar_tur(rows, TT(False, False), f), rows)
-
-    def test_csv_selection(self):
-        f = {'TAR': '4:1', 'TUR': '3:1'}
-        self.assertEqual(report_pdf.csv_columns(TT(True, False)), ['TAR'])
-        self.assertEqual(report_pdf.csv_cells(TT(True, False), f), ['4:1'])
-        self.assertEqual(report_pdf.csv_columns(TT(False, True)), ['TUR'])
-        self.assertEqual(report_pdf.csv_cells(TT(False, True), f), ['3:1'])
-        self.assertEqual(report_pdf.csv_columns(TT(True, True)), ['TAR', 'TUR'])
-        self.assertEqual(report_pdf.csv_cells(TT(True, True), f), ['4:1', '3:1'])
-        self.assertEqual(report_pdf.csv_columns(TT(False, False)), [])
-        self.assertEqual(report_pdf.csv_cells(TT(False, False), f), [])
-        self.assertEqual(report_pdf.csv_show_tar_tur(TT(False, True)), TT(False, True))
-        self.assertEqual(report_pdf.csv_show_tar_tur(True), TT(True, True))
-        with mock.patch.object(report_pdf, 'settings_path', return_value=Path('/nonexistent/q.json')):
-            self.assertEqual(report_pdf.csv_show_tar_tur(), TT(False, False))
 
     def test_definition_wording(self):
         both, tar, tur = (report_pdf.tar_tur_definition(TT(*x)) for x in ((1, 1), (1, 0), (0, 1)))

@@ -9,7 +9,7 @@ are required.
     import truevolt_verification
     truevolt_verification.main('34470A')       # what Procedures/Keysight_34470A_Verification.py does
 """
-import csv, json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
@@ -489,27 +489,6 @@ class App(datamode.DataModeMixin):
         except Exception as exc:
             messagebox.showerror('PDF export error',str(exc));return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-    def export(self):
-        path = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=[('CSV', '*.csv')], initialfile=f'{MODEL}_verification.csv')
-        if not path: return
-        demo = 'YES' if self.any_synthetic() else 'NO'
-        import report_pdf, tartur_wiring
-        show = report_pdf.csv_show_tar_tur()
-        with open(path, 'w', newline='', encoding='utf-8-sig') as file:
-            w = csv.writer(file)
-            w.writerow(['Instrument ID', self.asset.get(), 'Serial Number', self.serial.get()])
-            w.writerow(['SOURCE', f'{SPEC["source"]["document"]}, pp. {SPEC["source"]["pages"]}'])
-            w.writerow(['LIMITS APPLIED', self.period.get()]); w.writerow(['DEMO DATA', demo]); w.writerow([])
-            w.writerow(['Section', 'Description', 'Nominal', 'Tolerance -', 'Tolerance +', 'UOM', 'As Found', 'OOT', 'Status', 'Quick check', 'Manual page', 'Timestamp', 'Synthetic', 'As Left', 'As Left status'] + report_pdf.csv_columns(show))
-            for p in POINTS:
-                if p['optional'] and not self.include_optional.get() and str(p['id']) not in self.found: continue
-                r = self.found.get(str(p['id']), {}); n = p['nominal']; e = p['error']; lr = self.left.get(str(p['id']), {})
-                w.writerow([p['section_title'], p['description'], n, n - e, n + e, p['unit'], r.get('reading', ''),
-                            'OOT' if r.get('result') == 'FAIL' else '', r.get('result', ''), 'Q' if p['quick'] else '', p['page'],
-                            r.get('timestamp', ''), r.get('synthetic', ''), lr.get('reading', 'Same' if r else ''), lr.get('result', '')]
-                           + report_pdf.csv_cells(show, tartur_wiring.point_fields(p, '5560A') if show and (r or lr) else None))
-        self.status.set(f'Exported {path}')
-
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return
         self.stop = True; self._save_settings(); self.disconnect(); self.root.destroy()
