@@ -1389,7 +1389,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [self.tar_tur_for(p) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix MDO{c.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Options', opts), ('Source', 'MDO4000C Specifications and Performance Verification, 077-1178-01 Rev B')],
-                                             demo=demo, details=details, footer_note=note, title='Calibration Data')
+                                             demo=demo, details=details, footer_note=note, title='Calibration Data',
+                                             snapshot_context=report_pdf.context_for(self))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
         except Exception as exc:

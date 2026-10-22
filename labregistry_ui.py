@@ -4,9 +4,10 @@ from __future__ import annotations
 import os
 import tkinter as tk
 from datetime import date
-from tkinter import messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
 
 import labregistry as reg
+import report_snapshot as snap
 import ui_theme as ui
 
 def _tags(tree):
@@ -42,6 +43,9 @@ class HistoryPanel(ttk.Frame):
         self.runs.master.pack(fill='x')
         _tags(self.runs)
         self.runs.bind('<<TreeviewSelect>>', lambda _e: self.show_points())
+        self.runs.bind('<Double-1>', self._runs_double)                                   # choice: regenerate the PDF / open the saved one
+        for button in ('<Button-3>', '<Button-2>'):                                         # context menu (right click; middle button on macOS)
+            self.runs.bind(button, self._runs_menu)
         head = ttk.Frame(self)
         head.pack(fill='x', pady=(10, 3))
         ttk.Label(head, text='Points in the selected report', style='Bold.TLabel').pack(side='left')
@@ -58,6 +62,13 @@ class HistoryPanel(ttk.Frame):
         self.btn_drift.pack(side='left')
         self.btn_open = ttk.Button(buttons, text='Open report PDF', command=self.open_report)
         self.btn_open.pack(side='left', padx=8)
+        self.btn_regen = ttk.Button(buttons, text='Regenerate PDF...', command=self.regenerate_pdf)
+        self.btn_regen.pack(side='left')
+        self.regen_note = tk.StringVar()
+        ttk.Label(buttons, textvariable=self.regen_note, style='Muted.TLabel').pack(side='left', padx=10)
+        self.menu = tk.Menu(self, tearoff=0)
+        self.menu.add_command(label='Regenerate PDF...', command=self.regenerate_pdf)
+        self.menu.add_command(label='Open report PDF', command=self.open_report)
         self.refresh()
 
     def refresh(self):
@@ -104,6 +115,62 @@ class HistoryPanel(ttk.Frame):
             self.points.insert('', 'end', iid=str(n), values=(p['section'], p['description'], p['nominal'], p['low'], p['high'], p['found'], p['unit'],
                                                               p['result'], pct), tags=('fail',) if p['result'] == 'FAIL' else ())
         self._points = reg.points_for(int(sel[0])) if sel else []
+        self._show_regen_hint(int(sel[0]) if sel else None)
+
+    # ------------------------------------------------------------------------------------------ regenerate the PDF of an event
+    def _show_regen_hint(self, run_id):
+        """One line saying whether the selected event can be printed again (report_snapshot.availability); never raises."""
+        try:
+            self.regen_note.set(snap.availability(run_id)[1] if run_id is not None else '')
+        except Exception:
+            self.regen_note.set('')
+
+    def _selected_run_id(self):
+        sel = self.runs.selection()
+        return int(sel[0]) if sel else None
+
+    def regenerate_pdf(self):
+        """Print the selected event's report again (report_snapshot.regenerate): ask where to save, never overwrite without asking."""
+        parent = self.winfo_toplevel()
+        run_id = self._selected_run_id()
+        if run_id is None:
+            messagebox.showinfo('Regenerate PDF', 'Select a report in the middle table first.', parent=parent)
+            return
+
+        def choose(default_name, original):
+            options = dict(parent=parent, title='Save regenerated report', defaultextension='.pdf', initialfile=default_name,
+                           filetypes=[('PDF report', '*.pdf')], confirmoverwrite=False)       # the overwrite question is asked by overwrite() below
+            if original and os.path.isdir(os.path.dirname(original)):
+                options['initialdir'] = os.path.dirname(original)
+            return filedialog.asksaveasfilename(**options)
+
+        def overwrite(path, is_original):
+            what = 'This is the file the original report was saved to.\n\n' if is_original else ''
+            return messagebox.askyesno('Replace file?', f'{what}{os.path.basename(path)} already exists. Replace it?', icon='warning', default='no', parent=parent)
+
+        result = snap.regenerate(run_id, choose_path=choose, confirm_overwrite=overwrite,
+                                 confirm_rebuilt=lambda text: messagebox.askokcancel('Rebuild from history rows', text + '\n\nContinue?', parent=parent))
+        if result.message:                                  # a cancel has no message
+            messagebox.showinfo('Regenerate PDF', result.message, parent=parent)
+
+    def _runs_double(self, event=None):
+        """Double-click on a report: choose between regenerating the PDF and opening the saved one."""
+        if event is not None and not self.runs.identify_row(event.y):
+            return
+        choice = choose_action(self.winfo_toplevel())
+        if choice == 'regenerate':
+            self.regenerate_pdf()
+        elif choice == 'open':
+            self.open_report()
+
+    def _runs_menu(self, event):
+        row = self.runs.identify_row(event.y)
+        if row:
+            self.runs.selection_set(row)
+            try:
+                self.menu.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.menu.grab_release()
 
     def open_report(self):
         sel = self.runs.selection()
@@ -127,6 +194,28 @@ class HistoryPanel(ttk.Frame):
             return
         p = self._points[int(sel[0])]
         open_drift_chart(self.winfo_toplevel(), asset, p['section'], p['description'], p['unit'])
+
+
+def choose_action(parent):
+    """Small three-button question: 'regenerate' / 'open' / None."""
+    win = ui.dialog(parent, 'Report')
+    outer = ttk.Frame(win, padding=(18, 14, 18, 14))
+    outer.pack(fill='both', expand=True)
+    ttk.Label(outer, text='What would you like to do with this report?', style='Bold.TLabel').pack(anchor='w')
+    ttk.Label(outer, text='Regenerate prints it again from the record saved when it was issued (it asks where to save).', style='Muted.TLabel').pack(anchor='w', pady=(2, 10))
+    picked = {'v': None}
+
+    def done(value):
+        picked['v'] = value
+        win.destroy()
+    bar = ttk.Frame(outer)
+    bar.pack(fill='x')
+    ttk.Button(bar, text='Regenerate PDF...', style='Accent.TButton', command=lambda: done('regenerate')).pack(side='left')
+    ttk.Button(bar, text='Open saved PDF', command=lambda: done('open')).pack(side='left', padx=8)
+    ttk.Button(bar, text='Cancel', command=lambda: done(None)).pack(side='right')
+    win.bind('<Escape>', lambda _e: done(None))
+    parent.wait_window(win)
+    return picked['v']
 
 
 def open_drift_chart(parent, asset, section, description, unit=''):

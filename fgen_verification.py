@@ -958,7 +958,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                                                                  ('Serial', self.serial.get()), ('Limits applied', self.period.get()),
                                                                  ('Flatness method', ', '.join(FLAT_METHODS[m] for m in used) or 'not tested'),
                                                                  ('Source', f'{SPEC["source"]["document"]}, {SPEC["source"]["chapter"]}, pp. {SPEC["source"]["pages"]}')],
-                                             demo=demo, details=details, footer_note=note, title='Calibration Data')
+                                             demo=demo, details=details, footer_note=note, title='Calibration Data',
+                                             snapshot_context=report_pdf.context_for(self))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
         except Exception as exc:
