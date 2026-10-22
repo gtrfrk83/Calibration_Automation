@@ -29,7 +29,7 @@ LIGHT = dict(
     danger='#FF3B30', danger_hi='#E0281D', danger_lo='#C21A10', danger_off='#FFB3AE',
     combo_btn='#EAEFF5', combo_btn_hi='#DCE5F0', trough='#E3E3E8', scroll='#D1D1D6', scroll_hi='#A1A1A6', scroll_lo='#8E8E93',
     tip='#3A3A3C', row_even='#FFFFFF',
-    row_pass='#FFFFFF', row_pass_fg='#1D1D1F', row_fail='#FFFFFF', row_fail_fg='#B3261E', row_warn='#FFFFFF', row_warn_fg='#8A5A00',
+    row_pass='#FFFFFF', row_pass_fg='#1F7A3A', row_fail='#FFFFFF', row_fail_fg='#B3261E', row_warn='#FFFFFF', row_warn_fg='#8A5A00',
 )
 
 # Flat warm-charcoal dark theme with one blue accent (the beta's default look).
@@ -49,7 +49,7 @@ DARK = dict(
     danger='#C0392B', danger_hi='#D64535', danger_lo='#A12F23', danger_off='#4A2522',
     combo_btn='#33322F', combo_btn_hi='#3B3A37', trough='#33322F', scroll='#555450', scroll_hi='#6F6D67', scroll_lo='#8A8780',
     tip='#44433F', row_even='#2B2A28',
-    row_pass='#2B2A28', row_pass_fg='#ECE9E1', row_fail='#2B2A28', row_fail_fg='#F87171', row_warn='#2B2A28', row_warn_fg='#FBBF24',
+    row_pass='#2B2A28', row_pass_fg='#34D399', row_fail='#2B2A28', row_fail_fg='#F87171', row_warn='#2B2A28', row_warn_fg='#FBBF24',
 )
 PALETTES = {'light': LIGHT, 'dark': DARK}
 C = dict(LIGHT)                    # the live palette: modules read ui.C at use time; use_palette() changes it in place
