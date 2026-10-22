@@ -144,7 +144,19 @@ class Exports(unittest.TestCase):
         names = self.files(self.base, '*.pdf')
         self.assertEqual(len(names), 9)
         for n in names:
+            if n == 'handheld_Fluke_87V.pdf':
+                self.check_87v_rows_only(n)          # the 87V points 1-48 / 1-49 (peak Min/Max square wave) and 1-50 / 1-51 (degC) changed on purpose
+                continue
             self.assertEqual((self.base / n).read_bytes(), (self.off / n).read_bytes(), n)
+
+    def check_87v_rows_only(self, n):
+        import difflib
+        txt = lambda d: subprocess.run(['pdftotext', '-layout', str(d / n), '-'], capture_output=True, text=True).stdout.splitlines()
+        changed = [l[2:] for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
+        self.assertTrue(changed)
+        for l in changed:
+            self.assertRegex(l, r'Min / Max|^\s*6 V range|Type K range', l)
+        self.assertLessEqual(len(changed), 14)
 
     def test_on_pdf_has_columns_and_values(self):
         for n in self.files(self.on, '*.pdf'):

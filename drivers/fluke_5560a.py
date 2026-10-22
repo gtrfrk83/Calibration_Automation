@@ -6,6 +6,7 @@ Reference: Fluke 5560A Remote Programming (verify against your firmware before a
 """
 from __future__ import annotations
 
+import dataclasses
 import math
 import time
 
@@ -15,6 +16,7 @@ from .base import Instrument, InstrumentError, SafetyError
 from .transport import SerialSettings
 
 _REF = 'Fluke 5560A Remote Programming'
+_REF_5522_SQ = '5522A Operators Manual pp. 6-48 (WAVE), 6-13 (DC_OFFSET), 5-28 (coupled commands), 4-42 and 1-24 (square wave amplitude in p-p)'
 
 
 def _f(sample=1.0, fmt='.9g'):
@@ -82,6 +84,22 @@ COMMANDS = {
                    placeholders={'tc_type': Placeholder('str', '', 'K')}, kind='set', verified=False),
     'out.temp': Cmd('OUT {celsius:.9g}CEL', 'Thermocouple simulation temperature', 'Not verified on a 5560A',
                     placeholders={'celsius': _f(100.0)}, kind='set', verified=False),
+    # ---- square wave with a duty cycle and a DC offset (handheld DMM duty-cycle and Peak Min/Max points). Coupled commands:
+    # WAVE, OUT and DC_OFFSET are programmed together in ONE compound line (5522A Operators Manual p. 5-28); DUTY is not coupled and follows.
+    # Square-wave amplitude is peak-to-peak (5522A Operators Manual p. 4-42, spec table p. 1-24). The 5560A manual could not be read when
+    # these were added: they are verified=False here and the 5522A (Fluke5522A.COMMANDS) carries the page references.
+    'wave.square.out': Cmd('WAVE SQUARE; OUT {vpp:.9g}V,{freq}; DC_OFFSET {offset:.9g}V', 'Square wave: amplitude (p-p), frequency, DC offset',
+                           'One compound line of coupled commands. Amplitude is peak-to-peak. Not verified on a 5560A',
+                           placeholders={'vpp': _f(5.0), 'freq': Placeholder('str', '', '1kHz'), 'offset': _f(2.5)}, kind='set',
+                           readback='wave.query', verified=False),
+    'duty.set': Cmd('DUTY {duty:.9g}', 'Square wave duty cycle (%)', 'Single-output square waves only, 1.00 to 99.00 %. Not verified on a 5560A',
+                    placeholders={'duty': _f(50.0)}, kind='set', readback='duty.query', verified=False),
+    'duty.query': Cmd('DUTY?', 'Square wave duty cycle', 'Percent', kind='query', verified=False),
+    'wave.query': Cmd('WAVE?', 'Waveform', 'SINE / TRI / SQUARE / TRUNCS (a second name for a dual output)', kind='query', verified=False),
+    'dcoffset.query': Cmd('DC_OFFSET?', 'DC offset', 'Volts; 0 means no offset', kind='query', verified=False),
+    'wave.sine.offset0': Cmd('WAVE SINE; DC_OFFSET 0V', 'Back to a sine wave with no DC offset',
+                             'One compound line of coupled commands, sent with the output in standby after a square-wave point. Not verified on a 5560A',
+                             kind='set', readback='wave.query', verified=False),
     'trg.measr': Cmd('*TRG', 'Trigger a resistance reading', 'In MEASR mode *TRG is a query and returns value + units (never overridable)',
                      kind='query', risk='locked', verified=True, ref=_REF),
     'err.query': Cmd('ERR?', 'Error queue', 'Oldest error; reading removes it (error-queue path, never overridable)', kind='query',
@@ -134,8 +152,12 @@ class Fluke5560A(Instrument):
 
     RESET_SCOPE_OFF = False        # True for the oscilloscope procedures: the calibrator is also left with its SCOPE function OFF after the reset
 
+    def _reset_standby(self):
+        self.standby()
+        self.wave_nonsine = False      # *RST has just put the waveform back to its power-up state (sine, no offset)
+
     def _reset_extra(self):
-        steps = [('output in STANDBY (STBY, OPER? = 0)', self.standby)]
+        steps = [('output in STANDBY (STBY, OPER? = 0)', self._reset_standby)]
         if self.RESET_SCOPE_OFF:
             steps.append(('SCOPE function OFF (SCOPE OFF, SCOPE? = OFF)', self.scope_off))
         return steps
@@ -302,6 +324,60 @@ class Fluke5560A(Instrument):
         self.send('tc.type', tc_type=tc_type)
         self.send('out.temp', celsius=celsius)
 
+    # ---- square wave with duty cycle and DC offset (NORMAL terminals) --------------------------------------------
+    wave_nonsine = False        # True from the moment a square wave is programmed until WAVE SINE is read back (never leave a square wave selected)
+
+    @staticmethod
+    def _first_number(reply):
+        return float(str(reply).split(',')[0].strip())
+
+    def set_output_square(self, vpp, frequency_hz, duty_pct=50.0, offset_v=0.0):
+        """Square wave on the NORMAL terminals: `WAVE SQUARE; OUT <vpp>V,<freq>; DC_OFFSET <offset>V` as ONE compound line (WAVE, OUT and
+        DC_OFFSET are coupled commands), then `DUTY <duty>`. Amplitude is PEAK-TO-PEAK. The error queue is read, then WAVE? (SQUARE),
+        DUTY? (within 0.01 %), DC_OFFSET? and OUT? are read back and compared; any difference raises InstrumentError and the output is not
+        operated. Every write is sent once. wave_nonsine is set BEFORE the first write, so cleanup (restore_sine) always runs."""
+        self.wave_nonsine = True
+        self.send('wave.square.out', vpp=vpp, freq=self._freq_text(frequency_hz), offset=offset_v)
+        self.send('duty.set', duty=duty_pct)
+        self.check_error(f'square wave {vpp:g} V p-p, {frequency_hz:g} Hz, {duty_pct:g} % duty, offset {offset_v:g} V')
+        wave = self.ask('wave.query').strip().upper().split(',')[0].strip()
+        if wave != 'SQUARE':
+            raise InstrumentError(f'{self.label} did not select a square wave: WAVE?={wave!r}')
+        duty = self._first_number(self.ask('duty.query'))
+        if abs(duty - duty_pct) > 0.01:
+            raise InstrumentError(f'{self.label} duty cycle mismatch: DUTY?={duty:g} vs {duty_pct:g} %')
+        offset = self._first_number(self.ask('dcoffset.query'))
+        if not math.isclose(offset, offset_v, rel_tol=1e-4, abs_tol=1e-4):
+            raise InstrumentError(f'{self.label} DC offset mismatch: DC_OFFSET?={offset:g} V vs {offset_v:g} V')
+        reply = self.ask('out.query').strip()
+        parts = [x.strip() for x in reply.split(',')]
+        try:
+            amp = float(parts[0])
+            freq = float(parts[4]) if len(parts) >= 5 else float(parts[2]) if len(parts) >= 4 and parts[3].upper() == 'HZ' else None
+        except (ValueError, IndexError):
+            raise InstrumentError(f'Unexpected {self.label} OUT? response: {reply}')
+        if len(parts) < 2 or parts[1].upper() != 'V':
+            raise InstrumentError(f'Unexpected {self.label} OUT? response: {reply}')
+        if not math.isclose(amp, vpp, rel_tol=1e-5, abs_tol=1e-6):
+            raise InstrumentError(f'{self.label} square-wave amplitude mismatch: OUT? {amp:g} V vs {vpp:g} V peak-to-peak')
+        if freq is not None and not math.isclose(freq, frequency_hz, rel_tol=1e-5):
+            raise InstrumentError(f'{self.label} square-wave frequency mismatch: OUT? {freq:g} Hz vs {frequency_hz:g} Hz')
+
+    def restore_sine(self):
+        """`WAVE SINE; DC_OFFSET 0V` (one compound line), read back WAVE? (SINE) and DC_OFFSET? (0). Only with the output confirmed in
+        STANDBY (OPER? is a read-only query). Sent once, never retried; wave_nonsine stays set unless everything reads back as expected."""
+        if self.ask('oper.query').strip() != '0':
+            raise SafetyError(f'{self.label} is not in standby: the square wave was not changed back to a sine wave')
+        self.send('wave.sine.offset0')
+        self.check_error('WAVE SINE, DC offset 0 V')
+        wave = self.ask('wave.query').strip().upper().split(',')[0].strip()
+        if wave != 'SINE':
+            raise InstrumentError(f'{self.label} did not return to a sine wave: WAVE?={wave!r}')
+        offset = self._first_number(self.ask('dcoffset.query'))
+        if abs(offset) > 1e-6:
+            raise InstrumentError(f'{self.label} DC offset not cleared: DC_OFFSET?={offset:g} V')
+        self.wave_nonsine = False
+
     def read_error(self) -> str:
         """ERR? -> oldest error in the queue ('0,\"No error\"' when empty); reading removes it."""
         return self.ask('err.query').strip()
@@ -344,4 +420,16 @@ class Fluke5522A(Fluke5560A):
     COMMANDS = {
         'reset': cmdreg.reset_cmd(True, '5522A Operators Manual p. 6-35 (*RST: power-up state, STBY, holds off later commands until done)'),
         'opc.query': cmdreg.opc_cmd(True, '5522A Operators Manual p. 5-44 (Using *OPC?, *OPC, *WAI)'),
+        # square wave with duty cycle and DC offset: syntax from the Operators Manual (WAVE p. 6-48, DC_OFFSET p. 6-13, DUTY p. 6-14, coupled
+        # commands p. 5-28, square-wave amplitude in p-p p. 4-42 and p. 1-24). The remote OUT? reply for a square wave is not documented
+        # (the program compares its first field with the p-p amplitude and stops the point on a difference).
+        'wave.square.out': dataclasses.replace(COMMANDS['wave.square.out'], verified=True, ref=_REF_5522_SQ,
+                                               description='One compound line of coupled commands (p. 5-28). Amplitude is peak-to-peak (p. 4-42)'),
+        'duty.set': dataclasses.replace(COMMANDS['duty.set'], verified=True, ref='5522A Operators Manual p. 6-14 (DUTY: 1.00 to 99.00 %, single-output square waves only)',
+                                        description='Single-output square waves only, 1.00 to 99.00 %'),
+        'duty.query': dataclasses.replace(COMMANDS['duty.query'], verified=True, ref='5522A Operators Manual p. 6-14 (DUTY?)'),
+        'wave.query': dataclasses.replace(COMMANDS['wave.query'], verified=True, ref='5522A Operators Manual p. 6-48 (WAVE?: SINE, TRI, SQUARE, TRUNCS, NONE)'),
+        'dcoffset.query': dataclasses.replace(COMMANDS['dcoffset.query'], verified=True, ref='5522A Operators Manual p. 6-13 (DC_OFFSET?)'),
+        'wave.sine.offset0': dataclasses.replace(COMMANDS['wave.sine.offset0'], verified=True, ref='5522A Operators Manual pp. 6-48, 6-13, 5-28 (WAVE, DC_OFFSET, coupled commands)',
+                                                 description='One compound line of coupled commands, sent in standby after a square-wave point'),
     }

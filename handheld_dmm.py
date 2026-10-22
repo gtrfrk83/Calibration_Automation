@@ -53,7 +53,9 @@ WIRING = {
     'SCOPE_SINE': 'Calibrator SCOPE output (leveled sine, 50 Ω) to the oscilloscope input through the 50 Ω BNC cable and a 50 Ω feedthrough terminator at the scope input.',
     'SCOPE_MARKER': 'Calibrator SCOPE output (time marker) to the oscilloscope input with the BNC cable and a 50 Ω feedthrough terminator at the scope input.',
 }
-SYMBOL = {'ohm': 'Ω', 'V': 'V', 'A': 'A', 'F': 'F', 'Hz': 'Hz', 'C': '°C', 'degF': '°F', 'S': 'S', '%': '%', 's': 's', 'dB': 'dB'}
+SYMBOL = {'ohm': 'Ω', 'V': 'V', 'A': 'A', 'F': 'F', 'Hz': 'Hz', 'C': '°C', 'degC': '°C', 'degF': '°F', 'S': 'S', '%': '%', 's': 's', 'dB': 'dB'}
+TEMP_BASE_UNITS = ('C', 'degC', 'degF')     # temperatures are never SI-prefixed (no 'k°C'); the calibrator always sources degrees C
+SQUARE_KINDS = ('DUTY', 'SQUARE')          # square-wave sources: applied = value (V peak-to-peak), frequency, duty (%), offset (V DC); DUTY is read as duty cycle, SQUARE as DCV (Peak Min Max)
 
 
 def load_spec(path=SPEC_PATH):
@@ -89,9 +91,13 @@ def output_text(p):
     if not a:
         return 'No calibrator output (STANDBY)'
     kind, v, f = p['kind'], a['value'], a.get('frequency')
-    unit = {'ACV': 'V', 'DCV': 'V', 'ACI': 'A', 'DCI': 'A', 'OHM': 'ohm', 'CAP': 'F', 'TEMP': 'C'}[kind]
+    unit = {'ACV': 'V', 'DCV': 'V', 'ACI': 'A', 'DCI': 'A', 'OHM': 'ohm', 'CAP': 'F', 'TEMP': 'C', 'DUTY': 'V', 'SQUARE': 'V'}[kind]
     text = _fmt(v, unit)
-    if kind in ('ACV', 'ACI'):
+    if kind in SQUARE_KINDS:
+        text += f' p-p square wave, {_fmt(f, "Hz")}, {a.get("duty", 50.0):g} % duty'
+        if a.get('offset'):
+            text += f', {_fmt(a["offset"], "V")} DC offset'
+    elif kind in ('ACV', 'ACI'):
         text += f' AC @ {_fmt(f, "Hz")}'
     elif kind in ('DCV', 'DCI'):
         text += ' DC'
@@ -178,7 +184,14 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         return (self.cal,)
 
     def standby(self):
+        """Output to STANDBY; a calibrator left on a square wave (duty-cycle / Peak Min Max points) is put back to WAVE SINE with no DC offset
+        straight after (once, read back; a failure is logged and the next point refuses to start, see apply)."""
         self.cal.standby_quiet()
+        if getattr(self.cal, 'wave_nonsine', False):
+            try:
+                self.cal.restore_sine()
+            except Exception as exc:
+                self.log.add('!!', f'square wave NOT changed back to sine: {exc}', self.cal.label)
 
     def close(self):
         try:
@@ -231,6 +244,9 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         kind, v, f = p['kind'], a['value'], a.get('frequency')
         context = describe(p)
         self.standby()
+        if getattr(self.cal, 'wave_nonsine', False) and kind not in SQUARE_KINDS:
+            raise drivers.InstrumentError('The calibrator is still on a square wave (WAVE SINE was not confirmed after the last square-wave point): '
+                                          'output not enabled. Run again (the calibrator is reset to its defaults first).')
         if kind in ('DCV', 'ACV'):
             self._volts(v, f, context, cancel, ramp=p.get('ramp'), dc=kind == 'DCV')
         else:
@@ -242,6 +258,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 self.cal.set_output_capacitance(v)
             elif kind == 'TEMP':
                 self.cal.set_output_temperature(v)
+            elif kind in SQUARE_KINDS:
+                self.cal.set_output_square(v, f, a.get('duty', 50.0), a.get('offset', 0.0))
             else:
                 raise ValueError('No calibrator output for ' + kind)
             self.cal.check_error(context)      # the calibrator refuses outputs it cannot make; never operate then
@@ -1348,7 +1366,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 row['As Found'] += '  (AC annunciator ' + ('on' if r['annunciator'] else 'OFF') + ')'
             if p['kind'] == 'ACV' and p['display_unit'] == 'kHz':
                 row['Description'] = f'{p["range"]} range (2 V applied)'
-            if p['base_unit'] in ('C', 'degF'):        # temperatures are never SI-prefixed (no 'k°C')
+            if p['base_unit'] in TEMP_BASE_UNITS:      # temperatures are never SI-prefixed (no 'k°C')
                 d = max(len(x.split('.')[1]) if '.' in x else 0 for x in (p['low'], p['high']))
                 row.update({'Nominal': f'{p["nominal"]:.{d}f} {unit}', 'Tolerance -': p['low'], 'Tolerance +': p['high'], 'UOM': unit})
                 if r['reading'] is not None:

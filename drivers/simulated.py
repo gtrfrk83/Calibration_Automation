@@ -14,7 +14,7 @@ from .transport import Transport, TransportError
 
 class SimBench:
     def __init__(self, gain_error=1.0005, offset_v=0.0001):
-        self.fluke = dict(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', ohms=50.02)
+        self.fluke = dict(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', ohms=50.02, wave='SINE', duty=50.0, offset=0.0)
         self.scope = {}
         self.gain_error, self.offset_v = gain_error, offset_v
         self.fail_next = None        # set to a substring to make the next matching command time out
@@ -98,13 +98,29 @@ class SimFlukeTransport(_SimBase):
         if u in getattr(self, 'reject', ()):
             self.errors = getattr(self, 'errors', []) + ['-117,"Wrong type of parameter(s)"']
             return None
+        if ';' in cmd:                                     # compound line (coupled commands WAVE / OUT / DC_OFFSET): run each segment in order
+            reply = None
+            for part in cmd.split(';'):
+                if part.strip():
+                    reply = self._handle(part.strip())
+            return reply
+        if u.startswith('WAVE '): f['wave'] = u.split()[1].split(',')[0]; return None
+        if u == 'WAVE?': return f['wave'] + ',NONE'
+        if u.startswith('DUTY '):
+            if f['wave'] != 'SQUARE': self.errors = getattr(self, 'errors', []) + ['-221,"Settings conflict"']; return None
+            f['duty'] = float(re.sub(r'[^0-9.eE+-]', '', u.split()[1])); return None
+        if u == 'DUTY?': return f"{f['duty']:.3E}"
+        if u.startswith('DC_OFFSET '):
+            m = re.match(r'DC_OFFSET\s+([-+0-9.eE]+)\s*(MV|V)?$', u)
+            f['offset'] = float(m.group(1)) * (0.001 if m.group(2) == 'MV' else 1.0); return None
+        if u == 'DC_OFFSET?': return f"{f['offset']:+.5E}"
         if u == 'SCOPE MARKER': f['scope'], f['func'] = 'MARKER', 'SMARK'; return None
         m = re.match(r'OUT\s+([0-9.eE+-]+)S$', u)
         if m and f['scope'] == 'MARKER':
             f['period'] = float(m.group(1)); return None
         if u == 'OUT?' and f['scope'] == 'MARKER': return f"{f.get('period', 0.0):.9E},S"
         if u == '*RST':
-            f.update(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M'); f.pop('period', None)
+            f.update(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', wave='SINE', duty=50.0, offset=0.0); f.pop('period', None)
             self.errors = []; self.next_error = None; return None
         if u == '*OPC?': return '1'
         if u == 'STBY': f['operate'] = False; return None

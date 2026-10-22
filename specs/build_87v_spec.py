@@ -29,8 +29,17 @@ UNITS = {'mV': ('mV', '0.001', 'V'), 'V': ('V', '1', 'V'), 'Vpp': ('Vpp', '1', '
          'nS': ('nS', '0.000000001', 'S'), 'A': ('A', '1', 'A'), 'mA': ('mA', '0.001', 'A'), 'µA': ('µA', '0.000001', 'A'),
          'nF': ('nF', '0.000000001', 'F'), 'µF': ('µF', '0.000001', 'F'), '°F': ('°F', '1', 'degF')}
 
+
+def f_to_c(text):
+    """Exact (F - 32) * 5 / 9 of a printed °F number, as a one-decimal string ('30.2' -> '-1.0', '212' -> '100.0')."""
+    c = (D(text) - 32) * 5 / 9
+    q = c.quantize(D('0.1'))
+    assert q == c, f'{text} °F is not an exact one-decimal °C value'
+    return str(q)
+
 # per MDD row number: (section, switch, range, kind, extra)
-# kind: ACV DCV ACI DCI OHM CAP TEMP, or NONE (numeric reading with no calibrator output)
+# kind: ACV DCV ACI DCI OHM CAP TEMP, DUTY / SQUARE (square-wave source: applied = value in V peak-to-peak, frequency, duty %, DC offset V), or NONE
+# (numeric reading with no calibrator output)
 ROWS = {}
 
 
@@ -48,8 +57,11 @@ rows(13, 13, 'AC volts frequency sensitivity', 'Hz  (frequency, AC volts input)'
 rows(14, 14, 'AC volts frequency sensitivity', 'Hz  (frequency, AC volts input)', '60 V', 'ACV', note='The meter displays FREQUENCY on this step.')
 rows(15, 15, 'DC volts frequency trigger level', 'Hz  (frequency, DC volts input)', '', 'NONE',
      setup='Set the calibrator or a function generator to 3.4 Vpp at 1000 Hz and connect it to the meter VΩ and COM inputs (this step has no automatic calibrator output). Select the DC volts frequency (Hz) function.')
-rows(16, 16, 'DC volts duty cycle', 'Hz  (duty cycle, DC volts input)', '6 V', 'NONE',
-     setup='Set a 50 % duty-cycle signal on the meter VΩ and COM inputs (this step has no automatic calibrator output). Select the duty-cycle function.')
+# Duty cycle: the calibrator sources the square wave (87 Series V Calibration Manual Table 3 step 16, p. 9: 5 V, 1 kHz, DC offset 2.5 V Sq. Wave).
+# 5 V is peak-to-peak (5522A Operators Manual p. 4-42); the meter shows the duty cycle in %.
+rows(16, 16, 'DC volts duty cycle', 'Hz  (duty cycle, DC volts input)', '6 V', 'DUTY',
+     square=dict(value=5.0, frequency=1000.0, duty=50.0, offset=2.5),
+     note='The meter displays DUTY CYCLE (%) on this step. The calibrator applies a 5 V p-p square wave, 1 kHz, 2.5 V DC offset, 50 % duty (manual Table 3 step 16, p. 9).')
 for n, rng in zip(range(17, 23), ['6 V', '60 V', '600 V', '1000 V', '600 mV', '600 mV']):
     ROWS[n] = ('DC volts', 'mV  (DC millivolts)' if rng == '600 mV' else DCV_SW, rng, 'DCV', {})
 for n, rng in zip(range(23, 29), ['600 Ω', '6 kΩ', '60 kΩ', '600 kΩ', '6 MΩ', '60 MΩ']):
@@ -72,12 +84,30 @@ ROWS[45] = ('Capacitance', 'Capacitance', '100 µF', 'CAP', dict(settle=15))
 LPF = 'Enable the meter low-pass filter mode on the AC volts function for this step (see the 87V manual).'
 ROWS[46] = ('Low pass filter', ACV_SW, '', 'ACV', dict(note=LPF))
 ROWS[47] = ('Low pass filter', ACV_SW, '', 'ACV', dict(note=LPF))
-ROWS[48] = ('Min / Max', DCV_SW, '6 V', 'DCV', dict(note='Press MIN MAX and read the MAX value (MDD step: Min/Max: Max).'))
-ROWS[49] = ('Min / Max', DCV_SW, '6 V', 'DCV', dict(note='MIN MAX is on: read the MIN value (MDD step: Min/Max: Min).'))
+# Peak Min/Max (87 Series V Calibration Manual Table 3 step 47, p. 11): 6 V dc range, calibrator 6 Vpp, 2 kHz Sq. Wave, DC offset 1 V, so the signal swings
+# +4 V / -2 V; Max = 3.897 to 4.103 V, Min = -1.898 to -2.102 V (87 column). Both points use the SAME square wave; the meter is read in DC volts.
+# The MDD's MAX row (source +6 V DC, 5.896 to 6.104 V) does not match the manual: the manual's source and Max limits are used (the MIN row is identical).
+# The indicator 'p' = Peak Min Max mode, response time 250 us (display feature table); the manual does not say which key enters it.
+PEAK_SQ = dict(value=6.0, frequency=2000.0, duty=50.0, offset=1.0)
+ROWS[48] = ('Peak Min / Max', DCV_SW, '6 V', 'SQUARE', dict(
+    square=PEAK_SQ, limits=('3.897', '4.103'), nominal=4.0,
+    prompt='With the meter on V DC (6 V range), select Peak Min Max (the p indicator shows the 250 µs Peak Min Max mode), then read MAX.',
+    note='Peak Min/Max, read the MAX value. Calibrator: 6 V p-p square wave, 2 kHz, 1 V DC offset, so the signal swings +4 V / -2 V (manual Table 3 step 47, p. 11).'))
+ROWS[49] = ('Peak Min / Max', DCV_SW, '6 V', 'SQUARE', dict(
+    square=PEAK_SQ,
+    prompt='Peak Min Max is on: step the meter to MIN (the display shows MIN) and read it.',
+    note='Peak Min/Max, read the MIN value (same 6 V p-p, 2 kHz, 1 V offset square wave; manual Table 3 step 47, p. 11). '
+         'After you record this reading, exit Min Max by pressing and holding the MIN MAX button (manual p. 9, pushbutton test step 3).'))
+# The MDD prints the temperature limits in °F. The meter is set to °C and the calibrator sources °C, so the limits and nominal are the exact
+# conversions (F - 32) * 5 / 9 of the printed ones: 30.2 / 33.8 °F -> -1.0 / 1.0 °C and 210.2 / 213.8 °F -> 99.0 / 101.0 °C.
+# NOTE: the 87 Series V Calibration Manual (Table 3 steps 49 / 50, p. 11) prints -1.0 to 1.0 and 98.0 to 102.0 °C, i.e. WIDER at 100 °C.
+# The MDD-derived (tighter) limits are kept until the lab owner decides.
+TEMP_NOTE = ('Connect the K-type thermocouple between the meter and the calibrator (80AK adapter); allow the junctions to stabilise. '
+             'The meter shows °C (set the meter to °C); the calibrator is set in °C.')
 ROWS[50] = ('Temperature', 'Temperature', 'Type K', 'TEMP', dict(group='TEMP', settle=30, celsius=0.0,
-            note='Connect the K-type thermocouple between the meter and the calibrator (80AK adapter); allow the junctions to stabilise. The meter shows °F; the calibrator is set in °C.'))
+            note=TEMP_NOTE))
 ROWS[51] = ('Temperature', 'Temperature', 'Type K', 'TEMP', dict(group='TEMP', settle=30, celsius=100.0,
-            note='Connect the K-type thermocouple between the meter and the calibrator (80AK adapter); allow the junctions to stabilise. The meter shows °F; the calibrator is set in °C.'))
+            note=TEMP_NOTE))
 
 
 def number(text):
@@ -111,6 +141,14 @@ def build(mdd: Path):
             tol_unit = re.sub(r'\[.*?\]', '', (p.get('Text_Tolerance') or '').split('~')[0]).split()[-1]
             low, high = p['Tol_Low'].strip(), p['Tol_High'].strip()
         display, factor, base = UNITS[tol_unit]
+        if kind == 'TEMP':                           # the meter is set to °C: limits and nominal are the exact conversions of the printed °F values
+            assert tol_unit == '°F'
+            display, factor, base = '°C', '1', 'degC'
+            low, high, nominal_text = f_to_c(low), f_to_c(high), f_to_c(nominal_text)
+        if 'limits' in extra:                        # manual-derived limits (peak Min/Max MAX)
+            low, high = extra['limits']
+        if 'nominal' in extra:
+            nominal_text = str(extra['nominal'])
         step = dict(table='1', step=n, section=section, switch=switch, range=rng, models=['87V'], kind=kind, display_unit=display,
                     factor=float(D(factor)), base_unit=base, low=low, high=high, test='numeric')
         # what the calibrator applies
@@ -124,9 +162,13 @@ def build(mdd: Path):
             value, f = extra['applied']
             step['applied'] = dict(value=clean(value), frequency=f)
             step['nominal'] = clean(D(nominal_text) * D(factor))
+        elif 'square' in extra:                       # square-wave source (duty cycle, peak Min/Max)
+            step['applied'] = dict(extra['square'])
+            step['nominal'] = clean(D(nominal_text) * D(factor))
         elif kind == 'TEMP':
             step['applied'] = dict(value=extra['celsius'], frequency=None)
             step['nominal'] = clean(D(nominal_text) * D(factor))
+            assert step['nominal'] == extra['celsius'], 'nominal °C must equal the calibrator output'
         elif reading_is_frequency:                    # frequency reading: the voltage is in the condition, the frequency is the nominal
             m_v = re.search(r'@\s*([\d.]+)\s*(mV|V)', cond)
             volts = D(m_v.group(1)) * (D('0.001') if m_v.group(2) == 'mV' else 1)
@@ -144,7 +186,7 @@ def build(mdd: Path):
             step['section'] = 'Low pass filter'
             step['range'] = f'400 V @ {int(step["applied"]["frequency"])} Hz'
             step['nominal'] = 400.0
-        for key in ('note', 'setup', 'group', 'settle', 'no_uncertainty'):
+        for key in ('note', 'setup', 'group', 'settle', 'no_uncertainty', 'prompt'):
             if key in extra:
                 step[key] = extra[key]
         if kind == 'NONE' and n == 43:
@@ -159,7 +201,9 @@ def build(mdd: Path):
                     pages='MDD points 1-51', cite='Fluke 87 Series V calibration datasheet (MDD), 365 day interval',
                     limits='Limits as printed in the MDD datasheet (365 day)',
                     note='Limits are the MDD datasheet limits. Capacitance (open) and the two low-pass-filter rows are printed as Pass/Fail with a numeric range; '
-                         'they are recorded here as numeric readings against that range. Calibrator: Fluke 5560A or 5522A.'),
+                         'they are recorded here as numeric readings against that range. Calibrator: Fluke 5560A or 5522A.'
+                         " Duty cycle (1-16) and Peak Min/Max (1-48, 1-49) are sourced as square waves per the 87 Series V Calibration Manual Table 3 (printed pp. 9 and 11); "
+                         "the Peak Min/Max MAX limits are the manual's (the MDD printed a 6 V DC source). Temperature limits are the exact degC conversions of the MDD's degF limits."),
         models={'87V': dict(name='Fluke 87V', brand='Fluke', model_note='Fluke 87 Series V true-rms digital multimeter')},
         steps=steps)
 

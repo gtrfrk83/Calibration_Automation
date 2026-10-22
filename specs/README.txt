@@ -14,6 +14,9 @@ Included
   fluke_110_series_pv.json  Fluke 110/113/114/115/116/117 Calibration Information, Tables 3-4 (schema 2: manual-reading; limits are the
                             exact printed display-reading strings, each step lists the models it applies to)
   fluke_87v_pv.json         Fluke 87 Series V, 51 points (schema 2, written by build_87v_spec.py from the MDD datasheet)
+                            Duty cycle (1-16) and Peak Min/Max (1-48, 1-49) are sourced as square waves per the 87 Series V Calibration Manual
+                            Table 3 (printed pp. 9, 11); temperature (1-50, 1-51) is read and sourced in degC (the MDD printed degF).
+                            build_87v_spec.py was edited by hand for this and NOT re-run (the MDD is not in the repository).
   keysight_33210a_pv.json / _33220a_ / _33250a_   function generators (schema 4, written by build_fgen_spec.py from the page images of
                             each Service Guide's Chapter 4): 39 / 54 / 54 points; periods 90d / 1y (they differ only for the timebase)
   fgen_332xx_reference_cmc.json  editable uncertainties for the generator procedure (RF flatness has no A2LA entry; blank = N/A)
@@ -34,6 +37,17 @@ Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, f
                             turn the meter, with the calibrator in standby. Points of group NONE (functional checks, hand-set points) get none
                             (they carry their own prompt and set the function); with options.range_prompt (MM325) the dial prompt shown at every
                             point takes its place. On in all four handheld specs.
+
+Square-wave sources in handheld specs (additive; handheld_dmm.py, procspec.validate_manual_reading)
+  step.kind                 DUTY    square-wave source, the meter reads the duty cycle (%) (87V 1-16)
+                            SQUARE  square-wave source, the meter reads DC volts (87V peak Min/Max 1-48 / 1-49)
+  step.applied              {value: amplitude in V PEAK-TO-PEAK, frequency: Hz, duty: 1-99 % (default 50), offset: V DC (default 0)}
+                            a DC offset needs duty 50 % (5522A Operators Manual p. 4-47). The calibrator sends one compound line
+                            `WAVE SQUARE; OUT <vpp>V,<freq>; DC_OFFSET <offset>V` (coupled commands, 5522A p. 5-28), then `DUTY <duty>`, and reads back
+                            WAVE? / DUTY? / DC_OFFSET? / OUT?. Whenever the output goes to standby (after the point, on stop / abort / close) the engine
+                            sends `WAVE SINE; DC_OFFSET 0V` and reads it back; a square wave is never left selected.
+  step.prompt               (existing field) shown in the 'Meter setup' dialog before the point (87V 1-48 / 1-49)
+  TEMP steps                the calibrator sources degC, so display_unit must be degC (base_unit 'C' or 'degC'); a degF TEMP step is a spec error.
 
 Schema (schema 1)
   periods / default_period      ["24h","90d","1y","2y"] / "90d"

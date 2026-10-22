@@ -3951,6 +3951,874 @@
    ]
   },
   {
+   "call": "{'applied': {'duty': 50.0, 'frequency': 1000.0, 'offset': 2.5, 'value': 5.0}, 'base_unit': '%', 'display_unit': '%', 'factor': 1.0, 'group': 'VOHM', 'high': '50.3', 'id': '1-16', 'kind': 'DUTY', 'low': '49.7', 'models': ['87V'], 'n': 16, 'nominal': 50.0, 'note': 'The meter displays DUTY CYCLE (%) on this step. The calibrator applies a 5 V p-p square wave, 1 kHz, 2.5 V DC offset, 50 % duty (manual Table 3 step 16, p. 9).', 'range': '6 V', 'section': 'DC volts duty cycle', 'step': 16, 'switch': 'Hz  (duty cycle, DC volts input)', 'table': '1', 'test': 'numeric'}",
+   "case": "handheld_dmm.IO.apply[87V DUTY#16]",
+   "log": [
+    "Fluke 5522A|>>|STBY",
+    "Fluke 5522A|>>|WAVE SQUARE; OUT 5V,1kHz; DC_OFFSET 2.5V",
+    "Fluke 5522A|>>|DUTY 50",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|WAVE?",
+    "Fluke 5522A|<<|SQUARE,NONE",
+    "Fluke 5522A|>>|DUTY?",
+    "Fluke 5522A|<<|5.000E+01",
+    "Fluke 5522A|>>|DC_OFFSET?",
+    "Fluke 5522A|<<|+2.50000E+00",
+    "Fluke 5522A|>>|OUT?",
+    "Fluke 5522A|<<|5.000000000,V,1000.0,HZ",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|OPER"
+   ],
+   "method": "handheld_dmm.IO.apply",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "WAVE SQUARE; OUT 5V,1kHz; DC_OFFSET 2.5V"
+    ],
+    [
+     "W",
+     "DUTY 50"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "WAVE?",
+     "SQUARE,NONE"
+    ],
+    [
+     "Q",
+     "DUTY?",
+     "5.000E+01"
+    ],
+    [
+     "Q",
+     "DC_OFFSET?",
+     "+2.50000E+00"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "5.000000000,V,1000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "handheld_dmm.IO.standby[87V after DUTY#16]",
+   "log": [
+    "Fluke 5522A|>>|STBY",
+    "Fluke 5522A|>>|OPER?",
+    "Fluke 5522A|<<|0",
+    "Fluke 5522A|>>|WAVE SINE; DC_OFFSET 0V",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|WAVE?",
+    "Fluke 5522A|<<|SINE,NONE",
+    "Fluke 5522A|>>|DC_OFFSET?",
+    "Fluke 5522A|<<|+0.00000E+00"
+   ],
+   "method": "handheld_dmm.IO.standby",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "WAVE SINE; DC_OFFSET 0V"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "WAVE?",
+     "SINE,NONE"
+    ],
+    [
+     "Q",
+     "DC_OFFSET?",
+     "+0.00000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "{'applied': {'duty': 50.0, 'frequency': 2000.0, 'offset': 1.0, 'value': 6.0}, 'base_unit': 'V', 'display_unit': 'V', 'factor': 1.0, 'group': 'VOHM', 'high': '4.103', 'id': '1-48', 'kind': 'SQUARE', 'low': '3.897', 'models': ['87V'], 'n': 48, 'nominal': 4.0, 'note': 'Peak Min/Max, read the MAX value. Calibrator: 6 V p-p square wave, 2 kHz, 1 V DC offset, so the signal swings +4 V / -2 V (manual Table 3 step 47, p. 11).', 'prompt': 'With the meter on V DC (6 V range), select Peak Min Max (the p indicator shows the 250 µs Peak Min Max mode), then read MAX.', 'range': '6 V', 'section': 'Peak Min / Max', 'step': 48, 'switch': 'V⎓  (DC volts)', 'table': '1', 'test': 'numeric'}",
+   "case": "handheld_dmm.IO.apply[87V SQUARE#48]",
+   "log": [
+    "Fluke 5522A|>>|STBY",
+    "Fluke 5522A|>>|WAVE SQUARE; OUT 6V,2kHz; DC_OFFSET 1V",
+    "Fluke 5522A|>>|DUTY 50",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|WAVE?",
+    "Fluke 5522A|<<|SQUARE,NONE",
+    "Fluke 5522A|>>|DUTY?",
+    "Fluke 5522A|<<|5.000E+01",
+    "Fluke 5522A|>>|DC_OFFSET?",
+    "Fluke 5522A|<<|+1.00000E+00",
+    "Fluke 5522A|>>|OUT?",
+    "Fluke 5522A|<<|6.000000000,V,2000.0,HZ",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|OPER"
+   ],
+   "method": "handheld_dmm.IO.apply",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "WAVE SQUARE; OUT 6V,2kHz; DC_OFFSET 1V"
+    ],
+    [
+     "W",
+     "DUTY 50"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "WAVE?",
+     "SQUARE,NONE"
+    ],
+    [
+     "Q",
+     "DUTY?",
+     "5.000E+01"
+    ],
+    [
+     "Q",
+     "DC_OFFSET?",
+     "+1.00000E+00"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "6.000000000,V,2000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "handheld_dmm.IO.standby[87V after SQUARE#48]",
+   "log": [
+    "Fluke 5522A|>>|STBY",
+    "Fluke 5522A|>>|OPER?",
+    "Fluke 5522A|<<|0",
+    "Fluke 5522A|>>|WAVE SINE; DC_OFFSET 0V",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|WAVE?",
+    "Fluke 5522A|<<|SINE,NONE",
+    "Fluke 5522A|>>|DC_OFFSET?",
+    "Fluke 5522A|<<|+0.00000E+00"
+   ],
+   "method": "handheld_dmm.IO.standby",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "WAVE SINE; DC_OFFSET 0V"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "WAVE?",
+     "SINE,NONE"
+    ],
+    [
+     "Q",
+     "DC_OFFSET?",
+     "+0.00000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "{'applied': {'frequency': None, 'value': 0.0}, 'base_unit': 'degC', 'display_unit': '°C', 'factor': 1.0, 'group': 'TEMP', 'high': '1.0', 'id': '1-50', 'kind': 'TEMP', 'low': '-1.0', 'models': ['87V'], 'n': 50, 'nominal': 0.0, 'note': 'Connect the K-type thermocouple between the meter and the calibrator (80AK adapter); allow the junctions to stabilise. The meter shows °C (set the meter to °C); the calibrator is set in °C.', 'range': 'Type K', 'section': 'Temperature', 'settle': 30, 'step': 50, 'switch': 'Temperature', 'table': '1', 'test': 'numeric'}",
+   "case": "handheld_dmm.IO.apply[87V TEMP#50]",
+   "log": [
+    "Fluke 5522A|>>|STBY",
+    "Fluke 5522A|>>|TC_TYPE K",
+    "Fluke 5522A|>>|OUT 0CEL",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|OPER"
+   ],
+   "method": "handheld_dmm.IO.apply",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "TC_TYPE K"
+    ],
+    [
+     "W",
+     "OUT 0CEL"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "sleep",
+     0.25
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "handheld_dmm.IO.standby[87V after TEMP#50]",
+   "log": [
+    "Fluke 5522A|>>|STBY"
+   ],
+   "method": "handheld_dmm.IO.standby",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
    "call": "",
    "case": "handheld_dmm.IO.close",
    "log": [

@@ -256,6 +256,11 @@ def run_handheld():
     p289 = H.points_for(spec, '289')
     for p in sample([p for p in p289 if p.get('applied') and p['kind'] in ('ACV', 'DCI', 'CAP', 'TEMP')], lambda p: (p['kind'], bool(p.get('ramp'))), 6):
         c.run(f'handheld_dmm.IO.apply[289 {p["kind"]}#{p["n"]}]', io.apply, p, _log=io.log)
+    # the 87V spec: duty cycle (square wave + offset), peak Min/Max (square wave), temperature in degC; standby after each restores WAVE SINE
+    for p in H.points_for(H.load_spec('fluke_87v_pv.json'), '87V'):
+        if p['id'] in ('1-16', '1-48', '1-50'):
+            c.run(f'handheld_dmm.IO.apply[87V {p["kind"]}#{p["n"]}]', io.apply, p, _log=io.log)
+            c.run(f'handheld_dmm.IO.standby[87V after {p["kind"]}#{p["n"]}]', io.standby, _log=io.log)
     c.run('handheld_dmm.IO.close', io.close, _log=io.log)
     # IR reads
     bench2 = SimBench()
