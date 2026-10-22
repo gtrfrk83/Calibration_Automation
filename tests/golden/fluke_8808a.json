@@ -1,0 +1,1687 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Fluke8808A.connect",
+   "log": [
+    "8808A|>>|*IDN?",
+    "8808A|<<|FLUKE, 8808A, SIM0001, 1.0 D1.0",
+    "8808A|>>|REMS",
+    "8808A|>>|*CLS"
+   ],
+   "method": "Fluke8808A.connect",
+   "result": "returned <Fluke8808A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE, 8808A, SIM0001, 1.0 D1.0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*CLS"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.identify",
+   "log": [
+    "8808A|>>|*IDN?",
+    "8808A|<<|FLUKE, 8808A, SIM0001, 1.0 D1.0"
+   ],
+   "method": "Fluke8808A.identify",
+   "result": "returned 'FLUKE, 8808A, SIM0001, 1.0 D1.0'",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE, 8808A, SIM0001, 1.0 D1.0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.remote",
+   "log": [
+    "8808A|>>|REMS"
+   ],
+   "method": "Fluke8808A.remote",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.local",
+   "log": [
+    "8808A|>>|LOCS"
+   ],
+   "method": "Fluke8808A.local",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "LOCS"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.cleanup",
+   "log": [
+    "8808A|>>|LOCS"
+   ],
+   "method": "Fluke8808A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "LOCS"
+    ]
+   ]
+  },
+  {
+   "call": "'FORMAT 1'",
+   "case": "Fluke8808A.write",
+   "log": [
+    "8808A|>>|FORMAT 1"
+   ],
+   "method": "Fluke8808A.write",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FORMAT 1"
+    ]
+   ]
+  },
+  {
+   "call": "'FORMAT?'",
+   "case": "Fluke8808A.query",
+   "log": [
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.query",
+   "result": "returned '1'",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "'rate.set', rate='S'",
+   "case": "Fluke8808A.send[set]",
+   "log": [
+    "8808A|>>|RATE S"
+   ],
+   "method": "Fluke8808A.send",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ]
+   ]
+  },
+  {
+   "call": "'reset'",
+   "case": "Fluke8808A.send[reset settles]",
+   "log": [
+    "8808A|>>|*RST"
+   ],
+   "method": "Fluke8808A.send",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "sleep",
+     3.0
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'range': 0.2}",
+   "case": "Fluke8808A.configure_point[DCV]",
+   "log": [
+    "8808A|>>|VDC",
+    "8808A|>>|FUNC1?",
+    "8808A|<<|VDC",
+    "8808A|>>|FIXED",
+    "8808A|>>|AUTO?",
+    "8808A|<<|0",
+    "8808A|>>|RANGE 1",
+    "8808A|>>|RANGE1?",
+    "8808A|<<|1",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "VDC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FUNC1?",
+     "VDC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FIXED"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RANGE 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RANGE1?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'range': 1000.0}",
+   "case": "Fluke8808A.configure_point[DCV 1000 V]",
+   "log": [
+    "8808A|>>|VDC",
+    "8808A|>>|FUNC1?",
+    "8808A|<<|VDC",
+    "8808A|>>|FIXED",
+    "8808A|>>|AUTO?",
+    "8808A|<<|0",
+    "8808A|>>|RANGE 5",
+    "8808A|>>|RANGE1?",
+    "8808A|<<|5",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "VDC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FUNC1?",
+     "VDC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FIXED"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RANGE 5"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RANGE1?",
+     "5"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'ACV', 'range': 750.0}",
+   "case": "Fluke8808A.configure_point[ACV 750 V]",
+   "log": [
+    "8808A|>>|VAC",
+    "8808A|>>|FUNC1?",
+    "8808A|<<|VAC",
+    "8808A|>>|FIXED",
+    "8808A|>>|AUTO?",
+    "8808A|<<|0",
+    "8808A|>>|RANGE 5",
+    "8808A|>>|RANGE1?",
+    "8808A|<<|5",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "VAC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FUNC1?",
+     "VAC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FIXED"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RANGE 5"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RANGE1?",
+     "5"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCI', 'range': 10.0}",
+   "case": "Fluke8808A.configure_point[DCI 10 A]",
+   "log": [
+    "8808A|>>|ADC",
+    "8808A|>>|FUNC1?",
+    "8808A|<<|ADC",
+    "8808A|>>|FIXED",
+    "8808A|>>|AUTO?",
+    "8808A|<<|0",
+    "8808A|>>|RANGE 6",
+    "8808A|>>|RANGE1?",
+    "8808A|<<|6",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "ADC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FUNC1?",
+     "ADC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FIXED"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RANGE 6"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RANGE1?",
+     "6"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'ACI', 'range': 0.02}",
+   "case": "Fluke8808A.configure_point[ACI 20 mA]",
+   "log": [
+    "8808A|>>|AAC",
+    "8808A|>>|FUNC1?",
+    "8808A|<<|AAC",
+    "8808A|>>|FIXED",
+    "8808A|>>|AUTO?",
+    "8808A|<<|0",
+    "8808A|>>|RANGE 1",
+    "8808A|>>|RANGE1?",
+    "8808A|<<|1",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "AAC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FUNC1?",
+     "AAC"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FIXED"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RANGE 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RANGE1?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM2', 'range': 2000.0}",
+   "case": "Fluke8808A.configure_point[OHM2]",
+   "log": [
+    "8808A|>>|OHMS",
+    "8808A|>>|FUNC1?",
+    "8808A|<<|OHMS",
+    "8808A|>>|WIRE2",
+    "8808A|>>|FIXED",
+    "8808A|>>|AUTO?",
+    "8808A|<<|0",
+    "8808A|>>|RANGE 2",
+    "8808A|>>|RANGE1?",
+    "8808A|<<|2",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "OHMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FUNC1?",
+     "OHMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "WIRE2"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FIXED"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RANGE 2"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RANGE1?",
+     "2"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM4', 'range': 2000.0}",
+   "case": "Fluke8808A.configure_point[OHM4]",
+   "log": [
+    "8808A|>>|OHMS",
+    "8808A|>>|FUNC1?",
+    "8808A|<<|OHMS",
+    "8808A|>>|WIRE4",
+    "8808A|>>|FIXED",
+    "8808A|>>|AUTO?",
+    "8808A|<<|0",
+    "8808A|>>|RANGE 2",
+    "8808A|>>|RANGE1?",
+    "8808A|<<|2",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "OHMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FUNC1?",
+     "OHMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "WIRE4"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FIXED"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RANGE 2"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RANGE1?",
+     "2"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'FREQ', 'range': 20000.0}",
+   "case": "Fluke8808A.configure_point[FREQ no rate]",
+   "log": [
+    "8808A|>>|FREQ",
+    "8808A|>>|FUNC1?",
+    "8808A|<<|FREQ",
+    "8808A|>>|FIXED",
+    "8808A|>>|AUTO?",
+    "8808A|<<|0",
+    "8808A|>>|RANGE 2",
+    "8808A|>>|RANGE1?",
+    "8808A|<<|2",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1"
+   ],
+   "method": "Fluke8808A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FREQ"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FUNC1?",
+     "FREQ"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FIXED"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "AUTO?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RANGE 2"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RANGE1?",
+     "2"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'range': 100.0}",
+   "case": "Fluke8808A.configure_point[bad range]",
+   "log": [],
+   "method": "Fluke8808A.configure_point",
+   "result": "raised InstrumentError: The 8808A has no 100 range for DCV (Table 4-11A, p. 4-22)",
+   "wire": []
+  },
+  {
+   "call": "{'kind': 'CAP', 'range': 1e-07}",
+   "case": "Fluke8808A.configure_point[CAP unsupported]",
+   "log": [],
+   "method": "Fluke8808A.configure_point",
+   "result": "raised InstrumentError: Fluke 8808A driver does not support CAP",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.read",
+   "log": [
+    "8808A|>>|MEAS1?",
+    "8808A|<<|+1.900040E-01",
+    "8808A|>>|MEAS1?",
+    "8808A|<<|+1.900040E-01"
+   ],
+   "method": "Fluke8808A.read",
+   "result": "returned 0.190004",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "MEAS1?",
+     "+1.900040E-01"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "MEAS1?",
+     "+1.900040E-01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.read[overload]",
+   "log": [
+    "8808A|>>|MEAS1?",
+    "8808A|<<|+1.000000E+09",
+    "8808A|>>|MEAS1?",
+    "8808A|<<|+1.000000E+09"
+   ],
+   "method": "Fluke8808A.read",
+   "result": "raised InstrumentError: Fluke 8808A: overload reading +1.000000E+09 (input not connected, wrong range or wrong function)",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "MEAS1?",
+     "+1.000000E+09"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "MEAS1?",
+     "+1.000000E+09"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Fluke8808A.check_errors[ok]",
+   "log": [
+    "8808A|>>|*ESR?",
+    "8808A|<<|0"
+   ],
+   "method": "Fluke8808A.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'configuring'",
+   "case": "Fluke8808A.check_errors[command error]",
+   "log": [
+    "8808A|>>|*ESR?",
+    "8808A|<<|32"
+   ],
+   "method": "Fluke8808A.check_errors",
+   "result": "raised InstrumentError: Fluke 8808A reported command error after configuring (*ESR? = 32)",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "32"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.connect[wrong model]",
+   "log": [
+    "8808A|>>|*IDN?",
+    "8808A|<<|FLUKE, 8846A, 1, 1.0"
+   ],
+   "method": "Fluke8808A.connect",
+   "result": "raised InstrumentError: Unexpected DMM identification: FLUKE, 8846A, 1, 1.0",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE, 8846A, 1, 1.0"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.connect[echo on]",
+   "log": [
+    "8808A|>>|*IDN?",
+    "8808A|<<|=> FLUKE, 8808A, 1, 1.0"
+   ],
+   "method": "Fluke8808A.connect",
+   "result": "raised InstrumentError: The 8808A is replying with prompts: Echo is ON. Turn Echo off in the front-panel serial settings (Users Manual Table 4-1, p. 4-4; factory setting: off) and connect again.",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "=> FLUKE, 8808A, 1, 1.0"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.reset_to_defaults",
+   "log": [
+    "8808A|>>|*RST",
+    "8808A|>>|*CLS",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1",
+    "8808A|>>|*ESR?",
+    "8808A|<<|0",
+    "8808A|>>|REMS",
+    "8808A|>>|FORMAT 1",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER 1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|*ESR?",
+    "8808A|<<|0"
+   ],
+   "method": "Fluke8808A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='8808A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='*ESR? = 0'), ResetStep(name='re-enter remote (REMS)', ok=True, detail=''), ResetStep(name='reply format 1 (FORMAT 1, read back)', ok=True, detail='1'), ResetStep(name='internal trigger (TRIGGER 1, read back)', ok=True, detail='1'), ResetStep(name='slow rate (RATE S, read back)', ok=True, detail='S'), ResetStep(name='event status after the reset', ok=True, detail='no error bits')], warnings=[])",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FORMAT 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "TRIGGER 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.reset_to_defaults[error bit set: warning]",
+   "log": [
+    "8808A|>>|*RST",
+    "8808A|>>|*CLS",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1",
+    "8808A|>>|*ESR?",
+    "8808A|<<|32",
+    "8808A|!!|event status after reset: command error",
+    "8808A|>>|REMS",
+    "8808A|>>|FORMAT 1",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER 1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|*ESR?",
+    "8808A|<<|0"
+   ],
+   "method": "Fluke8808A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='8808A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='*ESR? = 32 (command error)'), ResetStep(name='re-enter remote (REMS)', ok=True, detail=''), ResetStep(name='reply format 1 (FORMAT 1, read back)', ok=True, detail='1'), ResetStep(name='internal trigger (TRIGGER 1, read back)', ok=True, detail='1'), ResetStep(name='slow rate (RATE S, read back)', ok=True, detail='S'), ResetStep(name='event status after the reset', ok=True, detail='no error bits')], warnings=['event status after reset: command error'])",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "32"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FORMAT 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "TRIGGER 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  }
+ ],
+ "name": "fluke_8808a",
+ "schema": 1
+}

@@ -55,6 +55,7 @@ MODEL_IDS = {
     'handheld': 'the spec model key, e.g. 115 or 289',
     'a34401': '34401A',
     'f8846a': '8846A',
+    'f8808a': '8808A',
     'mdo': 'MDO4000C',
     'ws': 'WS4104HD',
 }
@@ -91,6 +92,10 @@ for _e, _name in (('a34401', '34401A'), ('f8846a', '8846A')):
     _t(_e, 'settle.zero', 1.5, 0.2, 120.0, f'{_name}: settle before a zero-offset reading')
     _t(_e, 'settle.ac', 3.5, 0.2, 120.0, f'{_name}: settle, AC points')
     _t(_e, 'settle.default', 2.0, 0.2, 120.0, f'{_name}: settle, other points')
+for _key, _default, _what in (('zero', 2.0, 'settle before a zero-offset reading'), ('default', 2.0, 'settle, DC, resistance and current points'),
+                              ('ac', 4.0, 'settle, AC points'), ('freq', 3.0, 'settle, frequency points'),
+                              ('ohm_high', 4.0, 'settle, resistance ranges of 10 Mohm and above')):
+    _t('f8808a', 'settle.' + _key, _default, 0.2, 120.0, f'8808A: {_what}')
 _t('fgen', 'settle.timebase', 2.0, 0.2, 120.0, 'Function generator: settle, time base')
 _t('fgen', 'settle.acamp', 1.0, 0.2, 120.0, 'Function generator: settle, AC amplitude')
 _t('fgen', 'settle.lfflat', 1.0, 0.2, 120.0, 'Function generator: settle, low-frequency flatness')

@@ -35,11 +35,13 @@ import procmods  # noqa: E402
 import procmods_engine as pe  # noqa: E402
 from drivers.simulated import make_dacq_bench, make_dmm_bench  # noqa: E402
 from drivers.simulated_fgen import make_fgen_bench  # noqa: E402
+from drivers.simulated_8808a import make_8808a_bench  # noqa: E402
 from drivers.simulated_mdo import make_mdo_bench  # noqa: E402
 from drivers.simulated import make_bench  # noqa: E402
 from tests import golden_capture as gc  # noqa: E402
 
 import dacq_verification as D  # noqa: E402
+import fluke8808a_verification as K  # noqa: E402
 import fgen_verification as F  # noqa: E402
 import handheld_dmm as H  # noqa: E402
 import mdo4000c_verification as M  # noqa: E402
@@ -162,6 +164,15 @@ def build_dacq(mods):
     return io, lambda: [safe(io.measure, p) for p in pts]
 
 
+def build_f8808a(mods):
+    K.configure()
+    bench, ft, dt = make_8808a_bench('5522A', enforce_cal_limits=False)
+    io = K.IO('sim', 'sim', cal_model='Fluke 5522A', transports=(gc.RecordingTransport(dt), gc.RecordingTransport(ft)), mods=mods)
+    pts = _sample(K.POINTS, lambda p: (p['kind'], p['source'], p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7, p['kind'] == 'ACV'), 14)
+    io.reset_at_start()          # the engine resets both instruments before the first point; the 8808A is only configured on top of that
+    return io, lambda: [safe(io.measure, p) for p in pts]
+
+
 def build_fgen(mods):
     F.configure('33220A')
     bench, t = make_fgen_bench('33220A')
@@ -234,7 +245,7 @@ def build_mdo(mods):
 ENGINES = {
     'truevolt': ('34470A', build_truevolt), 'dacq': ('34970A', build_dacq), 'fgen': ('33220A', build_fgen),
     'a34401': ('34401A', build_a34401), 'f8846a': ('8846A', build_f8846a), 'handheld': ('5522A', build_handheld),
-    'mdo': ('MDO4000C', build_mdo),
+    'mdo': ('MDO4000C', build_mdo), 'f8808a': ('8808A', build_f8808a),
 }
 # handheld overrides are scoped to the spec model; the sim run mixes 115 / 116 / 117 points, so the tests use asset scope for it
 SCOPE_KW = {'handheld': dict(scope='asset', asset_id='HH-1')}
@@ -297,7 +308,7 @@ class Registry(unittest.TestCase):
     def test_every_tunable_is_read_by_the_source_of_its_engine(self):
         files = {'truevolt': 'truevolt_verification.py', 'dacq': 'dacq_verification.py', 'fgen': 'fgen_verification.py',
                  'handheld': 'handheld_dmm.py', 'a34401': 'Procedures/Agilent_34401A.py', 'f8846a': 'Procedures/Fluke_8846A_Verification.py',
-                 'mdo': 'mdo4000c_verification.py', 'ws': 'Procedures/WaveSurfer_WS4104HD.py'}
+                 'mdo': 'mdo4000c_verification.py', 'ws': 'Procedures/WaveSurfer_WS4104HD.py', 'f8808a': 'fluke8808a_verification.py'}
         dynamic = ('truevolt.settle.ac_', 'dacq.settle.ac_')
         for name, t in pe.TUNABLES.items():
             src = (ROOT / files[t['engine']]).read_text(encoding='utf-8')
@@ -317,7 +328,8 @@ class Registry(unittest.TestCase):
     def test_every_engine_wires_the_mixin_and_the_run_start(self):
         """Source-level guard: every procedure loads the modifications at run start, binds drivers, and skips skipped points."""
         for rel in ('truevolt_verification.py', 'dacq_verification.py', 'fgen_verification.py', 'handheld_dmm.py', 'mdo4000c_verification.py',
-                    'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py', 'Procedures/WaveSurfer_WS4104HD.py'):
+                    'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py', 'Procedures/WaveSurfer_WS4104HD.py',
+                    'fluke8808a_verification.py'):
             src = (ROOT / rel).read_text(encoding='utf-8')
             self.assertIn('procmods_engine.ProcModsMixin', src, rel)
             self.assertIn('pm_init(', src, rel)

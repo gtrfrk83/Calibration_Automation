@@ -50,7 +50,8 @@ PTYPES = ('float', 'int', 'str', 'enum', 'secret')
 EXTRA_FORBIDDEN = (('SYST', 'SEC'), ('SYST', 'COMM'), ('SYST', 'CPON'), ('MMEM', 'DEL'), ('MEM', 'DEL'))
 FORBIDDEN_FIRST_NODE = (r'CAL(?!C)', r'SEC', r'PASS', r'DIAG', r'SERV', r'FACT')
 # Per-driver additions, keyed by a lower-case substring of the driver class name.
-DRIVER_FORBIDDEN = {'8846': (re.compile(r'(?:^|[\s:;])CAL(?:IBRATION)?\s*:', re.I),)}
+DRIVER_FORBIDDEN = {'8846': (re.compile(r'(?:^|[\s:;])CAL(?:IBRATION)?\s*:', re.I),),
+                    '8808': (re.compile(r'(?:^|[\s;])(?:\*TER|CALREF|EXIT)(?![A-Za-z])', re.I),)}      # 8808A: *TER enters calibration mode (Cal Manual Table 3-9)
 VBS_PATH = re.compile(r'^app\.(Acquisition|Measure|Math)[\w.()]*$')
 VBS_FORBIDDEN = re.compile(r'CreateObject|Shell|WScript|Exec|Calibrat', re.I)
 _SPEC = re.compile(r'^(?:[<>^=])?[+\- ]?#?0?(?:\d{1,3})?[,_]?(?:\.\d{1,2})?[bcdeEfFgGnosxX%]?$')

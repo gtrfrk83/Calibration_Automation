@@ -44,6 +44,8 @@ from drivers.keysight_5313x import Keysight5313x  # noqa: E402
 from drivers.keysight_dacq import KeysightDacq  # noqa: E402
 from drivers.keysight_truevolt import KeysightTruevolt  # noqa: E402
 from drivers.scpi_dmm import ScpiDmm  # noqa: E402
+from drivers.fluke_8808a import Fluke8808A  # noqa: E402
+from drivers.simulated_8808a import make_8808a_bench  # noqa: E402
 from drivers.simulated import make_bench, make_dacq_bench, make_dmm_bench  # noqa: E402
 from drivers.simulated_28x import SimFluke28x  # noqa: E402
 from drivers.simulated import SimBench  # noqa: E402
@@ -85,6 +87,10 @@ COVERAGE = {
         'Fluke8846A': dict(covered=['connect_for_adjustment', 'unlock_calibration', 'lock_calibration', 'adjust_step', 'record_calibration'],
                            no_command=[]),
         'Agilent34401A': dict(covered=['set_ac_filter_slow'], no_command=[]),
+    },
+    'fluke_8808a': {
+        'Fluke8808A': dict(covered=['write', 'query', 'send', 'identify', 'connect', 'remote', 'local', 'cleanup', 'configure_point', 'read',
+                                    'check_errors'], no_command=[]),
     },
     'keysight_truevolt': {
         'KeysightTruevolt': dict(covered=['connect', 'cleanup', 'set_nplc', 'set_ac_filter', 'configure_point', 'configure_frequency_point',
@@ -156,7 +162,7 @@ COVERAGE = {
 }
 
 # Stage 7: reset_to_defaults is defined once, on Instrument, and exercised on each of these concrete drivers (golden cases "Class.reset_to_defaults").
-for _cls in ('Fluke5560A', 'Fluke5522A', 'Fluke8846A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
+for _cls in ('Fluke5560A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
              'Keysight53132A', 'Fluke5790B', 'Fluke28x', 'WaveSurfer4104HD', 'TektronixMDO4000C', 'Fluke96270A', 'AgilentAFG', 'ReferenceMeter',
              'TektronixTDS2000C', 'Fluke5522AScope'):
     for _fixture in COVERAGE.values():
@@ -164,7 +170,7 @@ for _cls in ('Fluke5560A', 'Fluke5522A', 'Fluke8846A', 'Agilent34401A', 'Keysigh
             _fixture[_cls]['covered'].append('reset_to_defaults')
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
-LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
+LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
               'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
@@ -528,6 +534,40 @@ def cases_scpi_dmm(c):
     notok = c.inst(Fluke8846A, Scripted([(r'^CAL\? ON', '+1'), (r'^CAL:SEC:STAT\?', '+1')]), label='8846A')
     c.run('Fluke8846A.adjust_step[failure]', notok.adjust_step, 'ACV', 1)
     c.run('Fluke8846A.unlock_calibration[still locked]', notok.unlock_calibration, pw)
+
+
+def cases_8808a(c):
+    bench, ft, dt = make_8808a_bench('5522A', enforce_cal_limits=False)
+    d = c.inst(Fluke8808A, dt, opened=False, label='8808A')
+    c.run('Fluke8808A.connect', d.connect)
+    c.run('Fluke8808A.identify', d.identify)
+    c.run('Fluke8808A.remote', d.remote)
+    c.run('Fluke8808A.local', d.local)
+    c.run('Fluke8808A.cleanup', d.cleanup)
+    c.run('Fluke8808A.write', d.write, 'FORMAT 1')
+    c.run('Fluke8808A.query', d.query, 'FORMAT?')
+    c.run('Fluke8808A.send[set]', d.send, 'rate.set', rate='S')
+    c.run('Fluke8808A.send[reset settles]', d.send, 'reset')
+    c.quiet(lambda: (d.send('format.set', fmt=1), d.send('status.clear')))
+    pts = [('DCV', dict(kind='DCV', range=0.2)), ('DCV 1000 V', dict(kind='DCV', range=1000.0)), ('ACV 750 V', dict(kind='ACV', range=750.0)),
+           ('DCI 10 A', dict(kind='DCI', range=10.0)), ('ACI 20 mA', dict(kind='ACI', range=0.02)), ('OHM2', dict(kind='OHM2', range=2e3)),
+           ('OHM4', dict(kind='OHM4', range=2e3)), ('FREQ no rate', dict(kind='FREQ', range=20000.0)),
+           ('bad range', dict(kind='DCV', range=100.0)), ('CAP unsupported', dict(kind='CAP', range=1e-7))]
+    for tag, p in pts:
+        c.run(f'Fluke8808A.configure_point[{tag}]', d.configure_point, p)
+    bench.fluke.update(operate=True, volts=0.19, unit='V', freq=0.0)
+    c.quiet(d.configure_point, dict(kind='DCV', range=0.2))
+    c.run('Fluke8808A.read', d.read)
+    bench.fluke.update(volts=1.0)
+    c.run('Fluke8808A.read[overload]', d.read)
+    c.run('Fluke8808A.check_errors[ok]', d.check_errors, 'ctx')
+    c.quiet(d.write, 'NOTACOMMAND')
+    c.run('Fluke8808A.check_errors[command error]', d.check_errors, 'configuring')
+    c.quiet(dt.handle, '*CLS')
+    wrong = c.inst(Fluke8808A, Scripted([(r'\*IDN\?', 'FLUKE, 8846A, 1, 1.0'), (r'^REMS', None)]), opened=False, label='8808A')
+    c.run('Fluke8808A.connect[wrong model]', wrong.connect)
+    echo = c.inst(Fluke8808A, Scripted([(r'\*IDN\?', '=> FLUKE, 8808A, 1, 1.0')]), opened=False, label='8808A')
+    c.run('Fluke8808A.connect[echo on]', echo.connect)
 
 
 def cases_truevolt(c):
@@ -1110,6 +1150,14 @@ def resets_5522a_scope(c):
     c.run('Fluke5522AScope.reset_to_defaults[SCOPE mode not OFF]', stuck.reset_to_defaults)
 
 
+def resets_8808a(c):
+    bench, ft, dt = make_8808a_bench('5522A', enforce_cal_limits=False)
+    d = c.inst(Fluke8808A, dt, label='8808A')
+    c.run('Fluke8808A.reset_to_defaults', d.reset_to_defaults)
+    bad = c.inst(Fluke8808A, Scripted([(r'^\*ESR\?', ['32', '0']), (r'^\*OPC\?', '1'), (r'^FORMAT\?', '1'), (r'^TRIGGER\?', '1'), (r'^RATE\?', 'S')]), label='8808A')
+    c.run('Fluke8808A.reset_to_defaults[error bit set: warning]', bad.reset_to_defaults)
+
+
 def _with_resets(cases, resets):
     def both(c):
         cases(c)
@@ -1119,7 +1167,7 @@ def _with_resets(cases, resets):
 
 DRIVER_CASES = {
     'base': _with_resets(cases_base, resets_base), 'fluke_5560a': _with_resets(cases_fluke_5560a, resets_fluke_5560a),
-    'scpi_dmm': _with_resets(cases_scpi_dmm, resets_scpi_dmm), 'keysight_truevolt': _with_resets(cases_truevolt, resets_truevolt),
+    'scpi_dmm': _with_resets(cases_scpi_dmm, resets_scpi_dmm), 'fluke_8808a': _with_resets(cases_8808a, resets_8808a), 'keysight_truevolt': _with_resets(cases_truevolt, resets_truevolt),
     'keysight_dacq': _with_resets(cases_dacq, resets_dacq), 'keysight_332xx': _with_resets(cases_332xx, resets_332xx),
     'keysight_5313x': _with_resets(cases_5313x, resets_5313x), 'fluke_5790b': _with_resets(cases_5790b, resets_5790b),
     'fluke_28x': _with_resets(cases_28x, resets_28x), 'lecroy_ws4104hd': _with_resets(cases_lecroy, resets_lecroy),
