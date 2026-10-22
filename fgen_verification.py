@@ -431,7 +431,7 @@ def tar_tur_fields(p, r=None):
     TUR = tolerance / the uncertainty printed in the Uncertainty column (same numeric value, rounded up as printed), only when the
     tolerance and the uncertainty are in the same unit; blank for the self test, '(typical)' points (a typical value is not a limit)
     and points with no printed uncertainty.  TAR only for AC amplitude and low-frequency flatness, which are read on the Fluke 5790B
-    (the only reference this program uses for them): the 5790B specmanager row at that voltage and frequency, in volts.  The time base
+    (the only reference this program uses for them), sine waves only: the 5790B specmanager row at that voltage and frequency, in volts.  The time base
     (counter) and RF flatness (power meter / relative 5790B wideband, in dB) have no matching specification row: TAR blank."""
     import tartur
     try:
@@ -443,7 +443,7 @@ def tar_tur_fields(p, r=None):
         if value is not None:
             u, uu = uncertainty.round_up(value), unit
         acc = au = None
-        if p['kind'] in ('ACAMP', 'LFFLAT'):
+        if p['kind'] in ('ACAMP', 'LFFLAT') and p.get('function') == 'SIN':        # the 5790B sinewave rows do not describe a square wave
             acc, au = tartur.standard_accuracy('5790B', 'ACV', p['nominal'], frequency=p['frequency'], direction='input')
         return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['nominal'] - p['error'], p['nominal'] + p['error']), p['unit'], acc, au, u, uu))
     except Exception:
@@ -929,8 +929,8 @@ class App(datamode.DataModeMixin):
                 'Frequency - Measure; RF flatness uses specs/fgen_332xx_reference_cmc.json and is blank where no value is set. '
                 'AC amplitude reference standard: Fluke 5790B (the manual lists a 3458A DMM). ' + ' '.join(how[m] for m in used))
         try:
-            if details.get('show_tar_tur'):
-                rows = report_pdf.apply_tar_tur(rows, True, [tar_tur_fields(p) for p, _row in pairs])
+            if report_pdf.details_tar_tur(details):
+                rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [tar_tur_fields(p) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'{SPEC["manufacturer"]} {MODEL}'), ('Instrument ID', self.asset.get()),
                                                                  ('Serial', self.serial.get()), ('Limits applied', self.period.get()),
                                                                  ('Flatness method', ', '.join(FLAT_METHODS[m] for m in used) or 'not tested'),

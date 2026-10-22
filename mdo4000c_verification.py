@@ -1363,8 +1363,8 @@ class App(datamode.DataModeMixin):
         note = ('Uncertainty: points without an input signal show N/A. Analog points use the laboratory A2LA scope (Fluke 5560A CMC); RF, function-generator and meter points '
                 'use the entries in specs/mdo4000c_reference_cmc.json and show N/A where none is set.' + (f' {skipped} point(s) were skipped (instrument not available).' if skipped else ''))
         try:
-            if details.get('show_tar_tur'):
-                rows = report_pdf.apply_tar_tur(rows, True, [self.tar_tur_for(p) for p, _row in pairs])
+            if report_pdf.details_tar_tur(details):
+                rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [self.tar_tur_for(p) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix MDO{c.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Options', opts), ('Source', 'MDO4000C Specifications and Performance Verification, 077-1178-01 Rev B')],
                                              demo=demo, details=details, footer_note=note, title='Calibration Data')

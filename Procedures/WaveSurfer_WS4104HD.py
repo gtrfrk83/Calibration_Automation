@@ -3596,8 +3596,8 @@ class RMSNoiseApp(datamode.DataModeMixin):
                 details=report_dialog.ask_details(self.root,'WaveSurfer 4104HD verification')
                 if details is None:
                     return 0
-            if details.get('show_tar_tur'):
-                rows=report_pdf.apply_tar_tur(rows,True,[self.tar_tur_fields(k,r) for k,r in sources])
+            if report_pdf.details_tar_tur(details):
+                rows=report_pdf.apply_tar_tur(rows,report_pdf.details_tar_tur(details),[self.tar_tur_fields(k,r) for k,r in sources])
             count=report_pdf.write_calibration_pdf(
                 filename,rows,header=[('Instrument','Teledyne LeCroy WaveSurfer 4104HD'),
                                       ('Instrument ID',self.instrument_id.get().strip() or 'NOT ENTERED'),
