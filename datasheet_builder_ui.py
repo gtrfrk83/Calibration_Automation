@@ -1217,9 +1217,6 @@ class SpecPanel(ttk.Frame):
         self.nominal_e = cell('nominal', 'Nominal Value', self.v['nominal'], 14, 0, 0, 'The value to test, for example 5. The unit comes from Units of Measure.')
         self.units_c = cell('units', 'Units of Measure', self.v['units'], 12, 0, 1, 'The unit the numbers in these boxes are in. Display only.',
                             widget=lambda f: ttk.Combobox(f, textvariable=self.v['units'], width=10))
-        self.units_b = ttk.Button(box, text='...', width=3, command=self.pick_unit)
-        self.units_b.grid(row=0, column=2, sticky='sw', pady=2)
-        tip(self.units_b, 'Pick the unit from a list (mV, V, kV ...).')
         cell('iv', '% of I.V.', self.v['iv'], 10, 0, 3, 'How many percent of the value being tested, for example 0.05.')
         self.cells['iv_ppm'] = ttk.Checkbutton(box, text='ppm', variable=self.b['iv_ppm'])
         self.cells['iv_ppm'].grid(row=0, column=4, sticky='sw', pady=2)
@@ -1338,20 +1335,6 @@ class SpecPanel(ttk.Frame):
                 widget.grid_remove()
             elif name in want:
                 widget.grid()
-
-    # ---- the unit picker
-    def pick_unit(self):
-        choices = self._state.get('unit_choices') or []
-        if not choices:
-            return None
-        menu = tk.Menu(self, tearoff=0)
-        for u in choices:
-            menu.add_command(label=u, command=lambda u=u: self.v['units'].set(u))
-        try:
-            menu.tk_popup(self.units_b.winfo_rootx(), self.units_b.winfo_rooty() + self.units_b.winfo_height())
-        except tk.TclError:
-            pass
-        return menu
 
     # ---- model <-> boxes
     def load(self, state):
@@ -1517,15 +1500,6 @@ class GridEditorWindow(tk.Toplevel):
             b = ttk.Button(grid, text=name, width=3 if name != 'Units' else 6, style='Compact.TButton', command=lambda n=name: self.insert_symbol(n))
             b.grid(row=i // 3, column=i % 3, padx=1, pady=1)
             self.symbol_buttons[name] = b
-        ttk.Label(col, text='Special Ops', style='Bold.TLabel').pack(anchor='w')
-        self.header_b = ttk.Button(col, text='Ins. Header', command=self.insert_header)
-        self.header_b.pack(anchor='w', fill='x', pady=(2, 2))
-        tip(self.header_b, 'Add a new section heading (a new function to test) after the selected row.')
-        self.break_b = ttk.Button(col, text='Page Break', state='disabled')
-        self.break_b.pack(anchor='w', fill='x', pady=(0, 2))
-        tip(self.break_b, 'Not available: the report decides where its pages end.')
-        self.delete_b = ttk.Button(col, text='Delete row', style='Danger.TButton', command=self.delete_row)
-        self.delete_b.pack(anchor='w', fill='x', pady=(0, 10))
         ttk.Label(col, text='Warnings', style='Bold.TLabel').pack(anchor='w')
         self.warn_v = tk.StringVar()
         ttk.Label(col, textvariable=self.warn_v, wraplength=ui.px(170), justify='left').pack(anchor='w')
@@ -1741,21 +1715,6 @@ class GridEditorWindow(tk.Toplevel):
         except tk.TclError:
             pass
         return sym
-
-    def insert_header(self):
-        labels = [c['label'] for c in self.model.function_choices() if c['label'].startswith('New section: ')]
-        pick = ask_choice(self, 'Ins. Header', 'What does the new section test?', [x[len('New section: '):] for x in labels])
-        if not pick:
-            return None
-        return self.changed(self.model.add_section(pick))
-
-    def delete_row(self):
-        row = self.model.selected_row()
-        if row['kind'] == 'header':
-            fn = self.model.ds.function(row['fid'])
-            if not messagebox.askyesno('Delete section', f'Delete the section "{fn.name}" with its {len(fn.points)} row(s)? (Undo brings it back.)', parent=self):
-                return None
-        return self.changed(self.model.clear_row())
 
     def remark_set(self, quiet=False):
         row = self.model.selected_row()

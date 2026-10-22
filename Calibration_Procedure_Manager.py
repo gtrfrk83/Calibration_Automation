@@ -27,7 +27,6 @@ import labregistry
 import labregistry_ui
 import specmanager_ui
 import procmods
-import procmods_ui
 import procmods_ui_model
 import datasheet_builder_ui
 import dsb_manager      # user-built datasheets are listed (not stored) in the Procedures table
@@ -287,8 +286,6 @@ class Manager:
         self.btn_demo.pack(fill='x')
         ttk.Checkbutton(card, text='Fast demo (no windows)', variable=self.fast_demo).pack(anchor='w', pady=(4, 0))
         self.d_mod = ui.Pill(card, '', 'warn')                    # 'MODIFIED (n)': saved model-wide procedure changes exist
-        self.btn_changes = ttk.Button(card, text='Procedure changes...', command=self.procedure_changes)
-        self.btn_changes.pack(fill='x', pady=(6, 0))
         self.btn_verify = ttk.Button(card, text='Mark verified on hardware...', command=self.mark_verified)
         self.btn_verify.pack(fill='x', pady=(6, 0))
         self.btn_lock = ttk.Button(card, text='Unlock for editing...', command=self.toggle_lock)
@@ -304,7 +301,7 @@ class Manager:
             self.d_desc.set(''); self.d_path.set('')
             self.d_pill.set('', 'neutral')
             self.btn_run.configure(state='disabled'); self.btn_demo.configure(state='disabled')
-            self.d_mod.pack_forget(); self.btn_changes.configure(state='disabled')
+            self.d_mod.pack_forget()
             self.d_ver.set('', 'neutral'); self.d_ver_text.set('')
             self.btn_verify.configure(state='disabled'); self.btn_lock.configure(state='disabled')
             return
@@ -326,7 +323,6 @@ class Manager:
             self.d_mod.pack(anchor='w', pady=(6, 0), before=self.btn_run)
         else:
             self.d_mod.pack_forget()
-        self.btn_changes.configure(state='normal')
         self.show_verified(rec)
 
     # ------------------------------------------------------------------ Verified on hardware (verified.py)
@@ -460,15 +456,6 @@ class Manager:
             except Exception:
                 self._mods = {}
         return self._mods
-
-    def procedure_changes(self):
-        """Saved changes for the selected procedure's model: read-only until developer mode is unlocked.  A running procedure is edited
-        from its own window (Modify procedure), never from here."""
-        rec = self._selected_row()
-        if not rec:
-            return
-        lock = procmods_ui.shared_lock()
-        procmods_ui.open_manager_changes(self.root, rec[3], procmods.Store(devmode=lock.devmode), lock, proc_key=self._ver_entry(rec).proc_key)
 
     def selected(self):
         selection = self.table.selection()

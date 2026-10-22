@@ -167,11 +167,6 @@ class GridWidgetStubTests(unittest.TestCase):
         self.assertFalse(win.model.point_of(key)[1].enabled)
         win.run_v.set(True)
         win.run_set()
-        with mock.patch.object(self.ui, 'ask_choice', return_value='AC volts'):
-            res = win.insert_header()
-        self.assertTrue(res.ok, res.message)
-        with mock.patch.object(self.ui, 'ask_choice', return_value=None):
-            self.assertIsNone(win.insert_header())
         win.lock_v.set('Locked')
         win.lock_chosen()
         win.model.select(key, 'nominal')
@@ -180,10 +175,6 @@ class GridWidgetStubTests(unittest.TestCase):
         win.lock_v.set('Edit Mode')
         win.lock_chosen()
         self.assertTrue(win.model.cell_editable()[0])
-        win.model.select(key, 'nominal')
-        res = win.delete_row()
-        self.assertTrue(res.ok, res.message)
-        self.assertIsNone(win.model.point_of(key)[1])
 
     def test_recalc_copy_problems_and_preview(self):
         win, key = self.build()
