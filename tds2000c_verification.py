@@ -24,6 +24,7 @@ import ui_theme as ui
 import ui_shell
 import appdata
 import datamode
+import reset_startup
 import drivers
 
 SPEC_PATH = HERE / 'specs' / 'tektronix_tds2000c_pv.json'
@@ -236,7 +237,7 @@ def tar_tur_fields(p, r):
 # ======================================================================================================================
 # bench I/O
 # ======================================================================================================================
-class IO:
+class IO(reset_startup.IOResetMixin):
     """The oscilloscope (USB) and the calibrator."""
 
     def __init__(self, addrs, transports=None):
@@ -257,8 +258,13 @@ class IO:
             self.cal.open(verify_model=True); self.cal.clear_status()
         except Exception:
             self.close(); raise
+        self.cal.RESET_SCOPE_OFF = True               # the reset leaves the calibrator in standby with its SCOPE function OFF (the procedure selects its mode per test)
         self.ident = self.scope.idn
         self.is_5560 = '5560' in text
+
+    def reset_roles(self):
+        """(standards, units under test): the calibrator is reset first, then the oscilloscope."""
+        return [self.cal], [self.scope]
 
     def all_outputs_off(self):
         try:
@@ -372,7 +378,7 @@ class Runner:
             self.ensure_imp_5560('1M')
         else:
             cal.select_scope_dcv('1M')
-            cal.check_error('SCOPE VOLT / OUT_IMP 1M')   # 5520A/5522A path (unverified): name the command if it is rejected
+            cal.check_error('SCOPE VOLT / OUT_IMP Z1M')   # 5520A/5522A path: SCOPE VOLT and OUT_IMP Z1M are in the 5522A Operators Manual ch. 10
 
     def apply_dc(self, volts, settle=2.0):
         cal = self.io.cal
@@ -394,8 +400,8 @@ class Runner:
         if self.io.is_5560:
             self.ensure_imp_5560('50')          # 'OUT_IMP 50' is rejected (-117) on the 5560A: read first, write Z50 only if needed
         else:
-            cal.write('OUT_IMP 50')
-            cal.check_error('OUT_IMP 50')
+            cal.write('OUT_IMP Z50')            # 5522A manual p. 10-31: the argument is Z50 / Z1M
+            cal.check_error('OUT_IMP Z50')
 
     def ensure_imp_5560(self, want):
         """5560A SCOPE output impedance: read OUT_IMP?; only if it is not already `want` ('1M' or '50') write 'OUT_IMP Z1M' / 'Z50' ONCE (argument form
@@ -656,7 +662,7 @@ class Runner:
 # ======================================================================================================================
 # the application window
 # ======================================================================================================================
-class App(datamode.DataModeMixin):
+class App(reset_startup.AppResetMixin, datamode.DataModeMixin):
     def __init__(self, root, demo=False):
         self.root, self.demo = root, demo
         self.io = None
@@ -938,12 +944,15 @@ class App(datamode.DataModeMixin):
         if self.io is None: self.test_connections()
         if self.io is None: return
         self.stop = False; self.busy = True
+        if not self.reset_notice_ok(): return                  # unit-under-test notice, before any instrument is touched
         threading.Thread(target=self._worker, args=(points,), daemon=True).start()
 
     def _worker(self, points):
         runner = Runner(self)
         error = None
         try:
+            self.post('status', 'Resetting instruments to default settings ...')
+            self.reset_run()                               # every run (first, re-run, resume): before the first point and before any other calibrator / scope command; a failure ends the run here
             for i, p in enumerate(points, 1):
                 if self.stop: raise Stopped()
                 self.post('status', f'Running {i}/{len(points)}: {p["desc"]}')

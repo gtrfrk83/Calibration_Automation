@@ -23,6 +23,7 @@ import datamode
 import drivers
 import procmods
 import procmods_engine
+import reset_startup
 
 DEFAULT_ADDRESS = 'USB0::0x05FF::0x1023::LCRY4903C19426::0::INSTR'
 SCALES = [0.002, 0.005, 0.010, 0.020, 0.050, 0.100, 0.200, 0.500, 1.000]
@@ -1390,6 +1391,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         try:
             _f, scope = self.open_bench(None, 0, address, log)
             scope.open()
+            self.reset_bench(None, scope, log)       # reset to default settings before the first point
             ident = scope.idn
             self.events.put(('status', f'Connected: {ident}'))
             scope.configure_p1(channel, 'StandardDeviation')
@@ -1900,6 +1902,15 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self._pm_bench(log, fluke, scope)
         return fluke, scope
 
+    def reset_bench(self, fluke, scope, log):
+        """Reset the calibrator and the scope (the unit under test) to their default settings before the first point of a test; the
+        unit-under-test notice is asked once per session of tests (reset_startup.SessionNotice). Raises ResetDeclined / ResetFailed."""
+        notice = getattr(self, '_reset_notice', None)
+        if notice is None:
+            notice = self._reset_notice = reset_startup.SessionNotice(
+                self.root, lambda text: messagebox.askokcancel('Reset instruments', text, icon='warning', parent=self.root))
+        reset_startup.reset_all([fluke] if fluke is not None else [], [scope] if scope is not None else [], confirm=notice, log=log)
+
     def _pm_bench(self, log, *insts):
         """Procedure modifications: the command overrides are bound to each driver as it is opened, and a banner line goes at the top of
         the command log.  Nothing at all happens (no log line, no change) when no modification is stored."""
@@ -1944,6 +1955,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             stage = 'scope USB open and read-only handshake'
             scope.open()
             scope.handshake()
+            stage = 'reset to default settings'
+            self.reset_bench(fluke, scope, log)       # before the first point
             ch, scale, nominal = point['channel'], point['scale_v_div'], point['nominal_v']
             # Configure the scope before energizing the calibrator output.
             stage = 'scope vertical scale write / readback'
@@ -1983,6 +1996,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             _f,scope=self.open_bench(None,0,self.visa_address.get().strip(),log)
             scope.open()
             scope.handshake()
+            self.reset_bench(None, scope, log)       # reset to default settings before the first point
             ch=point['channel']
             scope.set_vertical_scale(ch,point['scale_v_div'],settle=0.0)
             scope.configure_dc_input(ch)
@@ -2287,6 +2301,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             fluke, scope = self.open_bench(fluke_address, baud, scope_address, log)
             fluke.open()
             scope.open()
+            self.reset_bench(fluke, scope, log)       # reset to default settings before the first point
             # Disable previous scope function before any DUT reconfiguration.
             fluke.scope_off()
             ch = point['channel']
@@ -2611,6 +2626,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             stage = 'Scope USB connection and read-only handshake'
             scope.open()
             scope.handshake()
+            stage = 'reset to default settings'
+            self.reset_bench(fluke, scope, log)       # before the first point
             ch = point['channel']
             stage = 'Scope scale'
             scope.set_vertical_scale(ch, point['scale_v_div'])
@@ -2836,6 +2853,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             fluke.standby()
             stage='Scope connection'
             scope.open()
+            stage='reset to default settings'
+            self.reset_bench(fluke,scope,log)       # before the first point
             ch=point['channel']
             amplitude=point['amplitude_vpp']
             stage='Scope scale'
@@ -3072,6 +3091,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             stage = 'Scope USB connection and read-only handshake'
             scope.open()
             scope.handshake()
+            stage = 'reset to default settings'
+            self.reset_bench(fluke, scope, log)       # before the first point
             ch, period = point['channel'], point['marker_period_s']
             stage = 'Scope scale and zero offset'
             scope.set_vertical_scale(ch, point['scale_v_div'])
@@ -3318,6 +3339,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             stage = 'Scope USB connection and read-only handshake'
             scope.open()
             scope.handshake()
+            stage = 'reset to default settings'
+            self.reset_bench(fluke, scope, log)       # before the first point
             stage = 'Scope scale, DC 1 MΩ / 20 MHz and zero offset'
             scope.set_vertical_scale(ch, point['scale_v_div'])
             scope.configure_dc_input(ch)

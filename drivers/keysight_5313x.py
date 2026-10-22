@@ -92,6 +92,10 @@ COMMANDS = {
                 verified=False, ref=_ref('READ?', '4-52, 4-53')),
 }
 
+COMMANDS['reset'] = cmdreg.reset_cmd(True, '53131A/53132A Programming Guide p. 2-40 and Table 2-3 (*RST state; [:SENSe]:ROSCillator:SOURce:AUTO returns to ON)',
+                                     note='Reference oscillator source reverts to AUTO: the procedure selects INT / EXT again after the reset')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(True, '53131A/53132A Programming Guide p. 4-133 (*OPC?)')
+
 
 class Keysight5313x(Instrument):
     MODEL = 'Agilent 53131A / 53132A'

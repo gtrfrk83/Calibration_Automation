@@ -26,6 +26,20 @@
     "LeCroy WaveSurfer 4104HD|<<|LECROY,WS4104HD,SIM0001,9.9",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 0.0",
+    "Fluke 5560A|>>|*RST",
+    "Fluke 5560A|>>|*CLS",
+    "Fluke 5560A|>>|*OPC?",
+    "Fluke 5560A|<<|1",
+    "Fluke 5560A|>>|ERR?",
+    "Fluke 5560A|<<|0,\"No error\"",
+    "Fluke 5560A|>>|STBY",
+    "Fluke 5560A|>>|OPER?",
+    "Fluke 5560A|<<|0",
+    "LeCroy WaveSurfer 4104HD|>>|*RST",
+    "LeCroy WaveSurfer 4104HD|>>|*CLS",
+    "LeCroy WaveSurfer 4104HD|>>|*OPC?",
+    "LeCroy WaveSurfer 4104HD|<<|1",
+    "RESET|--|Instruments reset to default settings at start: Fluke 5560A, LeCroy WaveSurfer 4104HD",
     "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.VerScale=0.5'",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 0.5",
@@ -105,6 +119,66 @@
      "Q",
      "VBS? \"return=app.Acquisition.C1.VerScale\"",
      "VBS 0.0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
     ],
     [
      "W",
@@ -285,6 +359,11 @@
     "LeCroy WaveSurfer 4104HD|<<|LECROY,WS4104HD,SIM0001,9.9",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 0.5",
+    "LeCroy WaveSurfer 4104HD|>>|*RST",
+    "LeCroy WaveSurfer 4104HD|>>|*CLS",
+    "LeCroy WaveSurfer 4104HD|>>|*OPC?",
+    "LeCroy WaveSurfer 4104HD|<<|1",
+    "RESET|--|Instruments reset to default settings at start: LeCroy WaveSurfer 4104HD",
     "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.VerScale=0.5'",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 0.5",
@@ -297,7 +376,8 @@
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
-    "LeCroy WaveSurfer 4104HD|<<|VBS C1",
+    "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Measure.P1.Source1=\"C1\" ' ",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS C1",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
@@ -324,6 +404,29 @@
      "Q",
      "VBS? \"return=app.Acquisition.C1.VerScale\"",
      "VBS 0.5"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
     ],
     [
      "W",
@@ -372,7 +475,15 @@
     [
      "Q",
      "VBS? \"return=app.Measure.P1.Source1\"",
-     "VBS C1"
+     "VBS Mean"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.Source1=\"C1\" ' "
+    ],
+    [
+     "sleep",
+     0.5
     ],
     [
      "Q",

@@ -21,6 +21,7 @@ BASE = Path(__file__).resolve().parent
 sys.path.append(str(BASE.parent))  # shared ui_theme.py sits next to the Manager
 import ui_theme as ui
 import drivers
+import reset_startup
 DB = BASE / 'calibration_procedures.sqlite3'
 STEPS = [
     ('PRE', 'As Found verification', 'Run and save the complete independent 8846A performance verification before any adjustment.', '', '', False),
@@ -269,12 +270,31 @@ class App:
             self.meter=open_meter(self.port.get(),self.baud.get(),self.parity.get(),self.bits.get())
             self.status.set('Connected: '+self.meter.idn)
             self.log('CONNECT',self.meter.idn,'OK')
+            if self.run_id is not None and not self.reset_meter():    # resuming a record: reset after reconnecting, before any step
+                self.meter.close();self.meter=None;self._sync();return
             self.settings.set('port',self.port.get());self.settings.set('baud',self.baud.get());self.settings.set('parity',self.parity.get());self.settings.set('bits',self.bits.get());self.settings.save()
             self._sync()
         except Exception as e:
             self.meter=None;self._sync()
             self.status.set('Connection error: '+str(e))
             messagebox.showerror('Connection error',str(e))
+
+    def reset_meter(self):
+        """Reset the 8846A to its default settings before an adjustment record starts (or resumes after reconnecting). The notice about the
+        unit under test is asked first; declining or a failed reset ends the start before any adjustment step. Calibration stays locked
+        (nothing here sends a CAL: command). Returns True when the meter is reset (or there is no meter: demo)."""
+        if self.demo or not self.meter:
+            return True
+        try:
+            reset_startup.reset_all([], [self.meter], confirm=lambda t: messagebox.askokcancel('Reset instruments', t, icon='warning'),
+                                    log=self.meter.log)
+        except reset_startup.ResetDeclined as e:
+            self.status.set('Not started: the 8846A was not reset (nothing was touched).');self.log('RESET','declined by operator','CANCELLED');return False
+        except Exception as e:
+            self.status.set('Reset failed - not started: '+str(e).splitlines()[0]);self.log('RESET',str(e).splitlines()[0],'FAILED')
+            messagebox.showerror('Reset failed - not started',str(e));return False
+        self.log('RESET','Instruments reset to default settings at start: '+self.meter.label,'OK')
+        return True
 
     def start(self):
         if not all([self.asset.get().strip(),self.serial.get().strip(),self.tech.get().strip()]):
@@ -283,6 +303,7 @@ class App:
             messagebox.showwarning('Connection required','Connect and identify the 8846A first.');return
         if not messagebox.askyesno('Start new record','Start a new adjustment audit record? This does not unlock the meter.'):
             return
+        if not self.reset_meter():return
         cur=self.conn.execute('INSERT INTO adjustment_runs(asset_id,serial_number,technician,meter_idn) VALUES(?,?,?,?)',
                 (self.asset.get().strip(),self.serial.get().strip(),self.tech.get().strip(),
                  self.meter.idn if self.meter else 'DEMO'))

@@ -16,6 +16,10 @@ SCOPE_VOLT_MODE = 'VOLT'
 
 class Fluke5522AScope(Fluke5522A):
     MODEL = 'Fluke 5520A / 5522A (scope option)'
+    # Reset: the inherited 5522A *RST (Operators Manual p. 6-35; the table of values it evokes, p. 6-36, includes SCOPE OFF, OUT_IMP Z1M, STBY),
+    # then STBY confirmed, then SCOPE OFF read back (SCOPE OFF: Operators Manual p. 9-28, SCOPE? answers OFF: p. 9-29). The calibrator is left in
+    # standby with no SCOPE mode; select_scope_dcv() / the LEVSINE / MARKER selections in the procedure choose the mode again for each test.
+    RESET_SCOPE_OFF = True
 
     def select_scope_dcv(self, source_impedance='1M'):
         """SCOPE VOLT (the 5560A driver's 'SCOPE DCV' is a 5560A word and is not used here), then OUT_IMP, each checked."""
@@ -24,12 +28,19 @@ class Fluke5522AScope(Fluke5522A):
         mode = self.query('SCOPE?').strip().upper()
         if SCOPE_VOLT_MODE not in mode:
             raise InstrumentError(f'Calibrator SCOPE mode not confirmed: SCOPE?={mode!r} (expected VOLT)')
-        self.write(f'OUT_IMP {source_impedance}')
-        self.check_error(f'OUT_IMP {source_impedance}')
+        # 5522A Operators Manual p. 10-31 (and the 5560A Remote Programmers Manual): OUT_IMP takes Z50 or Z1M; '1M' / '50' are rejected
+        # with 'Bad parameter unit'.
+        self.write(f'OUT_IMP Z{source_impedance}')
+        self.check_error(f'OUT_IMP Z{source_impedance}')
         reply = self.query('OUT_IMP?').strip().upper()
         want = {'1M': 1e6, '50': 50.0}[source_impedance]
+        first = reply.split(',')[0].strip()
+        if first.startswith('Z'):                      # the manual's example reply: Z1M / Z50
+            if first != f'Z{source_impedance}':
+                raise InstrumentError(f'Unexpected SCOPE output impedance: {reply!r}')
+            return
         try:
-            value = float(reply.split(',')[0])
+            value = float(first)
         except ValueError:
             raise InstrumentError(f'Unexpected OUT_IMP? reply {reply!r}')
         if abs(value - want) > 0.01 * want:

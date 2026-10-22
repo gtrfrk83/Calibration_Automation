@@ -20,6 +20,15 @@ Command API (stable; every driver follows it):
     describe_commands() -> [dict]                  merged registry for the UI
     command_overrides_active() -> [uid]            overrides in effect (for the report / log banner)
     rejected_commands() -> [(key, uid, [problems])]
+
+Reset to default settings (Stage 7 rule; see drivers/README.txt "Adding a model"):
+    COMMANDS['reset']                              a LOCKED command (risk 'locked', never overridable): *RST or the model's equivalent
+    reset_to_defaults() -> ResetReport             *RST, *CLS, wait for completion, drain the error queue, then the model's own
+                                                   known-state steps (_reset_extra: re-enter remote, restore connect-time settings,
+                                                   confirm outputs off / standby). Every write is sent once and never retried; the read-only
+                                                   follow-up queries may be. The first failed step ends the sequence (ok=False).
+    RESET_EXEMPT = 'why'                           a model with no safe software reset documents the reason here (and RESET_KNOWN_STATE
+                                                   says how its state is established instead); the report then says "exempt".
 """
 from __future__ import annotations
 
@@ -29,6 +38,33 @@ import time
 import cmdreg
 
 from .transport import CommandLog, Transport, TransportError
+
+
+@dataclasses.dataclass
+class ResetStep:
+    name: str
+    ok: bool = True
+    detail: str = ''
+
+
+@dataclasses.dataclass
+class ResetReport:
+    """Result of Instrument.reset_to_defaults(): per-step ok/error, warnings (e.g. leftover error-queue entries), exemption."""
+    instrument: str = ''
+    ok: bool = True
+    exempt: bool = False
+    steps: list = dataclasses.field(default_factory=list)
+    warnings: list = dataclasses.field(default_factory=list)
+
+    @property
+    def failed_step(self):
+        return next((s for s in self.steps if not s.ok), None)
+
+    def text(self) -> str:
+        head = f'{self.instrument}: ' + ('exempt from reset' if self.exempt else 'reset OK' if self.ok else 'RESET FAILED')
+        lines = [head] + [f'  {"ok " if s.ok else "ERR"} {s.name}' + (f': {s.detail}' if s.detail else '') for s in self.steps]
+        lines += [f'  warning: {w}' for w in self.warnings]
+        return '\n'.join(lines)
 
 
 class InstrumentError(RuntimeError):
@@ -45,6 +81,9 @@ class Instrument:
     DEFAULT_TIMEOUT = 10.0
     COMMANDS: dict = {}       # {key: cmdreg.Cmd}; merged along the MRO by cmdreg.merge_commands
     SECRET_MASK = '********'  # what a secret placeholder shows in the command log
+    RESET_EXEMPT = ''         # non-empty: why this model has no software reset (documented exemption, see reset_to_defaults)
+    RESET_KNOWN_STATE = ''    # for an exempt model: how its state is established instead
+    RESET_OPC_TIMEOUT = 30.0  # transport timeout while waiting for *OPC? after the reset
 
     def __init__(self, transport: Transport, log: CommandLog | None = None, label: str | None = None):
         self.t = transport
@@ -235,6 +274,78 @@ class Instrument:
                             overridable=ok, locked_reason=why, editable=ok, owner=owners.get(key, ''),
                             placeholders=sorted(cmd.placeholders)))
         return out
+
+    # ---- reset to default settings (Stage 7) -------------------------------------------------------------
+    def reset_to_defaults(self) -> ResetReport:
+        """Put the instrument in its default state before any test point. Returns a ResetReport; never raises.
+        Order: reset (*RST or equivalent, a locked command), *CLS, wait for completion (*OPC?), drain the error queue (leftovers are
+        warnings), then the model's own known-state steps. Writes are sent once and never retried; only the read-only queries
+        (*OPC?, error queue) go through query_retry. The first failed step ends the sequence with ok=False."""
+        rep = ResetReport(self.label)
+        if self.RESET_EXEMPT:
+            rep.exempt = True
+            rep.steps.append(ResetStep('exempt', True, f'{self.RESET_EXEMPT} Known state: {self.RESET_KNOWN_STATE or "n/a"}'))
+            self.log.add('--', f'RESET EXEMPT: {self.RESET_EXEMPT}', self.label)
+            return rep
+        reg = self._registry()
+        if 'reset' not in reg:
+            rep.ok = False
+            rep.steps.append(ResetStep('reset', False, 'driver declares no reset command and no documented exemption'))
+            return rep
+        plan = [(f'reset ({reg["reset"].template})', lambda: self.send('reset'))]
+        if 'status.clear' in reg:
+            plan.append((f'clear status ({reg["status.clear"].template})', lambda: self.send('status.clear')))
+        if 'opc.query' in reg:
+            plan.append(('wait for completion (*OPC?)', self._reset_wait))
+        plan.append(('drain error queue', lambda: self._reset_drain(rep)))
+        plan += list(self._reset_extra())
+        for name, fn in plan:
+            try:
+                detail = fn()
+            except Exception as exc:                                    # includes SafetyError / TransportError
+                rep.ok = False
+                rep.steps.append(ResetStep(name, False, f'{type(exc).__name__}: {exc}'))
+                self.log.add('!!', f'RESET step failed: {name}: {exc}', self.label)
+                break
+            rep.steps.append(ResetStep(name, True, detail if isinstance(detail, str) else ''))
+        return rep
+
+    def _reset_wait(self):
+        """*OPC? after the reset (read-only: may be retried). The transport timeout is raised while waiting, then put back as it was."""
+        prev = getattr(self.t, 'timeout', None)
+        self.t.set_timeout(max(self.RESET_OPC_TIMEOUT, prev or 0.0))
+        try:
+            self.query_retry('opc.query', attempts=3, delay=1.0)
+        finally:
+            self.t.set_timeout(prev if prev is not None else self.DEFAULT_TIMEOUT)
+
+    @staticmethod
+    def _error_code(reply: str):
+        code = reply.split(',')[0].strip().lstrip('+')
+        try:
+            return int(float(code))
+        except ValueError:
+            return None
+
+    def _reset_drain(self, rep, limit=10):
+        """Read the error queue until empty (read-only). Anything found is logged and reported as a warning, not a failure."""
+        if 'err.query' not in self._registry():
+            return 'no error-queue command'
+        found = []
+        for _ in range(limit):
+            reply = self.query_retry('err.query', attempts=3, delay=0.5).strip()
+            if self._error_code(reply) == 0:
+                break
+            found.append(reply)
+        for f in found:
+            rep.warnings.append(f'error queue after reset: {f}')
+            self.log.add('!!', f'error queue after reset: {f}', self.label)
+        return f'{len(found)} entr{"y" if len(found) == 1 else "ies"} drained' if found else 'queue empty'
+
+    def _reset_extra(self):
+        """Model-specific known-state steps after the reset: [(name, callable)]. Override: re-enter remote, restore the settings connect()
+        makes, confirm outputs off / standby. A callable raises on failure."""
+        return []
 
     # ---- helpers for the "set, read back, compare" pattern used throughout calibration work
     @staticmethod

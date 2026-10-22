@@ -128,6 +128,158 @@
    ]
   },
   {
+   "call": "",
+   "case": "fgen_verification.IO.reset_at_start",
+   "log": [
+    "5790B|>>|*RST",
+    "5790B|>>|*CLS",
+    "5790B|>>|*OPC?",
+    "5790B|<<|1",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\"",
+    "Counter|>>|*RST",
+    "Counter|>>|*CLS",
+    "Counter|>>|*OPC?",
+    "Counter|<<|1",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\"",
+    "PowerMeter|>>|*RST",
+    "PowerMeter|>>|*CLS",
+    "PowerMeter|>>|*OPC?",
+    "PowerMeter|<<|1",
+    "33220A|>>|*RST",
+    "33220A|>>|*CLS",
+    "33220A|>>|*OPC?",
+    "33220A|<<|1",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+0,\"No error\"",
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0",
+    "RESET|--|Instruments reset to default settings at start: 5790B, Counter, PowerMeter, 33220A"
+   ],
+   "method": "fgen_verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
    "call": "{'desc': 'Complete self-test (*TST?)', 'error': 0.5, 'group': 'NONE', 'id': 1, 'kind': 'SELFTEST', 'limits': {'1y': 0.5, '90d': 0.5}, 'nominal': 0, 'page': 60, 'quick': True, 'section': 'selftest', 'section_title': 'Self-Test', 'setup': 'No connections are needed. The generator runs its complete self-test (*TST?).', 'unit': ''}, {}, {}",
    "case": "fgen_verification.IO.measure[SELFTEST#1]",
    "log": [

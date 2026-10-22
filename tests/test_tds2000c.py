@@ -280,6 +280,107 @@ class Engine(unittest.TestCase):
         self.assertFalse(bench.fluke['operate'])
 
 
+class ResetAtStart(unittest.TestCase):
+    """Stage 7 on the TDS procedure: every run (first, re-run, resume) resets the calibrator then the scope before any point; a failure or a declined
+    notice ends the run before a point."""
+
+    def setUp(self):
+        T.SLEEP_SCALE = 0
+        self.addCleanup(setattr, T, 'SLEEP_SCALE', 1.0)
+
+    def make(self, cal='5560A', ask=True):
+        bench, t = make_tds_bench('2024C', cal)
+        io = T.IO(dict(cal_baud=9600, cal_model='Fluke ' + cal), transports=t)
+        self.addCleanup(io.close)
+        io.log.entries.clear()
+        points_run = []
+
+        class App(T.App):
+            def __init__(s):
+                s.io, s.stop, s.results = io, False, {}
+                s.posted, s.shown, s.errors, s.busy_ = [], [], [], True
+                s.demo = False
+                s.status = type('V', (), {'set': lambda self, v: None})()
+
+            mode_label = 'As Found'
+            busy = property(lambda s: s.busy_, lambda s, v: setattr(s, 'busy_', v))
+            def post(s, kind, payload=None): s.posted.append((kind, payload))
+            def reset_ask(s, text): s.shown.append(text); return ask
+            def _record_threadsafe(s, p, reading, raw, synthetic): points_run.append(p['id'])
+            def save(s, silent=False): pass
+        app = App()
+
+        class R:
+            def __init__(s, a): pass
+            def run_point(s, p):
+                points_run.append(p['id']); return 0.0, {}
+        self.orig_runner = T.Runner
+        T.Runner = R
+        self.addCleanup(setattr, T, 'Runner', self.orig_runner)
+        return bench, io, app, points_run
+
+    def wire(self, io):
+        return [t for _ts, _i, d, t in io.log.entries if d == '>>']
+
+    def test_reset_is_first_on_every_run_5560a(self):
+        for run in range(2):                                              # first run, then a re-run / resume
+            bench, io, app, pts = self.make('5560A')
+            bench.fluke.update(operate=True, volts=1.0, scope='VOLT')
+            self.assertTrue(app.reset_notice_ok())
+            app._worker([T.POINTS[0]])
+            w = self.wire(io)
+            self.assertEqual(w[:3], ['*RST', '*CLS', '*OPC?'])
+            self.assertIn('FACtory', w); self.assertLess(w.index('*RST'), w.index('FACtory'))
+            self.assertNotIn('*CAL?', w)
+            self.assertEqual(bench.fluke['scope'], 'OFF')
+            self.assertFalse(bench.fluke['operate'])
+            self.assertIn('Instruments reset to default settings at start: 5560A, TDS2000C', [t for _ts, _i, _d, t in io.log.entries])
+            self.assertEqual(set(pts), {T.POINTS[0]['id']})                    # the point ran, after the reset
+
+    def test_reset_5522a_scope_then_engine_selects_scope_again(self):
+        bench, io, app, pts = self.make('5522A')
+        bench.fluke.update(operate=True, volts=1.0, scope='VOLT')
+        app.reset_notice_ok(); app._worker([T.POINTS[0]])
+        w = self.wire(io)
+        self.assertEqual(w[0], '*RST')
+        self.assertIn('SCOPE OFF', w)
+        self.assertEqual(bench.fluke['scope'], 'OFF')
+        cal = io.cal
+        cal.select_scope_dcv('1M')                                         # the procedure's own selection still works from SCOPE OFF
+        self.assertEqual(bench.fluke['scope'], 'VOLT')
+        self.assertFalse(bench.fluke['operate'])
+
+    def test_failed_reset_stops_before_any_point(self):
+        bench, io, app, pts = self.make('5560A')
+        bench.fluke.update(operate=True, volts=1.0)
+        bench.fail_next = '*RST'
+        app.reset_notice_ok(); app._worker([T.POINTS[0]])
+        self.assertEqual(pts, [])
+        self.assertEqual(self.wire(io).count('*RST'), 1)                  # never retried
+        self.assertNotIn('FACtory', self.wire(io))                        # the scope was not reached
+        self.assertFalse(bench.fluke['operate'])                          # standby
+        self.assertEqual(app.posted[-1][0], 'done')
+        self.assertIn('did not reset', str(app.posted[-1][1]))
+
+    def test_scope_reset_failure_stops_before_any_point(self):
+        bench, io, app, pts = self.make('5560A')
+        io.scope.t.errors = None
+        orig = io.scope.t.query
+        io.scope.t.query = lambda text: '16' if text.upper().startswith('*ESR') else orig(text)
+        app.reset_notice_ok(); app._worker([T.POINTS[0]])
+        self.assertEqual(pts, [])
+        self.assertIn('did not reset', str(app.posted[-1][1]))
+
+    def test_declined_notice_sends_nothing(self):
+        bench, io, app, pts = self.make('5560A', ask=False)
+        bench.fluke.update(operate=True, volts=1.0)
+        self.assertFalse(app.reset_notice_ok())
+        self.assertEqual(self.wire(io), [])
+        self.assertTrue(bench.fluke['operate'])
+        self.assertFalse(app.busy)
+        self.assertIn('TDS2000C', app.shown[0])
+
+
 class Helpers(unittest.TestCase):
     def test_display_row_scales_for_display_only(self):
         gain = next(p for p in T.POINTS if p['kind'] == 'GAIN')

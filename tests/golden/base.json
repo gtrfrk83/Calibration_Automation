@@ -255,6 +255,14 @@
      10.0
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "Instrument.reset_to_defaults[no reset declared]",
+   "log": [],
+   "method": "Instrument.reset_to_defaults",
+   "result": "returned ResetReport(instrument='Base', ok=False, exempt=False, steps=[ResetStep(name='reset', ok=False, detail='driver declares no reset command and no documented exemption')], warnings=[])",
+   "wire": []
   }
  ],
  "name": "base",

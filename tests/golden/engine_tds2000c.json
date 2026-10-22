@@ -70,6 +70,119 @@
    ]
   },
   {
+   "call": "",
+   "case": "tds2000c_verification.IO.reset_at_start",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|>>|*CLS",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0",
+    "5560A|>>|SCOPE OFF",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|OFF",
+    "TDS2000C|>>|FACtory",
+    "TDS2000C|>>|*CLS",
+    "TDS2000C|>>|*OPC?",
+    "TDS2000C|<<|1",
+    "TDS2000C|>>|HEADer OFF",
+    "TDS2000C|>>|VERBose OFF",
+    "TDS2000C|>>|*ESR?",
+    "TDS2000C|<<|0",
+    "RESET|--|Instruments reset to default settings at start: 5560A, TDS2000C"
+   ],
+   "method": "tds2000c_verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "SCOPE OFF"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  },
+  {
    "call": "{'ch': None, 'desc': 'Self test (power-on diagnostics, no errors)', 'high': 1, 'id': 1, 'kind': 'SELFTEST', 'low': 1, 'nominal': 1, 'note': 'p. 4-3: \"Verify that no error messages are displayed\". Read back with DIAg:RESUlt:FLAg?. The scope must have run 20 minutes first.', 'passfail': True, 'section': 'selftest', 'stim': 'none', 'unit': ''}",
    "case": "tds2000c_verification.Runner.run_point[SELFTEST#1]",
    "log": [

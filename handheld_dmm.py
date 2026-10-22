@@ -35,6 +35,7 @@ import appdata
 import datamode
 import drivers
 import procmods_engine
+import reset_startup
 
 SPEC_PATH = HERE / 'specs' / 'fluke_110_series_pv.json'
 READ_TYPED, READ_IR = 'Type the reading', 'Read over IR (Fluke IR cable)'
@@ -143,7 +144,7 @@ class Cancelled(Exception):
     pass
 
 
-class IO(procmods_engine.ProcModsMixin):
+class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """The calibrator: set the output for a point, confirm it was accepted, and never leave it energised."""
     RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the 110-series manual's "ramp up in 50 V increments, 5 s apart"
     auto_ramp = True                                          # the spec's options.auto_ramp (false: straight to the test value)
@@ -161,6 +162,9 @@ class IO(procmods_engine.ProcModsMixin):
             self.close()
             raise
         self.ident = self.cal.idn
+
+    def reset_roles(self):
+        return [self.cal], []          # the meter under test has no remote interface here (typed readings)
 
     def pm_drivers(self):
         return (self.cal,)
@@ -479,7 +483,7 @@ def ask_range(parent, p, total, dial, standby_text):
 
 
 # ============================================================================ application
-class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def __init__(self, root, model, demo=False, spec=None, io_factory=None, meter_factory=None):
         self.root, self.model, self.demo = root, model, demo
         self.meter, self.meter_factory = None, meter_factory
@@ -861,7 +865,13 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.stop = False
         self.busy = True
         self._last_switch = None
-        self._next(points, 0, None)
+        self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
+
+    def reset_extra_uuts(self):
+        return [self.meter] if (self.use_ir and self.meter is not None) else []     # the 287 / 289 on IR: documented exemption (no reset)
+
+    def reset_log(self):
+        return self.io.log if self.io is not None else (self.meter.log if self.meter is not None else None)
 
     def _group_key(self, p):
         return p['id'] if p['group'] == 'NONE' else p['group']

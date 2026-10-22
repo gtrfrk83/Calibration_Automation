@@ -9,6 +9,7 @@ from __future__ import annotations
 import math
 import time
 
+import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError, SafetyError
 from .transport import SerialSettings
@@ -89,6 +90,9 @@ COMMANDS = {
                         risk='locked', verified=False),
 }
 
+COMMANDS['reset'] = cmdreg.reset_cmd(True, '5560A Remote Programmers Manual, IEEE-488.2 common commands table (*RST: power-up state, holds off later commands until complete)',
+                                     note='*RST: power-up state, output in STANDBY (confirmed afterwards with STBY / OPER?)')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(True, '5560A Remote Programmers Manual p. 86 (*OPC?: returns 1 when all pending operations are complete)')
 
 # RS-232 defaults for the 5560A; pass different SerialSettings for other baud rates.
 SERIAL_DEFAULT = SerialSettings(baud=9600, data_bits=8, parity='none', stop_bits=1,
@@ -127,6 +131,14 @@ class Fluke5560A(Instrument):
 
     standby_confirmed = False
     stale_errors = ()
+
+    RESET_SCOPE_OFF = False        # True for the oscilloscope procedures: the calibrator is also left with its SCOPE function OFF after the reset
+
+    def _reset_extra(self):
+        steps = [('output in STANDBY (STBY, OPER? = 0)', self.standby)]
+        if self.RESET_SCOPE_OFF:
+            steps.append(('SCOPE function OFF (SCOPE OFF, SCOPE? = OFF)', self.scope_off))
+        return steps
 
     # ---- SCOPE function ------------------------------------------------------------------------
     def scope_off(self):
@@ -201,7 +213,7 @@ class Fluke5560A(Instrument):
             if reply.split(',')[0].strip() in ('0', '+0'):
                 return stale
             stale.append(reply)
-        raise InstrumentError(f'5560A error queue did not empty after {limit} reads: {stale[-3:]}')
+        raise InstrumentError(f'{self.label} error queue did not empty after {limit} reads: {stale[-3:]}')
 
     def select_scope_marker(self):
         """SCOPE? reports MARKER in time-marker mode (confirmed from the 5560A front panel, 2026-10-21)."""
@@ -299,7 +311,7 @@ class Fluke5560A(Instrument):
         reply = self.read_error()
         code = reply.split(',')[0].strip()
         if code not in ('0', '+0'):
-            raise InstrumentError(f'5560A rejected the setting{" (" + context + ")" if context else ""}: {reply}')
+            raise InstrumentError(f'{self.label} rejected the setting{" (" + context + ")" if context else ""}: {reply}')
 
     def clear_status(self):
         """*CLS - clears the status registers and the error queue."""
@@ -329,3 +341,7 @@ class Fluke5522A(Fluke5560A):
     outputs the DMM procedures use. Offered so the handheld-meter procedures run with the calibrator the manual lists."""
     MODEL = 'Fluke 5522A'
     IDN_MATCH = ('5522', '5520', '5502', '5500')
+    COMMANDS = {
+        'reset': cmdreg.reset_cmd(True, '5522A Operators Manual p. 6-35 (*RST: power-up state, STBY, holds off later commands until done)'),
+        'opc.query': cmdreg.opc_cmd(True, '5522A Operators Manual p. 5-44 (Using *OPC?, *OPC, *WAI)'),
+    }

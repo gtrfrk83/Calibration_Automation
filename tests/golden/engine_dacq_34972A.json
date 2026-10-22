@@ -67,6 +67,97 @@
    ]
   },
   {
+   "call": "",
+   "case": "dacq_verification.IO.reset_at_start",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|>>|*CLS",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0",
+    "34972A|>>|*RST",
+    "34972A|>>|*CLS",
+    "34972A|>>|*OPC?",
+    "34972A|<<|1",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "RESET|--|Instruments reset to default settings at start: 5560A, 34972A"
+   ],
+   "method": "dacq_verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
    "call": "{'description': 'Zero offset, DC volts, 100.0 mV range (input shorted)', 'error': 4e-06, 'group': 'ZERO_SHORT', 'id': 1, 'input': 'short', 'kind': 'DCV', 'limits': {'1y': 4e-06, '24h': 3.5e-06, '90d': 4e-06}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 0.1, 'role': 'short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'V'}",
    "case": "dacq_verification.IO.measure[DCV#1]",
    "log": [

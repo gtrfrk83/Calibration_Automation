@@ -912,6 +912,192 @@
      "FLUKE,5522A,SIM0001,1.0"
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.reset_to_defaults",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|>>|*CLS",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "Fluke5560A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5560A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output in STANDBY (STBY, OPER? = 0)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.reset_to_defaults[reset write fails: not retried]",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|!!|RESET step failed: reset (*RST): simulated timeout on '*RST'"
+   ],
+   "method": "Fluke5560A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5560A', ok=False, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=False, detail=\"TransportError: simulated timeout on '*RST'\")], warnings=[])",
+   "wire": [
+    [
+     "W!",
+     "*RST",
+     "simulated timeout on '*RST'"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5522A.reset_to_defaults",
+   "log": [
+    "5522A|>>|*RST",
+    "5522A|>>|*CLS",
+    "5522A|>>|*OPC?",
+    "5522A|<<|1",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|STBY",
+    "5522A|>>|OPER?",
+    "5522A|<<|0"
+   ],
+   "method": "Fluke5522A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5522A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output in STANDBY (STBY, OPER? = 0)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.reset_to_defaults[standby not confirmed]",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|>>|*CLS",
+    "5560A|>>|*OPC?",
+    "5560A|>>|*OPC?",
+    "5560A|>>|*OPC?",
+    "5560A|!!|RESET step failed: wait for completion (*OPC?): 'opc.query' failed after 3 attempts: scripted transport: nothing to read"
+   ],
+   "method": "Fluke5560A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5560A', ok=False, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=False, detail=\"InstrumentError: 'opc.query' failed after 3 attempts: scripted transport: nothing to read\")], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
   }
  ],
  "name": "fluke_5560a",

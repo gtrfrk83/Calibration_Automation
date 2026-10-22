@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import time
 
+import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
 from .transport import SerialSettings
@@ -63,6 +64,10 @@ COMMANDS = {
     'meas.query': Cmd('MEAS?', 'Measurement', 'Volts, Hz, status code; repeated only while the code says not yet settled', kind='query',
                       verified=False, ref=_REF + ' p. 6-53'),
 }
+
+COMMANDS['reset'] = cmdreg.reset_cmd(True, _REF + ' p. 6-11 (summary), p. 6-22 (*RST: power-up state, continuous triggering stopped, holds off later commands)',
+                                     note='Also re-secures calibration; EXTRIG / INPUT / RANGE are set again per point')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(True, _REF + ' pp. 6-10, 6-22 (Use of *OPC?, *OPC, and *WAI)')
 
 
 class Fluke5790B(Instrument):
