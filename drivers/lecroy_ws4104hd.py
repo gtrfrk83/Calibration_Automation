@@ -16,10 +16,90 @@ from __future__ import annotations
 import math
 import time
 
+from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
 from .transport import TransportError
 
 P1 = 'app.Measure.P1'
+
+
+def _vbs(template, name, description='', *, kind='set', readback=None, verified=True, risk='normal', placeholders=None):
+    return Cmd(template, name, description, placeholders=placeholders or {}, kind=kind, readback=readback, risk=risk, verified=verified,
+               lang='vbs')
+
+
+def _txt(name, sample):
+    return {name: Placeholder('str', '', sample)}
+
+
+_CH = {'ch': Placeholder('enum', '', '1', enum=('1', '2', '3', '4'))}      # analog channel 1-4 (the driver refuses anything else)
+_NUM = Placeholder('float', '', 0.5)                                 # plain {value}: the text the old f-string gave
+_UNV = 'Property path NOT verified on a 4104HD'
+
+# Every command the driver sends. VBS commands are lang='vbs': under the cmdreg whitelist only the property path (app.Acquisition /
+# Measure / Math ...) and the value of an override can change - never the VBS verb, the quotes or the read / write form.
+# verified=True rests on the driver's own basis (the header docstring and the working procedures use these properties); the MAUI
+# automation manual is not in the project, so no page is cited. The trigger slope / level / mode paths are NOT verified on a 4104HD
+# (see the comment above set_trigger_slope). The three generic vbs.* keys take the whole path from the caller (the public helpers
+# vbs_get / vbs_set_number / vbs_set_text); they are locked because a path-only edit of them is meaningless - edit the specific key.
+# p1.engine.set / p1.source.set / p1.view.on end with a space after the closing quote: that is the text the procedures have always
+# sent and it is kept byte for byte (cmdreg's VBS check therefore cannot accept an edited form of those three).
+COMMANDS = {
+    'vbs.get': _vbs('VBS? "return={path}"', 'Read any VBS property', 'Generic helper: the whole property path comes from the caller',
+                    kind='query', risk='locked', placeholders=_txt('path', 'app.Acquisition.C1.VerScale')),
+    'vbs.set.number': _vbs("VBS '{path}={value}'", 'Write any VBS numeric property', 'Generic helper: path and value come from the caller',
+                           risk='locked', placeholders={**_txt('path', 'app.Acquisition.C1.VerScale'), **_txt('value', '0.5')}),
+    'vbs.set.text': _vbs("VBS '{path}=\"{text}\" '", 'Write any VBS text property', 'Generic helper: path and text come from the caller',
+                         risk='locked', placeholders={**_txt('path', 'app.Acquisition.C1.Coupling'), **_txt('text', 'DC1M')}),
+    # vertical
+    'vert.scale.set': _vbs("VBS 'app.Acquisition.C{ch}.VerScale={value}'", 'Vertical scale (V/div)', readback='vert.scale.get',
+                           placeholders={**_CH, 'value': _NUM}),
+    'vert.scale.get': _vbs('VBS? "return=app.Acquisition.C{ch}.VerScale"', 'Vertical scale read-back', kind='query', placeholders=_CH),
+    'vert.offset.set': _vbs("VBS 'app.Acquisition.C{ch}.VerOffset={value}'", 'Vertical offset (V)', readback='vert.offset.get',
+                            placeholders={**_CH, 'value': _NUM}),
+    'vert.offset.get': _vbs('VBS? "return=app.Acquisition.C{ch}.VerOffset"', 'Vertical offset read-back', kind='query', placeholders=_CH),
+    'coupling.set': _vbs("VBS 'app.Acquisition.C{ch}.Coupling=\"{coupling}\" '", 'Input coupling (DC1M, DC50, AC1M)',
+                         'Also used for the DC 1 MOhm state of configure_dc_input', readback='coupling.get',
+                         placeholders={**_CH, **_txt('coupling', 'DC1M')}),
+    'coupling.get': _vbs('VBS? "return=app.Acquisition.C{ch}.Coupling"', 'Input coupling read-back', kind='query', placeholders=_CH),
+    'bandwidth.set': _vbs("VBS 'app.Acquisition.C{ch}.BandwidthLimit=\"{limit}\" '", 'Bandwidth limit (Full, 20MHz ...)',
+                          'Also used for the 20 MHz state of configure_dc_input', readback='bandwidth.get',
+                          placeholders={**_CH, **_txt('limit', '20MHz')}),
+    'bandwidth.get': _vbs('VBS? "return=app.Acquisition.C{ch}.BandwidthLimit"', 'Bandwidth limit read-back', kind='query', placeholders=_CH),
+    # classic remote command (impedance test)
+    'cpl.set': Cmd('{channel_name}:CPL {coupling}', 'Coupling (classic command)', 'Classic remote command, e.g. C1:CPL D50 (D50 / D1M / A1M)',
+                   placeholders={**_txt('channel_name', 'C1'), **_txt('coupling', 'D50')}, kind='set', readback='cpl.query', verified=True),
+    'cpl.query': Cmd('{channel_name}:CPL?', 'Coupling read-back (classic command)', placeholders=_txt('channel_name', 'C1'), kind='query',
+                     verified=True),
+    # horizontal / trigger
+    'hor.scale.set': _vbs("VBS 'app.Acquisition.Horizontal.HorScale={seconds:.12g}'", 'Time base (s/div)', readback='hor.scale.get',
+                          placeholders={'seconds': Placeholder('float', '.12g', 1e-3)}),
+    'hor.scale.get': _vbs('VBS? "return=app.Acquisition.Horizontal.HorScale"', 'Time base read-back', kind='query'),
+    'trig.type.edge': _vbs("VBS 'app.Acquisition.Trigger.Type=\"Edge\"'", 'Trigger type Edge'),
+    'trig.source.set': _vbs("VBS 'app.Acquisition.Trigger.Edge.Source=\"C{channel}\"'", 'Edge trigger source', readback='trig.source.get',
+                            placeholders=_txt('channel', '1')),
+    'trig.source.get': _vbs('VBS? "return=app.Acquisition.Trigger.Edge.Source"', 'Edge trigger source read-back', kind='query'),
+    'trig.slope.set': _vbs("VBS 'app.Acquisition.Trigger.Edge.Slope=\"{slope}\" '", 'Edge trigger slope (Positive / Negative)', _UNV,
+                           readback='trig.slope.get', verified=False, placeholders=_txt('slope', 'Positive')),
+    'trig.slope.get': _vbs('VBS? "return=app.Acquisition.Trigger.Edge.Slope"', 'Edge trigger slope read-back', _UNV, kind='query',
+                           verified=False),
+    'trig.level.set': _vbs("VBS 'app.Acquisition.Trigger.Edge.Level={volts:.6g}'", 'Edge trigger level (V)', _UNV,
+                           readback='trig.level.get', verified=False, placeholders={'volts': Placeholder('float', '.6g', 0.5)}),
+    'trig.level.get': _vbs('VBS? "return=app.Acquisition.Trigger.Edge.Level"', 'Edge trigger level read-back', _UNV, kind='query',
+                           verified=False),
+    'trig.mode.set': _vbs("VBS 'app.Acquisition.TriggerMode=\"{mode}\" '", 'Trigger mode (Auto / Normal / Single / Stopped)', _UNV,
+                          readback='trig.mode.get', verified=False, placeholders=_txt('mode', 'Auto')),
+    'trig.mode.get': _vbs('VBS? "return=app.Acquisition.TriggerMode"', 'Trigger mode read-back', _UNV, kind='query', verified=False),
+    # measurement P1
+    'p1.engine.set': _vbs("VBS 'app.Measure.P1.ParamEngine=\"{engine}\" ' ", 'P1 measurement (Mean, StandardDeviation, PkPk, Freq)',
+                          readback='p1.engine.get', placeholders=_txt('engine', 'Mean')),
+    'p1.engine.get': _vbs('VBS? "return=app.Measure.P1.ParamEngine"', 'P1 measurement read-back', kind='query'),
+    'p1.source.set': _vbs("VBS 'app.Measure.P1.Source1=\"C{channel}\" ' ", 'P1 source channel', readback='p1.source.get',
+                          placeholders=_txt('channel', '1')),
+    'p1.source.get': _vbs('VBS? "return=app.Measure.P1.Source1"', 'P1 source read-back', kind='query'),
+    'p1.view.on': _vbs("VBS 'app.Measure.P1.View=True ' ", 'Show the P1 parameter'),
+    'p1.value.get': _vbs('VBS? "return=app.Measure.P1.Out.Result.Value"', 'P1 value', kind='query'),
+}
 
 
 class WaveSurfer4104HD(Instrument):
@@ -27,6 +107,7 @@ class WaveSurfer4104HD(Instrument):
     IDN_MATCH = ('LECROY', 'TELEDYNE')
     DEFAULT_TIMEOUT = 10.0
     RELAY_SETTLE = 0.4      # s after a coupling / bandwidth-limit write (front-end relays switch)
+    COMMANDS = COMMANDS
 
     # ---- VBS primitives ------------------------------------------------------------------------
     @staticmethod
@@ -45,14 +126,18 @@ class WaveSurfer4104HD(Instrument):
         self.t.open()
         self.t.set_timeout(self.DEFAULT_TIMEOUT)
 
-    def query_retry(self, cmd: str, attempts=3, delay=0.5) -> str:
+    def query_retry(self, cmd: str, attempts=3, delay=0.5, values: dict | None = None) -> str:
         """Read-only queries only (writes never come through here and are never replayed).
+        `cmd` is a registered query key (`values` fills its placeholders) or the query text itself.
         Before the 2nd attempt the session gets a device clear; before the 3rd it is closed and reopened."""
+        wire, log_as = cmd, None
+        if cmd in self._registry():
+            wire, log_as = self._prepare(cmd, values or {}, 'query_retry')
         recoveries = (self._recover_clear, self._recover_reopen)
         last = None
         for n in range(attempts):
             try:
-                return self.query(cmd)
+                return self.query(wire) if log_as is None else self.query(wire, log_as=log_as)
             except TransportError as exc:
                 last = exc
                 if n + 1 < attempts:
@@ -61,14 +146,14 @@ class WaveSurfer4104HD(Instrument):
                         recoveries[min(n, len(recoveries) - 1)]()
                     except TransportError as rexc:
                         last = rexc
-        raise InstrumentError(f'{cmd!r} failed after {attempts} attempts '
+        raise InstrumentError(f'{wire!r} failed after {attempts} attempts '
                               f'(device clear and session reopen tried): {last}') from last
 
-    def vbs_get(self, path: str) -> str:
-        return self._parse(self.query_retry(f'VBS? "return={path}"'))
+    def _get(self, key, **vals) -> str:
+        return self._parse(self.query_retry(key, values=vals))
 
-    def vbs_get_float(self, path: str) -> float:
-        reply = self.vbs_get(path)
+    @staticmethod
+    def _as_float(path: str, reply: str) -> float:
         try:
             value = float(reply)
         except ValueError:
@@ -78,55 +163,69 @@ class WaveSurfer4104HD(Instrument):
             raise InstrumentError(f'{path} returned a non-finite value')
         return value
 
+    def _get_float(self, key, path, **vals) -> float:
+        return self._as_float(path, self._get(key, **vals))
+
+    def vbs_get(self, path: str) -> str:
+        return self._get('vbs.get', path=path)
+
+    def vbs_get_float(self, path: str) -> float:
+        return self._as_float(path, self.vbs_get(path))
+
     def vbs_set_number(self, path: str, value):
-        self.write(f"VBS '{path}={value}'")
+        self.send('vbs.set.number', path=path, value=format(value))
 
     def vbs_set_text(self, path: str, text: str):
-        self.write(f"""VBS '{path}="{text}" '""")
+        self.send('vbs.set.text', path=path, text=text)
 
-    def _set_text_verified(self, path, text, settle=0.0):
-        self.vbs_set_text(path, text)
+    def _set_text_verified(self, set_key, get_key, path, text, settle=0.0, **vals):
+        self.send(set_key, **vals)
         if settle:
             time.sleep(settle)
-        got = self.vbs_get(path)
+        got = self._get(get_key, **vals)
         if got.casefold() != text.casefold():
             raise InstrumentError(f'{path}: set {text!r} but scope reports {got!r}')
 
     def handshake(self, attempts=2):
         """Read-only USB check; if the session has gone stale, close and reopen once (never replays writes)."""
-        probe = f'{self._ch(1)}.VerScale'
         try:
-            self._parse(self.query_retry(f'VBS? "return={probe}"', attempts=attempts))
+            self._parse(self.query_retry('vert.scale.get', attempts=attempts, values={'ch': self._chn(1)}))
         except InstrumentError:
             self.t.close()
             time.sleep(1.0)
             self.t.open()
             self.t.set_timeout(self.DEFAULT_TIMEOUT)
-            self._parse(self.query_retry(f'VBS? "return={probe}"', attempts=attempts))
+            self._parse(self.query_retry('vert.scale.get', attempts=attempts, values={'ch': self._chn(1)}))
 
     # ---- vertical ------------------------------------------------------------------------
     @staticmethod
-    def _ch(channel) -> str:
-        """channel: 1-4 (int or digit string). 'C1'-style names are refused so a path can never become 'CC1'."""
+    def _chn(channel) -> str:
+        """channel: 1-4 (int or digit string) as the digit text. 'C1'-style names are refused so a path can never become 'CC1'."""
         text = str(channel).strip()
         if text not in ('1', '2', '3', '4'):
             raise InstrumentError(f'Channel must be 1-4, got {channel!r}')
-        return f'app.Acquisition.C{text}'
+        return text
+
+    @classmethod
+    def _ch(cls, channel) -> str:
+        return f'app.Acquisition.C{cls._chn(channel)}'
 
     def set_vertical_scale(self, channel, volts_per_div, settle=0.35):
         path = f'{self._ch(channel)}.VerScale'
-        self.vbs_set_number(path, volts_per_div)
+        ch = self._chn(channel)
+        self.send('vert.scale.set', ch=ch, value=volts_per_div)
         time.sleep(settle)
-        actual = self.vbs_get_float(path)
+        actual = self._get_float('vert.scale.get', path, ch=ch)
         if not math.isclose(actual, volts_per_div, rel_tol=0.01, abs_tol=1e-7):
             raise InstrumentError(f'CH{channel} scale: requested {volts_per_div} V/div, scope reports {actual}')
         return actual
 
     def set_vertical_offset(self, channel, volts, settle=0.4, tolerance=0.001):
         path = f'{self._ch(channel)}.VerOffset'
-        self.vbs_set_number(path, volts)
+        ch = self._chn(channel)
+        self.send('vert.offset.set', ch=ch, value=volts)
         time.sleep(settle)
-        actual = self.vbs_get_float(path)
+        actual = self._get_float('vert.offset.get', path, ch=ch)
         if not math.isclose(actual, volts, abs_tol=tolerance):
             raise InstrumentError(f'CH{channel} offset: requested {volts} V, scope reports {actual}')
         return actual
@@ -134,53 +233,56 @@ class WaveSurfer4104HD(Instrument):
     def ensure_zero_offset(self, channel, tolerance=0.001):
         """Read first; only write when needed (a failed write is never replayed)."""
         path = f'{self._ch(channel)}.VerOffset'
-        if abs(self.vbs_get_float(path)) > tolerance:
-            self.vbs_set_number(path, 0)
+        ch = self._chn(channel)
+        if abs(self._get_float('vert.offset.get', path, ch=ch)) > tolerance:
+            self.send('vert.offset.set', ch=ch, value=0)
             time.sleep(0.3)
-        offset = self.vbs_get_float(path)
+        offset = self._get_float('vert.offset.get', path, ch=ch)
         if abs(offset) > tolerance:
             raise InstrumentError(f'CH{channel} offset not zero: {offset}')
 
     def set_coupling(self, channel, coupling):
         """coupling: DC1M, DC50, AC1M (VBS names)."""
-        self._set_text_verified(f'{self._ch(channel)}.Coupling', coupling, settle=self.RELAY_SETTLE)
+        self._set_text_verified('coupling.set', 'coupling.get', f'{self._ch(channel)}.Coupling', coupling, settle=self.RELAY_SETTLE,
+                                ch=self._chn(channel), coupling=coupling)
 
     def set_bandwidth_limit(self, channel, limit):
         """limit: 'Full', '20MHz', ..."""
-        self._set_text_verified(f'{self._ch(channel)}.BandwidthLimit', limit, settle=self.RELAY_SETTLE)
+        self._set_text_verified('bandwidth.set', 'bandwidth.get', f'{self._ch(channel)}.BandwidthLimit', limit, settle=self.RELAY_SETTLE,
+                                ch=self._chn(channel), limit=limit)
 
     def set_coupling_legacy(self, channel_name, coupling):
         """Classic remote command, e.g. 'C1:CPL D50' (used by the impedance test; value is D50/D1M/A1M)."""
-        self.write(f'{channel_name}:CPL {coupling}')
-        reply = self.query(f'{channel_name}:CPL?').strip().upper()
+        self.send('cpl.set', channel_name=channel_name, coupling=coupling)
+        reply = self.ask('cpl.query', channel_name=channel_name).strip().upper()
         if reply.split()[-1].strip(',') != coupling:
             raise InstrumentError(f'Coupling readback mismatch: requested {coupling}, returned {reply!r}')
 
     def configure_dc_input(self, channel):
         """DC 1 MOhm + 20 MHz bandwidth limit - the input state for DCV and offset tests."""
-        self.write(f"VBS '{self._ch(channel)}.Coupling=\"DC1M\" '")
+        ch = self._chn(channel)
+        self.send('coupling.set', ch=ch, coupling='DC1M')
         time.sleep(self.RELAY_SETTLE)
-        self.write(f"VBS '{self._ch(channel)}.BandwidthLimit=\"20MHz\" '")
+        self.send('bandwidth.set', ch=ch, limit='20MHz')
         time.sleep(self.RELAY_SETTLE)
-        coupling = self.vbs_get(f'{self._ch(channel)}.Coupling')
-        bandwidth = self.vbs_get(f'{self._ch(channel)}.BandwidthLimit')
+        coupling = self._get('coupling.get', ch=ch)
+        bandwidth = self._get('bandwidth.get', ch=ch)
         if coupling.casefold() != 'dc1m' or bandwidth.casefold() != '20mhz':
             raise InstrumentError(f'CH{channel} input setup failed: coupling={coupling!r}, '
                                   f'bandwidth={bandwidth!r}; required DC1M / 20MHz')
 
     # ---- horizontal / trigger ------------------------------------------------------------------------
     def set_timebase(self, seconds_per_div, settle=0.4):
-        path = 'app.Acquisition.Horizontal.HorScale'
-        self.vbs_set_number(path, f'{seconds_per_div:.12g}')
+        self.send('hor.scale.set', seconds=seconds_per_div)
         time.sleep(settle)
-        actual = self.vbs_get_float(path)
+        actual = self._get_float('hor.scale.get', 'app.Acquisition.Horizontal.HorScale')
         if not math.isclose(actual, seconds_per_div, rel_tol=0.02, abs_tol=1e-13):
             raise InstrumentError(f'Timebase: requested {seconds_per_div:.12g} s/div, scope reports {actual:.12g}')
 
     def set_edge_trigger_source(self, channel):
-        self.write("VBS 'app.Acquisition.Trigger.Type=\"Edge\"'")
-        self.write(f"VBS 'app.Acquisition.Trigger.Edge.Source=\"C{channel}\"'")
-        source = self.vbs_get('app.Acquisition.Trigger.Edge.Source')
+        self.send('trig.type.edge')
+        self.send('trig.source.set', channel=str(channel))
+        source = self._get('trig.source.get')
         if source.strip().upper() != f'C{channel}':
             raise InstrumentError(f'Trigger source {source!r} does not match CH{channel}')
 
@@ -191,14 +293,14 @@ class WaveSurfer4104HD(Instrument):
 
     def set_trigger_slope(self, slope):
         """slope: 'Positive' or 'Negative'."""
-        self._set_text_verified(f'{self.TRIGGER}.Edge.Slope', slope, settle=0.3)
+        self._set_text_verified('trig.slope.set', 'trig.slope.get', f'{self.TRIGGER}.Edge.Slope', slope, settle=0.3, slope=slope)
 
     def set_trigger_level(self, volts, tolerance=0.002):
         """Returns the level the scope reports (it may round to its trigger DAC step)."""
         path = f'{self.TRIGGER}.Edge.Level'
-        self.vbs_set_number(path, f'{volts:.6g}')
+        self.send('trig.level.set', volts=volts)
         time.sleep(0.3)
-        actual = self.vbs_get_float(path)
+        actual = self._get_float('trig.level.get', path)
         if not math.isclose(actual, volts, abs_tol=tolerance):
             raise InstrumentError(f'Trigger level: requested {volts:+.4f} V, scope reports {actual:+.4f} V')
         return actual
@@ -206,26 +308,26 @@ class WaveSurfer4104HD(Instrument):
     def set_trigger_mode(self, mode, accept=None):
         """mode: 'Auto', 'Normal' or 'Single'. After 'Single' the scope may already report 'Stopped' if it
         triggered at once, so the accepted readbacks can be widened with `accept`."""
-        self.vbs_set_text('app.Acquisition.TriggerMode', mode)
+        self.send('trig.mode.set', mode=mode)
         time.sleep(0.3)
-        got = self.vbs_get('app.Acquisition.TriggerMode')
+        got = self._get('trig.mode.get')
         allowed = {mode.casefold()} | {a.casefold() for a in (accept or ())}
         if got.casefold() not in allowed:
             raise InstrumentError(f'Trigger mode: set {mode!r} but scope reports {got!r}')
         return got
 
     def trigger_mode(self) -> str:
-        return self.vbs_get('app.Acquisition.TriggerMode')
+        return self._get('trig.mode.get')
 
     # ---- measurement P1 ------------------------------------------------------------------------
     def configure_p1(self, channel, engine, show=True):
         """engine: 'Mean', 'StandardDeviation' (RMS noise), 'PkPk' or 'Freq' (time base). Verified by readback."""
         want = engine.casefold()
-        current = self.vbs_get(f'{P1}.ParamEngine')
+        current = self._get('p1.engine.get')
         if current.casefold() not in {want} | {'pkpk': {'peaktopeak'}, 'freq': {'frequency'}}.get(want, set()):
-            self.write(f"""VBS '{P1}.ParamEngine="{engine}" ' """)
+            self.send('p1.engine.set', engine=engine)
             time.sleep(0.5)
-            current = self.vbs_get(f'{P1}.ParamEngine')
+            current = self._get('p1.engine.get')
         # MAUI may report the long engine name after the short one is written (PkPk -> PeakToPeak, Freq -> Frequency,
         # the latter seen on the 4104HD).
         aliases = {'pkpk': {'peaktopeak'}, 'freq': {'frequency'}}
@@ -233,18 +335,18 @@ class WaveSurfer4104HD(Instrument):
         if current.casefold() not in accepted:
             raise InstrumentError(f'P1 engine {current!r}, expected {engine}')
         target = f'C{channel}'
-        if self.vbs_get(f'{P1}.Source1').upper() != target:
-            self.write(f"""VBS '{P1}.Source1="{target}" ' """)
+        if self._get('p1.source.get').upper() != target:
+            self.send('p1.source.set', channel=str(channel))
             time.sleep(0.5)
-        source = self.vbs_get(f'{P1}.Source1')
+        source = self._get('p1.source.get')
         if source.upper() != target:
             raise InstrumentError(f'P1 source {source!r}, expected {target}')
         if show:
-            self.write(f"VBS '{P1}.View=True ' ")
+            self.send('p1.view.on')
 
     def read_p1(self) -> float:
         """Current P1 value (volts for Mean / StandardDeviation / PkPk, hertz for Freq)."""
-        return self.vbs_get_float(f'{P1}.Out.Result.Value')
+        return self._get_float('p1.value.get', f'{P1}.Out.Result.Value')
 
     def read_p1_settled(self, settle_s, discard_gap_s=0.5):
         """Wait, discard one possibly stale reading, then return a fresh one."""

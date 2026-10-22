@@ -1,0 +1,919 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Fluke5560A.standby",
+   "log": [
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "Fluke5560A.standby",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.operate",
+   "log": [
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1"
+   ],
+   "method": "Fluke5560A.operate",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.is_operating",
+   "log": [
+    "5560A|>>|OPER?",
+    "5560A|<<|1"
+   ],
+   "method": "Fluke5560A.is_operating",
+   "result": "returned True",
+   "wire": [
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.cleanup",
+   "log": [
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "Fluke5560A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.scope_off",
+   "log": [
+    "5560A|>>|SCOPE OFF",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|OFF"
+   ],
+   "method": "Fluke5560A.scope_off",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SCOPE OFF"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "OFF"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.select_scope_dcv[1M]",
+   "log": [
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP 1M",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM"
+   ],
+   "method": "Fluke5560A.select_scope_dcv",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP 1M"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ]
+   ]
+  },
+  {
+   "call": "'50'",
+   "case": "Fluke5560A.select_scope_dcv[50]",
+   "log": [
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP 50",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|50,OHM"
+   ],
+   "method": "Fluke5560A.select_scope_dcv",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP 50"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "50,OHM"
+    ]
+   ]
+  },
+  {
+   "call": "1.0",
+   "case": "Fluke5560A.set_dc_volts",
+   "log": [
+    "5560A|>>|OUT 1.000000000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|1.000000000,V,0.0,HZ"
+   ],
+   "method": "Fluke5560A.set_dc_volts",
+   "result": "returned 1.0",
+   "wire": [
+    [
+     "W",
+     "OUT 1.000000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "1.000000000,V,0.0,HZ"
+    ]
+   ]
+  },
+  {
+   "call": "-0.0123456789",
+   "case": "Fluke5560A.set_dc_volts[negative small]",
+   "log": [
+    "5560A|>>|OUT -0.012345679V",
+    "5560A|>>|OUT?",
+    "5560A|<<|-0.012345679,V,0.0,HZ"
+   ],
+   "method": "Fluke5560A.set_dc_volts",
+   "result": "returned -0.012345679",
+   "wire": [
+    [
+     "W",
+     "OUT -0.012345679V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "-0.012345679,V,0.0,HZ"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.select_scope_levsine",
+   "log": [
+    "5560A|>>|SCOPE LEVSINE"
+   ],
+   "method": "Fluke5560A.select_scope_levsine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SCOPE LEVSINE"
+    ]
+   ]
+  },
+  {
+   "call": "2.5, 50.0",
+   "case": "Fluke5560A.set_levsine[Hz]",
+   "log": [
+    "5560A|>>|OUT 2.5V,50Hz"
+   ],
+   "method": "Fluke5560A.set_levsine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 2.5V,50Hz"
+    ]
+   ]
+  },
+  {
+   "call": "2.5, 50000.0",
+   "case": "Fluke5560A.set_levsine[kHz]",
+   "log": [
+    "5560A|>>|OUT 2.5V,50kHz"
+   ],
+   "method": "Fluke5560A.set_levsine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 2.5V,50kHz"
+    ]
+   ]
+  },
+  {
+   "call": "2.5, 1500000.0",
+   "case": "Fluke5560A.set_levsine[MHz]",
+   "log": [
+    "5560A|>>|OUT 2.5V,1.5MHz"
+   ],
+   "method": "Fluke5560A.set_levsine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 2.5V,1.5MHz"
+    ]
+   ]
+  },
+  {
+   "call": "2.5, 1100000000.0",
+   "case": "Fluke5560A.set_levsine[GHz]",
+   "log": [
+    "5560A|>>|OUT 2.5V,1.1GHz"
+   ],
+   "method": "Fluke5560A.set_levsine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 2.5V,1.1GHz"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.select_scope_square",
+   "log": [
+    "5560A|>>|SCOPE SQUARE"
+   ],
+   "method": "Fluke5560A.select_scope_square",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SCOPE SQUARE"
+    ]
+   ]
+  },
+  {
+   "call": "1.0, 1000.0",
+   "case": "Fluke5560A.set_square",
+   "log": [
+    "5560A|>>|OUT 1V,1kHz"
+   ],
+   "method": "Fluke5560A.set_square",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 1V,1kHz"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.drain_errors[stale]",
+   "log": [
+    "5560A|>>|ERR?",
+    "5560A|<<|-113,\"Undefined header\"",
+    "5560A|>>|ERR?",
+    "5560A|<<|-221,\"Settings conflict\"",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\""
+   ],
+   "method": "Fluke5560A.drain_errors",
+   "result": "returned ['-113,\"Undefined header\"', '-221,\"Settings conflict\"']",
+   "wire": [
+    [
+     "Q",
+     "ERR?",
+     "-113,\"Undefined header\""
+    ],
+    [
+     "Q",
+     "ERR?",
+     "-221,\"Settings conflict\""
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.drain_errors[empty]",
+   "log": [
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\""
+   ],
+   "method": "Fluke5560A.drain_errors",
+   "result": "returned []",
+   "wire": [
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.select_scope_marker",
+   "log": [
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE MARKER",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|MARKER"
+   ],
+   "method": "Fluke5560A.select_scope_marker",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "SCOPE MARKER"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "MARKER"
+    ]
+   ]
+  },
+  {
+   "call": "0.001",
+   "case": "Fluke5560A.set_marker_period",
+   "log": [
+    "5560A|>>|OUT 0.001S",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT?",
+    "5560A|<<|1.000000000E-03,S"
+   ],
+   "method": "Fluke5560A.set_marker_period",
+   "result": "returned 0.001",
+   "wire": [
+    [
+     "W",
+     "OUT 0.001S"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT?",
+     "1.000000000E-03,S"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.select_scope_measure_resistance",
+   "log": [
+    "5560A|>>|SCOPE MEASR",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|MEASR"
+   ],
+   "method": "Fluke5560A.select_scope_measure_resistance",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SCOPE MEASR"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "MEASR"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.measure_scope_resistance",
+   "log": [
+    "5560A|>>|*TRG",
+    "5560A|<<|50.0200,OHM"
+   ],
+   "method": "Fluke5560A.measure_scope_resistance",
+   "result": "returned 50.02",
+   "wire": [
+    [
+     "Q",
+     "*TRG",
+     "50.0200,OHM"
+    ]
+   ]
+  },
+  {
+   "call": "1.0",
+   "case": "Fluke5560A.set_output_volts[no freq]",
+   "log": [
+    "5560A|>>|OUT 1V"
+   ],
+   "method": "Fluke5560A.set_output_volts",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 1V"
+    ]
+   ]
+  },
+  {
+   "call": "1.0, 1000.0",
+   "case": "Fluke5560A.set_output_volts[freq]",
+   "log": [
+    "5560A|>>|OUT 1V,1000Hz"
+   ],
+   "method": "Fluke5560A.set_output_volts",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 1V,1000Hz"
+    ]
+   ]
+  },
+  {
+   "call": "0.001",
+   "case": "Fluke5560A.set_output_amps[no freq]",
+   "log": [
+    "5560A|>>|OUT 0.001A"
+   ],
+   "method": "Fluke5560A.set_output_amps",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 0.001A"
+    ]
+   ]
+  },
+  {
+   "call": "0.001, 1000.0",
+   "case": "Fluke5560A.set_output_amps[freq]",
+   "log": [
+    "5560A|>>|OUT 0.001A,1000Hz"
+   ],
+   "method": "Fluke5560A.set_output_amps",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 0.001A,1000Hz"
+    ]
+   ]
+  },
+  {
+   "call": "1000.0",
+   "case": "Fluke5560A.set_output_ohms",
+   "log": [
+    "5560A|>>|OUT 1000OHM"
+   ],
+   "method": "Fluke5560A.set_output_ohms",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 1000OHM"
+    ]
+   ]
+  },
+  {
+   "call": "4.7e-09",
+   "case": "Fluke5560A.set_output_capacitance[nF]",
+   "log": [
+    "5560A|>>|OUT 4.7NF"
+   ],
+   "method": "Fluke5560A.set_output_capacitance",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 4.7NF"
+    ]
+   ]
+  },
+  {
+   "call": "4.7e-06",
+   "case": "Fluke5560A.set_output_capacitance[uF]",
+   "log": [
+    "5560A|>>|OUT 4.7UF"
+   ],
+   "method": "Fluke5560A.set_output_capacitance",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 4.7UF"
+    ]
+   ]
+  },
+  {
+   "call": "0.01",
+   "case": "Fluke5560A.set_output_capacitance[F]",
+   "log": [
+    "5560A|>>|OUT 0.01F"
+   ],
+   "method": "Fluke5560A.set_output_capacitance",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUT 0.01F"
+    ]
+   ]
+  },
+  {
+   "call": "100.0",
+   "case": "Fluke5560A.set_output_temperature",
+   "log": [
+    "5560A|>>|TC_TYPE K",
+    "5560A|>>|OUT 100CEL"
+   ],
+   "method": "Fluke5560A.set_output_temperature",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "TC_TYPE K"
+    ],
+    [
+     "W",
+     "OUT 100CEL"
+    ]
+   ]
+  },
+  {
+   "call": "25.5, 'J'",
+   "case": "Fluke5560A.set_output_temperature[type J]",
+   "log": [
+    "5560A|>>|TC_TYPE J",
+    "5560A|>>|OUT 25.5CEL"
+   ],
+   "method": "Fluke5560A.set_output_temperature",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "TC_TYPE J"
+    ],
+    [
+     "W",
+     "OUT 25.5CEL"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.read_error",
+   "log": [
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\""
+   ],
+   "method": "Fluke5560A.read_error",
+   "result": "returned '0,\"No error\"'",
+   "wire": [
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Fluke5560A.check_error[ok]",
+   "log": [
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\""
+   ],
+   "method": "Fluke5560A.check_error",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'out of range'",
+   "case": "Fluke5560A.check_error[rejected]",
+   "log": [
+    "5560A|>>|ERR?",
+    "5560A|<<|-222,\"Data out of range\""
+   ],
+   "method": "Fluke5560A.check_error",
+   "result": "raised InstrumentError: 5560A rejected the setting (out of range): -222,\"Data out of range\"",
+   "wire": [
+    [
+     "Q",
+     "ERR?",
+     "-222,\"Data out of range\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.clear_status",
+   "log": [
+    "5560A|>>|*CLS"
+   ],
+   "method": "Fluke5560A.clear_status",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "*CLS"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.operate_unverified",
+   "log": [
+    "5560A|>>|OPER"
+   ],
+   "method": "Fluke5560A.operate_unverified",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OPER"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.standby_quiet",
+   "log": [
+    "5560A|>>|STBY"
+   ],
+   "method": "Fluke5560A.standby_quiet",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "1.0",
+   "case": "Fluke5560A.apply_scope_dc",
+   "log": [
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0",
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP 1M",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|OUT 1.000000000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|1.000000000,V,1000.0,HZ",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1"
+   ],
+   "method": "Fluke5560A.apply_scope_dc",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP 1M"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "W",
+     "OUT 1.000000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "1.000000000,V,1000.0,HZ"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.standby[not confirmed]",
+   "log": [
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|1"
+   ],
+   "method": "Fluke5560A.standby",
+   "result": "raised SafetyError: Fluke did not confirm standby",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.operate[not confirmed]",
+   "log": [
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "Fluke5560A.operate",
+   "result": "raised InstrumentError: Fluke did not confirm OPERATE; output not verified",
+   "wire": [
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.cleanup[standby not confirmed]",
+   "log": [
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|1"
+   ],
+   "method": "Fluke5560A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5522A.open",
+   "log": [
+    "5522A|>>|*IDN?",
+    "5522A|<<|FLUKE,5522A,SIM0001,1.0"
+   ],
+   "method": "Fluke5522A.open",
+   "result": "returned <Fluke5522A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5522A,SIM0001,1.0"
+    ]
+   ]
+  }
+ ],
+ "name": "fluke_5560a",
+ "schema": 1
+}

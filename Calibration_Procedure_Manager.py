@@ -26,6 +26,9 @@ import suite_info
 import labregistry
 import labregistry_ui
 import specmanager_ui
+import procmods
+import procmods_ui
+import procmods_ui_model
 
 BASE = Path(__file__).resolve().parent
 DB = appdata.db_path('calibration_procedures.sqlite3')     # the person's own data folder (see appdata.py)
@@ -278,10 +281,11 @@ class Manager:
         split.rowconfigure(0, weight=1)
         cols = ('name', 'manufacturer', 'model', 'category', 'ready')
         self.table = ui.make_table(split, cols, ('Procedure', 'Manufacturer', 'Model', 'Category', 'Status'),
-                                   (260, 130, 110, 170, 90), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w'},
+                                   (260, 130, 110, 170, 150), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w'},
                                    zebra=True, pack=False, stretch={'manufacturer': False, 'model': False, 'category': False, 'ready': False})
         self.table.master.grid(row=0, column=0, sticky='nsew')
         self.table.tag_configure('missing', foreground=ui.C['bad'])
+        self.table.tag_configure('modified', foreground=ui.C['warn'])
         self.empty_lib = self._empty_state(self.table, 'No procedures match.\nUse "Register procedure..." to add one.')
         self.table.bind('<Double-1>', lambda _: self.run_selected())
         self.table.bind('<<TreeviewSelect>>', lambda _: (self.refresh_details(), self.refresh_development()))
@@ -301,6 +305,9 @@ class Manager:
         self.btn_run.pack(fill='x', pady=(18, 6))
         self.btn_demo = ttk.Button(card, text='Try in demo mode (no hardware)', command=lambda: self.run_selected(demo=True))
         self.btn_demo.pack(fill='x')
+        self.d_mod = ui.Pill(card, '', 'warn')                    # 'MODIFIED (n)': saved model-wide procedure changes exist
+        self.btn_changes = ttk.Button(card, text='Procedure changes...', command=self.procedure_changes)
+        self.btn_changes.pack(fill='x', pady=(6, 0))
         ttk.Label(card, text='Run procedure uses real instruments. Demo mode only simulates readings, so you can rehearse safely.',
                   style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 0))
 
@@ -312,6 +319,7 @@ class Manager:
             self.d_desc.set(''); self.d_path.set('')
             self.d_pill.set('', 'neutral')
             self.btn_run.configure(state='disabled'); self.btn_demo.configure(state='disabled')
+            self.d_mod.pack_forget(); self.btn_changes.configure(state='disabled')
             return
         id_, name, mfr, model, cat, script, desc = rec
         found = script_file(script).is_file()
@@ -323,6 +331,13 @@ class Manager:
         self.d_pill.set('Ready to run' if found else 'Script file not found', 'good' if found else 'bad')
         state = 'normal' if found else 'disabled'
         self.btn_run.configure(state=state); self.btn_demo.configure(state=state)
+        n = self._mod_counts().get((model or '').casefold(), 0)
+        if n:
+            self.d_mod.set(procmods_ui_model.chip_text(n), 'warn')
+            self.d_mod.pack(anchor='w', pady=(6, 0), before=self.btn_run)
+        else:
+            self.d_mod.pack_forget()
+        self.btn_changes.configure(state='normal')
 
     def _selected_row(self):
         sel = self.table.selection()
@@ -342,14 +357,17 @@ class Manager:
         keep = self.table.selection()
         self.table.delete(*self.table.get_children())
         shown = 0
+        mods = self._mod_counts(refresh=True)
         for id_, name, mfr, model, category, script in rows:
             if cat != ALL_CATEGORIES and category != cat:
                 continue
             if term and term not in ' '.join((name, mfr, model, category)).lower():
                 continue
             found = script_file(script).is_file()
-            tags = ['even' if shown % 2 == 0 else 'odd'] + ([] if found else ['missing'])
-            self.table.insert('', 'end', iid=str(id_), values=(name, mfr, model, category, 'Ready' if found else 'Missing'), tags=tags)
+            n_mod = mods.get((model or '').casefold(), 0)
+            tags = ['even' if shown % 2 == 0 else 'odd'] + ([] if found else ['missing']) + (['modified'] if n_mod else [])
+            status = ('Ready' if found else 'Missing') + (f'  {procmods_ui_model.chip_text(n_mod)}' if n_mod else '')
+            self.table.insert('', 'end', iid=str(id_), values=(name, mfr, model, category, status), tags=tags)
             shown += 1
         self._toggle_empty(self.table, shown == 0)
         if keep and self.table.exists(keep[0]):
@@ -358,6 +376,24 @@ class Manager:
             self.table.selection_set(self.table.get_children()[0])
         self.refresh_details()
         self.status.set(f'{shown} of {len(rows)} procedure(s) shown. Double-click a procedure to run it.')
+
+    def _mod_counts(self, refresh=False):
+        """{model: n} of saved model-wide procedure changes (one query per list refresh; never blocks the list if the registry is unreadable)."""
+        if refresh or not hasattr(self, '_mods'):
+            try:
+                self._mods = procmods_ui_model.model_counts(procmods.Store())
+            except Exception:
+                self._mods = {}
+        return self._mods
+
+    def procedure_changes(self):
+        """Saved changes for the selected procedure's model: read-only until developer mode is unlocked.  A running procedure is edited
+        from its own window (Modify procedure), never from here."""
+        rec = self._selected_row()
+        if not rec:
+            return
+        lock = procmods_ui.shared_lock()
+        procmods_ui.open_manager_changes(self.root, rec[3], procmods.Store(devmode=lock.devmode), lock)
 
     def selected(self):
         selection = self.table.selection()

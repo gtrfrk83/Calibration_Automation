@@ -17,11 +17,65 @@ from __future__ import annotations
 
 import math
 
+import cmdreg
+from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError, SafetyError
 
 HIGH_Z = 9.9e37
 UNITS = ('VPP', 'VRMS', 'DBM')
 FUNCS = {'SIN': 'SIN', 'SQU': 'SQU'}
+
+_REF = "33210A/33220A/33250A User's Guide"
+
+
+def _ref(topic, p210, p220, p250):
+    return f"{_REF}: {topic} (pp. {p210} / {p220} / {p250})"
+
+
+# Every command the driver sends (same text and format specs the old f-strings used). All of them are taken from the User's Guides and
+# have NOT been run on hardware (NOTES.md), so verified=False throughout. OUTP ON / OUTP OFF / OUTP? change or confirm the output state
+# (risk 'output'); *CLS, SYST:ERR? and *TST? are bootstrap / error-queue / self-test plumbing (risk 'locked'). Neither kind can be overridden.
+# APPLy is deliberately absent: it switches the output on by itself.
+COMMANDS = {
+    'status.clear': Cmd('*CLS', 'Clear status', 'Clears the status registers and the error queue (never overridable)', kind='set',
+                        risk='locked', verified=False),
+    'err.query': Cmd('SYST:ERR?', 'Error queue', "Oldest error; '+0,\"No error\"' when empty (never overridable)", kind='query',
+                     risk='locked', verified=False),
+    'selftest': Cmd('*TST?', 'Self-test', 'Runs the self-test: 0 pass / 1 fail (never overridable)', kind='query', risk='locked',
+                    verified=False, ref=_ref('*TST?', 141, 131, 114)),
+    'outp.on': Cmd('OUTP ON', 'Output on', 'Enables the output (never overridable)', kind='set', readback='outp.query', risk='output',
+                   verified=False, ref=_ref('OUTPut', 82, 67, 60)),
+    'outp.off': Cmd('OUTP OFF', 'Output off', 'Disables the output (never overridable)', kind='set', readback='outp.query', risk='output',
+                    verified=False, ref=_ref('OUTPut', 82, 67, 60)),
+    'outp.query': Cmd('OUTP?', 'Output state', 'Returns 0 or 1 (never overridable)', kind='query', risk='output', verified=False,
+                      ref=_ref('OUTPut?', 82, 67, 60)),
+    'load.inf': Cmd('OUTP:LOAD INF', 'Output termination High Z', 'OUTP:LOAD? returns 9.9E+37 for High Z', kind='set',
+                    readback='load.query', verified=False, ref=_ref('OUTPut:LOAD', 78, 63, 57)),
+    'load.ohms': Cmd('OUTP:LOAD {load:g}', 'Output termination (ohm)', 'Load in ohm (50)',
+                     placeholders={'load': Placeholder('float', 'g', 50.0)}, kind='set', readback='load.query', verified=False,
+                     ref=_ref('OUTPut:LOAD', 78, 63, 57)),
+    'load.query': Cmd('OUTP:LOAD?', 'Output termination', kind='query', verified=False, ref=_ref('OUTPut:LOAD?', 78, 63, 57)),
+    'unit.vrms': Cmd('VOLT:UNIT VRMS', 'Amplitude unit Vrms', 'Sent first: dBm is refused while the load is High Z', kind='set',
+                     readback='unit.query', verified=False, ref=_ref('VOLTage:UNIT', 77, 62, 56)),
+    'unit.set': Cmd('VOLT:UNIT {unit}', 'Amplitude unit', 'VPP, VRMS or DBM (dBm is refused at High Z)',
+                    placeholders={'unit': Placeholder('enum', '', 'VPP', enum=UNITS)}, kind='set', readback='unit.query', verified=False,
+                    ref=_ref('VOLTage:UNIT', 77, 62, 56)),
+    'unit.query': Cmd('VOLT:UNIT?', 'Amplitude unit', kind='query', verified=False, ref=_ref('VOLTage:UNIT?', 77, 62, 56)),
+    'func.set': Cmd('FUNC {func}', 'Waveform', 'SIN or SQU', placeholders={'func': Placeholder('enum', '', 'SIN', enum=tuple(FUNCS.values()))},
+                    kind='set', readback='func.query', verified=False, ref=_ref('FUNCtion', 71, 56, 153)),
+    'func.query': Cmd('FUNC?', 'Waveform', kind='query', verified=False, ref=_ref('FUNCtion?', 71, 56, 153)),
+    'offs.zero': Cmd('VOLT:OFFS 0', 'DC offset 0 V', kind='set', readback='offs.query', verified=False, ref=_ref('VOLTage:OFFSet', 76, 61, 55)),
+    'offs.query': Cmd('VOLT:OFFS?', 'DC offset', kind='query', verified=False, ref=_ref('VOLTage:OFFSet?', 76, 61, 55)),
+    'autorange.on': Cmd('VOLT:RANG:AUTO ON', 'Amplitude autorange on', kind='set', readback='autorange.query', verified=False,
+                        ref=_ref('VOLTage:RANGe:AUTO', 81, 66, 60)),
+    'autorange.query': Cmd('VOLT:RANG:AUTO?', 'Amplitude autorange', kind='query', verified=False, ref=_ref('VOLTage:RANGe:AUTO?', 81, 66, 60)),
+    'freq.set': Cmd('FREQ {frequency:.12g}', 'Frequency', 'Hz', placeholders={'frequency': Placeholder('float', '.12g', 1000.0)}, kind='set',
+                    readback='freq.query', verified=False, ref=_ref('FREQuency', 73, 58, 52)),
+    'freq.query': Cmd('FREQ?', 'Frequency', kind='query', verified=False, ref=_ref('FREQuency?', 73, 58, 52)),
+    'volt.set': Cmd('VOLT {amplitude:.6g}', 'Amplitude', 'In the unit selected with VOLT:UNIT',
+                    placeholders={'amplitude': Placeholder('float', '.6g', 1.0)}, kind='set', readback='volt.query', verified=False),
+    'volt.query': Cmd('VOLT?', 'Amplitude', kind='query', verified=False),
+}
 
 
 class Keysight332xx(Instrument):
@@ -30,12 +84,13 @@ class Keysight332xx(Instrument):
     DEFAULT_TIMEOUT = 15.0
     SELFTEST_TIMEOUT = 90.0
     MAX_SINE_HZ = 0.0
+    COMMANDS = COMMANDS
 
     output_off_confirmed = False
 
     def connect(self):
         self.open(verify_model=True)
-        self.write('*CLS')
+        self.send('status.clear')
         self.output(False)
         self.check_errors('connect')
         return self
@@ -43,7 +98,7 @@ class Keysight332xx(Instrument):
     # ---- error queue ---------------------------------------------------------------------------------
     def check_errors(self, context=''):
         """SYSTem:ERRor? -> '+0,"No error"' when empty. Raise with the first error otherwise."""
-        reply = self.query('SYST:ERR?').strip()
+        reply = self.ask('err.query').strip()
         code = reply.split(',')[0].strip().lstrip('+')
         try:
             failed = int(code) != 0
@@ -58,7 +113,7 @@ class Keysight332xx(Instrument):
         self.output(False)
         self.t.set_timeout(self.SELFTEST_TIMEOUT)
         try:
-            reply = self.query('*TST?').strip()
+            reply = self.ask('selftest').strip()
         finally:
             self.t.set_timeout(self.DEFAULT_TIMEOUT)
         try:
@@ -67,22 +122,26 @@ class Keysight332xx(Instrument):
             raise InstrumentError(f'Unexpected *TST? reply: {reply!r}')
         detail = ''
         if not passed:
-            detail = self.query('SYST:ERR?').strip()
+            detail = self.ask('err.query').strip()
         else:
             self.check_errors('self-test')
         self.output(False)
         return passed, detail
 
     # ---- settings (write, read back, compare) --------------------------------------------------------
-    def _set_text(self, cmd, query, want, what):
-        self.write(cmd)
-        got = self.query(query).strip().strip('"').upper()
-        if not got.startswith(want):
-            raise InstrumentError(f'{self.MODEL} {what}: set {cmd!r}, reports {got!r}')
+    def _wire(self, key, **vals):
+        """The factory text of a command with its values filled in (for error messages)."""
+        return cmdreg.render(self._registry()[key], vals)
 
-    def _set_number(self, cmd, query, want, what, rel=1e-6, abs_=1e-9):
-        self.write(cmd)
-        got = float(self.query(query).strip())
+    def _set_text(self, key, query, want, what, **vals):
+        self.send(key, **vals)
+        got = self.ask(query, **vals).strip().strip('"').upper()
+        if not got.startswith(want):
+            raise InstrumentError(f'{self.MODEL} {what}: set {self._wire(key, **vals)!r}, reports {got!r}')
+
+    def _set_number(self, key, query, want, what, rel=1e-6, abs_=1e-9, **vals):
+        self.send(key, **vals)
+        got = float(self.ask(query, **vals).strip())
         if not math.isclose(got, want, rel_tol=rel, abs_tol=abs_):
             raise InstrumentError(f'{self.MODEL} {what}: set {want:g}, reports {got:g}')
         return got
@@ -90,12 +149,12 @@ class Keysight332xx(Instrument):
     def set_load(self, load):
         """'INF' (High Z) or 50 ohms."""
         if str(load).upper().startswith('INF'):
-            self.write('OUTP:LOAD INF')
-            got = float(self.query('OUTP:LOAD?').strip())
+            self.send('load.inf')
+            got = float(self.ask('load.query').strip())
             if got < 1e37:
                 raise InstrumentError(f'{self.MODEL} output termination: set High Z, reports {got:g} ohm')
         else:
-            self._set_number(f'OUTP:LOAD {float(load):g}', 'OUTP:LOAD?', float(load), 'output termination')
+            self._set_number('load.ohms', 'load.query', float(load), 'output termination', load=float(load))
 
     def setup(self, function, frequency, amplitude, unit, load):
         """Configure a test point with the output OFF: termination, waveform, 0 V offset, autorange on, units,
@@ -107,21 +166,21 @@ class Keysight332xx(Instrument):
         if func == 'SIN' and frequency > self.MAX_SINE_HZ:
             raise InstrumentError(f'{frequency / 1e6:g} MHz is above the {self.MODEL} sine range ({self.MAX_SINE_HZ / 1e6:g} MHz)')
         self.output(False)
-        self._set_text('VOLT:UNIT VRMS', 'VOLT:UNIT?', 'VRMS', 'amplitude units')   # dBm is refused at High Z: leave it first
+        self._set_text('unit.vrms', 'unit.query', 'VRMS', 'amplitude units')   # dBm is refused at High Z: leave it first
         self.set_load(load)
-        self._set_text(f'FUNC {func}', 'FUNC?', func, 'function')
-        self._set_number('VOLT:OFFS 0', 'VOLT:OFFS?', 0.0, 'dc offset', abs_=1e-6)
-        self._set_text('VOLT:RANG:AUTO ON', 'VOLT:RANG:AUTO?', '1', 'amplitude autorange')
+        self._set_text('func.set', 'func.query', func, 'function', func=func)
+        self._set_number('offs.zero', 'offs.query', 0.0, 'dc offset', abs_=1e-6)
+        self._set_text('autorange.on', 'autorange.query', '1', 'amplitude autorange')
         if unit != 'VRMS':
-            self._set_text(f'VOLT:UNIT {unit}', 'VOLT:UNIT?', unit, 'amplitude units')
-        self._set_number(f'FREQ {frequency:.12g}', 'FREQ?', frequency, 'frequency', rel=1e-9, abs_=1e-6)
-        self._set_number(f'VOLT {amplitude:.6g}', 'VOLT?', amplitude, 'amplitude', rel=1e-4, abs_=5e-3 if unit == 'DBM' else 1e-5)
+            self._set_text('unit.set', 'unit.query', unit, 'amplitude units', unit=unit)
+        self._set_number('freq.set', 'freq.query', frequency, 'frequency', rel=1e-9, abs_=1e-6, frequency=frequency)
+        self._set_number('volt.set', 'volt.query', amplitude, 'amplitude', rel=1e-4, abs_=5e-3 if unit == 'DBM' else 1e-5, amplitude=amplitude)
         self.check_errors(f'{func} {frequency:g} Hz {amplitude:g} {unit}')
 
     def output(self, on: bool):
         """OUTP ON / OFF, confirmed with OUTP?. An unconfirmed OFF is a SafetyError."""
-        self.write('OUTP ON' if on else 'OUTP OFF')
-        state = self.query('OUTP?').strip()
+        self.send('outp.on' if on else 'outp.off')
+        state = self.ask('outp.query').strip()
         if state != ('1' if on else '0'):
             if on:
                 raise InstrumentError(f'{self.MODEL} did not confirm output ON (OUTP? -> {state!r})')
@@ -130,8 +189,8 @@ class Keysight332xx(Instrument):
     def cleanup(self):
         """Best effort: output OFF. Never raises."""
         try:
-            self.write('OUTP OFF')
-            self.output_off_confirmed = self.query('OUTP?').strip() == '0'
+            self.send('outp.off')
+            self.output_off_confirmed = self.ask('outp.query').strip() == '0'
         except Exception:
             self.output_off_confirmed = False
 

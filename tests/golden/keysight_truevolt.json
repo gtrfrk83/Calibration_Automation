@@ -1,0 +1,655 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "KeysightTruevolt.connect",
+   "log": [
+    "34470A|>>|*CLS",
+    "34470A|>>|*IDN?",
+    "34470A|<<|Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+   ],
+   "method": "KeysightTruevolt.connect",
+   "result": "returned <Keysight34470A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeysightTruevolt.cleanup",
+   "log": [],
+   "method": "KeysightTruevolt.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "'DCV'",
+   "case": "KeysightTruevolt.set_nplc[DCV]",
+   "log": [
+    "34470A|>>|VOLT:DC:NPLC 10"
+   ],
+   "method": "KeysightTruevolt.set_nplc",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VOLT:DC:NPLC 10"
+    ]
+   ]
+  },
+  {
+   "call": "'DCI'",
+   "case": "KeysightTruevolt.set_nplc[DCI]",
+   "log": [
+    "34470A|>>|CURR:DC:NPLC 10"
+   ],
+   "method": "KeysightTruevolt.set_nplc",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CURR:DC:NPLC 10"
+    ]
+   ]
+  },
+  {
+   "call": "'OHM2'",
+   "case": "KeysightTruevolt.set_nplc[OHM2]",
+   "log": [
+    "34470A|>>|RES:NPLC 10"
+   ],
+   "method": "KeysightTruevolt.set_nplc",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "RES:NPLC 10"
+    ]
+   ]
+  },
+  {
+   "call": "'OHM4'",
+   "case": "KeysightTruevolt.set_nplc[OHM4]",
+   "log": [
+    "34470A|>>|FRES:NPLC 10"
+   ],
+   "method": "KeysightTruevolt.set_nplc",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FRES:NPLC 10"
+    ]
+   ]
+  },
+  {
+   "call": "'DCV', 100",
+   "case": "KeysightTruevolt.set_nplc[DCV 100]",
+   "log": [
+    "34470A|>>|VOLT:DC:NPLC 100"
+   ],
+   "method": "KeysightTruevolt.set_nplc",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VOLT:DC:NPLC 100"
+    ]
+   ]
+  },
+  {
+   "call": "'DCV', 0.2",
+   "case": "KeysightTruevolt.set_nplc[DCV 0.2]",
+   "log": [
+    "34470A|>>|VOLT:DC:NPLC 0.2"
+   ],
+   "method": "KeysightTruevolt.set_nplc",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VOLT:DC:NPLC 0.2"
+    ]
+   ]
+  },
+  {
+   "call": "'ACV', 3",
+   "case": "KeysightTruevolt.set_ac_filter[ACV 3]",
+   "log": [
+    "34470A|>>|VOLT:AC:BAND 3"
+   ],
+   "method": "KeysightTruevolt.set_ac_filter",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VOLT:AC:BAND 3"
+    ]
+   ]
+  },
+  {
+   "call": "'ACV', 20",
+   "case": "KeysightTruevolt.set_ac_filter[ACV 20]",
+   "log": [
+    "34470A|>>|VOLT:AC:BAND 20"
+   ],
+   "method": "KeysightTruevolt.set_ac_filter",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VOLT:AC:BAND 20"
+    ]
+   ]
+  },
+  {
+   "call": "'ACV', 200",
+   "case": "KeysightTruevolt.set_ac_filter[ACV 200]",
+   "log": [
+    "34470A|>>|VOLT:AC:BAND 200"
+   ],
+   "method": "KeysightTruevolt.set_ac_filter",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VOLT:AC:BAND 200"
+    ]
+   ]
+  },
+  {
+   "call": "'ACI', 20",
+   "case": "KeysightTruevolt.set_ac_filter[ACI 20]",
+   "log": [
+    "34470A|>>|CURR:AC:BAND 20"
+   ],
+   "method": "KeysightTruevolt.set_ac_filter",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CURR:AC:BAND 20"
+    ]
+   ]
+  },
+  {
+   "call": "'ACV', 50",
+   "case": "KeysightTruevolt.set_ac_filter[invalid]",
+   "log": [],
+   "method": "KeysightTruevolt.set_ac_filter",
+   "result": "raised InstrumentError: AC filter must be 3, 20 or 200 Hz, not 50",
+   "wire": []
+  },
+  {
+   "call": "{'kind': 'DCV', 'plc': 10, 'range': 10}",
+   "case": "KeysightTruevolt.configure_point[DCV plc]",
+   "log": [
+    "34470A|>>|CONF:VOLT:DC 10",
+    "34470A|>>|VOLT:DC:NPLC 10"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:DC 10"
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 10"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'range': 10}",
+   "case": "KeysightTruevolt.configure_point[DCV no plc]",
+   "log": [
+    "34470A|>>|CONF:VOLT:DC 10"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:DC 10"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCI', 'plc': 10, 'range': 0.01}",
+   "case": "KeysightTruevolt.configure_point[DCI plc]",
+   "log": [
+    "34470A|>>|CONF:CURR:DC 0.01",
+    "34470A|>>|CURR:DC:NPLC 10"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:CURR:DC 0.01"
+    ],
+    [
+     "W",
+     "CURR:DC:NPLC 10"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM2', 'plc': 10, 'range': 1000}",
+   "case": "KeysightTruevolt.configure_point[OHM2]",
+   "log": [
+    "34470A|>>|CONF:RES 1000",
+    "34470A|>>|RES:NPLC 10"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:RES 1000"
+    ],
+    [
+     "W",
+     "RES:NPLC 10"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM4', 'plc': 10, 'range': 100000}",
+   "case": "KeysightTruevolt.configure_point[OHM4]",
+   "log": [
+    "34470A|>>|CONF:FRES 100000",
+    "34470A|>>|FRES:NPLC 10"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FRES 100000"
+    ],
+    [
+     "W",
+     "FRES:NPLC 10"
+    ]
+   ]
+  },
+  {
+   "call": "{'filter_hz': 20, 'kind': 'ACV', 'range': 1}",
+   "case": "KeysightTruevolt.configure_point[ACV filter]",
+   "log": [
+    "34470A|>>|CONF:VOLT:AC 1",
+    "34470A|>>|VOLT:AC:BAND 20"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:AC 1"
+    ],
+    [
+     "W",
+     "VOLT:AC:BAND 20"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'ACV', 'range': 1}",
+   "case": "KeysightTruevolt.configure_point[ACV no filter]",
+   "log": [
+    "34470A|>>|CONF:VOLT:AC 1"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:AC 1"
+    ]
+   ]
+  },
+  {
+   "call": "{'filter_hz': 200, 'kind': 'ACI', 'range': 0.1}",
+   "case": "KeysightTruevolt.configure_point[ACI filter]",
+   "log": [
+    "34470A|>>|CONF:CURR:AC 0.1",
+    "34470A|>>|CURR:AC:BAND 200"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:CURR:AC 0.1"
+    ],
+    [
+     "W",
+     "CURR:AC:BAND 200"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'CAP', 'range': 1e-07}",
+   "case": "KeysightTruevolt.configure_point[CAP]",
+   "log": [
+    "34470A|>>|CONF:CAP 1e-07"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:CAP 1e-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'FREQ', 'range': 1}",
+   "case": "KeysightTruevolt.configure_point[FREQ]",
+   "log": [
+    "34470A|>>|CONF:FREQ DEF,MIN",
+    "34470A|>>|FREQ:RANG:LOW 3",
+    "34470A|>>|FREQ:APER 1",
+    "34470A|>>|FREQ:VOLT:RANG 1"
+   ],
+   "method": "KeysightTruevolt.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ DEF,MIN"
+    ],
+    [
+     "W",
+     "FREQ:RANG:LOW 3"
+    ],
+    [
+     "W",
+     "FREQ:APER 1"
+    ],
+    [
+     "W",
+     "FREQ:VOLT:RANG 1"
+    ]
+   ]
+  },
+  {
+   "call": "10",
+   "case": "KeysightTruevolt.configure_frequency_point",
+   "log": [
+    "34470A|>>|CONF:FREQ DEF,MIN",
+    "34470A|>>|FREQ:RANG:LOW 3",
+    "34470A|>>|FREQ:APER 1",
+    "34470A|>>|FREQ:VOLT:RANG 10"
+   ],
+   "method": "KeysightTruevolt.configure_frequency_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ DEF,MIN"
+    ],
+    [
+     "W",
+     "FREQ:RANG:LOW 3"
+    ],
+    [
+     "W",
+     "FREQ:APER 1"
+    ],
+    [
+     "W",
+     "FREQ:VOLT:RANG 10"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeysightTruevolt.front_rear[FRONT]",
+   "log": [
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON"
+   ],
+   "method": "KeysightTruevolt.front_rear",
+   "result": "returned 'FRONT'",
+   "wire": [
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeysightTruevolt.front_rear[REAR]",
+   "log": [
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|REAR"
+   ],
+   "method": "KeysightTruevolt.front_rear",
+   "result": "returned 'REAR'",
+   "wire": [
+    [
+     "Q",
+     "ROUT:TERM?",
+     "REAR"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "KeysightTruevolt.check_errors[ok]",
+   "log": [
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\""
+   ],
+   "method": "KeysightTruevolt.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'configuring'",
+   "case": "KeysightTruevolt.check_errors[error]",
+   "log": [
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|-113,\"Undefined header\""
+   ],
+   "method": "KeysightTruevolt.check_errors",
+   "result": "raised InstrumentError: Keysight 34470A reported an error after configuring: -113,\"Undefined header\"",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "-113,\"Undefined header\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34460A.connect",
+   "log": [
+    "34460A|>>|*CLS",
+    "34460A|>>|*IDN?",
+    "34460A|<<|Keysight Technologies,34460A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+   ],
+   "method": "Keysight34460A.connect",
+   "result": "returned <Keysight34460A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Keysight Technologies,34460A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34461A.connect",
+   "log": [
+    "34461A|>>|*CLS",
+    "34461A|>>|*IDN?",
+    "34461A|<<|Keysight Technologies,34461A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+   ],
+   "method": "Keysight34461A.connect",
+   "result": "returned <Keysight34461A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Keysight Technologies,34461A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34465A.connect",
+   "log": [
+    "34465A|>>|*CLS",
+    "34465A|>>|*IDN?",
+    "34465A|<<|Keysight Technologies,34465A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+   ],
+   "method": "Keysight34465A.connect",
+   "result": "returned <Keysight34465A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Keysight Technologies,34465A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34470A.connect",
+   "log": [
+    "34470A|>>|*CLS",
+    "34470A|>>|*IDN?",
+    "34470A|<<|Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+   ],
+   "method": "Keysight34470A.connect",
+   "result": "returned <Keysight34470A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeysightTruevolt.connect[wrong model]",
+   "log": [
+    "34470A|>>|*CLS",
+    "34470A|>>|*IDN?",
+    "34470A|<<|Keysight Technologies,34461A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+   ],
+   "method": "KeysightTruevolt.connect",
+   "result": "raised InstrumentError: Unexpected DMM identification: Keysight Technologies,34461A,SIM0001,A.03.01-02.40-03.01-00.52-02-01",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Keysight Technologies,34461A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "keysight_truevolt",
+ "schema": 1
+}

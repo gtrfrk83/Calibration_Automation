@@ -13,6 +13,8 @@ sys.path.insert(0, str(HERE))
 try:
     import tkinter as tk
     from tkinter import ttk
+    if getattr(tk, '__file__', None) is None:      # a test stub (tests/_tk_stub.py), not the real tkinter
+        raise ImportError('stub tkinter')
     _probe = tk.Tk(); _probe.destroy()
     HAVE_TK = True
 except Exception:                                  # no tkinter, or no display

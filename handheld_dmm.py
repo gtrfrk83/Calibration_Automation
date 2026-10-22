@@ -34,6 +34,7 @@ import ui_shell
 import appdata
 import datamode
 import drivers
+import procmods_engine
 
 SPEC_PATH = HERE / 'specs' / 'fluke_110_series_pv.json'
 READ_TYPED, READ_IR = 'Type the reading', 'Read over IR (Fluke IR cable)'
@@ -119,11 +120,11 @@ class Cancelled(Exception):
     pass
 
 
-class IO:
+class IO(procmods_engine.ProcModsMixin):
     """The calibrator: set the output for a point, confirm it was accepted, and never leave it energised."""
     RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the manual's "ramp up in 50 V increments, 5 s apart"
 
-    def __init__(self, model_name, address, baud=9600, transport=None):
+    def __init__(self, model_name, address, baud=9600, transport=None, mods=None):
         self.log = drivers.CommandLog()
         cls = drivers.Fluke5522A if '5522' in model_name else drivers.Fluke5560A
         t = transport or drivers.open_visa(address, timeout=20, baud=baud)
@@ -131,10 +132,14 @@ class IO:
         try:
             self.cal.open(verify_model=True)
             self.cal.clear_status()
+            self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close()
             raise
         self.ident = self.cal.idn
+
+    def pm_drivers(self):
+        return (self.cal,)
 
     def standby(self):
         self.cal.standby_quiet()
@@ -182,7 +187,7 @@ class IO:
             if i == 0:
                 self.cal.operate_unverified()
             if len(steps) > 1 and i < len(steps) - 1:
-                self._wait(self.RAMP_DELAY, cancel)
+                self._wait(self.pm_param('handheld.ramp_delay', self.RAMP_DELAY), cancel)
 
     def apply(self, p, cancel=None):
         """Program and enable the output for point p, then wait for it to settle."""
@@ -206,7 +211,7 @@ class IO:
             self.cal.check_error(context)      # the calibrator refuses outputs it cannot make; never operate then
             self.cal.operate_unverified()
         self.on_at = time.monotonic()
-        self._wait(p.get('settle', 3.0), cancel)
+        self._wait(p.get('settle', self.pm_param('handheld.settle.default', 3.0)), cancel)
 
 
 # ============================================================================ the reading dialog
@@ -365,7 +370,7 @@ def ir_text(p, r):
     return f'{r.value / p["factor"]:.{max(r.decimals - shift, 0)}f}'
 
 
-def ir_read(meter, p, cancel=None):
+def ir_read(meter, p, cancel=None, timeout=45.0):
     """(text, Reading, Display, history) for point p, or raises SetupProblem with what to fix. Pure I/O - no Tk."""
     want = p['ir']
     disp = meter.display()
@@ -373,7 +378,7 @@ def ir_read(meter, p, cancel=None):
     if problems:
         raise SetupProblem(problems, disp.summary())
     try:
-        r, disp, history = meter.stable_reading(want['unit'], cancel=cancel, timeout=p.get('ir_timeout', 45.0))
+        r, disp, history = meter.stable_reading(want['unit'], cancel=cancel, timeout=p.get('ir_timeout', timeout))
     except drivers.InstrumentError as exc:
         raise SetupProblem([str(exc)], '')
     problems = drivers.fluke_28x.check_setup(disp, want)       # the set-up must still be right at the moment of the reading
@@ -450,7 +455,7 @@ def ask_range(parent, p, total, dial, standby_text):
 
 
 # ============================================================================ application
-class App(datamode.DataModeMixin):
+class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def __init__(self, root, model, demo=False, spec=None, io_factory=None, meter_factory=None):
         self.root, self.model, self.demo = root, model, demo
         self.meter, self.meter_factory = None, meter_factory
@@ -459,6 +464,7 @@ class App(datamode.DataModeMixin):
         self.info = self.spec['models'][model]
         self.points = points_for(self.spec, model)
         self.by_id = {p['id']: p for p in self.points}
+        self.pm_init('handheld', model, demo=demo, lists=[self.points], on_change=self._pm_points_changed)   # procedure modifications
         self.io, self._busy, self.stop = None, False, False
         self.io_factory = io_factory
         self.results = {}
@@ -487,6 +493,10 @@ class App(datamode.DataModeMixin):
         root.bind('<Control-s>', lambda _e: self.save())
         import labregistry
         labregistry.attach(root, self.asset, self.serial, self.status.set)
+
+    def _pm_points_changed(self):
+        """The point list was patched in place (procedure modifications): the lookup by id must follow."""
+        self.by_id = {p['id']: p for p in self.points}
 
     @property
     def busy(self):
@@ -698,7 +708,7 @@ class App(datamode.DataModeMixin):
         if self.io_factory:
             self.io = self.io_factory()
         else:
-            self.io = IO(self.cal_mode.get(), self._address(), int(self.cal_baud.get()))
+            self.io = IO(self.cal_mode.get(), self._address(), int(self.cal_baud.get()), mods=self.pm_state)
         self._set_conn(True)
         self._save_settings()
 
@@ -808,6 +818,10 @@ class App(datamode.DataModeMixin):
             return
         if not self.asset.get().strip():
             messagebox.showwarning('Instrument ID', 'Enter an instrument ID.')
+            return
+        points = self.pm_begin_run(points, self.asset.get().strip())     # load the saved modifications for this asset (patches self.points)
+        if not points:
+            self.status.set('Every selected point is skipped by a procedure modification.')
             return
         if not self.confirm_found_overwrite(points):
             return
@@ -1085,7 +1099,7 @@ class App(datamode.DataModeMixin):
 
         def work():
             try:
-                state['out'] = ir_read(self.meter, p, cancel=lambda: self.stop)
+                state['out'] = ir_read(self.meter, p, cancel=lambda: self.stop, timeout=self.pm_param('handheld.ir_timeout', 45.0))
             except BaseException as exc:
                 state['exc'] = exc
             state['done'] = True
@@ -1156,6 +1170,7 @@ class App(datamode.DataModeMixin):
         fields.setdefault('synthetic', False)
         fields['timestamp'] = datetime.now().isoformat(timespec='seconds')
         fields['data'] = self.mode_label
+        fields.update(self.pm_result_fields())
         self.results[p['id']] = fields
         self._update_row(p)
         self.save(silent=True)
@@ -1182,7 +1197,7 @@ class App(datamode.DataModeMixin):
     def save(self, silent=False):
         path = self._checkpoint_path()
         try:
-            path.write_text(json.dumps(dict(model=self.model, asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, **self.save_fields()), indent=2))
+            path.write_text(json.dumps(dict(model=self.model, asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         except OSError as exc:
             if not silent:
                 self.status.set(f'Could not save progress: {exc}')
@@ -1204,6 +1219,7 @@ class App(datamode.DataModeMixin):
         self.asset.set(data.get('asset', ''))
         self.serial.set(data.get('serial', ''))
         self.load_results(data)
+        self.pm_on_checkpoint(data)                                     # a saved modification snapshot is used unless the store has changed
         self.refresh()
         self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
 

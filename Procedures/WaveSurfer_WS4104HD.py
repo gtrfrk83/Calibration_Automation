@@ -21,6 +21,8 @@ import ui_shell
 import appdata
 import datamode
 import drivers
+import procmods
+import procmods_engine
 
 DEFAULT_ADDRESS = 'USB0::0x05FF::0x1023::LCRY4903C19426::0::INSTR'
 SCALES = [0.002, 0.005, 0.010, 0.020, 0.050, 0.100, 0.200, 0.500, 1.000]
@@ -130,9 +132,27 @@ def make_report(groups, output_path, synthetic=False, instrument_id=""):
 
 
 
-class RMSNoiseApp(datamode.DataModeMixin):
+# Procedure modifications (procmods_engine): which tolerance fields of each section's points can be overridden.
+# section -> (nominal field or None, low field, high field, fields that identify the point besides the section)
+PM_SECTIONS = {
+    'dcv': ('nominal_v', 'lower_v', 'upper_v', ('channel', 'scale_v_div')),
+    'impedance': ('nominal_ohm', 'lower_ohm', 'upper_ohm', ('channel', 'coupling', 'scale_v_div', 'description')),
+    'offset': ('nominal_v', 'lower_v', 'upper_v', ('channel', 'scale_v_div', 'scope_offset_v')),
+    'bandwidth': (None, 'lower_db', 'upper_db', ('channel', 'scale_v_div')),
+    'timebase': (None, 'lower_hz', 'upper_hz', ('channel',)),                      # the limit is an error band around 0 Hz
+    'trigger': ('level_v', 'lower_v', 'upper_v', ('channel', 'slope')),
+}
+# entry-box variable -> (tunable, factory default, factory text).  The text is exactly what the box always started with.
+PM_VARS = (('delay', 'ws.rms_delay', 3, '3'), ('samples', 'ws.rms_samples', 5, '5'), ('dc_settle', 'ws.dcv_settle', 3.0, '3.0'),
+           ('imp_settle', 'ws.imp_settle', 2.0, '2.0'), ('imp_samples', 'ws.imp_samples', 3, '3'),
+           ('offset_settle', 'ws.offset_settle', 3.0, '3.0'), ('bw_settle', 'ws.bw_settle', 3.0, '3.0'),
+           ('tb_settle', 'ws.tb_settle', 3.0, '3.0'), ('tb_samples', 'ws.tb_samples', 5, '5'), ('trig_settle', 'ws.trig_settle', 1.0, '1.0'))
+
+
+class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def __init__(self, root):
         self.root = root
+        self.pm_init('ws', 'WS4104HD', demo='--demo' in sys.argv)      # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
         root.title('WaveSurfer 4104HD | Calibration Verification v56')
         ui.fit_window(root, 1300, 880, min_w=900, min_h=640)
@@ -150,8 +170,8 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.all_channels = tk.BooleanVar(value=True)
         self.awaiting_channel = False
         self.ref_factor = tk.StringVar(value='2.75')
-        self.delay = tk.StringVar(value='3')
-        self.samples = tk.StringVar(value='5')
+        self.delay = tk.StringVar(value=self.pm_text('ws.rms_delay', 3, '3'))
+        self.samples = tk.StringVar(value=self.pm_text('ws.rms_samples', 5, '5'))
         self.status = tk.StringVar(value='Disconnected')
         self.reading = tk.StringVar(value='—')
         self.db_reading = tk.StringVar(value='—')
@@ -173,7 +193,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.dc_batch_point_ok = False
         self.dc_p1_mode = tk.BooleanVar(value=True)
         self.dc_auto_fluke = tk.BooleanVar(value=True)
-        self.dc_settle = tk.StringVar(value='3.0')
+        self.dc_settle = tk.StringVar(value=self.pm_text('ws.dcv_settle', 3.0, '3.0'))
         self.offset_rows = []
         self.offset_running = False
         self.offset_batch = False
@@ -181,7 +201,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.offset_connected_channel = None
         self.offset_checkpoint = appdata.progress_path('offset_mean_checkpoint_v28.json')
         self.offset_status = tk.StringVar(value='Ready — 0 of 16 offset points')
-        self.offset_settle = tk.StringVar(value='3.0')
+        self.offset_settle = tk.StringVar(value=self.pm_text('ws.offset_settle', 3.0, '3.0'))
         self.bw_rows = []
         self.bw_running = False
         self.bw_batch = False
@@ -189,13 +209,13 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.bw_connected_channel = None
         self.bw_checkpoint = appdata.progress_path('bandwidth_checkpoint_v29.json')
         self.bw_status = tk.StringVar(value='Ready — 0 of 24 bandwidth points')
-        self.bw_settle = tk.StringVar(value='3.0')
+        self.bw_settle = tk.StringVar(value=self.pm_text('ws.bw_settle', 3.0, '3.0'))
         self.tb_rows = []
         self.tb_running = False
         self.tb_retest_index = None
         self.tb_status = tk.StringVar(value='Ready \u2014 0 of 1 time base point')
-        self.tb_settle = tk.StringVar(value='3.0')
-        self.tb_samples = tk.StringVar(value='5')
+        self.tb_settle = tk.StringVar(value=self.pm_text('ws.tb_settle', 3.0, '3.0'))
+        self.tb_samples = tk.StringVar(value=self.pm_text('ws.tb_samples', 5, '5'))
         self.tb_period_us = tk.StringVar(value='10')
         self.trig_rows = []
         self.trig_running = False
@@ -204,7 +224,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.trig_retest_index = None
         self.trig_connected_channel = None
         self.trig_status = tk.StringVar(value='Ready \u2014 0 of 24 trigger level points')
-        self.trig_settle = tk.StringVar(value='1.0')
+        self.trig_settle = tk.StringVar(value=self.pm_text('ws.trig_settle', 1.0, '1.0'))
         self.imp_rows = []
         self.imp_running = False
         self.imp_batch = False
@@ -213,10 +233,11 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self.imp_connected_input = None
         self.imp_checkpoint = appdata.progress_path('impedance_checkpoint_v11.json')
         self.imp_status = tk.StringVar(value='Ready — 0 of 28 impedance points')
-        self.imp_settle = tk.StringVar(value='2.0')
-        self.imp_samples = tk.StringVar(value='3')
+        self.imp_settle = tk.StringVar(value=self.pm_text('ws.imp_settle', 2.0, '2.0'))
+        self.imp_samples = tk.StringVar(value=self.pm_text('ws.imp_samples', 3, '3'))
         self._ckpt_key = None
         self._ckpt_id = ''
+        self._pm_ws_last = {v: getattr(self, v).get() for v, _n, _d, _t in PM_VARS}   # what each box held when the modifications were applied
         self._set_ckpt_paths('UNASSIGNED')
         # All test views live in one root window. Test dialogs for cable changes
         # and safety confirmations remain modal by design.
@@ -907,6 +928,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
     def sync_asset(self):
         """Switch to the saved results of the Instrument ID now in the entry (called when the entry is left, and before every run, rerun,
         clear and export, so a report can never carry another instrument's results). Returns False if it cannot switch right now."""
+        self._pm_begin()
         if '--demo' in sys.argv:
             return True
         key = self._asset_key()
@@ -931,8 +953,131 @@ class RMSNoiseApp(datamode.DataModeMixin):
         self._load_all_checkpoints()
         self._refresh_all_results()
         have = sum(len(r) for r in (self.rows, self.dc_rows, self.imp_rows, self.offset_rows, self.bw_rows, self.tb_rows, self.trig_rows))
+        self._pm_restore_sidecar(have)
         self.msg.set(f'Instrument {self._ckpt_id or key}: restored {have} saved result(s).' if have else f'Instrument {self._ckpt_id or key}: no saved results yet.')
         return True
+
+    # ======================================================================== procedure modifications (procmods_engine)
+    # What can be modified on this procedure: the settle times and sample counts of every section (they are the entry-box defaults, so a
+    # technician can still change them for a run), the time base read gap, the command templates of the drivers, and the TOLERANCE of the
+    # DCV / impedance / offset / bandwidth / time base / trigger points (developer mode).  Not modifiable here: skipping a point (the
+    # sections save their results by position), the RMS-noise minimum limits (already a box on the screen) and every safety prompt.
+    def _pm_begin(self):
+        """Load the saved modifications for the Instrument ID now in the entry.  Called from sync_asset (before every run); never while a
+        measurement is running; never raises."""
+        try:
+            if self._batch_busy():
+                return
+            self.pm_begin_run(None, self.instrument_id.get().strip())
+            self._pm_defaults()
+            self._pm_write_sidecar()
+        except Exception as exc:
+            if self.pm_state is not None:
+                self.pm_state.warnings.append(f'procedure modifications could not be loaded ({type(exc).__name__})')
+
+    def _pm_defaults(self):
+        """Move each entry box to its (modified) default, but only if the technician has not typed something else there."""
+        for var, name, default, text in PM_VARS:
+            box = getattr(self, var)
+            want = self.pm_text(name, default, text)
+            if box.get() == self._pm_ws_last.get(var, text) and want != box.get():
+                box.set(want)
+            if box.get() == want:
+                self._pm_ws_last[var] = want
+
+    def _pm_sidecar(self):
+        return appdata.progress_path(f'ws4104hd_overrides_{self._asset_key()}.json')
+
+    def _pm_write_sidecar(self):
+        """The five-plus checkpoint files have no room for the modification snapshot, so it is kept next to them (only for modified runs)."""
+        st = self.pm_state
+        if st is None or not st.oset or not st.snapshot:
+            return
+        path = self._pm_sidecar()
+        tmp = path.with_suffix('.tmp')
+        tmp.write_text(json.dumps({'asset': self.instrument_id.get().strip(), 'overrides': st.snapshot}, indent=2), encoding='utf-8')
+        tmp.replace(path)
+
+    def _pm_restore_sidecar(self, have):
+        """Results exist for this instrument: continue under the modifications they were taken with (the saved snapshot), unless the
+        store has changed and pm_choose(diff) says 'current'."""
+        try:
+            path = self._pm_sidecar()
+            if have and path.exists():
+                self.pm_on_checkpoint(json.loads(path.read_text(encoding='utf-8')), choose=getattr(self, 'pm_choose', None))
+                self._pm_defaults()
+        except Exception as exc:
+            if self.pm_state is not None:
+                self.pm_state.warnings.append(f'the saved modification record could not be read ({type(exc).__name__})')
+
+    @staticmethod
+    def _pm_view(section, p):
+        """The point as procmods sees it (the field names it keys and limits on)."""
+        nom, lo, hi, idf = PM_SECTIONS[section]
+        unit = {'dcv': 'V', 'impedance': 'ohm', 'offset': 'V', 'bandwidth': 'dB', 'timebase': 'Hz', 'trigger': 'V'}[section]
+        rest = [f for f in idf if f not in ('channel', 'scale_v_div', 'description')]
+        return dict(section=section, kind=section.upper(), nominal=(p.get(nom) if nom else None), low=p[lo], high=p[hi], unit=unit,
+                    ch=p.get('channel'), range=p.get('scale_v_div'), stim='|'.join(str(p[f]) for f in rest) or None,
+                    desc=p.get('description'))
+
+    def pm_limit_views(self):
+        """{section: [views of the FACTORY points]} - what the tolerance editor must key and check its overrides against."""
+        return {sec: [self._pm_view(sec, p) for p in self._pm_factory(sec)] for sec in PM_SECTIONS}
+
+    def _pm_factory(self, section):
+        fn = getattr(type(self), PM_POINT_METHODS[section])
+        return fn.pm_orig() if fn.pm_static else fn.pm_orig(self)
+
+    def pm_section_points(self, section, pts):
+        """`pts` unchanged (the same list) unless a valid, enabled, HMAC-verified limit override is in effect; then copies of the points
+        concerned with the new low / high.  Nothing but the low / high of those points can change (procmods' guard is re-run)."""
+        st = self.pm_state
+        if st is None or not st.oset or not st.oset.has_limits:
+            return pts
+        try:
+            nom, lo, hi, idf = PM_SECTIONS[section]
+            views = [self._pm_view(section, p) for p in pts]
+            patched, lim = st.patch(views)
+            out = []
+            for i, (p, q) in enumerate(zip(pts, patched)):
+                if i in lim:
+                    r = dict(p)
+                    r[lo], r[hi] = q['low'], q['high']
+                    r['limit_modified'], r['limit_factory'] = True, q['limit_factory']
+                    out.append(r)
+                else:
+                    out.append(p)
+            return out
+        except Exception as exc:                       # anything wrong: the manufacturer's tolerances, and say so
+            st.warnings.append(f'tolerance changes for {section} could not be applied ({type(exc).__name__}); factory tolerances are used')
+            return pts
+
+    def _pm_limits_ok(self, row, section, factory):
+        """A saved row's tolerance is acceptable when it is the factory one, the current one, or the row says it was a modified one."""
+        _n, lo, hi, _i = PM_SECTIONS[section]
+        got = (row.get(lo), row.get(hi))
+        cur = tuple(factory)
+        pts = getattr(self, PM_POINT_METHODS[section])()
+        return got == cur or bool(row.get('limit_modified')) or any((p[lo], p[hi]) == got for p in pts)
+
+    def _pm_ckpt_points(self, section, rows):
+        """The points a saved result file is compared with.  Identical to the plain points unless a tolerance modification exists or the
+        saved rows carry one; then a row's own tolerance is accepted (results taken under a modification stay loadable)."""
+        cur = getattr(self, PM_POINT_METHODS[section])()
+        _n, lo, hi, _i = PM_SECTIONS[section]
+        modified = isinstance(rows, list) and any(isinstance(r, dict) and r.get('limit_modified') for r in rows)
+        if not isinstance(rows, list) or not (modified or (self.pm_state is not None and self.pm_state.oset and self.pm_state.oset.has_limits)):
+            return cur
+        fac = self._pm_factory(section)
+        out = []
+        for i, c in enumerate(cur):
+            r = rows[i] if i < len(rows) and isinstance(rows[i], dict) else None
+            if r is not None and r.get(lo) is not None and r.get(hi) is not None \
+                    and (bool(r.get('limit_modified')) or (r[lo], r[hi]) in ((fac[i][lo], fac[i][hi]), (c[lo], c[hi]))):
+                c = dict(c)
+                c[lo], c[hi] = r[lo], r[hi]
+            out.append(c)
+        return out
 
     def _adopt_legacy_results(self, key):
         """Older versions saved one set of results for every instrument. Offer to assign that set to this Instrument ID, once."""
@@ -1752,7 +1897,16 @@ class RMSNoiseApp(datamode.DataModeMixin):
         fluke = drivers.Fluke5560A(drivers.open_visa(fluke_addr, baud=baud), log) if fluke_addr else None
         scope = (drivers.WaveSurfer4104HD(drivers.open_visa(scope_addr, timeout=scope_timeout), log)
                  if scope_addr else None)
+        self._pm_bench(log, fluke, scope)
         return fluke, scope
+
+    def _pm_bench(self, log, *insts):
+        """Procedure modifications: the command overrides are bound to each driver as it is opened, and a banner line goes at the top of
+        the command log.  Nothing at all happens (no log line, no change) when no modification is stored."""
+        st = self.pm_state
+        if st is not None and st.oset:
+            self.pm_bind_after_open(*insts)
+            st.banner(log)
 
     def finish_bench(self, fluke, scope, log, name):
         """Common cleanup. Returns True when the Fluke is confirmed in standby (or was never opened)."""
@@ -1913,7 +2067,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
         if not self.dc_checkpoint.exists():return
         try:
             data=json.loads(self.dc_checkpoint.read_text(encoding='utf-8'))
-            rows=data['rows']; points=self.dcv_points()
+            rows=data['rows']; points=self._pm_ckpt_points('dcv',rows)
             if not isinstance(rows,list) or len(rows)>len(points): raise ValueError('Invalid DCV checkpoint length')
             for idx,row in enumerate(rows):
                 for key in ('channel','scale_v_div','nominal_v','lower_v','upper_v'):
@@ -2296,7 +2450,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
             return
         try:
             rows = json.loads(self.imp_checkpoint.read_text(encoding='utf-8'))['rows']
-            points = self.impedance_points()
+            points = self._pm_ckpt_points('impedance', rows)
             if not isinstance(rows, list) or len(rows) > len(points):
                 raise ValueError('Invalid impedance checkpoint length')
             for idx, row in enumerate(rows):
@@ -2536,7 +2690,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
             return
         try:
             rows=json.loads(self.offset_checkpoint.read_text(encoding='utf-8'))
-            points=self.offset_points()
+            points=self._pm_ckpt_points('offset',rows)
             if not isinstance(rows,list) or len(rows)>16:
                 raise ValueError('Invalid checkpoint length')
             for i,row in enumerate(rows):
@@ -2946,7 +3100,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
             stage = 'P1 Freq readings'
             readings = []
             for _ in range(samples):
-                time.sleep(TB_READ_GAP_S)
+                time.sleep(self.pm_param('ws.tb_read_gap', TB_READ_GAP_S))
                 readings.append(scope.read_p1())
             stage = 'Fluke standby after point'
             fluke.standby()
@@ -3013,7 +3167,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
                 raise ValueError('Invalid checkpoint length')
             for row in rows:
                 if not isinstance(row, dict) or row.get('channel') != 1 or not row.get('marker_period_s') \
-                        or row.get('lower_hz') != -TIMEBASE_LIMIT_HZ or row.get('upper_hz') != TIMEBASE_LIMIT_HZ:
+                        or not self._pm_limits_ok(row, 'timebase', (-TIMEBASE_LIMIT_HZ, TIMEBASE_LIMIT_HZ)):
                     raise ValueError('Checkpoint point mismatch')
             self.tb_rows = rows
             self.refresh_timebase()
@@ -3262,7 +3416,7 @@ class RMSNoiseApp(datamode.DataModeMixin):
             return
         try:
             rows = json.loads(self.trig_checkpoint.read_text(encoding='utf-8'))
-            points = self.trigger_points()
+            points = self._pm_ckpt_points('trigger', rows)
             if not isinstance(rows, list) or len(rows) > len(points):
                 raise ValueError('Invalid checkpoint length')
             for i, row in enumerate(rows):
@@ -3661,6 +3815,29 @@ class RMSNoiseApp(datamode.DataModeMixin):
             return
         messagebox.showinfo('Report exported',
             f'Created formatted Excel report with {count} test points:\n{filename}')
+
+
+# Procedure modifications: every section's point list goes through pm_section_points().  The original functions are left exactly as
+# they were; these wrappers return THEIR list unchanged (the same object contents) unless a tolerance modification is in effect.
+PM_POINT_METHODS = {'dcv': 'dcv_points', 'impedance': 'impedance_points', 'offset': 'offset_points', 'bandwidth': 'bandwidth_points',
+                    'timebase': 'timebase_points', 'trigger': 'trigger_points'}
+
+
+def _pm_wrap_points(section, name):
+    raw = RMSNoiseApp.__dict__[name]
+    static = isinstance(raw, staticmethod)
+    orig = raw.__func__ if static else raw
+
+    def points(self):
+        pts = orig() if static else orig(self)
+        return self.pm_section_points(section, pts)
+    points.__name__, points.__doc__ = name, orig.__doc__
+    points.pm_orig, points.pm_static = orig, static
+    setattr(RMSNoiseApp, name, points)
+
+
+for _section, _name in PM_POINT_METHODS.items():
+    _pm_wrap_points(_section, _name)
 
 
 if __name__ == '__main__':

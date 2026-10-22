@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import math
 
+from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
 from .transport import SerialSettings
 
@@ -44,7 +45,58 @@ def scan_list(channel: int) -> str:
     return f'(@{channel})'
 
 
+_REF = 'Keysight 34970A/34972A Service Guide, Chapter 4 (Internal DMM Verification Tests, pp. 80-87)'
+_CH = {'ch': Placeholder('str', '', '(@210)')}      # the scan list text, e.g. (@210)
+
+
+def _conf(kind):
+    node = CONF_NODE[kind]
+    return Cmd('CONF:' + node + ' {range:.9g},{ch}', f'Configure {kind}', f'CONF:{node} with the range on the channel',
+               placeholders={'range': Placeholder('float', '.9g', 10.0), **_CH}, kind='set', verified=True, ref=_REF)
+
+
+def _nplc(kind):
+    node = CONF_NODE[kind]
+    return Cmd(node + ':NPLC {plc:g},{ch}', f'{kind} integration time (PLC)', '10 PLC = 6.5 digits',
+               placeholders={'plc': Placeholder('float', 'g', 10.0), **_CH}, kind='set', verified=True, ref=_REF)
+
+
+def _band(kind):
+    node = CONF_NODE[kind]
+    return Cmd(node + ':BAND {hz:g},{ch}', f'{kind} detector bandwidth', 'AC filter 3, 20 or 200 Hz on the channel. Not verified on a 34970A/34972A',
+               placeholders={'hz': Placeholder('float', 'g', 3.0), **_CH}, kind='set', verified=False)
+
+
+# Every command the 34970A/34972A driver sends. Format specs are the ones the old f-strings used; the f-strings that chose the
+# function node are split into one key per function. Unverified per NOTES.md: FREQ:APER, the AC bandwidth on the current channel and the
+# ROUT:SCAN + READ? reading path. *CLS and SYST:ERR? are status / error-queue plumbing (locked).
+COMMANDS = {
+    'sys.rem': Cmd('SYST:REM', 'Remote mode', '34970A over RS-232 is put into remote with SYST:REM', kind='set', verified=True, ref=_REF),
+    'sys.loc': Cmd('SYST:LOC', 'Local mode', 'Return to front-panel control', kind='set', verified=True, ref=_REF),
+    'status.clear': Cmd('*CLS', 'Clear status', 'Clears the status registers and the error queue (never overridable)', kind='set', risk='locked',
+                        verified=True, ref=_REF),
+    'module.type': Cmd('SYST:CTYP? {card}', 'Plug-in module type', 'Card number is slot * 100',
+                       placeholders={'card': Placeholder('int', 'd', 100)}, kind='query', verified=True, ref=_REF),
+    'conf.freq': Cmd('CONF:FREQ {nominal:.9g},{ch}', 'Configure frequency', 'Expected frequency as the range',
+                     placeholders={'nominal': Placeholder('float', '.9g', 1000.0), **_CH}, kind='set', verified=True, ref=_REF),
+    'freq.volt.rang': Cmd('FREQ:VOLT:RANG {range:.9g},{ch}', 'Frequency input voltage range', 'Input voltage range for the frequency function',
+                          placeholders={'range': Placeholder('float', '.9g', 1.0), **_CH}, kind='set', verified=True, ref=_REF),
+    'freq.aper': Cmd('FREQ:APER 1,{ch}', 'Frequency gate time', '1 s gate (6.5 digits). Not verified on a 34970A/34972A', placeholders=dict(_CH),
+                     kind='set', verified=False),
+    **{'conf.' + k.lower(): _conf(k) for k in CONF_NODE},
+    **{'nplc.' + k.lower(): _nplc(k) for k in NPLC_KINDS},
+    **{'band.' + k.lower(): _band(k) for k in AC_KINDS},
+    'rout.scan': Cmd('ROUT:SCAN {ch}', 'Select the scan channel', 'Single-channel scan. Not verified on a 34970A/34972A', placeholders=dict(_CH),
+                     kind='set', verified=False),
+    'trig.sour': Cmd('TRIG:SOUR IMM', 'Trigger source', 'Immediate trigger', kind='set', verified=True, ref=_REF),
+    'read': Cmd('READ?', 'Take a reading', 'One scan of the selected channel. Not verified on a 34970A/34972A', kind='query', verified=False),
+    'err.query': Cmd('SYST:ERR?', 'Error queue', 'Oldest error; reading removes it (error-queue path, never overridable)', kind='query',
+                     risk='locked', verified=True, ref=_REF),
+}
+
+
 class KeysightDacq(Instrument):
+    COMMANDS = COMMANDS
     DEFAULT_TIMEOUT = 30.0          # one AC reading with the 3 Hz filter takes about 7 s
     # 34970A RS-232 factory defaults: 57600 baud, 8 data bits, no parity, 1 stop bit, XON/XOFF; <NL> terminates
     SERIAL = SerialSettings(baud=57600, data_bits=8, parity='none', stop_bits=1,
@@ -57,8 +109,8 @@ class KeysightDacq(Instrument):
         self.open(verify_model=False)
         try:
             if self.REMOTE_ON_CONNECT:
-                self.write('SYST:REM')
-            self.write('*CLS')
+                self.send('sys.rem')
+            self.send('status.clear')
             self.idn = self.identify()
             if self.IDN_MATCH and not any(m.upper() in self.idn.upper() for m in self.IDN_MATCH):
                 raise InstrumentError(f'Unexpected instrument identification: {self.idn}')
@@ -70,14 +122,14 @@ class KeysightDacq(Instrument):
     def cleanup(self):
         if self.REMOTE_ON_CONNECT:
             try:
-                self.write('SYST:LOC')
+                self.send('sys.loc')
             except Exception:
                 pass
 
     # ---- plug-in modules ---------------------------------------------------------------------------
     def module_type(self, slot: int) -> str:
         """SYST:CTYP? <slot*100> -> e.g. 'AGILENT TECHNOLOGIES,34901A,0,1.0' (or 'Keysight ...')."""
-        return self.query(f'SYST:CTYP? {slot * 100}').strip()
+        return self.ask('module.type', card=slot * 100).strip()
 
     def require_module(self, module: str, slot: int):
         found = self.module_type(slot)
@@ -93,27 +145,26 @@ class KeysightDacq(Instrument):
         rng = point['range']
         if kind == 'FREQ':
             # range of the frequency function is the expected frequency; the input voltage range and a 1 s gate (6.5 digits) follow
-            self.write(f'CONF:FREQ {point["nominal"]:.9g},{ch}')
-            self.write(f'FREQ:VOLT:RANG {rng:.9g},{ch}')
-            self.write(f'FREQ:APER 1,{ch}')
+            self.send('conf.freq', nominal=point['nominal'], ch=ch)
+            self.send('freq.volt.rang', range=rng, ch=ch)
+            self.send('freq.aper', ch=ch)
         elif kind in CONF_NODE:
-            node = CONF_NODE[kind]
-            self.write(f'CONF:{node} {rng:.9g},{ch}')
+            self.send('conf.' + kind.lower(), range=rng, ch=ch)
             if kind in NPLC_KINDS:
-                self.write(f'{node}:NPLC {point.get("plc") or 10:g},{ch}')      # 10 PLC = 6.5 digits
+                self.send('nplc.' + kind.lower(), plc=point.get('plc') or 10, ch=ch)      # 10 PLC = 6.5 digits
             if kind in AC_KINDS:
                 hz = point.get('filter_hz') or 3
                 if hz not in (3, 20, 200):
                     raise InstrumentError(f'AC filter must be 3, 20 or 200 Hz, not {hz}')
-                self.write(f'{node}:BAND {hz:g},{ch}')                             # 3 Hz slow filter
+                self.send('band.' + kind.lower(), hz=hz, ch=ch)                             # 3 Hz slow filter
         else:
             raise InstrumentError(f'{self.MODEL} driver does not support {kind}')
-        self.write(f'ROUT:SCAN {ch}')
-        self.write('TRIG:SOUR IMM')
+        self.send('rout.scan', ch=ch)
+        self.send('trig.sour')
 
     def read(self) -> float:
         """READ? (one scan of the selected channel) -> first field as a float; rejects overload (9.9E37) and non-finite values."""
-        raw = self.query('READ?').strip().split(',')[0]
+        raw = self.ask('read').strip().split(',')[0]
         value = float(raw)
         if not math.isfinite(value) or abs(value) > 1e35:
             raise InstrumentError(f'Invalid DMM reading: {raw} (overload or open channel)')
@@ -123,7 +174,7 @@ class KeysightDacq(Instrument):
         """Raise if the error queue holds anything (SYST:ERR? -> '+0,"No error"'); reports up to five entries."""
         found = []
         for _ in range(5):
-            reply = self.query('SYST:ERR?').strip()
+            reply = self.ask('err.query').strip()
             if reply.split(',')[0].strip() in ('0', '+0', '-0'):
                 break
             found.append(reply)
