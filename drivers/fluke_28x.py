@@ -15,6 +15,8 @@ from __future__ import annotations
 import math
 import time
 
+import cmdreg
+from cmdreg import Cmd
 from .base import Instrument, InstrumentError
 from .transport import SerialSettings, TransportError
 
@@ -22,6 +24,19 @@ SERIAL_DEFAULT = SerialSettings(baud=115200, data_bits=8, parity='none', stop_bi
                                 write_termination='\r', read_termination='\r', flow_control='none')
 ACK = {'0': 'OK', '1': 'syntax error', '2': 'execution error', '5': 'no data available'}
 OVERLOAD = 9.9e37
+_REF = 'Fluke 289/287 Remote Interface Specification (IR serial)'
+
+# The whole command set the driver uses: three read-only query codes of the meter's fixed two-line protocol (CMD_ACK, then one data
+# line). They are not SCPI (no '?') and the reply format is parsed by the code, so all three are risk 'locked' (never overridable);
+# kind 'query' because they only read. The reset / memory commands DS, RI and RMP are deliberately NOT registered or sent.
+# They go through _ask (self.t.write + log), not Instrument.write, because the protocol reads the ACK line separately.
+COMMANDS = {
+    'id': Cmd('ID', 'Identify', 'Model, software version, serial (p. 4). Fixed protocol code', kind='query', risk='locked', verified=True, ref=_REF + ' p. 4'),
+    'qm': Cmd('QM', 'Query measurement', 'Primary display reading in base units (pp. 5-6). Fixed protocol code', kind='query', risk='locked',
+              verified=True, ref=_REF + ' pp. 5-6'),
+    'qdda': Cmd('QDDA', 'Query display data', 'Whole display: functions, range, modes and every reading (pp. 7-11). Fixed protocol code',
+                kind='query', risk='locked', verified=True, ref=_REF + ' pp. 7-11'),
+}
 MULT = {-9: 'n', -6: 'µ', -3: 'm', 0: '', 3: 'k', 6: 'M'}
 
 
@@ -102,6 +117,7 @@ class Fluke28x(Instrument):
     MODEL = 'Fluke 287 / 289'
     IDN_MATCH = ('FLUKE 287', 'FLUKE 289')
     DEFAULT_TIMEOUT = 3.0
+    COMMANDS = COMMANDS
 
     def connect(self):
         self.open(verify_model=False)
@@ -117,8 +133,10 @@ class Fluke28x(Instrument):
         return '289' if '289' in self.idn else '287'
 
     # ---- the two-line protocol --------------------------------------------------------------------
-    def _ask(self, cmd, data=True):
-        """Send a read-only command; returns the data line (or '' when data=False). A timeout is retried twice."""
+    def _ask(self, key, data=True):
+        """Send a read-only command (a registered key; the code is fixed and never overridden); returns the data line (or '' when
+        data=False). A timeout is retried twice."""
+        cmd = cmdreg.render(self._registry()[key])
         last = None
         for attempt in range(3):
             try:
@@ -139,14 +157,14 @@ class Fluke28x(Instrument):
         raise InstrumentError(f'{self.MODEL}: no reply to {cmd} over the IR cable ({last}). Check the cable is seated on the meter.')
 
     def identify(self):
-        return self._ask('ID')
+        return self._ask('id')
 
     def display(self) -> Display:
-        return Display.parse(self._ask('QDDA'))
+        return Display.parse(self._ask('qdda'))
 
     def primary(self):
         """QM -> (value in base units, unit, state, attribute)."""
-        f = [x.strip() for x in self._ask('QM').split(',')]
+        f = [x.strip() for x in self._ask('qm').split(',')]
         if len(f) != 4:
             raise InstrumentError(f'Unexpected QM reply: {",".join(f)}')
         return float(f[0]), f[1], f[2], f[3]

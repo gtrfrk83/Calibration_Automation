@@ -1,0 +1,745 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Fluke5790B.connect",
+   "log": [
+    "5790B|>>|*IDN?",
+    "5790B|<<|FLUKE,5790B,SIM0001, v1.08+v1.01 FPGAv4",
+    "5790B|>>|*CLS",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.connect",
+   "result": "returned <Fluke5790B>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5790B,SIM0001, v1.08+v1.01 FPGAv4"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Fluke5790B.check_error[ok]",
+   "log": [
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.check_error",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "'INPUT1'",
+   "case": "Fluke5790B.select_input[INPUT1]",
+   "log": [
+    "5790B|>>|INPUT INPUT1",
+    "5790B|>>|INPUT?",
+    "5790B|<<|INPUT1",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.select_input",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INPUT INPUT1"
+    ],
+    [
+     "Q",
+     "INPUT?",
+     "INPUT1"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "'input2'",
+   "case": "Fluke5790B.select_input[INPUT2]",
+   "log": [
+    "5790B|>>|INPUT INPUT2",
+    "5790B|>>|INPUT?",
+    "5790B|<<|INPUT2",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.select_input",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INPUT INPUT2"
+    ],
+    [
+     "Q",
+     "INPUT?",
+     "INPUT2"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "'AUX'",
+   "case": "Fluke5790B.select_input[AUX]",
+   "log": [
+    "5790B|>>|INPUT AUX",
+    "5790B|>>|INPUT?",
+    "5790B|<<|AUX",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.select_input",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INPUT AUX"
+    ],
+    [
+     "Q",
+     "INPUT?",
+     "AUX"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "'WBND'",
+   "case": "Fluke5790B.select_input[WBND]",
+   "log": [
+    "5790B|>>|INPUT WBND",
+    "5790B|>>|INPUT?",
+    "5790B|<<|WBND",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.select_input",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INPUT WBND"
+    ],
+    [
+     "Q",
+     "INPUT?",
+     "WBND"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "'FRONT'",
+   "case": "Fluke5790B.select_input[bad]",
+   "log": [],
+   "method": "Fluke5790B.select_input",
+   "result": "raised InstrumentError: 5790B input must be one of ('INPUT1', 'INPUT2', 'AUX', 'WBND'), not 'FRONT'",
+   "wire": []
+  },
+  {
+   "call": "True",
+   "case": "Fluke5790B.set_external_trigger[on]",
+   "log": [
+    "5790B|>>|EXTRIG ON",
+    "5790B|>>|EXTRIG?",
+    "5790B|<<|1",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.set_external_trigger",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "EXTRIG ON"
+    ],
+    [
+     "Q",
+     "EXTRIG?",
+     "1"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "Fluke5790B.set_external_trigger[off]",
+   "log": [
+    "5790B|>>|EXTRIG OFF",
+    "5790B|>>|EXTRIG?",
+    "5790B|<<|0",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.set_external_trigger",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "EXTRIG OFF"
+    ],
+    [
+     "Q",
+     "EXTRIG?",
+     "0"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.range_info",
+   "log": [
+    "5790B|>>|RANGE?",
+    "5790B|<<|7.000000E+00,2.090000E+00,7.000000E-06,1"
+   ],
+   "method": "Fluke5790B.range_info",
+   "result": "returned (7.0, 2.09, 7e-06, True)",
+   "wire": [
+    [
+     "Q",
+     "RANGE?",
+     "7.000000E+00,2.090000E+00,7.000000E-06,1"
+    ]
+   ]
+  },
+  {
+   "call": "0.5",
+   "case": "Fluke5790B.set_range_for",
+   "log": [
+    "5790B|>>|RANGE 0.5",
+    "5790B|>>|RANGE?",
+    "5790B|<<|7.000000E-01,2.090000E-01,7.000000E-07,0",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.set_range_for",
+   "result": "returned 0.7",
+   "wire": [
+    [
+     "W",
+     "RANGE 0.5"
+    ],
+    [
+     "Q",
+     "RANGE?",
+     "7.000000E-01,2.090000E-01,7.000000E-07,0"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "-2.0",
+   "case": "Fluke5790B.set_range_for[negative]",
+   "log": [
+    "5790B|>>|RANGE 2",
+    "5790B|>>|RANGE?",
+    "5790B|<<|2.200000E+00,6.650000E-01,2.200000E-06,0",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.set_range_for",
+   "result": "returned 2.2",
+   "wire": [
+    [
+     "W",
+     "RANGE 2"
+    ],
+    [
+     "Q",
+     "RANGE?",
+     "2.200000E+00,6.650000E-01,2.200000E-06,0"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.set_autorange",
+   "log": [
+    "5790B|>>|RANGE AUTO",
+    "5790B|>>|RANGE?",
+    "5790B|<<|2.200000E+00,6.650000E-01,2.200000E-06,1",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.set_autorange",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "RANGE AUTO"
+    ],
+    [
+     "Q",
+     "RANGE?",
+     "2.200000E+00,6.650000E-01,2.200000E-06,1"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.wideband_option[WBND]",
+   "log": [
+    "5790B|>>|*OPT?",
+    "5790B|<<|WBND"
+   ],
+   "method": "Fluke5790B.wideband_option",
+   "result": "returned 'WBND'",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "WBND"
+    ]
+   ]
+  },
+  {
+   "call": "20000000.0",
+   "case": "Fluke5790B.require_wideband[WBND ok]",
+   "log": [
+    "5790B|>>|*OPT?",
+    "5790B|<<|WBND"
+   ],
+   "method": "Fluke5790B.require_wideband",
+   "result": "returned 'WBND'",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "WBND"
+    ]
+   ]
+  },
+  {
+   "call": "40000000.0",
+   "case": "Fluke5790B.require_wideband[WBND too slow]",
+   "log": [
+    "5790B|>>|*OPT?",
+    "5790B|<<|WBND"
+   ],
+   "method": "Fluke5790B.require_wideband",
+   "result": "raised InstrumentError: The 5790B wideband option (WBND) covers 30 MHz; the flatness test needs 40 MHz.",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "WBND"
+    ]
+   ]
+  },
+  {
+   "call": "40000000.0",
+   "case": "Fluke5790B.require_wideband[WBAF correction off]",
+   "log": [
+    "5790B|>>|*OPT?",
+    "5790B|<<|WBAF",
+    "5790B|>>|WBAF?",
+    "5790B|<<|0"
+   ],
+   "method": "Fluke5790B.require_wideband",
+   "result": "returned 'WBAF'",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "WBAF"
+    ],
+    [
+     "Q",
+     "WBAF?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "40000000.0",
+   "case": "Fluke5790B.require_wideband[WBAF correction on]",
+   "log": [
+    "5790B|>>|*OPT?",
+    "5790B|<<|WBAF",
+    "5790B|>>|WBAF?",
+    "5790B|<<|1"
+   ],
+   "method": "Fluke5790B.require_wideband",
+   "result": "raised InstrumentError: The 5790B 50 MHz cable correction is on (WBAF? -> 1). It applies only to the 50 MHz spot calibration; turn it off (wideband menu, 50 MHz Cable Correction) and continue.",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "WBAF"
+    ],
+    [
+     "Q",
+     "WBAF?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.wideband_option[none]",
+   "log": [
+    "5790B|>>|*OPT?",
+    "5790B|<<|0"
+   ],
+   "method": "Fluke5790B.wideband_option",
+   "result": "returned ''",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "10000000.0",
+   "case": "Fluke5790B.require_wideband[none]",
+   "log": [
+    "5790B|>>|*OPT?",
+    "5790B|<<|0"
+   ],
+   "method": "Fluke5790B.require_wideband",
+   "result": "raised InstrumentError: This 5790B has no wideband option (*OPT? reports none). Use the power-meter method for flatness.",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.measure[settles]",
+   "log": [
+    "5790B|>>|MEAS?",
+    "5790B|<<|0.0000000E+00,1.000000E+03,4",
+    "5790B|>>|MEAS?",
+    "5790B|<<|0.0000000E+00,1.000000E+03,4",
+    "5790B|>>|MEAS?",
+    "5790B|<<|2.0023895E+00,1.000000E+03,0"
+   ],
+   "method": "Fluke5790B.measure",
+   "result": "returned (2.0023895, 1000.0)",
+   "wire": [
+    [
+     "Q",
+     "MEAS?",
+     "0.0000000E+00,1.000000E+03,4"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "0.0000000E+00,1.000000E+03,4"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "2.0023895E+00,1.000000E+03,0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.measure[value invalid]",
+   "log": [
+    "5790B|>>|MEAS?",
+    "5790B|<<|0.0000000E+00,0.000000E+00,1"
+   ],
+   "method": "Fluke5790B.measure",
+   "result": "raised InstrumentError: 5790B measurement not valid: frequency underrange (reading 0 V at 0 Hz)",
+   "wire": [
+    [
+     "Q",
+     "MEAS?",
+     "0.0000000E+00,0.000000E+00,1"
+    ]
+   ]
+  },
+  {
+   "call": "3.0, 1.0",
+   "case": "Fluke5790B.measure[never settles]",
+   "log": [
+    "5790B|>>|MEAS?",
+    "5790B|<<|0.0E+00,1.0E+03,4",
+    "5790B|>>|MEAS?",
+    "5790B|<<|0.0E+00,1.0E+03,4",
+    "5790B|>>|MEAS?",
+    "5790B|<<|0.0E+00,1.0E+03,4",
+    "5790B|>>|MEAS?",
+    "5790B|<<|0.0E+00,1.0E+03,4",
+    "5790B|>>|MEAS?",
+    "5790B|<<|0.0E+00,1.0E+03,4"
+   ],
+   "method": "Fluke5790B.measure",
+   "result": "raised InstrumentError: 5790B reading did not settle within 3 s (last status: unsettled)",
+   "wire": [
+    [
+     "Q",
+     "MEAS?",
+     "0.0E+00,1.0E+03,4"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "0.0E+00,1.0E+03,4"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "0.0E+00,1.0E+03,4"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "0.0E+00,1.0E+03,4"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "MEAS?",
+     "0.0E+00,1.0E+03,4"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.measure[short reply]",
+   "log": [
+    "5790B|>>|MEAS?",
+    "5790B|<<|1.0"
+   ],
+   "method": "Fluke5790B.measure",
+   "result": "raised InstrumentError: Unexpected MEAS? reply: 1.0",
+   "wire": [
+    [
+     "Q",
+     "MEAS?",
+     "1.0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.cleanup",
+   "log": [
+    "5790B|>>|EXTRIG OFF"
+   ],
+   "method": "Fluke5790B.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "EXTRIG OFF"
+    ]
+   ]
+  },
+  {
+   "call": "'input WBND'",
+   "case": "Fluke5790B.check_error[error]",
+   "log": [
+    "5790B|>>|ERR?",
+    "5790B|<<|303,\"Option not installed\""
+   ],
+   "method": "Fluke5790B.check_error",
+   "result": "raised InstrumentError: 5790B reported an error (input WBND): 303,\"Option not installed\"",
+   "wire": [
+    [
+     "Q",
+     "ERR?",
+     "303,\"Option not installed\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.connect[5790A emulation]",
+   "log": [
+    "5790B|>>|*IDN?",
+    "5790B|<<|FLUKE,5790A,1,1"
+   ],
+   "method": "Fluke5790B.connect",
+   "result": "raised InstrumentError: The 5790B identifies as a 5790A: 5790A emulation is on. Turn it off (Setup Menu > System Settings, Emulate 5790A) and connect again.",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5790A,1,1"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.connect[other model]",
+   "log": [
+    "5790B|>>|*IDN?",
+    "5790B|<<|KEYSIGHT,34401A,1,1"
+   ],
+   "method": "Fluke5790B.connect",
+   "result": "raised InstrumentError: Expected a Fluke 5790B but the instrument identifies as: 'KEYSIGHT,34401A,1,1'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEYSIGHT,34401A,1,1"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.range_info[short reply]",
+   "log": [
+    "5790B|>>|RANGE?",
+    "5790B|<<|7,1"
+   ],
+   "method": "Fluke5790B.range_info",
+   "result": "raised InstrumentError: Unexpected RANGE? reply: 7,1",
+   "wire": [
+    [
+     "Q",
+     "RANGE?",
+     "7,1"
+    ]
+   ]
+  },
+  {
+   "call": "5.0",
+   "case": "Fluke5790B.set_range_for[autorange still on]",
+   "log": [
+    "5790B|>>|RANGE 5",
+    "5790B|>>|RANGE?",
+    "5790B|<<|7.0E+00,6.6E+00,7E-06,1"
+   ],
+   "method": "Fluke5790B.set_range_for",
+   "result": "raised InstrumentError: 5790B range for 5 V: RANGE? reports 6.6 to 7 V, autorange on",
+   "wire": [
+    [
+     "W",
+     "RANGE 5"
+    ],
+    [
+     "Q",
+     "RANGE?",
+     "7.0E+00,6.6E+00,7E-06,1"
+    ]
+   ]
+  }
+ ],
+ "name": "fluke_5790b",
+ "schema": 1
+}

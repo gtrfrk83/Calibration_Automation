@@ -1,0 +1,807 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Fluke96270A.connect",
+   "log": [
+    "96270A|>>|*IDN?",
+    "96270A|<<|Fluke,96270A,SIM0001,1.00",
+    "96270A|>>|*CLS",
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|SINE",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|POW:OFFS:STAT 0",
+    "96270A|>>|POW:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|FREQ:OFFS:STAT 0",
+    "96270A|>>|FREQ:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.connect",
+   "result": "returned <Fluke96270A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Fluke,96270A,SIM0001,1.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Fluke96270A.check_error[ok]",
+   "log": [
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.check_error",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "1000000000.0, -10.0",
+   "case": "Fluke96270A.set_rf",
+   "log": [
+    "96270A|>>|FREQ 1000000000;:POW -10.000",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|FREQ?",
+    "96270A|<<|1.000000000000E+09",
+    "96270A|>>|POW?",
+    "96270A|<<|-1.000000000000E+01"
+   ],
+   "method": "Fluke96270A.set_rf",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FREQ 1000000000;:POW -10.000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "1.000000000000E+09"
+    ],
+    [
+     "Q",
+     "POW?",
+     "-1.000000000000E+01"
+    ]
+   ]
+  },
+  {
+   "call": "7000000000.0, -10.0",
+   "case": "Fluke96270A.set_rf[above range]",
+   "log": [],
+   "method": "Fluke96270A.set_rf",
+   "result": "raised InstrumentError: 7 GHz is above the Fluke 96270A range",
+   "wire": []
+  },
+  {
+   "call": "1000000000.0, 40.0",
+   "case": "Fluke96270A.set_rf[level out of range]",
+   "log": [
+    "96270A|>>|FREQ 1000000000;:POW 40.000",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|-222,\"Data out of range\""
+   ],
+   "method": "Fluke96270A.set_rf",
+   "result": "raised InstrumentError: 96270A rejected the setting (1e+09 Hz, 40 dBm): -222,\"Data out of range\"",
+   "wire": [
+    [
+     "W",
+     "FREQ 1000000000;:POW 40.000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "-222,\"Data out of range\""
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "Fluke96270A.output[on]",
+   "log": [
+    "96270A|>>|OUTP ON",
+    "96270A|>>|OUTP?",
+    "96270A|<<|1"
+   ],
+   "method": "Fluke96270A.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP ON"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "Fluke96270A.output[off]",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.cleanup",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "Fluke96270A.output[off not confirmed]",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|1"
+   ],
+   "method": "Fluke96270A.output",
+   "result": "raised SafetyError: 96270A did not confirm output OFF; check the front panel",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.cleanup[off not confirmed]",
+   "log": [
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|1"
+   ],
+   "method": "Fluke96270A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "Fluke96270A.output[on not confirmed]",
+   "log": [
+    "96270A|>>|OUTP ON",
+    "96270A|>>|OUTP?",
+    "96270A|<<|OFF"
+   ],
+   "method": "Fluke96270A.output",
+   "result": "raised InstrumentError: 96270A did not confirm output ON",
+   "wire": [
+    [
+     "W",
+     "OUTP ON"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "OFF"
+    ]
+   ]
+  },
+  {
+   "call": "'level'",
+   "case": "Fluke96270A.check_error[error]",
+   "log": [
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|-222,\"Data out of range\""
+   ],
+   "method": "Fluke96270A.check_error",
+   "result": "raised InstrumentError: 96270A rejected the setting (level): -222,\"Data out of range\"",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "-222,\"Data out of range\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.connect[instrument not confirmed]",
+   "log": [
+    "96270A|>>|*IDN?",
+    "96270A|<<|Fluke,96270A,1,1",
+    "96270A|>>|*CLS",
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|\"PULSE\""
+   ],
+   "method": "Fluke96270A.connect",
+   "result": "raised InstrumentError: 96270A instrument SINE: set 'INST SINE', reports '\"PULSE\"'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Fluke,96270A,1,1"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "\"PULSE\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFG.connect",
+   "log": [
+    "FuncGen|>>|*IDN?",
+    "FuncGen|<<|Agilent Technologies,33250A,SIM0001,1.0",
+    "FuncGen|>>|*CLS",
+    "FuncGen|>>|*IDN?",
+    "FuncGen|<<|Agilent Technologies,33250A,SIM0001,1.0"
+   ],
+   "method": "AgilentAFG.connect",
+   "result": "returned <AgilentAFG>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "1000000.0, 1.0",
+   "case": "AgilentAFG.sine[50]",
+   "log": [
+    "FuncGen|>>|OUTPut OFF",
+    "FuncGen|>>|OUTPut:LOAD 50",
+    "FuncGen|>>|APPLy:SINusoid 1000000,1,0",
+    "FuncGen|>>|FREQuency?",
+    "FuncGen|<<|1000000",
+    "FuncGen|>>|VOLTage?",
+    "FuncGen|<<|1",
+    "FuncGen|>>|SYSTem:ERRor?",
+    "FuncGen|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFG.sine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "W",
+     "APPLy:SINusoid 1000000,1,0"
+    ],
+    [
+     "Q",
+     "FREQuency?",
+     "1000000"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "1000000.0, 2.0, load='INF'",
+   "case": "AgilentAFG.sine[INF]",
+   "log": [
+    "FuncGen|>>|OUTPut OFF",
+    "FuncGen|>>|OUTPut:LOAD INF",
+    "FuncGen|>>|APPLy:SINusoid 1000000,2,0",
+    "FuncGen|>>|FREQuency?",
+    "FuncGen|<<|1000000",
+    "FuncGen|>>|VOLTage?",
+    "FuncGen|<<|2",
+    "FuncGen|>>|SYSTem:ERRor?",
+    "FuncGen|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFG.sine",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD INF"
+    ],
+    [
+     "W",
+     "APPLy:SINusoid 1000000,2,0"
+    ],
+    [
+     "Q",
+     "FREQuency?",
+     "1000000"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "2"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "1000.0, 1.0",
+   "case": "AgilentAFG.square",
+   "log": [
+    "FuncGen|>>|OUTPut OFF",
+    "FuncGen|>>|OUTPut:LOAD 50",
+    "FuncGen|>>|APPLy:SQUare 1000,1,0",
+    "FuncGen|>>|FREQuency?",
+    "FuncGen|<<|1000",
+    "FuncGen|>>|VOLTage?",
+    "FuncGen|<<|1",
+    "FuncGen|>>|SYSTem:ERRor?",
+    "FuncGen|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFG.square",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "W",
+     "APPLy:SQUare 1000,1,0"
+    ],
+    [
+     "Q",
+     "FREQuency?",
+     "1000"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "90000000.0, 1.0",
+   "case": "AgilentAFG.sine[above range]",
+   "log": [],
+   "method": "AgilentAFG.sine",
+   "result": "raised InstrumentError: 90 MHz is above the 33250 sine range (80 MHz)",
+   "wire": []
+  },
+  {
+   "call": "True",
+   "case": "AgilentAFG.output[on]",
+   "log": [
+    "FuncGen|>>|OUTPut ON"
+   ],
+   "method": "AgilentAFG.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut ON"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "AgilentAFG.output[off]",
+   "log": [
+    "FuncGen|>>|OUTPut OFF"
+   ],
+   "method": "AgilentAFG.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFG.cleanup",
+   "log": [
+    "FuncGen|>>|OUTPut OFF"
+   ],
+   "method": "AgilentAFG.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ]
+   ]
+  },
+  {
+   "call": "1000000.0, 1.0",
+   "case": "AgilentAFG.sine[readback mismatch]",
+   "log": [
+    "FuncGen|>>|OUTPut OFF",
+    "FuncGen|>>|OUTPut:LOAD 50",
+    "FuncGen|>>|APPLy:SINusoid 1000000,1,0",
+    "FuncGen|>>|FREQuency?",
+    "FuncGen|<<|5000",
+    "FuncGen|>>|VOLTage?",
+    "FuncGen|<<|1"
+   ],
+   "method": "AgilentAFG.sine",
+   "result": "raised InstrumentError: 33220 frequency set 1e+06, reports 5000",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "W",
+     "APPLy:SINusoid 1000000,1,0"
+    ],
+    [
+     "Q",
+     "FREQuency?",
+     "5000"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ReferenceMeter.connect",
+   "log": [
+    "RefDMM|>>|*CLS",
+    "RefDMM|>>|*IDN?",
+    "RefDMM|<<|KEYSIGHT,SIM-METER,SIM0001,1.0"
+   ],
+   "method": "ReferenceMeter.connect",
+   "result": "returned <ReferenceMeter>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEYSIGHT,SIM-METER,SIM0001,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ReferenceMeter.frequency",
+   "log": [
+    "RefDMM|>>|MEASure:FREQuency?",
+    "RefDMM|<<|1.000000200e+03"
+   ],
+   "method": "ReferenceMeter.frequency",
+   "result": "returned 1000.0002",
+   "wire": [
+    [
+     "Q",
+     "MEASure:FREQuency?",
+     "1.000000200e+03"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ReferenceMeter.ac_rms",
+   "log": [
+    "RefDMM|>>|CONFigure:VOLTage:AC",
+    "RefDMM|>>|VOLTage:AC:BANDwidth 200",
+    "RefDMM|>>|READ?",
+    "RefDMM|<<|5.010000000e-01"
+   ],
+   "method": "ReferenceMeter.ac_rms",
+   "result": "returned 0.501",
+   "wire": [
+    [
+     "W",
+     "CONFigure:VOLTage:AC"
+    ],
+    [
+     "W",
+     "VOLTage:AC:BANDwidth 200"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "5.010000000e-01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ReferenceMeter.power",
+   "log": [
+    "RefDMM|>>|MEASure:POWer?",
+    "RefDMM|<<|0.0"
+   ],
+   "method": "ReferenceMeter.power",
+   "result": "returned 0.0",
+   "wire": [
+    [
+     "Q",
+     "MEASure:POWer?",
+     "0.0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ReferenceMeter.dc",
+   "log": [
+    "RefDMM|>>|CONFigure:VOLTage:DC",
+    "RefDMM|>>|READ?",
+    "RefDMM|<<|0.000000000e+00"
+   ],
+   "method": "ReferenceMeter.dc",
+   "result": "returned 0.0",
+   "wire": [
+    [
+     "W",
+     "CONFigure:VOLTage:DC"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "0.000000000e+00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ReferenceMeter.frequency[overload]",
+   "log": [
+    "RefDMM|>>|MEASure:FREQuency?",
+    "RefDMM|<<|9.91E+37"
+   ],
+   "method": "ReferenceMeter.frequency",
+   "result": "raised InstrumentError: Invalid reading from MEASure:FREQuency?: 9.91E+37",
+   "wire": [
+    [
+     "Q",
+     "MEASure:FREQuency?",
+     "9.91E+37"
+    ]
+   ]
+  }
+ ],
+ "name": "reference_instruments",
+ "schema": 1
+}

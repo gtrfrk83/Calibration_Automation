@@ -9,7 +9,7 @@ are required.
     import truevolt_verification
     truevolt_verification.main('34470A')       # what Procedures/Keysight_34470A_Verification.py does
 """
-import csv, json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
@@ -22,6 +22,7 @@ import procspec
 import drivers
 import appdata
 import datamode
+import procmods_engine
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
 PERIODS = {'24 hours': '24h', '90 days': '90d', '1 year': '1y', '2 years': '2y'}
@@ -49,11 +50,11 @@ def to_visa(text):
     return f'ASRL{int(t)}::INSTR'
 
 
-class IO:
+class IO(procmods_engine.ProcModsMixin):
     """Bench I/O: the DMM under test and the Fluke 5560A, both through the instrument drivers."""
     SETTLE_AC = {3: 9.0, 20: 5.0, 200: 4.0}
 
-    def __init__(self, dmm_address, cal_address, cal_baud=9600, transports=None):
+    def __init__(self, dmm_address, cal_address, cal_baud=9600, transports=None, mods=None):
         self.log = drivers.CommandLog()
         if transports:
             dmm_t, cal_t = transports
@@ -66,9 +67,13 @@ class IO:
             self.cal.open(verify_model=True)
             self.cal.clear_status()
             self.dmm.connect()
+            self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
         self.ident = self.dmm.idn
+
+    def pm_drivers(self):
+        return (self.dmm, self.cal)
 
     def standby(self):
         self.cal.standby_quiet()
@@ -99,10 +104,13 @@ class IO:
             raise drivers.InstrumentError(f'The Front/Rear switch is on {have}; this point needs {want}. Move the switch and rerun.')
 
     def settle(self, p):
-        if p['kind'] == 'FREQ': return 3.0
-        if p['kind'] in ('ACV', 'ACI'): return self.SETTLE_AC.get(p.get('filter_hz') or 200, 4.0)
-        if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return 4.0
-        return 2.0
+        if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
+        if p['kind'] == 'FREQ': return self.pm_param('truevolt.settle.freq', 3.0)
+        if p['kind'] in ('ACV', 'ACI'):
+            f = p.get('filter_hz') or 200
+            return self.pm_param(f'truevolt.settle.ac_{int(f)}hz', self.SETTLE_AC[f]) if f in self.SETTLE_AC else self.pm_param('truevolt.settle.ac_other', 4.0)
+        if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return self.pm_param('truevolt.settle.ohm_high', 4.0)
+        return self.pm_param('truevolt.settle.default', 2.0)
 
     def measure(self, p):
         self.standby()
@@ -110,10 +118,10 @@ class IO:
         self.dmm.configure_point(p)
         self.dmm.check_errors('configuring ' + p['description'])
         if p['source'] == 'none':          # copper short / open input: the calibrator stays in STANDBY
-            time.sleep(1.5)
+            time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.zero', 1.5))
             return self.dmm.read()
         if p['source'] == 'manual':        # e.g. a capacitance standard connected by the technician
-            time.sleep(2.0)
+            time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.manual', 2.0))
             return self.dmm.read()
         k, v, f = p['kind'], p['nominal'], p.get('frequency')
         if k in ('DCV', 'ACV'): self.cal.set_output_volts(v, f)
@@ -128,7 +136,7 @@ class IO:
         return reading
 
 
-class App(datamode.DataModeMixin):
+class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     WIRING_TEXT = {
         'VOLT': 'Calibrator voltage output to the DMM front HI / LO input terminals.',
         'CURRENT': 'Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first.',
@@ -140,6 +148,7 @@ class App(datamode.DataModeMixin):
         configure(model)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}
+        self.pm_init('truevolt', MODEL, demo=demo, lists=[POINTS])     # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
         root.title(f'Keysight {MODEL} | Performance Verification' + (' [DEMO]' if demo else ''))
         ui.fit_window(root, 1320, 820, min_w=900, min_h=640)
@@ -167,6 +176,7 @@ class App(datamode.DataModeMixin):
     # ------------------------------------------------------------------ selection
     def active(self, p):
         if p['optional'] and not self.include_optional.get(): return False
+        if p.get('skip'): return False                               # a point skipped by a procedure modification
         if self.test_set.get().startswith('Quick') and not p['quick']: return False
         return True
 
@@ -286,7 +296,9 @@ class App(datamode.DataModeMixin):
         self.update_shell_sections([p for p in POINTS if self.active(p)], lambda p: p['section_title'])
 
     def on_period(self, save=True):
+        self.pm_revert(POINTS)                                       # limits come from the period table: take the modifications off,
         procspec.apply_period(POINTS, PERIODS[self.period.get()])
+        self.pm_apply(POINTS)                                        # then put them back (they only apply if they fit this period)
         for records in (self.found, self.left):     # re-judge stored readings (As Found and As Left) against the newly selected limits
             for key, rec in records.items():
                 p = POINTS[int(key) - 1]
@@ -330,7 +342,7 @@ class App(datamode.DataModeMixin):
         if self.demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
         self.status.set('Connecting ...'); self.root.update_idletasks()
         try:
-            self.disconnect(); self.io = IO(self.dmm_addr.get(), self.cal_addr.get(), int(self.cal_baud.get()))
+            self.disconnect(); self.io = IO(self.dmm_addr.get(), self.cal_addr.get(), int(self.cal_baud.get()), mods=self.pm_state)
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
@@ -365,6 +377,8 @@ class App(datamode.DataModeMixin):
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
+        if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
         if not self.demo and self.io is None: self.test_connections()
         if not self.demo and self.io is None: return
@@ -427,7 +441,7 @@ class App(datamode.DataModeMixin):
     def _record(self, p, reading, synthetic):
         result = 'PASS' if abs(reading - p['nominal']) <= p['error'] else 'FAIL'
         self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()],
-                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label)
+                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields())
         self._update_row(p); self.save(silent=True)
 
     # ------------------------------------------------------------------ files
@@ -438,7 +452,7 @@ class App(datamode.DataModeMixin):
     def save(self, silent=False):
         path = self._checkpoint_path()
         path.write_text(json.dumps(dict(asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, period=self.period.get(),
-                                        **self.save_fields()), indent=2))
+                                        **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
@@ -449,6 +463,7 @@ class App(datamode.DataModeMixin):
             if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.period.set(data.get('period', self.period.get())); self.load_results(data)
+        self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
 
     @staticmethod
@@ -459,14 +474,17 @@ class App(datamode.DataModeMixin):
         return p['section'] in ('hi',)
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
+        return self.certificate_rows_and_points()[0]
+    def certificate_rows_and_points(self):
+        """(rows, points): the report rows and, parallel to them, the spec point each came from (for the optional TAR / TUR fields)."""
         import report_pdf
-        rows=[]
+        rows=[];pts=[]
         for p in POINTS:
             row=self.found_left_row(p,lambda r:report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard='5560A'))
-            if row:rows.append(row)
-        return rows
+            if row:rows.append(row);pts.append(p)
+        return rows,pts
     def export_pdf(self):
-        rows=self.certificate_rows()
+        rows,pts=self.certificate_rows_and_points()
         if not rows:messagebox.showinfo('No results','No recorded results to export yet.');return
         try:import report_pdf,report_dialog
         except ImportError as exc:messagebox.showerror('Report export',str(exc));return
@@ -477,30 +495,15 @@ class App(datamode.DataModeMixin):
         if not path:return
         demo=self.any_synthetic()
         try:
+            if details.get('show_tar_tur'):
+                import tartur_wiring
+                rows=report_pdf.apply_tar_tur(rows,details.get('show_tar_tur'),[tartur_wiring.point_fields(p,'5560A') for p in pts])
             report_pdf.write_calibration_pdf(path,rows,header=[('Instrument',f'Keysight {MODEL}'),('Instrument ID',self.asset.get()),('Serial',self.serial.get()),('Limits applied',self.period.get()),('Source',f'Keysight Truevolt Operating and Service Guide, pp. 501-520 ({MODEL} tables)')],demo=demo,details=details,footer_note=report_pdf.uncertainty_note(rows,'5560A'))
         except ImportError:
             messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab');return
         except Exception as exc:
             messagebox.showerror('PDF export error',str(exc));return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-    def export(self):
-        path = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=[('CSV', '*.csv')], initialfile=f'{MODEL}_verification.csv')
-        if not path: return
-        demo = 'YES' if self.any_synthetic() else 'NO'
-        with open(path, 'w', newline='', encoding='utf-8-sig') as file:
-            w = csv.writer(file)
-            w.writerow(['Instrument ID', self.asset.get(), 'Serial Number', self.serial.get()])
-            w.writerow(['SOURCE', f'{SPEC["source"]["document"]}, pp. {SPEC["source"]["pages"]}'])
-            w.writerow(['LIMITS APPLIED', self.period.get()]); w.writerow(['DEMO DATA', demo]); w.writerow([])
-            w.writerow(['Section', 'Description', 'Nominal', 'Tolerance -', 'Tolerance +', 'UOM', 'As Found', 'OOT', 'Status', 'Quick check', 'Manual page', 'Timestamp', 'Synthetic', 'As Left', 'As Left status'])
-            for p in POINTS:
-                if p['optional'] and not self.include_optional.get() and str(p['id']) not in self.found: continue
-                r = self.found.get(str(p['id']), {}); n = p['nominal']; e = p['error']; lr = self.left.get(str(p['id']), {})
-                w.writerow([p['section_title'], p['description'], n, n - e, n + e, p['unit'], r.get('reading', ''),
-                            'OOT' if r.get('result') == 'FAIL' else '', r.get('result', ''), 'Q' if p['quick'] else '', p['page'],
-                            r.get('timestamp', ''), r.get('synthetic', ''), lr.get('reading', 'Same' if r else ''), lr.get('result', '')])
-        self.status.set(f'Exported {path}')
-
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return
         self.stop = True; self._save_settings(); self.disconnect(); self.root.destroy()

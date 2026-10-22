@@ -10,6 +10,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 - Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 87V, Klein MM325), `mdo4000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A).
 - `labregistry.py` / `labregistry_ui.py`: per-asset report history and drift (`lab_registry.sqlite3`, not in the repo).
 - `report_pdf.py` / `report_dialog.py`: PDF "Calibration Data" reports.
+  Optional TAR / TUR columns: two independent checkboxes (TAR, TUR) in `report_dialog.ask_details` (`details["show_tar"]`, `["show_tur"]`, `["show_tar_tur"]` = `report_pdf.TarTur`, default off, remembered in `~/.calibration_suite/report_tartur.json`); `report_pdf.apply_tar_tur`. TAR / TUR appear on the PDF data file only (there is no CSV export). Off = the PDF is unchanged.
 - `diagrams/`: hook-up PNGs. 34970A/34972A naming is in `diagrams/README_dacq.txt`.
 
 ## Procedures
@@ -99,6 +100,17 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.
 Real-window tests (need a display; `xvfb-run -a python -m unittest tests.test_asleft tests.test_specmanager`).
 Simulated bench: `drivers/simulated.py` (`make_dacq_bench`, `make_dmm_bench`, `make_bench`).
+
+## Procedure modifications in the engines (procmods_engine.py)
+Every procedure (truevolt, dacq, fgen, handheld, 34401A, 8846A, MDO4000C, WaveSurfer) mixes in `procmods_engine.ProcModsMixin`. At the start of a Run
+(`pm_begin_run`) it loads the stored overrides for the model / instrument ID, patches the point list in place (skip, text, per-point settle, and - only
+from valid, enabled, HMAC-verified `limit` rows - error / low / high), and binds the command overrides to the drivers (`use_commands`). Tunables are read
+with `self.pm_param(name, default)`: with nothing stored it returns `default` itself, so unmodified runs are byte-identical (the golden transcripts prove
+it). What is tunable is listed in `procmods_engine.TUNABLES` (name, default, bounds); a default declared there must equal what the engine passes (a test
+checks it). Ranges are not tunable (they are part of a point's identity and of the manufacturer's table). Engines that judge `low <= x <= high` while the
+point also carries `error` (8846A) are registered with shape='band': create overrides against `pm_limit_points()`. The report reads
+`procmods_engine.applied_modifications(run)` / `applied_info(run)`; the checkpoint carries `overrides` (snapshot) only when something is modified.
+New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_checkpoint_fields / skip filter) and read every settle time through pm_param.
 
 ## Standards specification manager and uncertainty budget
 - `specs/build_standard_spec.py <SpecTrack pdf>` reads a manufacturer accuracy sheet into `specs/standards/<maker>_<model>_standard.json` (with a `problems` list

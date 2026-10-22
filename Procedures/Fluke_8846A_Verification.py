@@ -2,7 +2,7 @@
 Hardware I/O is OFF in demo mode. Never run unattended: wiring confirmations required.
 Source: Fluke 8845A/8846A Calibration Manual, Tables 3-4 and 3-18 (1-year).
 """
-import csv, json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
@@ -13,6 +13,7 @@ import ui_theme as ui
 import ui_shell
 import appdata
 import datamode
+import procmods_engine
 import drivers
 DATA=HERE/'8846A_results.json'
 POINTS=[]
@@ -44,9 +45,9 @@ for kind, block in TEST_TABLES.items():
 # The manual also specifies optional DC ratio, rear-terminal and split-lead tests.
 # Those require distinct setups/measurement commands and are not executed here.
 
-class IO:
+class IO(procmods_engine.ProcModsMixin):
     """Bench I/O for this procedure: the DMM and the Fluke 5560A, both through the instrument drivers."""
-    def __init__(self, dmm_port, fluke_port, baud, parity, bits):
+    def __init__(self, dmm_port, fluke_port, baud, parity, bits, mods=None):
         self.log=drivers.CommandLog()
         self.dmm=drivers.Fluke8846A(drivers.open_visa(f'ASRL{dmm_port}::INSTR',timeout=20,baud=baud,data_bits=bits,
             parity=parity.lower(),stop_bits=1,write_termination='\n',read_termination='\n'),self.log,label='8846A')
@@ -56,9 +57,12 @@ class IO:
             self.fluke.open(verify_model=False)
             self.fluke.write('STBY')
             self.dmm.connect()
+            self.pm_attach(mods,*self.pm_drivers())
         except Exception:
             self.close();raise
         self.ident=self.dmm.idn
+    def pm_drivers(self):
+        return (self.dmm,self.fluke)
     def standby(self):
         self.fluke.standby_quiet()
     def close(self):
@@ -84,7 +88,7 @@ class IO:
             # Zero-offset verification requires a physical copper short or OPEN current
             # input. The 5560A must remain in STBY and is never used as a zero source.
             self.dmm.configure(k,r)
-            time.sleep(1.5)
+            time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('f8846a.settle.zero',1.5))
             return self.dmm.read()
         if k in ('CAP','FREQ'):
             raise RuntimeError(f'{k} source/measurement commands must be verified at the lab before enabling hardware automation. Point is retained for guided review.')
@@ -101,12 +105,12 @@ class IO:
             self.dmm.configure_frequency()
             self.fluke.set_output_volts(p["amplitude"],f)
         self.fluke.operate_unverified()
-        time.sleep(3.5 if k.startswith('AC') else 2)
+        time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('f8846a.settle.ac',3.5) if k.startswith('AC') else self.pm_param('f8846a.settle.default',2))
         reading=self.dmm.read()
         self.standby()
         return reading
 
-class App(datamode.DataModeMixin):
+class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     SETUP_TEXT = {
         'VOLTAGE': '5560A voltage output to the meter HI / LO terminals',
         'CURRENT': '5560A current output to the meter current (A) input and LO',
@@ -118,6 +122,7 @@ class App(datamode.DataModeMixin):
     def __init__(self,root,demo=False):
         self.root=root;self.demo=demo;self.io=None;self._busy=False;self.stop=False
         self.results={}
+        self.pm_init('f8846a','8846A',demo=demo,lists=[POINTS],shape='band')   # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
         root.title('Fluke 8846A | Performance Verification v58'+(' [DEMO]' if demo else ''))
         ui.fit_window(root, 1280, 800, min_w=900, min_h=620)
@@ -298,7 +303,7 @@ class App(datamode.DataModeMixin):
         self.status.set('Connecting ...');self.root.update_idletasks()
         try:
             self.disconnect();self.io=IO(self.parse_com(self.dmm_port.get()),self.parse_com(self.fluke_port.get()),
-                                        int(self.baud.get()),self.parity.get(),int(self.bits.get()))
+                                        int(self.baud.get()),self.parity.get(),int(self.bits.get()),mods=self.pm_state)
         except Exception as exc:
             self.disconnect();self._set_conn(False)
             self.status.set('Connection error: '+str(exc))
@@ -328,6 +333,8 @@ class App(datamode.DataModeMixin):
         if not self.confirm_found_overwrite(points):return
         if self.busy or not points:return
         if not self.asset.get().strip():messagebox.showwarning('Instrument ID','Enter an instrument ID.');return
+        points=self.pm_begin_run(points,self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
+        if not points:self.status.set('Every selected point is skipped by a procedure modification.');return
         if not self.demo and self.io is None:self.test_connections()
         if not self.demo and self.io is None:return
         self.stop=False;self.busy=True
@@ -391,11 +398,11 @@ class App(datamode.DataModeMixin):
     def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));messagebox.showerror('Measurement stopped',str(exc))
     def _record(self,p,reading,synthetic):
         result='PASS' if p['low']<=reading<=p['high'] else 'FAIL'
-        self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label)
+        self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label,**self.pm_result_fields())
         self._update_row(p);self.save(silent=True)
     def save(self,silent=False):
         path=appdata.progress_path(f'8846A_{"".join(c if c.isalnum() or c in "-_" else "_" for c in self.asset.get()) or "UNASSIGNED"}_checkpoint.json')
-        path.write_text(json.dumps(dict(asset=self.asset.get(),serial=self.serial.get(),demo=self.demo,**self.save_fields()),indent=2))
+        path.write_text(json.dumps(dict(asset=self.asset.get(),serial=self.serial.get(),demo=self.demo,**self.save_fields(),**self.pm_checkpoint_fields()),indent=2))
         if not silent:self.status.set(f'Saved {path.name}')
     def load(self):
         path=filedialog.askopenfilename(filetypes=[('Checkpoint','*.json')]);
@@ -403,7 +410,7 @@ class App(datamode.DataModeMixin):
         data=json.loads(Path(path).read_text())
         if self.file_has_synthetic(data) and not self.demo:
             if not messagebox.askyesno('Synthetic data','Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):return
-        self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.load_results(data);self.refresh();self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
+        self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.load_results(data);self.pm_on_checkpoint(data);self.refresh();self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
     @staticmethod
     def report_section(p):
         import report_pdf
@@ -414,14 +421,17 @@ class App(datamode.DataModeMixin):
         return bool(p.get('zero_offset'))
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
+        return self.certificate_rows_and_points()[0]
+    def certificate_rows_and_points(self):
+        """(rows, points): the report rows and, parallel to them, the spec point each came from (for the optional TAR / TUR fields)."""
         import report_pdf
-        rows=[]
+        rows=[];pts=[]
         for p in POINTS:
             row=self.found_left_row(p,lambda r:report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard='5560A'))
-            if row:rows.append(row)
-        return rows
+            if row:rows.append(row);pts.append(p)
+        return rows,pts
     def export_pdf(self):
-        rows=self.certificate_rows()
+        rows,pts=self.certificate_rows_and_points()
         if not rows:messagebox.showinfo('No results','No recorded results to export yet.');return
         try:import report_pdf,report_dialog
         except ImportError as exc:messagebox.showerror('Report export',str(exc));return
@@ -432,22 +442,15 @@ class App(datamode.DataModeMixin):
         if not path:return
         demo=self.any_synthetic()
         try:
+            if details.get('show_tar_tur'):
+                import tartur_wiring
+                rows=report_pdf.apply_tar_tur(rows,details.get('show_tar_tur'),[tartur_wiring.point_fields(p,'5560A') for p in pts])
             report_pdf.write_calibration_pdf(path,rows,header=[('Instrument','Fluke 8846A'),('Instrument ID',self.asset.get()),('Serial',self.serial.get()),('Source','Fluke 8845A/8846A Calibration Manual, Appendix A Table A-2 - 1-year verification')],demo=demo,details=details,footer_note=report_pdf.uncertainty_note(rows,'5560A'))
         except ImportError:
             messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab');return
         except Exception as exc:
             messagebox.showerror('PDF export error',str(exc));return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-    def export(self):
-        path=filedialog.asksaveasfilename(defaultextension='.csv',filetypes=[('CSV','*.csv')],initialfile='8846A_verification.csv')
-        if not path:return
-        with open(path,'w',newline='',encoding='utf-8-sig') as file:
-            writer=csv.writer(file);writer.writerow(['Instrument ID',self.asset.get(),'Serial Number',self.serial.get()]);writer.writerow(['SOURCE','Fluke 8845A/8846A Calibration Manual Appendix A Table A-2; 1-year verification']);writer.writerow(['DEMO DATA','YES' if self.demo or any(v.get('synthetic') for v in self.results.values()) else 'NO']);writer.writerow([])
-            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic','As Left','As Left status'])
-            for p in POINTS:
-                r=self.found.get(str(p['id']),{});lr=self.left.get(str(p['id']),{});n=p['nominal'];e=p['error']
-                writer.writerow(['ZERO '+p['kind'] if p.get('zero_offset') else p['kind'],p['description'],n,p['low'],p['high'],p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic',''),lr.get('reading','Same' if r else ''),lr.get('result','')])
-        self.status.set(f'Exported 1-year verification: {path}')
     def export_excel(self):
         """Export a formatted, sectioned verification report. No synthetic results are certified."""
         try:

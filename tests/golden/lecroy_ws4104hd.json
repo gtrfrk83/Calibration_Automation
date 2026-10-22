@@ -1,0 +1,1178 @@
+{
+ "entries": [
+  {
+   "call": "'app.Acquisition.C1.VerScale', 0.5",
+   "case": "WaveSurfer4104HD.vbs_set_number",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.VerScale=0.5'"
+   ],
+   "method": "WaveSurfer4104HD.vbs_set_number",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.VerScale=0.5'"
+    ]
+   ]
+  },
+  {
+   "call": "'app.Acquisition.C1.Coupling', 'DC1M'",
+   "case": "WaveSurfer4104HD.vbs_set_text",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.Coupling=\"DC1M\" '"
+   ],
+   "method": "WaveSurfer4104HD.vbs_set_text",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.Coupling=\"DC1M\" '"
+    ]
+   ]
+  },
+  {
+   "call": "'app.Acquisition.C1.Coupling'",
+   "case": "WaveSurfer4104HD.vbs_get",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.Coupling\"",
+    "WS4104HD|<<|VBS DC1M"
+   ],
+   "method": "WaveSurfer4104HD.vbs_get",
+   "result": "returned 'DC1M'",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.Coupling\"",
+     "VBS DC1M"
+    ]
+   ]
+  },
+  {
+   "call": "'app.Acquisition.C1.VerScale'",
+   "case": "WaveSurfer4104HD.vbs_get_float",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|<<|VBS 0.5"
+   ],
+   "method": "WaveSurfer4104HD.vbs_get_float",
+   "result": "returned 0.5",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.5"
+    ]
+   ]
+  },
+  {
+   "call": "'app.Acquisition.C1.Coupling'",
+   "case": "WaveSurfer4104HD.vbs_get_float[not a number]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.Coupling\"",
+    "WS4104HD|<<|VBS DC1M"
+   ],
+   "method": "WaveSurfer4104HD.vbs_get_float",
+   "result": "raised InstrumentError: app.Acquisition.C1.Coupling: scope did not return a number: 'DC1M'",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.Coupling\"",
+     "VBS DC1M"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "WaveSurfer4104HD.handshake",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|<<|VBS 0.5"
+   ],
+   "method": "WaveSurfer4104HD.handshake",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.5"
+    ]
+   ]
+  },
+  {
+   "call": "1, 0.01",
+   "case": "WaveSurfer4104HD.set_vertical_scale",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.VerScale=0.01'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|<<|VBS 0.01"
+   ],
+   "method": "WaveSurfer4104HD.set_vertical_scale",
+   "result": "returned 0.01",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.VerScale=0.01'"
+    ],
+    [
+     "sleep",
+     0.35
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.01"
+    ]
+   ]
+  },
+  {
+   "call": "'3', 0.05, settle=0.1",
+   "case": "WaveSurfer4104HD.set_vertical_scale[channel text]",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C3.VerScale=0.05'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C3.VerScale\"",
+    "WS4104HD|<<|VBS 0.05"
+   ],
+   "method": "WaveSurfer4104HD.set_vertical_scale",
+   "result": "returned 0.05",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C3.VerScale=0.05'"
+    ],
+    [
+     "sleep",
+     0.1
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C3.VerScale\"",
+     "VBS 0.05"
+    ]
+   ]
+  },
+  {
+   "call": "'C1', 0.01",
+   "case": "WaveSurfer4104HD.set_vertical_scale[bad channel]",
+   "log": [],
+   "method": "WaveSurfer4104HD.set_vertical_scale",
+   "result": "raised InstrumentError: Channel must be 1-4, got 'C1'",
+   "wire": []
+  },
+  {
+   "call": "1, 0.25",
+   "case": "WaveSurfer4104HD.set_vertical_offset",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.VerOffset=0.25'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerOffset\"",
+    "WS4104HD|<<|VBS 0.25"
+   ],
+   "method": "WaveSurfer4104HD.set_vertical_offset",
+   "result": "returned 0.25",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.VerOffset=0.25'"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerOffset\"",
+     "VBS 0.25"
+    ]
+   ]
+  },
+  {
+   "call": "1",
+   "case": "WaveSurfer4104HD.ensure_zero_offset[needs write]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerOffset\"",
+    "WS4104HD|<<|VBS 0.25",
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.VerOffset=0'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerOffset\"",
+    "WS4104HD|<<|VBS 0.0"
+   ],
+   "method": "WaveSurfer4104HD.ensure_zero_offset",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerOffset\"",
+     "VBS 0.25"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.VerOffset=0'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerOffset\"",
+     "VBS 0.0"
+    ]
+   ]
+  },
+  {
+   "call": "1",
+   "case": "WaveSurfer4104HD.ensure_zero_offset[already zero]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerOffset\"",
+    "WS4104HD|<<|VBS 0.0",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerOffset\"",
+    "WS4104HD|<<|VBS 0.0"
+   ],
+   "method": "WaveSurfer4104HD.ensure_zero_offset",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerOffset\"",
+     "VBS 0.0"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerOffset\"",
+     "VBS 0.0"
+    ]
+   ]
+  },
+  {
+   "call": "1, 'DC50'",
+   "case": "WaveSurfer4104HD.set_coupling",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.Coupling=\"DC50\" '",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.Coupling\"",
+    "WS4104HD|<<|VBS DC50"
+   ],
+   "method": "WaveSurfer4104HD.set_coupling",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.Coupling=\"DC50\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.Coupling\"",
+     "VBS DC50"
+    ]
+   ]
+  },
+  {
+   "call": "1, '20MHz'",
+   "case": "WaveSurfer4104HD.set_bandwidth_limit",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.BandwidthLimit=\"20MHz\" '",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
+    "WS4104HD|<<|VBS 20MHz"
+   ],
+   "method": "WaveSurfer4104HD.set_bandwidth_limit",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.BandwidthLimit=\"20MHz\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
+     "VBS 20MHz"
+    ]
+   ]
+  },
+  {
+   "call": "'C1', 'D50'",
+   "case": "WaveSurfer4104HD.set_coupling_legacy",
+   "log": [
+    "WS4104HD|>>|C1:CPL D50",
+    "WS4104HD|>>|C1:CPL?",
+    "WS4104HD|<<|C1:CPL D50"
+   ],
+   "method": "WaveSurfer4104HD.set_coupling_legacy",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "C1:CPL D50"
+    ],
+    [
+     "Q",
+     "C1:CPL?",
+     "C1:CPL D50"
+    ]
+   ]
+  },
+  {
+   "call": "2",
+   "case": "WaveSurfer4104HD.configure_dc_input",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C2.Coupling=\"DC1M\" '",
+    "WS4104HD|>>|VBS 'app.Acquisition.C2.BandwidthLimit=\"20MHz\" '",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C2.Coupling\"",
+    "WS4104HD|<<|VBS DC1M",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C2.BandwidthLimit\"",
+    "WS4104HD|<<|VBS 20MHz"
+   ],
+   "method": "WaveSurfer4104HD.configure_dc_input",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C2.Coupling=\"DC1M\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C2.BandwidthLimit=\"20MHz\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C2.Coupling\"",
+     "VBS DC1M"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C2.BandwidthLimit\"",
+     "VBS 20MHz"
+    ]
+   ]
+  },
+  {
+   "call": "0.001",
+   "case": "WaveSurfer4104HD.set_timebase",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.Horizontal.HorScale=0.001'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.Horizontal.HorScale\"",
+    "WS4104HD|<<|VBS 0.001"
+   ],
+   "method": "WaveSurfer4104HD.set_timebase",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.Horizontal.HorScale=0.001'"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.Horizontal.HorScale\"",
+     "VBS 0.001"
+    ]
+   ]
+  },
+  {
+   "call": "2",
+   "case": "WaveSurfer4104HD.set_edge_trigger_source",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.Trigger.Type=\"Edge\"'",
+    "WS4104HD|>>|VBS 'app.Acquisition.Trigger.Edge.Source=\"C2\"'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.Trigger.Edge.Source\"",
+    "WS4104HD|<<|VBS C2"
+   ],
+   "method": "WaveSurfer4104HD.set_edge_trigger_source",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.Trigger.Type=\"Edge\"'"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.Trigger.Edge.Source=\"C2\"'"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.Trigger.Edge.Source\"",
+     "VBS C2"
+    ]
+   ]
+  },
+  {
+   "call": "'Negative'",
+   "case": "WaveSurfer4104HD.set_trigger_slope",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.Trigger.Edge.Slope=\"Negative\" '",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.Trigger.Edge.Slope\"",
+    "WS4104HD|<<|VBS Negative"
+   ],
+   "method": "WaveSurfer4104HD.set_trigger_slope",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.Trigger.Edge.Slope=\"Negative\" '"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.Trigger.Edge.Slope\"",
+     "VBS Negative"
+    ]
+   ]
+  },
+  {
+   "call": "0.5",
+   "case": "WaveSurfer4104HD.set_trigger_level",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.Trigger.Edge.Level=0.5'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.Trigger.Edge.Level\"",
+    "WS4104HD|<<|VBS 0.5"
+   ],
+   "method": "WaveSurfer4104HD.set_trigger_level",
+   "result": "returned 0.5",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.Trigger.Edge.Level=0.5'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.Trigger.Edge.Level\"",
+     "VBS 0.5"
+    ]
+   ]
+  },
+  {
+   "call": "'Normal'",
+   "case": "WaveSurfer4104HD.set_trigger_mode",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.TriggerMode=\"Normal\" '",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.TriggerMode\"",
+    "WS4104HD|<<|VBS Normal"
+   ],
+   "method": "WaveSurfer4104HD.set_trigger_mode",
+   "result": "returned 'Normal'",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.TriggerMode=\"Normal\" '"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.TriggerMode\"",
+     "VBS Normal"
+    ]
+   ]
+  },
+  {
+   "call": "'Single', accept=('Stopped', 'Single')",
+   "case": "WaveSurfer4104HD.set_trigger_mode[accept]",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.TriggerMode=\"Single\" '",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.TriggerMode\"",
+    "WS4104HD|<<|VBS Single"
+   ],
+   "method": "WaveSurfer4104HD.set_trigger_mode",
+   "result": "returned 'Single'",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.TriggerMode=\"Single\" '"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.TriggerMode\"",
+     "VBS Single"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "WaveSurfer4104HD.trigger_mode",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.TriggerMode\"",
+    "WS4104HD|<<|VBS Single"
+   ],
+   "method": "WaveSurfer4104HD.trigger_mode",
+   "result": "returned 'Single'",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.TriggerMode\"",
+     "VBS Single"
+    ]
+   ]
+  },
+  {
+   "call": "1, 'Mean'",
+   "case": "WaveSurfer4104HD.configure_p1[Mean]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS Mean",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS Mean",
+    "WS4104HD|>>|VBS 'app.Measure.P1.Source1=\"C1\" ' ",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C1",
+    "WS4104HD|>>|VBS 'app.Measure.P1.View=True ' "
+   ],
+   "method": "WaveSurfer4104HD.configure_p1",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS Mean"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS Mean"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.Source1=\"C1\" ' "
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.View=True ' "
+    ]
+   ]
+  },
+  {
+   "call": "1, 'StandardDeviation'",
+   "case": "WaveSurfer4104HD.configure_p1[StandardDeviation]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS Mean",
+    "WS4104HD|>>|VBS 'app.Measure.P1.ParamEngine=\"StandardDeviation\" ' ",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS StandardDeviation",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C1",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C1",
+    "WS4104HD|>>|VBS 'app.Measure.P1.View=True ' "
+   ],
+   "method": "WaveSurfer4104HD.configure_p1",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS Mean"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.ParamEngine=\"StandardDeviation\" ' "
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS StandardDeviation"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.View=True ' "
+    ]
+   ]
+  },
+  {
+   "call": "1, 'PkPk'",
+   "case": "WaveSurfer4104HD.configure_p1[PkPk]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS StandardDeviation",
+    "WS4104HD|>>|VBS 'app.Measure.P1.ParamEngine=\"PkPk\" ' ",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS PkPk",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C1",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C1",
+    "WS4104HD|>>|VBS 'app.Measure.P1.View=True ' "
+   ],
+   "method": "WaveSurfer4104HD.configure_p1",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS StandardDeviation"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.ParamEngine=\"PkPk\" ' "
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS PkPk"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.View=True ' "
+    ]
+   ]
+  },
+  {
+   "call": "1, 'Freq'",
+   "case": "WaveSurfer4104HD.configure_p1[Freq]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS PkPk",
+    "WS4104HD|>>|VBS 'app.Measure.P1.ParamEngine=\"Freq\" ' ",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS Frequency",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C1",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C1",
+    "WS4104HD|>>|VBS 'app.Measure.P1.View=True ' "
+   ],
+   "method": "WaveSurfer4104HD.configure_p1",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS PkPk"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.ParamEngine=\"Freq\" ' "
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS Frequency"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.View=True ' "
+    ]
+   ]
+  },
+  {
+   "call": "2, 'Mean', show=False",
+   "case": "WaveSurfer4104HD.configure_p1[show False]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS Frequency",
+    "WS4104HD|>>|VBS 'app.Measure.P1.ParamEngine=\"Mean\" ' ",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "WS4104HD|<<|VBS Mean",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C1",
+    "WS4104HD|>>|VBS 'app.Measure.P1.Source1=\"C2\" ' ",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "WS4104HD|<<|VBS C2"
+   ],
+   "method": "WaveSurfer4104HD.configure_p1",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS Frequency"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.ParamEngine=\"Mean\" ' "
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS Mean"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.Source1=\"C2\" ' "
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C2"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "WaveSurfer4104HD.read_p1",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+    "WS4104HD|<<|VBS 1.0006"
+   ],
+   "method": "WaveSurfer4104HD.read_p1",
+   "result": "returned 1.0006",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+     "VBS 1.0006"
+    ]
+   ]
+  },
+  {
+   "call": "2.0",
+   "case": "WaveSurfer4104HD.read_p1_settled",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+    "WS4104HD|<<|VBS 1.0006",
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+    "WS4104HD|<<|VBS 1.0006"
+   ],
+   "method": "WaveSurfer4104HD.read_p1_settled",
+   "result": "returned 1.0006",
+   "wire": [
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+     "VBS 1.0006"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+     "VBS 1.0006"
+    ]
+   ]
+  },
+  {
+   "call": "'VBS? \"return=app.Acquisition.C1.VerScale\"'",
+   "case": "WaveSurfer4104HD.query_retry[first try]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|<<|VBS 0.01"
+   ],
+   "method": "WaveSurfer4104HD.query_retry",
+   "result": "returned 'VBS 0.01'",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.01"
+    ]
+   ]
+  },
+  {
+   "call": "'VBS? \"return=app.Acquisition.C1.VerScale\"'",
+   "case": "WaveSurfer4104HD.query_retry[device clear]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|--|read failed: device clear before retry",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|<<|VBS 0.01"
+   ],
+   "method": "WaveSurfer4104HD.query_retry",
+   "result": "returned 'VBS 0.01'",
+   "wire": [
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "timeout"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.01"
+    ]
+   ]
+  },
+  {
+   "call": "'VBS? \"return=app.Acquisition.C1.VerScale\"'",
+   "case": "WaveSurfer4104HD.query_retry[reopen]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|--|read failed: device clear before retry",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|--|read failed: closing and reopening the USB session before retry",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|<<|VBS 0.01"
+   ],
+   "method": "WaveSurfer4104HD.query_retry",
+   "result": "returned 'VBS 0.01'",
+   "wire": [
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "timeout"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "timeout"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.01"
+    ]
+   ]
+  },
+  {
+   "call": "'VBS? \"return=app.Acquisition.C1.VerScale\"'",
+   "case": "WaveSurfer4104HD.query_retry[gives up]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|--|read failed: device clear before retry",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|--|read failed: closing and reopening the USB session before retry",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\""
+   ],
+   "method": "WaveSurfer4104HD.query_retry",
+   "result": "raised InstrumentError: 'VBS? \"return=app.Acquisition.C1.VerScale\"' failed after 3 attempts (device clear and session reopen tried): timeout",
+   "wire": [
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "timeout"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "timeout"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "timeout"
+    ]
+   ]
+  },
+  {
+   "call": "attempts=2",
+   "case": "WaveSurfer4104HD.handshake[stale session reopened]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|--|read failed: device clear before retry",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|--|read failed: device clear before retry",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "WS4104HD|<<|VBS 0.01"
+   ],
+   "method": "WaveSurfer4104HD.handshake",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "t"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "t"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q!",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "t"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.01"
+    ]
+   ]
+  },
+  {
+   "call": "'C1', 'D50'",
+   "case": "WaveSurfer4104HD.set_coupling_legacy[mismatch]",
+   "log": [
+    "WS4104HD|>>|C1:CPL D50",
+    "WS4104HD|>>|C1:CPL?",
+    "WS4104HD|<<|C1:CPL A1M"
+   ],
+   "method": "WaveSurfer4104HD.set_coupling_legacy",
+   "result": "raised InstrumentError: Coupling readback mismatch: requested D50, returned 'C1:CPL A1M'",
+   "wire": [
+    [
+     "W",
+     "C1:CPL D50"
+    ],
+    [
+     "Q",
+     "C1:CPL?",
+     "C1:CPL A1M"
+    ]
+   ]
+  },
+  {
+   "call": "4",
+   "case": "WaveSurfer4104HD.ensure_zero_offset[stays non-zero]",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C4.VerOffset\"",
+    "WS4104HD|<<|VBS 0.5",
+    "WS4104HD|>>|VBS 'app.Acquisition.C4.VerOffset=0'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C4.VerOffset\"",
+    "WS4104HD|<<|VBS 0.5"
+   ],
+   "method": "WaveSurfer4104HD.ensure_zero_offset",
+   "result": "raised InstrumentError: CH4 offset not zero: 0.5",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C4.VerOffset\"",
+     "VBS 0.5"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C4.VerOffset=0'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C4.VerOffset\"",
+     "VBS 0.5"
+    ]
+   ]
+  },
+  {
+   "call": "1",
+   "case": "WaveSurfer4104HD.configure_dc_input[mismatch]",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.Coupling=\"DC1M\" '",
+    "WS4104HD|>>|VBS 'app.Acquisition.C1.BandwidthLimit=\"20MHz\" '",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.Coupling\"",
+    "WS4104HD|<<|VBS DC50",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
+    "WS4104HD|<<|VBS Full"
+   ],
+   "method": "WaveSurfer4104HD.configure_dc_input",
+   "result": "raised InstrumentError: CH1 input setup failed: coupling='DC50', bandwidth='Full'; required DC1M / 20MHz",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.Coupling=\"DC1M\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.BandwidthLimit=\"20MHz\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.Coupling\"",
+     "VBS DC50"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
+     "VBS Full"
+    ]
+   ]
+  }
+ ],
+ "name": "lecroy_ws4104hd",
+ "schema": 1
+}

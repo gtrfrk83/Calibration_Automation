@@ -12,7 +12,7 @@ front-panel-only step. Writes are never retried; all settings are read back; out
 """
 from __future__ import annotations
 
-import csv, json, math, queue, sys, threading, time, tkinter as tk
+import json, math, queue, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
@@ -24,6 +24,7 @@ import ui_shell
 import appdata
 import datamode
 import drivers
+import procmods_engine
 
 SPEC_PATH = HERE / 'specs' / 'tektronix_mdo4000c_pv.json'
 REF_CMC_PATH = HERE / 'specs' / 'mdo4000c_reference_cmc.json'
@@ -35,11 +36,12 @@ MODELS = SPEC['models']
 PLAIN_UNITS = {'%', 'dB', 'dBm', 'dBc', 'dBm/Hz', 'dBc/Hz', 'ratio', ''}
 ENBW_FACTOR = 1.0            # noise-equivalent bandwidth = ENBW_FACTOR x RBW when converting dBm to dBm/Hz (see README)
 SLEEP_SCALE = 1.0            # tests set this to 0
+PM_PAUSE_SCALE = 1.0         # a procedure modification (mdo.pause_scale) multiplies every wait; set by Runner.run_point, 1.0 = factory
 
 
 def pause(seconds):
     if seconds > 0 and SLEEP_SCALE > 0:
-        time.sleep(seconds * SLEEP_SCALE)
+        time.sleep(seconds * SLEEP_SCALE * PM_PAUSE_SCALE)
 
 
 # ======================================================================================================================
@@ -180,11 +182,12 @@ def reference_cmc():
     return _REF['v']
 
 
-def uncertainty_text(p, raw):
-    """Expanded uncertainty for a point, or 'N/A'. Points with no stimulus are always N/A; stimulus points use the lab's A2LA scope
-    (5560A) or the editable reference table for the 96270A / function generator / reference meters; blank entries are N/A."""
+def uncertainty_parts(p, raw):
+    """The number behind uncertainty_text: (value, unit, style) or None when the text is 'N/A'.  value is the unrounded uncertainty
+    in `unit` ('ohm', '%', 'V', 'ratio' for the bandwidth gain, or the unit of the reference-file entry); style says how
+    uncertainty_text prints it ('si' = uncertainty.format_value, 'bw' = plain 2 significant figures, 'ref' = number and unit)."""
     if p['stim'] == 'none' or p.get('passfail'):
-        return 'N/A'
+        return None
     import report_pdf, uncertainty
     sc = report_pdf.scope()
     k = p['kind']
@@ -192,25 +195,25 @@ def uncertainty_text(p, raw):
         if sc is not None:
             if k == 'IMP':
                 v, u, _ = sc.oscilloscope('impedance', ohms=p['nominal'])
-                return uncertainty.format_value(v, 'ohm') if v is not None else 'N/A'
+                return (v, 'ohm', 'si') if v is not None else None
             if k == 'GAIN':
                 ua = [abs(sc.oscilloscope('dcv', volts=abs(p[n]), impedance=p['term'])[0] or 0) / 100 * abs(p[n]) for n in ('vneg', 'vpos')]
                 if all(ua):
-                    return uncertainty.format_value(100 * math.hypot(*ua) / abs(p['vdiff']), '%')
+                    return 100 * math.hypot(*ua) / abs(p['vdiff']), '%', 'si'
             if k == 'OFFSET':
                 v, u, _ = sc.oscilloscope('offset', volts=abs(p['offset']), impedance=p['term'])
-                return uncertainty.format_value(v, 'V') if v is not None else 'N/A'
+                return (v, 'V', 'si') if v is not None else None
             if k == 'BW':
                 v, u, _ = sc.oscilloscope('bandwidth', volts_pp=p['vin_pp'], frequency=p['freq'])
                 if v is not None:
                     ratio = 10 ** (v / 20) - 1
-                    return f'{uncertainty.round_up(ratio * max(raw.get("gain", raw.get("reading", 1)), 0.707)):.2g}'
+                    return ratio * max(raw.get("gain", raw.get("reading", 1)), 0.707), 'ratio', 'bw'
             if k == 'DVMDC':
                 v, u, _ = sc.oscilloscope('dcv', volts=abs(p['nominal']), impedance='1M')
                 if v is not None:
-                    return uncertainty.format_value(v / 100 * abs(p['nominal']) if u == '%' else v, 'V')
+                    return (v / 100 * abs(p['nominal']) if u == '%' else v), 'V', 'si'
     except Exception:
-        return 'N/A'
+        return None
     ref = reference_cmc().get(k)
     if ref and (ref.get('rel') is not None or ref.get('abs') is not None):
         reading = abs(raw.get('reading', p['nominal']))
@@ -219,17 +222,67 @@ def uncertainty_text(p, raw):
             floor = sc.dmm('FREQ', p['nominal'], None, None, basis='measure')     # never below the A2LA frequency CMC
             if floor is not None and value < floor:
                 value = floor
-        return f'{uncertainty.round_up(value):.2g} {ref.get("unit", p["unit"])}'.strip()
-    return 'N/A'
+        return value, ref.get('unit', p['unit']), 'ref'
+    return None
+
+
+def format_uncertainty(parts):
+    """The printed text of uncertainty_parts()."""
+    import uncertainty
+    value, unit, style = parts
+    if style == 'si':
+        return uncertainty.format_value(value, unit)
+    if style == 'bw':
+        return f'{uncertainty.round_up(value):.2g}'
+    return f'{uncertainty.round_up(value):.2g} {unit}'.strip()
+
+
+def uncertainty_text(p, raw):
+    """Expanded uncertainty for a point, or 'N/A'. Points with no stimulus are always N/A; stimulus points use the lab's A2LA scope
+    (5560A) or the editable reference table for the 96270A / function generator / reference meters; blank entries are N/A."""
+    parts = uncertainty_parts(p, raw)
+    if parts is None:
+        return 'N/A'
+    if parts[2] == 'ref':
+        return format_uncertainty(parts)
+    try:
+        return format_uncertainty(parts)
+    except Exception:
+        return 'N/A'
+
+
+def tar_tur_fields(p, r):
+    """dict(TAR, TUR) strings for one recorded point (r = its record), used only when the report asks for them.
+    TUR = tolerance / the uncertainty printed in the Uncertainty column, only when both are in the same unit and the printed text is
+    the one uncertainty_parts() gives now (a stored text from another scope version gives a blank).  TAR only for the points the
+    Fluke 5560A sources as DC volts (DC offset, DVM DC): its specmanager DCV row at that voltage, in volts; blank for every other test
+    (gain is a %, the others are measurements or non-DC / leveled-sine / square stimulus with no matching specification row)."""
+    import tartur
+    try:
+        if p.get('passfail') or p.get('stim') == 'none':
+            return dict(TAR='', TUR='')
+        raw = r.get('raw', {})
+        text = r.get('uncertainty') or uncertainty_text(p, raw)
+        parts = uncertainty_parts(p, raw)
+        u = uu = None
+        if parts is not None and text != 'N/A' and format_uncertainty(parts) == text:
+            import uncertainty
+            u, uu = uncertainty.round_up(parts[0]), parts[1]
+        acc = au = None
+        if p['kind'] in ('OFFSET', 'DVMDC') and p['stim'] == 'cal':
+            acc, au = tartur.standard_accuracy('5560A', 'DCV', abs(p['offset'] if p['kind'] == 'OFFSET' else p['nominal']))
+        return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['low'], p['high']), p['unit'], acc, au, u, uu))
+    except Exception:
+        return dict(TAR='', TUR='')
 
 
 # ======================================================================================================================
 # bench I/O
 # ======================================================================================================================
-class IO:
+class IO(procmods_engine.ProcModsMixin):
     """Every instrument the procedure can use. Only the oscilloscope and the 5560A are required; the others are opened when an address is given."""
 
-    def __init__(self, addrs, transports=None):
+    def __init__(self, addrs, transports=None, mods=None):
         self.log = drivers.CommandLog()
         self.addrs = addrs
         self.scope = self.cal = self.rf1 = self.rf2 = self.gen = self.dmm = self.counter = self.power = None
@@ -245,12 +298,18 @@ class IO:
                                     ('dmm', drivers.ReferenceMeter, 'RefDMM'), ('counter', drivers.ReferenceMeter, 'Counter'), ('power', drivers.ReferenceMeter, 'PowerMeter')):
                 if key in t or addrs.get(key, '').strip():
                     inst = cls(tr(key), self.log, label=label); inst.connect(); setattr(self, key, inst)
+            self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
         self.ident = self.scope.idn
 
-    def reconnect_scope(self, attempts=36, wait=5.0):
+    def pm_drivers(self):
+        return tuple(d for d in (self.scope, self.cal, self.rf1, self.rf2, self.gen, self.dmm, self.counter, self.power) if d is not None)
+
+    def reconnect_scope(self, attempts=None, wait=None):
         """Re-open the oscilloscope after the power cycle the self test requires."""
+        attempts = self.pm_param('mdo.reconnect_attempts', 36) if attempts is None else attempts
+        wait = self.pm_param('mdo.reconnect_wait', 5.0) if wait is None else wait
         self.scope.close()
         for _ in range(attempts):
             try:
@@ -356,6 +415,8 @@ class Runner:
 
     # ---- top-level dispatch -----------------------------------------------------------------------------------------------
     def run_point(self, p):
+        global PM_PAUSE_SCALE
+        PM_PAUSE_SCALE = self.io.pm_param('mdo.pause_scale', 1.0)       # procedure modification; 1.0 unless one is stored
         fn = getattr(self, 'do_' + p['kind'].lower(), None)
         if fn is None:
             raise Skip(f'no executor for {p["kind"]}')
@@ -593,7 +654,7 @@ class Runner:
         s.trigger_edge(f'CH{ch}', mode='AUTO')
         s.acquire_mode('SAMple')
         src = self.sine_source(ch, p['freq'], p['vpp'], 'Delta time')
-        sd = s.delay_stddev(ch, samples=100, wait=8.0)
+        sd = s.delay_stddev(ch, samples=100, wait=self.io.pm_param('mdo.delta_wait', 8.0))
         return sd, dict(source=src)
 
     # ---- digital threshold ----------------------------------------------------------------------------------------------------------
@@ -603,7 +664,7 @@ class Runner:
         step = 0.010
         grid = lambda v: round(round(v / step) * step, 6)
         lo, hi = grid(centre - 0.4), grid(centre + 0.4)
-        want_high = lambda v: (self.apply_dc(v), s.digital_state(d, settle=3.0))[1]
+        want_high = lambda v: (self.apply_dc(v), s.digital_state(d, settle=self.io.pm_param('mdo.digital_settle', 3.0)))[1]
         # make sure the bracket really straddles the threshold (manual: start at +/-400 mV, widen to +/-500 mV)
         for _ in range(4):
             if want_high(lo) != 'low': lo = grid(lo - 0.1)
@@ -863,7 +924,7 @@ class Runner:
 # ======================================================================================================================
 # the application window
 # ======================================================================================================================
-class App(datamode.DataModeMixin):
+class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def __init__(self, root, demo=False):
         self.root, self.demo = root, demo
         self.io = None
@@ -872,6 +933,7 @@ class App(datamode.DataModeMixin):
         self.results = {}
         self.q = queue.Queue()
         self.cfg = Config()
+        self.pm_init('mdo', 'MDO4000C', demo=demo, lists=[POINTS], shape='band')    # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
         root.title('Tektronix MDO4000C | Performance Verification' + (' [DEMO]' if demo else ''))
         ui.fit_window(root, 1380, 880, min_w=900, min_h=680)
@@ -908,7 +970,7 @@ class App(datamode.DataModeMixin):
         return self.cfg
 
     def active_points(self):
-        return [p for p in POINTS if self.cfg.applies(p)]
+        return [p for p in POINTS if self.cfg.applies(p) and not p.get('skip')]
 
     @property
     def busy(self): return self._busy
@@ -975,7 +1037,6 @@ class App(datamode.DataModeMixin):
         self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
         self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
-        sh.add_action('Export CSV', self.export_csv, side='right', short='CSV')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
 
@@ -1095,7 +1156,7 @@ class App(datamode.DataModeMixin):
         if self.demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware.'); return
         self.status.set('Connecting ...'); self.root.update_idletasks()
         try:
-            self.disconnect(); self.io = IO(self.addrs())
+            self.disconnect(); self.io = IO(self.addrs(), mods=self.pm_state)
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
@@ -1178,6 +1239,8 @@ class App(datamode.DataModeMixin):
         if not self.confirm_found_overwrite(points): return
         if self.busy or not points: return
         if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
+        if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         self.read_cfg()
         if self.demo:
             for p in points:
@@ -1220,7 +1283,8 @@ class App(datamode.DataModeMixin):
     def _record_threadsafe(self, p, reading, raw, synthetic):
         raw = dict(raw, reading=reading)
         self.results[str(p['id'])] = dict(reading=reading, raw=raw, result=judge(p, reading), synthetic=synthetic,
-                                          uncertainty=uncertainty_text(p, raw), timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label)
+                                          uncertainty=uncertainty_text(p, raw), timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label,
+                                          **self.pm_result_fields())
         self.post('row', p['id'])
         self.save(silent=True)
 
@@ -1235,7 +1299,7 @@ class App(datamode.DataModeMixin):
 
     def save(self, silent=False):
         path = self._checkpoint_path()
-        path.write_text(json.dumps(dict(asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, config=self.cfg.as_dict(), **self.save_fields()), indent=2))
+        path.write_text(json.dumps(dict(asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, config=self.cfg.as_dict(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
@@ -1249,6 +1313,7 @@ class App(datamode.DataModeMixin):
         self.v_model.set(c.get('model', self.v_model.get())); self.v_sa.set(c.get('sa', 'None'))
         for var, key in ((self.v_afg, 'afg'), (self.v_dvm, 'dvm'), (self.v_dig, 'dig'), (self.v_tpa, 'tpa')): var.set(bool(c.get(key, var.get())))
         self.load_results(data)
+        self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_config(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s).')
 
     def certificate_row(self, p, r):
@@ -1275,14 +1340,29 @@ class App(datamode.DataModeMixin):
 
     def certificate_rows(self):
         """As Found for every recorded point; As Left where it was measured again after an adjustment, else 'Same'."""
-        rows = []
+        return [row for _p, row in self.certificate_pairs()]
+
+    def certificate_pairs(self):
+        """(point, report row) in the order certificate_rows() lists them."""
+        pairs = []
         for p in POINTS:
             row = self.found_left_row(p, lambda r: self.certificate_row(p, r))
-            if row: rows.append(row)
-        return rows
+            if row: pairs.append((p, row))
+        return pairs
+
+    def tar_tur_for(self, p):
+        """TAR / TUR strings of one point (the As Found record when it was measured, else the As Left one); only called when the report shows them."""
+        key = str(p['id'])
+        r = self.found.get(key)
+        if not r or r.get('result') not in ('PASS', 'FAIL'):
+            r = self.left.get(key) or {}
+        if r.get('result') not in ('PASS', 'FAIL'):
+            return dict(TAR='', TUR='')
+        return tar_tur_fields(p, r)
 
     def export_pdf(self):
-        rows = self.certificate_rows()
+        pairs = self.certificate_pairs()
+        rows = [row for _p, row in pairs]
         if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
         try: import report_pdf, report_dialog
         except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
@@ -1298,6 +1378,8 @@ class App(datamode.DataModeMixin):
         note = ('Uncertainty: points without an input signal show N/A. Analog points use the laboratory A2LA scope (Fluke 5560A CMC); RF, function-generator and meter points '
                 'use the entries in specs/mdo4000c_reference_cmc.json and show N/A where none is set.' + (f' {skipped} point(s) were skipped (instrument not available).' if skipped else ''))
         try:
+            if report_pdf.details_tar_tur(details):
+                rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [self.tar_tur_for(p) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix MDO{c.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Options', opts), ('Source', 'MDO4000C Specifications and Performance Verification, 077-1178-01 Rev B')],
                                              demo=demo, details=details, footer_note=note, title='Calibration Data')
@@ -1306,19 +1388,6 @@ class App(datamode.DataModeMixin):
         except Exception as exc:
             messagebox.showerror('PDF export error', str(exc)); return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-
-    def export_csv(self):
-        path = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=[('CSV', '*.csv')], initialfile=f'MDO{self.cfg.model}_verification.csv')
-        if not path: return
-        with open(path, 'w', newline='', encoding='utf-8-sig') as f:
-            w = csv.writer(f)
-            w.writerow(['Instrument ID', self.asset.get(), 'Serial', self.serial.get(), 'Config', json.dumps(self.cfg.as_dict())]); w.writerow([])
-            w.writerow(['#', 'Section', 'Description', 'Low', 'High', 'Unit', 'Reading', 'Result', 'Uncertainty', 'Worksheet values', 'Timestamp', 'Synthetic', 'As Left', 'As Left result'])
-            for p in self.active_points():
-                r = self.found.get(str(p['id']), {}); lr = self.left.get(str(p['id']), {})
-                w.writerow([p['id'], SECTION_TITLE[p['section']], p['desc'], p['low'], p['high'], p['unit'], r.get('reading', ''), r.get('result', ''), r.get('uncertainty', ''),
-                            json.dumps(r.get('raw', {})), r.get('timestamp', ''), r.get('synthetic', ''), lr.get('reading', 'Same' if r else ''), lr.get('result', '')])
-        self.status.set(f'Exported {path}')
 
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return

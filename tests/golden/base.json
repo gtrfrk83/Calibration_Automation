@@ -1,0 +1,262 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Instrument.open[verify]",
+   "log": [
+    "Base|>>|*IDN?",
+    "Base|<<|GOLDEN,BASE,1,1"
+   ],
+   "method": "Instrument.open",
+   "result": "returned <Instrument>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "GOLDEN,BASE,1,1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Instrument.identify",
+   "log": [
+    "Base|>>|*IDN?",
+    "Base|<<|GOLDEN,BASE,1,1"
+   ],
+   "method": "Instrument.identify",
+   "result": "returned 'GOLDEN,BASE,1,1'",
+   "wire": [
+    [
+     "Q",
+     "*IDN?",
+     "GOLDEN,BASE,1,1"
+    ]
+   ]
+  },
+  {
+   "call": "'FOO 1'",
+   "case": "Instrument.write",
+   "log": [
+    "Base|>>|FOO 1"
+   ],
+   "method": "Instrument.write",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FOO 1"
+    ]
+   ]
+  },
+  {
+   "call": "'SECRET 12345', log_as='SECRET ********'",
+   "case": "Instrument.write[log_as]",
+   "log": [
+    "Base|>>|SECRET ********"
+   ],
+   "method": "Instrument.write",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SECRET 12345"
+    ]
+   ]
+  },
+  {
+   "call": "'FOO?'",
+   "case": "Instrument.query",
+   "log": [
+    "Base|>>|FOO?",
+    "Base|<<|1"
+   ],
+   "method": "Instrument.query",
+   "result": "returned '1'",
+   "wire": [
+    [
+     "Q",
+     "FOO?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "'FOO?', log_as='FOO? (masked)'",
+   "case": "Instrument.query[log_as]",
+   "log": [
+    "Base|>>|FOO? (masked)",
+    "Base|<<|2"
+   ],
+   "method": "Instrument.query",
+   "result": "returned '2'",
+   "wire": [
+    [
+     "Q",
+     "FOO?",
+     "2"
+    ]
+   ]
+  },
+  {
+   "call": "'FOO?'",
+   "case": "Instrument.query_retry[first try]",
+   "log": [
+    "Base|>>|FOO?",
+    "Base|<<|3"
+   ],
+   "method": "Instrument.query_retry",
+   "result": "returned '3'",
+   "wire": [
+    [
+     "Q",
+     "FOO?",
+     "3"
+    ]
+   ]
+  },
+  {
+   "call": "'FLAKY?', attempts=3, delay=0.5",
+   "case": "Instrument.query_retry[third try]",
+   "log": [
+    "Base|>>|FLAKY?",
+    "Base|>>|FLAKY?",
+    "Base|>>|FLAKY?",
+    "Base|<<|7"
+   ],
+   "method": "Instrument.query_retry",
+   "result": "returned '7'",
+   "wire": [
+    [
+     "Q!",
+     "FLAKY?",
+     "timeout"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q!",
+     "FLAKY?",
+     "timeout"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "FLAKY?",
+     "7"
+    ]
+   ]
+  },
+  {
+   "call": "'DEAD?', attempts=2, delay=0.25",
+   "case": "Instrument.query_retry[gives up]",
+   "log": [
+    "Base|>>|DEAD?",
+    "Base|>>|DEAD?"
+   ],
+   "method": "Instrument.query_retry",
+   "result": "raised InstrumentError: 'DEAD?' failed after 2 attempts: timeout",
+   "wire": [
+    [
+     "Q!",
+     "DEAD?",
+     "timeout"
+    ],
+    [
+     "sleep",
+     0.25
+    ],
+    [
+     "Q!",
+     "DEAD?",
+     "timeout"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Instrument.cleanup",
+   "log": [],
+   "method": "Instrument.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Instrument.close",
+   "log": [],
+   "method": "Instrument.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Instrument.open[wrong model]",
+   "log": [
+    "Base2|>>|*IDN?",
+    "Base2|<<|SOMEONE,ELSE,1,1"
+   ],
+   "method": "Instrument.open",
+   "result": "raised InstrumentError: Expected Expected Model but the instrument identifies as: 'SOMEONE,ELSE,1,1'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "SOMEONE,ELSE,1,1"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "verify_model=False",
+   "case": "Instrument.open[no verify]",
+   "log": [],
+   "method": "Instrument.open",
+   "result": "returned <Instrument>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ]
+   ]
+  }
+ ],
+ "name": "base",
+ "schema": 1
+}

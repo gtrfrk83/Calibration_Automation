@@ -3,6 +3,7 @@ Remembers the last entries per user so the technician normally just presses Save
 import tkinter as tk
 from tkinter import ttk
 
+import report_pdf
 import ui_theme as ui
 
 
@@ -32,6 +33,10 @@ def ask_details(parent, procedure=''):
         std_rows.append(trio)
         for c, (v, w) in enumerate(zip(trio, (28, 16, 14))):
             ttk.Entry(sg, textvariable=v, width=w).grid(row=r, column=c, padx=(0, 8), pady=2, sticky='w')
+    remembered = report_pdf.remembered_show_tar_tur()                        # first run: both off
+    tar_var, tur_var = tk.BooleanVar(value=remembered.tar), tk.BooleanVar(value=remembered.tur)
+    ttk.Checkbutton(outer, text='Show TAR on the data file', variable=tar_var).pack(anchor='w', pady=(12, 0))
+    ttk.Checkbutton(outer, text='Show TUR on the data file', variable=tur_var).pack(anchor='w')
     result = {'ok': None}
 
     def done(ok):
@@ -39,6 +44,9 @@ def ask_details(parent, procedure=''):
             details = {k: v.get().strip() for k, v in vars_.items()}
             details['standards'] = [dict(zip(('description', 'serial', 'due'), (x.get().strip() for x in trio))) for trio in std_rows]
             details['procedure'] = procedure
+            details['show_tar'], details['show_tur'] = bool(tar_var.get()), bool(tur_var.get())
+            details['show_tar_tur'] = report_pdf.TarTur(details['show_tar'], details['show_tur'])      # truthy if either is on
+            report_pdf.remember_show_tar_tur(details['show_tar_tur'])
             for k in ('technician', 'temperature', 'humidity'):
                 store.set(k, details[k])
             store.set('standards', details['standards']); store.save()

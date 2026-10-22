@@ -17,7 +17,7 @@ Hardware I/O is off in demo mode, and demo results are labelled as demo data eve
     import fgen_verification
     fgen_verification.main('33220A')       # what Procedures/Keysight_33220A_Verification.py does
 """
-import csv, json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog, simpledialog
@@ -28,6 +28,7 @@ import ui_theme as ui
 import ui_shell
 import appdata
 import datamode
+import procmods_engine
 import drivers
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
@@ -173,11 +174,11 @@ def to_visa(text):
 # ================================================================================================================
 # bench I/O (no tkinter: the simulated-bench tests drive this class directly)
 # ================================================================================================================
-class IO:
+class IO(procmods_engine.ProcModsMixin):
     """The generator under test, the 5790B, and (optionally) a counter and a power meter. A reference left without an
     address is read by the technician: ask_number(prompt, unit) is called and must return a float (or None to stop)."""
 
-    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT'):
+    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT', mods=None):
         self.log = drivers.CommandLog()
         self.ask_number = ask_number
         self.std_input = std_input
@@ -201,9 +202,13 @@ class IO:
                 self.counter = self._connect_counter(tr)
             if 'power' in t or (addrs.get('power') or '').strip():
                 self.power = drivers.ReferenceMeter(tr('power'), self.log, label='PowerMeter'); self.power.connect()
+            self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
         self.ident = self.uut.idn
+
+    def pm_drivers(self):
+        return tuple(d for d in (self.uut, self.std, self.counter, self.power) if d is not None)
 
     def _connect_counter(self, tr):
         """A 53131A / 53132A gets its own driver (input, gate and reference set and read back); any other counter is used
@@ -273,11 +278,12 @@ class IO:
         raw = dict(reference='not checked (generic counter)')
         if isinstance(self.counter, drivers.Keysight5313x):
             ref_hz = self.counter.set_reference(self.counter_ref)          # EXT: selected, checked now, and re-checked every reading
-            self.counter.configure_frequency(channel=1, gate_s=1.0, impedance=50, coupling='AC', expected_hz=expected_hz)
+            gate_s = self.pm_param('fgen.counter_gate', 1.0)
+            self.counter.configure_frequency(channel=1, gate_s=gate_s, impedance=50, coupling='AC', expected_hz=expected_hz)
             src, auto = self.counter.reference()
             if src != self.counter_ref:
                 raise drivers.InstrumentError(f'Counter timebase is {src}, expected {self.counter_ref}.')
-            raw = dict(counter=self.counter.idn.split(',')[1].strip(), gate_s=1.0,
+            raw = dict(counter=self.counter.idn.split(',')[1].strip(), gate_s=gate_s,
                        reference=f'EXT {ref_hz / 1e6:g} MHz (checked)' if ext else 'INT')
         f = self.counter.frequency()
         if not 1e6 < f < 1e8:
@@ -295,7 +301,12 @@ class IO:
     def _out(self, p, frequency=None):
         self.uut.setup(p['function'], frequency or p['frequency'], p['amplitude'], p['amp_unit'], p['load'])
         self.uut.output(True)
-        time.sleep(SETTLE.get(p['kind'], 1.0))
+        time.sleep(self._settle(p))
+
+    def _settle(self, p):
+        if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
+        k = p['kind']
+        return self.pm_param(f'fgen.settle.{k.lower()}', SETTLE[k]) if k in SETTLE else self.pm_param('fgen.settle.other', 1.0)
 
     # ---- one point -----------------------------------------------------------------------------------------
     def measure(self, p, results, pref_cache):
@@ -395,9 +406,8 @@ def _ref_cmc():
         return {}
 
 
-def point_uncertainty(p):
-    """(text, source) - the editable reference file first, then the laboratory scope (Measure entries), else ''."""
-    import uncertainty
+def uncertainty_value(p):
+    """(value, unit, source) behind point_uncertainty: the unrounded uncertainty in `unit`, or (None, None, '') when there is none."""
     scope_value, scope_unit = None, None
     if p['kind'] in ('ACAMP', 'LFFLAT', 'TIMEBASE'):
         import report_pdf
@@ -412,10 +422,43 @@ def point_uncertainty(p):
         unit = entry.get('unit', p['unit'])
         if scope_value is not None and unit == scope_unit and value < scope_value:
             value = scope_value          # an editable reference value may never be reported below the A2LA scope
-        return uncertainty.format_value(value, unit), 'reference file'
+        return value, unit, 'reference file'
     if scope_value is not None:
-        return uncertainty.format_value(scope_value, scope_unit), 'scope'
-    return '', ''
+        return scope_value, scope_unit, 'scope'
+    return None, None, ''
+
+
+def point_uncertainty(p):
+    """(text, source) - the editable reference file first, then the laboratory scope (Measure entries), else ''."""
+    import uncertainty
+    value, unit, source = uncertainty_value(p)
+    if value is None:
+        return '', ''
+    return uncertainty.format_value(value, unit), source
+
+
+def tar_tur_fields(p, r=None):
+    """dict(TAR, TUR) strings for one point, used only when the report asks for them.
+    TUR = tolerance / the uncertainty printed in the Uncertainty column (same numeric value, rounded up as printed), only when the
+    tolerance and the uncertainty are in the same unit; blank for the self test, '(typical)' points (a typical value is not a limit)
+    and points with no printed uncertainty.  TAR only for AC amplitude and low-frequency flatness, which are read on the Fluke 5790B
+    (the only reference this program uses for them), sine waves only: the 5790B specmanager row at that voltage and frequency, in volts.  The time base
+    (counter) and RF flatness (power meter / relative 5790B wideband, in dB) have no matching specification row: TAR blank."""
+    import tartur
+    try:
+        if p['kind'] == 'SELFTEST' or p.get('typical'):
+            return dict(TAR='', TUR='')
+        import uncertainty
+        value, unit, _src = uncertainty_value(p)
+        u = uu = None
+        if value is not None:
+            u, uu = uncertainty.round_up(value), unit
+        acc = au = None
+        if p['kind'] in ('ACAMP', 'LFFLAT') and p.get('function') == 'SIN':        # the 5790B sinewave rows do not describe a square wave
+            acc, au = tartur.standard_accuracy('5790B', 'ACV', p['nominal'], frequency=p['frequency'], direction='input')
+        return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['nominal'] - p['error'], p['nominal'] + p['error']), p['unit'], acc, au, u, uu))
+    except Exception:
+        return dict(TAR='', TUR='')
 
 
 def display_ref(p):
@@ -462,7 +505,7 @@ def certificate_rows(results):
 # ================================================================================================================
 # application
 # ================================================================================================================
-class App(datamode.DataModeMixin):
+class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     WIRING = {
         'NONE': ('Self-test', [('Disconnect', 'Remove any cable from the generator OUTPUT. No connections are needed for the self-test.')]),
         'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter channel 1 input with a 50 ohm BNC cable.'),
@@ -489,6 +532,7 @@ class App(datamode.DataModeMixin):
         configure(model)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}; self.pref_cache = {}; self.conditions_ok = False
+        self.pm_init('fgen', MODEL, demo=demo, lists=[POINTS])         # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
         root.title(f'{SPEC["manufacturer"]} {MODEL} | Performance Verification' + (' [DEMO]' if demo else ''))
         ui.fit_window(root, 1320, 840, min_w=900, min_h=640)
@@ -520,6 +564,7 @@ class App(datamode.DataModeMixin):
 
     # ------------------------------------------------------------------ selection
     def active(self, p):
+        if p.get('skip'): return False                               # a point skipped by a procedure modification
         return not (self.test_set.get().startswith('Quick') and not p['quick'])
 
     def active_points(self): return [p for p in POINTS if self.active(p)]
@@ -594,7 +639,6 @@ class App(datamode.DataModeMixin):
         self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
         self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
-        sh.add_action('Export CSV', self.export_csv, side='right', short='CSV')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
         sh.add_action('Save progress', self.save, side='right', short='Save')
 
@@ -657,7 +701,9 @@ class App(datamode.DataModeMixin):
         self.update_shell_sections(self.active_points(), lambda p: p['section_title'])
 
     def on_period(self, save=True):
+        self.pm_revert(POINTS)                                       # limits come from the period table: take the modifications off,
         apply_period(POINTS, PERIODS[self.period.get()])
+        self.pm_apply(POINTS)                                        # then put them back (they only apply if they fit this period)
         for records in (self.found, self.left):      # As Found and As Left are re-judged against the newly selected limits
             for key, rec in records.items():
                 rec['result'] = judge(POINTS[int(key) - 1], rec['reading'])
@@ -704,7 +750,7 @@ class App(datamode.DataModeMixin):
         try:
             self.disconnect()
             self.io = IO(self._addrs(), ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()],
-                         flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()])
+                         flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=self.pm_state)
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
@@ -752,6 +798,8 @@ class App(datamode.DataModeMixin):
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
+        if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
         if not self.demo and self.io is None: self.test_connections()
         if not self.demo and self.io is None: return
@@ -836,7 +884,8 @@ class App(datamode.DataModeMixin):
             stale = [q for q in POINTS if q['kind'] == 'FLAT' and q['range_db'] == rng and str(q['id']) in self.results
                      and self.results[str(q['id'])].get('raw', {}).get('method', 'POWER') == 'POWER']
         self.results[str(p['id'])] = dict(reading=reading, result=judge(p, reading), raw=raw, synthetic=synthetic,
-                                          period=PERIODS[self.period.get()], timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label)
+                                          period=PERIODS[self.period.get()], timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label,
+                                          **self.pm_result_fields())
         self._update_row(p); self.save(silent=True)
         if stale:
             messagebox.showwarning('Flatness reference changed',
@@ -851,7 +900,7 @@ class App(datamode.DataModeMixin):
     def save(self, silent=False):
         path = self._checkpoint_path()
         path.write_text(json.dumps(dict(model=MODEL, asset=self.asset.get(), serial=self.serial.get(), demo=self.demo,
-                                        period=self.period.get(), **self.save_fields()), indent=2))
+                                        period=self.period.get(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
@@ -864,18 +913,24 @@ class App(datamode.DataModeMixin):
             if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.period.set(data.get('period', self.period.get())); self.load_results(data)
+        self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
 
     def certificate_rows(self):
         """Report rows: As Found for every recorded point; As Left where the point was measured again after an adjustment, else 'Same'."""
-        rows = []
+        return [row for _p, row in self.certificate_pairs()]
+
+    def certificate_pairs(self):
+        """(point, report row) in the order certificate_rows() lists them."""
+        pairs = []
         for p in POINTS:
             row = self.found_left_row(p, lambda r: certificate_row(p, r))
-            if row: rows.append(row)
-        return rows
+            if row: pairs.append((p, row))
+        return pairs
 
     def export_pdf(self):
-        rows = self.certificate_rows()
+        pairs = self.certificate_pairs()
+        rows = [row for _p, row in pairs]
         if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
         try: import report_pdf, report_dialog
         except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
@@ -893,6 +948,8 @@ class App(datamode.DataModeMixin):
                 'Frequency - Measure; RF flatness uses specs/fgen_332xx_reference_cmc.json and is blank where no value is set. '
                 'AC amplitude reference standard: Fluke 5790B (the manual lists a 3458A DMM). ' + ' '.join(how[m] for m in used))
         try:
+            if report_pdf.details_tar_tur(details):
+                rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [tar_tur_fields(p) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'{SPEC["manufacturer"]} {MODEL}'), ('Instrument ID', self.asset.get()),
                                                                  ('Serial', self.serial.get()), ('Limits applied', self.period.get()),
                                                                  ('Flatness method', ', '.join(FLAT_METHODS[m] for m in used) or 'not tested'),
@@ -903,25 +960,6 @@ class App(datamode.DataModeMixin):
         except Exception as exc:
             messagebox.showerror('PDF export error', str(exc)); return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-
-    def export_csv(self):
-        path = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=[('CSV', '*.csv')], initialfile=f'{MODEL}_verification.csv')
-        if not path: return
-        demo = 'YES' if self.any_synthetic() else 'NO'
-        with open(path, 'w', newline='', encoding='utf-8-sig') as f:
-            w = csv.writer(f)
-            w.writerow(['Instrument ID', self.asset.get(), 'Serial Number', self.serial.get()])
-            w.writerow(['SOURCE', f'{SPEC["source"]["document"]}, pp. {SPEC["source"]["pages"]}'])
-            w.writerow(['LIMITS APPLIED', self.period.get()]); w.writerow(['DEMO DATA', demo]); w.writerow([])
-            w.writerow(['#', 'Section', 'Description', 'Nominal', 'Low', 'High', 'Unit', 'Reading', 'Status', 'Quick check', 'Manual page',
-                        'Worksheet values', 'Timestamp', 'Synthetic', 'As Left', 'As Left status'])
-            for p in POINTS:
-                r = self.found.get(str(p['id']), {}); n = p['nominal']; e = p['error']; lr = self.left.get(str(p['id']), {})
-                lo, hi = ('', '') if p['kind'] == 'SELFTEST' else (n - e, n + e)
-                w.writerow([p['id'], p['section_title'], p['desc'], 'Pass' if p['kind'] == 'SELFTEST' else n, lo, hi, p['unit'], r.get('reading', ''),
-                            r.get('result', ''), 'Q' if p['quick'] else '', p['page'], json.dumps(r.get('raw', {})), r.get('timestamp', ''), r.get('synthetic', ''),
-                            lr.get('reading', 'Same' if r else ''), lr.get('result', '')])
-        self.status.set(f'Exported {path}')
 
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return

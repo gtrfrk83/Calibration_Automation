@@ -1,0 +1,514 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "ScpiDmm.connect[8846A]",
+   "log": [
+    "8846A|>>|SYST:REM",
+    "8846A|>>|*IDN?",
+    "8846A|<<|FLUKE,8846A,SIM0001,1.0"
+   ],
+   "method": "ScpiDmm.connect",
+   "result": "returned <Fluke8846A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,8846A,SIM0001,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ScpiDmm.remote",
+   "log": [
+    "8846A|>>|SYST:REM"
+   ],
+   "method": "ScpiDmm.remote",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SYST:REM"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ScpiDmm.local",
+   "log": [
+    "8846A|>>|SYST:LOC"
+   ],
+   "method": "ScpiDmm.local",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SYST:LOC"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ScpiDmm.cleanup",
+   "log": [
+    "8846A|>>|SYST:LOC"
+   ],
+   "method": "ScpiDmm.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SYST:LOC"
+    ]
+   ]
+  },
+  {
+   "call": "'DCV', 10",
+   "case": "ScpiDmm.configure[DCV@8846A]",
+   "log": [
+    "8846A|>>|CONF:VOLT:DC 10"
+   ],
+   "method": "ScpiDmm.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:DC 10"
+    ]
+   ]
+  },
+  {
+   "call": "'ACV', 1",
+   "case": "ScpiDmm.configure[ACV@8846A]",
+   "log": [
+    "8846A|>>|CONF:VOLT:AC 1"
+   ],
+   "method": "ScpiDmm.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:AC 1"
+    ]
+   ]
+  },
+  {
+   "call": "'DCI', 0.01",
+   "case": "ScpiDmm.configure[DCI@8846A]",
+   "log": [
+    "8846A|>>|CONF:CURR:DC 0.01"
+   ],
+   "method": "ScpiDmm.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:CURR:DC 0.01"
+    ]
+   ]
+  },
+  {
+   "call": "'ACI', 1",
+   "case": "ScpiDmm.configure[ACI@8846A]",
+   "log": [
+    "8846A|>>|CONF:CURR:AC 1"
+   ],
+   "method": "ScpiDmm.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:CURR:AC 1"
+    ]
+   ]
+  },
+  {
+   "call": "'OHM2', 1000",
+   "case": "ScpiDmm.configure[OHM2@8846A]",
+   "log": [
+    "8846A|>>|CONF:RES 1000"
+   ],
+   "method": "ScpiDmm.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:RES 1000"
+    ]
+   ]
+  },
+  {
+   "call": "'OHM4', 100000",
+   "case": "ScpiDmm.configure[OHM4@8846A]",
+   "log": [
+    "8846A|>>|CONF:FRES 100000"
+   ],
+   "method": "ScpiDmm.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FRES 100000"
+    ]
+   ]
+  },
+  {
+   "call": "'CAP', 1e-07",
+   "case": "ScpiDmm.configure[CAP@8846A]",
+   "log": [
+    "8846A|>>|CONF:CAP 1e-07"
+   ],
+   "method": "ScpiDmm.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:CAP 1e-07"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ScpiDmm.configure_frequency",
+   "log": [
+    "8846A|>>|CONF:FREQ"
+   ],
+   "method": "ScpiDmm.configure_frequency",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ScpiDmm.read",
+   "log": [
+    "8846A|>>|READ?",
+    "8846A|<<|+1.000020000E+00"
+   ],
+   "method": "ScpiDmm.read",
+   "result": "returned 1.00002",
+   "wire": [
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ScpiDmm.connect[34401A]",
+   "log": [
+    "34401A|>>|SYST:REM",
+    "34401A|>>|*IDN?",
+    "34401A|<<|HEWLETT-PACKARD,34401A,SIM0001,11-5-2"
+   ],
+   "method": "ScpiDmm.connect",
+   "result": "returned <Agilent34401A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "HEWLETT-PACKARD,34401A,SIM0001,11-5-2"
+    ]
+   ]
+  },
+  {
+   "call": "'CAP', 1e-07",
+   "case": "ScpiDmm.configure[CAP unsupported@34401A]",
+   "log": [],
+   "method": "ScpiDmm.configure",
+   "result": "raised InstrumentError: Agilent 34401A driver does not support CAP",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Agilent34401A.set_ac_filter_slow",
+   "log": [
+    "34401A|>>|DET:BAND 3"
+   ],
+   "method": "Agilent34401A.set_ac_filter_slow",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "DET:BAND 3"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ScpiDmm.read[overload]",
+   "log": [
+    "DMM|>>|READ?",
+    "DMM|<<|+9.90000000E+37"
+   ],
+   "method": "ScpiDmm.read",
+   "result": "raised ValueError: Invalid DMM reading: +9.90000000E+37",
+   "wire": [
+    [
+     "Q",
+     "READ?",
+     "+9.90000000E+37"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ScpiDmm.connect[wrong model]",
+   "log": [
+    "8846A|>>|SYST:REM",
+    "8846A|>>|*IDN?",
+    "8846A|<<|OTHER,1234,1,1"
+   ],
+   "method": "ScpiDmm.connect",
+   "result": "raised InstrumentError: Unexpected DMM identification: OTHER,1234,1,1",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "OTHER,1234,1,1"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8846A.connect_for_adjustment",
+   "log": [
+    "8846A|>>|*IDN?",
+    "8846A|<<|FLUKE,8846A,SIM0001,1.0"
+   ],
+   "method": "Fluke8846A.connect_for_adjustment",
+   "result": "returned <Fluke8846A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,8846A,SIM0001,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "'<secret>'",
+   "case": "Fluke8846A.unlock_calibration",
+   "log": [
+    "8846A|>>|CAL:SEC:STAT OFF,********",
+    "8846A|>>|CAL:SEC:STAT?",
+    "8846A|<<|+0"
+   ],
+   "method": "Fluke8846A.unlock_calibration",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CAL:SEC:STAT OFF,<password masked, 18 chars>"
+    ],
+    [
+     "Q",
+     "CAL:SEC:STAT?",
+     "+0"
+    ]
+   ]
+  },
+  {
+   "call": "'DCV', 10",
+   "case": "Fluke8846A.adjust_step",
+   "log": [
+    "8846A|>>|CAL:VAL DCV,10",
+    "8846A|>>|CAL? ON",
+    "8846A|<<|+0"
+   ],
+   "method": "Fluke8846A.adjust_step",
+   "result": "returned '+0'",
+   "wire": [
+    [
+     "W",
+     "CAL:VAL DCV,10"
+    ],
+    [
+     "Q",
+     "CAL? ON",
+     "+0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8846A.record_calibration",
+   "log": [
+    "8846A|>>|CAL:REC"
+   ],
+   "method": "Fluke8846A.record_calibration",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CAL:REC"
+    ]
+   ]
+  },
+  {
+   "call": "'<secret>'",
+   "case": "Fluke8846A.lock_calibration",
+   "log": [
+    "8846A|>>|CAL:SEC:STAT ON,********",
+    "8846A|>>|CAL:SEC:STAT?",
+    "8846A|<<|+1"
+   ],
+   "method": "Fluke8846A.lock_calibration",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CAL:SEC:STAT ON,<password masked, 18 chars>"
+    ],
+    [
+     "Q",
+     "CAL:SEC:STAT?",
+     "+1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8846A.connect_for_adjustment[refused]",
+   "log": [
+    "8846A|>>|*IDN?",
+    "8846A|<<|KEYSIGHT,34401A,1,1"
+   ],
+   "method": "Fluke8846A.connect_for_adjustment",
+   "result": "raised InstrumentError: Refusing to adjust unexpected instrument: KEYSIGHT,34401A,1,1",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEYSIGHT,34401A,1,1"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "'ACV', 1",
+   "case": "Fluke8846A.adjust_step[failure]",
+   "log": [
+    "8846A|>>|CAL:VAL ACV,1",
+    "8846A|>>|CAL? ON",
+    "8846A|<<|+1"
+   ],
+   "method": "Fluke8846A.adjust_step",
+   "result": "raised InstrumentError: Instrument did not report adjustment success: +1",
+   "wire": [
+    [
+     "W",
+     "CAL:VAL ACV,1"
+    ],
+    [
+     "Q",
+     "CAL? ON",
+     "+1"
+    ]
+   ]
+  },
+  {
+   "call": "'<secret>'",
+   "case": "Fluke8846A.unlock_calibration[still locked]",
+   "log": [
+    "8846A|>>|CAL:SEC:STAT OFF,********",
+    "8846A|>>|CAL:SEC:STAT?",
+    "8846A|<<|+1"
+   ],
+   "method": "Fluke8846A.unlock_calibration",
+   "result": "raised InstrumentError: Calibration security did not report unlocked: +1",
+   "wire": [
+    [
+     "W",
+     "CAL:SEC:STAT OFF,<password masked, 18 chars>"
+    ],
+    [
+     "Q",
+     "CAL:SEC:STAT?",
+     "+1"
+    ]
+   ]
+  }
+ ],
+ "name": "scpi_dmm",
+ "schema": 1
+}

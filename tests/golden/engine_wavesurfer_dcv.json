@@ -1,0 +1,400 @@
+{
+ "entries": [
+  {
+   "call": "FakeApp, {'channel': 1, 'lower_v': 0.99, 'nominal_v': 1.0, 'scale_v_div': 0.5, 'upper_v': 1.01}, 2.0, 'sim', 9600, 'sim'",
+   "case": "WaveSurfer_WS4104HD.automatic_dcv_point",
+   "events": [
+    [
+     "dc_auto_value",
+     {
+      "channel": 1,
+      "lower_v": 0.99,
+      "nominal_v": 1.0,
+      "scale_v_div": 0.5,
+      "upper_v": 1.01
+     },
+     1.0006
+    ],
+    [
+     "dc_idle"
+    ]
+   ],
+   "log": [
+    "Fluke 5560A|>>|*IDN?",
+    "Fluke 5560A|<<|FLUKE,5560A,SIM0001,1.0",
+    "LeCroy WaveSurfer 4104HD|>>|*IDN?",
+    "LeCroy WaveSurfer 4104HD|<<|LECROY,WS4104HD,SIM0001,9.9",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 0.0",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.VerScale=0.5'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 0.5",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.Coupling=\"DC1M\" '",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.BandwidthLimit=\"20MHz\" '",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.Coupling\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS DC1M",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 20MHz",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Measure.P1.Source1=\"C1\" ' ",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS C1",
+    "Fluke 5560A|>>|STBY",
+    "Fluke 5560A|>>|OPER?",
+    "Fluke 5560A|<<|0",
+    "Fluke 5560A|>>|SCOPE DCV",
+    "Fluke 5560A|>>|FUNC?",
+    "Fluke 5560A|<<|SDCV",
+    "Fluke 5560A|>>|SCOPE?",
+    "Fluke 5560A|<<|VOLT",
+    "Fluke 5560A|>>|OUT_IMP 1M",
+    "Fluke 5560A|>>|OUT_IMP?",
+    "Fluke 5560A|<<|1000000,OHM",
+    "Fluke 5560A|>>|OUT 1.000000000V",
+    "Fluke 5560A|>>|OUT?",
+    "Fluke 5560A|<<|1.000000000,V,0.0,HZ",
+    "Fluke 5560A|>>|OPER",
+    "Fluke 5560A|>>|OPER?",
+    "Fluke 5560A|<<|1",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 1.0006",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 1.0006",
+    "Fluke 5560A|>>|STBY",
+    "Fluke 5560A|>>|OPER?",
+    "Fluke 5560A|<<|0",
+    "Fluke 5560A|>>|STBY",
+    "Fluke 5560A|>>|OPER?",
+    "Fluke 5560A|<<|0"
+   ],
+   "method": "WaveSurfer_WS4104HD.automatic_dcv_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5560A,SIM0001,1.0"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "LECROY,WS4104HD,SIM0001,9.9"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.0"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.VerScale=0.5'"
+    ],
+    [
+     "sleep",
+     0.35
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.5"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.Coupling=\"DC1M\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.BandwidthLimit=\"20MHz\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.Coupling\"",
+     "VBS DC1M"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
+     "VBS 20MHz"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS Mean"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS Mean"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.Source1=\"C1\" ' "
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP 1M"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "W",
+     "OUT 1.000000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "1.000000000,V,0.0,HZ"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+     "VBS 1.0006"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+     "VBS 1.0006"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "FakeApp, {'channel': 1, 'lower_v': 0.99, 'nominal_v': 1.0, 'scale_v_div': 0.5, 'upper_v': 1.01}",
+   "case": "WaveSurfer_WS4104HD.read_dcv_scope",
+   "events": [
+    [
+     "dc_value",
+     {
+      "channel": 1,
+      "lower_v": 0.99,
+      "nominal_v": 1.0,
+      "scale_v_div": 0.5,
+      "upper_v": 1.01
+     },
+     0.0
+    ]
+   ],
+   "log": [
+    "LeCroy WaveSurfer 4104HD|>>|*IDN?",
+    "LeCroy WaveSurfer 4104HD|<<|LECROY,WS4104HD,SIM0001,9.9",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 0.5",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.VerScale=0.5'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 0.5",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.Coupling=\"DC1M\" '",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.BandwidthLimit=\"20MHz\" '",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.Coupling\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS DC1M",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 20MHz",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS C1",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS C1",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS 0"
+   ],
+   "method": "WaveSurfer_WS4104HD.read_dcv_scope",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "LECROY,WS4104HD,SIM0001,9.9"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.5"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.VerScale=0.5'"
+    ],
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.VerScale\"",
+     "VBS 0.5"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.Coupling=\"DC1M\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C1.BandwidthLimit=\"20MHz\" '"
+    ],
+    [
+     "sleep",
+     0.4
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.Coupling\"",
+     "VBS DC1M"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
+     "VBS 20MHz"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.ParamEngine\"",
+     "VBS Mean"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Source1\"",
+     "VBS C1"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+     "VBS 0"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_wavesurfer_dcv",
+ "schema": 1
+}
