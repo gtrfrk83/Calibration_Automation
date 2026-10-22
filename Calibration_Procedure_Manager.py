@@ -29,6 +29,7 @@ import specmanager_ui
 import procmods
 import procmods_ui
 import procmods_ui_model
+import datasheet_builder_ui
 
 BASE = Path(__file__).resolve().parent
 DB = appdata.db_path('calibration_procedures.sqlite3')     # the person's own data folder (see appdata.py)
@@ -205,16 +206,19 @@ class Manager:
         self.history_frame = ttk.Frame(self.notebook, padding=16)
         self.specs_frame = ttk.Frame(self.notebook, padding=16)
         self.datasheets_frame = ttk.Frame(self.notebook, padding=16)
+        self.dsb_frame = ttk.Frame(self.notebook, padding=16)
         self.development_frame = ttk.Frame(self.notebook, padding=16)
         self.notebook.add(self.library_frame, text='  Procedures  ')
         self.notebook.add(self.instruments_frame, text='  Instruments  ')
         self.notebook.add(self.history_frame, text='  Asset History  ')
         self.notebook.add(self.specs_frame, text='  Standards Specs  ')
         self.notebook.add(self.datasheets_frame, text='  Datasheets (.MDD)  ')
+        self.notebook.add(self.dsb_frame, text='  Datasheet Builder  ')
         self.notebook.add(self.development_frame, text='  Procedure Development  ')
         self.build_library_tab()
         self.build_development_tab()
         self.build_datasheets_tab()
+        self.build_datasheet_builder_tab()
         self.build_instruments_tab()
         self.history_panel = labregistry_ui.HistoryPanel(self.history_frame)
         self.history_panel.pack(fill='both', expand=True)
@@ -243,6 +247,9 @@ class Manager:
             self.status.set('Published specifications of the calibrators used as standards; they set the lowest uncertainty that may be reported.')
         elif tab is self.datasheets_frame:
             self.status.set('Import Cal Processor .MDD datasheets as read-only templates.')
+        elif tab is self.dsb_frame:
+            self.dsb_panel.refresh()
+            self.status.set('Build your own datasheet from a manufacturer specification; each save is a new version and a runnable procedure.')
         else:
             self.refresh_development()
             self.status.set('Maintainer tools: test, update and roll back procedure scripts.')
@@ -666,6 +673,15 @@ class Manager:
         ttk.Button(row, text='Cancel', command=win.destroy).pack(side='right')
         ttk.Button(row, text='Restore selected', style='Accent.TButton', command=restore).pack(side='right', padx=8)
         ui.center_on(win, self.root)
+
+    # ------------------------------------------------------------------ Datasheet Builder tab
+    def build_datasheet_builder_tab(self):
+        self.dsb_panel = datasheet_builder_ui.DatasheetBuilderPanel(self.dsb_frame, on_saved=self._dsb_saved, status=self.status)
+        self.dsb_panel.pack(fill='both', expand=True)
+
+    def _dsb_saved(self):
+        """A datasheet was saved, deleted, restored or imported: the Procedures list is refreshed (the runnable spec has changed)."""
+        self.refresh()
 
     # ------------------------------------------------------------------ Datasheets tab
     def build_datasheets_tab(self):

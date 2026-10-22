@@ -22,12 +22,19 @@ class _Dummy:
 class _Var:
     def __init__(self, *a, value='', **k):
         self._v = value
+        self._cbs = []
 
     def get(self):
         return self._v
 
     def set(self, v):
         self._v = v
+        for cb in list(self._cbs):                    # like Tk: 'write' traces run on every set
+            cb('', '', 'write')
+
+    def trace_add(self, mode, callback):
+        self._cbs.append(callback)
+        return str(len(self._cbs))
 
 
 class _Mod(types.ModuleType):
@@ -43,10 +50,11 @@ MESSAGES = []
 
 
 def install():
-    """Put stub tkinter modules in sys.modules (only if the real one is missing); returns True when stubs were installed."""
+    """Put stub tkinter modules in sys.modules (only if the real one is missing); returns True when the stubs are in use (installed now or by an
+    earlier test module: several test modules call this, and they must all agree that tkinter is the stub), False when the real tkinter is there."""
     try:
-        import tkinter  # noqa: F401
-        return False
+        import tkinter
+        return bool(getattr(tkinter, '_cal_stub', False))
     except Exception:
         pass
     names = ('tkinter', 'tkinter.ttk', 'tkinter.messagebox', 'tkinter.simpledialog', 'tkinter.filedialog', 'tkinter.font', 'tkinter.scrolledtext')
@@ -56,6 +64,7 @@ def install():
         if '.' in n:
             setattr(mods['tkinter'], n.split('.')[1], m)
     t = mods['tkinter']
+    t._cal_stub = True
     for v in ('StringVar', 'IntVar', 'BooleanVar', 'DoubleVar'):
         setattr(t, v, _Var)
     mb = mods['tkinter.messagebox']
