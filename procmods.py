@@ -549,10 +549,13 @@ def _extra_problems(tgt, value, driver_name) -> list:
 
 def build_entry(kind, target, value, scope, reason, *, model='', asset_id='', author=None, cmd=None, driver_name=None, point=None,
                 factory=None, factory_hash='', label='', fw_match=None, expires_at=None, tested=None, session=None, devmode=None,
-                now=None, uid=None, version=1, supersedes=None, enabled=1, allow_run=False):
-    """Validate and normalise a new override.  Returns the entry dict; raises OverrideError listing every problem."""
+                now=None, uid=None, version=1, supersedes=None, enabled=1, allow_run=False, dev_gate=True):
+    """Validate and normalise a new override.  Returns the entry dict; raises OverrideError listing every problem.
+    dev_gate=False is honoured ONLY for a run-scope command entry (a typed / edited command for this run only, held in memory and never
+    stored); anything else still needs the developer-mode session."""
     probs = []
-    _need_dev(session, devmode)                          # every mutation needs an unlocked developer-mode session
+    if dev_gate or not (allow_run and scope == 'run' and kind == 'command'):
+        _need_dev(session, devmode)                      # every mutation needs an unlocked developer-mode session
     if kind not in KINDS:
         raise OverrideError(f'unknown kind {kind!r}')
     if scope not in SCOPES or (scope == 'run' and not allow_run):
@@ -653,11 +656,13 @@ def build_entry(kind, target, value, scope, reason, *, model='', asset_id='', au
 
 
 def make_run_entry(kind, target, value, reason, *, author=None, cmd=None, driver_name=None, point=None, factory=None, label='',
-                   fw_match=None, tested=None, session=None, devmode=None, now=None):
+                   fw_match=None, tested=None, session=None, devmode=None, now=None, dev_gate=True):
     """An override for this run only: validated like a stored one, held in memory / the checkpoint snapshot, never written to the DB.
-    Pass the result in resolve(..., run_overrides=[...])."""
+    Pass the result in resolve(..., run_overrides=[...]).  dev_gate=False (kind 'command' only; every other kind still needs the session):
+    a run-only command edit needs no passphrase because nothing is stored."""
     return build_entry(kind, target, value, 'run', reason, author=author, cmd=cmd, driver_name=driver_name, point=point, factory=factory,
-                       label=label, fw_match=fw_match, tested=tested, session=session, devmode=devmode, now=now, allow_run=True)
+                       label=label, fw_match=fw_match, tested=tested, session=session, devmode=devmode, now=now, allow_run=True,
+                       dev_gate=dev_gate)
 
 
 # ------------------------------------------------------------------------------------------------------------ store

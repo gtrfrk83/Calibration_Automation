@@ -410,7 +410,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 except Exception as exc:
                     try:self.io.standby()
                     except Exception:pass
-                    self.root.after(0,lambda:self._error(exc))
+                    err=exc   # 'exc' is deleted when the except block ends; capture by default arg
+                    self.root.after(0,lambda err=err:self._error(err))
             threading.Thread(target=work,daemon=True).start()
     def _done(self,points,i,p,reading):
         self._record(p,reading,False)

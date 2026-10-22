@@ -281,6 +281,7 @@ class PointWindow(tk.Toplevel):
     def refresh(self):
         m = self.model
         self.update_header()
+        self.update_scope_buttons()
         self.plan_note.set(m.plan_note)
         sel = self._selected
         self.tree.delete(*self.tree.get_children())
@@ -303,6 +304,14 @@ class PointWindow(tk.Toplevel):
         self.update_footer()
         self.update_buttons()
 
+    def update_scope_buttons(self):
+        for value, _label, available, why in self.model.scope_choices():
+            b = self.scope_buttons.get(value)
+            if b is not None:
+                b.configure(state='normal' if available else 'disabled')
+        if self.scope.get() != self.model.scope:
+            self.scope.set(self.model.scope)
+
     def update_header(self):
         m = self.model
         st = self.lock.state
@@ -313,7 +322,8 @@ class PointWindow(tk.Toplevel):
         if why:
             self.info.set(why + '  (read-only)')
         elif st != 'unlocked':
-            self.info.set('Read-only. Turn on developer mode to type commands or change the point\'s limits, nominal, unit and description. '
+            self.info.set('You can type or change commands for this run only without a passphrase. Turn on developer mode to change the point\'s '
+                          'limits, nominal, unit and description, or to save a change for this instrument or for all of this model. '
                           'The passphrase is the one used for all procedure changes.')
         else:
             self.info.set(m.effective_from_text() or m.pm.applies_from_text())
@@ -358,7 +368,7 @@ class PointWindow(tk.Toplevel):
         m = self.model
         self.btn_apply.configure(state='normal' if (m.pm.drafts and not m.blockers()) else 'disabled')
         self.btn_cancel.configure(state='normal' if m.pm.drafts else 'disabled')
-        ok = m.editable
+        ok = m.commands_editable                                    # typed commands for this run need no developer mode
         for b in (self.btn_add,):
             b.configure(state='normal' if ok else 'disabled')
         r = m.row(self._selected) if self._selected is not None else None

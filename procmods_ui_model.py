@@ -253,6 +253,7 @@ class ProcModsModel:
         self.oset = None
         self.last_applied = []                           # labels of what the last apply() wrote (live mode)
         self.last_kinds = set()
+        self.run_commands_ungated = False                # the per-point window sets this: a RUN-ONLY command edit needs no passphrase
         self.refresh()
 
     # ------------------------------------------------------------------ state
@@ -340,8 +341,37 @@ class ProcModsModel:
             raise ValueError('no model is known')
         self.scope = scope
 
+    def run_only_commands(self) -> bool:
+        """True when everything staged is a command edit for THIS RUN ONLY (a typed command or extra line, or removing one made this run) and
+        this window may do that without developer mode.  Nothing is written to the override store then (the entries live in ctx.run_entries),
+        so the store's developer-mode gate is not involved.  Tolerance / unit / nominal / description, any other kind and any saved scope
+        (this asset / this model, or restoring a saved command) still need developer mode."""
+        if not self.run_commands_ungated or self.scope != 'run' or not self.drafts:
+            return False
+        for (kind, _t), d in self.drafts.items():
+            if kind != 'command':
+                return False
+            if d.action == 'reset' and not any(e['uid'] == d.uid for e in self.ctx.run_entries):
+                return False
+        return True
+
+    def _blocked_without_dev(self) -> str:
+        """Why nothing can be edited whatever the passphrase (verified/locked procedure, run state); '' = no such block."""
+        why = self.verified_lock
+        if why:
+            return why
+        if self.live_mode:
+            return self.ctx.live.blocked_reason() or ''
+        return 'A run is in progress. Stop the run to edit.' if self.running() else ''
+
     def _need_edit(self):
         self.__dict__.pop('_vlock', None)                # a write always looks at the registry afresh
+        if self.run_only_commands():
+            why = self._blocked_without_dev()
+            if why:
+                raise pm.OverrideError(why)
+            self.lock.touch()
+            return
         if not self.editable:
             raise pm.OverrideError(self.read_only_reason)
         self.lock.touch()
@@ -817,7 +847,8 @@ class ProcModsModel:
         opts = self._opts(d)
         if self.scope == 'run':
             old = next((e for e in self.ctx.run_entries if e['kind'] == d.kind and e['target'] == d.target), None)
-            entry = pm.make_run_entry(d.kind, d.target, d.value, reason, author=author, session=session, devmode=self.lock.devmode, **opts)
+            entry = pm.make_run_entry(d.kind, d.target, d.value, reason, author=author, session=session, devmode=self.lock.devmode,
+                                      dev_gate=not (self.run_commands_ungated and d.kind == 'command'), **opts)
             if old is not None:
                 self.ctx.run_entries.remove(old)
             self.ctx.run_entries.append(entry)

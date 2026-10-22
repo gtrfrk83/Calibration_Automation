@@ -59,9 +59,12 @@ Editing one test point (right-click > Edit)
   locked commands cannot be changed (the reason is shown). You can also add lines to send before or after the point. A line that sets something needs the
   query that reads it back and the reply to expect. It is sent once, read back and compared; if it does not match, the point stops and nothing is retried.
   Anything you type is recorded as UNVERIFIED. Outputs go to standby after the point as always. "Not tested" means the program has no safe way to try a command.
+  No passphrase is needed to type or change a command (or add a before/after line) for THIS RUN ONLY: nothing is saved, it is gone when the instrument ID
+  changes or the window is closed, and it is still recorded in this run's audit trail (who, when, old, new, reason), UNVERIFIED, and marked DEMO in demo mode.
+  Saving a command change for this instrument or for all of this model (or taking a saved one away again) does need developer mode.
   Developer mode: press "Turn on developer mode..." and enter the developer passphrase (the same one as everywhere in the suite; it locks itself again after 15
-  minutes without use). Only then can you change the tolerance (low/high or plus-minus), the unit, the nominal and the description of the point. Without it
-  those fields are read-only. Changing a tolerance changes pass/fail, so you must type a reason and tick the acknowledgement. If the point already has a reading
+  minutes without use). Only then can you change the tolerance (low/high or plus-minus), the unit, the nominal and the description of the point, or choose
+  "This asset" / "This model". Without it those fields are read-only and the saved choices are greyed out. Changing a tolerance changes pass/fail, so you must type a reason and tick the acknowledgement. If the point already has a reading
   it is measured again against the new limit.
   Choose "This run only", "This asset" or "This model". Changes start at the next point, never in the middle of one. Every change is recorded (who, when, old,
   new, reason, point). PDF reports are unchanged. Demo mode is marked DEMO and always run-only. The WaveSurfer procedure shows no commands (tolerance only).

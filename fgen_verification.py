@@ -914,7 +914,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 reading, raw = self.io.measure(p, self.results, self.pref_cache)
                 self.root.after(0, lambda: self._done(points, i, p, reading, raw, key))
             except Exception as exc:
-                self.root.after(0, lambda: self._error(exc))
+                err = exc   # 'exc' is deleted when the except block ends; capture by default arg
+                self.root.after(0, lambda err=err: self._error(err))
         threading.Thread(target=work, daemon=True).start()
 
     def _done(self, points, i, p, reading, raw, key):

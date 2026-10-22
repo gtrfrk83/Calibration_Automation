@@ -31,6 +31,8 @@ TIP_LIMIT = ('Changing a limit changes whether this point passes or fails. The c
              'new values and your reason) and is printed with the results.')
 TIP_UNVERIFIED = ('A command you type is recorded as UNVERIFIED: it has not been checked against the manufacturer\'s manual. A setting is '
                   'sent once, read back and compared; it is never retried. Outputs return to standby after the point.')
+SAVE_NEEDS_DEV = 'Saving a change for this instrument or for all of this model needs developer mode. A change for this run only does not.'
+SAVED_NEEDS_DEV = 'This command change is saved for later runs; removing it needs developer mode.'
 NOT_TESTED = 'Not tested (this procedure offers no way to try a command from here)'
 
 FIELD_LABELS = {'description': 'Description', 'nominal': 'Nominal', 'unit': 'Unit', 'error': 'Tolerance (+/-)', 'low': 'Lower limit',
@@ -190,6 +192,7 @@ class PointEditModel:
         if store is not None:
             self.ctx.store = store
         self.pm = M.ProcModsModel(self.ctx, lock, now=now)
+        self.pm.run_commands_ungated = True                          # Mike: a RUN-ONLY command edit needs no passphrase (nothing is stored)
         self.live_point = app.pm_find_point(pid)
         self.view, self.key = app.pm_factory_point(pid)
         self.title = self._title()
@@ -221,6 +224,8 @@ class PointEditModel:
         return self.pm.scope
 
     def set_scope(self, scope):
+        if scope != 'run' and not self.lock.unlocked:
+            raise ValueError(SAVE_NEEDS_DEV)
         self.pm.set_scope(scope)                                     # raises ValueError with the reason (demo: this run only)
 
     def scope_choices(self) -> list:
@@ -231,8 +236,10 @@ class PointEditModel:
             why = 'Demo mode: an edit applies to this run only and is never saved.'
             return [('run', 'This run only (demo)', True, ''), ('asset', 'Save for this instrument', False, why),
                     ('model', f'Save for all {model}', False, why)]
-        out.append(('asset', 'Save for this instrument', bool(self.ctx.asset_id), '' if self.ctx.asset_id else 'Enter the instrument ID first.'))
-        out.append(('model', f'Save for all {model}', bool(self.ctx.model), ''))
+        dev = self.lock.unlocked
+        out.append(('asset', 'Save for this instrument', bool(self.ctx.asset_id) and dev,
+                    SAVE_NEEDS_DEV if not dev else '' if self.ctx.asset_id else 'Enter the instrument ID first.'))
+        out.append(('model', f'Save for all {model}', bool(self.ctx.model) and dev, '' if dev else SAVE_NEEDS_DEV))
         return out
 
     @property
@@ -251,6 +258,12 @@ class PointEditModel:
         if why:
             return why
         return self.app.pm_point_busy(self.pid)
+
+    @property
+    def commands_editable(self) -> bool:
+        """Typed / edited commands for THIS RUN need no developer mode; only a verified/locked procedure, a point in progress or a
+        non-editable run stops them."""
+        return not self.blocked_reason
 
     @property
     def needs_unlock(self) -> bool:
@@ -290,6 +303,8 @@ class PointEditModel:
         self.rebuild()
 
     def rebuild(self):
+        if self.pm.scope != 'run' and not self.lock.unlocked:        # developer mode went off (idle auto-lock): back to this run only
+            self.pm.scope = 'run'
         self.rows = self._build_rows()
         self._build_fields()
         self._rebuild_limit()
@@ -307,7 +322,7 @@ class PointEditModel:
         rows, seen = [], {}
         entries = list(self.plan.entries)
         used = set()
-        why_ro = self.read_only_reason
+        why_ro = self.blocked_reason
         i = 0
         while i < len(entries):
             e = entries[i]
@@ -430,7 +445,7 @@ class PointEditModel:
         if r is None:
             return ['unknown command']
         if not r.editable:
-            return [r.reason or self.read_only_reason or 'this command cannot be changed']
+            return [r.reason or self.blocked_reason or 'this command cannot be changed']
         text = (text or '').strip()
         k = ('command', r.target)
         if text == (r.template or '').strip() and k not in self.pm.drafts:
@@ -453,6 +468,9 @@ class PointEditModel:
         self.rebuild()
         return []
 
+    def _is_run_entry(self, uid) -> bool:
+        return any(e.get('uid') == uid for e in self.ctx.run_entries)
+
     def restore_command(self, seq) -> list:
         """'Restore default' for a command changed for this point (a staged edit is dropped; a saved one is removed on Apply)."""
         r = self.row(seq)
@@ -466,6 +484,9 @@ class PointEditModel:
         self.pm.drafts.pop(k, None)
         self.command_problems.pop(seq, None)
         if r.source == 'this point' and r.uid:
+            if not self._is_run_entry(r.uid) and not self.lock.unlocked:
+                self.rebuild()
+                return [SAVED_NEEDS_DEV]
             self.pm.drafts[k] = M.Draft('command', r.target, action='reset', uid=r.uid, label=f'{r.name or r.key} (point {self.pid})')
         self.rebuild()
         return []
@@ -510,7 +531,7 @@ class PointEditModel:
     def add_extra(self, driver, phase, text, readback='', expect='') -> list:
         """Stage an extra command line for this point and instrument: sent `phase` ('before' | 'after') the point's own commands.  A write must
         name the query that reads it back and the reply that proves it (set, read back, compare; sent once, never retried)."""
-        why = self.read_only_reason
+        why = self.blocked_reason
         if why:
             return [why]
         if phase not in pdef.PHASES:
@@ -532,9 +553,11 @@ class PointEditModel:
         r = self.row(seq)
         if r is None or r.extra is None:
             return ['not an extra line']
-        why = self.read_only_reason
+        why = self.blocked_reason
         if why and not r.pending:
             return [why]
+        if not r.pending and not self.lock.unlocked and not self._is_run_entry(r.uid):
+            return [SAVED_NEEDS_DEV]
         k = ('command', r.target)
         if r.pending:
             self.pm.drafts.pop(k, None)
@@ -816,8 +839,10 @@ class PointEditModel:
         if not self.pm.drafts and not bad:
             out.append('Nothing has been changed.')
             return out
-        if self.read_only_reason:
-            out.append(self.read_only_reason)
+        if self.blocked_reason:
+            out.append(self.blocked_reason)
+        elif not self.lock.unlocked and not self.pm.run_only_commands():
+            out.append('Developer mode is needed for this change: only typed or edited commands for this run only can be made without it.')
         out += bad
         if not self.reason.strip():
             out.append('Enter the reason for the change.')
