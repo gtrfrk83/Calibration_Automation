@@ -1418,7 +1418,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [self.certificate_fields(p) for p in pts])
             report_pdf.write_calibration_pdf(path, rows, header=self.report_header(src),
                                              title=self.report_title(), demo=demo, details=details,
-                                             footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows, self.calibrator_model()), self.source_note()) if x))
+                                             footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows, self.calibrator_model()), self.source_note()) if x),
+                                             snapshot_context=report_pdf.context_for(self))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab')
             return

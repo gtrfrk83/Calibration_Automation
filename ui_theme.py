@@ -1116,8 +1116,8 @@ def polish(root):
             continue
 
 
-def report_filename(asset, ext='.pdf', tag=''):
+def report_filename(asset, ext='.pdf', tag='', when=None):
     """Default report name: <asset>-MM-DD-YYYY.pdf  (a slash cannot be used in a Windows file name, so dashes separate the date)."""
     from datetime import datetime
     safe = ''.join(c if c.isalnum() or c in '-_' else '_' for c in str(asset or '')) or 'UNASSIGNED'
-    return f"{safe}{'-' + tag if tag else ''}-{datetime.now():%m-%d-%Y}{ext}"
+    return f"{safe}{'-' + tag if tag else ''}-{(when or datetime.now()):%m-%d-%Y}{ext}"

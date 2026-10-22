@@ -630,7 +630,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Keysight {MODEL}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Limits applied', self.period.get()),
                                                                  ('Source', f'Keysight 34970A/34972A Service Guide, pp. 80-87 (Internal DMM Verification)')],
-                                             demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, self.cal_key))
+                                             demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, self.cal_key),
+                                             snapshot_context=report_pdf.context_for(self))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
         except Exception as exc:

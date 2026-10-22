@@ -320,14 +320,30 @@ def _mod_lines(modifications) -> list:
         return []
 
 
-def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note='', show_tar_tur=None, modifications=None):
+def context_for(app) -> dict:
+    """Version stamps of an engine's App for the report snapshot (report_snapshot.context_for); pass as write_calibration_pdf(snapshot_context=...).
+    Never raises."""
+    try:
+        import report_snapshot
+        return report_snapshot.context_for(app)
+    except Exception:
+        return {}
+
+
+def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note='', show_tar_tur=None, modifications=None,
+                          issued_at=None, reprint_note=None, record_history=True, snapshot_context=None):
     """Write the report; returns the number of data rows.
 
     header   list of (label, value) shown under the title
     details  optional dict from report_dialog.ask_details: technician, temperature, humidity, standards[]
     show_tar_tur  None (default) follows details['show_tar_tur'] (bool or TarTur; default off); a bool or TarTur forces it.  Each selected
-             kind with at least one value gets a column after Uncertainty; the definition of the shown term(s) is printed under the table."""
+             kind with at least one value gets a column after Uncertainty; the definition of the shown term(s) is printed under the table.
+    issued_at / reprint_note / record_history  used only to print a saved report again (report_snapshot.py): issued_at (text 'YYYY-MM-DD HH:MM' or a
+             datetime) replaces the 'Report date' of the header; reprint_note is one line drawn in the page footer of every page (the data pages are
+             otherwise identical); record_history=False writes no Asset History event and no snapshot.  All default to the old behaviour.
+    snapshot_context  version stamps from context_for(app), stored with the report snapshot (see report_snapshot.py); no effect on the PDF."""
     mods = _mod_lines(modifications)
+    show_tar_tur_arg = show_tar_tur                    # as passed (the name is reused below for the effective choice); kept for the report snapshot
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import letter
     from reportlab.lib.styles import ParagraphStyle
@@ -366,9 +382,10 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
         return ('' if value is None else str(value)).replace('μ', 'µ').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
     # ---- header strip ---------------------------------------------------------------------------------
+    report_date = issued_at if isinstance(issued_at, str) and issued_at else (issued_at or datetime.now()).strftime('%Y-%m-%d %H:%M')
     info = header + [('Procedure', details.get('procedure')), ('Technician', details.get('technician')),
                      ('Temperature', details.get('temperature')), ('Humidity', details.get('humidity')),
-                     ('Report date', datetime.now().strftime('%Y-%m-%d %H:%M'))]
+                     ('Report date', report_date)]
     info = [(k, v) for k, v in info if v not in (None, '') and k not in HEADER_HIDDEN]
     story = [Paragraph(f'<u>{clean(title)}</u>', title_style), Spacer(1, 6)]
     # two items per line keeps long source citations from running off the page
@@ -520,14 +537,27 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
                 self.translate(W / 2, H / 2); self.rotate(45)
                 self.drawCentredString(0, 0, 'DEMO DATA')
             self.restoreState()
+            if reprint_note:                           # a reprint: one line in the page footer, drawn last; nothing is added to the data area
+                self.saveState()
+                self.setFont(BOLD, 6.2); self.setFillColorRGB(0.69, 0, 0.13)
+                self.drawString(margin, 0.56 * inch, str(reprint_note))
+                self.restoreState()
 
     doc = SimpleDocTemplate(str(path), pagesize=letter, leftMargin=margin, rightMargin=margin,
-                            topMargin=0.62 * inch, bottomMargin=0.68 * inch, title=title, author='Calibration Suite')
+                            topMargin=0.62 * inch, bottomMargin=0.68 * inch, title=title, author='Calibration Suite',
+                            **({'subject': str(reprint_note)} if reprint_note else {}))
     doc.build(story, canvasmaker=Numbered)
-    if not demo:                                   # asset history (lab_registry.sqlite3); never affects the report
+    if not demo and record_history:                # asset history (lab_registry.sqlite3); never affects the report
+        run_id = None
         try:
             import labregistry
-            labregistry.record_run(header, rows, details, report_file=path)
+            run_id = labregistry.record_run(header, rows, details, report_file=path)
+        except Exception:
+            pass
+        try:                                       # the snapshot that lets Asset History print this report again (report_snapshot.py)
+            import report_snapshot
+            report_snapshot.record_issued(run_id, header=header, rows=rows, title=title, details=details, footer_note=footer_note,
+                                          show_tar_tur=show_tar_tur_arg, modifications=mods, issued_at=report_date, context=snapshot_context, demo=demo)
         except Exception:
             pass
     return total
