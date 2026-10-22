@@ -18,12 +18,14 @@ from tests import live_editor_harness as H  # noqa: E402
 
 import drivers  # noqa: E402
 import dacq_verification as D  # noqa: E402
+import fluke8808a_verification as K  # noqa: E402
 import fgen_verification as F  # noqa: E402
 import truevolt_verification as T  # noqa: E402
 import Agilent_34401A as A  # noqa: E402
 import Fluke_8846A_Verification as V  # noqa: E402
 from drivers.simulated import make_dacq_bench, make_dmm_bench  # noqa: E402
 from drivers.simulated_fgen import make_fgen_bench  # noqa: E402
+from drivers.simulated_8808a import make_8808a_bench  # noqa: E402
 
 BOOM = 'simulated read-back mismatch 42'
 
@@ -92,6 +94,21 @@ class DacqFail(FailedMeasure, unittest.TestCase):
         _b, ft, dt = make_dacq_bench('34970A')
         app.io = D.IO('sim', 'sim', cal_model='Fluke 5560A', module='34901A', slot=2, transports=(dt, ft), mods=app.pm_state)
         self.points = [p for p in D.POINTS if p['kind'] == 'DCV' and p['source'] == 'calibrator'][:2]
+
+
+class F8808Fail(FailedMeasure, unittest.TestCase):
+    MODULES = (K,)
+
+    def build(self):
+        K.configure()
+        app = self.app = K.App(self.h.root, '8808A', demo=False)
+        self.h.app = app
+        app.asset.set('A-100')
+        app.serial.set('S')
+        _b, ct, dt = make_8808a_bench('5522A')
+        app.io = K.IO('sim', 'sim', 'Fluke 5522A', 9600, transports=(dt, ct), mods=app.pm_state)
+        app.io.is_manual = app.is_manual
+        self.points = [p for p in K.POINTS if p['kind'] == 'DCV' and p['source'] == 'calibrator'][:2]
 
 
 class FgenFail(FailedMeasure, unittest.TestCase):

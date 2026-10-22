@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DMM_ENGINES = ['handheld_dmm.py', 'truevolt_verification.py', 'dacq_verification.py',
-               'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py']
+               'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py', 'fluke8808a_verification.py']
 
 
 class DcZeroHz(unittest.TestCase):
