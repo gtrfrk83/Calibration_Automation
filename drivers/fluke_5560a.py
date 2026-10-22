@@ -90,9 +90,9 @@ COMMANDS = {
                         risk='locked', verified=False),
 }
 
-COMMANDS['reset'] = cmdreg.reset_cmd(False, '5560A manual: not available to the session that wrote this; 5522A p. 6-35 documents *RST for the 5522A only',
+COMMANDS['reset'] = cmdreg.reset_cmd(True, '5560A Remote Programmers Manual, IEEE-488.2 common commands table (*RST: power-up state, holds off later commands until complete)',
                                      note='*RST: power-up state, output in STANDBY (confirmed afterwards with STBY / OPER?)')
-COMMANDS['opc.query'] = cmdreg.opc_cmd(False, '5560A manual not checked')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(True, '5560A Remote Programmers Manual p. 86 (*OPC?: returns 1 when all pending operations are complete)')
 
 # RS-232 defaults for the 5560A; pass different SerialSettings for other baud rates.
 SERIAL_DEFAULT = SerialSettings(baud=9600, data_bits=8, parity='none', stop_bits=1,

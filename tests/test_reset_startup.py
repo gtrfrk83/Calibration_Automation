@@ -85,7 +85,7 @@ class DriversDeclareReset(unittest.TestCase):
         """Only these resets are backed by a manual page; everything else is flagged unverified in the report."""
         ok = sorted(c.__name__ for c in all_driver_classes()
                     if not c.RESET_EXEMPT and cmdreg.merge_commands(c)['reset'].verified)
-        self.assertEqual(ok, ['Fluke5522A', 'Fluke5522AScope', 'Fluke5790B', 'Fluke96270A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x'])
+        self.assertEqual(ok, ['Fluke5522A', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke96270A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x'])
 
 
 # ------------------------------------------------------------------------------------------------------------------------------
