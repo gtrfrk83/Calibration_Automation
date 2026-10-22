@@ -67,10 +67,10 @@
   "lecroy_ws4104hd": {
    "concat_f": 0,
    "format_f": 0,
-   "helper_f": 3,
-   "query_f": 1,
-   "query_retry_f": 3,
-   "write_f": 9
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
   },
   "reference_instruments": {
    "concat_f": 0,
@@ -89,12 +89,12 @@
    "write_f": 2
   },
   "tektronix_mdo4000c": {
-   "concat_f": 1,
-   "format_f": 1,
-   "helper_f": 9,
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
    "query_f": 0,
    "query_retry_f": 0,
-   "write_f": 33
+   "write_f": 0
   }
  },
  "schema": 1
