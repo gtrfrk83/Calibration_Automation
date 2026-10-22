@@ -24,12 +24,19 @@ class Fluke5522AScope(Fluke5522A):
         mode = self.query('SCOPE?').strip().upper()
         if SCOPE_VOLT_MODE not in mode:
             raise InstrumentError(f'Calibrator SCOPE mode not confirmed: SCOPE?={mode!r} (expected VOLT)')
-        self.write(f'OUT_IMP {source_impedance}')
-        self.check_error(f'OUT_IMP {source_impedance}')
+        # 5522A Operators Manual p. 10-31 (and the 5560A Remote Programmers Manual): OUT_IMP takes Z50 or Z1M; '1M' / '50' are rejected
+        # with 'Bad parameter unit'.
+        self.write(f'OUT_IMP Z{source_impedance}')
+        self.check_error(f'OUT_IMP Z{source_impedance}')
         reply = self.query('OUT_IMP?').strip().upper()
         want = {'1M': 1e6, '50': 50.0}[source_impedance]
+        first = reply.split(',')[0].strip()
+        if first.startswith('Z'):                      # the manual's example reply: Z1M / Z50
+            if first != f'Z{source_impedance}':
+                raise InstrumentError(f'Unexpected SCOPE output impedance: {reply!r}')
+            return
         try:
-            value = float(reply.split(',')[0])
+            value = float(first)
         except ValueError:
             raise InstrumentError(f'Unexpected OUT_IMP? reply {reply!r}')
         if abs(value - want) > 0.01 * want:

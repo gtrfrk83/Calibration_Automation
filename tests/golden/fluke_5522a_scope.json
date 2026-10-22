@@ -9,7 +9,7 @@
     "5522A|<<|0,\"No error\"",
     "5522A|>>|SCOPE?",
     "5522A|<<|VOLT",
-    "5522A|>>|OUT_IMP 1M",
+    "5522A|>>|OUT_IMP Z1M",
     "5522A|>>|ERR?",
     "5522A|<<|0,\"No error\"",
     "5522A|>>|OUT_IMP?",
@@ -34,7 +34,7 @@
     ],
     [
      "W",
-     "OUT_IMP 1M"
+     "OUT_IMP Z1M"
     ],
     [
      "Q",
@@ -57,7 +57,7 @@
     "5522A|<<|0,\"No error\"",
     "5522A|>>|SCOPE?",
     "5522A|<<|VOLT",
-    "5522A|>>|OUT_IMP 50",
+    "5522A|>>|OUT_IMP Z50",
     "5522A|>>|ERR?",
     "5522A|<<|0,\"No error\"",
     "5522A|>>|OUT_IMP?",
@@ -82,7 +82,7 @@
     ],
     [
      "W",
-     "OUT_IMP 50"
+     "OUT_IMP Z50"
     ],
     [
      "Q",
@@ -134,7 +134,7 @@
     "5522A|<<|0,\"No error\"",
     "5522A|>>|SCOPE?",
     "5522A|<<|VOLT",
-    "5522A|>>|OUT_IMP 1M",
+    "5522A|>>|OUT_IMP Z1M",
     "5522A|>>|ERR?",
     "5522A|<<|0,\"No error\"",
     "5522A|>>|OUT_IMP?",
@@ -159,7 +159,7 @@
     ],
     [
      "W",
-     "OUT_IMP 1M"
+     "OUT_IMP Z1M"
     ],
     [
      "Q",
@@ -182,14 +182,14 @@
     "5522A|<<|0,\"No error\"",
     "5522A|>>|SCOPE?",
     "5522A|<<|VOLT",
-    "5522A|>>|OUT_IMP 1M",
+    "5522A|>>|OUT_IMP Z1M",
     "5522A|>>|ERR?",
     "5522A|<<|0,\"No error\"",
     "5522A|>>|OUT_IMP?",
     "5522A|<<|Z1M"
    ],
    "method": "Fluke5522AScope.select_scope_dcv",
-   "result": "raised InstrumentError: Unexpected OUT_IMP? reply 'Z1M'",
+   "result": "returned None",
    "wire": [
     [
      "W",
@@ -207,7 +207,7 @@
     ],
     [
      "W",
-     "OUT_IMP 1M"
+     "OUT_IMP Z1M"
     ],
     [
      "Q",

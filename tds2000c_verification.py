@@ -372,7 +372,7 @@ class Runner:
             self.ensure_imp_5560('1M')
         else:
             cal.select_scope_dcv('1M')
-            cal.check_error('SCOPE VOLT / OUT_IMP 1M')   # 5520A/5522A path (unverified): name the command if it is rejected
+            cal.check_error('SCOPE VOLT / OUT_IMP Z1M')   # 5520A/5522A path: SCOPE VOLT and OUT_IMP Z1M are in the 5522A Operators Manual ch. 10
 
     def apply_dc(self, volts, settle=2.0):
         cal = self.io.cal
@@ -394,8 +394,8 @@ class Runner:
         if self.io.is_5560:
             self.ensure_imp_5560('50')          # 'OUT_IMP 50' is rejected (-117) on the 5560A: read first, write Z50 only if needed
         else:
-            cal.write('OUT_IMP 50')
-            cal.check_error('OUT_IMP 50')
+            cal.write('OUT_IMP Z50')            # 5522A manual p. 10-31: the argument is Z50 / Z1M
+            cal.check_error('OUT_IMP Z50')
 
     def ensure_imp_5560(self, want):
         """5560A SCOPE output impedance: read OUT_IMP?; only if it is not already `want` ('1M' or '50') write 'OUT_IMP Z1M' / 'Z50' ONCE (argument form
