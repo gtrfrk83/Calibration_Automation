@@ -27,6 +27,10 @@ Included
                             33 numeric readings + 2 continuity (beeper) checks; ids 2-1 .. 2-35; the meter is autoranging so each step's 'range' is the range the reading falls in (p. 5).
                             Step 8 (AC volts, 50 mV, 45 Hz) prints 0.47 / 0.53 V ac; 0.047 / 0.053 V ac is used (printed text kept in step.printed_limits). build_77_spec.py
                             checks every limit against the +/-(% of reading + counts) accuracy table (p. 5) and fails if one disagrees.
+  fluke_170_series_pv.json  Fluke 175 / 177 / 179 Calibration Information, Table 2 (175, pp. 10-11) and Table 3 (177 / 179, pp. 12-13) (schema 2, written by build_170_spec.py from the page images): per-step 'models' as in the 110-series spec;
+                            175 = 52 points, 177 = 51, 179 = 54 (adds 3 temperature points, TEMP kind, degC). Steps are numbered in table order (the tables print no numbers): ids 2-1..2-52 (175), 3-1..3-54 (177 / 179).
+                            THREE printed values are corrected (step.printed_limits keeps the printed text; the report row Description says 'limits corrected'); format-only changes keep step.printed_text.
+                            Frequency rows (AC / DC volts frequency) are sourced as AC volts and read in Hz / kHz: no_uncertainty true. build_170_spec.py checks every limit against the published accuracy and fails on a disagreement.
   klein_mm325_pv.json       Klein Tools MM325 instruction manual (schema 3, written by build_mm325.py): one point per range at 90 %, AC at 60 Hz;
                             adds groups{} (cable-change prompts + hook-up diagram), dial{} (picture and position of every range) and options{}
                             (range_prompt, hv_threshold_v); per step: dial, dial_text, tol_text, max_on_s / recovery_s (10 A duty limit)
@@ -48,6 +52,9 @@ Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, f
   step.report_desc          optional: the report row's Description (77 IV: '99.99 kHz range (5 V applied)' for the frequency step, which would otherwise print the 110-series
                             '(2 V applied)' text, and '6.000 V range (limits corrected)' for step 8).
   step.printed_limits       optional record of limits as printed when the spec uses corrected ones (not read by the engine).
+  step.printed_text         optional (Fluke 170 series): the printed limit text when the spec writes the same numbers at the display resolution (50.1 -> 50.10); not read by the engine.
+  step.no_freq_suffix       optional true (Fluke 170 series Hz-unit frequency rows): the report Nominal has no 'at f Hz' suffix.
+  step.no_uncertainty       optional true (Fluke 170 series frequency rows): the report row gets no Uncertainty (and TAR / TUR stay blank); the 77 IV / 110 / 87V frequency steps do not set it (existing behaviour, unchanged).
 
 Square-wave sources in handheld specs (additive; handheld_dmm.py, procspec.validate_manual_reading)
   step.kind                 DUTY    square-wave source, the meter reads the duty cycle (%) (87V 1-16)

@@ -73,5 +73,4 @@ Editing one test point (right-click > Edit)
   it is measured again against the new limit.
   Choose "This run only", "This asset" or "This model". Changes start at the next point, never in the middle of one. Every change is recorded (who, when, old,
   new, reason, point). PDF reports are unchanged. Demo mode is marked DEMO and always run-only. The WaveSurfer procedure shows no commands (tolerance only).
-  "All procedure changes..." opens the older window for settle times, skipping points, notes and commands that apply to the whole instrument.
 

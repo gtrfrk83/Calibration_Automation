@@ -50,6 +50,9 @@ METERS = {
     # Fluke 77 Series IV: jacks named as printed on the case (photo of the real terminals): 2 x 2 block, top-left '400 mA', bottom-left '10A'
     # (the two fused inputs), top-right 'V Ω' (red), bottom-right 'COM' (black)
     'fluke77': dict(name='Fluke 77 Series IV', jacks={'vohm': 'V Ω', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'}),
+    # Fluke 175 / 177 / 179: the Calibration Information (pp. 2, 3, 9) names the jacks VΩ, 400 mA, 10 A and COM; their ORDER on the case is not shown in it (Figure 1 p. 3 draws
+    # only the VΩ jack and one current jack): UNVERIFIED, confirm on the real meter
+    'fluke170': dict(name='Fluke 175 / 177 / 179', jacks={'vohm': 'VΩ', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'}),
 }
 RED_JACK = {'VOHM': 'vohm', 'UAMP': 'ma', 'AMP10': 'a10'}
 
@@ -59,6 +62,7 @@ AVAILABLE = {
     'fluke110': ('VOHM', 'UAMP', 'AMP10', 'TEMP', 'VOLTALERT'),
     'fluke87v': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
     'fluke77': ('VOHM', 'UAMP', 'AMP10'),
+    'fluke170': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
 }
 
 # extra text for particular meters
@@ -72,6 +76,12 @@ EXTRA = {
                                       'The meter shows LEAd when the rotary switch moves to or from the mA position: check the leads are in the right jacks (p. 3).'),
     ('fluke77', 'AMP10'): dict(caution='The 10A input is fused at 11 A: never apply more than 10 A (20 A for 30 s at most, then 10 minutes rest; manual pp. 4, 6). '
                                        'Use leads rated for 10 A. The meter shows LEAd when the rotary switch moves to or from the A position (p. 3).'),
+    ('fluke170', 'UAMP'): dict(caution='The 400 mA input is fused at 440 mA: never apply more than the point being tested (manual pp. 2, 3, 18). '
+                                       'The meter shows LEAd when the rotary switch moves to or from the mA position: check the leads are in the right jacks (p. 2). '
+                                       'For AC current, short the VΩ input to COM or leave it unconnected (p. 9).'),
+    ('fluke170', 'AMP10'): dict(caution='The 10A input is fused at 11 A: never apply more than the point being tested (manual pp. 2, 3, 18). Use leads rated for 10 A. '
+                                        'The meter shows LEAd when the rotary switch moves to or from the A position (p. 2). For AC current, short the VΩ input to COM or leave it unconnected (p. 9).'),
+    ('fluke170', 'TEMP'): dict(caution='Use the correct cable (Table 3 note 3). The meter and the thermocouple adapter must be at the same temperature: allow 20 minutes before the temperature points (Table 3 note 4).'),
 }
 GENERIC_CAUTION = {
     'AMP10': 'Leads, plugs and terminals carry high current: use leads rated for 10 A or more, check the meter fuse, and make sure every connection is tight.',

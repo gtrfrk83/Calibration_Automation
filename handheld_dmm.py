@@ -1462,7 +1462,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                                                         frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None),
                                                         standard=self.calibrator_model())
             a = p.get('applied') or {}
-            freq = a.get('frequency') if p['kind'] in ('ACV', 'ACI') and p['display_unit'] != 'kHz' else None
+            freq = a.get('frequency') if p['kind'] in ('ACV', 'ACI') and p['display_unit'] != 'kHz' and not p.get('no_freq_suffix') else None      # no_freq_suffix: opt-in per point (Fluke 170 series Hz-unit frequency rows)
             row = report_pdf.cert_row(f'{p["range"]} range' if p['range'] else describe(p), p['nominal'], clean(Decimal(p['low'])), clean(Decimal(p['high'])),
                                       unit, reading=r['reading'] if r['reading'] is not None else None, failed=failed, section=p['section'],
                                       frequency=freq, uncertainty=unc)
