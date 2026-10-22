@@ -1,0 +1,579 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Keysight34970A.connect",
+   "log": [
+    "34970A|>>|SYST:REM",
+    "34970A|>>|*CLS",
+    "34970A|>>|*IDN?",
+    "34970A|<<|Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00"
+   ],
+   "method": "Keysight34970A.connect",
+   "result": "returned <Keysight34970A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34970A.cleanup",
+   "log": [
+    "34970A|>>|SYST:LOC"
+   ],
+   "method": "Keysight34970A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SYST:LOC"
+    ]
+   ]
+  },
+  {
+   "call": "2",
+   "case": "KeysightDacq.module_type",
+   "log": [
+    "34970A|>>|SYST:CTYP? 200",
+    "34970A|<<|AGILENT TECHNOLOGIES,34901A,0,1.0"
+   ],
+   "method": "KeysightDacq.module_type",
+   "result": "returned 'AGILENT TECHNOLOGIES,34901A,0,1.0'",
+   "wire": [
+    [
+     "Q",
+     "SYST:CTYP? 200",
+     "AGILENT TECHNOLOGIES,34901A,0,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "'34901A', 2",
+   "case": "KeysightDacq.require_module",
+   "log": [
+    "34970A|>>|SYST:CTYP? 200",
+    "34970A|<<|AGILENT TECHNOLOGIES,34901A,0,1.0"
+   ],
+   "method": "KeysightDacq.require_module",
+   "result": "returned 'AGILENT TECHNOLOGIES,34901A,0,1.0'",
+   "wire": [
+    [
+     "Q",
+     "SYST:CTYP? 200",
+     "AGILENT TECHNOLOGIES,34901A,0,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "'34902A', 2",
+   "case": "KeysightDacq.require_module[wrong module]",
+   "log": [
+    "34970A|>>|SYST:CTYP? 200",
+    "34970A|<<|AGILENT TECHNOLOGIES,34901A,0,1.0"
+   ],
+   "method": "KeysightDacq.require_module",
+   "result": "raised InstrumentError: Slot 2 holds \"AGILENT TECHNOLOGIES,34901A,0,1.0\", not a 34902A. Install the 34902A in slot 2 (or choose the module that is installed).",
+   "wire": [
+    [
+     "Q",
+     "SYST:CTYP? 200",
+     "AGILENT TECHNOLOGIES,34901A,0,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "'34901A', 3",
+   "case": "KeysightDacq.require_module[empty slot]",
+   "log": [
+    "34970A|>>|SYST:CTYP? 300",
+    "34970A|<<|AGILENT TECHNOLOGIES,0,0,0"
+   ],
+   "method": "KeysightDacq.require_module",
+   "result": "raised InstrumentError: Slot 3 holds \"AGILENT TECHNOLOGIES,0,0,0\", not a 34901A. Install the 34901A in slot 3 (or choose the module that is installed).",
+   "wire": [
+    [
+     "Q",
+     "SYST:CTYP? 300",
+     "AGILENT TECHNOLOGIES,0,0,0"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'FREQ', 'nominal': 1000.0, 'range': 1}, 210",
+   "case": "KeysightDacq.configure_point[FREQ]",
+   "log": [
+    "34970A|>>|CONF:FREQ 1000,(@210)",
+    "34970A|>>|FREQ:VOLT:RANG 1,(@210)",
+    "34970A|>>|FREQ:APER 1,(@210)",
+    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ 1000,(@210)"
+    ],
+    [
+     "W",
+     "FREQ:VOLT:RANG 1,(@210)"
+    ],
+    [
+     "W",
+     "FREQ:APER 1,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'plc': 1, 'range': 10}, 210",
+   "case": "KeysightDacq.configure_point[DCV plc]",
+   "log": [
+    "34970A|>>|CONF:VOLT:DC 10,(@210)",
+    "34970A|>>|VOLT:DC:NPLC 1,(@210)",
+    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:DC 10,(@210)"
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 1,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'range': 10}, 210",
+   "case": "KeysightDacq.configure_point[DCV no plc]",
+   "log": [
+    "34970A|>>|CONF:VOLT:DC 10,(@210)",
+    "34970A|>>|VOLT:DC:NPLC 10,(@210)",
+    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:DC 10,(@210)"
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 10,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'ACV', 'range': 1}, 210",
+   "case": "KeysightDacq.configure_point[ACV default filter]",
+   "log": [
+    "34970A|>>|CONF:VOLT:AC 1,(@210)",
+    "34970A|>>|VOLT:AC:BAND 3,(@210)",
+    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:AC 1,(@210)"
+    ],
+    [
+     "W",
+     "VOLT:AC:BAND 3,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'filter_hz': 20, 'kind': 'ACV', 'range': 1}, 210",
+   "case": "KeysightDacq.configure_point[ACV 20 Hz]",
+   "log": [
+    "34970A|>>|CONF:VOLT:AC 1,(@210)",
+    "34970A|>>|VOLT:AC:BAND 20,(@210)",
+    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:AC 1,(@210)"
+    ],
+    [
+     "W",
+     "VOLT:AC:BAND 20,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCI', 'range': 0.01}, 221",
+   "case": "KeysightDacq.configure_point[DCI]",
+   "log": [
+    "34970A|>>|CONF:CURR:DC 0.01,(@221)",
+    "34970A|>>|CURR:DC:NPLC 10,(@221)",
+    "34970A|>>|ROUT:SCAN (@221)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:CURR:DC 0.01,(@221)"
+    ],
+    [
+     "W",
+     "CURR:DC:NPLC 10,(@221)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@221)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'filter_hz': 200, 'kind': 'ACI', 'range': 0.1}, 221",
+   "case": "KeysightDacq.configure_point[ACI]",
+   "log": [
+    "34970A|>>|CONF:CURR:AC 0.1,(@221)",
+    "34970A|>>|CURR:AC:BAND 200,(@221)",
+    "34970A|>>|ROUT:SCAN (@221)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:CURR:AC 0.1,(@221)"
+    ],
+    [
+     "W",
+     "CURR:AC:BAND 200,(@221)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@221)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM2', 'range': 1000}, 210",
+   "case": "KeysightDacq.configure_point[OHM2]",
+   "log": [
+    "34970A|>>|CONF:RES 1000,(@210)",
+    "34970A|>>|RES:NPLC 10,(@210)",
+    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:RES 1000,(@210)"
+    ],
+    [
+     "W",
+     "RES:NPLC 10,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM4', 'range': 1000}, 210",
+   "case": "KeysightDacq.configure_point[OHM4]",
+   "log": [
+    "34970A|>>|CONF:FRES 1000,(@210)",
+    "34970A|>>|FRES:NPLC 10,(@210)",
+    "34970A|>>|ROUT:SCAN (@210)",
+    "34970A|>>|TRIG:SOUR IMM"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FRES 1000,(@210)"
+    ],
+    [
+     "W",
+     "FRES:NPLC 10,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ]
+   ]
+  },
+  {
+   "call": "{'filter_hz': 50, 'kind': 'ACV', 'range': 1}, 210",
+   "case": "KeysightDacq.configure_point[ACV bad filter]",
+   "log": [
+    "34970A|>>|CONF:VOLT:AC 1,(@210)"
+   ],
+   "method": "KeysightDacq.configure_point",
+   "result": "raised InstrumentError: AC filter must be 3, 20 or 200 Hz, not 50",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:AC 1,(@210)"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'CAP', 'range': 1e-07}, 210",
+   "case": "KeysightDacq.configure_point[CAP unsupported]",
+   "log": [],
+   "method": "KeysightDacq.configure_point",
+   "result": "raised InstrumentError: Keysight 34970A driver does not support CAP",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "KeysightDacq.read",
+   "log": [
+    "34970A|>>|READ?",
+    "34970A|<<|+1.000002000E+00"
+   ],
+   "method": "KeysightDacq.read",
+   "result": "returned 1.000002",
+   "wire": [
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "KeysightDacq.check_errors[ok]",
+   "log": [
+    "34970A|>>|SYST:ERR?",
+    "34970A|<<|+0,\"No error\""
+   ],
+   "method": "KeysightDacq.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'configuring'",
+   "case": "KeysightDacq.check_errors[errors]",
+   "log": [
+    "34970A|>>|SYST:ERR?",
+    "34970A|<<|-113,\"Undefined header\"",
+    "34970A|>>|SYST:ERR?",
+    "34970A|<<|-221,\"Settings conflict\"",
+    "34970A|>>|SYST:ERR?",
+    "34970A|<<|+0,\"No error\""
+   ],
+   "method": "KeysightDacq.check_errors",
+   "result": "raised InstrumentError: Keysight 34970A reported an error after configuring: -113,\"Undefined header\" | -221,\"Settings conflict\"",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "-113,\"Undefined header\""
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "-221,\"Settings conflict\""
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "KeysightDacq.read[overload]",
+   "log": [
+    "34970A|>>|READ?",
+    "34970A|<<|+9.90000000E+37"
+   ],
+   "method": "KeysightDacq.read",
+   "result": "raised InstrumentError: Invalid DMM reading: +9.90000000E+37 (overload or open channel)",
+   "wire": [
+    [
+     "Q",
+     "READ?",
+     "+9.90000000E+37"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34972A.connect",
+   "log": [
+    "34972A|>>|*CLS",
+    "34972A|>>|*IDN?",
+    "34972A|<<|Agilent Technologies,34972A,SIM0001,1.20-1.20-1.00"
+   ],
+   "method": "Keysight34972A.connect",
+   "result": "returned <Keysight34972A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,34972A,SIM0001,1.20-1.20-1.00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34972A.cleanup",
+   "log": [],
+   "method": "Keysight34972A.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "KeysightDacq.connect[wrong model]",
+   "log": [
+    "34972A|>>|*CLS",
+    "34972A|>>|*IDN?",
+    "34972A|<<|Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00"
+   ],
+   "method": "KeysightDacq.connect",
+   "result": "raised InstrumentError: Unexpected instrument identification: Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "keysight_dacq",
+ "schema": 1
+}

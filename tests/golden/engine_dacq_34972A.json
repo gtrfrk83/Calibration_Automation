@@ -1,0 +1,914 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "dacq_verification.IO.__init__",
+   "log": [
+    "5560A|>>|*IDN?",
+    "5560A|<<|FLUKE,5560A,SIM0001,1.0",
+    "5560A|>>|*CLS",
+    "34972A|>>|*CLS",
+    "34972A|>>|*IDN?",
+    "34972A|<<|Agilent Technologies,34972A,SIM0001,1.20-1.20-1.00",
+    "34972A|>>|SYST:CTYP? 200",
+    "34972A|<<|AGILENT TECHNOLOGIES,34901A,0,1.0",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.__init__",
+   "result": "returned <dacq_verification.IO object>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5560A,SIM0001,1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,34972A,SIM0001,1.20-1.20-1.00"
+    ],
+    [
+     "Q",
+     "SYST:CTYP? 200",
+     "AGILENT TECHNOLOGIES,34901A,0,1.0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Zero offset, DC volts, 100.0 mV range (input shorted)', 'error': 4e-06, 'group': 'ZERO_SHORT', 'id': 1, 'input': 'short', 'kind': 'DCV', 'limits': {'1y': 4e-06, '24h': 3.5e-06, '90d': 4e-06}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 0.1, 'role': 'short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "dacq_verification.IO.measure[DCV#1]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:VOLT:DC 0.1,(@209)",
+    "34972A|>>|VOLT:DC:NPLC 10,(@209)",
+    "34972A|>>|ROUT:SCAN (@209)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "34972A|>>|READ?",
+    "34972A|<<|+2.000000000E-12",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1,(@209)"
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 10,(@209)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@209)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Zero offset, 4-wire ohms, 100.0 Ω range (input shorted)', 'error': 0.004, 'group': 'ZERO_SHORT', 'id': 6, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 0.004, '24h': 0.0035, '90d': 0.004}, 'nominal': 0.0, 'optional': False, 'page': '80-81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'short', 'section': 'zero_short', 'section_title': 'Zero offset: shorted input', 'setup': 'Low-thermal copper short on the input channel (and its 4-wire partner channel). The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "dacq_verification.IO.measure[OHM4#6]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:FRES 100,(@209)",
+    "34972A|>>|FRES:NPLC 10,(@209)",
+    "34972A|>>|ROUT:SCAN (@209)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "34972A|>>|READ?",
+    "34972A|<<|+2.000000000E-12",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:FRES 100,(@209)"
+    ],
+    [
+     "W",
+     "FRES:NPLC 10,(@209)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@209)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Zero offset, DC current, 10.00 mA range (input open)', 'error': 2e-06, 'group': 'ZERO_OPEN', 'id': 13, 'input': 'open', 'kind': 'DCI', 'limits': {'1y': 2e-06, '24h': 1e-06, '90d': 2e-06}, 'nominal': 0.0, 'optional': False, 'page': '80', 'plc': 10, 'quick': False, 'range': 0.01, 'role': 'current', 'section': 'zero_open', 'section_title': 'Zero offset: current open', 'setup': 'Current input channel left OPEN. The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "dacq_verification.IO.measure[DCI#13]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:CURR:DC 0.01,(@221)",
+    "34972A|>>|CURR:DC:NPLC 10,(@221)",
+    "34972A|>>|ROUT:SCAN (@221)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "34972A|>>|READ?",
+    "34972A|<<|+2.000000000E-12",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 0.01,(@221)"
+    ],
+    [
+     "W",
+     "CURR:DC:NPLC 10,(@221)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@221)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DC volts -10.00 V, 10.00 V range', 'error': 0.0004, 'group': 'DCV', 'id': 16, 'kind': 'DCV', 'limits': {'1y': 0.00039999999999999996, '24h': 0.00018999999999999998, '90d': 0.00025}, 'nominal': -10, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 10, 'role': 'input', 'section': 'dcv', 'section_title': 'DC volts gain', 'setup': 'Calibrator voltage output to the input channel HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "dacq_verification.IO.measure[DCV#16]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:VOLT:DC 10,(@210)",
+    "34972A|>>|VOLT:DC:NPLC 10,(@210)",
+    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "5560A|>>|OUT -10V",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34972A|>>|READ?",
+    "34972A|<<|-1.000002000E+01",
+    "5560A|>>|STBY",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned -10.00002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 10,(@210)"
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 10,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT -10V"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "-1.000002000E+01"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 22, 'kind': 'OHM4', 'limits': {'1y': 0.014, '24h': 0.006500000000000001, '90d': 0.012}, 'nominal': 100, 'optional': False, 'page': '82', 'plc': 10, 'quick': False, 'range': 100, 'role': 'input', 'section': 'ohm4', 'section_title': '4-wire ohms gain', 'setup': 'Calibrator resistance output, 4-wire: force to the input channel, sense to its 4-wire partner channel.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "dacq_verification.IO.measure[OHM4#22]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:FRES 100,(@210)",
+    "34972A|>>|FRES:NPLC 10,(@210)",
+    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 100OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34972A|>>|READ?",
+    "34972A|<<|+1.000010000E+02",
+    "5560A|>>|STBY",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 100.001",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:FRES 100,(@210)"
+    ],
+    [
+     "W",
+     "FRES:NPLC 10,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 100OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000010000E+02"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DC current 10.00 mA, 10.00 mA range', 'error': 7e-06, 'group': 'DCI', 'id': 29, 'kind': 'DCI', 'limits': {'1y': 7e-06, '24h': 1.5e-06, '90d': 4.9999999999999996e-06}, 'nominal': 0.01, 'optional': False, 'page': '83', 'plc': 10, 'quick': False, 'range': 0.01, 'role': 'current', 'section': 'dci', 'section_title': 'DC current gain', 'setup': 'Calibrator current output to the current input channel.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "dacq_verification.IO.measure[DCI#29]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:CURR:DC 0.01,(@221)",
+    "34972A|>>|CURR:DC:NPLC 10,(@221)",
+    "34972A|>>|ROUT:SCAN (@221)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 0.01A",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34972A|>>|READ?",
+    "34972A|<<|+1.000002000E-02",
+    "5560A|>>|STBY",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 0.01000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 0.01,(@221)"
+    ],
+    [
+     "W",
+     "CURR:DC:NPLC 10,(@221)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@221)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.01A"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E-02"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter', 'error': 0.0001, 'filter_hz': 3, 'frequency': 1000.0, 'group': 'ACV', 'id': 32, 'kind': 'ACV', 'limits': {'1y': 9.999999999999999e-05, '24h': 7e-05, '90d': 8.999999999999999e-05}, 'nominal': 0.1, 'optional': False, 'page': '84', 'quick': False, 'range': 0.1, 'role': 'input', 'section': 'acv', 'section_title': 'AC volts gain', 'setup': 'Calibrator AC voltage output to the input channel HI / LO. 3 Hz AC filter (7 s per reading).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "dacq_verification.IO.measure[ACV#32]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:VOLT:AC 0.1,(@210)",
+    "34972A|>>|VOLT:AC:BAND 3,(@210)",
+    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 0.1V,1000Hz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34972A|>>|READ?",
+    "34972A|<<|+1.000002000E-01",
+    "5560A|>>|STBY",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 0.1000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:AC 0.1,(@210)"
+    ],
+    [
+     "W",
+     "VOLT:AC:BAND 3,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.1V,1000Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     4.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E-01"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'AC current 10.00 mA @ 1.000 kHz, 10.00 mA range, 3 Hz filter', 'error': 1.4e-05, 'filter_hz': 3, 'frequency': 1000.0, 'group': 'ACI', 'id': 44, 'kind': 'ACI', 'limits': {'1y': 1.4e-05, '24h': 1.4e-05, '90d': 1.4e-05}, 'nominal': 0.01, 'optional': False, 'page': '85', 'quick': False, 'range': 0.01, 'role': 'current', 'section': 'aci', 'section_title': 'AC current gain', 'setup': 'Calibrator AC current output to the current input channel. 3 Hz AC filter (7 s per reading).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "dacq_verification.IO.measure[ACI#44]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:CURR:AC 0.01,(@221)",
+    "34972A|>>|CURR:AC:BAND 3,(@221)",
+    "34972A|>>|ROUT:SCAN (@221)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 0.01A,1000Hz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34972A|>>|READ?",
+    "34972A|<<|+1.000002000E-02",
+    "5560A|>>|STBY",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 0.01000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:AC 0.01,(@221)"
+    ],
+    [
+     "W",
+     "CURR:AC:BAND 3,(@221)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@221)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.01A,1000Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     4.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E-02"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'amplitude': 0.01, 'description': 'Frequency 100.0 Hz at 10.00 mV rms, 100.0 mV range', 'error': 0.1, 'group': 'FREQ', 'id': 48, 'kind': 'FREQ', 'limits': {'1y': 0.1, '24h': 0.06, '90d': 0.1}, 'nominal': 100, 'note': 'Isolate the calibrator output from earth ground for this point (manual footnote b).', 'optional': False, 'page': '86', 'quick': False, 'range': 0.1, 'role': 'input', 'section': 'freq', 'section_title': 'Frequency gain', 'setup': 'Calibrator AC voltage at the stated level and frequency to the input channel HI / LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'Hz'}",
+   "case": "dacq_verification.IO.measure[FREQ#48]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:FREQ 100,(@210)",
+    "34972A|>>|FREQ:VOLT:RANG 0.1,(@210)",
+    "34972A|>>|FREQ:APER 1,(@210)",
+    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 0.01V,100Hz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34972A|>>|READ?",
+    "34972A|<<|+1.000000200E+02",
+    "5560A|>>|STBY",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 100.00002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:FREQ 100,(@210)"
+    ],
+    [
+     "W",
+     "FREQ:VOLT:RANG 0.1,(@210)"
+    ],
+    [
+     "W",
+     "FREQ:APER 1,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.01V,100Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000000200E+02"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Zero offset, 2-wire ohms, 100.0 Ω range (input shorted)', 'error': 4.004, 'group': 'ZERO_SHORT', 'id': 50, 'input': 'short', 'kind': 'OHM2', 'limits': {'1y': 4.004, '24h': 4.0035, '90d': 4.004}, 'nominal': 0.0, 'note': '2-wire: the manual says to add 4 ohm of error (footnote c); applied to the limit.', 'opt': 'ohm2', 'optional': True, 'page': '81', 'plc': 10, 'quick': False, 'range': 100, 'role': 'short', 'section': 'zero_ohm2', 'section_title': '2-wire ohms zero (optional)', 'setup': 'Short on the input channel. The calibrator is not used.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "dacq_verification.IO.measure[OHM2#50]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:RES 100,(@209)",
+    "34972A|>>|RES:NPLC 10,(@209)",
+    "34972A|>>|ROUT:SCAN (@209)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "34972A|>>|READ?",
+    "34972A|<<|+2.000000000E-12",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:RES 100,(@209)"
+    ],
+    [
+     "W",
+     "RES:NPLC 10,(@209)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@209)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '2-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 1.014, 'group': 'OHM2', 'id': 57, 'kind': 'OHM2', 'limits': {'1y': 1.014, '24h': 1.0065, '90d': 1.012}, 'nominal': 100, 'note': '2-wire: the manual says to add 1 ohm of error (footnote d) and to use a 1 s channel delay with the 5700 in 2-wire compensated mode.', 'opt': 'ohm2', 'optional': True, 'page': '83', 'plc': 10, 'quick': False, 'range': 100, 'role': 'input', 'section': 'ohm2', 'section_title': '2-wire ohms gain (optional)', 'setup': 'Calibrator resistance output, 2-wire, to the input channel HI / LO (34901A channel 10 / 34902A channel 8 recommended).', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "dacq_verification.IO.measure[OHM2#57]",
+   "log": [
+    "5560A|>>|STBY",
+    "34972A|>>|CONF:RES 100,(@210)",
+    "34972A|>>|RES:NPLC 10,(@210)",
+    "34972A|>>|ROUT:SCAN (@210)",
+    "34972A|>>|TRIG:SOUR IMM",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 100OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34972A|>>|READ?",
+    "34972A|<<|+1.000010000E+02",
+    "5560A|>>|STBY",
+    "34972A|>>|SYST:ERR?",
+    "34972A|<<|+0,\"No error\""
+   ],
+   "method": "dacq_verification.IO.measure",
+   "result": "returned 100.001",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:RES 100,(@210)"
+    ],
+    [
+     "W",
+     "RES:NPLC 10,(@210)"
+    ],
+    [
+     "W",
+     "ROUT:SCAN (@210)"
+    ],
+    [
+     "W",
+     "TRIG:SOUR IMM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 100OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000010000E+02"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "dacq_verification.IO.close",
+   "log": [
+    "5560A|>>|STBY"
+   ],
+   "method": "dacq_verification.IO.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_dacq_34972A",
+ "schema": 1
+}

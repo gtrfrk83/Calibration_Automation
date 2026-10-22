@@ -1,0 +1,919 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Keysight33210A.connect",
+   "log": [
+    "33210A|>>|*IDN?",
+    "33210A|<<|Agilent Technologies,33210A,SIM0001,1.00-1.00",
+    "33210A|>>|*CLS",
+    "33210A|>>|OUTP OFF",
+    "33210A|>>|OUTP?",
+    "33210A|<<|0",
+    "33210A|>>|SYST:ERR?",
+    "33210A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight33210A.connect",
+   "result": "returned <Keysight33210A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33210A,SIM0001,1.00-1.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight33220A.connect",
+   "log": [
+    "33220A|>>|*IDN?",
+    "33220A|<<|Agilent Technologies,33220A,SIM0001,1.00-1.00",
+    "33220A|>>|*CLS",
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight33220A.connect",
+   "result": "returned <Keysight33220A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33220A,SIM0001,1.00-1.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Keysight332xx.check_errors[ok]",
+   "log": [
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight332xx.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "Keysight332xx.output[on]",
+   "log": [
+    "33220A|>>|OUTP ON",
+    "33220A|>>|OUTP?",
+    "33220A|<<|1"
+   ],
+   "method": "Keysight332xx.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP ON"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "Keysight332xx.output[off]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0"
+   ],
+   "method": "Keysight332xx.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'INF'",
+   "case": "Keysight332xx.set_load[INF]",
+   "log": [
+    "33220A|>>|OUTP:LOAD INF",
+    "33220A|>>|OUTP:LOAD?",
+    "33220A|<<|9.900000E+37"
+   ],
+   "method": "Keysight332xx.set_load",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP:LOAD INF"
+    ],
+    [
+     "Q",
+     "OUTP:LOAD?",
+     "9.900000E+37"
+    ]
+   ]
+  },
+  {
+   "call": "50",
+   "case": "Keysight332xx.set_load[50]",
+   "log": [
+    "33220A|>>|OUTP:LOAD 50",
+    "33220A|>>|OUTP:LOAD?",
+    "33220A|<<|5.000000E+01"
+   ],
+   "method": "Keysight332xx.set_load",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTP:LOAD?",
+     "5.000000E+01"
+    ]
+   ]
+  },
+  {
+   "call": "'SIN', 1000.0, 1.0, 'VRMS', 50",
+   "case": "Keysight332xx.setup[SIN VRMS 50]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0",
+    "33220A|>>|VOLT:UNIT VRMS",
+    "33220A|>>|VOLT:UNIT?",
+    "33220A|<<|VRMS",
+    "33220A|>>|OUTP:LOAD 50",
+    "33220A|>>|OUTP:LOAD?",
+    "33220A|<<|5.000000E+01",
+    "33220A|>>|FUNC SIN",
+    "33220A|>>|FUNC?",
+    "33220A|<<|SIN",
+    "33220A|>>|VOLT:OFFS 0",
+    "33220A|>>|VOLT:OFFS?",
+    "33220A|<<|+0.000000E+00",
+    "33220A|>>|VOLT:RANG:AUTO ON",
+    "33220A|>>|VOLT:RANG:AUTO?",
+    "33220A|<<|1",
+    "33220A|>>|FREQ 1000",
+    "33220A|>>|FREQ?",
+    "33220A|<<|+1.000000000000E+03",
+    "33220A|>>|VOLT 1",
+    "33220A|>>|VOLT?",
+    "33220A|<<|+1.000000E+00",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight332xx.setup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "VOLT:UNIT VRMS"
+    ],
+    [
+     "Q",
+     "VOLT:UNIT?",
+     "VRMS"
+    ],
+    [
+     "W",
+     "OUTP:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTP:LOAD?",
+     "5.000000E+01"
+    ],
+    [
+     "W",
+     "FUNC SIN"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SIN"
+    ],
+    [
+     "W",
+     "VOLT:OFFS 0"
+    ],
+    [
+     "Q",
+     "VOLT:OFFS?",
+     "+0.000000E+00"
+    ],
+    [
+     "W",
+     "VOLT:RANG:AUTO ON"
+    ],
+    [
+     "Q",
+     "VOLT:RANG:AUTO?",
+     "1"
+    ],
+    [
+     "W",
+     "FREQ 1000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "+1.000000000000E+03"
+    ],
+    [
+     "W",
+     "VOLT 1"
+    ],
+    [
+     "Q",
+     "VOLT?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'SQU', 100000.0, 2.0, 'VPP', 'INF'",
+   "case": "Keysight332xx.setup[SQU VPP INF]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0",
+    "33220A|>>|VOLT:UNIT VRMS",
+    "33220A|>>|VOLT:UNIT?",
+    "33220A|<<|VRMS",
+    "33220A|>>|OUTP:LOAD INF",
+    "33220A|>>|OUTP:LOAD?",
+    "33220A|<<|9.900000E+37",
+    "33220A|>>|FUNC SQU",
+    "33220A|>>|FUNC?",
+    "33220A|<<|SQU",
+    "33220A|>>|VOLT:OFFS 0",
+    "33220A|>>|VOLT:OFFS?",
+    "33220A|<<|+0.000000E+00",
+    "33220A|>>|VOLT:RANG:AUTO ON",
+    "33220A|>>|VOLT:RANG:AUTO?",
+    "33220A|<<|1",
+    "33220A|>>|VOLT:UNIT VPP",
+    "33220A|>>|VOLT:UNIT?",
+    "33220A|<<|VPP",
+    "33220A|>>|FREQ 100000",
+    "33220A|>>|FREQ?",
+    "33220A|<<|+1.000000000000E+05",
+    "33220A|>>|VOLT 2",
+    "33220A|>>|VOLT?",
+    "33220A|<<|+2.000000E+00",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight332xx.setup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "VOLT:UNIT VRMS"
+    ],
+    [
+     "Q",
+     "VOLT:UNIT?",
+     "VRMS"
+    ],
+    [
+     "W",
+     "OUTP:LOAD INF"
+    ],
+    [
+     "Q",
+     "OUTP:LOAD?",
+     "9.900000E+37"
+    ],
+    [
+     "W",
+     "FUNC SQU"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SQU"
+    ],
+    [
+     "W",
+     "VOLT:OFFS 0"
+    ],
+    [
+     "Q",
+     "VOLT:OFFS?",
+     "+0.000000E+00"
+    ],
+    [
+     "W",
+     "VOLT:RANG:AUTO ON"
+    ],
+    [
+     "Q",
+     "VOLT:RANG:AUTO?",
+     "1"
+    ],
+    [
+     "W",
+     "VOLT:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLT:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "FREQ 100000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "+1.000000000000E+05"
+    ],
+    [
+     "W",
+     "VOLT 2"
+    ],
+    [
+     "Q",
+     "VOLT?",
+     "+2.000000E+00"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'SIN', 10000000.0, 0.0, 'DBM', 50",
+   "case": "Keysight332xx.setup[SIN DBM 50]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0",
+    "33220A|>>|VOLT:UNIT VRMS",
+    "33220A|>>|VOLT:UNIT?",
+    "33220A|<<|VRMS",
+    "33220A|>>|OUTP:LOAD 50",
+    "33220A|>>|OUTP:LOAD?",
+    "33220A|<<|5.000000E+01",
+    "33220A|>>|FUNC SIN",
+    "33220A|>>|FUNC?",
+    "33220A|<<|SIN",
+    "33220A|>>|VOLT:OFFS 0",
+    "33220A|>>|VOLT:OFFS?",
+    "33220A|<<|+0.000000E+00",
+    "33220A|>>|VOLT:RANG:AUTO ON",
+    "33220A|>>|VOLT:RANG:AUTO?",
+    "33220A|<<|1",
+    "33220A|>>|VOLT:UNIT DBM",
+    "33220A|>>|VOLT:UNIT?",
+    "33220A|<<|DBM",
+    "33220A|>>|FREQ 10000000",
+    "33220A|>>|FREQ?",
+    "33220A|<<|+1.000000000000E+07",
+    "33220A|>>|VOLT 0",
+    "33220A|>>|VOLT?",
+    "33220A|<<|+0.000000E+00",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight332xx.setup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "VOLT:UNIT VRMS"
+    ],
+    [
+     "Q",
+     "VOLT:UNIT?",
+     "VRMS"
+    ],
+    [
+     "W",
+     "OUTP:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTP:LOAD?",
+     "5.000000E+01"
+    ],
+    [
+     "W",
+     "FUNC SIN"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SIN"
+    ],
+    [
+     "W",
+     "VOLT:OFFS 0"
+    ],
+    [
+     "Q",
+     "VOLT:OFFS?",
+     "+0.000000E+00"
+    ],
+    [
+     "W",
+     "VOLT:RANG:AUTO ON"
+    ],
+    [
+     "Q",
+     "VOLT:RANG:AUTO?",
+     "1"
+    ],
+    [
+     "W",
+     "VOLT:UNIT DBM"
+    ],
+    [
+     "Q",
+     "VOLT:UNIT?",
+     "DBM"
+    ],
+    [
+     "W",
+     "FREQ 10000000"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "+1.000000000000E+07"
+    ],
+    [
+     "W",
+     "VOLT 0"
+    ],
+    [
+     "Q",
+     "VOLT?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'SIN', 1000.0, 1.0, 'MV', 50",
+   "case": "Keysight332xx.setup[bad unit]",
+   "log": [],
+   "method": "Keysight332xx.setup",
+   "result": "raised InstrumentError: amplitude unit must be one of ('VPP', 'VRMS', 'DBM')",
+   "wire": []
+  },
+  {
+   "call": "'SIN', 30000000.0, 1.0, 'VRMS', 50",
+   "case": "Keysight332xx.setup[above sine range]",
+   "log": [],
+   "method": "Keysight332xx.setup",
+   "result": "raised InstrumentError: 30 MHz is above the Agilent 33220A sine range (20 MHz)",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keysight332xx.self_test[pass]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0",
+    "33220A|>>|*TST?",
+    "33220A|<<|0",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+0,\"No error\"",
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0"
+   ],
+   "method": "Keysight332xx.self_test",
+   "result": "returned (True, '')",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     90.0
+    ],
+    [
+     "Q",
+     "*TST?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight332xx.self_test[fail]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0",
+    "33220A|>>|*TST?",
+    "33220A|<<|1",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+625,\"Self-test failed; I/O processor\"",
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0"
+   ],
+   "method": "Keysight332xx.self_test",
+   "result": "returned (False, '+625,\"Self-test failed; I/O processor\"')",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     90.0
+    ],
+    [
+     "Q",
+     "*TST?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+625,\"Self-test failed; I/O processor\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight332xx.cleanup",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0"
+   ],
+   "method": "Keysight332xx.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "Keysight332xx.output[off not confirmed]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|1"
+   ],
+   "method": "Keysight332xx.output",
+   "result": "raised SafetyError: Agilent 33220A did not confirm output OFF (OUTP? -> '1'); check the front panel",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight332xx.cleanup[off not confirmed]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|1"
+   ],
+   "method": "Keysight332xx.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "Keysight332xx.output[on not confirmed]",
+   "log": [
+    "33220A|>>|OUTP ON",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0"
+   ],
+   "method": "Keysight332xx.output",
+   "result": "raised InstrumentError: Agilent 33220A did not confirm output ON (OUTP? -> '0')",
+   "wire": [
+    [
+     "W",
+     "OUTP ON"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'setup'",
+   "case": "Keysight332xx.check_errors[error]",
+   "log": [
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|-221,\"Settings conflict\""
+   ],
+   "method": "Keysight332xx.check_errors",
+   "result": "raised InstrumentError: Agilent 33220A reported an error (setup): -221,\"Settings conflict\"",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "-221,\"Settings conflict\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight332xx.self_test[fail reply]",
+   "log": [
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0",
+    "33220A|>>|*TST?",
+    "33220A|<<|1",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+625,\"Self-test failed\"",
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0"
+   ],
+   "method": "Keysight332xx.self_test",
+   "result": "returned (False, '+625,\"Self-test failed\"')",
+   "wire": [
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     90.0
+    ],
+    [
+     "Q",
+     "*TST?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+625,\"Self-test failed\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight33250A.connect",
+   "log": [
+    "33250A|>>|*IDN?",
+    "33250A|<<|Agilent Technologies,33250A,SIM0001,1.00-1.00",
+    "33250A|>>|*CLS",
+    "33250A|>>|OUTP OFF",
+    "33250A|>>|OUTP?",
+    "33250A|<<|0",
+    "33250A|>>|SYST:ERR?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight33250A.connect",
+   "result": "returned <Keysight33250A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.00-1.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  }
+ ],
+ "name": "keysight_332xx",
+ "schema": 1
+}

@@ -1,0 +1,923 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "truevolt_verification.IO.__init__",
+   "log": [
+    "5560A|>>|*IDN?",
+    "5560A|<<|FLUKE,5560A,SIM0001,1.0",
+    "5560A|>>|*CLS",
+    "34470A|>>|*CLS",
+    "34470A|>>|*IDN?",
+    "34470A|<<|Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+   ],
+   "method": "truevolt_verification.IO.__init__",
+   "result": "returned <truevolt_verification.IO object>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5560A,SIM0001,1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Front DC current, 1.000 µA range (input open)', 'error': 5e-11, 'id': 1, 'input': 'open', 'kind': 'DCI', 'limits': {'1y': 5e-11, '24h': 5e-11, '2y': 5e-11, '90d': 5e-11}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': False, 'range': 1e-06, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'FRONT', 'typical': True, 'unit': 'A'}",
+   "case": "truevolt_verification.IO.measure[DCI#1]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:CURR:DC 1e-06",
+    "34470A|>>|CURR:DC:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000000000E-12"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 1e-06"
+    ],
+    [
+     "W",
+     "CURR:DC:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Front DC volts, 100.0 mV range (input shorted)', 'error': 3.5e-06, 'id': 10, 'input': 'short', 'kind': 'DCV', 'limits': {'1y': 3.5e-06, '24h': 3e-06, '2y': 3.5e-06, '90d': 3.5e-06}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': True, 'range': 0.1, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'FRONT', 'typical': False, 'unit': 'V'}",
+   "case": "truevolt_verification.IO.measure[DCV#10]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:VOLT:DC 0.1",
+    "34470A|>>|VOLT:DC:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000000000E-12"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Front 4-wire ohms, 100.0 Ω range (input shorted)', 'error': 0.004, 'id': 15, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 0.004, '24h': 0.003, '2y': 0.004, '90d': 0.004}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': False, 'range': 100.0, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'FRONT', 'typical': False, 'unit': 'ohm'}",
+   "case": "truevolt_verification.IO.measure[OHM4#15]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:FRES 100",
+    "34470A|>>|FRES:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000000000E-12"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:FRES 100"
+    ],
+    [
+     "W",
+     "FRES:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Front 2-wire ohms, 100.0 MΩ range (input shorted)', 'error': 1000.0, 'id': 21, 'input': 'short', 'kind': 'OHM2', 'limits': {'1y': 1000.0, '24h': 1000.0, '2y': 1000.0, '90d': 1000.0}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': False, 'range': 100000000.0, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'FRONT', 'typical': False, 'unit': 'ohm'}",
+   "case": "truevolt_verification.IO.measure[OHM2#21]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:RES 100000000",
+    "34470A|>>|RES:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000000000E-12"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:RES 100000000"
+    ],
+    [
+     "W",
+     "RES:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Rear DC current, 1.000 µA range (input open)', 'error': 5e-11, 'id': 22, 'input': 'open', 'kind': 'DCI', 'limits': {'1y': 5e-11, '24h': 5e-11, '2y': 5e-11, '90d': 5e-11}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': False, 'range': 1e-06, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'REAR', 'typical': True, 'unit': 'A'}",
+   "case": "truevolt_verification.IO.measure[DCI#22]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|REAR",
+    "34470A|>>|CONF:CURR:DC 1e-06",
+    "34470A|>>|CURR:DC:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000000000E-12"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "REAR"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 1e-06"
+    ],
+    [
+     "W",
+     "CURR:DC:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Rear DC volts, 100.0 mV range (input shorted)', 'error': 3.5e-06, 'id': 30, 'input': 'short', 'kind': 'DCV', 'limits': {'1y': 3.5e-06, '24h': 3e-06, '2y': 3.5e-06, '90d': 3.5e-06}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': True, 'range': 0.1, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'REAR', 'typical': False, 'unit': 'V'}",
+   "case": "truevolt_verification.IO.measure[DCV#30]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|REAR",
+    "34470A|>>|CONF:VOLT:DC 0.1",
+    "34470A|>>|VOLT:DC:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000000000E-12"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "REAR"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Rear 4-wire ohms, 100.0 Ω range (input shorted)', 'error': 0.004, 'id': 35, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 0.004, '24h': 0.003, '2y': 0.004, '90d': 0.004}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': False, 'range': 100.0, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'REAR', 'typical': False, 'unit': 'ohm'}",
+   "case": "truevolt_verification.IO.measure[OHM4#35]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|REAR",
+    "34470A|>>|CONF:FRES 100",
+    "34470A|>>|FRES:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000000000E-12"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "REAR"
+    ],
+    [
+     "W",
+     "CONF:FRES 100"
+    ],
+    [
+     "W",
+     "FRES:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Rear 2-wire ohms, 100.0 MΩ range (input shorted)', 'error': 1000.0, 'id': 41, 'input': 'short', 'kind': 'OHM2', 'limits': {'1y': 1000.0, '24h': 1000.0, '2y': 1000.0, '90d': 1000.0}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': False, 'range': 100000000.0, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'REAR', 'typical': False, 'unit': 'ohm'}",
+   "case": "truevolt_verification.IO.measure[OHM2#41]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|REAR",
+    "34470A|>>|CONF:RES 100000000",
+    "34470A|>>|RES:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000000000E-12"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2e-12",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "REAR"
+    ],
+    [
+     "W",
+     "CONF:RES 100000000"
+    ],
+    [
+     "W",
+     "RES:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000000000E-12"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DC volts 100.0 mV, 100.0 mV range', 'error': 7.5e-06, 'id': 42, 'kind': 'DCV', 'limits': {'1y': 7.5e-06, '24h': 6e-06, '2y': 8e-06, '90d': 7.5e-06}, 'nominal': 0.1, 'optional': False, 'page': '512', 'plc': 10, 'quick': False, 'range': 0.1, 'section': 'dcv', 'section_title': 'DC volts gain', 'setup': 'Calibrator voltage output to the front HI / LO input terminals.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "truevolt_verification.IO.measure[DCV#42]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:VOLT:DC 0.1",
+    "34470A|>>|VOLT:DC:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 0.1V",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34470A|>>|READ?",
+    "34470A|<<|+1.000002000E-01",
+    "5560A|>>|STBY"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 0.1000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "W",
+     "VOLT:DC:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.1V"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E-01"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DC current 2.000 A, 3.000 A range', 'error': 0.0046, 'id': 53, 'kind': 'DCI', 'limits': {'1y': 0.0046, '24h': 0.0042, '2y': 0.0052, '90d': 0.0046}, 'nominal': 2.0, 'optional': False, 'page': '512', 'plc': 10, 'quick': False, 'range': 3.0, 'section': 'dci', 'section_title': 'DC current gain', 'setup': 'Calibrator current output to the front current (A) input and LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "truevolt_verification.IO.measure[DCI#53]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:CURR:DC 3",
+    "34470A|>>|CURR:DC:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 2A",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34470A|>>|READ?",
+    "34470A|<<|+2.000004000E+00",
+    "5560A|>>|STBY"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 2.000004",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 3"
+    ],
+    [
+     "W",
+     "CURR:DC:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 2A"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+2.000004000E+00"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.01, 'id': 58, 'kind': 'OHM4', 'limits': {'1y': 0.01, '24h': 0.006, '2y': 0.011, '90d': 0.009}, 'nominal': 100.0, 'optional': False, 'page': '512', 'plc': 10, 'quick': False, 'range': 100.0, 'section': 'res', 'section_title': 'Resistance gain', 'setup': 'Calibrator resistance output: 4-wire force/sense leads for 4-wire points, 2-wire leads for 2-wire points.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "truevolt_verification.IO.measure[OHM4#58]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:FRES 100",
+    "34470A|>>|FRES:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 100OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34470A|>>|READ?",
+    "34470A|<<|+1.000010000E+02",
+    "5560A|>>|STBY"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 100.001",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:FRES 100"
+    ],
+    [
+     "W",
+     "FRES:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 100OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000010000E+02"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '2-wire ohms 10.00 MΩ, 10.00 MΩ range', 'error': 2600.0, 'id': 64, 'kind': 'OHM2', 'limits': {'1y': 2600.0, '24h': 1100.0, '2y': 3100.0, '90d': 2100.0}, 'nominal': 10000000.0, 'optional': False, 'page': '512', 'plc': 10, 'quick': True, 'range': 10000000.0, 'section': 'res', 'section_title': 'Resistance gain', 'setup': 'Calibrator resistance output: 4-wire force/sense leads for 4-wire points, 2-wire leads for 2-wire points.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "truevolt_verification.IO.measure[OHM2#64]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:RES 10000000",
+    "34470A|>>|RES:NPLC 10",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 10000000OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34470A|>>|READ?",
+    "34470A|<<|+1.000010000E+07",
+    "5560A|>>|STBY"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 10000100.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:RES 10000000"
+    ],
+    [
+     "W",
+     "RES:NPLC 10"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 10000000OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     4.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000010000E+07"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'amplitude': 0.1, 'description': 'Frequency 10.00 Hz at 100.0 mV rms, 1.000 V range', 'error': 0.003, 'filter_hz': None, 'frequency': None, 'id': 66, 'kind': 'FREQ', 'limits': {'1y': 0.003, '24h': 0.003, '2y': 0.003, '90d': 0.003}, 'nominal': 10.0, 'optional': False, 'page': '513', 'plc': None, 'quick': False, 'range': 1.0, 'section': 'freq', 'section_title': 'Frequency accuracy', 'setup': 'Voltage source at the stated Vrms and frequency to the input terminals. CONF:FREQ DEF,MIN with 3 Hz filter and 1 s aperture.', 'source': 'generator', 'terminal': 'FRONT', 'unit': 'Hz'}",
+   "case": "truevolt_verification.IO.measure[FREQ#66]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:FREQ DEF,MIN",
+    "34470A|>>|FREQ:RANG:LOW 3",
+    "34470A|>>|FREQ:APER 1",
+    "34470A|>>|FREQ:VOLT:RANG 1",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 0.1V,10Hz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34470A|>>|READ?",
+    "34470A|<<|+1.000000200E+01",
+    "5560A|>>|STBY"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 10.000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:FREQ DEF,MIN"
+    ],
+    [
+     "W",
+     "FREQ:RANG:LOW 3"
+    ],
+    [
+     "W",
+     "FREQ:APER 1"
+    ],
+    [
+     "W",
+     "FREQ:VOLT:RANG 1"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.1V,10Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000000200E+01"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 200 Hz filter', 'error': 7e-05, 'filter_hz': 200, 'frequency': 1000.0, 'id': 68, 'kind': 'ACV', 'limits': {'1y': 7e-05, '24h': 4e-05, '2y': 8e-05, '90d': 6e-05}, 'nominal': 0.1, 'optional': False, 'page': '517', 'plc': None, 'quick': False, 'range': 0.1, 'section': 'acv', 'section_title': 'AC volts', 'setup': 'Calibrator AC voltage output to the front HI / LO input terminals.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "truevolt_verification.IO.measure[ACV#68]",
+   "log": [
+    "5560A|>>|STBY",
+    "34470A|>>|ROUT:TERM?",
+    "34470A|<<|FRON",
+    "34470A|>>|CONF:VOLT:AC 0.1",
+    "34470A|>>|VOLT:AC:BAND 200",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "5560A|>>|OUT 0.1V,1000Hz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "34470A|>>|READ?",
+    "34470A|<<|+1.000002000E-01",
+    "5560A|>>|STBY"
+   ],
+   "method": "truevolt_verification.IO.measure",
+   "result": "returned 0.1000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:VOLT:AC 0.1"
+    ],
+    [
+     "W",
+     "VOLT:AC:BAND 200"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.1V,1000Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     4.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E-01"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "truevolt_verification.IO.close",
+   "log": [
+    "5560A|>>|STBY"
+   ],
+   "method": "truevolt_verification.IO.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_truevolt_34470A",
+ "schema": 1
+}

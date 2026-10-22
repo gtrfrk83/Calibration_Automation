@@ -1,0 +1,358 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Fluke28x.connect",
+   "log": [
+    "289|>>|ID",
+    "289|<<|0",
+    "289|<<|FLUKE 289,V1.10,95081087"
+   ],
+   "method": "Fluke28x.connect",
+   "result": "returned <Fluke28x>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     3.0
+    ],
+    [
+     "W",
+     "ID"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "FLUKE 289,V1.10,95081087"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke28x.identify",
+   "log": [
+    "289|>>|ID",
+    "289|<<|0",
+    "289|<<|FLUKE 289,V1.10,95081087"
+   ],
+   "method": "Fluke28x.identify",
+   "result": "returned 'FLUKE 289,V1.10,95081087'",
+   "wire": [
+    [
+     "W",
+     "ID"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "FLUKE 289,V1.10,95081087"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke28x.primary",
+   "log": [
+    "289|>>|QM",
+    "289|<<|0",
+    "289|<<|1.000030E+00,VDC,NORMAL,NONE"
+   ],
+   "method": "Fluke28x.primary",
+   "result": "returned (1.00003, 'VDC', 'NORMAL', 'NONE')",
+   "wire": [
+    [
+     "W",
+     "QM"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "1.000030E+00,VDC,NORMAL,NONE"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke28x.display",
+   "log": [
+    "289|>>|QDDA",
+    "289|<<|0",
+    "289|<<|V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540001.000"
+   ],
+   "method": "Fluke28x.display",
+   "result": "returned Display(function V_DC, range 5 V (manual), modes none; readings=['Reading(PRIMARY,1.0,VDC,mult=0,dec=4,NORMAL)'])",
+   "wire": [
+    [
+     "W",
+     "QDDA"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540001.000"
+    ]
+   ]
+  },
+  {
+   "call": "'VDC'",
+   "case": "Fluke28x.stable_reading",
+   "log": [
+    "289|>>|QDDA",
+    "289|<<|0",
+    "289|<<|V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540002.000",
+    "289|>>|QDDA",
+    "289|<<|0",
+    "289|<<|V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540003.000",
+    "289|>>|QDDA",
+    "289|<<|0",
+    "289|<<|V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540004.000"
+   ],
+   "method": "Fluke28x.stable_reading",
+   "result": "returned (Reading(PRIMARY,1.0,VDC,mult=0,dec=4,NORMAL), Display(function V_DC, range 5 V (manual), modes none; readings=['Reading(PRIMARY,1.0,VDC,mult=0,dec=4,NORMAL)']), [Reading(PRIMARY,1.0,VDC,mult=0,dec=4,NORMAL), Reading(PRIMARY,1.0,VDC,mult=0,dec=4,NORMAL), Reading(PRIMARY,1.0,VDC,mult=0,dec=4,NORMAL)])",
+   "wire": [
+    [
+     "W",
+     "QDDA"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540002.000"
+    ],
+    [
+     "sleep",
+     0.8
+    ],
+    [
+     "W",
+     "QDDA"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540003.000"
+    ],
+    [
+     "sleep",
+     0.8
+    ],
+    [
+     "W",
+     "QDDA"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540004.000"
+    ]
+   ]
+  },
+  {
+   "call": "'OHM'",
+   "case": "Fluke28x.stable_reading[no such unit]",
+   "log": [
+    "289|>>|QDDA",
+    "289|<<|0",
+    "289|<<|V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540005.000"
+   ],
+   "method": "Fluke28x.stable_reading",
+   "result": "raised InstrumentError: The meter shows no OHM reading (function V_DC, range 5 V (manual), modes none).",
+   "wire": [
+    [
+     "W",
+     "QDDA"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,1,VDC,0,4,5,NORMAL,NONE,1792540005.000"
+    ]
+   ]
+  },
+  {
+   "call": "'VDC'",
+   "case": "Fluke28x.stable_reading[overload]",
+   "log": [
+    "289|>>|QDDA",
+    "289|<<|0",
+    "289|<<|V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,9.99999999e+37,VDC,0,4,5,OL,NONE,1792540006.000"
+   ],
+   "method": "Fluke28x.stable_reading",
+   "result": "returned (Reading(PRIMARY,9.99999999e+37,VDC,mult=0,dec=4,OL), Display(function V_DC, range 5 V (manual), modes none; readings=['Reading(PRIMARY,9.99999999e+37,VDC,mult=0,dec=4,OL)']), [Reading(PRIMARY,9.99999999e+37,VDC,mult=0,dec=4,OL)])",
+   "wire": [
+    [
+     "W",
+     "QDDA"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "V_DC,NONE,MANUAL,VDC,5,0,OFF,0.000,0,1,PRIMARY,9.99999999e+37,VDC,0,4,5,OL,NONE,1792540006.000"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke28x.cleanup",
+   "log": [],
+   "method": "Fluke28x.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke28x.connect[wrong model]",
+   "log": [
+    "87|>>|ID",
+    "87|<<|0",
+    "87|<<|FLUKE 87,V1,1"
+   ],
+   "method": "Fluke28x.connect",
+   "result": "raised InstrumentError: Expected a Fluke 287 or 289 on the IR cable, got 'FLUKE 87,V1,1'. Check the cable is on the meter's IR port and the meter is switched on.",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     3.0
+    ],
+    [
+     "W",
+     "ID"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R",
+     "FLUKE 87,V1,1"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke28x.primary[no data line]",
+   "log": [
+    "289|>>|QM",
+    "289|<<|0",
+    "289|>>|QM",
+    "289|<<|0",
+    "289|>>|QM",
+    "289|<<|0"
+   ],
+   "method": "Fluke28x.primary",
+   "result": "raised InstrumentError: Fluke 287 / 289: no reply to QM over the IR cable (scripted transport: nothing to read). Check the cable is seated on the meter.",
+   "wire": [
+    [
+     "W",
+     "QM"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R!",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "W",
+     "QM"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R!",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     0.6
+    ],
+    [
+     "W",
+     "QM"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "R!",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     0.8999999999999999
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke28x.display[syntax error ack]",
+   "log": [
+    "289|>>|QDDA",
+    "289|<<|1"
+   ],
+   "method": "Fluke28x.display",
+   "result": "raised InstrumentError: Fluke 287 / 289: QDDA -> 1 (syntax error)",
+   "wire": [
+    [
+     "W",
+     "QDDA"
+    ],
+    [
+     "R",
+     "1"
+    ]
+   ]
+  }
+ ],
+ "name": "fluke_28x",
+ "schema": 1
+}

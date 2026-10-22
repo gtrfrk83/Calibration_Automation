@@ -1,0 +1,530 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Agilent_34401A.IO.__init__",
+   "log": [
+    "34401A|>>|SYST:REM",
+    "34401A|>>|*IDN?",
+    "34401A|<<|HEWLETT-PACKARD,34401A,SIM0001,11-5-2"
+   ],
+   "method": "Agilent_34401A.IO.__init__",
+   "result": "returned <Agilent_34401A.IO object>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "HEWLETT-PACKARD,34401A,SIM0001,11-5-2"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DCV 0.1 V', 'error': 8.5e-06, 'frequency': None, 'id': 1, 'kind': 'DCV', 'nominal': 0.1, 'range': 0.1, 'unit': 'V', 'wiring': 'VOLTAGE'}",
+   "case": "Agilent_34401A.IO.measure[DCV#1]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:VOLT:DC 0.1",
+    "5560A|>>|OUT 0.1V",
+    "5560A|>>|OPER",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.000020000E-01",
+    "5560A|>>|STBY"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 0.100002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "W",
+     "OUT 0.1V"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E-01"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'OHM2 100 ohm (2-wire +0.2 ohm allowance)', 'error': 0.21400000000000002, 'frequency': None, 'id': 7, 'kind': 'OHM2', 'nominal': 100, 'range': 100, 'unit': 'ohm', 'wiring': 'RESISTANCE_2W'}",
+   "case": "Agilent_34401A.IO.measure[OHM2#7]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:RES 100",
+    "5560A|>>|OUT 100OHM",
+    "5560A|>>|OPER",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.000020000E+02",
+    "5560A|>>|STBY"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 100.002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:RES 100"
+    ],
+    [
+     "W",
+     "OUT 100OHM"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E+02"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'OHM4 100 ohm', 'error': 0.014, 'frequency': None, 'id': 8, 'kind': 'OHM4', 'nominal': 100, 'range': 100, 'unit': 'ohm', 'wiring': 'RESISTANCE_4W'}",
+   "case": "Agilent_34401A.IO.measure[OHM4#8]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:FRES 100",
+    "5560A|>>|OUT 100OHM",
+    "5560A|>>|OPER",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.000020000E+02",
+    "5560A|>>|STBY"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 100.002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:FRES 100"
+    ],
+    [
+     "W",
+     "OUT 100OHM"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E+02"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DCI 0.01 A', 'error': 7e-06, 'frequency': None, 'id': 21, 'kind': 'DCI', 'nominal': 0.01, 'range': 0.01, 'unit': 'A', 'wiring': 'CURRENT'}",
+   "case": "Agilent_34401A.IO.measure[DCI#21]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:CURR:DC 0.01",
+    "5560A|>>|OUT 0.01A",
+    "5560A|>>|OPER",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.000020000E-02",
+    "5560A|>>|STBY"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 0.0100002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 0.01"
+    ],
+    [
+     "W",
+     "OUT 0.01A"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E-02"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'ACV 0.01 V @ 1000 Hz', 'error': 4.6e-05, 'frequency': 1000.0, 'id': 25, 'kind': 'ACV', 'nominal': 0.01, 'range': 0.1, 'unit': 'V', 'wiring': 'VOLTAGE'}",
+   "case": "Agilent_34401A.IO.measure[ACV#25]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:VOLT:AC 0.1",
+    "34401A|>>|DET:BAND 3",
+    "5560A|>>|OUT 0.01V,1000Hz",
+    "5560A|>>|OPER",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.000020000E-02",
+    "5560A|>>|STBY"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 0.0100002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:AC 0.1"
+    ],
+    [
+     "W",
+     "DET:BAND 3"
+    ],
+    [
+     "W",
+     "OUT 0.01V,1000Hz"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E-02"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'ACI 1 A @ 1000 Hz', 'error': 0.0014, 'frequency': 1000.0, 'id': 37, 'kind': 'ACI', 'nominal': 1, 'range': 1, 'unit': 'A', 'wiring': 'CURRENT'}",
+   "case": "Agilent_34401A.IO.measure[ACI#37]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:CURR:AC 1",
+    "34401A|>>|DET:BAND 3",
+    "5560A|>>|OUT 1A,1000Hz",
+    "5560A|>>|OPER",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.000020000E+00",
+    "5560A|>>|STBY"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 1.00002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:AC 1"
+    ],
+    [
+     "W",
+     "DET:BAND 3"
+    ],
+    [
+     "W",
+     "OUT 1A,1000Hz"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E+00"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'amplitude': 0.01, 'description': 'Frequency 100 Hz, 0.01 V rms', 'error': 0.1, 'frequency': 100, 'id': 39, 'kind': 'FREQ', 'nominal': 100, 'range': 0.1, 'unit': 'Hz', 'wiring': 'VOLTAGE'}",
+   "case": "Agilent_34401A.IO.measure[FREQ#39]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:FREQ",
+    "5560A|>>|OUT 0.01V,100Hz",
+    "5560A|>>|OPER",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.000020000E-02",
+    "5560A|>>|STBY"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 0.0100002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:FREQ"
+    ],
+    [
+     "W",
+     "OUT 0.01V,100Hz"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E-02"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'ZERO OFFSET FRONT DCI range 0.01', 'error': 2e-06, 'frequency': None, 'id': 41, 'kind': 'DCI', 'manual_limit': 2e-06, 'nominal': 0.0, 'range': 0.01, 'terminal': 'FRONT', 'unit': 'A', 'wiring': 'ZERO_FRONT_OPEN_CURRENT', 'zero_offset': True}",
+   "case": "Agilent_34401A.IO.measure[DCI#41]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:CURR:DC 0.01",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.200000000E-07"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 0.01"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'ZERO OFFSET FRONT DCV range 0.1', 'error': 3.5e-06, 'frequency': None, 'id': 45, 'kind': 'DCV', 'manual_limit': 3.5e-06, 'nominal': 0.0, 'range': 0.1, 'terminal': 'FRONT', 'unit': 'V', 'wiring': 'ZERO_FRONT_SHORT', 'zero_offset': True}",
+   "case": "Agilent_34401A.IO.measure[DCV#45]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:VOLT:DC 0.1",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.200000000E-07"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'ZERO OFFSET FRONT OHM2 range 100 (no Math Null; +0.2 ohm allowance)', 'error': 0.20400000000000001, 'frequency': None, 'id': 50, 'kind': 'OHM2', 'manual_limit': 0.004, 'nominal': 0.0, 'range': 100, 'terminal': 'FRONT', 'unit': 'ohm', 'wiring': 'ZERO_FRONT_SHORT', 'zero_offset': True}",
+   "case": "Agilent_34401A.IO.measure[OHM2#50]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:RES 100",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.200000000E-07"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:RES 100"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'ZERO OFFSET FRONT OHM4 range 100', 'error': 0.004, 'frequency': None, 'id': 57, 'kind': 'OHM4', 'manual_limit': 0.004, 'nominal': 0.0, 'range': 100, 'terminal': 'FRONT', 'unit': 'ohm', 'wiring': 'ZERO_FRONT_SHORT', 'zero_offset': True}",
+   "case": "Agilent_34401A.IO.measure[OHM4#57]",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|CONF:FRES 100",
+    "34401A|>>|READ?",
+    "34401A|<<|+1.200000000E-07"
+   ],
+   "method": "Agilent_34401A.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:FRES 100"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent_34401A.IO.close",
+   "log": [
+    "5560A|>>|STBY",
+    "34401A|>>|SYST:LOC"
+   ],
+   "method": "Agilent_34401A.IO.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SYST:LOC"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_agilent_34401a",
+ "schema": 1
+}

@@ -1,0 +1,101 @@
+{
+ "counts": {
+  "base": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
+  "fluke_28x": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
+  "fluke_5560a": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 11
+  },
+  "fluke_5790b": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 3
+  },
+  "keysight_332xx": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 5,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
+  "keysight_5313x": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 6,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
+  "keysight_dacq": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 1,
+   "query_retry_f": 0,
+   "write_f": 7
+  },
+  "keysight_truevolt": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 3
+  },
+  "lecroy_ws4104hd": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 3,
+   "query_f": 1,
+   "query_retry_f": 3,
+   "write_f": 9
+  },
+  "reference_instruments": {
+   "concat_f": 0,
+   "format_f": 1,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 4
+  },
+  "scpi_dmm": {
+   "concat_f": 2,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 2
+  },
+  "tektronix_mdo4000c": {
+   "concat_f": 1,
+   "format_f": 1,
+   "helper_f": 9,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 33
+  }
+ },
+ "schema": 1
+}
