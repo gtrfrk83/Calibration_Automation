@@ -1610,12 +1610,27 @@ def _paths(uid, root=None):
     return root, root / f'{uid}.json', root / 'versions' / uid
 
 
+def lock_reason(uid, db=None):
+    """'' when the user-built procedure `uid` may be edited or deleted, else the sentence saying it is verified on hardware and locked (verified.py).
+    `db` is the registry file (None = the real one, where the seeded list applies)."""
+    if not uid:
+        return ''
+    try:
+        import verified
+    except ImportError:
+        return ''
+    return verified.Registry(db, seed=db is None).lock_reason(proc_key=verified.DS_PREFIX + str(uid))
+
+
 def save(ds, who='', note='', root=None, db=None):
     """Save `ds` as a NEW version.  The datasheet is written to user_specs/versions/<uid>/vNNNN.datasheet.json (never overwritten).  If it validates
     (no errors) and exports, the runnable spec is also written to versions/<uid>/vNNNN.spec.json and user_specs/<uid>.json is replaced atomically
     (the previous runnable file already exists as its own version file).  Otherwise status is 'draft' and the earlier runnable spec stays.
     ds.uid / ds.version / ds.created are set.  The registry row is updated; a damaged registry never stops the files being written."""
     import datasheet_builder_specs as dsp
+    why = lock_reason(ds.uid, db)
+    if why:                                                  # verified on hardware and locked: no new version, nothing written
+        return SaveResult(False, ds.uid, ds.version, 'locked', problems=[DsProblem('locked', why)])
     problems = validate(ds)
     try:
         if not ds.uid:
@@ -1801,7 +1816,9 @@ def duplicate(uid, title=None, model=None, make=None, who='', root=None, db=None
 
 def delete(uid, who='', root=None, db=None):
     """SOFT delete: the registry row is marked deleted and the runnable spec file is moved to user_specs/_deleted/ (so it leaves the Procedures list).
-    Every version file stays.  Returns True when something was marked."""
+    Every version file stays.  Returns True when something was marked.  A procedure that is verified on hardware and locked is not deleted."""
+    if lock_reason(uid, db):
+        return False
     try:
         with _db(db) as con:
             row = con.execute('SELECT id,spec_file FROM user_datasheets WHERE uid=? AND deleted=0', (uid,)).fetchone()

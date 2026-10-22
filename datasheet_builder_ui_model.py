@@ -195,6 +195,10 @@ class Storage:
     def save(self, ds, note=''):
         return db.save(ds, who=self.who, note=note, **self.kw())
 
+    def lock_reason(self, uid):
+        """'' or the sentence saying this user-built procedure is verified on hardware and locked (verified.py)."""
+        return db.lock_reason(uid, db=self.db_path)
+
     def duplicate(self, uid, title=None):
         return db.duplicate(uid, title=title, who=self.who, **self.kw())
 
@@ -291,12 +295,19 @@ class DatasheetList:
         return GridModel(self.storage, matcher_factory=self.matcher_factory)
 
     def open(self, uid, version=None):
-        """An EditorModel for the datasheet (latest or the given version), or None with `self.last_error` set."""
+        """An EditorModel for the datasheet (latest or the given version), or None with `self.last_error` set.  A procedure that is verified on
+        hardware and locked is not opened for editing (`self.refused` is True and last_error says how to unlock or copy it)."""
+        self.refused = False
+        why = self.storage.lock_reason(uid)
+        if why:
+            self.refused, self.last_error = True, why
+            return None
         ed = GridModel.open(self.storage, uid, version, matcher_factory=self.matcher_factory)
         self.last_error = '' if ed else f'Could not read datasheet {uid}' + (f' version {version}' if version else '') + '.'
         return ed
 
     last_error = ''
+    refused = False
 
     def duplicate(self, uid, title=None):
         res = self.storage.duplicate(uid, title=title)
@@ -306,7 +317,11 @@ class DatasheetList:
         return Outcome(True, f'Duplicated as "{res.uid}" (version {res.version}).', res.uid)
 
     def delete(self, uid):
-        """SOFT delete: it leaves the Procedures list, every version stays on disk, and Restore brings it back."""
+        """SOFT delete: it leaves the Procedures list, every version stays on disk, and Restore brings it back.  Refused for a procedure that is
+        verified on hardware and locked."""
+        why = self.storage.lock_reason(uid)
+        if why:
+            return Outcome(False, why)
         if not self.storage.delete(uid):
             return Outcome(False, 'Could not delete that datasheet.')
         self.refresh()

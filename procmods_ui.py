@@ -940,13 +940,19 @@ def attach_to_shell(shell, ctx_factory, lock: M.DevLock | None = None) -> ShellH
 # ------------------------------------------------------------------------------------------------------------ inside a procedure window
 class LiveHook:
     """The 'Edit procedure' action of a running procedure window (procmods_live).  Unlike the Manager's window, it stays usable during a run:
-    saved edits start at the next point.  `app` is an engine App (procmods_engine.ProcModsMixin)."""
+    saved edits start at the next point.  `app` is an engine App (procmods_engine.ProcModsMixin).
+
+    A procedure that is verified on hardware and locked (verified.py) keeps the control, but disabled, with a green 'VERIFIED ON HARDWARE -
+    LOCKED' chip and the reason as its tooltip.  Running is not affected."""
 
     LABEL = 'Edit procedure'
+    CHIP = 'VERIFIED ON HARDWARE - LOCKED'
 
     def __init__(self, app, shell, lock):
         self.app, self.shell, self.lock = app, shell, lock
         self.window = None
+        self.locked_reason = ''
+        self._tip = None
         self.button = shell.add_action(self.LABEL, self.open, short='Edit')
         lock.on_change(lambda _s: self._safe_refresh())
         self.refresh()
@@ -961,12 +967,35 @@ class LiveHook:
         st = self.app.pm_state
         return len(st.oset.active()) if st is not None and st.oset else 0
 
+    def verified_reason(self) -> str:
+        """Why the procedure cannot be edited because it is verified and locked ('' = it can).  Looked at afresh every time."""
+        st = self.app.pm_state
+        return st.lock_reason() if st is not None else ''
+
     def refresh(self):
-        """Header chips: MODIFIED (n) = what the running procedure uses, DEVELOPER MODE while unlocked."""
+        """Header chips: MODIFIED (n) = what the running procedure uses, DEVELOPER MODE while unlocked, VERIFIED ... while locked by verification."""
         self.shell.set_modified(self.count())
         self.shell.set_devmode(self.lock.unlocked)
+        self.sync_verified()
+
+    def sync_verified(self):
+        self.locked_reason = why = self.verified_reason()
+        setter = getattr(self.shell, 'set_verified', None)
+        if setter is not None:
+            setter(self.CHIP if why else '')
+        try:
+            self.button.configure(state='disabled' if why else 'normal')
+            if why and self._tip is None:
+                self._tip = ui.Tooltip(self.button, lambda: self.locked_reason)
+        except (AttributeError, tk.TclError):
+            pass
 
     def open(self):
+        why = self.verified_reason()
+        if why:
+            self.sync_verified()
+            messagebox.showinfo('Procedure is locked', why, parent=getattr(self.shell, 'root', None))
+            return None
         if self.window is not None:
             try:
                 if self.window.winfo_exists():
@@ -985,8 +1014,8 @@ def attach_live(app, shell, lock: M.DevLock | None = None) -> LiveHook:
 
 
 # ------------------------------------------------------------------------------------------------------------ Manager window
-def open_manager_changes(parent, model_name, store=None, lock=None, registries=None):
+def open_manager_changes(parent, model_name, store=None, lock=None, registries=None, proc_key=''):
     """The Manager's 'Procedure changes...' window: the saved model-wide / asset overrides for a model (Changes tab only: the
     command and point lists need a running engine).  Read-only until unlocked; it cannot edit a running procedure."""
-    ctx = M.Context(title=model_name, model=model_name, store=store, registries=registries or {})
+    ctx = M.Context(title=model_name, model=model_name, store=store, registries=registries or {}, proc_key=proc_key or '')
     return open_modify_window(parent, ctx, lock or shared_lock())

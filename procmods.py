@@ -515,6 +515,20 @@ class Store:
     def now(self):
         return self._now()
 
+    def lock_reason(self, model='', proc_key='') -> str:
+        """'' when saved procedure changes for this model may be written, else the sentence saying the procedure is verified on hardware and
+        locked (verified.py).  The registry is this store's own file; the seeded list only applies to the real registry (no explicit path)."""
+        try:
+            import verified
+        except ImportError:
+            return ''
+        return verified.Registry(self._path, seed=self._path is None).lock_reason(proc_key=proc_key, model=model)
+
+    def _refuse_if_locked(self, model, proc_key=''):
+        why = self.lock_reason(model, proc_key)
+        if why:
+            raise OverrideError(why)
+
     @contextmanager
     def _db(self):
         con = sqlite3.connect(str(self.path), timeout=5)
@@ -592,6 +606,7 @@ class Store:
 
     # -------------------------------------------------------------------------------------------- writes
     def _insert(self, e, action, who):
+        self._refuse_if_locked(e.get('model') or '')       # the one place every create / edit / import is written: verified procedures are locked
         try:
             with self._db() as con:
                 con.execute(
@@ -651,6 +666,7 @@ class Store:
         e = self.get(uid)
         if e is None:
             raise OverrideError('no such override')
+        self._refuse_if_locked(e.get('model') or '')
         try:
             with self._db() as con:
                 con.execute('UPDATE override SET enabled=? WHERE uid=?', (int(bool(enabled)), uid))

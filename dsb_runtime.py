@@ -513,6 +513,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         self.dsb_ref = {}
         self.counter_ref = tk.StringVar(value='EXT')
         self.period_var = tk.StringVar(value=self.period)
+        if self.dsb.get('uid'):
+            self.pm_proc_key = 'ds:' + str(self.dsb['uid'])      # verified.py: this datasheet's own verified / locked state, not its model's
         super().__init__(root, self.dsb['model'], demo=demo, spec=spec, io_factory=io_factory)
         self.counter_ref.set(self.settings.get('counter_ref', 'EXT'))
 

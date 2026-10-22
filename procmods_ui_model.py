@@ -192,6 +192,7 @@ class Context:
     author: str = ''
     run_entries: list = field(default_factory=list)     # in-memory 'run' scope entries (the engine passes them to resolve())
     live: object = None                                 # procmods_live.LiveBridge when the editor is opened INSIDE a procedure window
+    proc_key: str = ''                                  # the procedure's key in verified.py ('ds:<uid>' for a user-built one); '' = match by model
 
 
 @dataclass
@@ -277,7 +278,27 @@ class ProcModsModel:
             return {'running': True, 'current': None, 'next': None}
 
     @property
+    def verified_lock(self) -> str:
+        """Why this procedure cannot be edited at all: it is verified on hardware and locked (verified.py).  '' = not locked."""
+        fn = getattr(self.store, 'lock_reason', None)
+        if fn is None:
+            return ''
+        now = time.monotonic()
+        cached = self.__dict__.get('_vlock')
+        if cached is not None and now - cached[0] < 1.0:                 # editable is asked many times per redraw; the registry is read at most once a second
+            return cached[1]
+        try:
+            why = fn(self.ctx.model, self.ctx.proc_key) or ''
+        except Exception:
+            why = ''
+        self.__dict__['_vlock'] = (now, why)
+        return why
+
+    @property
     def read_only_reason(self) -> str:
+        why = self.verified_lock
+        if why:
+            return why
         if self.live_mode:
             why = self.ctx.live.blocked_reason()
             if why:
@@ -293,6 +314,7 @@ class ProcModsModel:
         return not self.read_only_reason
 
     def refresh(self):
+        self.__dict__.pop('_vlock', None)
         self.oset = pm.resolve(self.ctx.model, self.ctx.asset_id, run_overrides=self.ctx.run_entries, idn=self.idn(), store=self.store)
         return self.oset
 
@@ -318,6 +340,7 @@ class ProcModsModel:
         self.scope = scope
 
     def _need_edit(self):
+        self.__dict__.pop('_vlock', None)                # a write always looks at the registry afresh
         if not self.editable:
             raise pm.OverrideError(self.read_only_reason)
         self.lock.touch()

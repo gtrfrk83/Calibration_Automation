@@ -2038,7 +2038,7 @@ class DatasheetBuilderPanel(ttk.Frame):
                 self.editors.pop(uid, None)
         ed = self.lst.open(uid)
         if ed is None:
-            self.say(f'Could not read datasheet {uid}: the file is missing or damaged.')
+            self.say(self.lst.last_error if self.lst.refused else f'Could not read datasheet {uid}: the file is missing or damaged.')
             return None
         return self.open_editor(ed)
 
@@ -2089,6 +2089,10 @@ class DatasheetBuilderPanel(ttk.Frame):
         if row['deleted']:
             res = self.lst.restore(uid)
         else:
+            why = self.lst.storage.lock_reason(uid)
+            if why:                                                   # verified on hardware and locked: say so before asking anything
+                self.say(why)
+                return None
             if not messagebox.askyesno('Delete datasheet', f'Delete "{row["title"]}"? It leaves the Procedures list. Every version is kept and you can restore it '
                                        f'(tick "Show deleted").', parent=self.winfo_toplevel()):
                 return None
