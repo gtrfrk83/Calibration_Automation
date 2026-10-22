@@ -75,6 +75,7 @@ class Transport:
         return self.read()
     def set_timeout(self, seconds: float): pass
     def clear(self): pass
+    def go_local(self): pass            # GPIB: address the instrument with GTL (go to local); other buses have nothing to send
 
 
 def bus_of(address: str) -> str:
@@ -154,6 +155,18 @@ class VisaTransport(Transport):
     def clear(self):
         try:
             self._res.clear()
+        except Exception:
+            pass
+
+    def go_local(self):
+        """GPIB only: GTL (go to local) addressed to this instrument, which also restores its front panel keys. Never raises."""
+        if bus_of(self.address) != 'GPIB' or self._res is None:
+            return
+        try:
+            import pyvisa
+            op = getattr(getattr(pyvisa.constants, 'RENLineOperation', None), 'address_gtl', None) or getattr(pyvisa.constants, 'VI_GPIB_REN_ADDRESS_GTL', None)
+            if op is not None:
+                self._res.control_ren(op)
         except Exception:
             pass
 

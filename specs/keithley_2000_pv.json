@@ -1,0 +1,589 @@
+{
+ "schema": 1,
+ "manufacturer": "Keithley",
+ "model": "2000",
+ "title": "Model 2000 Performance Verification",
+ "idn_match": [
+  "MODEL 2000"
+ ],
+ "source": {
+  "document": "Keithley Model 2000 Multimeter Calibration Manual (2000-905-01 Rev. F)",
+  "pages": "1-3 to 1-13 (Tables 1-2 to 1-6)",
+  "note": "One interval only: 1 year, 18-28 C (the manual calculates the limits from the one-year accuracy specification and does not include calibrator uncertainty, p. 1-5; if a reading is slightly outside, the manual says to recalculate limits from the 2000 and the calibrator specifications). The 90-day and 24-hour limits are not printed in the verification tables."
+ },
+ "periods": [
+  "1y"
+ ],
+ "default_period": "1y",
+ "front_rear_switch": true,
+ "equipment": {
+  "dc_ac_source": "Fluke 5700A or equivalent (Table 1-1); this procedure drives a Fluke 5522A or 5560A",
+  "high_voltage_ac": "Fluke 5725A amplifier, only for 700 V at 50 kHz (otherwise 219 V at 50 kHz)",
+  "resistance": "4-wire; 100 Mohm 2-wire"
+ },
+ "general": [
+  "Warm up the 2000 for at least one hour before the verification (p. 1-3); allow the test equipment its own warm-up time.",
+  "Ambient 18 to 28 C, relative humidity below 80 % (p. 1-3); line 100 / 120 / 220 / 240 V +/-10 %, 45 to 66 Hz or 360 to 440 Hz.",
+  "Restore factory defaults first (Speed: medium, Filter: 10 readings, p. 1-5); front panel inputs selected with the INPUTS switch (p. 1-6).",
+  "Never use autorange: set the range for each test signal (p. 1-6). Calibrator in operate; always let the source signal settle before a reading.",
+  "Do not connect test equipment through a scanner or other switching equipment (p. 1-6).",
+  "Max common-mode voltage (INPUT LO to chassis) 500 V peak; do not exceed 1000 V peak between INPUT HI and LO, or 8 x 10^7 V-Hz (p. 1-8 caution)."
+ ],
+ "measure": {
+  "nplc": 1,
+  "filter_state": "ON",
+  "filter_count": 10,
+  "filter_type": "REPeat",
+  "ac_bandwidth": 30,
+  "note": "Speed medium = 1 PLC (DC, ohms, DC current) and detector bandwidth 30 (AC, \"Medium\" rate) with the digital filter on, 10 readings: the factory default operating conditions the manual restores (p. 1-5, Table 2-2 of the User Manual). The filter is the REPEAT (one-shot) type so each :READ? is ten fresh conversions; the specification sheet states MED (1 PLC) with a filter of 10 as its DC condition."
+ },
+ "prep": {
+  "dcv_rel_zero": {
+   "kind": "DCV",
+   "range": 0.1,
+   "nominal": 0.0,
+   "page": "1-7",
+   "text": "Select DC volts, 100 mV range. Set the calibrator output to 0.00000 mV DC and allow the reading to settle, then enable the 2000 REL mode. Leave REL enabled for the remainder of the DC volts verification tests (p. 1-7 steps 2 to 4). REL must be DISABLED for AC volts (p. 1-8 step 3)."
+  }
+ },
+ "sections": [
+  {
+   "id": "dcv",
+   "title": "DC voltage",
+   "page": "1-7 (Table 1-2)",
+   "group": "DCV",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "setup": "Connect the calibrator HI / LO to the 2000 INPUT HI / LO (Figure 1-1). Use shielded, low-thermal connections for the 100 mV and 1 V ranges, shield to the calibrator output LO. With the calibrator at 0.00000 mV DC the program enables REL on the 100 mV range and leaves it on for the remainder of the DC volts tests. Positive and negative values for each range.",
+   "points": [
+    {
+     "kind": "DCV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "1y": 8.5e-06
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "99.9915 to 100.0085 mV",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": -0.1,
+     "range": 0.1,
+     "limits": {
+      "1y": 8.5e-06
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "-100.0085 to -99.9915 mV",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": 1.0,
+     "range": 1.0,
+     "limits": {
+      "1y": 3.7e-05
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "0.999963 to 1.000037 V",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": -1.0,
+     "range": 1.0,
+     "limits": {
+      "1y": 3.7e-05
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "-1.000037 to -0.999963 V",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "limits": {
+      "1y": 0.00035
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "9.99965 to 10.00035 V",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": -10.0,
+     "range": 10.0,
+     "limits": {
+      "1y": 0.00035
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "-10.00035 to -9.99965 V",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": 100.0,
+     "range": 100.0,
+     "limits": {
+      "1y": 0.0051
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "99.9949 to 100.0051 V",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": -100.0,
+     "range": 100.0,
+     "limits": {
+      "1y": 0.0051
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "-100.0051 to -99.9949 V",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": 1000.0,
+     "range": 1000.0,
+     "limits": {
+      "1y": 0.061
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "999.939 to 1000.061 V",
+     "plc": 1
+    },
+    {
+     "kind": "DCV",
+     "nominal": -1000.0,
+     "range": 1000.0,
+     "limits": {
+      "1y": 0.061
+     },
+     "quick": false,
+     "group": "DCV",
+     "printed_limits": "-1000.061 to -999.939 V",
+     "plc": 1
+    }
+   ]
+  },
+  {
+   "id": "acv",
+   "title": "AC voltage",
+   "page": "1-9 (Table 1-3)",
+   "group": "ACV",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "setup": "Connect the calibrator HI / LO to the 2000 INPUT HI / LO with shielded cable (Figure 1-2). ACV function, 100 mV range, REL disabled. Source 1 kHz and 50 kHz for each range.",
+   "points": [
+    {
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "1y": 9e-05
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "99.9100 to 100.0900 mV",
+     "frequency": 1000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "1y": 0.00017
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "99.8300 to 100.1700 mV",
+     "frequency": 50000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1.0,
+     "range": 1.0,
+     "limits": {
+      "1y": 0.0009
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "0.999100 to 1.000900 V",
+     "frequency": 1000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 1.0,
+     "range": 1.0,
+     "limits": {
+      "1y": 0.0017
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "0.998300 to 1.001700 V",
+     "frequency": 50000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "limits": {
+      "1y": 0.009
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "9.99100 to 10.00900 V",
+     "frequency": 1000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 10.0,
+     "limits": {
+      "1y": 0.017
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "9.98300 to 10.01700 V",
+     "frequency": 50000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 100.0,
+     "range": 100.0,
+     "limits": {
+      "1y": 0.09
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "99.9100 to 100.0900 V",
+     "frequency": 1000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 100.0,
+     "range": 100.0,
+     "limits": {
+      "1y": 0.17
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "99.8300 to 100.1700 V",
+     "frequency": 50000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 700.0,
+     "range": 750.0,
+     "limits": {
+      "1y": 0.645
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "699.355 to 700.645 V",
+     "frequency": 1000.0
+    },
+    {
+     "kind": "ACV",
+     "nominal": 219.0,
+     "range": 750.0,
+     "limits": {
+      "1y": 0.638
+     },
+     "quick": false,
+     "group": "ACV",
+     "printed_limits": "218.362 to 219.638 V",
+     "frequency": 50000.0,
+     "computed_limit": 0.6378,
+     "variant": "alt219",
+     "note": "The manual substitutes 219 V at 50 kHz for the 700 V at 50 kHz step when the 5725A amplifier is not available (Table 1-3 footnote); its limits are printed 218.362 to 219.638 V."
+    }
+   ]
+  },
+  {
+   "id": "acv700",
+   "title": "AC voltage 700 V at 50 kHz (5725A amplifier)",
+   "page": "1-9 (Table 1-3)",
+   "group": "ACV700",
+   "source": "manual",
+   "optional": true,
+   "terminal": "FRONT",
+   "setup": "700.000 V at 50 kHz needs the Fluke 5725A amplifier with a 5700A-class calibrator (Figure 1-2): neither the 5522A nor the 5560A is assumed to make it. Source 700.000 V, 50 kHz by hand, in operate, let it settle, then confirm; the program reads the 2000 itself.",
+   "points": [
+    {
+     "kind": "ACV",
+     "nominal": 700.0,
+     "range": 750.0,
+     "limits": {
+      "1y": 1.215
+     },
+     "quick": false,
+     "group": "ACV700",
+     "printed_limits": "698.785 to 701.215 V",
+     "frequency": 50000.0,
+     "variant": "opt700"
+    }
+   ]
+  },
+  {
+   "id": "dci",
+   "title": "DC current",
+   "page": "1-10 (Table 1-4)",
+   "group": "DCI",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "setup": "Connect the calibrator current output (normal current output) to the 2000 AMPS and INPUT LO jacks (Figure 1-3). DCI function, 10 mA range first. Positive and negative values for each range. Check the AMPS fuse (3 A, 250 V) first.",
+   "points": [
+    {
+     "kind": "DCI",
+     "nominal": 0.01,
+     "range": 0.01,
+     "limits": {
+      "1y": 5.8e-06
+     },
+     "quick": false,
+     "group": "DCI",
+     "printed_limits": "9.99420 to 10.00580 mA",
+     "plc": 1
+    },
+    {
+     "kind": "DCI",
+     "nominal": -0.01,
+     "range": 0.01,
+     "limits": {
+      "1y": 5.8e-06
+     },
+     "quick": false,
+     "group": "DCI",
+     "printed_limits": "-10.00580 to -9.99420 mA",
+     "plc": 1
+    },
+    {
+     "kind": "DCI",
+     "nominal": 0.1,
+     "range": 0.1,
+     "limits": {
+      "1y": 0.00013
+     },
+     "quick": false,
+     "group": "DCI",
+     "printed_limits": "99.8700 to 100.1300 mA",
+     "plc": 1
+    },
+    {
+     "kind": "DCI",
+     "nominal": -0.1,
+     "range": 0.1,
+     "limits": {
+      "1y": 0.00013
+     },
+     "quick": false,
+     "group": "DCI",
+     "printed_limits": "-100.1300 to -99.8700 mA",
+     "plc": 1
+    },
+    {
+     "kind": "DCI",
+     "nominal": 1.0,
+     "range": 1.0,
+     "limits": {
+      "1y": 0.00088
+     },
+     "quick": false,
+     "group": "DCI",
+     "printed_limits": "0.999120 to 1.000880 A",
+     "plc": 1
+    },
+    {
+     "kind": "DCI",
+     "nominal": -1.0,
+     "range": 1.0,
+     "limits": {
+      "1y": 0.00088
+     },
+     "quick": false,
+     "group": "DCI",
+     "printed_limits": "-1.000880 to -0.999120 A",
+     "plc": 1
+    },
+    {
+     "kind": "DCI",
+     "nominal": 2.2,
+     "range": 3.0,
+     "limits": {
+      "1y": 0.00276
+     },
+     "quick": false,
+     "group": "DCI",
+     "printed_limits": "2.19724 to 2.20276 A",
+     "plc": 1
+    },
+    {
+     "kind": "DCI",
+     "nominal": -2.2,
+     "range": 3.0,
+     "limits": {
+      "1y": 0.00276
+     },
+     "quick": false,
+     "group": "DCI",
+     "printed_limits": "-2.20276 to -2.19724 A",
+     "plc": 1
+    }
+   ]
+  },
+  {
+   "id": "aci",
+   "title": "AC current",
+   "page": "1-11 (Table 1-5)",
+   "group": "ACI",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "setup": "Connect the calibrator AC current output to the 2000 AMPS and INPUT LO jacks (Figure 1-4). ACI function, 1 A range first. 1 kHz.",
+   "points": [
+    {
+     "kind": "ACI",
+     "nominal": 1.0,
+     "range": 1.0,
+     "limits": {
+      "1y": 0.0014
+     },
+     "quick": false,
+     "group": "ACI",
+     "printed_limits": "0.998600 to 1.001400 A",
+     "frequency": 1000.0
+    },
+    {
+     "kind": "ACI",
+     "nominal": 2.2,
+     "range": 3.0,
+     "limits": {
+      "1y": 0.0051
+     },
+     "quick": false,
+     "group": "ACI",
+     "printed_limits": "2.19490 to 2.20510 A",
+     "frequency": 1000.0
+    }
+   ]
+  },
+  {
+   "id": "ohm4",
+   "title": "Resistance 100 ohm to 10 Mohm (4-wire)",
+   "page": "1-12 to 1-13 (Table 1-6)",
+   "group": "OHM4",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "setup": "Shielded 4-wire connections: 2000 INPUT and SENSE jacks to the calibrator (Figure 1-5), calibrator for 4-wire resistance with external sense ON. Select the 2000 4-wire resistance function (the manual says the Ohm4 key), 100 ohm range, FILTER on.",
+   "points": [
+    {
+     "kind": "OHM4",
+     "nominal": 100.0,
+     "range": 100.0,
+     "limits": {
+      "1y": 0.014
+     },
+     "quick": false,
+     "group": "OHM4",
+     "printed_limits": "99.9860 to 100.0140 ohm",
+     "plc": 1
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 1000.0,
+     "range": 1000.0,
+     "limits": {
+      "1y": 0.11
+     },
+     "quick": false,
+     "group": "OHM4",
+     "printed_limits": "0.999890 to 1.000110 kohm",
+     "plc": 1
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 10000.0,
+     "range": 10000.0,
+     "limits": {
+      "1y": 1.1
+     },
+     "quick": false,
+     "group": "OHM4",
+     "printed_limits": "9.99890 to 10.00110 kohm",
+     "plc": 1
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 100000.0,
+     "range": 100000.0,
+     "limits": {
+      "1y": 11.0
+     },
+     "quick": false,
+     "group": "OHM4",
+     "printed_limits": "99.9890 to 100.0110 kohm",
+     "plc": 1
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 1000000.0,
+     "range": 1000000.0,
+     "limits": {
+      "1y": 110.0
+     },
+     "quick": false,
+     "group": "OHM4",
+     "printed_limits": "0.999890 to 1.000110 Mohm",
+     "plc": 1
+    },
+    {
+     "kind": "OHM4",
+     "nominal": 10000000.0,
+     "range": 10000000.0,
+     "limits": {
+      "1y": 4100.0
+     },
+     "quick": false,
+     "group": "OHM4",
+     "printed_limits": "9.99590 to 10.00410 Mohm",
+     "plc": 1
+    }
+   ]
+  },
+  {
+   "id": "ohm100m",
+   "title": "Resistance 100 Mohm",
+   "page": "1-12 to 1-13 (Table 1-6)",
+   "group": "OHM100M",
+   "source": "calibrator",
+   "terminal": "FRONT",
+   "setup": "Connect the 2000 INPUT and SENSE jacks to the calibrator as in Figure 1-6, with the calibrator external sense OFF (2-wire output); shielded cables. The manual selects the 100 Mohm range of the same Ohm4 function.",
+   "points": [
+    {
+     "kind": "OHM4",
+     "nominal": 100000000.0,
+     "range": 100000000.0,
+     "limits": {
+      "1y": 153000.0
+     },
+     "quick": false,
+     "group": "OHM100M",
+     "printed_limits": "99.8470 to 100.1530 Mohm",
+     "plc": 1
+    }
+   ]
+  }
+ ]
+}

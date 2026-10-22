@@ -17,6 +17,10 @@ Included
                             (short | open), terminal, group (ZERO_SHORT ZERO_OPEN VOLT OHM4 OHM2 IMA I2A I10A), limits {90d, 1y: {low, high}} in base units, std_relative (ohms:
                             tolerance about the calibrator setting), accuracy (the formula % of reading, % of range), cal_limits {5522A: why} (points that calibrator cannot
                             make), and, where the printed table was wrong, flags + printed_limits. build_8808a_spec.py checks every limit against the accuracy formula in Decimal.
+  keithley_2000_pv.json     Keithley Model 2000 Calibration Manual 2000-905-01 Rev. F, Tables 1-2 .. 1-6 (printed pp. 1-7 .. 1-13), 38 points (schema 1, written by build_k2000_spec.py from the page images). ONE period, '1y' (the manual prints one
+                            interval: 1 year, 18-28 C). Per point: kind (DCV / ACV / DCI / ACI / OHM4), nominal (negative for the minus points), range (the meter range, manual, never autorange), limits{'1y'}, frequency, plc, group (hook-up key: DCV, ACV, ACV700, DCI, ACI,
+                            OHM4, OHM100M), printed_limits (text as printed), variant ('alt219' = the 219 V @ 50 kHz substitute, 'opt700' = the optional 700 V @ 50 kHz, source 'manual'), computed_limit (219 V only). Top level: measure{nplc, filter_state, filter_count,
+                            filter_type, ac_bandwidth}, prep.dcv_rel_zero, general[] (warm-up / environment lines), equipment. The builder recomputes every printed half-width in Decimal from the one-year accuracy specification and aborts on a mismatch.
   fluke_110_series_pv.json  Fluke 110/113/114/115/116/117 Calibration Information, Tables 3-4 (schema 2: manual-reading; limits are the
                             exact printed display-reading strings, each step lists the models it applies to)
   fluke_87v_pv.json         Fluke 87 Series V, 51 points (schema 2, written by build_87v_spec.py from the MDD datasheet)

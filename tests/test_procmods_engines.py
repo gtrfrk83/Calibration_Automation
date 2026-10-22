@@ -44,6 +44,7 @@ import dacq_verification as D  # noqa: E402
 import fluke8808a_verification as K  # noqa: E402
 import fgen_verification as F  # noqa: E402
 import handheld_dmm as H  # noqa: E402
+import keithley2000_verification as K2000  # noqa: E402
 import mdo4000c_verification as M  # noqa: E402
 import truevolt_verification as T  # noqa: E402
 import Agilent_34401A as A  # noqa: E402
@@ -220,6 +221,14 @@ def build_handheld(mods):
     return io, lambda: [safe(io.apply, p) for p in uniq[:14]]
 
 
+def build_k2000(mods):
+    from drivers.simulated_k2000 import make_k2000_bench
+    bench, ft, dt = make_k2000_bench('5522A', 'GPIB')
+    io = K2000.IO('sim', 'sim', 'Fluke 5522A', 9600, 'GPIB', transports=(gc.RecordingTransport(dt), gc.RecordingTransport(ft)), mods=mods)
+    pts = _sample(K2000.POINTS, lambda p: (p['kind'], p['group'], bool(p.get('frequency')), p['range'] >= 1e7, p['source']), 14)
+    return io, lambda: [safe(io.measure, p) for p in pts]
+
+
 def build_mdo(mods):
     bench, t = make_mdo_bench()
     io = M.IO(dict(cal_baud=9600), transports={k: gc.RecordingTransport(v) for k, v in t.items()}, mods=mods)
@@ -246,6 +255,7 @@ ENGINES = {
     'truevolt': ('34470A', build_truevolt), 'dacq': ('34970A', build_dacq), 'fgen': ('33220A', build_fgen),
     'a34401': ('34401A', build_a34401), 'f8846a': ('8846A', build_f8846a), 'handheld': ('5522A', build_handheld),
     'mdo': ('MDO4000C', build_mdo), 'f8808a': ('8808A', build_f8808a),
+    'k2000': ('2000', build_k2000),
 }
 # handheld overrides are scoped to the spec model; the sim run mixes 115 / 116 / 117 points, so the tests use asset scope for it
 SCOPE_KW = {'handheld': dict(scope='asset', asset_id='HH-1')}
@@ -308,7 +318,7 @@ class Registry(unittest.TestCase):
     def test_every_tunable_is_read_by_the_source_of_its_engine(self):
         files = {'truevolt': 'truevolt_verification.py', 'dacq': 'dacq_verification.py', 'fgen': 'fgen_verification.py',
                  'handheld': 'handheld_dmm.py', 'a34401': 'Procedures/Agilent_34401A.py', 'f8846a': 'Procedures/Fluke_8846A_Verification.py',
-                 'mdo': 'mdo4000c_verification.py', 'ws': 'Procedures/WaveSurfer_WS4104HD.py', 'f8808a': 'fluke8808a_verification.py'}
+                 'mdo': 'mdo4000c_verification.py', 'ws': 'Procedures/WaveSurfer_WS4104HD.py', 'f8808a': 'fluke8808a_verification.py', 'k2000': 'keithley2000_verification.py'}
         dynamic = ('truevolt.settle.ac_', 'dacq.settle.ac_')
         for name, t in pe.TUNABLES.items():
             src = (ROOT / files[t['engine']]).read_text(encoding='utf-8')
@@ -329,7 +339,7 @@ class Registry(unittest.TestCase):
         """Source-level guard: every procedure loads the modifications at run start, binds drivers, and skips skipped points."""
         for rel in ('truevolt_verification.py', 'dacq_verification.py', 'fgen_verification.py', 'handheld_dmm.py', 'mdo4000c_verification.py',
                     'Procedures/Agilent_34401A.py', 'Procedures/Fluke_8846A_Verification.py', 'Procedures/WaveSurfer_WS4104HD.py',
-                    'fluke8808a_verification.py'):
+                    'fluke8808a_verification.py', 'keithley2000_verification.py'):
             src = (ROOT / rel).read_text(encoding='utf-8')
             self.assertIn('procmods_engine.ProcModsMixin', src, rel)
             self.assertIn('pm_init(', src, rel)
