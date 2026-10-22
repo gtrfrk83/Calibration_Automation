@@ -3,7 +3,7 @@
     python3 specs/build_hookups.py                 (needs Pillow; the procedures themselves do not)
     python3 specs/build_hookups.py fluke77         (only the named meter(s); the other diagrams are left byte for byte as they are)
 
-Meters: Klein MM325, Fluke 110 series, Fluke 87V, Fluke 77 Series IV.   Calibrators: Fluke 5560A and Fluke 5522A.
+Meters: Klein MM325, Fluke 110 series, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179.   Calibrators: Fluke 5560A and Fluke 5522A.
 The terminals each calibrator uses come from hookups.py, so the pictures and the prompts' text agree.
 
 5560A: drawn from a photograph of the real front panel (OUTPUT V/ohm HI / LO, VI AUX, SENSE HI / LO, 30A, GUARD, ground, TC, SCOPE, TRIG).
@@ -188,6 +188,9 @@ METER_DRAW = {
     'fluke77': dict(brand='FLUKE', model='77 Series IV', body='#f3c40f', edge='#8a6d00', face='#2b2e33', ink='#ffffff', accent='#f3c40f',
                     grid=[('ma', '400 mA', 100, 480, 'L'), ('a10', '10A', 100, 556, 'L'), ('vohm', 'V Ω', 270, 480, 'R'), ('com', 'COM', 270, 556, 'R')],
                     jacks=[('ma', '400 mA', 100), ('a10', '10A', 100), ('vohm', 'V Ω', 270), ('com', 'COM', 270)], alias={}),
+    # the 175 / 177 / 179 manual names the jacks (pp. 2, 3, 9) but does not show their order on the case: drawn like the 87V's row (UNVERIFIED)
+    'fluke170': dict(brand='FLUKE', model='175 / 177 / 179', body='#f3c40f', edge='#8a6d00', face='#2b2e33', ink='#ffffff', accent='#f3c40f',
+                     jacks=[('a10', '10A', 96), ('ma', '400 mA', 152), ('com', 'COM', 208), ('vohm', 'VΩ', 264)], alias={}),
 }
 
 

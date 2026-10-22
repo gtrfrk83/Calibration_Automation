@@ -67,13 +67,17 @@ STABLE = {
  'Fluke 287 Performance Verification': 'Fluke_287_Verification.py',
  'Fluke 289 Performance Verification': 'Fluke_289_Verification.py',
  'Fluke 77 Series IV Performance Verification': 'Fluke_77IV_Verification.py',
+ 'Fluke 175 Performance Verification': 'Fluke_175_Verification.py',
+ 'Fluke 177 Performance Verification': 'Fluke_177_Verification.py',
+ 'Fluke 179 Performance Verification': 'Fluke_179_Verification.py',
 }
 VERSIONS = {'WaveSurfer_WS4104HD.py': '51', 'Fluke_87V.py': '53', 'Agilent_34401A.py': '55',
             'Fluke_8846A_Verification.py': '59', 'Fluke_8846A_Adjustment.py': '57',
             'Keysight_34465A_Verification.py': '3', 'Keysight_34460A_Verification.py': '2', 'Keysight_34461A_Verification.py': '2', 'Keysight_34470A_Verification.py': '2', 'Keysight_34970A_Verification.py': '1', 'Keysight_34972A_Verification.py': '1',
             'Tektronix_MDO4000C_Verification.py': '2', 'Tektronix_TDS2000C_Verification.py': '1', 'Fluke_110_Verification.py': '2', 'Fluke_113_Verification.py': '2', 'Fluke_114_Verification.py': '2', 'Fluke_115_Verification.py': '2', 'Fluke_116_Verification.py': '2', 'Fluke_117_Verification.py': '2', 'Klein_MM325_Verification.py': '2',
             'Keysight_33210A_Verification.py': '2', 'Agilent_33220A_Verification.py': '2', 'Agilent_33250A_Verification.py': '1',
-            'Fluke_287_Verification.py': '1', 'Fluke_289_Verification.py': '1', 'Fluke_77IV_Verification.py': '1'}
+            'Fluke_287_Verification.py': '1', 'Fluke_289_Verification.py': '1', 'Fluke_77IV_Verification.py': '1',
+            'Fluke_175_Verification.py': '1', 'Fluke_177_Verification.py': '1', 'Fluke_179_Verification.py': '1'}
 ALL_CATEGORIES = 'All categories'
 
 
@@ -140,6 +144,9 @@ def init_db():
             ('Fluke 287 Performance Verification','Fluke','287','Digital Multimeter','Fluke_287_Verification.py'),
             ('Fluke 289 Performance Verification','Fluke','289','Digital Multimeter','Fluke_289_Verification.py'),
             ('Fluke 77 Series IV Performance Verification','Fluke','77 Series IV','Digital Multimeter','Fluke_77IV_Verification.py'),
+            ('Fluke 175 Performance Verification','Fluke','175','Digital Multimeter','Fluke_175_Verification.py'),
+            ('Fluke 177 Performance Verification','Fluke','177','Digital Multimeter','Fluke_177_Verification.py'),
+            ('Fluke 179 Performance Verification','Fluke','179','Digital Multimeter','Fluke_179_Verification.py'),
         ]
         for name,mfr,model,category,filename in records:
             stable = str(Path('Procedures') / filename)
@@ -194,6 +201,7 @@ class Manager:
         root.title('Calibration Procedure Manager')
         ui.fit_window(root, 1260, 740, min_w=1000, min_h=580)
         self.demo = tk.BooleanVar(value=False)
+        self.fast_demo = tk.BooleanVar(value=False)       # demo without windows or commands (the old quick demo)
         self.status = tk.StringVar(value='Select a procedure, then press Run Procedure.')
         self.search = tk.StringVar()
         self.category = tk.StringVar(value=ALL_CATEGORIES)
@@ -322,8 +330,9 @@ class Manager:
         ttk.Label(card, textvariable=self.d_path, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
         self.btn_run = ttk.Button(card, text='▶  Run procedure', style='Accent.TButton', command=self.run_selected)
         self.btn_run.pack(fill='x', pady=(18, 6))
-        self.btn_demo = ttk.Button(card, text='Try in demo mode (no hardware)', command=lambda: self.run_selected(demo=True))
+        self.btn_demo = ttk.Button(card, text='Try in demo mode (virtual instruments)', command=lambda: self.run_selected(demo=True))
         self.btn_demo.pack(fill='x')
+        ttk.Checkbutton(card, text='Fast demo (no windows)', variable=self.fast_demo).pack(anchor='w', pady=(4, 0))
         self.d_mod = ui.Pill(card, '', 'warn')                    # 'MODIFIED (n)': saved model-wide procedure changes exist
         self.btn_changes = ttk.Button(card, text='Procedure changes...', command=self.procedure_changes)
         self.btn_changes.pack(fill='x', pady=(6, 0))
@@ -331,7 +340,7 @@ class Manager:
         self.btn_verify.pack(fill='x', pady=(6, 0))
         self.btn_lock = ttk.Button(card, text='Unlock for editing...', command=self.toggle_lock)
         self.btn_lock.pack(fill='x', pady=(6, 0))
-        ttk.Label(card, text='Run procedure uses real instruments. Demo mode only simulates readings, so you can rehearse safely.',
+        ttk.Label(card, text='Run procedure uses real instruments. Demo mode connects VIRTUAL instruments: the windows of a real run appear and commands go to simulated instruments, so you can rehearse safely. Nothing from a demo is calibration evidence.',
                   style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 0))
 
     def refresh_details(self):
@@ -524,6 +533,8 @@ class Manager:
         args = [sys.executable, str(path)]
         if demo:
             args.append('--demo')
+            if self.fast_demo.get():
+                args.append('--fast-demo')
         if asset:
             args += ['--asset', asset]
         args += list(extra or [])

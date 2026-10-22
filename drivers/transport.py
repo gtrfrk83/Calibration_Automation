@@ -30,6 +30,7 @@ class CommandLog:
     of exactly which commands were issued."""
     entries: list = field(default_factory=list)
     echo: bool = False
+    virtual: bool = False        # a demo run on simulated instruments: never appended to the shared evidence log
 
     def add(self, direction, text, instrument=''):
         entry = (time.time(), instrument, direction, text)
@@ -42,7 +43,9 @@ class CommandLog:
         return [f'{t - t0:9.3f}  {inst:<10} {d}  {txt}' for t, inst, d, txt in self.entries]
 
     def append_default(self, name):
-        """Append to ~/.calibration_suite/command_log.txt (shared evidence log). Never raises."""
+        """Append to ~/.calibration_suite/command_log.txt (shared evidence log). Never raises. A virtual (demo) log writes nothing."""
+        if self.virtual:
+            return
         try:
             from datetime import datetime
             from pathlib import Path

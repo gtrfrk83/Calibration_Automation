@@ -143,7 +143,7 @@ Procedures/Keysight_34970A_Verification.py  (RS-232)   and   Keysight_34972A_Ver
 
 Fluke 110 / 113 / 114 / 115 / 116 / 117 handheld meters (manual-reading procedures)
 -------------------------------------------------------------------------------
-Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Klein MM325)
+Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179, Klein MM325)
   hookups.py holds the connection tables; specs/build_hookups.py (needs Pillow) draws diagrams/hook_<meter>_<calibrator>_<group>.png
   (24 pictures). The text and picture follow the Calibrator selector, because the two calibrators wire differently:
       voltage / ohms        5560A: OUTPUT V/ohm HI / LO            5522A: NORMAL HI / LO
@@ -233,6 +233,16 @@ Procedures/Fluke_77IV_Verification.py   (engine: handheld_dmm.py; spec: specs/fl
   high voltages go straight to the test value (no ramp). Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf.
   Not included: the calibration ADJUSTMENT (Table 3, pp. 14-16), fuse test, diode test (it has no step in Table 2).
   Rebuild the spec after editing the table:  python3 specs/build_77_spec.py     Demo with:  python Procedures/Fluke_77IV_Verification.py --demo
+
+Fluke 175 / 177 / 179 (handheld multimeters, one spec for the family)
+-------------------------------------------------------------------
+Procedures/Fluke_175_Verification.py, Fluke_177_Verification.py, Fluke_179_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_170_series_pv.json built by specs/build_170_spec.py; diagrams: diagrams/hook_fluke170_*)
+  175 = Table 2 of the 175 / 177 / 179 Calibration Information (printed pp. 10-11, 52 points); 177 = Table 3 (pp. 12-13, 51 points); 179 = Table 3 plus the temperature points (54: 0, -40, 400 degC, K-type thermocouple through the 80AK adapter).
+  Functions: AC volts (15), AC / DC volts frequency, DC volts, DC millivolts, ohms (500 ohm ... 19 Mohm), capacitance (0.9 ... 900 uF), continuity (beeper), diode, AC / DC mA, AC / DC A.
+  Calibrator: Fluke 5522A or 5560A (the manual names a 5500A), automatic or Manual. No remote interface: you type the display reading. Prompts: hook-up dialog with diagram at every cable change (volts / ohms, 400 mA, 10 A, thermocouple),
+  "Change the function" at every dial / yellow-button change, HIGH VOLTAGE confirmation from 30 V, no ramp. Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf.
+  Three printed table values are corrected and flagged (see NOTES.md). Not included: the calibration ADJUSTMENT (Table 4), fuse test.
+  Rebuild after editing the table:  python3 specs/build_170_spec.py     Demo with:  python Procedures/Fluke_175_Verification.py --demo
 
 Tektronix TDS2000C / TDS1000C-EDU
 ---------------------------------

@@ -110,7 +110,7 @@ class ProgressPanel(ttk.Frame):
 
 
 class Shell:
-    def __init__(self, root, title, subtitle='', demo=False, on_section=None, version=''):
+    def __init__(self, root, title, subtitle='', demo=False, on_section=None, version='', virtual=False):
         self.root = root
         self.demo = demo
         self.on_section = on_section
@@ -140,7 +140,7 @@ class Shell:
         self._sub = ttk.Label(left, textvariable=self.subtitle, style='BannerSub.TLabel', justify='left')
         self._sub.pack(anchor='w')
         left.bind('<Configure>', lambda e: self._sub.configure(wraplength=max(ui.px(200), e.width - ui.px(8))), add='+')
-        self.mode_chip = self.add_chip('DEMO MODE  -  simulated readings', 'warn') if demo else self.add_chip('HARDWARE MODE', 'info')
+        self.mode_chip = self.add_chip('DEMO MODE  -  virtual instruments' if virtual else 'DEMO MODE  -  simulated readings', 'warn') if demo else self.add_chip('HARDWARE MODE', 'info')
         tk.Frame(root, height=1, background=C['border']).pack(fill='x')
 
         # ---- strip (ID, serial, As Found / As Left, progress) ---------------------------------------------
