@@ -1084,19 +1084,10 @@ class Manager:
             self.status.set(f'Launched {name} for instrument {asset}' + (' in demo mode.' if demo else '.') + ' The Instrument ID and serial number are filled in.')
 
 
-def check_environment(root):
-    """Tell the person, in plain words, about add-on packages that are missing (demo mode and the Manager still work without them)."""
-    import diagnostics
-    missing = diagnostics.missing_packages()
-    if missing:
-        messagebox.showwarning('Some add-ons are missing', diagnostics.explain_missing(missing), parent=root)
-
-
 if __name__ == '__main__':
     appdata.migrate_legacy_progress()
     init_db()
     ui.enable_hidpi()
     root = tk.Tk()
     Manager(root)
-    root.after(600, lambda: check_environment(root))
     root.mainloop()
