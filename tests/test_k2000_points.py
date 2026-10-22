@@ -5,7 +5,7 @@ accuracy specification and aborts on a disagreement), the printed limit text aga
 Part 2: the driver on the simulated 2000 (GPIB and RS-232): the command registry (page references, verified flags, the unverified list), set / read back /
 compare, a write is never retried, REL, overflow, the error queue, the INPUTS switch, remote / local, the 5522A ZCOMP command.
 Part 3: the engine (keithley2000_verification.IO and App) on the simulated bench: command order, explicit 0 Hz, standby after each point, REL once, the resistance
-compensation, high-voltage and hook-up prompts, the 700 V option, set-up refusal paths, Decimal judging, report rows (negative nominals), TAR / TUR, demo, registration.
+compensation, high-voltage and hook-up prompts, no 700 V point, RS-232 default for the calibrator, AC bandwidth 3 / filter off, 2-wire 100 Mohm, set-up refusal paths, Decimal judging, report rows (negative nominals), TAR / TUR, demo, registration.
 tkinter is stubbed in setUpModule (not at import time), like tests/test_170_points.py.
 Run:  python -m unittest tests.test_k2000_points"""
 import json
@@ -35,18 +35,17 @@ LIMITS = {
     15: ('ACV', '10', '10', 1000, '0.009', 'ACV'), 16: ('ACV', '10', '10', 50000, '0.017', 'ACV'),
     17: ('ACV', '100', '100', 1000, '0.09', 'ACV'), 18: ('ACV', '100', '100', 50000, '0.17', 'ACV'),
     19: ('ACV', '700', '750', 1000, '0.645', 'ACV'), 20: ('ACV', '219', '750', 50000, '0.638', 'ACV'),
-    21: ('ACV', '700', '750', 50000, '1.215', 'ACV700'),
-    22: ('DCI', '0.01', '0.01', None, '0.0000058', 'DCI'), 23: ('DCI', '-0.01', '0.01', None, '0.0000058', 'DCI'),
-    24: ('DCI', '0.1', '0.1', None, '0.00013', 'DCI'), 25: ('DCI', '-0.1', '0.1', None, '0.00013', 'DCI'),
-    26: ('DCI', '1', '1', None, '0.00088', 'DCI'), 27: ('DCI', '-1', '1', None, '0.00088', 'DCI'),
-    28: ('DCI', '2.2', '3', None, '0.00276', 'DCI'), 29: ('DCI', '-2.2', '3', None, '0.00276', 'DCI'),
-    30: ('ACI', '1', '1', 1000, '0.0014', 'ACI'), 31: ('ACI', '2.2', '3', 1000, '0.0051', 'ACI'),
-    32: ('OHM4', '100', '100', None, '0.014', 'OHM4'), 33: ('OHM4', '1000', '1000', None, '0.11', 'OHM4'),
-    34: ('OHM4', '10000', '10000', None, '1.1', 'OHM4'), 35: ('OHM4', '100000', '100000', None, '11', 'OHM4'),
-    36: ('OHM4', '1000000', '1000000', None, '110', 'OHM4'), 37: ('OHM4', '10000000', '10000000', None, '4100', 'OHM4'),
-    38: ('OHM4', '100000000', '100000000', None, '153000', 'OHM100M'),
+    21: ('DCI', '0.01', '0.01', None, '0.0000058', 'DCI'), 22: ('DCI', '-0.01', '0.01', None, '0.0000058', 'DCI'),
+    23: ('DCI', '0.1', '0.1', None, '0.00013', 'DCI'), 24: ('DCI', '-0.1', '0.1', None, '0.00013', 'DCI'),
+    25: ('DCI', '1', '1', None, '0.00088', 'DCI'), 26: ('DCI', '-1', '1', None, '0.00088', 'DCI'),
+    27: ('DCI', '2.2', '3', None, '0.00276', 'DCI'), 28: ('DCI', '-2.2', '3', None, '0.00276', 'DCI'),
+    29: ('ACI', '1', '1', 1000, '0.0014', 'ACI'), 30: ('ACI', '2.2', '3', 1000, '0.0051', 'ACI'),
+    31: ('OHM4', '100', '100', None, '0.014', 'OHM4'), 32: ('OHM4', '1000', '1000', None, '0.11', 'OHM4'),
+    33: ('OHM4', '10000', '10000', None, '1.1', 'OHM4'), 34: ('OHM4', '100000', '100000', None, '11', 'OHM4'),
+    35: ('OHM4', '1000000', '1000000', None, '110', 'OHM4'), 36: ('OHM4', '10000000', '10000000', None, '4100', 'OHM4'),
+    37: ('OHM2', '100000000', '100000000', None, '153000', 'OHM100M'),
 }
-SECTION_SIZES = {'dcv': 10, 'acv': 10, 'acv700': 1, 'dci': 8, 'aci': 2, 'ohm4': 6, 'ohm100m': 1}
+SECTION_SIZES = {'dcv': 10, 'acv': 10, 'dci': 8, 'aci': 2, 'ohm4': 6, 'ohm100m': 1}
 
 
 def setUpModule():
@@ -69,7 +68,7 @@ def printed_to_base(text):
 class SpecTests(unittest.TestCase):
     def test_counts(self):
         self.assertEqual({s['id']: len(s['points']) for s in SPEC['sections']}, SECTION_SIZES)
-        self.assertEqual(len(PTS), 38)
+        self.assertEqual(len(PTS), 37)
         self.assertEqual(SPEC['periods'], ['1y'])
         self.assertEqual(SPEC['default_period'], '1y')
 
@@ -95,7 +94,7 @@ class SpecTests(unittest.TestCase):
         rounded = [p for p in PTS if p.get('computed_limit') is not None]
         self.assertEqual([p['id'] for p in rounded], [20])
         self.assertEqual(D(str(rounded[0]['computed_limit'])), D('0.6378'))
-        self.assertEqual(rounded[0]['variant'], 'alt219')
+        self.assertIn('substitutes 219 V', rounded[0]['note'])
 
     def test_dc_points_come_in_plus_minus_pairs(self):
         for kind in ('DCV', 'DCI'):
@@ -107,23 +106,30 @@ class SpecTests(unittest.TestCase):
 
     def test_ranges_hold_the_signal_and_are_real_2000_ranges(self):
         real = {'DCV': (0.1, 1, 10, 100, 1000), 'ACV': (0.1, 1, 10, 100, 750), 'DCI': (0.01, 0.1, 1, 3), 'ACI': (1, 3),
-                'OHM4': (1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8)}
+                'OHM4': (1e2, 1e3, 1e4, 1e5, 1e6, 1e7), 'OHM2': (1e8,)}
         for p in PTS:
             self.assertIn(p['range'], real[p['kind']], p['id'])
             self.assertGreaterEqual(p['range'], abs(p['nominal']))
             if p['kind'] in ('ACV', 'ACI'):
                 self.assertIn(p['frequency'], (1000.0, 50000.0))
 
-    def test_the_700_volt_point_is_optional_and_by_hand(self):
-        sec = next(s for s in SPEC['sections'] if s['id'] == 'acv700')
-        self.assertTrue(sec['optional'])
-        self.assertEqual(sec['source'], 'manual')
-        p = next(q for q in PTS if q['id'] == 21)
-        self.assertTrue(p['optional'] and p['source'] == 'manual')
-        self.assertEqual(p['frequency'], 50000.0)
+    def test_the_700_volt_50_khz_point_is_gone_and_219_volts_stays(self):
+        self.assertFalse([s for s in SPEC['sections'] if s['id'] == 'acv700'])
+        self.assertFalse([p for p in PTS if p['kind'] == 'ACV' and p['nominal'] == 700 and p['frequency'] == 50000.0])
+        self.assertFalse([p for p in PTS if p.get('optional') or p['source'] != 'calibrator'])        # nothing optional, nothing sourced by hand
+        self.assertEqual([p['id'] for p in PTS if p['kind'] == 'ACV' and p['range'] == 750.0], [19, 20])
+        self.assertEqual([(p['nominal'], p['frequency']) for p in PTS if p['id'] in (19, 20)], [(700.0, 1000.0), (219.0, 50000.0)])
+        text = json.dumps(SPEC) + (ROOT / 'diagrams' / 'README_k2000.txt').read_text()
+        for needle in ('5725', 'ACV700', 'opt700', 'alt219', 'Include 700'):
+            self.assertNotIn(needle, text)
 
-    def test_ohm_hundred_megohm_is_its_own_hookup_group(self):
-        self.assertEqual({p['id'] for p in PTS if p['group'] == 'OHM100M'}, {38})
+    def test_ohm_hundred_megohm_is_a_pure_two_wire_point(self):
+        pt = next(p for p in PTS if p['group'] == 'OHM100M')
+        self.assertEqual((pt['id'], pt['kind'], pt['range'], pt['nominal']), (37, 'OHM2', 1e8, 1e8))
+        self.assertEqual(D(str(pt['limits']['1y'])), D('153000'))                  # the limit printed in Table 1-6 (99.8470 to 100.1530 Mohm), unchanged
+        self.assertEqual(pt['printed_limits'], '99.8470 to 100.1530 Mohm')
+        self.assertEqual([p['kind'] for p in PTS if p['group'] != 'OHM100M' and p['kind'].startswith('OHM')], ['OHM4'] * 6)
+        self.assertIn('NO sense leads', pt['setup'] if 'setup' in pt else next(s for s in SPEC['sections'] if s['id'] == 'ohm100m')['setup'])
 
     def test_builder_reproduces_the_stored_file(self):
         import importlib.util
@@ -134,7 +140,7 @@ class SpecTests(unittest.TestCase):
 
     def test_measurement_conditions_and_prep(self):
         m = SPEC['measure']
-        self.assertEqual((m['nplc'], m['filter_state'], m['filter_count'], m['filter_type'], m['ac_bandwidth']), (1, 'ON', 10, 'REPeat', 30))
+        self.assertEqual((m['nplc'], m['filter_state'], m['filter_count'], m['filter_type'], m['ac_bandwidth'], m['ac_filter_state']), (1, 'ON', 10, 'REPeat', 3, 'OFF'))
         z = SPEC['prep']['dcv_rel_zero']
         self.assertEqual((z['kind'], z['range'], z['nominal']), ('DCV', 0.1, 0.0))
         self.assertTrue(SPEC['general'])
@@ -193,12 +199,13 @@ class DriverTests(unittest.TestCase):
     def test_configure_sets_reads_back_and_never_repeats_a_write(self):
         d, _ft, dt = self.make()
         mark = len(dt.sent)
-        d.configure_point(dict(kind='ACV', range=10.0, ac_bandwidth=30))
+        d.configure_point(dict(kind='ACV', range=10.0, ac_bandwidth=3, filter_on=False))
         sent = dt.sent[mark:]
         writes = [c for c in sent if not c.endswith('?')]
         self.assertEqual(len(writes), len(set(writes)), 'a setting was written twice')
         self.assertEqual(writes[0], ":SENS:FUNC 'VOLT:AC'")
-        self.assertIn(':SENS:VOLT:AC:DET:BAND 30', writes)
+        self.assertIn(':SENS:VOLT:AC:DET:BAND 3', writes)
+        self.assertIn(':SENS:VOLT:AC:AVER:STAT OFF', writes)
         self.assertNotIn('AUTO ON', ' '.join(sent))
         for w in writes:                                                      # every write is followed (not necessarily at once) by its query
             self.assertIn(w.split(' ')[0] + '?', ' '.join(sent).replace(w, w), w)
@@ -250,10 +257,50 @@ class DriverTests(unittest.TestCase):
 
     def test_rel_is_forced_off_for_the_other_functions(self):
         d, _ft, dt = self.make()
-        for kind, rng in (('ACV', 1.0), ('DCI', 0.1), ('ACI', 1.0), ('OHM4', 1000.0)):
+        for kind, rng in (('ACV', 1.0), ('DCI', 0.1), ('ACI', 1.0), ('OHM4', 1000.0), ('OHM2', 1e8)):
             mark = len(dt.sent)
-            d.configure_point(dict(kind=kind, range=rng, plc=1, ac_bandwidth=30))
+            d.configure_point(dict(kind=kind, range=rng, plc=1, ac_bandwidth=3))
             self.assertTrue(any('REF:STAT OFF' in c for c in dt.sent[mark:]), kind)
+
+    def test_ac_bandwidth_is_3_and_the_filter_is_off_for_ac_but_on_for_dc_and_ohms(self):
+        d, _ft, dt = self.make()
+        for kind, rng, node in (('ACV', 10.0, 'VOLT:AC'), ('ACI', 1.0, 'CURR:AC')):
+            mark = len(dt.sent)
+            d.configure_point(dict(kind=kind, range=rng, ac_bandwidth=3))               # the filter default for AC comes from the driver: off
+            sent = dt.sent[mark:]
+            self.assertIn(f':SENS:{node}:DET:BAND 3', sent)
+            self.assertIn(f':SENS:{node}:AVER:STAT OFF', sent)
+            self.assertFalse([c for c in sent if ':AVER:TCON' in c or ':AVER:COUN' in c and not c.endswith('?')], 'AC: no filter type / count is set')
+            self.assertEqual(dt.cfg[node]['band'], 3.0)
+            self.assertFalse(dt.cfg[node]['avg'])
+        for kind, rng, node in (('DCV', 10.0, 'VOLT:DC'), ('DCI', 0.1, 'CURR:DC'), ('OHM4', 1000.0, 'FRES'), ('OHM2', 1e8, 'RES')):
+            mark = len(dt.sent)
+            d.configure_point(dict(kind=kind, range=rng, plc=1))
+            sent = dt.sent[mark:]
+            self.assertIn(f':SENS:{node}:AVER:TCON REP', sent)
+            self.assertIn(f':SENS:{node}:AVER:COUN 10', sent)
+            self.assertIn(f':SENS:{node}:AVER:STAT ON', sent)
+            self.assertEqual((dt.cfg[node]['tcon'], dt.cfg[node]['count'], dt.cfg[node]['avg']), ('REP', 10, True))
+
+    def test_the_filter_state_is_read_back_and_a_wrong_answer_stops_the_point(self):
+        import drivers
+        d, _ft, dt = self.make()
+        orig = dt.handle
+        dt.handle = lambda cmd: '1' if cmd.strip().upper() == ':SENS:VOLT:AC:AVER:STAT?' else orig(cmd)     # the meter says the filter is still on
+        with self.assertRaises(drivers.InstrumentError):
+            d.configure_point(dict(kind='ACV', range=10.0, ac_bandwidth=3))
+        self.assertEqual(len([c for c in dt.sent if c == ':SENS:VOLT:AC:AVER:STAT OFF']), 1)             # never resent
+
+    def test_registry_bandwidth_and_filter_entries(self):
+        from drivers import keithley_2000 as mod
+        for k in ('acv', 'aci'):
+            self.assertTrue(mod.COMMANDS[f'band.{k}'].verified)                       # the command is in the manual
+            self.assertFalse(mod.COMMANDS[f'band.query.{k}'].verified)                # the reply text is not
+            self.assertTrue(mod.COMMANDS[f'band.{k}'].placeholders['hz'].sample == 3.0)
+        self.assertTrue(mod.COMMANDS['filter.acv'].verified)
+        self.assertEqual(mod.COMMANDS['filter.acv'].template, ':SENS:VOLT:AC:AVER:STAT {state}')
+        self.assertEqual(mod.COMMANDS['func.ohm2'].template, ":SENS:FUNC 'RES'")
+        self.assertEqual(mod.COMMANDS['range.ohm2'].template, ':SENS:RES:RANG {expected:.9g}')
 
     def test_overflow_is_an_error_not_a_reading(self):
         import drivers
@@ -328,8 +375,8 @@ class Flow(unittest.TestCase):
     def test_virtual_run_passes_every_point_and_is_marked_demo(self):
         a = self.app()
         self.assertTrue(self.hn.run_all())
-        self.assertEqual(len(a.results), 37)                                    # the optional 700 V point is not run
-        self.assertNotIn('21', a.results)
+        self.assertEqual(len(a.results), 37)                                    # the default run is 37 points
+        self.assertNotIn('38', a.results)
         self.assertTrue(all(r['result'] == 'PASS' and r['synthetic'] for r in a.results.values()))
         self.assertTrue(a.io.log.virtual)
         self.assertTrue(a.any_synthetic())
@@ -391,17 +438,100 @@ class Flow(unittest.TestCase):
         self.assertEqual(len(asked), 8)                    # +/-100 V and +/-1000 V DC; 100 V AC at 1 kHz and 50 kHz; 700 V 1 kHz; 219 V 50 kHz
         self.assertTrue(any('-1000 V' in b[3] for b in asked))
 
-    def test_700_volt_option_swaps_the_219_volt_point(self):
+    def test_no_700_volt_option_and_219_volt_point_runs(self):
         a = self.app(cal='Fluke 5522A')
-        a.include_700.set(True)
-        self.assertTrue(a.active(PTS[20]) and not a.active(PTS[19]))
+        self.assertFalse(hasattr(a, 'include_700'))
+        self.assertTrue(all(a.active(p) for p in PTS))
+        self.assertEqual(len(a.active_points()), 37)
         self.assertTrue(self.hn.run_all())
-        self.assertIn('21', a.results)
-        self.assertNotIn('20', a.results)
-        self.assertEqual(len(a.results), 37)
-        self.assertIn('Connect the standard', self.hn.titles())
-        self.assertFalse([t for t in self.wire(a, '5522A') if t.startswith('OUT 700V,50000Hz')])         # no calibrator command for the by-hand point
-        self.assertTrue(a.results['21']['synthetic'])
+        self.assertIn('20', a.results)                                           # 219 V at 50 kHz
+        self.assertNotIn('Connect the standard', self.hn.titles())               # no hand-sourced point, no such dialog
+        cal = self.wire(a, '5522A')
+        self.assertIn('OUT 219V,50000Hz', cal)
+        self.assertFalse([t for t in cal if t.startswith('OUT 700V,50000Hz')])
+
+    def test_ac_points_run_at_bandwidth_3_with_the_filter_off_and_the_long_settle(self):
+        a = self.app(cal='Fluke 5522A')
+        self.assertTrue(self.hn.run_all())
+        w = self.wire(a, '2000')
+        for node in ('VOLT:AC', 'CURR:AC'):
+            self.assertTrue([t for t in w if t == f':SENS:{node}:DET:BAND 3'])
+            self.assertFalse([t for t in w if t.startswith(f':SENS:{node}:DET:BAND ') and t != f':SENS:{node}:DET:BAND 3' and not t.endswith('?')])
+            self.assertTrue([t for t in w if t == f':SENS:{node}:AVER:STAT OFF'])
+            self.assertFalse([t for t in w if t == f':SENS:{node}:AVER:STAT ON'])
+        for node in ('VOLT:DC', 'CURR:DC', 'FRES', 'RES'):
+            self.assertTrue([t for t in w if t == f':SENS:{node}:AVER:STAT ON'], node)
+            self.assertFalse([t for t in w if t == f':SENS:{node}:AVER:STAT OFF'], node)
+        self.assertFalse([t for t in w if 'DET:BAND 30' in t])
+        io = a.io
+        self.assertEqual(io.settle(PTS[10]), K.AC_SETTLE_DEFAULT_S)               # an AC point
+        self.assertGreaterEqual(K.AC_SETTLE_DEFAULT_S, 20.0)
+        self.assertGreater(io.settle(PTS[10]), 6.0)                               # longer than the old 30 Hz figure
+        import procmods_engine as pe
+        self.assertEqual(pe.tunables_for('k2000') and [t for t in pe.tunables_for('k2000') if 'settle.ac' in str(t)] != [], True)
+
+    def test_hundred_megohm_is_a_pure_two_wire_run(self):
+        for cal in ('Fluke 5522A', 'Fluke 5560A'):
+            self.hn.stop(); self.setUp()
+            a = self.app(cal=cal)
+            self.assertTrue(self.hn.run_all())
+            w = self.wire(a, '2000')
+            i = max(i for i, t in enumerate(w) if t == ":SENS:FUNC 'RES'")          # the 2-wire function, selected for the 100 Mohm point only
+            self.assertEqual([t for t in w if t == ":SENS:FUNC 'RES'"], [":SENS:FUNC 'RES'"])
+            self.assertIn(':SENS:RES:RANG 90000000', w[i:])
+            self.assertIn(':SENS:RES:RANG 90000000', w)
+            self.assertEqual(len([t for t in w if t == ":SENS:FUNC 'FRES'"]), 6)    # the six 4-wire points only
+            self.assertFalse([t for t in w if t.startswith(':SENS:FRES:RANG 90000000')])
+            cal_w = self.wire(a, '5522A' if cal.endswith('5522A') else '5560A')
+            outs = [t for t in cal_w if t.startswith('OUT') and t.endswith('OHM')]
+            self.assertEqual(outs[-1], 'OUT 100000000OHM')
+            if cal.endswith('5522A'):
+                self.assertEqual([t for t in cal_w if t.startswith('ZCOMP ') and not t.endswith('?')][-1], 'ZCOMP NONE')
+                self.assertNotIn('ZCOMP WIRE2', cal_w)
+            self.assertFalse([t for t in cal_w if 'SENSE' in t.upper() or 'EXTSENSE' in t.upper()])
+            self.assertEqual(a.results['37']['result'], 'PASS')
+
+    def test_calibrator_interface_is_rs232_by_default_and_gpib_selectable(self):
+        a = self.app()
+        self.assertEqual(K.CAL_INTERFACES[0], 'RS-232')
+        self.assertEqual(a.cal_interface.get(), 'RS-232')
+        self.assertEqual(a.cal_addr.get(), 'COM9')
+        self.assertEqual(a.interface.get(), 'GPIB')                               # the meter's assumed interface is unchanged
+        self.assertIn('GPIB', K.CAL_INTERFACES)
+        a.cal_interface.set('GPIB'); a.on_cal_interface()
+        self.assertTrue(a.cal_addr.get().startswith('GPIB0::'))
+        a.cal_addr.set('GPIB0::6::INSTR')
+        a.cal_interface.set('RS-232'); a.on_cal_interface()
+        self.assertEqual(a.cal_addr.get(), 'COM9')                                # the RS-232 port typed earlier comes back
+        a.cal_interface.set('GPIB'); a.on_cal_interface()
+        self.assertEqual(a.cal_addr.get(), 'GPIB0::6::INSTR')
+
+    def test_calibrator_visa_addresses(self):
+        self.assertEqual(K.to_cal_visa('COM9'), 'ASRL9::INSTR')
+        self.assertEqual(K.to_cal_visa('9', 'RS-232'), 'ASRL9::INSTR')
+        self.assertEqual(K.to_cal_visa('4', 'GPIB'), 'GPIB0::4::INSTR')
+        self.assertEqual(K.to_cal_visa('GPIB0::6::INSTR', 'GPIB'), 'GPIB0::6::INSTR')
+        with self.assertRaises(ValueError):
+            K.to_cal_visa('COM', 'GPIB')
+
+    def test_io_opens_the_calibrator_with_baud_on_rs232_only(self):
+        calls = []
+        orig = K.drivers.open_visa
+
+        def fake(address, timeout=10.0, **kw):
+            calls.append((address, kw))
+            if len(calls) == 1:
+                return bench()[2]                           # the Model 2000
+            raise RuntimeError('stop here')
+        K.drivers.open_visa = fake
+        try:
+            for iface, want in (('RS-232', ('ASRL9::INSTR', {'baud': 19200})), ('GPIB', ('GPIB0::4::INSTR', {}))):
+                calls.clear()
+                with self.assertRaises(RuntimeError):
+                    K.IO('GPIB0::16::INSTR', '9' if iface == 'RS-232' else '4', 'Fluke 5522A', 19200, 'GPIB', cal_interface=iface)
+                self.assertEqual(calls[1], want)            # calls[0] is the Model 2000
+        finally:
+            K.drivers.open_visa = orig
 
     def test_fast_demo_connects_nothing(self):
         a = self.app(fast=True)
@@ -468,7 +598,7 @@ class Flow(unittest.TestCase):
         n = dict(PTS[1]); n['error'] = 8.5e-06
         self.assertTrue(K.judge(n, -0.1000085))
         self.assertFalse(K.judge(n, -0.0999914))
-        big = dict(PTS[37]); big['error'] = 153000.0
+        big = dict(PTS[36]); big['error'] = 153000.0
         self.assertTrue(K.judge(big, 100153000.0))
         self.assertFalse(K.judge(big, 100153000.1))
 
@@ -494,16 +624,9 @@ class Flow(unittest.TestCase):
         self.assertTrue(all(r['Section'] for r in rows))
         self.assertFalse([r for r in rows if r['OOT']])
 
-    def test_700_volt_row_claims_no_calibrator_uncertainty(self):
+    def test_every_row_has_a_calibrator_standard(self):
         a = self.app()
-        a.include_700.set(True)
-        self.assertTrue(self.hn.run_all())
-        rows, pts = a.certificate_rows_and_points()
-        row = next(r for p, r in zip(pts, rows) if p['id'] == 21)
-        self.assertEqual(a.standard_for(PTS[19]), '5560A')
-        self.assertIsNone(a.standard_for(next(p for p in PTS if p['id'] == 21)))
-        import report_pdf
-        self.assertEqual(row['Uncertainty'], report_pdf.point_uncertainty(next(p for p in PTS if p['id'] == 21), None))      # the scope CMC, not a calibrator budget
+        self.assertTrue(all(a.standard_for(p) == '5560A' for p in PTS))
 
     def test_tar_tur_fields_exist_for_every_point(self):
         import tartur_wiring
@@ -543,13 +666,17 @@ class Flow(unittest.TestCase):
     def test_setup_text_names_the_calibrator_terminals(self):
         a = self.app()
         self.assertIn('OUTPUT V/ohm HI / LO', a.setup_text(PTS[0]))
-        self.assertIn('VI AUX', a.setup_text(PTS[21]))
+        self.assertIn('VI AUX', a.setup_text(PTS[20]))
         a.cal_model.set('Fluke 5522A')
         self.assertIn('NORMAL HI / LO', a.setup_text(PTS[0]))
-        self.assertIn('AUX HI and AUX LO', a.setup_text(PTS[21]))
-        self.assertIn('ZCOMP', a.setup_text(PTS[31]))
+        self.assertIn('AUX HI and AUX LO', a.setup_text(PTS[20]))
+        self.assertIn('ZCOMP', a.setup_text(PTS[30]))
+        self.assertIn('Pure 2-wire', a.setup_text(PTS[36]))
+        self.assertIn('NO sense leads', a.setup_text(PTS[36]))
+        self.assertIn('2-wire resistance function (not 4-wire)', a.setup_text(PTS[36]))
         a.cal_model.set('Fluke 5560A')
-        self.assertIn('sends no compensation command', a.setup_text(PTS[31]))
+        self.assertIn('sends no compensation command', a.setup_text(PTS[30]))
+        self.assertIn('2-wire mode', a.setup_text(PTS[36]))
 
 
 CAL_KEY = {'Fluke 5522A': '5522A', 'Fluke 5560A': '5560A'}
@@ -573,7 +700,7 @@ class Registration(unittest.TestCase):
 
     def test_diagram_readme_exists_and_names_the_groups(self):
         text = (ROOT / 'diagrams' / 'README_k2000.txt').read_text(encoding='utf-8')
-        for g in ('DCV', 'ACV', 'ACV700', 'DCI', 'ACI', 'OHM4', 'OHM100M'):
+        for g in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM4', 'OHM100M'):
             self.assertIn(g, text)
 
 
