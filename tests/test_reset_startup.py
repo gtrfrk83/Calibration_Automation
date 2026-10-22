@@ -85,7 +85,7 @@ class DriversDeclareReset(unittest.TestCase):
         """Only these resets are backed by a manual page; everything else is flagged unverified in the report."""
         ok = sorted(c.__name__ for c in all_driver_classes()
                     if not c.RESET_EXEMPT and cmdreg.merge_commands(c)['reset'].verified)
-        self.assertEqual(ok, ['Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke8808A', 'Fluke96270A', 'Keithley2000', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x'])
+        self.assertEqual(ok, ['Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke8808A', 'Fluke96270A', 'Keithley2000', 'Keysight34410A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x'])
 
 
 # ------------------------------------------------------------------------------------------------------------------------------
@@ -93,6 +93,7 @@ ENGINES = {          # source file -> (function that starts a run, name of the r
     'truevolt_verification.py': ('execute', 'reset_then', '_next'),
     'dacq_verification.py': ('execute', 'reset_then', '_next'),
     'keithley2000_verification.py': ('execute', 'reset_then', '_next'),
+    'agilent34410a_verification.py': ('execute', 'reset_then', '_next'),
     'fgen_verification.py': ('execute', 'reset_then', '_next'),
     'handheld_dmm.py': ('execute', 'reset_then', '_next'),
     'dsb_runtime.py': ('execute', 'reset_then', '_next'),                  # user-built datasheets (Datasheet Builder runtime)

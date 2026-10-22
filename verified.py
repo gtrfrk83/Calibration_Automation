@@ -136,6 +136,7 @@ FILES = {
     'Fluke_177_Verification.py': _files('Fluke_177_Verification.py', _HH, ['fluke_5560a'], ['fluke_170_series_pv.json']),
     'Fluke_179_Verification.py': _files('Fluke_179_Verification.py', _HH, ['fluke_5560a'], ['fluke_170_series_pv.json']),
     'Keithley_2000_Verification.py': _files('Keithley_2000_Verification.py', ['keithley2000_verification.py', 'procspec.py'], ['keithley_2000', 'fluke_5560a'], ['keithley_2000_pv.json']),
+    'Agilent_34410A_Verification.py': _files('Agilent_34410A_Verification.py', ['agilent34410a_verification.py', 'procspec.py'], ['keysight_34410a', 'fluke_5560a'], ['keysight_34410a_pv.json']),
 }
 USER_CODE = ['Procedures/User_Datasheet.py', 'dsb_runtime.py']      # a user-built procedure: its runnable spec is the rest of its definition
 

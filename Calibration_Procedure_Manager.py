@@ -72,6 +72,7 @@ STABLE = {
  'Fluke 177 Performance Verification': 'Fluke_177_Verification.py',
  'Fluke 179 Performance Verification': 'Fluke_179_Verification.py',
  'Keithley 2000 Performance Verification': 'Keithley_2000_Verification.py',
+ 'Agilent 34410A Performance Verification': 'Agilent_34410A_Verification.py',
 }
 VERSIONS = {'WaveSurfer_WS4104HD.py': '51', 'Fluke_87V.py': '53', 'Agilent_34401A.py': '55',
             'Fluke_8846A_Verification.py': '59', 'Fluke_8846A_Adjustment.py': '57', 'Fluke_8808A_Verification.py': '1',
@@ -80,7 +81,7 @@ VERSIONS = {'WaveSurfer_WS4104HD.py': '51', 'Fluke_87V.py': '53', 'Agilent_34401
             'Keysight_33210A_Verification.py': '2', 'Agilent_33220A_Verification.py': '2', 'Agilent_33250A_Verification.py': '1',
             'Fluke_287_Verification.py': '1', 'Fluke_289_Verification.py': '1', 'Fluke_77IV_Verification.py': '1',
             'Fluke_175_Verification.py': '1', 'Fluke_177_Verification.py': '1', 'Fluke_179_Verification.py': '1',
-            'Keithley_2000_Verification.py': '1'}
+            'Keithley_2000_Verification.py': '1', 'Agilent_34410A_Verification.py': '1'}
 ALL_CATEGORIES = 'All categories'
 
 
@@ -152,6 +153,7 @@ def init_db():
             ('Fluke 177 Performance Verification','Fluke','177','Digital Multimeter','Fluke_177_Verification.py'),
             ('Fluke 179 Performance Verification','Fluke','179','Digital Multimeter','Fluke_179_Verification.py'),
             ('Keithley 2000 Performance Verification','Keithley','2000','Digital Multimeter','Keithley_2000_Verification.py'),
+            ('Agilent 34410A Performance Verification','Agilent','34410A','Digital Multimeter','Agilent_34410A_Verification.py'),
         ]
         for name,mfr,model,category,filename in records:
             stable = str(Path('Procedures') / filename)

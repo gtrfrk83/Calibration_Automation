@@ -18,6 +18,9 @@ One driver per instrument MODEL. Procedures call intent-level methods
   keithley_2000.py      Keithley Model 2000 (GPIB or RS-232 SCPI: function, range, speed, filter, REL, :READ?, error queue) and the 5522A with its
                         ZCOMP command; every command has a page reference and a verified flag (the read-back reply formats are unverified)
   simulated_k2000.py    Simulated 2000 on the simulated calibrator (GPIB / RS-232 behaviour, REL, overflow, error queue)
+  keysight_34410a.py    Keysight / Agilent 34410A (GPIB or USB SCPI: function, range, 100 NPLC / AC filter, READ?, ROUT:TERM? Front/Rear, error queue); every command has a
+                        page reference and a verified flag (21 of 46 unverified: reply formats and a few node names the guides do not print)
+  simulated_34410a.py   Simulated 34410A on the simulated calibrator (GPIB / USB behaviour, Front/Rear switch, overflow, error queue)
   keysight_332xx.py     Keysight/Agilent 33210A, 33220A, 33250A generators under test (settings one at a time with the
                         output OFF - never APPLy -, OUTP? confirmed, *TST? self-test)
   keysight_5313x.py     Agilent / HP 53131A and 53132A counters (frequency: input, gate, expected frequency, reference
