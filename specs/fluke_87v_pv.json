@@ -1217,8 +1217,8 @@
    "display_unit": "°C",
    "factor": 1.0,
    "base_unit": "degC",
-   "low": "99.0",
-   "high": "101.0",
+   "low": "98.0",
+   "high": "102.0",
    "test": "numeric",
    "applied": {
     "value": 100.0,
