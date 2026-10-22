@@ -1,0 +1,50 @@
+{
+ "schema": 1,
+ "id": "Keithley_2000_Verification",
+ "name": "Keithley 2000 Performance Verification",
+ "manufacturer": "Keithley",
+ "model": "2000",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 30,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Keithley_2000_Verification.py",
+ "engine": [
+  "keithley2000_verification.py"
+ ],
+ "drivers": [
+  "keithley_2000",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/keithley_2000_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keithley_2000_Verification.py",
+   "keithley2000_verification.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/keithley_2000.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/keithley_2000_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_k2000"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Keithley_2000_Verification.py",
+  "Procedures/Keithley_2000_Verification.procedure.json",
+  "specs/keithley_2000_pv.json",
+  "drivers/keithley_2000.py",
+  "tests/test_k2000_points.py"
+ ]
+}

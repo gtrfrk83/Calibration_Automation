@@ -1,0 +1,45 @@
+{
+ "schema": 1,
+ "id": "Fluke_110_Verification",
+ "name": "Fluke 110 Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "110",
+ "category": "Digital Multimeter",
+ "version": "2",
+ "order": 14,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_110_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_110_series_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_110_Verification.py",
+   "handheld_dmm.py",
+   "hookups.py#fluke110",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_110_series_pv.json#110"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke110",
+  "diagram_prefixes": [
+   "hook_fluke110"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_110_Verification.py",
+  "Procedures/Fluke_110_Verification.procedure.json"
+ ]
+}

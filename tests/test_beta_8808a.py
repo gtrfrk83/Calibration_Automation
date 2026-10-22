@@ -637,7 +637,8 @@ class SourceGuards(unittest.TestCase):
     def test_launcher_and_manager_registration(self):
         launcher = (ROOT / 'Procedures' / 'Fluke_8808A_Verification.py').read_text(encoding='utf-8')
         self.assertIn('fluke8808a_verification.main()', launcher)
-        mgr = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
+        from tests._registry_text import manager_text            # the Manager finds procedures by scanning Procedures/*.procedure.json
+        mgr = manager_text()
         self.assertEqual(mgr.count('Fluke_8808A_Verification.py'), 3)
 
     def test_the_unit_of_work_is_exported(self):

@@ -396,6 +396,8 @@ class IndexTests(unittest.TestCase):
             f = base / rel
             f.parent.mkdir(parents=True, exist_ok=True)
             f.write_text('{}' if rel.endswith('.json') else f'# {rel}\n', encoding='utf-8')
+        side = Path('Procedures/Fluke_117_Verification.procedure.json')        # the procedure's own metadata says what its fingerprint covers
+        (base / side).write_text((ROOT / side).read_text(encoding='utf-8'), encoding='utf-8')
         self.mgr.verified = V.Registry(Path(self.tmp.name) / 'fresh.sqlite3', base=base, seed=True)
         self.mgr.refresh()
         self.iid = {r['values'][0]: i for i, r in self.mgr.table.rows.items()}

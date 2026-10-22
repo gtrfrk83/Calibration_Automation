@@ -25,6 +25,9 @@ def fake_install(base: Path, key='Fluke_117_Verification.py'):
         f = base / rel
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(json.dumps({'file': rel, 'points': [1, 2]}) if rel.endswith('.json') else f'# {rel}\nline one\nline two\n', encoding='utf-8')
+    side = Path(f'Procedures/{Path(key).stem}.procedure.json')            # the procedure's own metadata says what its fingerprint covers
+    (base / side).parent.mkdir(parents=True, exist_ok=True)
+    (base / side).write_text((ROOT / side).read_text(encoding='utf-8'), encoding='utf-8')
 
 
 class Base(unittest.TestCase):
@@ -60,18 +63,17 @@ class Keys(unittest.TestCase):
 
     def test_every_launcher_has_a_definition_and_every_listed_file_exists(self):
         launchers = {p.name for p in (ROOT / 'Procedures').glob('*.py')} - {'User_Datasheet.py', '__init__.py'}
-        self.assertEqual(launchers, set(V.FILES), 'a launcher in Procedures/ without a FILES entry (or the other way round)')
+        self.assertEqual(launchers, set(V.FILES), 'a launcher in Procedures/ without a Procedures/<id>.procedure.json (or the other way round)')
         missing = [(k, rel) for k, f in V.FILES.items() for rel in f['code'] + f['spec'] if not (ROOT / rel).is_file()]
         self.assertEqual(missing, [])
         self.assertTrue(all((ROOT / rel).is_file() for rel in V.USER_CODE))
 
-    def test_seed_names_and_models_match_the_manager_index(self):
-        src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
+    def test_seed_names_and_models_match_the_registered_procedures(self):
+        import procscan
+        registered = procscan.find
         for s in V.SEED:
-            self.assertIn(f"('{s['name']}'", src, s['name'])
-            m = re.search(r"\('" + re.escape(s['name']) + r"','[^']*','([^']*)'", src)
-            self.assertEqual(m.group(1), s['model'])
-            self.assertIn(f"'{s['name']}': '{s['proc_key']}'", src)
+            proc = registered(s['proc_key'], ROOT)
+            self.assertEqual((proc.name, proc.model, proc.launcher_name), (s['name'], s['model'], s['proc_key']))
             self.assertTrue((ROOT / 'Procedures' / s['proc_key']).is_file())
         self.assertEqual([s['proc_key'] for s in V.SEED],
                          ['Tektronix_TDS2000C_Verification.py', 'WaveSurfer_WS4104HD.py', 'Fluke_117_Verification.py'])

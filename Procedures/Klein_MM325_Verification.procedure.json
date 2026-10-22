@@ -1,0 +1,46 @@
+{
+ "schema": 1,
+ "id": "Klein_MM325_Verification",
+ "name": "Klein Tools MM325 Performance Verification",
+ "manufacturer": "Klein Tools",
+ "model": "MM325",
+ "category": "Digital Multimeter",
+ "version": "2",
+ "order": 20,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Klein_MM325_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/klein_mm325_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Klein_MM325_Verification.py",
+   "handheld_dmm.py",
+   "hookups.py#mm325",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/klein_mm325_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": "mm325",
+  "diagram_prefixes": [
+   "hook_mm325"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Klein_MM325_Verification.py",
+  "Procedures/Klein_MM325_Verification.procedure.json",
+  "specs/klein_mm325_pv.json"
+ ]
+}

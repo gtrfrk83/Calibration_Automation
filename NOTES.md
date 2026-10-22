@@ -8,6 +8,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 - `specs/`: `*_pv.json` test points and limits, plus the `build_*.py` scripts that wrote them. See `specs/README.txt`.
 - `drivers/`: instrument drivers, transports (VISA / pyserial), simulators (`simulated.py`). See `drivers/README.txt`.
 - Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 77 IV, 175/177/179, 87V, 287/289, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A), `fluke8808a_verification.py` (Fluke 8808A bench DMM), `keithley2000_verification.py` (Keithley 2000, two-way over GPIB / RS-232).
+- `procscan.py`: procedures register themselves. `Procedures/<id>.procedure.json` (sidecar) per launcher; the Manager scans them (no hand-written list). `packages.py` / `packages_ui.py` / `tools/make_package.py`: procedure packages (zip) export / import. See 'Procedure registration and packages'.
 - `labregistry.py` / `labregistry_ui.py`: per-asset report history and drift (`lab_registry.sqlite3`, not in the repo).
 - `report_pdf.py` / `report_dialog.py`: PDF "Calibration Data" reports.
   Optional TAR / TUR columns: two independent checkboxes (TAR, TUR) in `report_dialog.ask_details` (`details["show_tar"]`, `["show_tur"]`, `["show_tar_tur"]` = `report_pdf.TarTur`, default off, remembered in `~/.calibration_suite/report_tartur.json`); `report_pdf.apply_tar_tur`. TAR / TUR appear on the PDF data file only (there is no CSV export). Off = the PDF is unchanged.
@@ -434,11 +435,11 @@ procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods
   (the editor before a run and the in-run editor, run scope included), `ModsState.live_blocked_reason`, `datasheet_builder.save` (existing uid) and `.delete`. The in-run 'Edit procedure' control is disabled with the reason
   (`procmods_ui.LiveHook`, green chip via `ui_shell.Shell.set_verified`). Running is unaffected; overrides saved before the lock stay and still apply. Locks are by model for library procedures (the saved changes are kept per
   model) and by key for user-built ones.
-- Fingerprint (launcher + engine + driver files from `verified.FILES`, the spec / limit JSON, the saved overrides for the model; line endings and JSON layout ignored) is stored at verification time.
+- Fingerprint (the files the procedure's own sidecar declares: launcher + engine + driver files, the spec / limit JSON, the saved overrides for the model; line endings and JSON layout ignored; see 'Per-procedure fingerprints' below) is stored at verification time.
   If a LOCKED procedure no longer matches it, it is auto-unlocked: one `unlock` event, who `system`, reason `files changed since verification: <files>` (`Registry.sync`, run by the list refresh and by `lock_reason`, so an
   editor never refuses a changed procedure and the event is written once). Status kind `changed` = 'Changed since verification - needs hardware re-verification' (warn, not green); it stays until 'Mark verified on hardware'
   is pressed again. 'Unlock for editing' (typed reason) remains for an unchanged procedure. User-built procedures are synced by the Procedures list (their spec path is known there).
-  When you add a procedure to `Procedures/`, add its `verified.FILES` entry (`tests/test_verified_model.py` fails otherwise). The suite never blocks an update.
+  When you add a procedure to `Procedures/`, add its `Procedures/<id>.procedure.json` (its `fingerprint` block replaces the old `verified.FILES` table; `tests/test_verified_model.py` and `tests/test_procscan.py` fail otherwise). The suite never blocks an update.
 - Not in the PDF reports. Tests: `tests/test_verified_model.py`, `test_verified_editors.py`, `test_verified_ui.py` (the windows have never been viewed).
 
 ## Per-point editor (branch point-editor)
@@ -530,3 +531,37 @@ checkbox "Fast demo (no windows)"). Apps use `VirtualMixin`: `demo` (any demo), 
   "Connect" card is NOT built (the reading window has never shown the hook-up and the data is not passed to it).
 - Helpers in ui_theme: `rounded_card`, `status_circle` (drawn tick, no font glyph needed), borders drawn as two filled shapes (a 1 px smoothed outline renders broken on this Tk).
 - Real-Tk checks: `tests/real_tk_checks.py::checks_handheld_dialogs` (nothing clipped, Enter / Esc / Skip / Stop).
+
+## Procedure registration and packages (branch `procedure-packages`; checked on the simulated bench / throw-away trees and on a real Tk under Xvfb only)
+- Registration: the Manager no longer lists procedures by hand. Each procedure is `Procedures/<id>.py` + `Procedures/<id>.procedure.json` (schema 1; fields in `procscan.py`'s docstring: id, name,
+  manufacturer, model, category (= instrument class), version, order, launcher, engine, drivers, specs, `fingerprint {code, spec}`, `hookup {meter, diagram_prefixes}`, `seed_verified` / `seed_order`, `own_files`, `tests`).
+  `procscan.scan()` reads them (cached on the sidecars' mtimes; a bad sidecar is skipped and listed in `ScanResult.problems`, it never stops the others). `Calibration_Procedure_Manager.init_db()` registers
+  `[p.registration for p in procscan.procs(BASE)]` exactly as the old hand list did (same names, order, categories, launch behaviour; same `INSERT` / rename / de-duplication logic; the procedures table
+  schema is untouched); `STABLE` and `VERSIONS` are filled from the scan. A launcher with no sidecar (`User_Datasheet.py`) is not a registered procedure.
+  The sidecar is a separate file so editing metadata never changes a launcher (a launcher edit changes a verified procedure's fingerprint).
+  New procedure = launcher + sidecar (+ spec / driver / diagrams / tests). Nothing to edit in the Manager, `hookups.py` or `verified.py` any more. Exception: a NEW handheld meter family still needs its
+  `hookups.py` tables (not done from metadata; `hookups.py` and the engines were deliberately not touched).
+  `tests/test_procscan.py` compares the scan with `tests/fixtures/legacy_registry.json`, the frozen hand-written lists of main 59cfe1c (records, STABLE, VERSIONS, verified.FILES, verified.SEED).
+  Older tests that grepped the Manager source for the hand list use `tests/_registry_text.manager_text()` (the same strings rebuilt from the scan).
+- Per-procedure fingerprints (`verified.py`): `FILES` is now a read-only view of the sidecars' `fingerprint` lists (paths only). A label `specs/x.json#117` = only the part of a shared multi-model spec that
+  model 117 uses (its `models` entry and the steps that list it; everything common stays); `hookups.py#fluke110` = hookups.py with the other meters' entries of METERS / AVAILABLE / EXTRA left out
+  (code and shared tables still count). So editing 113's steps or the 87V jack names no longer unlocks 117; a step shared by two models, the common part of the spec, `handheld_dmm.py`, `drivers/fluke_5560a.py`,
+  `drivers/base.py`, `drivers/transport.py` and the hookups code DO still unlock everything that runs on them (they change what those procedures do). `hookups.py` was dropped from 287 / 289 (their spec has no `hookup_meter`).
+  Records taken before this (whole files stored) are still compared: only the files declared TODAY are looked at, a sliced label is compared on the whole file when the record has none, a declared file the record
+  lacks counts as changed (`Registry.changes_since`). Auto-unlock, the lock rules, `proc_verify_events` and the seed are as before. The three seeded procedures (TDS2000C, WaveSurfer, Fluke 117) are NOT re-marked.
+  `verified.SEED` is derived from `seed_verified` in the sidecars; a package can neither add nor remove that flag (refused on import; an existing flag is kept when a package replaces its sidecar; `make_package` strips it).
+- Packages (`packages.py`): zip with `manifest.json` at the root (package_format 1, procedure id / name / version, min_suite_version, author, created, requires, `files` [{path, sha256, size}], optional `verified` {date, who, fingerprint}).
+  `packages.inspect()` checks everything and writes nothing; `packages.install()` repeats the check, refuses if the zip changed since the preview, backs up every replaced file to `Backups/packages/<folder>/<name>_backup_vNN<ext>`,
+  writes atomically one by one, rolls back on failure, and records the import in the NEW append-only table `package_imports` of lab_registry.sqlite3 (procedure, version, zip sha256, origin, who, when, files, backups, unlocked, mark).
+  `calibration_procedures.sqlite3` is never opened by the importer (the Manager registers a new procedure the usual way when the list refreshes). Allowed: Procedures/ specs/ drivers/ diagrams/ tests/ only; extensions .py .json .png .jpg .txt .md .csv;
+  never executable / database names; `.py` is parsed with `ast`, never run. Zip-slip, absolute / drive / backslash / `..` / hidden / device-name paths, symlinks, unlisted or missing files, bad or missing checksums, a sidecar that disagrees,
+  a duplicate display name, the seeded flag, unmet requirements (a fingerprint file that is neither packaged nor installed), newer format / suite, size limits are all refused. Engines at the suite root cannot be packaged (outside the allowed folders):
+  they are `requires` (the target must have them); a NEW procedure's engine has to live in `Procedures/`.
+  Verified: replacing files of a verified-and-locked procedure unlocks it (`unlock`, who `package import`); a package mark counts only if `file_fingerprint` (declared files with the package's files in place, no overrides) equals the mark and the model has
+  no saved procedure changes; then a `verify` event (mark's date / name) follows. The mark is the exporting lab's claim: it proves identical files, not a hardware run. Other locked procedures hit by a replaced shared file are listed in the preview (`Preview.affected`) and show 'changed'.
+  `tools/make_package.py <id> [--out DIR] [--include PATH] [--verified-mark] [--author NAME]` (`--list`). Zips are reproducible.
+- UI: Procedures tab button 'Import procedure package...' (`Manager.import_package`: picker -> `packages_ui.ask_install` preview -> install -> refresh); Procedure Development tab 'Procedure packages' row = library folder setting
+  (`~/.calibration_suite/packages.json`, key `library_folder`, default empty; the picker opens there; the preview says whether the file is inside it). The preview carries a plain warning that a package is program code, shows the origin
+  (full path + sha256), and keeps Install disabled until a confirmation box is ticked. No hosting, no database of packages. Tests: `test_procscan`, `test_packages`, `test_fingerprint_isolation`, `test_packages_ui`, plus `checks_import_package` in
+  `tests/real_tk_checks.py` (run by `test_beta_real_tk_windows`; screenshots when PKG_SHOTS is set).
+- UNVERIFIED / limits: nothing here sends an instrument command. The package windows were viewed on a real Tk under Xvfb only (Linux), never on Windows. Mark validity cannot prove a hardware run. Packaging of engines at the root and of a new `hookups.py` meter family is not supported.

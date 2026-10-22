@@ -359,12 +359,126 @@ def checks_handheld_dialogs():
     root.destroy()
 
 
+def checks_import_package():
+    """'Import procedure package...' on a real Tk: the preview dialog (warning, origin, files, confirmation gate), the install, and the refusal view."""
+    import json
+    import zipfile
+    import Calibration_Procedure_Manager as CPM
+    import packages
+    import packages_ui
+    import procscan
+    import verified
+    from tests._pkg_helpers import make_tree
+    work = Path(tempfile.mkdtemp())
+    src = make_tree(work / 'src', ['Keithley_2000_Verification'])
+    lib = work / 'lib'
+    zp = packages.build_package('Keithley_2000_Verification', src, lib, registry=verified.Registry(work / 'sr.sqlite3', base=src), author='Check')
+    tree = make_tree(work / 'target', [], ['Keithley_2000_Verification'])
+    CPM.init_db()
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    m = CPM.Manager(root)
+    pump(root, 20)
+    m.verified = verified.Registry(work / 'reg.sqlite3', base=tree)
+    check('import button exists', any(isinstance(w, ttk.Button) and w.cget('text') == 'Import procedure package...' for w in walk(m.library_frame)))
+    check('library folder row exists', 'not set' in m.lib_folder.get(), m.lib_folder.get())
+
+    def drive(fn):
+        def go():
+            tops = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel)]
+            if not tops:
+                root.after(100, go)
+                return
+            try:
+                fn(tops[-1])
+            except Exception as ex:                          # report it, and close the dialog so the run does not hang
+                errs.append(ex)
+                tops[-1].destroy()
+        root.after(400, go)
+
+    def shot(top, name):
+        out = os.environ.get('PKG_SHOTS')
+        if out:
+            from PIL import ImageGrab
+            pump(root, 10)
+            x, y, w, h = top.winfo_rootx(), top.winfo_rooty(), top.winfo_width(), top.winfo_height()
+            ImageGrab.grab(bbox=(x, y, x + w, y + h), xdisplay=os.environ['DISPLAY']).save(f'{out}/{name}_{THEME}.png')
+
+    def preview(top):
+        btns = [w for w in walk(top) if isinstance(w, ttk.Button)]
+        install = next(b for b in btns if b.cget('text') == 'Install package')
+        box = next(w for w in walk(top) if isinstance(w, ttk.Checkbutton))
+        check('preview: install disabled until confirmed', str(install.cget('state')) == 'disabled')
+        texts = ' '.join(str(w.cget('text')) for w in walk(top) if isinstance(w, ttk.Label))
+        check('preview: code warning shown', 'Only import packages from the lab' in texts)
+        check('preview: origin shown', str(zp) in texts.replace('\n', ' ') or zp.name in texts)
+        rows = [w for w in walk(top) if isinstance(w, ttk.Treeview)][0].get_children()
+        check('preview: file list', len(rows) == 5, len(rows))
+        check('preview: buttons visible', all(inside(top, b) for b in btns + [box]))
+        shot(top, 'import_preview')
+        box.invoke()
+        pump(root, 3)
+        check('preview: install enabled after confirming', str(install.cget('state')) == 'normal')
+        install.invoke()
+    from unittest import mock
+    with mock.patch.object(CPM, 'BASE', tree), mock.patch.object(packages_ui, 'choose_package', return_value=str(zp)), \
+            mock.patch.object(messagebox, 'showinfo') as info, mock.patch.object(packages, 'get_library_dir', return_value=str(lib)):
+        drive(preview)
+        m.import_package()
+        pump(root, 10)
+        check('import: procedure installed', (tree / 'Procedures' / 'Keithley_2000_Verification.py').is_file())
+        check('import: scanner finds it', procscan.find('Keithley_2000_Verification', tree) is not None)
+        check('import: result shown', info.called and 'Installed' in info.call_args[0][1], info.call_args)
+
+        # a refused package: no install button, reasons shown
+        bad = work / 'bad.zip'
+        with zipfile.ZipFile(bad, 'w') as zf:
+            zf.writestr('manifest.json', json.dumps({'package_format': 1, 'procedure': {'id': 'X_Proc', 'name': 'X', 'version': '1'},
+                                                    'files': [{'path': '../evil.py', 'sha256': '0' * 64}]}))
+        def refused(top):
+            btns = [w for w in walk(top) if isinstance(w, ttk.Button)]
+            check('refused: no install button', not any(b.cget('text') == 'Install package' and str(b.cget('state')) != 'disabled' for b in btns))
+            check('refused: buttons visible', all(inside(top, b) for b in btns))
+            texts = ' '.join(str(w.cget('text')) for w in walk(top) if isinstance(w, ttk.Label))
+            check('refused: reason shown', '..' in texts, texts[:400])
+            shot(top, 'import_refused')
+            [b for b in btns if b.cget('text') == 'Close'][0].invoke()
+        with mock.patch.object(packages_ui, 'choose_package', return_value=str(bad)):
+            drive(refused)
+            m.import_package()
+        pump(root, 5)
+
+        # re-import over the installed (and verified-locked) procedure: replaces files, warns about the lock
+        proc = procscan.find('Keithley_2000_Verification', tree)
+        entry = verified.make_entry(proc.name, proc.model, tree / proc.launcher, tree)
+        from datetime import date
+        (tree / 'specs' / 'keithley_2000_pv.json').write_text('{"older": true}')
+        (tree / 'Procedures' / 'Keithley_2000_Verification.py').write_text('# older launcher\n')
+        m.verified.verify(entry, 'Mike', '2026-10-20', '', '', today=date(2026, 10, 22))          # verified and locked with the OLD files
+
+        def replace(top):
+            texts = ' '.join(str(w.cget('text')) for w in walk(top) if isinstance(w, ttk.Label))
+            check('replace: lock warning', 'UNLOCK' in texts.upper() and 'VERIFIED ON HARDWARE' in texts.upper(), texts[:500])
+            check('replace: buttons visible', all(inside(top, b) for b in walk(top) if isinstance(b, ttk.Button)))
+            shot(top, 'import_replace_locked')
+            [b for b in walk(top) if isinstance(b, ttk.Button) and b.cget('text') == 'Cancel'][0].invoke()
+        with mock.patch.object(packages_ui, 'choose_package', return_value=str(zp)):
+            drive(replace)
+            m.import_package()
+        pump(root, 5)
+        check('replace: cancel leaves the old file', (tree / 'Procedures' / 'Keithley_2000_Verification.py').read_text() == '# older launcher\n')
+    check('no callback errors', not errs, errs)
+    root.destroy()
+
+
 if __name__ == '__main__':
     try:
         checks_handheld_dialogs()
         checks_point_window()
         checks_edit_point_button()
         checks_manager_windows()
+        checks_import_package()
     except Exception:
         traceback.print_exc()
         sys.exit(1)
