@@ -13,6 +13,7 @@ import math
 import re
 import time
 
+import cmdreg
 from .base import Instrument, InstrumentError
 
 MODEL_RE = re.compile(r'TDS\s*(\d{4}C(?:-EDU)?)', re.I)
@@ -30,8 +31,24 @@ def _last_word(reply: str) -> str:
     return reply.strip().replace(';', ' ').split()[-1].strip('"').upper()
 
 
+# Reset to default settings at the start of a run (Stage 7 rule).  The reset is FACtory (the Default Setup button, p. 2-87 as cited by default_setup()),
+# NOT *RST and NOT *CAL? / self calibration: FACtory is the command this procedure already sends before every test set-up, so it cannot take the scope
+# anywhere the procedure does not already go, and it leaves the stored calibration (self-cal constants) alone.  The TDS programmer manual was not
+# available to the session that wrote this, so the reset is flagged UNVERIFIED (verified=False).  FACtory turns HEADer ON again, so the code's
+# header-less / short replies are restored in _reset_extra().  *CLS and *OPC? are registered (locked) so reset_to_defaults() clears and waits.
+COMMANDS = {
+    'status.clear': cmdreg.Cmd('*CLS', 'Clear status', 'Clears the status registers (never overridable)', kind='set', risk='locked', verified=False),
+}
+COMMANDS['reset'] = cmdreg.reset_cmd(False, 'TDS2000C programmer manual (077-0444-03): FACtory p. 2-87 as cited by default_setup(); manual not available to the '
+                                            'session that added the reset, so unverified', template='FACtory',
+                                     note='FACtory (Default Setup), not *RST; the self calibration is never part of the reset')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(False, 'TDS2000C programmer manual: *OPC? p. 2-152 as cited by opc(); not re-checked')
+
+
 class TektronixTDS2000C(Instrument):
     MODEL = 'Tektronix TDS2000C / TDS1000C-EDU'
+    COMMANDS = COMMANDS
+    RESET_OPC_TIMEOUT = 60.0         # FACtory is waited for as default_setup() does (opc(60))
     IDN_MATCH = ('TDS',)
     DEFAULT_TIMEOUT = 15.0
     SELF_CAL_TIMEOUT = 360.0        # "can take several minutes" (p. 2-48)
@@ -57,6 +74,13 @@ class TektronixTDS2000C(Instrument):
 
     def cleanup(self):
         """The scope has no outputs; nothing to turn off."""
+
+    def _reset_extra(self):
+        """FACtory turns HEADer ON again (see default_setup): put back the header-less, short replies the code parses, then require a clean
+        event status register. No self calibration, no *RST."""
+        return [('replies without headers (HEADer OFF)', lambda: self.write('HEADer OFF')),
+                ('short headers (VERBose OFF)', lambda: self.write('VERBose OFF')),
+                ('event status clean (*ESR?)', lambda: self.check_errors('reset'))]
 
     # ---- helpers --------------------------------------------------------------------------------------------------------
     def opc(self, timeout=None):

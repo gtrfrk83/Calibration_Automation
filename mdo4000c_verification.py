@@ -25,6 +25,7 @@ import appdata
 import datamode
 import drivers
 import procmods_engine
+import reset_startup
 
 SPEC_PATH = HERE / 'specs' / 'tektronix_mdo4000c_pv.json'
 REF_CMC_PATH = HERE / 'specs' / 'mdo4000c_reference_cmc.json'
@@ -279,7 +280,7 @@ def tar_tur_fields(p, r):
 # ======================================================================================================================
 # bench I/O
 # ======================================================================================================================
-class IO(procmods_engine.ProcModsMixin):
+class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Every instrument the procedure can use. Only the oscilloscope and the 5560A are required; the others are opened when an address is given."""
 
     def __init__(self, addrs, transports=None, mods=None):
@@ -302,6 +303,9 @@ class IO(procmods_engine.ProcModsMixin):
         except Exception:
             self.close(); raise
         self.ident = self.scope.idn
+
+    def reset_roles(self):
+        return [d for d in (self.cal, self.rf1, self.rf2, self.gen, self.dmm, self.counter, self.power) if d is not None], [self.scope]
 
     def pm_drivers(self):
         return tuple(d for d in (self.scope, self.cal, self.rf1, self.rf2, self.gen, self.dmm, self.counter, self.power) if d is not None)
@@ -924,7 +928,7 @@ class Runner:
 # ======================================================================================================================
 # the application window
 # ======================================================================================================================
-class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def __init__(self, root, demo=False):
         self.root, self.demo = root, demo
         self.io = None
@@ -1249,12 +1253,15 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if self.io is None: self.test_connections()
         if self.io is None: return
         self.stop = False; self.busy = True
+        if not self.reset_notice_ok(): return                  # unit-under-test notice, before any instrument is touched
         threading.Thread(target=self._worker, args=(points,), daemon=True).start()
 
     def _worker(self, points):
         runner = Runner(self)
         error = None
         try:
+            self.post('status', 'Resetting instruments to default settings ...')
+            self.reset_run()                               # every run (first, re-run, resume): before the first point; a failure ends the run here
             for i, p in enumerate(points, 1):
                 if self.stop: raise Stopped()
                 self.post('status', f'Running {i}/{len(points)}: {p["desc"]}')

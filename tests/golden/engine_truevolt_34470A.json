@@ -53,6 +53,97 @@
    ]
   },
   {
+   "call": "",
+   "case": "truevolt_verification.IO.reset_at_start",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|>>|*CLS",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0",
+    "34470A|>>|*RST",
+    "34470A|>>|*CLS",
+    "34470A|>>|*OPC?",
+    "34470A|<<|1",
+    "34470A|>>|SYST:ERR?",
+    "34470A|<<|+0,\"No error\"",
+    "RESET|--|Instruments reset to default settings at start: 5560A, 34470A"
+   ],
+   "method": "truevolt_verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
    "call": "{'description': 'Front DC current, 1.000 µA range (input open)', 'error': 5e-11, 'id': 1, 'input': 'open', 'kind': 'DCI', 'limits': {'1y': 5e-11, '24h': 5e-11, '2y': 5e-11, '90d': 5e-11}, 'nominal': 0.0, 'optional': False, 'page': '507', 'plc': 10, 'quick': False, 'range': 1e-06, 'section': 'zero', 'section_title': 'Zero offset', 'setup': 'Fit the 34172B low-thermal short (input OPEN for current ranges). Do the front terminals, then the rear terminals.', 'source': 'none', 'terminal': 'FRONT', 'typical': True, 'unit': 'A'}",
    "case": "truevolt_verification.IO.measure[DCI#1]",
    "log": [

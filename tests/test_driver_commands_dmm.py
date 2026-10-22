@@ -200,11 +200,11 @@ class Describe(unittest.TestCase):
         self.assertFalse(any(c.verified for k, c in cmdreg.merge_commands(Fluke8846A).items() if k.startswith('cal.')))
 
     def test_counts(self):
-        self.assertEqual(counts(ScpiDmm), dict(total=11, normal=11, output=0, locked=0, verified=9, unverified=2))
-        self.assertEqual(counts(Fluke8846A), dict(total=17, normal=11, output=0, locked=6, verified=9, unverified=8))
-        self.assertEqual(counts(Agilent34401A), dict(total=12, normal=12, output=0, locked=0, verified=10, unverified=2))
-        self.assertEqual(counts(Keysight34470A), dict(total=24, normal=22, output=0, locked=2, verified=22, unverified=2))
-        self.assertEqual(counts(Keysight34970A), dict(total=23, normal=21, output=0, locked=2, verified=18, unverified=5))
+        self.assertEqual(counts(ScpiDmm), dict(total=15, normal=11, output=0, locked=4, verified=9, unverified=6))   # Stage 7: +status.clear, err.query, reset, opc.query
+        self.assertEqual(counts(Fluke8846A), dict(total=21, normal=11, output=0, locked=10, verified=9, unverified=12))
+        self.assertEqual(counts(Agilent34401A), dict(total=16, normal=12, output=0, locked=4, verified=10, unverified=6))
+        self.assertEqual(counts(Keysight34470A), dict(total=26, normal=22, output=0, locked=4, verified=22, unverified=4))
+        self.assertEqual(counts(Keysight34970A), dict(total=25, normal=21, output=0, locked=4, verified=18, unverified=7))
         self.assertEqual(counts(Keysight34972A), counts(Keysight34970A))
 
 

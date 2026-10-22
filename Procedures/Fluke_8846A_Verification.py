@@ -14,6 +14,7 @@ import ui_shell
 import appdata
 import datamode
 import procmods_engine
+import reset_startup
 import drivers
 DATA=HERE/'8846A_results.json'
 POINTS=[]
@@ -45,7 +46,7 @@ for kind, block in TEST_TABLES.items():
 # The manual also specifies optional DC ratio, rear-terminal and split-lead tests.
 # Those require distinct setups/measurement commands and are not executed here.
 
-class IO(procmods_engine.ProcModsMixin):
+class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O for this procedure: the DMM and the Fluke 5560A, both through the instrument drivers."""
     def __init__(self, dmm_port, fluke_port, baud, parity, bits, mods=None):
         self.log=drivers.CommandLog()
@@ -61,6 +62,8 @@ class IO(procmods_engine.ProcModsMixin):
         except Exception:
             self.close();raise
         self.ident=self.dmm.idn
+    def reset_roles(self):
+        return [self.fluke],[self.dmm]
     def pm_drivers(self):
         return (self.dmm,self.fluke)
     def standby(self):
@@ -110,7 +113,7 @@ class IO(procmods_engine.ProcModsMixin):
         self.standby()
         return reading
 
-class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     SETUP_TEXT = {
         'VOLTAGE': '5560A voltage output to the meter HI / LO terminals',
         'CURRENT': '5560A current output to the meter current (A) input and LO',
@@ -338,7 +341,7 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if not self.demo and self.io is None:self.test_connections()
         if not self.demo and self.io is None:return
         self.stop=False;self.busy=True
-        self._next(points,0,None)
+        self.reset_then(lambda:self._next(points,0,None))   # every run (first, re-run, resume): reset to defaults before the first point
     def _next(self,points,i,previous):
         if i>=len(points) or self.stop:
             self.busy=False;self.save();self.status.set('Run stopped by the operator. Progress is saved.' if self.stop else 'Run complete. Save progress or export a report.');return

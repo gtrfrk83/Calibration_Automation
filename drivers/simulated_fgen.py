@@ -76,6 +76,10 @@ class SimGen(_SimBase):
         err = g['errors']
         if u == '*IDN?': return f'Agilent Technologies,{self.bench.model},SIM0001,1.00-1.00'
         if u == '*CLS': err.clear(); return None
+        if u == '*RST':
+            g.update(func='SIN', freq=1e3, amp=0.1, unit='VPP', load=50.0, offs=0.0, auto=True, on=False)
+            return None
+        if u == '*OPC?': return '1'
         if u in ('SYST:ERR?', 'SYSTEM:ERROR?'): return err.pop(0) if err else '+0,"No error"'
         if u == '*TST?':
             g['on'] = False
@@ -133,6 +137,9 @@ class SimStd(_SimBase):
         b, s, u = self.bench, self.bench.std, cmd.upper()
         if u == '*IDN?': return 'FLUKE,5790B,SIM0001, v1.08+v1.01 FPGAv4'
         if u == '*CLS': s['errors'].clear(); return None
+        if u == '*RST':
+            s.update(input='INPUT1', extrig=False, range=7.0, auto=True, unsettled_left=0); return None
+        if u == '*OPC?': return '1'
         if u == '*OPT?': return b.std_option
         if u == 'WBAF?': return '1' if b.wbaf_on else '0'
         if u == 'ERR?': return s['errors'].pop(0) if s['errors'] else '0,"No Error"'
@@ -195,6 +202,9 @@ class SimCounter(_SimBase):
         b, s, u = self.bench, self.st, cmd.upper().lstrip(':')
         if u == '*IDN?': return f'HEWLETT-PACKARD,{b.counter_model},0,4806'
         if u == '*CLS': s['errors'].clear(); return None
+        if u == '*RST':
+            s.update(func='FREQ', imp=1e6, coup='AC', start='IMM', stop='TIM', gate=0.1, exp=None, rosc='INT', auto=True, check='ON'); return None
+        if u == '*OPC?': return '1'
         if u in ('MEASURE:FREQUENCY?', 'MEAS:FREQ?'):
             return self._reading()
         if b.counter_model not in ('53131A', '53132A'):
@@ -249,6 +259,8 @@ class SimPowerMeter(_SimBase):
         b, u = self.bench, cmd.upper()
         if u == '*IDN?': return 'Agilent Technologies,E4418B,SIM0001,A1.08.00'
         if u == '*CLS': return None
+        if u in ('*RST', ): return None
+        if u == '*OPC?': return '1'
         if u in ('MEASURE:POWER?', 'MEAS:POW?'):
             if b.connected != 'power':
                 return '-9.9E+37'

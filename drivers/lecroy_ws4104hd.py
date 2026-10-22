@@ -16,6 +16,7 @@ from __future__ import annotations
 import math
 import time
 
+import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
 from .transport import TransportError
@@ -100,6 +101,13 @@ COMMANDS = {
     'p1.view.on': _vbs("VBS 'app.Measure.P1.View=True ' ", 'Show the P1 parameter'),
     'p1.value.get': _vbs('VBS? "return=app.Measure.P1.Out.Result.Value"', 'P1 value', kind='query'),
 }
+
+
+COMMANDS['reset'] = cmdreg.reset_cmd(False, 'WaveSurfer 4000HD remote-control manual not in the session: *RST (IEEE 488.2) unverified',
+                                     note='Scale / offset / coupling / timebase are set again by each test')
+COMMANDS['status.clear'] = cmdreg.Cmd('*CLS', 'Clear status', 'Clears the status registers (never overridable)', kind='set', risk='locked',
+                                      verified=False, ref='WaveSurfer remote-control manual not checked')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(False, 'WaveSurfer remote-control manual not checked')
 
 
 class WaveSurfer4104HD(Instrument):

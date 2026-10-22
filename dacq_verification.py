@@ -23,6 +23,7 @@ import ui_shell
 import appdata
 import datamode
 import procmods_engine
+import reset_startup
 import procspec
 import drivers
 from drivers.keysight_dacq import channel_for, pair_channel
@@ -87,7 +88,7 @@ def list_com_ports():
         return []
 
 
-class IO(procmods_engine.ProcModsMixin):
+class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the 34970A / 34972A and the calibrator, both through the instrument drivers."""
     SETTLE_AC = {10: 6.0, 20: 5.0}
 
@@ -116,6 +117,9 @@ class IO(procmods_engine.ProcModsMixin):
         except Exception:
             self.close(); raise
         self.ident = self.dmm.idn
+
+    def reset_roles(self):
+        return [self.cal], [self.dmm]
 
     def pm_drivers(self):
         return (self.dmm, self.cal)
@@ -180,7 +184,7 @@ class IO(procmods_engine.ProcModsMixin):
         return reading
 
 
-class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def __init__(self, root, model, demo=False):
         configure(model)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
@@ -504,7 +508,7 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if not self.demo and self.io is None: self.test_connections()
         if not self.demo and self.io is None: return
         self.stop = False; self.busy = True
-        self._next(points, 0, None)
+        self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
     def _prompt_setup(self, p):
         """Confirm the physical hook-up when the wiring group changes (with the picture, if installed). False if the technician cancels."""

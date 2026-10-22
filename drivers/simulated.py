@@ -103,6 +103,10 @@ class SimFlukeTransport(_SimBase):
         if m and f['scope'] == 'MARKER':
             f['period'] = float(m.group(1)); return None
         if u == 'OUT?' and f['scope'] == 'MARKER': return f"{f.get('period', 0.0):.9E},S"
+        if u == '*RST':
+            f.update(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M'); f.pop('period', None)
+            self.errors = []; self.next_error = None; return None
+        if u == '*OPC?': return '1'
         if u == 'STBY': f['operate'] = False; return None
         if u == 'OPER': f['operate'] = True; return None
         if u == 'OPER?': return '1' if f['operate'] else '0'
@@ -179,6 +183,9 @@ class SimScopeTransport(_SimBase):
         if m: s[m.group(1) + ':CPL'] = m.group(2); return None
         m = re.match(r'(C\d):CPL\?$', cmd)
         if m: return f"{m.group(1)}:CPL {s.get(m.group(1) + ':CPL', 'D1M')}"
+        if cmd == '*RST': s.clear(); s['app.Acquisition.Trigger.Type'] = 'Edge'; return None
+        if cmd == '*CLS': return None
+        if cmd == '*OPC?': return '1'
         raise TransportError(f'simulated scope: unknown command {cmd!r}')
 
     @staticmethod
@@ -211,6 +218,8 @@ class SimDmmTransport(_SimBase):
                 return f'Keysight Technologies,{self.model},SIM0001,A.03.01-02.40-03.01-00.52-02-01'
             return {'8846A': 'FLUKE,8846A,SIM0001,1.0'}.get(self.model, 'HEWLETT-PACKARD,34401A,SIM0001,11-5-2')
         if u == '*CLS': return None
+        if u == '*RST': self.function = 'VOLT:DC'; return None            # SCPI: remote / local state is not changed
+        if u == '*OPC?': return '1'
         if u == 'SYST:ERR?': return '+0,"No error"'
         if u == 'ROUT:TERM?': return getattr(self, 'terminals', 'FRON')
         if re.match(r'^(VOLT|CURR|RES|FRES)(:DC|:AC)?:(NPLC|BAND) ', u) or re.match(r'^FREQ:(RANG:LOW|APER|VOLT:RANG) ', u):
@@ -259,6 +268,8 @@ class SimDacqTransport(_SimBase):
         if u == '*IDN?':
             return f'Agilent Technologies,{self.model},SIM0001,1.20-1.20-1.00'
         if u == '*CLS': self.errors = []; return None
+        if u == '*RST': self.function, self.scan, self.errors = 'VOLT:DC', None, []; return None
+        if u == '*OPC?': return '1'
         if u == 'SYST:ERR?': return self.errors.pop(0) if self.errors else '+0,"No error"'
         if u == 'SYST:REM': self.remote = True; return None
         if u == 'SYST:LOC': self.remote = False; return None

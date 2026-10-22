@@ -16,6 +16,10 @@ SCOPE_VOLT_MODE = 'VOLT'
 
 class Fluke5522AScope(Fluke5522A):
     MODEL = 'Fluke 5520A / 5522A (scope option)'
+    # Reset: the inherited 5522A *RST (Operators Manual p. 6-35; the table of values it evokes, p. 6-36, includes SCOPE OFF, OUT_IMP Z1M, STBY),
+    # then STBY confirmed, then SCOPE OFF read back (SCOPE OFF: Operators Manual p. 9-28, SCOPE? answers OFF: p. 9-29). The calibrator is left in
+    # standby with no SCOPE mode; select_scope_dcv() / the LEVSINE / MARKER selections in the procedure choose the mode again for each test.
+    RESET_SCOPE_OFF = True
 
     def select_scope_dcv(self, source_impedance='1M'):
         """SCOPE VOLT (the 5560A driver's 'SCOPE DCV' is a 5560A word and is not used here), then OUT_IMP, each checked."""

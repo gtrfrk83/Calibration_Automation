@@ -10,6 +10,7 @@ tests/test_golden_commands.py fails on that). Output enables, calibration, reset
 """
 from __future__ import annotations
 
+import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError, SafetyError
 from .transport import SerialSettings
@@ -26,6 +27,13 @@ COMMANDS = {
     'something.get': Cmd('SOME:CMD?', 'Read something back', kind='query', verified=False, ref='<manual, page>'),
 }
 
+# Stage 7 rule - every driver declares how it is reset to default settings BEFORE a run (locked: a modified procedure can never skip it).
+# (Examples: drivers/tektronix_tds2000c.py resets with FACtory, not *RST, because the procedure runs the self calibration itself; drivers/fluke_5522a_scope.py also leaves SCOPE OFF.)
+# verified=True only when a manual page backs it (put the page in ref); otherwise leave False and it is listed as unverified in the report.
+COMMANDS['reset'] = cmdreg.reset_cmd(verified=False, ref='<manual, page of *RST>')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(verified=False, ref='<manual, page of *OPC?>')
+# If the model has *CLS / an error queue, also register 'status.clear' and 'err.query' (risk 'locked') so reset_to_defaults() clears and drains them.
+
 
 class ModelName(Instrument):
     MODEL = 'Maker Model'
@@ -40,6 +48,13 @@ class ModelName(Instrument):
         if not self.close_to(got, value):
             raise InstrumentError(f'SOME:CMD: set {value}, instrument reports {got}')
         return got
+
+    # No safe software reset at all (read-only remote protocol, ...)? Instead of COMMANDS['reset'] declare, on the class:
+    #   RESET_EXEMPT = 'why there is no reset'          RESET_KNOWN_STATE = 'how its state is established instead'
+    def _reset_extra(self):
+        """Known-state steps after *RST / *CLS / *OPC? / error-queue drain: [(name, callable)]. Re-enter remote if the instrument leaves it,
+        apply again whatever connect() sets, and CONFIRM sources are in standby / output off (raise SafetyError otherwise)."""
+        return []
 
     def cleanup(self):
         """Leave the instrument safe (sources off, standby, local mode). Never raise."""
