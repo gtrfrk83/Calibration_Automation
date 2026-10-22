@@ -582,15 +582,19 @@ class App(datamode.DataModeMixin):
 
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
+        return self.certificate_rows_and_points()[0]
+
+    def certificate_rows_and_points(self):
+        """(rows, points): the report rows and, parallel to them, the spec point each came from (for the optional TAR / TUR fields)."""
         import report_pdf
-        rows = []
+        rows, pts = [], []
         for p in POINTS:
             row = self.found_left_row(p, lambda r: report_pdf.point_row(p, r['reading'], r['result'] == 'FAIL', section=self.report_section(p), standard=self.cal_key))
-            if row: rows.append(row)
-        return rows
+            if row: rows.append(row); pts.append(p)
+        return rows, pts
 
     def export_pdf(self):
-        rows = self.certificate_rows()
+        rows, pts = self.certificate_rows_and_points()
         if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
         try: import report_pdf, report_dialog
         except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
@@ -601,6 +605,9 @@ class App(datamode.DataModeMixin):
         if not path: return
         demo = self.any_synthetic()
         try:
+            if details.get('show_tar_tur'):
+                import tartur_wiring
+                rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [tartur_wiring.point_fields(p, self.cal_key) for p in pts])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Keysight {MODEL}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Limits applied', self.period.get()),
                                                                  ('Source', f'Keysight 34970A/34972A Service Guide, pp. 80-87 (Internal DMM Verification)')],

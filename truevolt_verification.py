@@ -9,7 +9,7 @@ are required.
     import truevolt_verification
     truevolt_verification.main('34470A')       # what Procedures/Keysight_34470A_Verification.py does
 """
-import csv, json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
@@ -459,14 +459,17 @@ class App(datamode.DataModeMixin):
         return p['section'] in ('hi',)
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
+        return self.certificate_rows_and_points()[0]
+    def certificate_rows_and_points(self):
+        """(rows, points): the report rows and, parallel to them, the spec point each came from (for the optional TAR / TUR fields)."""
         import report_pdf
-        rows=[]
+        rows=[];pts=[]
         for p in POINTS:
             row=self.found_left_row(p,lambda r:report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard='5560A'))
-            if row:rows.append(row)
-        return rows
+            if row:rows.append(row);pts.append(p)
+        return rows,pts
     def export_pdf(self):
-        rows=self.certificate_rows()
+        rows,pts=self.certificate_rows_and_points()
         if not rows:messagebox.showinfo('No results','No recorded results to export yet.');return
         try:import report_pdf,report_dialog
         except ImportError as exc:messagebox.showerror('Report export',str(exc));return
@@ -477,30 +480,15 @@ class App(datamode.DataModeMixin):
         if not path:return
         demo=self.any_synthetic()
         try:
+            if details.get('show_tar_tur'):
+                import tartur_wiring
+                rows=report_pdf.apply_tar_tur(rows,details.get('show_tar_tur'),[tartur_wiring.point_fields(p,'5560A') for p in pts])
             report_pdf.write_calibration_pdf(path,rows,header=[('Instrument',f'Keysight {MODEL}'),('Instrument ID',self.asset.get()),('Serial',self.serial.get()),('Limits applied',self.period.get()),('Source',f'Keysight Truevolt Operating and Service Guide, pp. 501-520 ({MODEL} tables)')],demo=demo,details=details,footer_note=report_pdf.uncertainty_note(rows,'5560A'))
         except ImportError:
             messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab');return
         except Exception as exc:
             messagebox.showerror('PDF export error',str(exc));return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-    def export(self):
-        path = filedialog.asksaveasfilename(defaultextension='.csv', filetypes=[('CSV', '*.csv')], initialfile=f'{MODEL}_verification.csv')
-        if not path: return
-        demo = 'YES' if self.any_synthetic() else 'NO'
-        with open(path, 'w', newline='', encoding='utf-8-sig') as file:
-            w = csv.writer(file)
-            w.writerow(['Instrument ID', self.asset.get(), 'Serial Number', self.serial.get()])
-            w.writerow(['SOURCE', f'{SPEC["source"]["document"]}, pp. {SPEC["source"]["pages"]}'])
-            w.writerow(['LIMITS APPLIED', self.period.get()]); w.writerow(['DEMO DATA', demo]); w.writerow([])
-            w.writerow(['Section', 'Description', 'Nominal', 'Tolerance -', 'Tolerance +', 'UOM', 'As Found', 'OOT', 'Status', 'Quick check', 'Manual page', 'Timestamp', 'Synthetic', 'As Left', 'As Left status'])
-            for p in POINTS:
-                if p['optional'] and not self.include_optional.get() and str(p['id']) not in self.found: continue
-                r = self.found.get(str(p['id']), {}); n = p['nominal']; e = p['error']; lr = self.left.get(str(p['id']), {})
-                w.writerow([p['section_title'], p['description'], n, n - e, n + e, p['unit'], r.get('reading', ''),
-                            'OOT' if r.get('result') == 'FAIL' else '', r.get('result', ''), 'Q' if p['quick'] else '', p['page'],
-                            r.get('timestamp', ''), r.get('synthetic', ''), lr.get('reading', 'Same' if r else ''), lr.get('result', '')])
-        self.status.set(f'Exported {path}')
-
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return
         self.stop = True; self._save_settings(); self.disconnect(); self.root.destroy()

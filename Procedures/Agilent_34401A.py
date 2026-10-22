@@ -2,7 +2,7 @@
 Hardware I/O is OFF in demo mode. Never run unattended: wiring confirmations required.
 Source: Keysight 34401A Service Guide, Ch 4 pp 69-71.
 """
-import csv, json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
 from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
@@ -410,14 +410,17 @@ class App(datamode.DataModeMixin):
         return bool(p.get('zero_offset'))
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
+        return self.certificate_rows_and_points()[0]
+    def certificate_rows_and_points(self):
+        """(rows, points): the report rows and, parallel to them, the spec point each came from (for the optional TAR / TUR fields)."""
         import report_pdf
-        rows=[]
+        rows=[];pts=[]
         for p in POINTS:
             row=self.found_left_row(p,lambda r:report_pdf.point_row(p,r['reading'],r['result']=='FAIL',section=self.report_section(p),mixed=self.report_mixed(p),standard='5560A'))
-            if row:rows.append(row)
-        return rows
+            if row:rows.append(row);pts.append(p)
+        return rows,pts
     def export_pdf(self):
-        rows=self.certificate_rows()
+        rows,pts=self.certificate_rows_and_points()
         if not rows:messagebox.showinfo('No results','No recorded results to export yet.');return
         try:import report_pdf,report_dialog
         except ImportError as exc:messagebox.showerror('Report export',str(exc));return
@@ -428,22 +431,15 @@ class App(datamode.DataModeMixin):
         if not path:return
         demo=self.any_synthetic()
         try:
+            if details.get('show_tar_tur'):
+                import tartur_wiring
+                rows=report_pdf.apply_tar_tur(rows,details.get('show_tar_tur'),[tartur_wiring.point_fields(p,'5560A') for p in pts])
             report_pdf.write_calibration_pdf(path,rows,header=[('Instrument','Agilent 34401A'),('Instrument ID',self.asset.get()),('Serial',self.serial.get()),('Source','Keysight 34401A Service Guide, Ch. 4 - one-year gain and zero-offset verification')],demo=demo,details=details,footer_note=report_pdf.uncertainty_note(rows,'5560A'))
         except ImportError:
             messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab');return
         except Exception as exc:
             messagebox.showerror('PDF export error',str(exc));return
         self.status.set(f'Exported {len(rows)} rows: {path}')
-    def export(self):
-        path=filedialog.asksaveasfilename(defaultextension='.csv',filetypes=[('CSV','*.csv')],initialfile='34401A_verification.csv')
-        if not path:return
-        with open(path,'w',newline='',encoding='utf-8-sig') as file:
-            writer=csv.writer(file);writer.writerow(['Instrument ID',self.asset.get(),'Serial Number',self.serial.get()]);writer.writerow(['SOURCE','34401A Service Guide Chapter 4, one-year gain and zero-offset verification; front/rear']);writer.writerow(['DEMO DATA','YES' if self.demo or any(v.get('synthetic') for v in self.results.values()) else 'NO']);writer.writerow([])
-            writer.writerow(['Section','Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OOT','Status','Timestamp','Synthetic','As Left','As Left status'])
-            for p in POINTS:
-                r=self.found.get(str(p['id']),{});lr=self.left.get(str(p['id']),{});n=p['nominal'];e=p['error']
-                writer.writerow(['ZERO OFFSET '+p['terminal'] if p.get('zero_offset') else p['kind'],p['description'],n,n-e,n+e,p['unit'],r.get('reading',''),'OOT' if r.get('result')=='FAIL' else '',r.get('result',''),r.get('timestamp',''),r.get('synthetic',''),lr.get('reading','Same' if r else ''),lr.get('result','')])
-        self.status.set(f'Exported {path}')
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run','A point may be active. Stop and close?'):return
         self.stop=True;self._save_settings();self.disconnect();self.root.destroy()

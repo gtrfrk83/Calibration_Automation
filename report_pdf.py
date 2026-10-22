@@ -9,9 +9,132 @@ Layout: title, header strip, overall verdict, grouped table (shaded rows, out-of
 """
 from __future__ import annotations
 
+from collections import namedtuple
 from datetime import datetime
 
 COLUMNS = ('Description', 'Nominal', 'Tolerance -', 'Tolerance +', 'UOM', 'As Found', 'OOT', 'As Left', 'Uncertainty')
+TAR_TUR_COLUMNS = ('TAR', 'TUR')          # optional, after Uncertainty; each only when the user ticks its checkbox (default off)
+
+
+# ---------------------------------------------------------------------------------------------- optional TAR / TUR
+# The choice lives in report_dialog.ask_details (details['show_tar_tur']) and is remembered in ~/.calibration_suite/report_tartur.json.
+# Everything below is inert unless the flag is on: with it off every export is identical to what it was before this feature.
+_TAR_DEF = ('TAR (test accuracy ratio) is the unit under test tolerance, taken as half the width of its pass/fail limits at the test point, '
+            'divided by the accuracy specification of the standard used.')
+_TUR_DEF = ('TUR (test uncertainty ratio) is the unit under test tolerance, taken as half the width of its pass/fail limits at the test point, '
+            'divided by the reported expanded uncertainty of the measurement.')
+_TAR_TUR_PLACEHOLDER = _TAR_DEF + ' ' + _TUR_DEF
+
+
+class TarTur(namedtuple('TarTur', 'tar tur')):
+    """Which of the optional columns are selected.  Immutable; truthy if either is on, so a value that used to be a plain
+    bool (details.get('show_tar_tur')) keeps working.  A plain True / False anywhere means both on / both off."""
+    __slots__ = ()
+
+    def __bool__(self):
+        return bool(self.tar or self.tur)
+
+
+def as_tar_tur(value) -> TarTur:
+    """Normalise None / bool / TarTur / (tar, tur) pair to a TarTur."""
+    if isinstance(value, TarTur):
+        return value
+    if isinstance(value, (tuple, list)) and len(value) == 2:
+        return TarTur(bool(value[0]), bool(value[1]))
+    return TarTur(bool(value), bool(value))
+
+
+def details_tar_tur(details) -> TarTur:
+    """Selection carried by a details dict: 'show_tar_tur' (bool or TarTur), else the separate 'show_tar' / 'show_tur' keys."""
+    details = details or {}
+    if 'show_tar_tur' in details:
+        return as_tar_tur(details['show_tar_tur'])
+    return TarTur(bool(details.get('show_tar')), bool(details.get('show_tur')))
+
+
+def settings_path():
+    from pathlib import Path
+    return Path.home() / '.calibration_suite' / 'report_tartur.json'
+
+
+def remembered_show_tar_tur(path=None) -> TarTur:
+    """The last choice of the two checkboxes; both off on first run or if the file is missing or unreadable. Never raises.
+    An old file with the single key show_tar_tur: true means both on."""
+    import json
+    try:
+        from pathlib import Path
+        data = json.loads(Path(path or settings_path()).read_text(encoding='utf-8'))
+        if 'show_tar' in data or 'show_tur' in data:
+            return TarTur(bool(data.get('show_tar', False)), bool(data.get('show_tur', False)))
+        return as_tar_tur(bool(data.get('show_tar_tur', False)))
+    except Exception:
+        return TarTur(False, False)
+
+
+def remember_show_tar_tur(value, path=None) -> bool:
+    """Store the choice (bool or TarTur); returns False (and does nothing else) if the file cannot be written. Never raises."""
+    import json
+    try:
+        from pathlib import Path
+        v = as_tar_tur(value)
+        p = Path(path or settings_path())
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps({'show_tar': v.tar, 'show_tur': v.tur}, indent=2), encoding='utf-8')
+        return True
+    except Exception:
+        return False
+
+
+def tar_tur_definition(show=None) -> str:
+    """Footer paragraph defining the selected term(s) (default both).  Both: tartur.definition_text() (placeholder text if the
+    module is not present); one term: its own sentence plus the shared closing sentence about blank ratios."""
+    v = TarTur(True, True) if show is None else as_tar_tur(show)
+    full = ''
+    try:
+        import tartur
+        full = str(tartur.definition_text() or '')
+    except Exception:
+        pass
+    if v.tar and v.tur:
+        return full or _TAR_TUR_PLACEHOLDER
+    if not (v.tar or v.tur):
+        return ''
+    sentences = [x.strip() for x in full.replace('. ', '.\n').split('\n') if x.strip()]
+    own = next((x for x in sentences if x.startswith('TAR' if v.tar else 'TUR')), '')
+    if v.tur and own.startswith('TUR') and 'same tolerance' in own:   # tartur's TUR sentence refers back to the TAR one
+        own = own.replace('is the same tolerance', 'is the unit under test tolerance (half the width of its pass/fail limits at the test point)')
+    tail = ' '.join(x for x in sentences if x.startswith('Ratios')) or ''
+    if not own:
+        own = _TAR_DEF if v.tar else _TUR_DEF
+    if v.tar and own.startswith('TAR') and full and 'TUR' in own:
+        own = _TAR_DEF
+    return f'{own} {tail}'.strip()
+
+
+def shown_tar_tur_columns(rows, show) -> tuple:
+    """The selected columns that have at least one non-blank value, in TAR, TUR order."""
+    v = as_tar_tur(show)
+    return tuple(c for c, on in zip(TAR_TUR_COLUMNS, v) if on and any(str(r.get(c) or '').strip() for r in rows))
+
+
+def has_tar_tur(rows, show=True) -> bool:
+    return bool(shown_tar_tur_columns(rows, show))
+
+
+def apply_tar_tur(rows, show, point_fields):
+    """Rows with the selected 'TAR' / 'TUR' merged in.  show: bool or TarTur.  point_fields is a sequence parallel to rows
+    (each a dict like tartur.row_fields(p, low, high, standard) returns, or None) or a callable row -> dict.  With nothing selected
+    the rows are returned untouched (same list).  Input rows are never modified."""
+    v = as_tar_tur(show)
+    if not v:
+        return rows
+    keys = [c for c, on in zip(TAR_TUR_COLUMNS, v) if on]
+    out = []
+    for i, row in enumerate(rows):
+        f = point_fields(row) if callable(point_fields) else (point_fields[i] if i < len(point_fields) else None)
+        f = f or {}
+        out.append(dict(row, **{c: str(f.get(c) or '') for c in keys}))
+    return out
 
 
 _FONT_CANDIDATES = (
@@ -183,11 +306,13 @@ HEADER_HIDDEN = {'Limits applied', 'Source', 'Procedure', 'Technician', 'Tempera
 # So is the footnote under the table (footer_note is accepted and ignored).
 
 
-def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note=''):
+def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note='', show_tar_tur=None):
     """Write the report; returns the number of data rows.
 
     header   list of (label, value) shown under the title
-    details  optional dict from report_dialog.ask_details: technician, temperature, humidity, standards[]"""
+    details  optional dict from report_dialog.ask_details: technician, temperature, humidity, standards[]
+    show_tar_tur  None (default) follows details['show_tar_tur'] (bool or TarTur; default off); a bool or TarTur forces it.  Each selected
+             kind with at least one value gets a column after Uncertainty; the definition of the shown term(s) is printed under the table."""
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import letter
     from reportlab.lib.styles import ParagraphStyle
@@ -201,6 +326,12 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
         order.setdefault(row.get('Section') or '', len(order))
     rows = sorted(rows, key=lambda r: order[r.get('Section') or ''])
     details = details or {}
+    columns = COLUMNS
+    selected = details_tar_tur(details) if show_tar_tur is None else as_tar_tur(show_tar_tur)
+    extra = shown_tar_tur_columns(rows, selected)
+    columns = COLUMNS + extra
+    show_tar_tur = bool(extra)
+    shown_sel = TarTur('TAR' in extra, 'TUR' in extra)
     REG, BOLD, embedded = _fonts()
     header = list(header or [])
     instrument_id = next((v for k, v in header if k == 'Instrument ID'), '') or ''
@@ -256,7 +387,7 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     # Standards used and the signature block are on the lab's cover certificate, so they are not printed here.
 
     # ---- table with section headings ------------------------------------------------------------------
-    right = {'Nominal', 'Tolerance -', 'Tolerance +', 'As Found', 'Uncertainty'}
+    right = {'Nominal', 'Tolerance -', 'Tolerance +', 'As Found', 'Uncertainty', 'TAR', 'TUR'}
     centre = {'UOM', 'OOT', 'As Left'}
 
     def style_for(col, base, align=None):
@@ -264,19 +395,21 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
                               alignment=align if align is not None else 2 if col in right else 1 if col in centre else 0)
 
     has_uncertainty = any(r.get('Uncertainty') for r in rows)
-    data = [[Paragraph(c, style_for(c, head_style)) for c in COLUMNS]]
+    data = [[Paragraph(c, style_for(c, head_style)) for c in columns]]
     spans, tints, last_section, shade = [], [], None, 0
     for row in rows:
         sec = row.get('Section') or ''
         if sec and sec != last_section:
-            data.append([Paragraph(clean(sec), section_style)] + [''] * (len(COLUMNS) - 1))
+            data.append([Paragraph(clean(sec), section_style)] + [''] * (len(columns) - 1))
             spans.append(len(data) - 1)
             last_section, shade = sec, 0
         cells = []
-        for col in COLUMNS:
+        for col in columns:
             value = row.get(col, '')
             if col == 'Uncertainty' and not value and has_uncertainty:
                 value = 'N/A'          # the scope of accreditation has no entry for this point
+            if col in TAR_TUR_COLUMNS and not str(value or '').strip():
+                value = 'N/A'          # no ratio for this point (same rule as Uncertainty)
             if col == 'As Left' and str(value) not in ('', 'Same'):          # an As Left reading: right aligned like As Found, red if still OOT
                 if row.get('As Left OOT'):
                     value = f'{value} OOT'
@@ -295,6 +428,9 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     if left_rows:                                      # room for the As Left readings
         widths[0] -= 0.34
         widths[7] += 0.34
+    if show_tar_tur:                                   # two narrow columns, paid for mostly by the description
+        widths = widths + [0.5] * len(extra)
+        widths[0] -= 0.275 * len(extra)
     scale = (W - 2 * margin) / (sum(widths) * inch)
     widths = [w * inch * scale for w in widths]
     table = LongTable(data, colWidths=widths, repeatRows=1)
@@ -309,6 +445,8 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     table.setStyle(TableStyle(style))
     story.append(table)
     # footer_note (uncertainty source, method notes) is not printed: that information is on the lab's cover certificate.
+    if show_tar_tur:                                   # only when the optional columns are on
+        story += [Spacer(1, 6), Paragraph(clean(tar_tur_definition(shown_sel)), meta)]
 
     # ---- page furniture -------------------------------------------------------------------------------
     class Numbered(rl_canvas.Canvas):

@@ -18,7 +18,7 @@ Using it in a procedure's App class (see truevolt_verification.py for the refere
         self.save():   dict(..., **self.save_fields())     # both result sets go into the progress file
         self.load():   self.load_results(data)
         report rows:   self.found_left_row(p, build)       # build(record) -> the row for that record
-        report/CSV:    self.any_synthetic()                # demo data in either set marks the report as demo
+        report:        self.any_synthetic()                # demo data in either set marks the report as demo
 
 `self.results` always refers to the set being collected, so the existing run / rerun / refresh code works unchanged in both modes.
 Needs nothing from the procedure except an optional `busy` flag, `refresh()` and a `status` StringVar.
