@@ -1,0 +1,488 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Fluke_8846A_Verification.IO.__init__",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|SYST:REM",
+    "8846A|>>|*IDN?",
+    "8846A|<<|FLUKE,8846A,SIM0001,1.0"
+   ],
+   "method": "Fluke_8846A_Verification.IO.__init__",
+   "result": "returned <Fluke_8846A_Verification.IO object>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,8846A,SIM0001,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DCV 0 V (range 0.1)', 'error': 3.5e-06, 'frequency': None, 'high': 3.5e-06, 'id': 1, 'kind': 'DCV', 'low': -3.5e-06, 'nominal': 0.0, 'range': 0.1, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'V', 'verified': True, 'wiring': 'VOLTAGE', 'zero_offset': True}",
+   "case": "Fluke_8846A_Verification.IO.measure[DCV#1]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:VOLT:DC 0.1",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.200000000E-07"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DCV 0.1 V (range 0.1)', 'error': 7.199999999998874e-06, 'frequency': None, 'high': 0.1000072, 'id': 2, 'kind': 'DCV', 'low': 0.0999928, 'nominal': 0.1, 'range': 0.1, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'V', 'verified': True, 'wiring': 'VOLTAGE', 'zero_offset': False}",
+   "case": "Fluke_8846A_Verification.IO.measure[DCV#2]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:VOLT:DC 0.1",
+    "5560A|>>|OUT 0.1V",
+    "5560A|>>|OPER",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.000020000E-01",
+    "5560A|>>|STBY"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 0.100002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "W",
+     "OUT 0.1V"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E-01"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'ACV 0.1 V @ 10 Hz (range 0.1)', 'error': 0.00010000000000000286, 'frequency': 10.0, 'high': 0.1001, 'id': 18, 'kind': 'ACV', 'low': 0.0999, 'nominal': 0.1, 'range': 0.1, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'V', 'verified': True, 'wiring': 'VOLTAGE', 'zero_offset': False}",
+   "case": "Fluke_8846A_Verification.IO.measure[ACV#18]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:VOLT:AC 0.1"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "raised RuntimeError: AC filter and Fluke source setup must be lab-verified before automatic output is enabled.",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:VOLT:AC 0.1"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'FREQ 10 Hz @ 10 Hz (range 1)', 'error': 0.0030000000000001137, 'frequency': 10.0, 'high': 10.003, 'id': 43, 'kind': 'FREQ', 'low': 9.997, 'nominal': 10.0, 'range': 1.0, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'Hz', 'verified': True, 'wiring': 'VOLTAGE', 'zero_offset': False}",
+   "case": "Fluke_8846A_Verification.IO.measure[FREQ#43]",
+   "log": [
+    "5560A|>>|STBY"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "raised RuntimeError: FREQ source/measurement commands must be verified at the lab before enabling hardware automation. Point is retained for guided review.",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'OHM4 0 ohm (range 10)', 'error': 0.003, 'frequency': None, 'high': 0.003, 'id': 47, 'kind': 'OHM4', 'low': 0.0, 'nominal': 0.0, 'range': 10.0, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'ohm', 'verified': True, 'wiring': 'RESISTANCE_4W', 'zero_offset': True}",
+   "case": "Fluke_8846A_Verification.IO.measure[OHM4#47]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:FRES 10",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.200000000E-07"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:FRES 10"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'OHM4 10 ohm (range 10)', 'error': 0.0039999999999995595, 'frequency': None, 'high': 10.004, 'id': 48, 'kind': 'OHM4', 'low': 9.996, 'nominal': 10.0, 'range': 10.0, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'ohm', 'verified': True, 'wiring': 'RESISTANCE_4W', 'zero_offset': False}",
+   "case": "Fluke_8846A_Verification.IO.measure[OHM4#48]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:FRES 10",
+    "5560A|>>|OUT 10OHM",
+    "5560A|>>|OPER",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.000020000E+01",
+    "5560A|>>|STBY"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 10.0002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:FRES 10"
+    ],
+    [
+     "W",
+     "OUT 10OHM"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E+01"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'OHM2 0 ohm (range 100)', 'error': 0.004, 'frequency': None, 'high': 0.004, 'id': 57, 'kind': 'OHM2', 'low': 0.0, 'nominal': 0.0, 'range': 100.0, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'ohm', 'verified': True, 'wiring': 'RESISTANCE_2W', 'zero_offset': True}",
+   "case": "Fluke_8846A_Verification.IO.measure[OHM2#57]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:RES 100",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.200000000E-07"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:RES 100"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'OHM2 100 ohm (range 100)', 'error': 0.013999999999995794, 'frequency': None, 'high': 100.014, 'id': 58, 'kind': 'OHM2', 'low': 99.99, 'nominal': 100.0, 'range': 100.0, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'ohm', 'verified': True, 'wiring': 'RESISTANCE_2W', 'zero_offset': False}",
+   "case": "Fluke_8846A_Verification.IO.measure[OHM2#58]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:RES 100",
+    "5560A|>>|OUT 100OHM",
+    "5560A|>>|OPER",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.000020000E+02",
+    "5560A|>>|STBY"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 100.002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:RES 100"
+    ],
+    [
+     "W",
+     "OUT 100OHM"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E+02"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'CAP 0 F (range 1e-09)', 'error': 2.5e-11, 'frequency': None, 'high': 2.5e-11, 'id': 73, 'kind': 'CAP', 'low': 0.0, 'nominal': 0.0, 'range': 1e-09, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'F', 'verified': True, 'wiring': 'CAPACITANCE', 'zero_offset': True}",
+   "case": "Fluke_8846A_Verification.IO.measure[CAP#73]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:CAP 1e-09",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.200000000E-07"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CAP 1e-09"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'CAP 1e-09 F (range 1e-09)', 'error': 4.5000000000000155e-11, 'frequency': None, 'high': 1.045e-09, 'id': 74, 'kind': 'CAP', 'low': 9.55e-10, 'nominal': 1e-09, 'range': 1e-09, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'F', 'verified': True, 'wiring': 'CAPACITANCE', 'zero_offset': False}",
+   "case": "Fluke_8846A_Verification.IO.measure[CAP#74]",
+   "log": [
+    "5560A|>>|STBY"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "raised RuntimeError: CAP source/measurement commands must be verified at the lab before enabling hardware automation. Point is retained for guided review.",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DCI 0 A (range 0.0001)', 'error': 2.5e-08, 'frequency': None, 'high': 2.5e-08, 'id': 83, 'kind': 'DCI', 'low': -2.5e-08, 'nominal': 0.0, 'range': 0.0001, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'A', 'verified': True, 'wiring': 'CURRENT', 'zero_offset': True}",
+   "case": "Fluke_8846A_Verification.IO.measure[DCI#83]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:CURR:DC 0.0001",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.200000000E-07"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 1.2e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 0.0001"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.200000000E-07"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DCI 0.0001 A (range 0.0001)', 'error': 7.500000000000182e-08, 'frequency': None, 'high': 0.000100075, 'id': 84, 'kind': 'DCI', 'low': 9.9935e-05, 'nominal': 0.0001, 'range': 0.0001, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'A', 'verified': True, 'wiring': 'CURRENT', 'zero_offset': False}",
+   "case": "Fluke_8846A_Verification.IO.measure[DCI#84]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:CURR:DC 0.0001",
+    "5560A|>>|OUT 0.0001A",
+    "5560A|>>|OPER",
+    "8846A|>>|READ?",
+    "8846A|<<|+1.000020000E-04",
+    "5560A|>>|STBY"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "returned 0.000100002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 0.0001"
+    ],
+    [
+     "W",
+     "OUT 0.0001A"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000020000E-04"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'ACI 0.0001 A @ 10 Hz (range 0.0001)', 'error': 1.4000000000000882e-07, 'frequency': 10.0, 'high': 0.00010014, 'id': 107, 'kind': 'ACI', 'low': 9.986e-05, 'nominal': 0.0001, 'range': 0.0001, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'A', 'verified': True, 'wiring': 'CURRENT', 'zero_offset': False}",
+   "case": "Fluke_8846A_Verification.IO.measure[ACI#107]",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|CONF:CURR:AC 0.0001"
+   ],
+   "method": "Fluke_8846A_Verification.IO.measure",
+   "result": "raised RuntimeError: AC filter and Fluke source setup must be lab-verified before automatic output is enabled.",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "CONF:CURR:AC 0.0001"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke_8846A_Verification.IO.close",
+   "log": [
+    "5560A|>>|STBY",
+    "8846A|>>|SYST:LOC"
+   ],
+   "method": "Fluke_8846A_Verification.IO.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SYST:LOC"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_fluke_8846a",
+ "schema": 1
+}

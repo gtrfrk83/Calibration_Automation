@@ -1,0 +1,1001 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Keysight53131A.connect",
+   "log": [
+    "Counter|>>|*IDN?",
+    "Counter|<<|HEWLETT-PACKARD,53131A,0,4806",
+    "Counter|>>|*CLS",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53131A.connect",
+   "result": "returned <Keysight53131A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "HEWLETT-PACKARD,53131A,0,4806"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'EXT'",
+   "case": "Keysight5313x.set_reference[EXT 53131A]",
+   "log": [
+    "Counter|>>|:ROSC:SOUR EXT",
+    "Counter|>>|:ROSC:SOUR?",
+    "Counter|<<|EXT",
+    "Counter|>>|:ROSC:EXT:CHEC ONCE",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\"",
+    "Counter|>>|:ROSC:EXT:CHEC ON",
+    "Counter|>>|:ROSC:EXT:CHEC?",
+    "Counter|<<|ON",
+    "Counter|>>|:ROSC:EXT:FREQ?",
+    "Counter|<<|+1.00000E+07",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.set_reference",
+   "result": "returned 10000000.0",
+   "wire": [
+    [
+     "W",
+     ":ROSC:SOUR EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "W",
+     ":ROSC:EXT:CHEC ONCE"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     ":ROSC:EXT:CHEC ON"
+    ],
+    [
+     "Q",
+     ":ROSC:EXT:CHEC?",
+     "ON"
+    ],
+    [
+     "Q",
+     ":ROSC:EXT:FREQ?",
+     "+1.00000E+07"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53132A.connect",
+   "log": [
+    "Counter|>>|*IDN?",
+    "Counter|<<|HEWLETT-PACKARD,53132A,0,4806",
+    "Counter|>>|*CLS",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53132A.connect",
+   "result": "returned <Keysight53132A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "HEWLETT-PACKARD,53132A,0,4806"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Keysight5313x.check_errors[ok]",
+   "log": [
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.self_test[pass]",
+   "log": [
+    "Counter|>>|*TST?",
+    "Counter|<<|+0"
+   ],
+   "method": "Keysight5313x.self_test",
+   "result": "returned (True, '')",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*TST?",
+     "+0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.configure_frequency[ch1 defaults]",
+   "log": [
+    "Counter|>>|:FUNC \"FREQ 1\"",
+    "Counter|>>|:FUNC?",
+    "Counter|<<|\"FREQ\"",
+    "Counter|>>|:INP1:IMP 50",
+    "Counter|>>|:INP1:IMP?",
+    "Counter|<<|+5.00000E+01",
+    "Counter|>>|:INP1:COUP AC",
+    "Counter|>>|:INP1:COUP?",
+    "Counter|<<|AC",
+    "Counter|>>|:FREQ:ARM:STAR:SOUR IMM",
+    "Counter|>>|:FREQ:ARM:STAR:SOUR?",
+    "Counter|<<|IMM",
+    "Counter|>>|:FREQ:ARM:STOP:SOUR TIM",
+    "Counter|>>|:FREQ:ARM:STOP:SOUR?",
+    "Counter|<<|TIM",
+    "Counter|>>|:FREQ:ARM:STOP:TIM 1",
+    "Counter|>>|:FREQ:ARM:STOP:TIM?",
+    "Counter|<<|+1.00000E+00",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.configure_frequency",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":FUNC \"FREQ 1\""
+    ],
+    [
+     "Q",
+     ":FUNC?",
+     "\"FREQ\""
+    ],
+    [
+     "W",
+     ":INP1:IMP 50"
+    ],
+    [
+     "Q",
+     ":INP1:IMP?",
+     "+5.00000E+01"
+    ],
+    [
+     "W",
+     ":INP1:COUP AC"
+    ],
+    [
+     "Q",
+     ":INP1:COUP?",
+     "AC"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STAR:SOUR IMM"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STAR:SOUR?",
+     "IMM"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STOP:SOUR TIM"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STOP:SOUR?",
+     "TIM"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STOP:TIM 1"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STOP:TIM?",
+     "+1.00000E+00"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "1, 0.5, 1000000.0, 'DC', 1000000.0",
+   "case": "Keysight5313x.configure_frequency[ch1 expected 1 MHz DC 1M]",
+   "log": [
+    "Counter|>>|:FUNC \"FREQ 1\"",
+    "Counter|>>|:FUNC?",
+    "Counter|<<|\"FREQ\"",
+    "Counter|>>|:INP1:IMP 1e+06",
+    "Counter|>>|:INP1:IMP?",
+    "Counter|<<|+1.00000E+06",
+    "Counter|>>|:INP1:COUP DC",
+    "Counter|>>|:INP1:COUP?",
+    "Counter|<<|DC",
+    "Counter|>>|:FREQ:ARM:STAR:SOUR IMM",
+    "Counter|>>|:FREQ:ARM:STAR:SOUR?",
+    "Counter|<<|IMM",
+    "Counter|>>|:FREQ:ARM:STOP:SOUR TIM",
+    "Counter|>>|:FREQ:ARM:STOP:SOUR?",
+    "Counter|<<|TIM",
+    "Counter|>>|:FREQ:ARM:STOP:TIM 0.5",
+    "Counter|>>|:FREQ:ARM:STOP:TIM?",
+    "Counter|<<|+5.00000E-01",
+    "Counter|>>|:FREQ:EXP1 1000000",
+    "Counter|>>|:FREQ:EXP1?",
+    "Counter|<<|+1.00000000000000E+06",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.configure_frequency",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":FUNC \"FREQ 1\""
+    ],
+    [
+     "Q",
+     ":FUNC?",
+     "\"FREQ\""
+    ],
+    [
+     "W",
+     ":INP1:IMP 1e+06"
+    ],
+    [
+     "Q",
+     ":INP1:IMP?",
+     "+1.00000E+06"
+    ],
+    [
+     "W",
+     ":INP1:COUP DC"
+    ],
+    [
+     "Q",
+     ":INP1:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STAR:SOUR IMM"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STAR:SOUR?",
+     "IMM"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STOP:SOUR TIM"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STOP:SOUR?",
+     "TIM"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STOP:TIM 0.5"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STOP:TIM?",
+     "+5.00000E-01"
+    ],
+    [
+     "W",
+     ":FREQ:EXP1 1000000"
+    ],
+    [
+     "Q",
+     ":FREQ:EXP1?",
+     "+1.00000000000000E+06"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.reference",
+   "log": [
+    "Counter|>>|:ROSC:SOUR?",
+    "Counter|<<|EXT",
+    "Counter|>>|:ROSC:SOUR:AUTO?",
+    "Counter|<<|1"
+   ],
+   "method": "Keysight5313x.reference",
+   "result": "returned ('EXT', True)",
+   "wire": [
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR:AUTO?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "'INT'",
+   "case": "Keysight5313x.set_reference[INT]",
+   "log": [
+    "Counter|>>|:ROSC:SOUR INT",
+    "Counter|>>|:ROSC:SOUR?",
+    "Counter|<<|INT",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.set_reference",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":ROSC:SOUR INT"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "INT"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'EXT'",
+   "case": "Keysight5313x.set_reference[EXT 53132A]",
+   "log": [
+    "Counter|>>|:ROSC:SOUR EXT",
+    "Counter|>>|:ROSC:SOUR?",
+    "Counter|<<|EXT",
+    "Counter|>>|:ROSC:EXT:CHEC ONCE",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\"",
+    "Counter|>>|:ROSC:EXT:CHEC ON",
+    "Counter|>>|:ROSC:EXT:CHEC?",
+    "Counter|<<|ON",
+    "Counter|>>|:ROSC:EXT:FREQ?",
+    "Counter|<<|+1.00000E+07",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.set_reference",
+   "result": "returned 10000000.0",
+   "wire": [
+    [
+     "W",
+     ":ROSC:SOUR EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "W",
+     ":ROSC:EXT:CHEC ONCE"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     ":ROSC:EXT:CHEC ON"
+    ],
+    [
+     "Q",
+     ":ROSC:EXT:CHEC?",
+     "ON"
+    ],
+    [
+     "Q",
+     ":ROSC:EXT:FREQ?",
+     "+1.00000E+07"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'XTAL'",
+   "case": "Keysight5313x.set_reference[bad]",
+   "log": [],
+   "method": "Keysight5313x.set_reference",
+   "result": "raised InstrumentError: reference must be INT or EXT",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.read_frequency[no signal]",
+   "log": [
+    "Counter|>>|READ?",
+    "Counter|<<|+9.91000000000E+37",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|-230,\"Data corrupt or stale\""
+   ],
+   "method": "Keysight5313x.read_frequency",
+   "result": "raised InstrumentError: Agilent 53132A: no valid frequency (READ? -> +9.91000000000E+37); check the signal and the input setup.",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+9.91000000000E+37"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "-230,\"Data corrupt or stale\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.read_frequency",
+   "log": [
+    "Counter|>>|READ?",
+    "Counter|<<|+1.000001320000026E+06",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.read_frequency",
+   "result": "returned 1000001.320000026",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000001320000026E+06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.frequency",
+   "log": [
+    "Counter|>>|READ?",
+    "Counter|<<|+1.000001320000026E+06",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.frequency",
+   "result": "returned 1000001.320000026",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000001320000026E+06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.cleanup",
+   "log": [],
+   "method": "Keysight5313x.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "3",
+   "case": "Keysight5313x.configure_frequency[bad channel]",
+   "log": [],
+   "method": "Keysight5313x.configure_frequency",
+   "result": "raised InstrumentError: channel must be 1 or 2",
+   "wire": []
+  },
+  {
+   "call": "1, 5000",
+   "case": "Keysight5313x.configure_frequency[bad gate]",
+   "log": [],
+   "method": "Keysight5313x.configure_frequency",
+   "result": "raised InstrumentError: gate time 5000 s is outside 1 ms to 1000 s",
+   "wire": []
+  },
+  {
+   "call": "1, 1.0, 75",
+   "case": "Keysight5313x.configure_frequency[bad impedance]",
+   "log": [],
+   "method": "Keysight5313x.configure_frequency",
+   "result": "raised InstrumentError: input impedance must be 50 or 1e6 ohm",
+   "wire": []
+  },
+  {
+   "call": "1, 1.0, 50, 'AC', 500000000.0",
+   "case": "Keysight5313x.configure_frequency[expected out of range]",
+   "log": [
+    "Counter|>>|:FUNC \"FREQ 1\"",
+    "Counter|>>|:FUNC?",
+    "Counter|<<|\"FREQ\"",
+    "Counter|>>|:INP1:IMP 50",
+    "Counter|>>|:INP1:IMP?",
+    "Counter|<<|+5.00000E+01",
+    "Counter|>>|:INP1:COUP AC",
+    "Counter|>>|:INP1:COUP?",
+    "Counter|<<|AC",
+    "Counter|>>|:FREQ:ARM:STAR:SOUR IMM",
+    "Counter|>>|:FREQ:ARM:STAR:SOUR?",
+    "Counter|<<|IMM",
+    "Counter|>>|:FREQ:ARM:STOP:SOUR TIM",
+    "Counter|>>|:FREQ:ARM:STOP:SOUR?",
+    "Counter|<<|TIM",
+    "Counter|>>|:FREQ:ARM:STOP:TIM 1",
+    "Counter|>>|:FREQ:ARM:STOP:TIM?",
+    "Counter|<<|+1.00000E+00"
+   ],
+   "method": "Keysight5313x.configure_frequency",
+   "result": "raised InstrumentError: expected frequency 5e+08 Hz is outside 0.1 Hz to 225 MHz",
+   "wire": [
+    [
+     "W",
+     ":FUNC \"FREQ 1\""
+    ],
+    [
+     "Q",
+     ":FUNC?",
+     "\"FREQ\""
+    ],
+    [
+     "W",
+     ":INP1:IMP 50"
+    ],
+    [
+     "Q",
+     ":INP1:IMP?",
+     "+5.00000E+01"
+    ],
+    [
+     "W",
+     ":INP1:COUP AC"
+    ],
+    [
+     "Q",
+     ":INP1:COUP?",
+     "AC"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STAR:SOUR IMM"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STAR:SOUR?",
+     "IMM"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STOP:SOUR TIM"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STOP:SOUR?",
+     "TIM"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STOP:TIM 1"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STOP:TIM?",
+     "+1.00000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "2, 1.0, 50, 'ac', 1000000.0",
+   "case": "Keysight5313x.configure_frequency[ch2 expected]",
+   "log": [
+    "Counter|>>|:FUNC \"FREQ 2\"",
+    "Counter|>>|:FUNC?",
+    "Counter|<<|\"FREQ 2\"",
+    "Counter|>>|:INP2:IMP 50",
+    "Counter|>>|:INP2:IMP?",
+    "Counter|<<|+5.00000E+01",
+    "Counter|>>|:INP2:COUP AC",
+    "Counter|>>|:INP2:COUP?",
+    "Counter|<<|AC",
+    "Counter|>>|:FREQ:ARM:STAR:SOUR IMM",
+    "Counter|>>|:FREQ:ARM:STAR:SOUR?",
+    "Counter|<<|IMM",
+    "Counter|>>|:FREQ:ARM:STOP:SOUR TIM",
+    "Counter|>>|:FREQ:ARM:STOP:SOUR?",
+    "Counter|<<|TIM",
+    "Counter|>>|:FREQ:ARM:STOP:TIM 1",
+    "Counter|>>|:FREQ:ARM:STOP:TIM?",
+    "Counter|<<|+1.00000E+00",
+    "Counter|>>|:FREQ:EXP2 1000000",
+    "Counter|>>|:FREQ:EXP2?",
+    "Counter|<<|+1.00000000000E+06",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+0,\"No error\""
+   ],
+   "method": "Keysight5313x.configure_frequency",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":FUNC \"FREQ 2\""
+    ],
+    [
+     "Q",
+     ":FUNC?",
+     "\"FREQ 2\""
+    ],
+    [
+     "W",
+     ":INP2:IMP 50"
+    ],
+    [
+     "Q",
+     ":INP2:IMP?",
+     "+5.00000E+01"
+    ],
+    [
+     "W",
+     ":INP2:COUP AC"
+    ],
+    [
+     "Q",
+     ":INP2:COUP?",
+     "AC"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STAR:SOUR IMM"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STAR:SOUR?",
+     "IMM"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STOP:SOUR TIM"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STOP:SOUR?",
+     "TIM"
+    ],
+    [
+     "W",
+     ":FREQ:ARM:STOP:TIM 1"
+    ],
+    [
+     "Q",
+     ":FREQ:ARM:STOP:TIM?",
+     "+1.00000E+00"
+    ],
+    [
+     "W",
+     ":FREQ:EXP2 1000000"
+    ],
+    [
+     "Q",
+     ":FREQ:EXP2?",
+     "+1.00000000000E+06"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'EXT'",
+   "case": "Keysight5313x.set_reference[EXT no timebase]",
+   "log": [
+    "Counter|>>|:ROSC:SOUR EXT",
+    "Counter|>>|:ROSC:SOUR?",
+    "Counter|<<|EXT",
+    "Counter|>>|:ROSC:EXT:CHEC ONCE",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+2009,\"No valid external timebase\""
+   ],
+   "method": "Keysight5313x.set_reference",
+   "result": "raised InstrumentError: Agilent 53132A: no valid external timebase at Ref In (+2009). Check the 10 MHz GPS reference cable on the rear panel and that the GPS receiver is locked.",
+   "wire": [
+    [
+     "W",
+     ":ROSC:SOUR EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "W",
+     ":ROSC:EXT:CHEC ONCE"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+2009,\"No valid external timebase\""
+    ]
+   ]
+  },
+  {
+   "call": "'EXT'",
+   "case": "Keysight5313x.set_reference[EXT error]",
+   "log": [
+    "Counter|>>|:ROSC:SOUR EXT",
+    "Counter|>>|:ROSC:SOUR?",
+    "Counter|<<|EXT",
+    "Counter|>>|:ROSC:EXT:CHEC ONCE",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|-221,\"Settings conflict\""
+   ],
+   "method": "Keysight5313x.set_reference",
+   "result": "raised InstrumentError: Agilent 53132A reported an error (external reference check): -221,\"Settings conflict\"",
+   "wire": [
+    [
+     "W",
+     ":ROSC:SOUR EXT"
+    ],
+    [
+     "Q",
+     ":ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "W",
+     ":ROSC:EXT:CHEC ONCE"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "-221,\"Settings conflict\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.read_frequency[timebase lost]",
+   "log": [
+    "Counter|>>|READ?",
+    "Counter|<<|+1.00000000000000E+06",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+2010,\"External timebase failed\""
+   ],
+   "method": "Keysight5313x.read_frequency",
+   "result": "raised InstrumentError: Agilent 53132A: the external timebase was lost during the measurement (+2010,\"External timebase failed\"). Check the GPS reference.",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.00000000000000E+06"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+2010,\"External timebase failed\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.read_frequency[NaN]",
+   "log": [
+    "Counter|>>|READ?",
+    "Counter|<<|+9.91000000000E+37",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|-230,\"Data corrupt or stale\""
+   ],
+   "method": "Keysight5313x.read_frequency",
+   "result": "raised InstrumentError: Agilent 53132A: no valid frequency (READ? -> +9.91000000000E+37); check the signal and the input setup.",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+9.91000000000E+37"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "-230,\"Data corrupt or stale\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight5313x.self_test[fail]",
+   "log": [
+    "Counter|>>|*TST?",
+    "Counter|<<|+1",
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|+301,\"Self test failed\""
+   ],
+   "method": "Keysight5313x.self_test",
+   "result": "returned (False, '+301,\"Self test failed\"')",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*TST?",
+     "+1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+301,\"Self test failed\""
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Keysight5313x.check_errors[error]",
+   "log": [
+    "Counter|>>|:SYST:ERR?",
+    "Counter|<<|-113,\"Undefined header\""
+   ],
+   "method": "Keysight5313x.check_errors",
+   "result": "raised InstrumentError: Agilent 53132A reported an error (ctx): -113,\"Undefined header\"",
+   "wire": [
+    [
+     "Q",
+     ":SYST:ERR?",
+     "-113,\"Undefined header\""
+    ]
+   ]
+  }
+ ],
+ "name": "keysight_5313x",
+ "schema": 1
+}

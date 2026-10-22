@@ -44,7 +44,8 @@ def func_sources(src, names):
 
 
 class TarTurCoreUnchanged(unittest.TestCase):
-    NAMES = ('compute', '_compute', 'format_ratio', 'definition_text', 'row_fields', '_blank', '_num', '_scope')
+    # '_compute' is excluded on purpose: it gained the natural-unit guard (NATURAL_UNITS) after the verifier found Hz tolerances divided by volts.
+    NAMES = ('compute', 'format_ratio', 'definition_text', 'row_fields', '_blank', '_num', '_scope')
 
     def test_existing_functions_identical_to_integration(self):
         old = git_show('tartur.py')
