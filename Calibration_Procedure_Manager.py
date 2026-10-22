@@ -212,7 +212,7 @@ class Manager:
         self.notebook.add(self.instruments_frame, text='  Instruments  ')
         self.notebook.add(self.history_frame, text='  Asset History  ')
         self.notebook.add(self.specs_frame, text='  Standards Specs  ')
-        self.notebook.add(self.datasheets_frame, text='  Datasheets (.MDD)  ')
+        self.notebook.add(self.datasheets_frame, text='  Mudcats Datasheet Importer  ')
         self.notebook.add(self.dsb_frame, text='  Datasheet Builder  ')
         self.notebook.add(self.development_frame, text='  Procedure Development  ')
         self.build_library_tab()
