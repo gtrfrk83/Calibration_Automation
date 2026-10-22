@@ -676,11 +676,12 @@ def cases_k2000(c):
     d = c.inst(Keithley2000, dt, opened=False, label='2000')
     c.quiet(d.connect)
     c.quiet(ft.open)
-    pts = [('DCV', dict(kind='DCV', range=0.1, plc=1)), ('DCV 1000', dict(kind='DCV', range=1000.0, plc=1)), ('ACV', dict(kind='ACV', range=10.0, ac_bandwidth=30)),
-           ('ACV 750', dict(kind='ACV', range=750.0, ac_bandwidth=30)), ('DCI', dict(kind='DCI', range=0.01, plc=1)), ('DCI 3 A', dict(kind='DCI', range=3.0, plc=1)),
-           ('ACI', dict(kind='ACI', range=1.0, ac_bandwidth=30)), ('OHM4', dict(kind='OHM4', range=100000.0, plc=1)),
-           ('OHM4 100M', dict(kind='OHM4', range=1e8, plc=1)), ('OHM2', dict(kind='OHM2', range=1000.0, plc=1)),
-           ('ACV filter count 5', dict(kind='ACV', range=1.0, ac_bandwidth=30, filter_count=5))]
+    pts = [('DCV', dict(kind='DCV', range=0.1, plc=1)), ('DCV 1000', dict(kind='DCV', range=1000.0, plc=1)), ('ACV', dict(kind='ACV', range=10.0, ac_bandwidth=3)),
+           ('ACV 750', dict(kind='ACV', range=750.0, ac_bandwidth=3)), ('DCI', dict(kind='DCI', range=0.01, plc=1)), ('DCI 3 A', dict(kind='DCI', range=3.0, plc=1)),
+           ('ACI', dict(kind='ACI', range=1.0, ac_bandwidth=3)), ('OHM4', dict(kind='OHM4', range=100000.0, plc=1)),
+           ('OHM2 100M', dict(kind='OHM2', range=1e8, plc=1)), ('OHM2', dict(kind='OHM2', range=1000.0, plc=1)),
+           ('DCV filter count 5', dict(kind='DCV', range=1.0, plc=1, filter_count=5)),
+           ('ACV filter on override', dict(kind='ACV', range=1.0, ac_bandwidth=3, filter_on=True, filter_count=5))]
     for tag, p in pts:
         c.run(f'Keithley2000.configure_point[{tag}]', d.configure_point, p)
     c.run('Keithley2000.configure_point[unknown kind]', d.configure_point, dict(kind='FREQ', range=1.0))

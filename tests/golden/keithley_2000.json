@@ -333,7 +333,7 @@
    ]
   },
   {
-   "call": "{'ac_bandwidth': 30, 'kind': 'ACV', 'range': 10.0}",
+   "call": "{'ac_bandwidth': 3, 'kind': 'ACV', 'range': 10.0}",
    "case": "Keithley2000.configure_point[ACV]",
    "log": [
     "2000|>>|:SENS:FUNC 'VOLT:AC'",
@@ -344,18 +344,12 @@
     "2000|<<|+1.000000E+01",
     "2000|>>|:SENS:VOLT:AC:RANG:AUTO?",
     "2000|<<|0",
-    "2000|>>|:SENS:VOLT:AC:DET:BAND 30",
+    "2000|>>|:SENS:VOLT:AC:DET:BAND 3",
     "2000|>>|:SENS:VOLT:AC:DET:BAND?",
-    "2000|<<|+3.000000E+01",
-    "2000|>>|:SENS:VOLT:AC:AVER:TCON REP",
-    "2000|>>|:SENS:VOLT:AC:AVER:TCON?",
-    "2000|<<|REP",
-    "2000|>>|:SENS:VOLT:AC:AVER:COUN 10",
-    "2000|>>|:SENS:VOLT:AC:AVER:COUN?",
-    "2000|<<|+10",
-    "2000|>>|:SENS:VOLT:AC:AVER:STAT ON",
+    "2000|<<|+3.000000E+00",
+    "2000|>>|:SENS:VOLT:AC:AVER:STAT OFF",
     "2000|>>|:SENS:VOLT:AC:AVER:STAT?",
-    "2000|<<|1",
+    "2000|<<|0",
     "2000|>>|:SENS:VOLT:AC:REF:STAT OFF",
     "2000|>>|:SENS:VOLT:AC:REF:STAT?",
     "2000|<<|0"
@@ -388,39 +382,21 @@
     ],
     [
      "W",
-     ":SENS:VOLT:AC:DET:BAND 30"
+     ":SENS:VOLT:AC:DET:BAND 3"
     ],
     [
      "Q",
      ":SENS:VOLT:AC:DET:BAND?",
-     "+3.000000E+01"
+     "+3.000000E+00"
     ],
     [
      "W",
-     ":SENS:VOLT:AC:AVER:TCON REP"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:TCON?",
-     "REP"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:COUN 10"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:COUN?",
-     "+10"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:STAT ON"
+     ":SENS:VOLT:AC:AVER:STAT OFF"
     ],
     [
      "Q",
      ":SENS:VOLT:AC:AVER:STAT?",
-     "1"
+     "0"
     ],
     [
      "W",
@@ -434,7 +410,7 @@
    ]
   },
   {
-   "call": "{'ac_bandwidth': 30, 'kind': 'ACV', 'range': 750.0}",
+   "call": "{'ac_bandwidth': 3, 'kind': 'ACV', 'range': 750.0}",
    "case": "Keithley2000.configure_point[ACV 750]",
    "log": [
     "2000|>>|:SENS:FUNC 'VOLT:AC'",
@@ -445,18 +421,12 @@
     "2000|<<|+7.500000E+02",
     "2000|>>|:SENS:VOLT:AC:RANG:AUTO?",
     "2000|<<|0",
-    "2000|>>|:SENS:VOLT:AC:DET:BAND 30",
+    "2000|>>|:SENS:VOLT:AC:DET:BAND 3",
     "2000|>>|:SENS:VOLT:AC:DET:BAND?",
-    "2000|<<|+3.000000E+01",
-    "2000|>>|:SENS:VOLT:AC:AVER:TCON REP",
-    "2000|>>|:SENS:VOLT:AC:AVER:TCON?",
-    "2000|<<|REP",
-    "2000|>>|:SENS:VOLT:AC:AVER:COUN 10",
-    "2000|>>|:SENS:VOLT:AC:AVER:COUN?",
-    "2000|<<|+10",
-    "2000|>>|:SENS:VOLT:AC:AVER:STAT ON",
+    "2000|<<|+3.000000E+00",
+    "2000|>>|:SENS:VOLT:AC:AVER:STAT OFF",
     "2000|>>|:SENS:VOLT:AC:AVER:STAT?",
-    "2000|<<|1",
+    "2000|<<|0",
     "2000|>>|:SENS:VOLT:AC:REF:STAT OFF",
     "2000|>>|:SENS:VOLT:AC:REF:STAT?",
     "2000|<<|0"
@@ -489,39 +459,21 @@
     ],
     [
      "W",
-     ":SENS:VOLT:AC:DET:BAND 30"
+     ":SENS:VOLT:AC:DET:BAND 3"
     ],
     [
      "Q",
      ":SENS:VOLT:AC:DET:BAND?",
-     "+3.000000E+01"
+     "+3.000000E+00"
     ],
     [
      "W",
-     ":SENS:VOLT:AC:AVER:TCON REP"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:TCON?",
-     "REP"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:COUN 10"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:COUN?",
-     "+10"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:STAT ON"
+     ":SENS:VOLT:AC:AVER:STAT OFF"
     ],
     [
      "Q",
      ":SENS:VOLT:AC:AVER:STAT?",
-     "1"
+     "0"
     ],
     [
      "W",
@@ -737,7 +689,7 @@
    ]
   },
   {
-   "call": "{'ac_bandwidth': 30, 'kind': 'ACI', 'range': 1.0}",
+   "call": "{'ac_bandwidth': 3, 'kind': 'ACI', 'range': 1.0}",
    "case": "Keithley2000.configure_point[ACI]",
    "log": [
     "2000|>>|:SENS:FUNC 'CURR:AC'",
@@ -748,18 +700,12 @@
     "2000|<<|+1.000000E+00",
     "2000|>>|:SENS:CURR:AC:RANG:AUTO?",
     "2000|<<|0",
-    "2000|>>|:SENS:CURR:AC:DET:BAND 30",
+    "2000|>>|:SENS:CURR:AC:DET:BAND 3",
     "2000|>>|:SENS:CURR:AC:DET:BAND?",
-    "2000|<<|+3.000000E+01",
-    "2000|>>|:SENS:CURR:AC:AVER:TCON REP",
-    "2000|>>|:SENS:CURR:AC:AVER:TCON?",
-    "2000|<<|REP",
-    "2000|>>|:SENS:CURR:AC:AVER:COUN 10",
-    "2000|>>|:SENS:CURR:AC:AVER:COUN?",
-    "2000|<<|+10",
-    "2000|>>|:SENS:CURR:AC:AVER:STAT ON",
+    "2000|<<|+3.000000E+00",
+    "2000|>>|:SENS:CURR:AC:AVER:STAT OFF",
     "2000|>>|:SENS:CURR:AC:AVER:STAT?",
-    "2000|<<|1",
+    "2000|<<|0",
     "2000|>>|:SENS:CURR:AC:REF:STAT OFF",
     "2000|>>|:SENS:CURR:AC:REF:STAT?",
     "2000|<<|0"
@@ -792,39 +738,21 @@
     ],
     [
      "W",
-     ":SENS:CURR:AC:DET:BAND 30"
+     ":SENS:CURR:AC:DET:BAND 3"
     ],
     [
      "Q",
      ":SENS:CURR:AC:DET:BAND?",
-     "+3.000000E+01"
+     "+3.000000E+00"
     ],
     [
      "W",
-     ":SENS:CURR:AC:AVER:TCON REP"
-    ],
-    [
-     "Q",
-     ":SENS:CURR:AC:AVER:TCON?",
-     "REP"
-    ],
-    [
-     "W",
-     ":SENS:CURR:AC:AVER:COUN 10"
-    ],
-    [
-     "Q",
-     ":SENS:CURR:AC:AVER:COUN?",
-     "+10"
-    ],
-    [
-     "W",
-     ":SENS:CURR:AC:AVER:STAT ON"
+     ":SENS:CURR:AC:AVER:STAT OFF"
     ],
     [
      "Q",
      ":SENS:CURR:AC:AVER:STAT?",
-     "1"
+     "0"
     ],
     [
      "W",
@@ -939,31 +867,31 @@
    ]
   },
   {
-   "call": "{'kind': 'OHM4', 'plc': 1, 'range': 100000000.0}",
-   "case": "Keithley2000.configure_point[OHM4 100M]",
+   "call": "{'kind': 'OHM2', 'plc': 1, 'range': 100000000.0}",
+   "case": "Keithley2000.configure_point[OHM2 100M]",
    "log": [
-    "2000|>>|:SENS:FUNC 'FRES'",
+    "2000|>>|:SENS:FUNC 'RES'",
     "2000|>>|:SENS:FUNC?",
-    "2000|<<|\"FRES\"",
-    "2000|>>|:SENS:FRES:RANG 90000000",
-    "2000|>>|:SENS:FRES:RANG?",
+    "2000|<<|\"RES\"",
+    "2000|>>|:SENS:RES:RANG 90000000",
+    "2000|>>|:SENS:RES:RANG?",
     "2000|<<|+1.000000E+08",
-    "2000|>>|:SENS:FRES:RANG:AUTO?",
+    "2000|>>|:SENS:RES:RANG:AUTO?",
     "2000|<<|0",
-    "2000|>>|:SENS:FRES:NPLC 1",
-    "2000|>>|:SENS:FRES:NPLC?",
+    "2000|>>|:SENS:RES:NPLC 1",
+    "2000|>>|:SENS:RES:NPLC?",
     "2000|<<|+1.000000E+00",
-    "2000|>>|:SENS:FRES:AVER:TCON REP",
-    "2000|>>|:SENS:FRES:AVER:TCON?",
+    "2000|>>|:SENS:RES:AVER:TCON REP",
+    "2000|>>|:SENS:RES:AVER:TCON?",
     "2000|<<|REP",
-    "2000|>>|:SENS:FRES:AVER:COUN 10",
-    "2000|>>|:SENS:FRES:AVER:COUN?",
+    "2000|>>|:SENS:RES:AVER:COUN 10",
+    "2000|>>|:SENS:RES:AVER:COUN?",
     "2000|<<|+10",
-    "2000|>>|:SENS:FRES:AVER:STAT ON",
-    "2000|>>|:SENS:FRES:AVER:STAT?",
+    "2000|>>|:SENS:RES:AVER:STAT ON",
+    "2000|>>|:SENS:RES:AVER:STAT?",
     "2000|<<|1",
-    "2000|>>|:SENS:FRES:REF:STAT OFF",
-    "2000|>>|:SENS:FRES:REF:STAT?",
+    "2000|>>|:SENS:RES:REF:STAT OFF",
+    "2000|>>|:SENS:RES:REF:STAT?",
     "2000|<<|0"
    ],
    "method": "Keithley2000.configure_point",
@@ -971,70 +899,70 @@
    "wire": [
     [
      "W",
-     ":SENS:FUNC 'FRES'"
+     ":SENS:FUNC 'RES'"
     ],
     [
      "Q",
      ":SENS:FUNC?",
-     "\"FRES\""
+     "\"RES\""
     ],
     [
      "W",
-     ":SENS:FRES:RANG 90000000"
+     ":SENS:RES:RANG 90000000"
     ],
     [
      "Q",
-     ":SENS:FRES:RANG?",
+     ":SENS:RES:RANG?",
      "+1.000000E+08"
     ],
     [
      "Q",
-     ":SENS:FRES:RANG:AUTO?",
+     ":SENS:RES:RANG:AUTO?",
      "0"
     ],
     [
      "W",
-     ":SENS:FRES:NPLC 1"
+     ":SENS:RES:NPLC 1"
     ],
     [
      "Q",
-     ":SENS:FRES:NPLC?",
+     ":SENS:RES:NPLC?",
      "+1.000000E+00"
     ],
     [
      "W",
-     ":SENS:FRES:AVER:TCON REP"
+     ":SENS:RES:AVER:TCON REP"
     ],
     [
      "Q",
-     ":SENS:FRES:AVER:TCON?",
+     ":SENS:RES:AVER:TCON?",
      "REP"
     ],
     [
      "W",
-     ":SENS:FRES:AVER:COUN 10"
+     ":SENS:RES:AVER:COUN 10"
     ],
     [
      "Q",
-     ":SENS:FRES:AVER:COUN?",
+     ":SENS:RES:AVER:COUN?",
      "+10"
     ],
     [
      "W",
-     ":SENS:FRES:AVER:STAT ON"
+     ":SENS:RES:AVER:STAT ON"
     ],
     [
      "Q",
-     ":SENS:FRES:AVER:STAT?",
+     ":SENS:RES:AVER:STAT?",
      "1"
     ],
     [
      "W",
-     ":SENS:FRES:REF:STAT OFF"
+     ":SENS:RES:REF:STAT OFF"
     ],
     [
      "Q",
-     ":SENS:FRES:REF:STAT?",
+     ":SENS:RES:REF:STAT?",
      "0"
     ]
    ]
@@ -1141,8 +1069,97 @@
    ]
   },
   {
-   "call": "{'ac_bandwidth': 30, 'filter_count': 5, 'kind': 'ACV', 'range': 1.0}",
-   "case": "Keithley2000.configure_point[ACV filter count 5]",
+   "call": "{'filter_count': 5, 'kind': 'DCV', 'plc': 1, 'range': 1.0}",
+   "case": "Keithley2000.configure_point[DCV filter count 5]",
+   "log": [
+    "2000|>>|:SENS:FUNC 'VOLT:DC'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"VOLT:DC\"",
+    "2000|>>|:SENS:VOLT:DC:RANG 0.9",
+    "2000|>>|:SENS:VOLT:DC:RANG?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:VOLT:DC:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:VOLT:DC:NPLC 1",
+    "2000|>>|:SENS:VOLT:DC:NPLC?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:VOLT:DC:AVER:TCON REP",
+    "2000|>>|:SENS:VOLT:DC:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:VOLT:DC:AVER:COUN 5",
+    "2000|>>|:SENS:VOLT:DC:AVER:COUN?",
+    "2000|<<|+5",
+    "2000|>>|:SENS:VOLT:DC:AVER:STAT ON",
+    "2000|>>|:SENS:VOLT:DC:AVER:STAT?",
+    "2000|<<|1"
+   ],
+   "method": "Keithley2000.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":SENS:FUNC 'VOLT:DC'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"VOLT:DC\""
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:RANG 0.9"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:RANG?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:NPLC?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:COUN 5"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:COUN?",
+     "+5"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:STAT?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'ac_bandwidth': 3, 'filter_count': 5, 'filter_on': True, 'kind': 'ACV', 'range': 1.0}",
+   "case": "Keithley2000.configure_point[ACV filter on override]",
    "log": [
     "2000|>>|:SENS:FUNC 'VOLT:AC'",
     "2000|>>|:SENS:FUNC?",
@@ -1152,9 +1169,9 @@
     "2000|<<|+1.000000E+00",
     "2000|>>|:SENS:VOLT:AC:RANG:AUTO?",
     "2000|<<|0",
-    "2000|>>|:SENS:VOLT:AC:DET:BAND 30",
+    "2000|>>|:SENS:VOLT:AC:DET:BAND 3",
     "2000|>>|:SENS:VOLT:AC:DET:BAND?",
-    "2000|<<|+3.000000E+01",
+    "2000|<<|+3.000000E+00",
     "2000|>>|:SENS:VOLT:AC:AVER:TCON REP",
     "2000|>>|:SENS:VOLT:AC:AVER:TCON?",
     "2000|<<|REP",
@@ -1196,12 +1213,12 @@
     ],
     [
      "W",
-     ":SENS:VOLT:AC:DET:BAND 30"
+     ":SENS:VOLT:AC:DET:BAND 3"
     ],
     [
      "Q",
      ":SENS:VOLT:AC:DET:BAND?",
-     "+3.000000E+01"
+     "+3.000000E+00"
     ],
     [
      "W",

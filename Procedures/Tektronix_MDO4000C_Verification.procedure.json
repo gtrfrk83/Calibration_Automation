@@ -1,0 +1,51 @@
+{
+ "schema": 1,
+ "id": "Tektronix_MDO4000C_Verification",
+ "name": "Tektronix MDO4000C Performance Verification",
+ "manufacturer": "Tektronix",
+ "model": "MDO4024C/4034C/4054C/4104C",
+ "category": "Oscilloscope",
+ "version": "2",
+ "order": 12,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Tektronix_MDO4000C_Verification.py",
+ "engine": [
+  "mdo4000c_verification.py"
+ ],
+ "drivers": [
+  "tektronix_mdo4000c",
+  "fluke_5560a",
+  "reference_instruments"
+ ],
+ "specs": [
+  "specs/tektronix_mdo4000c_pv.json",
+  "specs/mdo4000c_reference_cmc.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Tektronix_MDO4000C_Verification.py",
+   "mdo4000c_verification.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/tektronix_mdo4000c.py",
+   "drivers/fluke_5560a.py",
+   "drivers/reference_instruments.py"
+  ],
+  "spec": [
+   "specs/tektronix_mdo4000c_pv.json",
+   "specs/mdo4000c_reference_cmc.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": []
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Tektronix_MDO4000C_Verification.py",
+  "Procedures/Tektronix_MDO4000C_Verification.procedure.json",
+  "specs/tektronix_mdo4000c_pv.json",
+  "specs/mdo4000c_reference_cmc.json",
+  "drivers/tektronix_mdo4000c.py"
+ ]
+}

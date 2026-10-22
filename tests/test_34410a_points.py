@@ -518,14 +518,13 @@ class Registration(unittest.TestCase):
     def test_launcher_manager_verified_and_tunables(self):
         src = (ROOT / 'Procedures' / 'Agilent_34410A_Verification.py').read_text(encoding='utf-8')
         self.assertIn('agilent34410a_verification.main()', src)
-        mgr = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertIn("'Agilent 34410A Performance Verification': 'Agilent_34410A_Verification.py'", mgr)
-        self.assertIn("('Agilent 34410A Performance Verification','Agilent','34410A','Digital Multimeter','Agilent_34410A_Verification.py')", mgr)
-        self.assertIn("'Agilent_34410A_Verification.py': '1'", mgr)
-        import verified
-        self.assertIn('Agilent_34410A_Verification.py', verified.FILES)
-        for rel in verified.FILES['Agilent_34410A_Verification.py']['code'] + verified.FILES['Agilent_34410A_Verification.py']['spec']:
+        side = json.loads((ROOT / 'Procedures' / 'Agilent_34410A_Verification.procedure.json').read_text(encoding='utf-8'))
+        self.assertEqual((side['id'], side['model'], side['category'], side['seed_verified']), ('Agilent_34410A_Verification', '34410A', 'Digital Multimeter', False))
+        self.assertEqual(side['launcher'], 'Procedures/Agilent_34410A_Verification.py')
+        for rel in side['fingerprint']['code'] + side['fingerprint']['spec'] + side['own_files']:
             self.assertTrue((ROOT / rel).exists(), rel)
+        import procscan
+        self.assertIn('Agilent_34410A_Verification', [q.id for q in procscan.procs(ROOT)])
         import procmods_engine as pe
         self.assertEqual(pe.MODEL_IDS['a34410a'], '34410A')
         self.assertTrue(pe.tunables_for('a34410a'))

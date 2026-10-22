@@ -1,0 +1,47 @@
+{
+ "schema": 1,
+ "id": "Fluke_77IV_Verification",
+ "name": "Fluke 77 Series IV Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "77 Series IV",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 26,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_77IV_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_77iv_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_77IV_Verification.py",
+   "handheld_dmm.py",
+   "hookups.py#fluke77",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_77iv_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke77",
+  "diagram_prefixes": [
+   "hook_fluke77"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_77IV_Verification.py",
+  "Procedures/Fluke_77IV_Verification.procedure.json",
+  "specs/fluke_77iv_pv.json",
+  "tests/test_77_points.py"
+ ]
+}

@@ -127,6 +127,8 @@ class SpecTests(unittest.TestCase):
 
     def test_calibrator_limits_are_the_five_known_points(self):
         self.assertEqual(sorted(p['ref'] for p in points() if p.get('cal_limits')), ['T3-3 #26', 'T3-3 #27', 'T3-3 #28', 'T3-7 #14', 'T3-8 #6'])
+        self.assertEqual({p['ref']: sorted(p['cal_limits']) for p in points() if p.get('cal_limits')},
+                         {'T3-3 #26': ['5522A', '5560A'], 'T3-3 #27': ['5522A', '5560A'], 'T3-3 #28': ['5522A', '5560A'], 'T3-7 #14': ['5522A'], 'T3-8 #6': ['5522A', '5560A']})
 
     def test_every_range_exists_on_the_meter(self):
         for p in points():
@@ -477,12 +479,52 @@ class EngineRunTests(unittest.TestCase):
         self.assertNotIn('OPER', sent)
         self.assertEqual(sent[-1], 'ERR?')
 
-    def test_the_5560a_uses_the_operator_standard_for_the_same_points_unless_ticked(self):
+    def test_the_5560a_drives_the_10_a_40_hz_point_and_uses_the_operator_standard_for_the_four_it_cannot_make(self):
+        # 5560A Product Specifications (Rev. 8, 6/26): ACV 1020 V range 3 Hz - 10 kHz only (printed p. 4), ACV stops at 500 kHz (pp. 3-4), ACI 12 A range 3 Hz - 45 Hz (p. 8)
         app = self.build(cal='Fluke 5560A', enforce=False)
         refs = sorted(p['ref'] for p in E.POINTS if app.is_manual(p))
-        self.assertEqual(refs, ['T3-3 #26', 'T3-3 #27', 'T3-3 #28', 'T3-7 #14', 'T3-8 #6'])
-        app.try_5560a.set(True)
-        self.assertEqual([p for p in E.POINTS if app.is_manual(p)], [])
+        self.assertEqual(refs, ['T3-3 #26', 'T3-3 #27', 'T3-3 #28', 'T3-8 #6'])
+        p = next(q for q in E.POINTS if q['ref'] == 'T3-7 #14')
+        self.assertFalse(app.is_manual(p))
+        self.assertEqual(app.manual_reason(p), '')
+        for ref in refs:
+            self.assertIn('5560A Product Specifications', app.manual_reason(next(q for q in E.POINTS if q['ref'] == ref)))
+        app.cal_model.set('Fluke 5522A')                                  # the 5522A is unchanged: the same five points are manual
+        self.assertEqual(sorted(q['ref'] for q in E.POINTS if app.is_manual(q)), ['T3-3 #26', 'T3-3 #27', 'T3-3 #28', 'T3-7 #14', 'T3-8 #6'])
+        self.assertFalse(hasattr(app, 'try_5560a'))
+
+    def test_the_5560a_run_sources_10_a_at_40_hz_and_not_the_four_manual_points(self):
+        self.build(cal='Fluke 5560A', enforce=False)
+        self.run_all()
+        sent = [t for w, d, t in self.log_lines() if w == '5560A' and d == '>>']
+        outs = ' '.join(sent)
+        self.assertRegex(outs, r'OUT 10A,40')
+        self.assertNotRegex(outs, r'OUT 750V,(20|50|100)')
+        self.assertNotIn('1MHz', outs)
+        self.assertEqual(sent.count('OPER'), 80)                          # 105 - 21 zero points - 4 manual points
+        self.assertEqual(sent[-1], 'STBY')
+
+    def test_5560a_uncertainty_and_tar_for_10_a_40_hz_use_the_5560a_12_a_range_spec(self):
+        import os
+        import tempfile
+        import specmanager as sm
+        import report_pdf
+        import tartur_wiring
+        import uncertainty_budget
+        db = os.path.join(tempfile.mkdtemp(), 'reg.sqlite3')
+        sm.seed(path=db)
+        std = sm.standard('5560A', db)
+        h = std.lookup('ACI', 10.0, frequency=40.0)
+        self.assertEqual(h.row['label'], '12A @ 3 - 45 Hz')
+        self.assertAlmostEqual(h.limit, 0.00029 * 10 + 0.001, 12)                       # 290 uA/A + 1 mA (1 year, 95 %, 5560A printed p. 8)
+        E.configure()
+        p = next(q for q in E.POINTS if q['ref'] == 'T3-7 #14')
+        b = uncertainty_budget.build('ACI', 10.0, 'A', standard=std, frequency=40.0, scope=report_pdf.scope(), range_value=10.0)
+        self.assertEqual(b.hit.row['label'], '12A @ 3 - 45 Hz')
+        self.assertEqual(b.components[0].name, '5560A Calibrator')
+        self.assertNotEqual(report_pdf.point_uncertainty(p, '5560A'), '')
+        self.assertNotEqual(tartur_wiring.point_fields(p, '5560A')['TAR'], '')            # the 5522A has no spec at 40 Hz here: its TAR stays blank
+        self.assertEqual(tartur_wiring.point_fields(p, '5522A')['TAR'], '')
 
     def test_high_voltage_points_ask_first_and_a_refusal_stops_the_run(self):
         app = self.build()
@@ -595,7 +637,8 @@ class SourceGuards(unittest.TestCase):
     def test_launcher_and_manager_registration(self):
         launcher = (ROOT / 'Procedures' / 'Fluke_8808A_Verification.py').read_text(encoding='utf-8')
         self.assertIn('fluke8808a_verification.main()', launcher)
-        mgr = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
+        from tests._registry_text import manager_text            # the Manager finds procedures by scanning Procedures/*.procedure.json
+        mgr = manager_text()
         self.assertEqual(mgr.count('Fluke_8808A_Verification.py'), 3)
 
     def test_the_unit_of_work_is_exported(self):

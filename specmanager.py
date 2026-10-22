@@ -569,7 +569,8 @@ def export_data(standard_id, path=None):
 # ------------------------------------------------------------------------------------------------------------ lookup
 # Thermocouple simulation resolution (degC) where the manufacturer's document states it and the sheet's own degC rows carry none.  A value edited in the
 # Standards Specs manager (row 'resolution') always wins.  A model that is not listed has no TC resolution component (the budget says so in its notes).
-TC_RESOLUTION = {'5522A': (0.01, '5522A Operators Manual p. 1-17, Temperature Calibration (Thermocouple), note [2]: resolution is 0.01 degC')}
+TC_RESOLUTION = {'5522A': (0.01, '5522A Operators Manual p. 1-17, Temperature Calibration (Thermocouple), note [2]: resolution is 0.01 degC'),
+                 '5560A': (0.01, '5560A Product Specifications (Rev. 8, 6/26) printed p. 15, TC Specifications: resolution 0.01 degC')}
 
 DEFAULT_VARIANT = {   # preferred / excluded words in the function's bracket text, per kind (the person can pass variant= to override)
     'ACV': dict(prefer=('sinewave',), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated')),

@@ -1,0 +1,47 @@
+{
+ "schema": 1,
+ "id": "Fluke_87V",
+ "name": "Fluke 87V Guided Verification",
+ "manufacturer": "Fluke",
+ "model": "87 Series V",
+ "category": "Digital Multimeter",
+ "version": "53",
+ "order": 1,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_87V.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_87v_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_87V.py",
+   "handheld_dmm.py",
+   "hookups.py#fluke87v",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_87v_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke87v",
+  "diagram_prefixes": [
+   "hook_fluke87v"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_87V.py",
+  "Procedures/Fluke_87V.procedure.json",
+  "specs/fluke_87v_pv.json",
+  "tests/test_87v_points.py"
+ ]
+}

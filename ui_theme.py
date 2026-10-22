@@ -465,13 +465,17 @@ def dialog(parent, title, modal=True):
     return win
 
 
-def confirm_steps(parent, title, heading, steps, facts=None, caution=None, ok='OK', cancel='Cancel', image=None):
+def confirm_steps(parent, title, heading, steps, facts=None, caution=None, ok='OK', cancel='Cancel', image=None, layout=None, card=None):
     """Technician-friendly confirmation: heading, key facts, numbered steps, optional caution and picture.
 
     steps   - list of strings, or (bold lead, detail) tuples
     facts   - list of (label, value) shown in a compact card, e.g. [('Channel', 'CH1')]
     image   - optional path to a PNG hook-up diagram, shown beside the text
+    layout  - None (the numbered list below) or 'function_change': the point strip + stepper built from `card` (see `function_change_card`
+              in handheld_dmm.py); `heading`, `steps` and `facts` are then only what a caller / test harness sees and are not drawn
     Returns True when the OK button is pressed (Enter), False for Cancel / Esc / closing."""
+    if layout == 'function_change':
+        return _confirm_function_change(parent, title, card, ok=ok, cancel=cancel)
     win = dialog(parent, title)
     result = {'ok': False}
     win.resizable(False, False)
@@ -532,6 +536,139 @@ def confirm_steps(parent, title, heading, steps, facts=None, caution=None, ok='O
     okb = ttk.Button(bar, text=ok, style='Accent.TButton', command=lambda: finish(True))
     okb.pack(side='right')
     ttk.Button(bar, text=cancel, command=lambda: finish(False)).pack(side='right', padx=(0, 8))
+    win.bind('<Return>', lambda _e: finish(True))
+    win.protocol('WM_DELETE_WINDOW', lambda: finish(False))
+    center_on(win, parent.winfo_toplevel())
+    okb.focus_set()
+    win.wait_window()
+    return result['ok']
+
+
+FN_WIDTH = 540          # content width of the function-change window in 96-dpi units (the text wraps inside it)
+
+
+def _round_rect(cv, x0, y0, x1, y1, r, **kw):
+    pts = [x0 + r, y0, x1 - r, y0, x1, y0, x1, y0 + r, x1, y1 - r, x1, y1, x1 - r, y1, x0 + r, y1, x0, y1, x0, y1 - r, x0, y0 + r, x0, y0]
+    return cv.create_polygon(pts, smooth=True, **kw)
+
+
+def rounded_card(parent, width, build, fill=None, outline=None, outline_w=1, radius=10, pad=(14, 10), page=None):
+    """A rounded panel of fixed `width` (pixels) that grows downward to fit what `build(inner, wrap)` puts in it.  `inner` is a tk.Frame with
+    the panel colour; `wrap` is the text width that fits inside the padding.  Returns the Canvas (grid / pack it).  Colours default to the theme's
+    card / border tokens; `page` is the colour behind the panel (default the window background)."""
+    fill = fill or C['card']
+    outline = outline or C['border']
+    px_, py_ = px(pad[0]), px(pad[1])
+    cv = tk.Canvas(parent, background=page or C['bg'], highlightthickness=0, borderwidth=0, width=width, height=px(40))
+    inner = tk.Frame(cv, background=fill)
+    build(inner, width - 2 * px_)
+    inner.update_idletasks()
+    h = inner.winfo_reqheight() + 2 * py_
+    cv.configure(height=h)
+    _round_bordered(cv, width, h, px(radius), fill, outline, outline_w)
+    cv.create_window(px_, py_, window=inner, anchor='nw')
+    return cv
+
+
+def status_circle(parent, kind, background=None, size=22):
+    """A small round marker: kind 'done' = green circle with a drawn tick, anything else = an empty circle in the border colour."""
+    d = px(size)
+    cv = tk.Canvas(parent, background=background or C['bg'], highlightthickness=0, borderwidth=0, width=d, height=d)
+    r, m = d / 2 - 1.5, d / 2
+    if kind == 'done':
+        cv.create_oval(m - r, m - r, m + r, m + r, fill=C['good_dot'], outline=C['good_dot'])
+        cv.create_line(m - r * 0.45, m, m - r * 0.1, m + r * 0.35, m + r * 0.5, m - r * 0.35, fill=C['on_primary'], width=2, capstyle='round', joinstyle='round')
+    else:
+        cv.create_oval(m - r, m - r, m + r, m + r, outline=C['border_strong'], width=2)
+    return cv
+
+
+def _round_bordered(cv, w, h, r, fill, outline, bw=1):
+    """A rounded panel with a border, drawn as two filled shapes (a 1 px smoothed outline renders broken on some Tk builds)."""
+    _round_rect(cv, 0, 0, w, h, r, fill=outline, outline='')
+    _round_rect(cv, bw, bw, w - bw, h - bw, max(1, r - bw), fill=fill, outline='')
+
+
+def _function_strip(parent, card, width):
+    """The rounded point strip: the point number large in the accent colour, the test text bold, the meter line muted."""
+    pad, gap = px(14), px(16)
+    cv = tk.Canvas(parent, background=C['bg'], highlightthickness=0, borderwidth=0, width=width, height=px(50))
+    inner = tk.Frame(cv, background=C['bar'])
+    num = tk.Label(inner, text=f'{card["n"]} of {card["total"]}', background=C['bar'], foreground=C['primary'], font='CalH1')
+    num.grid(row=0, column=0, rowspan=2, sticky='nw', padx=(0, gap))
+    num.update_idletasks()
+    wrap = max(px(120), width - 2 * pad - num.winfo_reqwidth() - gap)
+    tk.Label(inner, text=card['test'], background=C['bar'], foreground=C['text'], font='CalBold', anchor='w', justify='left',
+             wraplength=wrap).grid(row=0, column=1, sticky='nw')
+    tk.Label(inner, text=card['meter_line'], background=C['bar'], foreground=C['muted'], anchor='w', justify='left',
+             wraplength=wrap).grid(row=1, column=1, sticky='nw')
+    inner.update_idletasks()
+    h = inner.winfo_reqheight() + 2 * px(10)
+    cv.configure(height=h)
+    _round_bordered(cv, width, h, px(10), C['bar'], C['border'])
+    cv.create_window(pad, px(10), window=inner, anchor='nw')
+    return cv
+
+
+def _function_step(parent, row, n, lead, detail, state, last, wrap):
+    """One stepper row: a circle (tick when `state` is 'done', else the number) joined to the next circle by a thin line, bold lead, muted detail."""
+    d = px(28)
+    cv = tk.Canvas(parent, background=C['bg'], highlightthickness=0, borderwidth=0, width=d + px(4), height=d)
+    cv.grid(row=row, column=0, sticky='ns', padx=(0, px(14)))
+    box = tk.Frame(parent, background=C['bg'])
+    box.grid(row=row, column=1, sticky='nw', pady=(0, 0 if last else px(14)))
+    tk.Label(box, text=lead, background=C['bg'], foreground=C['text'], font='CalBold', anchor='w', justify='left', wraplength=wrap).pack(anchor='w')
+    if detail:
+        tk.Label(box, text=detail, background=C['bg'], foreground=C['muted'], anchor='w', justify='left', wraplength=wrap).pack(anchor='w')
+
+    def draw(_e=None):
+        cv.delete('all')
+        h = cv.winfo_height()
+        cx, r = (d + px(4)) / 2, d / 2 - 1
+        if not last:
+            cv.create_line(cx, d, cx, h, fill=C['border_strong'], width=1)
+        if state == 'done':
+            cv.create_oval(cx - r, 1, cx + r, 1 + 2 * r, fill=C['good_dot'], outline=C['good_dot'])
+            m = 1 + r          # a drawn tick: no font is certain to have the check-mark glyph
+            cv.create_line(cx - r * 0.45, m, cx - r * 0.1, m + r * 0.35, cx + r * 0.5, m - r * 0.35, fill=C['on_primary'], width=2, capstyle='round', joinstyle='round')
+        else:
+            cv.create_oval(cx - r, 1, cx + r, 1 + 2 * r, outline=C['primary'], width=2)
+            cv.create_text(cx, 1 + r, text=str(n), fill=C['primary'], font='CalBold')
+    cv.bind('<Configure>', draw)
+    return cv
+
+
+def _confirm_function_change(parent, title, card, ok='OK', cancel='Cancel'):
+    """The 'Change the function' window (layout C): point strip on top, a three-step stepper below, Cancel / accent OK at the bottom right.
+    card: n, total, test, meter_line, steps = [(lead, detail, state)] with state 'done' (green tick: only when the calibrator is KNOWN to be in
+    standby) or 'todo'.  Enter = OK, Esc / closing = Cancel; the window is a fixed width, a grid, and grows downward to fit wrapped text."""
+    win = dialog(parent, title)
+    result = {'ok': False}
+    win.resizable(False, False)
+    outer = tk.Frame(win, background=C['bg'])
+    outer.pack(fill='both', expand=True, padx=px(22), pady=(px(18), px(16)))
+    outer.grid_columnconfigure(0, weight=1)
+    width = px(FN_WIDTH)
+    _function_strip(outer, card, width).grid(row=0, column=0, sticky='ew')
+    stepper = tk.Frame(outer, background=C['bg'])
+    stepper.grid(row=1, column=0, sticky='ew', pady=(px(20), 0))
+    stepper.grid_columnconfigure(1, weight=1)
+    steps = card['steps']
+    wrap = width - px(28) - px(14) - px(4)
+    for i, (lead, detail, state) in enumerate(steps):
+        _function_step(stepper, i, i + 1, lead, detail, state, i == len(steps) - 1, wrap)
+        if i < len(steps) - 1:
+            stepper.grid_rowconfigure(i, minsize=px(58))      # room for the joining line even when a step has no detail text
+    bar = tk.Frame(outer, background=C['bg'])
+    bar.grid(row=2, column=0, sticky='ew', pady=(px(22), 0))
+    bar.grid_columnconfigure(0, weight=1)
+
+    def finish(value):
+        result['ok'] = value
+        win.destroy()
+    okb = ttk.Button(bar, text=ok, style='Accent.TButton', command=lambda: finish(True))
+    okb.grid(row=0, column=2)
+    ttk.Button(bar, text=cancel, command=lambda: finish(False)).grid(row=0, column=1, padx=(0, 8))
     win.bind('<Return>', lambda _e: finish(True))
     win.protocol('WM_DELETE_WINDOW', lambda: finish(False))
     center_on(win, parent.winfo_toplevel())

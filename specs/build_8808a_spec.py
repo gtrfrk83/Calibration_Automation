@@ -256,13 +256,20 @@ STRUCT = {
     ('3-8', 5): dict(unit='kHz', why='the limits print "Hz" but are kHz (195.024 against a 195 kHz input)'),
     ('3-8', 6): dict(unit='kHz', why='the limits print "Hz" but are kHz (1000.14 against a 1000 kHz input)'),
 }
-# points the calibrators cannot make (name -> reason): the procedure asks for another standard instead (manual source)
+# points the calibrators cannot make (name -> reason, per calibrator): the procedure asks for another standard instead.
+# A calibrator that is not listed for a point CAN make it and drives it.  5522A: Operators Manual (R0) Detailed Specifications.
+# 5560A: Product Specifications (Rev. 8, 6/26), read from the rendered page images (PDF pp. 4-5 = printed pp. 3-4, ACV; PDF p. 9 = printed p. 8, ACI).
+_5522A_HV = '5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier.'
+_5560A_HV = ('5560A: the 1020 V range (above 330 V, so 750 V) is specified 3 Hz to 10 kHz only; the 330 V range stops at 100 kHz (5560A Product Specifications, ACV Specifications, '
+             'printed p. 4). The manual uses a 5725A amplifier.')
 CAL_LIMITS = {
-    ('3-3', 26): '5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier.',
-    ('3-3', 27): '5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier.',
-    ('3-3', 28): '5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier.',
-    ('3-7', 14): '5522A: 3 A to 10.9999 A ac is specified 45 Hz to 5 kHz only (5522A Operators Manual, Detailed Specifications, AC current, printed p. 1-14); this point is at 40 Hz.',
-    ('3-8', 6): '5522A: the ac voltage output stops at 500 kHz (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12); this point is at 1000 kHz. The manual uses a Fluke 271 function generator.',
+    ('3-3', 26): {'5522A': _5522A_HV, '5560A': _5560A_HV},
+    ('3-3', 27): {'5522A': _5522A_HV, '5560A': _5560A_HV},
+    ('3-3', 28): {'5522A': _5522A_HV, '5560A': _5560A_HV},
+    # 10 A ac at 40 Hz: the 5560A CAN make it (12 A range, 3 Hz to 45 Hz, 5560A Product Specifications, ACI Specifications, printed p. 8), so only the 5522A is listed
+    ('3-7', 14): {'5522A': '5522A: 3 A to 10.9999 A ac is specified 45 Hz to 5 kHz only (5522A Operators Manual, Detailed Specifications, AC current, printed p. 1-14); this point is at 40 Hz.'},
+    ('3-8', 6): {'5522A': '5522A: the ac voltage output stops at 500 kHz (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12); this point is at 1000 kHz. The manual uses a Fluke 271 function generator.',
+                 '5560A': '5560A: the ac voltage output stops at 500 kHz (5560A Product Specifications, ACV Specifications, printed pp. 3-4); this point is at 1000 kHz. The manual uses a Fluke 271 function generator.'},
 }
 
 
@@ -395,7 +402,7 @@ def build_points():
                 point['printed_limits'] = printed_limits
                 point['flags'] = flags
             if key in CAL_LIMITS:
-                point['cal_limits'] = {'5522A': CAL_LIMITS[key]}
+                point['cal_limits'] = dict(CAL_LIMITS[key])
             points.append(point)
             point['_zero'] = is_zero
     for key in CORR:
@@ -468,7 +475,7 @@ def build_spec():
             note=(f'Tables 3-2 to 3-8, {total} points: DC volts 17, AC volts 28, 4-wire ohms 6, 2-wire ohms 14, DC current 18, AC current 16, frequency 6 (the zero-offset points of each '
                   'table are run first, with the input shorted or, for current, open). Limits are the printed 90-day or 1-year limits; several typographical errors in the printed tables '
                   'were corrected from the specification formula (see the point details). The manual names a Fluke 5700A with a 5725A amplifier and a Fluke 271 function generator; this '
-                  'procedure drives a Fluke 5522A or 5560A. Points the selected calibrator cannot make (750 V ac above 10 kHz, 10 A ac at 40 Hz, 1000 kHz) are measured with a standard '
+                  'procedure drives a Fluke 5522A or 5560A. Points the selected calibrator cannot make (5522A: 750 V ac above 10 kHz, 10 A ac at 40 Hz, 1000 kHz; 5560A: 750 V ac above 10 kHz, 1000 kHz) are measured with a standard '
                   'you connect. The meter must be warmed up for half an hour; the specification is valid in the 5-1/2 digit (slow) rate only.')),
         models={MODEL: dict(name='Fluke 8808A', brand='Fluke', model_note='Fluke 8808A 5-1/2 digit bench multimeter, RS-232 only (no IEEE-488, no USB)')},
         sections=sections)

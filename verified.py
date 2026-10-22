@@ -20,7 +20,11 @@ Running a locked procedure is not affected, and changes that were saved before t
 
 'Changed since verification': at verification time a fingerprint of the procedure's definition is stored: the program files it runs (its
 launcher, engine and drivers), its test point / limit file(s) (user-built: the runnable spec) and the saved procedure changes (overrides) for its
-model.  Text files are compared without regard to line endings, JSON without regard to layout.  The suite never blocks an update.  A verified
+model.  WHICH files are declared by the procedure itself (the `fingerprint` block of Procedures/<id>.procedure.json, see procscan.py), so a
+procedure is only affected by the files it really depends on: a shared spec counts only the part its own model uses ('specs/x.json#117'), and
+hookups.py only the data of its own meter ('hookups.py#fluke110').  A record taken before this (it stored whole files) is compared file by file
+on what the procedure declares today, so nothing is unlocked by a file the procedure no longer lists.
+Text files are compared without regard to line endings, JSON without regard to layout.  The suite never blocks an update.  A verified
 procedure whose fingerprint no longer matches is NOT locked: the first time it is looked at (the Procedures list, or an editor asking whether it is
 locked) one auto-unlock event is recorded (who 'system', reason 'files changed since verification: <files>') and the list shows 'Changed since
 verification - needs hardware re-verification' until someone presses 'Mark verified on hardware' again.  The fingerprint is only computed
@@ -32,14 +36,18 @@ an explicit path (tests) is never seeded.  The baseline fingerprint of a seeded 
 """
 from __future__ import annotations
 
+import ast
 import getpass
 import hashlib
 import json
 import sqlite3
+from collections.abc import Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
+
+import procscan
 
 HERE = Path(__file__).resolve().parent
 DS_PREFIX = 'ds:'
@@ -77,67 +85,41 @@ SEED_DATE = '2026-10-22'
 SEED_NOTE = ('Recorded on 2026-10-22 from the lab owner\'s statement that this procedure ran flawlessly on the actual hardware. '
              'The date of the hardware run, the instrument and the calibrator were not entered. The fingerprint was taken from the files '
              'installed when this was first recorded.')
-SEED = (
-    dict(proc_key='Tektronix_TDS2000C_Verification.py', name='Tektronix TDS2000C / TDS1000C-EDU Performance Verification',
-         model='TDS2000C/TDS1000C-EDU'),
-    dict(proc_key='WaveSurfer_WS4104HD.py', name='WaveSurfer WS4104HD Verification', model='WS4104HD'),
-    dict(proc_key='Fluke_117_Verification.py', name='Fluke 117 Performance Verification', model='117'),
-)
-
-# ------------------------------------------------------------------------------------------------------------ what a procedure is made of
-_COMMON = ['drivers/base.py', 'drivers/transport.py']
+# The seeded list is derived from the procedures' own metadata (`"seed_verified": true` in Procedures/<id>.procedure.json); tests/test_procscan.py
+# pins it to the three procedures the lab owner attested (TDS2000C, WaveSurfer, Fluke 117).  A package can never carry that flag (packages.py refuses it).
+SEED = procscan.seed_list(procscan.procs(HERE))
 
 
-def _files(launcher, engine, drivers, specs=()):
-    return {'code': [f'Procedures/{launcher}'] + list(engine) + _COMMON + [f'drivers/{d}.py' for d in drivers],
-            'spec': [f'specs/{s}' for s in specs]}
+class _FilesView(Mapping):
+    """verified.FILES: {launcher file: {'code': [paths], 'spec': [paths]}} as declared by each procedure's metadata (the '#part' of a slice label is
+    dropped here: these are the FILES a procedure depends on).  Read-only; always the current sidecars."""
+
+    @staticmethod
+    def _plain(labels):
+        out = []
+        for label in labels:
+            path = procscan.split_label(label)[0]
+            if path not in out:
+                out.append(path)
+        return out
+
+    def _one(self, proc):
+        return {'code': self._plain(proc.fingerprint_code), 'spec': self._plain(proc.fingerprint_spec)}
+
+    def __getitem__(self, key):
+        proc = procscan.find(key, HERE)
+        if proc is None or proc.launcher_name != key:
+            raise KeyError(key)
+        return self._one(proc)
+
+    def __iter__(self):
+        return iter([p.launcher_name for p in procscan.procs(HERE)])
+
+    def __len__(self):
+        return len(procscan.procs(HERE))
 
 
-_HH = ['handheld_dmm.py', 'hookups.py']
-_TV = ['truevolt_verification.py', 'procspec.py']
-_DQ = ['dacq_verification.py', 'procspec.py']
-_FG = ['fgen_verification.py']
-FILES = {
-    'WaveSurfer_WS4104HD.py': _files('WaveSurfer_WS4104HD.py', [], ['lecroy_ws4104hd', 'fluke_5560a']),
-    'Fluke_87V.py': _files('Fluke_87V.py', _HH, ['fluke_5560a'], ['fluke_87v_pv.json']),
-    'Agilent_34401A.py': _files('Agilent_34401A.py', [], ['scpi_dmm', 'fluke_5560a']),
-    'Fluke_8846A_Verification.py': _files('Fluke_8846A_Verification.py', [], ['scpi_dmm', 'fluke_5560a']),
-    'Fluke_8846A_Adjustment.py': _files('Fluke_8846A_Adjustment.py', [], ['scpi_dmm']),
-    'Fluke_8808A_Verification.py': _files('Fluke_8808A_Verification.py', ['fluke8808a_verification.py', 'procspec.py'], ['fluke_8808a', 'fluke_5560a'],
-                                          ['fluke_8808a_pv.json']),
-    'Keysight_34465A_Verification.py': _files('Keysight_34465A_Verification.py', _TV, ['keysight_truevolt', 'fluke_5560a'], ['keysight_34465a_pv.json']),
-    'Keysight_34460A_Verification.py': _files('Keysight_34460A_Verification.py', _TV, ['keysight_truevolt', 'fluke_5560a'], ['keysight_34460a_pv.json']),
-    'Keysight_34461A_Verification.py': _files('Keysight_34461A_Verification.py', _TV, ['keysight_truevolt', 'fluke_5560a'], ['keysight_34461a_pv.json']),
-    'Keysight_34470A_Verification.py': _files('Keysight_34470A_Verification.py', _TV, ['keysight_truevolt', 'fluke_5560a'], ['keysight_34470a_pv.json']),
-    'Keysight_34970A_Verification.py': _files('Keysight_34970A_Verification.py', _DQ, ['keysight_dacq', 'fluke_5560a'], ['keysight_34970a_pv.json']),
-    'Keysight_34972A_Verification.py': _files('Keysight_34972A_Verification.py', _DQ, ['keysight_dacq', 'fluke_5560a'], ['keysight_34972a_pv.json']),
-    'Tektronix_MDO4000C_Verification.py': _files('Tektronix_MDO4000C_Verification.py', ['mdo4000c_verification.py'],
-                                                 ['tektronix_mdo4000c', 'fluke_5560a', 'reference_instruments'],
-                                                 ['tektronix_mdo4000c_pv.json', 'mdo4000c_reference_cmc.json']),
-    'Tektronix_TDS2000C_Verification.py': _files('Tektronix_TDS2000C_Verification.py', ['tds2000c_verification.py'],
-                                                 ['tektronix_tds2000c', 'fluke_5522a_scope', 'fluke_5560a'], ['tektronix_tds2000c_pv.json']),
-    'Fluke_110_Verification.py': _files('Fluke_110_Verification.py', _HH, ['fluke_5560a'], ['fluke_110_series_pv.json']),
-    'Fluke_113_Verification.py': _files('Fluke_113_Verification.py', _HH, ['fluke_5560a'], ['fluke_110_series_pv.json']),
-    'Fluke_114_Verification.py': _files('Fluke_114_Verification.py', _HH, ['fluke_5560a'], ['fluke_110_series_pv.json']),
-    'Fluke_115_Verification.py': _files('Fluke_115_Verification.py', _HH, ['fluke_5560a'], ['fluke_110_series_pv.json']),
-    'Fluke_116_Verification.py': _files('Fluke_116_Verification.py', _HH, ['fluke_5560a'], ['fluke_110_series_pv.json']),
-    'Fluke_117_Verification.py': _files('Fluke_117_Verification.py', _HH, ['fluke_5560a'], ['fluke_110_series_pv.json']),
-    'Klein_MM325_Verification.py': _files('Klein_MM325_Verification.py', _HH, ['fluke_5560a'], ['klein_mm325_pv.json']),
-    'Keysight_33210A_Verification.py': _files('Keysight_33210A_Verification.py', _FG,
-                                              ['keysight_332xx', 'fluke_5790b', 'keysight_5313x', 'reference_instruments'], ['keysight_33210a_pv.json']),
-    'Agilent_33220A_Verification.py': _files('Agilent_33220A_Verification.py', _FG,
-                                             ['keysight_332xx', 'fluke_5790b', 'keysight_5313x', 'reference_instruments'], ['keysight_33220a_pv.json']),
-    'Agilent_33250A_Verification.py': _files('Agilent_33250A_Verification.py', _FG,
-                                             ['keysight_332xx', 'fluke_5790b', 'keysight_5313x', 'reference_instruments'], ['keysight_33250a_pv.json']),
-    'Fluke_287_Verification.py': _files('Fluke_287_Verification.py', _HH, ['fluke_5560a', 'fluke_28x'], ['fluke_287_289_pv.json']),
-    'Fluke_289_Verification.py': _files('Fluke_289_Verification.py', _HH, ['fluke_5560a', 'fluke_28x'], ['fluke_287_289_pv.json']),
-    'Fluke_77IV_Verification.py': _files('Fluke_77IV_Verification.py', _HH, ['fluke_5560a'], ['fluke_77iv_pv.json']),
-    'Fluke_175_Verification.py': _files('Fluke_175_Verification.py', _HH, ['fluke_5560a'], ['fluke_170_series_pv.json']),
-    'Fluke_177_Verification.py': _files('Fluke_177_Verification.py', _HH, ['fluke_5560a'], ['fluke_170_series_pv.json']),
-    'Fluke_179_Verification.py': _files('Fluke_179_Verification.py', _HH, ['fluke_5560a'], ['fluke_170_series_pv.json']),
-    'Keithley_2000_Verification.py': _files('Keithley_2000_Verification.py', ['keithley2000_verification.py', 'procspec.py'], ['keithley_2000', 'fluke_5560a'], ['keithley_2000_pv.json']),
-    'Agilent_34410A_Verification.py': _files('Agilent_34410A_Verification.py', ['agilent34410a_verification.py', 'procspec.py'], ['keysight_34410a', 'fluke_5560a'], ['keysight_34410a_pv.json']),
-}
+FILES = _FilesView()
 USER_CODE = ['Procedures/User_Datasheet.py', 'dsb_runtime.py']      # a user-built procedure: its runnable spec is the rest of its definition
 
 
@@ -154,19 +136,99 @@ def _sha(text) -> str:
     return hashlib.sha256(text if isinstance(text, bytes) else text.encode('utf-8')).hexdigest()
 
 
-def _file_digest(path) -> str:
-    """Fingerprint of one file: JSON by content (layout does not matter), anything else with line endings normalised; 'MISSING' when absent."""
-    p = Path(path)
+def _read(path):
     try:
-        raw = p.read_bytes()
+        return Path(path).read_bytes()
     except OSError:
+        return None
+
+
+def digest_bytes(raw, name) -> str:
+    """Fingerprint of one file's content: JSON by content (layout does not matter), anything else with line endings normalised; 'MISSING' for None."""
+    if raw is None:
         return 'MISSING'
-    if p.suffix.lower() == '.json':
+    if str(name).lower().endswith('.json'):
         try:
             return _sha(_canon(json.loads(raw.decode('utf-8-sig'))))
         except ValueError:
             pass
     return _sha(raw.replace(b'\r\n', b'\n'))
+
+
+def _file_digest(path) -> str:
+    """Fingerprint of one file; 'MISSING' when absent."""
+    return digest_bytes(_read(path), Path(path).name)
+
+
+def _spec_slice(doc, part):
+    """The part of a shared multi-model spec that model `part` uses: its `models` entry and the `steps` that list it (everything else, such as
+    options and groups, is common to the models and stays)."""
+    if not isinstance(doc, dict):
+        return doc
+    out = dict(doc)
+    if isinstance(doc.get('models'), dict):
+        out['models'] = {k: v for k, v in doc['models'].items() if k == part}
+    if isinstance(doc.get('steps'), list):
+        out['steps'] = [st for st in doc['steps'] if not isinstance(st, dict) or part in (st.get('models') or [])]
+    return out
+
+
+_HOOKUP_TABLES = ('METERS', 'AVAILABLE', 'EXTRA')
+
+
+def _literal(node):
+    """ast.literal_eval that also understands dict(key=value, ...) calls (hookups.py writes its tables that way)."""
+    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'dict' and not node.args:
+        return {kw.arg: _literal(kw.value) for kw in node.keywords if kw.arg}
+    if isinstance(node, ast.Dict):
+        return {_literal(k): _literal(v) for k, v in zip(node.keys, node.values)}
+    if isinstance(node, (ast.Tuple, ast.List)):
+        return tuple(_literal(e) for e in node.elts)
+    return ast.literal_eval(node)
+
+
+def _hookups_slice_digest(raw: bytes, meter: str) -> str:
+    """hookups.py as one meter family sees it: the code and the shared tables as they are, but of the per-meter tables (METERS, AVAILABLE, EXTRA)
+    only the entries of `meter`.  Editing another meter's jacks or cautions does not change this."""
+    text = raw.decode('utf-8-sig', errors='replace').replace('\r\n', '\n')
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return _sha(raw.replace(b'\r\n', b'\n'))
+    lines = text.split('\n')
+    drop, tables = set(), {}
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) and node.targets[0].id in _HOOKUP_TABLES:
+            drop.update(range(node.lineno - 1, node.end_lineno))
+            try:
+                tables[node.targets[0].id] = _literal(node.value)
+            except (ValueError, TypeError):
+                return _sha(raw.replace(b'\r\n', b'\n'))
+    rest = '\n'.join(ln for i, ln in enumerate(lines) if i not in drop)
+    extra = sorted(([k[1], v] for k, v in (tables.get('EXTRA') or {}).items() if k[0] == meter), key=lambda kv: kv[0])
+    return _sha(_canon({'rest': _sha(rest), 'meter': (tables.get('METERS') or {}).get(meter), 'groups': (tables.get('AVAILABLE') or {}).get(meter),
+                        'extra': extra}))
+
+
+def label_digest_bytes(label, raw) -> str:
+    """Digest of a fingerprint label from the file's content (None = absent): 'a/b.py' (the whole file), 'specs/x.json#117' (the slice for model 117),
+    'hookups.py#fluke110' (that meter family's view of hookups.py)."""
+    rel, part = procscan.split_label(label)
+    name = rel.rsplit('/', 1)[-1]
+    if not part or raw is None:
+        return digest_bytes(raw, name)
+    if name.lower().endswith('.json'):
+        try:
+            return _sha(_canon(_spec_slice(json.loads(raw.decode('utf-8-sig')), part)))
+        except ValueError:
+            return digest_bytes(raw, name)
+    if name == 'hookups.py':
+        return _hookups_slice_digest(raw, part)
+    return digest_bytes(raw, name)
+
+
+def label_digest(path, label) -> str:
+    return label_digest_bytes(label, _read(path))
 
 
 def _now_text(now) -> str:
@@ -518,6 +580,21 @@ class Registry:
             return {}
         return {f'{k}:{t}@{s}' + (f':{a}' if a else ''): _sha(v or '') for k, t, s, a, v in rows}
 
+    def file_components(self, proc, read=None):
+        """({label: digest} for the procedure's declared program files, the same for its test point / limit files).  `read(relative path)` -> bytes or
+        None supplies the content (default: the files installed under this registry's base); the package importer passes a reader that sees the
+        package's files first, to work out the fingerprint a procedure WILL have."""
+        read = read or (lambda rel: _read(self.base / rel))
+        return ({label: label_digest_bytes(label, read(procscan.split_label(label)[0])) for label in proc.fingerprint_code},
+                {label: label_digest_bytes(label, read(procscan.split_label(label)[0])) for label in proc.fingerprint_spec})
+
+    def override_digests(self, model) -> dict:
+        try:
+            with self._db() as c:
+                return self._override_component(c, model)
+        except sqlite3.Error:
+            return {}
+
     def definition(self, entry: Entry, con=None) -> dict:
         """{'code': {file: digest}, 'spec': {file: digest}, 'overrides': {item: digest}} for the files installed now."""
         base = self.base
@@ -527,11 +604,8 @@ class Registry:
                 code[rel] = _file_digest(base / rel)
             if entry.spec_path:
                 spec['user spec'] = _file_digest(entry.spec_path)
-        elif entry.proc_key in FILES:
-            for rel in FILES[entry.proc_key]['code']:
-                code[rel] = _file_digest(base / rel)
-            for rel in FILES[entry.proc_key]['spec']:
-                spec[rel] = _file_digest(base / rel)
+        elif procscan.find(entry.proc_key, base) is not None:
+            code, spec = self.file_components(procscan.find(entry.proc_key, base))
         elif entry.script:
             code[Path(entry.script).name] = _file_digest(entry.script)
         if con is not None:
@@ -548,15 +622,41 @@ class Registry:
     def definition_hash(components) -> str:
         return _sha(_canon(components))
 
+    def changes_since(self, rec: Record, comps: dict) -> list:
+        """What differs between the definition that was verified (`rec`) and `comps` (the definition now): [] = nothing that matters.
+        Only the files the procedure declares today are compared, so a file it no longer lists, or an entry of a record that no other
+        procedure's edit can reach, never counts.  A record taken before slices existed (it holds the whole spec / hookups.py) is compared
+        on the whole file."""
+        if self.definition_hash(comps) == rec.hash:
+            return []
+        old, out = rec.components or {}, []
+        names = {'code': 'program file', 'spec': 'test points / limits file'}
+        for group in ('code', 'spec'):
+            a, b = old.get(group) or {}, comps.get(group) or {}
+            for label, digest in sorted(b.items()):
+                if label in a:
+                    if a[label] != digest:
+                        out.append(f'{names[group]}: {label}')
+                    continue
+                rel, part = procscan.split_label(label)
+                if part and rel in a:
+                    if a[rel] != _file_digest(self.base / rel):
+                        out.append(f'{names[group]}: {rel}')
+                else:
+                    out.append(f'{names[group]}: {label} (new)')
+        a, b = old.get('overrides') or {}, comps.get('overrides') or {}
+        for label in sorted(set(a) | set(b)):
+            if a.get(label) != b.get(label):
+                out.append(f'saved procedure change: {label}' + (' (new)' if label not in a else ' (removed)' if label not in b else ''))
+        return out
+
     # ---- status
     def _status(self, rec: Record | None, entry: Entry, con=None) -> Status:
         if rec is None:
             return Status('none')
         comps = self.definition(entry, con)
-        changed = rec.unreadable is False and self.definition_hash(comps) != rec.hash
-        changes = describe_changes(rec.components, comps) if changed else []
-        if changed and not changes:
-            changes = ['the definition differs']
+        changes = [] if rec.unreadable else self.changes_since(rec, comps)
+        changed = bool(changes)
         kind = 'changed' if changed else ('verified' if rec.locked else 'unlocked')
         return Status(kind, rec, changes, changed)
 
@@ -571,9 +671,9 @@ class Registry:
         if rec is None or not rec.locked or rec.unreadable:
             return rec
         comps = self.definition(entry)
-        if self.definition_hash(comps) == rec.hash:
+        changes = self.changes_since(rec, comps)
+        if not changes:
             return rec
-        changes = describe_changes(rec.components, comps) or ['the definition differs']
         try:
             with self._db() as con:
                 con.execute('BEGIN IMMEDIATE')
@@ -626,7 +726,7 @@ class Registry:
                 rec = self._fold(self._events(con)).get(entry.proc_key.casefold())
                 comps = self.definition(entry, con)
                 h = self.definition_hash(comps)
-                if rec is not None and rec.locked and rec.hash == h:
+                if rec is not None and rec.locked and not self.changes_since(rec, comps):
                     raise VerifyError('It is already verified and locked, and nothing has changed since. To change it, unlock it first.')
                 self._insert(con, entry.proc_key, 'verify', clean['who'], on_date=clean['on_date'], note=clean['note'], hardware=clean['hardware'],
                              name=entry.name, model=entry.model, hash=h, components=comps)
@@ -664,7 +764,7 @@ class Registry:
                     raise VerifyError('This procedure has not been marked as verified.')
                 if rec.locked:
                     raise VerifyError('It is already locked.')
-                if self.definition_hash(self.definition(entry, con)) != rec.hash:
+                if self.changes_since(rec, self.definition(entry, con)):
                     raise VerifyError('Something has changed since it was verified, so it cannot simply be locked again. Mark it verified again on the hardware.')
                 self._insert(con, rec.proc_key, 'relock', who, name=rec.name, model=rec.model)
         except sqlite3.Error as ex:

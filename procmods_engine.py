@@ -99,12 +99,11 @@ for _key, _default, _what in (('zero', 2.0, 'settle before a zero-offset reading
                               ('ohm_high', 4.0, 'settle, resistance ranges of 10 Mohm and above')):
     _t('f8808a', 'settle.' + _key, _default, 0.2, 120.0, f'8808A: {_what}')
 _t('k2000', 'settle.default', 2.0, 0.2, 120.0, 'Keithley 2000: settle, DC volts and other points')
-_t('k2000', 'settle.ac', 6.0, 0.2, 120.0, 'Keithley 2000: settle, AC volts and AC current')
+_t('k2000', 'settle.ac', 20.0, 0.2, 120.0, 'Keithley 2000: settle, AC volts and AC current (3 Hz detector bandwidth; UNVERIFIED estimate)')
 _t('k2000', 'settle.dci', 3.0, 0.2, 120.0, 'Keithley 2000: settle, DC current')
 _t('k2000', 'settle.ohm', 3.0, 0.2, 120.0, 'Keithley 2000: settle, resistance below 10 Mohm')
 _t('k2000', 'settle.ohm_high', 5.0, 0.2, 120.0, 'Keithley 2000: settle, resistance of 10 Mohm and above')
 _t('k2000', 'settle.rel_zero', 5.0, 0.2, 120.0, 'Keithley 2000: settle at 0 mV before the DC volts REL zero')
-_t('k2000', 'settle.manual', 2.0, 0.2, 120.0, 'Keithley 2000: settle, 700 V source set by the technician')
 for _key, _default, _what in (('zero', 1.5, 'settle before a zero-offset reading'), ('default', 2.0, 'settle, DC volts and resistance points'),
                               ('ac', 9.0, 'settle, AC volts and AC current'), ('freq', 3.0, 'settle, frequency points'), ('dci', 3.0, 'settle, DC current'),
                               ('ohm_high', 4.0, 'settle, resistance ranges of 10 Mohm and above'), ('manual', 2.0, 'settle, capacitance standard connected by the technician')):
