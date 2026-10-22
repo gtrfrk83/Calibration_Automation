@@ -65,6 +65,7 @@ def install():
             setattr(mods['tkinter'], n.split('.')[1], m)
     t = mods['tkinter']
     t._cal_stub = True
+    t.TclError = type('TclError', (Exception,), {})              # a real exception class, so `except tk.TclError` works
     for v in ('StringVar', 'IntVar', 'BooleanVar', 'DoubleVar'):
         setattr(t, v, _Var)
     mb = mods['tkinter.messagebox']

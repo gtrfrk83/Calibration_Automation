@@ -122,4 +122,5 @@ User-built datasheets (Datasheet Builder; NOT stored in this folder)
                                standard measures), point_id (= step id), range_id, unit, engine_ready, stimulus{nominal, frequency, amplitude, settings},
                                limit{nominal, low, high, minus, plus, source, one_sided, periods{id:{low,high}}}, assignment{standard, mode, ...}
   Values inside 'dsb' are SI base units as exact decimal strings; low / high / nominal / factor / applied of the step itself follow the handheld convention above.
+  A point may carry its own 'spec' (one SpecEntry; the grid editor writes it) inside dsb.datasheet.functions[].points[]; it governs that point instead of the function table. Optional, additive.
   Points the stock handheld engine cannot drive (scope bandwidth / time base / trigger, generator functions) are exported as hand-set points (kind NONE or VISUAL, group NONE).

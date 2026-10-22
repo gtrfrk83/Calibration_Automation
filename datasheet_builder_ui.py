@@ -4,10 +4,11 @@
     panel = dsb_ui.DatasheetBuilderPanel(parent_frame, on_saved=callback)       # the Manager's 'Datasheet Builder' tab
     panel.refresh()                                                             # when the tab is shown
 
-The tab lists the user datasheets (New / Open / Duplicate / Delete + Restore / Export JSON / Import JSON / Version history).  Opening one shows the
-editor window, a guided flow: Header -> Functions -> Ranges -> Specification -> Test points -> Automation -> Review & Save.  Every step shows the
-validation messages (error / warning, with the location) that belong to it; double-click a message to jump to the place.  Anyone can use it (there
-is no developer-mode lock).  Display-only SI scaling: the model formats values, the datasheet keeps SI.
+The tab lists the user datasheets (New / Open / Duplicate / Delete + Restore / Export JSON / Import JSON / Version history).  Opening one shows
+the grid editor window: a spreadsheet-like sheet (one row per test point) with an Edit Cell bar above it, the spec boxes (Select Spec Types, Calc / Recalc)
+below it and a tool column at the right.  The older detail pages (Ranges, Specification table, Sections, Details, Standards and automation) open from the
+More menu.  Messages (error / warning, with the row) show under the sheet and in the Warnings list.  Anyone can use it (there is no developer-mode lock).
+Display-only SI scaling: the model formats values, the datasheet keeps SI.
 
 NOTE: these widgets were written without a display.  They have been imported and constructed under tests/_tk_stub.py only (every class constructs
 and every handler runs); the windows have NEVER been looked at on a real screen, so layout, wrapping, sizes and colours are unchecked.
@@ -119,35 +120,6 @@ class Form(ttk.Frame):
         if self.col:
             self.col, self.row = 0, self.row + 1
 
-
-# ------------------------------------------------------------------------------------------------------------------------------ step bar
-class StepBar(ttk.Frame):
-    """The numbered flow indicator.  Clicking a step goes there (greyed out when it needs something first)."""
-
-    KIND = {'current': 'Info', 'done': 'Good', 'warn': 'Neutral', 'error': 'Neutral', 'todo': 'Neutral'}
-
-    def __init__(self, parent, model, command):
-        super().__init__(parent)
-        self.model, self.command = model, command
-        self.labels = []
-        self.tips = [st['help'] for st in M.STEPS]
-        for i, st in enumerate(M.STEPS):
-            if i:
-                ttk.Label(self, text='›', style='Muted.TLabel').pack(side='left', padx=4)
-            lab = ttk.Label(self, text=f'{i + 1}  {st["title"]}', style='PillNeutral.TLabel', cursor='hand2')
-            lab.pack(side='left')
-            lab.bind('<Button-1>', lambda _e, k=i: self.command(k))
-            ui.Tooltip(lab, lambda k=i: self.tips[k])
-            self.labels.append(lab)
-        self.update_states()
-
-    def update_states(self):
-        for lab, s in zip(self.labels, self.model.step_states()):
-            mark = {'done': '✔  ', 'error': '✖  ', 'warn': '!  '}.get(s['state'], '')
-            count = f'  ({s["errors"]})' if s['errors'] else ''
-            lab.configure(text=f'{mark}{s["index"] + 1}  {s["title"]}{count}' if mark else f'{s["index"] + 1}  {s["title"]}{count}',
-                          style=f'Pill{self.KIND[s["state"]]}.TLabel')
-            self.tips[s['index']] = s['why_not'] or M.STEPS[s['index']]['help']
 
 
 # ------------------------------------------------------------------------------------------------------------------------------ pages
@@ -461,7 +433,7 @@ class RangesPage(Page):
         rows = self.model.range_rows(self.fbar.fid)
         fill(self.table, rows, 'id', ('text', 'resolution', 'max_input', 'display_unit', 'points', 'spec'))
         fn = self.model.fn(self.fbar.fid)
-        self.hint.configure(text=f'Type values with their unit, for example {M.show(M.db.D(10), fn.unit)} or {M.show(M.db.D("0.1"), fn.unit)}.' if fn else 'Add a function first (step 2).')
+        self.hint.configure(text=f'Type values with their unit, for example {M.show(M.db.D(10), fn.unit)} or {M.show(M.db.D("0.1"), fn.unit)}.' if fn else 'Add a section first (More > Sections and function settings).')
 
     def picked(self):
         s = selected(self.table)
@@ -707,161 +679,6 @@ def db_modes():
     return M.db.MODES
 
 
-class PointsPage(Page):
-    def __init__(self, parent, win):
-        super().__init__(parent, win)
-        self.intro(M.S_POINTS)
-        top = ttk.Frame(self)
-        top.pack(fill='x')
-        self.fbar = FunctionBar(top, win, command=self.reload)
-        self.fbar.pack(side='left')
-        ttk.Label(top, text='   Show limits for:').pack(side='left')
-        self.period_var = tk.StringVar()
-        self.period_box = ttk.Combobox(top, textvariable=self.period_var, state='readonly', width=14)
-        self.period_box.pack(side='left', padx=6)
-        self.period_box.bind('<<ComboboxSelected>>', lambda _e: self.period_picked())
-        self.only_problems = tk.BooleanVar(value=False)
-        ttk.Checkbutton(top, text='Only points with problems', variable=self.only_problems, command=self.reload).pack(side='left', padx=12)
-        ttk.Label(self, text='How the points are worked out (rules)', style='Section.TLabel').pack(anchor='w', pady=(8, 2))
-        self.rules = ui.make_table(self, ('label', 'text', 'points', 'on'), ('Rule', 'What it makes', 'Points', 'On'), (170, 560, 70, 50), anchors={'label': 'w', 'text': 'w'},
-                                   height=3, zebra=True, pack=False, stretch={'points': False, 'on': False})
-        self.rules.master.pack(fill='x')
-        bar, _ = row_buttons(self, ('Add rule...', self.add_rule, 'Accent.TButton'), ('Change rule...', self.edit_rule), ('Switch rule on/off', self.toggle_rule),
-                             ('Remove rule', self.remove_rule, 'Danger.TButton'), ('Recalculate points', self.recalculate))
-        bar.pack(fill='x', pady=(6, 6))
-        ttk.Label(self, text='Test points and their limits', style='Section.TLabel').pack(anchor='w', pady=(4, 2))
-        cols = ('nominal', 'frequency', 'amplitude', 'range', 'low', 'high', 'source', 'origin', 'on')
-        self.table = ui.make_table(self, cols, ('Nominal', 'Frequency', 'Level', 'Range', 'Low limit', 'High limit', 'Limits from', 'Made by', 'On'), (110, 90, 80, 90, 120, 120, 90, 80, 40),
-                                   anchors={'nominal': 'e', 'low': 'e', 'high': 'e'}, height=10, pack=False, stretch={'on': False})
-        self.table.master.pack(fill='both', expand=True)
-        self.table.bind('<<TreeviewSelect>>', lambda _e: self.picked())
-        self.table.bind('<Double-1>', lambda _e: self.edit_point())
-        self.detail = tk.StringVar(value='Select a point to see its accept text.')
-        ttk.Label(self, textvariable=self.detail, style='Muted.TLabel', wraplength=ui.px(900), justify='left').pack(anchor='w', pady=(4, 0))
-        bar2, _ = row_buttons(self, ('Add point...', self.add_point), ('Edit point...', self.edit_point), ('Typed limits...', self.override), ('Switch point on/off', self.toggle_point),
-                              ('Remove point', self.remove_point, 'Danger.TButton'))
-        bar2.pack(fill='x', pady=(6, 0))
-        self._rows = {}
-
-    def reload(self):
-        self.fbar.reload()
-        m = self.model
-        fid = self.fbar.fid
-        ids = [p['id'] for p in m.period_rows()]
-        self.period_box.configure(values=ids)
-        self.period_var.set(m.period)
-        fill(self.rules, [dict(r, on_text='yes' if r['enabled'] else 'no') for r in m.rule_rows(fid)], 'id', ('label', 'text', 'points', 'on_text'))
-        rows = m.point_rows(fid, m.period, self.only_problems.get())
-        self._rows = {r['id']: r for r in rows}
-        for r in rows:
-            r['on_text'] = 'yes' if r['enabled'] else 'no'
-        fill(self.table, rows, 'id', ('nominal', 'frequency', 'amplitude', 'range', 'low', 'high', 'source', 'origin', 'on_text'),
-             tags=lambda r: ('error',) if r['has_error'] else ('pending',) if not r['enabled'] else ())
-        self.detail.set(f'{len(rows)} point(s).')
-
-    def period_picked(self):
-        if self.model.set_period(self.period_var.get()):
-            self.reload()
-
-    def _pid(self):
-        s = selected(self.table)
-        return s[0] if s else ''
-
-    def picked(self):
-        r = self._rows.get(self._pid())
-        if r:
-            self.detail.set(f'{r["accept"]}.   {r["tol_text"]}' + (f'   PROBLEM: {r["error"]}' if r['error'] else '') + ('   (two specification lines apply equally here; the tighter one is used)' if r['ambiguous'] else ''))
-
-    def recalculate(self):
-        return self.say(self.model.recalculate(self.fbar.fid))
-
-    # ---- rules
-    def _rule_id(self):
-        s = selected(self.rules)
-        return s[0] if s else ''
-
-    def add_rule(self):
-        if not self.fbar.fid:
-            return self.say(M.Outcome(False, 'Add a function and its ranges first.'))
-        dlg = RuleDialog(self.win, self.model, self.fbar.fid)
-        self.win.wait_window(dlg)
-        if dlg.outcome:
-            self.say(dlg.outcome)
-        return dlg.outcome
-
-    def edit_rule(self):
-        rid = self._rule_id()
-        if not rid:
-            return self.say(M.Outcome(False, 'Select a rule in the table first.'))
-        dlg = RuleDialog(self.win, self.model, self.fbar.fid, rid)
-        self.win.wait_window(dlg)
-        if dlg.outcome:
-            self.say(dlg.outcome)
-        return dlg.outcome
-
-    def toggle_rule(self):
-        rid = self._rule_id()
-        if not rid:
-            return self.say(M.Outcome(False, 'Select a rule in the table first.'))
-        fn = self.model.fn(self.fbar.fid)
-        r = next((x for x in fn.rules if x.id == rid), None)
-        return self.say(self.model.set_rule_enabled(self.fbar.fid, rid, not (r and r.enabled)))
-
-    def remove_rule(self):
-        rid = self._rule_id()
-        if not rid:
-            return self.say(M.Outcome(False, 'Select a rule in the table first.'))
-        if not messagebox.askyesno('Remove rule', 'Remove this rule and the points only it produced? (Points you edited are kept; Undo brings the rest back.)', parent=self.win):
-            return None
-        return self.say(self.model.remove_rule(self.fbar.fid, rid))
-
-    # ---- points
-    def add_point(self):
-        if not self.fbar.fid:
-            return self.say(M.Outcome(False, 'Add a function and its ranges first.'))
-        dlg = PointDialog(self.win, self.model, self.fbar.fid)
-        self.win.wait_window(dlg)
-        if dlg.outcome:
-            self.say(dlg.outcome)
-        return dlg.outcome
-
-    def edit_point(self):
-        pid = self._pid()
-        if not pid:
-            return self.say(M.Outcome(False, 'Select a point in the table first.'))
-        dlg = PointDialog(self.win, self.model, self.fbar.fid, pid)
-        self.win.wait_window(dlg)
-        if dlg.outcome:
-            self.say(dlg.outcome)
-        return dlg.outcome
-
-    def override(self):
-        pid = self._pid()
-        if not pid:
-            return self.say(M.Outcome(False, 'Select a point in the table first.'))
-        d = self.model.point_detail(self.fbar.fid, pid)
-        fn = self.model.fn(self.fbar.fid)
-        text = simpledialog.askstring('Typed limits', f'Low and high limit for {pid} ({self.model.period}), in SI units or with a unit, separated by a comma.\n'
-                                      f'Example: 4.99 V, 5.01 V.   Leave empty to use the specification again.', initialvalue=f"{d.get('low', '')}, {d.get('high', '')}".strip(' ,'),
-                                      parent=self.win)
-        if text is None:
-            return None
-        parts = [t.strip() for t in text.split(',')] + ['', '']
-        return self.say(self.model.set_point_override(self.fbar.fid, pid, parts[0], parts[1]) if fn else M.Outcome(False, 'No function.'))
-
-    def toggle_point(self):
-        pid = self._pid()
-        if not pid:
-            return self.say(M.Outcome(False, 'Select a point in the table first.'))
-        return self.say(self.model.set_point_enabled(self.fbar.fid, pid, not self._rows[pid]['enabled']))
-
-    def remove_point(self):
-        pid = self._pid()
-        if not pid:
-            return self.say(M.Outcome(False, 'Select a point in the table first.'))
-        return self.say(self.model.remove_point(self.fbar.fid, pid))
-
-
 class RuleDialog(tk.Toplevel):
     """Rule picker: choose how the points are worked out; only the fields that apply are shown.  `outcome` holds the result (None = cancelled)."""
 
@@ -962,61 +779,6 @@ class RuleDialog(tk.Toplevel):
     def ok(self):
         form = self.form()
         res = self.model.update_rule(self.fid, self.rule_id, form) if self.rule_id else self.model.add_rule(self.fid, form)
-        if not res.ok:
-            self.msg.set(res.message)
-            return
-        self.outcome = res
-        self.destroy()
-
-
-class PointDialog(tk.Toplevel):
-    """Add or edit one point by hand.  `outcome` holds the result (None = cancelled)."""
-
-    def __init__(self, parent, model, fid, pid=None):
-        super().__init__(parent)
-        self.model, self.fid, self.pid, self.outcome = model, fid, pid, None
-        self.title('Edit test point' if pid else 'Add a test point')
-        self.transient(parent)
-        fields = model.point_form_fields(fid)
-        fn = model.fn(fid)
-        body = ttk.Frame(self, padding=14)
-        body.pack(fill='both', expand=True)
-        self.nominal, self.freq, self.amp, self.label, self.note, self.expect, self.range_var = (tk.StringVar() for _ in range(7))
-        self.ranges = [('', 'Automatic (smallest range that holds it)')] + [(r.id, model.range_text(fn, r)) for r in fn.ranges] if fn else [('', 'Automatic')]
-        f = Form(body, columns=1)
-        f.entry(f'Nominal ({fields["unit"] or "value"})', self.nominal, 24, 'With a unit, for example 5 V or 100 mV.')
-        if not pid:
-            f.combo('Range', self.range_var, [lab for _v, lab in self.ranges], 34)
-        if fields['frequency']:
-            f.entry('Frequency', self.freq, 16, 'For example 1 kHz')
-        if fields['amplitude']:
-            f.entry('Stimulus level', self.amp, 16, 'For example 1 V')
-        if fields['expect']:
-            f.combo('Beeper should be', self.expect, ['on', 'off'], 8)
-        f.entry('Label (optional)', self.label, 30)
-        f.entry('Note for the operator (optional)', self.note, 40)
-        f.pack(fill='x')
-        self.msg = tk.StringVar()
-        ttk.Label(body, textvariable=self.msg, foreground=ui.C['bad'], wraplength=ui.px(420), justify='left').pack(anchor='w', pady=(8, 0))
-        bar, _ = row_buttons(body, ('OK', self.ok, 'Accent.TButton'), ('Cancel', self.destroy))
-        bar.pack(anchor='e', pady=(10, 0))
-        self.bind('<Escape>', lambda _e: self.destroy())
-        if pid:
-            d = model.point_detail(fid, pid)
-            self.nominal.set(M.show(M.db.dec(d['nominal']), fn.unit))
-            self.freq.set(M.show(M.db.dec(d['frequency']), 'Hz') if d['frequency'] else '')
-            self.amp.set(M.show(M.db.dec(d['amplitude']), 'V') if d['amplitude'] else '')
-            self.label.set(d['label']), self.note.set(d['note']), self.expect.set(d['expect'] or 'on')
-        else:
-            self.expect.set('on')
-
-    def ok(self):
-        if self.pid:
-            res = self.model.edit_point(self.fid, self.pid, nominal=self.nominal.get(), frequency=self.freq.get(), amplitude=self.amp.get(), label=self.label.get(),
-                                        note=self.note.get(), expect=self.expect.get() if self.model.point_form_fields(self.fid)['expect'] else None)
-        else:
-            res = self.model.add_point(self.fid, self.nominal.get(), value_of(self.ranges, self.range_var.get()) or None, self.freq.get(), self.amp.get(), self.label.get(), self.note.get(),
-                                       self.expect.get() if self.model.point_form_fields(self.fid)['expect'] else None)
         if not res.ok:
             self.msg.set(res.message)
             return
@@ -1138,202 +900,957 @@ class DriversWindow(tk.Toplevel):
         ui.fit_window(self, 1000, 440, min_w=700, min_h=300)
 
 
-class ReviewPage(Page):
-    def __init__(self, parent, win):
-        super().__init__(parent, win)
-        self.intro(M.S_REVIEW)
-        self.summary = tk.StringVar()
-        ttk.Label(self, textvariable=self.summary, justify='left', wraplength=ui.px(900)).pack(anchor='w')
-        self.auto = tk.StringVar()
-        ttk.Label(self, textvariable=self.auto, style='Muted.TLabel', justify='left', wraplength=ui.px(900)).pack(anchor='w', pady=(6, 0))
-        ttk.Label(self, text='Everything that needs your attention', style='Section.TLabel').pack(anchor='w', pady=(10, 2))
-        self.table = ui.make_table(self, ('level', 'step', 'where', 'message'), ('', 'Step', 'Where', 'What is wrong'), (70, 110, 260, 560), anchors={'where': 'w', 'message': 'w', 'step': 'w'},
-                                   height=8, pack=False, stretch={'level': False, 'step': False})
-        self.table.master.pack(fill='both', expand=True)
-        self.table.bind('<Double-1>', lambda _e: self.go_to())
-        self.can = tk.StringVar()
-        self.note = tk.StringVar()
-        ttk.Label(self, textvariable=self.can, style='Bold.TLabel', wraplength=ui.px(900), justify='left').pack(anchor='w', pady=(8, 0))
-        row = ttk.Frame(self)
-        row.pack(fill='x', pady=(6, 0))
-        ttk.Label(row, text='Note for this version (optional):').pack(side='left')
-        ttk.Entry(row, textvariable=self.note, width=50).pack(side='left', padx=6)
-        bar, self.buttons = row_buttons(self, ('Save new version', self.save, 'Accent.TButton'), ('Save as draft (not runnable)', self.save_draft), ('Version history...', self.history))
+# ------------------------------------------------------------------------------------------------------------------------------ the sheet
+class SheetCanvas(tk.Canvas):
+    """The big spreadsheet-like grid: heading, row numbers, one row per test point, empty rows at the end.  Drawing and 'which cell is here'
+    come from M.GridGeometry; what a row shows comes from the model.  Click a cell to select it; the window handles the keys."""
+
+    def __init__(self, parent, model, on_click, on_key, on_edit):
+        super().__init__(parent, background=ui.C['table'], highlightthickness=1, highlightbackground=ui.C['border_strong'], takefocus=1)
+        self.model, self.on_click, self.on_key, self.on_edit = model, on_click, on_key, on_edit
+        self.geo = M.GridGeometry(row_h=ui.px(30), head_h=ui.px(44), num_w=ui.px(48), widths=[ui.px(c['width']) for c in M.GRID_COLUMNS])
+        self.top = 0
+        self.scrollbar = None
+        self._cw = ui.px(7)
+        self.bind('<Button-1>', self._click)
+        self.bind('<Double-Button-1>', lambda _e: self.on_edit())
+        self.bind('<Key>', lambda e: self.on_key(e))
+        self.bind('<Configure>', lambda _e: self.redraw())
+        self.bind('<MouseWheel>', self._wheel)
+        self.bind('<Button-4>', lambda _e: self.scroll_cmd('scroll', -3, 'units'))
+        self.bind('<Button-5>', lambda _e: self.scroll_cmd('scroll', 3, 'units'))
+
+    # ---- size and scrolling
+    def _size(self):
+        try:
+            w, h = int(self.winfo_width()), int(self.winfo_height())
+        except (TypeError, ValueError, tk.TclError):
+            w = h = 0
+        return (w if w > 80 else ui.px(1000)), (h if h > 80 else ui.px(480))
+
+    def _wheel(self, e):
+        try:
+            self.scroll_cmd('scroll', -1 if e.delta > 0 else 1, 'units')
+        except (TypeError, AttributeError):
+            pass
+
+    def scroll_cmd(self, *args):
+        """The scrollbar's command: ('moveto', fraction) or ('scroll', n, 'units' | 'pages')."""
+        w, h = self._size()
+        n = len(self.model.rows())
+        room = self.geo.max_top(n, h)
+        if args and args[0] == 'moveto':
+            self.top = int(float(args[1]) * (n * self.geo.row_h))
+        elif len(args) >= 3 and args[0] == 'scroll':
+            step = self.geo.row_h if args[2] == 'units' else max(self.geo.row_h, h - self.geo.head_h - self.geo.row_h)
+            self.top += int(args[1]) * step
+        self.top = max(0, min(room, self.top))
+        self.redraw()
+
+    def see(self, key=None):
+        """Scroll so the selected row shows."""
+        i = self.model.row_index(key)
+        if i is None:
+            return
+        _w, h = self._size()
+        self.top = self.geo.top_for(i, self.top, h)
+
+    # ---- drawing
+    def _fit(self, text, width):
+        if not text:
+            return ''
+        n = max(1, int((width - ui.px(12)) // self._cw))
+        return text if len(text) <= n else text[:max(1, n - 1)] + '…'
+
+    def redraw(self):
+        try:
+            self.delete('all')
+            w, h = self._size()
+            geo, rows = self.geo, self.model.rows()
+            geo.fit(w - ui.px(4))
+            self.top = max(0, min(self.top, geo.max_top(len(rows), h)))
+            c = ui.C
+            sel_key, sel_col = self.model.sel_key, M.COL_KEYS.index(self.model.sel_col)
+            first, last = geo.visible(self.top, h, len(rows))
+            for r in range(first, last):
+                row = rows[r]
+                x0, y0, x1, y1 = geo.box(r, 0, self.top)
+                is_sel = row['key'] == sel_key
+                self.create_rectangle(0, y0, geo.num_w, y1, fill=c['select'] if is_sel else c['head'], outline=c['border_strong'])
+                self.create_text(geo.num_w / 2, (y0 + y1) / 2, text=str(row['n']), fill=c['muted'], font=self._bold)
+                if row['kind'] == 'header':
+                    self.create_rectangle(geo.num_w, y0, geo.width, y1, fill=c['head_hi'], outline=c['border_strong'])
+                    label = row['function'] + (f'   - {row["problem"]}' if row['problem'] and row['level'] == 'error' else '')
+                    self.create_text(geo.num_w + ui.px(10), (y0 + y1) / 2, text=self._fit(label, geo.width - geo.num_w), anchor='w',
+                                     fill=c['bad'] if row['problem'] and row['level'] == 'error' else c['text'], font=self._bold)
+                    if is_sel:
+                        self.create_rectangle(geo.num_w + 1, y0 + 1, geo.width - 1, y1 - 1, outline=c['primary'], width=2)
+                    continue
+                for ci, col in enumerate(M.GRID_COLUMNS):
+                    cx0, cy0, cx1, cy1 = geo.box(r, ci, self.top)
+                    selected_cell = is_sel and ci == sel_col
+                    fill = c['primary'] if selected_cell else (c['bad_bg'] if col['key'] in row['bad'] and row['level'] == 'error' else
+                                                                  c['warn_bg'] if col['key'] in row['bad'] else c['select'] if is_sel else c['table'])
+                    self.create_rectangle(cx0, cy0, cx1, cy1, fill=fill, outline=c['border_strong'])
+                    text = self._fit(row.get(col['key'], ''), cx1 - cx0)
+                    if not text:
+                        continue
+                    color = c['on_primary'] if selected_cell else c['muted'] if (not row['enabled'] and row['kind'] == 'point') else c['text']
+                    if col['align'] == 'center':
+                        self.create_text((cx0 + cx1) / 2, (cy0 + cy1) / 2, text=text, fill=color, font=self._font)
+                    else:
+                        self.create_text(cx0 + ui.px(8), (cy0 + cy1) / 2, text=text, anchor='w', fill=color, font=self._font)
+            # the heading is drawn last so scrolled rows slide under it
+            self.create_rectangle(0, 0, geo.width, geo.head_h, fill=c['head'], outline=c['border_strong'])
+            self.create_text(geo.num_w / 2, geo.head_h / 2, text='#', fill=c['muted'], font=self._bold)
+            for ci, col in enumerate(M.GRID_COLUMNS):
+                x0 = geo.col_x(ci)
+                self.create_rectangle(x0, 0, x0 + geo.widths[ci], geo.head_h, fill=c['head'], outline=c['border_strong'])
+                self.create_text(x0 + geo.widths[ci] / 2, geo.head_h / 2, text=self._fit(col['title'], geo.widths[ci]) if len(col['title']) < 14 else col['title'],
+                                 fill=c['text'], font=self._bold, width=max(20, geo.widths[ci] - ui.px(8)), justify='center')
+            if self.scrollbar is not None:
+                total = max(1, len(rows) * geo.row_h)
+                self.scrollbar.set(self.top / total, min(1.0, (self.top + h - geo.head_h) / total))
+        except tk.TclError:                       # the window is closing
+            pass
+
+    @property
+    def _font(self):
+        return 'TkDefaultFont'
+
+    @property
+    def _bold(self):
+        return 'CalBold'
+
+    # ---- mouse
+    def _click(self, event):
+        self.focus_set()
+        rows = self.model.rows()
+        r = self.geo.row_at(event.y, len(rows), self.top)
+        c = self.geo.col_at(event.x)
+        if r is None or r < 0 or c is None:
+            return
+        self.on_click(r, 0 if c < 0 else c)
+
+
+# ------------------------------------------------------------------------------------------------------------------------------ small dialogs
+class ChoiceDialog(tk.Toplevel):
+    """Pick one thing from a list (a function for a new section).  `value` is the chosen label, None when cancelled."""
+
+    def __init__(self, parent, title, prompt, labels, initial=''):
+        super().__init__(parent)
+        self.title(title)
+        self.transient(parent)
+        self.value = None
+        self.var = tk.StringVar(value=initial or (labels[0] if labels else ''))
+        body = ttk.Frame(self, padding=14)
+        body.pack(fill='both', expand=True)
+        ttk.Label(body, text=prompt, wraplength=ui.px(420), justify='left').pack(anchor='w')
+        self.box = ttk.Combobox(body, textvariable=self.var, values=list(labels), state='readonly', width=46)
+        self.box.pack(anchor='w', pady=(8, 10))
+        bar, _ = row_buttons(body, ('OK', self.ok, 'Accent.TButton'), ('Cancel', self.destroy))
+        bar.pack(anchor='e')
+        self.bind('<Return>', lambda _e: self.ok())
+        self.bind('<Escape>', lambda _e: self.destroy())
+
+    def ok(self):
+        self.value = self.var.get()
+        self.destroy()
+
+
+def ask_choice(parent, title, prompt, labels, initial=''):
+    dlg = ChoiceDialog(parent, title, prompt, labels, initial)
+    try:
+        dlg.grab_set()
+    except tk.TclError:
+        pass
+    parent.wait_window(dlg)
+    return dlg.value
+
+
+class PageDialog(tk.Toplevel):
+    """One of the older detail pages (Ranges, Specification table, Sections, Details, Standards) in its own window over the sheet."""
+
+    def __init__(self, owner, title, page_cls, width=1000, height=640):
+        super().__init__(owner)
+        self.owner = owner
+        self.title(title)
+        body = ttk.Frame(self, padding=12)
+        body.pack(fill='both', expand=True)
+        self.page = page_cls(body, owner)
+        self.page.pack(fill='both', expand=True)
+        bar = ttk.Frame(body)
         bar.pack(fill='x', pady=(8, 0))
-        self.result = tk.StringVar()
-        ttk.Label(self, textvariable=self.result, wraplength=ui.px(900), justify='left').pack(anchor='w', pady=(6, 0))
-        self._problems = []
+        ttk.Button(bar, text='Close', command=self.close).pack(side='right')
+        self.bind('<Escape>', lambda _e: self.close())
+        self.page.reload()
+        ui.fit_window(self, width, height, min_w=720, min_h=420)
 
     def reload(self):
-        rv = self.model.review()
-        self.summary.set('\n'.join(rv['lines']) + f"\n{rv['points']} test point(s) in total." + (f"\nBased on {rv['based_on']}." if rv['based_on'] else ''))
-        self.auto.set(rv['automation'])
-        self._problems = rv['problems']
-        rows = [dict(p, id=i, level_text='ERROR' if p['level'] == 'error' else 'warning', step_text=M.STEPS[p['step']]['title'], where_text=p['location'] or p['where']) for i, p in enumerate(rv['problems'])]
-        fill(self.table, rows, 'id', ('level_text', 'step_text', 'where_text', 'message'), tags=lambda r: ('fail',) if r['level'] == 'error' else ('error',))
-        self.can.set(rv['save_text'])
-        state = 'normal' if rv['can_save'] else 'disabled'
-        self.buttons['Save new version'].configure(state=state)
-        self.buttons['Save as draft (not runnable)'].configure(state='normal' if rv['can_save_draft'] and not rv['can_save'] else 'disabled')
-        self.buttons['Version history...'].configure(state='normal' if self.model.ds.uid else 'disabled')
+        self.page.reload()
 
-    def go_to(self):
-        s = selected(self.table)
-        if s and int(s[0]) < len(self._problems):
-            self.win.goto_problem(self._problems[int(s[0])])
+    def close(self):
+        self.page.commit()
+        self.destroy()
 
-    def _save(self, draft):
-        self.win.commit_page()
-        res = self.model.save(self.note.get(), as_draft=draft)
-        self.result.set(res.message)
-        self.say(res)
-        if res.ok:
-            self.note.set('')
-            self.win.saved()
+
+class ProblemsWindow(tk.Toplevel):
+    """Everything that needs attention, in plain words.  Double-click one to go to its row."""
+
+    def __init__(self, owner):
+        super().__init__(owner)
+        self.owner = owner
+        self.title('Problems on this datasheet')
+        body = ttk.Frame(self, padding=12)
+        body.pack(fill='both', expand=True)
+        self.summary = tk.StringVar()
+        ttk.Label(body, textvariable=self.summary, style='Bold.TLabel').pack(anchor='w', pady=(0, 6))
+        self.table = ui.make_table(body, ('level', 'row', 'text'), ('', 'Row', 'What to do'), (90, 60, 760), anchors={'text': 'w'}, height=10, zebra=False,
+                                   stretch={'level': False, 'row': False})
+        self.table.bind('<Double-1>', lambda _e: self.go())
+        bar, _ = row_buttons(body, ('Go to the row', self.go, 'Accent.TButton'), ('Close', self.destroy))
+        bar.pack(anchor='e', pady=(8, 0))
+        self.bind('<Escape>', lambda _e: self.destroy())
+        self._rows = []
         self.reload()
+        ui.fit_window(self, 980, 440, min_w=640, min_h=300)
+
+    def reload(self):
+        m = self.owner.model
+        self._rows = m.problem_rows()
+        self.summary.set(m.problem_summary())
+        rows = [dict(r, id=i, level_text='FIX' if r['level'] == 'error' else 'warning', row_text=r['row'] or '') for i, r in enumerate(self._rows)]
+        fill(self.table, rows, 'id', ('level_text', 'row_text', 'text'), tags=lambda r: ('fail',) if r['level'] == 'error' else ('error',))
+
+    def go(self):
+        s = selected(self.table)
+        if not s or int(s[0]) >= len(self._rows):
+            return None
+        row = self._rows[int(s[0])]
+        if row['key']:
+            self.owner.goto_row(row['key'])
+        return row
+
+
+class PreviewWindow(tk.Toplevel):
+    """The blank datasheet as it would print, with Save as PDF.  As Found and As Left are empty: it is a template, not a record."""
+
+    def __init__(self, owner):
+        super().__init__(owner)
+        self.owner = owner
+        view = owner.model.print_view()
+        self.view = view
+        self.title('Print preview: ' + view['title'])
+        body = ttk.Frame(self, padding=12)
+        body.pack(fill='both', expand=True)
+        ttk.Label(body, text=view['title'], style='Section.TLabel').pack(anchor='w')
+        ttk.Label(body, text=view['subtitle'], style='Muted.TLabel').pack(anchor='w')
+        ui.Notice(body, kind='warn', text=view['notice']).pack(fill='x', pady=(6, 8))
+        keys = tuple(f'c{i}' for i in range(len(view['columns'])))
+        self.table = ui.make_table(body, keys, view['columns'], (70, 220, 170, 110, 110, 60, 260), anchors={'c1': 'w', 'c2': 'w', 'c6': 'w'}, height=14, zebra=False)
+        for i, row in enumerate(view['rows']):
+            self.table.insert('', 'end', iid=str(i), values=row['cells'], tags=('pending',) if row['kind'] == 'header' else ())
+        self.msg = tk.StringVar()
+        ttk.Label(body, textvariable=self.msg, style='Muted.TLabel', wraplength=ui.px(800), justify='left').pack(anchor='w', pady=(6, 0))
+        bar, _ = row_buttons(body, ('Save as PDF to print...', self.save_pdf, 'Accent.TButton'), ('Close', self.destroy))
+        bar.pack(anchor='e', pady=(8, 0))
+        self.bind('<Escape>', lambda _e: self.destroy())
+        ui.fit_window(self, 1000, 560, min_w=700, min_h=360)
+
+    def save_pdf(self):
+        m = self.owner.model
+        name = ('-'.join(x for x in (m.ds.make, m.ds.model, 'blank datasheet') if x) or 'blank datasheet').replace(' ', '_') + '.pdf'
+        path = filedialog.asksaveasfilename(title='Save the blank datasheet as PDF', defaultextension='.pdf', initialfile=name, filetypes=[('PDF', '*.pdf')], parent=self)
+        if not path:
+            return None
+        res = m.write_sheet_pdf(path)
+        self.msg.set(res.message)
         return res
 
-    def save(self):
-        return self._save(False)
 
-    def save_draft(self):
-        return self._save(True)
+# ------------------------------------------------------------------------------------------------------------------------------ the boxes under the sheet
+class SpecPanel(ttk.Frame):
+    """Select Spec Types, the matching entry fields, the options row, Calc / Recalc and the Test Point Definitions list.  It only shows and collects
+    values: M.GridModel.panel_state() fills it and M.GridModel.calc_row() uses what form() returns."""
 
-    def history(self):
-        return VersionsWindow(self.win, self.model.storage, self.model.ds.uid, editor=self.win)
+    def __init__(self, parent, win):
+        super().__init__(parent, padding=(8, 6))
+        self.win = win
+        self.sides = {'plus': M.GridModel.blank_side(), 'minus': M.GridModel.blank_side()}
+        self.operand_now = 'plus'
+        self.v = {k: tk.StringVar() for k in ('nominal', 'units', 'freq', 'level', 'expect', 'iv', 'fs', 'fs_scale', 'floor', 'db', 'calc', 'multi_high', 'multi_n',
+                                              'decs', 'res', 'operand', 'multi_mode', 'func', 'definition')}
+        self.b = {k: tk.BooleanVar(value=False) for k in ('iv_ppm', 'multi', 'asym', 'auto_res')}
+        self.types = {k: tk.BooleanVar(value=False) for k in M.SPEC_ORDER}
+        self.cells = {}
+        self._defs = []
+        self._choices = []
+        self._state = {}
+
+        top = ttk.Frame(self)
+        top.pack(fill='x')
+        ttk.Label(top, text='This row tests:', style='Bold.TLabel').pack(side='left')
+        self.func_box = ttk.Combobox(top, textvariable=self.v['func'], state='readonly', width=34)
+        self.func_box.pack(side='left', padx=(6, 18))
+        self.func_box.bind('<<ComboboxSelected>>', lambda _e: self.win.function_chosen(self.v['func'].get()))
+        ttk.Label(top, text='Select Spec Types:', style='Bold.TLabel').pack(side='left')
+        for key, label, hint in M.SPEC_TYPES:
+            cb = ttk.Checkbutton(top, text=label, variable=self.types[key], command=self.types_changed)
+            cb.pack(side='left', padx=(10, 0))
+            tip(cb, hint)
+
+        box = ttk.LabelFrame(self, text='Entry fields', padding=(8, 4))
+        box.pack(fill='x', pady=(6, 0))
+        self.box = box
+
+        def cell(name, label, var, width, row, col, hint='', widget=None):
+            f = ttk.Frame(box)
+            ttk.Label(f, text=label, style='Small.TLabel').pack(anchor='w')
+            e = widget(f) if widget else ttk.Entry(f, textvariable=var, width=width)
+            e.pack(anchor='w')
+            if hint:
+                tip(e, hint)
+            f.grid(row=row, column=col, sticky='w', padx=(0, 10), pady=2)
+            self.cells[name] = f
+            return e
+
+        self.nominal_e = cell('nominal', 'Nominal Value', self.v['nominal'], 14, 0, 0, 'The value to test, for example 5. The unit comes from Units of Measure.')
+        self.units_c = cell('units', 'Units of Measure', self.v['units'], 12, 0, 1, 'The unit the numbers in these boxes are in. Display only.',
+                            widget=lambda f: ttk.Combobox(f, textvariable=self.v['units'], width=10))
+        self.units_b = ttk.Button(box, text='...', width=3, command=self.pick_unit)
+        self.units_b.grid(row=0, column=2, sticky='sw', pady=2)
+        tip(self.units_b, 'Pick the unit from a list (mV, V, kV ...).')
+        cell('iv', '% of I.V.', self.v['iv'], 10, 0, 3, 'How many percent of the value being tested, for example 0.05.')
+        self.cells['iv_ppm'] = ttk.Checkbutton(box, text='ppm', variable=self.b['iv_ppm'])
+        self.cells['iv_ppm'].grid(row=0, column=4, sticky='sw', pady=2)
+        tip(self.cells['iv_ppm'], 'Tick when the number is parts per million of the value instead of percent.')
+        cell('fs', '% of F.S.', self.v['fs'], 10, 0, 5, 'How many percent of the full scale, for example 0.01.')
+        cell('fs_scale', 'F.S. (full scale)', self.v['fs_scale'], 12, 0, 6, 'The full scale of the range this row is on, for example 10 V. Leave it as it is to keep the range.')
+        cell('floor', 'Floor (fixed value)', self.v['floor'], 12, 0, 7, 'A fixed amount added to the tolerance, in the Units of Measure, for example 20.')
+        cell('db', '± dB', self.v['db'], 8, 0, 8, 'A tolerance in dB, for example 0.5.')
+        cell('calc', 'Calculator: type the accuracy statement', self.v['calc'], 46, 1, 0, 'For example 0.05 % of reading + 2 counts. Same wording as the manual.')
+        self.cells['calc'].grid(columnspan=4)
+        cell('freq', 'Frequency', self.v['freq'], 12, 1, 4, 'For AC and frequency tests, with its unit, for example 1 kHz.')
+        cell('level', 'Signal level', self.v['level'], 10, 1, 5, 'The level of the signal applied while a frequency, period or bandwidth is tested, for example 1 V.')
+        cell('expect', 'Beeper should be', self.v['expect'], 8, 1, 6, widget=lambda f: ttk.Combobox(f, textvariable=self.v['expect'], values=['on', 'off'], state='readonly', width=6))
+        self.multi_cb = ttk.Checkbutton(box, text='Multiple Test Points', variable=self.b['multi'], command=self.multi_changed)
+        self.multi_cb.grid(row=2, column=0, sticky='w', pady=(4, 0))
+        tip(self.multi_cb, 'Make several rows at once: Nominal Value is the lowest, High is the last. Choose below how the rows are spaced.')
+        cell('multi_high', 'High', self.v['multi_high'], 12, 2, 1, 'The last value the rows should reach.')
+        cell('multi_n', 'n', self.v['multi_n'], 8, 2, 3, 'How many points (Lo to High) or the size of the step (n %, n Units, n ppm).')
+        self.asym_cb = ttk.Checkbutton(box, text='Asymmetrical Tol', variable=self.b['asym'], command=self.asym_changed)
+        self.asym_cb.grid(row=3, column=0, sticky='w')
+        tip(self.asym_cb, 'The tolerance below the nominal differs from the one above it. Use Operand to switch between entering the + side and the - side.')
+
+        opt = ttk.Frame(self)
+        opt.pack(fill='x', pady=(6, 0))
+        modes = ttk.Frame(opt)
+        modes.pack(side='left', padx=(0, 14))
+        self.v['multi_mode'].set('span')
+        for i, (key, label, hint) in enumerate(M.MULTI_MODES):
+            rb = ttk.Radiobutton(modes, text=label, value=key, variable=self.v['multi_mode'])
+            rb.grid(row=i % 2, column=i // 2, sticky='w', padx=(0, 10))
+            tip(rb, hint)
+        dec = ttk.Frame(opt)
+        dec.pack(side='left', padx=(0, 14))
+        ttk.Label(dec, text='Display Decs.').grid(row=0, column=0, sticky='w')
+        de = ttk.Entry(dec, textvariable=self.v['decs'], width=4)
+        de.grid(row=0, column=1, padx=4)
+        tip(de, 'How many decimal places the instrument shows in these units, for example 4 for 5.0000. Auto Res turns it into the resolution.')
+        ttk.Label(dec, text='Operand').grid(row=1, column=0, sticky='w')
+        self.operand_box = ttk.Combobox(dec, textvariable=self.v['operand'], values=['±', '+', '-'], state='disabled', width=3)
+        self.operand_box.grid(row=1, column=1, padx=4)
+        self.operand_box.bind('<<ComboboxSelected>>', lambda _e: self.operand_changed())
+        tip(self.operand_box, 'With Asymmetrical Tol ticked: which side (+ or -) the boxes above are for.')
+        res = ttk.Frame(opt)
+        res.pack(side='left', padx=(0, 14))
+        ttk.Label(res, text='Meas Res').grid(row=0, column=0, sticky='w')
+        self.res_e = ttk.Entry(res, textvariable=self.v['res'], width=12, state='disabled')
+        self.res_e.grid(row=0, column=1, padx=4)
+        tip(self.res_e, 'The smallest step the instrument display shows in this range, for example 10 µV. Rows on the same range share it.')
+        self.auto_cb = ttk.Checkbutton(res, text='Auto Res', variable=self.b['auto_res'], command=self.auto_changed)
+        self.auto_cb.grid(row=1, column=0, columnspan=2, sticky='w')
+        tip(self.auto_cb, 'Work the resolution out from Display Decs (or from the decimals you typed in Nominal Value).')
+        self.calc_b = ttk.Button(opt, text='Calc', style='Accent.TButton', command=self.win.calc)
+        self.calc_b.pack(side='left', padx=(0, 6))
+        tip(self.calc_b, 'Work out the calibration tolerance of this row from the boxes and put it in the sheet.')
+        self.recalc_b = ttk.Button(opt, text='Recalc', command=self.win.recalc)
+        self.recalc_b.pack(side='left', padx=(0, 6))
+        tip(self.recalc_b, 'Re-run the test point rules and check every row of the sheet.')
+        self.copy_b = ttk.Button(opt, text='Copy tolerance to rows below', command=self.win.copy_down)
+        self.copy_b.pack(side='left', padx=(0, 14))
+        tip(self.copy_b, 'Give the rows under this one, in the same section, the same tolerance as this row.')
+        defs = ttk.Frame(opt)
+        defs.pack(side='left', fill='x', expand=True)
+        ttk.Label(defs, text='Test Point Definitions:').pack(anchor='w')
+        self.def_box = ttk.Combobox(defs, textvariable=self.v['definition'], state='readonly', width=44)
+        self.def_box.pack(anchor='w')
+        self.def_box.bind('<<ComboboxSelected>>', lambda _e: self.win.definition_chosen(self.v['definition'].get()))
+        tip(self.def_box, 'The rules of the test point calculator for this section. Pick one to change it.')
+        self.note = tk.StringVar()
+        ttk.Label(self, textvariable=self.note, style='Muted.TLabel', wraplength=ui.px(1000), justify='left').pack(anchor='w', pady=(4, 0))
+
+    # ---- visibility
+    def types_changed(self):
+        self.show_fields()
+
+    def multi_changed(self):
+        self.show_fields()
+
+    def auto_changed(self):
+        self.res_e.configure(state='disabled' if self.b['auto_res'].get() else 'normal')
+
+    def asym_changed(self):
+        self.save_side()
+        self.operand_box.configure(state='readonly' if self.b['asym'].get() else 'disabled')
+        if not self.b['asym'].get():
+            self.operand_now = 'plus'
+            self.v['operand'].set('±')
+            self.load_side()
+        else:
+            self.v['operand'].set('+')
+
+    def operand_changed(self):
+        self.save_side()
+        self.operand_now = 'minus' if self.v['operand'].get() == '-' else 'plus'
+        self.load_side()
+
+    def save_side(self):
+        s = self.sides[self.operand_now]
+        s.update(iv=self.v['iv'].get(), iv_ppm=self.b['iv_ppm'].get(), fs=self.v['fs'].get(), floor=self.v['floor'].get(), db=self.v['db'].get(), calc=self.v['calc'].get())
+
+    def load_side(self):
+        s = self.sides[self.operand_now]
+        self.v['iv'].set(s['iv']), self.b['iv_ppm'].set(bool(s['iv_ppm'])), self.v['fs'].set(s['fs']), self.v['floor'].set(s['floor']), self.v['db'].set(s['db'])
+        self.v['calc'].set(s['calc'])
+
+    def show_fields(self):
+        st = self._state
+        fields = st.get('fields', {})
+        want = {'iv': self.types['iv'].get(), 'iv_ppm': self.types['iv'].get(), 'fs': self.types['fs'].get(), 'fs_scale': self.types['fs'].get(),
+                'floor': self.types['floor'].get(), 'db': self.types['db'].get(), 'calc': self.types['calc'].get(), 'freq': fields.get('frequency', False),
+                'level': fields.get('amplitude', False), 'expect': fields.get('expect', False), 'multi_high': self.b['multi'].get(), 'multi_n': self.b['multi'].get()}
+        if st.get('passfail'):
+            for k in ('iv', 'iv_ppm', 'fs', 'fs_scale', 'floor', 'db', 'calc'):
+                want[k] = False
+        for name, widget in self.cells.items():
+            if name in want and not want[name]:
+                widget.grid_remove()
+            elif name in want:
+                widget.grid()
+
+    # ---- the unit picker
+    def pick_unit(self):
+        choices = self._state.get('unit_choices') or []
+        if not choices:
+            return None
+        menu = tk.Menu(self, tearoff=0)
+        for u in choices:
+            menu.add_command(label=u, command=lambda u=u: self.v['units'].set(u))
+        try:
+            menu.tk_popup(self.units_b.winfo_rootx(), self.units_b.winfo_rooty() + self.units_b.winfo_height())
+        except tk.TclError:
+            pass
+        return menu
+
+    # ---- model <-> boxes
+    def load(self, state):
+        """Fill the boxes from M.GridModel.panel_state()."""
+        self._state = state
+        form = state['form']
+        self.sides = {'plus': dict(form['plus']), 'minus': dict(form['minus'])}
+        self.operand_now = 'plus'
+        for k in ('nominal', 'units', 'freq', 'level', 'expect', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode'):
+            self.v[k].set(form[k])
+        for k in M.SPEC_ORDER:
+            self.types[k].set(k in form['types'])
+        self.b['multi'].set(bool(form['multi'])), self.b['asym'].set(bool(form['asym'])), self.b['auto_res'].set(bool(form['auto_res']))
+        self.v['operand'].set('+' if form['asym'] else '±')
+        self.operand_box.configure(state='readonly' if form['asym'] else 'disabled')
+        self.load_side()
+        self.units_c.configure(values=state['unit_choices'])
+        self._choices = self.win.model.function_choices()
+        self.func_box.configure(values=[c['label'] for c in self._choices])
+        self.v['func'].set(state['function'])
+        self.func_box.configure(state='readonly' if state['can_edit'] or state['kind'] == 'blank' else 'disabled')
+        defs = self.win.model.definition_rows(state['fid']) if state['fid'] else []
+        self._defs = defs
+        self.def_box.configure(values=['New rule...'] + [d['label'] for d in defs])
+        self.v['definition'].set('')
+        self.auto_changed()
+        self.show_fields()
+        self.note.set(state['note'])
+        usable = 'normal' if state['can_edit'] else 'disabled'
+        for b in (self.calc_b, self.copy_b):
+            b.configure(state=usable)
+
+    def form(self):
+        """The boxes as a form dict for M.GridModel.calc_row()."""
+        self.save_side()
+        asym = bool(self.b['asym'].get())
+        return dict(types=[k for k in M.SPEC_ORDER if self.types[k].get()], plus=dict(self.sides['plus']), minus=dict(self.sides['minus']), asym=asym,
+                    operand='-' if self.v['operand'].get() == '-' else '+', fs_scale=self.v['fs_scale'].get(), nominal=self.v['nominal'].get(), units=self.v['units'].get(),
+                    freq=self.v['freq'].get(), level=self.v['level'].get(), expect=self.v['expect'].get() or 'on', multi=bool(self.b['multi'].get()),
+                    multi_mode=self.v['multi_mode'].get() or 'span', multi_high=self.v['multi_high'].get(), multi_n=self.v['multi_n'].get(), decs=self.v['decs'].get(),
+                    res=self.v['res'].get(), auto_res=bool(self.b['auto_res'].get()))
+
+    def definition_id(self, label):
+        return next((d['id'] for d in self._defs if d['label'] == label), None)
 
 
-# ------------------------------------------------------------------------------------------------------------------------------ editor window
-class EditorWindow(tk.Toplevel):
-    """The guided flow window for one datasheet."""
+# ------------------------------------------------------------------------------------------------------------------------------ the window
+class GridEditorWindow(tk.Toplevel):
+    """One datasheet as a big grid: Edit Cell bar and toolbar on top, the sheet in the middle, the tool column at the right, the spec boxes below.
+    Every decision is in M.GridModel; this class draws it and passes clicks and keys to it."""
 
     def __init__(self, parent, model, panel=None):
         super().__init__(parent)
         self.model, self.panel = model, panel
+        self.dialogs = []
         self.configure(background=ui.C['bg'])
-        self.banner = ui.Banner(self, 'Datasheet Builder', 'Build a datasheet from the manufacturer\'s specification, step by step')
+        self.banner = ui.Banner(self, 'Datasheet Builder', 'One row per test point. Click a cell, type, press Enter.')
         self.banner.pack(fill='x')
         self.dirty_pill = self.banner.add_pill('', 'warn')
-        self.steps = StepBar(self, model, self.go)
-        self.steps.pack(fill='x', padx=14, pady=(10, 4))
+        self.problem_pill = self.banner.add_pill('', 'good')
         self.status = tk.StringVar(value='')
         ui.StatusBar(self, self.status).pack(side='bottom', fill='x')
-        nav = ttk.Frame(self, padding=(14, 6))
-        nav.pack(side='bottom', fill='x')
-        self.back_b = ttk.Button(nav, text='‹ Back', command=self.back)
-        self.back_b.pack(side='left')
-        self.undo_b = ttk.Button(nav, text='Undo', command=self.undo)
-        self.undo_b.pack(side='left', padx=(14, 4))
-        self.redo_b = ttk.Button(nav, text='Redo', command=self.redo)
-        self.redo_b.pack(side='left')
-        self.next_b = ttk.Button(nav, text='Next ›', style='Accent.TButton', command=self.next)
-        self.next_b.pack(side='right')
-        self.problem_box = ttk.LabelFrame(self, text='Problems in this step', padding=(10, 4))
-        self.problem_box.pack(side='bottom', fill='x', padx=14, pady=(0, 4))
-        self.problems = ui.make_table(self.problem_box, ('level', 'where', 'message'), ('', 'Where', 'What is wrong'), (80, 260, 700), anchors={'where': 'w', 'message': 'w'}, height=3,
-                                      stretch={'level': False})
-        self.problems.bind('<Double-1>', lambda _e: self.open_problem())
         self.note = tk.StringVar()
-        self.note_label = ttk.Label(self, textvariable=self.note, wraplength=ui.px(1000), justify='left')
+        self.note_label = ttk.Label(self, textvariable=self.note, wraplength=ui.px(1100), justify='left')
         self.note_label.pack(side='bottom', anchor='w', padx=14)
-        self.holder = ttk.Frame(self, padding=(14, 6))
-        self.holder.pack(fill='both', expand=True)
-        self.pages = [HeaderPage(self.holder, self), FunctionsPage(self.holder, self), RangesPage(self.holder, self), SpecPage(self.holder, self),
-                      PointsPage(self.holder, self), AutomationPage(self.holder, self), ReviewPage(self.holder, self)]
-        self._shown = None
-        self._problem_rows = []
+        self.issue = tk.StringVar()
+        self.issue_label = ttk.Label(self, textvariable=self.issue, wraplength=ui.px(1100), justify='left')
+        self.issue_label.pack(side='bottom', anchor='w', padx=14)
+        self.panel_box = SpecPanel(self, self)
+        self.panel_box.pack(side='bottom', fill='x', padx=6)
+
+        main = ttk.Frame(self, padding=(10, 6))
+        main.pack(fill='both', expand=True)
+        self._build_header(main)
+        self._build_editbar(main)
+        mid = ttk.Frame(main)
+        mid.pack(fill='both', expand=True, pady=(6, 0))
+        self._build_tools(mid)
+        sheet_holder = ttk.Frame(mid)
+        sheet_holder.pack(side='left', fill='both', expand=True)
+        self.sheet = SheetCanvas(sheet_holder, model, self.sheet_click, self.sheet_key, self.focus_bar)
+        sb = ttk.Scrollbar(sheet_holder, orient='vertical', command=self.sheet.scroll_cmd)
+        self.sheet.scrollbar = sb
+        sb.pack(side='right', fill='y')
+        self.sheet.pack(side='left', fill='both', expand=True)
+
         self.protocol('WM_DELETE_WINDOW', self.close)
-        self.bind('<Control-z>', lambda _e: self.undo())
-        self.bind('<Control-y>', lambda _e: self.redo())
-        ui.fit_window(self, 1240, 860, min_w=900, min_h=620)
-        self.show()
+        for seq, fn in (('<Control-z>', self.undo), ('<Control-y>', self.redo), ('<Control-s>', self.save), ('<Control-p>', self.preview)):
+            self.bind(seq, lambda _e, fn=fn: (fn(), 'break')[1])
+        ui.fit_window(self, 1340, 900, min_w=1000, min_h=700)
+        self.sync()
+
+    # ---- building
+    def _build_header(self, parent):
+        bar = ttk.Frame(parent)
+        bar.pack(fill='x')
+        self.make_v, self.model_v, self.title_v = tk.StringVar(), tk.StringVar(), tk.StringVar()
+        self.make_e = self.model_e = self.title_e = None
+        for label, var, width, hint in (('Make', self.make_v, 16, 'The manufacturer, for example Keysight.'), ('Model', self.model_v, 14, 'For example 34461A.'),
+                                        ('Title', self.title_v, 34, 'What the procedure list shows, for example 34461A Performance Verification.')):
+            ttk.Label(bar, text=label, style='Bold.TLabel').pack(side='left', padx=(0, 4))
+            e = ttk.Entry(bar, textvariable=var, width=width)
+            e.pack(side='left', padx=(0, 12))
+            setattr(self, {'Make': 'make_e', 'Model': 'model_e', 'Title': 'title_e'}[label], e)
+            e.bind('<FocusOut>', lambda _e: self.commit_header())
+            e.bind('<Return>', lambda _e: self.commit_header())
+            tip(e, hint)
+        self.period_v = tk.StringVar()
+        self.period_label = ttk.Label(bar, text='Tolerances for')
+        self.period_box = ttk.Combobox(bar, textvariable=self.period_v, state='readonly', width=14)
+        self.period_box.bind('<<ComboboxSelected>>', lambda _e: self.period_chosen())
+        right = ttk.Frame(bar)
+        right.pack(side='right')
+        self.undo_b = ttk.Button(right, text='Undo', command=self.undo)
+        self.undo_b.pack(side='left', padx=(0, 4))
+        self.redo_b = ttk.Button(right, text='Redo', command=self.redo)
+        self.redo_b.pack(side='left', padx=(0, 10))
+        ttk.Button(right, text='Standards...', command=self.open_standards).pack(side='left', padx=(0, 4))
+        more = ttk.Menubutton(right, text='More')
+        menu = tk.Menu(more, tearoff=0)
+        for label, cmd in (('Test point calculator...', self.open_calculator), ('Ranges...', self.open_ranges), ('Specification table (advanced)...', self.open_spec),
+                           ('Sections and function settings...', self.open_functions), ('Details and time periods...', self.open_details),
+                           ('What can the suite drive today?', self.open_drivers), ('Version history...', self.open_versions)):
+            menu.add_command(label=label, command=cmd)
+        more.configure(menu=menu)
+        self.more_menu = menu
+        more.pack(side='left')
+
+    def _build_editbar(self, parent):
+        bar = ttk.Frame(parent)
+        bar.pack(fill='x', pady=(8, 0))
+        ttk.Label(bar, text='Edit Cell:', style='Bold.TLabel').pack(side='left', padx=(0, 6))
+        self.bar_v = tk.StringVar()
+        self.bar = ttk.Entry(bar, textvariable=self.bar_v)
+        self.bar.pack(side='left', fill='x', expand=True)
+        self.bar.bind('<Return>', lambda _e: self.commit_bar('down'))
+        self.bar.bind('<KP_Enter>', lambda _e: self.commit_bar('down'))
+        self.bar.bind('<Tab>', lambda _e: self.commit_bar('right') or 'break')
+        self.bar.bind('<Escape>', lambda _e: self.cancel_bar())
+        tip(self.bar, 'Type the new content of the selected cell and press Enter. Esc puts the old text back.')
+        for text, cmd, hint in (('Print / Preview', self.preview, 'See the blank datasheet as it prints, and save it as a PDF.'),
+                                ('Save', self.save, 'Save a new version (Ctrl+S).'),
+                                ('Calculate', self.calc, 'Work out the tolerance of the selected row from the boxes below (same as Calc).')):
+            b = ttk.Button(bar, text=text, command=cmd)
+            b.pack(side='left', padx=(6, 0))
+            tip(b, hint)
+
+    def _build_tools(self, parent):
+        col = ttk.Frame(parent, padding=(8, 0, 0, 0))
+        col.pack(side='right', fill='y')
+        ttk.Label(col, text='Lock Status', style='Bold.TLabel').pack(anchor='w')
+        self.lock_v = tk.StringVar(value=M.LOCK_MODES[0][1])
+        lock = ttk.Combobox(col, textvariable=self.lock_v, values=[lab for _k, lab in M.LOCK_MODES], state='readonly', width=14)
+        lock.pack(anchor='w', pady=(2, 10))
+        lock.bind('<<ComboboxSelected>>', lambda _e: self.lock_chosen())
+        tip(lock, 'Locked: nothing can be changed by accident. Edit Mode: you can change the sheet.')
+        ttk.Label(col, text='Copy symbol to the Edit Cell', style='Bold.TLabel').pack(anchor='w')
+        grid = ttk.Frame(col)
+        grid.pack(anchor='w', pady=(2, 10))
+        self.symbol_buttons = {}
+        for i, name in enumerate(M.SYMBOLS + ('Units',)):
+            b = ttk.Button(grid, text=name, width=3 if name != 'Units' else 6, style='Compact.TButton', command=lambda n=name: self.insert_symbol(n))
+            b.grid(row=i // 3, column=i % 3, padx=1, pady=1)
+            self.symbol_buttons[name] = b
+        ttk.Label(col, text='Special Ops', style='Bold.TLabel').pack(anchor='w')
+        self.header_b = ttk.Button(col, text='Ins. Header', command=self.insert_header)
+        self.header_b.pack(anchor='w', fill='x', pady=(2, 2))
+        tip(self.header_b, 'Add a new section heading (a new function to test) after the selected row.')
+        self.break_b = ttk.Button(col, text='Page Break', state='disabled')
+        self.break_b.pack(anchor='w', fill='x', pady=(0, 2))
+        tip(self.break_b, 'Not available: the report decides where its pages end.')
+        self.delete_b = ttk.Button(col, text='Delete row', style='Danger.TButton', command=self.delete_row)
+        self.delete_b.pack(anchor='w', fill='x', pady=(0, 10))
+        ttk.Label(col, text='Warnings', style='Bold.TLabel').pack(anchor='w')
+        self.warn_v = tk.StringVar()
+        ttk.Label(col, textvariable=self.warn_v, wraplength=ui.px(170), justify='left').pack(anchor='w')
+        ttk.Button(col, text='Show list', command=self.show_problems).pack(anchor='w', fill='x', pady=(2, 10))
+        ttk.Label(col, text='Row level remark', style='Bold.TLabel').pack(anchor='w')
+        self.remark_v = tk.StringVar()
+        re_ = ttk.Entry(col, textvariable=self.remark_v, width=22)
+        re_.pack(anchor='w', pady=(2, 2))
+        re_.bind('<Return>', lambda _e: self.remark_set())
+        re_.bind('<FocusOut>', lambda _e: self.remark_set(quiet=True))
+        tip(re_, 'A note the operator sees with this row. A * appears next to its step number.')
+        self.run_v = tk.BooleanVar(value=True)
+        rc = ttk.Checkbutton(col, text='Run this row', variable=self.run_v, command=self.run_set)
+        rc.pack(anchor='w')
+        tip(rc, 'Untick to keep the row on the sheet but leave it out of the procedure.')
 
     # ---- showing
-    def commit_page(self):
-        if self._shown is not None:
-            self.pages[self._shown].commit()
+    def sync(self):
+        """Redraw the sheet and fill the Edit Cell bar and the boxes from the model."""
+        m = self.model
+        row = m.select()
+        self.sheet.see()
+        self.sheet.redraw()
+        ok, why = m.cell_editable()
+        self.bar_v.set(m.cell_text())
+        self.bar.configure(state='normal' if ok else 'readonly')
+        state = m.panel_state()
+        self.panel_box.load(state)
+        self.remark_v.set(state['form']['remark']), self.run_v.set(bool(state['form']['run']))
+        self.set_issue(row, ok, why)
 
-    def show(self):
-        step = self.model.step
-        if self._shown is not None and self._shown != step:
-            self.pages[self._shown].pack_forget()
-        recalculated = None
-        if step == M.S_POINTS and self._shown != step:
-            recalculated = self.model.recalculate()             # rules -> points (edited and hand-made points are never touched)
-        self.pages[step].pack(fill='both', expand=True)
-        self._shown = step
-        self.refresh()
-        if recalculated is not None and recalculated.message != 'No point changed.':
-            self.changed(recalculated)
+    def set_issue(self, row, ok=True, why=''):
+        text = f'Row {row["n"]}: {row["problem"]}' if row['problem'] else ''
+        self.issue.set(text or ('' if ok else why))
+        try:
+            self.issue_label.configure(foreground=ui.C['bad'] if row['level'] == 'error' else ui.C['warn'] if row['problem'] else ui.C['muted'])
+        except (tk.TclError, KeyError):
+            pass
 
     def refresh(self):
-        if self._shown is None:
-            return
-        self.pages[self._shown].reload()
-        self.steps.update_states()
         m = self.model
+        ds = m.ds
+        for var, val, e in ((self.make_v, ds.make, self.make_e), (self.model_v, ds.model, self.model_e), (self.title_v, ds.title, self.title_e)):
+            if var.get() != val and self.focus_get() is not e:
+                var.set(val)
         self.title(('* ' if m.dirty else '') + m.title + ' - Datasheet Builder')
         self.dirty_pill.set('unsaved changes' if m.dirty else 'saved', 'warn' if m.dirty else 'good')
-        self.back_b.configure(state='normal' if m.step > 0 else 'disabled')
-        self.next_b.configure(state='normal' if m.step < len(M.STEPS) - 1 else 'disabled')
-        self.undo_b.configure(text=f'Undo {m.undo_label}' if m.can_undo else 'Undo', state='normal' if m.can_undo else 'disabled')
+        c = m.problem_counts()
+        self.problem_pill.set(f'{c["errors"]} to fix' if c['errors'] else f'{c["warnings"]} warning(s)' if c['warnings'] else 'no problems', 'bad' if c['errors'] else 'warn' if c['warnings'] else 'good')
+        self.warn_v.set(m.problem_summary())
+        self.undo_b.configure(state='normal' if m.can_undo else 'disabled')
         self.redo_b.configure(state='normal' if m.can_redo else 'disabled')
-        probs = m.problems_for(step=m.step, function_id=m.fid if m.step in (M.S_RANGES, M.S_SPEC, M.S_POINTS) else None)
-        self._problem_rows = probs
-        rows = [dict(p, id=i, level_text='ERROR' if p['level'] == 'error' else 'warning', where_text=p['location'] or p['where']) for i, p in enumerate(probs)]
-        fill(self.problems, rows, 'id', ('level_text', 'where_text', 'message'), tags=lambda r: ('fail',) if r['level'] == 'error' else ('error',))
-        self.problem_box.configure(text=f'Problems in this step ({len(probs)})' if probs else 'No problems in this step')
+        if len(ds.periods) > 1:
+            self.period_label.pack(side='left', padx=(0, 4))
+            self.period_box.pack(side='left')
+            self.period_box.configure(values=[p.label or p.id for p in ds.periods])
+            self.period_v.set(next((p.label or p.id for p in ds.periods if p.id == m.period), ''))
+        else:
+            self.period_label.pack_forget()
+            self.period_box.pack_forget()
+        self.sync()
+        for d in list(self.dialogs):
+            try:
+                d.reload()
+            except tk.TclError:
+                self.dialogs.remove(d)
 
     def changed(self, outcome=None):
-        """Called by the pages after every action: status line, then redraw."""
+        """After every action: the message (green / red), then redraw everything."""
         if outcome is not None:
-            self.note.set(outcome.message if outcome.ok else 'Not done: ' + outcome.message)
+            msg = outcome.message if outcome.ok else 'Not done: ' + outcome.message
+            self.note.set(msg)
             self.status.set(outcome.message if outcome.ok else 'Cannot do that: ' + outcome.message)
             try:
                 self.note_label.configure(foreground=ui.C['good'] if outcome.ok else ui.C['bad'])
             except (tk.TclError, KeyError):
                 pass
         self.refresh()
+        return outcome
 
-    # ---- navigation
-    def go(self, step):
-        self.commit_page()
-        res = self.model.go(step)
-        if not res.ok:
-            self.changed(res)
-            return res
-        self.show()
+    def commit_page(self):
+        """Hook the detail pages use before they close (nothing is held back in this window)."""
+
+    # ---- the sheet
+    def sheet_click(self, r, c):
+        self.commit_bar_if_changed()
+        self.model.select_at(r, c)
+        self.sync()
+
+    def goto_row(self, key):
+        self.model.select(key, 'nominal')
+        self.sync()
+        self.focus_force()
+
+    def sheet_key(self, e):
+        ks = e.keysym
+        state = int(getattr(e, 'state', 0) or 0)
+        ctrl = bool(state & 0x4)
+        if ctrl:
+            return None
+        act = self.model.nav(ks, shift=bool(state & 0x1))
+        if act == 'moved':
+            self.sync()
+            return 'break'
+        if act == 'edit':
+            self.focus_bar(select_all=True)
+            return 'break'
+        if ks in ('Delete', 'BackSpace'):
+            self.changed(self.model.clear_cell())
+            return 'break'
+        ch = getattr(e, 'char', '')
+        if ch and ch.isprintable() and not ch.isspace() or ch == ' ':
+            ok, why = self.model.cell_editable()
+            if not ok:
+                self.set_issue(self.model.selected_row(), False, why)
+                return 'break'
+            self.bar_v.set(ch)
+            self.focus_bar()
+            return 'break'
+        return None
+
+    def focus_bar(self, select_all=False):
+        ok, why = self.model.cell_editable()
+        if not ok:
+            self.set_issue(self.model.selected_row(), False, why)
+            return
+        self.bar.focus_set()
+        try:
+            if select_all:
+                self.bar.selection_range(0, 'end')
+            self.bar.icursor('end')
+        except tk.TclError:
+            pass
+
+    def commit_bar_if_changed(self):
+        if self.bar_v.get() != self.model.cell_text() and self.model.cell_editable()[0] and str(self.focus_get()) == str(self.bar):
+            self.commit_bar('stay')
+
+    def commit_bar(self, move='down'):
+        """Enter (down) or Tab (right) in the Edit Cell bar."""
+        ok, why = self.model.cell_editable()
+        if not ok:
+            self.set_issue(self.model.selected_row(), False, why)
+            return None
+        res = self.model.commit_cell(self.bar_v.get(), move=move)
+        self.changed(res)
+        self.sheet.focus_set()
         return res
 
-    def next(self):
-        return self.go(self.model.step + 1)
+    def cancel_bar(self):
+        self.bar_v.set(self.model.cell_text())
+        self.sheet.focus_set()
 
-    def back(self):
-        return self.go(self.model.step - 1)
+    # ---- header strip
+    def commit_header(self):
+        ds = self.model.ds
+        new = dict(make=self.make_v.get().strip(), model=self.model_v.get().strip(), title=self.title_v.get().strip())
+        if new == dict(make=ds.make, model=ds.model, title=ds.title):
+            return None
+        return self.changed(self.model.set_header(**new))
 
-    def goto_problem(self, problem):
-        self.commit_page()
-        self.model.goto_problem(problem)
-        self.show()
+    def period_chosen(self):
+        label = self.period_v.get()
+        pid = next((p.id for p in self.model.ds.periods if (p.label or p.id) == label), '')
+        if pid and self.model.set_period(pid):
+            self.refresh()
 
-    def open_problem(self):
-        s = selected(self.problems)
-        if s and int(s[0]) < len(self._problem_rows):
-            self.goto_problem(self._problem_rows[int(s[0])])
+    # ---- the buttons
+    def calc(self):
+        self.commit_header()
+        form = self.panel_box.form()
+        form.update(remark=self.remark_v.get(), run=bool(self.run_v.get()))
+        return self.changed(self.model.calc_row(form=form))
 
+    def recalc(self):
+        return self.changed(self.model.recalc_all())
+
+    def copy_down(self):
+        n = self.model.would_overwrite()
+        if n and not messagebox.askyesno('Copy tolerance', f'{n} row(s) below already have a tolerance of their own. Replace them with this row\'s tolerance? (Undo brings them back.)', parent=self):
+            return None
+        return self.changed(self.model.copy_tolerance())
+
+    def function_chosen(self, label):
+        row = self.model.selected_row()
+        if row['kind'] == 'blank':
+            return self.changed(self.model.set_target_function(label))
+        if row['kind'] == 'point':
+            res = self.model.move_point(row['key'], label)
+            if res.ok and isinstance(res.detail, str):
+                self.model.select(res.detail)
+            return self.changed(res)
+        return None
+
+    def definition_chosen(self, label):
+        rid = self.panel_box.definition_id(label)
+        if label == 'New rule...' or rid is None:
+            return self.open_calculator()
+        return self.open_calculator(rid)
+
+    def insert_symbol(self, name):
+        sym = self.model.symbol_text(name)
+        if not sym:
+            return None
+        target = self.focus_get()
+        entry = target if isinstance(target, ttk.Entry) else self.bar
+        try:
+            entry.insert('insert', sym)
+            if entry is self.bar:
+                self.bar.focus_set()
+            self.clipboard_clear()
+            self.clipboard_append(sym)
+        except tk.TclError:
+            pass
+        return sym
+
+    def insert_header(self):
+        labels = [c['label'] for c in self.model.function_choices() if c['label'].startswith('New section: ')]
+        pick = ask_choice(self, 'Ins. Header', 'What does the new section test?', [x[len('New section: '):] for x in labels])
+        if not pick:
+            return None
+        return self.changed(self.model.add_section(pick))
+
+    def delete_row(self):
+        row = self.model.selected_row()
+        if row['kind'] == 'header':
+            fn = self.model.ds.function(row['fid'])
+            if not messagebox.askyesno('Delete section', f'Delete the section "{fn.name}" with its {len(fn.points)} row(s)? (Undo brings it back.)', parent=self):
+                return None
+        return self.changed(self.model.clear_row())
+
+    def remark_set(self, quiet=False):
+        row = self.model.selected_row()
+        if row['kind'] != 'point':
+            return None
+        fn, p = self.model.point_of()
+        if p is None or p.note == self.remark_v.get().strip():
+            return None
+        return self.changed(self.model.set_remark(row['key'], self.remark_v.get()))
+
+    def run_set(self):
+        row = self.model.selected_row()
+        if row['kind'] != 'point':
+            return None
+        return self.changed(self.model.set_run(row['key'], bool(self.run_v.get())))
+
+    def lock_chosen(self):
+        res = self.model.set_locked(self.lock_v.get() == M.LOCK_MODES[1][1])
+        return self.changed(res)
+
+    def show_problems(self):
+        win = ProblemsWindow(self)
+        self.dialogs.append(win)
+        return win
+
+    def preview(self):
+        return PreviewWindow(self)
+
+    # ---- the other windows
+    def _page(self, title, cls, **kw):
+        dlg = PageDialog(self, title, cls, **kw)
+        self.dialogs.append(dlg)
+        return dlg
+
+    def open_ranges(self):
+        return self._page('Ranges', RangesPage)
+
+    def open_spec(self):
+        return self._page('Specification table (advanced)', SpecPage)
+
+    def open_functions(self):
+        return self._page('Sections and function settings', FunctionsPage, width=1000, height=620)
+
+    def open_details(self):
+        return self._page('Details and time periods', HeaderPage, width=980, height=560)
+
+    def open_standards(self):
+        self.commit_header()
+        return self._page('Standards and automation', AutomationPage, width=1180, height=700)
+
+    def open_drivers(self):
+        return DriversWindow(self, self.model)
+
+    def open_versions(self):
+        if not self.model.ds.uid:
+            return self.changed(M.Outcome(False, 'Nothing to show yet: save the datasheet once first.'))
+        return VersionsWindow(self, self.model.storage, self.model.ds.uid, editor=self, panel=self.panel)
+
+    def open_calculator(self, rule_id=None):
+        fn = self.model.fn()
+        if fn is None:
+            return self.changed(M.Outcome(False, 'Click a row (or choose a function) first: the calculator makes rows for one section.'))
+        if not fn.ranges:
+            return self.changed(M.Outcome(False, 'This section has no ranges yet. Add a test row first (its range follows from its value), or open More > Ranges.'))
+        dlg = RuleDialog(self, self.model, fn.id, rule_id)
+        self.wait_window(dlg)
+        if dlg.outcome is not None:
+            return self.changed(dlg.outcome)
+        return None
+
+    # ---- undo / save / close
     def undo(self):
-        self.commit_page()
-        self.changed(self.model.undo())
+        return self.changed(self.model.undo())
 
     def redo(self):
-        self.changed(self.model.redo())
+        return self.changed(self.model.redo())
+
+    def save(self, note=''):
+        self.commit_header()
+        res = self.model.save_sheet(note)
+        if not res.ok and isinstance(res.detail, dict) and res.detail.get('needs_draft'):
+            if messagebox.askyesno('Save as a draft?', res.message + '\n\nSave it as a draft now? A draft is kept as a version but is not a runnable procedure yet.', parent=self):
+                res = self.model.save_sheet(note, as_draft=True)
+            else:
+                return self.changed(res)
+        self.changed(res)
+        if res.ok:
+            self.saved()
+        return res
 
     def saved(self):
         if self.panel is not None:
             self.panel.editor_saved(self)
 
     def close(self):
-        self.commit_page()
+        self.commit_header()
         if self.model.dirty and not messagebox.askyesno('Unsaved changes', 'This datasheet has changes that are not saved. Close without saving?', parent=self):
             return False
         if self.panel is not None:
@@ -1386,7 +1903,7 @@ class VersionsWindow(tk.Toplevel):
             return None
         if self.panel is not None:
             return self.panel.open_editor(ed)
-        return EditorWindow(self, ed)
+        return GridEditorWindow(self, ed)
 
     def load_here(self):
         v = self._version()
@@ -1526,7 +2043,7 @@ class DatasheetBuilderPanel(ttk.Frame):
         return self.open_editor(ed)
 
     def open_editor(self, model):
-        win = EditorWindow(self.winfo_toplevel(), model, panel=self)
+        win = GridEditorWindow(self.winfo_toplevel(), model, panel=self)
         win._key = model.ds.uid or f'new-{id(win)}'
         self.editors[win._key] = win
         return win

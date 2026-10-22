@@ -226,3 +226,13 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
 - Not stored anywhere today (so not in any snapshot): procedure modifications are not printed by any engine (`modifications=` is never passed) - their summary is kept in the stamps only.
 - Tests: `tests/test_reprint_*.py` (named to sort after test_beta because they install tests/_tk_stub.py); `tests/reprint_harness.py` runs the engines' real export code on the simulated benches.
 
+## Datasheet Builder grid editor (branch dsb-grid-ui)
+- The editor window is now one spreadsheet-like grid (`datasheet_builder_ui.GridEditorWindow`, drawn on a Canvas by `SheetCanvas`) instead of the seven-step wizard: columns STEP NUM, FUNCTION TESTED,
+  NOMINAL VALUE, AS FOUND, AS LEFT, Out of Tol, CALIBRATION TOLERANCE; an Edit Cell bar above it; the spec boxes (Select Spec Types, entry fields, Calc / Recalc, Test Point Definitions) below; a tool column at
+  the right (symbols, Ins. Header, Warnings, row remark, Run this row, Lock Status). As Found / As Left stay blank: the printed sheet is a template, never a record (the preview says so).
+- All grid logic is in `datasheet_builder_ui_model.GridModel` (a subclass of EditorModel; tkinter-free): rows, selection, keys, cell edits, the boxes -> tolerance (Decimal expression model), multiple test points,
+  undo (the EditorModel snapshot gate), print view / PDF. `GridGeometry` holds the pixel maths. The older detail pages (Ranges, Specification table, Sections, Details, Standards and automation) open from More.
+- Core change, additive only: `Point.spec` (optional list-of-one `SpecEntry` that governs that one point; written to JSON only when set). `Function.governing(point)` picks it, `limit_for` / `tol_text` / `export_spec`
+  use it, and the function-level 'no_spec' error is raised only for points that have neither their own spec nor a function table entry. Old files (no `spec`) load and export unchanged; the schema id stays 'dsb-1'.
+- Rows are created in an auto-made range (the next decade up from the nominal); Meas Res / Auto Res / Display Decs write `Range.resolution`.
+- Tests: tests/test_dsb_grid_model.py (no tkinter), tests/test_dsb_ui_widgets.py (tests/_tk_stub.py; the stub now has a real `TclError`). The window has never been viewed on a real display.
