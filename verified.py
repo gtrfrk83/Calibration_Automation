@@ -103,6 +103,8 @@ FILES = {
     'Agilent_34401A.py': _files('Agilent_34401A.py', [], ['scpi_dmm', 'fluke_5560a']),
     'Fluke_8846A_Verification.py': _files('Fluke_8846A_Verification.py', [], ['scpi_dmm', 'fluke_5560a']),
     'Fluke_8846A_Adjustment.py': _files('Fluke_8846A_Adjustment.py', [], ['scpi_dmm']),
+    'Fluke_8808A_Verification.py': _files('Fluke_8808A_Verification.py', ['fluke8808a_verification.py', 'procspec.py'], ['fluke_8808a', 'fluke_5560a'],
+                                          ['fluke_8808a_pv.json']),
     'Keysight_34465A_Verification.py': _files('Keysight_34465A_Verification.py', _TV, ['keysight_truevolt', 'fluke_5560a'], ['keysight_34465a_pv.json']),
     'Keysight_34460A_Verification.py': _files('Keysight_34460A_Verification.py', _TV, ['keysight_truevolt', 'fluke_5560a'], ['keysight_34460a_pv.json']),
     'Keysight_34461A_Verification.py': _files('Keysight_34461A_Verification.py', _TV, ['keysight_truevolt', 'fluke_5560a'], ['keysight_34461a_pv.json']),
