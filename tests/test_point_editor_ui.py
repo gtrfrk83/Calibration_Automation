@@ -69,6 +69,7 @@ class FakeTreeview:
     def column(self, *a, **k): pass
     def tag_configure(self, *a, **k): pass
     def pack(self, *a, **k): pass
+    def grid(self, *a, **k): pass
     def configure(self, *a, **k): pass
     def bind(self, *a, **k): pass
     def yview(self, *a): pass

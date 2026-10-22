@@ -61,7 +61,7 @@ class LiveWidgetTests(unittest.TestCase):
         hook.refresh()
 
     def test_open_builds_a_live_window_and_reuses_it(self):
-        win = self.ui.open_modify_window(self.shell.root, self.app.pm_live_context(), self.h.env.lock)      # reached from the point window's 'All procedure changes...'
+        win = self.ui.open_modify_window(self.shell.root, self.app.pm_live_context(), self.h.env.lock)      # the module is kept; no running window opens it now
         self.assertTrue(win.model.live_mode)
         win.update_header()
         win.update_info()
