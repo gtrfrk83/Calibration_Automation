@@ -319,6 +319,7 @@ def checks_handheld_dialogs():
             pump(root, 5)
             bad = [c for c in walk(win) if c.winfo_ismapped() and not inside(win, c)]
             seen['clipped'] = bad
+            seen['labels'] = sorted([c.cget('text') for c in walk(win) if isinstance(c, ttk.Button)])
             seen['size'] = (win.winfo_width(), win.winfo_height(), win.winfo_reqwidth(), win.winfo_reqheight())
             win.focus_force()
             pump(root, 5)
@@ -333,6 +334,7 @@ def checks_handheld_dialogs():
     r = drive(lambda: ui.confirm_steps(root, 'Change the function', 'AC volts', [], layout='function_change', card=card, ok='Done - continue'),
               lambda w: w.event_generate('<Return>'))
     check('function window: nothing clipped', not r['clipped'], r['clipped'])
+    check('function window: OK button keeps the caller label', r['labels'] == ['Cancel', 'Done - continue'], r['labels'])
     check('function window: Enter = Done', r['result'] is True)
     r = drive(lambda: ui.confirm_steps(root, 'Change the function', 'AC volts', [], layout='function_change', card=card, ok='Done - continue'),
               lambda w: w.event_generate('<Escape>'))
