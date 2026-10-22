@@ -332,3 +332,11 @@ procmods / procmods_live layer; nothing in calibration_procedures.sqlite3 change
   reaches `_error` with its message, busy cleared, on the simulated benches). Not covered by the behavioural test: mdo, tds2000c, handheld, WaveSurfer (the scan
   found no occurrence there).
 
+
+## Looking at the windows on a real Tk (Linux sandbox)
+- `uv python install 3.13` (python-build-standalone from GitHub; includes tkinter) + `xvfb-run -a -s "-screen 0 1600x1000x24" <that python> script.py`; screenshots with
+  `PIL.ImageGrab.grab(bbox=..., xdisplay=os.environ['DISPLAY'])`. pip/PyPI is not reachable there: borrow Pillow/reportlab by putting the system `dist-packages` of the
+  SAME minor Python on PYTHONPATH. `tests/real_tk_checks.py` + `tests/test_beta_real_tk_windows.py` drive the point window, Edit point, Mark verified / Unlock, the Datasheet
+  Builder grid and Asset History Regenerate PDF on a real Tk (skipped without tkinter / a display). The older stub-based tests are designed for NO tkinter: do not run the
+  whole suite under a real Tk.
+- Point window layout (procmods_point_ui.py): grid; command table 5 rows then scrolls; details (selected command, add a line, developer fields) scroll; footer always visible.

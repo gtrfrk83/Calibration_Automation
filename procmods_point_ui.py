@@ -436,7 +436,7 @@ class PointWindow(tk.Toplevel):
             if f.problems:
                 parts.append('; '.join(f.problems))
             else:
-                if f.reason and not f.editable:
+                if f.reason and not f.editable and f.reason != m.read_only_reason:        # the same sentence is in the note above the fields
                     parts.append(f.reason)
                 if f.changed:
                     parts.append(f'default: {f.factory}')
