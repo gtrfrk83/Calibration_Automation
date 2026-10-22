@@ -47,12 +47,13 @@ NOTES = {
 }
 
 
-SHEET = 'specification table supplied as a screenshot (document, revision and date unknown)'
+SHEET = 'Fluke Calibration 96270A 27 GHz Low Phase Noise RF Reference Source, Technical Data, pub. 6002252B_EN (3/2020), p.6 "96270A summary specifications"'
 PERIOD = '1 yr'     # the table prints no calibration period; stored under the default period so the manager finds it (flagged in problems)
 
 NOTES.update({
-    '6': 'SOURCE OF THE ROWS BELOW: ' + SHEET + '. Not read from a manual page. Specified values are as printed; "typical" values are marked in the row label. '
-         'No confidence level or coverage factor is printed on the table.',
+    '6': 'SOURCE OF THE ROWS BELOW: ' + SHEET + ' (rendered page image checked against the first transcription from a screenshot of the same table). Specified values are as printed; "typical" values are marked in the row label. '
+         'The page says "Refer to the 96270A Extended Specifications for detailed specifications"; that document (confidence level, calibration period, 75 ohm head) was not supplied. '
+         'Performance is specified at 23 degC +/- 5 degC (operating 0 to 50 degC, storage -20 to +70 degC).',
     '7': 'Printed on the same table, NOT accuracy and not stored as rows: Frequency / level range: Leveling Head O/P [50 ohm] 1 mHz to 4 GHz, -130 to +24 dBm to 125 MHz, '
          '+14 dBm at 4 GHz; Microwave O/P Direct 1 mHz to 27 GHz [with LL option], -4 [-100] to +24 dBm, above 1.4 GHz +20 dBm [above 20 GHz +18 dBm]; Microwave O/P with HF option '
          '1 kHz to 27 GHz [with LL option], -10 [-35] to +18 dBm, above 1.4 GHz +14 dBm [above 20 GHz +12 dBm]. Resolution 10 uHz and 0.001 dB.',
@@ -121,18 +122,18 @@ def build():
         manufacturer='Fluke', model='96270A', description='RF Reference Source (96000 Series; 96270A with microwave output, 96040A leveling head)',
         confidence_text='[Not Specified] - not printed on the specification table',
         confidence_pct=None,
-        reference='Fluke 96270A specification table: ' + SHEET + '. The Operators Manual (chapters 1-3) prints no accuracy specification (p.1-2 refers to www.fluke.com).',
-        revision='', author='rows typed from the supplied table by specs/build_96270a_standard_from_manual.py; operating limits read from the manual page images',
-        approved_by='', approve_date='', source_pdf='96270 Operator Manual.pdf (operating limits only); specification table: screenshot', sheet_generated='',
+        reference=SHEET + '. The Operators Manual (chapters 1-3) prints no accuracy specification (p.1-2 refers to www.fluke.com).',
+        revision='6002252B_EN 3/2020', author='rows typed from the datasheet summary table (page image checked) by specs/build_96270a_standard_from_manual.py; operating limits read from the Operators Manual page images',
+        approved_by='', approve_date='', source_pdf='96270A Technical Data 6002252B_EN.pdf (specification rows); 96270 Operator Manual.pdf (operating limits only)', sheet_generated='',
         built=datetime.now().isoformat(timespec='seconds')), notes=NOTES, functions=functions)
     problems = []
 
     def w(where, what, level='warn'):
         problems.append(dict(level=level, where=where, what=what))
-    w('standard', 'Rows come from a screenshot of the specification table, not from a manual page or a dated sheet. Check them against the current Fluke 96270A datasheet '
-                  '(www.fluke.com) before relying on them for an uncertainty budget.')
-    w('standard', 'Confidence level / coverage factor is not printed on the table. specmanager divisor() falls back to k = 2 for an unspecified level; set the divisor in the manager once known.')
-    w('standard', f'The table prints no calibration period. Every row is stored under "{PERIOD}" only so the manager finds it; that is a placeholder, not a printed value.')
+    w('standard', 'Rows come from the SUMMARY specifications on p.6 of the Technical Data (3/2020), which refers to the 96270A Extended Specifications for detailed specifications. '
+                  'Check against the Extended Specifications (not supplied) before relying on them for an uncertainty budget; it should state the confidence level and calibration period.')
+    w('standard', 'Confidence level / coverage factor is not printed in the summary table. specmanager divisor() falls back to k = 2 for an unspecified level; set the divisor in the manager once known.')
+    w('standard', f'The summary table prints no calibration period. Every row is stored under "{PERIOD}" only so the manager finds it; that is a placeholder, not a printed value.')
     w('RF level rows', 'Level accuracy is stored in dB as printed (kind OTHER, unit dB, 50 ohm). The uncertainty budget does not use kind OTHER, so nothing reads these rows yet; '
                        'a dB-to-volts (or % of power) conversion convention must be decided before they feed a budget.')
     w('Leveling Head, down to -48 dBm', 'Printed: "+/-0.03 dB to 100 kHz, +/-0.05 dB to 128 MHz, +/-0.3 dB at 4 GHz". Stored as bands 0-100 kHz, 100 kHz-128 MHz and the single point 4 GHz; '
