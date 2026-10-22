@@ -93,18 +93,33 @@ def save_log(root):
     open_folder(path.parent)
 
 
+def set_theme(root, name: str):
+    """Remember the look for next time.  Windows already open keep theirs until they are reopened."""
+    import ui_theme
+    store = ui_theme.Settings('appearance')
+    store.set('theme', name)
+    store.save()
+    messagebox.showinfo('Appearance', f'The {name} look is used the next time a window is opened.\n(Windows that are already open keep their current look.)', parent=root)
+
+
 def add_help_menu(root):
     try:
         bar = root['menu']
         menubar = root.nametowidget(bar) if bar else tk.Menu(root)
     except tk.TclError:
         menubar = tk.Menu(root)
+    import ui_theme
     help_menu = tk.Menu(menubar, tearoff=False)
     help_menu.add_command(label=f'About {suite_info.NAME}', command=lambda: about(root))
     help_menu.add_separator()
     help_menu.add_command(label='Open my data folder', command=lambda: open_folder(appdata.data_dir()))
     help_menu.add_command(label='Import data from another copy...', command=lambda: import_data(root))
     help_menu.add_command(label='Save diagnostic log for support', command=lambda: save_log(root))
+    help_menu.add_separator()
+    look = tk.Menu(help_menu, tearoff=False)
+    for name, label in (('dark', 'Dark'), ('light', 'Light')):
+        look.add_command(label=label + ('  (current)' if ui_theme.THEME == name else ''), command=lambda n=name: set_theme(root, n))
+    help_menu.add_cascade(label='Appearance', menu=look)
     menubar.add_cascade(label='Help', menu=help_menu)
     root.configure(menu=menubar)
 

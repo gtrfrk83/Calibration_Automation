@@ -30,3 +30,12 @@ If something goes wrong
   Saved results are not affected. Passwords are never written to logs.
 
 Keys:  Ctrl+S save progress   Ctrl+O load progress   Ctrl+P export PDF   F1 About
+
+The test window (beta layout)
+  Left: the sections of the procedure with a coloured dot (blue = in progress, green = all pass, red = something failed) and how many are done.
+  Top: Instrument ID and serial, the As Found | As Left switch, and the progress ring.
+  Connections: press "Connections" (top right) to set the instrument addresses and ports; Test connections is at the bottom of that panel. Esc closes it.
+  Bottom: Run All Pending, Run Shown Section, Rerun Selected, Stop, then Save / Load / Export.
+  Small screens: below about 1100 pixels wide the section list becomes a drop-down and Low / High limits share one column.
+  Look: Help > Appearance chooses Dark or Light for the next window you open.
+

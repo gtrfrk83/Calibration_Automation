@@ -84,6 +84,17 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Not done: a signed installer / single .exe (needs a Windows build machine), a resizable table divider, per-procedure guides (USER_GUIDE.txt is general).
 - tests: `tests/__init__.py` points CALSUITE_DATA at a throw-away folder, so tests never touch real data. `tests/test_beta.py`.
 
+## Redesigned test window (beta only)
+- `ui_theme.py`: palettes `LIGHT` and `DARK` (flat warm charcoal, one blue accent); `use_palette()` mutates `ui.C` in place, `apply_theme()` picks it
+  (`CALSUITE_THEME`, else Help > Appearance, else `suite_info.DEFAULT_THEME`: dark in the beta, light in the released copy). Colours come from tokens, never hex.
+- `ui_shell.py`: `Shell` (header with chips + Connections button, top strip with ID / serial / As Found | As Left / progress ring, section sidebar with status dots,
+  slide-in Connections drawer with a pinned footer, action bar, status bar), `ProgressPanel` (ring; re-run progress in As Left), `results_table()` and
+  `small_window()` (below ~1100 px the sidebar becomes a drop-down, Low/High merge into Limits, buttons shorten). Nothing in it talks to an instrument.
+- `datamode.py`: `build_mode_segment`, `shell_cells` (row cells with units, error, As Found / As Left / 'Same'), `update_shell_progress`, `update_shell_sections`.
+- Converted: 8846A, 34401A, Truevolt, DACQ, function generators, MDO4000C, handheld DMMs, WaveSurfer (sidebar = its seven functions). Instrument commands, limits,
+  pass/fail logic and safety prompts were not touched; only widgets were rearranged. `Fluke_8846A_Adjustment.py` and the Manager keep their layouts (they pick up the dark palette).
+- Tests: `tests/test_shell.py` (sidebar / drawer / small window / As Left columns), the toolbar-fit tests in `tests/test_asleft.py` run at 900 / 1000 / 1400 px.
+
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.
 Real-window tests (need a display; `xvfb-run -a python -m unittest tests.test_asleft tests.test_specmanager`).
