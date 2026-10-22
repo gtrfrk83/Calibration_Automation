@@ -32,24 +32,24 @@ LIGHT = dict(
     row_pass='#FFFFFF', row_pass_fg='#1D1D1F', row_fail='#FFFFFF', row_fail_fg='#B3261E', row_warn='#FFFFFF', row_warn_fg='#8A5A00',
 )
 
-# Flat warm-charcoal dark theme with one clay-orange accent, like claude.ai (the beta's default look).
+# Flat warm-charcoal dark theme with one blue accent (the beta's default look).
 DARK = dict(
     bg='#262624', card='#2B2A28', bar='#262624', border='#3B3A37', border_strong='#4A4945',
     text='#ECE9E1', muted='#A09D95', faint='#6F6D67',
-    navy='#ECE9E1', navy_hi='#BFBCB4', accent_line='#D97757',
-    primary='#D97757', primary_hi='#E58B6D', primary_lo='#C4633F',            # claude.ai's clay orange
-    select='#3A2E29', row_alt='#2F2E2B', head='#262624', head_hi='#33322F',
-    good='#6FCF9F', good_bg='#14302A', good_dot='#6FCF9F',
-    bad='#E5736A', bad_bg='#3A1F1D', bad_dot='#E5736A',
-    warn='#F2C14E', warn_bg='#2F2810', warn_dot='#F2C14E',
-    info='#EBB9A3', info_bg='#3A2A22', info_dot='#D97757',
+    navy='#ECE9E1', navy_hi='#BFBCB4', accent_line='#4C9BF5',
+    primary='#4C9BF5', primary_hi='#6AAEF7', primary_lo='#3B82E0',
+    select='#2A3A52', row_alt='#2F2E2B', head='#262624', head_hi='#33322F',
+    good='#34D399', good_bg='#08301F', good_dot='#34D399',
+    bad='#F87171', bad_bg='#3A1010', bad_dot='#F87171',
+    warn='#FBBF24', warn_bg='#2A2108', warn_dot='#FBBF24',
+    info='#9CC7FB', info_bg='#1D3556', info_dot='#4C9BF5',
     neutral='#A09D95', neutral_bg='#33322F', neutral_dot='#6F6D67',
-    field='#1F1E1D', table='#2B2A28', on_primary='#FFFFFF', primary_off='#5A3A2E',
+    field='#1F1E1D', table='#2B2A28', on_primary='#FFFFFF', primary_off='#2B4766',
     btn=('#2D2C2A', '#44433F'), btn_hi=('#363532', '#555450'), btn_lo=('#262624', '#555450'), btn_off=('#262624', '#33322F'),
-    danger='#B5483B', danger_hi='#C9574A', danger_lo='#9A3C31', danger_off='#4A2522',
+    danger='#C0392B', danger_hi='#D64535', danger_lo='#A12F23', danger_off='#4A2522',
     combo_btn='#33322F', combo_btn_hi='#3B3A37', trough='#33322F', scroll='#555450', scroll_hi='#6F6D67', scroll_lo='#8A8780',
     tip='#44433F', row_even='#2B2A28',
-    row_pass='#2B2A28', row_pass_fg='#ECE9E1', row_fail='#2B2A28', row_fail_fg='#E5736A', row_warn='#2B2A28', row_warn_fg='#F2C14E',
+    row_pass='#2B2A28', row_pass_fg='#ECE9E1', row_fail='#2B2A28', row_fail_fg='#F87171', row_warn='#2B2A28', row_warn_fg='#FBBF24',
 )
 PALETTES = {'light': LIGHT, 'dark': DARK}
 C = dict(LIGHT)                    # the live palette: modules read ui.C at use time; use_palette() changes it in place
@@ -836,7 +836,7 @@ class TabStrip(tk.Canvas):
     """macOS-style segmented control that replaces the notebook's native tab row.
 
     All segments are the same height and use the same font, so nothing shifts when the selection
-    changes; the selected segment is an accent-coloured rounded pill with white text. The notebook keeps working
+    changes; the selected segment is a blue rounded pill with white text. The notebook keeps working
     as before (add / select / tab(text=...)); the strip follows it, including tabs added later.
     """
 
