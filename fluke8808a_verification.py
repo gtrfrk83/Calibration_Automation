@@ -278,7 +278,6 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.cal_addr = tk.StringVar(value=s.get('cal_addr', 'COM9'))
         self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
         self.period = tk.StringVar(value=s.get('period', PERIOD_LABEL[SPEC['default_period']]))
-        self.try_5560a = tk.BooleanVar(value=False)
         self.status = tk.StringVar()
         self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
         self.show_section = tk.StringVar(value='All sections')
@@ -299,16 +298,12 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def is_manual(self, p):
         """True when the selected calibrator cannot make this point: the technician connects another standard (the meter is still read automatically).
-        5522A: the spec names the reason. 5560A: its limits are not verified (its manual is not available), so the same points are manual unless ticked."""
-        if p['source'] != 'calibrator' or not p.get('cal_limits'):
-            return False
-        if self.cal_key in p['cal_limits']:
-            return True
-        return self.cal_key == '5560A' and not self.try_5560a.get()
+        The spec's `cal_limits` names, per calibrator, the points it cannot make and why (5522A: Operators Manual; 5560A: Product Specifications);
+        a calibrator that is not listed for a point drives it."""
+        return p['source'] == 'calibrator' and self.cal_key in (p.get('cal_limits') or {})
 
     def manual_reason(self, p):
-        return p['cal_limits'].get(self.cal_key) or ('5560A: whether the 5560A can make this point is not verified (its manual was not available); '
-                                                     f'the 5522A cannot: {p["cal_limits"].get("5522A", "")}')
+        return (p.get('cal_limits') or {}).get(self.cal_key, '')
 
     def active(self, p):
         return not p.get('skip')                                     # a point skipped by a procedure modification
@@ -363,8 +358,6 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             row=r, column=0, columnspan=2, sticky='w', pady=(2, 6)); r += 1
         ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
         ttk.Combobox(d, textvariable=self.cal_model, values=list(CALIBRATORS), width=14, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        ttk.Checkbutton(d, text='Try the 5560A on points that are manual by default (unverified)', variable=self.try_5560a,
-                        command=self.refresh).grid(row=r, column=0, columnspan=2, sticky='w', pady=2); r += 1
         ttk.Label(d, text='Calibrator address').grid(row=r, column=0, sticky='w', pady=4)
         self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
         self.cal_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1
@@ -495,7 +488,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if g == 'I2A':
             return f'Calibrator current output ({amps}) to the meter 10 A terminal and COM for the 2 A range (Figure 3-4). Check the calibrator range and the fuse first.'
         if g == 'I10A':
-            high = "the calibrator's high-current output (see its manual; not verified for the 5560A)" if five60 else 'the calibrator 20 A output terminals'
+            high = 'the calibrator 30A and OUTPUT LO terminals (12 A range)' if five60 else 'the calibrator 20 A output terminals'
             return f'{high[0].upper() + high[1:]} to the meter 10 A terminal and COM (Figure 3-5). Use heavy leads and keep them short.'
         return p['setup']
 

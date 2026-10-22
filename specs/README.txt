@@ -15,8 +15,8 @@ Included
                             from the page images; loaded by fluke8808a_verification.py, not procspec.py, because the printed limits are asymmetric). Per point: ref (T3-2 #1),
                             table/row/page, kind (DCV ACV DCI ACI OHM2 OHM4 FREQ), nominal, range, unit, frequency (FREQ: amplitude 0.1 V), source (none | calibrator), input
                             (short | open), terminal, group (ZERO_SHORT ZERO_OPEN VOLT OHM4 OHM2 IMA I2A I10A), limits {90d, 1y: {low, high}} in base units, std_relative (ohms:
-                            tolerance about the calibrator setting), accuracy (the formula % of reading, % of range), cal_limits {5522A: why} (points that calibrator cannot
-                            make), and, where the printed table was wrong, flags + printed_limits. build_8808a_spec.py checks every limit against the accuracy formula in Decimal.
+                            tolerance about the calibrator setting), accuracy (the formula % of reading, % of range), cal_limits {5522A: why, 5560A: why} (points that calibrator cannot
+                            make; a calibrator not listed drives the point: 10 A ac at 40 Hz is listed for the 5522A only), and, where the printed table was wrong, flags + printed_limits. build_8808a_spec.py checks every limit against the accuracy formula in Decimal.
   keithley_2000_pv.json     Keithley Model 2000 Calibration Manual 2000-905-01 Rev. F, Tables 1-2 .. 1-6 (printed pp. 1-7 .. 1-13), 38 points (schema 1, written by build_k2000_spec.py from the page images). ONE period, '1y' (the manual prints one
                             interval: 1 year, 18-28 C). Per point: kind (DCV / ACV / DCI / ACI / OHM4), nominal (negative for the minus points), range (the meter range, manual, never autorange), limits{'1y'}, frequency, plc, group (hook-up key: DCV, ACV, ACV700, DCI, ACI,
                             OHM4, OHM100M), printed_limits (text as printed), variant ('alt219' = the 219 V @ 50 kHz substitute, 'opt700' = the optional 700 V @ 50 kHz, source 'manual'), computed_limit (219 V only). Top level: measure{nplc, filter_state, filter_count,
