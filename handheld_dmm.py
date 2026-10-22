@@ -1248,15 +1248,36 @@ class App(datamode.DataModeMixin):
 
     def certificate_rows(self):
         """As Found for every recorded point; As Left where it was measured again after an adjustment, else 'Same'."""
-        rows = []
+        return self.certificate_rows_and_points()[0]
+
+    def certificate_rows_and_points(self):
+        """(rows, points): the report rows and, parallel to them, the spec point each came from (for the optional TAR / TUR fields)."""
+        rows, pts = [], []
         for p in self.points:
             row = self.found_left_row(p, lambda r: self.certificate_row(p, r))
             if row:
                 rows.append(row)
-        return rows
+                pts.append(p)
+        return rows, pts
+
+    def certificate_fields(self, p):
+        """Optional TAR / TUR fields of one point, from the same point, limits and calibrator model as its Uncertainty cell.
+        Only points that carry an uncertainty today (numeric DCV / ACV / DCI / ACI / OHM / CAP with a source) get ratios; all others stay blank."""
+        blank = dict(TAR='', TUR='')
+        try:
+            if not (p['test'] == 'numeric' and p['kind'] in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP') and p.get('applied') and not p.get('no_uncertainty')):
+                return blank
+            import tartur
+            factor = Decimal(str(p['factor']))
+            clean = lambda d: float(f'{float(d * factor):.9g}')
+            q = dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
+                     frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)
+            return tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=self.calibrator_model())
+        except Exception:
+            return blank
 
     def export_pdf(self):
-        rows = self.certificate_rows()
+        rows, pts = self.certificate_rows_and_points()
         if not rows:
             messagebox.showinfo('No results', 'No recorded results to export yet.')
             return
@@ -1276,6 +1297,8 @@ class App(datamode.DataModeMixin):
         demo = self.any_synthetic()
         src = self.spec['source']
         try:
+            if details.get('show_tar_tur'):
+                rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [self.certificate_fields(p) for p in pts])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', self.info['name']), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Limits applied', src.get('limits', 'Manufacturer display-reading limits (12 month)')),
                                                                  ('Source', src.get('cite') or f'{src["document"]}, pp. {src["pages"].split(" ")[0]}')],
