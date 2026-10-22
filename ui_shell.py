@@ -25,6 +25,7 @@ Typical use (see Procedures/Fluke_8846A_Verification.py):
     shell.content                                               # the frame for the table
     shell.add_action('Run All Pending', cmd, accent=True)       # left of the action bar;   side='right' for file actions
     shell.set_sections([(name, passed, failed, total), ...])    # sidebar rows with status dots and counts
+    shell.set_verified('VERIFIED ON HARDWARE - LOCKED') # green chip while the procedure is locked (verified.py)
     shell.set_modified(3) / shell.set_devmode(True)             # amber 'MODIFIED (3)' / 'DEVELOPER MODE' header chips (procmods_ui.attach_to_shell calls these)
 """
 from __future__ import annotations
@@ -230,6 +231,22 @@ class Shell:
             chip.pack(side='left', padx=(8, 0))
         if text:
             chip.set(text, 'warn')
+            if not chip.winfo_manager():
+                chip.pack(side='left', padx=(8, 0))
+        else:
+            chip.pack_forget()
+        return chip
+
+    def set_verified(self, text):
+        """Green chip (e.g. 'VERIFIED ON HARDWARE - LOCKED') while the procedure is verified and locked (verified.py); '' removes it."""
+        chip = getattr(self, 'verified_chip', None)
+        if chip is None:
+            if not text:
+                return None
+            chip = self.verified_chip = ui.Pill(self.chip_frame, text, 'good')
+            chip.pack(side='left', padx=(8, 0))
+        if text:
+            chip.set(text, 'good')
             if not chip.winfo_manager():
                 chip.pack(side='left', padx=(8, 0))
         else:

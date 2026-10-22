@@ -39,3 +39,14 @@ The test window (beta layout)
   Small screens: below about 1100 pixels wide the section list becomes a drop-down and Low / High limits share one column.
   Look: Help > Appearance chooses Dark or Light for the next window you open.
 
+Verified on hardware (Procedures list)
+  The "Verified on hardware" column says which procedures have been run correctly on the real instruments, and when.
+  After a procedure has run correctly on the actual hardware, select it and press "Mark verified on hardware..." (who verified it, the date, and optionally the
+  instrument and calibrator used). It is then LOCKED: the procedure changes window, the "Edit procedure" control in the running window, developer-mode edits and
+  the Datasheet Builder (new version, delete) all refuse, with a message saying it is verified and locked. Running it is not affected, and changes that were
+  saved before it was locked stay as they are.
+  To change a locked procedure: select it, press "Unlock for editing..." and type the reason (your name, the date and the reason are recorded). Afterwards press
+  "Lock again" if nothing changed, or verify it on the hardware again. Anyone can unlock; nothing is hidden.
+  If a program file or test-point file of a verified procedure is replaced by an update, the column shows "CHANGED since" and the card lists what differs; the
+  procedure stays locked until it is verified again. Updates are never blocked.
+

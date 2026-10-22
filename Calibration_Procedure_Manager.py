@@ -17,7 +17,7 @@ import sys
 import tempfile
 import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import ui_theme as ui
 from mdd_importer_v49 import parse_mdd, import_mdd, init_datasheet_db
@@ -31,6 +31,8 @@ import procmods_ui
 import procmods_ui_model
 import datasheet_builder_ui
 import dsb_manager      # user-built datasheets are listed (not stored) in the Procedures table
+import verified         # 'Verified on hardware': the Procedures list marks, shows and locks verified procedures
+import verified_ui
 
 BASE = Path(__file__).resolve().parent
 DB = appdata.db_path('calibration_procedures.sqlite3')     # the person's own data folder (see appdata.py)
@@ -289,13 +291,14 @@ class Manager:
         split.pack(fill='both', expand=True)
         split.columnconfigure(0, weight=1)
         split.rowconfigure(0, weight=1)
-        cols = ('name', 'manufacturer', 'model', 'category', 'ready')
-        self.table = ui.make_table(split, cols, ('Procedure', 'Manufacturer', 'Model', 'Category', 'Status'),
-                                   (260, 130, 110, 170, 150), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w'},
-                                   zebra=True, pack=False, stretch={'manufacturer': False, 'model': False, 'category': False, 'ready': False})
+        cols = ('name', 'manufacturer', 'model', 'category', 'ready', 'verified')
+        self.table = ui.make_table(split, cols, ('Procedure', 'Manufacturer', 'Model', 'Category', 'Status', 'Verified on hardware'),
+                                   (260, 130, 110, 170, 150, 210), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w', 'verified': 'w'},
+                                   zebra=True, pack=False, stretch={'manufacturer': False, 'model': False, 'category': False, 'ready': False, 'verified': False})
         self.table.master.grid(row=0, column=0, sticky='nsew')
         self.table.tag_configure('missing', foreground=ui.C['bad'])
         self.table.tag_configure('modified', foreground=ui.C['warn'])
+        self.table.tag_configure('verified', foreground=ui.C['good'])
         self.empty_lib = self._empty_state(self.table, 'No procedures match.\nUse "Register procedure..." to add one.')
         self.table.bind('<Double-1>', lambda _: self.run_selected())
         self.table.bind('<<TreeviewSelect>>', lambda _: (self.refresh_details(), self.refresh_development()))
@@ -309,6 +312,10 @@ class Manager:
         ttk.Label(card, textvariable=self.d_sub, style='Muted.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(2, 8))
         self.d_pill = ui.Pill(card, '', 'neutral')
         self.d_pill.pack(anchor='w')
+        self.d_ver = ui.Pill(card, '', 'neutral')                  # 'VERIFIED ON HARDWARE <date> - LOCKED' / 'CHANGED SINCE' / 'UNLOCKED' / 'NOT VERIFIED'
+        self.d_ver.pack(anchor='w', pady=(6, 0))
+        self.d_ver_text = tk.StringVar()
+        ttk.Label(card, textvariable=self.d_ver_text, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(4, 0))
         ttk.Label(card, textvariable=self.d_desc, wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 4))
         ttk.Label(card, textvariable=self.d_path, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
         self.btn_run = ttk.Button(card, text='▶  Run procedure', style='Accent.TButton', command=self.run_selected)
@@ -318,6 +325,10 @@ class Manager:
         self.d_mod = ui.Pill(card, '', 'warn')                    # 'MODIFIED (n)': saved model-wide procedure changes exist
         self.btn_changes = ttk.Button(card, text='Procedure changes...', command=self.procedure_changes)
         self.btn_changes.pack(fill='x', pady=(6, 0))
+        self.btn_verify = ttk.Button(card, text='Mark verified on hardware...', command=self.mark_verified)
+        self.btn_verify.pack(fill='x', pady=(6, 0))
+        self.btn_lock = ttk.Button(card, text='Unlock for editing...', command=self.toggle_lock)
+        self.btn_lock.pack(fill='x', pady=(6, 0))
         ttk.Label(card, text='Run procedure uses real instruments. Demo mode only simulates readings, so you can rehearse safely.',
                   style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 0))
 
@@ -330,6 +341,8 @@ class Manager:
             self.d_pill.set('', 'neutral')
             self.btn_run.configure(state='disabled'); self.btn_demo.configure(state='disabled')
             self.d_mod.pack_forget(); self.btn_changes.configure(state='disabled')
+            self.d_ver.set('', 'neutral'); self.d_ver_text.set('')
+            self.btn_verify.configure(state='disabled'); self.btn_lock.configure(state='disabled')
             return
         id_, name, mfr, model, cat, script, desc = rec
         user = self._user_rows().get(str(id_))
@@ -350,6 +363,81 @@ class Manager:
         else:
             self.d_mod.pack_forget()
         self.btn_changes.configure(state='normal')
+        self.show_verified(rec)
+
+    # ------------------------------------------------------------------ Verified on hardware (verified.py)
+    def _verified(self):
+        if getattr(self, 'verified', None) is None:
+            self.verified = verified.Registry()
+        return self.verified
+
+    def _ver_entry(self, rec):
+        """The verified.Entry of a list row (id, name, manufacturer, model, category, script, ...)."""
+        id_, name, _mfr, model, _cat, script = rec[:6]
+        user = self._user_rows().get(str(id_))
+        return verified.make_entry(name, model, script, BASE, user_uid=user['uid'] if user else None, spec_path=user['spec_path'] if user else '')
+
+    def _ver_status(self, rec):
+        """(entry, Status) read afresh from the registry: another window may have unlocked it since the list was drawn."""
+        entry = self._ver_entry(rec)
+        return entry, self._verified().status(entry)
+
+    def show_verified(self, rec):
+        """The selected procedure's verification pill, notes and the two buttons."""
+        entry, status = self._ver_status(rec)
+        self.d_ver.set(status.pill, status.tone)
+        self.d_ver_text.set('\n'.join(status.detail_lines()))
+        state = verified.ui_state(status)
+        for button, key in ((self.btn_verify, 'verify'), (self.btn_lock, 'lock')):
+            text, enabled = state[key]
+            button.configure(text=text, state='normal' if enabled else 'disabled')
+        return status
+
+    def mark_verified(self):
+        rec = self._selected_row()
+        if not rec:
+            return None
+        entry, status = self._ver_status(rec)
+        form = verified_ui.ask_mark(self.root, entry, status)
+        if not form:
+            return None
+        try:
+            record = self._verified().verify(entry, form['who'], form['on_date'], form['note'], form['hardware'])
+        except verified.VerifyError as ex:
+            messagebox.showerror('Not recorded', str(ex), parent=self.root)
+            return None
+        self.refresh()
+        self.status.set(f'"{entry.name}" is marked verified on hardware ({record.verified_on}) and locked against edits.')
+        return record
+
+    def toggle_lock(self):
+        """'Unlock for editing...' (a typed reason is required) or, once unlocked and unchanged, 'Lock again'."""
+        rec = self._selected_row()
+        if not rec:
+            return None
+        entry, status = self._ver_status(rec)
+        try:
+            if status.kind == 'unlocked':
+                who = simpledialog.askstring('Lock again', 'Nothing has changed since it was verified. Your name (recorded):',
+                                             initialvalue=ui.Settings('verified').get('who', '') or verified.default_who(), parent=self.root)
+                if not who:
+                    return None
+                record = self._verified().relock(entry, who)
+                message = f'"{entry.name}" is locked again.'
+            elif status.kind in ('verified', 'changed'):
+                form = verified_ui.ask_unlock(self.root, entry, status)
+                if not form:
+                    return None
+                record = self._verified().unlock(entry.proc_key, form['who'], form['reason'])
+                message = f'"{entry.name}" is unlocked for editing; the reason is recorded.'
+            else:
+                return None
+        except verified.VerifyError as ex:
+            messagebox.showerror('Not changed', str(ex), parent=self.root)
+            return None
+        self.refresh()
+        self.status.set(message)
+        return record
 
     def _user_rows(self):
         """{iid: user-built row} of the last refresh (dsb_manager.user_rows)."""
@@ -379,17 +467,18 @@ class Manager:
         self.table.delete(*self.table.get_children())
         shown = 0
         mods = self._mod_counts(refresh=True)
-        for id_, name, mfr, model, category, script in rows:
-            if cat != ALL_CATEGORIES and category != cat:
-                continue
-            if term and term not in ' '.join((name, mfr, model, category)).lower():
-                continue
+        listed = [r for r in rows if not (cat != ALL_CATEGORIES and r[4] != cat) and not (term and term not in ' '.join((r[1], r[2], r[3], r[4])).lower())]
+        entries = [self._ver_entry(r) for r in listed]
+        self._ver_cache = self._verified().statuses(entries)          # one registry read; fingerprints only for verified procedures
+        for (id_, name, mfr, model, category, script), entry in zip(listed, entries):
             found = script_file(script).is_file()
             n_mod = mods.get((model or '').casefold(), 0)
-            tags = ['even' if shown % 2 == 0 else 'odd'] + ([] if found else ['missing']) + (['modified'] if n_mod else [])
+            vstat = self._ver_cache.get(entry.proc_key)
+            tags = ['even' if shown % 2 == 0 else 'odd'] + ([] if found else ['missing']) + (['modified'] if n_mod else []) + \
+                   (['verified'] if vstat is not None and vstat.kind == 'verified' and found and not n_mod else [])
             status = ('Ready' if found else 'Missing') + (f'  [{dsb_manager.TAG}]' if dsb_manager.is_user_iid(id_) else '') + \
                      (f'  {procmods_ui_model.chip_text(n_mod)}' if n_mod else '')
-            self.table.insert('', 'end', iid=str(id_), values=(name, mfr, model, category, status), tags=tags)
+            self.table.insert('', 'end', iid=str(id_), values=(name, mfr, model, category, status, vstat.text if vstat is not None else 'Not verified'), tags=tags)
             shown += 1
         self._toggle_empty(self.table, shown == 0)
         if keep and self.table.exists(keep[0]):
@@ -415,7 +504,7 @@ class Manager:
         if not rec:
             return
         lock = procmods_ui.shared_lock()
-        procmods_ui.open_manager_changes(self.root, rec[3], procmods.Store(devmode=lock.devmode), lock)
+        procmods_ui.open_manager_changes(self.root, rec[3], procmods.Store(devmode=lock.devmode), lock, proc_key=self._ver_entry(rec).proc_key)
 
     def selected(self):
         selection = self.table.selection()
@@ -508,6 +597,12 @@ class Manager:
         if sel and dsb_manager.is_user_iid(sel[0]):
             messagebox.showinfo('User-built datasheet', 'A user-built datasheet is not part of the library file. Delete it in the Datasheet Builder.')
             return
+        rec = self._selected_row()
+        if rec:
+            entry, status = self._ver_status(rec)
+            if status.locked:                                      # verified on hardware and locked: it stays in the list until it is unlocked
+                messagebox.showinfo('Verified and locked', verified.lock_text(status.record), parent=self.root)
+                return
         selected = self.selected()
         if not selected:
             return
@@ -648,6 +743,7 @@ class Manager:
         except Exception as exc:
             messagebox.showerror('Update failed', f'{exc}\n\nCheck the backup before continuing.'); return
         self.refresh_development()
+        self.refresh()                                                   # a verified procedure now shows 'CHANGED since'
         self.status.set(f'Updated {rec[1]}; backup saved as {backup.name}. Restart any open procedure windows to use it.')
         messagebox.showinfo('Update installed', f'Updated {rec[1]}.\nBackup: {backup}\n\nClose and reopen any running procedure windows.')
 
@@ -692,7 +788,7 @@ class Manager:
                 self._backup(rec, path); self._atomic_replace(raw, path)
             except Exception as exc:
                 messagebox.showerror('Restore failed', str(exc), parent=win); return
-            win.destroy(); self.refresh_development(); self.status.set(f'Restored {rec[1]} from {source.name}')
+            win.destroy(); self.refresh_development(); self.refresh(); self.status.set(f'Restored {rec[1]} from {source.name}')
             messagebox.showinfo('Restored', 'Previous procedure restored. Reopen any running procedure windows.')
         row = ttk.Frame(win); row.pack(fill='x', padx=16, pady=14)
         ttk.Button(row, text='Cancel', command=win.destroy).pack(side='right')

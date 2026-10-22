@@ -154,8 +154,9 @@ _EDIT_KINDS = ('point', 'limit', 'text')
 class ModsState:
     """Resolved overrides for one engine / model / asset, plus what was done with them.  One instance per App, shared with its IO."""
 
-    def __init__(self, engine, model, *, demo=False, store=None, devmode=None, shape=None, on_change=None):
+    def __init__(self, engine, model, *, demo=False, store=None, devmode=None, shape=None, on_change=None, proc_key=''):
         self.engine, self.model, self.demo = engine, model, bool(demo)
+        self.proc_key = proc_key or ''           # verified.py key of the procedure ('ds:<uid>' for a user-built one); '' = lock by model
         self.store, self.devmode = store, devmode
         self.shape = shape                       # 'band' when the engine judges low <= x <= high even though points also carry 'error'
         self.on_change = on_change
@@ -371,8 +372,18 @@ class ModsState:
             return self.oset
 
     # ---- live editing (procmods_live) --------------------------------------------------------------------------------------
+    def lock_reason(self) -> str:
+        """The procedure is verified on hardware and locked (verified.py): no editor may change it.  '' = editable.  Never raises."""
+        try:
+            return self._store().lock_reason(self.model, self.proc_key) or ''
+        except Exception:
+            return ''
+
     def live_blocked_reason(self) -> str:
         """Why the editor cannot change this run (empty = it can)."""
+        why = self.lock_reason()
+        if why:
+            return why
         if self.pinned:
             return ('This run continues under the modifications saved in its progress file. Stop the run and press Run again (or load the '
                     'progress file and choose the current settings) before editing.')
@@ -438,10 +449,11 @@ class ProcModsMixin:
     def pm_state(self):
         return self.__dict__.get('_pm_state')
 
-    def pm_init(self, engine, model, *, demo=False, lists=(), on_change=None, store=None, devmode=None, shape=None, load=True):
+    def pm_init(self, engine, model, *, demo=False, lists=(), on_change=None, store=None, devmode=None, shape=None, load=True, proc_key=None):
         """App side.  `lists`: the live point lists to patch in place (a module's POINTS, a handheld self.points).  shape='band' for an
         engine that judges low <= reading <= high.  `on_change()` is called after a list was patched (rebuild id lookups)."""
-        st = ModsState(engine, model, demo=demo, store=store, devmode=devmode, shape=shape, on_change=on_change)
+        st = ModsState(engine, model, demo=demo, store=store, devmode=devmode, shape=shape, on_change=on_change,
+                       proc_key=proc_key if proc_key is not None else getattr(self, 'pm_proc_key', ''))
         for lst in lists:
             st.register(lst)
         self.__dict__['_pm_state'] = st
@@ -827,7 +839,8 @@ class ProcModsMixin:
                                           supports_skip=self.pm_supports_skip(), supports_redo=self.pm_supports_redo(), pending=lambda: [x['text'] for x in st.live.pending])
         return M.Context(title=self.pm_title(), model=st.model, asset_id=self.pm_asset_text() or st.asset, demo=bool(getattr(self, 'demo', False)),
                          registries=regs, points=pts, defaults=defaults_for(st.engine), texts=self.pm_texts(pts), store=st._store(),
-                         idn=lambda: st.idn, is_running=self.pm_is_running, author=self.pm_author(), run_entries=st.run_entries, live=bridge)
+                         idn=lambda: st.idn, is_running=self.pm_is_running, author=self.pm_author(), run_entries=st.run_entries, live=bridge,
+                         proc_key=st.proc_key)
 
     def pm_live_attach(self, shell=None):
         """Give this procedure window the 'Edit procedure' action (it stays usable during a run).  Never breaks the window."""

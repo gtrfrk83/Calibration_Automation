@@ -246,3 +246,18 @@ procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods
   use it, and the function-level 'no_spec' error is raised only for points that have neither their own spec nor a function table entry. Old files (no `spec`) load and export unchanged; the schema id stays 'dsb-1'.
 - Rows are created in an auto-made range (the next decade up from the nominal); Meas Res / Auto Res / Display Decs write `Range.resolution`.
 - Tests: tests/test_dsb_grid_model.py (no tkinter), tests/test_dsb_ui_widgets.py (tests/_tk_stub.py; the stub now has a real `TclError`). The window has never been viewed on a real display.
+
+## Verified on hardware, and the lock (branch `verified-lock`)
+- `verified.py` (Tk-free): `Registry` over a NEW append-only table `proc_verify_events` (verify / unlock / relock / seed) in lab_registry.sqlite3; no existing table is touched.
+  A procedure's key is its launcher file name (`Fluke_117_Verification.py`) or `ds:<uid>` for a user-built datasheet. State is worked out from the events (who / when / why).
+- Seed: `verified.SEED` (code, shipped with every copy) = TDS2000C / TDS1000C-EDU (`Tektronix_TDS2000C_Verification.py`), WaveSurfer WS4104HD (`WaveSurfer_WS4104HD.py`), Fluke 117
+  (`Fluke_117_Verification.py`). Written into the real registry the first time it is used; a registry given an explicit path (tests) is never seeded; an unreadable registry keeps the seeded ones locked.
+  To seed another one, add it to `SEED` (or use the button in the Procedures list).
+- Locked means refused where the edit is saved: `procmods.Store._insert` / `set_enabled` (devmode command / setting / point / text / tolerance edits, import), `procmods_ui_model.ProcModsModel.read_only_reason`
+  (the editor before a run and the in-run editor, run scope included), `ModsState.live_blocked_reason`, `datasheet_builder.save` (existing uid) and `.delete`. The in-run 'Edit procedure' control is disabled with the reason
+  (`procmods_ui.LiveHook`, green chip via `ui_shell.Shell.set_verified`). Running is unaffected; overrides saved before the lock stay and still apply. Locks are by model for library procedures (the saved changes are kept per
+  model) and by key for user-built ones.
+- 'CHANGED since': a fingerprint (launcher + engine + driver files from `verified.FILES`, the spec / limit JSON, the saved overrides for the model; line endings and JSON layout ignored) is stored at verification time.
+  When you add a procedure to `Procedures/`, add its `verified.FILES` entry (`tests/test_verified_model.py` fails otherwise). The suite never blocks an update; it only flags.
+- Not in the PDF reports. Tests: `tests/test_verified_model.py`, `test_verified_editors.py`, `test_verified_ui.py` (the windows have never been viewed).
+
