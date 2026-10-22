@@ -934,7 +934,7 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         if self._high_voltage(p):
             if not messagebox.askyesno('HIGH VOLTAGE', f'This point outputs {abs(p["applied"]["value"]):g} V'
-                                       + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal else '') +
+                                       + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
                                        '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False
                 self.status.set('Stopped before a high-voltage point.')

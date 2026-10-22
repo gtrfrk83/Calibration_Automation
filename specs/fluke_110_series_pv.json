@@ -1,6 +1,8 @@
 {
  "schema": 2,
- "options": {"hookup_meter": "fluke110"},
+ "options": {
+  "hookup_meter": "fluke110"
+ },
  "kind": "manual-reading",
  "source": {
   "document": "Fluke 110/113/114/115/116/117 True-rms Multimeter - Calibration Information",
@@ -503,7 +505,10 @@
     "frequency": 45
    },
    "nominal": 600,
-   "id": "3-15"
+   "id": "3-15",
+   "ramp": [
+    600
+   ]
   },
   {
    "table": "3",
@@ -530,7 +535,10 @@
     "frequency": 1000.0
    },
    "nominal": 600,
-   "id": "3-16"
+   "id": "3-16",
+   "ramp": [
+    600
+   ]
   },
   {
    "table": "3",
@@ -664,7 +672,10 @@
     "frequency": null
    },
    "nominal": 600,
-   "id": "3-21"
+   "id": "3-21",
+   "ramp": [
+    600
+   ]
   },
   {
    "table": "3",
@@ -691,7 +702,10 @@
     "frequency": null
    },
    "nominal": -600,
-   "id": "3-22"
+   "id": "3-22",
+   "ramp": [
+    -600
+   ]
   },
   {
    "table": "3",
@@ -1617,7 +1631,10 @@
    },
    "nominal": 600,
    "note": "Select the range manually with the RANGE button.",
-   "id": "4-17"
+   "id": "4-17",
+   "ramp": [
+    600
+   ]
   },
   {
    "table": "4",
@@ -1641,7 +1658,10 @@
    },
    "nominal": -600,
    "note": "Select the range manually with the RANGE button.",
-   "id": "4-18"
+   "id": "4-18",
+   "ramp": [
+    -600
+   ]
   },
   {
    "table": "4",
@@ -1665,7 +1685,10 @@
    },
    "nominal": 600,
    "note": "Select the range manually with the RANGE button.",
-   "id": "4-19"
+   "id": "4-19",
+   "ramp": [
+    600
+   ]
   },
   {
    "table": "4",
@@ -1689,7 +1712,10 @@
    },
    "nominal": 600,
    "note": "Select the range manually with the RANGE button.",
-   "id": "4-20"
+   "id": "4-20",
+   "ramp": [
+    600
+   ]
   },
   {
    "table": "4",
