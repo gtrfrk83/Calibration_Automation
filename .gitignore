@@ -4,3 +4,4 @@ _backup*/
 Backups/
 *_checkpoint.json
 *.pdf
+.claude/worktrees/
