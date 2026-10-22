@@ -141,6 +141,16 @@ Procedures/Keysight_34970A_Verification.py  (RS-232)   and   Keysight_34972A_Ver
                   python Procedures/Keysight_34970A_Verification.py --demo
                   Not included: gain/offset ADJUSTMENT, relay contact resistance, thermocouple reference junction, 34907A.
 
+Procedures/Keithley_2000_Verification.py
+                  Two-way verification of the Keithley Model 2000 6.5-digit multimeter from the Model 2000 Calibration Manual (2000-905-01 Rev. F),
+                  section 1, Tables 1-2 to 1-6: DC volts, AC volts, DC current, AC current, 4-wire resistance and 100 Mohm (38 points, the optional
+                  700 V at 50 kHz needs a 5725A amplifier and is sourced by hand). The program sets function, range, speed and filter over GPIB
+                  (address 16) or RS-232 (SCPI, 4800 baud by default), drives a Fluke 5560A or 5522A, reads each result with :READ?, judges it against
+                  the printed 1-year limits and writes the 'Calibration Data' report. Warm-up (1 hour) and a hook-up dialog (pictures per
+                  diagrams/README_k2000.txt) are confirmed before the run. Engine: keithley2000_verification.py; driver: drivers/keithley_2000.py;
+                  spec builder: specs/build_k2000_spec.py. Demo (virtual instruments): python Procedures/Keithley_2000_Verification.py --demo
+                  Not included: the adjustment procedure.
+
 Fluke 110 / 113 / 114 / 115 / 116 / 117 handheld meters (manual-reading procedures)
 -------------------------------------------------------------------------------
 Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179, Klein MM325)

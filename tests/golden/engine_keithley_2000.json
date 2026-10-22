@@ -1,0 +1,1662 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "keithley2000_verification.IO.__init__",
+   "log": [
+    "5522A|>>|*IDN?",
+    "5522A|<<|FLUKE,5522A,SIM0001,1.0",
+    "5522A|>>|*CLS",
+    "2000|>>|*CLS",
+    "2000|>>|*IDN?",
+    "2000|<<|KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "keithley2000_verification.IO.__init__",
+   "result": "returned <keithley2000_verification.IO object>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5522A,SIM0001,1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "keithley2000_verification.IO.reset_at_start",
+   "log": [
+    "5522A|>>|*RST",
+    "5522A|>>|*CLS",
+    "5522A|>>|*OPC?",
+    "5522A|<<|1",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|STBY",
+    "5522A|>>|OPER?",
+    "5522A|<<|0",
+    "2000|>>|*RST",
+    "2000|>>|*CLS",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "2000|>>|:INIT:CONT OFF",
+    "2000|>>|:INIT:CONT?",
+    "2000|<<|0",
+    "2000|>>|:FORM:ELEM READ",
+    "2000|>>|:FORM:ELEM?",
+    "2000|<<|READ",
+    "2000|>>|:SYST:AZER:STAT?",
+    "2000|<<|1",
+    "RESET|--|Instruments reset to default settings at start: 5522A, 2000"
+   ],
+   "method": "keithley2000_verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     ":INIT:CONT OFF"
+    ],
+    [
+     "Q",
+     ":INIT:CONT?",
+     "0"
+    ],
+    [
+     "W",
+     ":FORM:ELEM READ"
+    ],
+    [
+     "Q",
+     ":FORM:ELEM?",
+     "READ"
+    ],
+    [
+     "Q",
+     ":SYST:AZER:STAT?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DC volts 100.0 mV, 100.0 mV range', 'error': 8.5e-06, 'group': 'DCV', 'id': 1, 'kind': 'DCV', 'limits': {'1y': 8.5e-06}, 'nominal': 0.1, 'optional': False, 'page': '1-7 (Table 1-2)', 'plc': 1, 'printed_limits': '99.9915 to 100.0085 mV', 'quick': False, 'range': 0.1, 'section': 'dcv', 'section_title': 'DC voltage', 'setup': 'Connect the calibrator HI / LO to the 2000 INPUT HI / LO (Figure 1-1). Use shielded, low-thermal connections for the 100 mV and 1 V ranges, shield to the calibrator output LO. With the calibrator at 0.00000 mV DC the program enables REL on the 100 mV range and leaves it on for the remainder of the DC volts tests. Positive and negative values for each range.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "keithley2000_verification.IO.measure[DCV#1]",
+   "log": [
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:FRSW?",
+    "2000|<<|1",
+    "2000|>>|:SENS:VOLT:DC:REF:STAT?",
+    "2000|<<|0",
+    "2000|>>|:SENS:FUNC 'VOLT:DC'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"VOLT:DC\"",
+    "2000|>>|:SENS:VOLT:DC:RANG 0.09",
+    "2000|>>|:SENS:VOLT:DC:RANG?",
+    "2000|<<|+1.000000E-01",
+    "2000|>>|:SENS:VOLT:DC:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:VOLT:DC:NPLC 1",
+    "2000|>>|:SENS:VOLT:DC:NPLC?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:VOLT:DC:AVER:TCON REP",
+    "2000|>>|:SENS:VOLT:DC:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:VOLT:DC:AVER:COUN 10",
+    "2000|>>|:SENS:VOLT:DC:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:VOLT:DC:AVER:STAT ON",
+    "2000|>>|:SENS:VOLT:DC:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|OUT 0V,0Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "2000|>>|:READ?",
+    "2000|<<|+2.500000E-06",
+    "2000|>>|:SENS:VOLT:DC:REF:ACQ",
+    "2000|>>|:SENS:VOLT:DC:REF?",
+    "2000|<<|+2.500000E-06",
+    "2000|>>|:SENS:VOLT:DC:REF:STAT ON",
+    "2000|>>|:SENS:VOLT:DC:REF:STAT?",
+    "2000|<<|1",
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "2000|>>|:SENS:FUNC 'VOLT:DC'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"VOLT:DC\"",
+    "2000|>>|:SENS:VOLT:DC:RANG 0.09",
+    "2000|>>|:SENS:VOLT:DC:RANG?",
+    "2000|<<|+1.000000E-01",
+    "2000|>>|:SENS:VOLT:DC:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:VOLT:DC:NPLC 1",
+    "2000|>>|:SENS:VOLT:DC:NPLC?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:VOLT:DC:AVER:TCON REP",
+    "2000|>>|:SENS:VOLT:DC:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:VOLT:DC:AVER:COUN 10",
+    "2000|>>|:SENS:VOLT:DC:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:VOLT:DC:AVER:STAT ON",
+    "2000|>>|:SENS:VOLT:DC:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|OUT 0.1V,0Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "2000|>>|:READ?",
+    "2000|<<|+1.000002E-01",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.measure",
+   "result": "returned 0.1000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:FRSW?",
+     "1"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:REF:STAT?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'VOLT:DC'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"VOLT:DC\""
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:RANG 0.09"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:RANG?",
+     "+1.000000E-01"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:NPLC?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0V,0Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+2.500000E-06"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:REF:ACQ"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:REF?",
+     "+2.500000E-06"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:REF:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:REF:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'VOLT:DC'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"VOLT:DC\""
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:RANG 0.09"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:RANG?",
+     "+1.000000E-01"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:NPLC?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:DC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:DC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.1V,0Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+1.000002E-01"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range', 'error': 9e-05, 'frequency': 1000.0, 'group': 'ACV', 'id': 11, 'kind': 'ACV', 'limits': {'1y': 9e-05}, 'nominal': 0.1, 'optional': False, 'page': '1-9 (Table 1-3)', 'printed_limits': '99.9100 to 100.0900 mV', 'quick': False, 'range': 0.1, 'section': 'acv', 'section_title': 'AC voltage', 'setup': 'Connect the calibrator HI / LO to the 2000 INPUT HI / LO with shielded cable (Figure 1-2). ACV function, 100 mV range, REL disabled. Source 1 kHz and 50 kHz for each range.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "keithley2000_verification.IO.measure[ACV#11]",
+   "log": [
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:FRSW?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FUNC 'VOLT:AC'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"VOLT:AC\"",
+    "2000|>>|:SENS:VOLT:AC:RANG 0.09",
+    "2000|>>|:SENS:VOLT:AC:RANG?",
+    "2000|<<|+1.000000E-01",
+    "2000|>>|:SENS:VOLT:AC:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:VOLT:AC:DET:BAND 30",
+    "2000|>>|:SENS:VOLT:AC:DET:BAND?",
+    "2000|<<|+3.000000E+01",
+    "2000|>>|:SENS:VOLT:AC:AVER:TCON REP",
+    "2000|>>|:SENS:VOLT:AC:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:VOLT:AC:AVER:COUN 10",
+    "2000|>>|:SENS:VOLT:AC:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:VOLT:AC:AVER:STAT ON",
+    "2000|>>|:SENS:VOLT:AC:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SENS:VOLT:AC:REF:STAT OFF",
+    "2000|>>|:SENS:VOLT:AC:REF:STAT?",
+    "2000|<<|0",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|OUT 0.1V,1000Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "2000|>>|:READ?",
+    "2000|<<|+1.000002E-01",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.measure",
+   "result": "returned 0.1000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:FRSW?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'VOLT:AC'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"VOLT:AC\""
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:RANG 0.09"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:RANG?",
+     "+1.000000E-01"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:DET:BAND 30"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:DET:BAND?",
+     "+3.000000E+01"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:REF:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:REF:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.1V,1000Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     6.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+1.000002E-01"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'AC volts 700.0 V @ 50.00 kHz, 750.0 V range', 'error': 1.215, 'frequency': 50000.0, 'group': 'ACV700', 'id': 21, 'kind': 'ACV', 'limits': {'1y': 1.215}, 'nominal': 700.0, 'optional': True, 'page': '1-9 (Table 1-3)', 'printed_limits': '698.785 to 701.215 V', 'quick': False, 'range': 750.0, 'section': 'acv700', 'section_title': 'AC voltage 700 V at 50 kHz (5725A amplifier)', 'setup': '700.000 V at 50 kHz needs the Fluke 5725A amplifier with a 5700A-class calibrator (Figure 1-2): neither the 5522A nor the 5560A is assumed to make it. Source 700.000 V, 50 kHz by hand, in operate, let it settle, then confirm; the program reads the 2000 itself.', 'source': 'manual', 'terminal': 'FRONT', 'unit': 'V', 'variant': 'opt700'}",
+   "case": "keithley2000_verification.IO.measure[ACV#21]",
+   "log": [
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:FRSW?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FUNC 'VOLT:AC'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"VOLT:AC\"",
+    "2000|>>|:SENS:VOLT:AC:RANG 675",
+    "2000|>>|:SENS:VOLT:AC:RANG?",
+    "2000|<<|+7.500000E+02",
+    "2000|>>|:SENS:VOLT:AC:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:VOLT:AC:DET:BAND 30",
+    "2000|>>|:SENS:VOLT:AC:DET:BAND?",
+    "2000|<<|+3.000000E+01",
+    "2000|>>|:SENS:VOLT:AC:AVER:TCON REP",
+    "2000|>>|:SENS:VOLT:AC:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:VOLT:AC:AVER:COUN 10",
+    "2000|>>|:SENS:VOLT:AC:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:VOLT:AC:AVER:STAT ON",
+    "2000|>>|:SENS:VOLT:AC:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SENS:VOLT:AC:REF:STAT OFF",
+    "2000|>>|:SENS:VOLT:AC:REF:STAT?",
+    "2000|<<|0",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "2000|>>|:READ?",
+    "2000|<<|+0.000000E+00",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.measure",
+   "result": "returned 0.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:FRSW?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'VOLT:AC'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"VOLT:AC\""
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:RANG 675"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:RANG?",
+     "+7.500000E+02"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:DET:BAND 30"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:DET:BAND?",
+     "+3.000000E+01"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:VOLT:AC:REF:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:VOLT:AC:REF:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DC current 10.00 mA, 10.00 mA range', 'error': 5.8e-06, 'group': 'DCI', 'id': 22, 'kind': 'DCI', 'limits': {'1y': 5.8e-06}, 'nominal': 0.01, 'optional': False, 'page': '1-10 (Table 1-4)', 'plc': 1, 'printed_limits': '9.99420 to 10.00580 mA', 'quick': False, 'range': 0.01, 'section': 'dci', 'section_title': 'DC current', 'setup': 'Connect the calibrator current output (normal current output) to the 2000 AMPS and INPUT LO jacks (Figure 1-3). DCI function, 10 mA range first. Positive and negative values for each range. Check the AMPS fuse (3 A, 250 V) first.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "keithley2000_verification.IO.measure[DCI#22]",
+   "log": [
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:FRSW?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FUNC 'CURR:DC'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"CURR:DC\"",
+    "2000|>>|:SENS:CURR:DC:RANG 0.009",
+    "2000|>>|:SENS:CURR:DC:RANG?",
+    "2000|<<|+1.000000E-02",
+    "2000|>>|:SENS:CURR:DC:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:CURR:DC:NPLC 1",
+    "2000|>>|:SENS:CURR:DC:NPLC?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:CURR:DC:AVER:TCON REP",
+    "2000|>>|:SENS:CURR:DC:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:CURR:DC:AVER:COUN 10",
+    "2000|>>|:SENS:CURR:DC:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:CURR:DC:AVER:STAT ON",
+    "2000|>>|:SENS:CURR:DC:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SENS:CURR:DC:REF:STAT OFF",
+    "2000|>>|:SENS:CURR:DC:REF:STAT?",
+    "2000|<<|0",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|OUT 0.01A,0Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "2000|>>|:READ?",
+    "2000|<<|+1.000002E-02",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.measure",
+   "result": "returned 0.01000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:FRSW?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'CURR:DC'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"CURR:DC\""
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:RANG 0.009"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:RANG?",
+     "+1.000000E-02"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:NPLC?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:CURR:DC:REF:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:DC:REF:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.01A,0Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+1.000002E-02"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'AC current 1.000 A @ 1.000 kHz, 1.000 A range', 'error': 0.0014, 'frequency': 1000.0, 'group': 'ACI', 'id': 30, 'kind': 'ACI', 'limits': {'1y': 0.0014}, 'nominal': 1.0, 'optional': False, 'page': '1-11 (Table 1-5)', 'printed_limits': '0.998600 to 1.001400 A', 'quick': False, 'range': 1.0, 'section': 'aci', 'section_title': 'AC current', 'setup': 'Connect the calibrator AC current output to the 2000 AMPS and INPUT LO jacks (Figure 1-4). ACI function, 1 A range first. 1 kHz.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "keithley2000_verification.IO.measure[ACI#30]",
+   "log": [
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:FRSW?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FUNC 'CURR:AC'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"CURR:AC\"",
+    "2000|>>|:SENS:CURR:AC:RANG 0.9",
+    "2000|>>|:SENS:CURR:AC:RANG?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:CURR:AC:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:CURR:AC:DET:BAND 30",
+    "2000|>>|:SENS:CURR:AC:DET:BAND?",
+    "2000|<<|+3.000000E+01",
+    "2000|>>|:SENS:CURR:AC:AVER:TCON REP",
+    "2000|>>|:SENS:CURR:AC:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:CURR:AC:AVER:COUN 10",
+    "2000|>>|:SENS:CURR:AC:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:CURR:AC:AVER:STAT ON",
+    "2000|>>|:SENS:CURR:AC:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SENS:CURR:AC:REF:STAT OFF",
+    "2000|>>|:SENS:CURR:AC:REF:STAT?",
+    "2000|<<|0",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|OUT 1A,1000Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "2000|>>|:READ?",
+    "2000|<<|+1.000002E+00",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.measure",
+   "result": "returned 1.000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:FRSW?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'CURR:AC'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"CURR:AC\""
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:RANG 0.9"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:RANG?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:DET:BAND 30"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:DET:BAND?",
+     "+3.000000E+01"
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:CURR:AC:REF:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:CURR:AC:REF:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 1A,1000Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     6.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+1.000002E+00"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 32, 'kind': 'OHM4', 'limits': {'1y': 0.014}, 'nominal': 100.0, 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '99.9860 to 100.0140 ohm', 'quick': False, 'range': 100.0, 'section': 'ohm4', 'section_title': 'Resistance 100 ohm to 10 Mohm (4-wire)', 'setup': 'Shielded 4-wire connections: 2000 INPUT and SENSE jacks to the calibrator (Figure 1-5), calibrator for 4-wire resistance with external sense ON. Select the 2000 4-wire resistance function (the manual says the Ohm4 key), 100 ohm range, FILTER on.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "keithley2000_verification.IO.measure[OHM4#32]",
+   "log": [
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:FRSW?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FUNC 'FRES'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"FRES\"",
+    "2000|>>|:SENS:FRES:RANG 90",
+    "2000|>>|:SENS:FRES:RANG?",
+    "2000|<<|+1.000000E+02",
+    "2000|>>|:SENS:FRES:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:FRES:NPLC 1",
+    "2000|>>|:SENS:FRES:NPLC?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:FRES:AVER:TCON REP",
+    "2000|>>|:SENS:FRES:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:FRES:AVER:COUN 10",
+    "2000|>>|:SENS:FRES:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:FRES:AVER:STAT ON",
+    "2000|>>|:SENS:FRES:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FRES:REF:STAT OFF",
+    "2000|>>|:SENS:FRES:REF:STAT?",
+    "2000|<<|0",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|OUT 100OHM",
+    "5522A|>>|ZCOMP WIRE4",
+    "5522A|>>|ZCOMP?",
+    "5522A|<<|WIRE4",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "2000|>>|:READ?",
+    "2000|<<|+1.000002E+02",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.measure",
+   "result": "returned 100.0002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:FRSW?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'FRES'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"FRES\""
+    ],
+    [
+     "W",
+     ":SENS:FRES:RANG 90"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:NPLC?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FRES:REF:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:REF:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 100OHM"
+    ],
+    [
+     "W",
+     "ZCOMP WIRE4"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "WIRE4"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+1.000002E+02"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '4-wire ohms 1.000 MΩ, 1.000 MΩ range', 'error': 110.0, 'group': 'OHM4', 'id': 36, 'kind': 'OHM4', 'limits': {'1y': 110.0}, 'nominal': 1000000.0, 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '0.999890 to 1.000110 Mohm', 'quick': False, 'range': 1000000.0, 'section': 'ohm4', 'section_title': 'Resistance 100 ohm to 10 Mohm (4-wire)', 'setup': 'Shielded 4-wire connections: 2000 INPUT and SENSE jacks to the calibrator (Figure 1-5), calibrator for 4-wire resistance with external sense ON. Select the 2000 4-wire resistance function (the manual says the Ohm4 key), 100 ohm range, FILTER on.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "keithley2000_verification.IO.measure[OHM4#36]",
+   "log": [
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:FRSW?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FUNC 'FRES'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"FRES\"",
+    "2000|>>|:SENS:FRES:RANG 900000",
+    "2000|>>|:SENS:FRES:RANG?",
+    "2000|<<|+1.000000E+06",
+    "2000|>>|:SENS:FRES:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:FRES:NPLC 1",
+    "2000|>>|:SENS:FRES:NPLC?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:FRES:AVER:TCON REP",
+    "2000|>>|:SENS:FRES:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:FRES:AVER:COUN 10",
+    "2000|>>|:SENS:FRES:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:FRES:AVER:STAT ON",
+    "2000|>>|:SENS:FRES:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FRES:REF:STAT OFF",
+    "2000|>>|:SENS:FRES:REF:STAT?",
+    "2000|<<|0",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|OUT 1000000OHM",
+    "5522A|>>|ZCOMP NONE",
+    "5522A|>>|ZCOMP?",
+    "5522A|<<|NONE",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "2000|>>|:READ?",
+    "2000|<<|+1.000002E+06",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.measure",
+   "result": "returned 1000002.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:FRSW?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'FRES'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"FRES\""
+    ],
+    [
+     "W",
+     ":SENS:FRES:RANG 900000"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG?",
+     "+1.000000E+06"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:NPLC?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FRES:REF:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:REF:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 1000000OHM"
+    ],
+    [
+     "W",
+     "ZCOMP NONE"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "NONE"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+1.000002E+06"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '4-wire ohms 100.0 MΩ, 100.0 MΩ range', 'error': 153000.0, 'group': 'OHM100M', 'id': 38, 'kind': 'OHM4', 'limits': {'1y': 153000.0}, 'nominal': 100000000.0, 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '99.8470 to 100.1530 Mohm', 'quick': False, 'range': 100000000.0, 'section': 'ohm100m', 'section_title': 'Resistance 100 Mohm', 'setup': 'Connect the 2000 INPUT and SENSE jacks to the calibrator as in Figure 1-6, with the calibrator external sense OFF (2-wire output); shielded cables. The manual selects the 100 Mohm range of the same Ohm4 function.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "keithley2000_verification.IO.measure[OHM4#38]",
+   "log": [
+    "5522A|>>|STBY",
+    "2000|>>|:SYST:FRSW?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FUNC 'FRES'",
+    "2000|>>|:SENS:FUNC?",
+    "2000|<<|\"FRES\"",
+    "2000|>>|:SENS:FRES:RANG 90000000",
+    "2000|>>|:SENS:FRES:RANG?",
+    "2000|<<|+1.000000E+08",
+    "2000|>>|:SENS:FRES:RANG:AUTO?",
+    "2000|<<|0",
+    "2000|>>|:SENS:FRES:NPLC 1",
+    "2000|>>|:SENS:FRES:NPLC?",
+    "2000|<<|+1.000000E+00",
+    "2000|>>|:SENS:FRES:AVER:TCON REP",
+    "2000|>>|:SENS:FRES:AVER:TCON?",
+    "2000|<<|REP",
+    "2000|>>|:SENS:FRES:AVER:COUN 10",
+    "2000|>>|:SENS:FRES:AVER:COUN?",
+    "2000|<<|+10",
+    "2000|>>|:SENS:FRES:AVER:STAT ON",
+    "2000|>>|:SENS:FRES:AVER:STAT?",
+    "2000|<<|1",
+    "2000|>>|:SENS:FRES:REF:STAT OFF",
+    "2000|>>|:SENS:FRES:REF:STAT?",
+    "2000|<<|0",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|OUT 100000000OHM",
+    "5522A|>>|ZCOMP NONE",
+    "5522A|>>|ZCOMP?",
+    "5522A|<<|NONE",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "2000|>>|:READ?",
+    "2000|<<|+1.000002E+08",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.measure",
+   "result": "returned 100000200.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     ":SYST:FRSW?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FUNC 'FRES'"
+    ],
+    [
+     "Q",
+     ":SENS:FUNC?",
+     "\"FRES\""
+    ],
+    [
+     "W",
+     ":SENS:FRES:RANG 90000000"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG?",
+     "+1.000000E+08"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     ":SENS:FRES:NPLC 1"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:NPLC?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:TCON REP"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:TCON?",
+     "REP"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:COUN 10"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:COUN?",
+     "+10"
+    ],
+    [
+     "W",
+     ":SENS:FRES:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     ":SENS:FRES:REF:STAT OFF"
+    ],
+    [
+     "Q",
+     ":SENS:FRES:REF:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 100000000OHM"
+    ],
+    [
+     "W",
+     "ZCOMP NONE"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "NONE"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     ":READ?",
+     "+1.000002E+08"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "keithley2000_verification.IO.close",
+   "log": [
+    "5522A|>>|STBY"
+   ],
+   "method": "keithley2000_verification.IO.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "ctl",
+     "go_local"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_keithley_2000",
+ "schema": 1
+}

@@ -65,6 +65,9 @@ class SimK2000Transport(_SimBase):
         """What the selected function sees right now: the calibrator output on a matching function, else nothing (0 / open)."""
         f = self.bench.fluke
         unit, ac = SOURCE[node]
+        ext = getattr(self.bench, 'external_input', None)         # a standard the technician connected (the 5725A system), independent of the calibrator
+        if ext is not None:
+            return float(ext) if unit == 'V' and ac is True else None
         if not f['operate'] or f.get('unit', 'V') != unit:
             return None
         if ac is True and not f['freq']:

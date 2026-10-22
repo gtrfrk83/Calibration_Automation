@@ -25,6 +25,7 @@ import drivers  # noqa: E402
 from drivers.simulated import SimBench, SimFlukeTransport, make_bench, make_dacq_bench, make_dmm_bench  # noqa: E402
 from drivers.simulated_28x import SimFluke28x  # noqa: E402
 from drivers.simulated_fgen import make_fgen_bench  # noqa: E402
+from drivers.simulated_k2000 import make_k2000_bench  # noqa: E402
 from drivers.simulated_mdo import make_mdo_bench  # noqa: E402
 from drivers.simulated_tds import make_tds_bench  # noqa: E402
 from tests import golden_capture as gc  # noqa: E402
@@ -90,6 +91,18 @@ def run_truevolt():
         dt.terminals = 'REAR' if p.get('terminal') == 'REAR' else 'FRON'          # the Front/Rear switch the technician would set
         c.run(f'truevolt_verification.IO.measure[{pid(p)}]', io.measure, p, _log=io.log)
     c.run('truevolt_verification.IO.close', io.close, _log=io.log)
+    return c.entries
+
+
+def run_k2000():
+    import keithley2000_verification as K
+    c = gc.Case('engine_keithley_2000')
+    bench, ft, dt = make_k2000_bench('5522A', 'GPIB')
+    r = Runner(c)
+    io = r.build('keithley2000_verification.IO.__init__', lambda: K.IO('sim', 'sim', 'Fluke 5522A', 9600, 'GPIB', transports=(rec(dt), rec(ft))))
+    c.run('keithley2000_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
+    _measure_all(c, io, sample(K.POINTS, lambda p: (p['kind'], p['group'], bool(p.get('frequency')), p['range'] >= 1e6), 16), 'keithley2000_verification')
+    c.run('keithley2000_verification.IO.close', io.close, _log=io.log)
     return c.entries
 
 
@@ -347,4 +360,5 @@ RUNS = {
     'fluke_8846a': run_fluke_8846a,
     'handheld_5522a': run_handheld,
     'wavesurfer_dcv': run_wavesurfer,
+    'keithley_2000': run_k2000,
 }

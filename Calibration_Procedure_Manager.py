@@ -70,6 +70,7 @@ STABLE = {
  'Fluke 175 Performance Verification': 'Fluke_175_Verification.py',
  'Fluke 177 Performance Verification': 'Fluke_177_Verification.py',
  'Fluke 179 Performance Verification': 'Fluke_179_Verification.py',
+ 'Keithley 2000 Performance Verification': 'Keithley_2000_Verification.py',
 }
 VERSIONS = {'WaveSurfer_WS4104HD.py': '51', 'Fluke_87V.py': '53', 'Agilent_34401A.py': '55',
             'Fluke_8846A_Verification.py': '59', 'Fluke_8846A_Adjustment.py': '57',
@@ -77,7 +78,8 @@ VERSIONS = {'WaveSurfer_WS4104HD.py': '51', 'Fluke_87V.py': '53', 'Agilent_34401
             'Tektronix_MDO4000C_Verification.py': '2', 'Tektronix_TDS2000C_Verification.py': '1', 'Fluke_110_Verification.py': '2', 'Fluke_113_Verification.py': '2', 'Fluke_114_Verification.py': '2', 'Fluke_115_Verification.py': '2', 'Fluke_116_Verification.py': '2', 'Fluke_117_Verification.py': '2', 'Klein_MM325_Verification.py': '2',
             'Keysight_33210A_Verification.py': '2', 'Agilent_33220A_Verification.py': '2', 'Agilent_33250A_Verification.py': '1',
             'Fluke_287_Verification.py': '1', 'Fluke_289_Verification.py': '1', 'Fluke_77IV_Verification.py': '1',
-            'Fluke_175_Verification.py': '1', 'Fluke_177_Verification.py': '1', 'Fluke_179_Verification.py': '1'}
+            'Fluke_175_Verification.py': '1', 'Fluke_177_Verification.py': '1', 'Fluke_179_Verification.py': '1',
+            'Keithley_2000_Verification.py': '1'}
 ALL_CATEGORIES = 'All categories'
 
 
@@ -147,6 +149,7 @@ def init_db():
             ('Fluke 175 Performance Verification','Fluke','175','Digital Multimeter','Fluke_175_Verification.py'),
             ('Fluke 177 Performance Verification','Fluke','177','Digital Multimeter','Fluke_177_Verification.py'),
             ('Fluke 179 Performance Verification','Fluke','179','Digital Multimeter','Fluke_179_Verification.py'),
+            ('Keithley 2000 Performance Verification','Keithley','2000','Digital Multimeter','Keithley_2000_Verification.py'),
         ]
         for name,mfr,model,category,filename in records:
             stable = str(Path('Procedures') / filename)
