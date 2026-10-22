@@ -114,10 +114,21 @@ class Scope:
         return None, '', 'no scope entry for this test (e.g. RMS noise)'
 
 
+def round_up(value, sig=2):
+    """Round a magnitude UP to `sig` significant figures. A reported uncertainty must never be smaller than the scope CMC or the budget,
+    so every uncertainty shown on a report goes through this and never through round-to-nearest."""
+    if not value or value <= 0:
+        return 0.0
+    step = 10 ** (math.floor(math.log10(value)) - sig + 1)
+    out = round(math.ceil(round(value / step, 9)) * step, 15)
+    return out if out >= value else value
+
+
 def format_value(value, unit, sig=2):
-    """Uncertainty text with SI prefix and two significant figures: 153 Ohm, 0.16 %, 40 µV."""
+    """Uncertainty text with SI prefix and two significant figures: 153 Ohm, 0.16 %, 40 µV.  Always rounded UP, never to nearest."""
     if value is None:
         return ''
+    value = round_up(value, sig)
     if unit == '%':
         return f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f} %' if value else '0 %'
     if unit == 'dB':

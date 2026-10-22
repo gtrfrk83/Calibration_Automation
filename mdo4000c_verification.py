@@ -201,7 +201,7 @@ def uncertainty_text(p, raw):
                 v, u, _ = sc.oscilloscope('bandwidth', volts_pp=p['vin_pp'], frequency=p['freq'])
                 if v is not None:
                     ratio = 10 ** (v / 20) - 1
-                    return f'{ratio * max(raw.get("gain", raw.get("reading", 1)), 0.707):.2g}'
+                    return f'{uncertainty.round_up(ratio * max(raw.get("gain", raw.get("reading", 1)), 0.707)):.2g}'
             if k == 'DVMDC':
                 v, u, _ = sc.oscilloscope('dcv', volts=abs(p['nominal']), impedance='1M')
                 if v is not None:
@@ -212,7 +212,7 @@ def uncertainty_text(p, raw):
     if ref and (ref.get('rel') is not None or ref.get('abs') is not None):
         reading = abs(raw.get('reading', p['nominal']))
         value = (ref.get('rel') or 0) * reading + (ref.get('abs') or 0)
-        return f'{value:.2g} {ref.get("unit", p["unit"])}'.strip()
+        return f'{uncertainty.round_up(value):.2g} {ref.get("unit", p["unit"])}'.strip()
     return 'N/A'
 
 
