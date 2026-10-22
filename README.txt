@@ -151,6 +151,17 @@ Procedures/Keithley_2000_Verification.py
                   spec builder: specs/build_k2000_spec.py. Demo (virtual instruments): python Procedures/Keithley_2000_Verification.py --demo
                   Not included: the adjustment procedure.
 
+Procedures/Agilent_34410A_Verification.py
+                  Two-way verification of the Agilent / Keysight 34410A 6.5-digit multimeter from the 34410A/11A/L4411A Service Guide, chapter 3
+                  Verification Tests (printed pp. 68-87): zero offset (front and rear terminals), DC volts, DC current, resistance, frequency, AC volts and AC
+                  current (86 points; the optional extra AC volts, AC current and capacitance tests are tick-boxes). The meter is connected over GPIB
+                  (address 22) or USB (a VISA resource string); the choice and an address for each are remembered. The program sets function, range, 100 NPLC or
+                  the 3 Hz AC filter, drives a Fluke 5560A, 5522A or 5520A, reads each result with READ?, and judges it against the printed 24 hour, 90 day or
+                  1 year limits (1 year by default). It reads the Front/Rear switch before every point (it cannot be set remotely). Hook-up pictures per
+                  diagrams/README_34410a.txt. Engine: agilent34410a_verification.py; driver: drivers/keysight_34410a.py; spec builder: specs/build_34410a_spec.py;
+                  calibrator suitability (TAR / TUR): specs/34410a_standards_suitability.md. Demo (virtual instruments):
+                  python Procedures/Agilent_34410A_Verification.py --demo      Not included: adjustment, self-test.
+
 Fluke 110 / 113 / 114 / 115 / 116 / 117 handheld meters (manual-reading procedures)
 -------------------------------------------------------------------------------
 Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179, Klein MM325)

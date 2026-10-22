@@ -30,7 +30,8 @@
   "Fluke 175 Performance Verification": "Fluke_175_Verification.py",
   "Fluke 177 Performance Verification": "Fluke_177_Verification.py",
   "Fluke 179 Performance Verification": "Fluke_179_Verification.py",
-  "Keithley 2000 Performance Verification": "Keithley_2000_Verification.py"
+  "Keithley 2000 Performance Verification": "Keithley_2000_Verification.py",
+  "Agilent 34410A Performance Verification": "Agilent_34410A_Verification.py"
  },
  "VERSIONS": {
   "WaveSurfer_WS4104HD.py": "51",
@@ -63,7 +64,8 @@
   "Fluke_175_Verification.py": "1",
   "Fluke_177_Verification.py": "1",
   "Fluke_179_Verification.py": "1",
-  "Keithley_2000_Verification.py": "1"
+  "Keithley_2000_Verification.py": "1",
+  "Agilent_34410A_Verification.py": "1"
  },
  "records": [
   [
@@ -282,6 +284,13 @@
    "2000",
    "Digital Multimeter",
    "Keithley_2000_Verification.py"
+  ],
+  [
+   "Agilent 34410A Performance Verification",
+   "Agilent",
+   "34410A",
+   "Digital Multimeter",
+   "Agilent_34410A_Verification.py"
   ]
  ],
  "FILES": {
@@ -692,6 +701,20 @@
    ],
    "spec": [
     "specs/keithley_2000_pv.json"
+   ]
+  },
+  "Agilent_34410A_Verification.py": {
+   "code": [
+    "Procedures/Agilent_34410A_Verification.py",
+    "agilent34410a_verification.py",
+    "procspec.py",
+    "drivers/base.py",
+    "drivers/transport.py",
+    "drivers/keysight_34410a.py",
+    "drivers/fluke_5560a.py"
+   ],
+   "spec": [
+    "specs/keysight_34410a_pv.json"
    ]
   }
  },

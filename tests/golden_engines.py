@@ -26,6 +26,7 @@ from drivers.simulated import SimBench, SimFlukeTransport, make_bench, make_dacq
 from drivers.simulated_28x import SimFluke28x  # noqa: E402
 from drivers.simulated_fgen import make_fgen_bench  # noqa: E402
 from drivers.simulated_k2000 import make_k2000_bench  # noqa: E402
+from drivers.simulated_34410a import make_34410a_bench  # noqa: E402
 from drivers.simulated_mdo import make_mdo_bench  # noqa: E402
 from drivers.simulated_tds import make_tds_bench  # noqa: E402
 from tests import golden_capture as gc  # noqa: E402
@@ -103,6 +104,19 @@ def run_k2000():
     c.run('keithley2000_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
     _measure_all(c, io, sample(K.POINTS, lambda p: (p['kind'], p['group'], bool(p.get('frequency')), p['range'] >= 1e6), 16), 'keithley2000_verification')
     c.run('keithley2000_verification.IO.close', io.close, _log=io.log)
+    return c.entries
+
+
+def run_34410a():
+    import agilent34410a_verification as A
+    c = gc.Case('engine_keysight_34410a')
+    bench, ft, dt = make_34410a_bench('5522A', 'GPIB')
+    r = Runner(c)
+    io = r.build('agilent34410a_verification.IO.__init__', lambda: A.IO('sim', 'sim', 'Fluke 5522A', 9600, 'GPIB', transports=(rec(dt), rec(ft))))
+    c.run('agilent34410a_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
+    _measure_all(c, io, sample([p for p in A.POINTS if p['terminal'] == 'FRONT'], lambda p: (p['kind'], p['group'], bool(p.get('frequency')), p['range'] >= 1e6, p['source']), 18),
+                 'agilent34410a_verification')
+    c.run('agilent34410a_verification.IO.close', io.close, _log=io.log)
     return c.entries
 
 
@@ -361,4 +375,5 @@ RUNS = {
     'handheld_5522a': run_handheld,
     'wavesurfer_dcv': run_wavesurfer,
     'keithley_2000': run_k2000,
+    'keysight_34410a': run_34410a,
 }
