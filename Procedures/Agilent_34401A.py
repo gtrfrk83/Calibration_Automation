@@ -13,6 +13,7 @@ import ui_theme as ui
 import ui_shell
 import appdata
 import datamode
+import procmods_engine
 import drivers
 DATA=HERE/'34401A_results.json'
 POINTS=[]
@@ -56,9 +57,9 @@ for terminal in ('FRONT','REAR'):
             POINTS[-1]['terminal']=terminal
             POINTS[-1]['manual_limit']=err
 
-class IO:
+class IO(procmods_engine.ProcModsMixin):
     """Bench I/O for this procedure: the DMM and the Fluke 5560A, both through the instrument drivers."""
-    def __init__(self, dmm_port, fluke_port, baud, parity, bits):
+    def __init__(self, dmm_port, fluke_port, baud, parity, bits, mods=None):
         self.log=drivers.CommandLog()
         self.dmm=drivers.Agilent34401A(drivers.open_visa(f'ASRL{dmm_port}::INSTR',timeout=20,baud=baud,data_bits=bits,
             parity=parity.lower(),stop_bits=2,write_termination='\n',read_termination='\n'),self.log,label='34401A')
@@ -67,9 +68,12 @@ class IO:
         try:
             self.fluke.open(verify_model=False)
             self.dmm.connect()
+            self.pm_attach(mods,*self.pm_drivers())
         except Exception:
             self.close();raise
         self.ident=self.dmm.idn
+    def pm_drivers(self):
+        return (self.dmm,self.fluke)
     def standby(self):
         self.fluke.standby_quiet()
     def close(self):
@@ -95,7 +99,7 @@ class IO:
             # Zero-offset verification requires a physical copper short or OPEN current
             # input. The 5560A must remain in STBY and is never used as a zero source.
             self.dmm.configure(k,r)
-            time.sleep(1.5)
+            time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('a34401.settle.zero',1.5))
             return self.dmm.read()
         if k in ('DCV','ACV','DCI','ACI'):
             self.dmm.configure(k,r)
@@ -110,12 +114,12 @@ class IO:
             self.dmm.configure_frequency()
             self.fluke.set_output_volts(p["amplitude"],f)
         self.fluke.operate_unverified()
-        time.sleep(3.5 if k.startswith('AC') else 2)
+        time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('a34401.settle.ac',3.5) if k.startswith('AC') else self.pm_param('a34401.settle.default',2))
         reading=self.dmm.read()
         self.standby()
         return reading
 
-class App(datamode.DataModeMixin):
+class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     SETUP_TEXT = {
         'VOLTAGE': '5560A voltage output to the meter HI / LO terminals',
         'CURRENT': '5560A current output to the meter current (A) input and LO',
@@ -127,6 +131,7 @@ class App(datamode.DataModeMixin):
     def __init__(self,root,demo=False):
         self.root=root;self.demo=demo;self.io=None;self._busy=False;self.stop=False
         self.results={}
+        self.pm_init('a34401','34401A',demo=demo,lists=[POINTS])   # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
         root.title('Agilent 34401A | Performance Verification v54'+(' [DEMO]' if demo else ''))
         ui.fit_window(root, 1280, 800, min_w=900, min_h=620)
@@ -295,7 +300,7 @@ class App(datamode.DataModeMixin):
         self.status.set('Connecting ...');self.root.update_idletasks()
         try:
             self.disconnect();self.io=IO(self.parse_com(self.dmm_port.get()),self.parse_com(self.fluke_port.get()),
-                                        int(self.baud.get()),self.parity.get(),int(self.bits.get()))
+                                        int(self.baud.get()),self.parity.get(),int(self.bits.get()),mods=self.pm_state)
         except Exception as exc:
             self.disconnect();self._set_conn(False)
             self.status.set('Connection error: '+str(exc))
@@ -325,6 +330,8 @@ class App(datamode.DataModeMixin):
         if not self.confirm_found_overwrite(points):return
         if self.busy or not points:return
         if not self.asset.get().strip():messagebox.showwarning('Instrument ID','Enter an instrument ID.');return
+        points=self.pm_begin_run(points,self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
+        if not points:self.status.set('Every selected point is skipped by a procedure modification.');return
         if not self.demo and self.io is None:self.test_connections()
         if not self.demo and self.io is None:return
         self.stop=False;self.busy=True
@@ -387,11 +394,11 @@ class App(datamode.DataModeMixin):
     def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));messagebox.showerror('Measurement stopped',str(exc))
     def _record(self,p,reading,synthetic):
         result='PASS' if abs(reading-p['nominal'])<=p['error'] else 'FAIL'
-        self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label)
+        self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label,**self.pm_result_fields())
         self._update_row(p);self.save(silent=True)
     def save(self,silent=False):
         path=appdata.progress_path(f'34401A_{"".join(c if c.isalnum() or c in "-_" else "_" for c in self.asset.get()) or "UNASSIGNED"}_checkpoint.json')
-        path.write_text(json.dumps(dict(asset=self.asset.get(),serial=self.serial.get(),demo=self.demo,**self.save_fields()),indent=2))
+        path.write_text(json.dumps(dict(asset=self.asset.get(),serial=self.serial.get(),demo=self.demo,**self.save_fields(),**self.pm_checkpoint_fields()),indent=2))
         if not silent:self.status.set(f'Saved {path.name}')
     def load(self):
         path=filedialog.askopenfilename(filetypes=[('Checkpoint','*.json')]);
@@ -399,7 +406,7 @@ class App(datamode.DataModeMixin):
         data=json.loads(Path(path).read_text())
         if self.file_has_synthetic(data) and not self.demo:
             if not messagebox.askyesno('Synthetic data','Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):return
-        self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.load_results(data);self.refresh();self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
+        self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.load_results(data);self.pm_on_checkpoint(data);self.refresh();self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
     @staticmethod
     def report_section(p):
         import report_pdf

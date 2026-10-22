@@ -28,6 +28,7 @@ import ui_theme as ui
 import ui_shell
 import appdata
 import datamode
+import procmods_engine
 import drivers
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
@@ -173,11 +174,11 @@ def to_visa(text):
 # ================================================================================================================
 # bench I/O (no tkinter: the simulated-bench tests drive this class directly)
 # ================================================================================================================
-class IO:
+class IO(procmods_engine.ProcModsMixin):
     """The generator under test, the 5790B, and (optionally) a counter and a power meter. A reference left without an
     address is read by the technician: ask_number(prompt, unit) is called and must return a float (or None to stop)."""
 
-    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT'):
+    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT', mods=None):
         self.log = drivers.CommandLog()
         self.ask_number = ask_number
         self.std_input = std_input
@@ -201,9 +202,13 @@ class IO:
                 self.counter = self._connect_counter(tr)
             if 'power' in t or (addrs.get('power') or '').strip():
                 self.power = drivers.ReferenceMeter(tr('power'), self.log, label='PowerMeter'); self.power.connect()
+            self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
         self.ident = self.uut.idn
+
+    def pm_drivers(self):
+        return tuple(d for d in (self.uut, self.std, self.counter, self.power) if d is not None)
 
     def _connect_counter(self, tr):
         """A 53131A / 53132A gets its own driver (input, gate and reference set and read back); any other counter is used
@@ -273,11 +278,12 @@ class IO:
         raw = dict(reference='not checked (generic counter)')
         if isinstance(self.counter, drivers.Keysight5313x):
             ref_hz = self.counter.set_reference(self.counter_ref)          # EXT: selected, checked now, and re-checked every reading
-            self.counter.configure_frequency(channel=1, gate_s=1.0, impedance=50, coupling='AC', expected_hz=expected_hz)
+            gate_s = self.pm_param('fgen.counter_gate', 1.0)
+            self.counter.configure_frequency(channel=1, gate_s=gate_s, impedance=50, coupling='AC', expected_hz=expected_hz)
             src, auto = self.counter.reference()
             if src != self.counter_ref:
                 raise drivers.InstrumentError(f'Counter timebase is {src}, expected {self.counter_ref}.')
-            raw = dict(counter=self.counter.idn.split(',')[1].strip(), gate_s=1.0,
+            raw = dict(counter=self.counter.idn.split(',')[1].strip(), gate_s=gate_s,
                        reference=f'EXT {ref_hz / 1e6:g} MHz (checked)' if ext else 'INT')
         f = self.counter.frequency()
         if not 1e6 < f < 1e8:
@@ -295,7 +301,12 @@ class IO:
     def _out(self, p, frequency=None):
         self.uut.setup(p['function'], frequency or p['frequency'], p['amplitude'], p['amp_unit'], p['load'])
         self.uut.output(True)
-        time.sleep(SETTLE.get(p['kind'], 1.0))
+        time.sleep(self._settle(p))
+
+    def _settle(self, p):
+        if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
+        k = p['kind']
+        return self.pm_param(f'fgen.settle.{k.lower()}', SETTLE[k]) if k in SETTLE else self.pm_param('fgen.settle.other', 1.0)
 
     # ---- one point -----------------------------------------------------------------------------------------
     def measure(self, p, results, pref_cache):
@@ -494,7 +505,7 @@ def certificate_rows(results):
 # ================================================================================================================
 # application
 # ================================================================================================================
-class App(datamode.DataModeMixin):
+class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     WIRING = {
         'NONE': ('Self-test', [('Disconnect', 'Remove any cable from the generator OUTPUT. No connections are needed for the self-test.')]),
         'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter channel 1 input with a 50 ohm BNC cable.'),
@@ -521,6 +532,7 @@ class App(datamode.DataModeMixin):
         configure(model)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}; self.pref_cache = {}; self.conditions_ok = False
+        self.pm_init('fgen', MODEL, demo=demo, lists=[POINTS])         # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
         root.title(f'{SPEC["manufacturer"]} {MODEL} | Performance Verification' + (' [DEMO]' if demo else ''))
         ui.fit_window(root, 1320, 840, min_w=900, min_h=640)
@@ -552,6 +564,7 @@ class App(datamode.DataModeMixin):
 
     # ------------------------------------------------------------------ selection
     def active(self, p):
+        if p.get('skip'): return False                               # a point skipped by a procedure modification
         return not (self.test_set.get().startswith('Quick') and not p['quick'])
 
     def active_points(self): return [p for p in POINTS if self.active(p)]
@@ -688,7 +701,9 @@ class App(datamode.DataModeMixin):
         self.update_shell_sections(self.active_points(), lambda p: p['section_title'])
 
     def on_period(self, save=True):
+        self.pm_revert(POINTS)                                       # limits come from the period table: take the modifications off,
         apply_period(POINTS, PERIODS[self.period.get()])
+        self.pm_apply(POINTS)                                        # then put them back (they only apply if they fit this period)
         for records in (self.found, self.left):      # As Found and As Left are re-judged against the newly selected limits
             for key, rec in records.items():
                 rec['result'] = judge(POINTS[int(key) - 1], rec['reading'])
@@ -735,7 +750,7 @@ class App(datamode.DataModeMixin):
         try:
             self.disconnect()
             self.io = IO(self._addrs(), ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()],
-                         flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()])
+                         flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=self.pm_state)
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
@@ -783,6 +798,8 @@ class App(datamode.DataModeMixin):
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
+        if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
         if not self.demo and self.io is None: self.test_connections()
         if not self.demo and self.io is None: return
@@ -867,7 +884,8 @@ class App(datamode.DataModeMixin):
             stale = [q for q in POINTS if q['kind'] == 'FLAT' and q['range_db'] == rng and str(q['id']) in self.results
                      and self.results[str(q['id'])].get('raw', {}).get('method', 'POWER') == 'POWER']
         self.results[str(p['id'])] = dict(reading=reading, result=judge(p, reading), raw=raw, synthetic=synthetic,
-                                          period=PERIODS[self.period.get()], timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label)
+                                          period=PERIODS[self.period.get()], timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label,
+                                          **self.pm_result_fields())
         self._update_row(p); self.save(silent=True)
         if stale:
             messagebox.showwarning('Flatness reference changed',
@@ -882,7 +900,7 @@ class App(datamode.DataModeMixin):
     def save(self, silent=False):
         path = self._checkpoint_path()
         path.write_text(json.dumps(dict(model=MODEL, asset=self.asset.get(), serial=self.serial.get(), demo=self.demo,
-                                        period=self.period.get(), **self.save_fields()), indent=2))
+                                        period=self.period.get(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
@@ -895,6 +913,7 @@ class App(datamode.DataModeMixin):
             if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.period.set(data.get('period', self.period.get())); self.load_results(data)
+        self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
 
     def certificate_rows(self):

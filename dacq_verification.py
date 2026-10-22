@@ -22,6 +22,7 @@ import ui_theme as ui
 import ui_shell
 import appdata
 import datamode
+import procmods_engine
 import procspec
 import drivers
 from drivers.keysight_dacq import channel_for, pair_channel
@@ -86,12 +87,12 @@ def list_com_ports():
         return []
 
 
-class IO:
+class IO(procmods_engine.ProcModsMixin):
     """Bench I/O: the 34970A / 34972A and the calibrator, both through the instrument drivers."""
     SETTLE_AC = {10: 6.0, 20: 5.0}
 
     def __init__(self, dmm_address, cal_address, cal_model='Fluke 5560A', cal_baud=9600, module='34901A', slot=2,
-                 serial=None, transports=None):
+                 serial=None, transports=None, mods=None):
         self.log = drivers.CommandLog()
         self.module, self.slot = module, int(slot)
         cal_name, cal_cls = CALIBRATORS[cal_model]
@@ -111,9 +112,13 @@ class IO:
             self.dmm.connect()
             self.dmm.require_module(module, self.slot)
             self.dmm.check_errors('connecting')
+            self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
         self.ident = self.dmm.idn
+
+    def pm_drivers(self):
+        return (self.dmm, self.cal)
 
     def standby(self):
         self.cal.standby_quiet()
@@ -141,12 +146,15 @@ class IO:
         return channel_for(self.module, self.slot, p['role'])
 
     def settle(self, p):
-        if p['kind'] == 'FREQ': return 3.0
-        if p['kind'] == 'ACV': return self.SETTLE_AC.get(p.get('frequency'), 4.0)
-        if p['kind'] == 'ACI': return 4.0
-        if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return 4.0
-        if p['kind'] in ('DCI', 'OHM2'): return 3.0
-        return 2.0
+        if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
+        if p['kind'] == 'FREQ': return self.pm_param('dacq.settle.freq', 3.0)
+        if p['kind'] == 'ACV':
+            f = p.get('frequency')
+            return self.pm_param(f'dacq.settle.ac_{int(f)}hz', self.SETTLE_AC[f]) if f in self.SETTLE_AC else self.pm_param('dacq.settle.ac_other', 4.0)
+        if p['kind'] == 'ACI': return self.pm_param('dacq.settle.aci', 4.0)
+        if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return self.pm_param('dacq.settle.ohm_high', 4.0)
+        if p['kind'] in ('DCI', 'OHM2'): return self.pm_param('dacq.settle.dci_ohm2', 3.0)
+        return self.pm_param('dacq.settle.default', 2.0)
 
     def measure(self, p):
         self.standby()
@@ -154,7 +162,7 @@ class IO:
         self.dmm.configure_point(p, ch)
         self.dmm.check_errors('configuring ' + p['description'])
         if p['source'] == 'none':          # copper short / open input: the calibrator stays in STANDBY
-            time.sleep(1.5)
+            time.sleep(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('dacq.settle.zero', 1.5))
             reading = self.dmm.read()
             self.dmm.check_errors('reading ' + p['description'])
             return reading
@@ -172,11 +180,12 @@ class IO:
         return reading
 
 
-class App(datamode.DataModeMixin):
+class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def __init__(self, root, model, demo=False):
         configure(model)
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}
+        self.pm_init('dacq', MODEL, demo=demo, lists=[POINTS])         # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
         root.title(f'Keysight {MODEL} | Performance Verification' + (' [DEMO]' if demo else ''))
         ui.fit_window(root, 1340, 860, min_w=900, min_h=660)
@@ -215,6 +224,7 @@ class App(datamode.DataModeMixin):
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
 
     def active(self, p):
+        if p.get('skip'): return False                               # a point skipped by a procedure modification
         if p.get('opt') == 'ohm2' and not self.include_ohm2.get(): return False
         if p.get('opt') == 'ac' and not self.include_ac.get(): return False
         if p['role'] == 'current' and self.module.get() == '34902A': return False     # the 34902A has no current input
@@ -358,7 +368,9 @@ class App(datamode.DataModeMixin):
         self.update_shell_sections([p for p in POINTS if self.active(p)], lambda p: p['section_title'])
 
     def on_period(self, save=True):
+        self.pm_revert(POINTS)                                       # limits come from the period table: take the modifications off,
         procspec.apply_period(POINTS, PERIODS[self.period.get()])
+        self.pm_apply(POINTS)                                        # then put them back (they only apply if they fit this period)
         for records in (self.found, self.left):     # re-judge stored readings (As Found and As Left) against the newly selected limits
             for key, rec in records.items():
                 p = POINTS[int(key) - 1]
@@ -442,7 +454,7 @@ class App(datamode.DataModeMixin):
 
     def _make_io(self):
         return IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()),
-                  self.module.get(), int(self.slot.get()), serial=self._serial_kwargs() if self.rs232 else None)
+                  self.module.get(), int(self.slot.get()), serial=self._serial_kwargs() if self.rs232 else None, mods=self.pm_state)
 
     def test_connections(self):
         if self.demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
@@ -486,6 +498,8 @@ class App(datamode.DataModeMixin):
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
+        if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
         if not self.demo and self.io is None: self.test_connections()
         if not self.demo and self.io is None: return
@@ -547,7 +561,7 @@ class App(datamode.DataModeMixin):
     def _record(self, p, reading, synthetic):
         result = 'PASS' if abs(reading - p['nominal']) <= p['error'] else 'FAIL'
         self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()],
-                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label)
+                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields())
         self._update_row(p); self.save(silent=True)
 
     # ------------------------------------------------------------------ files
@@ -558,7 +572,7 @@ class App(datamode.DataModeMixin):
     def save(self, silent=False):
         path = self._checkpoint_path()
         path.write_text(json.dumps(dict(asset=self.asset.get(), serial=self.serial.get(), demo=self.demo, period=self.period.get(),
-                                        module=self.module.get(), slot=self.slot.get(), **self.save_fields()), indent=2))
+                                        module=self.module.get(), slot=self.slot.get(), **self.save_fields(), **self.pm_checkpoint_fields()), indent=2))
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
@@ -570,6 +584,7 @@ class App(datamode.DataModeMixin):
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.module.set(data.get('module', self.module.get())); self.slot.set(data.get('slot', self.slot.get()))
         self.period.set(data.get('period', self.period.get())); self.load_results(data)
+        self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         # optional points that were run come back visible
         ran = set(self.found) | set(self.left)
         self.include_ohm2.set(any(POINTS[int(k) - 1].get('opt') == 'ohm2' for k in ran))
