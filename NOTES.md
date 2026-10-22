@@ -7,7 +7,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 - `Procedures/`: launchers (one per instrument), checkpoints are written here at run time (git-ignored).
 - `specs/`: `*_pv.json` test points and limits, plus the `build_*.py` scripts that wrote them. See `specs/README.txt`.
 - `drivers/`: instrument drivers, transports (VISA / pyserial), simulators (`simulated.py`). See `drivers/README.txt`.
-- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 77 IV, 87V, 287/289, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A).
+- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 77 IV, 175/177/179, 87V, 287/289, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A).
 - `labregistry.py` / `labregistry_ui.py`: per-asset report history and drift (`lab_registry.sqlite3`, not in the repo).
 - `report_pdf.py` / `report_dialog.py`: PDF "Calibration Data" reports.
   Optional TAR / TUR columns: two independent checkboxes (TAR, TUR) in `report_dialog.ask_details` (`details["show_tar"]`, `["show_tur"]`, `["show_tar_tur"]` = `report_pdf.TarTur`, default off, remembered in `~/.calibration_suite/report_tartur.json`); `report_pdf.apply_tar_tur`. TAR / TUR appear on the PDF data file only (there is no CSV export). Off = the PDF is unchanged.
@@ -15,7 +15,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 
 ## Procedures
 WaveSurfer WS4104HD, Fluke 87V, Agilent 34401A, Fluke 8846A (verification + adjustment), Keysight 34460A/61A/65A/70A,
-Tektronix MDO4000C, Tektronix TDS2000C / TDS1000C-EDU, Fluke 110/113/114/115/116/117, Fluke 77 Series IV, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
+Tektronix MDO4000C, Tektronix TDS2000C / TDS1000C-EDU, Fluke 110/113/114/115/116/117, Fluke 77 Series IV, Fluke 175/177/179, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
 Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard), Fluke 287 / 289 (typed or IR readings).
 
 ## Standing rules
@@ -180,6 +180,43 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Existing quirk found, not changed: the shared engine prints '(2 V applied)' on every kHz frequency row of the 110-series and 87V reports whatever the applied level is (the 77 IV uses `report_desc`).
 - Tests: `tests/test_77_points.py` (spec vs an independent second transcription of Table 2, specification check, step 8, padding, prompt sequences, wire commands on both simulated calibrators, full run on the bench, PDF, demo),
   plus the 77 IV in `tests/test_handheld_options.py`. The Tk windows were not viewed (no tkinter here).
+
+## Fluke 175 / 177 / 179 notes (branch `fluke-170-series`; checked on the simulated bench only, never run on hardware or a real UI)
+- Source: Fluke 175, 177, 179 Calibration Information (22 pp., PN 1600476 Rev. 7, 3/23): Table 1 calibrator (a 5500A), procedure p. 9, Table 2 = 175 (printed pp. 10-11, 52 rows), Table 3 = 177 / 179 (pp. 12-13, 51 rows + 3 temperature rows, 179 only).
+  Read from rendered page images (220 dpi) twice, plus a machine check of every printed limit against the extracted DIGITS (text extraction is used for digits only; it scrambles the 177/179 DC-frequency row).
+  The tables have no step numbers: steps are numbered in table order (ids `2-1`..`2-52` for the 175, `3-1`..`3-54` for the 177 / 179; the 179 adds `3-52`..`3-54`).
+- ONE spec for the family (`specs/fluke_170_series_pv.json`, `specs/build_170_spec.py`), per-step `models` like the 110 series: 175 = 52 points, 177 = 51, 179 = 54. Launchers `Procedures/Fluke_175_Verification.py`,
+  `Fluke_177_Verification.py`, `Fluke_179_Verification.py`; Manager rows 'Fluke 175 Performance Verification', 'Fluke 177 ...', 'Fluke 179 ...' (Digital Multimeter); `verified.FILES` entries; not verified on hardware (nothing seeded).
+- Points per function (175 / 177 / 179): AC volts 15 (300 mV 45 Hz; 500 mV 500 Hz / 1 kHz; 5, 50 V at 45 / 500 / 1k Hz; 300 V 45 Hz; 500 V 500 Hz / 1 kHz; 1000 V 45 / 500 / 1k Hz), AC volts frequency 4 (1 V 45 Hz, 900 Hz, 9 kHz; 5 V 50 kHz),
+  DC volts 5 (5, 50, 300, 1000, -1000 V), DC volts frequency 2 / 1 / 1, DC millivolts 3 (30, -300, 600 mV), ohms 6 (500 ohm ... 19 Mohm), capacitance 4 (0.9, 9, 90, 900 uF), continuity 2 (25 ohm on / 250 ohm off), diode 1 (2.0 V),
+  AC mA 3, AC A 2, DC mA 3, DC A 2, temperature 3 (179 only: 0, -40, 400 degC).
+- THREE printed values are corrected, each flagged in the spec (`printed_limits`), on the on-screen note and in the report row Description ('... (limits corrected)'; `report_pdf` does not print footer notes, so `source.report_note` is stored with the issued snapshot only):
+  2-30 (175, 500 ohm): upper limit printed '504.7 kOhm', judged 504.7 ohm (the 177/179 table prints 504.7 Ohm, accuracy 0.9 % + 2 counts of 0.1 ohm = 4.7 ohm);
+  3-4 (177/179, 5 V 45 Hz): upper limit printed 5.103 V, judged 5.053 V (4.947 lower, the 175 table, 1.0 % + 3 counts of 0.001 V);
+  3-25 (177/179, DC volts frequency): printed '3 V 45 kHz, 45.06 Hz / 44.94 Hz' (input in kHz, lower / upper columns swapped), judged 3 V at 45 Hz, 44.94 .. 45.06 Hz (the 175 table prints 3 V 45 Hz, 44.94 / 45.06). The 177/179 table has only this ONE
+  DC-volts-frequency row (the 175 has 3 V 45 Hz and 30 V 50 kHz); no second row is invented. Lab owner to confirm all three.
+  Format only (same number, printed text kept in `printed_text`): 50.1 -> 50.10 V (175), 899 / 901 -> 899.0 / 901.0 Hz, 8.99 / 9.01 -> 8.990 / 9.010 kHz, so the typed reading is padded to the meter's display resolution.
+- The published accuracy is NOT in the calibration manual. `build_170_spec.py` checks every limit against +/-(% of reading + counts x resolution) from the Fluke 170 Series Technical Data AS SUMMARISED FROM THE WEB (secondary source, the PDF itself was not downloaded:
+  AC 1.0 % + 3 (45-500 Hz) / 2.0 % + 3 (500 Hz-1 kHz); DC V 0.15 % + 2 (175), 0.09 % + 2 (177/179, 0.1 % at 1000 V); ohms 0.9 % + 2 / + 1, 50 Mohm 1.5 % + 3; capacitance 1.2 % + 2; diode 1 % + 2; AC mA / A 1.5 % + 3; DC mA / A 1.0 % + 3; Hz 0.1 % + 1;
+  temperature 1 % + 1.0 degC) to within half a display step; all 106 steps agree (the three corrected rows were found by this check and by the table itself). Ranges (600.0 mV ... 50.00 Mohm, 60.00 mA, 400.0 mA, 6.000 A, 10.00 A, 1000 nF ... 9999 uF, 99.99 Hz ... 99.99 kHz)
+  come from the same data sheet and the decimals of the limits: the manual names no range. Re-check against the real Technical Data before relying on them.
+- Standing rules as in the other handhelds: `,0Hz` on every DC point (incl. the diode 2.0 V point), HV straight to the test value (`auto_ramp` false; the manual prescribes none), `hv_threshold_v` 30 (project convention; the 170 manual gives no shock threshold), function prompt on every function change (13 in a 175 / 177 run, 14 in a 179 run),
+  reading padded to the display resolution, reset before the first point, standby after each point, typed readings (no remote interface in the manual: no IR / Bluetooth reading built, none described). Report: PDF 'Calibration Data' (`options.report_title`, like the 77), named asset-MM-DD-YYYY.pdf.
+  Not applicable: AUTO-V LoZ / annunciator pop-up (none of these points), square-wave sources (none), IR (none), REL.
+- Calibrator: 5522A or 5560A (the manual names a 5500A); only existing driver commands (`OUT ...V,<f>Hz`, `OUT ...A`, `OUT ...OHM`, `OUT ...NF / UF`, `TC_TYPE K` + `OUT ...CEL` for temperature), nothing new, no registry change. Sections: AC / DC volts, DC mV, diode, frequency rows: NORMAL output;
+  ohms: NORMAL (2-wire); capacitance: NORMAL; currents up to 400 mA: AUX (5522A) / VI AUX (5560A); 4 A / 9 A: 20 A (5522A) / 30 A (5560A); temperature: TC connector + Fluke 80AK adapter (Table 1), K-type thermocouple.
+- Frequency rows (AC and DC volts frequency) are sourced as AC volts and READ in Hz / kHz: `no_uncertainty` is set (the calibrator's voltage uncertainty is not a frequency uncertainty) and the natural-unit guard (`tartur.NATURAL_UNITS`) blanks TAR / TUR. Existing quirk found, NOT changed: the 77 IV, 110-series and 87V frequency steps still
+  print the voltage uncertainty with a Hz unit (e.g. '2.9 mHz' on 5 V at 50 kHz); set `no_uncertainty` on those steps (a spec-only change) if the lab agrees.
+- TAR / TUR (calibrator 5522A): below 1:1 at 9 A AC 1 kHz (0.6:1), about 1.8:1 at 400 mA AC 1 kHz and on capacitance; the report prints what it computes.
+- Shared-engine / shared-file edits (all small and additive): `handheld_dmm.py` one line (opt-in per point: `no_freq_suffix` true drops the 'at f Hz' from the report Nominal of a frequency reading; set only on the 170 Hz-unit frequency rows, every other procedure's report is unchanged); `hookups.py` + `specs/build_hookups.py` meter `fluke170` (8 diagrams drawn,
+  only the 170 files; the other diagrams are byte for byte unchanged); `Calibration_Procedure_Manager.py`; `verified.py`. The fingerprint of the verified Fluke 117 changes with `handheld_dmm.py` / `hookups.py` (verified.py shows 'Changed since verification'); its behaviour did not change.
+- Verified from the manual: jacks named VOhm, 400 mA, 10 A, COM (pp. 2, 3, 9; fuses 440 mA / 11 A p. 18); the four front buttons HOLD, MIN MAX, RANGE and a blank YELLOW button (Figure 1, p. 3; 'B (YELLOW button)', p. 14); the LEAd test-lead alert (p. 2); footnote 1 'Press the yellow button to access this function'
+  (capacitance, diode, DC mA, DC A, AC / DC volts frequency, temperature); note 2 (ohms exclude lead resistance); note 3 (correct cable) and 4 (20 minutes soak) for temperature; AC current noise note (short VOhm to COM or leave it unconnected, p. 9).
+- UNVERIFIED (Mike to confirm on the real meter): the rotary switch positions, their order and the yellow-button sequence (the manual has no dial figure; the 'Change the function' prompts use the table's own 'Test (Switch Position)' names and the footnote wording, and do not invent a toggle sequence; whether Ohms / Continuity / Diode /
+  Capacitance share one position); the jack ORDER and layout (the diagrams draw an 87V-style row 10A, 400 mA, COM, VOhm); that temperature is on the mV position with the yellow button (the manual says only 'press yellow'; 179 only); °C / °F selection on the 179; the ranges / resolutions listed above; the 30 V threshold;
+  calibrator capacitance output (`OUT <n>NF / UF`, unverified on both calibrators), DC current (`OUT <n>A,0Hz` unverified on the 5560A), thermocouple output (`TC_TYPE K` / `OUT <n>CEL` unverified on both) and whether the calibrators can make 9 A at 1 kHz, 30 V at 50 kHz and 1000 V at 1 kHz (the calibrator refuses what it cannot; the run stops).
+- Tests: `tests/test_170_points.py` (spec vs an independent second transcription of both tables, accuracy check, the three corrections, padding, prompt / cable / HV sequences, wire commands on both simulated calibrators for all three models, full runs, PDF, demo, checkpoint, registration; tkinter stubbed in setUpModule).
+  The Tk windows were not viewed (no tkinter here). `tests/test_tartur_wiring_dmm.test_off_identical_to_baseline` compares PDFs byte for byte and fails on a clean `main` too (a time stamp inside the PDF), unrelated.
 
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.
