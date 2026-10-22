@@ -491,7 +491,7 @@
    ]
   },
   {
-   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range', 'error': 9e-05, 'frequency': 1000.0, 'group': 'ACV', 'id': 11, 'kind': 'ACV', 'limits': {'1y': 9e-05}, 'nominal': 0.1, 'optional': False, 'page': '1-9 (Table 1-3)', 'printed_limits': '99.9100 to 100.0900 mV', 'quick': False, 'range': 0.1, 'section': 'acv', 'section_title': 'AC voltage', 'setup': 'Connect the calibrator HI / LO to the 2000 INPUT HI / LO with shielded cable (Figure 1-2). ACV function, 100 mV range, REL disabled. Source 1 kHz and 50 kHz for each range.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range', 'error': 9e-05, 'frequency': 1000.0, 'group': 'ACV', 'id': 11, 'kind': 'ACV', 'limits': {'1y': 9e-05}, 'nominal': 0.1, 'optional': False, 'page': '1-9 (Table 1-3)', 'printed_limits': '99.9100 to 100.0900 mV', 'quick': False, 'range': 0.1, 'section': 'acv', 'section_title': 'AC voltage', 'setup': 'Connect the calibrator HI / LO to the 2000 INPUT HI / LO with shielded cable (Figure 1-2). ACV function, 100 mV range, REL disabled. Source 1 kHz and 50 kHz for each range. Detector bandwidth 3 (slow), digital filter off.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
    "case": "keithley2000_verification.IO.measure[ACV#11]",
    "log": [
     "5522A|>>|STBY",
@@ -505,18 +505,12 @@
     "2000|<<|+1.000000E-01",
     "2000|>>|:SENS:VOLT:AC:RANG:AUTO?",
     "2000|<<|0",
-    "2000|>>|:SENS:VOLT:AC:DET:BAND 30",
+    "2000|>>|:SENS:VOLT:AC:DET:BAND 3",
     "2000|>>|:SENS:VOLT:AC:DET:BAND?",
-    "2000|<<|+3.000000E+01",
-    "2000|>>|:SENS:VOLT:AC:AVER:TCON REP",
-    "2000|>>|:SENS:VOLT:AC:AVER:TCON?",
-    "2000|<<|REP",
-    "2000|>>|:SENS:VOLT:AC:AVER:COUN 10",
-    "2000|>>|:SENS:VOLT:AC:AVER:COUN?",
-    "2000|<<|+10",
-    "2000|>>|:SENS:VOLT:AC:AVER:STAT ON",
+    "2000|<<|+3.000000E+00",
+    "2000|>>|:SENS:VOLT:AC:AVER:STAT OFF",
     "2000|>>|:SENS:VOLT:AC:AVER:STAT?",
-    "2000|<<|1",
+    "2000|<<|0",
     "2000|>>|:SENS:VOLT:AC:REF:STAT OFF",
     "2000|>>|:SENS:VOLT:AC:REF:STAT?",
     "2000|<<|0",
@@ -569,39 +563,21 @@
     ],
     [
      "W",
-     ":SENS:VOLT:AC:DET:BAND 30"
+     ":SENS:VOLT:AC:DET:BAND 3"
     ],
     [
      "Q",
      ":SENS:VOLT:AC:DET:BAND?",
-     "+3.000000E+01"
+     "+3.000000E+00"
     ],
     [
      "W",
-     ":SENS:VOLT:AC:AVER:TCON REP"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:TCON?",
-     "REP"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:COUN 10"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:COUN?",
-     "+10"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:STAT ON"
+     ":SENS:VOLT:AC:AVER:STAT OFF"
     ],
     [
      "Q",
      ":SENS:VOLT:AC:AVER:STAT?",
-     "1"
+     "0"
     ],
     [
      "W",
@@ -632,7 +608,7 @@
     ],
     [
      "sleep",
-     6.0
+     20.0
     ],
     [
      "Q",
@@ -651,151 +627,8 @@
    ]
   },
   {
-   "call": "{'description': 'AC volts 700.0 V @ 50.00 kHz, 750.0 V range', 'error': 1.215, 'frequency': 50000.0, 'group': 'ACV700', 'id': 21, 'kind': 'ACV', 'limits': {'1y': 1.215}, 'nominal': 700.0, 'optional': True, 'page': '1-9 (Table 1-3)', 'printed_limits': '698.785 to 701.215 V', 'quick': False, 'range': 750.0, 'section': 'acv700', 'section_title': 'AC voltage 700 V at 50 kHz (5725A amplifier)', 'setup': '700.000 V at 50 kHz needs the Fluke 5725A amplifier with a 5700A-class calibrator (Figure 1-2): neither the 5522A nor the 5560A is assumed to make it. Source 700.000 V, 50 kHz by hand, in operate, let it settle, then confirm; the program reads the 2000 itself.', 'source': 'manual', 'terminal': 'FRONT', 'unit': 'V', 'variant': 'opt700'}",
-   "case": "keithley2000_verification.IO.measure[ACV#21]",
-   "log": [
-    "5522A|>>|STBY",
-    "2000|>>|:SYST:FRSW?",
-    "2000|<<|1",
-    "2000|>>|:SENS:FUNC 'VOLT:AC'",
-    "2000|>>|:SENS:FUNC?",
-    "2000|<<|\"VOLT:AC\"",
-    "2000|>>|:SENS:VOLT:AC:RANG 675",
-    "2000|>>|:SENS:VOLT:AC:RANG?",
-    "2000|<<|+7.500000E+02",
-    "2000|>>|:SENS:VOLT:AC:RANG:AUTO?",
-    "2000|<<|0",
-    "2000|>>|:SENS:VOLT:AC:DET:BAND 30",
-    "2000|>>|:SENS:VOLT:AC:DET:BAND?",
-    "2000|<<|+3.000000E+01",
-    "2000|>>|:SENS:VOLT:AC:AVER:TCON REP",
-    "2000|>>|:SENS:VOLT:AC:AVER:TCON?",
-    "2000|<<|REP",
-    "2000|>>|:SENS:VOLT:AC:AVER:COUN 10",
-    "2000|>>|:SENS:VOLT:AC:AVER:COUN?",
-    "2000|<<|+10",
-    "2000|>>|:SENS:VOLT:AC:AVER:STAT ON",
-    "2000|>>|:SENS:VOLT:AC:AVER:STAT?",
-    "2000|<<|1",
-    "2000|>>|:SENS:VOLT:AC:REF:STAT OFF",
-    "2000|>>|:SENS:VOLT:AC:REF:STAT?",
-    "2000|<<|0",
-    "2000|>>|:SYST:ERR?",
-    "2000|<<|0,\"No error\"",
-    "2000|>>|:READ?",
-    "2000|<<|+0.000000E+00",
-    "2000|>>|:SYST:ERR?",
-    "2000|<<|0,\"No error\"",
-    "5522A|>>|STBY"
-   ],
-   "method": "keithley2000_verification.IO.measure",
-   "result": "returned 0.0",
-   "wire": [
-    [
-     "W",
-     "STBY"
-    ],
-    [
-     "Q",
-     ":SYST:FRSW?",
-     "1"
-    ],
-    [
-     "W",
-     ":SENS:FUNC 'VOLT:AC'"
-    ],
-    [
-     "Q",
-     ":SENS:FUNC?",
-     "\"VOLT:AC\""
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:RANG 675"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:RANG?",
-     "+7.500000E+02"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:RANG:AUTO?",
-     "0"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:DET:BAND 30"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:DET:BAND?",
-     "+3.000000E+01"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:TCON REP"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:TCON?",
-     "REP"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:COUN 10"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:COUN?",
-     "+10"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:AVER:STAT ON"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:AVER:STAT?",
-     "1"
-    ],
-    [
-     "W",
-     ":SENS:VOLT:AC:REF:STAT OFF"
-    ],
-    [
-     "Q",
-     ":SENS:VOLT:AC:REF:STAT?",
-     "0"
-    ],
-    [
-     "Q",
-     ":SYST:ERR?",
-     "0,\"No error\""
-    ],
-    [
-     "sleep",
-     2.0
-    ],
-    [
-     "Q",
-     ":READ?",
-     "+0.000000E+00"
-    ],
-    [
-     "Q",
-     ":SYST:ERR?",
-     "0,\"No error\""
-    ],
-    [
-     "W",
-     "STBY"
-    ]
-   ]
-  },
-  {
-   "call": "{'description': 'DC current 10.00 mA, 10.00 mA range', 'error': 5.8e-06, 'group': 'DCI', 'id': 22, 'kind': 'DCI', 'limits': {'1y': 5.8e-06}, 'nominal': 0.01, 'optional': False, 'page': '1-10 (Table 1-4)', 'plc': 1, 'printed_limits': '9.99420 to 10.00580 mA', 'quick': False, 'range': 0.01, 'section': 'dci', 'section_title': 'DC current', 'setup': 'Connect the calibrator current output (normal current output) to the 2000 AMPS and INPUT LO jacks (Figure 1-3). DCI function, 10 mA range first. Positive and negative values for each range. Check the AMPS fuse (3 A, 250 V) first.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
-   "case": "keithley2000_verification.IO.measure[DCI#22]",
+   "call": "{'description': 'DC current 10.00 mA, 10.00 mA range', 'error': 5.8e-06, 'group': 'DCI', 'id': 21, 'kind': 'DCI', 'limits': {'1y': 5.8e-06}, 'nominal': 0.01, 'optional': False, 'page': '1-10 (Table 1-4)', 'plc': 1, 'printed_limits': '9.99420 to 10.00580 mA', 'quick': False, 'range': 0.01, 'section': 'dci', 'section_title': 'DC current', 'setup': 'Connect the calibrator current output (normal current output) to the 2000 AMPS and INPUT LO jacks (Figure 1-3). DCI function, 10 mA range first. Positive and negative values for each range. Check the AMPS fuse (3 A, 250 V) first.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "keithley2000_verification.IO.measure[DCI#21]",
    "log": [
     "5522A|>>|STBY",
     "2000|>>|:SYST:FRSW?",
@@ -954,8 +787,8 @@
    ]
   },
   {
-   "call": "{'description': 'AC current 1.000 A @ 1.000 kHz, 1.000 A range', 'error': 0.0014, 'frequency': 1000.0, 'group': 'ACI', 'id': 30, 'kind': 'ACI', 'limits': {'1y': 0.0014}, 'nominal': 1.0, 'optional': False, 'page': '1-11 (Table 1-5)', 'printed_limits': '0.998600 to 1.001400 A', 'quick': False, 'range': 1.0, 'section': 'aci', 'section_title': 'AC current', 'setup': 'Connect the calibrator AC current output to the 2000 AMPS and INPUT LO jacks (Figure 1-4). ACI function, 1 A range first. 1 kHz.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
-   "case": "keithley2000_verification.IO.measure[ACI#30]",
+   "call": "{'description': 'AC current 1.000 A @ 1.000 kHz, 1.000 A range', 'error': 0.0014, 'frequency': 1000.0, 'group': 'ACI', 'id': 29, 'kind': 'ACI', 'limits': {'1y': 0.0014}, 'nominal': 1.0, 'optional': False, 'page': '1-11 (Table 1-5)', 'printed_limits': '0.998600 to 1.001400 A', 'quick': False, 'range': 1.0, 'section': 'aci', 'section_title': 'AC current', 'setup': 'Connect the calibrator AC current output to the 2000 AMPS and INPUT LO jacks (Figure 1-4). ACI function, 1 A range first. 1 kHz.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "keithley2000_verification.IO.measure[ACI#29]",
    "log": [
     "5522A|>>|STBY",
     "2000|>>|:SYST:FRSW?",
@@ -968,18 +801,12 @@
     "2000|<<|+1.000000E+00",
     "2000|>>|:SENS:CURR:AC:RANG:AUTO?",
     "2000|<<|0",
-    "2000|>>|:SENS:CURR:AC:DET:BAND 30",
+    "2000|>>|:SENS:CURR:AC:DET:BAND 3",
     "2000|>>|:SENS:CURR:AC:DET:BAND?",
-    "2000|<<|+3.000000E+01",
-    "2000|>>|:SENS:CURR:AC:AVER:TCON REP",
-    "2000|>>|:SENS:CURR:AC:AVER:TCON?",
-    "2000|<<|REP",
-    "2000|>>|:SENS:CURR:AC:AVER:COUN 10",
-    "2000|>>|:SENS:CURR:AC:AVER:COUN?",
-    "2000|<<|+10",
-    "2000|>>|:SENS:CURR:AC:AVER:STAT ON",
+    "2000|<<|+3.000000E+00",
+    "2000|>>|:SENS:CURR:AC:AVER:STAT OFF",
     "2000|>>|:SENS:CURR:AC:AVER:STAT?",
-    "2000|<<|1",
+    "2000|<<|0",
     "2000|>>|:SENS:CURR:AC:REF:STAT OFF",
     "2000|>>|:SENS:CURR:AC:REF:STAT?",
     "2000|<<|0",
@@ -1032,39 +859,21 @@
     ],
     [
      "W",
-     ":SENS:CURR:AC:DET:BAND 30"
+     ":SENS:CURR:AC:DET:BAND 3"
     ],
     [
      "Q",
      ":SENS:CURR:AC:DET:BAND?",
-     "+3.000000E+01"
+     "+3.000000E+00"
     ],
     [
      "W",
-     ":SENS:CURR:AC:AVER:TCON REP"
-    ],
-    [
-     "Q",
-     ":SENS:CURR:AC:AVER:TCON?",
-     "REP"
-    ],
-    [
-     "W",
-     ":SENS:CURR:AC:AVER:COUN 10"
-    ],
-    [
-     "Q",
-     ":SENS:CURR:AC:AVER:COUN?",
-     "+10"
-    ],
-    [
-     "W",
-     ":SENS:CURR:AC:AVER:STAT ON"
+     ":SENS:CURR:AC:AVER:STAT OFF"
     ],
     [
      "Q",
      ":SENS:CURR:AC:AVER:STAT?",
-     "1"
+     "0"
     ],
     [
      "W",
@@ -1095,7 +904,7 @@
     ],
     [
      "sleep",
-     6.0
+     20.0
     ],
     [
      "Q",
@@ -1114,8 +923,8 @@
    ]
   },
   {
-   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 32, 'kind': 'OHM4', 'limits': {'1y': 0.014}, 'nominal': 100.0, 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '99.9860 to 100.0140 ohm', 'quick': False, 'range': 100.0, 'section': 'ohm4', 'section_title': 'Resistance 100 ohm to 10 Mohm (4-wire)', 'setup': 'Shielded 4-wire connections: 2000 INPUT and SENSE jacks to the calibrator (Figure 1-5), calibrator for 4-wire resistance with external sense ON. Select the 2000 4-wire resistance function (the manual says the Ohm4 key), 100 ohm range, FILTER on.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
-   "case": "keithley2000_verification.IO.measure[OHM4#32]",
+   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 31, 'kind': 'OHM4', 'limits': {'1y': 0.014}, 'nominal': 100.0, 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '99.9860 to 100.0140 ohm', 'quick': False, 'range': 100.0, 'section': 'ohm4', 'section_title': 'Resistance 100 ohm to 10 Mohm (4-wire)', 'setup': 'Shielded 4-wire connections: 2000 INPUT and SENSE jacks to the calibrator (Figure 1-5), calibrator for 4-wire resistance with external sense ON. Select the 2000 4-wire resistance function (the manual says the Ohm4 key), 100 ohm range, FILTER on.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "keithley2000_verification.IO.measure[OHM4#31]",
    "log": [
     "5522A|>>|STBY",
     "2000|>>|:SYST:FRSW?",
@@ -1286,8 +1095,8 @@
    ]
   },
   {
-   "call": "{'description': '4-wire ohms 1.000 MΩ, 1.000 MΩ range', 'error': 110.0, 'group': 'OHM4', 'id': 36, 'kind': 'OHM4', 'limits': {'1y': 110.0}, 'nominal': 1000000.0, 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '0.999890 to 1.000110 Mohm', 'quick': False, 'range': 1000000.0, 'section': 'ohm4', 'section_title': 'Resistance 100 ohm to 10 Mohm (4-wire)', 'setup': 'Shielded 4-wire connections: 2000 INPUT and SENSE jacks to the calibrator (Figure 1-5), calibrator for 4-wire resistance with external sense ON. Select the 2000 4-wire resistance function (the manual says the Ohm4 key), 100 ohm range, FILTER on.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
-   "case": "keithley2000_verification.IO.measure[OHM4#36]",
+   "call": "{'description': '4-wire ohms 1.000 MΩ, 1.000 MΩ range', 'error': 110.0, 'group': 'OHM4', 'id': 35, 'kind': 'OHM4', 'limits': {'1y': 110.0}, 'nominal': 1000000.0, 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '0.999890 to 1.000110 Mohm', 'quick': False, 'range': 1000000.0, 'section': 'ohm4', 'section_title': 'Resistance 100 ohm to 10 Mohm (4-wire)', 'setup': 'Shielded 4-wire connections: 2000 INPUT and SENSE jacks to the calibrator (Figure 1-5), calibrator for 4-wire resistance with external sense ON. Select the 2000 4-wire resistance function (the manual says the Ohm4 key), 100 ohm range, FILTER on.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "keithley2000_verification.IO.measure[OHM4#35]",
    "log": [
     "5522A|>>|STBY",
     "2000|>>|:SYST:FRSW?",
@@ -1458,34 +1267,34 @@
    ]
   },
   {
-   "call": "{'description': '4-wire ohms 100.0 MΩ, 100.0 MΩ range', 'error': 153000.0, 'group': 'OHM100M', 'id': 38, 'kind': 'OHM4', 'limits': {'1y': 153000.0}, 'nominal': 100000000.0, 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '99.8470 to 100.1530 Mohm', 'quick': False, 'range': 100000000.0, 'section': 'ohm100m', 'section_title': 'Resistance 100 Mohm', 'setup': 'Connect the 2000 INPUT and SENSE jacks to the calibrator as in Figure 1-6, with the calibrator external sense OFF (2-wire output); shielded cables. The manual selects the 100 Mohm range of the same Ohm4 function.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
-   "case": "keithley2000_verification.IO.measure[OHM4#38]",
+   "call": "{'description': '2-wire ohms 100.0 MΩ, 100.0 MΩ range', 'error': 153000.0, 'group': 'OHM100M', 'id': 37, 'kind': 'OHM2', 'limits': {'1y': 153000.0}, 'nominal': 100000000.0, 'note': 'Measured with the 2000 2-wire resistance function (lab decision); the limit is the one printed for 100 Mohm in Table 1-6, which does not include the 1 ohm of additional uncertainty the specification sheet adds for 2-wire ohms (note 15: negligible at 100 Mohm).', 'optional': False, 'page': '1-12 to 1-13 (Table 1-6)', 'plc': 1, 'printed_limits': '99.8470 to 100.1530 Mohm', 'quick': False, 'range': 100000000.0, 'section': 'ohm100m', 'section_title': 'Resistance 100 Mohm (2-wire)', 'setup': \"Pure 2-wire hook-up (lab decision): calibrator 2-wire output to the 2000 INPUT HI / LO only, NO sense leads, calibrator external sense OFF (5522A ZCOMP NONE; 5560A 2-wire mode); shielded cables. The 2000 is set to its 2-wire resistance function (:FUNC 'RESistance') on the 100 Mohm range, filter on. The limit is the one printed for 100 Mohm in Table 1-6 (the manual has no separate 2-wire table).\", 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "keithley2000_verification.IO.measure[OHM2#37]",
    "log": [
     "5522A|>>|STBY",
     "2000|>>|:SYST:FRSW?",
     "2000|<<|1",
-    "2000|>>|:SENS:FUNC 'FRES'",
+    "2000|>>|:SENS:FUNC 'RES'",
     "2000|>>|:SENS:FUNC?",
-    "2000|<<|\"FRES\"",
-    "2000|>>|:SENS:FRES:RANG 90000000",
-    "2000|>>|:SENS:FRES:RANG?",
+    "2000|<<|\"RES\"",
+    "2000|>>|:SENS:RES:RANG 90000000",
+    "2000|>>|:SENS:RES:RANG?",
     "2000|<<|+1.000000E+08",
-    "2000|>>|:SENS:FRES:RANG:AUTO?",
+    "2000|>>|:SENS:RES:RANG:AUTO?",
     "2000|<<|0",
-    "2000|>>|:SENS:FRES:NPLC 1",
-    "2000|>>|:SENS:FRES:NPLC?",
+    "2000|>>|:SENS:RES:NPLC 1",
+    "2000|>>|:SENS:RES:NPLC?",
     "2000|<<|+1.000000E+00",
-    "2000|>>|:SENS:FRES:AVER:TCON REP",
-    "2000|>>|:SENS:FRES:AVER:TCON?",
+    "2000|>>|:SENS:RES:AVER:TCON REP",
+    "2000|>>|:SENS:RES:AVER:TCON?",
     "2000|<<|REP",
-    "2000|>>|:SENS:FRES:AVER:COUN 10",
-    "2000|>>|:SENS:FRES:AVER:COUN?",
+    "2000|>>|:SENS:RES:AVER:COUN 10",
+    "2000|>>|:SENS:RES:AVER:COUN?",
     "2000|<<|+10",
-    "2000|>>|:SENS:FRES:AVER:STAT ON",
-    "2000|>>|:SENS:FRES:AVER:STAT?",
+    "2000|>>|:SENS:RES:AVER:STAT ON",
+    "2000|>>|:SENS:RES:AVER:STAT?",
     "2000|<<|1",
-    "2000|>>|:SENS:FRES:REF:STAT OFF",
-    "2000|>>|:SENS:FRES:REF:STAT?",
+    "2000|>>|:SENS:RES:REF:STAT OFF",
+    "2000|>>|:SENS:RES:REF:STAT?",
     "2000|<<|0",
     "2000|>>|:SYST:ERR?",
     "2000|<<|0,\"No error\"",
@@ -1516,70 +1325,70 @@
     ],
     [
      "W",
-     ":SENS:FUNC 'FRES'"
+     ":SENS:FUNC 'RES'"
     ],
     [
      "Q",
      ":SENS:FUNC?",
-     "\"FRES\""
+     "\"RES\""
     ],
     [
      "W",
-     ":SENS:FRES:RANG 90000000"
+     ":SENS:RES:RANG 90000000"
     ],
     [
      "Q",
-     ":SENS:FRES:RANG?",
+     ":SENS:RES:RANG?",
      "+1.000000E+08"
     ],
     [
      "Q",
-     ":SENS:FRES:RANG:AUTO?",
+     ":SENS:RES:RANG:AUTO?",
      "0"
     ],
     [
      "W",
-     ":SENS:FRES:NPLC 1"
+     ":SENS:RES:NPLC 1"
     ],
     [
      "Q",
-     ":SENS:FRES:NPLC?",
+     ":SENS:RES:NPLC?",
      "+1.000000E+00"
     ],
     [
      "W",
-     ":SENS:FRES:AVER:TCON REP"
+     ":SENS:RES:AVER:TCON REP"
     ],
     [
      "Q",
-     ":SENS:FRES:AVER:TCON?",
+     ":SENS:RES:AVER:TCON?",
      "REP"
     ],
     [
      "W",
-     ":SENS:FRES:AVER:COUN 10"
+     ":SENS:RES:AVER:COUN 10"
     ],
     [
      "Q",
-     ":SENS:FRES:AVER:COUN?",
+     ":SENS:RES:AVER:COUN?",
      "+10"
     ],
     [
      "W",
-     ":SENS:FRES:AVER:STAT ON"
+     ":SENS:RES:AVER:STAT ON"
     ],
     [
      "Q",
-     ":SENS:FRES:AVER:STAT?",
+     ":SENS:RES:AVER:STAT?",
      "1"
     ],
     [
      "W",
-     ":SENS:FRES:REF:STAT OFF"
+     ":SENS:RES:REF:STAT OFF"
     ],
     [
      "Q",
-     ":SENS:FRES:REF:STAT?",
+     ":SENS:RES:REF:STAT?",
      "0"
     ],
     [
