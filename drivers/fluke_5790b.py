@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import time
 
+from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
 from .transport import SerialSettings
 
@@ -30,11 +31,45 @@ MEAS_CODES = {0: 'valid', 1: 'frequency underrange', 2: 'frequency overrange', 3
               4: 'unsettled', 5: 'value underrange', 6: 'value overrange', 7: 'value invalid'}
 WAIT_CODES = (3, 4)
 
+_REF = '5790B Operators Manual (June 2015), Chapter 6'
+
+# Every command the driver sends (same text and format specs the old f-strings used). All of them are taken from the manual and have NOT
+# been run on hardware (NOTES.md), so verified=False throughout. The 5790B is a measuring instrument with no output to enable.
+# *CLS and ERR? are bootstrap / error-queue plumbing (risk 'locked', never overridable).
+COMMANDS = {
+    'status.clear': Cmd('*CLS', 'Clear status', 'Clears the status registers and the error queue (never overridable)', kind='set',
+                        risk='locked', verified=False, ref=_REF + ' p. 6-11'),
+    'err.query': Cmd('ERR?', 'Error queue', "Oldest error; '0,\"No Error\"' when empty (never overridable)", kind='query', risk='locked',
+                     verified=False, ref=_REF + ' p. 6-46'),
+    'input.set': Cmd('INPUT {name}', 'Select input', 'INPUT1, INPUT2, AUX or WBND',
+                     placeholders={'name': Placeholder('enum', '', 'INPUT1', enum=INPUTS)}, kind='set', readback='input.query',
+                     verified=False, ref=_REF + ' p. 6-49'),
+    'input.query': Cmd('INPUT?', 'Selected input', kind='query', verified=False, ref=_REF + ' p. 6-49'),
+    'extrig.on': Cmd('EXTRIG ON', 'External trigger on', 'Each MEAS? starts a fresh measurement', kind='set', readback='extrig.query',
+                     verified=False, ref=_REF + ' pp. 6-46, 6-47'),
+    'extrig.off': Cmd('EXTRIG OFF', 'External trigger off', 'Continuous triggering (also sent at cleanup)', kind='set',
+                      readback='extrig.query', verified=False, ref=_REF + ' pp. 6-46, 6-47'),
+    'extrig.query': Cmd('EXTRIG?', 'External trigger mode', kind='query', verified=False, ref=_REF + ' pp. 6-46, 6-47'),
+    'range.query': Cmd('RANGE?', 'Range', 'Range max, range min, resolution, autoranging', kind='query', verified=False,
+                       ref=_REF + ' p. 6-55'),
+    'range.set': Cmd('RANGE {volts:.6g}', 'Select and lock a range', 'The range that measures this many volts',
+                     placeholders={'volts': Placeholder('float', '.6g', 1.0)}, kind='set', readback='range.query', verified=False,
+                     ref=_REF + ' p. 6-54'),
+    'range.auto': Cmd('RANGE AUTO', 'Autorange', kind='set', readback='range.query', verified=False, ref=_REF + ' p. 6-54'),
+    'opt.query': Cmd('*OPT?', 'Installed options', 'WBND / WBEX / WBAF for the wideband module', kind='query', verified=False,
+                     ref=_REF + ' p. 6-21'),
+    'wbaf.query': Cmd('WBAF?', '50 MHz cable correction', 'Reply format undocumented in the manual (summary p. 6-14, no detail page)',
+                      kind='query', verified=False, ref=_REF + ' p. 6-14'),
+    'meas.query': Cmd('MEAS?', 'Measurement', 'Volts, Hz, status code; repeated only while the code says not yet settled', kind='query',
+                      verified=False, ref=_REF + ' p. 6-53'),
+}
+
 
 class Fluke5790B(Instrument):
     MODEL = 'Fluke 5790B'
     IDN_MATCH = ('5790B',)
     DEFAULT_TIMEOUT = 30.0
+    COMMANDS = COMMANDS
     last_input = ''
 
     def connect(self):
@@ -48,14 +83,14 @@ class Fluke5790B(Instrument):
                 raise InstrumentError('The 5790B identifies as a 5790A: 5790A emulation is on. Turn it off '
                                       '(Setup Menu > System Settings, Emulate 5790A) and connect again.')
             raise InstrumentError(f'Expected a Fluke 5790B but the instrument identifies as: {self.idn!r}')
-        self.write('*CLS')
+        self.send('status.clear')
         self.check_error('clear status')
         return self
 
     # ---- error queue ---------------------------------------------------------------------------------
     def check_error(self, context=''):
         """ERR? returns '0,"No Error"' when the queue is empty (p. 6-46). Raise on anything else."""
-        reply = self.query('ERR?').strip()
+        reply = self.ask('err.query').strip()
         code = reply.split(',')[0].strip().lstrip('+')
         try:
             failed = int(code) != 0
@@ -69,8 +104,8 @@ class Fluke5790B(Instrument):
         name = name.upper()
         if name not in INPUTS:
             raise InstrumentError(f'5790B input must be one of {INPUTS}, not {name!r}')
-        self.write(f'INPUT {name}')
-        got = self.query('INPUT?').strip().upper()
+        self.send('input.set', name=name)
+        got = self.ask('input.query').strip().upper()
         if got != name:
             raise InstrumentError(f'5790B input set {name}, reports {got}')
         self.check_error(f'input {name}')
@@ -78,22 +113,22 @@ class Fluke5790B(Instrument):
 
     def set_external_trigger(self, on=True):
         """EXTRIG ON: each MEAS? starts a fresh measurement (p. 6-46)."""
-        self.write(f'EXTRIG {"ON" if on else "OFF"}')
-        got = self.query('EXTRIG?').strip()
+        self.send('extrig.on' if on else 'extrig.off')
+        got = self.ask('extrig.query').strip()
         if got != ('1' if on else '0'):
             raise InstrumentError(f'5790B EXTRIG set {"ON" if on else "OFF"}, reports {got}')
         self.check_error('trigger mode')
 
     def range_info(self):
         """RANGE? -> (range max, range min, resolution, autoranging) (p. 6-55)."""
-        parts = [x.strip() for x in self.query('RANGE?').strip().split(',')]
+        parts = [x.strip() for x in self.ask('range.query').strip().split(',')]
         if len(parts) < 4:
             raise InstrumentError(f'Unexpected RANGE? reply: {",".join(parts)}')
         return float(parts[0]), float(parts[1]), float(parts[2]), parts[3] == '1'
 
     def set_range_for(self, volts):
         """RANGE <value> selects and locks the range that measures `volts` (p. 6-54); checked with RANGE?."""
-        self.write(f'RANGE {abs(volts):.6g}')
+        self.send('range.set', volts=abs(volts))
         hi, lo, _res, auto = self.range_info()
         if auto or not (lo <= abs(volts) <= hi * 1.01):
             raise InstrumentError(f'5790B range for {volts:g} V: RANGE? reports {lo:g} to {hi:g} V, autorange {"on" if auto else "off"}')
@@ -101,7 +136,7 @@ class Fluke5790B(Instrument):
         return hi
 
     def set_autorange(self):
-        self.write('RANGE AUTO')
+        self.send('range.auto')
         if not self.range_info()[3]:
             raise InstrumentError('5790B did not confirm autoranging')
         self.check_error('autorange')
@@ -111,7 +146,7 @@ class Fluke5790B(Instrument):
 
     def wideband_option(self):
         """*OPT? -> 'WBND' (30 MHz), 'WBEX' / 'WBAF' (50 MHz), or '' when no wideband module is installed."""
-        reply = self.query('*OPT?').strip().strip('"').upper()
+        reply = self.ask('opt.query').strip().strip('"').upper()
         return next((o for o in self.WIDEBAND_MAX_HZ if o in reply), '')
 
     def require_wideband(self, max_hz):
@@ -124,7 +159,7 @@ class Fluke5790B(Instrument):
             raise InstrumentError(f'The 5790B wideband option ({opt}) covers {self.WIDEBAND_MAX_HZ[opt] / 1e6:g} MHz; '
                                   f'the flatness test needs {max_hz / 1e6:g} MHz.')
         if opt == 'WBAF':
-            state = self.query('WBAF?').strip().upper()
+            state = self.ask('wbaf.query').strip().upper()
             if state not in ('0', 'OFF'):
                 raise InstrumentError(f'The 5790B 50 MHz cable correction is on (WBAF? -> {state}). It applies only to the 50 MHz '
                                       'spot calibration; turn it off (wideband menu, 50 MHz Cable Correction) and continue.')
@@ -137,7 +172,7 @@ class Fluke5790B(Instrument):
         deadline = time.monotonic() + timeout
         last = None
         while True:
-            parts = [x.strip() for x in self.query('MEAS?').strip().split(',')]
+            parts = [x.strip() for x in self.ask('meas.query').strip().split(',')]
             if len(parts) < 3:
                 raise InstrumentError(f'Unexpected MEAS? reply: {",".join(parts)}')
             volts, freq, code = float(parts[0]), float(parts[1]), int(float(parts[2]))
@@ -153,6 +188,6 @@ class Fluke5790B(Instrument):
     def cleanup(self):
         """Return to continuous triggering so the front panel shows live readings. Never raises."""
         try:
-            self.write('EXTRIG OFF')
+            self.send('extrig.off')
         except Exception:
             pass
