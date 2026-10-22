@@ -276,7 +276,7 @@ class DatasheetBuilder(Base):
         self.assertEqual(res.version, 2)
         entry = V.make_entry(self.ds_entry.name, self.ds.model, '', ROOT, user_uid=self.uid, spec_path=res.spec_path)
         st = self.reg.status(entry)
-        self.assertEqual((st.kind, st.changed), ('unlocked', True))
+        self.assertEqual((st.kind, st.changed), ('changed', True))
         self.assertTrue(any('user spec' in c for c in st.changes))
 
     def test_list_model_messages_and_open_refusal(self):

@@ -20,8 +20,10 @@ Running a locked procedure is not affected, and changes that were saved before t
 
 'Changed since verification': at verification time a fingerprint of the procedure's definition is stored: the program files it runs (its
 launcher, engine and drivers), its test point / limit file(s) (user-built: the runnable spec) and the saved procedure changes (overrides) for its
-model.  Text files are compared without regard to line endings, JSON without regard to layout.  The suite never blocks an update: the Procedures
-list shows 'CHANGED since' and names what differs, and the procedure stays locked until it is verified again.  The fingerprint is only computed
+model.  Text files are compared without regard to line endings, JSON without regard to layout.  The suite never blocks an update.  A verified
+procedure whose fingerprint no longer matches is NOT locked: the first time it is looked at (the Procedures list, or an editor asking whether it is
+locked) one auto-unlock event is recorded (who 'system', reason 'files changed since verification: <files>') and the list shows 'Changed since
+verification - needs hardware re-verification' until someone presses 'Mark verified on hardware' again.  The fingerprint is only computed
 when the list is drawn or a verification is recorded, never during a lock check.
 
 Seed: SEED lists the procedures that are already verified.  It is code (shipped with every copy, so it cannot go missing) and is written into
@@ -66,6 +68,8 @@ BEGIN SELECT RAISE(ABORT, 'verification events are append-only'); END;
 CREATE TRIGGER IF NOT EXISTS proc_verify_no_delete BEFORE DELETE ON proc_verify_events
 BEGIN SELECT RAISE(ABORT, 'verification events are never deleted'); END;
 '''
+
+CHANGED_TEXT = 'Changed since verification - needs hardware re-verification'
 
 # ------------------------------------------------------------------------------------------------------------ the seeded list
 SEED_WHO = 'Mike (lab owner)'
@@ -307,7 +311,7 @@ class Status:
         if self.kind == 'verified':
             return base + '  [locked]'
         if self.kind == 'changed':
-            return base + '  [locked]  CHANGED since'
+            return CHANGED_TEXT
         return base + '  [UNLOCKED]' + ('  changed' if self.changed else '')
 
     @property
@@ -320,7 +324,7 @@ class Status:
         if self.kind == 'none' or r is None:
             return 'NOT VERIFIED ON HARDWARE'
         return {'verified': f'VERIFIED ON HARDWARE {r.verified_on} - LOCKED',
-                'changed': f'VERIFIED {r.verified_on} - CHANGED SINCE (LOCKED)',
+                'changed': CHANGED_TEXT.upper(),
                 'unlocked': f'VERIFIED {r.verified_on} - UNLOCKED FOR EDITING'}[self.kind]
 
     def detail_lines(self) -> list:
@@ -335,8 +339,10 @@ class Status:
         if self.kind == 'verified':
             out.append('Locked: editing is refused. The files and settings are unchanged since it was verified.')
         elif self.kind == 'changed':
-            out.append('Locked, but CHANGED since it was verified: ' + '; '.join(self.changes or ['the definition differs']) +
-                       '. Verify it again on the hardware (button above) once the new version has been checked.')
+            out.append('NOT locked: it has changed since it was verified (' + '; '.join(self.changes or ['the definition differs']) + ').')
+            if r.unlocked_by == 'system':
+                out.append(f'Unlocked automatically on {r.unlocked_at[:10]}.')
+            out.append('It needs hardware re-verification: run it on the hardware, then press "Mark verified on hardware...".')
         else:
             out.append(f'UNLOCKED by {r.unlocked_by} on {r.unlocked_at[:10]}: {r.unlock_reason}')
             out.append(('It has been changed since it was verified: ' + '; '.join(self.changes or ['the definition differs']) +
@@ -355,7 +361,7 @@ def ui_state(status: Status) -> dict:
     if k == 'verified':
         return {'verify': ('Mark verified on hardware...', False), 'lock': ('Unlock for editing...', True)}
     if k == 'changed':
-        return {'verify': ('Mark verified again...', True), 'lock': ('Unlock for editing...', True)}
+        return {'verify': ('Mark verified on hardware...', True), 'lock': ('Lock again (nothing changed)', False)}
     return {'verify': ('Mark verified again...', True), 'lock': ('Lock again (nothing changed)', not status.changed)}
 
 
@@ -474,14 +480,22 @@ class Registry:
         """'' when editing is allowed, else the sentence to show.  With a proc_key only that procedure counts; with a model only (the saved
         procedure changes are kept per model) any locked library procedure of that model counts.  User-built procedures match by key only."""
         recs = self.records()
+
+        def still_locked(r):
+            if not r.locked:
+                return False
+            e = self._entry_of(r)
+            if e is not None:
+                r = self.sync(e) or r        # changed files: auto-unlock (once) instead of refusing
+            return r.locked
         key = str(proc_key or '').casefold()
         if key:
             r = recs.get(key)
-            return lock_text(r) if r and r.locked else ''
+            return lock_text(r) if r and still_locked(r) else ''
         m = str(model or '').strip().casefold()
         if m:
             for r in recs.values():
-                if r.locked and not r.proc_key.startswith(DS_PREFIX) and r.model.strip().casefold() == m:
+                if r.locked and not r.proc_key.startswith(DS_PREFIX) and r.model.strip().casefold() == m and still_locked(r):
                     return lock_text(r)
         return ''
 
@@ -535,11 +549,40 @@ class Registry:
         changes = describe_changes(rec.components, comps) if changed else []
         if changed and not changes:
             changes = ['the definition differs']
-        kind = ('changed' if changed else 'verified') if rec.locked else 'unlocked'
+        kind = 'changed' if changed else ('verified' if rec.locked else 'unlocked')
         return Status(kind, rec, changes, changed)
 
     def status(self, entry: Entry) -> Status:
-        return self._status(self.record(entry.proc_key), entry)
+        return self._status(self.sync(entry), entry)
+
+    # ---- automatic unlock: a verified procedure whose files changed is no longer verified
+    def sync(self, entry: Entry) -> Record | None:
+        """The record of `entry`.  If it is locked but its fingerprint no longer matches the verified one, record ONE auto-unlock event (who 'system',
+        the changed files as the reason) and return the unlocked record; it stays unlocked until someone marks it verified again."""
+        rec = self.record(entry.proc_key)
+        if rec is None or not rec.locked or rec.unreadable:
+            return rec
+        comps = self.definition(entry)
+        if self.definition_hash(comps) == rec.hash:
+            return rec
+        changes = describe_changes(rec.components, comps) or ['the definition differs']
+        try:
+            with self._db() as con:
+                con.execute('BEGIN IMMEDIATE')
+                cur = self._fold(self._events(con)).get(rec.proc_key.casefold())
+                if cur is not None and cur.locked and cur.hash == rec.hash:        # not already done by another window
+                    self._insert(con, cur.proc_key, 'unlock', 'system', reason='files changed since verification: ' + '; '.join(changes),
+                                 name=cur.name, model=cur.model)
+        except sqlite3.Error:
+            return rec                                                              # cannot write: stay locked (fail safe)
+        return self.record(entry.proc_key)
+
+    def _entry_of(self, rec: Record):
+        if rec.proc_key.startswith(DS_PREFIX):
+            return None                      # its spec file is only known to the Procedures list, which syncs it
+        p = Path(rec.proc_key)
+        script = str(p if p.is_absolute() else self.base / 'Procedures' / rec.proc_key)
+        return Entry(rec.proc_key, rec.name, rec.model, script)
 
     def statuses(self, entries) -> dict:
         """{proc_key: Status} for the Procedures list: the registry is read once, and a definition is only worked out for verified procedures."""
@@ -548,7 +591,10 @@ class Registry:
         try:
             with self._db() as con:
                 for e in entries:
-                    out[e.proc_key] = self._status(recs.get(e.proc_key.casefold()), e, con)
+                    r = recs.get(e.proc_key.casefold())
+                    if r is not None and r.locked:
+                        r = self.sync(e)
+                    out[e.proc_key] = self._status(r, e, con)
         except sqlite3.Error:
             for e in entries:
                 out[e.proc_key] = self._status(recs.get(e.proc_key.casefold()), e)

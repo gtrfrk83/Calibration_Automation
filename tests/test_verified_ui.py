@@ -403,14 +403,16 @@ class IndexTests(unittest.TestCase):
         (base / 'handheld_dmm.py').write_text('# the updated engine\n', encoding='utf-8')
         self.mgr.refresh()
         self.iid = {r['values'][0]: i for i, r in self.mgr.table.rows.items()}
-        self.assertEqual(self.cell('Fluke 117 Performance Verification'), 'Verified 2026-10-22  [locked]  CHANGED since')
+        self.assertEqual(self.cell('Fluke 117 Performance Verification'), 'Changed since verification - needs hardware re-verification')
         self.assertNotIn('verified', self.mgr.table.rows[self.iid['Fluke 117 Performance Verification']]['tags'])
         self.select('Fluke 117 Performance Verification')
         self.assertEqual(self.mgr.d_ver.kind, 'warn')
         self.assertIn('handheld_dmm.py', self.mgr.d_ver_text.get())
-        self.assertEqual(self.mgr.btn_verify.opts['text'], 'Mark verified again...')
+        self.assertEqual(self.mgr.btn_verify.opts['text'], 'Mark verified on hardware...')
         self.assertEqual(self.mgr.btn_verify.opts['state'], 'normal')
-        self.assertTrue(self.mgr.verified.lock_reason(model='117'), 'flagged, still locked')
+        self.assertEqual(self.mgr.btn_lock.opts['state'], 'disabled')
+        self.assertEqual(self.mgr.verified.lock_reason(model='117'), '', 'auto-unlocked: editable until it is verified again')
+        self.assertEqual(self.mgr.d_ver.text, 'CHANGED SINCE VERIFICATION - NEEDS HARDWARE RE-VERIFICATION')
 
 
 @unittest.skipUnless(STUBBED, 'real tkinter present: these stub tests would need a display')
