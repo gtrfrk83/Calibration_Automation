@@ -22,7 +22,7 @@
    "helper_f": 0,
    "query_f": 0,
    "query_retry_f": 0,
-   "write_f": 11
+   "write_f": 0
   },
   "fluke_5790b": {
    "concat_f": 0,

@@ -5,10 +5,28 @@ Rules the base enforces so individual drivers stay small and consistent:
   * writes are never retried (their effect is unknown after a failure); read-only queries may be
   * a driver states how to recognise its own model (IDN_MATCH) and refuses to talk to anything else
   * cleanup() puts the instrument in a safe state and is called even after errors
+  * commands are declared once, in a class-level COMMANDS table of cmdreg.Cmd (merged along the MRO), and sent with
+    send(key, **vals) / ask(key, **vals); an approved override template (procmods) can replace the factory text of a
+    'normal' command, in which case the wire gets the override and the command log line carries "  [OVERRIDE ov-<uid>]".
+    With no override the wire text and the log line are exactly what the old f-string produced. Output (OPER/STBY/...),
+    calibration, error-queue and secret-bearing commands are never overridable.
+
+Command API (stable; every driver follows it):
+    COMMANDS = {key: cmdreg.Cmd(...)}              class attribute; keys are dotted lower-case ('out.volts')
+    use_commands(templates, uids=None) -> [(key, uid, [problems])]   install override templates; never raises; returns/records the rejected ones
+    send(key, **vals)                              set/action command: render, then self.write (no retry, read-back stays in the caller)
+    ask(key, **vals) -> str                        query command: render, then self.query
+    query_retry(key_or_text, attempts, delay, values=None)   read-only queries; a registered key must be kind 'query'
+    describe_commands() -> [dict]                  merged registry for the UI
+    command_overrides_active() -> [uid]            overrides in effect (for the report / log banner)
+    rejected_commands() -> [(key, uid, [problems])]
 """
 from __future__ import annotations
 
+import dataclasses
 import time
+
+import cmdreg
 
 from .transport import CommandLog, Transport, TransportError
 
@@ -25,6 +43,8 @@ class Instrument:
     MODEL = ''                # human name, e.g. 'Fluke 5560A'
     IDN_MATCH: tuple = ()     # any of these substrings (case-insensitive) must appear in *IDN?
     DEFAULT_TIMEOUT = 10.0
+    COMMANDS: dict = {}       # {key: cmdreg.Cmd}; merged along the MRO by cmdreg.merge_commands
+    SECRET_MASK = '********'  # what a secret placeholder shows in the command log
 
     def __init__(self, transport: Transport, log: CommandLog | None = None, label: str | None = None):
         self.t = transport
@@ -78,17 +98,143 @@ class Instrument:
         self.log.add('<<', reply.strip(), self.label)
         return reply
 
-    def query_retry(self, cmd: str, attempts=3, delay=0.5) -> str:
-        """Read-only queries only. Writes must never go through here."""
+    def query_retry(self, cmd: str, attempts=3, delay=0.5, values: dict | None = None) -> str:
+        """Read-only queries only. Writes must never go through here.
+        `cmd` is a registered command key (it must be kind 'query'; `values` fills its placeholders) or, for drivers not yet
+        converted to the registry, the query text itself."""
+        wire, log_as = cmd, None
+        if cmd in self._registry():
+            wire, log_as = self._prepare(cmd, values or {}, 'query_retry')
         last = None
         for n in range(attempts):
             try:
-                return self.query(cmd)
+                return self.query(wire) if log_as is None else self.query(wire, log_as=log_as)
             except TransportError as exc:
                 last = exc
                 if n + 1 < attempts:
                     time.sleep(delay * (n + 1))
         raise InstrumentError(f'{cmd!r} failed after {attempts} attempts: {last}') from last
+
+    # ---- command registry (COMMANDS) -------------------------------------------------------------------
+    _cmd_ov: dict | None = None            # {key: (override text, uid)} - instance state, created by use_commands
+    _cmd_rejected: list | None = None      # [(key, uid, [problems])]
+
+    def _registry(self) -> dict:
+        reg = self.__dict__.get('_reg_cache')
+        if reg is None:
+            reg = self.__dict__['_reg_cache'] = cmdreg.merge_commands(self)
+        return reg
+
+    @staticmethod
+    def _uid_text(uid) -> str:
+        uid = str(uid or '?')
+        return uid if uid.startswith('ov-') else 'ov-' + uid
+
+    def _reject(self, key, uid, problems):
+        """Record (and log) an override that was not applied. The text of the override is not logged (it is in the override store)."""
+        msgs = [str(p) for p in problems]
+        if self._cmd_rejected is None:
+            self._cmd_rejected = []
+        self._cmd_rejected.append((key, uid, msgs))
+        self.log.add('!!', f'OVERRIDE REJECTED {self._uid_text(uid)} {key}: ' + '; '.join(msgs), self.label)
+
+    def use_commands(self, templates: dict | None, uids: dict | None = None) -> list:
+        """Install override templates {key: text}. A value may also be (text, uid) or {'template': text, 'uid': uid}; `uids`
+        {key: uid} supplies the uid otherwise. Each one is re-validated against the merged registry (cmdreg.validate); failures are
+        dropped, recorded (rejected_commands) and logged as OVERRIDE REJECTED - never raised. Replaces any earlier set."""
+        self._cmd_ov, self._cmd_rejected = {}, []
+        reg = self._registry()
+        dname = type(self).__name__
+        for key, val in dict(templates or {}).items():
+            uid = (uids or {}).get(key)
+            if isinstance(val, dict):
+                uid, val = val.get('uid', uid), val.get('template')
+            elif isinstance(val, (tuple, list)) and len(val) == 2:
+                val, uid = val
+            cmd = reg.get(key)
+            ok, why = cmdreg.is_overridable(cmd)
+            if cmd is None:
+                probs = [cmdreg.Problem('type', 'unknown command')]
+            elif not ok:                                        # output / locked / secret: refused even if the text is unchanged
+                probs = [cmdreg.Problem('locked', f'{key} is not editable: {why}')]
+            else:
+                probs = cmdreg.validate(val, cmd, dname)
+            if probs:
+                self._reject(key, uid, probs)
+            elif val != cmd.template:                           # identical to the factory text: nothing to override
+                self._cmd_ov[key] = (val, uid)
+        effective = {k: t for k, (t, _u) in self._cmd_ov.items()}
+        bundle = cmdreg.validate_bundle(effective, reg) if effective else []
+        if bundle:
+            for key, (_t, uid) in list(self._cmd_ov.items()):
+                self._reject(key, uid, bundle)
+            self._cmd_ov = {}
+        return list(self._cmd_rejected)
+
+    def rejected_commands(self) -> list:
+        return list(self._cmd_rejected or [])
+
+    def command_overrides_active(self) -> list:
+        """uids of the command overrides in effect, in registry order (for the report / log banner)."""
+        reg = self._registry()
+        ov = self._cmd_ov or {}
+        return [self._uid_text(ov[k][1]) for k in reg if k in ov]
+
+    def _prepare(self, key, vals, how):
+        """(wire text, log_as or None) for a registered command. how: 'send' | 'ask' | 'query_retry'."""
+        cmd = self._registry().get(key)
+        if cmd is None:
+            raise InstrumentError(f'{self.label}: unknown command key {key!r}')
+        if how == 'send' and cmd.kind not in ('set', 'action'):
+            raise InstrumentError(f'{self.label}: {key!r} is a query; use ask()')
+        if how != 'send' and cmd.kind != 'query':
+            raise InstrumentError(f'{self.label}: {key!r} is not a query ({cmd.kind}); it cannot be asked or retried')
+        ov = (self._cmd_ov or {}).get(key)
+        if ov is not None:
+            text, uid = ov
+            ok, why = cmdreg.is_overridable(cmd)
+            probs = cmdreg.validate(text, cmd, type(self).__name__) if ok else [cmdreg.Problem('locked', f'{key} is not editable: {why}')]
+            if probs:                                           # re-validated at send time: fall back to the factory text
+                self._reject(key, uid, probs)
+                del self._cmd_ov[key]
+            else:
+                try:
+                    wire = cmdreg.render(dataclasses.replace(cmd, template=text), vals)
+                    return wire, wire + '  [OVERRIDE ' + self._uid_text(uid) + ']'
+                except cmdreg.CmdError as e:
+                    self._reject(key, uid, [cmdreg.Problem('placeholder.missing', str(e))])
+                    del self._cmd_ov[key]
+        wire = cmdreg.render(cmd, vals)
+        if cmd.secret:                                          # the value goes on the wire, never in the log
+            masked = {n: (self.SECRET_MASK if getattr(p, 'type', '') == 'secret' else vals.get(n)) for n, p in cmd.placeholders.items()}
+            return wire, cmdreg.render(cmd, masked)
+        return wire, None
+
+    def send(self, key: str, **vals):
+        """Send a registered set/action command through self.write (read-back/compare stays in the caller). Never retried."""
+        wire, log_as = self._prepare(key, vals, 'send')
+        self.write(wire) if log_as is None else self.write(wire, log_as=log_as)
+
+    def ask(self, key: str, **vals) -> str:
+        """Send a registered query through self.query and return the reply."""
+        wire, log_as = self._prepare(key, vals, 'ask')
+        return self.query(wire) if log_as is None else self.query(wire, log_as=log_as)
+
+    def describe_commands(self) -> list:
+        """The merged registry for the UI: one dict per command."""
+        reg = self._registry()
+        ov = self._cmd_ov or {}
+        owners = cmdreg.command_owners(self)
+        out = []
+        for key, cmd in reg.items():
+            ok, why = cmdreg.is_overridable(cmd)
+            cur = ov.get(key)
+            out.append(dict(key=key, name=cmd.name, description=cmd.description, factory=cmd.template,
+                            current=cur[0] if cur else cmd.template, overridden=bool(cur), uid=self._uid_text(cur[1]) if cur else None,
+                            kind=cmd.kind, risk=cmd.risk, readback=cmd.readback, verified=cmd.verified, ref=cmd.ref,
+                            overridable=ok, locked_reason=why, editable=ok, owner=owners.get(key, ''),
+                            placeholders=sorted(cmd.placeholders)))
+        return out
 
     # ---- helpers for the "set, read back, compare" pattern used throughout calibration work
     @staticmethod

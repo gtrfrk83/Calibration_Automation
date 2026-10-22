@@ -62,7 +62,9 @@ COVERAGE = {
     'base': {
         'Instrument': dict(
             covered=['open', 'close', 'identify', 'write', 'query', 'query_retry', 'cleanup'],
-            no_command=['close_to']),                                       # pure arithmetic helper
+            no_command=['close_to',                                         # pure arithmetic helper
+                        'send', 'ask',                                      # generic registry front ends: every driver case goes through them
+                        'use_commands', 'rejected_commands', 'command_overrides_active', 'describe_commands']),   # no wire traffic
     },
     'fluke_5560a': {
         'Fluke5560A': dict(
