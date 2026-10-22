@@ -84,6 +84,7 @@ def run_truevolt():
     bench, ft, dt = make_dmm_bench('34470A')
     r = Runner(c)
     io = r.build('truevolt_verification.IO.__init__', lambda: T.IO('sim', 'sim', transports=(rec(dt), rec(ft))))
+    c.run('truevolt_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)       # Stage 7: first thing in every run
     for p in sample(T.POINTS, _dmm_key, 14):
         dt.terminals = 'REAR' if p.get('terminal') == 'REAR' else 'FRON'          # the Front/Rear switch the technician would set
         c.run(f'truevolt_verification.IO.measure[{pid(p)}]', io.measure, p, _log=io.log)
@@ -99,6 +100,7 @@ def run_dacq(model):
     r = Runner(c)
     io = r.build('dacq_verification.IO.__init__', lambda: D.IO('sim', 'sim', cal_model='Fluke 5560A', module='34901A', slot=2,
                                                                transports=(rec(dt), rec(ft))))
+    c.run('dacq_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
     _measure_all(c, io, sample(D.POINTS, _dmm_key, 14), 'dacq_verification')
     c.run('dacq_verification.IO.close', io.close, _log=io.log)
     return c.entries
@@ -112,6 +114,7 @@ def run_fgen():
     wrapped = {k: rec(v) for k, v in t.items()}
     r = Runner(c)
     io = r.build('fgen_verification.IO.__init__', lambda: F.IO({}, transports=wrapped, ask_number=lambda prompt, unit: 0.0))
+    c.run('fgen_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
     results, cache = {}, {}
     for p in sample(F.POINTS, lambda p: (p['kind'], p.get('section'), p.get('function'), p.get('amp_unit'), p.get('load')), 16):
         bench.connected = {'TIMEBASE': 'counter', 'FLAT': 'power'}.get(p['kind'], 'std')           # which reference the output is cabled to
@@ -141,6 +144,7 @@ def run_mdo():
         def post(self, *a, **k):
             pass
 
+    c.run('mdo4000c_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
     runner = M.Runner(FakeApp())
     skip_kinds = {'selftest'}                 # needs a power cycle dialog
     pts = [p for p in M.POINTS if cfg.applies(p) and p['kind'].lower() not in skip_kinds]
@@ -171,6 +175,7 @@ def run_agilent_34401a():
         io = r.build('Agilent_34401A.IO.__init__', lambda: A.IO('1', '2', 9600, 'None', 8))
     finally:
         drivers.open_visa = saved
+    c.run('Agilent_34401A.IO.reset_at_start', io.reset_at_start, _log=io.log)
     pts = sample(A.POINTS, lambda p: (p['kind'], bool(p.get('zero_offset')), bool(p.get('frequency'))), 14)
     _measure_all(c, io, pts, 'Agilent_34401A')
     c.run('Agilent_34401A.IO.close', io.close, _log=io.log)
@@ -187,6 +192,7 @@ def run_fluke_8846a():
         io = r.build('Fluke_8846A_Verification.IO.__init__', lambda: V.IO('1', '2', 9600, 'None', 8))
     finally:
         drivers.open_visa = saved
+    c.run('Fluke_8846A_Verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
     pts = sample(V.POINTS, lambda p: (p['kind'], bool(p.get('zero_offset')), bool(p.get('frequency'))), 14)
     _measure_all(c, io, pts, 'Fluke_8846A_Verification')
     c.run('Fluke_8846A_Verification.IO.close', io.close, _log=io.log)
@@ -200,6 +206,7 @@ def run_handheld():
     ft.model = '5522A'
     r = Runner(c)
     io = r.build('handheld_dmm.IO.__init__', lambda: H.IO('Fluke 5522A', 'sim', transport=rec(ft)))
+    c.run('handheld_dmm.IO.reset_at_start', io.reset_at_start, _log=io.log)
     # steps of the 110-series spec (model 115 / 116 / 117 cover resistance, AC / DC volts, capacitance, currents, temperature)
     done = set()
     for model in ('115', '116', '117'):
@@ -253,6 +260,8 @@ def run_wavesurfer():
             return fluke, scope
 
         finish_bench = W.RMSNoiseApp.finish_bench
+        reset_bench = W.RMSNoiseApp.reset_bench
+        _reset_notice = staticmethod(lambda text: True)       # the unit-under-test notice, auto-accepted in the simulated bench
         save_command_log = W.RMSNoiseApp.save_command_log
 
     app = FakeApp()

@@ -507,6 +507,104 @@
      "+1"
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8846A.reset_to_defaults",
+   "log": [
+    "8846A|>>|*RST",
+    "8846A|>>|*CLS",
+    "8846A|>>|*OPC?",
+    "8846A|<<|1",
+    "8846A|>>|SYST:ERR?",
+    "8846A|<<|+0,\"No error\"",
+    "8846A|>>|SYST:REM"
+   ],
+   "method": "Fluke8846A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='8846A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='re-enter remote (SYST:REM)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent34401A.reset_to_defaults",
+   "log": [
+    "34401A|>>|*RST",
+    "34401A|>>|*CLS",
+    "34401A|>>|*OPC?",
+    "34401A|<<|1",
+    "34401A|>>|SYST:ERR?",
+    "34401A|<<|+0,\"No error\"",
+    "34401A|>>|SYST:REM"
+   ],
+   "method": "Agilent34401A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='34401A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='re-enter remote (SYST:REM)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ]
+   ]
   }
  ],
  "name": "scpi_dmm",

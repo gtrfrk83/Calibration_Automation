@@ -22,7 +22,8 @@ One driver per instrument MODEL. Procedures call intent-level methods
   simulated_fgen.py     Simulated generator + 5790B + counter (53131A / 53132A or generic) + power meter bench for fgen_verification.py
   selftest.py           Safe hardware check:  python -m drivers.selftest --sim
                         python -m drivers.selftest --fluke ASRL9::INSTR --baud 9600 --scope USB0::...::INSTR
-  _template.py          Starting point for a new model
+  _template.py          Starting point for a new model (includes the reset declaration)
+  ../reset_startup.py   Shared start-of-run reset helper used by every engine (notice, reset, standby/off on failure, log line)
 
 Rules every driver follows
   * Every setting is written, read back and compared; a mismatch raises InstrumentError.
@@ -43,7 +44,13 @@ Adding a model
   2. Add one method per thing a procedure needs. Cite the manual page in the docstring.
   3. Add the model to __init__.py, and a simulator class to simulated.py that understands the same strings.
   4. Add it to selftest.py with only safe checks (identify, set + read back with sources off).
-  5. Run the self-test on the real instrument and read the command log before using it in a procedure.
+  5. Declare the reset (Stage 7 rule): COMMANDS['reset'] = cmdreg.reset_cmd(verified, ref) (*RST or the model's equivalent; locked, never
+     overridable) and COMMANDS['opc.query'] = cmdreg.opc_cmd(...); add 'status.clear' / 'err.query' if the model has them; override
+     _reset_extra() with the model's known-state steps (re-enter remote, restore what connect() sets, confirm output OFF / standby).
+     verified=True only with a manual page in ref. A model with no safe software reset sets RESET_EXEMPT = 'reason' and
+     RESET_KNOWN_STATE = 'how its state is established instead' (see fluke_28x.py). Add the simulator's *RST / *OPC? handling.
+     Every engine resets all its instruments through reset_startup before the first point; tests/test_reset_startup.py enforces both.
+  6. Run the self-test on the real instrument and read the command log before using it in a procedure.
 
 Status
   Every procedure now talks to instruments only through these drivers: the WaveSurfer tabs, the

@@ -738,6 +738,107 @@
      "7.0E+00,6.6E+00,7E-06,1"
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.reset_to_defaults",
+   "log": [
+    "5790B|>>|*RST",
+    "5790B|>>|*CLS",
+    "5790B|>>|*OPC?",
+    "5790B|<<|1",
+    "5790B|>>|ERR?",
+    "5790B|<<|0,\"No Error\""
+   ],
+   "method": "Fluke5790B.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5790B', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No Error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5790B.reset_to_defaults[error queue not empty: warning]",
+   "log": [
+    "5790B|>>|*RST",
+    "5790B|>>|*CLS",
+    "5790B|>>|*OPC?",
+    "5790B|>>|*OPC?",
+    "5790B|>>|*OPC?",
+    "5790B|!!|RESET step failed: wait for completion (*OPC?): 'opc.query' failed after 3 attempts: scripted transport: nothing to read"
+   ],
+   "method": "Fluke5790B.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5790B', ok=False, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=False, detail=\"InstrumentError: 'opc.query' failed after 3 attempts: scripted transport: nothing to read\")], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ]
+   ]
   }
  ],
  "name": "fluke_5790b",

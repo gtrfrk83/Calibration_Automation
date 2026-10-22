@@ -77,6 +77,10 @@ COMMANDS = {
     'volt.query': Cmd('VOLT?', 'Amplitude', kind='query', verified=False),
 }
 
+COMMANDS['reset'] = cmdreg.reset_cmd(False, "33210A/33220A/33250A User's Guide: *RST not checked against the manuals (not available to the session that wrote this)",
+                                     note='Output is confirmed OFF afterwards (OUTP OFF, OUTP?)')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(False, "33210A/33220A/33250A User's Guide: *OPC? not checked")
+
 
 class Keysight332xx(Instrument):
     MODEL = 'Keysight 332xx'
@@ -87,6 +91,9 @@ class Keysight332xx(Instrument):
     COMMANDS = COMMANDS
 
     output_off_confirmed = False
+
+    def _reset_extra(self):
+        return [('output OFF confirmed (OUTP OFF, OUTP?)', lambda: self.output(False))]
 
     def connect(self):
         self.open(verify_model=True)

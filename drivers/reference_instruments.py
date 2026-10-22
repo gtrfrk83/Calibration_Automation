@@ -91,6 +91,16 @@ METER_COMMANDS = {
     'read': Cmd('READ?', 'Read', kind='query', verified=False),
 }
 
+RF_COMMANDS['reset'] = cmdreg.reset_cmd(True, "96270A Operator Manual p. 3-46 (Master Reset is equivalent to the GPIB command *RST); the Remote Programmers Manual page for *RST was not checked",
+                                        note='The connect-time known state (SINE, dBm, offsets off, output OFF) is applied again afterwards')
+RF_COMMANDS['opc.query'] = cmdreg.opc_cmd(False, '96000 Series Remote Programmers Manual: *OPC? not checked')
+AFG_COMMANDS['reset'] = cmdreg.reset_cmd(False, "33220A / 33250A User's Guide: *RST not checked (manuals not available to the session that wrote this)",
+                                         note='Output is confirmed OFF afterwards (OUTPut OFF, OUTPut?)')
+AFG_COMMANDS['opc.query'] = cmdreg.opc_cmd(False, "33220A / 33250A User's Guide: *OPC? not checked")
+AFG_COMMANDS['outp.query'] = Cmd('OUTPut?', 'Output state', 'Confirms on / off after the reset (never overridable)', kind='query', risk='output', verified=False)
+METER_COMMANDS['reset'] = cmdreg.reset_cmd(False, 'generic SCPI meter: no manual supplied, *RST is the IEEE 488.2 common command (unverified for the actual model)')
+METER_COMMANDS['opc.query'] = cmdreg.opc_cmd(False, 'generic SCPI meter: no manual supplied')
+
 
 def _bool_reply(reply: str) -> bool:
     r = reply.strip().upper()
@@ -115,12 +125,19 @@ class Fluke96270A(Instrument):
         Selecting the instrument also puts the output into standby (p38). Each setting is read back."""
         self.open(verify_model=True)
         self.send('status.clear')
+        self._apply_known_state()
+        return self
+
+    def _apply_known_state(self):
+        """SINE instrument, levels in dBm, no offsets, output off (each read back). Run at connect and again after a reset."""
         self._set_and_check('inst.set', 'inst.query', lambda r: r.strip().strip('"').upper() == 'SINE', 'instrument SINE')
         self._set_and_check('unit.set', 'unit.query', lambda r: r.strip().strip('"').upper() == 'DBM', 'power units DBM')
         self._set_and_check('poffs.set', 'poffs.query', lambda r: not _bool_reply(r), 'power offset off')
         self._set_and_check('foffs.set', 'foffs.query', lambda r: not _bool_reply(r), 'frequency offset off')
         self.output(False)
-        return self
+
+    def _reset_extra(self):
+        return [('known state again (SINE, dBm, offsets off, output OFF)', self._apply_known_state)]
 
     def _set_and_check(self, key, query, ok, what):
         self.send(key)
@@ -183,6 +200,13 @@ class AgilentAFG(Instrument):
         self.idn = self.identify()
         self.kind = '33250' if '33250' in self.idn else '33220'
         return self
+
+    def _reset_extra(self):
+        def off():
+            self.send('outp.off')
+            if _bool_reply(self.ask('outp.query')):
+                raise SafetyError('33220A / 33250A did not confirm output OFF after the reset; check the front panel')
+        return [('output OFF confirmed (OUTPut OFF, OUTPut?)', off)]
 
     @property
     def max_hz(self):

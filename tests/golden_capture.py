@@ -61,7 +61,7 @@ COVERAGE = {
     # driver fixture name -> {class name -> {'covered': [...], 'no_command': [...]}}
     'base': {
         'Instrument': dict(
-            covered=['open', 'close', 'identify', 'write', 'query', 'query_retry', 'cleanup'],
+            covered=['open', 'close', 'identify', 'write', 'query', 'query_retry', 'cleanup', 'reset_to_defaults'],
             no_command=['close_to',                                         # pure arithmetic helper
                         'send', 'ask',                                      # generic registry front ends: every driver case goes through them
                         'use_commands', 'rejected_commands', 'command_overrides_active', 'describe_commands']),   # no wire traffic
@@ -139,6 +139,13 @@ COVERAGE = {
         'ReferenceMeter': dict(covered=['connect', 'frequency', 'ac_rms', 'power', 'dc'], no_command=[]),
     },
 }
+
+# Stage 7: reset_to_defaults is defined once, on Instrument, and exercised on each of these concrete drivers (golden cases "Class.reset_to_defaults").
+for _cls in ('Fluke5560A', 'Fluke5522A', 'Fluke8846A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
+             'Keysight53132A', 'Fluke5790B', 'Fluke28x', 'WaveSurfer4104HD', 'TektronixMDO4000C', 'Fluke96270A', 'AgilentAFG', 'ReferenceMeter'):
+    for _fixture in COVERAGE.values():
+        if _cls in _fixture:
+            _fixture[_cls]['covered'].append('reset_to_defaults')
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
@@ -894,10 +901,112 @@ def cases_reference(c):
     c.run('ReferenceMeter.frequency[overload]', over.frequency)
 
 
+# ---- Stage 7: reset to default settings (Instrument.reset_to_defaults), one block per driver fixture, run after that fixture's other cases
+def resets_base(c):
+    i = c.inst(Instrument, Scripted([]), label='Base')
+    c.run('Instrument.reset_to_defaults[no reset declared]', i.reset_to_defaults)
+
+
+def resets_fluke_5560a(c):
+    bench, ft, _s = make_bench()
+    ft.opened = True
+    cal = c.inst(Fluke5560A, ft, label='5560A')
+    bench.fluke.update(operate=True, volts=1.0)
+    c.run('Fluke5560A.reset_to_defaults', cal.reset_to_defaults)
+    bench.fail_next = '*RST'
+    c.run('Fluke5560A.reset_to_defaults[reset write fails: not retried]', cal.reset_to_defaults)
+    ft2 = make_dacq_bench(cal='5522A')[1]
+    cal2 = c.inst(Fluke5522A, ft2, label='5522A')
+    c.run('Fluke5522A.reset_to_defaults', cal2.reset_to_defaults)
+    stuck = c.inst(Fluke5560A, Scripted([(r'^OPER\?', '1')]), label='5560A')
+    c.run('Fluke5560A.reset_to_defaults[standby not confirmed]', stuck.reset_to_defaults)
+
+
+def resets_scpi_dmm(c):
+    for cls, model in ((Fluke8846A, '8846A'), (Agilent34401A, '34401A')):
+        bench, ft, dt = make_dmm_bench(model)
+        d = c.inst(cls, dt, label=model)
+        c.run(f'{cls.__name__}.reset_to_defaults', d.reset_to_defaults)
+
+
+def resets_truevolt(c):
+    bench, ft, dt = make_dmm_bench('34470A')
+    d = c.inst(Keysight34470A, dt, label='34470A')
+    c.run('Keysight34470A.reset_to_defaults', d.reset_to_defaults)
+
+
+def resets_dacq(c):
+    for cls, model in ((Keysight34970A, '34970A'), (Keysight34972A, '34972A')):
+        bench, ft, dt = make_dacq_bench(model)
+        d = c.inst(cls, dt, label=model)
+        c.run(f'{cls.__name__}.reset_to_defaults', d.reset_to_defaults)
+
+
+def resets_332xx(c):
+    bench, t = make_fgen_bench('33220A')
+    g = c.inst(Keysight33220A, t['uut'], label='33220A')
+    bench.gen.update(on=True, freq=5e6)
+    c.run('Keysight33220A.reset_to_defaults', g.reset_to_defaults)
+    stuck = c.inst(Keysight33220A, Scripted([(r'^OUTP\?', '1')]), label='33220A')
+    c.run('Keysight33220A.reset_to_defaults[output stays on]', stuck.reset_to_defaults)
+
+
+def resets_5313x(c):
+    bench, t = make_fgen_bench('33220A')
+    bench.counter_model = '53132A'
+    k = c.inst(Keysight53132A, t['counter'], label='Counter')
+    c.run('Keysight53132A.reset_to_defaults', k.reset_to_defaults)
+
+
+def resets_5790b(c):
+    bench, t = make_fgen_bench('33220A')
+    s = c.inst(Fluke5790B, t['std'], label='5790B')
+    c.run('Fluke5790B.reset_to_defaults', s.reset_to_defaults)
+    q = c.inst(Fluke5790B, Scripted([(r'^ERR\?', ['101,"Command error"', '0,"No Error"'])]), label='5790B')
+    c.run('Fluke5790B.reset_to_defaults[error queue not empty: warning]', q.reset_to_defaults)
+
+
+def resets_28x(c):
+    m = c.inst(Fluke28x, SimFluke28x(SimBench(), '289'), label='289')
+    c.run('Fluke28x.reset_to_defaults[exempt]', m.reset_to_defaults)
+
+
+def resets_lecroy(c):
+    bench, _ft, st = make_bench()
+    w = c.inst(WaveSurfer4104HD, st, label='WS4104HD')
+    c.run('WaveSurfer4104HD.reset_to_defaults', w.reset_to_defaults)
+
+
+def resets_mdo(c):
+    bench, t = make_mdo_bench()
+    m = c.inst(TektronixMDO4000C, t['scope'], label='MDO4000C')
+    c.run('TektronixMDO4000C.reset_to_defaults', m.reset_to_defaults)
+
+
+def resets_reference(c):
+    bench, t = make_mdo_bench()
+    rf = c.inst(Fluke96270A, t['rf1'], label='96270A')
+    c.run('Fluke96270A.reset_to_defaults', rf.reset_to_defaults)
+    g = c.inst(AgilentAFG, t['gen'], label='FuncGen')
+    c.run('AgilentAFG.reset_to_defaults', g.reset_to_defaults)
+    mtr = c.inst(ReferenceMeter, t['dmm'], label='RefDMM')
+    c.run('ReferenceMeter.reset_to_defaults', mtr.reset_to_defaults)
+
+
+def _with_resets(cases, resets):
+    def both(c):
+        cases(c)
+        resets(c)
+    return both
+
+
 DRIVER_CASES = {
-    'base': cases_base, 'fluke_5560a': cases_fluke_5560a, 'scpi_dmm': cases_scpi_dmm, 'keysight_truevolt': cases_truevolt,
-    'keysight_dacq': cases_dacq, 'keysight_332xx': cases_332xx, 'keysight_5313x': cases_5313x, 'fluke_5790b': cases_5790b,
-    'fluke_28x': cases_28x, 'lecroy_ws4104hd': cases_lecroy, 'tektronix_mdo4000c': cases_mdo, 'reference_instruments': cases_reference,
+    'base': _with_resets(cases_base, resets_base), 'fluke_5560a': _with_resets(cases_fluke_5560a, resets_fluke_5560a),
+    'scpi_dmm': _with_resets(cases_scpi_dmm, resets_scpi_dmm), 'keysight_truevolt': _with_resets(cases_truevolt, resets_truevolt),
+    'keysight_dacq': _with_resets(cases_dacq, resets_dacq), 'keysight_332xx': _with_resets(cases_332xx, resets_332xx),
+    'keysight_5313x': _with_resets(cases_5313x, resets_5313x), 'fluke_5790b': _with_resets(cases_5790b, resets_5790b),
+    'fluke_28x': _with_resets(cases_28x, resets_28x), 'lecroy_ws4104hd': _with_resets(cases_lecroy, resets_lecroy),
+    'tektronix_mdo4000c': _with_resets(cases_mdo, resets_mdo), 'reference_instruments': _with_resets(cases_reference, resets_reference),
 }
 
 

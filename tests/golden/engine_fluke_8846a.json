@@ -46,6 +46,102 @@
    ]
   },
   {
+   "call": "",
+   "case": "Fluke_8846A_Verification.IO.reset_at_start",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|>>|*CLS",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0",
+    "8846A|>>|*RST",
+    "8846A|>>|*CLS",
+    "8846A|>>|*OPC?",
+    "8846A|<<|1",
+    "8846A|>>|SYST:ERR?",
+    "8846A|<<|+0,\"No error\"",
+    "8846A|>>|SYST:REM",
+    "RESET|--|Instruments reset to default settings at start: 5560A, 8846A"
+   ],
+   "method": "Fluke_8846A_Verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "SYST:REM"
+    ]
+   ]
+  },
+  {
    "call": "{'description': 'DCV 0 V (range 0.1)', 'error': 3.5e-06, 'frequency': None, 'high': 3.5e-06, 'id': 1, 'kind': 'DCV', 'low': -3.5e-06, 'nominal': 0.0, 'range': 0.1, 'source': 'Fluke Calibration Manual Appendix A, Table A-2 (1-year)', 'terminal': 'FRONT', 'unit': 'V', 'verified': True, 'wiring': 'VOLTAGE', 'zero_offset': True}",
    "case": "Fluke_8846A_Verification.IO.measure[DCV#1]",
    "log": [

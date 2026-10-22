@@ -166,6 +166,8 @@ COMMANDS = {
     'spc.status': _q('CALibrate:INTERNal:STATus?', 'Signal path compensation status', risk='locked'),
     'spc.result': _q('CALibrate:RESults:SPC?', 'Signal path compensation result', risk='locked'),
 }
+COMMANDS['reset'] = _c('*RST', 'Reset to default settings', 'Returns the oscilloscope to its default setup before a run (never overridable). '
+                       'Not verified: MDO4000/B/C Programmer Manual page not checked', risk='locked', verified=False)
 
 # The spectrum-analyser commands by their old short names (rf_cmd('center', v=...) sends the registry key 'rf.center').
 RF = {key[3:]: cmd.template for key, cmd in COMMANDS.items() if key.startswith('rf.')}
@@ -196,6 +198,15 @@ class TektronixMDO4000C(Instrument):
             if part.upper().startswith('MDO4'):
                 return part.upper().replace('MDO', '')          # '4104C'
         return ''
+
+    RESET_OPC_TIMEOUT = 60.0
+
+    def _reset_extra(self):
+        """*RST can put the reply format back: header-less / short replies are what the code parses. The AFG output is forced off."""
+        return [('replies without headers (HEADer OFF)', lambda: self.send('sys.header.off')),
+                ('short headers (VERBose OFF)', lambda: self.send('sys.verbose.off')),
+                ('AFG output off', lambda: self.send('afg.off')),
+                ('event status clean (*ESR?)', lambda: self.check_errors('reset'))]
 
     def installed_options(self):
         """Tokens from *OPT? (e.g. SA3, SA6, AFG, DVM) for pre-selecting the option boxes; the technician can override."""

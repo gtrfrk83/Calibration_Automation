@@ -32,6 +32,63 @@
    ]
   },
   {
+   "call": "",
+   "case": "handheld_dmm.IO.reset_at_start",
+   "log": [
+    "Fluke 5522A|>>|*RST",
+    "Fluke 5522A|>>|*CLS",
+    "Fluke 5522A|>>|*OPC?",
+    "Fluke 5522A|<<|1",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|STBY",
+    "Fluke 5522A|>>|OPER?",
+    "Fluke 5522A|<<|0",
+    "RESET|--|Instruments reset to default settings at start: Fluke 5522A"
+   ],
+   "method": "handheld_dmm.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
    "call": "{'applied': {'frequency': None, 'value': 0}, 'base_unit': 'ohm', 'display_unit': 'Ω', 'factor': 1.0, 'group': 'VOHM', 'high': '0.2', 'id': '3-1', 'kind': 'OHM', 'low': '0.0', 'models': ['110', '114', '115', '116', '117'], 'n': 4, 'nominal': 0.0, 'range': '600.0', 'section': 'Ohms', 'step': 1, 'switch': 'Ω  (Ohms)', 'table': '3', 'test': 'numeric'}",
    "case": "handheld_dmm.IO.apply[115 OHM#4]",
    "log": [

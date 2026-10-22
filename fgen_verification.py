@@ -29,6 +29,7 @@ import ui_shell
 import appdata
 import datamode
 import procmods_engine
+import reset_startup
 import drivers
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
@@ -174,7 +175,7 @@ def to_visa(text):
 # ================================================================================================================
 # bench I/O (no tkinter: the simulated-bench tests drive this class directly)
 # ================================================================================================================
-class IO(procmods_engine.ProcModsMixin):
+class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """The generator under test, the 5790B, and (optionally) a counter and a power meter. A reference left without an
     address is read by the technician: ask_number(prompt, unit) is called and must return a float (or None to stop)."""
 
@@ -206,6 +207,9 @@ class IO(procmods_engine.ProcModsMixin):
         except Exception:
             self.close(); raise
         self.ident = self.uut.idn
+
+    def reset_roles(self):
+        return [d for d in (self.std, self.counter, self.power) if d is not None], [self.uut]
 
     def pm_drivers(self):
         return tuple(d for d in (self.uut, self.std, self.counter, self.power) if d is not None)
@@ -505,7 +509,7 @@ def certificate_rows(results):
 # ================================================================================================================
 # application
 # ================================================================================================================
-class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     WIRING = {
         'NONE': ('Self-test', [('Disconnect', 'Remove any cable from the generator OUTPUT. No connections are needed for the self-test.')]),
         'COUNTER': ('Connect the frequency counter', [('Connect', 'Generator OUTPUT to the frequency counter channel 1 input with a 50 ohm BNC cable.'),
@@ -811,7 +815,7 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         self.conditions_ok = True
         self.stop = False; self.busy = True; self.pref_cache = {}
-        self._next(points, 0, None)
+        self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
     def method(self):
         return next(k for k, v in FLAT_METHODS.items() if v == self.flat_method.get())

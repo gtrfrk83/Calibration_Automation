@@ -21,12 +21,13 @@ DRIVERS = [Keysight332xx, Keysight5313x, Fluke5790B, Fluke96270A, AgilentAFG, Re
 
 # (risk -> verified -> count) per driver. Nothing in these drivers has been run on hardware (NOTES.md), so nothing is verified=True.
 EXPECTED = {
-    'Keysight332xx': {('normal', False): 16, ('output', False): 3, ('locked', False): 3},
-    'Keysight5313x': {('normal', False): 22, ('locked', False): 3},
-    'Fluke5790B': {('normal', False): 11, ('locked', False): 2},
-    'Fluke96270A': {('normal', False): 11, ('output', False): 3, ('locked', False): 2},
-    'AgilentAFG': {('normal', False): 4, ('output', False): 4, ('locked', False): 2},
-    'ReferenceMeter': {('normal', False): 6, ('locked', False): 1},
+    # Stage 7 added the locked reset + opc.query to each (verified=True where a manual page backs it)
+    'Keysight332xx': {('normal', False): 16, ('output', False): 3, ('locked', False): 5},
+    'Keysight5313x': {('normal', False): 22, ('locked', False): 3, ('locked', True): 2},
+    'Fluke5790B': {('normal', False): 11, ('locked', False): 2, ('locked', True): 2},
+    'Fluke96270A': {('normal', False): 11, ('output', False): 3, ('locked', False): 3, ('locked', True): 1},
+    'AgilentAFG': {('normal', False): 4, ('output', False): 5, ('locked', False): 4},
+    'ReferenceMeter': {('normal', False): 6, ('locked', False): 3},
 }
 
 

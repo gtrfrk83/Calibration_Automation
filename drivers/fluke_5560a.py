@@ -9,6 +9,7 @@ from __future__ import annotations
 import math
 import time
 
+import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError, SafetyError
 from .transport import SerialSettings
@@ -83,6 +84,9 @@ COMMANDS = {
                         risk='locked', verified=False),
 }
 
+COMMANDS['reset'] = cmdreg.reset_cmd(False, '5560A manual: not available to the session that wrote this; 5522A p. 6-35 documents *RST for the 5522A only',
+                                     note='*RST: power-up state, output in STANDBY (confirmed afterwards with STBY / OPER?)')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(False, '5560A manual not checked')
 
 # RS-232 defaults for the 5560A; pass different SerialSettings for other baud rates.
 SERIAL_DEFAULT = SerialSettings(baud=9600, data_bits=8, parity='none', stop_bits=1,
@@ -121,6 +125,9 @@ class Fluke5560A(Instrument):
 
     standby_confirmed = False
     stale_errors = ()
+
+    def _reset_extra(self):
+        return [('output in STANDBY (STBY, OPER? = 0)', self.standby)]
 
     # ---- SCOPE function ------------------------------------------------------------------------
     def scope_off(self):
@@ -317,3 +324,7 @@ class Fluke5522A(Fluke5560A):
     outputs the DMM procedures use. Offered so the handheld-meter procedures run with the calibrator the manual lists."""
     MODEL = 'Fluke 5522A'
     IDN_MATCH = ('5522', '5520', '5502', '5500')
+    COMMANDS = {
+        'reset': cmdreg.reset_cmd(True, '5522A Operators Manual p. 6-35 (*RST: power-up state, STBY, holds off later commands until done)'),
+        'opc.query': cmdreg.opc_cmd(True, '5522A Operators Manual p. 5-44 (Using *OPC?, *OPC, *WAI)'),
+    }

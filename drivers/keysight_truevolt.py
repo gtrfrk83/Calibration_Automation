@@ -6,6 +6,7 @@ frequency points use CONFigure:FREQuency DEF,MIN with a 3 Hz filter and 1 s aper
 """
 from __future__ import annotations
 
+import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
 from .scpi_dmm import FUNCTIONS, ScpiDmm
@@ -64,6 +65,9 @@ class KeysightTruevolt(ScpiDmm):
             self.close()
             raise InstrumentError(f'Unexpected DMM identification: {self.idn}')
         return self
+
+    def _reset_extra(self):
+        return []                   # no SYST:REM on the Truevolt meters: remote control is implicit
 
     def cleanup(self):
         # Truevolt meters return to front-panel control on their own when the remote session ends.

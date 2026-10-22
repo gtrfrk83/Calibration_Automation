@@ -25,6 +25,24 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Outputs to standby/off after each point.
 - Read limit tables from rendered page images, not extracted text.
 - No cover sheets, no standards-due tracking (handled by other software).
+- Reset to default settings (Stage 7): every instrument is reset to its default settings BEFORE the first test point of every run (first run,
+  re-run, resume after Stop). Every driver declares a locked `COMMANDS['reset']` (risk 'locked', never overridable; `cmdreg.reset_cmd`) plus
+  `opc.query`, or a documented `RESET_EXEMPT` reason with `RESET_KNOWN_STATE`. `Instrument.reset_to_defaults()` runs reset, `*CLS`, wait,
+  error-queue drain, then the model's `_reset_extra()` (re-enter remote, restore connect-time settings, confirm outputs off/standby) and returns
+  a `ResetReport`; a reset write is never retried; a failure stops the run before any point and sends outputs to standby/off. Engines call the
+  shared helper `reset_startup` (`AppResetMixin.reset_then` / `IOResetMixin.reset_at_start` / `reset_all`) and log
+  'Instruments reset to default settings at start'. Because a UUT reset can erase stored settings, a notice is confirmed first (declining touches
+  nothing). Demo mode sends nothing. A new procedure must call the helper before its first point; `tests/test_reset_startup.py` enforces it.
+
+## Reset to default settings: what is verified (Stage 7)
+- Backed by a manual page: Fluke 5522A `*RST` (Operators Manual p. 6-35) and `*OPC?` (p. 5-44); Fluke 5790B `*RST` (Operators Manual pp. 6-11,
+  6-22) and `*OPC?` (pp. 6-10, 6-22); Agilent 53131A/53132A `*RST` (Programming Guide p. 2-40, Table 2-3; `*OPC?` p. 4-133; the reference
+  oscillator source returns to AUTO, so the procedure selects it again); Fluke 96270A Master Reset equals `*RST` (Operator Manual p. 3-46).
+- NOT verified (manual not available when written; `verified=False`): Fluke 5560A, 8845A/8846A, 34401A, Keysight Truevolt 34460A-70A,
+  34970A/34972A, 33210A/33220A/33250A (also as the AFG in the MDO4000C procedure), LeCroy WaveSurfer 4104HD, Tektronix MDO4000C (`*RST`
+  vs `FACtory`, reply format after reset), generic ReferenceMeter (power meter / counters), plus `*CLS`/`*OPC?`/`SYST:ERR?` on the DMMs.
+- Exempt: Fluke 287/289 over IR (read-only protocol, no reset command; known state = the unchanged set-up check).
+- The 8846A adjustment procedure resets the meter when an adjustment record starts (and after reconnecting a resumed record), never between steps.
 
 ## Open items: Keysight 34970A / 34972A (not yet run on hardware)
 - Unverified SCPI: `FREQ:APER`, AC bandwidth on the current channel, reading with `ROUT:SCAN` + `READ?`.

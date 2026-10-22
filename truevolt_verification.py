@@ -23,6 +23,7 @@ import drivers
 import appdata
 import datamode
 import procmods_engine
+import reset_startup
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
 PERIODS = {'24 hours': '24h', '90 days': '90d', '1 year': '1y', '2 years': '2y'}
@@ -50,7 +51,7 @@ def to_visa(text):
     return f'ASRL{int(t)}::INSTR'
 
 
-class IO(procmods_engine.ProcModsMixin):
+class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the DMM under test and the Fluke 5560A, both through the instrument drivers."""
     SETTLE_AC = {3: 9.0, 20: 5.0, 200: 4.0}
 
@@ -71,6 +72,9 @@ class IO(procmods_engine.ProcModsMixin):
         except Exception:
             self.close(); raise
         self.ident = self.dmm.idn
+
+    def reset_roles(self):
+        return [self.cal], [self.dmm]
 
     def pm_drivers(self):
         return (self.dmm, self.cal)
@@ -136,7 +140,7 @@ class IO(procmods_engine.ProcModsMixin):
         return reading
 
 
-class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     WIRING_TEXT = {
         'VOLT': 'Calibrator voltage output to the DMM front HI / LO input terminals.',
         'CURRENT': 'Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first.',
@@ -383,7 +387,7 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if not self.demo and self.io is None: self.test_connections()
         if not self.demo and self.io is None: return
         self.stop = False; self.busy = True
-        self._next(points, 0, None)
+        self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
     def _prompt_setup(self, p):
         """Confirm the physical setup when the wiring group changes. Returns False if the technician cancels."""

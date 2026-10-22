@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import math
 
+import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
 from .transport import SerialSettings
@@ -94,6 +95,10 @@ COMMANDS = {
                      risk='locked', verified=True, ref=_REF),
 }
 
+COMMANDS['reset'] = cmdreg.reset_cmd(False, '34970A/34972A manual: *RST not checked (manual not available to the session that wrote this)',
+                                     note='Channel / scan configuration is set again per point')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(False, '34970A/34972A manual: *OPC? not checked')
+
 
 class KeysightDacq(Instrument):
     COMMANDS = COMMANDS
@@ -103,6 +108,9 @@ class KeysightDacq(Instrument):
                             write_termination='\n', read_termination='\n', flow_control='xon_xoff')
     SUPPORTED = tuple(CONF_NODE) + ('FREQ',)
     REMOTE_ON_CONNECT = False       # 34970A over RS-232 is put into remote with SYST:REM
+
+    def _reset_extra(self):
+        return [('re-enter remote (SYST:REM)', lambda: self.send('sys.rem'))] if self.REMOTE_ON_CONNECT else []
 
     def connect(self):
         """Open, (RS-232: SYST:REM), clear status and confirm the model."""

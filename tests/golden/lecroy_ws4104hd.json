@@ -1171,6 +1171,43 @@
      "VBS Full"
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "WaveSurfer4104HD.reset_to_defaults",
+   "log": [
+    "WS4104HD|>>|*RST",
+    "WS4104HD|>>|*CLS",
+    "WS4104HD|>>|*OPC?",
+    "WS4104HD|<<|1"
+   ],
+   "method": "WaveSurfer4104HD.reset_to_defaults",
+   "result": "returned ResetReport(instrument='WS4104HD', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='no error-queue command')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ]
+   ]
   }
  ],
  "name": "lecroy_ws4104hd",

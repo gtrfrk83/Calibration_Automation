@@ -56,6 +56,9 @@ class SimRF(_SimBase):
         st, u = self.st, u0.upper()
         if u == '*IDN?': return 'Fluke,96270A,SIM0001,1.00'
         if u == '*CLS': st['errors'].clear(); return None
+        if u == '*RST':
+            st.update(f=1e6, p=-10.0, on=False, inst='SINE', unit='VRMS', poffs=True, foffs=False); return None
+        if u == '*OPC?': return '1'
         if u in ('SYST:ERR?', 'SYSTEM:ERROR?'): return st['errors'].pop(0) if st['errors'] else '0'
         m = re.match(r'INST(?:RUMENT)?(?::SEL(?:ECT)?)?\s+(\w+)$', u)
         if m: st['inst'] = m.group(1); st['on'] = st['on'] and st['stuck_on']; return None
@@ -96,8 +99,11 @@ class SimGen(_SimBase):
         u = cmd.upper()
         if u == '*IDN?': return f'Agilent Technologies,{self.model},SIM0001,1.0'
         if u == '*CLS': return None
+        if u == '*RST': self.st.update(f=1e3, v=1.0, fn='SIN', on=False, load=50); return None
+        if u == '*OPC?': return '1'
         if u == 'OUTPUT ON': self.st['on'] = True; return None
         if u == 'OUTPUT OFF': self.st['on'] = False; return None
+        if u == 'OUTPUT?': return '1' if self.st['on'] else '0'
         if u.startswith('OUTPUT:LOAD'): return None
         m = re.match(r'APPLY:(SIN|SQU)\w*\s+([-+0-9.eE]+),([-+0-9.eE]+),([-+0-9.eE]+)$', u)
         if m: self.st.update(fn=m.group(1), f=float(m.group(2)), v=float(m.group(3))); return None
@@ -120,6 +126,8 @@ class SimMeter(_SimBase):
         afg = self.bench.mdo_state.afg
         if u == '*IDN?': return 'KEYSIGHT,SIM-METER,SIM0001,1.0'
         if u == '*CLS': return None
+        if u == '*RST': self.mode = 'DC'; return None
+        if u == '*OPC?': return '1'
         if u.startswith('CONF'):
             self.mode = 'AC' if 'AC' in u else 'DC'; return None
         if u.startswith(('VOLT:AC:BAND', 'VOLTAGE:AC:BAND')): return None
@@ -207,6 +215,7 @@ class SimMdo(_SimBase):
         if u == '*ESR?': return '0'
         if u == 'EVMSG?': return '0,"No events"'
         if u == 'FACTORY': s.reset(); return None
+        if u == '*RST': s.reset(); return None
         m = re.match(r'SELECT:CH(\d) (ON|OFF)$', u)
         if m:
             (s.sel.add if m.group(2) == 'ON' else s.sel.discard)(int(m.group(1))); return None

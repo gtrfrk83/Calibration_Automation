@@ -351,6 +351,16 @@
      "1"
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "Fluke28x.reset_to_defaults[exempt]",
+   "log": [
+    "289|--|RESET EXEMPT: The 287 / 289 IR remote interface (Fluke remote interface specification) is read-only: it has no reset or setting command, and resetting the unit under test could erase its stored settings anyway."
+   ],
+   "method": "Fluke28x.reset_to_defaults",
+   "result": "returned ResetReport(instrument='289', ok=True, exempt=True, steps=[ResetStep(name='exempt', ok=True, detail='The 287 / 289 IR remote interface (Fluke remote interface specification) is read-only: it has no reset or setting command, and resetting the unit under test could erase its stored settings anyway. Known state: the procedure prompts the technician for function and range, then reads QDDA / QM and refuses a point whose function, range or REL / Low Pass state differs (set-up check, unchanged).')], warnings=[])",
+   "wire": []
   }
  ],
  "name": "fluke_28x",

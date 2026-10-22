@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import math
 
+import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
 from .transport import SerialSettings
@@ -36,7 +37,15 @@ COMMANDS = {
     'conf.freq': Cmd('CONF:FREQ', 'Configure frequency', 'Frequency function with default range. Not confirmed on a bench DMM', kind='set',
                      verified=False),
     'read': Cmd('READ?', 'Take a reading', 'One reading of the configured function', kind='query', verified=True, ref=_REF),
+    # plumbing shared with the Truevolt driver (which redeclares status.clear / err.query verified): locked, not checked against the 8846A / 34401A manuals
+    'status.clear': Cmd('*CLS', 'Clear status', 'Clears the status registers and the error queue (never overridable)', kind='set', risk='locked',
+                        verified=False, ref='8845A/8846A and 34401A manuals: *CLS not checked'),
+    'err.query': Cmd('SYST:ERR?', 'Error queue', 'Oldest error; reading removes it (error-queue path, never overridable)', kind='query',
+                     risk='locked', verified=False, ref='8845A/8846A and 34401A manuals: SYST:ERR? not checked'),
 }
+COMMANDS['reset'] = cmdreg.reset_cmd(False, '8845A/8846A Users Manual and 34401A User\'s Guide: *RST not checked (manuals not available to the session that wrote this)',
+                                     note='Remote mode is entered again afterwards (SYST:REM)')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(False, '8845A/8846A and 34401A manuals: *OPC? not checked')
 
 
 
@@ -59,6 +68,9 @@ class ScpiDmm(Instrument):
 
     def remote(self):
         self.send('sys.rem')
+
+    def _reset_extra(self):
+        return [('re-enter remote (SYST:REM)', self.remote)]
 
     def local(self):
         self.send('sys.loc')

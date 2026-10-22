@@ -433,6 +433,19 @@ def validate_bundle(templates, registry) -> list:
     return probs
 
 
+def reset_cmd(verified=False, ref='', template='*RST', note=''):
+    """The registered, LOCKED reset-to-defaults command every driver declares as COMMANDS['reset'] (Stage 7 rule): never overridable,
+    so a modified procedure can never skip the reset. verified=True only with a manual page in `ref`."""
+    return Cmd(template, 'Reset to default settings', ('Returns the instrument to its default state before a run (never overridable). ' + note).strip(),
+               kind='set', risk='locked', verified=verified, ref=ref)
+
+
+def opc_cmd(verified=False, ref=''):
+    """*OPC? - read-only wait for completion after the reset (locked plumbing, like *CLS)."""
+    return Cmd('*OPC?', 'Operation complete', 'Waits for pending operations; used after the reset (never overridable)', kind='query',
+               risk='locked', verified=verified, ref=ref)
+
+
 def lint_registry(registry) -> list:
     """Sanity check of a driver's own COMMANDS (not the override rules)."""
     probs = []

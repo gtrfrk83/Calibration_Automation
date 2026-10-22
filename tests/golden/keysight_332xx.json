@@ -912,6 +912,119 @@
      "+0,\"No error\""
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "Keysight33220A.reset_to_defaults",
+   "log": [
+    "33220A|>>|*RST",
+    "33220A|>>|*CLS",
+    "33220A|>>|*OPC?",
+    "33220A|<<|1",
+    "33220A|>>|SYST:ERR?",
+    "33220A|<<|+0,\"No error\"",
+    "33220A|>>|OUTP OFF",
+    "33220A|>>|OUTP?",
+    "33220A|<<|0"
+   ],
+   "method": "Keysight33220A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='33220A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output OFF confirmed (OUTP OFF, OUTP?)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight33220A.reset_to_defaults[output stays on]",
+   "log": [
+    "33220A|>>|*RST",
+    "33220A|>>|*CLS",
+    "33220A|>>|*OPC?",
+    "33220A|>>|*OPC?",
+    "33220A|>>|*OPC?",
+    "33220A|!!|RESET step failed: wait for completion (*OPC?): 'opc.query' failed after 3 attempts: scripted transport: nothing to read"
+   ],
+   "method": "Keysight33220A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='33220A', ok=False, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=False, detail=\"InstrumentError: 'opc.query' failed after 3 attempts: scripted transport: nothing to read\")], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "scripted transport: nothing to read"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ]
+   ]
   }
  ],
  "name": "keysight_332xx",

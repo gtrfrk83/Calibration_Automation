@@ -118,6 +118,10 @@ class Fluke28x(Instrument):
     IDN_MATCH = ('FLUKE 287', 'FLUKE 289')
     DEFAULT_TIMEOUT = 3.0
     COMMANDS = COMMANDS
+    RESET_EXEMPT = ('The 287 / 289 IR remote interface (Fluke remote interface specification) is read-only: it has no reset or setting '
+                    'command, and resetting the unit under test could erase its stored settings anyway.')
+    RESET_KNOWN_STATE = ('the procedure prompts the technician for function and range, then reads QDDA / QM and refuses a point whose '
+                         'function, range or REL / Low Pass state differs (set-up check, unchanged).')
 
     def connect(self):
         self.open(verify_model=False)

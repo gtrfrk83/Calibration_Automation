@@ -800,6 +800,231 @@
      "9.91E+37"
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "Fluke96270A.reset_to_defaults",
+   "log": [
+    "96270A|>>|*RST",
+    "96270A|>>|*CLS",
+    "96270A|>>|*OPC?",
+    "96270A|<<|1",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|SINE",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|POW:OFFS:STAT 0",
+    "96270A|>>|POW:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|FREQ:OFFS:STAT 0",
+    "96270A|>>|FREQ:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0"
+   ],
+   "method": "Fluke96270A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='96270A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='known state again (SINE, dBm, offsets off, output OFF)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFG.reset_to_defaults",
+   "log": [
+    "FuncGen|>>|*RST",
+    "FuncGen|>>|*CLS",
+    "FuncGen|>>|*OPC?",
+    "FuncGen|<<|1",
+    "FuncGen|>>|SYSTem:ERRor?",
+    "FuncGen|<<|+0,\"No error\"",
+    "FuncGen|>>|OUTPut OFF",
+    "FuncGen|>>|OUTPut?",
+    "FuncGen|<<|0"
+   ],
+   "method": "AgilentAFG.reset_to_defaults",
+   "result": "returned ResetReport(instrument='FuncGen', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output OFF confirmed (OUTPut OFF, OUTPut?)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "ReferenceMeter.reset_to_defaults",
+   "log": [
+    "RefDMM|>>|*RST",
+    "RefDMM|>>|*CLS",
+    "RefDMM|>>|*OPC?",
+    "RefDMM|<<|1"
+   ],
+   "method": "ReferenceMeter.reset_to_defaults",
+   "result": "returned ResetReport(instrument='RefDMM', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='no error-queue command')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
   }
  ],
  "name": "reference_instruments",
