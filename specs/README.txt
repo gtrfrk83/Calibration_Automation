@@ -112,6 +112,8 @@ Notes on the 34465A spec
   * Quick-check marks on merged cells (10 V and -100 V DC) follow the cell positions in the printed table.
 
 a2la_1888_03_cmc.json
+  (An optional entry {basis 'generate', kind 'TEMP', bands [{lo, hi, rel, abs}]} - signed degC bands - would make the temperature points of the handheld meters report no less than that CMC; the shipped file has none,
+  so the temperature uncertainty there is the calibrator's Type K simulation budget alone.  See NOTES.md.)
   CMC tables from the lab's scope of accreditation. Bands carry rel (fraction of reading), abs (fixed floor, base units) and
   rng (fraction of range, AC current only); AC voltage bands are by voltage and frequency, AC current by instrument range.
   Built by reading the scope PDF's Section V (pp. 8-32); AC-voltage ranges (1 to 2) V is printed with three repeated rows

@@ -1457,7 +1457,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             clean = lambda d: float(f'{float(d * factor):.9g}')
             unit = SYMBOL[p['base_unit']]
             unc = ''
-            if p['kind'] in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP') and p.get('applied') and not p.get('no_uncertainty'):
+            if self.has_uncertainty(p):
                 unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
                                                         frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None),
                                                         standard=self.calibrator_model())
@@ -1502,12 +1502,22 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 pts.append(p)
         return rows, pts
 
+    @staticmethod
+    def has_uncertainty(p):
+        """True for the points that carry an Uncertainty (and TAR / TUR): numeric DCV / ACV / DCI / ACI / OHM / CAP with a source, and the
+        thermocouple-simulation TEMP points (degC only: a degF point has no degC calibrator specification, so it stays blank)."""
+        if not p.get('applied') or p.get('no_uncertainty'):
+            return False
+        if p['kind'] == 'TEMP':
+            return p.get('base_unit') in ('C', 'degC')
+        return p['kind'] in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP')
+
     def certificate_fields(self, p):
         """Optional TAR / TUR fields of one point, from the same point, limits and calibrator model as its Uncertainty cell.
         Only points that carry an uncertainty today (numeric DCV / ACV / DCI / ACI / OHM / CAP with a source) get ratios; all others stay blank."""
         blank = dict(TAR='', TUR='')
         try:
-            if not (p['test'] == 'numeric' and p['kind'] in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP') and p.get('applied') and not p.get('no_uncertainty')):
+            if not (p['test'] == 'numeric' and self.has_uncertainty(p)):
                 return blank
             import tartur
             factor = Decimal(str(p['factor']))
@@ -1544,7 +1554,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [self.certificate_fields(p) for p in pts])
             report_pdf.write_calibration_pdf(path, rows, header=self.report_header(src),
                                              title=self.report_title(), demo=demo, details=details,
-                                             footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows, self.calibrator_model()), self.source_note()) if x),
+                                             footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows, self.calibrator_model()), self.temperature_note(), self.source_note()) if x),
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:
             messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab')
@@ -1571,6 +1581,17 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         """Model of the calibrator in use ('5560A' / '5522A'), for the uncertainty budget."""
         text = self.cal_mode.get()
         return '5522A' if '5522A' in text else '5560A' if '5560A' in text else None
+
+    def temperature_note(self):
+        """Footer text (kept with the issued report; the PDF itself does not print the footer) for the thermocouple-simulation points, or '' when the run
+        has none.  Says where the temperature uncertainty comes from and what it leaves out."""
+        cal = self.calibrator_model()
+        if not cal or not any(self.has_uncertainty(p) and p['kind'] == 'TEMP' for p in self.points):
+            return ''
+        return (f'Temperature points: the uncertainty is the published 1-year Type K thermocouple-simulation specification of the {cal} calibrator, in degC '
+                '(accuracy divided by the coverage divisor, with the calibrator resolution where known), k = 2. The scope of accreditation has no temperature '
+                'entry, so no CMC floor applies. It does not include the Fluke 80AK adapter, the thermocouple or reference-junction effects at the meter. '
+                'A temperature outside the calibrator\'s specified Type K range shows no uncertainty or ratio.')
 
     def source_note(self):
         """How the numeric readings were collected (IR and / or typed), for the report footer; plus the spec's own source.report_note

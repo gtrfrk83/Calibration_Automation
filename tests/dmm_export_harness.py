@@ -99,7 +99,7 @@ def _setup_point_row(mod, app, POINTS):
     _record_point_row(app, POINTS)
 
 
-def build_engine(spec, root):
+def build_engine(spec, root, cal_mode=None):
     """-> (app, module, points).  spec like 'truevolt:34461A'."""
     kind, _, arg = spec.partition(':')
     if kind == 'truevolt':
@@ -126,8 +126,9 @@ def build_engine(spec, root):
         return app, mod, mod.POINTS
     if kind == 'handheld':
         mod = importlib.import_module('handheld_dmm')
-        spec_file = {'Fluke 115': None, 'Fluke 87V': 'fluke_87v_pv.json', 'Klein MM325': 'klein_mm325_pv.json', 'Fluke 287': 'fluke_287_289_pv.json'}[arg]
-        model = {'Fluke 115': '115', 'Fluke 87V': '87V', 'Klein MM325': 'MM325', 'Fluke 287': '287'}[arg]
+        spec_file = {'Fluke 115': None, 'Fluke 87V': 'fluke_87v_pv.json', 'Klein MM325': 'klein_mm325_pv.json', 'Fluke 287': 'fluke_287_289_pv.json',
+                     'Fluke 116': None, 'Fluke 179': 'fluke_170_series_pv.json'}[arg]          # 116 / 179 are not in ENGINES (the baseline set); tests/test_beta_temp_uncertainty.py uses them
+        model = {'Fluke 115': '115', 'Fluke 87V': '87V', 'Klein MM325': 'MM325', 'Fluke 287': '287', 'Fluke 116': '116', 'Fluke 179': '179'}[arg]
         spec = mod.load_spec(Path(root) / 'specs' / spec_file) if spec_file else mod.load_spec()
         app = object.__new__(mod.App)
         app.model, app.demo, app.spec = model, True, spec
@@ -135,7 +136,7 @@ def build_engine(spec, root):
         app.points = mod.points_for(spec, model)
         app.asset, app.serial, app.status = Var('A-TEST'), Var('SN1'), Var()
         app.ir = False
-        app.cal_mode = Var('Fluke 5522A' if arg == 'Fluke 87V' else 'Fluke 5560A')
+        app.cal_mode = Var(cal_mode or ('Fluke 5522A' if arg == 'Fluke 87V' else 'Fluke 5560A'))
         app.root = mock.MagicMock()
         app._update_row = lambda p: None
         app.save = lambda silent=False: None
@@ -147,7 +148,7 @@ def build_engine(spec, root):
     raise KeyError(spec)
 
 
-def dump(root, outdir, show, specs=ENGINES, home=None):
+def dump(root, outdir, show, specs=ENGINES, home=None, cal_mode=None):
     """Run every engine's real export code from the tree `root`.  show: the TAR / TUR choice (None = key absent, as before the feature)."""
     stub_tk()
     outdir = Path(outdir)
@@ -164,7 +165,7 @@ def dump(root, outdir, show, specs=ENGINES, home=None):
     try:
         for spec in specs:
             _fresh(root)
-            app, mod, points = build_engine(spec, root)
+            app, mod, points = build_engine(spec, root, cal_mode)
             tag = spec.replace(':', '_').replace(' ', '_')
             pdf = outdir / f'{tag}.pdf'
             import report_dialog
