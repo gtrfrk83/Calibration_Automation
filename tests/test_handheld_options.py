@@ -218,7 +218,7 @@ EXPECTED = {       # the rotary-switch prompts, in order (group NONE points carr
     '113': ['Ω  (Ohms)  [113: CHEK / Ω position]', 'V CHEK  Continuity', 'V CHEK  Diode test', 'V CHEK  Volts'],
     '117': ['Ω  (Ohms)', 'Continuity', 'V~  (AC volts)', 'V~ Hz  (AC volts + frequency)', 'V⎓  (DC volts)', 'mV~  (AC millivolts)',
             'mV⎓  (DC millivolts)', 'Diode', 'LoZ capacitance', 'A⎓  (DC amps)', 'A~  (AC amps)', 'AUTO-V LoZ', 'VoltAlert  (Hi)', 'VoltAlert  (Lo)'],
-    '87V': ['mV  (AC millivolts)', 'V~  (AC volts)', 'Hz  (frequency, AC volts input)', 'V⎓  (DC volts)', 'mV  (DC millivolts)', 'Ω  (resistance)',
+    '87V': ['mV  (AC millivolts)', 'V~  (AC volts)', 'Hz  (frequency, AC volts input)', 'Hz  (duty cycle, DC volts input)', 'V⎓  (DC volts)', 'mV  (DC millivolts)', 'Ω  (resistance)',
             'Diode test', 'A~  (AC amps)', 'A⎓  (DC amps)', 'mA / µA', 'V~  (AC volts)', 'V⎓  (DC volts)', 'Temperature'],
     '287': ['mV ⎓ / temperature position, temperature (°C)', 'mV ⎓ / temperature position (DC millivolts)', 'Ω position (ohms)',
             'mV ~ position (AC millivolts)', 'V ~ position (AC volts)', 'V ⎓ position (DC volts)',

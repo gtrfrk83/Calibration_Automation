@@ -46,6 +46,8 @@ def _scope(scope):
 # The unit the standard's accuracy and the scope CMC are expressed in, per point kind. A tolerance in any other unit (the handheld frequency
 # and period points are sourced as ACV but read in Hz) is blank, never divided by an uncertainty in a different unit.
 NATURAL_UNITS = {'DCV': {'V'}, 'ACV': {'V'}, 'DCI': {'A'}, 'ACI': {'A'}, 'FREQ': {'Hz'}, 'CAP': {'F'},
+                 'TEMP': {'C', 'degC', '\u00b0C'},        # a degF tolerance (or any other unit) on a thermocouple point is never divided by a degC uncertainty
+                 'DUTY': set(), 'SQUARE': set(),          # square-wave sources: no ratio (the reading is not in the unit of the calibrator's uncertainty)
                  'OHM': {'ohm', 'Ohm', '\u03a9'}, 'OHM2': {'ohm', 'Ohm', '\u03a9'}, 'OHM4': {'ohm', 'Ohm', '\u03a9'}}
 
 

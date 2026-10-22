@@ -73,7 +73,7 @@ COVERAGE = {
             covered=['standby', 'operate', 'is_operating', 'cleanup', 'scope_off', 'select_scope_dcv', 'set_dc_volts', 'select_scope_levsine',
                      'set_levsine', 'select_scope_square', 'set_square', 'drain_errors', 'select_scope_marker', 'set_marker_period',
                      'select_scope_measure_resistance', 'measure_scope_resistance', 'set_output_volts', 'set_output_amps', 'set_output_ohms',
-                     'set_output_capacitance', 'set_output_temperature', 'read_error', 'check_error', 'clear_status', 'operate_unverified',
+                     'set_output_capacitance', 'set_output_temperature', 'set_output_square', 'restore_sine', 'read_error', 'check_error', 'clear_status', 'operate_unverified',
                      'standby_quiet', 'apply_scope_dc'],
             no_command=[]),
         'Fluke5522A': dict(covered=['open'], no_command=[]),                # inherits everything; only identity differs
@@ -467,6 +467,9 @@ def cases_fluke_5560a(c):
     c.run('Fluke5560A.set_output_capacitance[F]', cal.set_output_capacitance, 0.01)
     c.run('Fluke5560A.set_output_temperature', cal.set_output_temperature, 100.0)
     c.run('Fluke5560A.set_output_temperature[type J]', cal.set_output_temperature, 25.5, 'J')
+    c.run('Fluke5560A.set_output_square', cal.set_output_square, 5.0, 1000.0, 50.0, 2.5)
+    c.run('Fluke5560A.standby[after square wave]', cal.standby)
+    c.run('Fluke5560A.restore_sine', cal.restore_sine)
     c.run('Fluke5560A.read_error', cal.read_error)
     c.run('Fluke5560A.check_error[ok]', cal.check_error, 'ctx')
     ft.errors = ['-222,"Data out of range"']

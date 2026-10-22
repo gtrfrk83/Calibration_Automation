@@ -649,6 +649,126 @@
    ]
   },
   {
+   "call": "5.0, 1000.0, 50.0, 2.5",
+   "case": "Fluke5560A.set_output_square",
+   "log": [
+    "5560A|>>|WAVE SQUARE; OUT 5V,1kHz; DC_OFFSET 2.5V",
+    "5560A|>>|DUTY 50",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|WAVE?",
+    "5560A|<<|SQUARE,NONE",
+    "5560A|>>|DUTY?",
+    "5560A|<<|5.000E+01",
+    "5560A|>>|DC_OFFSET?",
+    "5560A|<<|+2.50000E+00",
+    "5560A|>>|OUT?",
+    "5560A|<<|5.000000000,V,1000.0,HZ"
+   ],
+   "method": "Fluke5560A.set_output_square",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "WAVE SQUARE; OUT 5V,1kHz; DC_OFFSET 2.5V"
+    ],
+    [
+     "W",
+     "DUTY 50"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "WAVE?",
+     "SQUARE,NONE"
+    ],
+    [
+     "Q",
+     "DUTY?",
+     "5.000E+01"
+    ],
+    [
+     "Q",
+     "DC_OFFSET?",
+     "+2.50000E+00"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "5.000000000,V,1000.0,HZ"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.standby[after square wave]",
+   "log": [
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "Fluke5560A.standby",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5560A.restore_sine",
+   "log": [
+    "5560A|>>|OPER?",
+    "5560A|<<|0",
+    "5560A|>>|WAVE SINE; DC_OFFSET 0V",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|WAVE?",
+    "5560A|<<|SINE,NONE",
+    "5560A|>>|DC_OFFSET?",
+    "5560A|<<|+0.00000E+00"
+   ],
+   "method": "Fluke5560A.restore_sine",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "WAVE SINE; DC_OFFSET 0V"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "WAVE?",
+     "SINE,NONE"
+    ],
+    [
+     "Q",
+     "DC_OFFSET?",
+     "+0.00000E+00"
+    ]
+   ]
+  },
+  {
    "call": "",
    "case": "Fluke5560A.read_error",
    "log": [

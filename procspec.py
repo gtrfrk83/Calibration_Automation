@@ -54,6 +54,7 @@ class SpecProblem(cmdreg.Problem):
 
 
 _TESTS = ('numeric', 'beeper', 'visual')
+SQUARE_KINDS = ('DUTY', 'SQUARE')          # handheld engine kinds that source a square wave (handheld_dmm.SQUARE_KINDS)
 
 
 def validate_manual_reading(spec: dict) -> list:
@@ -107,6 +108,23 @@ def validate_manual_reading(spec: dict) -> list:
                     add('limit_value', 'low / high / factor are not numbers.', where=w)
             elif s.get('test') == 'beeper' and not (s.get('applied') and s.get('expect')):
                 add('step_key', 'beeper step needs applied and expect.', where=w)
+            if s.get('kind') in SQUARE_KINDS:                 # additive: square-wave sources (see specs/README.txt)
+                a = s.get('applied')
+                try:
+                    ok = isinstance(a, dict) and float(a['value']) > 0 and float(a['frequency']) > 0
+                    duty = float(a.get('duty', 50.0)) if ok else 50.0
+                    offset = float(a.get('offset', 0.0)) if ok else 0.0
+                except (KeyError, ValueError, TypeError):
+                    ok = False
+                if not ok:
+                    add('square_applied', f"{s['kind']} step needs applied{{value (V peak-to-peak) > 0, frequency (Hz) > 0, duty (1 to 99 %, default 50), offset (V, default 0)}}.", where=w)
+                else:
+                    if not 1.0 <= duty <= 99.0:
+                        add('square_duty', 'duty must be 1 to 99 %.', where=w)
+                    if offset and duty != 50.0:
+                        add('square_offset', 'a DC offset needs a 50 % duty cycle (5522A Operators Manual p. 4-47).', where=w)
+            if s.get('kind') == 'TEMP' and s.get('base_unit') == 'degF':       # the calibrator sources degrees C: the reading and limits must be in degrees C
+                add('temp_unit', 'TEMP step is read in degF but the calibrator sources degC: use display_unit \u00b0C / base_unit degC and limits in degC.', where=w)
         if spec.get('dsb') is not None or any(isinstance(s, dict) and 'dsb' in s for s in steps):
             import datasheet_builder_specs
             out.extend(datasheet_builder_specs.validate_spec_ext(spec))
