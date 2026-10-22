@@ -9,13 +9,15 @@ point, and TAR = half-width of the pass/fail limits / that specification.  Numbe
   5522A Operators Manual (R0), Chapter 1, "Temperature Calibration (Thermocouple)", printed p. 1-17 (PDF page 37), Type K, 1 year, degC:
       -200..-100  0.33     -100..-25  0.18     -25..120  0.16     120..1000  0.26     1000..1372  0.40      (90 day: 0.25 0.14 0.12 0.19 0.30)
       note [2] resolution 0.01 degC; note [3] does not include thermocouple error.
-  5560A: the laboratory's own specification sheet (specs/standards/fluke_5560a_standard.json, SpecTrack); the 5560A manual was NOT available to
-      check it against.  1 year, degC:  -200..-100 0.22   -100..-25 0.10   -25..120 0.09   120..1000 0.16   1000..1372 0.27
+  5560A Product Specifications (Rev. 8, 6/26), "TC Specifications": Type K rows on PDF p. 17 = printed p. 16, table header and resolution on printed p. 15; read from the page image.
+      The stored sheet (specs/standards/fluke_5560a_standard.json) carries the 95 % confidence / 1 year column, the same column as every other 5560A row (confidence 95 %,
+      divisor 2).  1 year, 95 %, degC:  -200..-100 0.22   -100..-25 0.10   -25..120 0.09   120..1000 0.16   1000..1372 0.27
+      (the 99 % / 1 year column prints 0.28 0.13 0.11 0.21 0.35; 90 day 95 %: 0.17 0.08 0.07 0.13 0.22).  Resolution 0.01 degC (printed p. 15).
 
-Budget (uncertainty_budget): u = spec / 2, plus the calibrator resolution / sqrt(12) when known (5522A 0.01 degC; the 5560A has none on file),
+Budget (uncertainty_budget): u = spec / 2, plus the calibrator resolution / sqrt(12) when known (0.01 degC for both calibrators),
 EMU = 2 * sqrt(sum u^2), rounded UP to 2 significant figures; no CMC floor (the scope file has no temperature entry).
   5522A  0 / 100 degC: 2*sqrt(0.08^2 + 0.002887^2) = 0.160104 -> 0.17      400: 0.260069 -> 0.27      -40: 0.180086 -> 0.19
-  5560A  0 / 100 degC: 0.09 -> 0.090                                    400: 0.16                  -40: 0.10
+  5560A  0 / 100 degC: 2*sqrt(0.045^2 + 0.002887^2) = 0.090185 -> 0.091   400: 0.160104 -> 0.17   -40: 0.100167 -> 0.11   1000: 0.270062 -> 0.28
 """
 import copy
 import json
@@ -138,26 +140,34 @@ class Data(unittest.TestCase):
             self.assertEqual(uncertainty.format_value(b.reported, 'C'), f'{rep:.2f} °C')
 
     def test_5560a_budget_hand_worked(self):
-        for v, spec, text in ((0, 0.09, '0.090 °C'), (100, 0.09, '0.090 °C'), (400, 0.16, '0.16 °C'), (-40, 0.10, '0.10 °C')):
+        for v, spec, rep, text in ((0, 0.09, 0.091, '0.091 °C'), (100, 0.09, 0.091, '0.091 °C'), (400, 0.16, 0.17, '0.17 °C'), (-40, 0.10, 0.11, '0.11 °C'),
+                                   (1000, 0.27, 0.28, '0.28 °C'), (-200, 0.22, 0.23, '0.23 °C')):
             b = ub.build('TEMP', v, 'degC', standard=self.s56, scope=self.sc)
-            self.assertEqual(len(b.components), 1, v)                          # no TC resolution on file for the 5560A (noted, not guessed)
-            self.assertTrue(any('resolution' in n for n in b.notes))
-            self.assertAlmostEqual(b.emu, spec, 12)
-            self.assertAlmostEqual(b.reported, spec, 12)
+            self.assertEqual(len(b.components), 2, v)                          # spec / 2 and the 0.01 degC resolution (5560A Product Specifications p. 15)
+            self.assertAlmostEqual(b.components[0].u, spec / 2, 12)
+            self.assertAlmostEqual(b.components[1].u, 0.01 / 12 ** 0.5, 12)
+            self.assertAlmostEqual(b.emu, 2 * ((spec / 2) ** 2 + (0.01 ** 2) / 12) ** 0.5, 12)
+            self.assertIsNone(b.cmc)
+            self.assertEqual(b.reported, rep, v)
             self.assertEqual(uncertainty.format_value(b.reported, 'degC'), text)
 
-    def test_resolution_edited_in_the_manager_wins(self):
+    def test_5560a_resolution_is_the_printed_0_01_degC(self):
         h = self.s56.lookup_temperature(0)
-        self.assertEqual(self.s56.resolution(h)[0], None)
+        res, src = self.s56.resolution(h)
+        self.assertEqual(res, 0.01)
+        self.assertIn('5560A Product Specifications', src)
+
+    def test_resolution_edited_in_the_manager_wins(self):
         db = os.path.join(tempfile.mkdtemp(), 'r.sqlite3')
         sm.seed(path=db)
         std = sm.standard('5560A', db)
         row = std.lookup_temperature(0).row
-        self.assertTrue(sm.update_row(row['id'], {'resolution': 0.01}, who='test', path=db))
+        self.assertTrue(sm.update_row(row['id'], {'resolution': 0.1}, who='test', path=db))
         std = sm.standard('5560A', db)
+        self.assertEqual(std.resolution(std.lookup_temperature(0))[0], 0.1)    # the edited value wins over the printed 0.01
         b = ub.build('TEMP', 0, 'degC', standard=std, scope=self.sc)
         self.assertEqual(len(b.components), 2)
-        self.assertEqual(b.reported, 0.091)                                     # 2*sqrt(0.045^2 + 0.002887^2) = 0.09017 -> rounded UP to 0.091
+        self.assertEqual(b.reported, 0.11)                                     # 2*sqrt(0.045^2 + (0.1/sqrt(12))^2) = 0.10693 -> rounded UP to 0.11
 
     def test_out_of_range_budget_has_no_value(self):
         for std in (self.s22, self.s56):
@@ -209,11 +219,11 @@ class Data(unittest.TestCase):
         self.assertEqual(self.ratios(self.s22, 1000, 989.0, 1011.0)[:2], ('27.5:1', '26.8:1'))  # border: 0.40 -> 11/0.40, 11/0.41
 
     def test_tar_tur_5560a(self):
-        self.assertEqual(self.ratios(self.s56, 0, -1.0, 1.0)[:2], ('11.1:1', '11.1:1'))
-        self.assertEqual(self.ratios(self.s56, 100, 98.0, 102.0)[:2], ('22.2:1', '22.2:1'))
-        self.assertEqual(self.ratios(self.s56, 400, 395.0, 405.0)[:2], ('31.2:1', '31.2:1'))
-        self.assertEqual(self.ratios(self.s56, -40, -41.4, -38.6)[:2], ('14.0:1', '14.0:1'))
-        self.assertEqual(self.ratios(self.s56, 1000, 989.0, 1011.0)[:2], ('40.7:1', '40.7:1'))
+        self.assertEqual(self.ratios(self.s56, 0, -1.0, 1.0)[:2], ('11.1:1', '10.9:1'))
+        self.assertEqual(self.ratios(self.s56, 100, 98.0, 102.0)[:2], ('22.2:1', '21.9:1'))
+        self.assertEqual(self.ratios(self.s56, 400, 395.0, 405.0)[:2], ('31.2:1', '29.4:1'))
+        self.assertEqual(self.ratios(self.s56, -40, -41.4, -38.6)[:2], ('14.0:1', '12.7:1'))
+        self.assertEqual(self.ratios(self.s56, 1000, 989.0, 1011.0)[:2], ('40.7:1', '39.2:1'))
 
     def test_tar_tur_use_degC_for_everything(self):
         r = self.ratios(self.s22, 0, -1.0, 1.0)[2]
@@ -322,10 +332,10 @@ class Reports(unittest.TestCase):
                   'Fluke_179': [('0.0', '0.17 °C', '6.2:1', '5.8:1'), ('-40.0', '0.19 °C', '7.7:1', '7.3:1'), ('400.0', '0.27 °C', '19.2:1', '18.5:1')],
                   'Fluke_87V': [('0.0', '0.17 °C', '6.2:1', '5.8:1'), ('100.0', '0.17 °C', '12.5:1', '11.7:1')],
                   'Fluke_287': [('0.0', '0.17 °C', '6.2:1', '5.8:1'), ('100.0', '0.17 °C', '12.5:1', '11.7:1'), ('1000.0', '0.41 °C', '27.5:1', '26.8:1')]},
-        '5560A': {'Fluke_116': [('0.0', '0.090 °C', '11.1:1', '11.1:1'), ('400.0', '0.16 °C', '31.2:1', '31.2:1')],
-                  'Fluke_179': [('0.0', '0.090 °C', '11.1:1', '11.1:1'), ('-40.0', '0.10 °C', '14.0:1', '14.0:1'), ('400.0', '0.16 °C', '31.2:1', '31.2:1')],
-                  'Fluke_87V': [('0.0', '0.090 °C', '11.1:1', '11.1:1'), ('100.0', '0.090 °C', '22.2:1', '22.2:1')],
-                  'Fluke_287': [('0.0', '0.090 °C', '11.1:1', '11.1:1'), ('100.0', '0.090 °C', '22.2:1', '22.2:1'), ('1000.0', '0.27 °C', '40.7:1', '40.7:1')]},
+        '5560A': {'Fluke_116': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('400.0', '0.17 °C', '31.2:1', '29.4:1')],
+                  'Fluke_179': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('-40.0', '0.11 °C', '14.0:1', '12.7:1'), ('400.0', '0.17 °C', '31.2:1', '29.4:1')],
+                  'Fluke_87V': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('100.0', '0.091 °C', '22.2:1', '21.9:1')],
+                  'Fluke_287': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('100.0', '0.091 °C', '22.2:1', '21.9:1'), ('1000.0', '0.28 °C', '40.7:1', '39.2:1')]},
     }
 
     @classmethod
@@ -366,7 +376,7 @@ class Reports(unittest.TestCase):
                 rows = self.out[cal]['handheld:Fluke ' + tag]['rows']
                 got = [r['Unc'] for r in rows if r['UOM'] == '°C']
                 if cal == '5560A':
-                    want = {'116': ['0.090 °C', '0.16 °C'], '179': ['0.090 °C', '0.10 °C', '0.16 °C']}[tag]
+                    want = {'116': ['0.091 °C', '0.17 °C'], '179': ['0.091 °C', '0.11 °C', '0.17 °C']}[tag]
                 self.assertEqual(got, want, (cal, tag))
 
     def test_open_input_functional_check_stays_na(self):

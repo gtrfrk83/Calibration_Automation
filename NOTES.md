@@ -104,7 +104,13 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
 - Calibrators: Fluke 5522A or 5560A. The manual names a 5700A + 5725A (voltage, current, 750 V), a Fluke 271 (frequency) and a 5520A (resistance adjust). Points the 5522A cannot
   make: T3-3 #26-28 (750 V ac above 10 kHz, 5522A Operators Manual p. 1-12), T3-7 #14 (10 A ac at 40 Hz, below the 45 Hz of 3 A and up, p. 1-14), T3-8 #6 (1000 kHz, above 500 kHz).
   The spec lists them under `cal_limits`; the run asks the technician to connect their own standard and reads the meter automatically (report Uncertainty / TAR / TUR left empty).
-  For the 5560A the same five points are manual unless "Try the 5560A" is ticked: the 5560A manual was not available, so nothing about its ranges is verified.
+  The 5560A (Product Specifications Rev. 8, 6/26, read from the page images; PDF pp. 4-5 = printed pp. 3-4 ACV, PDF p. 9 = printed p. 8 ACI) cannot make four of them: 750 V ac at 20 / 50 / 100 kHz (the 1020 V range is
+  specified 3 Hz - 10 kHz only, the 330 V range stops at 100 kHz) and 1000 kHz (ACV stops at 500 kHz); `cal_limits` has a `5560A` entry for each (T3-3 #26-28, T3-8 #6) and they stay external-standard points.
+  10 A ac at 40 Hz (T3-7 #14) is NOT a 5560A limit: the 12 A range is specified 3 - 45 Hz (1 year, 95 %: 290 uA/A + 1 mA; 99 %: 375 uA/A + 1 mA), so with the 5560A selected the calibrator drives it
+  (`cal_limits` of that point lists only the 5522A) and its report row gets the 5560A budget (the '12A @ 3 - 45 Hz' row of `fluke_5560a_standard.json`; the scope CMC is the larger figure there, so the
+  Uncertainty prints 14 mA) and TAR / TUR (TAR 35.1:1 on the 5560A spec; blank for the 5522A, which has no spec at 40 Hz). `is_manual` is now simply 'the selected calibrator is in the point's `cal_limits`';
+  the old 'Try the 5560A' check box (and its 'unverified' fallback) is gone. Still unverified for the 5560A: the 30A + OUTPUT LO terminal names (taken from hookups.py; the specifications name no terminals),
+  whether the unit refuses 10 A 40 Hz for some reason the specifications do not state (the run stops on a rejection as before), and the 30 A terminal fuse / cool-down (specs: sourcing > 3 A may need a cooling-off time).
 - Zero-offset points run first, in two fixtures: 15 points with the 4-wire short (DC volts 5, 4-wire ohms 3, 2-wire ohms 7), then 6 DC-current points with the input OPEN
   (Table 3-1 lists the 4-wire short under Amps dc as well: question open). The calibrator is in STANDBY for every zero point.
 - Not in the engine: no Excel export (the 8846A launcher has one), no capacitance / temperature / diode / continuity points (the manual has no verification table for them),
@@ -345,7 +351,11 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
   `Temperature, open input` (functional check, no source) stays N/A.  `handheld_dmm.App.has_uncertainty` decides which points carry an uncertainty; `temperature_note()` adds the basis to the stored footer note.
   Manual values (5522A Operators Manual R0, Ch. 1 'Temperature Calibration (Thermocouple)', printed p. 1-17 = PDF page 37, read from the page image twice), Type K, degC, 90 day / 1 year:
   -200..-100 0.25 / 0.33, -100..-25 0.14 / 0.18, -25..120 0.12 / 0.16, 120..1000 0.19 / 0.26, 1000..1372 0.30 / 0.40; resolution 0.01 degC (note 2) is used for the 5522A (`specmanager.TC_RESOLUTION`; a value edited in
-  Standards Specs wins); note 3: 'does not include thermocouple error'.  5560A (1 year): 0.22 / 0.10 / 0.09 / 0.16 / 0.27 from the laboratory's own sheet, NOT checked against the 5560A manual (not available); no TC resolution on file for it.
+  Standards Specs wins); note 3: 'does not include thermocouple error'.  5560A (checked 2026-10-22 against the 5560A Product Specifications Rev. 8, 6/26, 'TC Specifications', Type K rows on PDF p. 17 = printed p. 16, table header and resolution on printed p. 15, rendered page image):
+  1 year, 95 % confidence column, degC: -200..-100 0.22, -100..-25 0.10, -25..120 0.09, 120..1000 0.16, 1000..1372 0.27 = the stored sheet values, unchanged (they were the 95 % / 1 y column; the 5560A sheet is stored at
+  95 %, divisor 2, for every function, so TC uses the same column; the 99 % / 1 y column prints 0.28 / 0.13 / 0.11 / 0.21 / 0.35, 99 % / 90 d 0.22 / 0.10 / 0.09 / 0.17 / 0.28).  The 5522A values above are the manual's single
+  published column, stored with no confidence on the sheet (divisor 2 assumed), so the two calibrators are not on the same confidence level: unchanged, to be decided by the lab.  Resolution 0.01 degC is printed (p. 15)
+  and is now in `specmanager.TC_RESOLUTION['5560A']`, so the 5560A budget includes it as the 5522A does: reported 0.091 (0 / 100 degC, was 0.090), 0.17 (400, was 0.16), 0.11 (-40, was 0.10), 0.28 (1000, was 0.27), 0.23 (-200, was 0.22).
   A2LA: the shipped scope file (a2la_1888_03_cmc.json, Section V pp. 8-32 and XII) has no temperature entry, so NO CMC applies and none is invented: the budget alone is reported.  If the lab's scope lists
   a temperature CMC, add an entry {basis 'generate', kind 'TEMP', bands [{lo, hi (signed degC), rel, abs}]} to that file: `Scope.dmm('TEMP', t)` then floors the reported value as for every other kind (tests cover it).
   Spec condition: the manual's table states none for the reference junction ('tcal +/- 5 degC', 'source/measure', excludes thermocouple error).  The procedure never sends `TC_REF`, so the calibrator is at its reset

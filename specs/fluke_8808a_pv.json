@@ -19,7 +19,7 @@
   "cite": "Fluke 8808A Calibration Manual, Tables 3-2 to 3-8, pp. 3-4 to 3-11 (limits as printed except the corrections listed in the point flags)",
   "limits": "Manufacturer limits, 90 days and 1 year, as printed (rounded) in Tables 3-2 to 3-8; typographical errors corrected from the specification formula, see the point flags",
   "report_note": "Limits are those of the manufacturer's Tables 3-2 to 3-8 (Fluke 8808A Calibration Manual, pp. 3-4 to 3-11), 90-day or 1-year as chosen, as printed (the manual rounds each limit to the printed number of digits). Printed typographical errors were corrected from the manual's own accuracy specification (pp. 1-10 to 1-14); each correction is recorded with the point. Resistance limits are the calibrator setting +/- the printed tolerance.",
-  "note": "Tables 3-2 to 3-8, 105 points: DC volts 17, AC volts 28, 4-wire ohms 6, 2-wire ohms 14, DC current 18, AC current 16, frequency 6 (the zero-offset points of each table are run first, with the input shorted or, for current, open). Limits are the printed 90-day or 1-year limits; several typographical errors in the printed tables were corrected from the specification formula (see the point details). The manual names a Fluke 5700A with a 5725A amplifier and a Fluke 271 function generator; this procedure drives a Fluke 5522A or 5560A. Points the selected calibrator cannot make (750 V ac above 10 kHz, 10 A ac at 40 Hz, 1000 kHz) are measured with a standard you connect. The meter must be warmed up for half an hour; the specification is valid in the 5-1/2 digit (slow) rate only."
+  "note": "Tables 3-2 to 3-8, 105 points: DC volts 17, AC volts 28, 4-wire ohms 6, 2-wire ohms 14, DC current 18, AC current 16, frequency 6 (the zero-offset points of each table are run first, with the input shorted or, for current, open). Limits are the printed 90-day or 1-year limits; several typographical errors in the printed tables were corrected from the specification formula (see the point details). The manual names a Fluke 5700A with a 5725A amplifier and a Fluke 271 function generator; this procedure drives a Fluke 5522A or 5560A. Points the selected calibrator cannot make (5522A: 750 V ac above 10 kHz, 10 A ac at 40 Hz, 1000 kHz; 5560A: 750 V ac above 10 kHz, 1000 kHz) are measured with a standard you connect. The meter must be warmed up for half an hour; the specification is valid in the 5-1/2 digit (slow) rate only."
  },
  "models": {
   "8808A": {
@@ -2295,7 +2295,8 @@
      },
      "std_relative": false,
      "cal_limits": {
-      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier.",
+      "5560A": "5560A: the 1020 V range (above 330 V, so 750 V) is specified 3 Hz to 10 kHz only; the 330 V range stops at 100 kHz (5560A Product Specifications, ACV Specifications, printed p. 4). The manual uses a 5725A amplifier."
      },
      "group": "VOLT",
      "terminal": "INPUT",
@@ -2354,7 +2355,8 @@
       }
      ],
      "cal_limits": {
-      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier.",
+      "5560A": "5560A: the 1020 V range (above 330 V, so 750 V) is specified 3 Hz to 10 kHz only; the 330 V range stops at 100 kHz (5560A Product Specifications, ACV Specifications, printed p. 4). The manual uses a 5725A amplifier."
      },
      "group": "VOLT",
      "terminal": "INPUT",
@@ -2393,7 +2395,8 @@
      },
      "std_relative": false,
      "cal_limits": {
-      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier.",
+      "5560A": "5560A: the 1020 V range (above 330 V, so 750 V) is specified 3 Hz to 10 kHz only; the 330 V range stops at 100 kHz (5560A Product Specifications, ACV Specifications, printed p. 4). The manual uses a 5725A amplifier."
      },
      "group": "VOLT",
      "terminal": "INPUT",
@@ -2707,7 +2710,8 @@
       }
      ],
      "cal_limits": {
-      "5522A": "5522A: the ac voltage output stops at 500 kHz (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12); this point is at 1000 kHz. The manual uses a Fluke 271 function generator."
+      "5522A": "5522A: the ac voltage output stops at 500 kHz (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12); this point is at 1000 kHz. The manual uses a Fluke 271 function generator.",
+      "5560A": "5560A: the ac voltage output stops at 500 kHz (5560A Product Specifications, ACV Specifications, printed pp. 3-4); this point is at 1000 kHz. The manual uses a Fluke 271 function generator."
      },
      "group": "VOLT",
      "terminal": "INPUT",
