@@ -44,7 +44,7 @@ COMMANDS = {
     'scope.measr': Cmd('SCOPE MEASR', 'SCOPE resistance measurement', kind='set', readback='scope.query', verified=True, ref=_REF),
     'scope.query': Cmd('SCOPE?', 'SCOPE mode', 'Read back the SCOPE mode', kind='query', verified=True, ref=_REF),
     'func.query': Cmd('FUNC?', 'Function', 'Read back the selected function (SDCV for SCOPE DCV)', kind='query', verified=True, ref=_REF),
-    'outimp.set': Cmd('OUT_IMP {source_impedance}', 'SCOPE output impedance', 'Source impedance of the SCOPE output (1M or 50)',
+    'outimp.set': Cmd('OUT_IMP Z{source_impedance}', 'SCOPE output impedance', 'Source impedance of the SCOPE output (1M or 50)',
                       placeholders={'source_impedance': Placeholder('str', '', '1M')}, kind='set', readback='outimp.query',
                       verified=True, ref=_REF),
     'outimp.query': Cmd('OUT_IMP?', 'SCOPE output impedance', kind='query', verified=True, ref=_REF),
@@ -180,6 +180,10 @@ class Fluke5560A(Instrument):
             raise InstrumentError(f'Fluke SCOPE output not in voltage mode: {mode!r}')
         self.send('outimp.set', source_impedance=source_impedance)
         reply = self.ask('outimp.query').strip().upper()
+        if reply in ('Z50', 'Z1M'):      # the 5560A answers OUT_IMP? with the argument form (seen on the bench)
+            if reply != f'Z{source_impedance}':
+                raise InstrumentError(f'Unexpected SCOPE output impedance: {reply!r}')
+            return
         try:
             value = float(reply.split(',')[0])
         except ValueError:
