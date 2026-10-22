@@ -113,7 +113,7 @@ class EngineHarness:
         self.env.close()
 
     # ---- scripted operator ---------------------------------------------------------------------------------------------------------
-    def _confirm(self, parent, title, heading, steps, facts=None, caution=None, ok='OK', cancel='Cancel', image=None):
+    def _confirm(self, parent, title, heading, steps, facts=None, caution=None, ok='OK', cancel='Cancel', image=None, **_layout):
         self.dialogs.append(('confirm', title, heading, [s if isinstance(s, str) else ' '.join(s) for s in steps]))
         if self.on_confirm is not None:
             r = self.on_confirm(title, heading, steps, facts)

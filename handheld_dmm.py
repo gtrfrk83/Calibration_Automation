@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sys
 import threading
 import time
@@ -113,6 +114,26 @@ def describe(p):
     if p['test'] == 'visual':
         return p.get('title') or p['section'] + (' ' + p['switch'].split('(')[-1].strip(') ') if p['section'] == 'VoltAlert' else '')
     return f'{p["section"]}, {p["range"]} range' if p['range'] else p['section']
+
+
+def split_switch(switch):
+    """'V~  (AC volts)' -> ('V~', 'AC volts'); text without a double-space bracket (e.g. 'Temperature') -> (text, '')."""
+    m = re.match(r'^(.*?)\s{2,}\((.*)\)\s*$', switch or '', re.S)
+    return (m.group(1).strip(), m.group(2).strip()) if m else ((switch or '').strip(), '')
+
+
+def function_change_card(p, total, standby_text, standby_known=False):
+    """What the 'Change the function' window (layout C, ui_theme.confirm_steps(layout='function_change')) shows for point `p`.
+    Presentation only: the same facts the list layout carried (point n of N, the test, the meter function and range, the rotary switch step,
+    the standby step).  `standby_known` is True only when the program has CONFIRMED the calibrator is in standby (a read-back); the engine
+    sends STBY before the dialog but does not read it back (standby_quiet swallows errors), so it passes False and step 1 is a numbered
+    step, not a green tick."""
+    short, detail = split_switch(p['switch'])
+    meter = f'Meter: {short}' + (f'  range {p["range"]}' if p['range'] else '')
+    steps = [('Calibrator output is OFF (standby)' if standby_known else 'Standby', standby_text, 'done' if standby_known else 'todo'),
+             (f'Turn the rotary switch to {short}', detail, 'todo'),
+             (f'Press Done when the meter shows {short}', 'The program then goes on with this point.', 'todo')]
+    return dict(n=p['n'], total=total, test=describe(p), meter_line=meter, steps=steps)
 
 
 def pad_reading(p, text):
@@ -283,6 +304,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
 
 
 # ============================================================================ the reading dialog
+READING_WIDTH = 560         # content width of the reading window in 96-dpi units (layout C; text wraps inside it)
+OUTPUT_ON_NOTE = 'Output is ON'     # the note _out_note gives while the program has the calibrator output on
+
+
 def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
                 limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None):
     """One modal dialog. mode 'numeric' (type the display) or 'yesno' (answer a question).
@@ -290,18 +315,48 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
     result = dict(action='stop', text='', ann=False, yes=None)
     win = ui.dialog(parent, f'Point {p["n"]} of {total}')
     win.resizable(False, False)
-    outer = ttk.Frame(win, padding=(ui.px(22), ui.px(16), ui.px(22), ui.px(14)))
-    outer.pack(fill='both', expand=True)
-    ttk.Label(outer, text=f'Point {p["n"]} of {total}  -  {p["section"]}' + (f'  -  {phase}' if phase else ''), style='Small.TLabel').pack(anchor='w')
-    ttk.Label(outer, text=describe(p), style='Section.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(2, 10))
+    C = ui.C
+    outer = tk.Frame(win, background=C['bg'])
+    outer.pack(fill='both', expand=True, padx=ui.px(22), pady=(ui.px(16), ui.px(14)))
+    outer.grid_columnconfigure(0, weight=1)
+    width = ui.px(READING_WIDTH)
+    wrap_all = width
+    sty = ttk.Style(win)                       # ttk widgets inside the white cards take the card colour
+    for name, base in (('ReadCard.TCheckbutton', 'TCheckbutton'), ('ReadCard.TRadiobutton', 'TRadiobutton')):
+        sty.configure(name, background=C['card'])
+    row_n = [0]
+
+    def put(widget, pady=(0, 0)):
+        widget.grid(row=row_n[0], column=0, sticky='ew', pady=pady)
+        row_n[0] += 1
+
+    def label(parent, text, fg=None, font=None, bg=None, wrap=None, **kw):
+        return tk.Label(parent, text=text, background=bg or C['bg'], foreground=fg or C['text'], font=font or 'TkDefaultFont', anchor='w',
+                        justify='left', wraplength=wrap or wrap_all, **kw)
+    put(label(outer, f'Point {p["n"]} of {total}  -  {p["section"]}' + (f'  -  {phase}' if phase else ''), fg=C['muted'], font='CalSmall'))
+    put(label(outer, describe(p), font='CalH2', fg=C['navy']), pady=(2, 10))
+
+    def row_card(caption, big, note, kind, big_font='CalBold'):
+        """A rounded card: a marker circle, the caption in muted capitals, the main text, an optional muted second text."""
+        def build(inner, wrap):
+            mark = ui.status_circle(inner, kind, background=C['card'])
+            mark.grid(row=0, column=0, rowspan=3, sticky='n', padx=(0, ui.px(12)))
+            tw = wrap - ui.px(22) - ui.px(12)
+            label(inner, caption, fg=C['muted'], font='CalSmallBold', bg=C['card'], wrap=tw).grid(row=0, column=1, sticky='w')
+            label(inner, big, font=big_font, bg=C['card'], wrap=tw).grid(row=1, column=1, sticky='w')
+            if note:
+                label(inner, note, fg=C['muted'], font='CalSmall', bg=C['card'], wrap=tw).grid(row=2, column=1, sticky='w')
+        put(ui.rounded_card(outer, width, build), pady=(0, ui.px(8)))
+    meter = p.get('dsb_device') or (f'Rotary switch / function: {p["switch"]}' + (f'\nRange: {p["range"]}' if p['range'] else ''))
+    row_card(device, meter, p.get('note'), 'done')                  # the operator has just confirmed the meter set-up (function / hook-up prompts)
     if p.get('applied') or p['group'] != 'NONE':
-        ttk.Label(outer, text=source, style='MetricCap.TLabel').pack(anchor='w')
-        ttk.Label(outer, text=out_text, style='Reading.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w')
-        ttk.Label(outer, text=out_note, style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(0, 10))
+        row_card(source, out_text, out_note, 'done' if str(out_note).startswith(OUTPUT_ON_NOTE) else 'todo', big_font='CalMetric')
     counter = tk.StringVar()
     clock = {'job': None, 'expired': False}
     if limit_s is not None:
-        ttk.Label(outer, textvariable=counter, foreground=ui.C.get('bad', '#B3261E'), style='Bold.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(0, 8))
+        tk.Label(outer, textvariable=counter, foreground=C.get('bad', '#B3261E'), background=C['bg'], font='CalBold', anchor='w', wraplength=wrap_all,
+                 justify='left').grid(row=row_n[0], column=0, sticky='ew', pady=(0, 8))
+        row_n[0] += 1
         end = time.monotonic() + max(0.0, limit_s)
 
         def tick():
@@ -321,38 +376,50 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
             except tk.TclError:
                 pass
         tick()
-    ttk.Label(outer, text=device, style='MetricCap.TLabel').pack(anchor='w')
-    meter = p.get('dsb_device') or (f'Rotary switch / function: {p["switch"]}' + (f'\nRange: {p["range"]}' if p['range'] else ''))
-    ttk.Label(outer, text=meter, wraplength=ui.px(520), justify='left').pack(anchor='w')
-    if p.get('note'):
-        ttk.Label(outer, text=p['note'], style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(2, 0))
-    ttk.Label(outer, text='ACCEPT IF', style='MetricCap.TLabel').pack(anchor='w', pady=(10, 0))
-    ttk.Label(outer, text=accept, style='Bold.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w')
-    if p.get('tol_text'):
-        ttk.Label(outer, text='Limit: ' + p['tol_text'], style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w')
 
     entry = None
     yes = tk.StringVar(value='')
     ann = tk.BooleanVar(value=False)
     error = tk.StringVar(value='')
-    if mode == 'numeric':
-        ttk.Label(outer, text=device + ' READING', style='MetricCap.TLabel').pack(anchor='w', pady=(10, 0))
-        row = ttk.Frame(outer)
-        row.pack(fill='x', pady=(2, 0))
-        text = tk.StringVar()
-        entry = ttk.Entry(row, textvariable=text, font='CalMetric', width=14)
-        entry.pack(side='left')
-        ttk.Label(row, text=unit, style='Section.TLabel').pack(side='left', padx=(8, 0))
-        if annunciator:
-            ttk.Checkbutton(outer, text='The AC annunciator is ON', variable=ann).pack(anchor='w', pady=(6, 0))
-        ttk.Label(outer, textvariable=error, foreground=ui.C.get('bad', '#B3261E'), wraplength=ui.px(520), justify='left').pack(anchor='w')
-    else:
-        ttk.Label(outer, text=question, wraplength=ui.px(520), justify='left', style='Bold.TLabel').pack(anchor='w', pady=(12, 4))
-        row = ttk.Frame(outer)
-        row.pack(anchor='w')
-        ttk.Radiobutton(row, text='Yes - as stated', variable=yes, value='y').pack(side='left')
-        ttk.Radiobutton(row, text='No - it does not', variable=yes, value='n').pack(side='left', padx=(16, 0))
-        ttk.Label(outer, textvariable=error, foreground=ui.C.get('bad', '#B3261E')).pack(anchor='w')
+    text = tk.StringVar()
+    fillers = {}
+
+    def reading_card(inner, wrap):
+        nonlocal entry
+        nonlocal_bg = C['card']
+        if mode == 'numeric':
+            label(inner, f'WHAT DOES THE {device} SHOW?', fg=C['primary'], font='CalSmallBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
+            row = tk.Frame(inner, background=nonlocal_bg)
+            row.pack(fill='x', pady=(6, 0))
+            entry = ttk.Entry(row, textvariable=text, font='CalMetric', width=14)
+            entry.pack(side='left')
+            label(row, unit, font='CalH2', bg=nonlocal_bg, wrap=wrap).pack(side='left', padx=(10, 0))
+            if annunciator:
+                ttk.Checkbutton(inner, text='The AC annunciator is ON', variable=ann, style='ReadCard.TCheckbutton').pack(anchor='w', pady=(6, 0))
+        else:
+            label(inner, 'YOUR ANSWER', fg=C['primary'], font='CalSmallBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
+            label(inner, question, font='CalBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w', pady=(6, 4))
+            row = tk.Frame(inner, background=nonlocal_bg)
+            row.pack(anchor='w')
+            ttk.Radiobutton(row, text='Yes - as stated', variable=yes, value='y', style='ReadCard.TRadiobutton').pack(side='left')
+            ttk.Radiobutton(row, text='No - it does not', variable=yes, value='n', style='ReadCard.TRadiobutton').pack(side='left', padx=(16, 0))
+        label(inner, '', fg=C.get('bad', '#B3261E'), bg=nonlocal_bg, wrap=wrap, textvariable=error).pack(anchor='w')
+        label(inner, 'ACCEPT IF', fg=C['muted'], font='CalSmallBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w', pady=(6, 0))
+        label(inner, accept, font='CalBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
+        if p.get('tol_text'):
+            label(inner, 'Limit: ' + p['tol_text'], fg=C['muted'], font='CalSmall', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
+        if demo_fill is not None:                   # demo only: a clearly marked helper; the operator may type anything instead
+            def fill():
+                value = demo_fill()
+                if mode == 'numeric':
+                    text.set(value)
+                    entry.focus_set()
+                else:
+                    yes.set('y' if value else 'n')
+            ttk.Button(inner, text=virtualbench.FILL_TEXT, command=fill).pack(anchor='w', pady=(10, 0))
+            label(inner, 'DEMO: this value is made up by the program; you may type any reading you like. Nothing here is calibration evidence.',
+                  fg=C.get('warn', '#B26A00'), font='CalSmall', bg=nonlocal_bg, wrap=wrap).pack(anchor='w', pady=(4, 0))
+    put(ui.rounded_card(outer, width, reading_card, outline=C['primary'], outline_w=2, radius=10, pad=(16, 12)), pady=(ui.px(4), 0))
 
     def done(action):
         result['action'] = action
@@ -377,23 +444,13 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
                 result['yes'] = yes.get() == 'y'
         win.destroy()
 
-    bar = ttk.Frame(outer)
-    bar.pack(fill='x', pady=(14, 0))
+    bar = tk.Frame(outer, background=C['bg'])
+    bar.grid(row=row_n[0], column=0, sticky='ew', pady=(ui.px(16), 0))
+    bar.grid_columnconfigure(1, weight=1)
     ok = ttk.Button(bar, text='Record  (Enter)', style='Accent.TButton', command=lambda: done('record'))
-    ok.pack(side='right')
-    ttk.Button(bar, text='Skip point', command=lambda: done('skip')).pack(side='right', padx=(0, 8))
-    ttk.Button(bar, text='Stop run', style='Danger.TButton', command=lambda: done('stop')).pack(side='left')
-    if demo_fill is not None:                       # demo only: a clearly marked helper; the operator may type anything instead
-        def fill():
-            value = demo_fill()
-            if mode == 'numeric':
-                text.set(value)
-                entry.focus_set()
-            else:
-                yes.set('y' if value else 'n')
-        ttk.Button(outer, text=virtualbench.FILL_TEXT, command=fill).pack(anchor='w', pady=(8, 0), before=bar)
-        ttk.Label(outer, text='DEMO: this value is made up by the program; you may type any reading you like. Nothing here is calibration evidence.',
-                  style='Small.TLabel', foreground=ui.C.get('warn', '#B26A00'), wraplength=ui.px(520), justify='left').pack(anchor='w', before=bar)
+    ok.grid(row=0, column=3)
+    ttk.Button(bar, text='Skip point', command=lambda: done('skip')).grid(row=0, column=2, padx=(0, 8))
+    ttk.Button(bar, text='Stop run', style='Danger.TButton', command=lambda: done('stop')).grid(row=0, column=0)
     win.bind('<Return>', lambda _e: done('record'))
     win.protocol('WM_DELETE_WINDOW', lambda: done('stop'))
     ui.center_on(win, parent.winfo_toplevel())
@@ -1048,7 +1105,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
         if not ui.confirm_steps(self.root, 'Change the function', p['section'],
                                 [('Rotary switch', f'Turn the meter to: {p["switch"]}'), ('Standby', standby)],
-                                facts=facts, ok='Done - continue'):
+                                facts=facts, ok='Done - continue', layout='function_change',
+                                card=function_change_card(p, len(self.points), standby)):
             return False
         self._last_switch = p['switch']
         return True
@@ -1231,7 +1289,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return ''
         if self.manual_cal:
             return 'Set this on the calibrator and press OPERATE, then read the meter.'
-        return 'Output is ON - allow the reading to settle, then read the meter.' if on else 'Output is in STANDBY.'
+        return OUTPUT_ON_NOTE + ' - allow the reading to settle, then read the meter.' if on else 'Output is in STANDBY.'
 
     def reading_labels(self, p):
         """Extra keyword arguments for ask_reading (a hook: user-built datasheets say 'oscilloscope' / 'measuring standard' instead of 'meter')."""

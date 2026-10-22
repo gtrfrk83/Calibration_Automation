@@ -514,6 +514,24 @@ checkbox "Fast demo (no windows)"). Apps use `VirtualMixin`: `demo` (any demo), 
   whole suite under a real Tk.
 - Point window layout (procmods_point_ui.py): grid; command table 5 rows then scrolls; details (selected command, add a line, developer fields) scroll; footer always visible.
 
+## Handheld dialogs, layout C (branch `function-window-c`; presentation only; viewed on a real Tk 9 under Xvfb in light and dark)
+- "Change the function" window: built in `ui_theme.confirm_steps(..., layout='function_change', card=...)` (`_confirm_function_change`), called ONLY by `handheld_dmm.App._prompt_function`
+  (the other engines keep the numbered-list layout; the shared `confirm_steps` still receives the same title / heading / steps / facts, so tests, harnesses and golden transcripts see the
+  same dialog as before; the harnesses' `_confirm` take `**_layout`). `handheld_dmm.function_change_card(p, total, standby_text, standby_known=False)` builds the content (pure, tested in
+  `tests/test_function_card.py`): a rounded point strip ("14 of 40" in the accent colour, bold test text, muted "Meter: V~  range 6.000 V") and a three-step stepper (standby / turn the rotary
+  switch to the short name, with the bracketed text as its muted line / press Done when the meter shows it). Switch text splits at the double space before "(" (110 / 170 / 77 / 87V / MM325);
+  287 / 289 and plain names ("Temperature", "AUTO-V LoZ") are used whole. Fixed width, grid, wraps long text, Enter = Done, Esc / close = Cancel.
+- Step 1 is a green tick ONLY when `standby_known=True`. The engine sends STBY before the dialog with `standby_quiet()` (errors swallowed, no read-back), so it passes False and step 1 is a
+  plain numbered step with the original sentence ("The calibrator output is OFF (standby) while you turn the rotary switch." / the manual-calibrator "Keep the calibrator in STANDBY ...").
+- Step 3's muted line says "The program then goes on with this point." (the mockup's "The next window asks for the hook-up" is not true: the hook-up prompt comes BEFORE the function prompt).
+- Reading window (`handheld_dmm.ask_reading`, signature unchanged): header line + test text, then rounded cards "METER" (switch / range / the point's note or a datasheet's device text) and
+  the source card ("CALIBRATOR OUTPUT": output text + note), the red time-limit line, and an accent-outlined reading card (numeric: "WHAT DOES THE METER SHOW?", entry + unit, annunciator box
+  when asked for, error line, ACCEPT IF, Limit, demo fill button + DEMO note; yes / no: question + Yes / No) and Stop run / Skip point / Record (Enter). Marker circles: the meter card is
+  ticked (the operator just confirmed the set-up); the source card is ticked only when the note says the program has the output ON (`OUTPUT_ON_NOTE`), otherwise an empty circle. The mockup's
+  "Connect" card is NOT built (the reading window has never shown the hook-up and the data is not passed to it).
+- Helpers in ui_theme: `rounded_card`, `status_circle` (drawn tick, no font glyph needed), borders drawn as two filled shapes (a 1 px smoothed outline renders broken on this Tk).
+- Real-Tk checks: `tests/real_tk_checks.py::checks_handheld_dialogs` (nothing clipped, Enter / Esc / Skip / Stop).
+
 ## Procedure registration and packages (branch `procedure-packages`; checked on the simulated bench / throw-away trees and on a real Tk under Xvfb only)
 - Registration: the Manager no longer lists procedures by hand. Each procedure is `Procedures/<id>.py` + `Procedures/<id>.procedure.json` (schema 1; fields in `procscan.py`'s docstring: id, name,
   manufacturer, model, category (= instrument class), version, order, launcher, engine, drivers, specs, `fingerprint {code, spec}`, `hookup {meter, diagram_prefixes}`, `seed_verified` / `seed_order`, `own_files`, `tests`).
