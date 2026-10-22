@@ -36,6 +36,7 @@ import datamode
 import drivers
 import procmods_engine
 import reset_startup
+import virtualbench
 
 SPEC_PATH = HERE / 'specs' / 'fluke_110_series_pv.json'
 READ_TYPED, READ_IR = 'Type the reading', 'Read over IR (Fluke IR cable)'
@@ -168,9 +169,13 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """The calibrator: set the output for a point, confirm it was accepted, and never leave it energised."""
     RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the 110-series manual's "ramp up in 50 V increments, 5 s apart"
     auto_ramp = True                                          # the spec's options.auto_ramp (false: straight to the test value)
+    virtual = False                                           # demo on the virtual bench: waits are shortened, nothing is appended to the shared log
 
-    def __init__(self, model_name, address, baud=9600, transport=None, mods=None):
+    def __init__(self, model_name, address, baud=9600, transport=None, mods=None, virtual=False):
         self.log = drivers.CommandLog()
+        self.virtual = bool(virtual)
+        if self.virtual:
+            virtualbench.mark_log(self.log)
         cls = drivers.Fluke5522A if '5522' in model_name else drivers.Fluke5560A
         t = transport or drivers.open_visa(address, timeout=20, baud=baud)
         self.cal = cls(t, self.log, label=cls.MODEL)
@@ -211,6 +216,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.save_log()
 
     def save_log(self):
+        if virtualbench.log_is_virtual(self.log):                  # a virtual (demo) session is never evidence
+            return
         try:
             folder = Path.home() / '.calibration_suite'
             folder.mkdir(parents=True, exist_ok=True)
@@ -242,7 +249,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             if i == 0:
                 self.cal.operate_unverified()
             if len(steps) > 1 and i < len(steps) - 1:
-                self._wait(self.pm_param('handheld.ramp_delay', self.RAMP_DELAY), cancel)
+                self._wait(virtualbench.scaled(self.pm_param('handheld.ramp_delay', self.RAMP_DELAY), self.virtual), cancel)
 
     @procmods_engine.point_commands()
     def apply(self, p, cancel=None):
@@ -272,12 +279,12 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             self.cal.check_error(context)      # the calibrator refuses outputs it cannot make; never operate then
             self.cal.operate_unverified()
         self.on_at = time.monotonic()
-        self._wait(p.get('settle', self.pm_param('handheld.settle.default', 3.0)), cancel)
+        self._wait(virtualbench.scaled(p.get('settle', self.pm_param('handheld.settle.default', 3.0)), self.virtual), cancel)
 
 
 # ============================================================================ the reading dialog
 def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
-                limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT'):
+                limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None):
     """One modal dialog. mode 'numeric' (type the display) or 'yesno' (answer a question).
     Returns dict(action='record'|'skip'|'stop', text=, ann=, yes=)."""
     result = dict(action='stop', text='', ann=False, yes=None)
@@ -376,6 +383,17 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
     ok.pack(side='right')
     ttk.Button(bar, text='Skip point', command=lambda: done('skip')).pack(side='right', padx=(0, 8))
     ttk.Button(bar, text='Stop run', style='Danger.TButton', command=lambda: done('stop')).pack(side='left')
+    if demo_fill is not None:                       # demo only: a clearly marked helper; the operator may type anything instead
+        def fill():
+            value = demo_fill()
+            if mode == 'numeric':
+                text.set(value)
+                entry.focus_set()
+            else:
+                yes.set('y' if value else 'n')
+        ttk.Button(outer, text=virtualbench.FILL_TEXT, command=fill).pack(anchor='w', pady=(8, 0), before=bar)
+        ttk.Label(outer, text='DEMO: this value is made up by the program; you may type any reading you like. Nothing here is calibration evidence.',
+                  style='Small.TLabel', foreground=ui.C.get('warn', '#B26A00'), wraplength=ui.px(520), justify='left').pack(anchor='w', before=bar)
     win.bind('<Return>', lambda _e: done('record'))
     win.protocol('WM_DELETE_WINDOW', lambda: done('stop'))
     ui.center_on(win, parent.winfo_toplevel())
@@ -516,9 +534,10 @@ def ask_range(parent, p, total, dial, standby_text):
 
 
 # ============================================================================ application
-class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
-    def __init__(self, root, model, demo=False, spec=None, io_factory=None, meter_factory=None):
+class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+    def __init__(self, root, model, demo=False, spec=None, io_factory=None, meter_factory=None, fast_demo=False):
         self.root, self.model, self.demo = root, model, demo
+        self.init_virtual(demo, fast_demo)
         self.meter, self.meter_factory = None, meter_factory
         self._stage = {'id': None, 'done': set()}
         self.spec = spec or load_spec()
@@ -548,7 +567,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
         self.show_section, self.show_status = tk.StringVar(value='All sections'), tk.StringVar(value='All points')
         self._build_ui()
-        self.status.set('DEMO MODE: no commands are sent and no readings are asked for. Enter an Instrument ID, then press Run All.' if demo else
+        self.status.set(('DEMO MODE (virtual instruments): the windows of a real run appear; commands go to a simulated calibrator. Enter an Instrument ID, then press Run All.' if self.virtual else
+                         'FAST DEMO: no commands are sent and no readings are asked for. Enter an Instrument ID, then press Run All.') if demo else
                         'Step 1: enter the Instrument ID. Step 2: choose the calibrator and press Test connection (or choose Manual). Step 3: Run All.')
         root.protocol('WM_DELETE_WINDOW', self.on_close)
         root.bind('<Control-s>', lambda _e: self.save())
@@ -593,14 +613,14 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         src = self.spec['source']
         sh = self.shell = ui_shell.Shell(root, f'{self.info["name"]}  -  Performance Verification',
                                          f'Manual-reading procedure: the calibrator output is set for you, you read the meter  |  {len(self.points)} points  |  {src["document"]}',
-                                         demo=self.demo, on_section=self.pick_section, version='spec v1')
+                                         demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
         self.status = sh.status_var
-        self.conn_pill = sh.add_chip('Demo - no hardware' if self.demo else 'Not connected', 'neutral')
+        self.conn_pill = sh.add_chip(self.chip_text() if self.demo else 'Not connected', 'neutral')
         sh.build_identity(self.asset, self.serial)
         self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
         self.summary = sh.build_progress()
         if self.demo:
-            sh.notice('Results are generated by the program and are NOT calibration evidence. Reports are marked as demo data.', 'warn', title='Demo mode')
+            sh.notice(self.banner_text(), 'warn', title=virtualbench.BANNER_TITLE)
         else:
             extra = ' You are prompted to turn the dial to each range and to change cables, with a hook-up diagram.' if self.spec.get('options', {}).get('range_prompt') else ''
             sh.notice('For each point the calibrator is programmed and enabled, then you read the meter and type the value exactly as displayed (without the unit). '
@@ -630,6 +650,13 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             self.btn_ir = ttk.Button(irrow, text='Test IR', command=self.test_ir); self.btn_ir.pack(side='left')
             ttk.Label(d, text='Read over IR needs the Fluke IR-to-USB cable on the meter\'s IR port (115200 baud). Without it, choose Type the reading.',
                       style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=10, column=0, columnspan=2, sticky='w', pady=(6, 0))
+        if self.virtual:
+            ttk.Separator(d).grid(row=11, column=0, columnspan=2, sticky='ew', pady=(12, 10))
+            self.demo_failures = tk.BooleanVar(value=False)
+            ttk.Checkbutton(d, text='Demo: include some failures in the simulated fill', variable=self.demo_failures).grid(row=12, column=0, columnspan=2, sticky='w')
+            ttk.Label(d, text='The calibrator is a virtual 5522A / 5560A (simulated). Press Test connection to connect it; no cable or address is needed. '
+                              'The "Fill with a simulated reading" button in the reading window enters a made-up value; you may type your own.',
+                      style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=13, column=0, columnspan=2, sticky='w', pady=(6, 0))
         btns = sh.drawer_footer
         self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
         self.btn_test = ttk.Button(btns, text='Test connection', command=self.test_connection, style='Accent.TButton'); self.btn_test.pack(side='left')
@@ -823,14 +850,18 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.disconnect()
         if self.io_factory:
             self.io = self.io_factory()
+        elif self.virtual:                                  # demo: the real IO / driver code over a simulated calibrator
+            _bench, transport = virtualbench.calibrator_transport(self.cal_mode.get())
+            self.io = IO(self.cal_mode.get(), 'virtual', 9600, transport=transport, mods=self.pm_state, virtual=True)
         else:
             self.io = IO(self.cal_mode.get(), self._address(), int(self.cal_baud.get()), mods=self.pm_state)
         self.io.auto_ramp = self._auto_ramp()
         self._set_conn(True)
-        self._save_settings()
+        if not self.demo:
+            self._save_settings()                           # a demo never changes the saved connection settings
 
     def test_connection(self):
-        if self.demo:
+        if self.fast_demo:
             messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.')
             return
         if self.manual_cal:
@@ -846,8 +877,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             self.status.set('Connection error: ' + str(exc))
             messagebox.showerror('Connection error', str(exc))
             return
-        self.status.set('Connected: ' + self.io.ident + '. Calibrator output is NOT enabled.')
-        messagebox.showinfo('Connected', f'{self.io.ident}\nCalibrator output is not enabled.')
+        tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
+        self.status.set('Connected: ' + self.io.ident + tag + '. Calibrator output is NOT enabled.')
+        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'{self.io.ident}{tag}\nCalibrator output is not enabled.')
 
     def disconnect(self):
         if self.io:
@@ -891,7 +923,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
 
     def test_ir(self):
         if self.demo:
-            messagebox.showinfo('Demo mode', 'Demo mode uses no hardware.')
+            self.read_mode.set(READ_TYPED)
+            messagebox.showinfo('Demo mode', 'The IR cable is not simulated: in demo mode the readings are typed (or filled with the simulated reading).')
             return
         try:
             self.connect_meter()
@@ -904,7 +937,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         messagebox.showinfo('IR connection', f'{self.meter.idn}\nReadings will be collected over IR.')
 
     def _set_conn(self, ok):
-        self.conn_pill.set('Connected' if ok else 'Connection failed' if ok is False else 'Demo - no hardware' if self.demo else 'Manual calibrator' if self.manual_cal else 'Not connected',
+        self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Demo - no hardware' if self.demo else 'Manual calibrator' if self.manual_cal else 'Not connected',
                            'good' if ok else 'bad' if ok is False else 'neutral')
 
     def _save_settings(self):
@@ -942,7 +975,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             return
         if not self.confirm_found_overwrite(points):
             return
-        if not self.demo and not self.manual_cal and self.io is None:
+        if self.virtual and self.use_ir:
+            self.read_mode.set(READ_TYPED)                  # the IR cable is not simulated
+        if not self.fast_demo and not self.manual_cal and self.io is None:
             self.test_connection()
             if self.io is None:
                 return
@@ -1052,7 +1087,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         if self.tree.exists(p['id']):
             self.tree.selection_set(p['id'])
             self.tree.see(p['id'])
-        if self.demo:
+        if self.fast_demo:
             self._record_demo(p)
             self.root.after(20, lambda: self._next(points, i + 1, key))
             return
@@ -1202,6 +1237,14 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         """Extra keyword arguments for ask_reading (a hook: user-built datasheets say 'oscilloscope' / 'measuring standard' instead of 'meter')."""
         return {}
 
+    def _fill(self, p, yesno=False, sub=0):
+        """Virtual bench only: {'demo_fill': callable} for the 'Fill with a simulated reading' button; {} in a real run, so its windows are unchanged."""
+        if not self.virtual:
+            return {}
+        if yesno:
+            return dict(demo_fill=lambda: virtualbench.plausible_answer(p['n'] + sub, self.virtual_failures()))
+        return dict(demo_fill=lambda: virtualbench.plausible_text(p['low'], p['high'], p['n'], self.virtual_failures()))
+
     def _ask(self, points, i, p, key):
         total = len(self.points)
         if p['test'] == 'numeric' and self.use_ir and p.get('ir') and not self._stage.get('typed'):
@@ -1226,7 +1269,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 used = (time.monotonic() - on_at) if on_at else 0.0
                 limit = dict(limit_s=max(1.0, p['max_on_s'] - used), on_expire=self._safe_standby if self.io and not self.manual_cal else None)
             r = ask_reading(self.root, p, total, output_text(p), self._out_note(p, True), self.accept_text(p), 'numeric',
-                            unit=p['display_unit'], annunciator=False, validate=validate, **limit, **self.reading_labels(p))     # the annunciator is a separate confirmation below
+                            unit=p['display_unit'], annunciator=False, validate=validate, **limit, **self.reading_labels(p), **self._fill(p))     # the annunciator is a separate confirmation below
             if p.get('recovery_s'):
                 self.last_high_current = time.monotonic()
             if r['action'] == 'record':
@@ -1246,14 +1289,14 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                     self.io.standby()
                 note = self._out_note(p, chk['output']) if not self.manual_cal else ('Output ON.' if chk['output'] else 'Put the calibrator in STANDBY.')
                 r = ask_reading(self.root, p, total, output_text(p), note, chk['question'], 'yesno', question=chk['question'], phase=f'check {n} of {len(p["checks"])}',
-                                **self.reading_labels(p))
+                                **self.reading_labels(p), **self._fill(p, True, n))
                 if r['action'] != 'record':
                     break
                 answers.append(r['yes'])
             if r['action'] == 'record':
                 self._store(p, entered='Pass' if all(answers) else 'Fail', reading=None, result='PASS' if all(answers) else 'FAIL', answers=answers)
         else:
-            r = ask_reading(self.root, p, total, output_text(p), self._out_note(p, True), p['question'], 'yesno', question=p['question'], **self.reading_labels(p))
+            r = ask_reading(self.root, p, total, output_text(p), self._out_note(p, True), p['question'], 'yesno', question=p['question'], **self.reading_labels(p), **self._fill(p, True))
             if r['action'] == 'record':
                 ok = r['yes'] if p['test'] == 'visual' else (r['yes'])
                 self._store(p, entered=('Pass' if ok else 'Fail') if p['test'] == 'visual' else
@@ -1340,7 +1383,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             pass
 
     def _store(self, p, **fields):
-        fields.setdefault('synthetic', False)
+        fields.setdefault('synthetic', bool(self.demo))      # everything recorded in a demo (typed or filled) is synthetic
         fields['timestamp'] = datetime.now().isoformat(timespec='seconds')
         fields['data'] = self.mode_label
         fields.update(self.pm_result_fields())
@@ -1557,5 +1600,6 @@ def main(model, argv=None, spec=None):
     """spec: a spec file name inside specs/ (or a path); the Fluke 110-series spec when omitted."""
     argv = sys.argv if argv is None else argv
     root = tk.Tk()
-    App(root, model, demo='--demo' in argv, spec=load_spec(spec) if spec else None)
+    demo, fast = virtualbench.flags(argv)
+    App(root, model, demo=demo, spec=load_spec(spec) if spec else None, fast_demo=fast)
     root.mainloop()

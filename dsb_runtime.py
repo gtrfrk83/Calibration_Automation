@@ -46,6 +46,7 @@ import fgen_verification as fg
 import handheld_dmm as hh
 import reset_startup
 import tds2000c_verification as tds
+import virtualbench
 import ui_theme as ui
 import datasheet_builder as db
 import datasheet_builder_match as dm
@@ -284,9 +285,12 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
     """The standards of one run: calibrators that source (5560A / 5522A), a 5790B and counters that measure.  Every driver is an open
     drivers.Instrument; settings are written, read back and compared by the drivers; nothing is retried."""
 
-    def __init__(self, addrs, counter_ref='EXT', transports=None, mods=None, scope=False):
+    def __init__(self, addrs, counter_ref='EXT', transports=None, mods=None, scope=False, virtual=False):
         """addrs: {model: {'address': VISA text, 'baud': int}}; transports: {model: transport} (simulated benches)."""
         self.log = drivers.CommandLog()
+        self.virtual = bool(virtual)
+        if self.virtual:
+            virtualbench.mark_log(self.log)
         self.drivers, self.counter_ref = {}, counter_ref
         self.scope = scope
         self.cal = None
@@ -415,7 +419,7 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
             r.set_sine(run['amplitude'], run['frequency'], settle=0.0)
         self._hot.add(cal.label)
         self.on_at = time.monotonic()
-        self._wait(self._settle(p), cancel)
+        self._wait(virtualbench.scaled(self._settle(p), self.virtual), cancel)
 
     def apply_reference(self, p, cancel=None):
         """Bandwidth: the leveled sine at the reference frequency (the operator notes the level before the test frequency is applied)."""
@@ -426,7 +430,7 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
         r.select_levsine()
         r.set_sine(run['amplitude'], run['reference_hz'], settle=0.0)
         self._hot.add(self.cal.label)
-        self._wait(self._settle(p), cancel)
+        self._wait(virtualbench.scaled(self._settle(p), self.virtual), cancel)
 
     # ---- the measuring side -------------------------------------------------------------------------------------
     def read_level(self, p, freq, route):
@@ -503,7 +507,7 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
 class DsbApp(hh.App, reset_startup.AppResetMixin):
     """The handheld engine's window for a user-built datasheet."""
 
-    def __init__(self, root, spec, demo=False, io_factory=None, period=None):
+    def __init__(self, root, spec, demo=False, io_factory=None, period=None, fast_demo=False):
         spec = with_plan(spec)
         self.dsb = spec['dsb']
         self.period = period or self.dsb.get('period')
@@ -516,7 +520,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         self.period_var = tk.StringVar(value=self.period)
         if self.dsb.get('uid'):
             self.pm_proc_key = 'ds:' + str(self.dsb['uid'])      # verified.py: this datasheet's own verified / locked state, not its model's
-        super().__init__(root, self.dsb['model'], demo=demo, spec=spec, io_factory=io_factory)
+        super().__init__(root, self.dsb['model'], demo=demo, spec=spec, io_factory=io_factory, fast_demo=fast_demo)
         self.counter_ref.set(self.settings.get('counter_ref', 'EXT'))
 
     # ---- hooks of the handheld engine -----------------------------------------------------------------------------
@@ -648,17 +652,25 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         self.disconnect()
         if self.io_factory:
             self.io = self.io_factory()
+        elif self.virtual:                  # demo: the calibrator is a virtual 5522A / 5560A; a 5790B / counter has no simulated unit under test, so those points are done by hand
+            eng = self.engine_model()
+            transports = {eng: virtualbench.calibrator_transport(eng)[1]} if eng else {}
+            self.io = DsbIO({}, counter_ref=self.counter_ref.get(), transports=transports, mods=self.pm_state, scope=self.has_scope(), virtual=True)
         else:
             self.io = DsbIO(self.addresses(), counter_ref=self.counter_ref.get(), mods=self.pm_state, scope=self.has_scope())
         self.io.auto_ramp = self._auto_ramp()
         self._set_conn(True)
-        self._save_settings()
+        if not self.demo:
+            self._save_settings()
 
     def test_connection(self):
-        if self.demo:
+        if self.fast_demo:
             messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.')
             return
-        if not self.wants_connection():
+        if self.virtual and not self.engine_model():
+            messagebox.showinfo('Manual', 'The calibrator is set to Manual: every point is done by hand. The program tells you what to set and asks for the readings.')
+            return
+        if not self.virtual and not self.wants_connection():
             messagebox.showinfo('Manual', 'No standard has an address: every point is done by hand. The program will tell you what to set and ask for the readings.')
             return
         self.status.set('Connecting ...')
@@ -671,8 +683,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
             self.status.set('Connection error: ' + str(exc))
             messagebox.showerror('Connection error', str(exc))
             return
-        self.status.set('Connected: ' + self.io.ident + '. Outputs are NOT enabled.')
-        messagebox.showinfo('Connected', f'{self.io.ident}\nOutputs are not enabled.')
+        tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
+        self.status.set('Connected: ' + self.io.ident + tag + '. Outputs are NOT enabled.')
+        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'{self.io.ident}{tag}\nOutputs are not enabled.')
 
     def _save_settings(self):
         super()._save_settings()
@@ -683,7 +696,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
 
     # ---- routing ---------------------------------------------------------------------------------------------------------
     def route(self, p):
-        if self.demo:
+        if self.fast_demo:
             return Route(False, '', _assigned(p), 'manual', 'demo mode')
         connected = self.io.models() if self.io is not None else set()
         eng = self.engine_model()
@@ -749,7 +762,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
             return
         if not self.confirm_found_overwrite(points):
             return
-        if not self.demo and self.wants_connection() and self.io is None:
+        if not self.fast_demo and (self.wants_connection() or (self.virtual and self.engine_model())) and self.io is None:
             self.test_connection()
             if self.io is None:
                 return
@@ -768,7 +781,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         self._cur = points[i] if (i < len(points) and not self.stop) else None
         if self._cur is not None:
             self._cur['_route'] = self.route(self._cur)
-            if not self.demo:
+            if not self.fast_demo:
                 self._note_route(self._cur)
         super()._next(points, i, previous)
 
@@ -837,7 +850,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     # ---- the readings that need more than the engine's dialog ----------------------------------------------------------------
     def _ask(self, points, i, p, key):
         run = p.get('run')
-        if run and not self.demo:
+        if run and not self.fast_demo:
             r = p.get('_route')
             if run['op'] == 'scope_bw' and r is not None and r.auto and 'ref' not in self._stage['done'] and self.scope_ref_key(p) not in self.dsb_ref:
                 self._scope_reference(points, i, p, key)
@@ -1115,6 +1128,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description='Run a user-built datasheet (Datasheet Builder).')
     ap.add_argument('--spec', help='the datasheet\'s runnable spec file')
     ap.add_argument('--demo', action='store_true')
+    ap.add_argument('--fast-demo', action='store_true', dest='fast_demo')
     ap.add_argument('--asset')
     ap.add_argument('--period')
     args, _unknown = ap.parse_known_args(sys.argv[1:] if argv is None else argv)
@@ -1128,7 +1142,7 @@ def main(argv=None):
             return
     try:
         spec = load_spec(path)
-        app = DsbApp(root, spec, demo=args.demo, period=args.period)
+        app = DsbApp(root, spec, demo=args.demo or args.fast_demo, period=args.period, fast_demo=args.fast_demo)
     except (procspec.SpecError, SpecProblem, OSError, ValueError, db.DsError) as exc:
         messagebox.showerror('User-built datasheet', f'{path}\n\n{exc}')
         root.destroy()

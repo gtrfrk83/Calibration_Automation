@@ -46,7 +46,7 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
   a `ResetReport`; a reset write is never retried; a failure stops the run before any point and sends outputs to standby/off. Engines call the
   shared helper `reset_startup` (`AppResetMixin.reset_then` / `IOResetMixin.reset_at_start` / `reset_all`) and log
   'Instruments reset to default settings at start'. Because a UUT reset can erase stored settings, a notice is confirmed first (declining touches
-  nothing). Demo mode sends nothing. A new procedure must call the helper before its first point; `tests/test_reset_startup.py` enforces it.
+  nothing). Fast demo sends nothing; a virtual-bench demo resets the SIMULATED instruments (see Virtual bench). A new procedure must call the helper before its first point; `tests/test_reset_startup.py` enforces it.
 
 ## Reset to default settings: what is verified (Stage 7)
 - Backed by a manual page: Fluke 5522A `*RST` (Operators Manual p. 6-35) and `*OPC?` (p. 5-44); Fluke 5790B `*RST` (Operators Manual pp. 6-11,
@@ -370,6 +370,23 @@ procmods / procmods_live layer; nothing in calibration_procedures.sqlite3 change
   found no occurrence there).
 
 
+
+## Virtual bench (demo mode)
+`--demo` = a real run with VIRTUAL instruments (`virtualbench.py`, Tk-free). `--fast-demo` = the old quick demo (no windows, no commands; Manager
+checkbox "Fast demo (no windows)"). Apps use `VirtualMixin`: `demo` (any demo), `fast_demo`, `virtual`. An object with only `demo` counts as fast demo.
+- Commands go through the REAL driver code over `drivers/simulated*.py` (`calibrator_transport`, `dmm_pair`, `dacq_pair`, fgen/TDS/MDO benches).
+  Shared modules test `fast_demo` (not `demo`) for reset (`reset_startup.reset_then`) and standby (`procmods_engine.pm_standby/commit_live`).
+- Operator actions that cannot be commands are done on the simulator after the prompt (`operator_sets_up`: Front/Rear, connect a standard;
+  `fgen_operator_sets_up`; `mdo_operator_confirmed`). Simulator additions are opt-in (`SimBench.freq_aware`, `external_input`) so golden transcripts hold.
+- Handheld typed readings: reading window + marked "Fill with a simulated reading (DEMO)" button (deterministic, in tolerance; "Include some failures"
+  toggle in the drawer, seeded by point number). The operator may type anything. Instrument-read procedures read the simulator.
+- Waits are scaled by `virtualbench.WAIT_SCALE`; driver-internal sleeps are not. Dialogs are never skipped.
+- Evidence: title suffix [DEMO], banner, chip "Demo - virtual instruments", `synthetic=True` on every record, PDF stamped DEMO on every page,
+  `CommandLog.virtual` => never appended to ~/.calibration_suite/command_log.txt, no Asset History / registry / standards usage, no settings saved.
+- Not switched: WaveSurfer (`--demo` loads canned data; ~4000-line engine, SimScope covers only a few VBS commands), Fluke_8846A_Adjustment (demo
+  issues no CAL commands on purpose - safety), IR reading of 287/289 (typed/Fill instead), 5790B / counter standards of user datasheets (done by hand).
+- Editing engine/driver files changes their `verified.py` fingerprints: Fluke 117, TDS2000C and WaveSurfer show "Changed since verification" until re-marked.
+- Tests: `tests/test_beta_virtual_bench*.py`, harness `tests/virtual_harness.py`.
 ## Looking at the windows on a real Tk (Linux sandbox)
 - `uv python install 3.13` (python-build-standalone from GitHub; includes tkinter) + `xvfb-run -a -s "-screen 0 1600x1000x24" <that python> script.py`; screenshots with
   `PIL.ImageGrab.grab(bbox=..., xdisplay=os.environ['DISPLAY'])`. pip/PyPI is not reachable there: borrow Pillow/reportlab by putting the system `dist-packages` of the

@@ -13,7 +13,12 @@ Your data
 
 Running a verification
   1. Pick the procedure in the Manager (or double-click the instrument in Instruments) and press Run procedure.
-     "Try in demo mode" needs no instruments; its reports are stamped DEMO DATA.
+     "Try in demo mode" needs no instruments. It connects VIRTUAL instruments: you see the same windows as a real run (connection, reset
+     notice, hook-up and function prompts, the reading window, per-point windows, Edit point) and every command goes through the real driver to a
+     simulated instrument. Where you type the reading (handhelds), a "Fill with a simulated reading (DEMO)" button offers an in-tolerance value;
+     you may type anything instead, and "Include some failures" makes some filled points fail. Waits are shortened. Everything is marked DEMO:
+     window titles, the banner, every report page; nothing goes into Asset History or the lab registry. "Fast demo (no windows)" keeps the old
+     quick demo. The WaveSurfer and the 8846A adjustment procedure still use their older demo (canned data / no instrument commands).
   2. Enter the Instrument ID and serial number, check the connections, press Test connections.
   3. Run All Pending. The program stops and asks you to confirm wiring before each new set-up. Outputs go to standby after every point.
   4. Save progress (Ctrl+S) any time; Load progress (Ctrl+O) to carry on later.

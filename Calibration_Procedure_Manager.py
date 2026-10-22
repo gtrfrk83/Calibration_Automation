@@ -201,6 +201,7 @@ class Manager:
         root.title('Calibration Procedure Manager')
         ui.fit_window(root, 1260, 740, min_w=1000, min_h=580)
         self.demo = tk.BooleanVar(value=False)
+        self.fast_demo = tk.BooleanVar(value=False)       # demo without windows or commands (the old quick demo)
         self.status = tk.StringVar(value='Select a procedure, then press Run Procedure.')
         self.search = tk.StringVar()
         self.category = tk.StringVar(value=ALL_CATEGORIES)
@@ -329,8 +330,9 @@ class Manager:
         ttk.Label(card, textvariable=self.d_path, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
         self.btn_run = ttk.Button(card, text='▶  Run procedure', style='Accent.TButton', command=self.run_selected)
         self.btn_run.pack(fill='x', pady=(18, 6))
-        self.btn_demo = ttk.Button(card, text='Try in demo mode (no hardware)', command=lambda: self.run_selected(demo=True))
+        self.btn_demo = ttk.Button(card, text='Try in demo mode (virtual instruments)', command=lambda: self.run_selected(demo=True))
         self.btn_demo.pack(fill='x')
+        ttk.Checkbutton(card, text='Fast demo (no windows)', variable=self.fast_demo).pack(anchor='w', pady=(4, 0))
         self.d_mod = ui.Pill(card, '', 'warn')                    # 'MODIFIED (n)': saved model-wide procedure changes exist
         self.btn_changes = ttk.Button(card, text='Procedure changes...', command=self.procedure_changes)
         self.btn_changes.pack(fill='x', pady=(6, 0))
@@ -338,7 +340,7 @@ class Manager:
         self.btn_verify.pack(fill='x', pady=(6, 0))
         self.btn_lock = ttk.Button(card, text='Unlock for editing...', command=self.toggle_lock)
         self.btn_lock.pack(fill='x', pady=(6, 0))
-        ttk.Label(card, text='Run procedure uses real instruments. Demo mode only simulates readings, so you can rehearse safely.',
+        ttk.Label(card, text='Run procedure uses real instruments. Demo mode connects VIRTUAL instruments: the windows of a real run appear and commands go to simulated instruments, so you can rehearse safely. Nothing from a demo is calibration evidence.',
                   style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 0))
 
     def refresh_details(self):
@@ -531,6 +533,8 @@ class Manager:
         args = [sys.executable, str(path)]
         if demo:
             args.append('--demo')
+            if self.fast_demo.get():
+                args.append('--fast-demo')
         if asset:
             args += ['--asset', asset]
         args += list(extra or [])
