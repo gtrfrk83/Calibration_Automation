@@ -96,3 +96,16 @@ Schema 4 (function generators: keysight_33210a/33220a/33250a_pv.json)
     quick, typical, note        Q mark; the manual calls the limit a guideline (33250A square wave)
   references.offset_N           which two references make the N dB flatness offset (worksheet step 5; power-meter method)
   flatness_methods              WBND (5790B wideband, relative to 1 kHz) and/or POWER (manual method); the first is the default
+
+User-built datasheets (Datasheet Builder; NOT stored in this folder)
+  datasheet_builder.py / datasheet_builder_specs.py / datasheet_builder_match.py write runnable specs into the app data folder, user_specs/<make>_<model>_<title>.json
+  (old versions in user_specs/versions/<uid>/), never into specs/.  The file is a schema-2 'manual-reading' spec (same steps[] keys as fluke_110_series_pv.json) plus the
+  additive extension below, which the stock engine ignores.  procspec.validate_manual_reading(spec) checks both.
+  top level   user_built       true
+              dsb              schema 'dsb-1', uid, version, revision, title, make, model, exported_at, period, periods[], default_period,
+                               engine{stock_runnable, points, runnable, hand_set, notes}, datasheet{the whole datasheet (re-openable)}, plan{optional matcher snapshot}
+  per step    dsb              function, kind (DCV ... SCOPE_BW ... GEN_AMPL), direction ('measure' = UUT measures a sourced stimulus, 'source' = UUT outputs and a
+                               standard measures), point_id (= step id), range_id, unit, engine_ready, stimulus{nominal, frequency, amplitude, settings},
+                               limit{nominal, low, high, minus, plus, source, one_sided, periods{id:{low,high}}}, assignment{standard, mode, ...}
+  Values inside 'dsb' are SI base units as exact decimal strings; low / high / nominal / factor / applied of the step itself follow the handheld convention above.
+  Points the stock handheld engine cannot drive (scope bandwidth / time base / trigger, generator functions) are exported as hand-set points (kind NONE or VISUAL, group NONE).

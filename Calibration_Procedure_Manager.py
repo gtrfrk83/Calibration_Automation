@@ -29,6 +29,8 @@ import specmanager_ui
 import procmods
 import procmods_ui
 import procmods_ui_model
+import datasheet_builder_ui
+import dsb_manager      # user-built datasheets are listed (not stored) in the Procedures table
 
 BASE = Path(__file__).resolve().parent
 DB = appdata.db_path('calibration_procedures.sqlite3')     # the person's own data folder (see appdata.py)
@@ -205,16 +207,19 @@ class Manager:
         self.history_frame = ttk.Frame(self.notebook, padding=16)
         self.specs_frame = ttk.Frame(self.notebook, padding=16)
         self.datasheets_frame = ttk.Frame(self.notebook, padding=16)
+        self.dsb_frame = ttk.Frame(self.notebook, padding=16)
         self.development_frame = ttk.Frame(self.notebook, padding=16)
         self.notebook.add(self.library_frame, text='  Procedures  ')
         self.notebook.add(self.instruments_frame, text='  Instruments  ')
         self.notebook.add(self.history_frame, text='  Asset History  ')
         self.notebook.add(self.specs_frame, text='  Standards Specs  ')
         self.notebook.add(self.datasheets_frame, text='  Mudcats Datasheet Importer  ')
+        self.notebook.add(self.dsb_frame, text='  Datasheet Builder  ')
         self.notebook.add(self.development_frame, text='  Procedure Development  ')
         self.build_library_tab()
         self.build_development_tab()
         self.build_datasheets_tab()
+        self.build_datasheet_builder_tab()
         self.build_instruments_tab()
         self.history_panel = labregistry_ui.HistoryPanel(self.history_frame)
         self.history_panel.pack(fill='both', expand=True)
@@ -243,6 +248,9 @@ class Manager:
             self.status.set('Published specifications of the calibrators used as standards; they set the lowest uncertainty that may be reported.')
         elif tab is self.datasheets_frame:
             self.status.set('Import Cal Processor .MDD datasheets as read-only templates.')
+        elif tab is self.dsb_frame:
+            self.dsb_panel.refresh()
+            self.status.set('Build your own datasheet from a manufacturer specification; each save is a new version and a runnable procedure.')
         else:
             self.refresh_development()
             self.status.set('Maintainer tools: test, update and roll back procedure scripts.')
@@ -324,12 +332,14 @@ class Manager:
             self.d_mod.pack_forget(); self.btn_changes.configure(state='disabled')
             return
         id_, name, mfr, model, cat, script, desc = rec
-        found = script_file(script).is_file()
+        user = self._user_rows().get(str(id_))
+        found = script_file(script).is_file() and (user is None or Path(user['spec_path']).is_file())
         version = VERSIONS.get(Path(script).name)
         self.d_name.set(name)
         self.d_sub.set('  |  '.join(x for x in (f'{mfr} {model}'.strip(), cat) if x))
         self.d_desc.set(desc or '')
-        self.d_path.set(f'File: {script}' + (f'   (version {version})' if version else ''))
+        self.d_path.set(f'File: {script}' + (f'   (version {version})' if version else '') if user is None else
+                        f'User-built datasheet v{user["version"]}   |   spec: {user["spec_path"]}')
         self.d_pill.set('Ready to run' if found else 'Script file not found', 'good' if found else 'bad')
         state = 'normal' if found else 'disabled'
         self.btn_run.configure(state=state); self.btn_demo.configure(state=state)
@@ -341,10 +351,17 @@ class Manager:
             self.d_mod.pack_forget()
         self.btn_changes.configure(state='normal')
 
+    def _user_rows(self):
+        """{iid: user-built row} of the last refresh (dsb_manager.user_rows)."""
+        return getattr(self, '_user', None) or {}
+
     def _selected_row(self):
         sel = self.table.selection()
         if not sel:
             return None
+        if dsb_manager.is_user_iid(sel[0]):
+            u = self._user_rows().get(sel[0])
+            return (u['iid'], u['name'], u['manufacturer'], u['model'], u['category'], u['script'], u['description']) if u else None
         with sqlite3.connect(DB) as conn:
             return conn.execute('SELECT id,name,manufacturer,model,category,script_path,description FROM procedures WHERE id=?', (int(sel[0]),)).fetchone()
 
@@ -352,6 +369,8 @@ class Manager:
         init_db()
         with sqlite3.connect(DB) as conn:
             rows = conn.execute('SELECT id,name,manufacturer,model,category,script_path FROM procedures WHERE enabled=1 ORDER BY manufacturer,model,name').fetchall()
+        self._user = {r['iid']: r for r in dsb_manager.user_rows()}          # user-built datasheets: listed after the library rows, never written to the database
+        rows = rows + [(r['iid'], r['name'], r['manufacturer'], r['model'], r['category'], r['script']) for r in self._user.values()]
         cats = sorted({r[4] for r in rows if r[4]})
         self.category_box['values'] = [ALL_CATEGORIES] + cats
         term = self.search.get().strip().lower()
@@ -368,7 +387,8 @@ class Manager:
             found = script_file(script).is_file()
             n_mod = mods.get((model or '').casefold(), 0)
             tags = ['even' if shown % 2 == 0 else 'odd'] + ([] if found else ['missing']) + (['modified'] if n_mod else [])
-            status = ('Ready' if found else 'Missing') + (f'  {procmods_ui_model.chip_text(n_mod)}' if n_mod else '')
+            status = ('Ready' if found else 'Missing') + (f'  [{dsb_manager.TAG}]' if dsb_manager.is_user_iid(id_) else '') + \
+                     (f'  {procmods_ui_model.chip_text(n_mod)}' if n_mod else '')
             self.table.insert('', 'end', iid=str(id_), values=(name, mfr, model, category, status), tags=tags)
             shown += 1
         self._toggle_empty(self.table, shown == 0)
@@ -405,7 +425,7 @@ class Manager:
         with sqlite3.connect(DB) as conn:
             return conn.execute('SELECT name,script_path FROM procedures WHERE id=? AND enabled=1', (int(selection[0]),)).fetchone()
 
-    def _launch(self, name, script, demo, asset=None):
+    def _launch(self, name, script, demo, asset=None, extra=None):
         path = script_file(script)
         if not path.is_file():
             messagebox.showerror('Procedure not found', f'Cannot locate the procedure script:\n{path}\n\nRegister its new location if it was moved.')
@@ -415,6 +435,7 @@ class Manager:
             args.append('--demo')
         if asset:
             args += ['--asset', asset]
+        args += list(extra or [])
         try:
             subprocess.Popen(args, cwd=str(path.parent))
         except OSError as exc:
@@ -423,6 +444,13 @@ class Manager:
         return True
 
     def run_selected(self, demo=None):
+        sel = self.table.selection()
+        if sel and dsb_manager.is_user_iid(sel[0]):               # a user-built datasheet: the generic launcher with its spec file
+            u = self._user_rows().get(sel[0])
+            demo = self.demo.get() if demo is None else demo
+            if u and self._launch(u['name'], u['script'], demo, extra=['--spec', u['spec_path']]):
+                self.status.set(f'Launched {u["name"]}' + (' in demo mode.' if demo else '.'))
+            return
         selected = self.selected()
         if not selected:
             return
@@ -476,6 +504,10 @@ class Manager:
         ui.center_on(win, self.root)
 
     def remove(self):
+        sel = self.table.selection()
+        if sel and dsb_manager.is_user_iid(sel[0]):
+            messagebox.showinfo('User-built datasheet', 'A user-built datasheet is not part of the library file. Delete it in the Datasheet Builder.')
+            return
         selected = self.selected()
         if not selected:
             return
@@ -509,7 +541,7 @@ class Manager:
 
     def _selected_record(self):
         sel = self.table.selection()
-        if not sel:
+        if not sel or dsb_manager.is_user_iid(sel[0]):
             return None
         with sqlite3.connect(DB) as conn:
             return conn.execute('SELECT id,name,script_path FROM procedures WHERE id=?', (int(sel[0]),)).fetchone()
@@ -666,6 +698,15 @@ class Manager:
         ttk.Button(row, text='Cancel', command=win.destroy).pack(side='right')
         ttk.Button(row, text='Restore selected', style='Accent.TButton', command=restore).pack(side='right', padx=8)
         ui.center_on(win, self.root)
+
+    # ------------------------------------------------------------------ Datasheet Builder tab
+    def build_datasheet_builder_tab(self):
+        self.dsb_panel = datasheet_builder_ui.DatasheetBuilderPanel(self.dsb_frame, on_saved=self._dsb_saved, status=self.status)
+        self.dsb_panel.pack(fill='both', expand=True)
+
+    def _dsb_saved(self):
+        """A datasheet was saved, deleted, restored or imported: the Procedures list is refreshed (the runnable spec has changed)."""
+        self.refresh()
 
     # ------------------------------------------------------------------ Datasheets tab
     def build_datasheets_tab(self):
