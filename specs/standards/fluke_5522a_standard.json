@@ -22,7 +22,8 @@
   "4": "Based on MINCO Application Aid No. 18",
   "5": "2.5 Vpp into 50 Ohm",
   "6": "Frequency limited to 1 kHz with LCOMP ON",
-  "7": "Frequency limited to 440 Hz with LCOMP ON"
+  "7": "Frequency limited to 440 Hz with LCOMP ON",
+  "8": "Four 1-year rows are deliberately MORE CONSERVATIVE than the 5522A manual (R0, printed pp.1-9 and 1-11), so that a reported uncertainty can never fall below the laboratory's A2LA scope. Kept on purpose; do not 'correct' them to the manual. Row / this file / manual: DC current 329.999 mA: 100 ppm + 30 uA / 100 ppm + 2.5 uA; DC current 1.1 to 2.99999 A: 380 ppm + 480 uA / 380 ppm + 40 uA; Resistance 11 to 32.99999 Mohm: 500 ppm / 250 ppm (floor 2500 ohm unchanged); Resistance 110 to 329.9999 Mohm: 6000 ppm / 3000 ppm (floor 100000 ohm unchanged). Instruction from the laboratory, 2026-10-21. Limits in this file are unchanged by this note."
  },
  "functions": [
   {
