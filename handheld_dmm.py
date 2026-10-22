@@ -835,6 +835,7 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 return
         self.stop = False
         self.busy = True
+        self._last_switch = None
         self._next(points, 0, None)
 
     def _group_key(self, p):
@@ -866,6 +867,23 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         a = p.get('applied')
         threshold = self.spec.get('options', {}).get('hv_threshold_v', 500)
         return bool(a) and p['kind'] in ('DCV', 'ACV') and abs(a['value']) >= threshold
+
+    def _prompt_function(self, p):
+        """options.function_prompt: each time the meter's rotary switch has to move to a new function, tell the operator (the output is
+        in standby meanwhile). Points of group NONE carry their own set-up prompt. True = go on, False = the operator cancelled."""
+        if not self.spec.get('options', {}).get('function_prompt') or p['group'] == 'NONE':
+            return True
+        if p['switch'] == getattr(self, '_last_switch', None):
+            return True
+        standby = ('Keep the calibrator in STANDBY while you turn the rotary switch.' if self.manual_cal
+                   else 'The calibrator output is OFF (standby) while you turn the rotary switch.')
+        facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
+        if not ui.confirm_steps(self.root, 'Change the function', p['section'],
+                                [('Rotary switch', f'Turn the meter to: {p["switch"]}'), ('Standby', standby)],
+                                facts=facts, ok='Done - continue'):
+            return False
+        self._last_switch = p['switch']
+        return True
 
     def _prompt_range(self, p):
         """'ok' / 'skip' / 'stop' - only for specs that ask for range selection (options.range_prompt)."""
@@ -909,6 +927,10 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if key != previous and not self._prompt_setup(p):
             self.busy = False
             self.status.set('Paused for wiring or setup.')
+            return
+        if not self._prompt_function(p):
+            self.busy = False
+            self.status.set('Paused at the function change.')
             return
         choice = self._prompt_range(p)
         if choice == 'stop':

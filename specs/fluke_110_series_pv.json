@@ -1,7 +1,8 @@
 {
  "schema": 2,
  "options": {
-  "hookup_meter": "fluke110"
+  "hookup_meter": "fluke110",
+  "function_prompt": true
  },
  "kind": "manual-reading",
  "source": {
