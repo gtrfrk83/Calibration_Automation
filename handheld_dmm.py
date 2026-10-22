@@ -1116,13 +1116,17 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 used = (time.monotonic() - on_at) if on_at else 0.0
                 limit = dict(limit_s=max(1.0, p['max_on_s'] - used), on_expire=self._safe_standby if self.io and not self.manual_cal else None)
             r = ask_reading(self.root, p, total, output_text(p), self._out_note(p, True), self.accept_text(p), 'numeric',
-                            unit=p['display_unit'], annunciator=bool(p.get('annunciator')), validate=validate, **limit)
+                            unit=p['display_unit'], annunciator=False, validate=validate, **limit)     # the annunciator is a separate confirmation below
             if p.get('recovery_s'):
                 self.last_high_current = time.monotonic()
             if r['action'] == 'record':
                 entered = pad_reading(p, r['text'])
-                result, base = judge_numeric(p, entered, r['ann'])
-                self._store(p, entered=entered, reading=base, result=result, annunciator=r['ann'] if p.get('annunciator') else None,
+                ann = True
+                if p.get('annunciator'):
+                    ann = bool(messagebox.askyesno('AC annunciator', f'{describe(p)}\n\nIs the AC annunciator ON in the meter display?\n\n'
+                                                   'Yes = it is on.  No = it is not (the point then fails).'))
+                result, base = judge_numeric(p, entered, ann)
+                self._store(p, entered=entered, reading=base, result=result, annunciator=ann if p.get('annunciator') else None,
                             source='typed')
         elif p.get('checks'):
             answers = []

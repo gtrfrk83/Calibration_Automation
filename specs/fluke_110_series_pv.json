@@ -1135,7 +1135,6 @@
     "frequency": null
    },
    "nominal": 0.5,
-   "annunciator": true,
    "note": "Applied 0.5 V at 0 Hz (DC).",
    "id": "3-39"
   },
