@@ -444,7 +444,8 @@ class Registered(unittest.TestCase):
         text = launcher.read_text(encoding='utf-8')
         self.assertIn("MODEL = '77IV'", text)
         self.assertIn("SPEC = 'fluke_77iv_pv.json'", text)
-        manager = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
+        from tests._registry_text import manager_text            # the Manager finds procedures by scanning Procedures/*.procedure.json
+        manager = manager_text()
         self.assertIn("'Fluke 77 Series IV Performance Verification': 'Fluke_77IV_Verification.py'", manager)
         self.assertIn("'Fluke_77IV_Verification.py': '1'", manager)
         self.assertIn("('Fluke 77 Series IV Performance Verification','Fluke','77 Series IV','Digital Multimeter','Fluke_77IV_Verification.py')", manager)

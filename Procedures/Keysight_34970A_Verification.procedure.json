@@ -1,0 +1,49 @@
+{
+ "schema": 1,
+ "id": "Keysight_34970A_Verification",
+ "name": "Keysight 34970A Performance Verification (RS-232)",
+ "manufacturer": "Keysight",
+ "model": "34970A",
+ "category": "Data Acquisition / Switch Unit",
+ "version": "1",
+ "order": 10,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Keysight_34970A_Verification.py",
+ "engine": [
+  "dacq_verification.py"
+ ],
+ "drivers": [
+  "keysight_dacq",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/keysight_34970a_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keysight_34970A_Verification.py",
+   "dacq_verification.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/keysight_dacq.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/keysight_34970a_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_34970A",
+   "hook_dacq"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Keysight_34970A_Verification.py",
+  "Procedures/Keysight_34970A_Verification.procedure.json",
+  "specs/keysight_34970a_pv.json"
+ ]
+}

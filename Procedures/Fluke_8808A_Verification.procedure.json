@@ -1,0 +1,49 @@
+{
+ "schema": 1,
+ "id": "Fluke_8808A_Verification",
+ "name": "Fluke 8808A Performance Verification (RS-232)",
+ "manufacturer": "Fluke",
+ "model": "8808A",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 5,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_8808A_Verification.py",
+ "engine": [
+  "fluke8808a_verification.py"
+ ],
+ "drivers": [
+  "fluke_8808a",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_8808a_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_8808A_Verification.py",
+   "fluke8808a_verification.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_8808a.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_8808a_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_8808A"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_8808A_Verification.py",
+  "Procedures/Fluke_8808A_Verification.procedure.json",
+  "specs/fluke_8808a_pv.json",
+  "drivers/fluke_8808a.py"
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "schema": 1,
+ "id": "WaveSurfer_WS4104HD",
+ "name": "WaveSurfer WS4104HD Verification",
+ "manufacturer": "Teledyne LeCroy",
+ "model": "WS4104HD",
+ "category": "Oscilloscope",
+ "version": "51",
+ "order": 0,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/WaveSurfer_WS4104HD.py",
+ "engine": [],
+ "drivers": [
+  "lecroy_ws4104hd",
+  "fluke_5560a"
+ ],
+ "specs": [],
+ "fingerprint": {
+  "code": [
+   "Procedures/WaveSurfer_WS4104HD.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/lecroy_ws4104hd.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": []
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": []
+ },
+ "seed_verified": true,
+ "seed_order": 2,
+ "own_files": [
+  "Procedures/WaveSurfer_WS4104HD.py",
+  "Procedures/WaveSurfer_WS4104HD.procedure.json",
+  "drivers/lecroy_ws4104hd.py"
+ ]
+}

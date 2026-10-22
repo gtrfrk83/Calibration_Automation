@@ -1,0 +1,37 @@
+{
+ "schema": 1,
+ "id": "Agilent_34401A",
+ "name": "Agilent 34401A Performance Verification",
+ "manufacturer": "Agilent",
+ "model": "34401A",
+ "category": "Digital Multimeter",
+ "version": "55",
+ "order": 2,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Agilent_34401A.py",
+ "engine": [],
+ "drivers": [
+  "scpi_dmm",
+  "fluke_5560a"
+ ],
+ "specs": [],
+ "fingerprint": {
+  "code": [
+   "Procedures/Agilent_34401A.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/scpi_dmm.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": []
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": []
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Agilent_34401A.py",
+  "Procedures/Agilent_34401A.procedure.json"
+ ]
+}

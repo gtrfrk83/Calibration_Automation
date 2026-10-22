@@ -1,0 +1,49 @@
+{
+ "schema": 1,
+ "id": "Keysight_34972A_Verification",
+ "name": "Keysight 34972A Performance Verification (USB)",
+ "manufacturer": "Keysight",
+ "model": "34972A",
+ "category": "Data Acquisition / Switch Unit",
+ "version": "1",
+ "order": 11,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Keysight_34972A_Verification.py",
+ "engine": [
+  "dacq_verification.py"
+ ],
+ "drivers": [
+  "keysight_dacq",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/keysight_34972a_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keysight_34972A_Verification.py",
+   "dacq_verification.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/keysight_dacq.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/keysight_34972a_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_34972A",
+   "hook_dacq"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Keysight_34972A_Verification.py",
+  "Procedures/Keysight_34972A_Verification.procedure.json",
+  "specs/keysight_34972a_pv.json"
+ ]
+}

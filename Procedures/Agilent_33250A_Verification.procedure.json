@@ -1,0 +1,51 @@
+{
+ "schema": 1,
+ "id": "Agilent_33250A_Verification",
+ "name": "Agilent 33250A Performance Verification",
+ "manufacturer": "Agilent",
+ "model": "33250A",
+ "category": "Function Generator",
+ "version": "1",
+ "order": 23,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Agilent_33250A_Verification.py",
+ "engine": [
+  "fgen_verification.py"
+ ],
+ "drivers": [
+  "keysight_332xx",
+  "fluke_5790b",
+  "keysight_5313x",
+  "reference_instruments"
+ ],
+ "specs": [
+  "specs/keysight_33250a_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Agilent_33250A_Verification.py",
+   "fgen_verification.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/keysight_332xx.py",
+   "drivers/fluke_5790b.py",
+   "drivers/keysight_5313x.py",
+   "drivers/reference_instruments.py"
+  ],
+  "spec": [
+   "specs/keysight_33250a_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_332xx"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Agilent_33250A_Verification.py",
+  "Procedures/Agilent_33250A_Verification.procedure.json",
+  "specs/keysight_33250a_pv.json"
+ ]
+}

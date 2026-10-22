@@ -1,0 +1,46 @@
+{
+ "schema": 1,
+ "id": "Keysight_34460A_Verification",
+ "name": "Keysight 34460A Performance Verification",
+ "manufacturer": "Keysight",
+ "model": "34460A",
+ "category": "Digital Multimeter",
+ "version": "2",
+ "order": 7,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Keysight_34460A_Verification.py",
+ "engine": [
+  "truevolt_verification.py"
+ ],
+ "drivers": [
+  "keysight_truevolt",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/keysight_34460a_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keysight_34460A_Verification.py",
+   "truevolt_verification.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/keysight_truevolt.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/keysight_34460a_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": []
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Keysight_34460A_Verification.py",
+  "Procedures/Keysight_34460A_Verification.procedure.json",
+  "specs/keysight_34460a_pv.json"
+ ]
+}

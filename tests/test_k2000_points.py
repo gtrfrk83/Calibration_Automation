@@ -559,7 +559,8 @@ class Registration(unittest.TestCase):
     def test_launcher_manager_verified_and_tunables(self):
         src = (ROOT / 'Procedures' / 'Keithley_2000_Verification.py').read_text(encoding='utf-8')
         self.assertIn('keithley2000_verification.main()', src)
-        mgr = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
+        from tests._registry_text import manager_text            # the Manager finds procedures by scanning Procedures/*.procedure.json
+        mgr = manager_text()
         self.assertIn("'Keithley 2000 Performance Verification': 'Keithley_2000_Verification.py'", mgr)
         self.assertIn("('Keithley 2000 Performance Verification','Keithley','2000','Digital Multimeter','Keithley_2000_Verification.py')", mgr)
         self.assertIn("'Keithley_2000_Verification.py': '1'", mgr)

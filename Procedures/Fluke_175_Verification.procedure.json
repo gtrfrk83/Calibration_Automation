@@ -1,0 +1,45 @@
+{
+ "schema": 1,
+ "id": "Fluke_175_Verification",
+ "name": "Fluke 175 Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "175",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 27,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_175_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_170_series_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_175_Verification.py",
+   "handheld_dmm.py",
+   "hookups.py#fluke170",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_170_series_pv.json#175"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke170",
+  "diagram_prefixes": [
+   "hook_fluke170"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_175_Verification.py",
+  "Procedures/Fluke_175_Verification.procedure.json"
+ ]
+}
