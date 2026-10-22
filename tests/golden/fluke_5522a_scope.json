@@ -222,6 +222,64 @@
    ]
   },
   {
+   "call": "0.05",
+   "case": "Fluke5522AScope.set_dc_volts[dc, 0 Hz sent]",
+   "log": [
+    "5522A|>>|OUT 0.050000000V,0Hz",
+    "5522A|>>|OUT?",
+    "5522A|<<|5.0E-02,V,0E+00,0,0E+00",
+    "5522A|>>|FUNC?",
+    "5522A|<<|SDCV"
+   ],
+   "method": "Fluke5522AScope.set_dc_volts",
+   "result": "returned 0.05",
+   "wire": [
+    [
+     "W",
+     "OUT 0.050000000V,0Hz"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "5.0E-02,V,0E+00,0,0E+00"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ]
+   ]
+  },
+  {
+   "call": "0.05",
+   "case": "Fluke5522AScope.set_dc_volts[still AC]",
+   "log": [
+    "5522A|>>|OUT 0.050000000V,0Hz",
+    "5522A|>>|OUT?",
+    "5522A|<<|5.0E-02,V,0E+00,0,1.0E+03",
+    "5522A|>>|FUNC?",
+    "5522A|<<|SACV"
+   ],
+   "method": "Fluke5522AScope.set_dc_volts",
+   "result": "raised InstrumentError: Calibrator is not sourcing DC: OUT? frequency 1.0E+03, FUNC?='SACV' (expected 0 Hz and SDCV)",
+   "wire": [
+    [
+     "W",
+     "OUT 0.050000000V,0Hz"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "5.0E-02,V,0E+00,0,1.0E+03"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SACV"
+    ]
+   ]
+  },
+  {
    "call": "",
    "case": "Fluke5522AScope.reset_to_defaults",
    "log": [

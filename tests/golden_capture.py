@@ -144,7 +144,7 @@ COVERAGE = {
             no_command=['model_from_idn']),                                 # static: parses the *IDN? text already read
     },
     'fluke_5522a_scope': {
-        'Fluke5522AScope': dict(covered=['select_scope_dcv'], no_command=[]),
+        'Fluke5522AScope': dict(covered=['select_scope_dcv', 'set_dc_volts'], no_command=[]),
     },
     'reference_instruments': {
         'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup'], no_command=[]),
@@ -989,6 +989,10 @@ def cases_5522a_scope(c):
     c.run('Fluke5522AScope.select_scope_dcv[impedance not confirmed]', badimp.select_scope_dcv, '1M')
     junk = c.inst(Fluke5522AScope, Scripted([(r'^ERR\?', '0,"No error"'), (r'^SCOPE\?', 'VOLT'), (r'^OUT_IMP\?', 'Z1M')]), label='5522A')
     c.run('Fluke5522AScope.select_scope_dcv[unreadable impedance]', junk.select_scope_dcv, '1M')
+    dc = c.inst(Fluke5522AScope, Scripted([(r'^OUT\?', '5.0E-02,V,0E+00,0,0E+00'), (r'^FUNC\?', 'SDCV')]), label='5522A')
+    c.run('Fluke5522AScope.set_dc_volts[dc, 0 Hz sent]', dc.set_dc_volts, 0.05)
+    ac = c.inst(Fluke5522AScope, Scripted([(r'^OUT\?', '5.0E-02,V,0E+00,0,1.0E+03'), (r'^FUNC\?', 'SACV')]), label='5522A')
+    c.run('Fluke5522AScope.set_dc_volts[still AC]', ac.set_dc_volts, 0.05)
 
 
 # ---- Stage 7: reset to default settings (Instrument.reset_to_defaults), one block per driver fixture, run after that fixture's other cases
