@@ -1,0 +1,18 @@
+Agilent 53131A / 53132A universal counter: no standard spec file written (nothing to transcribe)
+==============================================================================================
+Source checked: '53132A Programming Manual.pdf' (title "53131A/132A Universal Counter Programming Guide", 328 pages).
+The Programming Guide publishes NO accuracy, resolution, timebase-stability or aging tables.  Its own Introduction
+says the Operating Guide "contains the specifications for the Counter".  The only timebase content is SCPI:
+  *OPT? timebase options 001 (medium stability oven), 010 (high stability oven; also reported for 012 ultra high stability),
+  [:SENSe]:ROSCillator:SOURce INTernal|EXTernal and :AUTO (guide Chapter 4, pp. 4-134 for *OPT? and the ROSC entries),
+  error +2009 "No valid external timebase".
+Text search (ppm, aging, accuracy, stability) found nothing; the 41 embedded images are flowcharts, command trees and front-panel maps
+(sampled as rendered pages: 3-56, 4-6, 4-107, 4-127, 2-4, 4-139) with no tables.
+
+What is missing for a standards entry: frequency measurement accuracy (resolution, systematic error, trigger error), timebase
+initial accuracy / aging / temperature stability for the standard and option 001/010/012 oscillators, input sensitivity.
+Needed: the 53131A/132A Operating Guide (specifications chapter), or the Keysight data sheet.
+
+The schema (specs/standards/*.json, schema 1) CAN hold such numbers (kind FREQ, value band = input frequency, spec rel = fractional
+frequency error, abs = Hz, as the 5522A 'Frequency' rows do); the absence is of source data, not of schema.  No schema change proposed.
+The lab counts on an external 10 MHz GPS timebase (NOTES.md), so the counter's own timebase is not in the budget anyway.
