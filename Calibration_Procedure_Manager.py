@@ -743,7 +743,7 @@ class Manager:
         except Exception as exc:
             messagebox.showerror('Update failed', f'{exc}\n\nCheck the backup before continuing.'); return
         self.refresh_development()
-        self.refresh()                                                   # a verified procedure now shows 'CHANGED since'
+        self.refresh()                                                   # a verified procedure now is unlocked and shows 'Changed since verification'
         self.status.set(f'Updated {rec[1]}; backup saved as {backup.name}. Restart any open procedure windows to use it.')
         messagebox.showinfo('Update installed', f'Updated {rec[1]}.\nBackup: {backup}\n\nClose and reopen any running procedure windows.')
 

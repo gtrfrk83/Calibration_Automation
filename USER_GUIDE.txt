@@ -47,6 +47,6 @@ Verified on hardware (Procedures list)
   saved before it was locked stay as they are.
   To change a locked procedure: select it, press "Unlock for editing..." and type the reason (your name, the date and the reason are recorded). Afterwards press
   "Lock again" if nothing changed, or verify it on the hardware again. Anyone can unlock; nothing is hidden.
-  If a program file or test-point file of a verified procedure is replaced by an update, the column shows "CHANGED since" and the card lists what differs; the
-  procedure stays locked until it is verified again. Updates are never blocked.
-
+  If a program file or test-point file of a verified procedure is replaced by an update, it is no longer verified: it is unlocked automatically (recorded as
+  "system", with the changed files) and the column shows "Changed since verification - needs hardware re-verification" until someone runs it on the hardware and
+  presses "Mark verified on hardware..." again. Updates are never blocked. "Unlock for editing" (with a reason) is for when nothing has changed.

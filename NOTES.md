@@ -257,7 +257,10 @@ procmods_live.py (LiveState, diff, events, LiveBridge) and the pm_* live methods
   (the editor before a run and the in-run editor, run scope included), `ModsState.live_blocked_reason`, `datasheet_builder.save` (existing uid) and `.delete`. The in-run 'Edit procedure' control is disabled with the reason
   (`procmods_ui.LiveHook`, green chip via `ui_shell.Shell.set_verified`). Running is unaffected; overrides saved before the lock stay and still apply. Locks are by model for library procedures (the saved changes are kept per
   model) and by key for user-built ones.
-- 'CHANGED since': a fingerprint (launcher + engine + driver files from `verified.FILES`, the spec / limit JSON, the saved overrides for the model; line endings and JSON layout ignored) is stored at verification time.
-  When you add a procedure to `Procedures/`, add its `verified.FILES` entry (`tests/test_verified_model.py` fails otherwise). The suite never blocks an update; it only flags.
+- Fingerprint (launcher + engine + driver files from `verified.FILES`, the spec / limit JSON, the saved overrides for the model; line endings and JSON layout ignored) is stored at verification time.
+  If a LOCKED procedure no longer matches it, it is auto-unlocked: one `unlock` event, who `system`, reason `files changed since verification: <files>` (`Registry.sync`, run by the list refresh and by `lock_reason`, so an
+  editor never refuses a changed procedure and the event is written once). Status kind `changed` = 'Changed since verification - needs hardware re-verification' (warn, not green); it stays until 'Mark verified on hardware'
+  is pressed again. 'Unlock for editing' (typed reason) remains for an unchanged procedure. User-built procedures are synced by the Procedures list (their spec path is known there).
+  When you add a procedure to `Procedures/`, add its `verified.FILES` entry (`tests/test_verified_model.py` fails otherwise). The suite never blocks an update.
 - Not in the PDF reports. Tests: `tests/test_verified_model.py`, `test_verified_editors.py`, `test_verified_ui.py` (the windows have never been viewed).
 

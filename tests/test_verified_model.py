@@ -168,7 +168,7 @@ class Lifecycle(Base):
         self.reg.unlock(self.entry.proc_key, 'Sam', 'now changing the engine')
         (self.base / 'handheld_dmm.py').write_text('# edited\n', encoding='utf-8')
         st = self.reg.status(self.entry)
-        self.assertEqual((st.kind, st.changed), ('unlocked', True))
+        self.assertEqual((st.kind, st.changed), ('changed', True))
         self.assertEqual(V.ui_state(st)['lock'][1], False)
         with self.assertRaises(V.VerifyError) as c:
             self.reg.relock(self.entry, 'Sam')
@@ -201,22 +201,58 @@ class Lifecycle(Base):
 
 
 class ChangedSince(Base):
-    def test_a_replaced_engine_spec_or_driver_shows_as_changed_and_names_the_file(self):
-        self.verify()
+    def test_a_replaced_file_unlocks_it_once_and_it_needs_reverification(self):
         for rel, text in (('handheld_dmm.py', '# new engine\n'), ('specs/fluke_110_series_pv.json', '{"new": true}'), ('drivers/fluke_5560a.py', '# drv\n'),
                           ('Procedures/Fluke_117_Verification.py', '# launcher\n')):
             with self.subTest(rel):
+                self.verify(on_date='2026-10-21')                         # (re)verified: locked again, fingerprint of the files as they are now
+                self.assertTrue(self.reg.lock_reason(proc_key=self.entry.proc_key))
                 path = self.base / rel
                 before = path.read_text(encoding='utf-8')
+                n_before = len(self.reg.history(self.entry.proc_key))
                 path.write_text(text, encoding='utf-8')
-                st = self.reg.status(self.entry)
-                self.assertEqual((st.kind, st.changed), ('changed', True))
-                self.assertIn('CHANGED since', st.text)
+                for _ in range(3):                                         # looked at again and again: still ONE event
+                    st = self.reg.status(self.entry)
+                self.assertEqual((st.kind, st.changed, st.locked), ('changed', True, False))
+                self.assertEqual(st.text, 'Changed since verification - needs hardware re-verification')
                 self.assertTrue(any(rel in c for c in st.changes), st.changes)
-                self.assertTrue(self.reg.lock_reason(proc_key=self.entry.proc_key), 'still locked: the suite flags, it does not unlock')
-                self.assertEqual(V.ui_state(st)['verify'], ('Mark verified again...', True))
-                path.write_text(before, encoding='utf-8')
-                self.assertEqual(self.reg.status(self.entry).kind, 'verified', 'restoring the file clears the flag')
+                self.assertEqual(self.reg.lock_reason(proc_key=self.entry.proc_key), '', 'not locked: editable')
+                self.assertEqual(self.reg.lock_reason(model='117'), '')
+                hist = self.reg.history(self.entry.proc_key)
+                self.assertEqual(len(hist), n_before + 1)
+                self.assertEqual((hist[-1]['action'], hist[-1]['who']), ('unlock', 'system'))
+                self.assertTrue(hist[-1]['reason'].startswith('files changed since verification: '))
+                self.assertIn(rel, hist[-1]['reason'])
+                self.assertEqual(V.ui_state(st)['verify'], ('Mark verified on hardware...', True))
+                self.assertEqual(V.ui_state(st)['lock'][1], False)
+                path.write_text(before, encoding='utf-8')                  # putting the file back: unchanged again, but still unlocked
+                self.assertEqual(self.reg.status(self.entry).kind, 'unlocked')
+
+    def test_an_editor_asking_whether_it_is_locked_triggers_the_auto_unlock(self):
+        self.verify()
+        self.assertTrue(self.reg.lock_reason(model='117'))
+        (self.base / 'handheld_dmm.py').write_text('# updated\n', encoding='utf-8')
+        self.assertEqual(self.reg.lock_reason(model='117'), '')
+        h = self.reg.history(self.entry.proc_key)
+        self.assertEqual([(e['action'], e['who']) for e in h], [('verify', 'Mike'), ('unlock', 'system')])
+        self.assertEqual(self.reg.lock_reason(proc_key=self.entry.proc_key), '')
+        self.assertEqual(len(self.reg.history(self.entry.proc_key)), 2)
+
+    def test_marking_verified_again_locks_the_new_version(self):
+        self.verify()
+        (self.base / 'handheld_dmm.py').write_text('# updated\n', encoding='utf-8')
+        self.assertEqual(self.reg.status(self.entry).kind, 'changed')
+        self.verify(on_date='2026-10-22')
+        st = self.reg.status(self.entry)
+        self.assertEqual((st.kind, st.changed), ('verified', False))
+        self.assertTrue(self.reg.lock_reason(proc_key=self.entry.proc_key))
+
+    def test_unchanged_procedures_are_never_auto_unlocked(self):
+        self.verify()
+        for _ in range(3):
+            self.reg.status(self.entry)
+            self.reg.lock_reason(model='117')
+        self.assertEqual([e['action'] for e in self.reg.history(self.entry.proc_key)], ['verify'])
 
     def test_line_endings_and_json_layout_do_not_count_as_a_change(self):
         self.verify()
@@ -244,7 +280,7 @@ class ChangedSince(Base):
         self.reg.unlock(self.entry.proc_key, 'Sam', 'changing the settle again')
         store.add('param', 'delay', {'value': 5}, 'model', 'another one', model='117', factory=3, session=session)
         st = self.reg.status(self.entry)
-        self.assertEqual((st.kind, st.changed), ('unlocked', True))
+        self.assertEqual((st.kind, st.changed), ('changed', True))
         self.assertTrue(any('delay' in c for c in st.changes), st.changes)
 
     def test_detail_lines_say_what_is_going_on(self):
@@ -372,7 +408,7 @@ class Buttons(unittest.TestCase):
         cases = {
             ('none', False): (('Mark verified on hardware...', True), ('Unlock for editing...', False)),
             ('verified', False): (('Mark verified on hardware...', False), ('Unlock for editing...', True)),
-            ('changed', True): (('Mark verified again...', True), ('Unlock for editing...', True)),
+            ('changed', True): (('Mark verified on hardware...', True), ('Lock again (nothing changed)', False)),
             ('unlocked', False): (('Mark verified again...', True), ('Lock again (nothing changed)', True)),
             ('unlocked', True): (('Mark verified again...', True), ('Lock again (nothing changed)', False)),
         }
@@ -384,12 +420,13 @@ class Buttons(unittest.TestCase):
     def test_cells_and_pills(self):
         rec = V.Record('k', 'n', 'm', verified_on='2026-10-20', verified_by='Mike')
         self.assertEqual(V.Status('verified', rec).text, 'Verified 2026-10-20  [locked]')
-        self.assertEqual(V.Status('changed', rec, ['x'], True).text, 'Verified 2026-10-20  [locked]  CHANGED since')
+        self.assertEqual(V.Status('changed', rec, ['x'], True).text, 'Changed since verification - needs hardware re-verification')
         self.assertEqual(V.Status('unlocked', rec).text, 'Verified 2026-10-20  [UNLOCKED]')
         self.assertEqual(V.Status('unlocked', rec, ['x'], True).text, 'Verified 2026-10-20  [UNLOCKED]  changed')
         self.assertEqual(V.Status('none').text, 'Not verified')
         self.assertIn('LOCKED', V.Status('verified', rec).pill)
-        self.assertIn('CHANGED SINCE', V.Status('changed', rec, ['x'], True).pill)
+        self.assertEqual(V.Status('changed', rec, ['x'], True).pill, 'CHANGED SINCE VERIFICATION - NEEDS HARDWARE RE-VERIFICATION')
+        self.assertEqual(V.Status('changed', rec, ['x'], True).tone, 'warn')
         self.assertEqual(V.Status('verified', rec).tone, 'good')
 
 
