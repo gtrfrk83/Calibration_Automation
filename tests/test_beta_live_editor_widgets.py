@@ -55,16 +55,14 @@ class LiveWidgetTests(unittest.TestCase):
     def test_live_hook_adds_the_action_and_chips(self):
         hook = self.ui.attach_live(self.app, self.shell, self.h.env.lock)
         self.assertIsInstance(hook, self.ui.LiveHook)
-        self.assertIn(('action', 'Edit procedure', 'Edit'), self.calls)
+        self.assertIn(('action', 'Edit point', 'Edit'), self.calls)
         self.assertIn(('mod', 0), self.calls)
         self.assertEqual(hook.count(), 0)
         hook.refresh()
 
     def test_open_builds_a_live_window_and_reuses_it(self):
-        hook = self.ui.attach_live(self.app, self.shell, self.h.env.lock)
-        win = hook.open()
+        win = self.ui.open_modify_window(self.shell.root, self.app.pm_live_context(), self.h.env.lock)      # reached from the point window's 'All procedure changes...'
         self.assertTrue(win.model.live_mode)
-        self.assertEqual(hook.window, win)
         win.update_header()
         win.update_info()
         for tab in win.tabs.values():
@@ -73,8 +71,7 @@ class LiveWidgetTests(unittest.TestCase):
 
     def test_apply_saves_for_the_next_point_and_redo_needs_a_yes(self):
         import procmods
-        hook = self.ui.attach_live(self.app, self.shell, self.h.env.lock)
-        win = hook.open()
+        win = self.ui.open_modify_window(self.shell.root, self.app.pm_live_context(), self.h.env.lock)
         m = win.model
         pts = [p for p in T.POINTS if p['kind'] == 'DCV' and p['source'] == 'calibrator'][:3]
         self.app.pm_state.live.start_run(pts)

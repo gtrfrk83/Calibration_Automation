@@ -499,8 +499,8 @@ def _check_extra_command(tgt, value, driver_name, probs) -> dict:
     (set, read back, compare; the line is sent once and never retried), a QUERY needs neither.  It is always UNVERIFIED (never tested)."""
     tpl = value.get('template')
     phase, n = tgt['extra']
-    if n > MAX_EXTRA:
-        probs.append(f'at most {MAX_EXTRA} extra command lines per point, driver and phase')
+    if n > pdef.MAX_EXTRA:
+        probs.append(f'at most {pdef.MAX_EXTRA} extra command lines per point, driver and phase')
     if not isinstance(tpl, str) or not tpl.strip():
         probs.append('the command is empty')
         return {'template': tpl, 'extra': True, 'phase': phase}

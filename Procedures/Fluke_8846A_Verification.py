@@ -84,6 +84,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             with open(folder/'command_log.txt','a',encoding='utf-8') as f:
                 f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  8846A session\n'+'\n'.join(self.log.lines())+'\n')
         except OSError:pass
+    @procmods_engine.point_commands()
     def measure(self,p):
         k=p['kind'];v=p['nominal'];r=p['range'];f=p['frequency']
         self.standby()
@@ -203,7 +204,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         sh.add_action('Export Excel (.xlsx)',self.export_excel,side='right',short='Excel')
         self.btn_load=sh.add_action('Load progress',self.load,side='right',short='Load')
         sh.add_action('Save progress',self.save,side='right',short='Save')
-        self.pm_live_attach(sh)   # 'Edit procedure': the editor inside this window, usable during a run
+        self.pm_live_attach(sh)   # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
 
         # table
         body=sh.content
@@ -275,6 +276,17 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         return int(value)
 
     def pm_driver_classes(self):return (drivers.Fluke8846A,drivers.Fluke5560A)
+    def pm_plan_point(self,p):
+        """The commands IO.measure sends for point p: a dry run of that routine on the simulated bench (procmods_plan)."""
+        import procmods_plan
+        from unittest import mock
+        from drivers.simulated import make_dmm_bench
+        def build(mods):
+            _bench,ft,dt=make_dmm_bench('8846A')
+            queue_=[dt,ft]
+            with mock.patch.object(drivers,'open_visa',lambda *a,**k:queue_.pop(0)):
+                return IO('1','2',9600,'None',8,mods=mods)
+        return procmods_plan.run_plan(self.pm_state,build,lambda io:io.measure(p))
     def refresh(self):
         keep=self.tree.selection()
         self.tree.delete(*self.tree.get_children())

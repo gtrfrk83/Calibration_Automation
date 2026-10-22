@@ -231,7 +231,7 @@ class Instrument:
                 self._reject(key, uid, bundle)
             self._cmd_ov = {}
         for pkey, table in dict(points or {}).items():
-            for key, val in dict(table).items():
+            for key, val in (dict(table) if isinstance(table, dict) else {}).items():
                 uid = ((point_uids or {}).get(pkey) or {}).get(key)
                 cmd = check(key, val, uid)
                 if cmd is not None and val != cmd.template:
@@ -243,7 +243,7 @@ class Instrument:
                     self._reject(key, uid, bundle)
                 del self._cmd_pt[pkey]
         for pkey, lines in dict(extras or {}).items():
-            self._extras[pkey] = [dict(x) for x in lines]
+            self._extras[pkey] = [dict(x) for x in lines if isinstance(x, dict)] if isinstance(lines, (list, tuple)) else []
         return list(self._cmd_rejected)
 
     # ---- test point context: point-specific overrides and extra command lines (procmods "Edit point") --------------------

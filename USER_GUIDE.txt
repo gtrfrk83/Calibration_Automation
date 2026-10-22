@@ -42,7 +42,7 @@ The test window (beta layout)
 Verified on hardware (Procedures list)
   The "Verified on hardware" column says which procedures have been run correctly on the real instruments, and when.
   After a procedure has run correctly on the actual hardware, select it and press "Mark verified on hardware..." (who verified it, the date, and optionally the
-  instrument and calibrator used). It is then LOCKED: the procedure changes window, the "Edit procedure" control in the running window, developer-mode edits and
+  instrument and calibrator used). It is then LOCKED: the procedure changes window, the "Edit point" control in the running window, developer-mode edits and
   the Datasheet Builder (new version, delete) all refuse, with a message saying it is verified and locked. Running it is not affected, and changes that were
   saved before it was locked stay as they are.
   To change a locked procedure: select it, press "Unlock for editing..." and type the reason (your name, the date and the reason are recorded). Afterwards press
@@ -50,3 +50,20 @@ Verified on hardware (Procedures list)
   If a program file or test-point file of a verified procedure is replaced by an update, it is no longer verified: it is unlocked automatically (recorded as
   "system", with the changed files) and the column shows "Changed since verification - needs hardware re-verification" until someone runs it on the hardware and
   presses "Mark verified on hardware..." again. Updates are never blocked. "Unlock for editing" (with a reason) is for when nothing has changed.
+
+Editing one test point (right-click > Edit)
+  In a running procedure, right-click a test point and choose Edit (or select a point and press "Edit point"). A small window opens for that point only.
+  It is disabled, with the reason, on a procedure that is verified on hardware and locked, and while that point is being measured.
+  Commands: the list shows the instrument commands the procedure will send for this point, in order, with this point's real values. Each line shows the
+  read-back query, its risk, and whether it is verified or UNVERIFIED. Select a line to change it; "Restore default" puts it back. Output and
+  locked commands cannot be changed (the reason is shown). You can also add lines to send before or after the point. A line that sets something needs the
+  query that reads it back and the reply to expect. It is sent once, read back and compared; if it does not match, the point stops and nothing is retried.
+  Anything you type is recorded as UNVERIFIED. Outputs go to standby after the point as always. "Not tested" means the program has no safe way to try a command.
+  Developer mode: press "Turn on developer mode..." and enter the developer passphrase (the same one as everywhere in the suite; it locks itself again after 15
+  minutes without use). Only then can you change the tolerance (low/high or plus-minus), the unit, the nominal and the description of the point. Without it
+  those fields are read-only. Changing a tolerance changes pass/fail, so you must type a reason and tick the acknowledgement. If the point already has a reading
+  it is measured again against the new limit.
+  Choose "This run only", "This asset" or "This model". Changes start at the next point, never in the middle of one. Every change is recorded (who, when, old,
+  new, reason, point). PDF reports are unchanged. Demo mode is marked DEMO and always run-only. The WaveSurfer procedure shows no commands (tolerance only).
+  "All procedure changes..." opens the older window for settle times, skipping points, notes and commands that apply to the whole instrument.
+

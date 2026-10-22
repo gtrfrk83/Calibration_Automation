@@ -939,13 +939,15 @@ def attach_to_shell(shell, ctx_factory, lock: M.DevLock | None = None) -> ShellH
 
 # ------------------------------------------------------------------------------------------------------------ inside a procedure window
 class LiveHook:
-    """The 'Edit procedure' action of a running procedure window (procmods_live).  Unlike the Manager's window, it stays usable during a run:
-    saved edits start at the next point.  `app` is an engine App (procmods_engine.ProcModsMixin).
+    """The 'Edit point' action of a running procedure window (procmods_live): it opens the same small point window as right-click > Edit,
+    for the point selected in the list (procmods_point_ui).  It stays usable during a run: saved edits start at the next point.  The older
+    whole-procedure window (settle times, skipping points, notes, driver-wide commands) is reached from the point window's 'All procedure
+    changes...' button, so there is one editor, not two.  `app` is an engine App (procmods_engine.ProcModsMixin).
 
     A procedure that is verified on hardware and locked (verified.py) keeps the control, but disabled, with a green 'VERIFIED ON HARDWARE -
     LOCKED' chip and the reason as its tooltip.  Running is not affected."""
 
-    LABEL = 'Edit procedure'
+    LABEL = 'Edit point'
     CHIP = 'VERIFIED ON HARDWARE - LOCKED'
 
     def __init__(self, app, shell, lock):
@@ -996,15 +998,13 @@ class LiveHook:
             self.sync_verified()
             messagebox.showinfo('Procedure is locked', why, parent=getattr(self.shell, 'root', None))
             return None
-        if self.window is not None:
-            try:
-                if self.window.winfo_exists():
-                    self.window.lift()
-                    return self.window
-            except tk.TclError:
-                pass
-        ctx = self.app.pm_live_context()
-        self.window = open_modify_window(self.shell.root, ctx, self.lock, on_change=lambda _m: self.refresh())
+        import procmods_point_ui
+        pid = procmods_point_ui.selected_point(self.app)
+        if pid is None:
+            messagebox.showinfo('Edit point', 'Select a test point in the list first (or right-click a point and choose Edit).',
+                                parent=getattr(self.shell, 'root', None))
+            return None
+        self.window = procmods_point_ui.open_point_window(self.app, pid, lock=self.lock, parent=getattr(self.shell, 'root', None))
         return self.window
 
 

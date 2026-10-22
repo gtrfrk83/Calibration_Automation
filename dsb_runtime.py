@@ -386,6 +386,7 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
     def _settle(self, p):
         return p.get('settle', self.pm_param('handheld.settle.default', 3.0))
 
+    @hh.procmods_engine.point_commands()
     def apply(self, p, cancel=None):
         """Program and enable the output of point p on its routed standard (p['_route']), then wait for it to settle."""
         run, route = p['run'], p['_route']
@@ -687,6 +688,35 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         connected = self.io.models() if self.io is not None else set()
         eng = self.engine_model()
         return route_for(p, connected, prefer=[eng] if eng else [])
+
+    def pm_plan_point(self, p):
+        """The commands DsbIO.apply sends for a SOURCE point of the datasheet (the calibrator sets the stimulus the meter is read against), then
+        the STANDBY that follows the reading: a dry run on the simulated bench (procmods_plan).  Points the unit under test sources (the standard
+        reads them: 5790B, counters) are not shown: their measuring side has no simulated bench here."""
+        import procmods_plan
+        from drivers.simulated import make_bench, SimFlukeTransport
+        run = p.get('run')
+        if not run:
+            return super().pm_plan_point(p)
+        if run['direction'] != 'source' or run['op'].startswith('std_'):
+            return procmods_plan.Plan(error='The commands of a point the unit under test sources (read by the 5790B or a counter) cannot be shown before the run.')
+        eng = self.engine_model()
+        route = route_for(p, set(self.io.models()) if self.io is not None else set(SOURCE_MODELS), prefer=[eng] if eng else [])
+        if not route.auto or route.standard not in SOURCE_MODELS:
+            return procmods_plan.Plan(note=(route.reason or 'This point is set by hand: no instrument command is sent.'))
+        q = dict(p)
+        q['_route'] = route
+        scope = self.has_scope()
+
+        def build(mods):
+            bench, _a, _b = make_bench()
+            mods.alias(q, self.pm_point_key(p))
+            return DsbIO({}, transports={route.standard: SimFlukeTransport(bench, route.standard)}, scope=scope, mods=mods)
+
+        def go(io):
+            io.apply(q)
+            io.standby()
+        return procmods_plan.run_plan(self.pm_state, build, go)
 
     @property
     def manual_cal(self):

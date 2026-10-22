@@ -340,8 +340,15 @@ class ModsState:
     def key_of(self, p):
         """The factory key (procmods.point_key / point_keys, with '#n' for duplicates) of a point of a registered list; falls back to
         point_key(p) for anything else."""
+        al = self.__dict__.get('_alias')
+        if al and id(p) in al and al[id(p)][0] is p:
+            return al[id(p)][1]
         hit = self._keymap.get(id(p))
         return hit[1] if hit is not None and hit[0] is p else procmods.point_key(p)
+
+    def alias(self, copy, key):
+        """A dry-run helper: let `copy` (a throw-away copy of a live point) count as the point with factory key `key`."""
+        self.__dict__.setdefault('_alias', {})[id(copy)] = (copy, key)
 
     def apply(self, points):
         """Put the active overrides on this live list IN PLACE (entries are replaced by patched copies; originals are kept for revert)."""
@@ -457,7 +464,7 @@ class ModsState:
             if self.oset or self.snapshot:
                 self.snapshot = procmods.build_snapshot(self.oset, self.snapshot)
             ev = procmods_live.make_event(old, self.oset, rev=self.rev() or len((self.snapshot or {}).get('revs') or []), before=before,
-                                          demo=self.demo, standby=standby is not None)
+                                          demo=self.demo, standby=standby is not None, point_id=self.point_id_of, redo=self.live.redo)
             self.live.dirty, self.live.dirty_at, self.live.pending = False, None, []
             if ev is not None:
                 self.live.events.append(ev)
@@ -469,6 +476,14 @@ class ModsState:
                     except Exception:
                         pass
             return ev
+
+    def point_id_of(self, key):
+        """The engine's id of the point with this factory key (None if unknown): for the audit record of a per-point change."""
+        for ent in self.lists.values():
+            for q, k in zip(ent[1], procmods.point_keys(ent[1])):
+                if k == key:
+                    return procmods_live.point_id(q)
+        return None
 
     def rev(self):
         revs = (self.snapshot or {}).get('revs') or []
@@ -668,7 +683,11 @@ class ProcModsMixin:
         if st is None or not drivers or not hasattr(drivers[0], 'set_point'):
             yield
             return
+        if self.__dict__.get('_pm_scope_depth'):                  # a point routine called inside another (the user-datasheet apply -> handheld apply)
+            yield
+            return
         key = st.key_of(p)
+        self.__dict__['_pm_scope_depth'] = 1
         for d in drivers:
             d.set_point(key)
         try:
@@ -680,6 +699,7 @@ class ProcModsMixin:
         finally:
             for d in drivers:
                 d.set_point(None)
+            self.__dict__['_pm_scope_depth'] = 0
 
     def pm_find_point(self, pid):
         """The live point (as the run uses it) with this id, from the registered lists; None if unknown.  The id may be text (a table row id)."""
@@ -708,7 +728,9 @@ class ProcModsMixin:
         (the handheld nominal also sets the calibrator output; the generator and oscilloscope nominals are only the value a reading is judged
         against)."""
         out = {}
-        out['nominal'] = {'paths': ['nominal'], 'reason': '' if pdef.has_path(view, 'nominal') else 'this point has no nominal value', 'note': ''}
+        out['nominal'] = {'paths': ['nominal'], 'reason': '' if pdef.has_path(view, 'nominal') else 'this point has no nominal value',
+                          'note': 'The nominal is the value the calibrator is told to output and the value the reading is judged against. '
+                                  'The meter range and the instruments\' own limits are not changed.'}
         out['unit'] = {'paths': ['unit'], 'reason': '' if pdef.has_path(view, 'unit') else 'this point has no unit', 'note': ''}
         dp = next((x for x in ('description', 'desc') if pdef.has_path(view, x)), None)
         out['description'] = {'paths': [dp] if dp else [], 'reason': '' if dp else 'this point has no description', 'note': ''}
@@ -740,11 +762,12 @@ class ProcModsMixin:
         t = self.__dict__.get('tree')
         return [t] if t is not None else []
 
-    def pm_bind_tree(self, tree):
-        """Called by ui_shell.results_table: give the point list its right-click menu.  Never breaks the window."""
+    def pm_bind_tree(self, tree, resolver=None):
+        """Called by ui_shell.results_table (and by an engine whose lists are built another way): give the point list its right-click 'Edit'
+        menu.  `resolver(iid)` names the point of a row (default: the row id is the point id).  Never breaks the window."""
         try:
             import procmods_point_ui
-            procmods_point_ui.attach_tree_menu(self, tree)
+            procmods_point_ui.attach_tree_menu(self, tree, resolver)
         except Exception as exc:
             if self.pm_state is not None:
                 self.pm_state.warnings.append(f'the point list menu could not be attached ({type(exc).__name__})')
