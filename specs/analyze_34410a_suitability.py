@@ -10,7 +10,8 @@ Inputs (nothing is typed twice into a result without a cross-check):
     Every 5560A accuracy found through specmanager is compared with it; the run aborts on a disagreement.  The same typing carries the 99 % column the 5560A
     guarantees (the 95 % column is what the laboratory's standard sheet holds);
   * TAR / TUR through tartur.compute (the existing mechanism: TAR = limit / published accuracy; TUR = limit / reported expanded uncertainty, k = 2).
-The 5520A column is a PROXY: no 5520A specification is on file, so the 5522A rows stand in for it.  UNVERIFIED.
+The 5520A column uses the 5520A's own sheet (specs/standards/fluke_5520a_standard.json, written by specs/build_5520a_standard.py from the 5520A Service Manual
+printed pp. 1-7 .. 1-23, 1 year column, "Specification Confidence Interval 99 %").  It was a proxy (the 5522A rows) until that sheet existed.
 """
 import sys
 from decimal import Decimal as D
@@ -37,8 +38,7 @@ sm.seed()
 
 OUT = HERE / '34410a_standards_suitability.md'
 PERIODS = ('24h', '90d', '1y')
-CALS = ('5560A', '5522A', '5520A')                    # 5520A = 5522A rows as a proxy (UNVERIFIED)
-PROXY = {'5520A': '5522A'}
+CALS = ('5560A', '5522A', '5520A')
 
 # ---- second typing of the 5560A tables, 1 year: (99 % ppm, 95 % ppm, floor in base units), read from the page images --------------------------------
 UV, MV, NA, UA, MA = 1e-6, 1e-3, 1e-9, 1e-6, 1e-3
@@ -113,10 +113,10 @@ def load_points():
 
 
 def standard(model):
-    s = sm.standard(PROXY.get(model, model))
+    s = sm.standard(model)
     if s is None:
         sm.seed()
-        s = sm.standard(PROXY.get(model, model))
+        s = sm.standard(model)
     return s
 
 
@@ -136,9 +136,9 @@ def pnt(p):
 
 
 def ratios(p, model):
-    """{period: (TAR, TUR, accuracy, uncertainty)} through tartur.compute; the 5520A (proxy) has no standard of its own: it uses the 5522A rows for TAR and TUR."""
+    """{period: (TAR, TUR, accuracy, uncertainty)} through tartur.compute with the calibrator's own standard sheet."""
     out = {}
-    std_key = PROXY.get(model, model)
+    std_key = model
     for per in PERIODS:
         h = p['limits'][per]
         r = tartur.compute(pnt(p), p['nominal'] - h, p['nominal'] + h, standard=std_key)
@@ -231,15 +231,18 @@ def write(rows, documented=()):
       '(5560_Specs.pdf p. 1); the 99 % TAR is given in the appendix. Resistance uses the floor that assumes an ohms zero within 24 hours (+/-1 C); with only a 14 day zero the floor is much larger (appendix).')
     w('* **5522A**: the laboratory\'s own sheet; its note 8 says four 1 year rows are deliberately more conservative than the manual (DC current 329.999 mA and 1.1 to 2.99999 A, '
       'resistance 11 to 33 MOhm and 110 to 330 MOhm). Used as stored. The sheet states no confidence level.')
-    w('* **5520A: UNVERIFIED.** No 5520A specification is on file. The 5522A rows stand in for it (the 5522A is the successor with the same core ranges), so the 5520A column is a proxy, not a result. '
-      'Mike: please supply the 5520A specification pages (1 year column) so this can be replaced by real figures.')
+    w('* **5520A**: the 5520A\'s own sheet, typed from the rendered pages of the 5520A Service Manual (printed pp. 1-7 to 1-23, 1 year column; `specs/build_5520a_standard.py`). The manual prints '
+      '**99 %** confidence (p. 1-7); the sheet is stored at 99 %, so the budget divisor is 2.576. TAR uses no divisor, so the TAR column is on the manual\'s printed figure for all three calibrators; '
+      'TUR (budget) is not on one confidence basis: 5560A sheet 95 % (divisor 2), 5522A sheet no level (divisor 2, although its manual also says 99 %), 5520A sheet 99 % (divisor 2.576). '
+      'Resistance uses the 12 hour ohms-zero floor (as the 5522A sheet does); the 5520A 7 day floor is much larger (sheet function "Resistance [7 Day Zero Cal Floor]"). '
+      'The 5520A sheet flags manual misprints (see its Sheet issues): none of them touches a point of this procedure.')
     w('')
     w('## Summary by function and range: worst-case TAR over the points of the group')
     w('')
     w('Worst-case TAR against the **24 hour** column (the manual\'s criterion) and against the **1 year** limit (the limit the procedure applies). '
       '`-` marks a point the calibrator\'s sheet does not cover at that amplitude / frequency (the calibrator cannot source it, or the sheet is silent).')
     w('')
-    head = '| Function / range | Points | 5560A 24h | 5560A 1y | 5522A 24h | 5522A 1y | 5520A* 24h | 5520A* 1y |'
+    head = '| Function / range | Points | 5560A 24h | 5560A 1y | 5522A 24h | 5522A 1y | 5520A 24h | 5520A 1y |'
     w(head)
     w('|---|---|---|---|---|---|---|---|')
     for g, rs in groups.items():
@@ -251,7 +254,6 @@ def write(rows, documented=()):
                 cells.append(('-' if v is None else fmt(v)) + (f' ({len(nc)} of {len(rs)} not covered)' if nc and len(nc) < len(rs) else ' (not covered)' if nc else ''))
         w(f'| {g} | {len(rs)} | ' + ' | '.join(cells) + ' |')
     w('')
-    w('\\* 5520A = 5522A rows (UNVERIFIED proxy).')
     w('')
 
     # ---- which calibrator meets which tier
@@ -265,7 +267,7 @@ def write(rows, documented=()):
 
     w('## Which calibrator meets which ratio (every point of the group)')
     w('')
-    w('| Function / range | 5560A vs 24h | 5522A vs 24h | 5520A* vs 24h | 5560A vs 1y | 5522A vs 1y | 5520A* vs 1y |')
+    w('| Function / range | 5560A vs 24h | 5522A vs 24h | 5520A vs 24h | 5560A vs 1y | 5522A vs 1y | 5520A vs 1y |')
     w('|---|---|---|---|---|---|---|')
     for g, rs in groups.items():
         w(f'| {g} | ' + ' | '.join(verdict(rs, m, per) for per in ('24h', '1y') for m in CALS) + ' |')
@@ -277,30 +279,30 @@ def write(rows, documented=()):
     # ---- points needing an external standard
     w('## Points that need an external standard or a different calibrator')
     w('')
-    w('Listed when **no** calibrator (5560A, 5522A, 5520A proxy) reaches 4:1 against the 1 year limit the procedure applies, or a calibrator cannot source the point. '
+    w('Listed when **no** calibrator (5560A, 5522A, 5520A) reaches 4:1 against the 1 year limit the procedure applies, or a calibrator cannot source the point. '
       '"Class": **cannot source** = not on that calibrator\'s sheet (range, amplitude or frequency); **marginal** = best TAR between 1:1 and 4:1; **inadequate** = best TAR below 1:1.')
     w('')
-    w('| # | Test point | 34410A limit (1y) | 5560A TAR 1y | 5522A TAR 1y | Class |')
-    w('|---|---|---|---|---|---|')
+    w('| # | Test point | 34410A limit (1y) | 5560A TAR 1y | 5522A TAR 1y | 5520A TAR 1y | Class |')
+    w('|---|---|---|---|---|---|---|')
     need = []
     for r in rows:
         p = r['p']
         t = {m: (r['cal'][m]['ratios']['1y'][0] if r['cal'][m]['acc'] else None) for m in CALS}
         best = max([v for v in t.values() if v is not None] or [0])
         cls = []
-        for m in ('5560A', '5522A'):
+        for m in CALS:
             if t[m] is None:
                 cls.append(f'{m} cannot source')
         if best < 1:
             cls.append('inadequate')
         elif best < 4:
             cls.append('marginal')
-        if best < 4 or any(t[m] is None for m in ('5560A', '5522A')):
+        if best < 4 or any(t[m] is None for m in CALS):
             need.append(r)
             lim = ' '.join(si_one(p['limits']['1y'], p['unit']))
-            w(f'| {p["id"]} | {p["description"]} | +/-{lim} | {fmt(t["5560A"])} | {fmt(t["5522A"])} | {"; ".join(cls)} |')
+            w(f'| {p["id"]} | {p["description"]} | +/-{lim} | {fmt(t["5560A"])} | {fmt(t["5522A"])} | {fmt(t["5520A"])} | {"; ".join(cls)} |')
     if not need:
-        w('| - | none | | | | |')
+        w('| - | none | | | | | |')
     w('')
     # ---- recommendation, with its numbers taken from the results above
     def fn_worst(kinds, m, per):
@@ -308,44 +310,51 @@ def write(rows, documented=()):
         return worst(rs, m, per)
 
     def fn_best(kinds, per):
-        vals = [fn_worst(kinds, m, per) for m in ('5560A', '5522A')]
+        vals = [fn_worst(kinds, m, per) for m in CALS]
         return max(v for v in vals if v is not None)
 
     beaten = [r['p'] for r in rows if r['cal']['5522A']['acc'] and r['cal']['5560A']['acc'] and r['cal']['5522A']['ratios']['1y'][0] > r['cal']['5560A']['ratios']['1y'][0] * 1.0001]
     w('## Recommendation')
     w('')
-    w('1. **Use the 5560A as the source for the whole procedure.** It can source every point (the 5522A and the 5520A proxy cannot source three AC volts points at 300 kHz) and its TAR is higher '
-      'than the 5522A\'s at every point except ' + ('; '.join(f'#{p["id"]} ({p["description"].split(",")[0]})' for p in beaten) if beaten else 'none') + '.')
+    nc = {m: [r['p']['id'] for r in rows if r['cal'][m]['acc'] is None] for m in CALS}
+    ids = lambda m: ', '.join(f'#{i}' for i in nc[m]) if nc[m] else 'none'      # noqa: E731
+    w('1. **Use the 5560A as the source for the whole procedure.** It can source every point (not covered by the 5522A sheet: ' + ids('5522A') + '; by the 5520A sheet: ' + ids('5520A') + ') '
+      'and its TAR is higher than the 5522A\'s at every point except ' + ('; '.join(f'#{p["id"]} ({p["description"].split(",")[0]})' for p in beaten) if beaten else 'none') + '.')
     w(f'2. **Against the 1 year limits** (what the procedure applies by default) the 5560A gives a worst-case TAR of {fmt(fn_worst(("DCV",), "5560A", "1y"))}:1 for DC volts, '
       f'{fmt(fn_worst(("DCI",), "5560A", "1y"))}:1 for DC current, {fmt(fn_worst(("OHM2", "OHM4"), "5560A", "1y"))}:1 for resistance and {fmt(fn_worst(("FREQ",), "5560A", "1y"))}:1 for frequency: '
-      'at least 4:1 everywhere there, with 5:1 met at most of those points (see the tables). The 5522A (and the 5520A, if it matches) reaches '
-      f'{fmt(fn_worst(("DCV",), "5522A", "1y"))}:1 for DC volts, {fmt(fn_worst(("DCI",), "5522A", "1y"))}:1 for DC current and {fmt(fn_worst(("OHM2", "OHM4"), "5522A", "1y"))}:1 for resistance: '
-      'usable for a 1:1 / 2:1 comparison, not 4:1.')
+      'at least 4:1 everywhere there, with 5:1 met at most of those points (see the tables). The 5522A reaches '
+      f'{fmt(fn_worst(("DCV",), "5522A", "1y"))}:1 for DC volts, {fmt(fn_worst(("DCI",), "5522A", "1y"))}:1 for DC current and {fmt(fn_worst(("OHM2", "OHM4"), "5522A", "1y"))}:1 for resistance, '
+      f'the 5520A {fmt(fn_worst(("DCV",), "5520A", "1y"))}:1, {fmt(fn_worst(("DCI",), "5520A", "1y"))}:1 and {fmt(fn_worst(("OHM2", "OHM4"), "5520A", "1y"))}:1: '
+      'usable for a 1:1 / 2:1 comparison, not 4:1. The 5520A is better than the 5522A sheet only on DC current at 100 mA and 3 A, because the 5522A sheet deliberately carries larger floors there '
+      '(its note 8); on every other DC / resistance / AC point the two sheets give the same figure.')
     w(f'3. **Against the manual\'s own 24 hour column nobody reaches 5:1** except frequency ({fmt(fn_worst(("FREQ",), "5560A", "24h"))}:1) and the 2-wire 100 MOhm point on the 5560A. '
       f'Best worst-case TAR of the two (24 hour): DC volts {fmt(fn_best(("DCV",), "24h"))}:1, DC current {fmt(fn_best(("DCI",), "24h"))}:1, resistance {fmt(fn_best(("OHM2", "OHM4"), "24h"))}:1. '
       'The manual sizes its source (a 5720A) for the 24 hour specification, which applies only within 24 hours of an adjustment; for a calibration interval check the 1 year limits are the relevant ones.')
     w(f'4. **AC volts and AC current need an external standard (or a better AC source) to reach 4:1.** The 5560A\'s worst-case 1 year TAR is {fmt(fn_worst(("ACV",), "5560A", "1y"))}:1 for AC volts and '
-      f'{fmt(fn_worst(("ACI",), "5560A", "1y"))}:1 for AC current; the 5522A\'s is {fmt(fn_worst(("ACV",), "5522A", "1y"))}:1 and {fmt(fn_worst(("ACI",), "5522A", "1y"))}:1. '
+      f'{fmt(fn_worst(("ACI",), "5560A", "1y"))}:1 for AC current; the 5522A\'s is {fmt(fn_worst(("ACV",), "5522A", "1y"))}:1 and {fmt(fn_worst(("ACI",), "5522A", "1y"))}:1, '
+      f'the 5520A\'s {fmt(fn_worst(("ACV",), "5520A", "1y"))}:1 and {fmt(fn_worst(("ACI",), "5520A", "1y"))}:1. '
       'AC current is below 1.2:1 even on the 5560A, so it is a measurement against a calibrator at least as uncertain as the limit: report the TUR, or read the calibrator output with a better '
       'AC measurement standard (the suite already has 5790B support) and use that reading as the reference.')
-    w('5. **Frequency**: the 2.5 ppm of both calibrators is 0.1 mHz at 40 Hz and 25 mHz at 10 kHz, against limits of 20 mHz and 0.5 Hz (24 hour): no external frequency standard is needed for these two points.')
-    w('6. **High resistance**: the 5560A covers 10 MOhm (4-wire) and 100 MOhm (2-wire) with room to spare; the 5522A (and the 5520A proxy) is at 3.0:1 (10 MOhm, 4-wire) against the 1 year limit, 15:1 at 100 MOhm, '
-      'and its lab-sheet floors for 11 to 330 MOhm are deliberately more conservative than the manual (5522A sheet note 8). No external standard is needed with the 5560A.')
-    w('7. **AC bandwidth**: the 5522A / 5520A sheets stop before 10 V at 300 kHz, 50 V at 300 kHz and 70 V at 300 kHz (points 68, 71, 74); the 5560A covers them (70 V maximum above 100 kHz on its 120 V range). '
-      'If only a 5522A / 5520A is available, those three points need an external AC source.')
-    w('8. **The 5520A is a proxy.** Replace it with real figures when its specification pages are supplied.')
+    w('5. **Frequency**: the 2.5 ppm of all three calibrators is 0.1 mHz at 40 Hz and 25 mHz at 10 kHz, against limits of 20 mHz and 0.5 Hz (24 hour): no external frequency standard is needed for these two points.')
+    w('6. **High resistance**: the 5560A covers 10 MOhm (4-wire) and 100 MOhm (2-wire) with room to spare; the 5522A and the 5520A are at ' + fmt(fn_worst(("OHM4",), "5522A", "1y")) + ':1 and ' + fmt(fn_worst(("OHM4",), "5520A", "1y")) + ':1 at 10 MOhm (4-wire) against the 1 year limit; the 100 MOhm point (2-wire) is '
+      + fmt(fn_worst(("OHM2",), "5522A", "1y")) + ':1 and ' + fmt(fn_worst(("OHM2",), "5520A", "1y")) + ':1 (the 5522A sheet floors for 11 to 330 MOhm are deliberately more conservative than the manual, its note 8; the 5520A sheet holds the manual\'s figures). '
+      'No external standard is needed with the 5560A. 2-wire resistance on the 5520A / 5522A adds 5 uV per amp of stimulus current to the floor (5520A manual p. 1-11 note [2]); that term is not in either sheet.')
+    w('7. **AC bandwidth**: the 5522A and 5520A sheets stop before 10 V at 300 kHz, 50 V at 300 kHz and 70 V at 300 kHz (points 68, 71, 74: above 100 kHz only the ranges up to 3.3 V are specified, to 500 kHz; '
+      '5520A manual p. 1-12); the 5560A covers them (70 V maximum above 100 kHz on its 120 V range). If only a 5522A / 5520A is available, those three points need an external AC source.')
+    w('8. **5520A sheet.** Typed from the 5520A Service Manual page images (see `specs/build_5520a_standard.py` and NOTES.md); its confidence basis (99 %, divisor 2.576 in the budget) differs from the 5522A and 5560A sheets, '
+      'so TUR is not strictly comparable across the three columns (TAR is).')
     w('')
     # ---- detailed per point
     w('## Appendix A: every calibrator-sourced point')
     w('')
     w('Accuracy = published 1 year +/- figure of the calibrator at the output (base units: V, A, ohm, Hz). Ratios: TAR 24h / TAR 1y / TUR 1y.')
     w('')
-    w('| # | Point | Limit 24h | Limit 1y | 5560A acc | 5560A TAR 24h / 1y | 5560A TUR 1y | 5522A acc | 5522A TAR 24h / 1y | 5522A TUR 1y |')
-    w('|---|---|---|---|---|---|---|---|---|---|')
+    w('| # | Point | Limit 24h | Limit 1y | 5560A acc | 5560A TAR 24h / 1y | 5560A TUR 1y | 5522A acc | 5522A TAR 24h / 1y | 5522A TUR 1y | 5520A acc | 5520A TAR 24h / 1y | 5520A TUR 1y |')
+    w('|---|---|---|---|---|---|---|---|---|---|---|---|---|')
     for r in rows:
         p = r['p']
         cells = []
-        for m in ('5560A', '5522A'):
+        for m in CALS:
             c = r['cal'][m]
             if not c['acc']:
                 cells += ['-', '-', '-']
@@ -374,7 +383,9 @@ def write(rows, documented=()):
         w(f'* **Stored 5560A row differs from the page (conservative):** point {pid} ({desc}): the page gives {hand:.6g}, the suite\'s stored sheet {got:.6g}. '
           'Cause: the stored AC volts row 1.2 V, 5 to 10 Hz carries a 75 uV floor where the printed page (printed p. 4, 1.2 V range) says 70 uV. The stored sheet was not changed; '
           'the result above uses the stored (larger) figure.')
-    w('* **UNVERIFIED:** the whole 5520A column (5522A proxy); the 5522A sheet is the laboratory\'s stored sheet (not re-read against the 5522A manual in this task) and carries its own conservative rows (note 8).')
+    w('* **5520A column:** read from the rendered pages of the 5520A Service Manual twice (130 dpi page, 200 dpi crop) and cross-checked against the stored 5522A sheet (typed independently: every AC volts and LCOMP-off AC current figure agrees). '
+      'Differences found in the 5522A sheet versus the 5520A manual are listed in NOTES.md (not changed). Not verified on an instrument: the range-edge interpretation of the printed DC voltage ranges (30 V / 100 V), and the 12 hour ohms-zero floor assumption.')
+    w('* **UNVERIFIED:** the 5522A sheet is the laboratory\'s stored sheet (not re-read against the 5522A manual in this task) and carries its own conservative rows (note 8).')
     w('* The 34410A limits are the Service Guide\'s printed limits (see the build script); the DC 1000 V 1 year limit includes the footnote 5 adder while the 24 hour and 90 day limits do not (as printed), '
       'so the 24 hour TAR at 1000 V is not comparable with the 1 year TAR there.')
     w('* The 34410A 24 hour column is **not** an acceptance limit of this procedure; the ratios against it show how the calibrators compare with the manual\'s own 5:1 sizing rule.')

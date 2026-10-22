@@ -1,4 +1,4 @@
-"""Datasheet Builder: matching points to the imported standards (5522A, 5560A, 5790B, 96270A, 8563E, 8902A + driver-only 53131A / 53132A), coverage
+"""Datasheet Builder: matching points to the imported standards (5520A, 5522A, 5560A, 5790B, 96270A, 8563E, 8902A + driver-only 53131A / 53132A), coverage
 reasons, TAR / TUR, CMC clamp, ranking, overrides, and the driver table.   Run:  python -m unittest tests.test_datasheet_builder_match"""
 import os
 import sys
@@ -42,7 +42,7 @@ class Dmm(M):
         cls.res = cls.m.match(cls.ds)
 
     def test_every_standard_is_considered(self):
-        self.assertEqual(self.res.standards, ['5522A', '5560A', '5790B', '8563E', '8902A', '96270A', '53131A', '53132A'])
+        self.assertEqual(self.res.standards, ['5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', '53131A', '53132A'])
 
     def test_dc_volts_all_covered_and_automatable(self):
         s = self.res.summary()['dcv']
@@ -316,7 +316,7 @@ class Scope(M):
 class Drivers(M):
     def test_driver_table_lists_every_standard_and_what_it_can_do(self):
         rows = {r['model']: r for r in dm.driver_table(DB)}
-        self.assertEqual(set(rows), {'5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A'})
+        self.assertEqual(set(rows), {'5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A'})
         self.assertEqual(rows['5522A']['driver'], 'Fluke5522A')
         self.assertEqual(rows['5522A']['scope_driver'], 'Fluke5522AScope')
         self.assertEqual(rows['5522A']['functions']['DCV']['status'], 'ok')
