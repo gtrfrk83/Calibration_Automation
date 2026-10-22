@@ -52,9 +52,9 @@
    "concat_f": 0,
    "format_f": 0,
    "helper_f": 0,
-   "query_f": 1,
+   "query_f": 0,
    "query_retry_f": 0,
-   "write_f": 7
+   "write_f": 0
   },
   "keysight_truevolt": {
    "concat_f": 0,
@@ -62,7 +62,7 @@
    "helper_f": 0,
    "query_f": 0,
    "query_retry_f": 0,
-   "write_f": 3
+   "write_f": 0
   },
   "lecroy_ws4104hd": {
    "concat_f": 0,
@@ -81,12 +81,12 @@
    "write_f": 4
   },
   "scpi_dmm": {
-   "concat_f": 2,
+   "concat_f": 0,
    "format_f": 0,
    "helper_f": 0,
    "query_f": 0,
    "query_retry_f": 0,
-   "write_f": 2
+   "write_f": 0
   },
   "tektronix_mdo4000c": {
    "concat_f": 1,
