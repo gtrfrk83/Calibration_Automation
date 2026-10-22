@@ -55,9 +55,7 @@ OUT_COMMANDS = {
 }
 SECTION_COUNTS = {'Ohms': 5, 'Continuity': 2, 'AC volts': 9, 'AC volts frequency': 1, 'DC volts': 4, 'DC millivolts': 3, 'Capacitance': 1,
                   'AC milliamps': 3, 'AC amps': 2, 'DC milliamps': 3, 'DC amps': 2}
-FUNCTION_PROMPTS = ['Ω  (Ohms)', 'Continuity  (•)))  )', 'V~  (AC volts)', 'V~ Hz  (AC volts frequency; press the YELLOW button)', 'V⎓  (DC volts)',
-                    'mV⎓  (DC millivolts)', 'Capacitance  (press the YELLOW button)', 'mA~  (AC milliamps)', 'A~  (AC amps)',
-                    'mA⎓  (DC milliamps; press the YELLOW button)', 'A⎓  (DC amps; press the YELLOW button)']
+FUNCTION_PROMPTS = ['Ω  (dial: Ω / capacitance position)', 'Continuity  •)))  (dial: continuity / diode position)', 'V~  (dial: Hz V~ position)', 'Hz  (dial: Hz V~ position; press the YELLOW button)', 'V⎓  (dial: V⎓ position)', 'mV⎓  (dial: mV⎓ position)', 'Capacitance  ⊣⊢  (dial: Ω / capacitance position; press the YELLOW button)', 'mA~  (dial: mA position, AC)', 'A~  (dial: A position, AC)', 'mA⎓  (dial: mA position; press the YELLOW button)', 'A⎓  (dial: A position; press the YELLOW button)']
 
 
 def setUpModule():
@@ -151,6 +149,12 @@ class Spec(unittest.TestCase):
                 self.assertTrue(plan and plan['image'] and Path(plan['image']).is_file(), (cal, group))
         self.assertIn('400 mA', hookups.summary('fluke77', '5522A', 'UAMP'))
         self.assertIn('10A', hookups.summary('fluke77', '5560A', 'AMP10'))
+
+    def test_jack_names_are_as_printed_on_the_case(self):
+        """Photo of the real terminals: 2 x 2 block, '400 mA' / '10A' (fused) on the left, 'V Ω' / 'COM' on the right."""
+        import hookups
+        self.assertEqual(hookups.METERS['fluke77']['jacks'], {'vohm': 'V Ω', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'})
+        self.assertIn('V Ω', hookups.summary('fluke77', '5522A', 'VOHM'))
 
 
 class Step8(unittest.TestCase):

@@ -28,7 +28,7 @@
    "table": "2",
    "step": 1,
    "section": "Ohms",
-   "switch": "Ω  (Ohms)",
+   "switch": "Ω  (dial: Ω / capacitance position)",
    "range": "600.0 Ω",
    "models": [
     "77IV"
@@ -56,7 +56,7 @@
    "table": "2",
    "step": 2,
    "section": "Ohms",
-   "switch": "Ω  (Ohms)",
+   "switch": "Ω  (dial: Ω / capacitance position)",
    "range": "60.00 kΩ",
    "models": [
     "77IV"
@@ -84,7 +84,7 @@
    "table": "2",
    "step": 3,
    "section": "Ohms",
-   "switch": "Ω  (Ohms)",
+   "switch": "Ω  (dial: Ω / capacitance position)",
    "range": "6.000 MΩ",
    "models": [
     "77IV"
@@ -112,7 +112,7 @@
    "table": "2",
    "step": 4,
    "section": "Ohms",
-   "switch": "Ω  (Ohms)",
+   "switch": "Ω  (dial: Ω / capacitance position)",
    "range": "50.00 MΩ",
    "models": [
     "77IV"
@@ -140,7 +140,7 @@
    "table": "2",
    "step": 5,
    "section": "Ohms",
-   "switch": "Ω  (Ohms)",
+   "switch": "Ω  (dial: Ω / capacitance position)",
    "range": "50.00 MΩ",
    "models": [
     "77IV"
@@ -168,7 +168,7 @@
    "table": "2",
    "step": 6,
    "section": "Continuity",
-   "switch": "Continuity  (•)))  )",
+   "switch": "Continuity  •)))  (dial: continuity / diode position)",
    "range": "600 Ω",
    "models": [
     "77IV"
@@ -193,7 +193,7 @@
    "table": "2",
    "step": 7,
    "section": "Continuity",
-   "switch": "Continuity  (•)))  )",
+   "switch": "Continuity  •)))  (dial: continuity / diode position)",
    "range": "600 Ω",
    "models": [
     "77IV"
@@ -218,7 +218,7 @@
    "table": "2",
    "step": 8,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "6.000 V",
    "models": [
     "77IV"
@@ -253,7 +253,7 @@
    "table": "2",
    "step": 9,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "6.000 V",
    "models": [
     "77IV"
@@ -280,7 +280,7 @@
    "table": "2",
    "step": 10,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "6.000 V",
    "models": [
     "77IV"
@@ -307,7 +307,7 @@
    "table": "2",
    "step": 11,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "60.00 V",
    "models": [
     "77IV"
@@ -334,7 +334,7 @@
    "table": "2",
    "step": 12,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "60.00 V",
    "models": [
     "77IV"
@@ -361,7 +361,7 @@
    "table": "2",
    "step": 13,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "600.0 V",
    "models": [
     "77IV"
@@ -388,7 +388,7 @@
    "table": "2",
    "step": 14,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "600.0 V",
    "models": [
     "77IV"
@@ -415,7 +415,7 @@
    "table": "2",
    "step": 15,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "1000 V",
    "models": [
     "77IV"
@@ -442,7 +442,7 @@
    "table": "2",
    "step": 16,
    "section": "AC volts",
-   "switch": "V~  (AC volts)",
+   "switch": "V~  (dial: Hz V~ position)",
    "range": "1000 V",
    "models": [
     "77IV"
@@ -469,7 +469,7 @@
    "table": "2",
    "step": 17,
    "section": "AC volts frequency",
-   "switch": "V~ Hz  (AC volts frequency; press the YELLOW button)",
+   "switch": "Hz  (dial: Hz V~ position; press the YELLOW button)",
    "range": "99.99 kHz",
    "models": [
     "77IV"
@@ -498,7 +498,7 @@
    "table": "2",
    "step": 18,
    "section": "DC volts",
-   "switch": "V⎓  (DC volts)",
+   "switch": "V⎓  (dial: V⎓ position)",
    "range": "6.000 V",
    "models": [
     "77IV"
@@ -525,7 +525,7 @@
    "table": "2",
    "step": 19,
    "section": "DC volts",
-   "switch": "V⎓  (DC volts)",
+   "switch": "V⎓  (dial: V⎓ position)",
    "range": "600.0 V",
    "models": [
     "77IV"
@@ -552,7 +552,7 @@
    "table": "2",
    "step": 20,
    "section": "DC volts",
-   "switch": "V⎓  (DC volts)",
+   "switch": "V⎓  (dial: V⎓ position)",
    "range": "1000 V",
    "models": [
     "77IV"
@@ -579,7 +579,7 @@
    "table": "2",
    "step": 21,
    "section": "DC volts",
-   "switch": "V⎓  (DC volts)",
+   "switch": "V⎓  (dial: V⎓ position)",
    "range": "1000 V",
    "models": [
     "77IV"
@@ -606,7 +606,7 @@
    "table": "2",
    "step": 22,
    "section": "DC millivolts",
-   "switch": "mV⎓  (DC millivolts)",
+   "switch": "mV⎓  (dial: mV⎓ position)",
    "range": "600.0 mV",
    "models": [
     "77IV"
@@ -633,7 +633,7 @@
    "table": "2",
    "step": 23,
    "section": "DC millivolts",
-   "switch": "mV⎓  (DC millivolts)",
+   "switch": "mV⎓  (dial: mV⎓ position)",
    "range": "600.0 mV",
    "models": [
     "77IV"
@@ -660,7 +660,7 @@
    "table": "2",
    "step": 24,
    "section": "DC millivolts",
-   "switch": "mV⎓  (DC millivolts)",
+   "switch": "mV⎓  (dial: mV⎓ position)",
    "range": "600.0 mV",
    "models": [
     "77IV"
@@ -687,7 +687,7 @@
    "table": "2",
    "step": 25,
    "section": "Capacitance",
-   "switch": "Capacitance  (press the YELLOW button)",
+   "switch": "Capacitance  ⊣⊢  (dial: Ω / capacitance position; press the YELLOW button)",
    "range": "1000 nF",
    "models": [
     "77IV"
@@ -716,7 +716,7 @@
    "table": "2",
    "step": 26,
    "section": "AC milliamps",
-   "switch": "mA~  (AC milliamps)",
+   "switch": "mA~  (dial: mA position, AC)",
    "range": "60.00 mA",
    "models": [
     "77IV"
@@ -736,7 +736,7 @@
    "accuracy": "±(2.5 % of reading + 2 counts)",
    "tol_text": "Table 2: 0.47 to 0.53 mA   (specification p. 5: ±(2.5 % of reading + 2 counts of 0.01 mA))",
    "group": "UAMP",
-   "note": "Select AC with the YELLOW button if the display does not already show AC (~): the manual marks only the DC milliamp / DC amp rows with the yellow-button footnote. Table 2 note: avoid coupled noise on AC current by leaving the VΩ input unconnected (or shorting it to COM).",
+   "note": "Table 2 gives no yellow-button step for AC (only DC milliamps / DC amps carry footnote 1): the display should show AC (~). Table 2 note: avoid coupled noise on AC current by leaving the VΩ input unconnected (or shorting it to COM).",
    "ref": "T2 #26",
    "id": "2-26"
   },
@@ -744,7 +744,7 @@
    "table": "2",
    "step": 27,
    "section": "AC milliamps",
-   "switch": "mA~  (AC milliamps)",
+   "switch": "mA~  (dial: mA position, AC)",
    "range": "60.00 mA",
    "models": [
     "77IV"
@@ -764,7 +764,7 @@
    "accuracy": "±(2.5 % of reading + 2 counts)",
    "tol_text": "Table 2: 48.73 to 51.27 mA   (specification p. 5: ±(2.5 % of reading + 2 counts of 0.01 mA))",
    "group": "UAMP",
-   "note": "Select AC with the YELLOW button if the display does not already show AC (~): the manual marks only the DC milliamp / DC amp rows with the yellow-button footnote. Table 2 note: avoid coupled noise on AC current by leaving the VΩ input unconnected (or shorting it to COM).",
+   "note": "Table 2 gives no yellow-button step for AC (only DC milliamps / DC amps carry footnote 1): the display should show AC (~). Table 2 note: avoid coupled noise on AC current by leaving the VΩ input unconnected (or shorting it to COM).",
    "ref": "T2 #27",
    "id": "2-27"
   },
@@ -772,7 +772,7 @@
    "table": "2",
    "step": 28,
    "section": "AC milliamps",
-   "switch": "mA~  (AC milliamps)",
+   "switch": "mA~  (dial: mA position, AC)",
    "range": "400.0 mA",
    "models": [
     "77IV"
@@ -792,7 +792,7 @@
    "accuracy": "±(2.5 % of reading + 2 counts)",
    "tol_text": "Table 2: 389.8 to 410.2 mA   (specification p. 5: ±(2.5 % of reading + 2 counts of 0.1 mA))",
    "group": "UAMP",
-   "note": "Select AC with the YELLOW button if the display does not already show AC (~): the manual marks only the DC milliamp / DC amp rows with the yellow-button footnote. Table 2 note: avoid coupled noise on AC current by leaving the VΩ input unconnected (or shorting it to COM).",
+   "note": "Table 2 gives no yellow-button step for AC (only DC milliamps / DC amps carry footnote 1): the display should show AC (~). Table 2 note: avoid coupled noise on AC current by leaving the VΩ input unconnected (or shorting it to COM).",
    "ref": "T2 #28",
    "id": "2-28"
   },
@@ -800,7 +800,7 @@
    "table": "2",
    "step": 29,
    "section": "AC amps",
-   "switch": "A~  (AC amps)",
+   "switch": "A~  (dial: A position, AC)",
    "range": "6.000 A",
    "models": [
     "77IV"
@@ -829,7 +829,7 @@
    "table": "2",
    "step": 30,
    "section": "AC amps",
-   "switch": "A~  (AC amps)",
+   "switch": "A~  (dial: A position, AC)",
    "range": "10.00 A",
    "models": [
     "77IV"
@@ -858,7 +858,7 @@
    "table": "2",
    "step": 31,
    "section": "DC milliamps",
-   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "switch": "mA⎓  (dial: mA position; press the YELLOW button)",
    "range": "60.00 mA",
    "models": [
     "77IV"
@@ -886,7 +886,7 @@
    "table": "2",
    "step": 32,
    "section": "DC milliamps",
-   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "switch": "mA⎓  (dial: mA position; press the YELLOW button)",
    "range": "60.00 mA",
    "models": [
     "77IV"
@@ -914,7 +914,7 @@
    "table": "2",
    "step": 33,
    "section": "DC milliamps",
-   "switch": "mA⎓  (DC milliamps; press the YELLOW button)",
+   "switch": "mA⎓  (dial: mA position; press the YELLOW button)",
    "range": "400.0 mA",
    "models": [
     "77IV"
@@ -942,7 +942,7 @@
    "table": "2",
    "step": 34,
    "section": "DC amps",
-   "switch": "A⎓  (DC amps; press the YELLOW button)",
+   "switch": "A⎓  (dial: A position; press the YELLOW button)",
    "range": "6.000 A",
    "models": [
     "77IV"
@@ -971,7 +971,7 @@
    "table": "2",
    "step": 35,
    "section": "DC amps",
-   "switch": "A⎓  (DC amps; press the YELLOW button)",
+   "switch": "A⎓  (dial: A position; press the YELLOW button)",
    "range": "10.00 A",
    "models": [
     "77IV"

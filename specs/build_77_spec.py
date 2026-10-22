@@ -33,23 +33,23 @@ UNITS = {'Ω': ('1', 'ohm'), 'kΩ': ('1000', 'ohm'), 'MΩ': ('1000000', 'ohm'), 
 
 # dial position / function text shown by the "Change the function" prompt; the engine asks again whenever this text changes between two points
 SW = {
-    'ohm': 'Ω  (Ohms)',
-    'cont': 'Continuity  (•)))  )',
-    'acv': 'V~  (AC volts)',
-    'hz': 'V~ Hz  (AC volts frequency; press the YELLOW button)',
-    'dcv': 'V⎓  (DC volts)',
-    'mv': 'mV⎓  (DC millivolts)',
-    'cap': 'Capacitance  (press the YELLOW button)',
-    'acma': 'mA~  (AC milliamps)',
-    'aca': 'A~  (AC amps)',
-    'dcma': 'mA⎓  (DC milliamps; press the YELLOW button)',
-    'dca': 'A⎓  (DC amps; press the YELLOW button)',
+    'ohm': 'Ω  (dial: Ω / capacitance position)',
+    'cont': 'Continuity  •)))  (dial: continuity / diode position)',
+    'acv': 'V~  (dial: Hz V~ position)',
+    'hz': 'Hz  (dial: Hz V~ position; press the YELLOW button)',
+    'dcv': 'V⎓  (dial: V⎓ position)',
+    'mv': 'mV⎓  (dial: mV⎓ position)',
+    'cap': 'Capacitance  ⊣⊢  (dial: Ω / capacitance position; press the YELLOW button)',
+    'acma': 'mA~  (dial: mA position, AC)',
+    'aca': 'A~  (dial: A position, AC)',
+    'dcma': 'mA⎓  (dial: mA position; press the YELLOW button)',
+    'dca': 'A⎓  (dial: A position; press the YELLOW button)',
 }
 
 NOTE_LEADS = 'Table 2 note: avoid coupled noise on AC current by leaving the VΩ input unconnected (or shorting it to COM).'
 NOTE_YELLOW = 'Table 2 footnote 1: press the YELLOW button to access this function.'
 NOTE_OHMS = 'The limits do not include test lead resistance (Table 2 note 2).'
-NOTE_ACDC_AC = 'Select AC with the YELLOW button if the display does not already show AC (~): the manual marks only the DC milliamp / DC amp rows with the yellow-button footnote.'
+NOTE_ACDC_AC = 'Table 2 gives no yellow-button step for AC (only DC milliamps / DC amps carry footnote 1): the display should show AC (~).'
 
 # (step, section, switch, range, kind, applied value (base units), applied frequency (Hz), display unit, low, high, accuracy (pct, counts, resolution), extras)
 # low / high are the strings printed in Table 2 (as read from the page image) except where 'corrected' is given.

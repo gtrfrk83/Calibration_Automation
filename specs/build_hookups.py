@@ -183,9 +183,11 @@ METER_DRAW = {
                      jacks=[('a10', 'A', 110), ('com', 'COM', 185), ('vohm', 'VΩ', 260)], alias={'ma': 'vohm'}),
     'fluke87v': dict(brand='FLUKE', model='87V', body='#f3c40f', edge='#8a6d00', face='#2b2e33', ink='#ffffff', accent='#f3c40f',
                      jacks=[('a10', '10A', 96), ('ma', 'mA µA', 152), ('com', 'COM', 208), ('vohm', 'VΩ', 264)], alias={}),
-    # the jack order is drawn like the 87V's; the 77 IV manual names the jacks (pp. 7, 12) but does not show their order on the case
+    # the 77 IV has its four jacks in a 2 x 2 block (photo of the real terminals, supplied by the lab): top-left '400 mA', bottom-left '10A'
+    # (the two fused inputs), top-right 'V Ω' (red), bottom-right 'COM' (black).  grid = (key, label, x, y, side the label sits on).
     'fluke77': dict(brand='FLUKE', model='77 Series IV', body='#f3c40f', edge='#8a6d00', face='#2b2e33', ink='#ffffff', accent='#f3c40f',
-                    jacks=[('a10', '10A', 96), ('ma', '400 mA', 152), ('com', 'COM', 208), ('vohm', 'VΩ', 264)], alias={}),
+                    grid=[('ma', '400 mA', 100, 480, 'L'), ('a10', '10A', 100, 556, 'L'), ('vohm', 'V Ω', 270, 480, 'R'), ('com', 'COM', 270, 556, 'R')],
+                    jacks=[('ma', '400 mA', 100), ('a10', '10A', 100), ('vohm', 'V Ω', 270), ('com', 'COM', 270)], alias={}),
 }
 
 
@@ -274,6 +276,76 @@ def draw_cable(pen, pts, color, width=7):
     pen.line(pts, color, width)
 
 
+# ------------------------------------------------------------------------------------------------ the 77's 2 x 2 jack block
+def grid_pos(kind):
+    return {key: (x, y) for key, label, x, y, side in METER_DRAW[kind]['grid']}
+
+
+def grid_approach(key):
+    """Which side each jack is reached from: the right-hand column from the right, 400 mA from above, 10A from below."""
+    return {'vohm': 'right', 'com': 'right', 'ma': 'above', 'a10': 'below'}[key]
+
+
+def grid_candidates(start, exit_pts, key, pos):
+    ex, ey = exit_pts[-1]
+    jx, jy = pos[key]
+    mode = grid_approach(key)
+    out = []
+    for vx in (392, 410, 428, 446):
+        if vx >= ex:
+            continue
+        if mode == 'right':
+            out.append([start, *exit_pts, (vx, ey), (vx, jy), (jx + 46, jy)])
+        elif mode == 'above':
+            for ty in (418, 426):
+                out.append([start, *exit_pts, (vx, ey), (vx, ty), (jx, ty), (jx, jy - 46)])
+        else:
+            for ty in (630, 644):
+                out.append([start, *exit_pts, (vx, ey), (vx, ty), (jx, ty), (jx, jy + 46)])
+    return out
+
+
+def grid_routes(cable_a, cable_b, pos):
+    """Best pair of routes; non-touching if one exists, otherwise the shortest pair with the red cable (a) crossing over the black one,
+    which is what the real leads do when the red terminal sits below the black one on the calibrator and its meter jack is on the far side."""
+    for need_clear in (True, False):
+        best = None
+        for ra in grid_candidates(*cable_a, pos):
+            for rb in grid_candidates(*cable_b, pos):
+                if need_clear and min_distance(ra, rb) < 15:
+                    continue
+                length = sum(abs(p[0] - q[0]) + abs(p[1] - q[1]) for r in (ra, rb) for p, q in zip(r, r[1:]))
+                if best is None or length < best[0]:
+                    best = (length, ra, rb)
+        if best is not None:
+            return best[1], best[2]
+    raise RuntimeError('no cable routes found')
+
+
+def draw_grid_jacks(pen, kind, used):
+    for key, label, x, y, side in METER_DRAW[kind]['grid']:
+        if key in used:
+            pen.circle(x, y, 25, outline=AMBER, width=4)
+        pen.circle(x, y, 16, fill='#0d0e10', outline='#8b919b' if key in used else '#5c626c', width=3)
+        pen.circle(x, y, 6, fill='#333840')
+        w = pen.text_size(label, 10.5)[0] + 8
+        lx = x + 30 + w / 2 if side == 'L' else x - 30 - w / 2
+        pen.rect(lx - w / 2, y - 11, lx + w / 2, y + 11, r=8, fill='#1d2025', outline='#8b919b' if key in used else '#5c626c', width=1.4)
+        pen.text(lx, y, label, 10.5, '#ffffff' if key in used else '#8d939d')
+    pen.text(185, 518, 'FUSED', 9, '#8d939d', bold=False)
+
+
+def grid_plug(pen, key, color, pos):
+    jx, jy = pos[key]
+    mode = grid_approach(key)
+    if mode == 'right':
+        pen.rect(jx + 14, jy - 8, jx + 46, jy + 8, r=4, fill=color, outline='#ffffff', width=1.6)
+    elif mode == 'above':
+        pen.rect(jx - 8, jy - 46, jx + 8, jy - 14, r=4, fill=color, outline='#ffffff', width=1.6)
+    else:
+        pen.rect(jx - 8, jy + 14, jx + 8, jy + 46, r=4, fill=color, outline='#ffffff', width=1.6)
+
+
 # ------------------------------------------------------------------------------------------------ one diagram
 def hook(meter, cal, group):
     pen = Pen(W, H, '#ffffff')
@@ -333,20 +405,30 @@ def hook(meter, cal, group):
         return
 
     red_key = {'VOHM': 'vohm', 'UAMP': 'ma', 'AMP10': 'a10'}[group]
-    red_x, black_x = mjacks[red_key], mjacks['com']
     red_start, red_exit = jacks[names[0]]
     black_start, black_exit = jacks[names[1]]
-    r_route, b_route, r_mode, b_mode = choose_routes((red_start, red_exit, red_x), (black_start, black_exit, black_x))
-    used = {red_x, black_x}
-    for key, label, x in METER_DRAW[meter]['jacks']:
-        draw_jack(pen, x, x in used)
-    draw_cable(pen, b_route, BLACK)
-    draw_cable(pen, r_route, RED)
-    plug(pen, red_x, RED, r_mode == 'above')
-    plug(pen, black_x, BLACK, b_mode == 'above')
+    if meter == 'fluke77':
+        pos = grid_pos(meter)
+        r_route, b_route = grid_routes((red_start, red_exit, red_key), (black_start, black_exit, 'com'), pos)
+        draw_grid_jacks(pen, meter, {red_key, 'com'})
+        draw_cable(pen, b_route, BLACK)
+        draw_cable(pen, r_route, RED)
+        grid_plug(pen, red_key, RED, pos)
+        grid_plug(pen, 'com', BLACK, pos)
+    else:
+        red_x, black_x = mjacks[red_key], mjacks['com']
+        r_route, b_route, r_mode, b_mode = choose_routes((red_start, red_exit, red_x), (black_start, black_exit, black_x))
+        used = {red_x, black_x}
+        for key, label, x in METER_DRAW[meter]['jacks']:
+            draw_jack(pen, x, x in used)
+        draw_cable(pen, b_route, BLACK)
+        draw_cable(pen, r_route, RED)
+        plug(pen, red_x, RED, r_mode == 'above')
+        plug(pen, black_x, BLACK, b_mode == 'above')
     for (cx, cy), c in ((red_start, RED), (black_start, BLACK)):
         pen.circle(cx, cy, 6.4 * K, fill=c, outline='#ffffff', width=1.8)
-    draw_labels(pen, meter, used)
+    if meter != 'fluke77':
+        draw_labels(pen, meter, used)
     if cal == '5522A':
         for label, (ux, uy) in (('20A', (86, 131)), ('GUARD', (34, 131))):
             tx, ty = P(ux, uy)

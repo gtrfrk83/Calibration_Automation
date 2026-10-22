@@ -47,8 +47,9 @@ METERS = {
     'mm325': dict(name='Klein Tools MM325', jacks={'vohm': 'VΩ', 'ma': 'VΩ µA mA', 'a10': '10A', 'com': 'COM'}),
     'fluke110': dict(name='Fluke 110 series', jacks={'vohm': 'VΩ', 'ma': 'VΩ', 'a10': 'A', 'com': 'COM'}),
     'fluke87v': dict(name='Fluke 87V', jacks={'vohm': 'VΩ', 'ma': 'mA µA', 'a10': '10A', 'com': 'COM'}),
-    # Fluke 77 Series IV: the manual (Calibration Information pp. 7, 12) names the jacks VΩ, 400 mA, 10A and COM; their order on the case is not shown in it
-    'fluke77': dict(name='Fluke 77 Series IV', jacks={'vohm': 'VΩ', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'}),
+    # Fluke 77 Series IV: jacks named as printed on the case (photo of the real terminals): 2 x 2 block, top-left '400 mA', bottom-left '10A'
+    # (the two fused inputs), top-right 'V Ω' (red), bottom-right 'COM' (black)
+    'fluke77': dict(name='Fluke 77 Series IV', jacks={'vohm': 'V Ω', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'}),
 }
 RED_JACK = {'VOHM': 'vohm', 'UAMP': 'ma', 'AMP10': 'a10'}
 

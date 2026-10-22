@@ -226,8 +226,7 @@ EXPECTED = {       # the rotary-switch prompts, in order (group NONE points carr
             'Ω position, capacitance (press the yellow button)', 'diode / continuity position', 'µA position (current)',
             'mA / A position, mA', 'mA / A position, A'],
     'MM325': [],
-    '77IV': ['Ω  (Ohms)', 'Continuity  (•)))  )', 'V~  (AC volts)', 'V~ Hz  (AC volts frequency; press the YELLOW button)', 'V⎓  (DC volts)', 'mV⎓  (DC millivolts)',
-             'Capacitance  (press the YELLOW button)', 'mA~  (AC milliamps)', 'A~  (AC amps)', 'mA⎓  (DC milliamps; press the YELLOW button)', 'A⎓  (DC amps; press the YELLOW button)'],
+    '77IV': ['Ω  (dial: Ω / capacitance position)', 'Continuity  •)))  (dial: continuity / diode position)', 'V~  (dial: Hz V~ position)', 'Hz  (dial: Hz V~ position; press the YELLOW button)', 'V⎓  (dial: V⎓ position)', 'mV⎓  (dial: mV⎓ position)', 'Capacitance  ⊣⊢  (dial: Ω / capacitance position; press the YELLOW button)', 'mA~  (dial: mA position, AC)', 'A~  (dial: A position, AC)', 'mA⎓  (dial: mA position; press the YELLOW button)', 'A⎓  (dial: A position; press the YELLOW button)'],
 }
 EXPECTED['289'] = EXPECTED['287'][:8] + ['Ω position, LoΩ (289)'] + EXPECTED['287'][8:] + ['LoZ position (289)']
 
