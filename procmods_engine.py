@@ -55,6 +55,7 @@ MODEL_IDS = {
     'handheld': 'the spec model key, e.g. 115 or 289',
     'a34401': '34401A',
     'f8846a': '8846A',
+    'f8808a': '8808A',
     'mdo': 'MDO4000C',
     'ws': 'WS4104HD',
     'k2000': '2000',
@@ -92,6 +93,10 @@ for _e, _name in (('a34401', '34401A'), ('f8846a', '8846A')):
     _t(_e, 'settle.zero', 1.5, 0.2, 120.0, f'{_name}: settle before a zero-offset reading')
     _t(_e, 'settle.ac', 3.5, 0.2, 120.0, f'{_name}: settle, AC points')
     _t(_e, 'settle.default', 2.0, 0.2, 120.0, f'{_name}: settle, other points')
+for _key, _default, _what in (('zero', 2.0, 'settle before a zero-offset reading'), ('default', 2.0, 'settle, DC, resistance and current points'),
+                              ('ac', 4.0, 'settle, AC points'), ('freq', 3.0, 'settle, frequency points'),
+                              ('ohm_high', 4.0, 'settle, resistance ranges of 10 Mohm and above')):
+    _t('f8808a', 'settle.' + _key, _default, 0.2, 120.0, f'8808A: {_what}')
 _t('k2000', 'settle.default', 2.0, 0.2, 120.0, 'Keithley 2000: settle, DC volts and other points')
 _t('k2000', 'settle.ac', 6.0, 0.2, 120.0, 'Keithley 2000: settle, AC volts and AC current')
 _t('k2000', 'settle.dci', 3.0, 0.2, 120.0, 'Keithley 2000: settle, DC current')

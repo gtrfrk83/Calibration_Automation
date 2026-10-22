@@ -40,6 +40,14 @@
    "query_retry_f": 0,
    "write_f": 0
   },
+  "fluke_8808a": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
   "keithley_2000": {
    "concat_f": 0,
    "format_f": 0,

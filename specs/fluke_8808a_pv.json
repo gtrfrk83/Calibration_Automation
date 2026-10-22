@@ -1,0 +1,4231 @@
+{
+ "schema": 1,
+ "kind": "bench-dmm-band",
+ "model": "8808A",
+ "periods": [
+  "90d",
+  "1y"
+ ],
+ "default_period": "1y",
+ "interface": "rs232",
+ "options": {
+  "hv_threshold_v": 100,
+  "report_title": "Calibration Data",
+  "warm_up_minutes": 30
+ },
+ "source": {
+  "document": "Fluke 8808A Digital Multimeter, Calibration Manual (56 pp.), chapter 3 \"Performance Verification and Calibration\"",
+  "pages": "printed pp. 3-3 (Table 3-1, required equipment), 3-4 to 3-11 (Tables 3-2 to 3-8 and Figures 3-1 to 3-5); accuracy specifications pp. 1-10 to 1-14",
+  "cite": "Fluke 8808A Calibration Manual, Tables 3-2 to 3-8, pp. 3-4 to 3-11 (limits as printed except the corrections listed in the point flags)",
+  "limits": "Manufacturer limits, 90 days and 1 year, as printed (rounded) in Tables 3-2 to 3-8; typographical errors corrected from the specification formula, see the point flags",
+  "report_note": "Limits are those of the manufacturer's Tables 3-2 to 3-8 (Fluke 8808A Calibration Manual, pp. 3-4 to 3-11), 90-day or 1-year as chosen, as printed (the manual rounds each limit to the printed number of digits). Printed typographical errors were corrected from the manual's own accuracy specification (pp. 1-10 to 1-14); each correction is recorded with the point. Resistance limits are the calibrator setting +/- the printed tolerance.",
+  "note": "Tables 3-2 to 3-8, 105 points: DC volts 17, AC volts 28, 4-wire ohms 6, 2-wire ohms 14, DC current 18, AC current 16, frequency 6 (the zero-offset points of each table are run first, with the input shorted or, for current, open). Limits are the printed 90-day or 1-year limits; several typographical errors in the printed tables were corrected from the specification formula (see the point details). The manual names a Fluke 5700A with a 5725A amplifier and a Fluke 271 function generator; this procedure drives a Fluke 5522A or 5560A. Points the selected calibrator cannot make (750 V ac above 10 kHz, 10 A ac at 40 Hz, 1000 kHz) are measured with a standard you connect. The meter must be warmed up for half an hour; the specification is valid in the 5-1/2 digit (slow) rate only."
+ },
+ "models": {
+  "8808A": {
+   "name": "Fluke 8808A",
+   "brand": "Fluke",
+   "model_note": "Fluke 8808A 5-1/2 digit bench multimeter, RS-232 only (no IEEE-488, no USB)"
+  }
+ },
+ "sections": [
+  {
+   "id": "ZERO_SHORT",
+   "title": "Zero offset, shorted input",
+   "group": "ZERO_SHORT",
+   "page": "3-4 to 3-8",
+   "setup": "Fit the low-thermal 4-wire short across INPUT HI / LO and SENSE HI / LO (Table 3-1, Fluke PN 2653346). The calibrator is in STANDBY and is not used as a zero source.",
+   "points": [
+    {
+     "ref": "T3-2 #1",
+     "table": "3-2",
+     "row": 1,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -6e-06,
+       "high": 6e-06
+      },
+      "1y": {
+       "low": -8e-06,
+       "high": 8e-06
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.003"
+      ],
+      "1y": [
+       "0.015",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-2 #4",
+     "table": "3-2",
+     "row": 4,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -4e-05,
+       "high": 4e-05
+      },
+      "1y": {
+       "low": -6e-05,
+       "high": 6e-05
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-2 #9",
+     "table": "3-2",
+     "row": 9,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.0006,
+       "high": 0.0006
+      },
+      "1y": {
+       "low": -0.0008,
+       "high": 0.0008
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.003"
+      ],
+      "1y": [
+       "0.015",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-2 #12",
+     "table": "3-2",
+     "row": 12,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 200.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.004,
+       "high": 0.004
+      },
+      "1y": {
+       "low": -0.006,
+       "high": 0.006
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-2 #15",
+     "table": "3-2",
+     "row": 15,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 0.0,
+     "range": 1000.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.02,
+       "high": 0.02
+      },
+      "1y": {
+       "low": -0.03,
+       "high": 0.03
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-4 #1",
+     "table": "3-4",
+     "row": 1,
+     "page": "3-6",
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 200.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.008,
+       "high": 0.008
+      },
+      "1y": {
+       "low": -0.008,
+       "high": 0.008
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.004"
+      ],
+      "1y": [
+       "0.03",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-4 #3",
+     "table": "3-4",
+     "row": 3,
+     "page": "3-6",
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 2000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.04,
+       "high": 0.04
+      },
+      "1y": {
+       "low": -0.06,
+       "high": 0.06
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-4 #5",
+     "table": "3-4",
+     "row": 5,
+     "page": "3-6",
+     "kind": "OHM4",
+     "nominal": 0.0,
+     "range": 20000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.4,
+       "high": 0.4
+      },
+      "1y": {
+       "low": -0.6,
+       "high": 0.6
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-5 #1",
+     "table": "3-5",
+     "row": 1,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 200.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.008,
+       "high": 0.008
+      },
+      "1y": {
+       "low": -0.008,
+       "high": 0.008
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.004"
+      ],
+      "1y": [
+       "0.03",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-5 #3",
+     "table": "3-5",
+     "row": 3,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 2000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.04,
+       "high": 0.04
+      },
+      "1y": {
+       "low": -0.06,
+       "high": 0.06
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-5 #5",
+     "table": "3-5",
+     "row": 5,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 20000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.4,
+       "high": 0.4
+      },
+      "1y": {
+       "low": -0.6,
+       "high": 0.6
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-5 #7",
+     "table": "3-5",
+     "row": 7,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 200000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -4.0,
+       "high": 4.0
+      },
+      "1y": {
+       "low": -6.0,
+       "high": 6.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-5 #9",
+     "table": "3-5",
+     "row": 9,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 2000000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -60.0,
+       "high": 60.0
+      },
+      "1y": {
+       "low": -80.0,
+       "high": 80.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.03",
+       "0.003"
+      ],
+      "1y": [
+       "0.04",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-5 #11",
+     "table": "3-5",
+     "row": 11,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 20000000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -600.0,
+       "high": 600.0
+      },
+      "1y": {
+       "low": -600.0,
+       "high": 600.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.2",
+       "0.003"
+      ],
+      "1y": [
+       "0.25",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    },
+    {
+     "ref": "T3-5 #13",
+     "table": "3-5",
+     "row": 13,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 0.0,
+     "range": 100000000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -4000.0,
+       "high": 4000.0
+      },
+      "1y": {
+       "low": -4000.0,
+       "high": 4000.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "1.5",
+       "0.004"
+      ],
+      "1y": [
+       "1.75",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_SHORT",
+     "terminal": "INPUT",
+     "source": "none",
+     "input": "short"
+    }
+   ]
+  },
+  {
+   "id": "ZERO_OPEN",
+   "title": "Zero offset, open current input",
+   "group": "ZERO_OPEN",
+   "page": "3-9 / 3-10",
+   "setup": "Leave the current input (mA terminal, 10 A terminal) OPEN with nothing connected. The calibrator is in STANDBY.",
+   "points": [
+    {
+     "ref": "T3-6 #1",
+     "table": "3-6",
+     "row": 1,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.0002,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -1e-08,
+       "high": 1e-08
+      },
+      "1y": {
+       "low": -1e-08,
+       "high": 1e-08
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.005"
+      ],
+      "1y": [
+       "0.03",
+       "0.005"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_OPEN",
+     "terminal": "MA",
+     "source": "none",
+     "input": "open"
+    },
+    {
+     "ref": "T3-6 #4",
+     "table": "3-6",
+     "row": 4,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.002,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -1e-07,
+       "high": 1e-07
+      },
+      "1y": {
+       "low": -1e-07,
+       "high": 1e-07
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.005"
+      ],
+      "1y": [
+       "0.02",
+       "0.005"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_OPEN",
+     "terminal": "MA",
+     "source": "none",
+     "input": "open"
+    },
+    {
+     "ref": "T3-6 #7",
+     "table": "3-6",
+     "row": 7,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.02,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -4e-06,
+       "high": 4e-06
+      },
+      "1y": {
+       "low": -4e-06,
+       "high": 4e-06
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.03",
+       "0.02"
+      ],
+      "1y": [
+       "0.04",
+       "0.02"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_OPEN",
+     "terminal": "MA",
+     "source": "none",
+     "input": "open"
+    },
+    {
+     "ref": "T3-6 #10",
+     "table": "3-6",
+     "row": 10,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 0.2,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -1e-05,
+       "high": 1e-05
+      },
+      "1y": {
+       "low": -1.6e-05,
+       "high": 1.6e-05
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.005"
+      ],
+      "1y": [
+       "0.03",
+       "0.008"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "0.010 mA",
+       "low": "-0.010 mA"
+      },
+      "1y": {
+       "high": "0.020 mA",
+       "low": "-0.020 mA"
+      }
+     },
+     "flags": [
+      {
+       "code": "looser",
+       "period": "1y",
+       "field": "high",
+       "printed": "0.020 mA",
+       "used": "0.016 mA",
+       "why": "the 1-year zero limit of the 200 mA range prints 0.020 mA; the specification (0.008 % of the 200 mA range, the same term that gives the printed 190.073 mA limit) is 0.016 mA"
+      },
+      {
+       "code": "looser",
+       "period": "1y",
+       "field": "low",
+       "printed": "-0.020 mA",
+       "used": "-0.016 mA",
+       "why": "see the 1-year high limit of this row"
+      }
+     ],
+     "group": "ZERO_OPEN",
+     "terminal": "MA",
+     "source": "none",
+     "input": "open"
+    },
+    {
+     "ref": "T3-6 #13",
+     "table": "3-6",
+     "row": 13,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 2.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.0004,
+       "high": 0.0004
+      },
+      "1y": {
+       "low": -0.0004,
+       "high": 0.0004
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.05",
+       "0.02"
+      ],
+      "1y": [
+       "0.08",
+       "0.02"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_OPEN",
+     "terminal": "10A",
+     "source": "none",
+     "input": "open"
+    },
+    {
+     "ref": "T3-6 #16",
+     "table": "3-6",
+     "row": 16,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.0,
+     "range": 10.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.001,
+       "high": 0.001
+      },
+      "1y": {
+       "low": -0.001,
+       "high": 0.001
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.18",
+       "0.01"
+      ],
+      "1y": [
+       "0.2",
+       "0.01"
+      ]
+     },
+     "std_relative": false,
+     "group": "ZERO_OPEN",
+     "terminal": "10A",
+     "source": "none",
+     "input": "open"
+    }
+   ]
+  },
+  {
+   "id": "DCV",
+   "title": "DC volts",
+   "group": "VOLT",
+   "page": "3-4",
+   "setup": "Calibrator voltage output to INPUT HI / LO (Figure 3-1).",
+   "points": [
+    {
+     "ref": "T3-2 #2",
+     "table": "3-2",
+     "row": 2,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 0.189975,
+       "high": 0.190025
+      },
+      "1y": {
+       "low": 0.189964,
+       "high": 0.190037
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.003"
+      ],
+      "1y": [
+       "0.015",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #3",
+     "table": "3-2",
+     "row": 3,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": -0.19,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.190025,
+       "high": -0.189975
+      },
+      "1y": {
+       "low": -0.190037,
+       "high": -0.189964
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.003"
+      ],
+      "1y": [
+       "0.015",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #5",
+     "table": "3-2",
+     "row": 5,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 0.5,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 0.49991,
+       "high": 0.50009
+      },
+      "1y": {
+       "low": 0.49986,
+       "high": 0.50014
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #6",
+     "table": "3-2",
+     "row": 6,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": -0.5,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.50009,
+       "high": -0.49991
+      },
+      "1y": {
+       "low": -0.50014,
+       "high": -0.49986
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #7",
+     "table": "3-2",
+     "row": 7,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 1.89977,
+       "high": 1.90023
+      },
+      "1y": {
+       "low": 1.89966,
+       "high": 1.90034
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #8",
+     "table": "3-2",
+     "row": 8,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": -1.9,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -1.90023,
+       "high": -1.89977
+      },
+      "1y": {
+       "low": -1.90034,
+       "high": -1.89966
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #10",
+     "table": "3-2",
+     "row": 10,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 18.9975,
+       "high": 19.0025
+      },
+      "1y": {
+       "low": 18.9963,
+       "high": 19.0037
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.003"
+      ],
+      "1y": [
+       "0.015",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #11",
+     "table": "3-2",
+     "row": 11,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": -19.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -19.0025,
+       "high": -18.9975
+      },
+      "1y": {
+       "low": -19.0037,
+       "high": -18.9963
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.003"
+      ],
+      "1y": [
+       "0.015",
+       "0.004"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "-18.9975 V",
+       "low": "-19.0025 V"
+      },
+      "1y": {
+       "high": "-18.9963 V",
+       "low": "19.0037 V"
+      }
+     },
+     "flags": [
+      {
+       "code": "typo",
+       "period": "1y",
+       "field": "low",
+       "printed": "19.0037 V",
+       "used": "-19.0037 V",
+       "why": "the minus sign is missing: the 1-year low limit of -19 V prints 19.0037 V; the formula and the 1-year high limit (-18.9963 V) give -19.0037 V"
+      }
+     ],
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #13",
+     "table": "3-2",
+     "row": 13,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 190.0,
+     "range": 200.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 189.977,
+       "high": 190.023
+      },
+      "1y": {
+       "low": 189.966,
+       "high": 190.034
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #14",
+     "table": "3-2",
+     "row": 14,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": -190.0,
+     "range": 200.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -190.023,
+       "high": -189.977
+      },
+      "1y": {
+       "low": -190.034,
+       "high": -189.966
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #16",
+     "table": "3-2",
+     "row": 16,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": 1000.0,
+     "range": 1000.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 999.88,
+       "high": 1000.12
+      },
+      "1y": {
+       "low": 999.82,
+       "high": 1000.18
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-2 #17",
+     "table": "3-2",
+     "row": 17,
+     "page": "3-4",
+     "kind": "DCV",
+     "nominal": -1000.0,
+     "range": 1000.0,
+     "unit": "V",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -1000.12,
+       "high": -999.88
+      },
+      "1y": {
+       "low": -1000.18,
+       "high": -999.82
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.015",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "ACV",
+   "title": "AC volts",
+   "group": "VOLT",
+   "page": "3-5",
+   "setup": "Calibrator voltage output to INPUT HI / LO (Figure 3-1).",
+   "points": [
+    {
+     "ref": "T3-3 #1",
+     "table": "3-3",
+     "row": 1,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 0.01,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "90d": {
+       "low": 0.009885,
+       "high": 0.010115
+      },
+      "1y": {
+       "low": 0.00988,
+       "high": 0.01012
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "10.120 mV",
+       "low": "9.890 mV"
+      },
+      "1y": {
+       "high": "10.120 mV",
+       "low": "9.880 mV"
+      }
+     },
+     "flags": [
+      {
+       "code": "looser",
+       "period": "90d",
+       "field": "high",
+       "printed": "10.120 mV",
+       "used": "10.115 mV",
+       "why": "the 90-day pair prints 10.120 / 9.890 mV; the formula (0.15 % of 10 mV + 0.05 % of 200 mV = 0.115 mV) gives 10.115 / 9.885 mV"
+      },
+      {
+       "code": "looser",
+       "period": "90d",
+       "field": "low",
+       "printed": "9.890 mV",
+       "used": "9.885 mV",
+       "why": "see the 90-day high limit of this row"
+      }
+     ],
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #2",
+     "table": "3-3",
+     "row": 2,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": 20.0,
+     "limits": {
+      "90d": {
+       "low": 0.18838,
+       "high": 0.19162
+      },
+      "1y": {
+       "low": 0.18819,
+       "high": 0.19181
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "0.9",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #3",
+     "table": "3-3",
+     "row": 3,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 0.189615,
+       "high": 0.190385
+      },
+      "1y": {
+       "low": 0.18952,
+       "high": 0.19048
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #4",
+     "table": "3-3",
+     "row": 4,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": 20000.0,
+     "limits": {
+      "90d": {
+       "low": 0.189615,
+       "high": 0.190385
+      },
+      "1y": {
+       "low": 0.18952,
+       "high": 0.19048
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #5",
+     "table": "3-3",
+     "row": 5,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": 50000.0,
+     "limits": {
+      "90d": {
+       "low": 0.18933,
+       "high": 0.19067
+      },
+      "1y": {
+       "low": 0.189235,
+       "high": 0.190765
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.3",
+       "0.05"
+      ],
+      "1y": [
+       "0.35",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #6",
+     "table": "3-3",
+     "row": 6,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "V",
+     "frequency": 100000.0,
+     "limits": {
+      "90d": {
+       "low": 0.18838,
+       "high": 0.19162
+      },
+      "1y": {
+       "low": 0.18819,
+       "high": 0.19181
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "0.9",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #7",
+     "table": "3-3",
+     "row": 7,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 0.1,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "90d": {
+       "low": 0.09885,
+       "high": 0.10115
+      },
+      "1y": {
+       "low": 0.0988,
+       "high": 0.1012
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #8",
+     "table": "3-3",
+     "row": 8,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": 20.0,
+     "limits": {
+      "90d": {
+       "low": 1.8838,
+       "high": 1.9162
+      },
+      "1y": {
+       "low": 1.8819,
+       "high": 1.9181
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "0.9",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #9",
+     "table": "3-3",
+     "row": 9,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 1.89615,
+       "high": 1.90385
+      },
+      "1y": {
+       "low": 1.8952,
+       "high": 1.9048
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #10",
+     "table": "3-3",
+     "row": 10,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": 20000.0,
+     "limits": {
+      "90d": {
+       "low": 1.89615,
+       "high": 1.90385
+      },
+      "1y": {
+       "low": 1.8952,
+       "high": 1.9048
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "1.903985 V",
+       "low": "1.89615 V"
+      },
+      "1y": {
+       "high": "1.90480 V",
+       "low": "1.89520 V"
+      }
+     },
+     "flags": [
+      {
+       "code": "typo",
+       "period": "90d",
+       "field": "high",
+       "printed": "1.903985 V",
+       "used": "1.90385 V",
+       "why": "prints \"1.903985 V\": one digit too many; the formula and every other 45 Hz - 20 kHz row (190.385 mV, 19.0385 V ...) give 1.90385 V"
+      }
+     ],
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #11",
+     "table": "3-3",
+     "row": 11,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": 50000.0,
+     "limits": {
+      "90d": {
+       "low": 1.8933,
+       "high": 1.9067
+      },
+      "1y": {
+       "low": 1.89235,
+       "high": 1.90765
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.3",
+       "0.05"
+      ],
+      "1y": [
+       "0.35",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #12",
+     "table": "3-3",
+     "row": 12,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "V",
+     "frequency": 100000.0,
+     "limits": {
+      "90d": {
+       "low": 1.8838,
+       "high": 1.9162
+      },
+      "1y": {
+       "low": 1.8819,
+       "high": 1.9181
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "0.9",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #13",
+     "table": "3-3",
+     "row": 13,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 1.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "90d": {
+       "low": 0.9885,
+       "high": 1.0115
+      },
+      "1y": {
+       "low": 0.988,
+       "high": 1.012
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #14",
+     "table": "3-3",
+     "row": 14,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": 20.0,
+     "limits": {
+      "90d": {
+       "low": 18.838,
+       "high": 19.162
+      },
+      "1y": {
+       "low": 18.819,
+       "high": 19.181
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "0.9",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #15",
+     "table": "3-3",
+     "row": 15,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 18.9615,
+       "high": 19.0385
+      },
+      "1y": {
+       "low": 18.952,
+       "high": 19.048
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #16",
+     "table": "3-3",
+     "row": 16,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": 20000.0,
+     "limits": {
+      "90d": {
+       "low": 18.9615,
+       "high": 19.0385
+      },
+      "1y": {
+       "low": 18.952,
+       "high": 19.048
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #17",
+     "table": "3-3",
+     "row": 17,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": 50000.0,
+     "limits": {
+      "90d": {
+       "low": 18.933,
+       "high": 19.067
+      },
+      "1y": {
+       "low": 18.9235,
+       "high": 19.0765
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.3",
+       "0.05"
+      ],
+      "1y": [
+       "0.35",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #18",
+     "table": "3-3",
+     "row": 18,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 19.0,
+     "range": 20.0,
+     "unit": "V",
+     "frequency": 100000.0,
+     "limits": {
+      "90d": {
+       "low": 18.838,
+       "high": 19.162
+      },
+      "1y": {
+       "low": 18.819,
+       "high": 19.181
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "0.9",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #19",
+     "table": "3-3",
+     "row": 19,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 10.0,
+     "range": 200.0,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "90d": {
+       "low": 9.885,
+       "high": 10.115
+      },
+      "1y": {
+       "low": 9.88,
+       "high": 10.12
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #20",
+     "table": "3-3",
+     "row": 20,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 190.0,
+     "range": 200.0,
+     "unit": "V",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 189.615,
+       "high": 190.385
+      },
+      "1y": {
+       "low": 189.52,
+       "high": 190.48
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #21",
+     "table": "3-3",
+     "row": 21,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 190.0,
+     "range": 200.0,
+     "unit": "V",
+     "frequency": 20000.0,
+     "limits": {
+      "90d": {
+       "low": 189.62,
+       "high": 190.39
+      },
+      "1y": {
+       "low": 189.52,
+       "high": 190.48
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #22",
+     "table": "3-3",
+     "row": 22,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 190.0,
+     "range": 200.0,
+     "unit": "V",
+     "frequency": 50000.0,
+     "limits": {
+      "90d": {
+       "low": 189.33,
+       "high": 190.67
+      },
+      "1y": {
+       "low": 189.235,
+       "high": 190.765
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.3",
+       "0.05"
+      ],
+      "1y": [
+       "0.35",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #23",
+     "table": "3-3",
+     "row": 23,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 190.0,
+     "range": 200.0,
+     "unit": "V",
+     "frequency": 100000.0,
+     "limits": {
+      "90d": {
+       "low": 188.38,
+       "high": 191.62
+      },
+      "1y": {
+       "low": 188.19,
+       "high": 191.81
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "0.9",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #24",
+     "table": "3-3",
+     "row": 24,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 30.0,
+     "range": 750.0,
+     "unit": "V",
+     "frequency": 50.0,
+     "limits": {
+      "90d": {
+       "low": 29.58,
+       "high": 30.42
+      },
+      "1y": {
+       "low": 29.57,
+       "high": 30.44
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "30.42 V",
+       "low": "29.58 V"
+      },
+      "1y": {
+       "high": "30.44 V",
+       "low": "29.57 V"
+      }
+     },
+     "flags": [
+      {
+       "code": "structure",
+       "why": "the Ampl. and Range columns are swapped (prints Ampl. 750 V, Range 30 V): the limits (30.42 / 29.58 V = 0.15 % of 30 V + 0.05 % of 750 V) are those of 30 V on the 750 V range"
+      }
+     ],
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #25",
+     "table": "3-3",
+     "row": 25,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 750.0,
+     "range": 750.0,
+     "unit": "V",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 748.5,
+       "high": 751.5
+      },
+      "1y": {
+       "low": 748.13,
+       "high": 751.88
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #26",
+     "table": "3-3",
+     "row": 26,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 750.0,
+     "range": 750.0,
+     "unit": "V",
+     "frequency": 20000.0,
+     "limits": {
+      "90d": {
+       "low": 748.5,
+       "high": 751.5
+      },
+      "1y": {
+       "low": 748.13,
+       "high": 751.88
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.15",
+       "0.05"
+      ],
+      "1y": [
+       "0.2",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "cal_limits": {
+      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+     },
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #27",
+     "table": "3-3",
+     "row": 27,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 750.0,
+     "range": 750.0,
+     "unit": "V",
+     "frequency": 50000.0,
+     "limits": {
+      "90d": {
+       "low": 747.38,
+       "high": 752.63
+      },
+      "1y": {
+       "low": 747.0,
+       "high": 753.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.3",
+       "0.05"
+      ],
+      "1y": [
+       "0.35",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "752.63 V",
+       "low": "747.48 V"
+      },
+      "1y": {
+       "high": "753.00 V",
+       "low": "747.00 V"
+      }
+     },
+     "flags": [
+      {
+       "code": "typo",
+       "period": "90d",
+       "field": "low",
+       "printed": "747.48 V",
+       "used": "747.38 V",
+       "why": "prints 747.48 V; the formula (0.3 % of 750 V + 0.05 % of 750 V = 2.625 V) gives 747.375 V (747.38 V) and the high limit prints 752.63 V"
+      }
+     ],
+     "cal_limits": {
+      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+     },
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-3 #28",
+     "table": "3-3",
+     "row": 28,
+     "page": "3-5",
+     "kind": "ACV",
+     "nominal": 750.0,
+     "range": 750.0,
+     "unit": "V",
+     "frequency": 100000.0,
+     "limits": {
+      "90d": {
+       "low": 743.62,
+       "high": 756.38
+      },
+      "1y": {
+       "low": 742.88,
+       "high": 757.13
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "0.9",
+       "0.05"
+      ]
+     },
+     "std_relative": false,
+     "cal_limits": {
+      "5522A": "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+     },
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "FREQ",
+   "title": "Frequency",
+   "group": "VOLT",
+   "page": "3-11",
+   "setup": "Calibrator ac voltage output (0.1 V) to INPUT HI / LO.",
+   "points": [
+    {
+     "ref": "T3-8 #1",
+     "table": "3-8",
+     "row": 1,
+     "page": "3-11",
+     "kind": "FREQ",
+     "nominal": 20.0,
+     "range": 2000.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.1,
+     "limits": {
+      "90d": {
+       "low": 19.96,
+       "high": 20.04
+      },
+      "1y": {
+       "low": 19.94,
+       "high": 20.06
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.01",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-8 #2",
+     "table": "3-8",
+     "row": 2,
+     "page": "3-11",
+     "kind": "FREQ",
+     "nominal": 50.0,
+     "range": 2000.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.1,
+     "limits": {
+      "90d": {
+       "low": 50.0,
+       "high": 50.01
+      },
+      "1y": {
+       "low": 50.0,
+       "high": 50.01
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.01",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "50.01 Hz",
+       "low": "50.00 Hz"
+      },
+      "1y": {
+       "high": "50.01 Hz",
+       "low": "50.00 Hz"
+      }
+     },
+     "flags": [
+      {
+       "code": "tighter",
+       "why": "the printed 50.00 / 50.01 Hz is TIGHTER than the specification formula (0.01 % of 50 Hz + 0.002 % of the 2000 Hz range = 0.045 Hz); the printed limits are kept"
+      }
+     ],
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-8 #3",
+     "table": "3-8",
+     "row": 3,
+     "page": "3-11",
+     "kind": "FREQ",
+     "nominal": 1900.0,
+     "range": 2000.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.1,
+     "limits": {
+      "90d": {
+       "low": 1899.81,
+       "high": 1900.19
+      },
+      "1y": {
+       "low": 1899.81,
+       "high": 1900.19
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.01",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "1900.19 Hz",
+       "low": "1899.81 Hz"
+      },
+      "1y": {
+       "high": "1900.19 Hz",
+       "low": "1899.81 Hz"
+      }
+     },
+     "flags": [
+      {
+       "code": "tighter",
+       "why": "the printed 1899.81 / 1900.19 Hz is TIGHTER than the specification formula (0.01 % of 1900 Hz + 0.002 % of the 2000 Hz range = 0.23 Hz); the printed limits are kept"
+      }
+     ],
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-8 #4",
+     "table": "3-8",
+     "row": 4,
+     "page": "3-11",
+     "kind": "FREQ",
+     "nominal": 19000.0,
+     "range": 20000.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.1,
+     "limits": {
+      "90d": {
+       "low": 18997.7,
+       "high": 19002.3
+      },
+      "1y": {
+       "low": 18997.5,
+       "high": 19002.5
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.01",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "19.0023 kHz",
+       "low": "18.9977 kHz"
+      },
+      "1y": {
+       "high": "19.0025 kHz",
+       "low": "18.9975 kHz"
+      }
+     },
+     "flags": [
+      {
+       "code": "structure",
+       "why": "the limits print \"Hz\" but are kHz (19.0023 against a 19 kHz input)"
+      }
+     ],
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-8 #5",
+     "table": "3-8",
+     "row": 5,
+     "page": "3-11",
+     "kind": "FREQ",
+     "nominal": 195000.0,
+     "range": 200000.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.1,
+     "limits": {
+      "90d": {
+       "low": 194977.0,
+       "high": 195024.0
+      },
+      "1y": {
+       "low": 194975.0,
+       "high": 195026.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.002"
+      ],
+      "1y": [
+       "0.01",
+       "0.003"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "195.024 kHz",
+       "low": "194.977 kHz"
+      },
+      "1y": {
+       "high": "195.026 kHz",
+       "low": "194.975 kHz"
+      }
+     },
+     "flags": [
+      {
+       "code": "structure",
+       "why": "the limits print \"Hz\" but are kHz (195.024 against a 195 kHz input)"
+      }
+     ],
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-8 #6",
+     "table": "3-8",
+     "row": 6,
+     "page": "3-11",
+     "kind": "FREQ",
+     "nominal": 1000000.0,
+     "range": 1000000.0,
+     "unit": "Hz",
+     "frequency": null,
+     "amplitude": 0.1,
+     "limits": {
+      "90d": {
+       "low": 999860.0,
+       "high": 1000140.0
+      },
+      "1y": {
+       "low": 999840.0,
+       "high": 1000160.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.01",
+       "0.004"
+      ],
+      "1y": [
+       "0.01",
+       "0.006"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "1000.14 kHz",
+       "low": "999.86 kHz"
+      },
+      "1y": {
+       "high": "1000.16 kHz",
+       "low": "999.84 kHz"
+      }
+     },
+     "flags": [
+      {
+       "code": "structure",
+       "why": "the limits print \"Hz\" but are kHz (1000.14 against a 1000 kHz input)"
+      }
+     ],
+     "cal_limits": {
+      "5522A": "5522A: the ac voltage output stops at 500 kHz (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12); this point is at 1000 kHz. The manual uses a Fluke 271 function generator."
+     },
+     "group": "VOLT",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "OHM4",
+   "title": "4-wire ohms",
+   "group": "OHM4",
+   "page": "3-6",
+   "setup": "Calibrator output to INPUT HI / LO and calibrator SENSE to the meter SENSE 4W HI / LO (Figure 3-2). Calibrator external sense ON.",
+   "points": [
+    {
+     "ref": "T3-4 #2",
+     "table": "3-4",
+     "row": 2,
+     "page": "3-6",
+     "kind": "OHM4",
+     "nominal": 190.0,
+     "range": 200.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 189.954,
+       "high": 190.046
+      },
+      "1y": {
+       "low": 189.935,
+       "high": 190.065
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.004"
+      ],
+      "1y": [
+       "0.03",
+       "0.004"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM4",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-4 #4",
+     "table": "3-4",
+     "row": 4,
+     "page": "3-6",
+     "kind": "OHM4",
+     "nominal": 1900.0,
+     "range": 2000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 1899.67,
+       "high": 1900.33
+      },
+      "1y": {
+       "low": 1899.56,
+       "high": 1900.44
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM4",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-4 #6",
+     "table": "3-4",
+     "row": 6,
+     "page": "3-6",
+     "kind": "OHM4",
+     "nominal": 19000.0,
+     "range": 20000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 18996.7,
+       "high": 19003.3
+      },
+      "1y": {
+       "low": 18995.6,
+       "high": 19004.4
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM4",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "OHM2",
+   "title": "2-wire ohms",
+   "group": "OHM2",
+   "page": "3-7 / 3-8",
+   "setup": "Calibrator output to INPUT HI / LO, sense to INPUT HI / LO (Figure 3-3). Calibrator external sense ON and 2-wire compensation ON.",
+   "points": [
+    {
+     "ref": "T3-5 #2",
+     "table": "3-5",
+     "row": 2,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 190.0,
+     "range": 200.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 189.954,
+       "high": 190.046
+      },
+      "1y": {
+       "low": 189.935,
+       "high": 190.065
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.004"
+      ],
+      "1y": [
+       "0.03",
+       "0.004"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-5 #4",
+     "table": "3-5",
+     "row": 4,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 1900.0,
+     "range": 2000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 1899.67,
+       "high": 1900.33
+      },
+      "1y": {
+       "low": 1899.56,
+       "high": 1900.44
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": true,
+     "printed_limits": {
+      "90d": {
+       "high": "STD+0.00033 kohm",
+       "low": "STD-0.00033 kohm"
+      },
+      "1y": {
+       "high": "STD+0.0044 kohm",
+       "low": "STD-0.0044 kohm"
+      }
+     },
+     "flags": [
+      {
+       "code": "typo",
+       "period": "1y",
+       "field": "high",
+       "printed": "STD+0.0044 kohm",
+       "used": "STD+0.00044 kohm",
+       "why": "prints \"STD+0.0044 kohm\": a digit dropped; 0.02 % of 1.9 kohm + 0.003 % of 2 kohm = 0.00044 kohm, the 4-wire table (3-4) prints 0.00044 kohm for the same point"
+      },
+      {
+       "code": "typo",
+       "period": "1y",
+       "field": "low",
+       "printed": "STD-0.0044 kohm",
+       "used": "STD-0.00044 kohm",
+       "why": "prints \"STD-0.0044 kohm\": see the 1-year high limit of this row"
+      }
+     ],
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-5 #6",
+     "table": "3-5",
+     "row": 6,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 19000.0,
+     "range": 20000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 18996.7,
+       "high": 19003.3
+      },
+      "1y": {
+       "low": 18995.6,
+       "high": 19004.4
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-5 #8",
+     "table": "3-5",
+     "row": 8,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 190000.0,
+     "range": 200000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 189967.0,
+       "high": 190033.0
+      },
+      "1y": {
+       "low": 189956.0,
+       "high": 190044.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.002"
+      ],
+      "1y": [
+       "0.02",
+       "0.003"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-5 #10",
+     "table": "3-5",
+     "row": 10,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 1900000.0,
+     "range": 2000000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 1899370.0,
+       "high": 1900630.0
+      },
+      "1y": {
+       "low": 1899160.0,
+       "high": 1900840.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.03",
+       "0.003"
+      ],
+      "1y": [
+       "0.04",
+       "0.004"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-5 #12",
+     "table": "3-5",
+     "row": 12,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 19000000.0,
+     "range": 20000000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 18961400.0,
+       "high": 19038600.0
+      },
+      "1y": {
+       "low": 18951900.0,
+       "high": 19048100.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.2",
+       "0.003"
+      ],
+      "1y": [
+       "0.25",
+       "0.003"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-5 #14",
+     "table": "3-5",
+     "row": 14,
+     "page": "3-7 / 3-8",
+     "kind": "OHM2",
+     "nominal": 100000000.0,
+     "range": 100000000.0,
+     "unit": "ohm",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 98496000.0,
+       "high": 101504000.0
+      },
+      "1y": {
+       "low": 98246000.0,
+       "high": 101754000.0
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "1.5",
+       "0.004"
+      ],
+      "1y": [
+       "1.75",
+       "0.004"
+      ]
+     },
+     "std_relative": true,
+     "group": "OHM2",
+     "terminal": "INPUT",
+     "source": "calibrator",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "DCI",
+   "title": "DC current",
+   "group": null,
+   "page": "3-9 / 3-10",
+   "setup": "See each point: Figure 3-4 (mA terminal, 10 A terminal for the 2 A range) and Figure 3-5 (10 A terminal).",
+   "points": [
+    {
+     "ref": "T3-6 #2",
+     "table": "3-6",
+     "row": 2,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.00019,
+     "range": 0.0002,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 0.000189952,
+       "high": 0.000190048
+      },
+      "1y": {
+       "low": 0.000189933,
+       "high": 0.000190067
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.005"
+      ],
+      "1y": [
+       "0.03",
+       "0.005"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #3",
+     "table": "3-6",
+     "row": 3,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": -0.00019,
+     "range": 0.0002,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.000190048,
+       "high": -0.000189952
+      },
+      "1y": {
+       "low": -0.000190067,
+       "high": -0.000189933
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.005"
+      ],
+      "1y": [
+       "0.03",
+       "0.005"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #5",
+     "table": "3-6",
+     "row": 5,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.0019,
+     "range": 0.002,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 0.00189962,
+       "high": 0.00190039
+      },
+      "1y": {
+       "low": 0.00189952,
+       "high": 0.00190048
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.005"
+      ],
+      "1y": [
+       "0.02",
+       "0.005"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #6",
+     "table": "3-6",
+     "row": 6,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": -0.0019,
+     "range": 0.002,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.00190039,
+       "high": -0.00189962
+      },
+      "1y": {
+       "low": -0.00190048,
+       "high": -0.00189952
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.015",
+       "0.005"
+      ],
+      "1y": [
+       "0.02",
+       "0.005"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #8",
+     "table": "3-6",
+     "row": 8,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.019,
+     "range": 0.02,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 0.0189903,
+       "high": 0.0190097
+      },
+      "1y": {
+       "low": 0.0189884,
+       "high": 0.0190116
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.03",
+       "0.02"
+      ],
+      "1y": [
+       "0.04",
+       "0.02"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #9",
+     "table": "3-6",
+     "row": 9,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": -0.019,
+     "range": 0.02,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.0190097,
+       "high": -0.0189903
+      },
+      "1y": {
+       "low": -0.0190116,
+       "high": -0.0189884
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.03",
+       "0.02"
+      ],
+      "1y": [
+       "0.04",
+       "0.02"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "-18.9903 mA",
+       "low": "-19.0097 mA"
+      },
+      "1y": {
+       "high": "-18.9884 mA",
+       "low": "-190.0116 mA"
+      }
+     },
+     "flags": [
+      {
+       "code": "typo",
+       "period": "1y",
+       "field": "low",
+       "printed": "-190.0116 mA",
+       "used": "-19.0116 mA",
+       "why": "prints \"-190.0116 mA\": an extra digit; the formula and the 1-year high limit (-18.9884 mA) give -19.0116 mA"
+      }
+     ],
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #11",
+     "table": "3-6",
+     "row": 11,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 0.189952,
+       "high": 0.190048
+      },
+      "1y": {
+       "low": 0.189927,
+       "high": 0.190073
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.005"
+      ],
+      "1y": [
+       "0.03",
+       "0.008"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #12",
+     "table": "3-6",
+     "row": 12,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": -0.19,
+     "range": 0.2,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -0.190048,
+       "high": -0.189952
+      },
+      "1y": {
+       "low": -0.190073,
+       "high": -0.189927
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.02",
+       "0.005"
+      ],
+      "1y": [
+       "0.03",
+       "0.008"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "-189.952 mA",
+       "low": "190.048 mA"
+      },
+      "1y": {
+       "high": "-189.927 mA",
+       "low": "-190.073 mA"
+      }
+     },
+     "flags": [
+      {
+       "code": "typo",
+       "period": "90d",
+       "field": "low",
+       "printed": "190.048 mA",
+       "used": "-190.048 mA",
+       "why": "the minus sign is missing: prints 190.048 mA; the formula and the high limit (-189.952 mA) give -190.048 mA"
+      }
+     ],
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #14",
+     "table": "3-6",
+     "row": 14,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 1.89865,
+       "high": 1.90135
+      },
+      "1y": {
+       "low": 1.89808,
+       "high": 1.90192
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.05",
+       "0.02"
+      ],
+      "1y": [
+       "0.08",
+       "0.02"
+      ]
+     },
+     "std_relative": false,
+     "group": "I2A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #15",
+     "table": "3-6",
+     "row": 15,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": -1.9,
+     "range": 2.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -1.90135,
+       "high": -1.89865
+      },
+      "1y": {
+       "low": -1.90192,
+       "high": -1.89808
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.05",
+       "0.02"
+      ],
+      "1y": [
+       "0.08",
+       "0.02"
+      ]
+     },
+     "std_relative": false,
+     "group": "I2A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #17",
+     "table": "3-6",
+     "row": 17,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": 10.0,
+     "range": 10.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": 9.981,
+       "high": 10.019
+      },
+      "1y": {
+       "low": 9.979,
+       "high": 10.021
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.18",
+       "0.01"
+      ],
+      "1y": [
+       "0.2",
+       "0.01"
+      ]
+     },
+     "std_relative": false,
+     "group": "I10A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-6 #18",
+     "table": "3-6",
+     "row": 18,
+     "page": "3-9 / 3-10",
+     "kind": "DCI",
+     "nominal": -10.0,
+     "range": 10.0,
+     "unit": "A",
+     "frequency": null,
+     "limits": {
+      "90d": {
+       "low": -10.019,
+       "high": -9.981
+      },
+      "1y": {
+       "low": -10.021,
+       "high": -9.979
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.18",
+       "0.01"
+      ],
+      "1y": [
+       "0.2",
+       "0.01"
+      ]
+     },
+     "std_relative": false,
+     "group": "I10A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    }
+   ]
+  },
+  {
+   "id": "ACI",
+   "title": "AC current",
+   "group": null,
+   "page": "3-10",
+   "setup": "See each point: Figure 3-4 (mA terminal, 10 A terminal for the 2 A range) and Figure 3-5 (10 A terminal).",
+   "points": [
+    {
+     "ref": "T3-7 #1",
+     "table": "3-7",
+     "row": 1,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.001,
+     "range": 0.02,
+     "unit": "A",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 0.0009875,
+       "high": 0.0010125
+      },
+      "1y": {
+       "low": 0.000985,
+       "high": 0.001015
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #2",
+     "table": "3-7",
+     "row": 2,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.019,
+     "range": 0.02,
+     "unit": "A",
+     "frequency": 20.0,
+     "limits": {
+      "90d": {
+       "low": 0.0188,
+       "high": 0.0192
+      },
+      "1y": {
+       "low": 0.0187505,
+       "high": 0.0192495
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "1",
+       "0.05"
+      ],
+      "1y": [
+       "1.25",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #3",
+     "table": "3-7",
+     "row": 3,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.019,
+     "range": 0.02,
+     "unit": "A",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 0.018943,
+       "high": 0.019058
+      },
+      "1y": {
+       "low": 0.018931,
+       "high": 0.019069
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #4",
+     "table": "3-7",
+     "row": 4,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.019,
+     "range": 0.02,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "90d": {
+       "low": 0.0189425,
+       "high": 0.0190575
+      },
+      "1y": {
+       "low": 0.018931,
+       "high": 0.019069
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #5",
+     "table": "3-7",
+     "row": 5,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.01,
+     "range": 0.2,
+     "unit": "A",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 0.009875,
+       "high": 0.010125
+      },
+      "1y": {
+       "low": 0.00985,
+       "high": 0.01015
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #6",
+     "table": "3-7",
+     "row": 6,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "A",
+     "frequency": 20.0,
+     "limits": {
+      "90d": {
+       "low": 0.18838,
+       "high": 0.19162
+      },
+      "1y": {
+       "low": 0.18798,
+       "high": 0.19202
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.8",
+       "0.05"
+      ],
+      "1y": [
+       "1",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #7",
+     "table": "3-7",
+     "row": 7,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "A",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 0.189425,
+       "high": 0.190575
+      },
+      "1y": {
+       "low": 0.18931,
+       "high": 0.19069
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #8",
+     "table": "3-7",
+     "row": 8,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.19,
+     "range": 0.2,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "90d": {
+       "low": 0.189425,
+       "high": 0.190575
+      },
+      "1y": {
+       "low": 0.18931,
+       "high": 0.19069
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "IMA",
+     "terminal": "MA",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #9",
+     "table": "3-7",
+     "row": 9,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.1,
+     "range": 2.0,
+     "unit": "A",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 0.09875,
+       "high": 0.10125
+      },
+      "1y": {
+       "low": 0.0985,
+       "high": 0.1015
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "I2A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #10",
+     "table": "3-7",
+     "row": 10,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "A",
+     "frequency": 20.0,
+     "limits": {
+      "90d": {
+       "low": 1.88,
+       "high": 1.92
+      },
+      "1y": {
+       "low": 1.87505,
+       "high": 1.92495
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "1",
+       "0.05"
+      ],
+      "1y": [
+       "1.25",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "I2A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #11",
+     "table": "3-7",
+     "row": 11,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "A",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 1.89425,
+       "high": 1.90575
+      },
+      "1y": {
+       "low": 1.8931,
+       "high": 1.9069
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "I2A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #12",
+     "table": "3-7",
+     "row": 12,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 1.9,
+     "range": 2.0,
+     "unit": "A",
+     "frequency": 2000.0,
+     "limits": {
+      "90d": {
+       "low": 1.89425,
+       "high": 1.90575
+      },
+      "1y": {
+       "low": 1.8931,
+       "high": 1.9069
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.25",
+       "0.05"
+      ],
+      "1y": [
+       "0.3",
+       "0.06"
+      ]
+     },
+     "std_relative": false,
+     "group": "I2A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #13",
+     "table": "3-7",
+     "row": 13,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 0.5,
+     "range": 10.0,
+     "unit": "A",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 0.4883,
+       "high": 0.5118
+      },
+      "1y": {
+       "low": 0.4855,
+       "high": 0.5145
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.35",
+       "0.1"
+      ],
+      "1y": [
+       "0.5",
+       "0.12"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "0.5118 A",
+       "low": "0.4883 A"
+      },
+      "1y": {
+       "high": "0.5145 A",
+       "low": "04855 A"
+      }
+     },
+     "flags": [
+      {
+       "code": "typo",
+       "period": "1y",
+       "field": "low",
+       "printed": "04855 A",
+       "used": "0.4855 A",
+       "why": "prints \"04855 A\": the decimal point is missing; the formula gives 0.4855 A (0.5 A - 0.0145 A)"
+      }
+     ],
+     "group": "I10A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #14",
+     "table": "3-7",
+     "row": 14,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 10.0,
+     "range": 10.0,
+     "unit": "A",
+     "frequency": 40.0,
+     "limits": {
+      "90d": {
+       "low": 9.89,
+       "high": 10.11
+      },
+      "1y": {
+       "low": 9.863,
+       "high": 10.137
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "1",
+       "0.1"
+      ],
+      "1y": [
+       "1.25",
+       "0.12"
+      ]
+     },
+     "std_relative": false,
+     "cal_limits": {
+      "5522A": "5522A: 3 A to 10.9999 A ac is specified 45 Hz to 5 kHz only (5522A Operators Manual, Detailed Specifications, AC current, printed p. 1-14); this point is at 40 Hz."
+     },
+     "group": "I10A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #15",
+     "table": "3-7",
+     "row": 15,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 10.0,
+     "range": 10.0,
+     "unit": "A",
+     "frequency": 45.0,
+     "limits": {
+      "90d": {
+       "low": 9.955,
+       "high": 10.045
+      },
+      "1y": {
+       "low": 9.938,
+       "high": 10.062
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.35",
+       "0.1"
+      ],
+      "1y": [
+       "0.5",
+       "0.12"
+      ]
+     },
+     "std_relative": false,
+     "printed_limits": {
+      "90d": {
+       "high": "10.0450 A",
+       "low": "9.9550 A"
+      },
+      "1y": {
+       "high": "10.0620 A",
+       "low": "9.9380 A"
+      }
+     },
+     "flags": [
+      {
+       "code": "structure",
+       "why": "the frequency prints \"45 A\": a misprint of 45 Hz (the same limits as the 1 kHz row, i.e. the 45 Hz - 2 kHz band)"
+      }
+     ],
+     "group": "I10A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    },
+    {
+     "ref": "T3-7 #16",
+     "table": "3-7",
+     "row": 16,
+     "page": "3-10",
+     "kind": "ACI",
+     "nominal": 10.0,
+     "range": 10.0,
+     "unit": "A",
+     "frequency": 1000.0,
+     "limits": {
+      "90d": {
+       "low": 9.955,
+       "high": 10.045
+      },
+      "1y": {
+       "low": 9.938,
+       "high": 10.062
+      }
+     },
+     "accuracy": {
+      "90d": [
+       "0.35",
+       "0.1"
+      ],
+      "1y": [
+       "0.5",
+       "0.12"
+      ]
+     },
+     "std_relative": false,
+     "group": "I10A",
+     "terminal": "10A",
+     "source": "calibrator",
+     "input": null
+    }
+   ]
+  }
+ ]
+}

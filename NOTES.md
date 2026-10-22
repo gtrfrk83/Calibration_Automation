@@ -7,7 +7,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 - `Procedures/`: launchers (one per instrument), checkpoints are written here at run time (git-ignored).
 - `specs/`: `*_pv.json` test points and limits, plus the `build_*.py` scripts that wrote them. See `specs/README.txt`.
 - `drivers/`: instrument drivers, transports (VISA / pyserial), simulators (`simulated.py`). See `drivers/README.txt`.
-- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 77 IV, 175/177/179, 87V, 287/289, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A), `keithley2000_verification.py` (Keithley 2000, two-way over GPIB / RS-232).
+- Engines: `truevolt_verification.py` (Keysight Truevolt), `dacq_verification.py` (34970A/34972A), `handheld_dmm.py` (Fluke 110-117, 77 IV, 175/177/179, 87V, 287/289, Klein MM325), `mdo4000c_verification.py`, `tds2000c_verification.py`, `fgen_verification.py` (33210A/33220A/33250A), `fluke8808a_verification.py` (Fluke 8808A bench DMM), `keithley2000_verification.py` (Keithley 2000, two-way over GPIB / RS-232).
 - `labregistry.py` / `labregistry_ui.py`: per-asset report history and drift (`lab_registry.sqlite3`, not in the repo).
 - `report_pdf.py` / `report_dialog.py`: PDF "Calibration Data" reports.
   Optional TAR / TUR columns: two independent checkboxes (TAR, TUR) in `report_dialog.ask_details` (`details["show_tar"]`, `["show_tur"]`, `["show_tar_tur"]` = `report_pdf.TarTur`, default off, remembered in `~/.calibration_suite/report_tartur.json`); `report_pdf.apply_tar_tur`. TAR / TUR appear on the PDF data file only (there is no CSV export). Off = the PDF is unchanged.
@@ -16,7 +16,7 @@ Procedures are driven by JSON specs (`specs/`) of the manufacturer's performance
 ## Procedures
 WaveSurfer WS4104HD, Fluke 87V, Agilent 34401A, Fluke 8846A (verification + adjustment), Keysight 34460A/61A/65A/70A,
 Tektronix MDO4000C, Tektronix TDS2000C / TDS1000C-EDU, Fluke 110/113/114/115/116/117, Fluke 77 Series IV, Fluke 175/177/179, Klein MM325, Keysight 34970A (RS-232), Keysight 34972A (USB),
-Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard), Fluke 287 / 289 (typed or IR readings), Keithley 2000 (GPIB / RS-232).
+Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard), Fluke 287 / 289 (typed or IR readings), Fluke 8808A (RS-232), Keithley 2000 (GPIB / RS-232).
 
 ## Standing rules
 - Display-only SI scaling. `calibration_procedures.sqlite3` schema is never changed (read only).
@@ -71,6 +71,46 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 - Manual's DC current table says "Channel 209"; the procedure uses 221 (current channel).
 - Limits were transcribed from page images; compare a few rows against the manual.
 - Hook-up diagrams still to be supplied.
+
+## Fluke 8808A (branch `fluke-8808a`; checked on the simulated bench only, never run on hardware or a real UI)
+Launcher `Procedures/Fluke_8808A_Verification.py`, engine `fluke8808a_verification.py`, driver `drivers/fluke_8808a.py`, simulator `drivers/simulated_8808a.py`,
+spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagram names in `diagrams/README_8808a.txt`, tests `tests/test_beta_8808a.py`.
+- Sources: 8808A Calibration Manual (56 pp.) chapter 3, Tables 3-2 to 3-8, printed pp. 3-4 to 3-11, 105 points (DC volts 17, AC volts 28, 4-wire ohms 6, 2-wire ohms 14,
+  DC current 18, AC current 16, frequency 6); Table 3-1 (equipment) p. 3-3; accuracy specifications pp. 1-10 to 1-14. Users Manual (100 pp.) chapter 4 for every command.
+  Every number was read from rendered page images (150 / 130 dpi), twice.
+- Both the 90-day and 1-year limits are printed; the window offers both (default 1 year; the manual uses 90 days for an acceptance test after calibration). Verification
+  only: the manual's adjustment (Table 3-9, 124 steps, entered with `*TER` over RS-232) is NOT built, and `*TER`, `CALREF` and `EXIT` are on the forbidden list for the driver.
+- The builder checks every printed limit against the manual's own specification formula (+/-(% of reading + % of range)) in Decimal and stops on a disagreement it does
+  not know. Known disagreements, each stored in the point as `flags` with the printed text in `printed_limits`: TYPOS corrected from the formula (T3-2 #11 1y low sign;
+  T3-3 #10 90d high 1.903985; T3-3 #27 90d low 747.48 -> 747.38; T3-5 #4 1y 0.0044 -> 0.00044; T3-6 #9 1y low -190.0116; T3-6 #12 90d low sign; T3-7 #13 1y low 04855),
+  printed limits LOOSER than the formula, so the formula is used (T3-3 #1 90d 10.120 / 9.890 mV -> 10.115 / 9.885; T3-6 #10 1y +/-0.020 -> +/-0.016 mA), printed limits
+  TIGHTER than the formula, kept (T3-8 #2 50 Hz, T3-8 #3 1900 Hz), and column misprints (T3-3 #24 Ampl. / Range swapped: 30 V on the 750 V range; T3-7 #15 "45 A" is 45 Hz;
+  T3-8 #4-6 limits print "Hz" for kHz). Confirm against the printed manual.
+- Ohms limits are "STD +/- tol" in the manual (STD = the 5700A reading). The calibrator setting is used as STD (the 5522A / 5560A reading is not read back), so the limits are
+  setting +/- tol (`std_relative`).
+- Interface (Users Manual Table 4-1, p. 4-4): RS-232 only, no IEEE-488, no USB. 9600 baud, 8 data bits, no parity, 1 stop bit, echo off; changed from the front panel only.
+  The engine's baud / format boxes are the lab's choice if those settings were changed. Echo must be OFF: the driver refuses to run on a reply that carries a prompt.
+- Commands (page references are in `drivers/fluke_8808a.py` COMMANDS; all verified in the Users Manual except as listed): `*IDN?`, `*RST` ("power-up reset", Table 4-8 p. 4-16),
+  `*CLS`, `*OPC?`, `*ESR?`, `REMS`, `LOCS`, `VDC VAC ADC AAC OHMS FREQ`, `WIRE2 WIRE4`, `FIXED`, `AUTO?`, `RANGE n`, `RANGE1?`, `RATE S`, `RATE?`, `FORMAT 1`, `FORMAT?`,
+  `TRIGGER 1`, `TRIGGER?`, `MEAS1?`, `SERIAL?`, `*STB?` (registered, not used). Everything is set once, read back and compared where a query exists; no write is retried.
+- Flagged, not verified or not stated by the manual: (1) `FUNC1?` reply text (registered `verified=False`); (2) the wire mode has no query, so the operator confirms the 2W / 4W
+  annunciator in the hook-up prompt (the program selects the function and WIRE2 / WIRE4 first); (3) there is no state query for REMS / LOCS; (4) whether `*RST` leaves remote mode
+  and whether it touches the RS-232 settings is not stated: REMS is sent again afterwards and the settings it needs are set and read back (`FORMAT 1`, `TRIGGER 1`, `RATE S`);
+  (5) with echo off there is no prompt, so `COMMAND_GAP_S` (0.15 s) between commands and `RESET_SETTLE_S` (3 s) after `*RST` are this driver's choices, not manual figures; `*OPC?`
+  after the per-point set-up is the "done" signal; (6) that `MEAS1?` right after a range change is a fresh reading is not stated: the first of two `MEAS1?` is discarded;
+  (7) there is no error queue: errors are bits of `*ESR?` (mask 0x3C, Table 4-6 p. 4-12), read once per check because the read clears it (never retried); (8) the simulator's
+  power-up FORMAT (2) is a simulation choice.
+- Reset (Stage 7): `*RST` is manual-verified (p. 4-16), so `Fluke8808A` is in the verified-reset list of tests/test_reset_startup.py. The reset can erase settings stored on the meter (Users Manual).
+- Calibrators: Fluke 5522A or 5560A. The manual names a 5700A + 5725A (voltage, current, 750 V), a Fluke 271 (frequency) and a 5520A (resistance adjust). Points the 5522A cannot
+  make: T3-3 #26-28 (750 V ac above 10 kHz, 5522A Operators Manual p. 1-12), T3-7 #14 (10 A ac at 40 Hz, below the 45 Hz of 3 A and up, p. 1-14), T3-8 #6 (1000 kHz, above 500 kHz).
+  The spec lists them under `cal_limits`; the run asks the technician to connect their own standard and reads the meter automatically (report Uncertainty / TAR / TUR left empty).
+  For the 5560A the same five points are manual unless "Try the 5560A" is ticked: the 5560A manual was not available, so nothing about its ranges is verified.
+- Zero-offset points run first, in two fixtures: 15 points with the 4-wire short (DC volts 5, 4-wire ohms 3, 2-wire ohms 7), then 6 DC-current points with the input OPEN
+  (Table 3-1 lists the 4-wire short under Amps dc as well: question open). The calibrator is in STANDBY for every zero point.
+- Not in the engine: no Excel export (the 8846A launcher has one), no capacitance / temperature / diode / continuity points (the manual has no verification table for them),
+  no front / rear switch (the 8808A has none), no fixture for ranges beyond Tables 3-2 to 3-8.
+- The window opens with a half-hour warm-up question (Calibration Manual); the specifications are valid in the slow rate only, which the program selects.
+- Not viewed: the Tk windows (tkinter is not installed where this was built); only the real App code on the simulated bench was run (tests/test_beta_8808a.py, live_editor_harness).
 
 ## Open items: 33210A / 33220A / 33250A and the Fluke 5790B driver (not yet run on hardware)
 - Unverified: all 5790B commands (INPUT, EXTRIG, RANGE/RANGE?, MEAS?, ERR?) and all generator commands, taken from the manuals;

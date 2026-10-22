@@ -8,6 +8,9 @@ One driver per instrument MODEL. Procedures call intent-level methods
   fluke_5560a.py        Fluke 5560A calibrator (SCOPE DCV / MEASR / LEVSINE, normal V / A / ohm outputs, OPER, STBY)
   scpi_dmm.py           Fluke 8846A and Agilent 34401A (CONF / READ?, remote/local; 8846A also has the
                         calibration-adjustment commands - the password is masked in the command log)
+  fluke_8808a.py        Fluke 8808A 5-1/2 digit bench DMM over RS-232 only (function / WIRE / FIXED / RANGE n / RATE read back, MEAS1?, errors from *ESR? bits; every command carries
+                        its Users Manual page; the calibration (*TER) interface is deliberately absent)
+  simulated_8808a.py    Simulated 8808A (measures what the simulated calibrator outputs, only when the function / range / DC-AC set-up fits) and a 5522A that refuses what it cannot make
   lecroy_ws4104hd.py    LeCroy WaveSurfer 4104HD (VBS automation: scale, offset, coupling, P1, timebase)
   simulated.py          Simulated 5560A + scope that talk to each other (no hardware needed)
   fluke_5790b.py        Fluke 5790B AC Measurement Standard (INPUT, EXTRIG, RANGE, MEAS? with settle wait, ERR?,
