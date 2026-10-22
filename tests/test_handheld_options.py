@@ -12,8 +12,8 @@ import handheld_dmm as h  # noqa: E402
 from drivers.simulated import SimFlukeTransport, make_bench  # noqa: E402
 
 SPECS = {'113': 'fluke_110_series_pv.json', '117': 'fluke_110_series_pv.json', '87V': 'fluke_87v_pv.json', '287': 'fluke_287_289_pv.json',
-         '289': 'fluke_287_289_pv.json', 'MM325': 'klein_mm325_pv.json'}
-NEW_STYLE = ('87V', '287', '289', 'MM325')          # specs whose options set auto_ramp false (the 110-series keeps explicit ramp lists)
+         '289': 'fluke_287_289_pv.json', 'MM325': 'klein_mm325_pv.json', '77IV': 'fluke_77iv_pv.json'}
+NEW_STYLE = ('87V', '287', '289', 'MM325', '77IV')          # specs whose options set auto_ramp false (the 110-series keeps explicit ramp lists)
 
 
 class Spy(SimFlukeTransport):
@@ -171,7 +171,7 @@ class FunctionPrompt(unittest.TestCase):
             self.assertTrue(none_pts, model)
 
     def test_no_double_prompt_on_same_function(self):
-        for model in ('87V', '287', '289', 'MM325', '113'):
+        for model in ('87V', '287', '289', 'MM325', '113', '77IV'):
             seq = [sw for _n, sw in (lambda f: (f.run(), f.functions())[1])(Flow(model))]
             self.assertTrue(all(a != b for a, b in zip(seq, seq[1:])), model)
 
@@ -193,7 +193,7 @@ class FunctionPrompt(unittest.TestCase):
 
     def test_high_voltage_prompt_mentions_a_ramp_only_when_one_happens(self):
         texts = {}
-        for model in ('87V', '289', '113', '117'):
+        for model in ('87V', '289', '113', '117', '77IV'):
             f = Flow(model, calibrator=True)
             f.run()
             texts[model] = {}
@@ -204,6 +204,7 @@ class FunctionPrompt(unittest.TestCase):
             texts[model] = dict(zip([p['id'] for p in hv_points], hv_texts))
         self.assertFalse([i for i, t in texts['87V'].items() if 'ramp' in t])
         self.assertFalse([i for i, t in texts['289'].items() if 'ramp' in t])
+        self.assertFalse([i for i, t in texts['77IV'].items() if 'ramp' in t])
         self.assertFalse([i for i, t in texts['117'].items() if 'ramp' in t and i != '3-40'])      # explicit one-step lists: no ramp
         self.assertIn('ramped', texts['117']['3-40'])
 
@@ -225,6 +226,8 @@ EXPECTED = {       # the rotary-switch prompts, in order (group NONE points carr
             'Ω position, capacitance (press the yellow button)', 'diode / continuity position', 'µA position (current)',
             'mA / A position, mA', 'mA / A position, A'],
     'MM325': [],
+    '77IV': ['Ω  (Ohms)', 'Continuity  (•)))  )', 'V~  (AC volts)', 'V~ Hz  (AC volts frequency; press the YELLOW button)', 'V⎓  (DC volts)', 'mV⎓  (DC millivolts)',
+             'Capacitance  (press the YELLOW button)', 'mA~  (AC milliamps)', 'A~  (AC amps)', 'mA⎓  (DC milliamps; press the YELLOW button)', 'A⎓  (DC amps; press the YELLOW button)'],
 }
 EXPECTED['289'] = EXPECTED['287'][:8] + ['Ω position, LoΩ (289)'] + EXPECTED['287'][8:] + ['LoZ position (289)']
 

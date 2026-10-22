@@ -47,6 +47,8 @@ METERS = {
     'mm325': dict(name='Klein Tools MM325', jacks={'vohm': 'VΩ', 'ma': 'VΩ µA mA', 'a10': '10A', 'com': 'COM'}),
     'fluke110': dict(name='Fluke 110 series', jacks={'vohm': 'VΩ', 'ma': 'VΩ', 'a10': 'A', 'com': 'COM'}),
     'fluke87v': dict(name='Fluke 87V', jacks={'vohm': 'VΩ', 'ma': 'mA µA', 'a10': '10A', 'com': 'COM'}),
+    # Fluke 77 Series IV: the manual (Calibration Information pp. 7, 12) names the jacks VΩ, 400 mA, 10A and COM; their order on the case is not shown in it
+    'fluke77': dict(name='Fluke 77 Series IV', jacks={'vohm': 'VΩ', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'}),
 }
 RED_JACK = {'VOHM': 'vohm', 'UAMP': 'ma', 'AMP10': 'a10'}
 
@@ -55,6 +57,7 @@ AVAILABLE = {
     'mm325': ('VOHM', 'UAMP', 'AMP10'),
     'fluke110': ('VOHM', 'UAMP', 'AMP10', 'TEMP', 'VOLTALERT'),
     'fluke87v': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
+    'fluke77': ('VOHM', 'UAMP', 'AMP10'),
 }
 
 # extra text for particular meters
@@ -64,6 +67,10 @@ EXTRA = {
     ('mm325', 'UAMP'): dict(caution='Never apply more than 200 mA to the VΩ µA mA jack (200 mA fuse, manual p. 11).'),
     ('mm325', 'AMP10'): dict(caution='Never apply more than 10 A. Above 6 A the meter allows 30 s of measurement, then 10 min of rest (manual p. 9).'),
     ('fluke87v', 'UAMP'): dict(caution='The mA µA input is fused: do not exceed the range of the point being tested.'),
+    ('fluke77', 'UAMP'): dict(caution='The 400 mA input is fused at 440 mA: never apply more than the point being tested (manual p. 4). '
+                                      'The meter shows LEAd when the rotary switch moves to or from the mA position: check the leads are in the right jacks (p. 3).'),
+    ('fluke77', 'AMP10'): dict(caution='The 10A input is fused at 11 A: never apply more than 10 A (20 A for 30 s at most, then 10 minutes rest; manual pp. 4, 6). '
+                                       'Use leads rated for 10 A. The meter shows LEAd when the rotary switch moves to or from the A position (p. 3).'),
 }
 GENERIC_CAUTION = {
     'AMP10': 'Leads, plugs and terminals carry high current: use leads rated for 10 A or more, check the meter fuse, and make sure every connection is tight.',

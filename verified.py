@@ -129,6 +129,7 @@ FILES = {
                                              ['keysight_332xx', 'fluke_5790b', 'keysight_5313x', 'reference_instruments'], ['keysight_33250a_pv.json']),
     'Fluke_287_Verification.py': _files('Fluke_287_Verification.py', _HH, ['fluke_5560a', 'fluke_28x'], ['fluke_287_289_pv.json']),
     'Fluke_289_Verification.py': _files('Fluke_289_Verification.py', _HH, ['fluke_5560a', 'fluke_28x'], ['fluke_287_289_pv.json']),
+    'Fluke_77IV_Verification.py': _files('Fluke_77IV_Verification.py', _HH, ['fluke_5560a'], ['fluke_77iv_pv.json']),
 }
 USER_CODE = ['Procedures/User_Datasheet.py', 'dsb_runtime.py']      # a user-built procedure: its runnable spec is the rest of its definition
 

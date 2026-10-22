@@ -1379,6 +1379,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 row['As Found'] += '  (AC annunciator ' + ('on' if r['annunciator'] else 'OFF') + ')'
             if p['kind'] == 'ACV' and p['display_unit'] == 'kHz':
                 row['Description'] = f'{p["range"]} range (2 V applied)'
+            if p.get('report_desc'):                   # a spec's own report wording (Fluke 77 IV: the 5 V applied at 50 kHz; the corrected step 8)
+                row['Description'] = p['report_desc']
             if p['base_unit'] in TEMP_BASE_UNITS:      # temperatures are never SI-prefixed (no 'k°C')
                 d = max(len(x.split('.')[1]) if '.' in x else 0 for x in (p['low'], p['high']))
                 row.update({'Nominal': f'{p["nominal"]:.{d}f} {unit}', 'Tolerance -': p['low'], 'Tolerance +': p['high'], 'UOM': unit})
@@ -1460,7 +1462,8 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.status.set(f'Exported {len(rows)} rows: {path}')
 
     def report_title(self):
-        return f'{self.info["name"]} Performance Verification'
+        """options.report_title (the Fluke 77 IV spec: 'Calibration Data') or, as always before, '<model> Performance Verification'."""
+        return self.spec.get('options', {}).get('report_title') or f'{self.info["name"]} Performance Verification'
 
     def report_header(self, src):
         return [('Instrument', self.info['name']), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
@@ -1477,17 +1480,19 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         return '5522A' if '5522A' in text else '5560A' if '5560A' in text else None
 
     def source_note(self):
-        """How the numeric readings were collected (IR and / or typed), for the report footer."""
+        """How the numeric readings were collected (IR and / or typed), for the report footer; plus the spec's own source.report_note
+        (the Fluke 77 IV spec states there which printed limit was corrected)."""
+        note = self.spec.get('source', {}).get('report_note', '')
         if not self.ir:
-            return ''
+            return note
         every = list(self.all_records())
         ir = sum(1 for r in every if r.get('source') == 'IR' and r.get('reading', 0) is not None)
         typed = sum(1 for r in every if r.get('source') == 'typed')
         if not (ir or typed):
-            return ''
+            return note
         parts = ([f'{ir} reading(s) read from the meter over its IR interface, with the function, range and REL / Low Pass state checked'] if ir else []) + \
                 ([f'{typed} typed in by the technician from the display'] if typed else [])
-        return 'Meter readings: ' + '; '.join(parts) + '.'
+        return ' '.join(x for x in (note, 'Meter readings: ' + '; '.join(parts) + '.') if x)
 
     def on_close(self):
         if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'):

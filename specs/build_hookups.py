@@ -1,8 +1,9 @@
 """Draws the hook-up diagrams in diagrams/ (hook_<meter>_<calibrator>_<group>.png).
 
-    python3 specs/build_hookups.py        (needs Pillow; the procedures themselves do not)
+    python3 specs/build_hookups.py                 (needs Pillow; the procedures themselves do not)
+    python3 specs/build_hookups.py fluke77         (only the named meter(s); the other diagrams are left byte for byte as they are)
 
-Meters: Klein MM325, Fluke 110 series, Fluke 87V.   Calibrators: Fluke 5560A and Fluke 5522A.
+Meters: Klein MM325, Fluke 110 series, Fluke 87V, Fluke 77 Series IV.   Calibrators: Fluke 5560A and Fluke 5522A.
 The terminals each calibrator uses come from hookups.py, so the pictures and the prompts' text agree.
 
 5560A: drawn from a photograph of the real front panel (OUTPUT V/ohm HI / LO, VI AUX, SENSE HI / LO, 30A, GUARD, ground, TC, SCOPE, TRIG).
@@ -182,6 +183,9 @@ METER_DRAW = {
                      jacks=[('a10', 'A', 110), ('com', 'COM', 185), ('vohm', 'VΩ', 260)], alias={'ma': 'vohm'}),
     'fluke87v': dict(brand='FLUKE', model='87V', body='#f3c40f', edge='#8a6d00', face='#2b2e33', ink='#ffffff', accent='#f3c40f',
                      jacks=[('a10', '10A', 96), ('ma', 'mA µA', 152), ('com', 'COM', 208), ('vohm', 'VΩ', 264)], alias={}),
+    # the jack order is drawn like the 87V's; the 77 IV manual names the jacks (pp. 7, 12) but does not show their order on the case
+    'fluke77': dict(brand='FLUKE', model='77 Series IV', body='#f3c40f', edge='#8a6d00', face='#2b2e33', ink='#ffffff', accent='#f3c40f',
+                    jacks=[('a10', '10A', 96), ('ma', '400 mA', 152), ('com', 'COM', 208), ('vohm', 'VΩ', 264)], alias={}),
 }
 
 
@@ -359,9 +363,11 @@ def hook(meter, cal, group):
     pen.save(OUT / f'hook_{meter}_{cal}_{group}.png')
 
 
-def main():
+def main(only=()):
     made = 0
     for meter, groups in hookups.AVAILABLE.items():
+        if only and meter not in only:
+            continue
         for cal in hookups.CAL_TERMS:
             for group in groups:
                 hook(meter, cal, group)
@@ -370,4 +376,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(tuple(sys.argv[1:]))
