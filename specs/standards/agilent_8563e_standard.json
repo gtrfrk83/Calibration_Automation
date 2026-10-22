@@ -1,0 +1,6806 @@
+{
+ "schema": 1,
+ "standard": {
+  "manufacturer": "Agilent",
+  "model": "8563E",
+  "description": "Spectrum Analyzer, 9 kHz (30 Hz Opt 006) to 26.5 GHz (8563E / 8563EC)",
+  "confidence_text": "[Not Specified]",
+  "confidence_pct": null,
+  "reference": "Agilent 8560 E-Series and EC-Series Spectrum Analyzers Calibration Guide (Volumes I & II), Chapter 5 \"8563E/EC Specifications and Characteristics\", PDF/printed pp.177-216; specifications read from pp.178-197 (PDF page = printed page)",
+  "revision": "8560E/EC Calibration Guide (PDF created 2010-05-20)",
+  "author": "built from the manual page images by specs/build_8563e_standard_from_manual.py",
+  "approved_by": "",
+  "approve_date": "",
+  "source_pdf": "8563 Specifications.pdf",
+  "sheet_generated": "",
+  "built": "2026-10-21T21:31:56"
+ },
+ "notes": {
+  "1": "Conditions (p.178): five-minute warmup in ambient conditions, autocoupled controls, preselector peaked at the signal of interest, digital trace display, IF ADJ ON, REF LVL CAL adjusted, 1ST LO OUTPUT and 2ND IF OUTPUT terminated in 50 ohms, two-year calibration cycle, environmental requirements met. After a 30-minute warmup at 20 to 30 degC the preselector does not have to be peaked at each signal (factory preselector-peak values are sufficient). Amplitude temperature drift is a nominal 1 dB per 10 degC (p.178).",
+  "2": "Chapter 5 of the guide is the 8563E/EC chapter (PDF pp.177-216). Option / serial-number-prefix variants are rows of their own; choose those that match the unit (Option 006, 007, 103, H13; serial prefix <3246A, 3246A to <3645A, >=3645A, <3310A / >=3310A).",
+  "3": "DERIVED value: the printed formula contains the harmonic mixing number N (p.180: Band 0 = 1, Band 1 = 1, Band 2 = 2, Band 3 = 4); the number stored is the formula evaluated for that band. The manual does not print this number.",
+  "4": "All specifications are 2 yr (two-year calibration cycle, p.178 and p.198). The manual states no confidence level and no coverage factor.",
+  "5": "Typical value, printed beside the specification (p.193): \"Typical (20 degC to 30 degC)\". Not warranted. Stored as a second spec with period \"typical\".",
+  "6": "Noise sidebands (p.183) are specified for carrier frequencies <=1 GHz. For f > 1 GHz and f <= 2.9 GHz the footnotes add: 5.2 dB x (f/1 GHz - 1) (100 Hz, 1 kHz), 2.5 dB x (f/1 GHz - 1) (10 kHz, 100 kHz serial prefix <3436A), 3.0 dB x (f/1 GHz - 1) (30 kHz), 2.0 dB (100 kHz serial prefix >=3436A) (markers on the page: double-dagger, section sign, hash, double asterisk). NOT stored (frequency-dependent adder). For > 2.9 GHz refer to the characteristics section (not a specification).",
+  "7": "Noise sidebands (p.183): footnote double-dagger-dagger: 10 kHz and 30 kHz offsets apply for RES BW <= 1 kHz or span <= 745 kHz; footnote double-dagger-double-dagger: the 100 kHz offset applies for RES BW >= 3 kHz or span > 745 kHz.",
+  "8": "Displayed average noise level (p.190): with no signal at input, 1 Hz video bandwidth and 0 dB input attenuation, tracking generator off. Columns: 10 Hz RES BW (Option 103) and 1 Hz RES BW (Non-Option 103).",
+  "9": "Reference level uncertainty / frequency response (p.193): with 10 dB input attenuation. Relative = referenced to the midpoint between the highest and lowest peak excursions; absolute = referenced to the 300 MHz CAL OUTPUT.",
+  "10": "Printed band label \"13.2 kHz to 22.0 GHz\" on the Relative frequency response table (p.193) is read as 13.2 GHz to 22.0 GHz (typo in the manual: the adjacent bands are 6.46 to 13.2 GHz and 22.0 to 26.5 GHz).",
+  "11": "Mixer level = input level - input attenuation (footnote on pp.189, 191).",
+  "12": "Delayed sweep accuracy footnote (p.187): in E-Series instruments without Option 007 the delay time is subject to up to +/-0.5 us of jitter from synchronization to the internal 1 MHz timebase; in E-Series with Option 007 and in EC-Series using sweep times <30 ms, up to +/-83 ns of jitter (12 MHz timebase). Not added to the stored limits.",
+  "13": "Gate delay (p.188): the gate delay time experiences up to +/-0.5 us of jitter from synchronization to the internal 1 MHz timebase; time from GATE TRIGGER INPUT to positive edge of GATE OUTPUT. Gate length: time from positive edge to negative edge of GATE OUTPUT.",
+  "14": "Scale fidelity (p.196): not the same for RES BW <=100 Hz as for RES BW >=300 Hz; signals not at the reference level see an additional amplitude difference when switching between the two sets. 0 to -70 dB range for RES BW <=100 Hz when SPAN = 0 Hz.",
+  "15": "Printed as \"+/-2.5 dB characteristic\" (p.196): a characteristic, not a specification.",
+  "16": "Spurious responses (p.191): mixer level = input level - input attenuation; N = harmonic mixing number. TOI: two signals at the input mixer spaced by >=1 kHz.",
+  "17": "Gain compression footnote markers (p.189): the first band is marked with a double-dagger and the other two with a dagger; only the double-dagger footnote (\"Mixer level = input level - input attenuation\") is printed.",
+  "18": "Frequency reference accuracy (p.182): the aging / temperature-stability / settability figures are fractional (dimensionless). They are stored as rel (fraction of frequency) on the 10 MHz reference frequency (value 10 MHz); multiply rel by any other frequency (CAL OUTPUT 300 MHz, 10 MHz REF output, readout frequency) to get the error in Hz. \"frequency reference accuracy\" in the readout formulas = (aging x period since adjustment) + initial achievable accuracy + temperature stability.",
+  "19": "Option 006 extends the low-frequency tuning limit from 9 kHz (non-Option 006) to 30 Hz.",
+  "20": "Residual FM (p.183): zero span, 10 Hz RES BW, peak-to-peak in 20 ms. See \"Resolution Bandwidth Usability\" in Frequency Characteristics (not a specification).",
+  "21": "Residual responses (p.191): \">200 kHz with no signal at input, 0 dB input attenuation, N [symbol missing] 1\": the relation symbol between N and 1 is absent in the printed PDF page (text and image); the condition is stored as printed."
+ },
+ "functions": [
+  {
+   "name": "Reference Oscillator, Frequency Reference Accuracy",
+   "direction": "input",
+   "page": 182,
+   "ranges": [
+    {
+     "label": "Non-Option 103 aging per day (after 7 day warmup) @ 10 MHz",
+     "page": 182,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "10 MHz",
+       "annot": "",
+       "notes": [
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 day (after 7 day warmup)",
+       "rel": 5e-10,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[1 day (after 7 day warmup)] Accuracy: +/-(0.5E-9/day)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 10000000.0,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103 aging per year @ 10 MHz",
+     "page": 182,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "10 MHz",
+       "annot": "",
+       "notes": [
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 1e-07,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1E-7/year)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 10000000.0,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103 temperature stability @ 10 MHz",
+     "page": 182,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "10 MHz",
+       "annot": "",
+       "notes": [
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "temperature",
+       "rel": 1e-08,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[temperature] Accuracy: +/-(1E-8, -10 degC to +55 degC, referenced to 25 degC)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 10000000.0,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103 aging per year @ 10 MHz",
+     "page": 182,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "10 MHz",
+       "annot": "",
+       "notes": [
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 2e-06,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2E-6/year)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 10000000.0,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103 settability @ 10 MHz",
+     "page": 182,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "10 MHz",
+       "annot": "",
+       "notes": [
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 1e-06,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1E-6)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 10000000.0,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103 temperature stability @ 10 MHz",
+     "page": 182,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "10 MHz",
+       "annot": "",
+       "notes": [
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "temperature",
+       "rel": 1e-06,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[temperature] Accuracy: +/-(1E-6, -10 degC to +55 degC, referenced to 25 degC)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 10000000.0,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Residual FM [Peak-to-Peak in 20 ms, zero span, 10 Hz RES BW]",
+   "direction": "input",
+   "page": 183,
+   "ranges": [
+    {
+     "label": "Non-Option 103, Band 0 (N=1, derived) @ 30 Hz to 2.9 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 2.9 GHz",
+       "annot": "",
+       "notes": [
+        3,
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1 Hz x N, N = 1)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 30.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, Band 1 (N=1, derived) @ 2.75 GHz to 6.46 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2750000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.75 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": [
+        3,
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1 Hz x N, N = 1)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 2750000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, Band 2 (N=2, derived) @ 5.86 GHz to 13.2 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "",
+       "lo": 5860000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "5.86 GHz to 13.2 GHz",
+       "annot": "",
+       "notes": [
+        3,
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.0,
+       "unit": "Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1 Hz x N, N = 2)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 5860000000.0,
+     "freq_hi": 13200000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, Band 3 (N=4, derived) @ 12.4 GHz to 26.5 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "",
+       "lo": 12400000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "12.4 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": [
+        3,
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 4.0,
+       "unit": "Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1 Hz x N, N = 4)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 12400000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, Band 0 (N=1, derived) @ 30 Hz to 2.9 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 2.9 GHz",
+       "annot": "",
+       "notes": [
+        3,
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 10.0,
+       "unit": "Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(10 Hz x N, N = 1)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 30.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, Band 1 (N=1, derived) @ 2.75 GHz to 6.46 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2750000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.75 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": [
+        3,
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 10.0,
+       "unit": "Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(10 Hz x N, N = 1)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 2750000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, Band 2 (N=2, derived) @ 5.86 GHz to 13.2 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "",
+       "lo": 5860000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "5.86 GHz to 13.2 GHz",
+       "annot": "",
+       "notes": [
+        3,
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 20.0,
+       "unit": "Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(10 Hz x N, N = 2)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 5860000000.0,
+     "freq_hi": 13200000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, Band 3 (N=4, derived) @ 12.4 GHz to 26.5 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "",
+       "lo": 12400000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "12.4 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": [
+        3,
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 40.0,
+       "unit": "Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(10 Hz x N, N = 4)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 12400000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Noise Sidebands [Carrier <= 1 GHz]",
+   "direction": "input",
+   "page": 183,
+   "ranges": [
+    {
+     "label": "Non-Option 103, offset 100 Hz, serial prefix <3436A @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 100.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "100 Hz offset",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -80.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-80 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 100.0,
+     "amp_hi": 100.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, offset 100 Hz, serial prefix <3436A @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 100.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "100 Hz offset",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -70.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-70 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 100.0,
+     "amp_hi": 100.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, offset 100 Hz, serial prefix >=3436A @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 100.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "100 Hz offset",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -88.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-88 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 100.0,
+     "amp_hi": 100.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, offset 100 Hz, serial prefix >=3436A @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 100.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "100 Hz offset",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -70.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-70 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 100.0,
+     "amp_hi": 100.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, offset 1 kHz @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "1 kHz offset",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -97.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-97 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1000.0,
+     "amp_hi": 1000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, offset 1 kHz @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "1 kHz offset",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -90.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-90 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1000.0,
+     "amp_hi": 1000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, offset 10 kHz @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 10000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "10 kHz offset",
+       "annot": "",
+       "notes": [
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -113.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-113 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10000.0,
+     "amp_hi": 10000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, offset 10 kHz @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 10000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "10 kHz offset",
+       "annot": "",
+       "notes": [
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -113.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-113 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10000.0,
+     "amp_hi": 10000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, offset 30 kHz @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 30000.0,
+       "hi": 30000.0,
+       "unit": "Hz",
+       "text": "30 kHz offset",
+       "annot": "",
+       "notes": [
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -113.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-113 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 30000.0,
+     "amp_hi": 30000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, offset 30 kHz @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 30000.0,
+       "hi": 30000.0,
+       "unit": "Hz",
+       "text": "30 kHz offset",
+       "annot": "",
+       "notes": [
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -113.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-113 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 30000.0,
+     "amp_hi": 30000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, offset 100 kHz, serial prefix <3436A @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 100000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "100 kHz offset",
+       "annot": "",
+       "notes": [
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -113.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-113 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 100000.0,
+     "amp_hi": 100000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, offset 100 kHz, serial prefix <3436A @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 100000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "100 kHz offset",
+       "annot": "",
+       "notes": [
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -113.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-113 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 100000.0,
+     "amp_hi": 100000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, offset 100 kHz, serial prefix >=3436A @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 100000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "100 kHz offset",
+       "annot": "",
+       "notes": [
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -117.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-117 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 100000.0,
+     "amp_hi": 100000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, offset 100 kHz, serial prefix >=3436A @ carrier <= 1 GHz",
+     "page": 183,
+     "params": [
+      {
+       "tag": "Offset",
+       "lo": 100000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "100 kHz offset",
+       "annot": "",
+       "notes": [
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 GHz",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -117.0,
+       "unit": "dBc/Hz",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-117 dBc/Hz)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 100000.0,
+     "amp_hi": 100000.0,
+     "unit": "Hz",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Span Accuracy [Internal Mixing]",
+   "direction": "input",
+   "page": 184,
+   "ranges": [
+    {
+     "label": "Band 0 (N=1, derived), SPAN <= 2 MHz @ 30 Hz to 2.9 GHz",
+     "page": 184,
+     "params": [
+      {
+       "tag": "Span",
+       "lo": 0.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "span 0 Hz to 2 MHz",
+       "annot": "",
+       "notes": [
+        3
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 % of span)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 2000000.0,
+     "unit": "Hz",
+     "freq_lo": 30.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Band 0 (N=1, derived), SPAN > 2 MHz @ 30 Hz to 2.9 GHz",
+     "page": 184,
+     "params": [
+      {
+       "tag": "Span",
+       "lo": 2000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "span > 2 MHz to 13.2 GHz",
+       "annot": "",
+       "notes": [
+        3
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(5 % of span)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 2000000.0,
+     "amp_hi": 13200000000.0,
+     "unit": "Hz",
+     "freq_lo": 30.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Band 1 (N=1, derived), SPAN <= 2 MHz @ 2.75 GHz to 6.46 GHz",
+     "page": 184,
+     "params": [
+      {
+       "tag": "Span",
+       "lo": 0.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "span 0 Hz to 2 MHz",
+       "annot": "",
+       "notes": [
+        3
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2750000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.75 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 % of span)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 2000000.0,
+     "unit": "Hz",
+     "freq_lo": 2750000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Band 1 (N=1, derived), SPAN > 2 MHz @ 2.75 GHz to 6.46 GHz",
+     "page": 184,
+     "params": [
+      {
+       "tag": "Span",
+       "lo": 2000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "span > 2 MHz to 13.2 GHz",
+       "annot": "",
+       "notes": [
+        3
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2750000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.75 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(5 % of span)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 2000000.0,
+     "amp_hi": 13200000000.0,
+     "unit": "Hz",
+     "freq_lo": 2750000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Band 2 (N=2, derived), SPAN <= 4 MHz @ 5.86 GHz to 13.2 GHz",
+     "page": 184,
+     "params": [
+      {
+       "tag": "Span",
+       "lo": 0.0,
+       "hi": 4000000.0,
+       "unit": "Hz",
+       "text": "span 0 Hz to 4 MHz",
+       "annot": "",
+       "notes": [
+        3
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5860000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "5.86 GHz to 13.2 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 % of span)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 4000000.0,
+     "unit": "Hz",
+     "freq_lo": 5860000000.0,
+     "freq_hi": 13200000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Band 2 (N=2, derived), SPAN > 4 MHz @ 5.86 GHz to 13.2 GHz",
+     "page": 184,
+     "params": [
+      {
+       "tag": "Span",
+       "lo": 4000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "span > 4 MHz to 13.2 GHz",
+       "annot": "",
+       "notes": [
+        3
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5860000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "5.86 GHz to 13.2 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(5 % of span)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 4000000.0,
+     "amp_hi": 13200000000.0,
+     "unit": "Hz",
+     "freq_lo": 5860000000.0,
+     "freq_hi": 13200000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Band 3 (N=4, derived), SPAN <= 8 MHz @ 12.4 GHz to 26.5 GHz",
+     "page": 184,
+     "params": [
+      {
+       "tag": "Span",
+       "lo": 0.0,
+       "hi": 8000000.0,
+       "unit": "Hz",
+       "text": "span 0 Hz to 8 MHz",
+       "annot": "",
+       "notes": [
+        3
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 12400000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "12.4 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 % of span)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 8000000.0,
+     "unit": "Hz",
+     "freq_lo": 12400000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Band 3 (N=4, derived), SPAN > 8 MHz @ 12.4 GHz to 26.5 GHz",
+     "page": 184,
+     "params": [
+      {
+       "tag": "Span",
+       "lo": 8000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "span > 8 MHz to 13.2 GHz",
+       "annot": "",
+       "notes": [
+        3
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 12400000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "12.4 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(5 % of span)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 8000000.0,
+     "amp_hi": 13200000000.0,
+     "unit": "Hz",
+     "freq_lo": 12400000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Resolution Bandwidth, Accuracy",
+   "direction": "input",
+   "page": 185,
+   "ranges": [
+    {
+     "label": "RES BW 1 Hz to 300 kHz (RBW setting)",
+     "page": 185,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "1 Hz to 300 kHz RES BW",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.1,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(10 % of RES BW)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 300000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "RES BW 1 MHz (RBW setting)",
+     "page": 185,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1000000.0,
+       "hi": 1000000.0,
+       "unit": "Hz",
+       "text": "1 MHz RES BW",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.25,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Hz",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(25 % of RES BW)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1000000.0,
+     "freq_hi": 1000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Resolution Bandwidth, Selectivity [60 dB/3 dB bandwidth ratio]",
+   "direction": "input",
+   "page": 185,
+   "ranges": [
+    {
+     "label": "RES BW >= 300 Hz (ratio less than)",
+     "page": 185,
+     "params": [
+      {
+       "tag": "",
+       "lo": 300.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "RES BW >= 300 Hz (to 2 MHz)",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 15.0,
+       "unit": "ratio",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(15:1)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 300.0,
+     "freq_hi": 2000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "RES BW <= 100 Hz (ratio less than)",
+     "page": 185,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "RES BW 1 Hz to 100 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 5.0,
+       "unit": "ratio",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(5:1)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 100.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Time, Sweep Time Accuracy [Span = 0 Hz, Non-Option 007 (E-Series)]",
+   "direction": "input",
+   "page": 186,
+   "ranges": [
+    {
+     "label": "Sweep time sweep time 30 ms to 6,000 s",
+     "page": 186,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.03,
+       "hi": 6000.0,
+       "unit": "s",
+       "text": "0.03 s to 6000 s",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 % of sweep time)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Span = 0 Hz, Non-Option 007 (E-Series)",
+     "amp_lo": 0.03,
+     "amp_hi": 6000.0,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Sweep time sweep time < 30 ms (50 us lower end from the sweep time range, p.186)",
+     "page": 186,
+     "params": [
+      {
+       "tag": "",
+       "lo": 5e-05,
+       "hi": 0.03,
+       "unit": "s",
+       "text": "5e-05 s to 0.03 s",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.1,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(10 % of sweep time)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Span = 0 Hz, Non-Option 007 (E-Series)",
+     "amp_lo": 5e-05,
+     "amp_hi": 0.03,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Time, Sweep Time Accuracy [Span = 0 Hz, Option 007 (E-Series) and all EC-Series]",
+   "direction": "input",
+   "page": 186,
+   "ranges": [
+    {
+     "label": "Sweep time sweep time 30 ms to 6,000 s",
+     "page": 186,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.03,
+       "hi": 6000.0,
+       "unit": "s",
+       "text": "0.03 s to 6000 s",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 % of sweep time)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Span = 0 Hz, Option 007 (E-Series) and all EC-Series",
+     "amp_lo": 0.03,
+     "amp_hi": 6000.0,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Sweep time sweep time < 30 ms (50 us lower end from the sweep time range, p.186)",
+     "page": 186,
+     "params": [
+      {
+       "tag": "",
+       "lo": 5e-05,
+       "hi": 0.03,
+       "unit": "s",
+       "text": "5e-05 s to 0.03 s",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.1 % of sweep time)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Span = 0 Hz, Option 007 (E-Series) and all EC-Series",
+     "amp_lo": 5e-05,
+     "amp_hi": 0.03,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Time, Delayed Sweep Accuracy [Serial prefix 3310A and above]",
+   "direction": "input",
+   "page": 187,
+   "ranges": [
+    {
+     "label": "Delay +2 us to +65.535 ms",
+     "page": 187,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "+2 us to +65.535 ms",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1e-06,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 us)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix 3310A and above",
+     "amp_lo": 2e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Time, Delayed Sweep Accuracy [Serial prefix <3310A]",
+   "direction": "input",
+   "page": 187,
+   "ranges": [
+    {
+     "label": "Delay +2 us to +65.535 ms, 20 to 30 degC",
+     "page": 187,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "+2 us to +65.535 ms",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      },
+      {
+       "tag": "Temperature",
+       "lo": 20.0,
+       "hi": 30.0,
+       "unit": "degC",
+       "text": "20 degC to 30 degC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1e-06,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 us + 0.05 % x DELAY SWEEP setting)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix <3310A",
+     "amp_lo": 2e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Temperature",
+       "lo": 20.0,
+       "hi": 30.0,
+       "unit": "degC"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Delay +2 us to +65.535 ms, -10 to 55 degC",
+     "page": 187,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "+2 us to +65.535 ms",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      },
+      {
+       "tag": "Temperature",
+       "lo": -10.0,
+       "hi": 55.0,
+       "unit": "degC",
+       "text": "-10 degC to 55 degC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0012,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1e-06,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 us + 0.12 % x DELAY SWEEP setting)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix <3310A",
+     "amp_lo": 2e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Temperature",
+       "lo": -10.0,
+       "hi": 55.0,
+       "unit": "degC"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Time, Gate Delay Accuracy [Serial prefix 3310A and above]",
+   "direction": "input",
+   "page": 188,
+   "ranges": [
+    {
+     "label": "Gate delay 3 us to 65.535 ms",
+     "page": 188,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "3 us to 65.535 ms",
+       "annot": "",
+       "notes": [
+        13
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1e-06,
+       "unit": "s",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1 us)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix 3310A and above",
+     "amp_lo": 3e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Time, Gate Delay Accuracy [Serial prefix <3310A]",
+   "direction": "input",
+   "page": 188,
+   "ranges": [
+    {
+     "label": "Gate delay 3 us to 65.535 ms, 20 to 30 degC",
+     "page": 188,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "3 us to 65.535 ms",
+       "annot": "",
+       "notes": [
+        13
+       ]
+      },
+      {
+       "tag": "Temperature",
+       "lo": 20.0,
+       "hi": 30.0,
+       "unit": "degC",
+       "text": "20 degC to 30 degC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1e-06,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 us + 0.05 % x GATE DELAY setting)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix <3310A",
+     "amp_lo": 3e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Temperature",
+       "lo": 20.0,
+       "hi": 30.0,
+       "unit": "degC"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Gate delay 3 us to 65.535 ms, -10 to 55 degC",
+     "page": 188,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "3 us to 65.535 ms",
+       "annot": "",
+       "notes": [
+        13
+       ]
+      },
+      {
+       "tag": "Temperature",
+       "lo": -10.0,
+       "hi": 55.0,
+       "unit": "degC",
+       "text": "-10 degC to 55 degC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0012,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1e-06,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1 us + 0.12 % x GATE DELAY setting)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix <3310A",
+     "amp_lo": 3e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Temperature",
+       "lo": -10.0,
+       "hi": 55.0,
+       "unit": "degC"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Time, Gate Length Accuracy [Serial prefix 3310A and above]",
+   "direction": "input",
+   "page": 188,
+   "ranges": [
+    {
+     "label": "Gate length 1 us to 65.535 ms",
+     "page": 188,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "1 us to 65.535 ms",
+       "annot": "",
+       "notes": [
+        13
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1e-06,
+       "unit": "s",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1 us)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix 3310A and above",
+     "amp_lo": 1e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Time, Gate Length Accuracy [Serial prefix <3310A]",
+   "direction": "input",
+   "page": 188,
+   "ranges": [
+    {
+     "label": "Gate length 1 us to 65.535 ms, 20 to 30 degC",
+     "page": 188,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "1 us to 65.535 ms",
+       "annot": "",
+       "notes": [
+        13
+       ]
+      },
+      {
+       "tag": "Temperature",
+       "lo": 20.0,
+       "hi": 30.0,
+       "unit": "degC",
+       "text": "20 degC to 30 degC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2e-07,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.2 us + 0.05 % x GATE LENGTH setting)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix <3310A",
+     "amp_lo": 1e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Temperature",
+       "lo": 20.0,
+       "hi": 30.0,
+       "unit": "degC"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Gate length 1 us to 65.535 ms, -10 to 55 degC",
+     "page": 188,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1e-06,
+       "hi": 0.065535,
+       "unit": "s",
+       "text": "1 us to 65.535 ms",
+       "annot": "",
+       "notes": [
+        13
+       ]
+      },
+      {
+       "tag": "Temperature",
+       "lo": -10.0,
+       "hi": 55.0,
+       "unit": "degC",
+       "text": "-10 degC to 55 degC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0012,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2e-07,
+       "unit": "s",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.2 us + 0.12 % x GATE LENGTH setting)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Serial prefix <3310A",
+     "amp_lo": 1e-06,
+     "amp_hi": 0.065535,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [
+      {
+       "tag": "Temperature",
+       "lo": -10.0,
+       "hi": 55.0,
+       "unit": "degC"
+      }
+     ],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Gain Compression",
+   "direction": "input",
+   "page": 189,
+   "ranges": [
+    {
+     "label": "Mixer level <= -5 dBm @ 10 MHz to 2.9 GHz",
+     "page": 189,
+     "params": [
+      {
+       "tag": "Mixer level (max)",
+       "lo": -5.0,
+       "hi": -5.0,
+       "unit": "dBm",
+       "text": "<= -5 dBm at input mixer",
+       "annot": "",
+       "notes": [
+        11,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -5.0,
+     "amp_hi": -5.0,
+     "unit": "dBm",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Mixer level <= 0 dBm @ 2.9 GHz to 6.46 GHz",
+     "page": 189,
+     "params": [
+      {
+       "tag": "Mixer level (max)",
+       "lo": 0.0,
+       "hi": 0.0,
+       "unit": "dBm",
+       "text": "<= 0 dBm at input mixer",
+       "annot": "",
+       "notes": [
+        11,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2900000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.9 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 0.0,
+     "unit": "dBm",
+     "freq_lo": 2900000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Mixer level <= -3 dBm @ 6.46 GHz to 26.5 GHz",
+     "page": 189,
+     "params": [
+      {
+       "tag": "Mixer level (max)",
+       "lo": -3.0,
+       "hi": -3.0,
+       "unit": "dBm",
+       "text": "<= -3 dBm at input mixer",
+       "annot": "",
+       "notes": [
+        11,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 6460000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "6.46 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -3.0,
+     "amp_hi": -3.0,
+     "unit": "dBm",
+     "freq_lo": 6460000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Displayed Average Noise Level [No signal, 0 dB input attenuation, 1 Hz video bandwidth]",
+   "direction": "input",
+   "page": 190,
+   "ranges": [
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 30 Hz (Option 006)",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 30.0,
+       "unit": "Hz",
+       "text": "30 Hz",
+       "annot": "",
+       "notes": [
+        19
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -90.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-90 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 30.0,
+     "freq_hi": 30.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 30 Hz (Option 006)",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 30.0,
+       "unit": "Hz",
+       "text": "30 Hz",
+       "annot": "",
+       "notes": [
+        19
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -80.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-80 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 30.0,
+     "freq_hi": 30.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 1 kHz (Option 006)",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "1 kHz",
+       "annot": "",
+       "notes": [
+        19
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -105.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-105 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 1000.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 1 kHz (Option 006)",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "1 kHz",
+       "annot": "",
+       "notes": [
+        19
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -95.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-95 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 1000.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 10 kHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -120.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-120 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 10000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 10 kHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -110.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-110 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 10000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 100 kHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 100000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "100 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -120.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-120 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 100000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 100 kHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 100000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "100 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -110.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-110 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 100000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 1 MHz to 10 MHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000000.0,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "1 MHz to 10 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -140.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-140 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 1000000.0,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 1 MHz to 10 MHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000000.0,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "1 MHz to 10 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -130.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-130 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 1000000.0,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 10 MHz to 2.9 GHz, serial prefix <3246A",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -145.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-145 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 10 MHz to 2.9 GHz, serial prefix <3246A",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -135.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-135 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 10 MHz to 2.9 GHz, serial prefix 3246A to <3645A",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -144.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-144 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 10 MHz to 2.9 GHz, serial prefix 3246A to <3645A",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -134.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-134 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 10 MHz to 2.9 GHz, serial prefix >=3645A",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -149.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-149 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 10 MHz to 2.9 GHz, serial prefix >=3645A",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -139.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-139 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 10 MHz to 2.9 GHz, Option H13",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -149.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-149 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 10 MHz to 2.9 GHz, Option H13",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -139.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-139 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 10000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 2.9 GHz to 6.46 GHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2900000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.9 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -148.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-148 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 2900000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 2.9 GHz to 6.46 GHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2900000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.9 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -138.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-138 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 2900000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 6.46 GHz to 13.2 GHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 6460000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "6.46 GHz to 13.2 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -145.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-145 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 6460000000.0,
+     "freq_hi": 13200000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 6.46 GHz to 13.2 GHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 6460000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "6.46 GHz to 13.2 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -135.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-135 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 6460000000.0,
+     "freq_hi": 13200000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 13.2 GHz to 22.0 GHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 13200000000.0,
+       "hi": 22000000000.0,
+       "unit": "Hz",
+       "text": "13.2 GHz to 22 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -140.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-140 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 13200000000.0,
+     "freq_hi": 22000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 13.2 GHz to 22.0 GHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 13200000000.0,
+       "hi": 22000000000.0,
+       "unit": "Hz",
+       "text": "13.2 GHz to 22 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -130.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-130 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 13200000000.0,
+     "freq_hi": 22000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Non-Option 103, 1 Hz RES BW, 22.0 GHz to 26.5 GHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 1.0,
+       "hi": 1.0,
+       "unit": "Hz",
+       "text": "1 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 22000000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "22 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -139.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-139 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 1.0,
+     "amp_hi": 1.0,
+     "unit": "Hz",
+     "freq_lo": 22000000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Option 103, 10 Hz RES BW, 22.0 GHz to 26.5 GHz",
+     "page": 190,
+     "params": [
+      {
+       "tag": "RES BW",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "10 Hz RES BW",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 22000000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "22 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -129.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-129 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": 22000000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Spurious Responses [Second Harmonic Distortion]",
+   "direction": "input",
+   "page": 191,
+   "ranges": [
+    {
+     "label": "Applied signal 1 MHz to 1.45 GHz (serial prefix <3645A), mixer level -40 dBm",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level",
+       "lo": -40.0,
+       "hi": -40.0,
+       "unit": "dBm",
+       "text": "-40 dBm mixer level",
+       "annot": "",
+       "notes": [
+        11
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000000.0,
+       "hi": 1450000000.0,
+       "unit": "Hz",
+       "text": "1 MHz to 1.45 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -72.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-72 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -40.0,
+     "amp_hi": -40.0,
+     "unit": "dBm",
+     "freq_lo": 1000000.0,
+     "freq_hi": 1450000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Applied signal 20 MHz to 1.45 GHz (serial prefix >=3645A), mixer level -40 dBm",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level",
+       "lo": -40.0,
+       "hi": -40.0,
+       "unit": "dBm",
+       "text": "-40 dBm mixer level",
+       "annot": "",
+       "notes": [
+        11
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000000.0,
+       "hi": 1450000000.0,
+       "unit": "Hz",
+       "text": "20 MHz to 1.45 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -79.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-79 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -40.0,
+     "amp_hi": -40.0,
+     "unit": "dBm",
+     "freq_lo": 20000000.0,
+     "freq_hi": 1450000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Applied signal 20 MHz to 1.45 GHz (Option H13), mixer level -40 dBm",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level",
+       "lo": -40.0,
+       "hi": -40.0,
+       "unit": "dBm",
+       "text": "-40 dBm mixer level",
+       "annot": "",
+       "notes": [
+        11
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000000.0,
+       "hi": 1450000000.0,
+       "unit": "Hz",
+       "text": "20 MHz to 1.45 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -79.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-79 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -40.0,
+     "amp_hi": -40.0,
+     "unit": "dBm",
+     "freq_lo": 20000000.0,
+     "freq_hi": 1450000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Applied signal 1.45 GHz to 2 GHz (1.45 GHz to 2.0 GHz), mixer level -10 dBm",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level",
+       "lo": -10.0,
+       "hi": -10.0,
+       "unit": "dBm",
+       "text": "-10 dBm mixer level",
+       "annot": "",
+       "notes": [
+        11
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1450000000.0,
+       "hi": 2000000000.0,
+       "unit": "Hz",
+       "text": "1.45 GHz to 2 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -85.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-85 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -10.0,
+     "amp_hi": -10.0,
+     "unit": "dBm",
+     "freq_lo": 1450000000.0,
+     "freq_hi": 2000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Applied signal 2 GHz to 13.25 GHz (2.0 GHz to 13.25 GHz), mixer level -10 dBm",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level",
+       "lo": -10.0,
+       "hi": -10.0,
+       "unit": "dBm",
+       "text": "-10 dBm mixer level",
+       "annot": "",
+       "notes": [
+        11
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2000000000.0,
+       "hi": 13250000000.0,
+       "unit": "Hz",
+       "text": "2 GHz to 13.25 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -100.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-100 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -10.0,
+     "amp_hi": -10.0,
+     "unit": "dBm",
+     "freq_lo": 2000000000.0,
+     "freq_hi": 13250000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Spurious Responses [Third Order Intermodulation Distortion]",
+   "direction": "input",
+   "page": 191,
+   "ranges": [
+    {
+     "label": "Frequency range 1 MHz to 2.9 GHz (serial prefix <3645A), two signals at -30 dBm each",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level (each)",
+       "lo": -30.0,
+       "hi": -30.0,
+       "unit": "dBm",
+       "text": "-30 dBm each at input mixer",
+       "annot": "",
+       "notes": [
+        11,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "1 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -78.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-78 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -30.0,
+     "amp_hi": -30.0,
+     "unit": "dBm",
+     "freq_lo": 1000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Frequency range 20 MHz to 2.9 GHz (serial prefix >=3645A), two signals at -30 dBm each",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level (each)",
+       "lo": -30.0,
+       "hi": -30.0,
+       "unit": "dBm",
+       "text": "-30 dBm each at input mixer",
+       "annot": "",
+       "notes": [
+        11,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "20 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -82.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-82 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -30.0,
+     "amp_hi": -30.0,
+     "unit": "dBm",
+     "freq_lo": 20000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Frequency range 20 MHz to 2.9 GHz (Option H13), two signals at -30 dBm each",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level (each)",
+       "lo": -30.0,
+       "hi": -30.0,
+       "unit": "dBm",
+       "text": "-30 dBm each at input mixer",
+       "annot": "",
+       "notes": [
+        11,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "20 MHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -82.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-82 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -30.0,
+     "amp_hi": -30.0,
+     "unit": "dBm",
+     "freq_lo": 20000000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Frequency range 2.9 GHz to 6.46 GHz (2.9 GHz to 6.46 GHz), two signals at -30 dBm each",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level (each)",
+       "lo": -30.0,
+       "hi": -30.0,
+       "unit": "dBm",
+       "text": "-30 dBm each at input mixer",
+       "annot": "",
+       "notes": [
+        11,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2900000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.9 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -90.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-90 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -30.0,
+     "amp_hi": -30.0,
+     "unit": "dBm",
+     "freq_lo": 2900000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Frequency range 6.46 GHz to 26.5 GHz (6.46 GHz to 26.5 GHz), two signals at -30 dBm each",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level (each)",
+       "lo": -30.0,
+       "hi": -30.0,
+       "unit": "dBm",
+       "text": "-30 dBm each at input mixer",
+       "annot": "",
+       "notes": [
+        11,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 6460000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "6.46 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -75.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-75 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -30.0,
+     "amp_hi": -30.0,
+     "unit": "dBm",
+     "freq_lo": 6460000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Spurious Responses [Image, Multiple and Out-of-Band]",
+   "direction": "input",
+   "page": 191,
+   "ranges": [
+    {
+     "label": "Frequency range 10 MHz to 26.5 GHz, mixer level -10 dBm",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Mixer level",
+       "lo": -10.0,
+       "hi": -10.0,
+       "unit": "dBm",
+       "text": "-10 dBm mixer level",
+       "annot": "",
+       "notes": [
+        11
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -80.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-80 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -10.0,
+     "amp_hi": -10.0,
+     "unit": "dBm",
+     "freq_lo": 10000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Residual Responses [No signal at input, 0 dB input attenuation]",
+   "direction": "input",
+   "page": 191,
+   "ranges": [
+    {
+     "label": "Residual responses >200 kHz (N relation symbol missing in print)",
+     "page": 191,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 0.0,
+       "hi": 0.0,
+       "unit": "dB",
+       "text": "0 dB input attenuation",
+       "annot": "",
+       "notes": [
+        21
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 200000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "200 kHz to 26.5 GHz",
+       "annot": "",
+       "notes": [
+        21
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -90.0,
+       "unit": "dBm",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(-90 dBm)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 0.0,
+     "unit": "dB",
+     "freq_lo": 200000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Flatness [Frequency Response, Relative, 10 dB input attenuation]",
+   "direction": "input",
+   "page": 193,
+   "ranges": [
+    {
+     "label": "Relative, 30 Hz to 2.9 GHz (Option 006)",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.25,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.25 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.8,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(0.8 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Relative, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 30.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Relative, 9 kHz to 2.9 GHz (Non-Option 006)",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 9000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "9 kHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.25,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.25 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.8,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(0.8 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Relative, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 9000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Relative, 100 MHz to 2.0 GHz (serial prefix >=3645A)",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 100000000.0,
+       "hi": 2000000000.0,
+       "unit": "Hz",
+       "text": "100 MHz to 2 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.0 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.8,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(0.8 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Relative, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 100000000.0,
+     "freq_hi": 2000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Relative, 2.9 GHz to 6.46 GHz",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2900000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.9 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.5 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(1.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Relative, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 2900000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Relative, 6.46 GHz to 13.2 GHz",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 6460000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "6.46 GHz to 13.2 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.2,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(2.2 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(1.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Relative, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 6460000000.0,
+     "freq_hi": 13200000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Relative, 13.2 GHz to 22.0 GHz (printed \"13.2 kHz\")",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 13200000000.0,
+       "hi": 22000000000.0,
+       "unit": "Hz",
+       "text": "13.2 GHz to 22 GHz",
+       "annot": "",
+       "notes": [
+        10
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(2.5 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(1.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Relative, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 13200000000.0,
+     "freq_hi": 22000000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Relative, 22.0 GHz to 26.5 GHz",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 22000000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "22 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 3.3,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(3.3 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.2,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(2.2 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Relative, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 22000000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Flatness [Frequency Response, Absolute, referenced to 300 MHz CAL OUTPUT, 10 dB input attenuation]",
+   "direction": "input",
+   "page": 193,
+   "ranges": [
+    {
+     "label": "Absolute, 30 Hz to 2.9 GHz (Option 006)",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.8,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.8 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(1.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Absolute, referenced to 300 MHz CAL OUTPUT, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 30.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Absolute, 9 kHz to 2.9 GHz (Non-Option 006)",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 9000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "9 kHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.8,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.8 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(1.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Absolute, referenced to 300 MHz CAL OUTPUT, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 9000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Absolute, 2.9 GHz to 6.46 GHz",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 2900000000.0,
+       "hi": 6460000000.0,
+       "unit": "Hz",
+       "text": "2.9 GHz to 6.46 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.4,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(2.4 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(1.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Absolute, referenced to 300 MHz CAL OUTPUT, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 2900000000.0,
+     "freq_hi": 6460000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Absolute, 6.46 GHz to 13.2 GHz",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 6460000000.0,
+       "hi": 13200000000.0,
+       "unit": "Hz",
+       "text": "6.46 GHz to 13.2 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.9,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(2.9 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(2.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Absolute, referenced to 300 MHz CAL OUTPUT, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 6460000000.0,
+     "freq_hi": 13200000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Absolute, 13.2 GHz to 26.5 GHz",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 13200000000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "13.2 GHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 4.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(4.0 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(2.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Absolute, referenced to 300 MHz CAL OUTPUT, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 13200000000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Absolute, 30 Hz to 26.5 GHz (Option 006)",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 4.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(4.0 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(2.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Absolute, referenced to 300 MHz CAL OUTPUT, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 30.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Absolute, 9 kHz to 26.5 GHz (Non-Option 006)",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Input attenuation",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB input attenuation",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 9000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "9 kHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 4.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(4.0 dB)"
+      },
+      {
+       "period": "typical",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[typical] Accuracy: +/-(2.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Frequency Response, Absolute, referenced to 300 MHz CAL OUTPUT, 10 dB input attenuation",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 9000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Amplitude Uncertainty [Band Switching, additional to Relative Frequency Response]",
+   "direction": "input",
+   "page": 193,
+   "ranges": [
+    {
+     "label": "Between any two bands",
+     "page": 193,
+     "params": [
+      {
+       "tag": "",
+       "lo": 9000.0,
+       "hi": 26500000000.0,
+       "unit": "Hz",
+       "text": "9 kHz to 26.5 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 9000.0,
+     "freq_hi": 26500000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Amplitude Uncertainty [Calibrator, -10 dBm 300 MHz]",
+   "direction": "input",
+   "page": 193,
+   "ranges": [
+    {
+     "label": "Calibrator uncertainty at -10 dBm, 300 MHz",
+     "page": 193,
+     "params": [
+      {
+       "tag": "Level",
+       "lo": -10.0,
+       "hi": -10.0,
+       "unit": "dBm",
+       "text": "-10 dBm",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 300000000.0,
+       "hi": 300000000.0,
+       "unit": "Hz",
+       "text": "300 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.3,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.3 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -10.0,
+     "amp_hi": -10.0,
+     "unit": "dBm",
+     "freq_lo": 300000000.0,
+     "freq_hi": 300000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Amplitude Uncertainty [Input Attenuator Switching, 20 to 70 dB settings referenced to 10 dB]",
+   "direction": "input",
+   "page": 194,
+   "ranges": [
+    {
+     "label": "Per 10 dB step, 9 kHz to 2.9 GHz",
+     "page": 194,
+     "params": [
+      {
+       "tag": "Step",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB step",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 9000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "9 kHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.6,
+       "unit": "dB/10 dB step",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.6 dB per 10 dB step)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 9000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Maximum, 9 kHz to 2.9 GHz",
+     "page": 194,
+     "params": [
+      {
+       "tag": "Attenuator setting",
+       "lo": 20.0,
+       "hi": 70.0,
+       "unit": "dB",
+       "text": "20 to 70 dB settings",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 9000.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "9 kHz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.8,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.8 dB maximum)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 20.0,
+     "amp_hi": 70.0,
+     "unit": "dB",
+     "freq_lo": 9000.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Per 10 dB step, 30 Hz to 2.9 GHz (Option 006)",
+     "page": 194,
+     "params": [
+      {
+       "tag": "Step",
+       "lo": 10.0,
+       "hi": 10.0,
+       "unit": "dB",
+       "text": "10 dB step",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.6,
+       "unit": "dB/10 dB step",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.6 dB per 10 dB step)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 10.0,
+     "unit": "dB",
+     "freq_lo": 30.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "Maximum, 30 Hz to 2.9 GHz (Option 006)",
+     "page": 194,
+     "params": [
+      {
+       "tag": "Attenuator setting",
+       "lo": 20.0,
+       "hi": 70.0,
+       "unit": "dB",
+       "text": "20 to 70 dB settings",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 2900000000.0,
+       "unit": "Hz",
+       "text": "30 Hz to 2.9 GHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.8,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.8 dB maximum)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 20.0,
+     "amp_hi": 70.0,
+     "unit": "dB",
+     "freq_lo": 30.0,
+     "freq_hi": 2900000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Amplitude Uncertainty [IF Gain]",
+   "direction": "input",
+   "page": 194,
+   "ranges": [
+    {
+     "label": "Reference levels 0 dBm to -80 dBm, 10 dB input attenuation",
+     "page": 194,
+     "params": [
+      {
+       "tag": "",
+       "lo": -80.0,
+       "hi": 0.0,
+       "unit": "dBm",
+       "text": "0 dBm to -80 dBm reference level",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -80.0,
+     "amp_hi": 0.0,
+     "unit": "dBm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Amplitude Uncertainty [Resolution Bandwidth Switching, referenced to 300 kHz RES BW]",
+   "direction": "input",
+   "page": 194,
+   "ranges": [
+    {
+     "label": "Referenced to 300 kHz resolution bandwidth at the reference level",
+     "page": 194,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "RES BW 1 Hz to 2 MHz (range per p.185)",
+       "annot": "",
+       "notes": [
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 2000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Amplitude Uncertainty [Pulse Digitization, pulse response mode, PRF > 720/sweep time]",
+   "direction": "input",
+   "page": 195,
+   "ranges": [
+    {
+     "label": "LOG, RES BW <= 1 MHz (peak-to-peak)",
+     "page": 195,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 1000000.0,
+       "unit": "Hz",
+       "text": "RES BW <= 1 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.25,
+       "unit": "dB p-p",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(1.25 dB peak-to-peak)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 1000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "LOG, RES BW = 2 MHz (peak-to-peak)",
+     "page": 195,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2000000.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "RES BW = 2 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 3.0,
+       "unit": "dB p-p",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(3 dB peak-to-peak)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 2000000.0,
+     "freq_hi": 2000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "LINEAR, RES BW <= 1 MHz (peak-to-peak, of reference level)",
+     "page": 195,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 1000000.0,
+       "unit": "Hz",
+       "text": "RES BW <= 1 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.04,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "x reference level p-p",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(4 % of reference level peak-to-peak)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 1000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "LINEAR, RES BW = 2 MHz (peak-to-peak, of reference level)",
+     "page": 195,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2000000.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "RES BW = 2 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.12,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "x reference level p-p",
+       "le": true,
+       "raw": "[2 yr] Accuracy: <=(12 % of reference level peak-to-peak)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 2000000.0,
+     "freq_hi": 2000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Amplitude Uncertainty [IF Alignment, additional, 300 Hz RES BW only]",
+   "direction": "input",
+   "page": 195,
+   "ranges": [
+    {
+     "label": "300 Hz RES BW only",
+     "page": 195,
+     "params": [
+      {
+       "tag": "",
+       "lo": 300.0,
+       "hi": 300.0,
+       "unit": "Hz",
+       "text": "300 Hz RES BW",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 300.0,
+     "freq_hi": 300.0,
+     "qualifiers": [],
+     "range_max": 300.0,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Scale Fidelity [LOG, Incremental, 0 to -90 dB range]",
+   "direction": "input",
+   "page": 196,
+   "ranges": [
+    {
+     "label": "RES BW >= 300 Hz (per dB)",
+     "page": 196,
+     "params": [
+      {
+       "tag": "",
+       "lo": 300.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "RES BW >= 300 Hz",
+       "annot": "",
+       "notes": [
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.1,
+       "unit": "dB/dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.1 dB/dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 300.0,
+     "freq_hi": 2000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "RES BW <= 100 Hz (per 2 dB)",
+     "page": 196,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "RES BW <= 100 Hz",
+       "annot": "",
+       "notes": [
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.2,
+       "unit": "dB/2 dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.2 dB/2 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 100.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Scale Fidelity [LOG, Cumulative, maximum]",
+   "direction": "input",
+   "page": 196,
+   "ranges": [
+    {
+     "label": "0 to -90 dB range, RES BW >= 300 Hz, maximum",
+     "page": 196,
+     "params": [
+      {
+       "tag": "",
+       "lo": 300.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "RES BW >= 300 Hz",
+       "annot": "",
+       "notes": [
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.85,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.85 dB maximum (0.1 dB/dB from the reference level))"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 300.0,
+     "freq_hi": 2000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0 to -90 dB range (-70 dB for span 0 Hz), RES BW <= 100 Hz, maximum",
+     "page": 196,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "RES BW <= 100 Hz",
+       "annot": "",
+       "notes": [
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.85,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.85 dB maximum (0.2 dB/2 dB from the reference level))"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 100.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0 to -100 dB range, RES BW >= 300 Hz",
+     "page": 196,
+     "params": [
+      {
+       "tag": "",
+       "lo": 300.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "RES BW >= 300 Hz",
+       "annot": "",
+       "notes": [
+        14,
+        15
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "characteristic",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[characteristic] Accuracy: +/-(2.5 dB (characteristic))"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 300.0,
+     "freq_hi": 2000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "0 to -100 dB range, RES BW <= 100 Hz, maximum",
+     "page": 196,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "RES BW <= 100 Hz",
+       "annot": "",
+       "notes": [
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.5 dB maximum)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 100.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Scale Fidelity [LINEAR]",
+   "direction": "input",
+   "page": 196,
+   "ranges": [
+    {
+     "label": "LINEAR scale (of reference level)",
+     "page": 196,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.0,
+       "hi": 2000000.0,
+       "unit": "Hz",
+       "text": "any RES BW (not restricted on the page)",
+       "annot": "",
+       "notes": [
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.03,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "x reference level",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(3 % of reference level)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1.0,
+     "freq_hi": 2000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "IF INPUT [Full-screen deflection level, external mixing, 0 dBm reference level, 30 dB conversion loss]",
+   "direction": "input",
+   "page": 197,
+   "ranges": [
+    {
+     "label": "Input level -30 dBm +/-1.5 dB",
+     "page": 197,
+     "params": [
+      {
+       "tag": "",
+       "lo": -31.5,
+       "hi": -28.5,
+       "unit": "dBm",
+       "text": "-30 dBm +/-1.5 dB",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.5,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.5 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -31.5,
+     "amp_hi": -28.5,
+     "unit": "dBm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Calibrator Output [CAL OUTPUT, 300 MHz]",
+   "direction": "output",
+   "page": 197,
+   "ranges": [
+    {
+     "label": "CAL OUTPUT amplitude -10 dBm",
+     "page": 197,
+     "params": [
+      {
+       "tag": "",
+       "lo": -10.0,
+       "hi": -10.0,
+       "unit": "dBm",
+       "text": "-10 dBm",
+       "annot": "",
+       "notes": []
+      },
+      {
+       "tag": "",
+       "lo": 300000000.0,
+       "hi": 300000000.0,
+       "unit": "Hz",
+       "text": "300 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.3,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.3 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": -10.0,
+     "amp_hi": -10.0,
+     "unit": "dBm",
+     "freq_lo": 300000000.0,
+     "freq_hi": 300000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Local Oscillator Output [1ST LO OUTPUT]",
+   "direction": "output",
+   "page": 197,
+   "ranges": [
+    {
+     "label": "1ST LO OUTPUT amplitude +16.5 dBm",
+     "page": 197,
+     "params": [
+      {
+       "tag": "",
+       "lo": 16.5,
+       "hi": 16.5,
+       "unit": "dBm",
+       "text": "+16.5 dBm",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "2 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.0,
+       "unit": "dB",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(2.0 dB)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 16.5,
+     "amp_hi": 16.5,
+     "unit": "dBm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  }
+ ],
+ "problems": [
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Direction is \"input\" for the measuring specifications (the analyzer measures). specmanager.StandardSpec.lookup() defaults to direction=\"output\": pass direction=\"input\" (or None). The CAL OUTPUT amplitude and 1ST LO OUTPUT amplitude rows are direction \"output\" with kind OTHER."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "No confidence level or coverage factor is printed for the specifications (p.178). confidence_pct is left empty; the specification manager will assume k = 2 unless a divisor is set. The guide calls them \"warranted performance\" under the stated conditions."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Period: every warranted row is stored with period \"2 yr\" (the printed two-year calibration cycle). specmanager.StandardSpec.lookup() defaults to the standard's period (default \"1 yr\"), so a lookup needs period=\"2 yr\" (or set the standard's period to 2 yr in the manager) to find these specs. Typical values use period \"typical\"."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Model coverage: the guide (title \"8560E/EC Series Spectrum Analyzer Calibration Guide\", 1082 pages, Volumes I and II) has one specification chapter per model: 8560E/EC (Ch.2, PDF 63-100), 8561E/EC (Ch.3, 101-136), 8562E/EC (Ch.4, 137-176), 8563E/EC (Ch.5, 177-216), 8564E/EC (Ch.6, 217-256), 8565E/EC (Ch.7, 257-296). ONLY Ch.5 (pp.177-216) was read; every value in this file is 8563E/EC-specific. The performance tests (Vol. II, Ch.10, p.513 on) and test-record limits were not read."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Model name: stored as \"8563E\" (manufacturer \"Agilent\"). The chapter covers the 8563E and the 8563EC (the EC series differs by Option 007 timing and other items called out per row); the guide gives no separate 8563EC column. Check which rows (Option 006/007/103/H13, serial prefix) apply to the asset."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Page numbers: printed page = PDF page in this guide, so \"page\" fields and notes use the one number."
+  },
+  {
+   "level": "warn",
+   "where": "Frequency Readout Accuracy (p.181)",
+   "what": "NOT STORED (depends on span, RES BW, N and a sum of terms the schema cannot hold): <+/-(frequency readout x frequency reference accuracy + 5 % of frequency span + 15 % of resolution bandwidth + 10 Hz) for SPAN > 2 MHz x N; <+/-(frequency readout x frequency reference accuracy + 1 % of frequency span + 15 % of resolution bandwidth + 10 Hz) for SPAN <= 2 MHz x N (START, CENTER, STOP or MARKER frequency). N = harmonic mixing mode."
+  },
+  {
+   "level": "warn",
+   "where": "Frequency Count Marker (p.181)",
+   "what": "NOT STORED (needs N, reference accuracy and LSD): marker accuracy (S/N >= 25 dB) <+/-(marker frequency x frequency reference accuracy + 2 Hz x N + 1 LSD); delta count accuracy <+/-(delta frequency x frequency reference accuracy + 4 Hz x N + 2 LSD). Resolution selectable 1 Hz to 1 MHz. Marker frequency resolution SPAN/600 (min 1 Hz) and marker time resolution sweep time/600 (p.188) are resolutions, not stored."
+  },
+  {
+   "level": "warn",
+   "where": "Noise Sidebands > 1 GHz (p.183)",
+   "what": "Frequency-dependent adders for carriers above 1 GHz and up to 2.9 GHz are not stored (see note 6); only the <=1 GHz limits are rows."
+  },
+  {
+   "level": "warn",
+   "where": "Spurious Responses, all input-related (p.191)",
+   "what": "NOT STORED: 10 MHz to 26.5 GHz, mixer level -40 dBm, < (-75 + 20 log N) dBc, N = harmonic mixing number. Depends on N; evaluating it would need a rounded (irrational) number the manual does not print."
+  },
+  {
+   "level": "warn",
+   "where": "Resolution Bandwidth, Accuracy (p.185)",
+   "what": "2 MHz RES BW accuracy is printed \"<+50 %, -25 %\" (asymmetric): the schema holds one +/- limit, so it is NOT stored."
+  },
+  {
+   "level": "warn",
+   "where": "Resolution Bandwidth / Video Bandwidth / Span / Sweep ranges, mixing bands (pp.180, 184, 185, 186, 187)",
+   "what": "Range-only entries (frequency range, internal and external mixing bands, harmonic mixing numbers, span range 0 Hz and 100 Hz to 13.2 GHz, external mixing minimum span 100 Hz x N, RES BW 1 Hz to 1 MHz (Option 103: 10 Hz to 1 MHz) and 2 MHz, video BW 1 Hz to 3 MHz, sweep time ranges, trigger modes, delayed-sweep and gate ranges/resolution) carry no accuracy and are NOT stored. Delayed-sweep range and gate range are used as value ranges of their accuracy rows."
+  },
+  {
+   "level": "warn",
+   "where": "Bandwidth shape (p.185)",
+   "what": "Qualitative (approximately Gaussian / synchronously tuned 4-pole / digital) and not stored."
+  },
+  {
+   "level": "warn",
+   "where": "Maximum Safe Input Power / DC (p.189)",
+   "what": "Ratings, not accuracies, NOT stored: average continuous power +30 dBm (1 W) with input attenuation >=10 dB; peak pulse power +50 dBm (100 W) for pulse widths <=10 us and <1 % duty cycle with input attenuation >=30 dB; DC voltage <+/-0.2 V."
+  },
+  {
+   "level": "warn",
+   "where": "Display range, reference level range, marker amplitude resolution (pp.192, 196)",
+   "what": "Not stored (ranges and resolutions): LOG 10 / 5 / 2 / 1 dB/DIV and LINEAR 10 % per division scales; reference level range -120 dBm to +30 dBm (LOG, 0.1 dB steps) and 2.2 uV to 7.07 V (LINEAR, 1 % steps); marker amplitude resolution (1/6, 1/12, 1/30, 1/60 dB; reference level/600)."
+  },
+  {
+   "level": "warn",
+   "where": "Inputs and Outputs / General Specifications (pp.197-201)",
+   "what": "Connector, GPIB, plotter/printer, environmental, EMC, power and dimension tables are not calibration data and are NOT stored. Of p.197: IF INPUT level, CAL OUTPUT amplitude and 1ST LO OUTPUT amplitude ARE stored."
+  },
+  {
+   "level": "warn",
+   "where": "Characteristics (pp.202-212)",
+   "what": "\"These are not specifications\" (p.202): typical / nominal / approximate values (e.g. initial achievable accuracy, warmup, impulse bandwidth, noise-sideband plots, band-to-band amplitude accuracy, dynamic range) are NOT stored. Regulatory pages 213-216 not read."
+  },
+  {
+   "level": "warn",
+   "where": "Scale Fidelity, Cumulative LOG (p.196)",
+   "what": "Printed \"0.1 dB/dB from the reference level to a maximum of +/-0.85 dB\": the slope and the cap are both on the page; only the cap (0.85 dB, 1.5 dB) is stored as a number with the slope in the spec text. The 0 to -100 dB range with RES BW >= 300 Hz is \"+/-2.5 dB characteristic\" (stored with period \"characteristic\"); whether the RES BW <= 100 Hz \"maximum of +/-1.5 dB\" is also a characteristic is not stated (stored as a specification, 2 yr). Linear / incremental limits in dB per dB are stored with unit \"dB/dB\" or \"dB/2 dB\", not as ordinary +/- limits."
+  },
+  {
+   "level": "warn",
+   "where": "Scale Fidelity / Pulse Digitization / LINEAR (pp.195, 196)",
+   "what": "Limits given as a percentage of the reference level are stored as rel with unit \"x reference level\" (value = the reference level, which the program must supply). Pulse digitization limits are peak-to-peak and one-sided (\"<\")."
+  },
+  {
+   "level": "warn",
+   "where": "Amplitude Uncertainty [Input Attenuator Switching] (p.194)",
+   "what": "Printed \"<+/-0.6 dB/10 dB step, +/-1.8 dB max.\": stored as two rows (per step, maximum). The two-number rule cannot be a single spec."
+  },
+  {
+   "level": "warn",
+   "where": "Amplitude Uncertainty [Resolution Bandwidth Switching] (p.194)",
+   "what": "The value range of the RES BW is not printed on the row; stored as 1 Hz to 2 MHz (the RES BW range on p.185). Referenced to 300 kHz RES BW at the reference level."
+  },
+  {
+   "level": "warn",
+   "where": "Gate Delay / Gate Length Accuracy (p.188)",
+   "what": "The page has Edge Mode and Level Mode columns; the accuracy figures sit under the Edge Mode column for \"serial prefix 3310A and above\" and are centred across both columns for the <3310A formulas. Mode applicability is not stated unambiguously; stored without a mode qualifier. Level-mode range (<=0.5 us) not stored."
+  },
+  {
+   "level": "warn",
+   "where": "Gain Compression (p.189)",
+   "what": "Footnote markers are double-dagger on the first band and dagger on the other two, but only the double-dagger footnote is printed (note 17). Level conditions are \"mixer level at or below\" the printed dBm; stored as a (max) qualifier."
+  },
+  {
+   "level": "warn",
+   "where": "Residual Responses (p.191)",
+   "what": "The relation symbol between \"N\" and \"1\" is missing in the PDF page (condition \">200 kHz with no signal at input, 0 dB input attenuation, N [?] 1\"); stored as printed with the upper frequency 26.5 GHz (the instrument's range), which is not on the page."
+  },
+  {
+   "level": "warn",
+   "where": "Flatness [Frequency Response, Relative] 13.2 GHz to 22.0 GHz (p.193)",
+   "what": "Printed \"13.2 kHz to 22.0 GHz\"; read as 13.2 GHz (note 10). Confirm against the manufacturer if the row is used."
+  },
+  {
+   "level": "warn",
+   "where": "Flatness [Frequency Response] (p.193)",
+   "what": "Value range for the flatness rows is the input attenuation (10 dB, printed condition); the amplitude level of the measurement is not specified. Relative flatness is a peak-to-peak-about-midpoint figure; \"typical\" is a second spec (period \"typical\"), not a guarantee."
+  },
+  {
+   "level": "warn",
+   "where": "Residual FM / Span Accuracy rows (pp.183, 184)",
+   "what": "Per-band rows are DERIVED from the printed formulas with N from p.180 (note 3). Band 0 lower limit stored as 30 Hz (Option 006); non-Option 006 units start at 9 kHz. Bands overlap as printed (Band 1/Band 2 and Band 2/Band 3 ranges overlap on p.180). Span accuracy value range for the upper rows ends at 13.2 GHz (internal-mixing span limit, p.184)."
+  },
+  {
+   "level": "warn",
+   "where": "Reference Oscillator, Frequency Reference Accuracy (p.182)",
+   "what": "Stored as fractional rel on a 10 MHz reference (note 18); the printed \"Settability <+/-1E-6\" for Option 103 is stored with period \"2 yr\" (no period printed). The \"after 7 day warmup\" daily aging and the yearly aging are separate rows with their own period labels; Non-Option 103 settability is not printed."
+  },
+  {
+   "level": "warn",
+   "where": "Calibrator Output / 10 MHz REF OUT frequency (p.197)",
+   "what": "NOT STORED: CAL OUTPUT frequency \"300 MHz +/-(300 MHz x frequency reference accuracy)\" and 10 MHz REF output frequency \"10 MHz +/-(10 MHz x frequency reference accuracy)\" have no numeric limit (depends on aging x time since adjustment, initial accuracy and temperature stability, note 18). 10 MHz REF IN/OUT connector information is not stored."
+  },
+  {
+   "level": "warn",
+   "where": "Sweep Time Accuracy (p.186)",
+   "what": "Lower end of the \"<30 ms\" value range (50 us) is taken from the sweep time range table on the same page (analog display 50 us to <30 ms; Option 007 digital 50 us to 6,000 s)."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Confidence level is not specified on the sheet; set the coverage divisor in the manager before relying on this standard."
+  }
+ ]
+}
