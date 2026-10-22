@@ -249,7 +249,7 @@ class IndexTests(unittest.TestCase):
         mgr.verified = V.Registry(self.db, seed=True)
         for name in ('d_name', 'd_sub', 'd_desc', 'd_path', 'd_ver_text'):
             setattr(mgr, name, Var())
-        for name in ('d_pill', 'd_ver', 'd_mod', 'btn_run', 'btn_demo', 'btn_changes', 'btn_verify', 'btn_lock'):
+        for name in ('d_pill', 'd_ver', 'd_mod', 'btn_run', 'btn_demo', 'btn_verify', 'btn_lock'):
             setattr(mgr, name, Widget())
         mgr._mod_counts = lambda refresh=False: {}
         self.patches = [mock.patch.object(CPM, 'messagebox'), mock.patch.object(CPM, 'simpledialog'),
@@ -379,15 +379,6 @@ class IndexTests(unittest.TestCase):
         self.box.showinfo.assert_called_once()
         self.assertIn('verified on hardware', self.box.showinfo.call_args[0][1])
         self.box.askyesno.assert_not_called()
-
-    def test_procedure_changes_passes_the_key_so_the_editor_locks_exactly(self):
-        self.select('Fluke 117 Performance Verification')
-        with mock.patch.object(self.CPM.procmods_ui, 'open_manager_changes') as opened, mock.patch.object(self.CPM.procmods_ui, 'shared_lock') as lock, \
-                mock.patch.object(self.CPM.procmods, 'Store'):
-            lock.return_value.devmode = None
-            self.mgr.procedure_changes()
-        self.assertEqual(opened.call_args.kwargs['proc_key'], 'Fluke_117_Verification.py')
-        self.assertEqual(opened.call_args.args[1], '117')
 
     def test_an_update_of_a_verified_script_shows_changed_since(self):
         """Replacing a file of a verified procedure (an updated zip) flags it in the list; the suite does not block the update."""

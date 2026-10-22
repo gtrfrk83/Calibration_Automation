@@ -573,9 +573,11 @@ TC_RESOLUTION = {'5522A': (0.01, '5522A Operators Manual p. 1-17, Temperature Ca
                  '5560A': (0.01, '5560A Product Specifications (Rev. 8, 6/26) printed p. 15, TC Specifications: resolution 0.01 degC')}
 
 DEFAULT_VARIANT = {   # preferred / excluded words in the function's bracket text, per kind (the person can pass variant= to override)
-    'ACV': dict(prefer=('sinewave',), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated')),
+    # 'auxiliary' (5520A dual-output AUX rows) and '7 day' (5520A resistance floor with only a 7 day ohms zero) are excluded from a plain lookup; no other sheet has either word.
+    'DCV': dict(prefer=(), exclude=('auxiliary',)),
+    'ACV': dict(prefer=('sinewave',), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated', 'auxiliary')),
     'ACI': dict(prefer=('lcomp off',), exclude=('non-sinewave', 'squarewave', 'trianglewave')),
-    'OHM': dict(prefer=('4-wire',), exclude=()),
+    'OHM': dict(prefer=('4-wire',), exclude=('7 day',)),
     'FREQ': dict(prefer=('field service',), exclude=('scope', 'duty')),
 }
 
@@ -693,7 +695,8 @@ class StandardSpec:
         """(resolution in SI, source text) of the calibrator at this point, from the row's own value (edited) or the printed range digits."""
         r = hit.row
         if r.get('resolution'):
-            return float(r['resolution']), ('edited in the manager' if r.get('res_src') == 'edited' else 'last digit of the printed range')
+            src = {'edited': 'edited in the manager', 'manual': "resolution column printed in the manufacturer's manual"}.get(r.get('res_src'), 'last digit of the printed range')
+            return float(r['resolution']), src
         if r.get('kind') == 'TEMP' and r.get('unit') == 'degC' and self.model in TC_RESOLUTION:       # the sheet carries no digits for degC rows
             res, src = TC_RESOLUTION[self.model]
             return res, src
