@@ -145,7 +145,8 @@ class Cancelled(Exception):
 
 class IO(procmods_engine.ProcModsMixin):
     """The calibrator: set the output for a point, confirm it was accepted, and never leave it energised."""
-    RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the manual's "ramp up in 50 V increments, 5 s apart"
+    RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the 110-series manual's "ramp up in 50 V increments, 5 s apart"
+    auto_ramp = True                                          # the spec's options.auto_ramp (false: straight to the test value)
 
     def __init__(self, model_name, address, baud=9600, transport=None, mods=None):
         self.log = drivers.CommandLog()
@@ -199,7 +200,7 @@ class IO(procmods_engine.ProcModsMixin):
         steps = [v]
         if ramp:                                   # a ramp the meter's manual prescribes (e.g. 60 V then 120 V)
             steps = [float(x) for x in ramp]
-        elif abs(v) > self.RAMP_ABOVE:
+        elif self.auto_ramp and abs(v) > self.RAMP_ABOVE:
             n = int(abs(v) // self.RAMP_STEP)
             steps = [math.copysign(self.RAMP_STEP * i, v) for i in range(1, n + 1)]
             if abs(steps[-1]) < abs(v):
@@ -732,6 +733,7 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.io = self.io_factory()
         else:
             self.io = IO(self.cal_mode.get(), self._address(), int(self.cal_baud.get()), mods=self.pm_state)
+        self.io.auto_ramp = self._auto_ramp()
         self._set_conn(True)
         self._save_settings()
 
@@ -886,6 +888,9 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         caution = None if p['group'] == 'NONE' else 'Continue only after physically verifying the connections.'
         return ui.confirm_steps(self.root, 'Check the setup', f'Set up for {p["section"]}', steps, facts=facts, caution=caution, ok='Done - continue')
 
+    def _auto_ramp(self):
+        return bool(self.spec.get('options', {}).get('auto_ramp', True))
+
     def _high_voltage(self, p):
         a = p.get('applied')
         threshold = self.spec.get('options', {}).get('hv_threshold_v', 500)
@@ -893,8 +898,15 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def _prompt_function(self, p):
         """options.function_prompt: each time the meter's rotary switch has to move to a new function, tell the operator (the output is
-        in standby meanwhile). Points of group NONE carry their own set-up prompt. True = go on, False = the operator cancelled."""
-        if not self.spec.get('options', {}).get('function_prompt') or p['group'] == 'NONE':
+        in standby meanwhile). Points of group NONE (functional checks, hand-set points) and points that get the dial/range prompt carry their own. True = go on, False = the operator cancelled."""
+        opts = self.spec.get('options', {})
+        if not opts.get('function_prompt'):
+            return True
+        if p['group'] == 'NONE':                   # functional checks / hand-set points: no dial prompt (their own prompt already told the operator);
+            self._last_switch = p['switch']        # the next point on the same function (e.g. conductance, capacitance) is not asked again
+            return True
+        if opts.get('range_prompt') and p.get('dial'):     # the range prompt ('Turn the dial to ...', every point) already covers the function
+            self._last_switch = p['switch']
             return True
         if p['switch'] == getattr(self, '_last_switch', None):
             return True
@@ -979,7 +991,7 @@ class App(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         if self._high_voltage(p):
             if not messagebox.askyesno('HIGH VOLTAGE', f'This point outputs {abs(p["applied"]["value"]):g} V'
-                                       + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
+                                       + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and self._auto_ramp() and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
                                        '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False
                 self.status.set('Stopped before a high-voltage point.')

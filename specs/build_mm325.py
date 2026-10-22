@@ -116,7 +116,7 @@ def build_spec():
                     note='One test point per range at 90 % of the range; every AC point at 60 Hz. Limits are the manual\'s accuracy statement '
                          '(+/-(% of reading + digits), 18 to 28 C) evaluated at the applied value. Diode test and continuity have no stated tolerance and are not included. '
                          'Calibrator: Fluke 5560A (or 5522A).'),
-        options=dict(range_prompt=True, point_percent=90, ac_frequency_hz=AC_HZ, hv_threshold_v=60, hookup_meter='mm325'),
+        options=dict(range_prompt=True, point_percent=90, ac_frequency_hz=AC_HZ, hv_threshold_v=60, hookup_meter='mm325', auto_ramp=False, function_prompt=True),
         models={'MM325': dict(name='Klein Tools MM325', brand='Klein', model_note='manual-ranging digital multimeter, 600 V CAT III')},
         dial=dict(image='diagrams/mm325_dial.png', size=[DIAL_SIZE, DIAL_SIZE], center=list(DIAL_CENTER), knob_radius=84, positions=positions),
         steps=build_steps())

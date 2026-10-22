@@ -3,6 +3,8 @@
  "kind": "manual-reading",
  "options": {
   "hv_threshold_v": 60,
+  "auto_ramp": false,
+  "function_prompt": true,
   "ir": "fluke28x",
   "table_order": {
    "F": 0,

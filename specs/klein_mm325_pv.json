@@ -13,7 +13,9 @@
   "point_percent": 90,
   "ac_frequency_hz": 60,
   "hv_threshold_v": 60,
-  "hookup_meter": "mm325"
+  "hookup_meter": "mm325",
+  "auto_ramp": false,
+  "function_prompt": true
  },
  "models": {
   "MM325": {

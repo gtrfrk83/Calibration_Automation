@@ -24,6 +24,17 @@ Included
                             adds groups{} (cable-change prompts + hook-up diagram), dial{} (picture and position of every range) and options{}
                             (range_prompt, hv_threshold_v); per step: dial, dial_text, tol_text, max_on_s / recovery_s (10 A duty limit)
 
+Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, fluke_87v, fluke_287_289, klein_mm325)
+  options.auto_ramp         default true: a DC/AC volts point above 100 V is reached in 50 V steps, 5 s apart (the 110-series manual). false = one
+                            OUT command straight to the test value. Off in the 87V, 287/289 and MM325 specs (and their builders). A per-point
+                            'ramp' list the manual prescribes (287/289 point 4-64: 60 V then 120 V) is always followed. The 110-series spec leaves
+                            it on: its 600 V points carry one-step ramp lists, and only AUTO-V LoZ (3-40) uses the automatic ramp. The HIGH VOLTAGE
+                            prompt mentions ramping only when a ramp actually happens.
+  options.function_prompt   true = each time the rotary switch has to move to a different function (point.switch changes) the operator is asked to
+                            turn the meter, with the calibrator in standby. Points of group NONE (functional checks, hand-set points) get none
+                            (they carry their own prompt and set the function); with options.range_prompt (MM325) the dial prompt shown at every
+                            point takes its place. On in all four handheld specs.
+
 Schema (schema 1)
   periods / default_period      ["24h","90d","1y","2y"] / "90d"
   sections[]                    id, title, page, setup (technician text), source, points[]

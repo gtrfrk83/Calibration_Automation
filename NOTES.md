@@ -30,6 +30,13 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
   (`set_output_volts(..., dc=True)` / `set_output_amps(..., dc=True)`). An OUT with no frequency keeps the previous one, so the
   calibrator errors going from an AC point to a DC point. `tests/test_dc_zero_hz.py` fails if a DMM engine drops it. Add this to
   every new multimeter procedure.
+- Handheld multimeter procedures (`handheld_dmm.py`) go straight to the high-voltage test value: no 50 V ramp, except where the manual
+  prescribes one (explicit per-point `ramp` lists, e.g. 287/289 point 4-64: 60 V then 120 V; the 110-series AUTO-V LoZ point 3-40 keeps
+  the 50 V ramp). Spec option `options.auto_ramp` (default true) is false in the 87V, 287/289 and MM325 specs and builders; the HIGH VOLTAGE
+  prompt mentions ramping only when one happens. `tests/test_handheld_options.py` covers it.
+- Handheld multimeter procedures: every function change prompts the operator to turn the rotary switch (`options.function_prompt`, on in
+  all handheld specs; output in standby meanwhile). Group NONE points (functional checks, hand-set points) keep their own prompts and
+  are not given a 'turn the meter to' prompt; the MM325 already shows its dial prompt at every point, which covers the function change.
 - Read limit tables from rendered page images, not extracted text.
 - No cover sheets, no standards-due tracking (handled by other software).
 
