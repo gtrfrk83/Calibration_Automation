@@ -144,6 +144,8 @@ class SimFlukeTransport(_SimBase):
             if m.group(3):
                 f['freq'] = float(m.group(3)) * {'HZ': 1, 'KHZ': 1e3, 'MHZ': 1e6, 'GHZ': 1e9}[m.group(4)]
             return None
+        if u == 'OUT?' and f['wave'] == 'SQUARE':      # real 5522A reply for a square wave (from the bench): 2.000000E+00,VPP,0E+00,0,6.000E+01
+            return f"{f['volts']:.6E},VPP,0E+00,0,{f['freq']:.3E}"
         if u == 'OUT?': return f"{f['volts']:.9f},V,{f['freq']:.1f},HZ"
         if u == '*CLS': self.errors = []; self.next_error = None; return None
         if u == 'ERR?':

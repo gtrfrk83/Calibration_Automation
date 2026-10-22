@@ -98,10 +98,8 @@ ROWS[49] = ('Peak Min / Max', DCV_SW, '6 V', 'SQUARE', dict(
     prompt='Peak Min Max is on: step the meter to MIN (the display shows MIN) and read it.',
     note='Peak Min/Max, read the MIN value (same 6 V p-p, 2 kHz, 1 V offset square wave; manual Table 3 step 47, p. 11). '
          'After you record this reading, exit Min Max by pressing and holding the MIN MAX button (manual p. 9, pushbutton test step 3).'))
-# The MDD prints the temperature limits in °F. The meter is set to °C and the calibrator sources °C, so the limits and nominal are the exact
-# conversions (F - 32) * 5 / 9 of the printed ones: 30.2 / 33.8 °F -> -1.0 / 1.0 °C and 210.2 / 213.8 °F -> 99.0 / 101.0 °C.
-# NOTE: the 87 Series V Calibration Manual (Table 3 steps 49 / 50, p. 11) prints -1.0 to 1.0 and 98.0 to 102.0 °C, i.e. WIDER at 100 °C.
-# The MDD-derived (tighter) limits are kept until the lab owner decides.
+# The MDD prints the temperature limits in °F. The meter is set to °C and the calibrator sources °C. Limits follow the 87 Series V Calibration
+# Manual (Table 3 steps 49 / 50, printed p. 11): -1.0 to 1.0 °C at 0 °C and 98.0 to 102.0 °C at 100 °C (lab owner decision; the MDD-derived 99.0 / 101.0 are not used).
 TEMP_NOTE = ('Connect the K-type thermocouple between the meter and the calibrator (80AK adapter); allow the junctions to stabilise. '
              'The meter shows °C (set the meter to °C); the calibrator is set in °C.')
 ROWS[50] = ('Temperature', 'Temperature', 'Type K', 'TEMP', dict(group='TEMP', settle=30, celsius=0.0,

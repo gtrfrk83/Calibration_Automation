@@ -149,10 +149,9 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
   their wire text is locked by `tests/golden/tektronix_tds2000c.json`, `fluke_5522a_scope.json` and `engine_tds2000c.json`.
 - No procedure modifications (procmods) are wired into this engine yet. TAR/TUR: TUR only on the DC gain points (volts); TAR is blank.
 
-## Open items: Fluke 87V (branch fix-87v)
-- Temperature 1-50 / 1-51 are read and sourced in degC. Limits are the exact conversions of the MDD's degF limits: -1.0..1.0 and 99.0..101.0 degC.
-  DECISION NEEDED: the 87 Series V Calibration Manual (Table 3 steps 49 / 50, printed p. 11) prints -1.0..1.0 and 98.0..102.0 degC, i.e. wider at 100 degC.
-  The tighter MDD-derived limit is kept until the lab owner decides; nothing was silently widened.
+## Fluke 87V notes
+- Temperature 1-50 / 1-51 are read and sourced in degC. Limits follow the 87 Series V Calibration Manual (Table 3 steps 49 / 50, printed p. 11): -1.0..1.0 at 0 degC
+  and 98.0..102.0 at 100 degC (decided by the lab owner; the MDD-derived 99.0..101.0 is not used).
 - Duty cycle 1-16 (5 V p-p square, 1 kHz, 2.5 V DC offset, 50 % duty; manual Table 3 step 16, p. 9) and Peak Min/Max 1-48 / 1-49 (6 V p-p square, 2 kHz,
   1 V DC offset: MAX 3.897..4.103 V, MIN -2.102..-1.898 V; manual Table 3 step 47, p. 11) are sourced by the calibrator as square waves. The MDD's MAX row
   (+6 V DC source, 5.896..6.104 V) disagreed with the manual and was replaced. 5522A commands (WAVE p. 6-48, DC_OFFSET p. 6-13, DUTY p. 6-14, coupled commands
@@ -226,3 +225,5 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
 - Not stored anywhere today (so not in any snapshot): procedure modifications are not printed by any engine (`modifications=` is never passed) - their summary is kept in the stamps only.
 - Tests: `tests/test_reprint_*.py` (named to sort after test_beta because they install tests/_tk_stub.py); `tests/reprint_harness.py` runs the engines' real export code on the simulated benches.
 
+
+- 5522A OUT? reply for a square wave (observed on the bench): `2.000000E+00,VPP,0E+00,0,6.000E+01` for 2 Vpp at 60 Hz = amplitude, unit VPP, 0, 0, frequency. The square-wave read-back requires unit VPP.

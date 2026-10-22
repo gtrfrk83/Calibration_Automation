@@ -37,12 +37,10 @@ def spec_io():
 
 class Temperature(unittest.TestCase):
     def test_points_exact(self):
-        for pid, nominal, low, high, f_low, f_high in (('1-50', 0.0, '-1.0', '1.0', '30.2', '33.8'), ('1-51', 100.0, '99.0', '101.0', '210.2', '213.8')):
+        for pid, nominal, low, high in (('1-50', 0.0, '-1.0', '1.0'), ('1-51', 100.0, '98.0', '102.0')):          # limits as printed in the manual (Table 3 steps 49 / 50)
             p = PTS[pid]
             self.assertEqual((p['display_unit'], p['base_unit'], p['factor'], p['nominal'], p['low'], p['high']), ('°C', 'degC', 1.0, nominal, low, high))
             self.assertEqual(p['applied'], dict(value=nominal, frequency=None))          # sourced in degC, read in degC
-            self.assertEqual((D(f_low) - 32) * 5 / 9, D(low))                          # exact conversions of the MDD's printed degF limits
-            self.assertEqual((D(f_high) - 32) * 5 / 9, D(high))
             self.assertEqual(p['note'].split('; allow the junctions to stabilise. ')[1], 'The meter shows °C (set the meter to °C); the calibrator is set in °C.')
             self.assertEqual(p['group'], 'TEMP')
 
@@ -68,7 +66,7 @@ class Temperature(unittest.TestCase):
         app = object.__new__(h.App)
         app.cal_mode = type('V', (), {'get': staticmethod(lambda: 'Fluke 5522A')})()
         row = app.certificate_row(PTS['1-51'], dict(result='PASS', reading=100.1, entered='100.1'))
-        self.assertEqual((row['UOM'], row['Nominal'], row['Tolerance -'], row['Tolerance +']), ('°C', '100.0 °C', '99.0', '101.0'))
+        self.assertEqual((row['UOM'], row['Nominal'], row['Tolerance -'], row['Tolerance +']), ('°C', '100.0 °C', '98.0', '102.0'))
 
     def test_tartur_guard(self):
         base = dict(kind='TEMP', nominal=100.0, frequency=None, range=None)

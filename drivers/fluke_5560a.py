@@ -356,7 +356,7 @@ class Fluke5560A(Instrument):
             freq = float(parts[4]) if len(parts) >= 5 else float(parts[2]) if len(parts) >= 4 and parts[3].upper() == 'HZ' else None
         except (ValueError, IndexError):
             raise InstrumentError(f'Unexpected {self.label} OUT? response: {reply}')
-        if len(parts) < 2 or parts[1].upper() != 'V':
+        if len(parts) < 2 or parts[1].upper() != 'VPP':        # square-wave amplitude is reported in VPP (bench reply: 2.000000E+00,VPP,0E+00,0,6.000E+01)
             raise InstrumentError(f'Unexpected {self.label} OUT? response: {reply}')
         if not math.isclose(amp, vpp, rel_tol=1e-5, abs_tol=1e-6):
             raise InstrumentError(f'{self.label} square-wave amplitude mismatch: OUT? {amp:g} V vs {vpp:g} V peak-to-peak')
@@ -421,8 +421,8 @@ class Fluke5522A(Fluke5560A):
         'reset': cmdreg.reset_cmd(True, '5522A Operators Manual p. 6-35 (*RST: power-up state, STBY, holds off later commands until done)'),
         'opc.query': cmdreg.opc_cmd(True, '5522A Operators Manual p. 5-44 (Using *OPC?, *OPC, *WAI)'),
         # square wave with duty cycle and DC offset: syntax from the Operators Manual (WAVE p. 6-48, DC_OFFSET p. 6-13, DUTY p. 6-14, coupled
-        # commands p. 5-28, square-wave amplitude in p-p p. 4-42 and p. 1-24). The remote OUT? reply for a square wave is not documented
-        # (the program compares its first field with the p-p amplitude and stops the point on a difference).
+        # commands p. 5-28, square-wave amplitude in p-p p. 4-42 and p. 1-24). The remote OUT? reply for a square wave was observed on a 5522A:
+        # 2.000000E+00,VPP,0E+00,0,6.000E+01 for 2 Vpp at 60 Hz (amplitude, unit VPP, 0, 0, frequency); the program compares amplitude and frequency and stops on a difference.
         'wave.square.out': dataclasses.replace(COMMANDS['wave.square.out'], verified=True, ref=_REF_5522_SQ,
                                                description='One compound line of coupled commands (p. 5-28). Amplitude is peak-to-peak (p. 4-42)'),
         'duty.set': dataclasses.replace(COMMANDS['duty.set'], verified=True, ref='5522A Operators Manual p. 6-14 (DUTY: 1.00 to 99.00 %, single-output square waves only)',
