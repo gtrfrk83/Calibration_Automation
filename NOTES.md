@@ -74,7 +74,7 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
 
 ## Fluke 8808A (branch `fluke-8808a`; checked on the simulated bench only, never run on hardware or a real UI)
 Launcher `Procedures/Fluke_8808A_Verification.py`, engine `fluke8808a_verification.py`, driver `drivers/fluke_8808a.py`, simulator `drivers/simulated_8808a.py`,
-spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagram names in `diagrams/README_8808a.txt`, tests `tests/test_8808a.py`.
+spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagram names in `diagrams/README_8808a.txt`, tests `tests/test_beta_8808a.py`.
 - Sources: 8808A Calibration Manual (56 pp.) chapter 3, Tables 3-2 to 3-8, printed pp. 3-4 to 3-11, 105 points (DC volts 17, AC volts 28, 4-wire ohms 6, 2-wire ohms 14,
   DC current 18, AC current 16, frequency 6); Table 3-1 (equipment) p. 3-3; accuracy specifications pp. 1-10 to 1-14. Users Manual (100 pp.) chapter 4 for every command.
   Every number was read from rendered page images (150 / 130 dpi), twice.
@@ -110,7 +110,7 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
 - Not in the engine: no Excel export (the 8846A launcher has one), no capacitance / temperature / diode / continuity points (the manual has no verification table for them),
   no front / rear switch (the 8808A has none), no fixture for ranges beyond Tables 3-2 to 3-8.
 - The window opens with a half-hour warm-up question (Calibration Manual); the specifications are valid in the slow rate only, which the program selects.
-- Not viewed: the Tk windows (tkinter is not installed where this was built); only the real App code on the simulated bench was run (tests/test_8808a.py, live_editor_harness).
+- Not viewed: the Tk windows (tkinter is not installed where this was built); only the real App code on the simulated bench was run (tests/test_beta_8808a.py, live_editor_harness).
 
 ## Open items: 33210A / 33220A / 33250A and the Fluke 5790B driver (not yet run on hardware)
 - Unverified: all 5790B commands (INPUT, EXTRIG, RANGE/RANGE?, MEAS?, ERR?) and all generator commands, taken from the manuals;
