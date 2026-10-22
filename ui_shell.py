@@ -25,6 +25,7 @@ Typical use (see Procedures/Fluke_8846A_Verification.py):
     shell.content                                               # the frame for the table
     shell.add_action('Run All Pending', cmd, accent=True)       # left of the action bar;   side='right' for file actions
     shell.set_sections([(name, passed, failed, total), ...])    # sidebar rows with status dots and counts
+    shell.set_modified(3) / shell.set_devmode(True)             # amber 'MODIFIED (3)' / 'DEVELOPER MODE' header chips (procmods_ui.attach_to_shell calls these)
 """
 from __future__ import annotations
 
@@ -217,6 +218,37 @@ class Shell:
         pill = ui.Pill(self.chip_frame, text, kind)
         pill.pack(side='left', padx=(8, 0))
         return pill
+
+    def set_modified(self, count):
+        """Amber 'MODIFIED (n)' chip in the header while procedure modifications are in effect (nothing when there are none)."""
+        text = f'MODIFIED ({int(count)})' if count else ''
+        chip = getattr(self, 'modified_chip', None)
+        if chip is None:
+            if not text:
+                return None
+            chip = self.modified_chip = ui.Pill(self.chip_frame, text, 'warn')
+            chip.pack(side='left', padx=(8, 0))
+        if text:
+            chip.set(text, 'warn')
+            if not chip.winfo_manager():
+                chip.pack(side='left', padx=(8, 0))
+        else:
+            chip.pack_forget()
+        return chip
+
+    def set_devmode(self, on):
+        """Amber 'DEVELOPER MODE' chip while the developer-mode session is unlocked."""
+        chip = getattr(self, 'devmode_chip', None)
+        if chip is None:
+            if not on:
+                return None
+            chip = self.devmode_chip = ui.Pill(self.chip_frame, 'DEVELOPER MODE', 'warn')
+        if on:
+            if not chip.winfo_manager():
+                chip.pack(side='left', padx=(8, 0))
+        else:
+            chip.pack_forget()
+        return chip
 
     def build_identity(self, asset_var, serial_var, focus=True):
         box = ttk.Frame(self.strip)

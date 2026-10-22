@@ -306,13 +306,28 @@ HEADER_HIDDEN = {'Limits applied', 'Source', 'Procedure', 'Technician', 'Tempera
 # So is the footnote under the table (footer_note is accepted and ignored).
 
 
-def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note='', show_tar_tur=None):
+def _mod_lines(modifications) -> list:
+    """Summary dicts for the modifications block: the list from procmods.modifications_for_report / modifications_summary, or an
+    OverrideSet.  Anything else (None, empty, unreadable) means no block."""
+    if not modifications:
+        return []
+    try:
+        if not isinstance(modifications, (list, tuple)):
+            import procmods
+            modifications = procmods.modifications_summary(modifications)
+        return [m for m in modifications if isinstance(m, dict)]
+    except Exception:
+        return []
+
+
+def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note='', show_tar_tur=None, modifications=None):
     """Write the report; returns the number of data rows.
 
     header   list of (label, value) shown under the title
     details  optional dict from report_dialog.ask_details: technician, temperature, humidity, standards[]
     show_tar_tur  None (default) follows details['show_tar_tur'] (bool or TarTur; default off); a bool or TarTur forces it.  Each selected
              kind with at least one value gets a column after Uncertainty; the definition of the shown term(s) is printed under the table."""
+    mods = _mod_lines(modifications)
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import letter
     from reportlab.lib.styles import ParagraphStyle
@@ -361,6 +376,11 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     for group in pairs:
         story.append(Paragraph('&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;'.join(f'<b>{clean(k)}:</b> {clean(v)}' for k, v in group), meta))
     story.append(Spacer(1, 6))
+    tol_modified = any(m.get('limit') or m.get('tolerances_modified') for m in mods)
+    if tol_modified:
+        story.append(Paragraph("Tolerances in this report were modified from the manufacturer's specification - see Procedure modifications. "
+                               'PASS/FAIL is judged against the tolerance used.', red))
+        story.append(Spacer(1, 6))
 
     # ---- verdict --------------------------------------------------------------------------------------
     total = len(rows)
@@ -447,6 +467,19 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     # footer_note (uncertainty source, method notes) is not printed: that information is on the lab's cover certificate.
     if show_tar_tur:                                   # only when the optional columns are on
         story += [Spacer(1, 6), Paragraph(clean(tar_tur_definition(shown_sel)), meta)]
+
+    if mods:                                           # only when the run had overrides: unmodified reports are unchanged
+        story += [Spacer(1, 8), Paragraph('Procedure modifications', section_style)]
+        mdata = [[Paragraph(c, head_style) for c in ('Kind', 'Item', 'Factory', 'Used', 'Ver', 'Reason', 'Date')]]
+        for m in mods:
+            mdata.append([Paragraph(clean(x), small) for x in (m.get('kind'), m.get('item') or m.get('text'), m.get('factory'),
+                                                               m.get('used'), m.get('version'), m.get('reason'), m.get('date'))])
+        mt = LongTable(mdata, colWidths=[w * (W - 2 * margin) for w in (0.09, 0.22, 0.17, 0.17, 0.05, 0.22, 0.08)], repeatRows=1)
+        mt.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('LINEBELOW', (0, 0), (-1, 0), 0.8, colors.black),
+                                ('TOPPADDING', (0, 0), (-1, -1), 1.6), ('BOTTOMPADDING', (0, 0), (-1, -1), 1.6)]))
+        story.append(mt)
+        if tol_modified and show_tar_tur:
+            story.append(Paragraph('TAR and TUR use the tolerance printed in this report (the modified one).', meta))
 
     # ---- page furniture -------------------------------------------------------------------------------
     class Numbered(rl_canvas.Canvas):

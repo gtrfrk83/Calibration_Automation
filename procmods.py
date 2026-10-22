@@ -1304,12 +1304,34 @@ def modifications_summary(oset) -> list:
         else:
             man, used = _tolerance_text(v.get('factory'), v, v.get('unit', ''))
             text = f'Tolerance for {label}: manufacturer {man}, used {used}'
-        out.append({'text': text, 'reason': e['reason'], 'author': e['author'], 'date': e['created_at'][:10],
+        fac = used_v = ''
+        if k == 'command':
+            fac, used_v = v.get('factory'), v.get('template')
+        elif k == 'param':
+            fac, used_v = v.get('factory'), v.get('value')
+        elif k == 'limit':
+            fac, used_v = man, used
+        out.append({'item': label, 'factory': '' if fac is None else str(fac), 'used': '' if used_v is None else str(used_v),
+                    'version': e.get('version'),
+                    'text': text, 'reason': e['reason'], 'author': e['author'], 'date': e['created_at'][:10],
                     'unverified': _unverified(e), 'affects_conditions': bool(v.get('affects_conditions')),
                     'applies_to': _scope_text(e), 'kind': k, 'uid': e['uid'], 'limit': k == 'limit',
                     'manufacturer_tolerance': man, 'tolerance_used': used, 'tolerances_modified': k == 'limit',
                     'imported_by': imported_by(e)})
     return out
+
+
+def modifications_for_report(run_id, store=None) -> list:
+    """Plain function for the engines: the "Procedure modifications" lines of an issued run, read back from run_overrides in
+    lab_registry.sqlite3 (see record_run_snapshot).  [] when the run had no overrides, was a demo run, or the stored row fails its
+    checksum.  Never raises.  Pass the result as write_calibration_pdf(..., modifications=...)."""
+    try:
+        snap = get_run_snapshot(run_id, store=store)
+        if not snap:
+            return []
+        return modifications_summary(restore_snapshot(snap, verify=False))
+    except Exception:
+        return []
 
 
 def tolerances_modified(oset) -> bool:
