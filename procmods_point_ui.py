@@ -18,6 +18,10 @@ import procmods_ui_model as M
 import ui_theme as ui
 
 POLL_MS = 1000
+TREE_ROWS = 5                                  # command table rows shown before it scrolls (bounded: the rest of the window is guaranteed room)
+DETAIL_H = 300                                 # default height of the scrolling details area (96-dpi pixels)
+DEFAULT_SIZE = (980, 960)                      # 96-dpi pixels; clamped to the screen
+MIN_SIZE = (720, 560)
 _open = {}                                    # (id(app), str(pid)) -> window, so a second Edit on the same point raises the first
 
 
@@ -101,7 +105,6 @@ class PointWindow(tk.Toplevel):
         super().__init__(parent)
         self.app, self.model, self.lock = app, model, model.lock
         self.title(model.title + (' [DEMO]' if model.demo else ''))
-        self.geometry(f'{ui.px(860)}x{ui.px(760)}')
         self.message = tk.StringVar()
         self.scope = tk.StringVar(value=model.scope)
         self.reason = tk.StringVar()
@@ -116,9 +119,14 @@ class PointWindow(tk.Toplevel):
         self._selected = None
         self._busy = False
 
-        # ---- header
+        # ---- layout.  Grid, not pack: the window is a fixed stack of header / command table / details / footer, and the table has a
+        # small bounded height so it can never push the editor, the developer fields or the buttons out of the window.  The details
+        # (selected command, add-a-line, developer fields) scroll if the window is made smaller than they need.
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=2)                       # command table
+        self.rowconfigure(3, weight=3)                       # details
         head = ttk.Frame(self, padding=(14, 10, 14, 2))
-        head.pack(fill='x')
+        head.grid(row=0, column=0, sticky='ew')
         self.chip_dev = ui.Pill(head, 'DEVELOPER MODE', 'warn')
         self.btn_dev = ttk.Button(head, text='Turn on developer mode...', command=self.toggle_dev)
         self.btn_dev.pack(side='right')
@@ -126,74 +134,60 @@ class PointWindow(tk.Toplevel):
         if model.demo:
             ui.Pill(head, 'DEMO', 'warn').pack(side='right', padx=8)
         self.banner = tk.StringVar()
-        ttk.Label(head, textvariable=self.banner, wraplength=ui.px(560), justify='left').pack(side='left')
+        self.banner_lbl = ttk.Label(head, textvariable=self.banner, wraplength=ui.px(560), justify='left')
+        self.banner_lbl.pack(side='left', fill='x', expand=True)
         self.info = tk.StringVar()
-        ttk.Label(self, textvariable=self.info, wraplength=ui.px(820), justify='left', style='Muted.TLabel', padding=(14, 0, 14, 4)).pack(fill='x')
+        self.info_lbl = ttk.Label(self, textvariable=self.info, wraplength=ui.px(820), justify='left', style='Muted.TLabel', padding=(14, 0, 14, 4))
+        self.info_lbl.grid(row=1, column=0, sticky='ew')
 
-        # ---- footer first (so it is never pushed out)
-        foot = ttk.Frame(self, padding=(14, 6))
-        foot.pack(side='bottom', fill='x')
-        ttk.Label(self, textvariable=self.message, foreground=ui.C['bad'], wraplength=ui.px(820), justify='left',
-                  padding=(14, 0)).pack(side='bottom', fill='x')
-        self.btn_all = ttk.Button(foot, text='All procedure changes...', command=self.open_all)
-        self.btn_all.pack(side='left')
-        self.btn_close = ttk.Button(foot, text='Close', command=self.close)
-        self.btn_apply = ttk.Button(foot, text='Apply', style='Accent.TButton', command=self.apply)
-        self.btn_cancel = ttk.Button(foot, text='Cancel changes', command=self.cancel)
-        self.btn_close.pack(side='right')
-        self.btn_apply.pack(side='right', padx=8)
-        self.btn_cancel.pack(side='right')
-        sv = ttk.Frame(self, padding=(14, 4))
-        sv.pack(side='bottom', fill='x')
-        self.warn = tk.StringVar()
-        ttk.Label(sv, textvariable=self.warn, wraplength=ui.px(820), justify='left', foreground=ui.C['warn']).pack(fill='x')
-        self.summary = tk.StringVar()
-        ttk.Label(sv, textvariable=self.summary, wraplength=ui.px(820), justify='left').pack(fill='x', pady=(2, 0))
-        rr = ttk.Frame(sv)
-        rr.pack(fill='x', pady=(4, 0))
-        ttk.Label(rr, text='Reason for the change (required):').pack(side='left')
-        self.reason_entry = ttk.Entry(rr, textvariable=self.reason, width=60)
-        self.reason_entry.pack(side='left', padx=8, fill='x', expand=True)
-        self.reason.trace_add('write', lambda *_: self._reason_typed())
-        sc = ttk.Frame(sv)
-        sc.pack(fill='x', pady=(4, 0))
-        ttk.Label(sc, text='Applies to:').pack(side='left')
-        self.scope_buttons = {}
-        for value, label, available, why in model.scope_choices():
-            b = ttk.Radiobutton(sc, text=label, value=value, variable=self.scope, command=self.scope_changed)
-            b.pack(side='left', padx=(10, 0))
-            if not available:
-                b.configure(state='disabled')
-            self.scope_buttons[value] = b
-        self.chk_redo = ttk.Checkbutton(sv, text='Measure this point again after the change', variable=self.redo, command=self._redo_toggled)
-        self.chk_redo.pack(anchor='w', pady=(4, 0))
-        self.chk_ack = ttk.Checkbutton(sv, text='I understand this changes pass/fail for this point and is recorded in the audit trail.',
-                                       variable=self.ack, command=self._ack_toggled)
-        self.chk_ack.pack(anchor='w')
-
-        # ---- body (scrolls: a point can have a few hundred commands)
+        # ---- command table (bounded height, scrolls: a point can have a few hundred commands)
         body = ttk.Frame(self, padding=(14, 2, 14, 2))
-        body.pack(fill='both', expand=True)
-        ttk.Label(body, text='Instrument commands for this point, in the order they are sent', style='Bold.TLabel').pack(anchor='w')
+        body.grid(row=2, column=0, sticky='nsew')
+        body.columnconfigure(0, weight=1)
+        body.rowconfigure(2, weight=1)
+        ttk.Label(body, text='Instrument commands for this point, in the order they are sent', style='Bold.TLabel').grid(row=0, column=0, sticky='w')
         self.plan_note = tk.StringVar()
-        ttk.Label(body, textvariable=self.plan_note, wraplength=ui.px(820), justify='left', style='Muted.TLabel').pack(anchor='w', fill='x')
+        ttk.Label(body, textvariable=self.plan_note, wraplength=ui.px(820), justify='left', style='Muted.TLabel').grid(row=1, column=0, sticky='ew')
         holder = ttk.Frame(body)
-        holder.pack(fill='both', expand=True, pady=(2, 4))
-        self.tree = ttk.Treeview(holder, columns=[c[0] for c in self.COLUMNS], show='headings', height=9, selectmode='browse')
+        holder.grid(row=2, column=0, sticky='nsew', pady=(2, 4))
+        holder.columnconfigure(0, weight=1)
+        holder.rowconfigure(0, weight=1)
+        self.tree = ttk.Treeview(holder, columns=[c[0] for c in self.COLUMNS], show='headings', height=TREE_ROWS, selectmode='browse')
         for key, label, width in self.COLUMNS:
             self.tree.heading(key, text=label)
-            self.tree.column(key, width=ui.px(width), anchor='w')
+            self.tree.column(key, width=ui.px(width), anchor='w', stretch=(key == 'cmd'))
         self.tree.tag_configure('changed', foreground=ui.C['warn'])
         self.tree.tag_configure('readonly', foreground=ui.C['muted'])
-        self.tree.pack(side='left', fill='both', expand=True)
+        self.tree.grid(row=0, column=0, sticky='nsew')
         bar = ttk.Scrollbar(holder, orient='vertical', command=self.tree.yview)
-        bar.pack(side='right', fill='y')
+        bar.grid(row=0, column=1, sticky='ns')
         self.tree.configure(yscrollcommand=bar.set)
         self.tree.bind('<<TreeviewSelect>>', lambda _e: self.on_select())
 
-        ed = ttk.LabelFrame(body, text='Selected command', padding=8)
-        ed.pack(fill='x')
-        ttk.Label(ed, textvariable=self.cmd_info, wraplength=ui.px(800), justify='left', style='Muted.TLabel').pack(anchor='w', fill='x')
+        # ---- details: scrollable
+        dwrap = ttk.Frame(self, padding=(14, 0, 14, 0))
+        dwrap.grid(row=3, column=0, sticky='nsew')
+        dwrap.columnconfigure(0, weight=1)
+        dwrap.rowconfigure(0, weight=1)
+        self.canvas = tk.Canvas(dwrap, highlightthickness=0, borderwidth=0, height=ui.px(DETAIL_H), background=ui.C.get('bg', '#ffffff'))
+        self.dscroll = ttk.Scrollbar(dwrap, orient='vertical', command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.dscroll.set)
+        self.canvas.grid(row=0, column=0, sticky='nsew')
+        self.dscroll.grid(row=0, column=1, sticky='ns')
+        det = ttk.Frame(self.canvas)
+        self.details = det
+        self._dwin = self.canvas.create_window(0, 0, window=det, anchor='nw')
+        det.bind('<Configure>', lambda _e: self._details_resized())
+        self.canvas.bind('<Configure>', lambda e: self._canvas_resized(e.width))
+        for w in (self.canvas, det):
+            w.bind('<MouseWheel>', self._wheel)
+            w.bind('<Button-4>', self._wheel)
+            w.bind('<Button-5>', self._wheel)
+
+        ed = ttk.LabelFrame(det, text='Selected command', padding=8)
+        ed.pack(fill='x', pady=(0, 0))
+        self.cmd_info_lbl = ttk.Label(ed, textvariable=self.cmd_info, wraplength=ui.px(780), justify='left', style='Muted.TLabel')
+        self.cmd_info_lbl.pack(anchor='w', fill='x')
         er = ttk.Frame(ed)
         er.pack(fill='x', pady=(4, 0))
         ttk.Label(er, text='Command (template):').pack(side='left')
@@ -203,17 +197,18 @@ class PointWindow(tk.Toplevel):
         self.btn_use.pack(side='left')
         self.btn_restore = ttk.Button(er, text='Restore default', command=self.restore_command)
         self.btn_restore.pack(side='left', padx=(6, 0))
-        ttk.Label(ed, textvariable=self.cmd_preview, wraplength=ui.px(800), justify='left').pack(anchor='w', fill='x', pady=(4, 0))
-        ttk.Label(ed, textvariable=self.cmd_test, style='Small.TLabel').pack(anchor='w')
+        self.cmd_preview_lbl = ttk.Label(ed, textvariable=self.cmd_preview, wraplength=ui.px(780), justify='left')
+        self.cmd_preview_lbl.pack(anchor='w', fill='x', pady=(4, 0))
+        ttk.Label(ed, textvariable=self.cmd_test, style='Small.TLabel', wraplength=ui.px(780), justify='left').pack(anchor='w', fill='x')
 
-        ex = ttk.LabelFrame(body, text='Add a command line for this point', padding=8)
+        ex = ttk.LabelFrame(det, text='Add a command line for this point', padding=8)
         ex.pack(fill='x', pady=(6, 0))
         r1 = ttk.Frame(ex)
         r1.pack(fill='x')
         self.x_inst = tk.StringVar()
         self.x_phase = tk.StringVar(value='before')
         self.x_cmd, self.x_rb, self.x_exp = tk.StringVar(), tk.StringVar(), tk.StringVar()
-        self.x_inst_box = ttk.Combobox(r1, textvariable=self.x_inst, values=[], width=14, state='readonly')
+        self.x_inst_box = ttk.Combobox(r1, textvariable=self.x_inst, values=[], width=26, state='readonly')
         self.x_inst_box.pack(side='left')
         ttk.Combobox(r1, textvariable=self.x_phase, values=['before', 'after'], width=8, state='readonly').pack(side='left', padx=6)
         ttk.Label(r1, text='the point\'s own commands:').pack(side='left')
@@ -230,16 +225,116 @@ class PointWindow(tk.Toplevel):
         self.btn_rm = ttk.Button(r2, text='Remove selected line', command=self.remove_extra)
         self.btn_rm.pack(side='left')
 
-        self.dev = ttk.LabelFrame(body, text='Point definition (developer mode)', padding=8)
-        self.dev.pack(fill='x', pady=(6, 0))
+        self.dev = ttk.LabelFrame(det, text='Point definition (developer mode)', padding=8)
+        self.dev.pack(fill='x', pady=(6, 6))
+        self.dev_note = tk.StringVar()
+        ttk.Label(self.dev, textvariable=self.dev_note, wraplength=ui.px(780), justify='left', style='Muted.TLabel').pack(anchor='w', fill='x', pady=(0, 4))
         self.dev_grid = ttk.Frame(self.dev)
         self.dev_grid.pack(fill='x')
         self._build_fields()
+
+        # ---- footer (always visible)
+        low = ttk.Frame(self, padding=(14, 4))
+        low.grid(row=4, column=0, sticky='ew')
+        self.warn = tk.StringVar()
+        ttk.Label(low, textvariable=self.warn, wraplength=ui.px(820), justify='left', foreground=ui.C['warn']).pack(fill='x')
+        self.summary = tk.StringVar()
+        ttk.Label(low, textvariable=self.summary, wraplength=ui.px(820), justify='left').pack(fill='x', pady=(2, 0))
+        rr = ttk.Frame(low)
+        rr.pack(fill='x', pady=(4, 0))
+        ttk.Label(rr, text='Reason for the change (required):').pack(side='left')
+        self.reason_entry = ttk.Entry(rr, textvariable=self.reason, width=60)
+        self.reason_entry.pack(side='left', padx=8, fill='x', expand=True)
+        self.reason.trace_add('write', lambda *_: self._reason_typed())
+        sc = ttk.Frame(low)
+        sc.pack(fill='x', pady=(4, 0))
+        ttk.Label(sc, text='Applies to:').pack(side='left')
+        self.scope_buttons = {}
+        for value, label, available, why in model.scope_choices():
+            b = ttk.Radiobutton(sc, text=label, value=value, variable=self.scope, command=self.scope_changed)
+            b.pack(side='left', padx=(10, 0))
+            if not available:
+                b.configure(state='disabled')
+            self.scope_buttons[value] = b
+        self.chk_redo = ttk.Checkbutton(low, text='Measure this point again after the change', variable=self.redo, command=self._redo_toggled)
+        self.chk_redo.pack(anchor='w', pady=(4, 0))
+        self.chk_ack = ttk.Checkbutton(low, text='I understand this changes pass/fail for this point and is recorded in the audit trail.',
+                                       variable=self.ack, command=self._ack_toggled)
+        self.chk_ack.pack(anchor='w')
+        ttk.Label(low, textvariable=self.message, foreground=ui.C['bad'], wraplength=ui.px(820), justify='left').pack(fill='x', pady=(2, 0))
+        foot = ttk.Frame(low, padding=(0, 6, 0, 0))
+        foot.pack(fill='x')
+        self.btn_close = ttk.Button(foot, text='Close', command=self.close)
+        self.btn_apply = ttk.Button(foot, text='Apply', style='Accent.TButton', command=self.apply)
+        self.btn_cancel = ttk.Button(foot, text='Cancel changes', command=self.cancel)
+        self.btn_close.pack(side='right')
+        self.btn_apply.pack(side='right', padx=8)
+        self.btn_cancel.pack(side='right')
+
+        self.bind('<Configure>', self._resized, add='+')
+        self._size_window()
 
         self.protocol('WM_DELETE_WINDOW', self.close)
         self.lock.on_change(lambda _s: self._safe(self.refresh))
         self.refresh()
         self.after(POLL_MS, self._poll)
+
+    # ---- sizing / scrolling ---------------------------------------------------------------------------------------------------
+    def _size_window(self):
+        """Default size (clamped to the screen, centred) and a minimum size; the window is resizable both ways."""
+        try:
+            self.update_idletasks()
+            sw, sh = int(self.winfo_screenwidth()), int(self.winfo_screenheight())
+            w = min(ui.px(DEFAULT_SIZE[0]), sw - ui.px(40))
+            h = min(max(ui.px(DEFAULT_SIZE[1]), int(self.winfo_reqheight())), sh - ui.px(90))
+            x, y = max(0, (sw - w) // 2), max(0, (sh - h) // 3)
+            self.geometry(f'{w}x{h}+{x}+{y}')
+            self.minsize(min(ui.px(MIN_SIZE[0]), w), min(ui.px(MIN_SIZE[1]), h))
+        except (TypeError, ValueError):                       # no real screen (the headless test stub)
+            self.geometry(f'{ui.px(DEFAULT_SIZE[0])}x{ui.px(DEFAULT_SIZE[1])}')
+            self.minsize(ui.px(MIN_SIZE[0]), ui.px(MIN_SIZE[1]))
+        self.resizable(True, True)
+
+    def _resized(self, event):
+        if event.widget is not self:
+            return
+        wrap = max(ui.px(300), event.width - ui.px(60))
+        for lbl in (self.info_lbl, self.cmd_info_lbl, self.cmd_preview_lbl):
+            try:
+                lbl.configure(wraplength=wrap)
+            except tk.TclError:
+                pass
+
+    def _details_resized(self):
+        try:
+            self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+        except tk.TclError:
+            pass
+
+    def _canvas_resized(self, width):
+        try:
+            self.canvas.itemconfigure(self._dwin, width=width)
+        except tk.TclError:
+            pass
+
+    def _wheel(self, event):
+        try:
+            if self.details.winfo_reqheight() <= self.canvas.winfo_height():
+                return
+            step = -1 if (getattr(event, 'num', 0) == 4 or getattr(event, 'delta', 0) > 0) else 1
+            self.canvas.yview_scroll(step * 2, 'units')
+        except tk.TclError:
+            pass
+
+    def _show_in_details(self, widget):
+        """Scroll the details area so `widget` is visible."""
+        try:
+            self.update_idletasks()
+            top = widget.winfo_rooty() - self.details.winfo_rooty()
+            total = max(1, self.details.winfo_height())
+            self.canvas.yview_moveto(max(0.0, (top - ui.px(10)) / total))
+        except tk.TclError:
+            pass
 
     # ---- helpers -------------------------------------------------------------------------------------------------------------
     def _safe(self, fn):
@@ -275,7 +370,7 @@ class PointWindow(tk.Toplevel):
             self.frestore[name] = b
             msg = tk.StringVar()
             self.fmsg[name] = msg
-            ttk.Label(self.dev_grid, textvariable=msg, wraplength=ui.px(360), justify='left', style='Small.TLabel').grid(row=r, column=3, sticky='w')
+            ttk.Label(self.dev_grid, textvariable=msg, wraplength=ui.px(420), justify='left', style='Small.TLabel').grid(row=r, column=3, sticky='w')
 
     # ---- refresh -------------------------------------------------------------------------------------------------------------
     def refresh(self):
@@ -351,6 +446,12 @@ class PointWindow(tk.Toplevel):
                     parts.append(f.note)
             self.fmsg[name].set('   '.join(parts))
         self.dev.configure(text='Point definition (developer mode)' + ('' if dev_ok else ' - read-only'))
+        if dev_ok:
+            self.dev_note.set('Change the point\'s limits, nominal, unit and description here; each change needs a reason below and is recorded.')
+        elif m.blocked_reason:
+            self.dev_note.set('Read-only: ' + m.blocked_reason)
+        else:
+            self.dev_note.set('Read-only: turn on developer mode (button at the top) to change the limits, nominal, unit or description of this point.')
 
     def update_footer(self):
         m = self.model
@@ -514,13 +615,6 @@ class PointWindow(tk.Toplevel):
         self.message.set('')
         self._build_fields()
         self.refresh()
-
-    def open_all(self):
-        """The older all-procedure window (settle times, skipping points, notes, driver-wide commands)."""
-        try:
-            UI.open_modify_window(self, self.app.pm_live_context(), self.lock)
-        except Exception as exc:
-            self.message.set(f'Could not open it ({type(exc).__name__}).')
 
     def close(self):
         if self.model.pm.drafts and not messagebox.askyesno('Discard changes?', 'There are changes that have not been applied. Close and discard them?', parent=self):

@@ -941,8 +941,8 @@ def attach_to_shell(shell, ctx_factory, lock: M.DevLock | None = None) -> ShellH
 class LiveHook:
     """The 'Edit point' action of a running procedure window (procmods_live): it opens the same small point window as right-click > Edit,
     for the point selected in the list (procmods_point_ui).  It stays usable during a run: saved edits start at the next point.  The older
-    whole-procedure window (settle times, skipping points, notes, driver-wide commands) is reached from the point window's 'All procedure
-    changes...' button, so there is one editor, not two.  `app` is an engine App (procmods_engine.ProcModsMixin).
+    whole-procedure window (open_modify_window: settle times, skipping points, notes, driver-wide commands) is kept as a module but nothing in
+    a running procedure opens it any more.  `app` is an engine App (procmods_engine.ProcModsMixin).
 
     A procedure that is verified on hardware and locked (verified.py) keeps the control, but disabled, with a green 'VERIFIED ON HARDWARE -
     LOCKED' chip and the reason as its tooltip.  Running is not affected."""
