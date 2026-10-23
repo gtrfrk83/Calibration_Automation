@@ -1,0 +1,63 @@
+{
+ "schema": 1,
+ "id": "Keithley_2000_Adjustment",
+ "name": "Keithley 2000 Guided Adjustment",
+ "manufacturer": "Keithley",
+ "model": "2000",
+ "category": "Digital Multimeter Adjustment",
+ "kind": "adjustment",
+ "version": "1",
+ "order": 32,
+ "description": "Guided adjustment (calibration) of the Model 2000 by the remote :CAL:PROT commands of the Calibration Manual (Fluke 5560A or 5522A as the source)",
+ "launcher": "Procedures/Keithley_2000_Adjustment.py",
+ "engine": [
+  "keithley2000_adjustment.py",
+  "adjustment_audit.py"
+ ],
+ "drivers": [
+  "keithley_2000",
+  "keithley_2000_cal",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/keithley_2000_adjustment.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keithley_2000_Adjustment.py",
+   "keithley2000_adjustment.py",
+   "adjustment_audit.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/keithley_2000.py",
+   "drivers/keithley_2000_cal.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/keithley_2000_adjustment.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_k2000"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Keithley_2000_Adjustment.py",
+  "Procedures/Keithley_2000_Adjustment.procedure.json",
+  "specs/keithley_2000_adjustment.json",
+  "specs/build_k2000_adjustment_spec.py",
+  "specs/analyze_k2000_adjustment_standards.py",
+  "specs/k2000_adjustment_standards.md",
+  "keithley2000_adjustment.py",
+  "adjustment_audit.py",
+  "drivers/keithley_2000_cal.py",
+  "drivers/simulated_k2000_cal.py",
+  "tests/test_k2000_adjustment.py"
+ ],
+ "tests": [
+  "tests/test_k2000_adjustment.py"
+ ]
+}
