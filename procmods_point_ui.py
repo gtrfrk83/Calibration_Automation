@@ -47,6 +47,16 @@ def attach_tree_menu(app, tree, resolver=None, lock=None):
             menu.add_command(label='Edit', command=lambda: open_point_window(app, pid, lock=lock), state='normal' if enabled else 'disabled')
             if not enabled:
                 menu.add_command(label=why[:90] + ('...' if len(why) > 90 else ''), state='disabled')
+            extras = getattr(app, 'tree_menu_extras', None)         # an engine's own entries (manual_override: 'Enter reading manually'); none for every other procedure
+            if extras is not None:
+                try:
+                    for label, command, ok, reason in extras(pid):
+                        menu.add_separator()
+                        menu.add_command(label=label, command=command, state='normal' if ok else 'disabled')
+                        if not ok and reason:
+                            menu.add_command(label=reason[:90] + ('...' if len(reason) > 90 else ''), state='disabled')
+                except Exception:
+                    pass
             menu.tk_popup(event.x_root, event.y_root)
         finally:
             try:

@@ -29,7 +29,8 @@ import procmods_engine
 import reset_startup
 import procspec
 import drivers
-from drivers.base import InstrumentError
+import manual_override
+from drivers.base import InstrumentError, SafetyError
 from drivers.fluke_8808a import Fluke8808A, range_number
 
 MODEL = '8808A'
@@ -145,6 +146,10 @@ def prompt_key(p):
     """What decides whether the hook-up prompt is shown again: the wiring group, split in two for the open-input points (200 mA and below: both jacks
     empty; 2 A and 10 A: a lead in the 10 A jack), because the lead has to be inserted before the 2 A point and taken out again for a 200 mA point."""
     return p['group'] + ('_LEAD' if needs_10a_lead(p) else '')
+
+
+class ReadingUnavailable(InstrumentError):
+    """The automatic reading of a point failed (timeout, unreadable, overload). Same message as the error it wraps; the App offers a typed reading (manual_override)."""
 
 
 def judge(p, reading):
@@ -271,6 +276,28 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return self.pm_param('f8808a.settle.ohm_high', 4.0)
         return self.pm_param('f8808a.settle.default', 2.0)
 
+    def _read(self):
+        """The meter's reading (MEAS1?, unchanged). A failure is re-raised as ReadingUnavailable with the same text, so the window can offer a typed reading."""
+        try:
+            return self.dmm.read()
+        except SafetyError:
+            raise
+        except Exception as exc:
+            raise ReadingUnavailable(str(exc)) from exc
+
+    def after_read_failure(self, p, exc):
+        """After a failed automatic reading, so the run can go on with a typed one: calibrator to STANDBY, unsolicited meter output thrown away (read-only),
+        the meter's error status read ONCE so a leftover bit does not stop the next point (not when the meter did not answer at all; never retried)."""
+        self.log.add('!!', f'reading failed ({exc}); a manually entered reading may replace it', MODEL)
+        try: self.standby()
+        except Exception: pass
+        cause = exc.__cause__
+        try: self.dmm._discard_input('after a failed reading')
+        except Exception: pass
+        if isinstance(cause, InstrumentError):
+            try: self.dmm.check_errors('the failed reading of ' + p['description'])
+            except Exception as err: self.log.add('!!', f'error status after the failed reading: {err}', MODEL)
+
     @procmods_engine.point_commands()
     def measure(self, p):
         self.standby()
@@ -278,12 +305,12 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.dmm.check_errors('configuring ' + p['description'])
         if p['source'] == 'none':          # copper short / open input: the calibrator stays in STANDBY
             time.sleep(self.settle(p))
-            reading = self.dmm.read()
+            reading = self._read()
             self.dmm.check_errors('reading ' + p['description'])
             return reading
         if self.is_manual(p):              # the technician has connected a standard: the calibrator stays in STANDBY, the meter is read
             time.sleep(self.settle(p))
-            reading = self.dmm.read()
+            reading = self._read()
             self.dmm.check_errors('reading ' + p['description'])
             return reading
         k, v, f = p['kind'], p['nominal'], p.get('frequency')
@@ -294,13 +321,14 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.cal.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
         self.cal.operate_unverified()
         time.sleep(self.settle(p))
-        reading = self.dmm.read()
+        reading = self._read()
         self.standby()
         self.dmm.check_errors('reading ' + p['description'])
         return reading
 
 
-class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin, manual_override.ManualOverrideMixin):
+    MANUAL_OVERRIDE = True            # the owner's request, 8808A only: type a reading instead of the automatic one (manual_override.py)
     RESET_ONCE_PER_SESSION = True     # the owner's request for the 8808A: factory defaults on the FIRST Run of a session only (reset_startup.AppResetMixin; other engines still reset every Run)
     _hv_confirmed = None              # the hook-up key for which the high-voltage question was answered Yes in this run
 
@@ -433,6 +461,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
         self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
         self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
+        self.mo_add_button(sh)                                     # 'Enter reading manually' (also on the point list's right-click menu)
         self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
         sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
         self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
@@ -469,6 +498,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     def _row(self, p):
         cells, tags = self.shell_cells(p['id'], p['nominal'], p['low'], p['high'], p['unit'])
         return (p['id'], p['description'] + ('  [your standard]' if self.is_manual(p) else ''), *cells), tags
+
+    def mo_point(self, iid): return POINTS[int(iid) - 1]
+    def mo_total(self): return len(POINTS)
 
     def pm_driver_classes(self): return (Fluke8808A, *[cls for _n, cls in CALIBRATORS.values()])
 
@@ -631,6 +663,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
             self.warm_confirmed = True
         if not self.demo and self.io is None: self.test_connections()
         if not self.demo and self.io is None: return
+        self._mo_pending = None; self._mo_current = None
         self.stop = False; self.busy = True; self._hv_confirmed = None     # every Run (first, re-run, resume after Stop) asks the high-voltage question again
         self.reset_then(lambda: self._next(points, 0, None))     # the first Run of a session resets to defaults; later runs (re-run, resume) skip the *RST but still run session_check
 
@@ -696,11 +729,12 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 self.busy = False; return
             self._hv_confirmed = key                   # owner request: one high-voltage confirmation per hook-up group, not one per point (the text is unchanged)
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
+        self._mo_current = p                           # the point being measured: 'Enter reading manually' applies to it
         if self.tree.exists(str(p['id'])): self.tree.selection_set(str(p['id'])); self.tree.see(str(p['id']))
         if self.demo:
             mid, half = (p['low'] + p['high']) / 2, (p['high'] - p['low']) / 2
             reading = mid + half * math.sin(p['id'] * 1.71) * 0.38        # deterministic, labelled synthetic
-            self._record(p, reading, True, manual); self.root.after(30, lambda: self._next(points, i + 1, key))
+            self._finish_point(p, reading, True, manual); self.root.after(30, lambda: self._next(points, i + 1, key))
         else:
             def work():
                 try:
@@ -709,20 +743,42 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                 except Exception as exc:
                     try: self.io.standby()
                     except Exception: pass
+                    if isinstance(exc, ReadingUnavailable):
+                        try: self.io.after_read_failure(p, exc)
+                        except Exception: pass
+                        err = exc
+                        self.root.after(0, lambda err=err: self._reading_failed(points, i, p, key, manual, err))
+                        return
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
                     self.root.after(0, lambda err=err: self._error(err))
             threading.Thread(target=work, daemon=True).start()
 
     def _done(self, points, i, p, reading, key, manual=False):
-        self._record(p, reading, False, manual); self.root.after(30, lambda: self._next(points, i + 1, key))
+        self._finish_point(p, reading, False, manual); self.root.after(30, lambda: self._next(points, i + 1, key))
+
+    def _finish_point(self, p, reading, synthetic, manual=False):
+        """The automatic reading of point p arrived: record it, or the reading typed for this point while it was measured (manual_override; logged as the auto reading)."""
+        typed = self.mo_take_pending(p)
+        self._mo_current = None
+        if typed is not None: self.mo_commit(p, typed, auto=reading)
+        else: self._record(p, reading, synthetic, manual)
+
+    def _reading_failed(self, points, i, p, key, manual, exc):
+        """The meter could not be read (timeout, unreadable, overload). The calibrator is already in standby: ask for the reading and carry on, or stop as before."""
+        typed = self.mo_failed(p, exc)
+        self._mo_current = None
+        if typed is None: self._error(exc); return
+        self.mo_commit(p, typed, auto=None, why=str(exc))
+        self.root.after(30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
+        self._mo_current = None; self._mo_pending = None
         self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); messagebox.showerror('Measurement stopped', str(exc))
 
-    def _record(self, p, reading, synthetic, manual=False):
+    def _record(self, p, reading, synthetic, manual=False, extra=None):
         result = 'PASS' if judge(p, reading) else 'FAIL'
         self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()], manual=bool(manual),
-                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields())
+                                          timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields(), **(extra or {}))
         self._update_row(p); self.save(silent=True)
 
     # ------------------------------------------------------------------ files
