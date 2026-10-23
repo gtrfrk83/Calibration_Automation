@@ -26,6 +26,7 @@ import re
 import sys
 import tempfile
 import time
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -38,7 +39,7 @@ from drivers import (Agilent34401A, AgilentAFG, Fluke28x, Fluke5520A, Fluke5522A
                      Keysight34465A, Keysight34470A, Keysight34970A, Keysight34972A, Keysight53131A, Keysight53132A, ReferenceMeter,
                      TektronixMDO4000C, TektronixTDS2000C, Transport, TransportError, WaveSurfer4104HD)
 from drivers import Fluke5522AScope  # noqa: E402
-from drivers import Fluke5522AComp, Keithley2000, Keysight34410A  # noqa: E402
+from drivers import Fluke5522AComp, Keithley2000, Keithley2000Cal, Keysight34410A, Keysight34411A  # noqa: E402
 from drivers import fluke_28x  # noqa: E402
 from drivers.keysight_332xx import Keysight332xx  # noqa: E402
 from drivers.keysight_5313x import Keysight5313x  # noqa: E402
@@ -52,6 +53,8 @@ from drivers.simulated_28x import SimFluke28x  # noqa: E402
 from drivers.simulated import SimBench  # noqa: E402
 from drivers.simulated_fgen import make_fgen_bench  # noqa: E402
 from drivers.simulated_k2000 import make_k2000_bench  # noqa: E402
+from drivers.simulated_k2000_cal import SIM_CODE, make_k2000_cal_bench  # noqa: E402
+from drivers.simulated_k2000_cal import _steps as k2000_cal_steps  # noqa: E402
 from drivers.simulated_34410a import make_34410a_bench  # noqa: E402
 from drivers.simulated_mdo import make_mdo_bench  # noqa: E402
 from drivers.simulated_tds import make_tds_bench  # noqa: E402
@@ -164,9 +167,17 @@ COVERAGE = {
                              no_command=['bus']),                              # property: derives from the transport
         'Fluke5522AComp': dict(covered=['set_compensation'], no_command=[]),
     },
+    'keithley_2000_cal': {
+        'Keithley2000Cal': dict(covered=['connect', 'set_firmware_class', 'lock_state', 'unlock', 'initiate', 'drain_errors', 'require_no_errors', 'wait_complete',
+                                         'calibrate_step', 'set_dates', 'count', 'save', 'lock', 'cleanup'],
+                                no_command=[]),
+    },
     'keysight_34410a': {
         'Keysight34410A': dict(covered=['connect', 'local', 'cleanup', 'range_ok', 'configure_point', 'read', 'front_rear', 'check_errors', 'firmware_warning'],
                                no_command=['bus', 'firmware']),               # properties: derived from the transport / the *IDN? text already read
+    },
+    'keysight_34411a': {                                              # the family subclass of the 34410A driver (same module; its own fixture so the 34410A transcripts stay as recorded)
+        'Keysight34411A': dict(covered=['connect', 'configure_point', 'read', 'firmware_warning'], no_command=[]),     # inherited methods, exercised on the subclass
     },
     'reference_instruments': {
         'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup'], no_command=[]),
@@ -178,18 +189,18 @@ COVERAGE = {
 # Stage 7: reset_to_defaults is defined once, on Instrument, and exercised on each of these concrete drivers (golden cases "Class.reset_to_defaults").
 for _cls in ('Fluke5560A', 'Fluke5520A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
              'Keysight53132A', 'Fluke5790B', 'Fluke28x', 'WaveSurfer4104HD', 'TektronixMDO4000C', 'Fluke96270A', 'AgilentAFG', 'ReferenceMeter',
-             'TektronixTDS2000C', 'Fluke5522AScope', 'Keithley2000', 'Keysight34410A'):
+             'TektronixTDS2000C', 'Fluke5522AScope', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A'):
     for _fixture in COVERAGE.values():
         if _cls in _fixture:
             _fixture[_cls]['covered'].append('reset_to_defaults')
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
-              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keysight_34410a']
+              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keithley_2000_cal', 'keysight_34410a']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
 ENGINES = ('truevolt_34470A', 'dacq_34970A', 'dacq_34972A', 'fgen_33220A', 'mdo4000c', 'tds2000c', 'agilent_34401a', 'fluke_8846a', 'handheld_5522a',
-           'wavesurfer_dcv', 'keithley_2000', 'keysight_34410a')
+           'wavesurfer_dcv', 'keithley_2000', 'keysight_34410a', 'keysight_34411a')
 
 
 # =====================================================================================================================================
@@ -238,12 +249,16 @@ def pinned():
 
 
 _SECRET_WIRE = re.compile(r'^(CAL:SEC:STAT\s+(?:ON|OFF),)(.*)$', re.I)
+_SECRET_CODE = re.compile(r"^(:?CAL:PROT:CODE\s+)'(.*)'$", re.I)        # Keithley 2000: :CAL:PROT:CODE '<code>'
 
 
 def mask_wire(text):
     """Calibration-security commands carry the password: the record keeps the prefix and the length only."""
     m = _SECRET_WIRE.match(text)
-    return f'{m.group(1)}<password masked, {len(m.group(2))} chars>' if m else text
+    if m:
+        return f'{m.group(1)}<password masked, {len(m.group(2))} chars>'
+    m = _SECRET_CODE.match(text)
+    return f'{m.group(1)}<code masked, {len(m.group(2))} chars>' if m else text
 
 
 # =====================================================================================================================================
@@ -423,7 +438,7 @@ class Case:
         assert name not in self.names, f'duplicate golden case name {name}'
         self.names.add(name)
         call = ', '.join([fmt_result(a) for a in args] + [f'{k}={fmt_result(v)}' for k, v in kwargs.items()])
-        call = call.replace(SENTINEL_PASSWORD, '<secret>')            # never write a password into a fixture
+        call = call.replace(SENTINEL_PASSWORD, '<secret>').replace(SIM_CODE, '<secret>')            # never write a password into a fixture
         self.entries.append(dict(
             case=name, method=name.split('[')[0], call=call, wire=events, result=result,
             log=[f'{inst_}|{d}|{txt}' for _t, inst_, d, txt in (log.entries if log is not None else [])]))
@@ -666,6 +681,37 @@ def cases_34410a(c):
     c.quiet(old.connect)
     c.run('Keysight34410A.firmware_warning[old]', old.firmware_warning)
     c.run('Keysight34410A.firmware_warning[current]', d.firmware_warning)
+
+
+def cases_34411a(c):
+    """The 34411A is the 34410A driver with its own *IDN? text: the same wire strings, so only the model-specific paths are recorded here."""
+    for bus in ('GPIB', 'USB'):
+        bench, ft, dt = make_34410a_bench('5522A', bus, '34411A')
+        d = c.inst(Keysight34411A, dt, opened=False, label='34411A')
+        c.run(f'Keysight34411A.connect[{bus}]', d.connect)
+    bench, ft, dt = make_34410a_bench('5522A', 'GPIB', '34411A')
+    d = c.inst(Keysight34411A, dt, opened=False, label='34411A')
+    c.quiet(d.connect)
+    c.quiet(ft.open)
+    for tag, p in (('DCV', dict(kind='DCV', range=10.0, plc=100)), ('ACV', dict(kind='ACV', range=1.0, ac_bandwidth=3)), ('OHM4', dict(kind='OHM4', range=1000.0)),
+                   ('FREQ', dict(kind='FREQ', range=10.0, aperture_s=1))):
+        c.run(f'Keysight34411A.configure_point[{tag}]', d.configure_point, p)
+    c.quiet(d.configure_point, dict(kind='DCV', range=10.0))
+    c.quiet(ft.write, 'OUT 5V,0Hz'); c.quiet(ft.write, 'OPER')
+    c.run('Keysight34411A.read[5 V on 10 V]', d.read)
+    other = c.inst(Keysight34411A, Scripted([(r'\*IDN\?', 'Agilent Technologies,34410A,MY1,2.35-2.35-0.09-46-09')]), opened=False, label='34411A')
+    c.run('Keysight34411A.connect[a 34410A answers]', other.connect)
+    old = c.inst(Keysight34411A, Scripted([(r'\*IDN\?', 'Agilent Technologies,34411A,MY1,1.07-1.07-0.01-1-1')]), opened=False, label='34411A')
+    c.quiet(old.connect)
+    c.run('Keysight34411A.firmware_warning[old]', old.firmware_warning)
+    c.run('Keysight34411A.firmware_warning[current]', d.firmware_warning)
+
+
+def resets_34411a(c):
+    for bus in ('GPIB', 'USB'):
+        bench, ft, dt = make_34410a_bench('5522A', bus, '34411A')
+        d = c.inst(Keysight34411A, dt, label='34411A')
+        c.run(f'Keysight34411A.reset_to_defaults[{bus}]', d.reset_to_defaults)
 
 
 def cases_k2000(c):
@@ -1197,6 +1243,73 @@ def resets_truevolt(c):
     c.run('Keysight34470A.reset_to_defaults', d.reset_to_defaults)
 
 
+def cases_k2000_cal(c):
+    """The Model 2000 calibration interface (:CAL:PROT). The code on the wire is masked in the record; the code never appears in a log line, a result or an error text."""
+    steps = {x['id']: x for x in k2000_cal_steps()}
+    for fw in ('A20', 'A19'):
+        bench, ft, dt = make_k2000_cal_bench('5522A', 'GPIB', fw)
+        d = c.inst(Keithley2000Cal, dt, opened=False, label='2000')
+        c.run(f'Keithley2000Cal.connect[{fw}]', d.connect)
+    bench, ft, dt = make_k2000_cal_bench('5522A', 'GPIB', 'A20')
+    d = c.inst(Keithley2000Cal, dt, opened=False, label='2000')
+    c.quiet(d.connect)
+    c.quiet(ft.open)
+    c.run('Keithley2000Cal.set_firmware_class[A19-]', d.set_firmware_class, 'A19-')
+    c.run('Keithley2000Cal.set_firmware_class[bad]', d.set_firmware_class, 'A5')
+    c.quiet(d.set_firmware_class, 'A20+')
+    c.run('Keithley2000Cal.lock_state[locked]', d.lock_state)
+    c.run('Keithley2000Cal.initiate[before unlock]', d.initiate)
+    c.run('Keithley2000Cal.calibrate_step[before unlock]', d.calibrate_step, steps['D01'])
+    c.run('Keithley2000Cal.unlock[bad shape]', d.unlock, 'NOT A CODE!')
+    c.run('Keithley2000Cal.unlock', d.unlock, SIM_CODE)
+    c.run('Keithley2000Cal.unlock[second code refused]', d.unlock, SIM_CODE)
+    c.run('Keithley2000Cal.lock_state[unlocked]', d.lock_state)
+    c.run('Keithley2000Cal.initiate', d.initiate)
+    c.run('Keithley2000Cal.initiate[twice]', d.initiate)
+    c.run('Keithley2000Cal.calibrate_step[D01 short]', d.calibrate_step, steps['D01'])
+    c.quiet(ft.write, 'OUT 10V,0Hz'); c.quiet(ft.write, 'OPER')
+    c.run('Keithley2000Cal.calibrate_step[D03 +10 V]', d.calibrate_step, steps['D03'], 10.0)
+    c.run('Keithley2000Cal.calibrate_step[D03 parameter missing]', d.calibrate_step, steps['D03'])
+    c.run('Keithley2000Cal.calibrate_step[D03 parameter out of range]', d.calibrate_step, steps['D03'], 12.0)
+    c.quiet(ft.write, 'OUT 0.01V,1000Hz')
+    c.run('Keithley2000Cal.calibrate_step[A01 10 mV ac]', d.calibrate_step, steps['A01'])
+    c.run('Keithley2000Cal.calibrate_step[A01 parameter refused]', d.calibrate_step, steps['A01'], 1.0)
+    dt.fail_steps['D04'] = 403
+    c.quiet(ft.write, 'OUT -10V,0Hz')
+    c.run('Keithley2000Cal.calibrate_step[D04 error +403]', d.calibrate_step, steps['D04'], -10.0)
+    c.run('Keithley2000Cal.drain_errors[clean]', d.drain_errors)
+    dt.errors = ['+402,"10 vdc full scale error"', '+411,"Ohms 1k error"']
+    c.run('Keithley2000Cal.drain_errors[two errors]', d.drain_errors)
+    dt.errors = ['+402,"10 vdc full scale error"']
+    c.run('Keithley2000Cal.require_no_errors[error]', d.require_no_errors, 'ctx')
+    c.run('Keithley2000Cal.require_no_errors[ok]', d.require_no_errors, 'ctx')
+    c.run('Keithley2000Cal.wait_complete', d.wait_complete)
+    dt.hang_opc = True
+    c.run('Keithley2000Cal.wait_complete[no answer]', d.wait_complete)
+    c.quiet(d.set_firmware_class, 'A19-')
+    c.run('Keithley2000Cal.calibrate_step[D10 absent on A19]', d.calibrate_step, steps['D10'], 1e7)
+    c.quiet(d.set_firmware_class, 'A20+')
+    c.run('Keithley2000Cal.count', d.count)
+    c.run('Keithley2000Cal.save[dates missing]', d.save)
+    c.run('Keithley2000Cal.set_dates[due before calibration]', d.set_dates, date(2026, 10, 23), date(2026, 10, 1))
+    c.run('Keithley2000Cal.set_dates[year out of range]', d.set_dates, date(1990, 1, 1), date(1991, 1, 1))
+    c.run('Keithley2000Cal.set_dates', d.set_dates, date(2026, 10, 23), date(2027, 10, 23))
+    c.run('Keithley2000Cal.save', d.save)
+    c.run('Keithley2000Cal.lock', d.lock)
+    c.run('Keithley2000Cal.cleanup', d.cleanup)
+    bench, ft, dt = make_k2000_cal_bench('5522A', 'GPIB', 'A20')
+    still = c.inst(Keithley2000Cal, dt, opened=False, label='2000')
+    c.quiet(still.connect)
+    c.run('Keithley2000Cal.unlock[wrong code, stays locked]', still.unlock, 'WRONG123')
+
+
+def resets_k2000_cal(c):
+    for fw in ('A20', 'A19'):
+        bench, ft, dt = make_k2000_cal_bench('5522A', 'GPIB', fw)
+        d = c.inst(Keithley2000Cal, dt, label='2000')
+        c.run(f'Keithley2000Cal.reset_to_defaults[{fw}]', d.reset_to_defaults)
+
+
 def resets_k2000(c):
     for bus in ('GPIB', 'RS232'):
         bench, ft, dt = make_k2000_bench('5522A', bus)
@@ -1311,7 +1424,9 @@ DRIVER_CASES = {
     'tektronix_mdo4000c': _with_resets(cases_mdo, resets_mdo), 'tektronix_tds2000c': _with_resets(cases_tds, resets_tds),
     'fluke_5522a_scope': _with_resets(cases_5522a_scope, resets_5522a_scope), 'reference_instruments': _with_resets(cases_reference, resets_reference),
     'keithley_2000': _with_resets(cases_k2000, resets_k2000),
+    'keithley_2000_cal': _with_resets(cases_k2000_cal, resets_k2000_cal),
     'keysight_34410a': _with_resets(cases_34410a, resets_34410a),
+    'keysight_34411a': _with_resets(cases_34411a, resets_34411a),
 }
 
 

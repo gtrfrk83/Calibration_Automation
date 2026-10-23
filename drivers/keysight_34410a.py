@@ -12,8 +12,10 @@ Interface facts used (UG chapter 3):
 Reset rule: *RST (UG p. 51; also SYSTem:PRESet, not used).  The error queue is NOT cleared by *RST (UG p. 85): the reset sequence drains it.
 Writes are sent once, read back and compared; nothing is retried.  Only read-only queries (SYST:ERR? ...) may be retried.
 
-34411A / L4411A: the Service Guide tables, the SCPI commands used here and the specification page are shared with the 34411A ("34410A/11A/L4411A"), so a model flag
-(IDN_MATCH and the limits file) would cover the 34411A.  It is not built: this driver and the procedure are for the 34410A only.
+34411A: the Service Guide verification tables, the SCPI commands used here and the specification pages are shared with the 34411A ("34410A/11A/L4411A"), so the 34411A
+is the subclass Keysight34411A below (model flag: MODEL text, SHORT, IDN_MATCH): every command and every registry entry is the 34410A's.  The 34411A-only features
+(digitizing at up to 50,000 readings per second, pre-trigger, internal level trigger, 1 million readings of memory, NPLC 0.001 / 0.002) are not part of the performance
+verification and no command for them is in this driver.  The L4411A (no Front/Rear switch, no front panel) is NOT built.
 """
 from __future__ import annotations
 
@@ -125,6 +127,7 @@ def _flag(reply):
 
 class Keysight34410A(Instrument):
     MODEL = 'Keysight 34410A'
+    SHORT = '34410A'                    # the model name used in messages (the 34411A subclass overrides it)
     IDN_MATCH = ('34410A',)
     COMMANDS = COMMANDS
     DEFAULT_TIMEOUT = 30.0              # 100 NPLC with autozero takes about 4 s; an AC reading with the 3 Hz filter about 2.5 s plus the settling delay
@@ -158,10 +161,10 @@ class Keysight34410A(Instrument):
             self.idn = self.identify()
         except TransportError as exc:
             self.close()
-            raise InstrumentError(f'The 34410A did not answer *IDN? ({exc}). Check the GPIB address (factory 22) or the USB / VISA resource.') from exc
+            raise InstrumentError(f'The {self.SHORT} did not answer *IDN? ({exc}). Check the GPIB address (factory 22) or the USB / VISA resource.') from exc
         if self.IDN_MATCH and not any(m.upper() in self.idn.upper() for m in self.IDN_MATCH):
             self.close()
-            raise InstrumentError(f'Expected a 34410A but the instrument identifies as: {self.idn!r}')
+            raise InstrumentError(f'Expected a {self.SHORT} but the instrument identifies as: {self.idn!r}')
         return self
 
     def local(self):
@@ -192,7 +195,7 @@ class Keysight34410A(Instrument):
 
     def _confirm(self, what, ok, reply):
         if not ok:
-            raise InstrumentError(f'{self.label}: {what} was not accepted: the 34410A answered {str(reply).strip()!r}')
+            raise InstrumentError(f'{self.label}: {what} was not accepted: the {self.SHORT} answered {str(reply).strip()!r}')
 
     def configure_point(self, point: dict):
         """Function, manual range, integration time (100 NPLC) or AC filter (3 Hz) for one verification point.  Never autorange.
@@ -234,15 +237,15 @@ class Keysight34410A(Instrument):
 
     # ---- readings ----------------------------------------------------------------------------------------------------------
     @staticmethod
-    def _reading(reply) -> float:
+    def _reading(reply, short='34410A') -> float:
         value = _number(reply)
         if not math.isfinite(value) or abs(value) >= OVERFLOW:
-            raise InstrumentError(f'The 34410A reported an overload / invalid reading ({str(reply).strip()!r}): wrong range or nothing connected.')
+            raise InstrumentError(f'The {short} reported an overload / invalid reading ({str(reply).strip()!r}): wrong range or nothing connected.')
         return value
 
     def read(self) -> float:
         """READ? -> one reading.  Never retried."""
-        return self._reading(self.ask('read'))
+        return self._reading(self.ask('read'), self.SHORT)
 
     def front_rear(self) -> str:
         """ROUT:TERM? -> 'FRONT' or 'REAR' (the switch cannot be set remotely)."""
@@ -259,3 +262,11 @@ class Keysight34410A(Instrument):
             found.append(reply)
         if found:
             raise InstrumentError(f'{self.MODEL} reported an error{" after " + context if context else ""}: ' + ' | '.join(found))
+
+
+class Keysight34411A(Keysight34410A):
+    """Keysight / Agilent 34411A: the same SCPI, the same verification tables and the same Front/Rear switch as the 34410A (Service Guide pp. 68-87 are headed
+    "34410A/11A"); only the model text the *IDN? must contain and the messages differ.  Digitizing / pre-trigger / reading-memory commands are not used."""
+    MODEL = 'Keysight 34411A'
+    SHORT = '34411A'
+    IDN_MATCH = ('34411A',)

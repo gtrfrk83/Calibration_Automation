@@ -1237,6 +1237,70 @@ def checks_dsb_dialogs_fit():
     win.destroy()
     root.destroy()
 
+def checks_k2000_adjustment():
+    """Keithley 2000 guided adjustment (demo on the simulated 2000): the calibration-change notice is visible, nothing is clipped at 1300x860, the whole flow runs
+    (connect, record, unlock, 26 steps, dates, SAVE, lock), the window cannot be closed while unlocked, and the calibration code is nowhere in the window or the audit."""
+    import importlib
+    import keithley2000_adjustment as adj
+    from drivers.simulated_k2000_cal import SIM_CODE
+    from tkinter import simpledialog
+    mod = importlib.import_module('Keithley_2000_Adjustment')
+    root = tk.Tk()
+    app = mod.App(root, demo=True)
+    root.geometry('1300x860+0+0')
+    pump(root, 30)
+    notice = [w for w in walk(root) if isinstance(w, ttk.Label) and 'stored constants' in str(w.cget('text'))]
+    check('k2000 adjustment: change notice shown', bool(notice) and inside(root, notice[0]))
+    clipped = [str(w.cget('text')) for w in walk(root) if isinstance(w, (ttk.Button, ttk.Combobox, ttk.Entry)) and w.winfo_ismapped() and not inside(root, w)]
+    check('k2000 adjustment: nothing clipped', not clipped, clipped)
+    check('k2000 adjustment: starts locked and unconnected', str(app.btn_start['state']) == 'disabled' and str(app.btn_unlock['state']) == 'disabled' and str(app.btn_run['state']) == 'disabled')
+    app.asset.set('K2000-REAL-TK')
+    app.serial.set('SIM1')
+    app.tech.set('Tester')
+    answers = {'code_asked': 0}
+
+    def ask_str(title, prompt, **kw):
+        if 'code' in title.lower():
+            answers['code_asked'] += 1
+            return SIM_CODE
+        return adj.CONFIRM_SAVE
+    with mock.patch.object(messagebox, 'askyesno', return_value=True), mock.patch.object(messagebox, 'askokcancel', return_value=True), \
+            mock.patch.object(messagebox, 'showinfo'), mock.patch.object(messagebox, 'showwarning') as warn, mock.patch.object(messagebox, 'showerror') as err, \
+            mock.patch.object(ui, 'confirm_steps', return_value=True), mock.patch.object(simpledialog, 'askstring', side_effect=ask_str), \
+            mock.patch.object(app, 'ask_value', side_effect=lambda t, p, default: default):
+        app.connect()
+        pump(root, 5)
+        check('k2000 adjustment: connected (demo)', app.io is not None and 'DEMO' in app.pill_meter.cget('text'))
+        app.start_record()
+        check('k2000 adjustment: record started, still locked', app.session is not None and not app.session.unlocked and 'LOCKED' in app.pill_lock.cget('text'))
+        app.unlock()
+        check('k2000 adjustment: unlocked after the code', app.session.unlocked and answers['code_asked'] == 1 and 'UNLOCKED' in app.pill_lock.cget('text'))
+        app.on_close()
+        check('k2000 adjustment: cannot be closed while unlocked', root.winfo_exists() and warn.called)
+        n = 0
+        while app.session.next_step() and n < 40:
+            app.run_next()
+            n += 1
+        pump(root, 5)
+        check('k2000 adjustment: all 26 steps ran, none failed', n == 26 and app.session.all_done() and not err.called, (n, err.call_args_list[:1]))
+        check('k2000 adjustment: SAVE is offered only now', str(app.btn_save['state']) == 'normal' and str(app.btn_run['state']) == 'disabled')
+        app.dates_and_save()
+        pump(root, 5)
+    check('k2000 adjustment: saved and locked again', app.session.saved and app.session.locked_again and 'LOCKED' in app.pill_lock.cget('text') and not app.session.unlocked)
+    rows = [app.log_table.item(i, 'values') for i in app.log_table.get_children()]
+    check('k2000 adjustment: audit log filled', len(rows) > 80, len(rows))
+    check('k2000 adjustment: the code is not in the audit table or any label', not any(SIM_CODE in ' '.join(map(str, r)) for r in rows) and
+          not any(SIM_CODE in str(w.cget('text')) for w in walk(root) if isinstance(w, (ttk.Label, tk.Label))))
+    check('k2000 adjustment: demo record is in memory only', app.audit.path == ':memory:' and 'DEMO' in app.pill_run.cget('text'))
+    shots = os.environ.get('PKG_SHOTS')
+    if shots:
+        from PIL import ImageGrab
+        x, y = root.winfo_rootx(), root.winfo_rooty()
+        ImageGrab.grab(bbox=(x, y, x + root.winfo_width(), y + root.winfo_height()), xdisplay=os.environ['DISPLAY']).save(Path(shots) / f'k2000_adjustment_{THEME}.png')
+    app.disconnect()
+    app.on_close()
+
+
 
 if __name__ == '__main__':
     try:
@@ -1253,6 +1317,7 @@ if __name__ == '__main__':
         checks_dsb_auto_collapse()
         checks_dsb_dialogs_fit()
         checks_run_queue_app()
+        checks_k2000_adjustment()
     except Exception:
         traceback.print_exc()
         sys.exit(1)

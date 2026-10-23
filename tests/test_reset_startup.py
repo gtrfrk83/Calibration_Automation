@@ -85,7 +85,7 @@ class DriversDeclareReset(unittest.TestCase):
         """Only these resets are backed by a manual page; everything else is flagged unverified in the report."""
         ok = sorted(c.__name__ for c in all_driver_classes()
                     if not c.RESET_EXEMPT and cmdreg.merge_commands(c)['reset'].verified)
-        self.assertEqual(ok, ['Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke8808A', 'Fluke96270A', 'Keithley2000', 'Keysight34410A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x'])
+        self.assertEqual(ok, ['Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke8808A', 'Fluke96270A', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x'])
 
 
 # ------------------------------------------------------------------------------------------------------------------------------
@@ -175,8 +175,15 @@ class EnginesCallTheStartupHelper(unittest.TestCase):
         calls = calls_in(start)
         self.assertLess(min(l for l, c in calls if c == 'reset_meter'), min(l for l, c in calls if c == 'execute'))   # before the INSERT of the record
 
+    def test_keithley_2000_adjustment_resets_before_the_record_is_prepared_and_never_unlocks_first(self):
+        tree = ast.parse((ROOT / 'Procedures/Keithley_2000_Adjustment.py').read_text(encoding='utf-8'))
+        calls = calls_in(next(find_function(tree, 'start_record')))
+        self.assertLess(min(l for l, c in calls if c == 'reset'), min(l for l, c in calls if c == 'prepare'))
+        self.assertNotIn('unlock', [c for _l, c in calls])
+        self.assertNotIn('reset', [c for _l, c in calls_in(next(find_function(tree, 'unlock')))])     # the reset is never between the code and the steps
+
     def test_every_procedure_launcher_uses_a_checked_engine(self):
-        engine_mods = {Path(r).stem for r in ENGINES} | {'WaveSurfer_WS4104HD', 'Fluke_8846A_Adjustment'}
+        engine_mods = {Path(r).stem for r in ENGINES} | {'WaveSurfer_WS4104HD', 'Fluke_8846A_Adjustment', 'Keithley_2000_Adjustment'}
         for path in sorted((ROOT / 'Procedures').glob('*.py')):
             tree = ast.parse(path.read_text(encoding='utf-8'))
             imported = set()

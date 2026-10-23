@@ -120,6 +120,24 @@ def run_34410a():
     return c.entries
 
 
+def run_34411a():
+    """The 34411A through the same engine (configure('34411A')); the 34410A run above is untouched."""
+    import agilent34410a_verification as A
+    A.configure('34411A')
+    try:
+        c = gc.Case('engine_keysight_34411a')
+        bench, ft, dt = make_34410a_bench('5522A', 'GPIB', '34411A')
+        r = Runner(c)
+        io = r.build('agilent34410a_verification.IO.__init__', lambda: A.IO('sim', 'sim', 'Fluke 5522A', 9600, 'GPIB', transports=(rec(dt), rec(ft))))
+        c.run('agilent34410a_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
+        _measure_all(c, io, sample([p for p in A.POINTS if p['terminal'] == 'FRONT'], lambda p: (p['kind'], p['group'], bool(p.get('frequency')), p['range'] >= 1e6, p['source']), 18),
+                     'agilent34410a_verification')
+        c.run('agilent34410a_verification.IO.close', io.close, _log=io.log)
+        return c.entries
+    finally:
+        A.configure('34410A')
+
+
 def run_dacq(model):
     import dacq_verification as D
     D.configure(model)
@@ -376,4 +394,5 @@ RUNS = {
     'wavesurfer_dcv': run_wavesurfer,
     'keithley_2000': run_k2000,
     'keysight_34410a': run_34410a,
+    'keysight_34411a': run_34411a,
 }

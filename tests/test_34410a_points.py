@@ -534,7 +534,7 @@ class Registration(unittest.TestCase):
         import procscan
         self.assertIn('Agilent_34410A_Verification', [q.id for q in procscan.procs(ROOT)])
         import procmods_engine as pe
-        self.assertEqual(pe.MODEL_IDS['a34410a'], '34410A')
+        self.assertEqual(pe.MODEL_IDS['a34410a'], 'the model, 34410A or 34411A')
         self.assertTrue(pe.tunables_for('a34410a'))
 
     def test_diagram_readme_exists_and_names_the_groups(self):

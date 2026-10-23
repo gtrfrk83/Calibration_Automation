@@ -1,0 +1,440 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Keysight34411A.connect[GPIB]",
+   "log": [
+    "34411A|>>|*CLS",
+    "34411A|>>|*IDN?",
+    "34411A|<<|Agilent Technologies,34411A,MY00000001,2.35-2.35-0.09-46-09"
+   ],
+   "method": "Keysight34411A.connect",
+   "result": "returned <Keysight34411A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,34411A,MY00000001,2.35-2.35-0.09-46-09"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34411A.connect[USB]",
+   "log": [
+    "34411A|>>|*CLS",
+    "34411A|>>|*IDN?",
+    "34411A|<<|Agilent Technologies,34411A,MY00000001,2.35-2.35-0.09-46-09"
+   ],
+   "method": "Keysight34411A.connect",
+   "result": "returned <Keysight34411A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,34411A,MY00000001,2.35-2.35-0.09-46-09"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'DCV', 'plc': 100, 'range': 10.0}",
+   "case": "Keysight34411A.configure_point[DCV]",
+   "log": [
+    "34411A|>>|CONF:VOLT:DC 10",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"VOLT:DC\"",
+    "34411A|>>|SENS:VOLT:DC:RANG?",
+    "34411A|<<|+1.000000E+01",
+    "34411A|>>|SENS:VOLT:DC:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:VOLT:DC:NPLC 100",
+    "34411A|>>|SENS:VOLT:DC:NPLC?",
+    "34411A|<<|+1.000000E+02"
+   ],
+   "method": "Keysight34411A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:DC 10"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"VOLT:DC\""
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:RANG?",
+     "+1.000000E+01"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:VOLT:DC:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:NPLC?",
+     "+1.000000E+02"
+    ]
+   ]
+  },
+  {
+   "call": "{'ac_bandwidth': 3, 'kind': 'ACV', 'range': 1.0}",
+   "case": "Keysight34411A.configure_point[ACV]",
+   "log": [
+    "34411A|>>|CONF:VOLT:AC 1",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"VOLT:AC\"",
+    "34411A|>>|SENS:VOLT:AC:RANG?",
+    "34411A|<<|+1.000000E+00",
+    "34411A|>>|SENS:VOLT:AC:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:VOLT:AC:BAND 3",
+    "34411A|>>|SENS:VOLT:AC:BAND?",
+    "34411A|<<|+3.000000E+00"
+   ],
+   "method": "Keysight34411A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:VOLT:AC 1"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"VOLT:AC\""
+    ],
+    [
+     "Q",
+     "SENS:VOLT:AC:RANG?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:VOLT:AC:BAND 3"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:AC:BAND?",
+     "+3.000000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "{'kind': 'OHM4', 'range': 1000.0}",
+   "case": "Keysight34411A.configure_point[OHM4]",
+   "log": [
+    "34411A|>>|CONF:FRES 1000",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"FRES\"",
+    "34411A|>>|SENS:FRES:RANG?",
+    "34411A|<<|+1.000000E+03",
+    "34411A|>>|SENS:FRES:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:FRES:NPLC 100",
+    "34411A|>>|SENS:FRES:NPLC?",
+    "34411A|<<|+1.000000E+02"
+   ],
+   "method": "Keysight34411A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FRES 1000"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"FRES\""
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG?",
+     "+1.000000E+03"
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:FRES:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:FRES:NPLC?",
+     "+1.000000E+02"
+    ]
+   ]
+  },
+  {
+   "call": "{'aperture_s': 1, 'kind': 'FREQ', 'range': 10.0}",
+   "case": "Keysight34411A.configure_point[FREQ]",
+   "log": [
+    "34411A|>>|CONF:FREQ DEF,MIN",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"FREQ\"",
+    "34411A|>>|SENS:FREQ:APER 1",
+    "34411A|>>|SENS:FREQ:APER?",
+    "34411A|<<|+1.000000E+00",
+    "34411A|>>|SENS:FREQ:VOLT:RANG 10",
+    "34411A|>>|SENS:FREQ:VOLT:RANG?",
+    "34411A|<<|+1.000000E+01"
+   ],
+   "method": "Keysight34411A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ DEF,MIN"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"FREQ\""
+    ],
+    [
+     "W",
+     "SENS:FREQ:APER 1"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:APER?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     "SENS:FREQ:VOLT:RANG 10"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:VOLT:RANG?",
+     "+1.000000E+01"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34411A.read[5 V on 10 V]",
+   "log": [
+    "34411A|>>|READ?",
+    "34411A|<<|+5.000010400E+00"
+   ],
+   "method": "Keysight34411A.read",
+   "result": "returned 5.0000104",
+   "wire": [
+    [
+     "Q",
+     "READ?",
+     "+5.000010400E+00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34411A.connect[a 34410A answers]",
+   "log": [
+    "34411A|>>|*CLS",
+    "34411A|>>|*IDN?",
+    "34411A|<<|Agilent Technologies,34410A,MY1,2.35-2.35-0.09-46-09"
+   ],
+   "method": "Keysight34411A.connect",
+   "result": "raised InstrumentError: Expected a 34411A but the instrument identifies as: 'Agilent Technologies,34410A,MY1,2.35-2.35-0.09-46-09'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,34410A,MY1,2.35-2.35-0.09-46-09"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34411A.firmware_warning[old]",
+   "log": [],
+   "method": "Keysight34411A.firmware_warning",
+   "result": "returned \"firmware 1.07-1.07-0.01-1-1: the published specifications are valid for firmware 2.05 or later (User's Guide p. 128)\"",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keysight34411A.firmware_warning[current]",
+   "log": [],
+   "method": "Keysight34411A.firmware_warning",
+   "result": "returned ''",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keysight34411A.reset_to_defaults[GPIB]",
+   "log": [
+    "34411A|>>|*RST",
+    "34411A|>>|*CLS",
+    "34411A|>>|*OPC?",
+    "34411A|<<|1",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "34411A|>>|SENS:VOLT:DC:ZERO:AUTO?",
+    "34411A|<<|1"
+   ],
+   "method": "Keysight34411A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='34411A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='known measurement state (autozero on)', ok=True, detail='autozero on')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:ZERO:AUTO?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight34411A.reset_to_defaults[USB]",
+   "log": [
+    "34411A|>>|*RST",
+    "34411A|>>|*CLS",
+    "34411A|>>|*OPC?",
+    "34411A|<<|1",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "34411A|>>|SENS:VOLT:DC:ZERO:AUTO?",
+    "34411A|<<|1"
+   ],
+   "method": "Keysight34411A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='34411A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='known measurement state (autozero on)', ok=True, detail='autozero on')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:ZERO:AUTO?",
+     "1"
+    ]
+   ]
+  }
+ ],
+ "name": "keysight_34411a",
+ "schema": 1
+}
