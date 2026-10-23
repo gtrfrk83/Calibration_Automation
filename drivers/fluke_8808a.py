@@ -5,9 +5,12 @@ manual does not give are NOT guessed: they are marked verified=False in COMMANDS
 
     Interface (Users Manual Table 4-1, p. 4-4 and Calibration Manual p. 1-10): RS-232 only. Factory settings 9600 baud, 8 data bits, no parity,
         1 stop bit, echo OFF; they are changed from the front panel only. Output terminator CR LF; input accepts CR, LF or CR LF (p. 4-7).
-    Prompts ("=>", "?>", "!>", pp. 4-6 and 4-8) are sent ONLY while Echo is on. With echo off (the default) nothing tells the controller that a
-        command has finished, so this driver (1) leaves COMMAND_GAP_S between commands, (2) uses *OPC? as the "done" signal where it matters, and
-        (3) refuses to run when echo is on (the replies would carry prompts that this driver does not parse).
+    Prompts ("=>" no error, "?>" command error, "!>" execution / device-dependent error; pp. 4-6 and 4-8) are, per the manual, sent ONLY while Echo
+        is on, one after each command and AFTER its reply. With echo off (the default) nothing tells the controller that a command has finished, so
+        this driver (1) leaves COMMAND_GAP_S between commands, (2) uses *OPC? as the "done" signal where it matters, and (3) is prompt-tolerant:
+        on a real bench the '=>' prompt was seen after *RST although Echo had been set off before (the log shows it; WHY is not known), so a reply
+        line that is only a prompt is skipped (read-only, bounded, logged as skipped) and a '?>' / '!>' prompt is raised as an error of the command it
+        follows. Input is flushed after the *RST settle. A reply that is the echoed command text at connect time is refused with a clear message.
     Errors: there is no error queue. Command, execution and device-dependent errors set bits of the standard event status register, read with *ESR?
         (which also clears it). Mask 0x3C: bit 2 query error, 3 device-dependent, 4 execution, 5 command error (Table 4-6, p. 4-12).
         A new command line sent before a pending query was read is a query error (p. 4-12), so every query is read before the next command.
@@ -126,24 +129,126 @@ class Fluke8808A(Instrument):
     COMMAND_GAP_S = 0.15
     RESET_SETTLE_S = 3.0         # after *RST (a power-up reset); also a choice of this driver, not a manual figure
     PROMPTS = ('=>', '?>', '!>')
+    PROMPT_KIND = {'=>': 'ready', '?>': 'command-error', '!>': 'execution-error'}
+    MAX_REPLY_LINES = 5          # lines read while waiting for ONE reply (prompts / echo skipped); a bound, not a manual figure
+    PROMPT_WARNING = ('prompts returned: Echo appears to be ON or was restored by *RST - turn Echo off at the front panel '
+                      '(Users Manual Table 4-1, p. 4-4)')
+    prompts_seen = 0             # prompt lines skipped / raised since this driver object was made
+    echo_seen = 0                # echoed command lines skipped
+    _since = None                # commands sent since the last reply was read (a prompt that arrives before a reply belongs to one of them)
+    _prompt_logged = False
 
-    # ---- wire access: pacing -----------------------------------------------------------------------------------------------------------------
+    # ---- wire access: pacing, prompt-tolerant replies ----------------------------------------------------------------------------------------
     def write(self, cmd, log_as=None):
         time.sleep(self.COMMAND_GAP_S)
         super().write(cmd, log_as)
+        self._since = (self._since or [])[-19:] + [cmd.strip()]
 
     def query(self, cmd, log_as=None):
         time.sleep(self.COMMAND_GAP_S)
-        return super().query(cmd, log_as)
+        return self._query_lines(cmd, log_as, echo_ok=True)
+
+    def _note_prompts(self):
+        if not self._prompt_logged:
+            self._prompt_logged = True
+            self.log.add('!!', self.PROMPT_WARNING, self.label)
+
+    def _prompt_warning(self) -> str:
+        """The warning text for the reset report / summary, or '' when no prompt or echoed line was ever seen."""
+        if not (self.prompts_seen or self.echo_seen):
+            return ''
+        return f'{self.PROMPT_WARNING} ({self.prompts_seen} prompt line(s) and {self.echo_seen} echoed command line(s) skipped)'
+
+    def _query_lines(self, cmd, log_as, echo_ok):
+        """Send a query once and read its reply. The FIRST read is the transport's own query (so a timeout gives the same error as before).
+        A reply line that is only a prompt is not the reply: a prompt FOLLOWS the command it answers (p. 4-6), so one that arrives before this
+        query's reply belongs to an EARLIER command. '=>' (no error) is dropped; '?>' / '!>' is raised as that command's failure, never skipped.
+        An echoed copy of the command (Echo on) is skipped unless echo_ok is False. At most MAX_REPLY_LINES lines are read; every raw line read is
+        logged, a skipped one is marked. Read-only: nothing is ever written here."""
+        earlier = list(self._since or [])
+        self.log.add('>>', log_as or cmd, self.label)
+        line = self.t.query(cmd)
+        limit = self.MAX_REPLY_LINES + 2 * len(earlier)          # a command that was sent before may have left its echo and its prompt in front of the reply
+        for n in range(limit):
+            text = line.strip()
+            if text in self.PROMPTS:
+                self.prompts_seen += 1
+                if text != '=>':
+                    self.log.add('<<', f'{text}  [prompt: {self.PROMPT_KIND[text]}, raised as an error]', self.label)
+                    self._note_prompts()
+                    self._discard_input('after an error prompt')       # the rest of that exchange must not be paired with a later command
+                    raise InstrumentError(self._prompt_error(text, cmd, earlier))
+                self.log.add('<<', f'{text}  [prompt, skipped]', self.label)
+                self._note_prompts()
+            elif self._is_echo(text, cmd, earlier):
+                self.echo_seen += 1
+                if not echo_ok:
+                    self.log.add('<<', f'{text}  [echo of the command, refused]', self.label)
+                    self._note_prompts()
+                    raise InstrumentError(self._echo_error(cmd))
+                self.log.add('<<', f'{text}  [echo of the command, skipped]', self.label)
+                self._note_prompts()
+            else:
+                self.log.add('<<', text, self.label)
+                self._since = [cmd.strip()]          # its own prompt may still follow the reply
+                return line
+            if n + 1 < limit:
+                line = self.t.read()                  # a timeout here raises the transport's own error
+        self._since = [cmd.strip()]
+        raise InstrumentError(f'{self.MODEL}: no reply to {cmd!r} within {limit} lines (only prompts / echoed text were read)')
+
+    def _is_echo(self, text, cmd, earlier) -> bool:
+        """Is this line the echoed text of a command (Echo on)? Always for this query's own text. For an EARLIER command's text (its echo is read in
+        front of the next reply) only when that text cannot be a reply: it holds a '*', a space, a digit or a '?'. A bare mnemonic (VDC, FIXED, REMS)
+        could be the reply of FUNC1?, so it counts as an echo only once an echoed query has been seen (echo_seen > 0). A heuristic, not a manual fact."""
+        up = text.upper()
+        if not up:
+            return False
+        if up == cmd.strip().upper():
+            return True
+        for c in earlier:
+            if up == c.upper() and (self.echo_seen > 0 or not up.isalpha()):
+                return True
+        return False
+
+    def _prompt_error(self, prompt, cmd, earlier):
+        what = {'?>': 'a command error (the command was not understood)', '!>': 'an execution or device-dependent error (the command was understood but not executed)'}[prompt]
+        prev = earlier[-1] if earlier else None
+        since = f' (recent commands, oldest first: {", ".join(repr(c) for c in earlier)})' if len(earlier) > 1 else ''
+        owner = (f'A prompt follows the command it answers, so it belongs to the command sent before this query: {prev!r}{since}.' if prev else
+                 'A prompt follows the command it answers; no earlier command is on record since the last input flush, so it may be an earlier command or this query itself.')
+        return f'{self.MODEL}: the meter returned the prompt {prompt!r} = {what} while {cmd!r} was waiting for its reply. {owner} Read *ESR? for the error bit.'
+
+    def _echo_error(self, cmd):
+        return (f'{self.MODEL}: the meter echoed the command text {cmd.strip()!r} instead of replying: Echo is ON. Turn Echo off in the front-panel '
+                'serial settings (Users Manual Table 4-1, p. 4-4; factory setting: off) and connect again.')
+
+    def _discard_input(self, why):
+        """Throw away whatever the meter has sent that nobody asked for (stray prompts, a banner). Read-only on the instrument."""
+        self.t.clear()
+        self._since = []
+        self.log.add('--', f'input buffer cleared {why}: stray prompts / banner lines are not read as replies', self.label)
 
     def send(self, key, **vals):
         super().send(key, **vals)
         if key == 'reset':
             time.sleep(self.RESET_SETTLE_S)
+            self._discard_input('after the *RST settle')
+
+    def reset_to_defaults(self):
+        rep = super().reset_to_defaults()
+        warn = self._prompt_warning()
+        if warn and not rep.exempt:
+            rep.warnings.append(warn)
+            self.log.add('!!', warn, self.label)
+        return rep
 
     def identify(self):
-        reply = self.query('*IDN?').strip()
-        if any(p in reply for p in self.PROMPTS):
+        time.sleep(self.COMMAND_GAP_S)
+        reply = self._query_lines('*IDN?', None, echo_ok=False).strip()
+        if reply.upper().startswith('*IDN?'):                 # command text run into the reply (Echo on, no line end after the echo)
+            raise InstrumentError(self._echo_error('*IDN?'))
+        if any(p in reply for p in self.PROMPTS):             # a prompt on the SAME line as the reply: the framing is not understood
             raise InstrumentError('The 8808A is replying with prompts: Echo is ON. Turn Echo off in the front-panel serial settings '
                                   '(Users Manual Table 4-1, p. 4-4; factory setting: off) and connect again.')
         return reply

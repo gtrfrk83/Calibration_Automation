@@ -603,6 +603,24 @@ def cases_8808a(c):
     c.run('Fluke8808A.connect[wrong model]', wrong.connect)
     echo = c.inst(Fluke8808A, Scripted([(r'\*IDN\?', '=> FLUKE, 8808A, 1, 1.0')]), opened=False, label='8808A')
     c.run('Fluke8808A.connect[echo on]', echo.connect)
+    # prompt-tolerant replies (real-bench failure: '=>' prompts after *RST with Echo set off); simulator modes in drivers/simulated_8808a.py
+    pt = make_8808a_bench('5522A', enforce_cal_limits=False)[2]
+    pt.prompts = True
+    pd = c.inst(Fluke8808A, pt, opened=False, label='8808A')
+    c.run('Fluke8808A.connect[prompts tolerated]', pd.connect)
+    c.run('Fluke8808A.query[prompt skipped]', pd.query, 'FORMAT?')
+    c.quiet(pd.write, 'NOTACOMMAND')
+    c.run('Fluke8808A.query[command-error prompt raised]', pd.query, 'FORMAT?')
+    pt.prompts = False
+    rt = make_8808a_bench('5522A', enforce_cal_limits=False)[2]
+    rt.prompts_after_reset, rt.banner = True, 'FLUKE 8808A'
+    rd = c.inst(Fluke8808A, rt, opened=False, label='8808A')
+    c.quiet(rd.connect)
+    c.run('Fluke8808A.reset_to_defaults[prompts after reset]', rd.reset_to_defaults)
+    et = make_8808a_bench('5522A', enforce_cal_limits=False)[2]
+    et.echo = True
+    ed = c.inst(Fluke8808A, et, opened=False, label='8808A')
+    c.run('Fluke8808A.connect[echo of *IDN?]', ed.connect)
 
 
 def cases_truevolt(c):

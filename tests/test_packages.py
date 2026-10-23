@@ -339,6 +339,23 @@ class ReplaceAndBackup(Base):
         self.assertEqual((tree / 'Backups/packages/Procedures' / f'{K2}_backup_v02.py').read_text(), '# second OLD\n')
         self.assertEqual(b1.read_text(), '# OLD launcher\n')
 
+    def test_a_fix_package_ships_only_the_sidecar_and_the_named_file(self):
+        zp = self.package(only=['drivers/keithley_2000.py'])
+        members = read_zip(zp)
+        self.assertEqual(set(members), {'manifest.json', f'Procedures/{K2}.procedure.json', 'drivers/keithley_2000.py'})
+        man = json.loads(members['manifest.json'])
+        self.assertIn(f'Procedures/{K2}.py', man['requires'])                                # the launcher is required, not shipped
+        tree, reg = self.old_target()
+        (tree / 'drivers/keithley_2000.py').write_text('# OLD driver\n', encoding='utf-8')
+        pv = P.inspect(zp, tree, reg)
+        self.assertTrue(pv.ok, pv.errors)
+        self.assertEqual(pv.replaced, ['drivers/keithley_2000.py'])
+        res = P.install(zp, tree, reg)
+        self.assertEqual([r for r, _b in res.backups], ['drivers/keithley_2000.py'])
+        self.assertEqual((tree / 'Backups/packages/drivers/keithley_2000_backup_v01.py').read_text(), '# OLD driver\n')
+        self.assertEqual((tree / 'drivers/keithley_2000.py').read_bytes(), members['drivers/keithley_2000.py'])
+        self.assertEqual((tree / f'Procedures/{K2}.py').read_text(), '# OLD launcher\n')       # not part of the package: untouched
+
     def test_a_failure_part_way_puts_everything_back_and_records_nothing(self):
         zp = self.package()
         tree, reg = self.old_target()

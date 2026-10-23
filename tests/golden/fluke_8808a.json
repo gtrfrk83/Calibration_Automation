@@ -193,7 +193,8 @@
    "call": "'reset'",
    "case": "Fluke8808A.send[reset settles]",
    "log": [
-    "8808A|>>|*RST"
+    "8808A|>>|*RST",
+    "8808A|--|input buffer cleared after the *RST settle: stray prompts / banner lines are not read as replies"
    ],
    "method": "Fluke8808A.send",
    "result": "returned None",
@@ -209,6 +210,10 @@
     [
      "sleep",
      3.0
+    ],
+    [
+     "ctl",
+     "clear"
     ]
    ]
   },
@@ -1394,9 +1399,370 @@
   },
   {
    "call": "",
+   "case": "Fluke8808A.connect[prompts tolerated]",
+   "log": [
+    "8808A|>>|*IDN?",
+    "8808A|<<|FLUKE, 8808A, SIM0001, 1.0 D1.0",
+    "8808A|>>|REMS",
+    "8808A|>>|*CLS"
+   ],
+   "method": "Fluke8808A.connect",
+   "result": "returned <Fluke8808A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE, 8808A, SIM0001, 1.0 D1.0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*CLS"
+    ]
+   ]
+  },
+  {
+   "call": "'FORMAT?'",
+   "case": "Fluke8808A.query[prompt skipped]",
+   "log": [
+    "8808A|>>|FORMAT?",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|!!|prompts returned: Echo appears to be ON or was restored by *RST - turn Echo off at the front panel (Users Manual Table 4-1, p. 4-4)",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|2"
+   ],
+   "method": "Fluke8808A.query",
+   "result": "returned '2'",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "=>"
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R",
+     "2"
+    ]
+   ]
+  },
+  {
+   "call": "'FORMAT?'",
+   "case": "Fluke8808A.query[command-error prompt raised]",
+   "log": [
+    "8808A|>>|FORMAT?",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|?>  [prompt: command-error, raised as an error]",
+    "8808A|--|input buffer cleared after an error prompt: stray prompts / banner lines are not read as replies"
+   ],
+   "method": "Fluke8808A.query",
+   "result": "raised InstrumentError: Fluke 8808A: the meter returned the prompt '?>' = a command error (the command was not understood) while 'FORMAT?' was waiting for its reply. A prompt follows the command it answers, so it belongs to the command sent before this query: 'NOTACOMMAND' (recent commands, oldest first: 'FORMAT?', 'NOTACOMMAND'). Read *ESR? for the error bit.",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "=>"
+    ],
+    [
+     "R",
+     "?>"
+    ],
+    [
+     "ctl",
+     "clear"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.reset_to_defaults[prompts after reset]",
+   "log": [
+    "8808A|>>|*RST",
+    "8808A|--|input buffer cleared after the *RST settle: stray prompts / banner lines are not read as replies",
+    "8808A|>>|*CLS",
+    "8808A|>>|*OPC?",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|!!|prompts returned: Echo appears to be ON or was restored by *RST - turn Echo off at the front panel (Users Manual Table 4-1, p. 4-4)",
+    "8808A|<<|1",
+    "8808A|>>|*ESR?",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|0",
+    "8808A|>>|REMS",
+    "8808A|>>|FORMAT 1",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER 1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|1",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|S",
+    "8808A|>>|*ESR?",
+    "8808A|<<|=>  [prompt, skipped]",
+    "8808A|<<|0",
+    "8808A|!!|prompts returned: Echo appears to be ON or was restored by *RST - turn Echo off at the front panel (Users Manual Table 4-1, p. 4-4) (10 prompt line(s) and 0 echoed command line(s) skipped)"
+   ],
+   "method": "Fluke8808A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='8808A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='*ESR? = 0'), ResetStep(name='re-enter remote (REMS)', ok=True, detail=''), ResetStep(name='reply format 1 (FORMAT 1, read back)', ok=True, detail='1'), ResetStep(name='internal trigger (TRIGGER 1, read back)', ok=True, detail='1'), ResetStep(name='slow rate (RATE S, read back)', ok=True, detail='S'), ResetStep(name='event status after the reset', ok=True, detail='no error bits')], warnings=['prompts returned: Echo appears to be ON or was restored by *RST - turn Echo off at the front panel (Users Manual Table 4-1, p. 4-4) (10 prompt line(s) and 0 echoed command line(s) skipped)'])",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "=>"
+    ],
+    [
+     "R",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "=>"
+    ],
+    [
+     "R",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FORMAT 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "=>"
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "TRIGGER 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "=>"
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "=>"
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "=>"
+    ],
+    [
+     "R",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.connect[echo of *IDN?]",
+   "log": [
+    "8808A|>>|*IDN?",
+    "8808A|<<|*IDN?  [echo of the command, refused]",
+    "8808A|!!|prompts returned: Echo appears to be ON or was restored by *RST - turn Echo off at the front panel (Users Manual Table 4-1, p. 4-4)"
+   ],
+   "method": "Fluke8808A.connect",
+   "result": "raised InstrumentError: Fluke 8808A: the meter echoed the command text '*IDN?' instead of replying: Echo is ON. Turn Echo off in the front-panel serial settings (Users Manual Table 4-1, p. 4-4; factory setting: off) and connect again.",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "*IDN?"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
    "case": "Fluke8808A.reset_to_defaults",
    "log": [
     "8808A|>>|*RST",
+    "8808A|--|input buffer cleared after the *RST settle: stray prompts / banner lines are not read as replies",
     "8808A|>>|*CLS",
     "8808A|>>|*OPC?",
     "8808A|<<|1",
@@ -1429,6 +1795,10 @@
     [
      "sleep",
      3.0
+    ],
+    [
+     "ctl",
+     "clear"
     ],
     [
      "sleep",
@@ -1541,6 +1911,7 @@
    "case": "Fluke8808A.reset_to_defaults[error bit set: warning]",
    "log": [
     "8808A|>>|*RST",
+    "8808A|--|input buffer cleared after the *RST settle: stray prompts / banner lines are not read as replies",
     "8808A|>>|*CLS",
     "8808A|>>|*OPC?",
     "8808A|<<|1",
@@ -1574,6 +1945,10 @@
     [
      "sleep",
      3.0
+    ],
+    [
+     "ctl",
+     "clear"
     ],
     [
      "sleep",

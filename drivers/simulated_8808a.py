@@ -5,6 +5,11 @@ outputting (bench.fluke), but only when the meter is set up the way that signal 
 DC needs an explicit 0 Hz, AC a frequency), the range must hold the value, otherwise it returns the overload reading, as a real meter would.
 
 Simulation choices that are NOT facts about the real meter: the *RST format (2), the settle behaviour, the reading gain errors and the 5522A error text.
+Prompt modes (what the manual says: prompts and echo only while Echo is on, pp. 4-3 and 4-6; what a real bench showed: a '=>' after *RST although Echo
+had been set off): `sim.echo = True` = Echo ON (every command is echoed on its own line and a prompt follows its reply); `sim.prompts = True` = prompts
+without echo; `Sim8808ATransport(..., prompts_after_reset=True)` = Echo OFF, but the *RST turns prompts on (the reset's own prompt, the optional `banner`
+and every later command's prompt). A prompt is '=>' (ok), '?>' (command error: unknown command, bad syntax) or '!>' (execution error). `clear()` throws
+the unread output away, like a serial input flush. None of this is a statement about when the real meter does it.
 Keep this file out of any evidence: nothing here is calibration data.
 """
 from __future__ import annotations
@@ -21,15 +26,21 @@ GAIN = {'VDC': 1.00002, 'VAC': 1.00004, 'ADC': 1.00003, 'AAC': 1.00005, 'OHMS': 
 
 
 class Sim8808ATransport(_SimBase):
-    """RS-232 8808A with echo off (no prompts)."""
+    """RS-232 8808A. Default: echo off, no prompts (the manual's factory state). See the module docstring for the prompt modes."""
 
-    def __init__(self, bench, serial='SIM0001'):
+    def __init__(self, bench, serial='SIM0001', prompts_after_reset=False, banner=None):
         super().__init__(bench, 'SIM-8808A')
         self.serial = serial
         self.esr = PON
         self.remote = False
         self.sent = []
-        self.echo = False
+        self.echo = False                    # Echo ON: commands are echoed and prompts follow
+        self.prompts = False                 # prompts without echo
+        self.prompts_after_reset = prompts_after_reset
+        self.banner = banner                 # an extra line the reset sends (None: none)
+        self.out = []                        # unread output lines: (kind, text), kind in reply / prompt / echo / stray
+        self.cleared = 0
+        self._err = None
         self.reset_state(first=True)
 
     def reset_state(self, first=False):
@@ -82,10 +93,38 @@ class Sim8808ATransport(_SimBase):
     def write(self, text):
         if not self.opened:
             raise TransportError('simulated port not open')
-        if self._reply is not None:          # a new command line while a reply was pending: query error, the reply is lost
+        b = self.bench
+        if b.fail_next and b.fail_next in text:
+            b.fail_next = None
+            raise TransportError(f'simulated timeout on {text!r}')
+        if any(k == 'reply' for k, _t in self.out):          # a new command line while a reply was pending: query error, the reply is lost
             self.esr |= QYE
-            self._reply = None
-        super().write(text)
+            self.out = [(k, t) for k, t in self.out if k != 'reply']
+        self._err = None
+        reply = self.handle(text.strip())
+        if self.echo:
+            self.out.append(('echo', text.strip()))
+        if reply is not None:
+            self.out.append(('reply', reply))
+        if self.echo or self.prompts:
+            self.out.append(('prompt', self._err or '=>'))
+
+    def read(self):
+        if not self.out:
+            raise TransportError('simulated read timed out (no pending reply)')
+        return self.out.pop(0)[1]
+
+    def clear(self):
+        self.out = []
+        self.cleared += 1
+
+    @property
+    def _reply(self):                        # kept for the older tests: the first unread reply line, if any
+        return next((t for k, t in self.out if k == 'reply'), None)
+
+    @_reply.setter
+    def _reply(self, value):                 # _SimBase.__init__ sets it; the queue is the state here
+        pass
 
     def handle(self, cmd):
         u = cmd.strip().upper()
@@ -97,6 +136,10 @@ class Sim8808ATransport(_SimBase):
             return None
         if u == '*RST':
             self.reset_state()
+            if self.prompts_after_reset:
+                self.prompts = True
+                if self.banner:
+                    self.out.append(('stray', self.banner))
             return None
         if u == '*OPC?':
             return '1'
@@ -117,6 +160,7 @@ class Sim8808ATransport(_SimBase):
         if u in ('WIRE2', 'WIRE4'):
             if self.func != 'OHMS':
                 self.esr |= EXE
+                self._err = '!>'
                 return None
             self.wire = int(u[-1])
             return None
@@ -135,6 +179,7 @@ class Sim8808ATransport(_SimBase):
             n = int(m.group(1))
             if not 1 <= n <= len(self._table()):
                 self.esr |= EXE
+                self._err = '!>'
                 return None
             self.range_no, self.auto = n, False
             return None
@@ -165,6 +210,7 @@ class Sim8808ATransport(_SimBase):
                 return f'{self._reading():+.4f}'          # not the E notation the driver requires: the driver must set FORMAT 1
             return self._text(self._reading())
         self.esr |= CME                                    # unknown command
+        self._err = '?>'
         return None
 
     def query(self, text):

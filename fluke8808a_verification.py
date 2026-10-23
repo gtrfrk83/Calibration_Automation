@@ -215,12 +215,19 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             except Exception: pass
         self.save_log()
 
+    _logged = 0          # log lines already appended to the shared log (a failed reset saves the log while the window stays open; close() adds only the rest)
+
     def save_log(self):
-        """Append the exact commands sent to ~/.calibration_suite/command_log.txt."""
+        """Append the exact commands sent (not yet saved) to ~/.calibration_suite/command_log.txt."""
+        lines = self.log.lines()
+        new = lines[self._logged:]
+        if not new:
+            return
         try:
             folder = Path.home() / '.calibration_suite'; folder.mkdir(parents=True, exist_ok=True)
             with open(folder / 'command_log.txt', 'a', encoding='utf-8') as f:
-                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  Fluke {MODEL} session\n' + '\n'.join(self.log.lines()) + '\n')
+                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  Fluke {MODEL} session\n' + '\n'.join(new) + '\n')
+            self._logged = len(lines)
         except OSError:
             pass
 
@@ -537,6 +544,12 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self._set_conn(True); self._save_settings()
         self.status.set('Connected: ' + self.io.ident + '. Calibrator output is NOT enabled.')
         messagebox.showinfo('Connected', f'{MODEL}: {self.io.ident}\n{self.cal_model.get()}: {self.io.cal.idn}\nCalibrator output is not enabled.')
+
+    def _reset_failed(self, msg):
+        if self.io is not None:
+            try: self.io.save_log()          # the command log of the failed reset is on disk before the dialog (not only when the window closes); close() adds only what is new
+            except Exception: pass
+        super()._reset_failed(msg)           # status line + error dialog; the window stays open
 
     def disconnect(self):
         if self.io: self.io.close(); self.io = None

@@ -10,6 +10,9 @@ and the hook-up diagrams that match its prefixes). Files the procedure shares wi
 shipped; the package lists them as `requires` and the suite that imports it must already have them. Add more with --include <path> (a file under
 Procedures/, specs/, drivers/, diagrams/ or tests/).
 
+--only PATH (repeatable) makes a fix package: just the sidecar (the format needs it) and the named files, e.g. one changed driver; everything else
+the procedure uses is listed as `requires` and must already be installed.
+
 --verified-mark adds the lab's verified-on-hardware mark (date, name, fingerprint of the files). It is only added when the procedure is verified,
 locked and unchanged, and the model has no saved procedure changes. The importing suite honours it only if its installed files give the same
 fingerprint. The seeded-verified flag of the lab owner is never exported.
@@ -31,6 +34,7 @@ def main(argv=None) -> int:
     ap.add_argument('--out', default='.', help='folder for the zip (default: here)')
     ap.add_argument('--base', default=str(HERE), help='the suite folder to export from (default: this one)')
     ap.add_argument('--include', action='append', default=[], metavar='PATH', help='an extra file to ship, relative to the suite folder')
+    ap.add_argument('--only', action='append', default=[], metavar='PATH', help='a FIX package: ship only the sidecar and these files (repeatable); the rest of the procedure is "requires"')
     ap.add_argument('--author', default='', help='who made the package (shown in the preview as a claim)')
     ap.add_argument('--min-suite', default=None, help='minimum suite version, e.g. v70 (default: this suite)')
     ap.add_argument('--verified-mark', action='store_true', help='add the verified-on-hardware mark (only if verified, locked and unchanged)')
@@ -45,7 +49,7 @@ def main(argv=None) -> int:
     registry = verified.Registry(args.registry, base=base) if args.registry else verified.Registry(base=base)
     try:
         path = packages.build_package(args.procedure, base, args.out, registry=registry, extra_files=args.include, with_verified_mark=args.verified_mark,
-                                      author=args.author, min_suite=args.min_suite)
+                                      author=args.author, min_suite=args.min_suite, only=args.only)
     except packages.PackageError as ex:
         print(f'Not exported: {ex}', file=sys.stderr)
         return 2
