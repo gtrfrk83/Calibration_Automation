@@ -23,8 +23,11 @@ Sidecar fields (schema 1):
                   a code entry 'hookups.py#fluke110' means hookups.py with the data of the other meters left out (see verified.py).
     hookup        {'meter': hookups.py meter key or null, 'diagram_prefixes': ['hook_fluke110', ...]}: which diagrams/ files belong to it
     seed_verified true for the procedures the lab owner has attested as verified on hardware (verified.SEED is derived from this), seed_order their order
-    kind          optional, 'verification' or 'adjustment': which Manager tab lists the procedure.  Left out, it follows the category / name
-                  (classify(): 'adjust' in the category or the display name = adjustment, everything else = verification).  Changes no behaviour of the procedure.
+    kind          optional, 'verification' | 'adjustment' | 'manual': which Manager tab lists the procedure ('verification' is the stored value of
+                  the tab now called Automated Calibrations; it was NOT renamed, so no existing sidecar or package changes).  Left out, it follows the
+                  category / name (classify(): 'adjust' in the category or the display name = adjustment, everything else = verification).
+                  'manual' = a procedure with no instrument automation, run by typing readings (Manual Calibrations tab).  Changes no behaviour
+                  of the procedure.
     own_files     the files that belong to this procedure alone (what tools/make_package.py ships; shared files are listed in fingerprint but
                   not shipped, the target suite must already have them)
     tests         optional list of test files
@@ -45,12 +48,13 @@ ID_RE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_\-]{0,80}$')
 DEFAULT_ORDER = 1000
 KIND_VERIFICATION = 'verification'
 KIND_ADJUSTMENT = 'adjustment'
-KINDS = (KIND_VERIFICATION, KIND_ADJUSTMENT)
+KIND_MANUAL = 'manual'
+KINDS = (KIND_VERIFICATION, KIND_ADJUSTMENT, KIND_MANUAL)
 
 
 def classify(name='', category='', kind='') -> str:
     """Which list a procedure belongs to: an explicit valid `kind` wins, else 'adjust...' in the category or the display name means adjustment,
-    everything else is a performance verification.  Pure text rules; used by the Manager's two tabs."""
+    everything else is an automated calibration (performance verification).  Pure text rules; used by the Manager's three tabs."""
     k = str(kind or '').strip().lower()
     if k in KINDS:
         return k
@@ -102,7 +106,7 @@ class Proc:
     own_files: tuple = ()
     tests: tuple = ()
     sidecar: str = ''                                    # 'Procedures/<id>.procedure.json'
-    kind: str = ''                                       # '' (derive, see classify), 'verification' or 'adjustment'
+    kind: str = ''                                       # '' (derive, see classify), 'verification', 'adjustment' or 'manual'
 
     @property
     def effective_kind(self) -> str:
@@ -174,7 +178,7 @@ def parse_sidecar(doc, stem: str) -> Proc:
     if kind is None:
         kind = ''
     if not isinstance(kind, str) or kind not in ('', *KINDS):
-        raise ScanProblem('"kind" must be "verification" or "adjustment" (or left out)')
+        raise ScanProblem('"kind" must be "verification", "adjustment" or "manual" (or left out)')
     order = doc.get('order', DEFAULT_ORDER)
     seed_order = doc.get('seed_order', DEFAULT_ORDER)
     if any(isinstance(v, bool) or not isinstance(v, int) for v in (order, seed_order)):

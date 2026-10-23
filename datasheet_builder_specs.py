@@ -37,7 +37,7 @@ import datasheet_builder as db
 from datasheet_builder import D, DsError, DsProblem, KINDS, fmt
 
 DSB_SCHEMA = 'dsb-1'
-ENGINE_OPTIONS = ('function_prompt', 'auto_ramp', 'hv_threshold_v', 'hookup_meter')
+ENGINE_OPTIONS = ('function_prompt', 'auto_ramp', 'hv_threshold_v', 'hookup_meter', 'manual_entry')
 DEFAULT_OPTIONS = {'function_prompt': True, 'auto_ramp': False, 'hv_threshold_v': 60}
 ENGINE_BASE_UNIT = {'degC': 'C', 'ohm': 'ohm'}
 STOCK_READY = {'DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'FREQ', 'PERIOD', 'TEMP', 'DIODE', 'CONT', 'SCOPE_GAIN', 'SCOPE_OFFSET'}
@@ -75,6 +75,8 @@ def range_label(fn, rng):
     """'20.0000 V' style: the range's own label, else the full scale in the display unit with the decimals its resolution implies."""
     if rng.label:
         return rng.label
+    if rng.settings.get('unspecified'):          # a range the source document does not give (Cal Processor import): nothing to print
+        return ''
     prefix = display_prefix(fn, rng)
     factor = db.prefix_factor(prefix)
     with localcontext() as c:
@@ -85,6 +87,14 @@ def range_label(fn, rng):
             r = (rng.resolution / factor).normalize()
             places = max(0, -r.as_tuple().exponent)
     return f'{shown:.{places}f} {prefix}{db.unit_symbol(fn.unit)}'.rstrip()
+
+
+def _pad_places(text, places):
+    """A limit text filled out with zeros to `places` decimals (never shortened): '329.1' -> '329.10'.  Used for points that carry settings['decimals']."""
+    if not places:
+        return text
+    whole, _, frac = text.partition('.')
+    return text if len(frac) >= places else f'{whole}.{frac.ljust(places, "0")}'
 
 
 def _disp(value, factor):
@@ -139,10 +149,12 @@ def _engine_step(ds, fn, fi, n, p, rng, lims, period):
     base = ENGINE_BASE_UNIT.get(unit, unit)
     step = dict(table=str(fi), step=n, section=fn.name, switch=fn.switch or KINDS[k]['switch'], range=range_label(fn, rng), models=[ds.model])
     disp_unit = f'{prefix}{db.unit_symbol(unit)}'
-    ready = k in STOCK_READY
+    manual = bool(ds.options.get('manual_entry'))          # a manual calibration: nothing is sourced or read by the program, every reading is typed
+    ready = k in STOCK_READY and not manual
     nominal = float(p.nominal)
-    if KINDS[k].get('passfail') and k != 'CONT':
-        step.update(kind='VISUAL', test='visual', title=f'{fn.name}: {range_label(fn, rng)}', question=f'{fn.name} passes at this point.',
+    if KINDS[k].get('passfail') and (k != 'CONT' or manual):
+        # p.label (the text of the source document, Cal Processor import) words the question when there is one; otherwise as always
+        step.update(kind='VISUAL', test='visual', title=f'{fn.name}: {p.label or range_label(fn, rng)}', question=f'{p.label or fn.name} passes at this point.',
                     setup_key='NONE', setup=_setup_text(fn, p, rng), id=p.id)
         return step, False
     step.update(display_unit=disp_unit, factor=float(factor), base_unit=base)
@@ -151,7 +163,8 @@ def _engine_step(ds, fn, fi, n, p, rng, lims, period):
                     question='The beeper is ON (sounding).' if p.settings.get('expect', 'on') == 'on' else 'The beeper is OFF (silent).', id=p.id)
         step['group'] = 'VOHM'
         return step, True
-    step.update(low=_disp(lim.low, factor), high=_disp(lim.high, factor), test='numeric', nominal=nominal)
+    places = int(p.settings.get('decimals') or 0)         # the point's printed resolution (Cal Processor import): the limits carry its decimals, so typed readings are padded to it
+    step.update(low=_pad_places(_disp(lim.low, factor), places), high=_pad_places(_disp(lim.high, factor), places), test='numeric', nominal=nominal)
     if ready:
         if k in ('FREQ', 'PERIOD'):
             freq = p.nominal if k == 'FREQ' else (D(1) / p.nominal)
@@ -230,6 +243,8 @@ def export_spec(ds, period=None, plan=None, uid=None, include_datasheet=True):
                           'source': lim.source, 'one_sided': lim.one_sided,
                           'periods': {per: {'low': fmt(l.low) if l.low is not None else None, 'high': fmt(l.high) if l.high is not None else None}
                                       for per, l in lims.items()}}}
+            if p.label:                                  # the source document's own text for the nominal (Cal Processor import); written only when set
+                step['dsb']['label'] = p.label
             a = _assignment(ds, plan, p.id)
             if a:
                 step['dsb']['assignment'] = a
@@ -240,15 +255,19 @@ def export_spec(ds, period=None, plan=None, uid=None, include_datasheet=True):
     options = dict(DEFAULT_OPTIONS)
     options.update({k: v for k, v in ds.options.items() if k in ENGINE_OPTIONS})
     notes = []
-    if hand:
+    if ds.options.get('manual_entry'):
+        notes.append(f'Manual calibration: all {hand + ready_n} points are typed by the technician (no instrument is driven by the program).')
+    elif hand:
         notes.append(f'{hand} of {hand + ready_n} points are hand-set in the stock handheld engine (scope / generator functions need the runtime stage).')
     spec = {
         'schema': 2, 'kind': 'manual-reading', 'user_built': True, 'options': options,
         'source': {'document': ds.source.get('document') or f'{ds.make} {ds.model} - user-built datasheet "{ds.title}"',
                    'pages': ds.source.get('pages', ''),
                    'note': (ds.source.get('note') or '') + (' ' if ds.source.get('note') else '') +
-                           f'User-built datasheet (Datasheet Builder), version {ds.version}. Limits are calculated from the specification the author entered; '
-                           f'compare them with the manufacturer\'s document. Period shown: {period}.'},
+                           (f'Manual calibration (Datasheet Builder), version {ds.version}. Limits are the typed limits of each point; compare them with the source datasheet. '
+                            f'Period shown: {period}.' if ds.options.get('manual_entry') else
+                            f'User-built datasheet (Datasheet Builder), version {ds.version}. Limits are calculated from the specification the author entered; '
+                            f'compare them with the manufacturer\'s document. Period shown: {period}.')},
         'models': models, 'steps': steps,
         'dsb': {'schema': DSB_SCHEMA, 'uid': uid or ds.uid, 'version': ds.version, 'revision': ds.revision, 'title': ds.title, 'make': ds.make,
                 'model': ds.model, 'exported_at': datetime.now().isoformat(timespec='seconds'), 'period': period,

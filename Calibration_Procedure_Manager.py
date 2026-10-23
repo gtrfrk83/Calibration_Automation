@@ -29,6 +29,7 @@ import specmanager_ui
 import procmods
 import procmods_ui_model
 import datasheet_builder_ui
+import mdd_import_ui    # import preview: a Mudcats .MDD becomes a manual calibration procedure
 import dsb_manager      # user-built datasheets are listed (not stored) in the Procedures table
 import packages          # procedure packages: export / inspect / install a procedure as a zip (packages.py)
 import packages_ui
@@ -57,11 +58,17 @@ def scan_procedures():
 
 
 ALL_CATEGORIES = 'All categories'
-# The Procedures tab has two views (tabs): performance verification and adjustment.  A procedure's view comes from its sidecar `kind`
-# or, left out, from its category / name (procscan.classify); user-built datasheets and unknown scripts are verifications.
-VIEW_TABS = ((procscan.KIND_VERIFICATION, '  Performance Verification  '), (procscan.KIND_ADJUSTMENT, '  Adjustment  '))
-ADJUSTMENT_NOTE = ("Adjustment changes the instrument's calibration. Adjustment procedures are separate from performance verification: "
-                   "to check an instrument without changing it, use the Performance Verification tab.")
+# The Procedures tab has three views (tabs): Automated Calibrations (stored kind 'verification': the value is unchanged so no sidecar, package or
+# registry row needs a migration), Manual Calibrations (kind 'manual': no instrument automation, readings are typed into the grid) and Adjustment.
+# A procedure's view comes from its sidecar `kind` or, left out, from its category / name (procscan.classify); user-built datasheets take the kind saved with
+# them (all-manual or imported from a .MDD = manual); unknown scripts are automated.
+VIEW_TABS = ((procscan.KIND_VERIFICATION, '  Automated Calibrations  '), (procscan.KIND_MANUAL, '  Manual Calibrations  '),
+             (procscan.KIND_ADJUSTMENT, '  Adjustment  '))
+VIEW_NAMES = {procscan.KIND_VERIFICATION: 'Automated Calibrations', procscan.KIND_MANUAL: 'Manual Calibrations', procscan.KIND_ADJUSTMENT: 'Adjustment'}
+ADJUSTMENT_NOTE = ("Adjustment changes the instrument's calibration. Adjustment procedures are separate from the calibration checks: "
+                   "to check an instrument without changing it, use the Automated Calibrations or Manual Calibrations tab.")
+MANUAL_NOTE = ("Manual calibrations have no instrument automation: you set the standards yourself and type each reading into the test point grid "
+               "(Enter saves it and moves to the next point). Import a Mudcats .MDD datasheet to add one.")
 
 
 def find_wavesurfer():
@@ -273,7 +280,9 @@ class Manager:
         self.view_nb.pack(fill='x')
         ui.TabStrip(self.view_nb)
         self.view_nb.bind('<<NotebookTabChanged>>', self._view_changed)
-        self.adjust_note = ui.Notice(outer, text=ADJUSTMENT_NOTE, kind='warn')
+        self.view_notes = {procscan.KIND_ADJUSTMENT: ui.Notice(outer, text=ADJUSTMENT_NOTE, kind='warn'),
+                           procscan.KIND_MANUAL: ui.Notice(outer, text=MANUAL_NOTE, kind='info')}
+        self.adjust_note = self.view_notes[procscan.KIND_ADJUSTMENT]
         bar = ttk.Frame(outer)
         bar.pack(fill='x', pady=(8, 8))
         ttk.Label(bar, text='Find').pack(side='left')
@@ -287,6 +296,7 @@ class Manager:
         ttk.Button(bar, text='Remove from library', command=self.remove).pack(side='right')
         ttk.Button(bar, text='Register procedure...', command=self.add).pack(side='right', padx=8)
         ttk.Button(bar, text='Import procedure package...', command=self.import_package).pack(side='right')
+        ttk.Button(bar, text='Import Mudcats datasheet (.mdd)...', command=self.import_mdd_procedure).pack(side='right', padx=8)
 
         split = ttk.Frame(outer)
         split.pack(fill='both', expand=True)
@@ -339,15 +349,20 @@ class Manager:
             return
         self.view_kind = kind
         self.category.set(ALL_CATEGORIES)                       # the category list belongs to the view
-        if kind == procscan.KIND_ADJUSTMENT:
-            self.adjust_note.pack(fill='x', pady=(8, 0), after=self.view_nb)
-        else:
-            self.adjust_note.pack_forget()
+        for k, note in self.view_notes.items():
+            if k == kind:
+                note.pack(fill='x', pady=(8, 0), after=self.view_nb)
+            else:
+                note.pack_forget()
         self.refresh()
 
     def _kind_of(self, id_, name, category, script):
-        """'verification' | 'adjustment' of a list row: the sidecar's kind (or its category / name default) for a scanned procedure, the same text rule for any other."""
-        if dsb_manager.is_user_iid(id_) or not script:
+        """'verification' (Automated Calibrations) | 'manual' | 'adjustment' of a list row: the sidecar's kind (or its category / name default) for a scanned
+        procedure, the kind saved with a user-built datasheet, the same text rule for any other."""
+        if dsb_manager.is_user_iid(id_):
+            kind = (self._user_rows().get(str(id_)) or {}).get('kind')
+            return kind if kind in procscan.KINDS else procscan.KIND_VERIFICATION
+        if not script:
             return procscan.KIND_VERIFICATION
         proc = self._scanned.get(Path(str(script)).name.casefold())
         if proc is not None:
@@ -495,7 +510,8 @@ class Manager:
         mods = self._mod_counts(refresh=True)
         match = lambda r: not (cat != ALL_CATEGORIES and r[4] != cat) and not (term and term not in ' '.join((r[1], r[2], r[3], r[4])).lower())  # noqa: E731
         listed = [r for r in in_view if match(r)]
-        elsewhere = sum(1 for r in rows if kinds[r[0]] != self.view_kind and match(r)) if term else 0
+        elsewhere = {k: sum(1 for r in rows if kinds[r[0]] == k and match(r)) for k in VIEW_NAMES if k != self.view_kind} if term else {}
+        elsewhere = {k: n for k, n in elsewhere.items() if n}
         entries = [self._ver_entry(r) for r in listed]
         self._ver_cache = self._verified().statuses(entries)          # one registry read; fingerprints only for verified procedures
         for (id_, name, mfr, model, category, script), entry in zip(listed, entries):
@@ -510,8 +526,8 @@ class Manager:
             shown += 1
         text = self._empty_lib_default
         if shown == 0 and elsewhere:
-            other = 'Adjustment' if self.view_kind == procscan.KIND_VERIFICATION else 'Performance Verification'
-            text = f'No procedures match in this tab.\n{elsewhere} match in the {other} tab.'
+            other = ', '.join(f'{n} in the {VIEW_NAMES[k]} tab' for k, n in elsewhere.items())
+            text = f'No procedures match in this tab.\nMatches: {other}.'
         self.table._empty.configure(text=text)                  # the label _toggle_empty shows
         self._toggle_empty(self.table, shown == 0)
         if keep and self.table.exists(keep[0]):
@@ -887,6 +903,7 @@ class Manager:
         buttons.pack(fill='x', pady=(0, 10))
         ttk.Button(buttons, text='Import .MDD...', style='Accent.TButton', command=self.choose_mdd).pack(side='left', padx=(0, 8))
         ttk.Button(buttons, text='View test points', command=self.view_imported_points).pack(side='left', padx=(0, 8))
+        ttk.Button(buttons, text='Import as manual calibration...', command=self.import_mdd_procedure).pack(side='left', padx=(0, 8))
         ttk.Button(buttons, text='Refresh', command=self.refresh_datasheets).pack(side='left')
         cols = ('id', 'manufacturer', 'model', 'procedure', 'points', 'filename', 'date')
         self.ds_table = ui.make_table(area, cols, ('ID', 'Manufacturer', 'Model', 'Procedure', 'Points', 'Source file', 'Imported'),
@@ -908,6 +925,24 @@ class Manager:
             self.ds_table.insert('', 'end', iid=str(row[0]), values=row, tags=('even' if n % 2 == 0 else 'odd',))
         self._toggle_empty(self.ds_table, not rows)
         self.status.set(f'{len(rows)} imported datasheet(s).')
+
+    def import_mdd_procedure(self, path=None):
+        """Import a Mudcats .MDD as a MANUAL calibration procedure (mdd_import_ui: preview first, nothing is created until it is approved)."""
+        path = path or filedialog.askopenfilename(title='Choose Cal Processor datasheet', filetypes=[('Cal Processor datasheet', '*.mdd *.MDD'), ('All files', '*.*')])
+        if not path:
+            return None
+        return mdd_import_ui.open_preview(self.root, path, on_created=self._mdd_procedure_created, status=self.status)
+
+    def _mdd_procedure_created(self, res):
+        """The new manual procedure is in the registry: show it (Manual Calibrations tab, selected)."""
+        self.view_nb.select(self.view_pages[procscan.KIND_MANUAL])
+        self.search.set('')
+        self.category.set(ALL_CATEGORIES)
+        self.refresh()
+        iid = dsb_manager.IID_PREFIX + res.uid
+        if self.table.exists(iid):
+            self.table.selection_set(iid)
+            self.table.see(iid)
 
     def choose_mdd(self):
         path = filedialog.askopenfilename(title='Choose Cal Processor datasheet', filetypes=[('Cal Processor datasheet', '*.mdd *.MDD'), ('All files', '*.*')])

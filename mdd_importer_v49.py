@@ -110,6 +110,20 @@ def init_datasheet_db(conn):
     )''')
 
 
+def archive_mdd(parsed, folder):
+    """Keep the original .MDD bytes in `folder` as <sha256>.MDD (immutable: an existing archive is only verified, never rewritten).  Returns the archive Path.
+    Used by the procedure import (mdd_convert.py) and the same layout as import_mdd's archive.  Writes nothing else; the file is never executed or parsed again here."""
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / (parsed['sha256'] + '.MDD')
+    if target.exists():
+        if hashlib.sha256(target.read_bytes()).hexdigest() != parsed['sha256']:
+            raise ValueError('Existing archive checksum mismatch; import aborted.')
+    else:
+        target.write_bytes(parsed['raw_bytes'])
+    return target
+
+
 def import_mdd(db_path, path):
     parsed = parse_mdd(path)
     sha = parsed['sha256']

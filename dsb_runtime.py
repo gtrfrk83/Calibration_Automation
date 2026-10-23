@@ -20,6 +20,12 @@ engine's own code.  What this module adds is only what the stock engine cannot d
     fgen_verification's reading code - else the operator types the standard's reading.
   * Every instrument write is the driver's set / read back / compare; nothing is retried; outputs go to standby / off after every point.
 
+MANUAL CALIBRATIONS (spec option `manual_entry`, set by the Cal Processor (.MDD) import or by the owner's flag in the Datasheet Builder): nothing is sourced or
+read by the program.  The points are the same engine points (typed reading, padding, judge_numeric, As Found / As Left, checkpoint, PDF); no standard is
+routed, no calibrator is offered or connected, and the setup / function / high-voltage prompts of a driven run are not shown (nothing is driven).  The test
+point grid takes the typed readings directly (manual_grid.py: Enter = save and next point) on top of the ordinary reading window of Run All Pending.  The same
+grid entry is offered for a datasheet whose every point the matcher finds no standard for (all hand-set).
+
 Nothing in the datasheet, the matcher, the engine's limit tables or pass / fail logic is changed here.  Demo mode is the engine's demo mode: no commands,
 synthetic readings that are labelled as demo everywhere, reports marked as demo data.
 """
@@ -89,6 +95,16 @@ def with_plan(spec, db_path=None) -> dict:
     head = spec['dsb']
     if head.get('plan'):
         return spec
+    if (spec.get('options') or {}).get('manual_entry'):          # a manual calibration: no standard is looked for; every point is typed
+        new = copy.deepcopy(spec)
+        plan = {}
+        for step in new['steps']:
+            if 'dsb' in step:
+                a = dict(point_id=step['dsb'].get('point_id'), status='manual', mode='manual', standard='', automation='manual',
+                         message='manual calibration: the technician types the reading')
+                step['dsb']['assignment'] = plan[a['point_id']] = a
+        new['dsb']['plan'] = dict(period=head.get('period'), assignments=plan, uncovered=[], summary={}, notes=['manual calibration'])
+        return new
     ds = dsp.datasheet_from_spec(spec)
     if ds is None:
         return spec
@@ -193,10 +209,36 @@ def runtime_points(spec, model=None):
     tables = list(dict.fromkeys(s['table'] for s in spec['steps'] if model in s.get('models', ())))
     ordered = dict(spec, options=dict(spec.get('options') or {}, table_order={t: n for n, t in enumerate(tables)}))
     pts = hh.points_for(ordered, model)
+    manual = bool((spec.get('options') or {}).get('manual_entry'))
     for p in pts:
         if 'dsb' in p:
             decorate(p)
+            if manual:
+                manual_words(p)
     return pts
+
+
+def nominal_text(p) -> str:
+    """The nominal of a point as the technician reads it: the source document's own text when the point carries it (Cal Processor import), else the
+    value in its display unit with the frequency.  Display only."""
+    d = p.get('dsb') or {}
+    label = (d.get('label') or '').strip()
+    if label:
+        return label
+    run = p.get('run') or {}
+    if p.get('test') != 'numeric' or run.get('nominal') is None:
+        return p.get('title') or p.get('section', '')
+    text = hh._fmt(run['nominal'], run.get('unit', ''))
+    return text + (f' @ {hh._fmt(run["frequency"], "Hz")}' if run.get('frequency') else '')
+
+
+def manual_words(p):
+    """The wording of a point of a manual calibration: what is to be set (the nominal) and what the unit under test is asked for.  Nothing is sourced."""
+    text = nominal_text(p)
+    if p.get('test') == 'numeric':
+        p['dsb_desc'] = f'{p["section"]}: {text}'
+        p['dsb_device'] = f'{p["section"]}' + (f'\nRange: {p["range"]}' if p.get('range') else '')
+    return p
 
 
 def _assigned(p) -> str:
@@ -518,8 +560,10 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     """The handheld engine's window for a user-built datasheet."""
 
     def __init__(self, root, spec, demo=False, io_factory=None, period=None, fast_demo=False):
+        self.manual_entry = bool((spec.get('options') or {}).get('manual_entry'))      # a manual calibration (see the module docstring)
         spec = with_plan(spec)
         self.dsb = spec['dsb']
+        self.grid_entry = None
         self.period = period or self.dsb.get('period')
         if self.period != self.dsb.get('period'):
             spec = spec_for_period(spec, self.period)
@@ -540,7 +584,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     def calibrator_offer(self):
         """The 5520A for a user-built datasheet: it is offered, and a DMM-type point it cannot source is routed by hand with the reason (limit_problem); scope and
         generator points never go to it.  The note under the picker counts those points."""
-        reqs = [r for p in self.points if (p.get('run') or {}).get('op') == 'dmm' and p['run']['direction'] == 'measure' for r in calibrator_fit.handheld_requests([p])]
+        reqs = [r for p in self.points if (p.get('run') or {}).get('op') == 'dmm' and p['run']['direction'] == 'measure' and p.get('applied')
+                for r in calibrator_fit.handheld_requests([p])]
         return calibrator_fit.make_offer('5520A', reqs, per_point_manual=True, unverified=drivers.Fluke5520A.unverified_summary())
 
     def settings_name(self):
@@ -571,6 +616,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
 
     def reading_labels(self, p):
         run = p.get('run') or {}
+        if self.manual_entry:
+            return dict(device='UNIT UNDER TEST', source='TEST POINT')
         if run.get('op', 'dmm') == 'dmm':
             return {}
         if run['direction'] == 'source':
@@ -580,6 +627,11 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     # ---- window -------------------------------------------------------------------------------------------------------
     def _build_ui(self):
         super()._build_ui()
+        if self.manual_entry:
+            self._build_manual_ui()
+            self._attach_grid_entry()
+            return
+        self._attach_grid_entry()
         d = self.shell.drawer_body
         row = 20
         ttk.Separator(d).grid(row=row, column=0, columnspan=2, sticky='ew', pady=(12, 10))
@@ -610,6 +662,122 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
                           f'author entered; points a connected standard cannot make are done by hand and marked [manual] in the report.'
                           + (f' {manual} point(s) have no assigned standard.' if manual else ''), 'info')
 
+    # ---- manual calibrations: typed readings, the grid entry -------------------------------------------------------------
+    def _build_manual_ui(self):
+        """Window of a manual calibration: nothing to connect (the calibrator box is shown but switched off), a notice that says how to enter the readings."""
+        self.cal_mode.set(hh.CAL_CHOICES[2])
+        for name in ('cal_combo', 'cal_entry', 'btn_test', 'btn_find'):
+            widget = getattr(self, name, None)
+            if widget is not None:
+                widget.configure(state='disabled')
+        holder = self.shell.notice_holder
+        for child in list(holder.winfo_children()):                 # the stock text ('the calibrator is programmed and enabled ...') does not apply
+            label = getattr(child, 'label', None)
+            try:
+                if label is not None and str(label.cget('text')).startswith('For each point the calibrator is programmed'):
+                    child.destroy()
+            except Exception:
+                pass
+        d = self.shell.drawer_body
+        ttk.Separator(d).grid(row=20, column=0, columnspan=2, sticky='ew', pady=(12, 10))
+        ttk.Label(d, text='Manual calibration', style='Bold.TLabel').grid(row=21, column=0, columnspan=2, sticky='w')
+        ttk.Label(d, text='No instrument is connected or driven by this program. You set the stimulus with your own standards and type what the unit under test shows.',
+                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=22, column=0, columnspan=2, sticky='w', pady=(6, 0))
+        self.shell.notice(f'Manual calibration "{self.dsb.get("title")}", version {self.dsb.get("version")}. ' + self.GRID_HELP +
+                          ' Limits are those of the source datasheet.', 'info')
+        self.tree.heading('nominal', text='Nominal')
+        self._retitle_manual()
+
+    def _retitle_manual(self):
+        """The stock banner says 'Performance Verification' and 'the calibrator output is set for you': neither is true of a manual calibration."""
+        old = ' Performance Verification'
+        try:
+            title = str(self.root.title())
+            if old in title:
+                self.root.title(title.replace(old, ' Manual Calibration'))
+        except Exception:
+            pass
+
+        def walk(w):
+            for c in w.winfo_children():
+                yield c
+                yield from walk(c)
+        try:
+            for w in walk(self.root):
+                text = str(w.cget('text')) if 'text' in w.keys() else ''
+                if text.endswith('  -  Performance Verification'):
+                    w.configure(text=text.replace('Performance Verification', 'Manual Calibration'))
+            src = self.spec.get('source', {}).get('document', '')
+            self.shell.subtitle.set(f'Manual calibration: you set the stimulus with your own standards and type each reading  |  {len(self.points)} points  |  {src}')
+        except Exception:
+            pass
+
+    GRID_HELP = ('Click a test point and type the reading (without the unit): Enter saves it and opens the next point, Esc closes the box, '
+                 'Up / Down move. Run All Pending asks for each point in its own window instead.')
+
+    def _attach_grid_entry(self):
+        """Typed readings straight into the test point grid (manual_grid.py) for a manual calibration, and for any datasheet whose every point is done by hand."""
+        if not (self.manual_entry or self.all_hand_set()):
+            return
+        import manual_grid
+        self.grid_entry = manual_grid.GridEntry(self, self.tree)
+
+    def all_hand_set(self) -> bool:
+        """True when the standards plan has an assignment for every point and none of them can be automated (datasheet_builder_match): all points are hand-set."""
+        steps = [s for s in self.spec.get('steps', []) if 'dsb' in s]
+        if not steps:
+            return False
+        for s in steps:
+            a = s['dsb'].get('assignment')
+            if not a:
+                return False
+            if a.get('status') == 'assigned' and a.get('automation') in (dm.OK, dm.UNVERIFIED):
+                return False
+        return True
+
+    def type_reading(self, p, text):
+        """Record a reading typed into the grid for point p in the data mode on screen (As Found / As Left): the engine's own steps for a typed reading
+        (hh.pad_reading to the point's resolution, hh.judge_numeric, _store), nothing else.  Returns the stored record.  Raises ValueError with the reason
+        in words for text that is not a reading (empty, not a number, NaN / infinity, a comma, a unit) and RuntimeError when it cannot be recorded now."""
+        if self.busy:
+            raise RuntimeError('A run is in progress: finish or stop it before typing readings into the grid.')
+        asset = self.asset.get().strip()
+        if not asset:
+            raise RuntimeError('Enter the instrument ID first.')
+        live = self.pm_begin_run([p], asset)             # the saved procedure modifications of this asset, as at the start of a run
+        if not live:
+            raise RuntimeError('This point is skipped by a procedure modification.')
+        p = live[0]
+        raw = (text or '').strip()
+        if not raw:
+            raise ValueError('Type a reading.')
+        if p['test'] == 'numeric':
+            if ',' in raw:
+                raise ValueError('Use a decimal point, not a comma.')
+            entered = hh.pad_reading(p, raw)
+            result, base = hh.judge_numeric(p, entered, True)          # ValueError: not a number / NaN / infinity
+            self._store(p, entered=entered, reading=base, result=result, annunciator=None, source='typed')
+        else:
+            word = raw.lower()
+            if word in ('y', 'yes', 'p', 'pass'):
+                ok = True
+            elif word in ('n', 'no', 'f', 'fail'):
+                ok = False
+            else:
+                raise ValueError('Type Y (yes / pass) or N (no / fail).')
+            self._store(p, entered=('Pass' if ok else 'Fail') if p['test'] == 'visual' else (f'Beeper {p["expect"]}' if ok else f'Beeper not {p["expect"]}'),
+                        reading=None, result='PASS' if ok else 'FAIL', source='typed')
+        return self.results[p['id']]
+
+    def _row(self, p):
+        values, tags = super()._row(p)
+        if not self.manual_entry:
+            return values, tags
+        values = list(values)
+        values[1] = f'{p["section"]}' + (f'   ({p["range"]})' if p.get('range') else '')
+        values[2] = nominal_text(p)
+        return tuple(values), tags
+
     def on_period(self):
         new = self.period_var.get()
         if new == self.period:
@@ -634,10 +802,14 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     def engine_model(self):
         """The calibrator chosen in the engine's own box ('5560A' / '5522A' / '5520A'), None for Manual."""
         text = self.cal_mode.get()
+        if self.manual_entry:
+            return None
         return None if text.startswith('Manual') else ('5522A' if '5522A' in text else '5520A' if '5520A' in text else '5560A')
 
     def standards_needed(self):
         out = []
+        if self.manual_entry:
+            return out
         for p in self.points:
             m = _assigned(p)
             if m and m not in out:
@@ -664,6 +836,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         return out
 
     def wants_connection(self):
+        if self.manual_entry:
+            return False
         return bool(self.engine_model()) or any(v.get().strip() for v in self.std_addr.values())
 
     def connect(self):
@@ -684,6 +858,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     def test_connection(self):
         if self.fast_demo:
             messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.')
+            return
+        if self.manual_entry:
+            messagebox.showinfo('Manual calibration', 'This is a manual calibration: nothing is connected or driven by the program. Type the readings into the grid.')
             return
         if self.virtual and not self.engine_model():
             messagebox.showinfo('Manual', 'The calibrator is set to Manual: every point is done by hand. The program tells you what to set and asks for the readings.')
@@ -752,6 +929,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     @property
     def manual_cal(self):
         """For the point in progress: True when its source is set by hand (the engine's prompts then tell the operator to set it)."""
+        if self.manual_entry:
+            return True
         p = self._cur
         if p is not None and p.get('run') and p['run']['direction'] == 'measure':
             r = p.get('_route')
@@ -808,13 +987,22 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         if self.io is not None and r.reason and self.io.log is not None:
             self.io.log.add('--', f'{p["id"]}: ' + (f'using {r.standard}: ' if r.auto else 'done by hand: ') + r.reason, 'ROUTE')
 
+    def _prompt_setup(self, p):
+        if self.manual_entry:                       # nothing is rewired or driven: the technician only types readings
+            return True
+        return self._prompt_setup_driven(p)
+
     def _prompt_function(self, p):
+        if self.manual_entry:
+            return True
         if p.get('run') and p['run']['op'] != 'dmm':
             self._last_switch = p['switch']           # the wiring / set-up prompt of scope and generator points already says what to change
             return True
         return super()._prompt_function(p)
 
     def _high_voltage(self, p):
+        if self.manual_entry:                       # the program outputs nothing
+            return False
         run = p.get('run') or {}
         if run.get('op') == 'scope_dc' and run.get('nominal') is not None:
             return abs(run['nominal']) >= self.spec.get('options', {}).get('hv_threshold_v', 500)
@@ -826,7 +1014,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         text = (p.get('setup') or '').split(' Read the measuring standard')[0]
         return text or f'Set the unit under test to output {hh._fmt(run["nominal"], run["unit"])}.'
 
-    def _prompt_setup(self, p):
+    def _prompt_setup_driven(self, p):
         run = p.get('run')
         if not run or run['direction'] != 'source':
             return super()._prompt_setup(p)
@@ -1098,6 +1286,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         return out
 
     def report_title(self):
+        if self.manual_entry:                       # the lab's report name; the datasheet's title and make / model are in the header
+            return 'Calibration Data'
         return f'{self.info["name"]} - {self.dsb.get("title")}'
 
     def report_header(self, src):
