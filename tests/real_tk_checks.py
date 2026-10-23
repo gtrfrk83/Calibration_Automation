@@ -1634,9 +1634,11 @@ def checks_fluke_365():
 
 
 def checks_fluke_376():
-    """The Fluke 376 performance verification on a real Tk: the Manager lists it under Automated Calibrations only; its run window is the ordinary handheld window
-    (38 points, no typed grid, Performance Verification wording); the voltage, coil, iFlex simulation and iFlex-on-coil cable-change prompts."""
+    """The Fluke 374 / 375 / 376 / 376-II performance verifications on a real Tk: the Manager lists the four under Automated Calibrations only; the run window is the ordinary
+    handheld window plus the 'iFlex probe supplied' check box (38 points for the 376, 29 with the box off; no typed grid, Performance Verification wording); the voltage,
+    coil, iFlex simulation and iFlex-on-coil cable-change prompts."""
     import handheld_dmm as HH
+    import iflex_option as XO
     import Calibration_Procedure_Manager as CPM
     CPM.init_db()
     root = tk.Tk()
@@ -1655,34 +1657,56 @@ def checks_fluke_376():
     root.geometry('1260x800+0+0')
     pump(root, 20)
     names = lambda: [m.table.item(k, 'values')[0] for k in m.table.get_children()]  # noqa: E731
-    check('376: listed in Automated Calibrations', m.view_kind == 'verification' and 'Fluke 376 Clamp Meter Performance Verification' in names(), names())
+    four = [f'Fluke {x} Clamp Meter Performance Verification' for x in ('374', '375', '376', '376-II')]
+    check('374 / 375 / 376 / 376-II: listed in Automated Calibrations', m.view_kind == 'verification' and all(n in names() for n in four), names())
+    rows = {}
     for k in m.table.get_children():
-        if m.table.item(k, 'values')[0].startswith('Fluke 376'):
-            m.table.selection_set(k)
-            m.table.see(k)
-            row = m.table.item(k, 'values')
+        v = m.table.item(k, 'values')
+        if v[0] in four:
+            rows[v[0]] = v
+            if v[0] == four[2]:
+                m.table.selection_set(k)
+                m.table.see(k)
     pump(root, 10)
-    check('376: manufacturer, model, category, status', row[1:4] == ('Fluke', '376', 'Clamp Meter') and 'Ready' in row[4], row)
+    check('374 / 375 / 376 / 376-II: manufacturer, model, category, status', [(r[1], r[2], r[3]) for r in rows.values()] == [('Fluke', x, 'Clamp Meter') for x in ('374', '375', '376', '376-II')]
+          and all('Ready' in r[4] for r in rows.values()), rows)
     grab(root, 'fluke376_manager_automated')
     m.view_nb.select(m.view_pages['manual'])
     pump(root, 20)
-    check('376: not in Manual Calibrations', not any(n.startswith('Fluke 376') for n in names()), names())
+    check('374 / 375 / 376 / 376-II: not in Manual Calibrations', not any(n.startswith(('Fluke 374', 'Fluke 375', 'Fluke 376')) for n in names()), names())
     root.destroy()
     # --- the run window
     root = tk.Tk()
     root.report_callback_exception = lambda *a: errs.append(a)
     spec = HH.load_spec('fluke_376_pv.json')
-    app = HH.App(root, '376', demo=False, spec=spec)
+    app = XO.App(root, '376', demo=False, spec=spec)
     root.geometry('1320x800+0+0')
     pump(root, 30)
     app.asset.set('A-376')
     app.serial.set('S-376')
     tree = app.tree
-    check('376 run window: 38 points, ordinary handheld window (no typed grid, queue on)', len(tree.get_children()) == 38 and not hasattr(app, 'grid_entry')
-          and app.QUEUE_SUPPORTED is True and 'Manual Calibration' not in root.title(), root.title())
+    check('376 run window: 38 points, ordinary handheld window (no typed grid, no run queue)', len(tree.get_children()) == 38 and not hasattr(app, 'grid_entry')
+          and not app.queue_supported() and HH.App.QUEUE_SUPPORTED is True and 'Manual Calibration' not in root.title(), root.title())
+    boxes = [c for c in walk(root) if isinstance(c, ttk.Checkbutton) and 'iFlex probe supplied' in str(c.cget('text'))]
+    check('376 run window: the iFlex check box is shown before Run, ON by default, never skipped silently', len(boxes) == 1 and boxes[0].winfo_ismapped() and app.include_is_on('iflex')
+          and 'ON' in str(app._include_labels['iflex'].cget('text')), [str(c.cget('text')) for c in walk(root) if isinstance(c, ttk.Checkbutton)])
+    box = boxes[0]
+    check('376 run window: the check box sits above the point table', box.winfo_rooty() < tree.winfo_rooty(), (box.winfo_rooty(), tree.winfo_rooty()))
     tree.selection_set(tree.get_children()[29])                  # iFlex simulation 3 mV: the point detail shows the iFlex hook-up
     pump(root, 10)
     grab(root, 'fluke376_run_window')
+    asked = []
+    with mock.patch.object(XO.messagebox, 'askyesno', lambda *a, **k: asked.append(a) or True):
+        box.invoke()                                              # the operator turns the iFlex tests OFF
+        pump(root, 20)
+    check('376 run window: OFF asks first, then 29 points, the label says so', len(asked) == 1 and 'not tested (no iFlex supplied)' in asked[0][1] and len(tree.get_children()) == 29
+          and 'OFF' in str(app._include_labels['iflex'].cget('text')) and not app.include_is_on('iflex'), (asked, len(tree.get_children())))
+    check('376 run window OFF: no iFlex section in the list', not any('iFlex' in str(tree.item(k, 'values')[1]) for k in tree.get_children()), [tree.item(k, 'values')[1] for k in tree.get_children()][-3:])
+    grab(root, 'fluke376_run_window_iflex_off')
+    box.invoke()                                                  # ... and back ON (no question)
+    pump(root, 20)
+    check('376 run window: ON again restores the 38 points', len(tree.get_children()) == 38 and app.include_is_on('iflex'), len(tree.get_children()))
+    grab(root, 'fluke376_run_window_iflex_on')
     pts = {p['n']: p for p in app.points}
 
     def prompt(n, tag):
@@ -1702,6 +1726,22 @@ def checks_fluke_376():
                           (30, 'fluke376_prompt_iflex_sim', '2 mm jack'), (35, 'fluke376_prompt_iflex_coil', 'iFlex loop')):
         r = prompt(n, tag)
         check(f'376 prompt point {n}: shown, nothing clipped, says what it must', not r['clipped'] and words in r['text'], (r['clipped'], r['text'][:300]))
+    for model, total, off in (('374', 28, 19), ('375', 34, 25), ('376-II', 38, 29)):
+        try:
+            root.destroy()
+        except tk.TclError:
+            pass
+        root = tk.Tk()
+        root.report_callback_exception = lambda *a: errs.append(a)
+        app = XO.App(root, model, demo=False, spec=HH.load_spec('fluke_376_pv.json'))
+        root.geometry('1320x800+0+0')
+        pump(root, 20)
+        n_on = len(app.tree.get_children())
+        app.set_include('iflex', False, ask=False)
+        pump(root, 10)
+        check(f'{model} run window: {total} points ON, {off} OFF', (n_on, len(app.tree.get_children())) == (total, off), (n_on, len(app.tree.get_children())))
+        if model == '374':
+            grab(root, 'fluke374_run_window_iflex_off')
     check('376: no Tk callback errors', not errs, errs)
     try:
         root.destroy()

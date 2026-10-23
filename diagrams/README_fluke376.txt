@@ -1,4 +1,4 @@
-Fluke 376 clamp meter hook-up diagrams (Fluke 374 / 375 / 376 / 376-II family spec; the 376 is the registered procedure)
+Fluke 374 / 375 / 376 / 376-II clamp meter hook-up diagrams (one family spec; four registered procedures share these seven pictures: prefix hook_fluke376)
 ==============================================================================================================
 The procedure shows a picture each time the wiring changes. Drop PNG files in this folder (any size; they are shown beside the instructions).
 Missing pictures do not stop a run: the dialog shows the text instructions and names the file it looked for. Nothing here is drawn by the program:
@@ -17,7 +17,7 @@ Current through the 50-turn coil (the detachable jaw closed around the coil; NO 
     (The calibration manual's Figure 3 shows the same coil box on a 5560A.)
 
 iFlex simulation (calibrator voltage output to the iFlex input; no loop connected)
-    hook_fluke376_IFLEX_SIM.png       group IFLEX_SIM:  calibrator HI -> iFlex 2 mm jack (far left of the meter), calibrator LO -> black COM jack,
+    hook_fluke376_IFLEX_SIM.png       group IFLEX_SIM:  calibrator HI -> iFlex 2 mm jack (far left of the meter, owner-confirmed), calibrator LO -> black COM jack,
                                       with the 2 mm to 4 mm Slim Reach probe (PN 6508922) and the test lead with retractable sheath (6358, PN 1903307);
                                       one picture showing both calibrators' voltage terminals
 
@@ -28,3 +28,6 @@ iFlex loop on the 50-turn coil (iFlex probe plugged into the meter, loop around 
 The coil and iFlex pictures are named in the spec (specs/fluke_376_pv.json, groups COIL_AUX / COIL_20A / IFLEX_SIM / IFLEX_COIL_AUX / IFLEX_COIL_20A, key 'diagram'),
 not looked up per calibrator.
 The meter dial has no picture (Figure 1 of the calibration manual draws the dial positions as small symbols; see NOTES.md, Fluke 376).
+
+The iFlex pictures (IFLEX_SIM, IFLEX_COIL_AUX, IFLEX_COIL_20A) are only shown while the window option "iFlex probe supplied: run the iFlex tests" is ON (the default). When it is OFF the nine iFlex points,
+their cable-change prompts and these three pictures are not used. The meters themselves differ only in the points they have (374: 28, 375: 34, 376 and 376-II: 38); every picture applies to all four.
