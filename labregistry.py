@@ -228,7 +228,7 @@ def asset_summary(asset):
 def attach(root, asset_var, serial_var, notify):
     """One call from a procedure window's __init__.
 
-    * `--asset <ID>` on the command line pre-fills the Instrument ID (the Manager passes it when launching from the Instruments tab)
+    * `--asset <ID>` on the command line pre-fills the Instrument ID (nothing in the Manager passes it any more since the Instruments tab was removed)
     * typing an Instrument ID (after a short pause) fills an empty Serial number from the instrument list / last report and shows a one-line history
     `notify` is a callable taking one string (e.g. status_var.set).  Never raises."""
     try:

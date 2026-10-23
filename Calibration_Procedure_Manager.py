@@ -180,14 +180,12 @@ class Manager:
         self.notebook.pack(fill='both', expand=True)
         ui.TabStrip(self.notebook)
         self.library_frame = ttk.Frame(self.notebook, padding=16)
-        self.instruments_frame = ttk.Frame(self.notebook, padding=16)
         self.history_frame = ttk.Frame(self.notebook, padding=16)
         self.specs_frame = ttk.Frame(self.notebook, padding=16)
         self.datasheets_frame = ttk.Frame(self.notebook, padding=16)
         self.dsb_frame = ttk.Frame(self.notebook, padding=16)
         self.development_frame = ttk.Frame(self.notebook, padding=16)
         self.notebook.add(self.library_frame, text='  Procedures  ')
-        self.notebook.add(self.instruments_frame, text='  Instruments  ')
         self.notebook.add(self.history_frame, text='  Asset History  ')
         self.notebook.add(self.specs_frame, text='  Standards Specs  ')
         self.notebook.add(self.datasheets_frame, text='  Mudcats Datasheet Importer  ')
@@ -197,7 +195,6 @@ class Manager:
         self.build_development_tab()
         self.build_datasheets_tab()
         self.build_datasheet_builder_tab()
-        self.build_instruments_tab()
         self.history_panel = labregistry_ui.HistoryPanel(self.history_frame)
         self.history_panel.pack(fill='both', expand=True)
         self.specs_panel = specmanager_ui.SpecManagerPanel(self.specs_frame)
@@ -205,7 +202,6 @@ class Manager:
         ui.polish(root)
         self.notebook.bind('<<NotebookTabChanged>>', self._tab_changed)
         self.refresh()
-        self.refresh_instruments()
         self.refresh_development()
         root.bind('<Control-f>', lambda _e: (self.notebook.select(self.library_frame), self.search_entry.focus_set()))
 
@@ -235,9 +231,6 @@ class Manager:
         if tab is self.library_frame:
             self.refresh_details()
             self.status.set('Select a procedure, then press Run procedure (or Try in demo mode).')
-        elif tab is self.instruments_frame:
-            self.refresh_instruments()
-            self.status.set('Register the instruments you calibrate, assign a procedure, and launch it from here.')
         elif tab is self.history_frame:
             self.history_panel.refresh()
             self.status.set('Every exported PDF report is recorded here. Double-click a test point to see its drift across reports.')
@@ -1010,187 +1003,6 @@ class Manager:
         ttk.Button(bar, text='Close', command=win.destroy).pack(side='right')
         body = ttk.Frame(win, padding=(16, 0)); body.pack(fill='both', expand=True)
         self._point_grid(body, [json.loads(r[0]) for r in records])
-
-    # ------------------------------------------------------------------ Instruments tab
-    def build_instruments_tab(self):
-        parent = self.instruments_frame
-        searchbar = ttk.Frame(parent)
-        searchbar.pack(fill='x', pady=(0, 10))
-        ttk.Label(searchbar, text='Find').pack(side='left')
-        self.instrument_search = tk.StringVar()
-        ttk.Entry(searchbar, textvariable=self.instrument_search, width=34).pack(side='left', padx=(8, 6))
-        self.instrument_search.trace_add('write', lambda *_: self.refresh_instruments())
-        ttk.Label(searchbar, text='asset ID, model or serial number', style='Small.TLabel').pack(side='left', padx=(2, 8))
-        ttk.Button(searchbar, text='Clear', style='Quiet.TButton', command=lambda: self.instrument_search.set('')).pack(side='left')
-        ttk.Button(searchbar, text='New instrument...', style='Accent.TButton', command=self.new_instrument).pack(side='right')
-        cols = ('asset', 'manufacturer', 'model', 'serial', 'interval', 'procedure', 'last', 'due')
-        self.instrument_table = ui.make_table(parent, cols, ('Instrument ID', 'Manufacturer', 'Model', 'Serial number', 'Interval (months)', 'Assigned procedure', 'Last report', 'Next due'),
-                                              (140, 130, 110, 140, 100, 260, 100, 110), zebra=True,
-                                              anchors={'asset': 'w', 'manufacturer': 'w', 'model': 'w', 'serial': 'w', 'procedure': 'w'})
-        self.empty_inst = self._empty_state(self.instrument_table, 'No instruments yet.\nPress "New instrument..." to register your first one.')
-        self.instrument_table.bind('<Double-1>', lambda _: self.edit_instrument())
-        self.instrument_table.bind('<<TreeviewSelect>>', lambda _: self._sync_instrument_buttons())
-        bar = ttk.Frame(parent)
-        bar.pack(fill='x', pady=(12, 0))
-        self.btn_i_launch = ttk.Button(bar, text='▶  Launch assigned procedure', style='Accent.TButton', command=self.launch_instrument_procedure)
-        self.btn_i_demo = ttk.Button(bar, text='Demo', command=lambda: self.launch_instrument_procedure(demo=True))
-        self.btn_i_edit = ttk.Button(bar, text='Edit...', command=self.edit_instrument)
-        self.btn_i_delete = ttk.Button(bar, text='Delete', command=self.delete_instrument)
-        for b in (self.btn_i_launch, self.btn_i_demo, self.btn_i_edit):
-            b.pack(side='left', padx=(0, 8))
-        self.btn_i_delete.pack(side='right')
-        self.instrument_status = tk.StringVar(value='')
-
-    def _sync_instrument_buttons(self):
-        state = 'normal' if self.instrument_table.selection() else 'disabled'
-        for b in (self.btn_i_launch, self.btn_i_demo, self.btn_i_edit, self.btn_i_delete):
-            b.configure(state=state)
-
-    def refresh_instruments(self):
-        if not hasattr(self, 'instrument_table'):
-            return
-        term = self.instrument_search.get().strip()
-        with sqlite3.connect(DB) as conn:
-            rows = conn.execute('''SELECT i.id,i.asset_id,i.manufacturer,i.model,i.serial_number,
-                     i.interval_months,COALESCE(p.name,'Not assigned')
-                     FROM instruments i LEFT JOIN procedures p ON p.id=i.procedure_id
-                     WHERE (?='' OR i.asset_id LIKE ? OR i.model LIKE ? OR i.serial_number LIKE ?)
-                     ORDER BY i.asset_id''', (term, *(['%' + term + '%'] * 3))).fetchall()
-        previous = self.instrument_table.selection()
-        for iid in self.instrument_table.get_children():
-            self.instrument_table.delete(iid)
-        for n, row in enumerate(rows):
-            iid, asset, mfg, model, serial, interval, proc = row
-            runs = labregistry.runs_for(asset)
-            due, _ = labregistry.next_due(asset) if runs else (None, None)
-            late = bool(due and due < datetime.date.today())
-            self.instrument_table.insert('', 'end', iid=str(iid), values=(asset, mfg, model, serial, interval if interval is not None else '', proc,
-                                                                          runs[0]['run_at'][:10] if runs else '', (due.isoformat() + (' OVERDUE' if late else '')) if due else ''),
-                                         tags=(('overdue',) if late else ('even' if n % 2 == 0 else 'odd',)))
-        self.instrument_table.tag_configure('overdue', background=ui.C['bad_bg'], foreground=ui.C['bad'])
-        self._toggle_empty(self.instrument_table, not rows)
-        if rows and not term:
-            self.empty_inst.configure(text='No instruments yet.\nPress "New instrument..." to register your first one.')
-        if not rows and term:
-            self.empty_inst.configure(text='No instruments match your search.')
-        if previous and self.instrument_table.exists(previous[0]):
-            self.instrument_table.selection_set(previous[0])
-        self._sync_instrument_buttons()
-        self.instrument_status.set(f'{len(rows)} instrument(s) displayed.')
-
-    def selected_instrument(self):
-        selected = self.instrument_table.selection()
-        if not selected:
-            messagebox.showinfo('Select instrument', 'Select an instrument from the Instruments tab first.')
-            return None
-        with sqlite3.connect(DB) as conn:
-            return conn.execute('SELECT id,asset_id,manufacturer,model,serial_number,interval_months,procedure_id,notes FROM instruments WHERE id=?', (int(selected[0]),)).fetchone()
-
-    def new_instrument(self):
-        self.instrument_editor(None)
-
-    def edit_instrument(self):
-        item = self.selected_instrument()
-        if item:
-            self.instrument_editor(item)
-
-    def delete_instrument(self):
-        item = self.selected_instrument()
-        if not item:
-            return
-        if not messagebox.askyesno('Delete instrument', f'Delete instrument "{item[1]}" from the database?\n\nCalibration results already saved by procedures are not affected.'):
-            return
-        with sqlite3.connect(DB) as conn:
-            conn.execute('DELETE FROM instruments WHERE id=?', (item[0],))
-        self.refresh_instruments()
-        self.status.set(f'Deleted instrument {item[1]}.')
-
-    def instrument_editor(self, record):
-        win = ui.dialog(self.root, 'Edit instrument' if record else 'Register new instrument')
-        win.resizable(False, False)
-        form = ttk.Frame(win, padding=22)
-        form.pack(fill='both', expand=True)
-        ttk.Label(form, text='Edit instrument' if record else 'Register new instrument', style='Header.TLabel').grid(row=0, column=0, columnspan=2, sticky='w', pady=(0, 12))
-        labels = ('Instrument ID *', 'Manufacturer', 'Model', 'Serial number', 'Calibration interval (months)', 'Notes')
-        indexes = (1, 2, 3, 4, 5, 7)
-        variables = {}
-        entries = {}
-        for r, (label, index) in enumerate(zip(labels, indexes), 1):
-            ttk.Label(form, text=label).grid(row=r, column=0, sticky='w', padx=(0, 16), pady=6)
-            v = tk.StringVar(value=str(record[index]) if record and record[index] is not None else '')
-            e = ttk.Entry(form, textvariable=v, width=46)
-            e.grid(row=r, column=1, pady=6, sticky='ew')
-            variables[label.rstrip(' *')] = v
-            entries[label.rstrip(' *')] = e
-        ttk.Label(form, text='Assigned procedure').grid(row=7, column=0, sticky='w', pady=6)
-        with sqlite3.connect(DB) as conn:
-            procs = conn.execute('SELECT id,name,model FROM procedures WHERE enabled=1 ORDER BY name').fetchall()
-        options = ['(None)'] + [f'{id_}: {name}' for id_, name, _m in procs]
-        proc_var = tk.StringVar(value='(None)')
-        if record and record[6] is not None:
-            proc_var.set(next((x for x in options[1:] if x.startswith(str(record[6]) + ': ')), '(None)'))
-        ttk.Combobox(form, textvariable=proc_var, values=options, width=43, state='readonly').grid(row=7, column=1, pady=6, sticky='ew')
-        hint = ttk.Label(form, text='', style='Small.TLabel')
-        hint.grid(row=8, column=1, sticky='w')
-        def suggest(_e=None):
-            # Offer the matching procedure when a model is typed and nothing is assigned yet.
-            model = variables['Model'].get().strip().lower()
-            if model and proc_var.get() == '(None)':
-                for (id_, name, pmodel), option in zip(procs, options[1:]):
-                    if pmodel and (pmodel.lower() in model or model in pmodel.lower()):
-                        proc_var.set(option)
-                        hint.configure(text='Procedure suggested from the model - change it if needed.')
-                        return
-        entries['Model'].bind('<FocusOut>', suggest)
-        entries['Instrument ID'].focus_set()
-        def save():
-            asset = variables['Instrument ID'].get().strip()
-            if not asset:
-                messagebox.showerror('Required', 'Instrument ID is required.', parent=win); return
-            interval_str = variables['Calibration interval (months)'].get().strip()
-            try:
-                interval = int(interval_str) if interval_str else None
-                if interval is not None and interval <= 0:
-                    raise ValueError()
-            except ValueError:
-                messagebox.showerror('Invalid interval', 'Enter a positive whole number of months or leave blank.', parent=win); return
-            proc_id = int(proc_var.get().split(':', 1)[0]) if proc_var.get() != '(None)' else None
-            values = (asset, variables['Manufacturer'].get().strip(), variables['Model'].get().strip(), variables['Serial number'].get().strip(),
-                      interval, proc_id, variables['Notes'].get().strip())
-            try:
-                with sqlite3.connect(DB) as conn:
-                    if record:
-                        conn.execute('''UPDATE instruments SET asset_id=?,manufacturer=?,model=?,serial_number=?,interval_months=?,procedure_id=?,notes=?,updated_at=CURRENT_TIMESTAMP WHERE id=?''', (*values, record[0]))
-                    else:
-                        conn.execute('''INSERT INTO instruments(asset_id,manufacturer,model,serial_number,interval_months,procedure_id,notes) VALUES (?,?,?,?,?,?,?)''', values)
-            except sqlite3.IntegrityError:
-                messagebox.showerror('Duplicate ID', 'That Instrument ID already exists.', parent=win); return
-            win.destroy()
-            self.refresh_instruments()
-            self.status.set(f'Saved instrument {asset}.')
-        buttons = ttk.Frame(form)
-        buttons.grid(row=9, column=0, columnspan=2, sticky='e', pady=(16, 0))
-        ttk.Button(buttons, text='Cancel', command=win.destroy).pack(side='right')
-        ttk.Button(buttons, text='Save instrument', style='Accent.TButton', command=save).pack(side='right', padx=8)
-        win.bind('<Return>', lambda _: save())
-        ui.center_on(win, self.root)
-
-    def launch_instrument_procedure(self, demo=None):
-        item = self.selected_instrument()
-        if not item:
-            return
-        instrument_id, asset, _, _, _, _, procedure_id, _ = item
-        if procedure_id is None:
-            messagebox.showinfo('No procedure assigned', f'Assign a procedure to instrument {asset} first (Edit...).')
-            return
-        with sqlite3.connect(DB) as conn:
-            row = conn.execute('SELECT name,script_path FROM procedures WHERE id=? AND enabled=1', (procedure_id,)).fetchone()
-        if not row:
-            messagebox.showerror('Procedure unavailable', 'The assigned procedure is missing or disabled.'); return
-        name, script = row
-        demo = self.demo.get() if demo is None else demo
-        if self._launch(name, script, demo, asset=asset):
-            self.status.set(f'Launched {name} for instrument {asset}' + (' in demo mode.' if demo else '.') + ' The Instrument ID and serial number are filled in.')
 
 
 if __name__ == '__main__':
