@@ -70,6 +70,9 @@ class AuditStore:
         self.con = sqlite3.connect(self.path, timeout=5, check_same_thread=False)
         self.con.execute('PRAGMA foreign_keys=ON')
         self.con.executescript(SCHEMA)
+        cols = {r[1] for r in self.con.execute('PRAGMA table_info(adjustment_events)')}
+        if 'source' not in cols:                                  # additive, lab_registry.sqlite3 only: where a value entered by the operator came from ('' for every older row)
+            self.con.execute("ALTER TABLE adjustment_events ADD COLUMN source TEXT NOT NULL DEFAULT ''")
         self.con.commit()
         self.run_id = None
 
@@ -95,14 +98,14 @@ class AuditStore:
         return row[0] if row else None
 
     # ---- events
-    def log(self, action, outcome='', detail='', step_id=''):
+    def log(self, action, outcome='', detail='', step_id='', source=''):
         """One audit line; returns (time, action, outcome, detail) as stored (what the window shows). Nothing happens without a run."""
         if self.run_id is None:
             return None
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         detail = clean(detail)
-        self.con.execute('INSERT INTO adjustment_events(run_id,event_time,step_id,action,outcome,detail) VALUES(?,?,?,?,?,?)',
-                         (self.run_id, now, step_id or '', action, outcome, detail))
+        self.con.execute('INSERT INTO adjustment_events(run_id,event_time,step_id,action,outcome,detail,source) VALUES(?,?,?,?,?,?,?)',
+                         (self.run_id, now, step_id or '', action, outcome, detail, clean(source)))
         self.con.execute('UPDATE adjustment_runs SET updated_at=? WHERE id=?', (datetime.now().isoformat(timespec='seconds'), self.run_id))
         self.con.commit()
         return (now, action, outcome, detail)
@@ -110,6 +113,11 @@ class AuditStore:
     def events(self, run_id=None):
         rid = run_id if run_id is not None else self.run_id
         return self.con.execute('SELECT event_time,step_id,action,outcome,detail FROM adjustment_events WHERE run_id=? ORDER BY id', (rid,)).fetchall()
+
+    def sources(self, run_id=None):
+        """(step_id, action, source) of every event that carries a source."""
+        rid = run_id if run_id is not None else self.run_id
+        return self.con.execute("SELECT step_id,action,source FROM adjustment_events WHERE run_id=? AND source<>'' ORDER BY id", (rid,)).fetchall()
 
     def close(self):
         try:
