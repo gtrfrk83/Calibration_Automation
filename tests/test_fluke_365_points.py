@@ -1,11 +1,11 @@
-"""Fluke 365 clamp meter manual calibration (Procedures/Fluke_365_Verification.py -> fluke365_verification.py on the shared handheld engine,
+"""Fluke 365 clamp meter performance verification (Procedures/Fluke_365_Verification.py -> handheld_dmm.main('365', spec=...), the shared handheld engine unchanged,
 specs/fluke_365_pv.json built by specs/build_fluke_365_spec.py from the Calibration Manual, Table 2, printed pp. 7-8).
 
 Part 1: the spec against an INDEPENDENT second transcription of Table 2 (read from the rendered page images at 170 and 260 dpi); the four rows whose printed limit is
 not half of the published specification are flagged and NOT changed; the coil points (calibrator x 20 = meter); options; function / cable / high-voltage prompt sequences;
-hook-ups; the sidecar (kind manual) and its classification.
-Part 2: the real engine (handheld_dmm.App through fluke365_verification.App, worker threads, drivers, judging, checkpoint, PDF) on the simulated bench with both calibrators
-(5522A, 5560A): wire commands, explicit 0 Hz on DC, set / read back / never retried, standby after each point, reset first, typed grid readings, demo never real.
+hook-ups; the sidecar (automated, i.e. kind verification) and its classification; one high-voltage question per hook-up group; current-point uncertainty (unscaled).
+Part 2: the real engine (handheld_dmm.App, worker threads, drivers, judging, checkpoint, PDF) on the simulated bench with both calibrators
+(5522A, 5560A): wire commands, explicit 0 Hz on DC, set / read back / never retried, standby after each point, reset first, demo never real.
 tkinter is stubbed in setUpModule (not at import time), like tests/test_77_points.py, so tests.test_beta is loaded exactly as before.
 Run:  python -m unittest tests.test_fluke_365_points"""
 import importlib.util
@@ -21,7 +21,7 @@ from unittest import mock
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
-h = H = f365 = Flow = SPECS = Spy = SPEC = PTS = BUILDER = None
+h = H = Flow = SPECS = Spy = SPEC = PTS = BUILDER = None
 SPEC_NAME = 'fluke_365_pv.json'
 MODEL = '365'
 
@@ -55,14 +55,13 @@ FLAGGED = (18, 23, 29, 32)
 
 def setUpModule():
     """tkinter is stubbed here, not at import time (see tests/test_87v_points.py)."""
-    global h, H, f365, Flow, SPECS, Spy, SPEC, PTS, BUILDER
+    global h, H, Flow, SPECS, Spy, SPEC, PTS, BUILDER
     import _tk_stub
     _tk_stub.install()
     import handheld_dmm as _h
     import dsb_run_harness as _H
-    import fluke365_verification as _f
     from tests import test_handheld_options as _o
-    h, H, f365, Flow, SPECS, Spy = _h, _H, _f, _o.Flow, _o.SPECS, _o.Spy
+    h, H, Flow, SPECS, Spy = _h, _H, _o.Flow, _o.SPECS, _o.Spy
     SPECS[MODEL] = SPEC_NAME                                     # the shared Flow helper looks the spec up by model; removed again in tearDownModule
     SPEC = h.load_spec(SPEC_NAME)
     PTS = {p['n']: p for p in h.points_for(SPEC, MODEL)}
@@ -124,7 +123,8 @@ class Spec(unittest.TestCase):
         for n, p in PTS.items():
             if p['kind'] in ('ACI', 'DCI'):
                 self.assertEqual(D(str(p['applied']['value'])) * 20, D(str(p['nominal'])), n)
-                self.assertIs(p['no_uncertainty'], True, n)          # the coil is not in the suite's standards: nothing is printed rather than the calibrator's alone
+                self.assertNotIn('no_uncertainty', p, n)             # every current point carries the calibrator's current uncertainty (unscaled)
+                self.assertIn('NOT multiplied by 20', p['note'], n)
                 self.assertEqual(p['report_desc'], f'200.0 A, {D(str(p["applied"]["value"])).normalize():f} A x 20 turns')
                 self.assertIn('20-turn coil', h.describe(p))
                 self.assertEqual(p['range'], '200.0 A')
@@ -180,10 +180,11 @@ class Spec(unittest.TestCase):
             self.assertIn(name, text)
         self.assertFalse(list((ROOT / 'diagrams').glob('hook_fluke365*')))       # diagrams are supplied by the owner: none is invented
 
-    def test_sidecar_is_a_manual_calibration(self):
+    def test_sidecar_is_an_automated_verification(self):
         import procscan
         p = next(x for x in procscan.procs(ROOT) if x.id == 'Fluke_365_Verification')
-        self.assertEqual((p.kind, p.effective_kind), ('manual', 'manual'))
+        self.assertEqual(p.effective_kind, 'verification')
+        self.assertNotIn('Manual', p.name)
         self.assertEqual((p.hookup_meter, p.diagram_prefixes), ('fluke365', ('hook_fluke365',)))
         self.assertIn('hookups.py#fluke365', p.fingerprint_code)         # only this meter's slice of hookups.py: no other procedure is touched
         self.assertEqual(p.specs, ('specs/fluke_365_pv.json',))
@@ -193,11 +194,10 @@ class Spec(unittest.TestCase):
 
     def test_the_launcher_names_the_engine(self):
         text = (ROOT / 'Procedures' / 'Fluke_365_Verification.py').read_text(encoding='utf-8')
-        self.assertIn('fluke365_verification.main()', text)
-        self.assertEqual(f365.SPEC, SPEC_NAME)
-        self.assertEqual(f365.MODEL, MODEL)
-        self.assertTrue(issubclass(f365.App, h.App))
-        self.assertIs(f365.App.QUEUE_SUPPORTED, False)           # no run queue: one clamp on one coil at a time
+        self.assertIn('handheld_dmm.main(MODEL, spec=SPEC)', text)
+        self.assertIn("SPEC = 'fluke_365_pv.json'", text)
+        self.assertFalse((ROOT / 'fluke365_verification.py').exists())         # no 365-only engine fork
+        self.assertIs(h.App.QUEUE_SUPPORTED, True)               # the run queue is on, as for the other handhelds
 
 
 class Padding(unittest.TestCase):
@@ -254,7 +254,7 @@ class Prompts(unittest.TestCase):
         hv = [p['n'] for p in f.app.points if f.app._high_voltage(p)]
         self.assertEqual(hv, [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13])     # 30 V and above: the manual's shock level is 30 V ac rms / 60 V dc (Safety Information p. 2)
         texts = [e[1] for e in f.events if e[0] == 'hv']
-        self.assertEqual(len(texts), len(hv))
+        self.assertEqual(len(texts), 1)
         self.assertFalse([t for t in texts if 'ramp' in t])
 
     def test_direct_high_voltage_one_out_command(self):
@@ -345,7 +345,7 @@ class EndToEnd(unittest.TestCase):
             bench, _a, _b = make_bench()
             io = h.IO(f'Fluke {model}', 'sim', transport=Spy(bench, model))
             io.auto_ramp = False
-        app = f365.App(self.hn.root, MODEL, demo=demo, spec=h.load_spec(SPEC_NAME), io_factory=(lambda: io) if io else None, fast_demo=demo)
+        app = h.App(self.hn.root, MODEL, demo=demo, spec=h.load_spec(SPEC_NAME), io_factory=(lambda: io) if io else None, fast_demo=demo)
         app.asset.set('A-365')
         app.serial.set('S-365')
         app.cal_mode.set(h.CAL_CHOICES[1] if model == '5522A' else h.CAL_CHOICES[0])
@@ -407,7 +407,7 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(titles.count('Change the cables'), 9)
         self.assertEqual(titles.count('Change the function'), 5)
         hv = [d for d in self.hn.dialogs if d[0] == 'box' and d[2] == 'HIGH VOLTAGE']
-        self.assertEqual(len(hv), 12)
+        self.assertEqual(len(hv), 1)                                   # options.hv_once_per_group: ONE question for the VOHM hook-up group (was 12, one per point)
         self.assertFalse([d for d in hv if 'ramp' in d[3]])
         cables = [d for d in self.hn.dialogs if d[0] == 'confirm' and d[1] == 'Change the cables']
         self.assertEqual(sum(1 for d in cables if 'REMOVE the test leads' in ' '.join(d[3])), 8)       # every coil hook-up says so (VOHM is the first)
@@ -436,13 +436,29 @@ class EndToEnd(unittest.TestCase):
         self.assertRegex(text, r'Uncertainty\s+TAR\s+TUR')
         self.assertNotIn('Cover', text)
         self.assertNotIn('Due', text.replace('Due Date', ''))                      # no standards-due tracking on the report body
-        # the coil points carry no uncertainty / TAR / TUR; the voltage and ohms points do
+        # every one of the 32 points carries an uncertainty, TAR and TUR (the coil points: the calibrator's current uncertainty, unscaled)
         rows = app.certificate_rows()
         self.assertEqual(len(rows), 32)
-        self.assertTrue(all(r['Uncertainty'] == '' for r, p in zip(rows, app.points) if p['kind'] in ('ACI', 'DCI')))
-        self.assertTrue(all(r['Uncertainty'] != '' for r, p in zip(rows, app.points) if p['kind'] in ('ACV', 'DCV', 'OHM')))
+        self.assertTrue(all(r['Uncertainty'] != '' for r in rows), [r['Description'] for r in rows if not r['Uncertainty']])
         fields = [app.certificate_fields(p) for p in app.points]
-        self.assertTrue(all(f['TAR'] == '' and f['TUR'] == '' for f, p in zip(fields, app.points) if p['kind'] in ('ACI', 'DCI')))
+        self.assertTrue(all(f['TAR'] != '' and f['TUR'] != '' for f in fields), fields)
+
+    def test_current_uncertainty_is_the_calibrators_at_the_output_current_unscaled(self):
+        """Owner-chosen convention: Uncertainty = the regular calibrator current uncertainty at point / 20 (no x20, no coil); TAR / TUR use it as it is."""
+        import report_pdf
+        app, io = self.run_perfect('5522A')
+        rows = app.certificate_rows()
+        for p, r in zip(app.points, rows):
+            if p['kind'] in ('ACI', 'DCI'):
+                q = dict(kind=p['kind'], nominal=p['applied']['value'], frequency=p['applied'].get('frequency'), unit='A', range=None)
+                self.assertEqual(r['Uncertainty'], report_pdf.point_uncertainty(q, standard=app.calibrator_model()), p['n'])
+                self.assertIn('NOT multiplied by 20', p['note'])
+        self.assertFalse(set(PTS) - {p['n'] for p in app.points})
+
+    def test_other_specs_keep_the_per_point_high_voltage_question(self):
+        for name in ('fluke_77iv_pv.json', 'fluke_87v_pv.json', 'fluke_170_series_pv.json', 'fluke_110_series_pv.json'):
+            self.assertNotIn('hv_once_per_group', json.loads((ROOT / 'specs' / name).read_text(encoding='utf-8')).get('options', {}), name)
+        self.assertIs(SPEC['options']['hv_once_per_group'], True)
 
     def test_demo_never_produces_real_looking_evidence(self):
         app, _ = self.make(demo=True)
@@ -453,62 +469,6 @@ class EndToEnd(unittest.TestCase):
         out, seen, text = self.pdf(app)
         self.assertIn('DEMO', text.upper())
 
-
-class TypedGrid(unittest.TestCase):
-    """fluke365_verification.App.type_reading: what the grid's Enter does (manual_grid.GridEntry), without any output."""
-    def setUp(self):
-        self.hn = H.Harness().start()
-        self.app = f365.App(self.hn.root, MODEL, demo=False, spec=h.load_spec(SPEC_NAME))
-        self.app.cal_mode.set('Manual  (5522A front panel)')
-        self.app.asset.set('A-365')
-        self.hn.app = self.app
-
-    def tearDown(self):
-        self.hn.stop()
-
-    def test_grid_is_attached(self):
-        import manual_grid
-        self.assertIsInstance(self.app.grid_entry, manual_grid.GridEntry)
-
-    def test_typed_reading_is_padded_judged_and_stored(self):
-        rec = self.app.type_reading(PTS[1], '30')
-        self.assertEqual((rec['entered'], rec['result'], rec['source'], rec['synthetic']), ('30.0', 'PASS', 'typed', False))
-        rec = self.app.type_reading(PTS[18], '893')
-        self.assertEqual((rec['entered'], rec['result']), ('893', 'FAIL'))
-        rec = self.app.type_reading(PTS[32], '-190')
-        self.assertEqual((rec['entered'], rec['result']), ('-190.0', 'PASS'))
-        self.assertEqual(set(self.app.found), {'2-1', '2-18', '2-32'})
-        self.assertAlmostEqual(self.app.found['2-32']['reading'], -190.0)
-
-    def test_nothing_is_sent_to_any_instrument(self):
-        self.app.type_reading(PTS[2], '300.0')
-        self.assertIsNone(self.app.io)
-
-    def test_bad_text_is_refused_with_the_reason(self):
-        for text in ('', '   ', 'abc', 'nan', 'inf', '30,0', '30 V'):
-            with self.assertRaises(ValueError, msg=text):
-                self.app.type_reading(PTS[1], text)
-        self.assertFalse(self.app.found)
-
-    def test_needs_an_asset_and_no_run_in_progress(self):
-        self.app.asset.set('')
-        with self.assertRaises(RuntimeError):
-            self.app.type_reading(PTS[1], '30')
-        self.app.asset.set('A-365')
-        self.app.busy = True
-        try:
-            with self.assertRaises(RuntimeError):
-                self.app.type_reading(PTS[1], '30')
-        finally:
-            self.app.busy = False
-
-    def test_as_left_goes_through_the_same_path(self):
-        import datamode
-        self.app.type_reading(PTS[18], '893')
-        self.app.set_data_mode(datamode.LEFT)
-        self.app.type_reading(PTS[18], '900')
-        self.assertEqual((self.app.left['2-18']['result'], self.app.left['2-18']['data']), ('PASS', 'As Left'))
-        self.assertEqual(self.app.found['2-18']['result'], 'FAIL')
 
 
 if __name__ == '__main__':

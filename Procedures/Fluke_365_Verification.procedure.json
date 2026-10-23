@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "id": "Fluke_365_Verification",
- "name": "Fluke 365 Clamp Meter Manual Calibration",
+ "name": "Fluke 365 Clamp Meter Performance Verification",
  "manufacturer": "Fluke",
  "model": "365",
  "category": "Clamp Meter",
@@ -9,11 +9,8 @@
  "order": 34,
  "description": "Standalone calibration procedure",
  "launcher": "Procedures/Fluke_365_Verification.py",
- "kind": "manual",
  "engine": [
-  "fluke365_verification.py",
-  "handheld_dmm.py",
-  "manual_grid.py"
+  "handheld_dmm.py"
  ],
  "drivers": [
   "fluke_5560a"
@@ -24,9 +21,7 @@
  "fingerprint": {
   "code": [
    "Procedures/Fluke_365_Verification.py",
-   "fluke365_verification.py",
    "handheld_dmm.py",
-   "manual_grid.py",
    "hookups.py#fluke365",
    "drivers/base.py",
    "drivers/transport.py",
@@ -46,7 +41,6 @@
  "own_files": [
   "Procedures/Fluke_365_Verification.py",
   "Procedures/Fluke_365_Verification.procedure.json",
-  "fluke365_verification.py",
   "specs/fluke_365_pv.json",
   "specs/build_fluke_365_spec.py",
   "diagrams/README_fluke365.txt",

@@ -53,7 +53,9 @@ NOTE_OHMS = 'Table 2 does not say whether the limits include test lead resistanc
 NOTE_OHM_ZERO = ('At 0 ohm the whole 0.3 ohm upper limit is in play, so use the shortest leads; the lower limit is printed 0 (the meter cannot read below zero), '
                  'the specification would allow -0.5 ohm.')
 NOTE_COIL = ('The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: {applied} A in, {nominal} A on the meter. '
-             'The limits are the meter readings (Table 2, printed p. 8).')
+             'The limits are the meter readings (Table 2, printed p. 8). '
+             'Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current ({applied} A), as it is, NOT multiplied by 20 and without the coil; '
+             'TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 2.')
 
 # (section, switch key, range, kind, applied (calibrator output, base units), frequency (Hz or None), display unit, nominal (what the meter shows, display unit),
 #  printed low, printed high (exactly as printed), accuracy key, resolution of the range)
@@ -164,7 +166,6 @@ def build_steps():
         notes = []
         if coil:
             notes.append(NOTE_COIL.format(applied=f'{D(applied).normalize():f}', nominal=f'{D(nominal).normalize():f}'))
-            step['no_uncertainty'] = True            # the coil's own uncertainty is not in the suite (UNVERIFIED): no Uncertainty / TAR / TUR is printed rather than the calibrator's alone
             step['report_desc'] = f'{rng[:-2]} A, {D(applied).normalize():f} A x {COIL_TURNS} turns'          # short: the report's Description cell wraps beyond ~30 characters
             step['settle'] = 5
             # the line the technician sees for the point (handheld_dmm.describe reads dsb_desc when present; procmods_pointdef lists it as the point's description)
@@ -230,7 +231,7 @@ SOURCE_NOTE = (
     'calibrator compliance with the coil, 5522A LCOMP). The adjustment procedure (Tables 3 and 4, printed pp. 8-10) is not part of this procedure.')
 REPORT_NOTE = (
     'Limits are those of the manufacturer\'s Table 2 (Fluke 365 Calibration Manual, printed pp. 7-8), unchanged. The current points are driven through a 20-turn coil '
-    '(calibrator current x 20 = the reading shown); no uncertainty is printed for them.')
+    '(calibrator current x 20 = the reading shown). Their Uncertainty is the calibrator\'s current uncertainty at the actual output current (point / 20), unscaled and without the coil (owner-chosen convention); TAR / TUR compare it with the meter-reading tolerance.')
 
 
 def build_spec():
@@ -239,7 +240,7 @@ def build_spec():
         raise SystemExit('The printed limits are looser than the published specification:\n  ' + '\n  '.join(problems))
     return dict(
         schema=3, kind='manual-reading',
-        options=dict(hookup_meter='fluke365', hv_threshold_v=30, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
+        options=dict(hookup_meter='fluke365', hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
         source=dict(document=DOCUMENT,
                     pages='5-8 (printed): specifications pp. 5-6, Table 2 pp. 7-8 (PDF pages 13-16); safety p. 2-3; Table 3 (equipment) p. 8',
                     cite='Fluke 365 Calibration Manual, Table 2 Performance Tests, printed pp. 7-8; limits unchanged, four rows flagged against the published specification (see Source)',
