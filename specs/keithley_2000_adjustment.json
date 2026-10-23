@@ -1,0 +1,724 @@
+{
+ "schema": 1,
+ "kind": "bench-dmm-adjustment",
+ "instrument": "Keithley Model 2000",
+ "source": "Keithley Model 2000 Multimeter Calibration Manual (2000-905-01 Rev. F)",
+ "method": "remote :CAL:PROT commands (SCPI command calibration, pp. 2-14 to 2-19)",
+ "general": [
+  "This procedure changes the calibration constants of the Keithley Model 2000. The manual: \"intended only for qualified service personnel\" (p. 2-2). Complete the performance verification (As Found) first.",
+  "Environment: 23 C +/- 5 C, relative humidity below 80 % (p. 2-3). Warm-up: at least ONE hour before calibration; allow the test equipment its own warm-up (p. 2-3); one extra hour if the unit was outside the stated temperature range.",
+  "INPUTS switch on FRONT (button not pressed in) for every step (p. 2-15). The calibrator must be in OPERATE before each step, and the source signal must settle first (p. 2-4). No scanner or switching equipment between the calibrator and the 2000 (p. 2-4).",
+  "Select the DC volts function and the SLOW rate (integration time 10 PLC) before starting (p. 2-14, step 3).",
+  "Common-mode voltage (INPUT LO to chassis) must not exceed 500 V peak (p. 2-4 warning).",
+  "Calibration constants are only TEMPORARY until :CAL:PROT:SAVE is sent (p. 2-19, p. 3-8). Nothing is stored before that command."
+ ],
+ "equipment": {
+  "calibrator": "Fluke 5700A Calibrator (Table 2-1)",
+  "shorting_plug": "Keithley 8610 low-thermal shorting plug (Table 2-1, Figure 2-1)",
+  "footnote": "*1 kHz specifications. 10 mV and 700 V points require 1 kHz only. All calibration specifications are 90-day, 23 C +/- 5 C specifications (Table 2-1 footnote).",
+  "ppm": {
+   "DCV": [
+    [
+     "10",
+     "V",
+     "",
+     5
+    ],
+    [
+     "100",
+     "V",
+     "",
+     7
+    ]
+   ],
+   "ACV": [
+    [
+     "10",
+     "mV",
+     "1 kHz",
+     710
+    ],
+    [
+     "100",
+     "mV",
+     "1 kHz, 50 kHz",
+     200
+    ],
+    [
+     "1",
+     "V",
+     "1 kHz, 50 kHz",
+     82
+    ],
+    [
+     "10",
+     "V",
+     "1 kHz, 50 kHz",
+     82
+    ],
+    [
+     "100",
+     "V",
+     "1 kHz, 50 kHz",
+     90
+    ],
+    [
+     "700",
+     "V",
+     "1 kHz",
+     85
+    ]
+   ],
+   "DCI": [
+    [
+     "10",
+     "mA",
+     "",
+     60
+    ],
+    [
+     "100",
+     "mA",
+     "",
+     70
+    ],
+    [
+     "1",
+     "A",
+     "",
+     110
+    ]
+   ],
+   "ACI": [
+    [
+     "100",
+     "mA",
+     "1 kHz",
+     190
+    ],
+    [
+     "1",
+     "A",
+     "1 kHz",
+     690
+    ],
+    [
+     "2",
+     "A",
+     "1 kHz",
+     670
+    ]
+   ],
+   "OHM": [
+    [
+     "1",
+     "kohm",
+     "",
+     12
+    ],
+    [
+     "10",
+     "kohm",
+     "",
+     11
+    ],
+    [
+     "100",
+     "kohm",
+     "",
+     13
+    ],
+    [
+     "1",
+     "Mohm",
+     "",
+     18
+    ],
+    [
+     "10",
+     "Mohm",
+     "",
+     37
+    ]
+   ]
+  }
+ },
+ "firmware": {
+  "note": "Table 3-1 note, p. 3-4: STEP10 to STEP13 differ between firmware A19 and A20. A19 and earlier have no 10 Mohm step; their steps 10-12 are the 10 mA, 100 mA and 1 A steps (A20 and later: 11-13); there is no step 13 on A19 and earlier. AC steps are the same on both.",
+  "idn": "Keithley Model 2000 User Manual (2000-900 Rev. J) (common command *IDN?, PDF p. 122): *IDN?: KEITHLEY INSTRUMENTS INC., MODEL 2000, xxxxxxx, yyyyy/zzzzz (yyyyy = firmware revision of the digital board ROM, zzzzz = display board ROM); the revision text format (e.g. A19) is UNVERIFIED on a real meter.",
+  "boundary": "A20"
+ },
+ "sequence": [
+  {
+   "id": "prepare",
+   "text": "DCV function, SLOW rate (10 PLC), INPUTS front (p. 2-14 steps 3-4)"
+  },
+  {
+   "id": "code",
+   "text": ":CAL:PROT:CODE <code> sent ONCE (p. 2-14 step 5; p. 3-6: \"sent only once ... Do not send :CODE before each calibration step\")"
+  },
+  {
+   "id": "init",
+   "text": ":CAL:PROT:INIT sent ONCE (p. 2-14 step 6; p. 3-7)"
+  },
+  {
+   "id": "steps",
+   "text": "DC then AC steps in the order of Tables 2-8 to 2-12 (a complete calibration; DC only or AC only are allowed, p. 2-14 note); wait for each step to finish (p. 3-20, *OPC?)"
+  },
+  {
+   "id": "dates",
+   "text": ":CAL:PROT:DATE and :CAL:PROT:NDUE (p. 2-19); errors +438 / +439 if they are not set (Table B-1)"
+  },
+  {
+   "id": "save",
+   "text": ":CAL:PROT:SAVE (p. 2-19, p. 3-8): stores the constants in EEROM; \"only temporary unless :SAVE is sent\""
+  },
+  {
+   "id": "lock",
+   "text": ":CAL:PROT:LOCK (p. 2-19, p. 3-7); :CAL:PROT:LOCK? 0 = locked, 1 = unlocked"
+  }
+ ],
+ "steps": [
+  {
+   "id": "D01",
+   "scope": "DC",
+   "group": "SHORT",
+   "title": "Front terminal short circuit",
+   "a20": 1,
+   "a19": 1,
+   "source": null,
+   "param": null,
+   "page": "2-15, 3-11",
+   "thermal_wait": true,
+   "note": "Keithley 8610 low-thermal short on the front INPUT HI / LO and SENSE jacks (Figure 2-1); wait at least three minutes for thermal equilibrium before the command (p. 2-15)."
+  },
+  {
+   "id": "D02",
+   "scope": "DC",
+   "group": "OPEN",
+   "title": "Front terminal open circuit",
+   "a20": 2,
+   "a19": 2,
+   "source": null,
+   "param": null,
+   "page": "2-15, 3-11",
+   "note": "Remove the short; disconnect all cables and accessories from the front input jacks (p. 3-11)."
+  },
+  {
+   "id": "D03",
+   "scope": "DC",
+   "group": "DCV",
+   "title": "+10 V DC",
+   "a20": 3,
+   "a19": 3,
+   "source": {
+    "kind": "DCV",
+    "value": "10",
+    "unit": "V"
+   },
+   "param": {
+    "nominal": "10",
+    "lo": "9",
+    "hi": "11",
+    "unit": "V"
+   },
+   "page": "2-16, 3-11",
+   "thermal_wait": true,
+   "note": "Connect the calibrator (Figure 2-2) and wait three minutes for thermal equilibrium (p. 2-15); calibrator external sense OFF (p. 2-9)."
+  },
+  {
+   "id": "D04",
+   "scope": "DC",
+   "group": "DCV",
+   "title": "-10 V DC",
+   "a20": 4,
+   "a19": 4,
+   "source": {
+    "kind": "DCV",
+    "value": "-10",
+    "unit": "V"
+   },
+   "param": {
+    "nominal": "-10",
+    "lo": "-11",
+    "hi": "-9",
+    "unit": "V"
+   },
+   "page": "2-16, 3-12"
+  },
+  {
+   "id": "D05",
+   "scope": "DC",
+   "group": "DCV",
+   "title": "+100 V DC",
+   "a20": 5,
+   "a19": 5,
+   "source": {
+    "kind": "DCV",
+    "value": "100",
+    "unit": "V"
+   },
+   "param": {
+    "nominal": "100",
+    "lo": "90",
+    "hi": "110",
+    "unit": "V"
+   },
+   "page": "2-16, 3-12",
+   "hv": true
+  },
+  {
+   "id": "D06",
+   "scope": "DC",
+   "group": "OHM4",
+   "title": "1 kohm 4-wire",
+   "a20": 6,
+   "a19": 6,
+   "source": {
+    "kind": "OHM",
+    "value": "1000",
+    "unit": "ohm"
+   },
+   "param": {
+    "nominal": "1000",
+    "lo": "900",
+    "hi": "1100",
+    "unit": "ohm"
+   },
+   "page": "2-16, 3-12"
+  },
+  {
+   "id": "D07",
+   "scope": "DC",
+   "group": "OHM4",
+   "title": "10 kohm 4-wire",
+   "a20": 7,
+   "a19": 7,
+   "source": {
+    "kind": "OHM",
+    "value": "10000",
+    "unit": "ohm"
+   },
+   "param": {
+    "nominal": "10000",
+    "lo": "9000",
+    "hi": "11000",
+    "unit": "ohm"
+   },
+   "page": "2-16, 3-13"
+  },
+  {
+   "id": "D08",
+   "scope": "DC",
+   "group": "OHM4",
+   "title": "100 kohm 4-wire",
+   "a20": 8,
+   "a19": 8,
+   "source": {
+    "kind": "OHM",
+    "value": "100000",
+    "unit": "ohm"
+   },
+   "param": {
+    "nominal": "100000",
+    "lo": "90000",
+    "hi": "110000",
+    "unit": "ohm"
+   },
+   "page": "2-16, 3-13"
+  },
+  {
+   "id": "D09",
+   "scope": "DC",
+   "group": "OHM4",
+   "title": "1 Mohm 4-wire",
+   "a20": 9,
+   "a19": 9,
+   "source": {
+    "kind": "OHM",
+    "value": "1000000",
+    "unit": "ohm"
+   },
+   "param": {
+    "nominal": "1000000",
+    "lo": "900000",
+    "hi": "1100000",
+    "unit": "ohm"
+   },
+   "page": "2-16, 3-13",
+   "note": "The 5522A cannot compensate (4-wire) above 110 kohm (ZCOMP, 5522A Operators Manual p. 6-49); how the sense leads are used at 1 Mohm is UNVERIFIED."
+  },
+  {
+   "id": "D10",
+   "scope": "DC",
+   "group": "OHM4",
+   "title": "10 Mohm",
+   "a20": 10,
+   "a19": null,
+   "source": {
+    "kind": "OHM",
+    "value": "10000000",
+    "unit": "ohm"
+   },
+   "param": {
+    "nominal": "10000000",
+    "lo": "9000000",
+    "hi": "11000000",
+    "unit": "ohm"
+   },
+   "page": "2-16, 3-14",
+   "flags": [
+    "MISPRINT Table 3-2 (p. 3-10) prints the parameter limits as 9E-6 to 11E-6; p. 3-14 and Table 2-9 say 9E6 to 11E6 (used)",
+    "FIRMWARE exists only on A20 and later (Table 3-1 note, p. 3-4)"
+   ],
+   "note": "Firmware A20 and later only. Same unverified sense-lead remark as the 1 Mohm step."
+  },
+  {
+   "id": "D11",
+   "scope": "DC",
+   "group": "DCI",
+   "title": "10 mA DC",
+   "a20": 11,
+   "a19": 10,
+   "source": {
+    "kind": "DCI",
+    "value": "0.01",
+    "unit": "A"
+   },
+   "param": {
+    "nominal": "0.01",
+    "lo": "0.009",
+    "hi": "0.011",
+    "unit": "A"
+   },
+   "page": "2-17, 3-14",
+   "note": "Connect the calibrator to the AMPS and INPUT LO jacks (Figure 2-3); calibrator set for normal current output."
+  },
+  {
+   "id": "D12",
+   "scope": "DC",
+   "group": "DCI",
+   "title": "100 mA DC",
+   "a20": 12,
+   "a19": 11,
+   "source": {
+    "kind": "DCI",
+    "value": "0.1",
+    "unit": "A"
+   },
+   "param": {
+    "nominal": "0.1",
+    "lo": "0.09",
+    "hi": "0.11",
+    "unit": "A"
+   },
+   "page": "2-17, 3-14"
+  },
+  {
+   "id": "D13",
+   "scope": "DC",
+   "group": "DCI",
+   "title": "1 A DC",
+   "a20": 13,
+   "a19": 12,
+   "source": {
+    "kind": "DCI",
+    "value": "1",
+    "unit": "A"
+   },
+   "param": {
+    "nominal": "1",
+    "lo": "0.9",
+    "hi": "1.1",
+    "unit": "A"
+   },
+   "page": "2-17, 3-15"
+  },
+  {
+   "id": "A01",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "10 mV AC at 1 kHz",
+   "a20": 1,
+   "a19": 1,
+   "source": {
+    "kind": "ACV",
+    "value": "0.01",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-18, 3-17"
+  },
+  {
+   "id": "A02",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "100 mV AC at 1 kHz",
+   "a20": 2,
+   "a19": 2,
+   "source": {
+    "kind": "ACV",
+    "value": "0.1",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-18, 3-17"
+  },
+  {
+   "id": "A03",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "100 mV AC at 50 kHz",
+   "a20": 3,
+   "a19": 3,
+   "source": {
+    "kind": "ACV",
+    "value": "0.1",
+    "unit": "V",
+    "frequency": "50000"
+   },
+   "param": null,
+   "page": "2-18, 3-17"
+  },
+  {
+   "id": "A04",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "1 V AC at 1 kHz",
+   "a20": 4,
+   "a19": 4,
+   "source": {
+    "kind": "ACV",
+    "value": "1",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-18, 3-17"
+  },
+  {
+   "id": "A05",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "1 V AC at 50 kHz",
+   "a20": 5,
+   "a19": 5,
+   "source": {
+    "kind": "ACV",
+    "value": "1",
+    "unit": "V",
+    "frequency": "50000"
+   },
+   "param": null,
+   "page": "2-18, 3-17"
+  },
+  {
+   "id": "A06",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "10 V AC at 1 kHz",
+   "a20": 6,
+   "a19": 6,
+   "source": {
+    "kind": "ACV",
+    "value": "10",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-18, 3-17"
+  },
+  {
+   "id": "A07",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "10 V AC at 50 kHz",
+   "a20": 7,
+   "a19": 7,
+   "source": {
+    "kind": "ACV",
+    "value": "10",
+    "unit": "V",
+    "frequency": "50000"
+   },
+   "param": null,
+   "page": "2-18, 3-17"
+  },
+  {
+   "id": "A08",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "100 V AC at 1 kHz",
+   "a20": 8,
+   "a19": 8,
+   "source": {
+    "kind": "ACV",
+    "value": "100",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-18, 3-17",
+   "hv": true
+  },
+  {
+   "id": "A09",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "100 V AC at 50 kHz",
+   "a20": 9,
+   "a19": 9,
+   "source": {
+    "kind": "ACV",
+    "value": "100",
+    "unit": "V",
+    "frequency": "50000"
+   },
+   "param": null,
+   "page": "2-18, 3-17",
+   "hv": true
+  },
+  {
+   "id": "A10",
+   "scope": "AC",
+   "group": "ACV",
+   "title": "700 V AC at 1 kHz",
+   "a20": 10,
+   "a19": 10,
+   "source": {
+    "kind": "ACV",
+    "value": "700",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-18, 3-5, 3-17",
+   "hv": true,
+   "flags": [
+    "MISPRINT Table 3-3 (p. 3-16) and p. 3-17 label this step \"100V AC at 1kHz\"; Table 3-1, Table 2-6, Table 2-11 and Program C-1 say 700 V at 1 kHz (used)"
+   ]
+  },
+  {
+   "id": "A11",
+   "scope": "AC",
+   "group": "ACI",
+   "title": "100 mA AC at 1 kHz",
+   "a20": 11,
+   "a19": 11,
+   "source": {
+    "kind": "ACI",
+    "value": "0.1",
+    "unit": "A",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-19, 3-17",
+   "flags": [
+    "MISPRINT p. 3-17 labels this step \"10mA AC\"; Table 3-1, Table 2-7, Table 2-12 and Program C-1 say 100 mA at 1 kHz (used)"
+   ]
+  },
+  {
+   "id": "A12",
+   "scope": "AC",
+   "group": "ACI",
+   "title": "1 A AC at 1 kHz",
+   "a20": 12,
+   "a19": 12,
+   "source": {
+    "kind": "ACI",
+    "value": "1",
+    "unit": "A",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-19, 3-17"
+  },
+  {
+   "id": "A13",
+   "scope": "AC",
+   "group": "ACI",
+   "title": "2 A AC at 1 kHz",
+   "a20": 13,
+   "a19": 13,
+   "source": {
+    "kind": "ACI",
+    "value": "2",
+    "unit": "A",
+    "frequency": "1000"
+   },
+   "param": null,
+   "page": "2-19, 3-17"
+  }
+ ],
+ "errors": {
+  "400": "10 vdc zero error",
+  "401": "100 vdc zero error",
+  "402": "10 vdc full scale error",
+  "403": "-10 vdc full scale error",
+  "404": "100 vdc full scale error",
+  "405": "-100 vdc full scale error",
+  "406": "1k 2-w zero error",
+  "407": "10k 2-w zero error",
+  "408": "100k 2-w zero error",
+  "409": "10M 2-w zero error",
+  "410": "10M 2-w full scale error",
+  "411": "10M 2-w open error",
+  "412": "1k 4-w zero error",
+  "413": "10k 4-w zero error",
+  "414": "100k 4-w zero error",
+  "415": "10M 4-w sense lo zero error",
+  "416": "1k 4-w full scale error",
+  "417": "10k 4-w full scale error",
+  "418": "100k 4-w full scale error",
+  "419": "1M 4-w full scale error",
+  "420": "10M 4-w full scale error",
+  "421": "10m adc zero error",
+  "422": "100m adc zero error",
+  "423": "10m adc full scale error",
+  "424": "100m adc full scale error",
+  "425": "1 adc full scale error",
+  "438": "Date of calibration not set",
+  "439": "Next date of calibration not set",
+  "450": "100m vac dac error",
+  "451": "1 vac dac error",
+  "452": "10 vac dac error",
+  "453": "100 vac dac error",
+  "454": "100m vac zero error",
+  "455": "100m vac full scale error",
+  "456": "1 vac zero error",
+  "457": "1 vac full scale error",
+  "458": "1 vac noise error",
+  "459": "10 vac zero error",
+  "460": "10 vac full scale error",
+  "461": "10 vac noise error",
+  "462": "100 vac zero error",
+  "463": "100 vac full scale error",
+  "464": "750 vac zero error",
+  "465": "750 vac full scale error",
+  "466": "750 vac noise error",
+  "467": "Post filter offset error",
+  "468": "1 aac zero error",
+  "469": "1 aac full scale error",
+  "470": "3 aac zero error",
+  "471": "3 aac full scale error",
+  "472": "Input time constant error",
+  "473": "Frequency gain error",
+  "499": "1V, 10Hz frequency error",
+  "500": "Calibration data invalid",
+  "513": "AC calibration data lost",
+  "514": "DC calibration data lost",
+  "515": "Calibration dates lost",
+  "610": "Questionable Calibration"
+ },
+ "not_built": [
+  "Manufacturing calibration (:CAL:PROT:DC:STEP0, AC:STEP14, AC:STEP15; OPEN key at power-up; function generator / synthesizer): factory or repair only (pp. 2-20 to 2-25)",
+  "Front panel (keystroke) calibration: the remote method is provided by the manual and is used instead (pp. 2-7 to 2-13)"
+ ],
+ "times": {
+  "thermal_wait_s": 180,
+  "nplc_slow": 10,
+  "date_years": 1
+ }
+}

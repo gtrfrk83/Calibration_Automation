@@ -149,7 +149,21 @@ Procedures/Keithley_2000_Verification.py
                   the printed 1-year limits and writes the 'Calibration Data' report. Warm-up (1 hour) and a hook-up dialog (pictures per
                   diagrams/README_k2000.txt) are confirmed before the run. Engine: keithley2000_verification.py; driver: drivers/keithley_2000.py;
                   spec builder: specs/build_k2000_spec.py. Demo (virtual instruments): python Procedures/Keithley_2000_Verification.py --demo
-                  Not included: the adjustment procedure.
+                  Not included: the adjustment (see Procedures/Keithley_2000_Adjustment.py).
+
+Procedures/Keithley_2000_Adjustment.py
+                  Guided ADJUSTMENT (calibration) of the Keithley Model 2000 by the remote :CAL:PROT commands of the Calibration Manual (2000-905-01
+                  Rev. F, pp. 2-14 to 2-19): 13 DC steps (front short and open, +10 V, -10 V, +100 V, 4-wire 1 kohm to 10 Mohm, 10 mA to 1 A) and 13 AC steps
+                  (10 mV to 700 V at 1 kHz and 50 kHz, 100 mA to 2 A) in the manual's order, with a Fluke 5560A or 5522A as the source (the manual's
+                  Table 2-1 ratios are shown in the window: the 5522A meets none, the 5560A four of the 24). Category 'Digital Multimeter Adjustment',
+                  sidecar kind 'adjustment' (Adjustment tab). THIS CHANGES THE INSTRUMENT CALIBRATION: both instruments are reset first, the operator
+                  confirms warm-up, the As Found verification and authority, then types the calibration code (asked at run time, sent once, NEVER stored,
+                  logged or written to the audit record). Every step asks for the hook-up, programs and reads back the calibrator, waits to settle, asks again
+                  and sends the command ONCE (never repeated automatically); the calibrator goes to standby after each step. Nothing is stored in the
+                  2000 until the dates are set and 'SAVE 2000' is typed; an abort before that leaves the stored constants unchanged. Audit record: new
+                  tables in lab_registry.sqlite3 (a demo run writes nothing). Not built: manufacturing calibration, the front-panel method, a PDF record.
+                  Engine: keithley2000_adjustment.py + adjustment_audit.py; driver: drivers/keithley_2000_cal.py; spec: specs/keithley_2000_adjustment.json
+                  (specs/build_k2000_adjustment_spec.py). Demo (simulated meter, nothing saved): python Procedures/Keithley_2000_Adjustment.py --demo
 
 Procedures/Agilent_34410A_Verification.py
                   Two-way verification of the Agilent / Keysight 34410A 6.5-digit multimeter from the 34410A/11A/L4411A Service Guide, chapter 3

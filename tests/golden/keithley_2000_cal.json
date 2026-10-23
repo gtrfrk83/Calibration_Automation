@@ -1,0 +1,927 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Keithley2000Cal.connect[A20]",
+   "log": [
+    "2000|>>|*CLS",
+    "2000|>>|*IDN?",
+    "2000|<<|KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A20  /A02"
+   ],
+   "method": "Keithley2000Cal.connect",
+   "result": "returned <Keithley2000Cal>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A20  /A02"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.connect[A19]",
+   "log": [
+    "2000|>>|*CLS",
+    "2000|>>|*IDN?",
+    "2000|<<|KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02"
+   ],
+   "method": "Keithley2000Cal.connect",
+   "result": "returned <Keithley2000Cal>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02"
+    ]
+   ]
+  },
+  {
+   "call": "'A19-'",
+   "case": "Keithley2000Cal.set_firmware_class[A19-]",
+   "log": [],
+   "method": "Keithley2000Cal.set_firmware_class",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "'A5'",
+   "case": "Keithley2000Cal.set_firmware_class[bad]",
+   "log": [],
+   "method": "Keithley2000Cal.set_firmware_class",
+   "result": "raised InstrumentError: firmware class must be A20+ or A19-",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.lock_state[locked]",
+   "log": [
+    "2000|>>|:CAL:PROT:LOCK?",
+    "2000|<<|0"
+   ],
+   "method": "Keithley2000Cal.lock_state",
+   "result": "returned False",
+   "wire": [
+    [
+     "Q",
+     ":CAL:PROT:LOCK?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.initiate[before unlock]",
+   "log": [],
+   "method": "Keithley2000Cal.initiate",
+   "result": "raised InstrumentError: Calibration is locked: send the code first.",
+   "wire": []
+  },
+  {
+   "call": "{'a19': 1, 'a20': 1, 'group': 'SHORT', 'id': 'D01', 'note': 'Keithley 8610 low-thermal short on the front INPUT HI / LO and SENSE jacks (Figure 2-1); wait at least three minutes for thermal equilibrium before the command (p. 2-15).', 'page': '2-15, 3-11', 'param': None, 'scope': 'DC', 'source': None, 'thermal_wait': True, 'title': 'Front terminal short circuit'}",
+   "case": "Keithley2000Cal.calibrate_step[before unlock]",
+   "log": [],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "raised InstrumentError: Calibration is not unlocked and initiated.",
+   "wire": []
+  },
+  {
+   "call": "'NOT A CODE!'",
+   "case": "Keithley2000Cal.unlock[bad shape]",
+   "log": [],
+   "method": "Keithley2000Cal.unlock",
+   "result": "raised InstrumentError: The calibration code is 1 to 8 letters and digits (p. 3-6).",
+   "wire": []
+  },
+  {
+   "call": "'<secret>'",
+   "case": "Keithley2000Cal.unlock",
+   "log": [
+    "2000|>>|:CAL:PROT:CODE '********'",
+    "2000|>>|:CAL:PROT:LOCK?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.unlock",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:CODE <code masked, 8 chars>"
+    ],
+    [
+     "Q",
+     ":CAL:PROT:LOCK?",
+     "1"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'<secret>'",
+   "case": "Keithley2000Cal.unlock[second code refused]",
+   "log": [],
+   "method": "Keithley2000Cal.unlock",
+   "result": "raised InstrumentError: The calibration code was already sent in this session (the manual: send :CODE only once, p. 3-6). Disconnect and start again to try another code.",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.lock_state[unlocked]",
+   "log": [
+    "2000|>>|:CAL:PROT:LOCK?",
+    "2000|<<|1"
+   ],
+   "method": "Keithley2000Cal.lock_state",
+   "result": "returned True",
+   "wire": [
+    [
+     "Q",
+     ":CAL:PROT:LOCK?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.initiate",
+   "log": [
+    "2000|>>|:CAL:PROT:INIT",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.initiate",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:INIT"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.initiate[twice]",
+   "log": [],
+   "method": "Keithley2000Cal.initiate",
+   "result": "raised InstrumentError: :CAL:PROT:INIT was already sent in this session (the manual: once only, p. 3-7).",
+   "wire": []
+  },
+  {
+   "call": "{'a19': 1, 'a20': 1, 'group': 'SHORT', 'id': 'D01', 'note': 'Keithley 8610 low-thermal short on the front INPUT HI / LO and SENSE jacks (Figure 2-1); wait at least three minutes for thermal equilibrium before the command (p. 2-15).', 'page': '2-15, 3-11', 'param': None, 'scope': 'DC', 'source': None, 'thermal_wait': True, 'title': 'Front terminal short circuit'}",
+   "case": "Keithley2000Cal.calibrate_step[D01 short]",
+   "log": [
+    "2000|>>|:CAL:PROT:DC:STEP1",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "returned 1",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:DC:STEP1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     120.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'a19': 3, 'a20': 3, 'group': 'DCV', 'id': 'D03', 'note': 'Connect the calibrator (Figure 2-2) and wait three minutes for thermal equilibrium (p. 2-15); calibrator external sense OFF (p. 2-9).', 'page': '2-16, 3-11', 'param': {'hi': '11', 'lo': '9', 'nominal': '10', 'unit': 'V'}, 'scope': 'DC', 'source': {'kind': 'DCV', 'unit': 'V', 'value': '10'}, 'thermal_wait': True, 'title': '+10 V DC'}, 10.0",
+   "case": "Keithley2000Cal.calibrate_step[D03 +10 V]",
+   "log": [
+    "2000|>>|:CAL:PROT:DC:STEP3 10",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "returned 3",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:DC:STEP3 10"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     120.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'a19': 3, 'a20': 3, 'group': 'DCV', 'id': 'D03', 'note': 'Connect the calibrator (Figure 2-2) and wait three minutes for thermal equilibrium (p. 2-15); calibrator external sense OFF (p. 2-9).', 'page': '2-16, 3-11', 'param': {'hi': '11', 'lo': '9', 'nominal': '10', 'unit': 'V'}, 'scope': 'DC', 'source': {'kind': 'DCV', 'unit': 'V', 'value': '10'}, 'thermal_wait': True, 'title': '+10 V DC'}",
+   "case": "Keithley2000Cal.calibrate_step[D03 parameter missing]",
+   "log": [],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "raised InstrumentError: +10 V DC: this step needs the calibrator value as its parameter.",
+   "wire": []
+  },
+  {
+   "call": "{'a19': 3, 'a20': 3, 'group': 'DCV', 'id': 'D03', 'note': 'Connect the calibrator (Figure 2-2) and wait three minutes for thermal equilibrium (p. 2-15); calibrator external sense OFF (p. 2-9).', 'page': '2-16, 3-11', 'param': {'hi': '11', 'lo': '9', 'nominal': '10', 'unit': 'V'}, 'scope': 'DC', 'source': {'kind': 'DCV', 'unit': 'V', 'value': '10'}, 'thermal_wait': True, 'title': '+10 V DC'}, 12.0",
+   "case": "Keithley2000Cal.calibrate_step[D03 parameter out of range]",
+   "log": [],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "raised InstrumentError: +10 V DC: the parameter 12 is outside the range the manual allows (9 to 11).",
+   "wire": []
+  },
+  {
+   "call": "{'a19': 1, 'a20': 1, 'group': 'ACV', 'id': 'A01', 'page': '2-18, 3-17', 'param': None, 'scope': 'AC', 'source': {'frequency': '1000', 'kind': 'ACV', 'unit': 'V', 'value': '0.01'}, 'title': '10 mV AC at 1 kHz'}",
+   "case": "Keithley2000Cal.calibrate_step[A01 10 mV ac]",
+   "log": [
+    "2000|>>|:CAL:PROT:AC:STEP1",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "returned 1",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:AC:STEP1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     120.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'a19': 1, 'a20': 1, 'group': 'ACV', 'id': 'A01', 'page': '2-18, 3-17', 'param': None, 'scope': 'AC', 'source': {'frequency': '1000', 'kind': 'ACV', 'unit': 'V', 'value': '0.01'}, 'title': '10 mV AC at 1 kHz'}, 1.0",
+   "case": "Keithley2000Cal.calibrate_step[A01 parameter refused]",
+   "log": [],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "raised InstrumentError: AC calibration steps take no parameter.",
+   "wire": []
+  },
+  {
+   "call": "{'a19': 4, 'a20': 4, 'group': 'DCV', 'id': 'D04', 'page': '2-16, 3-12', 'param': {'hi': '-9', 'lo': '-11', 'nominal': '-10', 'unit': 'V'}, 'scope': 'DC', 'source': {'kind': 'DCV', 'unit': 'V', 'value': '-10'}, 'title': '-10 V DC'}, -10.0",
+   "case": "Keithley2000Cal.calibrate_step[D04 error +403]",
+   "log": [
+    "2000|>>|:CAL:PROT:DC:STEP4 -10",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|+403,\"-10 vdc full scale error\"",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "raised CalibrationError: The 2000 reported an error while calibrating -10 V DC: +403,\"-10 vdc full scale error\"",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:DC:STEP4 -10"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     120.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+403,\"-10 vdc full scale error\""
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.drain_errors[clean]",
+   "log": [
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.drain_errors",
+   "result": "returned []",
+   "wire": [
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.drain_errors[two errors]",
+   "log": [
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|+402,\"10 vdc full scale error\"",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|+411,\"Ohms 1k error\"",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.drain_errors",
+   "result": "returned ['+402,\"10 vdc full scale error\"', '+411,\"Ohms 1k error\"']",
+   "wire": [
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+402,\"10 vdc full scale error\""
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+411,\"Ohms 1k error\""
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Keithley2000Cal.require_no_errors[error]",
+   "log": [
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|+402,\"10 vdc full scale error\"",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.require_no_errors",
+   "result": "raised CalibrationError: The 2000 reported an error while ctx: +402,\"10 vdc full scale error\"",
+   "wire": [
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+402,\"10 vdc full scale error\""
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Keithley2000Cal.require_no_errors[ok]",
+   "log": [
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.require_no_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.wait_complete",
+   "log": [
+    "2000|>>|*OPC?",
+    "2000|<<|1"
+   ],
+   "method": "Keithley2000Cal.wait_complete",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     120.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.wait_complete[no answer]",
+   "log": [
+    "2000|>>|*OPC?"
+   ],
+   "method": "Keithley2000Cal.wait_complete",
+   "result": "raised StepIndeterminate: The 2000 did not confirm completion (*OPC? gave no answer within 120 s): simulated read timed out (no pending reply)",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     120.0
+    ],
+    [
+     "Q!",
+     "*OPC?",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ]
+   ]
+  },
+  {
+   "call": "{'a19': None, 'a20': 10, 'flags': ['MISPRINT Table 3-2 (p. 3-10) prints the parameter limits as 9E-6 to 11E-6; p. 3-14 and Table 2-9 say 9E6 to 11E6 (used)', 'FIRMWARE exists only on A20 and later (Table 3-1 note, p. 3-4)'], 'group': 'OHM4', 'id': 'D10', 'note': 'Firmware A20 and later only. Same unverified sense-lead remark as the 1 Mohm step.', 'page': '2-16, 3-14', 'param': {'hi': '11000000', 'lo': '9000000', 'nominal': '10000000', 'unit': 'ohm'}, 'scope': 'DC', 'source': {'kind': 'OHM', 'unit': 'ohm', 'value': '10000000'}, 'title': '10 Mohm'}, 10000000.0",
+   "case": "Keithley2000Cal.calibrate_step[D10 absent on A19]",
+   "log": [],
+   "method": "Keithley2000Cal.calibrate_step",
+   "result": "raised InstrumentError: 10 Mohm: this step does not exist on firmware A19- (Table 3-1 note, p. 3-4).",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.count",
+   "log": [
+    "2000|>>|:CAL:PROT:COUN?",
+    "2000|<<|7"
+   ],
+   "method": "Keithley2000Cal.count",
+   "result": "returned 7",
+   "wire": [
+    [
+     "Q",
+     ":CAL:PROT:COUN?",
+     "7"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.save[dates missing]",
+   "log": [
+    "2000|>>|:CAL:PROT:SAVE",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|+438,\"Date of calibration not set\"",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.save",
+   "result": "raised CalibrationError: The 2000 reported an error while saving the calibration constants: +438,\"Date of calibration not set\"",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:SAVE"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "+438,\"Date of calibration not set\""
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "datetime.date(2026, 10, 23), datetime.date(2026, 10, 1)",
+   "case": "Keithley2000Cal.set_dates[due before calibration]",
+   "log": [],
+   "method": "Keithley2000Cal.set_dates",
+   "result": "raised InstrumentError: The next due date must be after the calibration date.",
+   "wire": []
+  },
+  {
+   "call": "datetime.date(1990, 1, 1), datetime.date(1991, 1, 1)",
+   "case": "Keithley2000Cal.set_dates[year out of range]",
+   "log": [],
+   "method": "Keithley2000Cal.set_dates",
+   "result": "raised InstrumentError: Calibration date: the year must be 1994 to 2093 (p. 3-8).",
+   "wire": []
+  },
+  {
+   "call": "datetime.date(2026, 10, 23), datetime.date(2027, 10, 23)",
+   "case": "Keithley2000Cal.set_dates",
+   "log": [
+    "2000|>>|:CAL:PROT:DATE 2026,10,23",
+    "2000|>>|:CAL:PROT:DATE?",
+    "2000|<<|2026, 10, 23",
+    "2000|>>|:CAL:PROT:NDUE 2027,10,23",
+    "2000|>>|:CAL:PROT:NDUE?",
+    "2000|<<|2027, 10, 23",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.set_dates",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:DATE 2026,10,23"
+    ],
+    [
+     "Q",
+     ":CAL:PROT:DATE?",
+     "2026, 10, 23"
+    ],
+    [
+     "W",
+     ":CAL:PROT:NDUE 2027,10,23"
+    ],
+    [
+     "Q",
+     ":CAL:PROT:NDUE?",
+     "2027, 10, 23"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.save",
+   "log": [
+    "2000|>>|:CAL:PROT:SAVE",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.save",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:SAVE"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.lock",
+   "log": [
+    "2000|>>|:CAL:PROT:LOCK",
+    "2000|>>|:CAL:PROT:LOCK?",
+    "2000|<<|0"
+   ],
+   "method": "Keithley2000Cal.lock",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:LOCK"
+    ],
+    [
+     "Q",
+     ":CAL:PROT:LOCK?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.cleanup",
+   "log": [],
+   "method": "Keithley2000Cal.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "'WRONG123'",
+   "case": "Keithley2000Cal.unlock[wrong code, stays locked]",
+   "log": [
+    "2000|>>|:CAL:PROT:CODE '********'",
+    "2000|>>|:CAL:PROT:LOCK?",
+    "2000|<<|0",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\""
+   ],
+   "method": "Keithley2000Cal.unlock",
+   "result": "raised InstrumentError: :CAL:PROT:LOCK? still reports LOCKED after the code was sent: the 2000 did not accept it (the manual does not say what a wrong code does). Nothing was changed. Do not send codes repeatedly: check the code, then disconnect and start again.",
+   "wire": [
+    [
+     "W",
+     ":CAL:PROT:CODE <code masked, 8 chars>"
+    ],
+    [
+     "Q",
+     ":CAL:PROT:LOCK?",
+     "0"
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.reset_to_defaults[A20]",
+   "log": [
+    "2000|>>|*RST",
+    "2000|>>|*CLS",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "2000|>>|:INIT:CONT OFF",
+    "2000|>>|:INIT:CONT?",
+    "2000|<<|0",
+    "2000|>>|:FORM:ELEM READ",
+    "2000|>>|:FORM:ELEM?",
+    "2000|<<|READ",
+    "2000|>>|:SYST:AZER:STAT?",
+    "2000|<<|1"
+   ],
+   "method": "Keithley2000Cal.reset_to_defaults",
+   "result": "returned ResetReport(instrument='2000', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='enter remote (RS-232 only)', ok=True, detail='GPIB: remote when addressed'), ResetStep(name='known measurement state (initiation, data format, autozero)', ok=True, detail='initiation off, READing only, autozero on')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     ":INIT:CONT OFF"
+    ],
+    [
+     "Q",
+     ":INIT:CONT?",
+     "0"
+    ],
+    [
+     "W",
+     ":FORM:ELEM READ"
+    ],
+    [
+     "Q",
+     ":FORM:ELEM?",
+     "READ"
+    ],
+    [
+     "Q",
+     ":SYST:AZER:STAT?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keithley2000Cal.reset_to_defaults[A19]",
+   "log": [
+    "2000|>>|*RST",
+    "2000|>>|*CLS",
+    "2000|>>|*OPC?",
+    "2000|<<|1",
+    "2000|>>|:SYST:ERR?",
+    "2000|<<|0,\"No error\"",
+    "2000|>>|:INIT:CONT OFF",
+    "2000|>>|:INIT:CONT?",
+    "2000|<<|0",
+    "2000|>>|:FORM:ELEM READ",
+    "2000|>>|:FORM:ELEM?",
+    "2000|<<|READ",
+    "2000|>>|:SYST:AZER:STAT?",
+    "2000|<<|1"
+   ],
+   "method": "Keithley2000Cal.reset_to_defaults",
+   "result": "returned ResetReport(instrument='2000', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='enter remote (RS-232 only)', ok=True, detail='GPIB: remote when addressed'), ResetStep(name='known measurement state (initiation, data format, autozero)', ok=True, detail='initiation off, READing only, autozero on')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     ":SYST:ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     ":INIT:CONT OFF"
+    ],
+    [
+     "Q",
+     ":INIT:CONT?",
+     "0"
+    ],
+    [
+     "W",
+     ":FORM:ELEM READ"
+    ],
+    [
+     "Q",
+     ":FORM:ELEM?",
+     "READ"
+    ],
+    [
+     "Q",
+     ":SYST:AZER:STAT?",
+     "1"
+    ]
+   ]
+  }
+ ],
+ "name": "keithley_2000_cal",
+ "schema": 1
+}
