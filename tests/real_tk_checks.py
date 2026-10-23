@@ -1557,7 +1557,6 @@ def checks_8808a_adjustment():
     app.on_close()
 
 
-
 def checks_fluke_365():
     """The Fluke 365 performance verification on a real Tk: the Manager lists it under Automated Calibrations only; its run window is the ordinary handheld window
     (32 points, no typed grid, Performance Verification wording); the voltage and both coil cable-change prompts."""
@@ -1748,21 +1747,6 @@ def checks_fluke_376():
     except tk.TclError:
         pass
 
-def checks_fluke_376_queue():
-    """The run queue of the 374 / 375 / 376 / 376-II on a real Tk: the Connections drawer lists one 'iFlex supplied' box per queue meter (one ON, one OFF), the chip says so, the
-    set-up list shows the setting per meter, the window box follows the meter shown, a meter with the setting OFF does not show the iFlex points, and a drawer click changes
-    only its own meter.  Screenshots (SHOT_DIR) in the theme of THEME."""
-    import handheld_dmm as HH
-    import iflex_option as XO
-    import run_queue as RQ
-    root = tk.Tk()
-    errs = []
-    root.report_callback_exception = lambda *a: errs.append(a)
-    shots = os.environ.get('SHOT_DIR')
-    patches = [mock.patch.object(messagebox, n, return_value=True) for n in ('askyesno', 'askokcancel', 'askyesnocancel', 'showinfo', 'showwarning', 'showerror')]
-    for pt in patches:
-        pt.start()
-
 def checks_dsb_sheet_check():
     """Datasheet Builder 'Sheet check' (build-time rules 1-5): the pill, the window (findings, detail, buttons), 'Apply the fix' (enter by hand), the Commands
     window, the inspector's 'Uncertainty source' line; nothing clipped.  Screenshots when DSB_SHOTS is set (folder)."""
@@ -1868,6 +1852,22 @@ def checks_dsb_sheet_check():
     w.destroy()
     win.destroy()
     root.destroy()
+
+
+def checks_fluke_376_queue():
+    """The run queue of the 374 / 375 / 376 / 376-II on a real Tk: the Connections drawer lists one 'iFlex supplied' box per queue meter (one ON, one OFF), the chip says so, the
+    set-up list shows the setting per meter, the window box follows the meter shown, a meter with the setting OFF does not show the iFlex points, and a drawer click changes
+    only its own meter.  Screenshots (SHOT_DIR) in the theme of THEME."""
+    import handheld_dmm as HH
+    import iflex_option as XO
+    import run_queue as RQ
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    shots = os.environ.get('SHOT_DIR')
+    patches = [mock.patch.object(messagebox, n, return_value=True) for n in ('askyesno', 'askokcancel', 'askyesnocancel', 'showinfo', 'showwarning', 'showerror')]
+    for pt in patches:
+        pt.start()
 
 
     def grab(win, tag):
