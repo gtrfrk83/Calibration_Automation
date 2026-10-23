@@ -540,6 +540,22 @@ checkbox "Fast demo (no windows)"). Apps use `VirtualMixin`: `demo` (any demo), 
   whole suite under a real Tk.
 - Point window layout (procmods_point_ui.py): grid; command table 5 rows then scrolls; details (selected command, add a line, developer fields) scroll; footer always visible.
 
+## Standards Specs tab, Option A (branch `specs-tab-a`; presentation only; viewed on a real Tk 9 under Xvfb in light and dark at 1260x800 and 1100x700)
+- `specmanager_ui.py` (Tk) + `specmanager_view.py` (display model, no Tk, no database; `tests/test_specmanager_view.py`). Layout: standards rail (one card per standard: model, maker, description, a confidence / divisor chip
+  that is blue when the sheet states a level or the divisor was set and grey 'k = 2 assumed' when not, the range count, a sheet-issues pill), header card of the selected standard (Confidence, Divisor + Set divisor link, Period,
+  Ranges; Assets chips + Set assets; Approved; clickable Sheet issues pill; Export JSON and Check an EMU), then a card with function-type chips (counts, one row, the rest under 'More'), the text filter, the table grouped by
+  function (collapsible bands, banded rows) and a footer with the count and the 'double-click a row to set its calibrator resolution' hint. Import spec JSON sits at the foot of the rail.
+- Display only. A specification is formatted from the PRINTED text with decimal arithmetic (no float): `+/-(800 ppm I.V. + 0.006 mV)` shows as `±(800 ppm + 6.00 µV)`; a term is never rounded (3 significant digits at least, more when the
+  printed value needs them); any line that is not the usual shape (dB, 'x N', notes) is shown as printed with the signs replaced. The printed text is the tooltip of the cell. Spans / frequencies / resolutions are SI-scaled
+  (3 significant digits). Stored rows, `DEFAULT_VARIANT` (excludes auxiliary and 7 day variants in a plain lookup; the table still lists every row), limits and the uncertainty / TAR / TUR numbers are untouched.
+- The period columns follow the sheet: the standard's default period first (unless the sheet hardly prints it), then the most printed ones; up to three, two when the table is narrow; the Period block names what is shown and what else is on the sheet
+  (8563E: 2 yr / typical, 8902A: spec / supplemental, 5790B: 1 yr / 2 yr / 90 day / 24 hr).
+- Widths: rail 300 px at 1180 and wider, 248 px below, 224 px below ~1000, and below ~940 the rail is replaced by a selector above the header card. The window itself has a minimum of ~1040 px, so the selector only shows if the panel is hosted narrower.
+- Found while doing this: the old table's Sheet issues column and the Sheet issues window read `export_data()['problems']`, a key `export_data` never had, so they always said 0 / 'None found.' although the import stores the issues in
+  `standards.problems_json` (5520A 12, 5522A 12 of them 2 errors, 5790B 19, 8563E 31, 8902A 27, 96270A 12, 5560A 0). `specmanager.problems_of(standard_id)` (new, read only) reads them; the rail, the pill and the window use it. No schema change.
+- Real-Tk checks: `tests/real_tk_checks.py` `checks_standards_specs` / `checks_standards_specs_small` (set divisor, set assets, issues window, Check an EMU, export / import, type and text filters, resolution edit, band toggling, empty states, 1100 px, collapsed rail).
+- Not verified: Windows fonts and DPI (the Xvfb Tk here has only bitmap fonts, so the screenshots are wider than Segoe UI would be), the macOS look; the band chevrons are drawn images, the chip / card shapes are canvas drawings.
+
 ## Handheld dialogs, layout C (branch `function-window-c`; presentation only; viewed on a real Tk 9 under Xvfb in light and dark)
 - "Change the function" window: built in `ui_theme.confirm_steps(..., layout='function_change', card=...)` (`_confirm_function_change`), called ONLY by `handheld_dmm.App._prompt_function`
   (the other engines keep the numbered-list layout; the shared `confirm_steps` still receives the same title / heading / steps / facts, so tests, harnesses and golden transcripts see the

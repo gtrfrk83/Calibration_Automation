@@ -354,6 +354,272 @@ def checks_manager_tabs():
     root.destroy()
 
 
+def checks_standards_specs():
+    """The Standards Specs tab (Option A): standards rail, header card, type chips, grouped table, empty states, narrow layouts, and every old handler."""
+    import json
+
+    import Calibration_Procedure_Manager as CPM
+    import specmanager as sm
+    import specmanager_ui as SU
+    import specmanager_view as SV
+    from tkinter import filedialog, simpledialog
+    CPM.init_db()
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    m = CPM.Manager(root)
+    root.geometry('1260x800+0+0')
+    m.notebook.select(m.specs_frame)
+    pump(root, 30)
+    p = m.specs_panel
+    shot = os.environ.get('SHOT_DIR')
+
+    def grab(tag):
+        if not shot:
+            return
+        from PIL import ImageGrab
+        root.update()
+        ImageGrab.grab(bbox=(root.winfo_rootx(), root.winfo_rooty(), root.winfo_rootx() + root.winfo_width(), root.winfo_rooty() + root.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'standards_specs_{tag}_{THEME}.png'))
+
+    ids = {i['std']['model']: k for k, i in p._info.items()}
+    models = [s['model'] for s in sm.standards()]
+    check('specs: one rail card per standard', len(p._cards) == len(models) >= 7 and all(c.winfo_ismapped() for c in p._cards.values()), (len(p._cards), models))
+    check('specs: rail count shows the number', p.rail_count.cget('text') == str(len(models)))
+    chips = {i['std']['model']: dict(p._cards[k].info['chips']) for k, i in p._info.items()}
+    check('specs: stated confidence chip is info (blue), assumed k = 2 is neutral (grey)',
+          chips['5522A'][f'99 % {SV.DOT} {SV.DIVIDE} 2.576'] == 'info' and chips['8563E'][f'k = 2 assumed {SV.DOT} {SV.DIVIDE} 2'] == 'neutral', chips['8563E'])
+    check('specs: sheet issues pill on a card that has issues', any(k == 'warn' for k in chips['5520A'].values()) and not any(t.endswith('issues') for t in chips['5560A']))
+    colours = {p._cards[ids['5522A']].itemcget(i, 'fill') for i in p._cards[ids['5522A']].find_all()}
+    chosen = {p._cards[p.sel].itemcget(i, 'fill') for i in p._cards[p.sel].find_all()}
+    check('specs: card colours come from the theme tokens', ui.C['info_bg'] in colours and ui.C['card'] in colours and ui.C['select'] in chosen and ui.C['primary'] in chosen,
+          (colours, chosen))
+    check('specs: first standard selected, header shows it', p.sel == min(ids.values(), key=lambda k: p._info[k]['std']['model']) and p.h_title.cget('text') == models[0])
+
+    # ---- header card of the 5522A
+    p.select(ids['5522A'])
+    pump(root, 20)
+    st = {k: p.stat[k]['val'].cget('text') for k in p.stat}
+    check('specs: stat row', st == {'conf': '99 %', 'div': '2.576', 'period': '1 yr', 'ranges': '545'}, st)
+    check('specs: confidence note is short, the full sheet text is the tooltip', len(p.stat['conf']['sub_text']) < 80 and 'Operators Manual' in p.stat['conf']['tip']
+          and 'SpecTrack' in p.stat['conf']['tip'], p.stat['conf'])
+    check('specs: period note names both columns', p.stat['period']['sub_text'] == 'columns: 1 yr and 90 day', p.stat['period']['sub_text'])
+    check('specs: Set divisor link beside the divisor', p.div_link.winfo_ismapped() and p.div_link.cget('text') == 'Set divisor...')
+    texts = [w.cget('text') for w in walk(p.facts) if isinstance(w, tk.Label)]
+    check('specs: assets / approved / issues in the header', 'Set assets...' in texts and 'Approved' in texts and any('Pack Jr' in t for t in texts) and p.issues_chip.text.startswith('12 sheet issues'), texts)
+    check('specs: issues pill is bad (an error-level issue) with a dot', p.issues_chip.kind == 'bad' and p.issues_chip.dot)
+    btns = [b.cget('text') for b in walk(p.head_card.body) if isinstance(b, ttk.Button)]
+    check('specs: header actions', btns == ['Export JSON...', 'Check an EMU...'], btns)
+    check('specs: Import in the rail', any(isinstance(b, ttk.Button) and b.cget('text') == 'Import spec JSON...' for b in walk(p.rail)))
+
+    # ---- the table
+    tree = p.rows
+    bands = [k for k in tree.get_children('') if k.startswith('g')]
+    check('specs: table is grouped by function with a band per function', len(bands) == 69 and tree.item(bands[0], 'values')[0].endswith('ranges'), len(bands))
+    check('specs: footer count and hint', p.count_lbl.cget('text') == 'Showing 545 of 545 ranges' and p.hint.cget('text') == SU.HINT and p.hint.winfo_ismapped())
+
+    def columns_ok(tag):
+        disp = list(tree['displaycolumns'])
+        right = sum(int(tree.column(c, 'width')) for c in ['#0'] + disp)
+        check(f'specs {tag}: 1 yr and 90 day columns both shown and inside the table', 'p1' in disp and 'p2' in disp and right <= tree.winfo_width() + 1
+              and tree.heading('p1', 'text') == '1 YR SPEC' and tree.heading('p2', 'text') == '90 DAY SPEC', (disp, right, tree.winfo_width()))
+    columns_ok('1260')
+    check('specs: rail 300 wide at 1260', p.rail.winfo_width() == ui.px(300), p.rail.winfo_width())
+    p.kind.set('ACV')
+    pump(root, 20)
+    check('specs: ACV chip active, only ACV rows', p._chips['ACV'].active and not p._chips[''].active and p.count_lbl.cget('text') == 'Showing 59 of 545 ranges', p.count_lbl.cget('text'))
+    first = tree.get_children(bands[0] if tree.exists(bands[0]) else tree.get_children('')[0])[0]
+    check('specs: ACV rows in the first band', all(sm_row['kind'] == 'ACV' for sm_row in p._rows if str(sm_row['id']) in tree.get_children(tree.get_children('')[0])))
+    vals = tree.item(first, 'values')
+    check('specs: spec text formatted for display with SI scaling', vals[3] == f'{SV.PLUS_MINUS}(800 ppm + 6.00 {SV.MICRO}V)' and vals[4] == f'{SV.PLUS_MINUS}(600 ppm + 6.00 {SV.MICRO}V)', vals)
+    raw = sm.rows_of(ids['5522A'], kind='ACV')[0]
+    check('specs: raw printed text is the tooltip and the stored row is unchanged', p._tips[first]['p1'] == raw['specs'][1 if raw['specs'][0]['period'] == '90 day' else 0]['raw']
+          and '+/-(' in p._tips[first]['p1'] and raw['specs'][0]['raw'].startswith('['), p._tips[first])
+    check('specs: rows banded', tree.item(first, 'tags') == ('even',) and tree.item(tree.next(first), 'tags') == ('odd',))
+    # real clicks on a chip and on the table
+    p._chips['DCV'].event_generate('<Button-1>', x=5, y=5)
+    pump(root, 10)
+    check('specs: clicking a chip filters', p.kind.get() == 'DCV' and p._chips['DCV'].active and not p._chips['ACV'].active)
+    p.term.set('zzz nothing')
+    pump(root, 10)
+    check('specs: empty table says why and offers Clear', p.empty.winfo_ismapped() and 'DC volts' in p.empty_msg.cget('text') and "'zzz nothing'" in p.empty_msg.cget('text')
+          and p.empty_clear.winfo_ismapped() and not tree.get_children(''), p.empty_msg.cget('text'))
+    p.empty_clear.event_generate('<Button-1>')
+    pump(root, 10)
+    check('specs: Clear the filters restores the table', p.kind.get() == '' and p.term.get() == '' and not p.empty.winfo_ismapped() and len(p._rows) == 545 and tree.get_children(''))
+    p.term.set('lcomp')
+    pump(root, 10)
+    check('specs: text filter on function / label / variant', 0 < len([k for g in tree.get_children('') for k in tree.get_children(g)]) < 545 and all(tree.item(g, 'open') for g in tree.get_children('')))
+    p.term.set('')
+    pump(root, 10)
+    # groups open / close
+    p.set_all_groups(False)
+    pump(root, 5)
+    check('specs: Collapse all closes every band', all(not tree.item(g, 'open') for g in tree.get_children('')))
+    p.show_rows()
+    check('specs: collapsed state is remembered across a rebuild', all(not tree.item(g, 'open') for g in tree.get_children('')))
+    p.set_all_groups(True)
+    g0 = tree.get_children('')[0]
+    x, y, w, h = tree.bbox(g0)
+    tree.event_generate('<Button-1>', x=x + w // 2, y=y + h // 2)
+    check('specs: clicking a band toggles it', not tree.item(g0, 'open'))
+    tree.event_generate('<Button-1>', x=x + w // 2, y=y + h // 2)
+    check('specs: clicking a band again reopens it', tree.item(g0, 'open'))
+
+    # ---- resolution edit by double-click (old handler; Tk cannot synthesize a Double-1, so the bound handler is called with the click position)
+    from types import SimpleNamespace
+    check('specs: the table is bound to Double-1', bool(tree.bind('<Double-1>')))
+
+    def dbl(x, y):
+        tree.update_idletasks()
+        return p._double_click(SimpleNamespace(x=x, y=y))
+    rid = tree.get_children(g0)[1]
+    x, y, w, h = tree.bbox(rid)
+    asked = []
+    with mock.patch.object(simpledialog, 'askstring', side_effect=lambda *a, **k: asked.append((a, k)) or '2e-06'):
+        bx, by, bw, bh = tree.bbox(g0)
+        was = tree.item(g0, 'open')
+        dbl(bx + bw // 2, by + bh // 2)
+        check('specs: double-clicking a band does not open the resolution dialog (it toggles the band)', not asked and tree.item(g0, 'open') != was)
+        dbl(bx + bw // 2, by + bh // 2)
+        tree.selection_set(rid)
+        dbl(x + 20, y + h // 2)
+    pump(root, 10)
+    check('specs: double-click sets the calibrator resolution (stored, then shown)', len(asked) == 1 and 'Calibrator resolution' in asked[0][0][0]
+          and next(r for r in sm.rows_of(ids['5522A']) if r['id'] == int(rid))['resolution'] == 2e-06 and tree.item(rid, 'values')[2] == f'2.00 {SV.MICRO}V'
+          and tree.selection() == (rid,), (asked, tree.item(rid, 'values')))
+    with mock.patch.object(simpledialog, 'askstring', return_value=''):
+        p.edit_resolution()
+    check('specs: blank clears the resolution', next(r for r in sm.rows_of(ids['5522A']) if r['id'] == int(rid))['resolution'] is None and tree.item(rid, 'values')[2] == '')
+    tree.selection_set(g0)
+    with mock.patch.object(simpledialog, 'askstring', side_effect=AssertionError('no dialog for a band')):
+        p.edit_resolution()
+    check('specs: edit_resolution ignores a selected band', True)
+
+    # ---- set divisor / assets, sheet issues, check EMU, export, import
+    answers = iter(['1.96', 'checking the manager'])
+    with mock.patch.object(simpledialog, 'askstring', side_effect=lambda *a, **k: next(answers)):
+        p.set_divisor()
+    pump(root, 10)
+    check('specs: Set divisor stores it and the card / header show it', sm.standard(ids['5522A']).divisor()[0] == 1.96 and p.stat['div']['val'].cget('text') == '1.96'
+          and dict(p._cards[ids['5522A']].info['chips'])[f'99 % {SV.DOT} {SV.DIVIDE} 1.96 (set)'] == 'info' and p.sel == ids['5522A'], p.stat['div']['val'].cget('text'))
+    answers = iter(['', 'back to the sheet'])
+    with mock.patch.object(simpledialog, 'askstring', side_effect=lambda *a, **k: next(answers)):
+        p.set_divisor()
+    check('specs: blank divisor goes back to the sheet level', sm.standard(ids['5522A']).divisor()[0] == 2.576 and p.stat['div']['val'].cget('text') == '2.576')
+    with mock.patch.object(simpledialog, 'askstring', return_value='CAL-1:SN1; CAL-2:SN2; CAL-3:SN3'):
+        p.set_assets()
+    pump(root, 20)
+    check('specs: Set assets stores them and the header shows a chip each', sm.assets_of(ids['5522A']) == [('CAL-1', 'SN1'), ('CAL-2', 'SN2'), ('CAL-3', 'SN3')]
+          and len([c for c in p.facts.items if isinstance(c[0], SU.Chip) and 'CAL-' in c[0].text]) == 3)
+    with mock.patch.object(simpledialog, 'askstring', return_value=''):
+        p.set_assets()
+    check('specs: no assets says so', sm.assets_of(ids['5522A']) == [] and any(isinstance(w, tk.Label) and w.cget('text') == 'none set' for w in walk(p.facts)))
+    pump(root, 20)
+    p.issues_chip.event_generate('<Button-1>')
+    pump(root, 10)
+    win = p.issues_window
+    body = [w for w in walk(win) if isinstance(w, tk.Text)][0].get('1.0', 'end')
+    check('specs: clicking the issues pill lists the sheet issues', win.winfo_exists() and body.count('[warn]') == 10 and body.count('[error]') == 2, body[:200])
+    win.destroy()
+    before = set(walk(root))
+    p.check_emu()
+    pump(root, 10)
+    new = [w for w in walk(root) if w not in before and isinstance(w, tk.Toplevel)]
+    check('specs: Check an EMU opens the dialog', len(new) == 1 and isinstance(new[0], SU.CheckDialog) and 'Check a reported EMU - 5522A' in new[0].title())
+    new[0].destroy()
+    out = os.path.join(tempfile.mkdtemp(), 'x.json')
+    with mock.patch.object(filedialog, 'asksaveasfilename', return_value=out):
+        p.export_json()
+    data = json.load(open(out, encoding='utf-8'))
+    check('specs: Export JSON writes the standard', data['standard']['model'] == '5522A' and sum(len(f['ranges']) for f in data['functions']) == 545)
+    with mock.patch.object(filedialog, 'askopenfilename', return_value=out):
+        p.import_json()
+    pump(root, 10)
+    ids = {i['std']['model']: k for k, i in p._info.items()}                 # an import replaces the standard under a new id
+    check('specs: Import spec JSON reloads the rail and stays on the same model', len(p._cards) == len(models) and p.sel == ids['5522A']
+          and p.count_lbl.cget('text') == 'Showing 545 of 545 ranges')
+    with mock.patch.object(filedialog, 'askopenfilename', return_value=out), mock.patch.object(SU.messagebox, 'showerror') as err:
+        open(out, 'w').write('{"nope": 1}')
+        p.import_json()
+    check('specs: a bad import file is reported, nothing changes', err.called and len(p._cards) == len(models))
+
+    # ---- other standards: 5560A (one period), 8902A (periods other than 1 yr), arrows in the rail
+    p.select(ids['5560A'])
+    pump(root, 20)
+    check('specs: 5560A shows only its 1 yr column', list(tree['displaycolumns']) == ['span', 'freq', 'res', 'p1'] and tree.heading('p1', 'text') == '1 YR SPEC'
+          and tree.heading('p2', 'text') == '' and p.h_title.cget('text') == '5560A' and p.count_lbl.cget('text') == 'Showing 147 of 147 ranges', list(tree['displaycolumns']))
+    check('specs: 5560A has no sheet issues: green pill', p.issues_chip.kind == 'good' and p.issues_chip.text.startswith('0 sheet issues'))
+    grab('5560A_1260')
+    p.select(ids['8902A'])
+    pump(root, 20)
+    check('specs: columns follow the periods the sheet prints (spec / supplemental)', tree.heading('p1', 'text') == 'SPEC' and tree.heading('p2', 'text') == 'SUPPLEMENTAL', tree.heading('p1', 'text'))
+    check('specs: confidence not stated: grey value, k = 2 assumed', p.stat['conf']['val'].cget('text') == 'Not stated' and p.stat['conf']['sub_text'] == 'k = 2 assumed')
+    p.rail_cv.focus_force()
+    p.rail_cv.event_generate('<Up>')
+    check('specs: arrow keys move through the rail', p.sel == ids['8563E'] or p.sel != ids['8902A'], p.sel)
+    p.select(ids['5522A'])
+    p.kind.set('ACV')
+    pump(root, 20)
+    grab('5522A_1260')
+
+    # ---- 1100 px: the rail narrows, both period columns stay, the hint stays
+    root.geometry('1100x700+0+0')
+    pump(root, 40)
+    check('specs 1100: rail narrower', p.rail.winfo_ismapped() and p.rail.winfo_width() == ui.px(248), p.rail.winfo_width())
+    columns_ok('1100')
+    check('specs 1100: hint, footer and header buttons inside the window', all(inside(root, w) for w in (p.hint, p.count_lbl)) and
+          all(inside(root, b) for b in walk(p.head_card.body) if isinstance(b, ttk.Button)))
+    check('specs 1100: type chips on one row with the rest under More', p.chip_flow.winfo_height() <= ui.px(40) and (not p._chip_specs or p._chips), p.chip_flow.winfo_height())
+    p.kind.set('')
+    pump(root, 10)
+    grab('5522A_1100')
+    root.geometry('1260x800+0+0')
+    pump(root, 40)
+    columns_ok('1260 again')
+    check('specs: no Tk callback errors', not errs, errs)
+    root.destroy()
+
+
+def checks_standards_specs_small():
+    """A narrow panel collapses the rail into a selector; a database with no standards shows the empty state."""
+    import specmanager as sm
+    import specmanager_ui as SU
+    root = tk.Tk()
+    ui.apply_theme(root)
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    root.geometry('900x560+0+0')
+    holder = ttk.Frame(root, padding=16)
+    holder.pack(fill='both', expand=True)
+    p = SU.SpecManagerPanel(holder)
+    p.pack(fill='both', expand=True)
+    pump(root, 40)
+    check('specs 900: rail collapsed into a selector', not p.rail.winfo_ismapped() and p.pickbar.winfo_ismapped() and len(p.pick_box['values']) >= 7, p.winfo_width())
+    check('specs 900: table and header still shown, hint inside', p.table_card.winfo_ismapped() and inside(root, p.hint) and inside(root, p.head_card))
+    p.pick_box.set('5560A')
+    p.pick_box.event_generate('<<ComboboxSelected>>')
+    pump(root, 20)
+    check('specs 900: the selector picks a standard', p.h_title.cget('text') == '5560A' and p.count_lbl.cget('text') == 'Showing 147 of 147 ranges')
+    root.geometry('1260x700+0+0')
+    pump(root, 40)
+    check('specs: the rail comes back when the window widens', p.rail.winfo_ismapped() and not p.pickbar.winfo_ismapped())
+    p.destroy()
+    empty_db = os.path.join(tempfile.mkdtemp(), 'none.sqlite3')
+    with mock.patch.object(sm, 'DB', empty_db), mock.patch.object(sm, 'seed', lambda *a, **k: 0):
+        q = SU.SpecManagerPanel(holder)
+        q.pack(fill='both', expand=True)
+        pump(root, 40)
+        check('specs: no standards: message and an Import button, no header / table', q.empty_all.winfo_ismapped() and not q.head_card.winfo_ismapped()
+              and not q.table_card.winfo_ismapped() and q.rail_empty.winfo_ismapped() and q.sel is None
+              and any(isinstance(b, ttk.Button) and b.cget('text') == 'Import spec JSON...' for b in walk(q.empty_all)))
+        q.set_divisor(), q.set_assets(), q.show_issues(), q.export_json(), q.check_emu()
+        check('specs: handlers do nothing without a standard', True)
+        q.destroy()
+    check('specs small: no Tk callback errors', not errs, errs)
+    root.destroy()
+
+
 def checks_handheld_dialogs():
     """The 'Change the function' window (layout C) and the reading window (layout C): nothing clips, Enter = OK / Record, Esc = Cancel."""
     import handheld_dmm as HH
@@ -979,6 +1245,8 @@ if __name__ == '__main__':
         checks_edit_point_button()
         checks_manager_windows()
         checks_manager_tabs()
+        checks_standards_specs()
+        checks_standards_specs_small()
         checks_import_package()
         checks_run_queue()
         checks_dsb_layout()
