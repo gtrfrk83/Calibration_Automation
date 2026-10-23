@@ -403,6 +403,7 @@ class SpecManagerPanel(ttk.Frame):
         top.grid(row=0, column=0, sticky='ew', padx=ui.px(20), pady=ui.px(10))
         btns = tk.Frame(top, background=C['card'])
         btns.pack(side='right')
+        ttk.Button(btns, text='Edit spec...', command=self.edit_spec).pack(side='left', padx=(0, ui.px(8)))
         ttk.Button(btns, text='Export JSON...', command=self.export_json).pack(side='left', padx=(0, ui.px(8)))
         ttk.Button(btns, text='Check an EMU...', style='Accent.TButton', command=self.check_emu).pack(side='left')
         self.h_title = tk.Label(top, text='', font=f['title'], foreground=C['text'], background=C['card'])
@@ -994,6 +995,13 @@ class SpecManagerPanel(ttk.Frame):
             messagebox.showerror('Import', f'Could not import: {e}', parent=self)
             return
         self.refresh()
+
+    def edit_spec(self):
+        """Open the documented-edit editor (spec_editor_ui.py) on the selected standard's sheet."""
+        if self.sel is None:
+            return
+        import spec_editor_ui
+        spec_editor_ui.open_editor(self.winfo_toplevel(), self._info[self.sel]['std']['model'], on_saved=self.refresh)
 
     def export_json(self):
         if self.sel is None:

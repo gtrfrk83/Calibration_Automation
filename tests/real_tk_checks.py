@@ -807,7 +807,7 @@ def checks_standards_specs():
     check('specs: assets / approved / issues in the header', 'Set assets...' in texts and 'Approved' in texts and any('Pack Jr' in t for t in texts) and p.issues_chip.text.startswith('12 sheet issues'), texts)
     check('specs: issues pill is bad (an error-level issue) with a dot', p.issues_chip.kind == 'bad' and p.issues_chip.dot)
     btns = [b.cget('text') for b in walk(p.head_card.body) if isinstance(b, ttk.Button)]
-    check('specs: header actions', btns == ['Export JSON...', 'Check an EMU...'], btns)
+    check('specs: header actions', btns == ['Edit spec...', 'Export JSON...', 'Check an EMU...'], btns)
     check('specs: Import in the rail', any(isinstance(b, ttk.Button) and b.cget('text') == 'Import spec JSON...' for b in walk(p.rail)))
 
     # ---- the table
@@ -2213,6 +2213,98 @@ def checks_dsb_sections():
         pass
 
 
+def checks_spec_editor():
+    """The Standards spec editor on a real Tk at 1100x700: edit a cell, pending panel, red rows (theme tag + issue text), save dialog blocks without a reason,
+    history shows the entry.  Works on a throw-away copy of the sheets and a throw-away registry, never the real ones."""
+    import shutil
+    import specmanager as sm
+    import spec_editor_ui as SEU
+    import spec_edit_log as elog
+    tmp = Path(tempfile.mkdtemp())
+    sd = tmp / 'standards'
+    sd.mkdir()
+    for f in (ROOT / 'specs' / 'standards').glob('*_standard.json'):
+        shutil.copy(f, sd / f.name)
+    db = tmp / 'lab_registry.sqlite3'
+    sm.seed(sd, db)
+    root = tk.Tk()
+    ui.apply_theme(root)
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    root.geometry('1200x800+0+0')
+    shot = os.environ.get('SHOT_DIR')
+
+    def grab(win, tag):
+        if not shot:
+            return
+        from PIL import ImageGrab
+        pump(root, 10)
+        ImageGrab.grab(bbox=(win.winfo_rootx(), win.winfo_rooty(), win.winfo_rootx() + win.winfo_width(), win.winfo_rooty() + win.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'spec_editor_{tag}_{THEME}.png'))
+    with mock.patch.object(messagebox, 'showinfo', lambda *a, **k: None), mock.patch.object(messagebox, 'showerror', lambda *a, **k: None):
+        ed = SEU.EditorWindow(root, 'A2LA-5500A-COIL', spec_dir=sd, db_path=db, backup_dir=tmp / 'bk')
+        ed.win.geometry('1100x700+0+0')
+        pump(root, 30)
+        check('spec editor: opens with the sheet loaded and nothing pending', ed.doc is not None and ed.doc.diff() == [], ed.pending_text()[:80])
+        tree = ed.grid_rows.tree
+        check('spec editor: rows listed, none red or amber on a shipped sheet', len(tree.get_children()) == len(ed.doc.lines()) >= 5
+              and not any(t in tree.item(i, 'tags') for i in tree.get_children() for t in ('err', 'warn')))
+        grab(ed.win, '1_open')
+        first = ed.doc.lines()[0].iid
+        ed.grid_rows.commit_text(first, 'res', '0.01 A')
+        pump(root, 20)
+        check('spec editor: a cell edit shows in the pending panel as old -> new', 'Resolution' in ed.pending_text() and '10.0 mA' in ed.pending_text(), ed.pending_text()[:300])
+        check('spec editor: the edit is not saved yet', json_res(sd) is None)
+        third = ed.doc.lines()[2].iid
+        ed.grid_rows.commit_text(third, 'notes', '2, 99')
+        pump(root, 20)
+        tags = tree.item(third, 'tags')
+        check('spec editor: a row with a missing note is red (err tag), only that row', 'err' in tags and [i for i in tree.get_children() if 'err' in tree.item(i, 'tags')] == [third], tags)
+        check('spec editor: the err tag is the theme red', str(tree.tag_configure('err', 'foreground')) == ui.C['bad'], tree.tag_configure('err', 'foreground'))
+        check('spec editor: the red row also carries an icon (not colour only)', bool(tree.item(third, 'image')))
+        tip = ed.grid_rows.tip_for(third, '#1') if ed.grid_rows.tip_for else ''
+        check('spec editor: hovering a red row gives its issue text', 'note 99 does not exist' in (tip or ''), tip)
+        hit = ed.pending.search('note 99 does not exist', '1.0')
+        check('spec editor: the pending panel lists the issue in red', bool(hit) and 'errline' in ed.pending.tag_names(hit), (hit, ed.pending.tag_names(hit) if hit else ''))
+        grab(ed.win, '2_red_row')
+        dlg = ed.document_and_save()
+        pump(root, 10)
+        check('spec editor: an error blocks opening the save dialog', dlg is None)
+        ed.grid_rows.commit_text(third, 'notes', '5, 7')
+        pump(root, 20)
+        check('spec editor: fixing the note clears the red', 'err' not in tree.item(third, 'tags'), tree.item(third, 'tags'))
+        dlg = ed.document_and_save()
+        pump(root, 20)
+        check('spec editor: the save dialog opens', dlg is not None and dlg.win.winfo_exists())
+        grab(dlg.win, '3_dialog')
+        check('spec editor: saving without a reason is blocked and nothing is written', dlg.save() is None and bool(dlg.error_var.get()) and json_res(sd) is None and elog.count('a2la_5500a_coil_standard.json', db) == 0,
+              dlg.error_var.get())
+        dlg.reason.insert('1.0', 'Real-Tk check')
+        dlg.source_var.set('datasheet p. 2')
+        dlg.who_var.set('Tester')
+        res = dlg.save()
+        pump(root, 20)
+        check('spec editor: with reason, source and name the edit is saved and logged', res is not None and json_res(sd) == 0.01 and elog.count('a2la_5500a_coil_standard.json', db) == 1)
+        check('spec editor: nothing pending after the save', ed.doc.diff() == [])
+        h = ed.open_history()
+        pump(root, 20)
+        check('spec editor: the history shows the entry', len(h.tree.get_children()) == 1, h.tree.get_children())
+        grab(h.win, '4_history')
+        h.win.destroy()
+    check('spec editor: no Tk callback errors', not errs, errs)
+    try:
+        root.destroy()
+    except tk.TclError:
+        pass
+    shutil.rmtree(tmp, True)
+
+
+def json_res(sd):
+    import json
+    d = json.loads((sd / 'a2la_5500a_coil_standard.json').read_text(encoding='utf-8'))
+    return d['functions'][0]['ranges'][0].get('resolution')
+
+
 if __name__ == '__main__':
     try:
         checks_handheld_dialogs()
@@ -2229,6 +2321,7 @@ if __name__ == '__main__':
         checks_fluke_376_queue()
         checks_standards_specs()
         checks_standards_specs_small()
+        checks_spec_editor()
         checks_import_package()
         checks_run_queue()
         checks_dsb_layout()
