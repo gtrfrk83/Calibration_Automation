@@ -74,7 +74,7 @@ SW = {
     'dcv': 'V⎓  (DC volts)',
     'mv': 'mV⎓  (DC millivolts: dial on V⎓ / mV, then press the yellow button to select mV; Users Manual p. 12)',
     'ohm': 'Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)',
-    'cap': 'Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button until the display shows µF; Users Manual p. 14)',
+    'cap': 'Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button ONCE to select capacitance (display shows µF); Users Manual p. 14, single press owner-confirmed)',
     'aca': 'A~  (AC amps: detachable jaw closed around the 50-turn coil)',
     'dca': 'A⎓  (DC amps: detachable jaw closed around the 50-turn coil; the yellow button is ZERO, Users Manual p. 11)',
     'iflex': 'iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)',

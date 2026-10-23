@@ -985,7 +985,7 @@
    "table": "1",
    "step": 20,
    "section": "Capacitance",
-   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button until the display shows µF; Users Manual p. 14)",
+   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button ONCE to select capacitance (display shows µF); Users Manual p. 14, single press owner-confirmed)",
    "range": "100.0 µF",
    "models": [
     "374",
@@ -1017,7 +1017,7 @@
    "table": "1",
    "step": 21,
    "section": "Capacitance",
-   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button until the display shows µF; Users Manual p. 14)",
+   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button ONCE to select capacitance (display shows µF); Users Manual p. 14, single press owner-confirmed)",
    "range": "1000 µF",
    "models": [
     "374",
@@ -1049,7 +1049,7 @@
    "table": "1",
    "step": 22,
    "section": "Capacitance",
-   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button until the display shows µF; Users Manual p. 14)",
+   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button ONCE to select capacitance (display shows µF); Users Manual p. 14, single press owner-confirmed)",
    "range": "1000 µF",
    "models": [
     "374",
