@@ -150,11 +150,48 @@ class Exports(unittest.TestCase):
             if n == 'handheld_Fluke_287.pdf':
                 self.check_temperature_rows_only(n)  # the 287 temperature rows (3-1 .. 3-3) now print a thermocouple-simulation Uncertainty (temperature uncertainty branch)
                 continue
+            if self.is_demo(self.off / n):
+                self.check_demo_footer_only(n)       # the demo footer's long left text is now cut with '...' so it cannot overprint the red DEMO DATA line
+                continue
             self.assertEqual((self.base / n).read_bytes(), (self.off / n).read_bytes(), n)
+
+    @staticmethod
+    def is_demo(pdf):
+        return 'DEMO DATA' in subprocess.run(['pdftotext', str(pdf), '-'], capture_output=True, text=True).stdout
+
+    @staticmethod
+    def layout_lines(pdf):
+        """pdftotext -layout lines, spacing collapsed (the footer text width shifts the column spacing) and the footer lines left out."""
+        lines = subprocess.run(['pdftotext', '-layout', str(pdf), '-'], capture_output=True, text=True).stdout.splitlines()
+        lines = [' '.join(l.split()) for l in lines]
+        return [l for l in lines if l and 'Instrument ID:' not in l and not l.startswith('DEMO DATA - NOT')]
+
+    def body_words(self, pdf):
+        """Every word above the footer band (y < 740 pt) with its position, order-independent."""
+        out = subprocess.run(['pdftotext', '-bbox', str(pdf), '-'], capture_output=True, text=True).stdout
+        found = re.findall(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>', out)
+        return sorted(w for w in found if float(w[1]) < 740)
+
+    def footer_left(self, pdf):
+        """The words of the footer's left text, up to the red DEMO line, on page 1."""
+        out = subprocess.run(['pdftotext', '-f', '1', '-l', '1', '-bbox', str(pdf), '-'], capture_output=True, text=True).stdout
+        words = [(float(x), float(y), t) for x, y, _, _, t in re.findall(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>', out)]
+        return ' '.join(t for x, y, t in sorted(words) if y >= 740 and x < 200)
+
+    def check_demo_footer_only(self, n):
+        """Demo PDFs: the page body (87V / 287: apart from their own documented row changes) is the baseline's; only the footer's left text may differ, and then only by a '...' cut."""
+        if n == 'handheld_Fluke_87V.pdf':
+            self.check_87v_rows_only(n)
+        elif n == 'handheld_Fluke_287.pdf':
+            self.check_temperature_rows_only(n)
+        else:
+            self.assertEqual(self.body_words(self.base / n), self.body_words(self.off / n), n)
+        old, new = self.footer_left(self.base / n), self.footer_left(self.off / n)
+        self.assertTrue(new == old or (new.endswith('...') and old.startswith(new[:-3].rstrip())), (old, new))
 
     def check_87v_rows_only(self, n):
         import difflib
-        txt = lambda d: subprocess.run(['pdftotext', '-layout', str(d / n), '-'], capture_output=True, text=True).stdout.splitlines()
+        txt = lambda d: self.layout_lines(d / n)
         changed = [l[2:] for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
         self.assertTrue(changed)
         for l in changed:
@@ -164,7 +201,7 @@ class Exports(unittest.TestCase):
     def check_temperature_rows_only(self, n):
         """Only the Temperature rows differ from the baseline, and only in the Uncertainty cell (N/A before, 'x.xx degC' now)."""
         import difflib
-        txt = lambda d: subprocess.run(['pdftotext', '-layout', str(d / n), '-'], capture_output=True, text=True).stdout.splitlines()
+        txt = lambda d: self.layout_lines(d / n)
         changed = [l for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
         self.assertEqual(len(changed), 6, changed)
         for l in changed:
