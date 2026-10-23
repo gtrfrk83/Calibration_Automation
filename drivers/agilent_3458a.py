@@ -199,6 +199,36 @@ COMMANDS = {
 
 
 # ---- reply parsing ------------------------------------------------------------------------------------------------------------------------------
+def set_read_termination(transport, term) -> None:
+    """Text reads stop at `term`.  drivers/transport.py has no such call (it is shared with verified procedures and is not edited), so this uses the transport's own
+    method when it has one (simulators, recorders) and otherwise the pyvisa resource of a VisaTransport.  Never raises; a transport with neither is left alone."""
+    method = getattr(transport, 'set_read_termination', None)
+    if callable(method):
+        method(term)
+        return
+    res = getattr(transport, '_res', None)
+    if res is not None:
+        try:
+            res.read_termination = term
+        except Exception:
+            pass
+
+
+def read_raw(transport, count: int) -> bytes:
+    """Exactly `count` bytes with no termination handling (a LF inside binary data must not stop the read): the transport's own `read_raw`, else the pyvisa
+    resource's `read_bytes`.  Raises TransportError when neither exists or the read fails."""
+    method = getattr(transport, 'read_raw', None)
+    if callable(method):
+        return bytes(method(count))
+    res = getattr(transport, '_res', None)
+    if res is None or not hasattr(res, 'read_bytes'):
+        raise TransportError('this transport cannot read binary data')
+    try:
+        return bytes(res.read_bytes(int(count), break_on_termchar=False))
+    except Exception as exc:
+        raise TransportError(f'read of {count} bytes failed: {exc}') from exc
+
+
 def _text(reply) -> str:
     return str(reply).strip().strip('"\'').strip().upper()
 
@@ -338,7 +368,7 @@ class Agilent3458A(Instrument):
         """Open, set the LF read termination, device clear, clear the status byte, confirm the model with ID?, then learn the output format and trigger event
         with read-only queries.  Nothing is reset here: reset_to_defaults() does that."""
         self.open(verify_model=False)
-        self.t.set_read_termination(READ_TERMINATION)
+        set_read_termination(self.t, READ_TERMINATION)
         self.t.clear()
         self.send('status.clear')
         try:
@@ -523,7 +553,7 @@ class Agilent3458A(Instrument):
                 reply = self.t.read()
                 self.log.add('<<', reply.strip(), self.label)
                 return decode_reading(reply, 'ASCII')
-            data = self.t.read_raw(BYTES[fmt])
+            data = read_raw(self.t, BYTES[fmt])
         except TransportError as exc:
             raise InstrumentError(f'{self.label}: no reading arrived (trigger {self.trigger}, {self.out_format}): {exc}') from exc
         self.log.add('<<', f'<{fmt} {len(data)} bytes {bytes(data).hex()}>', self.label)

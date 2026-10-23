@@ -428,7 +428,7 @@ Behaviour:
 - **`ID?` answers the text `Keysight 3458A`** (p.228, 276); the brief said HP3458A.  Older firmware may answer `HP3458A`: the identity check matches on `3458A` (both pass; a 34410A or anything else is refused).
 - Reading transfer: TRIG SYN makes the controller's read request the trigger (p.374-375), so `read()` takes a fresh reading each time; TRIG SGL (driver mode: meter in HOLD, `TRIG SGL` before each read) is the alternative;
   TRIG AUTO / HOLD / EXT are refused by `read()` (AUTO may hand over a stale reading).  `TRIG SGL` cannot be read back (it reverts to HOLD, p.374), so it is the action `trig.sgl`, not a `trig.set` value.
-- Termination: the transport gets read termination LF at connect (`Transport.set_read_termination`, new, additive); binary readings are read by byte count (`Transport.read_raw`, new, additive) so EOI is not needed;
+- Termination: the transport gets read termination LF at connect (module helper `set_read_termination`, which uses the transport's own method or the pyvisa resource; `drivers/transport.py` is NOT edited because 40 procedure sidecars list it); binary readings are read by byte count (helper `read_raw`, same approach) so EOI is not needed;
   END ALWAYS is still set after the reset.  Query replies are always ASCII (p.309).
 - Formats: ASCII 15 bytes (+CR LF), SREAL IEEE-754 32 bit, DREAL IEEE-754 64 bit, most significant byte first (p.153-154, the guide's own SREAL conversion program is a unit test), overload +-1E+38 (p.309; SREAL rounds slightly
   below, so the driver treats |x| >= 9.9E+37 as overload and raises `OverloadError`).

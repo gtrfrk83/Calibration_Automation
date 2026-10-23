@@ -346,11 +346,17 @@ class RecordingTransport(Transport):
     def clear(self): self._rec('ctl', 'clear'); self.inner.clear()
     def set_timeout(self, seconds): self._rec('ctl', 'set_timeout', float(seconds)); return self.inner.set_timeout(seconds)
     def go_local(self): self._rec('ctl', 'go_local'); return self.inner.go_local()
-    def set_read_termination(self, term): self._rec('ctl', 'set_read_termination', term); return self.inner.set_read_termination(term)
+    def set_read_termination(self, term):
+        self._rec('ctl', 'set_read_termination', term)
+        method = getattr(self.inner, 'set_read_termination', None)
+        return method(term) if callable(method) else None
 
     def read_raw(self, count):
         try:
-            data = self.inner.read_raw(count)
+            method = getattr(self.inner, 'read_raw', None)
+            if not callable(method):
+                raise TransportError('this transport cannot read binary data')
+            data = method(count)
         except TransportError as exc:
             self._rec('RB!', int(count), str(exc))
             raise

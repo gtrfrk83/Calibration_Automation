@@ -567,11 +567,22 @@ class TestResetAndIdentity(unittest.TestCase):
 
 
 class TestTransport(unittest.TestCase):
-    def test_base_transport_defaults(self):
-        t = Transport()
-        t.set_read_termination('\n')                                        # a no-op where there is nothing to configure
-        with self.assertRaises(NotImplementedError):
-            t.read_raw(4)
+    """drivers/transport.py is NOT edited (40 procedure sidecars list it): the driver's helpers use the transport's own methods or the pyvisa resource."""
+
+    def test_transport_module_has_no_binary_api(self):
+        self.assertFalse(hasattr(Transport, 'read_raw'))
+        self.assertFalse(hasattr(Transport, 'set_read_termination'))
+
+    def test_helpers_use_the_transports_own_methods(self):
+        calls = []
+
+        class T(Transport):
+            def set_read_termination(self, term): calls.append(('term', term))
+            def read_raw(self, count): calls.append(('raw', count)); return b'\x01' * count
+
+        M.set_read_termination(T(), '\n')
+        self.assertEqual(M.read_raw(T(), 4), b'\x01' * 4)
+        self.assertEqual(calls, [('term', '\n'), ('raw', 4)])
 
     def test_visa_transport_reads_binary_by_count_and_sets_the_termination(self):
         class Res:
@@ -583,14 +594,19 @@ class TestTransport(unittest.TestCase):
 
         t = drivers.VisaTransport('GPIB0::22::INSTR')
         t._res = Res()
-        t.set_read_termination('\n')
+        M.set_read_termination(t, '\n')
         self.assertEqual(t._res.read_termination, '\n')
-        self.assertEqual(t.read_raw(8), b'\x0a' * 8)
+        self.assertEqual(M.read_raw(t, 8), b'\x0a' * 8)
         self.assertEqual(t._res.args, (8, False))
-        t._res = None
-        t.set_read_termination('\n')                                        # not open: nothing happens
+
+    def test_transports_without_support(self):
+        t = drivers.VisaTransport('GPIB0::22::INSTR')                        # not open
+        M.set_read_termination(t, '\n')                                      # nothing happens
         with self.assertRaises(TransportError):
-            t.read_raw(4)
+            M.read_raw(t, 4)
+        M.set_read_termination(Transport(), '\n')
+        with self.assertRaises(TransportError):
+            M.read_raw(Transport(), 4)
 
 
 class TestSimulatedBench(unittest.TestCase):
