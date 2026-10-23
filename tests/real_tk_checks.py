@@ -892,6 +892,31 @@ def checks_import_package():
     root.destroy()
 
 
+def checks_dsb_dialogs_fit():
+    """The Datasheet Builder's detail windows (Ranges, Specification table, Standards, Preview) are at least as tall as their content asks for,
+    so their button row is not cut off (datasheet_builder_ui.grow_to_fit)."""
+    import datasheet_builder_ui as U
+    import datasheet_builder_ui_model as DM
+    from tests import dsb_fixtures
+    t = Path(tempfile.mkdtemp())
+    root = tk.Tk()
+    ui.apply_theme(root)
+    root.geometry('200x100+1300+0')
+    win = U.GridEditorWindow(root, DM.GridModel(DM.Storage(t / 'u', t / 'r.sqlite3', who='real'), dsb_fixtures.dmm_34461a_like()))
+    win.geometry('1400x900+0+0')
+    pump(root, 30)
+    for name, opener in (('Ranges', win.open_ranges), ('Specification table', win.open_spec), ('Standards', win.open_standards), ('Preview', win.preview)):
+        w = opener()
+        pump(root, 30)
+        bad = [b.cget('text') for b in walk(w) if isinstance(b, ttk.Button) and not inside(w, b)]
+        check(f'dsb {name}: button row inside the window', not bad, bad)
+        check(f'dsb {name}: window as tall as its content', w.winfo_height() >= min(w.winfo_reqheight(), w.winfo_screenheight() - ui.px(110)) - 1,
+              (w.winfo_height(), w.winfo_reqheight()))
+        w.destroy()
+    win.destroy()
+    root.destroy()
+
+
 if __name__ == '__main__':
     try:
         checks_handheld_dialogs()
@@ -902,6 +927,7 @@ if __name__ == '__main__':
         checks_run_queue()
         checks_dsb_layout()
         checks_dsb_auto_collapse()
+        checks_dsb_dialogs_fit()
         checks_run_queue_app()
     except Exception:
         traceback.print_exc()

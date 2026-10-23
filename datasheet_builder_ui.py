@@ -1111,6 +1111,19 @@ def ask_new_sheet(parent):
     return None if dlg.cancelled else bool(dlg.handheld.get())
 
 
+def grow_to_fit(win):
+    """After ui.fit_window: make the window at least as tall as its content asks for (never taller than the screen), so the button row at the bottom
+    is not cut off when the fonts are larger than the fixed size assumed (seen on Preview and the Specification table under Xvfb)."""
+    try:
+        win.update_idletasks()
+        w, h = (int(v) for v in win.geometry().split('+')[0].split('x'))
+        need = min(win.winfo_reqheight(), win.winfo_screenheight() - ui.px(110))
+        if need > h:
+            win.geometry(f'{w}x{need}')
+    except (tk.TclError, ValueError, TypeError, AttributeError, IndexError):        # a window we cannot measure (no real Tk): leave its size alone
+        pass
+
+
 class PageDialog(tk.Toplevel):
     """One of the older detail pages (Ranges, Specification table, Sections, Details, Standards) in its own window over the sheet."""
 
@@ -1128,6 +1141,7 @@ class PageDialog(tk.Toplevel):
         self.bind('<Escape>', lambda _e: self.close())
         self.page.reload()
         ui.fit_window(self, width, height, min_w=720, min_h=420)
+        grow_to_fit(self)
 
     def reload(self):
         self.page.reload()
@@ -1199,6 +1213,7 @@ class PreviewWindow(tk.Toplevel):
         bar.pack(anchor='e', pady=(8, 0))
         self.bind('<Escape>', lambda _e: self.destroy())
         ui.fit_window(self, 1000, 560, min_w=700, min_h=360)
+        grow_to_fit(self)
 
     def save_pdf(self):
         m = self.owner.model
