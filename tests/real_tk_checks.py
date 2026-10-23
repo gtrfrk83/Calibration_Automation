@@ -361,6 +361,258 @@ def checks_handheld_dialogs():
     root.destroy()
 
 
+def checks_run_queue():
+    """The three run-queue windows on a real Tk: set-up, one-window reading entry for several meters, progress.  Screenshots when RQ_SHOTS is set."""
+    import handheld_dmm as HH
+    import run_queue as RQ
+    import run_queue_ui as RU
+    root = tk.Tk()
+    ui.apply_theme(root)
+    root.geometry('900x600+0+0')
+    pump(root)
+    spec = HH.load_spec('fluke_110_series_pv.json')
+    pts = HH.points_for(spec, '117')
+    p = next(x for x in pts if x['kind'] == 'DCV' and x['nominal'] == 5.0)
+
+    def shot(top, name):
+        out = os.environ.get('RQ_SHOTS')
+        if out:
+            from PIL import ImageGrab
+            pump(root, 10)
+            x, y, w, h = top.winfo_rootx(), top.winfo_rooty(), top.winfo_width(), top.winfo_height()
+            ImageGrab.grab(bbox=(x, y, x + w, y + h), xdisplay=os.environ['DISPLAY']).save(f'{out}/{name}_{THEME}.png')
+
+    def drive(open_it, act):
+        seen = {}
+
+        def go():
+            win = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel)][-1]
+            pump(root, 8)
+            win.focus_force()
+            pump(root, 5)
+            seen['clipped'] = [c for c in walk(win) if c.winfo_ismapped() and not inside(win, c)]
+            seen['win'] = win
+            act(win, seen)
+            root.after(4000, lambda: [w.destroy() for w in root.winfo_children() if isinstance(w, tk.Toplevel)])         # never hang
+        root.after(500, go)
+        seen['result'] = open_it()
+        return seen
+
+    def buttons(win):
+        return {b.cget('text'): b for b in walk(win) if isinstance(b, ttk.Button)}
+
+    # ---- set-up window
+    def summarize(meters, mode):
+        q = RQ.RunQueue()
+        for a, sn, t in meters:
+            q.add(a, sn, t)
+        info = RQ.summary(pts, q, spec['options'], mode=mode)
+        if mode == RQ.POINT_BY_POINT:
+            return dict(title=f'Saves {info["saved"]} calibrator settings', body=f'{info["points"]} points x {len(meters)} meters = {info["alone"]} settings one at a time; '
+                        f'point by point needs {info["settings"]}.', ok=True, kind='good')
+        return dict(title='One meter at a time', body=f'{info["alone"]} calibrator settings.', ok=True, kind='warn')
+    meters = [('4412', '21090134', 'M. Reyes'), ('4413', '21090187', 'M. Reyes'), ('4415', '21090240', 'M. Reyes')]
+
+    def setup_act(win, seen):
+        b = buttons(win)
+        check('queue setup: buttons present', {'+ Add meter', 'Edit', 'Remove', 'Move up', 'Move down', 'Start queue', 'Cancel'} <= set(b), sorted(b))
+        check('queue setup: nothing clipped', not seen['clipped'], seen['clipped'])
+        tree = next(w for w in walk(win) if isinstance(w, ttk.Treeview))
+        check('queue setup: three rows', len(tree.get_children()) == 3)
+        shot(win, 'queue_setup')
+        tree.selection_set('0')
+        b['Move down'].invoke()
+        pump(root, 3)
+        check('queue setup: move down', [tree.item(i, 'values')[1] for i in tree.get_children()] == ['4413', '4412', '4415'], [tree.item(i, 'values') for i in tree.get_children()])
+        tree.selection_set('2')
+        b['Remove'].invoke()
+        check('queue setup: remove', len(tree.get_children()) == 2)
+        radios = [w for w in walk(win) if isinstance(w, ttk.Radiobutton)]
+        radios[1].invoke()
+        pump(root, 3)
+        b['Start queue'].invoke()
+    r = drive(lambda: RU.ask_queue_setup(root, 'Run queue - Fluke 117', meters, RQ.POINT_BY_POINT, summarize, status_of=lambda a: 'Ready', default_tech='M. Reyes'), setup_act)
+    res = r['result']
+    check('queue setup: Start returns the edited queue and the chosen mode', res and res['action'] == 'start' and [m[0] for m in res['meters']] == ['4413', '4412']
+          and res['mode'] == RQ.ONE_AT_A_TIME, res)
+    r = drive(lambda: RU.ask_queue_setup(root, 'Run queue - Fluke 117', meters, RQ.POINT_BY_POINT, summarize), lambda w, s: buttons(w)['Cancel'].invoke())
+    check('queue setup: Cancel returns nothing', r['result'] is None)
+
+    # ---- the one-window reading entry
+    def judge(key, text):
+        padded = HH.pad_reading(p, text)
+        state, _ = HH.judge_numeric(p, padded)
+        return state, padded, '+0.001 V from nominal' if state == 'PASS' else ''
+    asset_rows = [('4412', '4412', ''), ('4413', '4413', ''), ('4415', '4415', '')]
+
+    def read(**kw):
+        return lambda: RU.ask_readings(root, p, len(pts), HH.output_text(p), 'Output is ON - allow the reading to settle, then read the meter.',
+                                       '4.9950 to 5.0050 V', asset_rows, unit='V', judge=judge, heading=HH.describe(p), **kw)
+
+    def reading_act(win, seen):
+        entries = [c for c in walk(win) if isinstance(c, ttk.Entry)]
+        check('readings: one box per meter', len(entries) == 3, len(entries))
+        check('readings: nothing clipped', not seen['clipped'], seen['clipped'])
+        labels = ' '.join(str(c.cget('text')) for c in walk(win) if isinstance(c, tk.Label))
+        check('readings: asset numbers shown', all(f'Asset {a}' in labels for a in ('4412', '4413', '4415')), labels[:300])
+        entries[0].focus_force()
+        entries[0].insert(0, '5.001')
+        pump(root, 5)
+        entries[1].focus_force()
+        entries[1].insert(0, '5.0')
+        pump(root, 5)
+        texts = ' '.join(str(c.cget('text')) for c in walk(win) if isinstance(c, tk.Label))
+        check('readings: live PASS and padding shown', 'PASS' in texts and 'padded to 5.000' in texts, texts)
+        entries[2].focus_force()
+        entries[2].insert(0, '9')
+        pump(root, 5)
+        texts = ' '.join(str(c.cget('text')) for c in walk(win) if isinstance(c, tk.Label))
+        check('readings: a failing meter shows FAIL', 'FAIL' in texts, texts)
+        shot(win, 'queue_reading')
+        entries[0].focus_force()
+        entries[0].event_generate('<Return>')
+        pump(root, 3)
+        check('readings: Enter moves to the next box', win.focus_get() is entries[1], win.focus_get())
+        entries[2].focus_force()
+        entries[2].event_generate('<Return>')                    # Enter in the last box records
+    r = drive(read(), reading_act)
+    got = r['result']
+    check('readings: Record all returns every meter\'s text', got['action'] == 'record' and got['texts'] == {'4412': '5.001', '4413': '5.0', '4415': '9'}, got)
+
+    def empty_act(win, seen):
+        buttons(win)['Record all  (Enter)'].invoke()
+        pump(root, 3)
+        texts = ' '.join(str(c.cget('textvariable')) and c.cget('text') for c in walk(win) if isinstance(c, tk.Label))
+        check('readings: empty boxes refuse to record', win.winfo_exists())
+        buttons(win)['Stop run'].invoke()
+    r = drive(read(), empty_act)
+    check('readings: Stop run', r['result']['action'] == 'stop')
+    r = drive(read(), lambda w, s: buttons(w)['Skip point'].invoke())
+    check('readings: Skip point', r['result']['action'] == 'skip')
+
+    def fill_act(win, seen):
+        b = buttons(win)
+        check('readings: demo button marked', any('simulated' in k for k in b), sorted(b))
+        shot(win, 'queue_reading_demo')
+        next(v for k, v in b.items() if 'simulated' in k).invoke()
+        pump(root, 3)
+        check('readings: Fill fills every box', all(c.get() for c in walk(win) if isinstance(c, ttk.Entry)))
+        b['Record all  (Enter)'].invoke()
+    r = drive(read(demo_fill=lambda i: f'5.00{i}'), fill_act)
+    check('readings: Fill result', r['result']['action'] == 'record' and len(r['result']['texts']) == 3, r['result'])
+
+    def noreading_act(win, seen):
+        boxes = [c for c in walk(win) if isinstance(c, ttk.Checkbutton)]
+        entries = [c for c in walk(win) if isinstance(c, ttk.Entry)]
+        entries[0].insert(0, '5.0')
+        entries[2].insert(0, '5.0')
+        boxes[1].invoke()
+        buttons(win)['Record all  (Enter)'].invoke()
+    r = drive(read(), noreading_act)
+    check('readings: a meter marked No reading records nothing', r['result']['texts'] == {'4412': '5.0', '4413': None, '4415': '5.0'}, r['result'])
+
+    # ---- progress window
+    rows = [dict(asset='4412', serial='', status='Running', recorded=7, failed=0, first_fail=None, total=40),
+            dict(asset='4413', serial='', status='Running', recorded=6, failed=0, first_fail=None, total=40),
+            dict(asset='4415', serial='', status='Running', recorded=6, failed=1, first_fail=3, total=40)]
+    prog = RU.QueueProgress(root)
+    prog.update('Point 7 of 40  -  all 3 meters', 7 / 40, rows)
+    pump(root, 10)
+    check('progress: window open', prog.alive())
+    check('progress: nothing clipped', not [c for c in walk(prog.win) if c.winfo_ismapped() and not inside(prog.win, c)])
+    shot(prog.win, 'queue_progress')
+    calls = []
+    prog.on_export, prog.on_show = (lambda: calls.append('export')), (lambda a: calls.append(a))
+    prog.update('Queue complete', 1.0, rows, finished=True)
+    pump(root, 10)
+    b = buttons(prog.win)
+    check('progress: finished offers export and close', 'Export all reports (PDF)...' in b and 'Close' in b, sorted(b))
+    b['Export all reports (PDF)...'].invoke()
+    buttons(prog.win)['Show'].invoke()
+    check('progress: callbacks', calls[0] == 'export' and calls[1] in ('4412', '4413', '4415'), calls)
+    shot(prog.win, 'queue_progress_done')
+    prog.close()
+    check('progress: close', not prog.alive())
+    prog.update('x', 0, rows)                                    # updating a closed window is harmless
+    root.destroy()
+
+
+def checks_run_queue_app():
+    """The real handheld window on a real Tk with a three-meter queue on the virtual bench: the drawer button and chip, then a whole point-by-point run with
+    the real reading / prompt windows driven by events (the Fill button), one report per meter."""
+    import time
+    import handheld_dmm as HH
+    import run_queue as RQ
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    home = os.environ.get('RQ_SHOTS')
+    patches = [mock.patch.object(messagebox, n, return_value=True) for n in ('askyesno', 'askokcancel', 'askyesnocancel', 'showinfo', 'showwarning', 'showerror')]
+    for pt in patches:
+        pt.start()
+    app = HH.App(root, '116', demo=True)
+    pump(root, 20)
+    btn = next((w for w in walk(root) if isinstance(w, ttk.Button) and w.cget('text') == 'Run queue...'), None)
+    check('app: the drawer has a Run queue... button', btn is not None)
+    check('app: no queue, no chip', not app.queue_pill.winfo_manager() and app.queue_chip_text() == '')
+    app.apply_queue([('4412', 'S1', 'Reyes'), ('4413', 'S2', 'Reyes'), ('4415', 'S3', 'Reyes')], RQ.POINT_BY_POINT)
+    pump(root, 5)
+    check('app: queue chip shown', app.queue_pill.winfo_manager() and 'Run queue: 3 meters' in str(app.queue_pill.cget('text')), app.queue_chip_text())
+    seen = {'windows': [], 'multi': 0, 'swap': 0}
+
+    def tick():
+        try:
+            wins = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel) and w.winfo_viewable() and not str(w.title()).startswith('Queue progress')]
+            for win in wins:
+                texts = {b.cget('text'): b for b in walk(win) if isinstance(b, ttk.Button)}
+                seen['windows'].append(win.title())
+                fill = next((b for t, b in texts.items() if 'simulated' in t), None)
+                if fill is not None:
+                    if len([e for e in walk(win) if isinstance(e, ttk.Entry)]) == 3:
+                        seen['multi'] += 1
+                    fill.invoke()
+                    pump(root, 2)
+                    next(b for t, b in texts.items() if t.startswith('Record')).invoke()
+                    continue
+                if 'Next meter' in win.title() or 'One meter at a time' in win.title():
+                    seen['swap'] += 1
+                go = next((b for t, b in texts.items() if 'continue' in t or t in ('OK', 'Yes')), None)
+                if go is not None:
+                    go.invoke()
+        except tk.TclError:
+            pass
+        root.after(120, tick)
+    root.after(300, tick)
+    app.run_all()
+    end = time.time() + 240
+
+    def watch():
+        if (not app.busy and app._q is None) or time.time() > end:
+            root.quit()
+        else:
+            root.after(250, watch)
+    root.after(1500, watch)
+    root.mainloop()                                              # the engine's worker threads post back to the main loop, so it must really run
+    pump(root, 10)
+    check('app: the run finished', not app.busy and app._q is None, app.status.get())
+    check('app: three-meter windows appeared', seen['multi'] > 10, seen['multi'])
+    check('app: the swap prompt appeared for the current points', seen['swap'] >= 3, seen['swap'])
+    for m in app.queue.meters:
+        check(f'app: asset {m.asset} has every point', len(m.found) == len(app.points), (len(m.found), len(app.points)))
+        check(f'app: asset {m.asset} is demo data', all(r['synthetic'] for r in m.found.values()))
+    check('app: shown results are meter 1', app.asset.get() == '4412')
+    if home:
+        from PIL import ImageGrab
+        root.update()
+        root.geometry('1320x800+0+0')
+        pump(root, 20)
+        ImageGrab.grab(bbox=(0, 0, 1320, 800), xdisplay=os.environ['DISPLAY']).save(f'{home}/queue_app_{THEME}.png')
+    check('app: no callback errors', not errs, errs)
+    for pt in patches:
+        pt.stop()
+    root.destroy()
+
+
 def checks_import_package():
     """'Import procedure package...' on a real Tk: the preview dialog (warning, origin, files, confirmation gate), the install, and the refusal view."""
     import json
@@ -481,6 +733,8 @@ if __name__ == '__main__':
         checks_edit_point_button()
         checks_manager_windows()
         checks_import_package()
+        checks_run_queue()
+        checks_run_queue_app()
     except Exception:
         traceback.print_exc()
         sys.exit(1)

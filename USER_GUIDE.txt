@@ -24,6 +24,35 @@ Running a verification
   4. Save progress (Ctrl+S) any time; Load progress (Ctrl+O) to carry on later.
   5. Export Report (PDF) (Ctrl+P): the "Calibration Data" report, named <asset>-<date>.
 
+Run queue: several handheld meters in one session (Fluke 110 series, 77 IV, 87V, 170 series, 287 / 289, Klein MM325)
+  Use it when you have several meters of the SAME model to verify. With one meter nothing changes: the procedure runs exactly as before.
+  1. Press "Connections", then "Run queue..." (under "Several meters"). The window lists the meters: asset number (typed, or chosen from Asset History,
+     which also fills the serial), serial, technician. Add meter / Edit / Remove / Move up / Move down. An asset can be listed once.
+  2. Choose how to run them.
+     Point by point (recommended): all meters are wired to the calibrator together. Each point is set ONCE (calibrator output, settle, OPERATE as usual);
+       then ONE window asks for the reading of meter 1, 2, 3, each box labelled with the asset number. Every box is judged at once against the point's limits
+       (PASS / FAIL, padding to the resolution as usual). Enter moves to the next box; Enter in the last box, or "Record all (Enter)", stores the point for every
+       meter. "No reading" on a row leaves that meter without a result for that point. "Skip point" and "Stop run" apply to the whole queue.
+       Hook-up, function and meter-setup prompts appear once per group and name every meter. The high-voltage question is asked once for each high-voltage point
+       (as before) and names every meter on the leads.
+       Points that cannot be shared are done one meter at a time, with a prompt that tells you why and which meter to connect: current points (the meters would
+       have to be in series), 4-wire resistance, VoltAlert, the 87V duty-cycle / square-wave points, and points set by hand. Voltage, resistance, frequency,
+       capacitance and temperature points are shared.
+     One meter at a time: the normal procedure runs for meter 1 to the end, then you are asked to swap in meter 2, and so on. Over the IR cable (287 / 289) this
+       is the only choice (one cable, one meter).
+     The window says what the choice saves, e.g. "40 points x 3 meters = 120 settings one at a time; point by point needs 50".
+  3. "Start queue" runs the pending points of every meter. "Save (do not start)" keeps the list; then Run All Pending, Run Shown Section and Rerun Selected use it
+     (a chip at the top says "Run queue: 3 meters"). Remove meters until one is left to go back to the single-meter run.
+  4. A small "Queue progress" window shows, per meter, how many points are recorded and how many failed. A failure on one meter never stops the others.
+  Each meter keeps its own results, As Found / As Left, saved progress, report and Asset History record. Nothing is merged between assets.
+  Reports: "Export Report (PDF)" offers one "Calibration Data" report for every meter (asset#-date, the technician from the queue); a file that already exists is
+  never overwritten. The progress window has the same "Export all reports (PDF)..." button when the run ends, and "Show" to look at one meter's results.
+  Resume: saved progress (checkpoint) is kept per meter. Run the queue again with the same assets and you are asked once whether to continue from it; points
+  already recorded are not measured again. Demo progress is never resumed by a real run.
+  Not supported: meters whose procedure modifications (Edit point, saved for an asset) differ from each other (the queue shares one set of points and limits; run them
+  separately), and user-built datasheets (Datasheet Builder).
+  Demo mode: the queue runs on the virtual bench; "Fill with a simulated reading (DEMO)" fills every box; reports are marked DEMO and nothing reaches Asset History.
+
 As Found and As Left
   "Collecting data" = As Found: the first measurements, before any adjustment.
   If the instrument was adjusted, switch to As Left and run the points again. The As Found readings are kept.
