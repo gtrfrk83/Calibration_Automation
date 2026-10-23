@@ -7,10 +7,11 @@
  "category": "Clamp Meter",
  "version": "1",
  "order": 35,
- "description": "Standalone calibration procedure",
+ "description": "Fluke 374 / 375 / 376 / 376-II Clamp Meter Performance Verification (family spec): this launcher runs the 376, 38 points",
  "launcher": "Procedures/Fluke_376_Verification.py",
  "engine": [
-  "handheld_dmm.py"
+  "handheld_dmm.py",
+  "iflex_option.py"
  ],
  "drivers": [
   "fluke_5560a"
@@ -22,6 +23,7 @@
   "code": [
    "Procedures/Fluke_376_Verification.py",
    "handheld_dmm.py",
+   "iflex_option.py",
    "hookups.py#fluke376",
    "drivers/base.py",
    "drivers/transport.py",
