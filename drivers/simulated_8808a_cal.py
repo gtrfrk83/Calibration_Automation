@@ -122,6 +122,13 @@ class Sim8808ACalTransport(Sim8808ATransport):
             return False
         return abs(value - ref) <= TOL * abs(ref) + 1e-12
 
+    def enter_panel(self, banner=False):
+        """The operator pressed the calibration button: the meter is in the calibration mode without any *TER. Whether the real meter then sends the banner is unknown (banner=True simulates it)."""
+        self.events.append(('PANEL',))
+        self.cal_mode, self.cal_func, self.cal_state, self.cal_error = True, None, None, False
+        if banner:
+            self._push('Select a Function or input EXIT to QUIT!')
+
     # ---- the dialog
     def handle(self, cmd):
         u = cmd.strip().upper()

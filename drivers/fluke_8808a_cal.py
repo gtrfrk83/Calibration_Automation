@@ -268,6 +268,17 @@ class Fluke8808ACal(Fluke8808A):
         self.in_cal, self.state, self.function, self.recommended = True, 'IDLE', None, None
         return reply
 
+    def adopt_manual_entry(self, quiet_s=None) -> Reply:
+        """The operator entered the calibration mode at the FRONT PANEL (calibration button). Nothing is written. Whatever the meter has already sent is read (read-only; the banner
+        'Select a Function or input EXIT to QUIT!' may or may not arrive: the manual does not say). The manual prints no query that shows the calibration mode, so it cannot be
+        verified here: the first function name must be answered with a recommended value, and select_function raises CalibrationError when it is not."""
+        if self.in_cal:
+            raise InstrumentError('The calibration mode is already open in this session.')
+        reply = self._read_burst(quiet_s=quiet_s)
+        self._fail_on_error(reply, 'the front-panel entry (pending text)')
+        self.in_cal, self.state, self.function, self.recommended = True, 'IDLE', None, None
+        return reply
+
     def select_function(self, function: str) -> Reply:
         """Select the function to calibrate; returns the reply holding the recommended value of its first point."""
         fn = str(function).upper()
@@ -279,7 +290,8 @@ class Fluke8808ACal(Fluke8808A):
         reply = self._read_burst(total_s=self.QUIET_S * 2)
         self._fail_on_error(reply, fn)
         if reply.recommended is None:
-            raise CalibrationError(f'{self.MODEL}: {fn} was not answered with a recommended calibration value (got: {" | ".join(reply.lines) or "nothing"}). Leave the mode with EXIT.', reply.lines)
+            raise CalibrationError(f'{self.MODEL}: {fn} was not answered with a recommended calibration value (got: {" | ".join(reply.lines) or "nothing"}). The meter is probably not in the calibration mode '
+                                   '(or *TER is needed over RS-232: the manual does not say). Nothing was changed. Leave the mode with EXIT / the front panel.', reply.lines)
         self.function, self.recommended, self.state = fn, reply.recommended, 'VALUE'
         return reply
 

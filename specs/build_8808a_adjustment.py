@@ -101,7 +101,7 @@ def group_of(func, range_no, zero, wire):
     if func in ('VAC', 'FREQ'):
         return 'VOLT'
     if func == 'OHMS':
-        return 'OHM4' if wire == 4 else 'OHM2'
+        return 'ZERO_SHORT' if zero else ('OHM4' if wire == 4 else 'OHM2')
     if zero:
         return 'ZERO_OPEN'
     if func == 'ADC':
@@ -121,8 +121,8 @@ def build():
             value, unit = num(text)
         if func == 'FREQ':
             src = {'kind': 'ACV', 'value': '1.9', 'unit': 'V', 'frequency': fmt(value)}      # 1.9 V at the test frequency (p. 3-13, p. 3-16 note)
-        elif zero and func != 'OHMS':
-            src = None                                                                         # short / open / calibrator in standby: no calibrator output
+        elif zero:
+            src = None                                                                         # short / open / calibrator in standby: no calibrator output (the zero ohm point uses the 4-wire short, owner's policy)
         else:
             src = {'kind': {'VDC': 'DCV', 'VAC': 'ACV', 'ADC': 'DCI', 'AAC': 'ACI', 'OHMS': 'OHM'}[func], 'value': fmt(value), 'unit': unit,
                    'frequency': '1000' if func == 'VAC' else '500' if func == 'AAC' else None}
@@ -149,7 +149,7 @@ def build():
         for i, t in enumerate(pts):
             add('FREQ', rno, t, printed_input='1.9 V@' + t, list_value=LIST['FREQ'][rno][i], desc='Frequency')
     # OHMS
-    add('OHMS', 1, '0 Ω', zero=True, wire=4, printed_input='0 Ω, 4Wire', desc='Zero point of OHMS, 200 Ω range')
+    add('OHMS', 1, '0 Ω', zero=True, wire=4, printed_input='0 Ω, 4Wire', desc='Zero point of OHMS, 200 Ω range; made with the low thermal 4-wire short on INPUT and SENSE (owner policy), no calibrator output')
     for rno, pts in OHMS:
         wire = 4 if rno <= 3 else 2
         for i, t in enumerate(pts):
@@ -203,8 +203,8 @@ def check(steps):
 
 GENERAL = [
     'This procedure changes the calibration constants of the Fluke 8808A. The manual: "Meter adjustments, or calibration, should be performed at the desired interval, or whenever a verification test indicates a Meter function is out of tolerance" (p. 3-11). Run the performance verification (As Found) first and again afterwards (As Left).',
-    'Warm-up: one half hour to full uncertainty specifications (General Specifications, p. 1-9). The equipment is that of Table 3-1 (p. 3-3): Fluke 5700A with 5725A amplifier (volts, current), Fluke 271 or equivalent for frequency, Fluke 5520A for the resistance adjustment, the low thermal 4-wire short (Fluke PN 2653346) for the DC zero points.',
-    'Method used here: "RS-232 Calibration (Manual)" (p. 3-16): *TER, then for each function the function name, an optional CALREF, the Enter key to confirm the value, the Enter key to start the point. The 8808A has no front-panel-free "save": the manual describes no save, lock, password or date command.',
+    'Warm-up: one half hour to full uncertainty specifications (General Specifications, p. 1-9). The equipment is that of Table 3-1 (p. 3-3): Fluke 5700A with 5725A amplifier (volts, current), Fluke 271 or equivalent for frequency, Fluke 5520A for the resistance adjustment, the low thermal 4-wire short (Fluke PN 2653346) for the DC volts and the zero ohm points.',
+    'Method used here: the dialog of "RS-232 Calibration (Manual)" (p. 3-16): for each function the function name, an optional CALREF, the Enter key to confirm the value, the Enter key to start the point. The calibration mode is entered by the operator at the front panel with the calibration button (owner policy); *TER, which the manual shows as the RS-232 entry, is an optional, UNVERIFIED path that is off by default. The manual describes no save, lock, password or date command.',
     'Once a function is selected, ALL of its calibration points must be calibrated before the calibration process is left; otherwise a CAL ERROR shows in the display (p. 3-16). Each function is therefore run as a whole.',
     'Current: use the mA input terminal for the low ranges (ADC ranges 1 to 4, AAC ranges 1 and 2) and the 10 A input terminal for the high ranges (ADC ranges 5 and 6, AAC ranges 3 and 4); for a ZERO point of a current function all test leads are removed (p. 3-16).',
     'Frequency: set the calibrator to 1.9 volts for the frequency calibration input (p. 3-16).',
@@ -221,7 +221,7 @@ EQUIPMENT = {
              ['Frequency', 'Function generator', 'Fluke 271 or equivalent', 'Requires frequency specification better than 0.0025 %'],
              ['Resistance adjust', 'Calibrator', 'Fluke 5520A', 'Requires resistance accuracy better than 0.0045 %']],
     'requirements': {'frequency_spec_pct': '0.0025', 'resistance_accuracy_pct': '0.0045'},
-    'note': 'Table 3-9 names the Fluke 5700A / 5725A for volts and current, the Fluke 5520A for frequency and resistance, and says the 5520A must be characterized with an 8508A on four DC current ranges (200 uA, 2000 uA, 200 mA, 2 A).',
+    'note': 'Table 3-9 names the Fluke 5700A / 5725A for volts and current, the Fluke 5520A for frequency and resistance, and says the 5520A must be characterized with an 8508A on four DC current ranges (200 uA, 2000 uA, 200 mA, 2 A); this lab characterizes with a Keysight / Agilent 3458A.',
 }
 
 

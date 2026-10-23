@@ -22,7 +22,7 @@ from drivers import fluke_8808a_cal as cal_driver  # noqa: E402
 from drivers.base import InstrumentError  # noqa: E402
 from drivers.simulated_8808a_cal import make_8808a_cal_bench  # noqa: E402
 
-ACKS = ('conditions', 'as_found', 'authorised', 'notice', 'ready')
+ACKS = ('conditions', 'as_found', 'authorised', 'notice', 'panel')
 CAL_NAME = {'5522A': 'Fluke 5522A', '5560A': 'Fluke 5560A', '5520A': 'Fluke 5520A'}
 
 
@@ -41,6 +41,7 @@ def open_session(*a, **k):
     s.prepare()
     for key in ACKS:
         s.acknowledge(key)
+    dmm_t.enter_panel()                                   # the operator presses the calibration button
     s.enter_calibration()
     return s, bench, cal_t, dmm_t
 
@@ -97,12 +98,29 @@ class SpecTests(unittest.TestCase):
     def test_characterized_ranges(self):
         self.assertEqual({s['n'] for s in adj.STEPS if s['characterize']}, set(range(101, 109)) | set(range(113, 121)))
 
-    def test_zero_points_need_no_output_except_ohms(self):
+    def test_zero_points_need_no_calibrator_output_ohms_zero_uses_the_4_wire_short(self):
         zeros = [s for s in adj.STEPS if s['zero']]
         self.assertEqual({s['function'] for s in zeros}, {'VDC', 'VAC', 'OHMS', 'AAC', 'ADC'})
         for s in zeros:
-            self.assertEqual(s['source'] is None, s['function'] != 'OHMS')
-        self.assertEqual(sum(1 for s in adj.STEPS if s['source']), 120)
+            self.assertIsNone(s['source'])
+        s055 = adj.STEP_BY_ID['S055']
+        self.assertEqual((s055['function'], s055['group'], s055['wire']), ('OHMS', 'ZERO_SHORT', 4))
+        self.assertIn('4-wire short', adj.hookup_text(s055, '5522A'))
+        self.assertIn('not the calibrator', adj.hookup_text(s055, '5522A'))
+        self.assertEqual(sum(1 for s in adj.STEPS if s['source']), 119)
+        self.assertEqual(len(adj.requests()), 119)
+
+    def test_characterized_steps_name_the_3458a(self):
+        for s in adj.STEPS:
+            if s['characterize']:
+                self.assertIn('3458A', adj.hookup_text(s, '5522A'))
+
+    def test_no_diagram_requirement(self):
+        self.assertFalse(hasattr(adj, 'find_diagram'))
+        for name in ('Procedures/Fluke_8808A_Adjustment.py', 'fluke8808a_adjustment.py'):
+            text = (ROOT / name).read_text(encoding='utf-8')
+            self.assertNotIn('not installed', text)
+            self.assertNotIn('find_diagram', text)
 
     def test_frequency_steps_source_1v9(self):
         for s in adj.function_steps('FREQ'):
@@ -152,12 +170,49 @@ class DriverTests(unittest.TestCase):
             self.assertEqual(cmd.risk, 'locked')                   # never overridable
         self.assertTrue(all(c.ref for c in cmds.values()))
 
-    def test_exactly_one_star_ter_and_enter_dialog(self):
+    def test_no_star_ter_by_default_and_never_twice(self):
         s, bench, cal_t, dmm_t = open_session()
         s.start_function(confirmed=True)
-        self.assertEqual([e for e in dmm_t.events if e[0] == 'TER'], [('TER',)])
+        self.assertEqual([e for e in dmm_t.events if e[0] == 'TER'], [])
+        self.assertEqual(dmm_t.events[0], ('PANEL',))
+        self.assertIn('VERIFIED', [r[3] for r in s.audit.events() if r[2] == 'ENTER CAL'])     # the first function name answered
         with self.assertRaises(InstrumentError):
             s.dmm.enter_cal_mode()
+
+    def test_optional_star_ter_path_is_off_by_default_and_sends_once(self):
+        s, bench, cal_t, dmm_t = new_session()
+        s.reset(confirm=lambda _t: True)
+        for key in ACKS:
+            s.acknowledge(key)
+        s.enter_calibration(use_ter=True)
+        self.assertEqual([e for e in dmm_t.events if e[0] == 'TER'], [('TER',)])
+        self.assertTrue(s.entry_verified)
+
+    def test_front_panel_entry_with_banner_or_without(self):
+        for banner in (False, True):
+            s, bench, cal_t, dmm_t = new_session()
+            s.reset(confirm=lambda _t: True)
+            for key in ACKS:
+                s.acknowledge(key)
+            dmm_t.enter_panel(banner=banner)
+            s.enter_calibration()
+            self.assertEqual(('; the banner arrived' in ' '.join(r[4] for r in s.audit.events() if r[2] == 'ENTER CAL' and r[3] == 'OPERATOR')), banner)
+            s.start_function(confirmed=True)
+            self.assertEqual(dmm_t.cal_func, 'VDC')
+
+    def test_operator_says_entered_but_meter_is_not_in_calibration(self):
+        s, bench, cal_t, dmm_t = new_session()
+        s.reset(confirm=lambda _t: True)
+        for key in ACKS:
+            s.acknowledge(key)
+        s.enter_calibration()                                      # no enter_panel: the operator was wrong
+        with self.assertRaises(cal_driver.CalibrationError):
+            s.start_function(confirmed=True)
+        self.assertFalse(s.entry_verified)
+        self.assertEqual(enters(dmm_t, 1) + enters(dmm_t, 2), [])
+        text = s.abort('test')
+        self.assertIn('front panel', text)
+        self.assertEqual(dmm_t.constants, {})
 
     def test_unknown_function_and_wrong_state_refused_without_sending(self):
         s, bench, cal_t, dmm_t = open_session()
@@ -238,9 +293,10 @@ class ConfirmationTests(unittest.TestCase):
             with self.assertRaises(adj.AdjustmentError):
                 s.enter_calibration()
             s.acknowledge(key)
-        self.assertEqual([e for e in dmm_t.events if e[0] == 'TER'], [])
+        self.assertEqual(dmm_t.events, [])                            # nothing is sent to enter the calibration mode
+        dmm_t.enter_panel()
         s.enter_calibration()
-        self.assertEqual(len([e for e in dmm_t.events if e[0] == 'TER']), 1)
+        self.assertEqual([e for e in dmm_t.events if e[0] == 'TER'], [])
 
     def test_function_start_needs_confirmation(self):
         s, bench, cal_t, dmm_t = open_session()
@@ -494,7 +550,7 @@ class FailureTests(unittest.TestCase):
                 for key in ACKS:
                     s.acknowledge(key)
                 with self.assertRaises(Exception):
-                    s.enter_calibration()
+                    s.enter_calibration(use_ter=True)
                 self.assertFalse(s.cal_mode)
                 self.assertFalse(dmm_t.cal_mode)
                 self.assertIn('FAILED', [r[3] for r in s.audit.events() if r[2] == 'ENTER CAL'])
@@ -626,7 +682,7 @@ class SidecarTests(unittest.TestCase):
         for must in ('fluke8808a_adjustment.py', 'adjustment_audit.py', 'drivers/fluke_8808a_cal.py', 'drivers/fluke_8808a.py', 'drivers/fluke_5560a.py'):
             self.assertIn(must, doc['fingerprint']['code'])
         self.assertIn('specs/fluke_8808a_adjustment.json', doc['fingerprint']['spec'])
-        self.assertEqual(doc['hookup']['diagram_prefixes'], ['hook_8808A'])
+        self.assertEqual(doc['hookup']['diagram_prefixes'], [])          # no hook-up diagrams (owner decision)
 
     def test_verification_fingerprint_does_not_include_the_new_driver(self):
         doc = json.loads((ROOT / 'Procedures' / 'Fluke_8808A_Verification.procedure.json').read_text(encoding='utf-8'))

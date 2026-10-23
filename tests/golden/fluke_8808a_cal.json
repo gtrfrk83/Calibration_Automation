@@ -502,6 +502,51 @@
    ]
   },
   {
+   "call": "'VDC'",
+   "case": "Fluke8808ACal.select_function[front-panel entry missing]",
+   "log": [],
+   "method": "Fluke8808ACal.select_function",
+   "result": "raised InstrumentError: A function can only be selected in the calibration mode while the meter is idle (not inside another function).",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.adopt_manual_entry[banner]",
+   "log": [
+    "8808A|<<|Select a Function or input EXIT to QUIT!"
+   ],
+   "method": "Fluke8808ACal.adopt_manual_entry",
+   "result": "returned Reply(lines=['Select a Function or input EXIT to QUIT!'], prompts=[], recommended=None, messages=[], wait=False, idle=True, unknown=[])",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "Select a Function or input EXIT to QUIT!"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.adopt_manual_entry[twice]",
+   "log": [],
+   "method": "Fluke8808ACal.adopt_manual_entry",
+   "result": "raised InstrumentError: The calibration mode is already open in this session.",
+   "wire": []
+  },
+  {
    "call": "",
    "case": "Fluke8808ACal.start_point[no completion]",
    "log": [

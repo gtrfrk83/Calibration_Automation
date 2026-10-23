@@ -8,7 +8,7 @@
  "kind": "adjustment",
  "version": "1",
  "order": 33,
- "description": "Guided adjustment (calibration) of the 8808A by the RS-232 calibration dialog of the Calibration Manual, Table 3-9, 124 steps (Fluke 5522A, 5560A or 5520A as the source)",
+ "description": "Guided adjustment (calibration) of the 8808A by the RS-232 calibration dialog of the Calibration Manual, Table 3-9, 124 steps (calibration mode entered at the front panel; Fluke 5522A, 5560A or 5520A as the source)",
  "launcher": "Procedures/Fluke_8808A_Adjustment.py",
  "engine": [
   "fluke8808a_adjustment.py",
@@ -39,9 +39,7 @@
  },
  "hookup": {
   "meter": null,
-  "diagram_prefixes": [
-   "hook_8808A"
-  ]
+  "diagram_prefixes": []
  },
  "seed_verified": false,
  "own_files": [

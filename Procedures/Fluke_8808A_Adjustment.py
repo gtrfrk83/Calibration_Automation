@@ -55,6 +55,7 @@ class App(virtualbench.VirtualMixin):
             self.cal_interface.set(adj.CAL_INTERFACES[0])
         self.cal_addr = tk.StringVar(value=s.get('cal_addr', adj.CAL_PORT_DEFAULT[self.cal_interface.get()]))
         self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
+        self.use_ter = tk.BooleanVar(value=False)         # optional, UNVERIFIED: also send *TER once (off by default)
         self.status = tk.StringVar()
         self.next_hint = tk.StringVar()
         self.cal_note = tk.StringVar()
@@ -117,6 +118,8 @@ class App(virtualbench.VirtualMixin):
         ttk.Combobox(link, textvariable=self.cal_baud, values=['9600', '19200', '38400', '4800', '2400'], width=7, state='readonly').grid(row=1, column=7, padx=(6, 0), pady=(6, 0), sticky='w')
         ttk.Label(link, textvariable=self.cal_note, style='Muted.TLabel', wraplength=ui.px(900), justify='left').grid(row=2, column=0, columnspan=8, sticky='w', pady=(6, 0))
 
+        ttk.Checkbutton(link, text='Also send *TER once (UNVERIFIED, off by default: calibration mode is entered at the front panel)', variable=self.use_ter).grid(row=3, column=0, columnspan=8, sticky='w', pady=(4, 0))
+
         hintrow = ttk.Frame(body)
         hintrow.pack(fill='x', pady=(10, 4))
         ttk.Label(hintrow, text='NEXT', style='MetricCap.TLabel').pack(side='left')
@@ -126,7 +129,7 @@ class App(virtualbench.VirtualMixin):
         bar.pack(side='bottom', fill='x', pady=(8, 0))
         self.btn_connect = ttk.Button(bar, text='Connect', command=self.connect)
         self.btn_start = ttk.Button(bar, text='Start adjustment record', command=self.start_record)
-        self.btn_enter = ttk.Button(bar, text='Enter calibration mode', command=self.enter_calibration)
+        self.btn_enter = ttk.Button(bar, text='Calibration mode entered', command=self.enter_calibration)
         self.btn_run = ttk.Button(bar, text='Run next point', style='Accent.TButton', command=self.run_next)
         self.btn_finish = ttk.Button(bar, text='Finish (EXIT)', command=self.finish)
         self.btn_abort = ttk.Button(bar, text='Abort', style='Danger.TButton', command=self.abort)
@@ -214,7 +217,7 @@ class App(virtualbench.VirtualMixin):
         elif s is None or finished:
             hint = 'Enter instrument ID, serial number and technician, then press "Start adjustment record" (this resets both instruments; the calibration is not touched).'
         elif not open_:
-            hint = 'Press "Enter calibration mode": you confirm warm-up, the As Found verification and your authority first. *TER is sent once.'
+            hint = 'Press "Calibration mode entered": you confirm warm-up, the As Found verification and your authority, then enter the calibration mode at the front panel (calibration button) and confirm.'
         elif s.all_done():
             hint = 'Every point of the scope is done. Press "Finish (EXIT)", then run the As Left performance verification.'
         else:
@@ -345,10 +348,9 @@ class App(virtualbench.VirtualMixin):
             [('Warm-up', 'The 8808A must have warmed up for at least one half hour (Calibration Manual p. 1-9); allow the calibrator its own warm-up.'),
              ('Environment', 'Ambient conditions as the manual requires (p. 3-2).'),
              ('As Found', 'The performance verification (As Found) has been run and its report kept.'),
-             ('Calibration enable', 'The manual describes the CAL seal and the Cal Enable button only for the front-panel method (p. 3-11) and does not say whether *TER needs them. '
-                                    'Do what your lab procedure requires; if *TER is refused, nothing has been changed.')],
+             ('Calibration mode', 'NEXT you enter the calibration mode yourself, at the front panel of the 8808A, with the calibration button. This program does not enter it for you.')],
             facts=[('Instrument', f'{self.asset.get().strip()}  (serial {self.serial.get().strip()})'), ('Calibrator', self.cal_model.get())],
-            caution='Next you confirm your authority; *TER is then sent once.', ok='All confirmed')
+            caution='Next you confirm your authority.', ok='All confirmed')
         if not ok:
             self.status.set('Not entered: conditions were not confirmed.')
             return
@@ -356,22 +358,34 @@ class App(virtualbench.VirtualMixin):
         s.acknowledge('as_found', 'As Found performance verification done')
         if not messagebox.askyesno('THIS CHANGES THE INSTRUMENT CALIBRATION',
                                    'I am authorised to adjust this instrument and understand that every point I start changes the calibration of the 8808A. There is no SAVE and no way '
-                                   'to undo a point; a function that is started must be completed.\n\nEnter the calibration mode?', icon='warning'):
+                                   'to undo a point; a function that is started must be completed.\n\nContinue?', icon='warning'):
             self.status.set('Not entered.')
             return
         s.acknowledge('authorised', 'operator authorised to adjust')
         s.acknowledge('notice', 'calibration-change notice acknowledged')
-        s.acknowledge('ready', 'meter ready for the calibration mode')
+        use_ter = bool(self.use_ter.get())
+        if not ui.confirm_steps(self.root, 'Operator step: enter calibration mode', 'Enter the calibration mode at the front panel',
+                                [('Front panel', 'Enter calibration mode on the front panel of the 8808A using the calibration button, then confirm here.'),
+                                 ('What the program can check', 'The manual prints no query that shows the calibration mode, so the program cannot verify it before the first function. ' +
+                                  'It will send the first function name only after you confirm; if the meter does not answer it with a recommended value, nothing has been changed and you stop.')]
+                                + ([('*TER (optional)', '*TER will ALSO be sent once after you confirm (UNVERIFIED: the manual shows it as the RS-232 entry, p. 3-16, but does not say whether it works without the front-panel entry).')] if use_ter else []),
+                                facts=[('Instrument', f'{self.asset.get().strip()}  (serial {self.serial.get().strip()})')],
+                                caution='Confirm only when the meter is in the calibration mode.', ok='Calibration mode entered - continue'):
+            self.status.set('Not entered: the front-panel entry was not confirmed.')
+            return
+        s.acknowledge('panel', 'operator entered the calibration mode at the front panel (calibration button)')
+        if self.virtual:
+            self.io.dmm.t.enter_panel()                       # demo only: the simulated meter 'is put' in the calibration mode as the operator would at the panel
         self._begin()
         try:
-            s.enter_calibration()
+            s.enter_calibration(use_ter=use_ter)
         except Exception as exc:
             self.status.set('Not entered: ' + str(exc).splitlines()[0])
             messagebox.showerror('Calibration mode not entered', str(exc))
             return
         finally:
             self._end()
-        self.status.set('Calibration mode OPEN. Press "Run next point".')
+        self.status.set('Calibration mode confirmed by you (not verifiable by the program until the first function). Press "Run next point".')
 
     # ------------------------------------------------------------------ one point
     def ask_value(self, title, prompt, default):
@@ -400,13 +414,10 @@ class App(virtualbench.VirtualMixin):
     def _hookup(self, st):
         s = self.session
         group = st['group']
-        image = adj.find_diagram(s.cal_key, group)
         facts = [('Step', f'{st["id"]}  {st["function"]}  {st["title"]}'), ('Calibrator output', adj.source_text(st)), ('Manual page', st['page'])]
-        if image is None and st['source']:
-            facts.append(('Diagram', f'not installed (expected diagrams/hook_8808A_ADJ_{s.cal_key}_{group}.png)'))
         steps = [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', adj.hookup_text(st, s.cal_key))]
         return ui.confirm_steps(self.root, 'Rewire / verify before the point', f'Connect for {adj.GROUP_TITLE.get(group, group)}', steps, facts=facts,
-                                caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image)
+                                caution='Continue only after physically verifying the connections.', ok='Connections verified - continue')
 
     def run_next(self):
         s = self.session
@@ -531,7 +542,7 @@ class App(virtualbench.VirtualMixin):
                 return
             unexpected = True
         if st['characterize']:
-            text = self.ask_value('Characterized value', f'{st["id"]}  {st["title"]}\n\nThe manual says this range needs the calibrator characterized (8508A). Enter the characterized value '
+            text = self.ask_value('Characterized value', f'{st["id"]}  {st["title"]}\n\nThe manual says this range needs the calibrator characterized (it names an 8508A; this lab uses the Keysight 3458A). Enter the value measured with the 3458A '
                                   f'(at most 6 significant digits, near {info["meter"]:g}); leave it empty to use the calibrator\'s nominal value.', '')
             if text is None:
                 return

@@ -21,7 +21,5 @@ GROUP (one picture per separate hook-up; Calibration Manual Figures 3-1 to 3-5 s
 
 ADJUSTMENT (Procedures/Fluke_8808A_Adjustment.py)
 -------------------------------------------------
-The guided adjustment shows a picture at every change of wiring, with the same GROUPs (the DC volts zero uses ZERO_SHORT; the AC volts zero and the zero ohms point use the VOLT / OHM groups with the calibrator in STANDBY / at 0 ohm; the two current zeros use ZERO_OPEN).
-Calibrator external sense is OFF for volts and ON for the four-wire ohms steps. The calibrator buttons / terminals are named in the dialog text.
-Search order: hook_8808A_ADJ_<cal>_<G>  ->  hook_8808A_ADJ_<G>  ->  hook_8808A_<cal>_<G>  ->  hook_8808A_<G>   (the verification pictures are used when no ADJ picture exists; a 5520A uses the 5522A pictures)
-The picture of one point shows the wiring only; it does not say whether the meter is in the calibration mode.
+No hook-up diagrams are needed or used by the guided adjustment (owner decision): the hook-up dialog shows text wording only, names the manual's figures (3-1 to 3-5) and never looks for a PNG or warns about a missing one.
+Do not add placeholder files for it. (The verification pictures above are unchanged.) The wiring groups the text covers: ZERO_SHORT (DC volts zero AND the zero ohm point, both with the low thermal 4-wire short), VOLT, OHM4, OHM2, ZERO_OPEN, IMA, I2A, I10A.
