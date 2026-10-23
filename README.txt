@@ -176,6 +176,13 @@ Procedures/Agilent_34410A_Verification.py
                   calibrator suitability (TAR / TUR): specs/34410a_standards_suitability.md. Demo (virtual instruments):
                   python Procedures/Agilent_34410A_Verification.py --demo      Not included: adjustment, self-test.
 
+Procedures/Agilent_34411A_Verification.py
+                  The same procedure for the Agilent / Keysight 34411A (a model of the 34410A family: the Service Guide tables are headed "34410A/11A" and are the
+                  same for both, so one spec, one engine and one driver module serve both; the launcher only selects the model). 103 points, 86 by default, GPIB or USB,
+                  Fluke 5560A / 5522A / 5520A, same limits. The 34411A-only features (digitizing, pre-trigger, 1 million readings of memory) are not part of the
+                  verification and are not used. Hook-up pictures: diagrams/hook_34411a_* first, then the 34410A names (README_34410a.txt).
+                  Demo: python Procedures/Agilent_34411A_Verification.py --demo      Not included: the L4411A (no Front/Rear switch), adjustment, self-test.
+
 Fluke 110 / 113 / 114 / 115 / 116 / 117 handheld meters (manual-reading procedures)
 -------------------------------------------------------------------------------
 Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179, Klein MM325)

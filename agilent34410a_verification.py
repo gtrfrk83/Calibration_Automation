@@ -1,4 +1,4 @@
-"""Keysight / Agilent 34410A 6 1/2-digit multimeter performance verification, driven from the manufacturer's tables.
+"""Keysight / Agilent 34410A and 34411A 6 1/2-digit multimeter performance verification, driven from the manufacturer's tables.
 
 Test points and limits are NOT written in this file: they are loaded from specs/keysight_34410a_pv.json, built by specs/build_34410a_spec.py from the
 Keysight 34410A/11A/L4411A Service Guide chapter 3 "Verification Tests" (printed pp. 68-87).  The tables print three intervals (24 hour, 90 day, 1 year); the
@@ -8,6 +8,11 @@ Never run unattended: wiring confirmations are required.
 
     import agilent34410a_verification
     agilent34410a_verification.main()           # what Procedures/Agilent_34410A_Verification.py does
+    agilent34410a_verification.main(model='34411A')   # what Procedures/Agilent_34411A_Verification.py does
+
+Model family: the 34410A and the 34411A share ONE spec (specs/keysight_34410a_pv.json: the Service Guide verification tables are the same for both, printed on the
+same pages "34410A/11A") and one engine.  The spec's models{} block carries the per-model flags; configure(model) selects the model.  The 34410A is the default and
+behaves exactly as before.  The 34411A-only features (digitizing, pre-trigger, 1 million reading memory) are not part of the verification and are not used.
 """
 import json, math, sys, threading, time, tkinter as tk
 from datetime import datetime
@@ -59,16 +64,37 @@ for _p in POINTS:
     _p['group'] = group_of(_p)
 
 
+MODELS = tuple(SPEC['models'])           # ('34410A', '34411A'): the per-model flags are in the spec's models{} block
+
+
+def model_info(model=None):
+    """The spec's flags for one model (default: the model selected now)."""
+    return SPEC['models'][model or MODEL]
+
+
 def configure(model=MODEL):
-    """The engine has one model; kept so the engine matches the shape of the other bench-DMM engines."""
+    """Select the model of the family.  The points and limits are the same for every model (one spec); the model decides the title, the *IDN? the driver
+    accepts, the settings / checkpoint names and the wording of the prompts and the report."""
+    global MODEL
+    if model not in SPEC['models']:
+        raise ValueError(f'unknown model {model!r}: expected one of {", ".join(SPEC["models"])}')
+    MODEL = model
     return MODEL
+
+
+def dmm_class(model=None):
+    """The driver class of a model of the family."""
+    return drivers.Keysight34411A if (model or MODEL) == '34411A' else drivers.Keysight34410A
 
 
 def find_diagram(cal, group):
     """Hook-up picture for a wiring group: diagrams/hook_34410a_<cal>_<GROUP>.png, then diagrams/hook_34410a_<GROUP>.png (see diagrams/README_34410a.txt).
-    The 5520A uses the 5522A picture."""
+    The 5520A uses the 5522A picture.  The 34411A looks for its own hook_34411a_ names first (same front panel and terminals: the 34410A pictures serve it)."""
     cal = '5522A' if cal == '5520A' else cal
-    for name in (f'hook_34410a_{cal}_{group}', f'hook_34410a_{group}'):
+    names = [f'hook_34410a_{cal}_{group}', f'hook_34410a_{group}']
+    if MODEL == '34411A':
+        names = [f'hook_34411a_{cal}_{group}', f'hook_34411a_{group}'] + names
+    for name in names:
         path = HERE / 'diagrams' / f'{name}.png'
         if path.exists():
             return path
@@ -104,7 +130,7 @@ def judge(p, reading) -> bool:
 
 
 class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
-    """Bench I/O: the 34410A under test and the calibrator, both through the instrument drivers."""
+    """Bench I/O: the 34410A / 34411A under test and the calibrator, both through the instrument drivers."""
 
     def __init__(self, dmm_address, cal_address, cal_model='Fluke 5560A', cal_baud=9600, interface='GPIB', transports=None, mods=None, virtual=False):
         self.log = drivers.CommandLog()
@@ -116,7 +142,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         else:
             dmm_t = drivers.open_visa(to_visa(dmm_address, interface), timeout=30)       # GPIB / USB (USBTMC) / LAN: the VISA resource string decides, no serial settings
             cal_t = drivers.open_visa(to_cal_visa(cal_address), timeout=20, baud=cal_baud)
-        self.dmm = drivers.Keysight34410A(dmm_t, self.log, label=MODEL)
+        self.dmm = dmm_class()(dmm_t, self.log, label=MODEL)
         self.cal = cal_cls(cal_t, self.log, label=cal_name)
         try:
             self.cal.open(verify_model=True)
@@ -223,9 +249,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.results = {}
         self.pm_init('a34410a', MODEL, demo=demo, lists=[POINTS])     # procedure modifications: saved overrides for this model
         ui.apply_theme(root)
-        root.title('Keysight 34410A | Performance Verification' + (' [DEMO]' if demo else ''))
+        root.title(f'Keysight {MODEL} | Performance Verification' + (' [DEMO]' if demo else ''))
         ui.fit_window(root, 1320, 820, min_w=900, min_h=640)
-        self.settings = ui.Settings('Keysight34410A')
+        self.settings = ui.Settings(f'Keysight{MODEL}')
         s = self.settings
         self.asset = tk.StringVar(); self.serial = tk.StringVar()
         self.interface = tk.StringVar(value=s.get('interface', 'GPIB') if s.get('interface', 'GPIB') in INTERFACES else 'GPIB')
@@ -288,7 +314,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     # ------------------------------------------------------------------ layout
     def _build_ui(self):
         root = self.root
-        sh = self.shell = ui_shell.Shell(root, 'Keysight 34410A  -  Performance Verification',
+        sh = self.shell = ui_shell.Shell(root, f'Keysight {MODEL}  -  Performance Verification',
                                          f'Test points from the 34410A/11A/L4411A Service Guide, pp. 68-87  |  {len(POINTS)} points in the spec  |  GPIB or USB',
                                          demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
         self.status = sh.status_var
@@ -312,15 +338,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.opt_check.grid(row=2, column=0, columnspan=2, sticky='w', pady=(2, 10))
         ttk.Separator(d).grid(row=3, column=0, columnspan=2, sticky='ew', pady=(0, 10))
         r = 4
-        ttk.Label(d, text='34410A interface').grid(row=r, column=0, sticky='w', pady=4)
+        ttk.Label(d, text=f'{MODEL} interface').grid(row=r, column=0, sticky='w', pady=4)
         self.iface_combo = ttk.Combobox(d, textvariable=self.interface, values=list(INTERFACES), width=10, state='readonly')
         self.iface_combo.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4)
         self.iface_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_interface()); r += 1
-        ttk.Label(d, text='34410A address / resource').grid(row=r, column=0, sticky='w', pady=4)
+        ttk.Label(d, text=f'{MODEL} address / resource').grid(row=r, column=0, sticky='w', pady=4)
         self.dmm_entry = ttk.Combobox(d, textvariable=self.dmm_addr, state='normal', width=34)
         self.dmm_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1
-        ttk.Label(d, text='GPIB: the 34410A factory address is 22 (UTILITY MENU > REMOTE I/O > GPIB). USB: nothing to set on the meter; the resource is '
-                          'USB0::<mfgID>::<modID>::<serial>::INSTR (UTILITY MENU > REMOTE I/O > USB > USB ID, or Find instruments). The 34410A has no RS-232. '
+        ttk.Label(d, text=f'GPIB: the {MODEL} factory address is 22 (UTILITY MENU > REMOTE I/O > GPIB). USB: nothing to set on the meter; the resource is '
+                          'USB0::<mfgID>::<modID>::<serial>::INSTR (UTILITY MENU > REMOTE I/O > USB > USB ID, or Find instruments). ' + f'The {MODEL} has no RS-232. ' +
                           'The IDs in the example are not verified for your bench.',
                   style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=r, column=0, columnspan=2, sticky='w', pady=(2, 8)); r += 1
         ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
@@ -369,7 +395,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.dmm_entry.configure(values=())
         if not self.demo: self._save_settings()
 
-    def pm_driver_classes(self): return (drivers.Keysight34410A, *[cls for _n, cls in CALIBRATORS.values()])
+    def pm_driver_classes(self): return (dmm_class(), *[cls for _n, cls in CALIBRATORS.values()])
 
     def pm_plan_point(self, p):
         """The commands IO.measure sends for point p: a dry run of that routine on the simulated bench (procmods_plan)."""
@@ -378,7 +404,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         cal_model = self.cal_model.get() if self.cal_model.get() in CALIBRATORS else 'Fluke 5560A'
 
         def build(mods):
-            _bench, ft, dt = make_34410a_bench(CALIBRATORS[cal_model][0], self.interface.get())
+            _bench, ft, dt = make_34410a_bench(CALIBRATORS[cal_model][0], self.interface.get(), MODEL)
             dt.terminals = 'REAR' if p.get('terminal') == 'REAR' else 'FRON'          # the Front/Rear switch the technician would set
             return IO('sim', 'sim', cal_model, 9600, self.interface.get(), transports=(dt, ft), mods=mods)
         return procmods_plan.run_plan(self.pm_state, build, lambda io: io.measure(p))
@@ -450,20 +476,20 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if g == 'ZERO_OPEN':
             return f'Select the {p["terminal"]} terminals; leave the current (I) input OPEN, nothing connected. The calibrator stays in STANDBY.'
         if g in ('DCV', 'ACV'):
-            return base + f'Calibrator {out} to the 34410A front INPUT HI / LO; low-thermal connections for DC volts on the 100 mV and 1 V ranges. Front/Rear switch on FRONT.'
+            return base + f'Calibrator {out} to the {MODEL} front INPUT HI / LO; low-thermal connections for DC volts on the 100 mV and 1 V ranges. Front/Rear switch on FRONT.'
         if g in ('DCI', 'ACI'):
             amps = 'VI AUX output and OUTPUT LO' if five60 else 'AUX HI and AUX LO'
-            return (f'Calibrator {amps} to the 34410A front 3 A (I) terminal and INPUT LO. Check the calibrator range, its fuse and the 34410A 3 A, 250 V fuse first. '
+            return (f'Calibrator {amps} to the {MODEL} front 3 A (I) terminal and INPUT LO. Check the calibrator range, its fuse and the {MODEL} 3 A, 250 V fuse first. '
                     'Front/Rear switch on FRONT.')
         if g == 'OHM4':
             comp = ('The program sets the calibrator impedance compensation (ZCOMP) to WIRE4 below 110 kohm and NONE from 110 kohm up.' if self.cal_key == '5522A' else
                     f'Set the {self.cal_key}\'s own 4-wire (external sense) mode for the points below 110 kohm; the program sends no compensation command to a {self.cal_key}.')
-            return (f'4-wire: calibrator {out} (force) to the 34410A INPUT HI / LO and the calibrator SENSE HI / LO to the 34410A SENSE (Sense Ohm 4W) HI / LO; '
+            return (f'4-wire: calibrator {out} (force) to the {MODEL} INPUT HI / LO and the calibrator SENSE HI / LO to the {MODEL} SENSE (Sense Ohm 4W) HI / LO; '
                     f'calibrator external sense ON. {comp} Front/Rear switch on FRONT.')
         if g == 'OHM2':
-            return f'Calibrator {out} to the 34410A INPUT HI / LO; calibrator external sense OFF (2-wire output); shielded cable. 2-wire ohms function. Front/Rear switch on FRONT.'
+            return f'Calibrator {out} to the {MODEL} INPUT HI / LO; calibrator external sense OFF (2-wire output); shielded cable. 2-wire ohms function. Front/Rear switch on FRONT.'
         if g == 'FREQ':
-            return ('Calibrator AC voltage output at the stated level and frequency to the 34410A front INPUT HI / LO (the manual\'s standard is a 33220A generator). '
+            return (f'Calibrator AC voltage output at the stated level and frequency to the {MODEL} front INPUT HI / LO (the manual\'s standard is a 33220A generator). '
                     'Front/Rear switch on FRONT.')
         return p['setup']
 
@@ -484,7 +510,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _new_io(self):
         if self.virtual:          # demo: the real IO / driver code over a simulated 34410A and calibrator
             from drivers.simulated_34410a import make_34410a_bench
-            self._vb = make_34410a_bench(self.cal_key, self.interface.get())
+            self._vb = make_34410a_bench(self.cal_key, self.interface.get(), MODEL)
             return IO('virtual', 'virtual', self.cal_model.get(), 9600, self.interface.get(), transports=(self._vb[2], self._vb[1]), mods=self.pm_state, virtual=True)
         return IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), self.interface.get(), mods=self.pm_state)
 
@@ -534,12 +560,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _prompt_start(self):
         """Warm-up and environment (Service Guide p. 67), asked once at the start of a run. Returns False if the technician cancels."""
         return ui.confirm_steps(self.root, 'Before the verification', 'Warm-up and conditions',
-            [('Warm-up', 'The 34410A must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well.'),
+            [('Warm-up', f'The {MODEL} must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well.'),
              ('Environment', 'Ambient 18 to 28 C (ideally 23 C +/- 2 C) and relative humidity below 80 % (p. 67).'),
              ('Cables', 'Shielded twisted-pair PTFE cables, as short as possible, shields to earth ground at ONE place (p. 67).'),
              ('Front / Rear', 'The program reads the Front/Rear switch (ROUT:TERM?) before every point and stops if it is wrong; it cannot move the switch. Never move it with signals present.')],
             facts=[('Limits', f'{self.period.get()}, 18 to 28 C'), ('Calibrator', self.cal_model.get()), ('Meter interface', self.interface.get())],
-            caution='The program restores the 34410A factory defaults (*RST) before the first point, then sets function, range, 100 NPLC or the 3 Hz AC filter for every point.',
+            caution=f'The program restores the {MODEL} factory defaults (*RST) before the first point, then sets function, range, 100 NPLC or the 3 Hz AC filter for every point.',
             ok='Conditions met - start')
 
     def execute(self, points):
@@ -569,8 +595,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 ok='Set up - measure', image=image)
         if p['source'] == 'manual':
             return ui.confirm_steps(self.root, 'Connect the standard', f'Connect for {GROUP_TITLE[group]}',
-                [('Null', 'With the test leads open, press Null on the 34410A in the capacitance function (User\'s Guide p. 60: the specification is with Math Null); the program sends no null command.'),
-                 ('Connect', p['setup']), ('Stabilise', 'Allow the standard to settle, then continue; the program reads the 34410A itself.')],
+                [('Null', f'With the test leads open, press Null on the {MODEL} in the capacitance function (User\'s Guide p. 60: the specification is with Math Null); the program sends no null command.'),
+                 ('Connect', p['setup']), ('Stabilise', f'Allow the standard to settle, then continue; the program reads the {MODEL} itself.')],
                 facts=facts, caution='The specification is for film capacitors; additional errors may occur for other types (User\'s Guide p. 136).', ok='Standard connected - measure', image=image)
         steps = [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p)), switch]
         if p['kind'] in ('ACV', 'ACI'):
@@ -581,7 +607,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _next(self, points, i, previous):
         if i >= len(points) or self.stop:
             self.busy = False; self.save()
-            end = ' The meter is still under remote control: press Shift / Local on the 34410A to return to the front panel.' if (self.interface.get() != 'GPIB' and not self.fast_demo) else ''
+            end = f' The meter is still under remote control: press Shift / Local on the {MODEL} to return to the front panel.' if (self.interface.get() != 'GPIB' and not self.fast_demo) else ''
             self.status.set('Run stopped by the operator. Progress is saved.' if self.stop else 'Run complete. Save progress or export a report.' + end); return
         p = points[i]
         try: p, previous = self.pm_step(points, i, previous)          # live edits: applied here, between two points (procmods_live)
@@ -676,7 +702,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
         try: import report_pdf, report_dialog
         except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
-        details = report_dialog.ask_details(self.root, 'Keysight 34410A performance verification')
+        details = report_dialog.ask_details(self.root, f'Keysight {MODEL} performance verification')
         if details is None: return
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
         path = filedialog.asksaveasfilename(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
@@ -687,7 +713,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 import tartur_wiring
                 rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [tartur_wiring.point_fields(p, self.standard_for(p)) for p in pts])
             std = self.cal_key if self.cal_key in ('5522A', '5560A', '5520A') else None
-            report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', 'Keysight 34410A'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
+            report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Keysight {MODEL}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Limits applied', self.period.get()), ('Source', 'Keysight 34410A/11A/L4411A Service Guide, pp. 68-87 (Verification Tests)')],
                                              demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, std), snapshot_context=report_pdf.context_for(self))
         except ImportError:
@@ -703,8 +729,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.disconnect(); self.root.destroy()
 
 
-def main(argv=None):
+def main(argv=None, model=None):
+    """model: '34410A' (default) or '34411A'; the launcher of each model passes its own."""
     argv = sys.argv if argv is None else argv
+    if model:
+        configure(model)
     root = tk.Tk()
     demo, fast = virtualbench.flags(argv)
     App(root, demo=demo, fast_demo=fast)

@@ -7,7 +7,7 @@ operator connects (bench.external_input) for capacitance.  With nothing sourced 
 +9.9E+37 when the signal does not fit the selected range, and queues errors the way the real meter does (SYST:ERR?).  The reply FORMATS of the query commands are
 assumptions (the guides state the queries but not their reply text): they are the same assumptions the driver's tolerant parser is written against.
 
-    bench, cal_t, dmm_t = make_34410a_bench('5522A', bus='GPIB')
+    bench, cal_t, dmm_t = make_34410a_bench('5522A', bus='GPIB')           # make_34410a_bench('5522A', 'GPIB', model='34411A') answers as a 34411A
 
 Test hooks: dmm_t.gain / dmm_t.offset (per node), dmm_t.terminals ('FRON' / 'REAR'), dmm_t.errors, dmm_t.sent, dmm_t.range_reply, dmm_t.idn_text.
 """
@@ -43,9 +43,12 @@ class Sim34410ATransport(_SimBase):
     """The simulated 34410A (GPIB, USB or LAN)."""
     idn_text = 'Agilent Technologies,34410A,MY00000001,2.35-2.35-0.09-46-09'
 
-    def __init__(self, bench, bus='GPIB'):
-        super().__init__(bench, 'SIM-34410A')
+    def __init__(self, bench, bus='GPIB', model='34410A'):
+        super().__init__(bench, f'SIM-{model}')
         self.bus = bus
+        self.model = model
+        if model != '34410A':                                      # the 34411A answers the same SCPI (the verification uses nothing it does not share)
+            self.idn_text = self.idn_text.replace('34410A', model)
         self.gain = {n: 1.000002 for n in RANGES}                  # +2 ppm everywhere: inside every limit
         self.gain['FREQ'] = 1.0000005
         self.offset = {n: 0.0 for n in RANGES}
@@ -178,8 +181,8 @@ class Sim34410ATransport(_SimBase):
         return self.read()
 
 
-def make_34410a_bench(cal='5522A', bus='GPIB'):
-    """(bench, calibrator transport, 34410A transport)."""
+def make_34410a_bench(cal='5522A', bus='GPIB', model='34410A'):
+    """(bench, calibrator transport, 34410A / 34411A transport)."""
     bench = SimBench()
     bench.freq_aware = True
-    return bench, SimFlukeComp(bench, cal), Sim34410ATransport(bench, bus)
+    return bench, SimFlukeComp(bench, cal), Sim34410ATransport(bench, bus, model)
