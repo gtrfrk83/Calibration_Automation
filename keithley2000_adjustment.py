@@ -42,8 +42,12 @@ MODEL = 'Keithley 2000'
 INSTRUMENT = 'Keithley Model 2000'
 
 SCOPES = {'Complete: DC, then AC (recommended)': ('DC', 'AC'), 'DC only (DC volts, ohms, DC current)': ('DC',), 'AC only (AC volts, AC current)': ('AC',)}
-# The 5522A / 5520A driver has no 'ZCOMP' for the 5560A; the 5520A is not offered: its specification does not meet the manual's Table 2-1 anywhere (specs/k2000_adjustment_standards.md).
-CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp)}
+CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
+# The 5520A is in the picker only when its published specification has a row for every output of the adjustment (calibrator_fit, the rule of the other pickers).  It gets no
+# ZCOMP (a command the supplied 5520A manual does not show): like the 5560A, the operator sets its own 4-wire mode.  Against the manual's Table 2-1 it meets none of the
+# sourced steps, the same as the 5522A (specs/k2000_adjustment_standards.md); the picker note says so.
+CAL_OFFERED_ONLY_IF_FIT = ('Fluke 5520A',)
+BY_HAND_COMP = ('5560A', '5520A')                 # no compensation command is sent to these: the operator sets the calibrator's own 4-wire mode
 HV_CONFIRM = 100.0                         # volts: a high-voltage confirmation for every step that outputs this much or more
 ZCOMP_LIMIT = 110e3                        # ohm: 5522A impedance compensation exists only below this (5522A Operators Manual p. 6-49)
 THERMAL_WAIT_S = float(SPEC['times']['thermal_wait_s'])     # p. 2-15: "Wait at least three minutes" (short; connecting the calibrator for DC volts)
@@ -59,6 +63,7 @@ FLOW = {'None': 'none', 'XON/XOFF': 'xon_xoff'}
 CAL_NOTES = {
     '5560A': 'Meets the manual\'s Table 2-1 (Fluke 5700A 90-day ppm) at 4 of the 24 sourced steps; the sheet holds the 1-year column, which is conservative.',
     '5522A': 'Meets the manual\'s Table 2-1 at none of the 24 sourced steps (the 5522A is a less accurate standard than the 5700A). The program allows it; the lab decides if its uncertainty is acceptable for an adjustment.',
+    '5520A': 'Meets the manual\'s Table 2-1 at none of the 24 sourced steps (90-day column of its sheet, like the 5522A). Offered because its published specification covers every output; the lab decides if its uncertainty is acceptable for an adjustment.',
 }
 OUT_REL_TOL = 1e-6                         # the calibrator's OUT? must equal the value programmed
 
@@ -171,9 +176,27 @@ def is_hv(step):
     return bool(src) and src['kind'] in ('DCV', 'ACV') and abs(float(src['value'])) >= HV_CONFIRM
 
 
+def requests():
+    """The outputs the adjustment asks of its calibrator, as calibrator_fit requests (the same question every calibrator picker asks)."""
+    import calibrator_fit
+    out = []
+    for st in STEPS:
+        src = st['source']
+        if src:
+            out.append(calibrator_fit.Req(src['kind'], float(src['value']), float(src['frequency']) if src.get('frequency') else None, label=f'{st["id"]}: {st["title"]}', key=st['id']))
+    return out
+
+
+def offered_calibrators():
+    """The picker's values: the 5520A only when its published specification covers every output (calibrator_fit.assess)."""
+    import calibrator_fit
+    return [n for n in CALIBRATORS if n not in CAL_OFFERED_ONLY_IF_FIT or calibrator_fit.assess(CALIBRATORS[n][0], requests()).complete]
+
+
 def hookup_text(step, cal_key):
     """The physical set-up for a step (Figures 2-1 to 2-4 and the text of pp. 2-8, 2-9, 2-15, 3-11).  Calibrator terminal names follow the verification procedure's wording (UNVERIFIED)."""
     five60 = cal_key == '5560A'
+    by_hand = cal_key in BY_HAND_COMP
     out = 'OUTPUT V/ohm HI / LO' if five60 else 'NORMAL HI / LO'
     g = step['group']
     if g == 'SHORT':
@@ -185,8 +208,8 @@ def hookup_text(step, cal_key):
         return ('Shielded low-thermal cables: calibrator ' + out + ' to the 2000 INPUT HI / LO (Figure 2-2). Calibrator set to DC volts with EXTERNAL SENSE OFF (disconnect the sense '
                 'leads if the calibrator cannot switch it) (p. 2-9). Wait three minutes for thermal equilibrium after connecting (p. 2-15).')
     if g == 'OHM4':
-        comp = ('The program sets the 5522A impedance compensation (ZCOMP) to WIRE4 below 110 kohm and NONE from 110 kohm up and reads it back.' if not five60 else
-                'Set the 5560A\'s own 4-wire (external sense) mode yourself: the program sends no compensation command to a 5560A.')
+        comp = ('The program sets the 5522A impedance compensation (ZCOMP) to WIRE4 below 110 kohm and NONE from 110 kohm up and reads it back.' if not by_hand else
+                f'Set the {cal_key}\'s own 4-wire (external sense) mode yourself: the program sends no compensation command to a {cal_key}.')
         return ('4-wire: calibrator ' + out + ' (force) to the 2000 INPUT HI / LO and the calibrator SENSE HI / LO to the 2000 SENSE Ohms 4 WIRE HI / LO (Figure 2-2). '
                 'Calibrator external sense ON for ALL resistance steps (p. 2-10). ' + comp)
     if g in ('DCI', 'ACI'):
@@ -199,6 +222,7 @@ def hookup_text(step, cal_key):
 
 def find_diagram(cal_key, group):
     """diagrams/hook_k2000_ADJ_<cal>_<GROUP>.png, hook_k2000_ADJ_<GROUP>.png, then the verification pictures hook_k2000_<cal>_<GROUP>.png / hook_k2000_<GROUP>.png (see diagrams/README_k2000.txt)."""
+    cal_key = '5522A' if cal_key == '5520A' else cal_key          # the 5520A uses the 5522A picture (same NORMAL / AUX terminals; UNVERIFIED), as the verification does
     for name in (f'hook_k2000_ADJ_{cal_key}_{group}', f'hook_k2000_ADJ_{group}', f'hook_k2000_{cal_key}_{group}', f'hook_k2000_{group}'):
         path = HERE / 'diagrams' / f'{name}.png'
         if path.exists():

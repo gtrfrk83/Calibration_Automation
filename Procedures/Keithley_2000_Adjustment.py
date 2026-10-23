@@ -13,6 +13,7 @@ from tkinter import messagebox, simpledialog, ttk
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))   # shared modules sit next to the Manager
 import adjustment_audit
+import calibrator_fit
 import drivers
 import keithley2000_adjustment as adj
 import reset_startup
@@ -49,8 +50,9 @@ class App(virtualbench.VirtualMixin):
         self.dmm_baud = tk.StringVar(value=s.get('dmm_baud', '4800'))
         self.dmm_term = tk.StringVar(value=s.get('dmm_term', 'LF'))
         self.dmm_flow = tk.StringVar(value=s.get('dmm_flow', 'None'))
+        self.cal_offer = calibrator_fit.make_offer('5520A', adj.requests(), unverified=drivers.Fluke5520A.unverified_summary())
         self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A'))
-        if self.cal_model.get() not in adj.CALIBRATORS:
+        if self.cal_model.get() not in self.cal_choices():
             self.cal_model.set('Fluke 5560A')
         self.cal_interface = tk.StringVar(value=s.get('cal_interface', adj.CAL_INTERFACES[0]))
         if self.cal_interface.get() not in adj.CAL_INTERFACES:
@@ -107,8 +109,9 @@ class App(virtualbench.VirtualMixin):
             ttk.Label(link, text=text, style='Muted.TLabel').grid(row=1, column=c_ * 2, sticky='w', pady=(6, 0))
             ttk.Combobox(link, textvariable=var, values=values, width=w_, state='readonly').grid(row=1, column=c_ * 2 + 1, padx=(6, 12), pady=(6, 0), sticky='w')
         ttk.Label(link, text='Calibrator').grid(row=2, column=0, sticky='w', pady=(6, 0))
-        cm = ttk.Combobox(link, textvariable=self.cal_model, values=list(adj.CALIBRATORS), width=14, state='readonly')
+        cm = ttk.Combobox(link, textvariable=self.cal_model, values=self.cal_choices(), width=14, state='readonly')
         cm.grid(row=2, column=1, padx=(6, 12), pady=(6, 0), sticky='w')
+        ui.Tooltip(cm, self.cal_offer.tooltip)
         cm.bind('<<ComboboxSelected>>', lambda _e: self.on_cal_model())
         ttk.Label(link, text='Interface').grid(row=2, column=2, sticky='w', pady=(6, 0))
         ci = ttk.Combobox(link, textvariable=self.cal_interface, values=list(adj.CAL_INTERFACES), width=8, state='readonly')
@@ -163,9 +166,14 @@ class App(virtualbench.VirtualMixin):
         else:
             self.log_box.pack_forget()
 
+    def cal_choices(self):
+        """The calibrator picker's values: the 5520A only when its published specification covers every output of the adjustment (calibrator_fit)."""
+        return [n for n in adj.CALIBRATORS if n not in adj.CAL_OFFERED_ONLY_IF_FIT or self.cal_offer.offered]
+
     def on_cal_model(self):
         key = adj.CALIBRATORS[self.cal_model.get()][0]
-        self.cal_note.set(f'{self.cal_model.get()} against the manual\'s Table 2-1: ' + adj.CAL_NOTES.get(key, ''))
+        self.cal_note.set(f'{self.cal_model.get()} against the manual\'s Table 2-1: ' + adj.CAL_NOTES.get(key, '') + (f'  {self.cal_offer.text}' if key == '5520A' else ''))
+
 
     # ------------------------------------------------------------------ table / state
     @property

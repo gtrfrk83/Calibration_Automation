@@ -154,8 +154,8 @@ Procedures/Keithley_2000_Verification.py
 Procedures/Keithley_2000_Adjustment.py
                   Guided ADJUSTMENT (calibration) of the Keithley Model 2000 by the remote :CAL:PROT commands of the Calibration Manual (2000-905-01
                   Rev. F, pp. 2-14 to 2-19): 13 DC steps (front short and open, +10 V, -10 V, +100 V, 4-wire 1 kohm to 10 Mohm, 10 mA to 1 A) and 13 AC steps
-                  (10 mV to 700 V at 1 kHz and 50 kHz, 100 mA to 2 A) in the manual's order, with a Fluke 5560A or 5522A as the source (the manual's
-                  Table 2-1 ratios are shown in the window: the 5522A meets none, the 5560A four of the 24). Category 'Digital Multimeter Adjustment',
+                  (10 mV to 700 V at 1 kHz and 50 kHz, 100 mA to 2 A) in the manual's order, with a Fluke 5560A, 5522A or 5520A as the source (the manual's
+                  Table 2-1 ratios are shown in the window: the 5522A and 5520A meet none, the 5560A four of the 24). Category 'Digital Multimeter Adjustment',
                   sidecar kind 'adjustment' (Adjustment tab). THIS CHANGES THE INSTRUMENT CALIBRATION: both instruments are reset first, the operator
                   confirms warm-up, the As Found verification and authority, then types the calibration code (asked at run time, sent once, NEVER stored,
                   logged or written to the audit record). Every step asks for the hook-up, programs and reads back the calibrator, waits to settle, asks again

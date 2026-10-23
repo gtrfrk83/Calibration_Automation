@@ -145,6 +145,12 @@ class RunTests(unittest.TestCase):
     def test_full_run_rs232_5560a(self):
         self.check_full_run('5560A', 'RS232', 'A20', 26)
 
+    def test_full_run_5520a_gets_no_compensation_command(self):
+        s, dmm_t = self.check_full_run('5520A', 'GPIB', 'A20', 26)
+        self.assertFalse(any('ZCOMP' in line for line in s.io.log.lines()))
+        self.assertIn('4-wire', adj.hookup_text(adj.step_by_id('D06'), '5520A'))
+        self.assertIn('no compensation command', adj.hookup_text(adj.step_by_id('D06'), '5520A'))
+
     def test_full_run_firmware_a19(self):
         s, dmm_t = self.check_full_run('5522A', 'GPIB', 'A19', 25)
         self.assertEqual(s.fw_class, 'A19-')
@@ -176,6 +182,22 @@ class RunTests(unittest.TestCase):
             if st['group'] == 'OHM4':
                 seen[st['id']] = cal_t.zcomp
         self.assertEqual(seen, {'D06': 'WIRE4', 'D07': 'WIRE4', 'D08': 'WIRE4', 'D09': 'NONE', 'D10': 'NONE'})
+
+
+class CalibratorPickerTests(unittest.TestCase):
+    def test_5520a_offered_because_its_sheet_covers_every_output(self):
+        import calibrator_fit
+        reqs = adj.requests()
+        self.assertEqual(len(reqs), 24)
+        for model in ('5520A', '5522A', '5560A'):
+            self.assertTrue(calibrator_fit.assess(model, reqs).complete, model)
+        self.assertEqual(adj.offered_calibrators(), ['Fluke 5560A', 'Fluke 5522A', 'Fluke 5520A'])
+        self.assertIn('5520A', adj.CAL_NOTES)
+
+    def test_every_calibrator_has_a_note_and_a_picture_search(self):
+        for name, (key, cls) in adj.CALIBRATORS.items():
+            self.assertIn(key, adj.CAL_NOTES, name)
+            self.assertTrue(cls.MODEL.endswith(key), name)
 
 
 class SafetyTests(unittest.TestCase):
