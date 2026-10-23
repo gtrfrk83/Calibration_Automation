@@ -7,36 +7,46 @@
   "hv_once_per_group": true,
   "auto_ramp": false,
   "function_prompt": true,
-  "report_title": "Calibration Data"
+  "report_title": "Calibration Data",
+  "include_toggles": [
+   {
+    "id": "iflex",
+    "label": "iFlex probe supplied: run the iFlex tests",
+    "default": true,
+    "count_text": "iFlex point",
+    "off_text": "not tested (no iFlex supplied)",
+    "on_text": "tested (iFlex supplied)"
+   }
+  ]
  },
  "source": {
   "document": "Fluke 374 / 375 / 376 / 376-II Clamp Meters - Calibration Manual (December 2010, Rev. 2, 11/25)",
-  "pages": "3-4 (printed): Table 1 pp. 3-4 (PDF pages 7-8); equipment Table 2 p. 4; Figure 1 p. 2",
-  "cite": "Fluke 374 / 375 / 376 / 376-II Calibration Manual, Table 1 Performance Tests, printed pp. 3-4; limits unchanged, rows flagged against the published accuracy (UNVERIFIED source, see Source)",
+  "pages": "3-4 (printed): Table 1 pp. 3-4 (PDF pages 7-8); equipment Table 2 p. 4; Figure 1 p. 2; Users Manual pp. 5-14, 20-26",
+  "cite": "Fluke 374 / 375 / 376 / 376-II Calibration Manual, Table 1 Performance Tests, printed pp. 3-4; limits unchanged, rows flagged against the accuracy printed in the 374 FC / 375 FC / 376 FC Users Manual (pp. 20-26)",
   "limits": "Manufacturer limits, Table 1, as printed",
   "report_note": "Limits are those of the manufacturer's Table 1 (Fluke 374 / 375 / 376 / 376-II Calibration Manual, printed pp. 3-4), unchanged. The jaw and iFlex current points are driven through a 50-turn coil (calibrator current x 50 = the reading shown); the iFlex simulated points apply a voltage to the iFlex input. Their Uncertainty is the calibrator's uncertainty at the actual output (current: point / 50, unscaled and without the coil; simulation: AC volts as applied), an owner-chosen convention; TAR / TUR compare it with the meter-reading tolerance for the coil points and are blank for the iFlex simulated points.",
-  "note": "Table 1 (38 rows: AC volts 4, DC volts 8 (4 of them millivolts), ohms 7, capacitance 3, AC amps 4, DC amps 3, iFlex simulated 5, iFlex with coil 4; printed pp. 3-4 of the 374 / 375 / 376 / 376-II Calibration Manual). The table has no step numbers: steps are numbered in table order (1-1 .. 1-38). One family spec: the X columns decide the models (374: 28 points, 375: 34, 376 and 376-II: 38). Table 2 (printed p. 4) names a calibrator with 4.5 digit resolution (Fluke 55XXA recommended), the 55XXA/COIL (50 turns), the test probe for iFlex and a test lead; the procedure drives a Fluke 5522A or 5560A (or you set the calibrator by hand). The current rows are driven through the 50-turn coil: the calibrator output is 0.2 / 10 / 18 / 6 A and the meter reads 50 x that (limits are meter readings). The iFlex rows are simulated with a voltage (3 to 750 mV) or driven through the coil with the iFlex loop. The meter has no remote interface: you type the display reading. Limits are as printed (nothing is corrected). Where a printed limit is not the full or half published accuracy (UNVERIFIED source, the fluke.com product page) the point says so. High-voltage points go straight to the test value (the manual prescribes no ramp). The calibration ADJUSTMENT (Table 3, printed pp. 5-8) is not part of this procedure."
+  "note": "Table 1 (38 rows: AC volts 4, DC volts 8 (4 of them millivolts), ohms 7, capacitance 3, AC amps 4, DC amps 3, iFlex simulated 5, iFlex with coil 4; printed pp. 3-4 of the 374 / 375 / 376 / 376-II Calibration Manual). The table has no step numbers: steps are numbered in table order (1-1 .. 1-38). One family spec: the X columns decide the models (374: 28 points, 375: 34, 376 and 376-II: 38). Table 2 (printed p. 4) names a calibrator with 4.5 digit resolution (Fluke 55XXA recommended), the 55XXA/COIL (50 turns), the test probe for iFlex and a test lead; the procedure drives a Fluke 5522A or 5560A (or you set the calibrator by hand). The current rows are driven through the 50-turn coil: the calibrator output is 0.2 / 10 / 18 / 6 A and the meter reads 50 x that (limits are meter readings). The iFlex rows are simulated with a voltage (3 to 750 mV) or driven through the coil with the iFlex loop. The meter has no remote interface: you type the display reading. Limits are as printed (nothing is corrected). Where a printed limit is not the full or half accuracy printed in the 374 FC / 375 FC / 376 FC Users Manual (pp. 20-26) the point says so (the 376 / 376-II AC volts limits are the 1.5 % figures, the 376 FC is specified at 1 %). The iFlex tests (9 points) can be switched off before the run when the meter has no iFlex (the window option; the report then states they were not tested). High-voltage points go straight to the test value (the manual prescribes no ramp). The calibration ADJUSTMENT (Table 3, printed pp. 5-8) is not part of this procedure."
  },
  "models": {
   "374": {
    "name": "Fluke 374",
    "brand": "Fluke",
-   "model_note": "Fluke 374 true-rms clamp meter (600 A jaw, 600 V): Table 1, 28 points"
+   "model_note": "Fluke 374 FC true-rms clamp meter (600.0 A jaw, 1000 V, 6000 ohm, no mV): Table 1, 28 points (19 without the iFlex tests)"
   },
   "375": {
    "name": "Fluke 375",
    "brand": "Fluke",
-   "model_note": "Fluke 375 true-rms clamp meter (600 A jaw, 600 V, mV): Table 1, 34 points"
+   "model_note": "Fluke 375 FC true-rms clamp meter (600.0 A jaw, 1000 V, 60 kohm, mV): Table 1, 34 points (25 without the iFlex tests)"
   },
   "376": {
    "name": "Fluke 376",
    "brand": "Fluke",
-   "model_note": "Fluke 376 true-rms clamp meter (999.9 A jaw, 1000 V, iFlex 2500 A): Table 1, 38 points"
+   "model_note": "Fluke 376 FC true-rms clamp meter (999.9 A jaw, 1000 V, iFlex 2500 A): Table 1, 38 points (29 without the iFlex tests)"
   },
   "376-II": {
    "name": "Fluke 376-II",
    "brand": "Fluke",
-   "model_note": "Fluke 376-II true-rms clamp meter: Table 1 prints one column for the 376 and the 376-II, 38 points (not registered as a procedure)"
+   "model_note": "Fluke 376-II true-rms clamp meter: Table 1 prints one column for the 376 and the 376-II, 38 points (29 without the iFlex tests); not in the Users Manual: 376 FC figures assumed"
   }
  },
  "groups": {
@@ -50,7 +60,7 @@
     ],
     [
      "Test leads",
-     "REMOVE the test leads from the VΩ and COM jacks while the current is measured with the jaw or the iFlex (general practice; the Calibration Manual does not say)."
+     "REMOVE the test leads from the VΩ and COM jacks while the current is measured with the jaw (general practice; the Calibration Manual does not say)."
     ],
     [
      "Standby",
@@ -62,7 +72,7 @@
     ],
     [
      "Jaw",
-     "Close the detachable jaw around the coil, jaw fully closed, the coil centred in the opening, the coil leads kept away from the meter body. The meter then reads 50 x the calibrator current: 0.2 A reads 10 A. (How the jaw sits on the 55XXA/COIL is not described in the manual: UNVERIFIED.)"
+     "Close the detachable jaw around the coil, jaw fully closed, the coil centred in the opening, the coil leads kept away from the meter body. The meter then reads 50 x the calibrator current: 0.2 A reads 10 A. (How the jaw sits on the 55XXA/COIL is not described in either manual: UNVERIFIED.)"
     ],
     [
      "LCOMP",
@@ -86,7 +96,7 @@
     ],
     [
      "Test leads",
-     "REMOVE the test leads from the VΩ and COM jacks while the current is measured with the jaw or the iFlex (general practice; the Calibration Manual does not say)."
+     "REMOVE the test leads from the VΩ and COM jacks while the current is measured with the jaw (general practice; the Calibration Manual does not say)."
     ],
     [
      "Standby",
@@ -94,7 +104,7 @@
     ],
     [
      "Coil",
-     "Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A."
+     "Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (the lab's coil and calibrator can do 6 A at 440 Hz and 18 A: owner-confirmed)."
     ],
     [
      "Jaw",
@@ -109,7 +119,7 @@
      "Compare your connections with the diagram, then continue."
     ]
    ],
-   "caution": "Up to 18 A flows in the coil. The 5500A/COIL data recorded in NOTES.md allows 11 A continuously and 20 A for 2 minutes (then 8 minutes rest): UNVERIFIED for this coil. Keep the calibrator in STANDBY whenever you touch the coil or leads; check that the coil and leads are not warm after a long run.",
+   "caution": "Up to 18 A flows in the coil. Duty cycle: the 5500A/COIL data recorded in NOTES.md allows 11 A continuously and 20 A for 2 minutes (then 8 minutes rest); not confirmed for this coil (UNVERIFIED). Keep the calibrator in STANDBY whenever you touch the coil or leads; check that the coil and leads are not warm after a long run.",
    "diagram": "diagrams/hook_fluke376_COIL_20A.png"
   },
   "IFLEX_SIM": {
@@ -130,7 +140,7 @@
     ],
     [
      "iFlex input",
-     "Calibrator HI to the iFlex 2 mm jack on the far left of the meter, calibrator LO to the black COM jack (Performance Tests, printed p. 3). Use the test probe for iFlex (2 mm to 4 mm Slim Reach probe, PN 6508922) and the test lead with retractable sheath (6358, PN 1903307) from the equipment list. No iFlex loop is connected. Which jack is the \"far left\" one is UNVERIFIED (Figure 1 shows the jacks too small to name)."
+     "Calibrator HI to the iFlex 2 mm jack on the far left of the meter, calibrator LO to the black COM jack (Performance Tests, printed p. 3). Use the test probe for iFlex (2 mm to 4 mm Slim Reach probe, PN 6508922) and the test lead with retractable sheath (6358, PN 1903307) from the equipment list. No iFlex loop is connected. The far-left 2 mm jack is the iFlex input (owner-confirmed)."
     ],
     [
      "Check",
@@ -150,7 +160,7 @@
     ],
     [
      "Test leads",
-     "REMOVE the test leads from the VΩ and COM jacks while the current is measured with the jaw or the iFlex (general practice; the Calibration Manual does not say)."
+     "REMOVE the test leads from the VΩ and COM jacks while the current is measured with the iFlex (general practice; the Calibration Manual does not say)."
     ],
     [
      "Standby",
@@ -162,7 +172,7 @@
     ],
     [
      "iFlex",
-     "Remove the jaw from the coil. Plug the iFlex probe into the meter and place its loop around the coil (Table 1, printed p. 4: iFlex Current Probe with 50-turn coil). The meter reads 50 x the calibrator current: 0.2 A reads 10 A. How the loop sits on the 55XXA/COIL (position, closed latch, away from the leads) is not described in the manual: UNVERIFIED."
+     "Remove the jaw from the coil. Plug the iFlex probe into the meter (Users Manual p. 9: lock the probe cable connector, then dial on iFlex A~) and place its loop around the coil (Table 1, printed p. 4: iFlex Current Probe with 50-turn coil). The meter reads 50 x the calibrator current: 0.2 A reads 10 A. The Users Manual p. 9 shows the loop closed and locked; its error is 0.5 % / 1.0 % / 2.0 % by the distance of the conductor from the optimum position (p. 23). How the loop sits on the 55XXA/COIL is not described in either manual: UNVERIFIED."
     ],
     [
      "Check",
@@ -182,7 +192,7 @@
     ],
     [
      "Test leads",
-     "REMOVE the test leads from the VΩ and COM jacks while the current is measured with the jaw or the iFlex (general practice; the Calibration Manual does not say)."
+     "REMOVE the test leads from the VΩ and COM jacks while the current is measured with the iFlex (general practice; the Calibration Manual does not say)."
     ],
     [
      "Standby",
@@ -190,7 +200,7 @@
     ],
     [
      "Coil",
-     "Move the two ends of the coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A."
+     "Move the two ends of the coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (owner-confirmed)."
     ],
     [
      "iFlex",
@@ -201,7 +211,7 @@
      "Compare your connections with the diagram, then continue."
     ]
    ],
-   "caution": "Up to 18 A flows in the coil. The 5500A/COIL data recorded in NOTES.md allows 11 A continuously and 20 A for 2 minutes (then 8 minutes rest): UNVERIFIED for this coil. Keep the calibrator in STANDBY whenever you touch the coil or leads.",
+   "caution": "Up to 18 A flows in the coil. Duty cycle: the 5500A/COIL data recorded in NOTES.md allows 11 A continuously and 20 A for 2 minutes (then 8 minutes rest); not confirmed for this coil (UNVERIFIED). Keep the calibrator in STANDBY whenever you touch the coil or leads.",
    "diagram": "diagrams/hook_fluke376_IFLEX_COIL_20A.png"
   }
  },
@@ -230,22 +240,63 @@
     "frequency": 50.0
    },
    "nominal": 10.0,
-   "accuracy": "±(1.5 % of reading + 5 digits)",
-   "tol_text": "Table 1: 9.4 to 10.7 V   (published specification, UNVERIFIED: ±(1.5 % of reading + 5 digits of 0.1 V) = ±0.65 V)",
+   "accuracy": "±(1.5 % of reading + 5 digits) (374, 375); ±(1 % of reading + 5 digits) (376, 376-II)",
+   "tol_text": "Table 1: 9.4 to 10.7 V   (Users Manual p. 24: 374, 375 ±(1.5 % of reading + 5 digits of 0.1 V) = ±0.65 V; 376, 376-II ±(1 % of reading + 5 digits of 0.1 V) = ±0.6 V)",
    "check": {
-    "verdict": "rounded",
-    "printed_vs_spec": [
-     {
-      "side": "high",
-      "printed": "0.7",
-      "half_spec": "0.325",
+    "verdict": "looser",
+    "models": {
+     "374": {
+      "verdict": "rounded",
+      "printed_vs_spec": [
+       {
+        "side": "high",
+        "printed": "0.7",
+        "half_spec": "0.325",
+        "full_spec": "0.65"
+       }
+      ],
       "full_spec": "0.65"
+     },
+     "375": {
+      "verdict": "rounded",
+      "printed_vs_spec": [
+       {
+        "side": "high",
+        "printed": "0.7",
+        "half_spec": "0.325",
+        "full_spec": "0.65"
+       }
+      ],
+      "full_spec": "0.65"
+     },
+     "376": {
+      "verdict": "looser",
+      "printed_vs_spec": [
+       {
+        "side": "high",
+        "printed": "0.7",
+        "half_spec": "0.3",
+        "full_spec": "0.6"
+       }
+      ],
+      "full_spec": "0.6"
+     },
+     "376-II": {
+      "verdict": "looser",
+      "printed_vs_spec": [
+       {
+        "side": "high",
+        "printed": "0.7",
+        "half_spec": "0.3",
+        "full_spec": "0.6"
+       }
+      ],
+      "full_spec": "0.6"
      }
-    ],
-    "full_spec": "0.65"
+    }
    },
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). CHECK (printed limit not changed): the printed limit is the specification value rounded to the display step (one side is looser than the specification by up to half a step): high limit 0.7 from the nominal vs the full specification 0.65 (full published specification ±0.65 V, UNVERIFIED source).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). CHECK (printed limit not changed; Users Manual p. 24): the printed limit is the specification value rounded to the display step (one side looser by up to half a step); the printed limit is WIDER than the Users Manual specification of that model. 374, 375: rounded (high limit ±0.7 from the nominal vs the full specification ±0.65; full specification ±0.65 V) | 376, 376-II: looser (high limit ±0.7 from the nominal vs the full specification ±0.6; full specification ±0.6 V).",
    "ref": "T1 #1",
    "id": "1-1"
   },
@@ -273,10 +324,51 @@
     "frequency": 50.0
    },
    "nominal": 500.0,
-   "accuracy": "±(1.5 % of reading + 5 digits)",
-   "tol_text": "Table 1: 492.0 to 508.0 V   (published specification, UNVERIFIED: ±(1.5 % of reading + 5 digits of 0.1 V) = ±8 V)",
+   "accuracy": "±(1.5 % of reading + 5 digits) (374, 375); ±(1 % of reading + 5 digits) (376, 376-II)",
+   "tol_text": "Table 1: 492.0 to 508.0 V   (Users Manual p. 24: 374, 375 ±(1.5 % of reading + 5 digits of 0.1 V) = ±8 V; 376, 376-II ±(1 % of reading + 5 digits of 0.1 V) = ±5.5 V)",
+   "check": {
+    "verdict": "looser",
+    "models": {
+     "376": {
+      "verdict": "looser",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "8",
+        "half_spec": "2.75",
+        "full_spec": "5.5"
+       },
+       {
+        "side": "high",
+        "printed": "8",
+        "half_spec": "2.75",
+        "full_spec": "5.5"
+       }
+      ],
+      "full_spec": "5.5"
+     },
+     "376-II": {
+      "verdict": "looser",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "8",
+        "half_spec": "2.75",
+        "full_spec": "5.5"
+       },
+       {
+        "side": "high",
+        "printed": "8",
+        "half_spec": "2.75",
+        "full_spec": "5.5"
+       }
+      ],
+      "full_spec": "5.5"
+     }
+    }
+   },
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). CHECK (printed limit not changed; Users Manual p. 24): the printed limit is WIDER than the Users Manual specification of that model. 376, 376-II: looser (low limit ±8 from the nominal vs the full specification ±5.5; high limit ±8 from the nominal vs the full specification ±5.5; full specification ±5.5 V).",
    "ref": "T1 #2",
    "id": "1-2"
   },
@@ -294,30 +386,64 @@
    "display_unit": "V",
    "factor": 1.0,
    "base_unit": "V",
-   "low": "882.0",
-   "high": "919.0",
+   "low": "882",
+   "high": "919",
    "test": "numeric",
    "applied": {
     "value": 900.0,
     "frequency": 50.0
    },
    "nominal": 900.0,
-   "accuracy": "±(1.5 % of reading + 5 digits)",
-   "tol_text": "Table 1: 882.0 to 919.0 V   (published specification, UNVERIFIED: ±(1.5 % of reading + 5 digits of 1 V) = ±18.5 V)",
+   "printed_text": {
+    "low": "882.0",
+    "high": "919.0",
+    "note": "printed with one decimal (882.0) although the range has 1 V resolution; same value, shown as whole volts"
+   },
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 1: 882 to 919 V   (Users Manual p. 24: ±(1 % of reading + 5 digits of 1 V) = ±14 V)",
    "check": {
-    "verdict": "rounded",
-    "printed_vs_spec": [
-     {
-      "side": "high",
-      "printed": "19",
-      "half_spec": "9.25",
-      "full_spec": "18.5"
+    "verdict": "looser",
+    "models": {
+     "376": {
+      "verdict": "looser",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "18",
+        "half_spec": "7",
+        "full_spec": "14"
+       },
+       {
+        "side": "high",
+        "printed": "19",
+        "half_spec": "7",
+        "full_spec": "14"
+       }
+      ],
+      "full_spec": "14"
+     },
+     "376-II": {
+      "verdict": "looser",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "18",
+        "half_spec": "7",
+        "full_spec": "14"
+       },
+       {
+        "side": "high",
+        "printed": "19",
+        "half_spec": "7",
+        "full_spec": "14"
+       }
+      ],
+      "full_spec": "14"
      }
-    ],
-    "full_spec": "18.5"
+    }
    },
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Printed with one decimal (882.0 style) although the 1000 V range is published with 1 V resolution (UNVERIFIED): a typed reading is padded to the printed one decimal. CHECK (printed limit not changed): the printed limit is the specification value rounded to the display step (one side is looser than the specification by up to half a step): high limit 19 from the nominal vs the full specification 18.5 (full published specification ±18.5 V, UNVERIFIED source).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The 1000 V range has 1 V resolution (Users Manual p. 24): the limits are shown and a typed reading is padded as whole volts. Table 1 prints them with one decimal (882.0 / 919.0); same values. CHECK (printed limit not changed; Users Manual p. 24): the printed limit is WIDER than the Users Manual specification of that model. 376, 376-II: looser (low limit ±18 from the nominal vs the full specification ±14; high limit ±19 from the nominal vs the full specification ±14; full specification ±14 V).",
    "ref": "T1 #3",
    "id": "1-3"
   },
@@ -345,10 +471,51 @@
     "frequency": 500.0
    },
    "nominal": 500.0,
-   "accuracy": "±(1.5 % of reading + 5 digits)",
-   "tol_text": "Table 1: 492.0 to 508.0 V   (published specification, UNVERIFIED: ±(1.5 % of reading + 5 digits of 0.1 V) = ±8 V)",
+   "accuracy": "±(1.5 % of reading + 5 digits) (374, 375); ±(1 % of reading + 5 digits) (376, 376-II)",
+   "tol_text": "Table 1: 492.0 to 508.0 V   (Users Manual p. 24: 374, 375 ±(1.5 % of reading + 5 digits of 0.1 V) = ±8 V; 376, 376-II ±(1 % of reading + 5 digits of 0.1 V) = ±5.5 V)",
+   "check": {
+    "verdict": "looser",
+    "models": {
+     "376": {
+      "verdict": "looser",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "8",
+        "half_spec": "2.75",
+        "full_spec": "5.5"
+       },
+       {
+        "side": "high",
+        "printed": "8",
+        "half_spec": "2.75",
+        "full_spec": "5.5"
+       }
+      ],
+      "full_spec": "5.5"
+     },
+     "376-II": {
+      "verdict": "looser",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "8",
+        "half_spec": "2.75",
+        "full_spec": "5.5"
+       },
+       {
+        "side": "high",
+        "printed": "8",
+        "half_spec": "2.75",
+        "full_spec": "5.5"
+       }
+      ],
+      "full_spec": "5.5"
+     }
+    }
+   },
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). CHECK (printed limit not changed; Users Manual p. 24): the printed limit is WIDER than the Users Manual specification of that model. 376, 376-II: looser (low limit ±8 from the nominal vs the full specification ±5.5; high limit ±8 from the nominal vs the full specification ±5.5; full specification ±5.5 V).",
    "ref": "T1 #4",
    "id": "1-4"
   },
@@ -377,9 +544,9 @@
    },
    "nominal": -500.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: -505.5 to -494.5 V   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 V) = ±5.5 V)",
+   "tol_text": "Table 1: -505.5 to -494.5 V   (Users Manual p. 24: ±(1 % of reading + 5 digits of 0.1 V) = ±5.5 V)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges).",
    "ref": "T1 #5",
    "id": "1-5"
   },
@@ -408,9 +575,9 @@
    },
    "nominal": 10.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 9.4 to 10.6 V   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 V) = ±0.6 V)",
+   "tol_text": "Table 1: 9.4 to 10.6 V   (Users Manual p. 24: ±(1 % of reading + 5 digits of 0.1 V) = ±0.6 V)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges).",
    "ref": "T1 #6",
    "id": "1-6"
   },
@@ -439,9 +606,9 @@
    },
    "nominal": 500.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 494.5 to 505.5 V   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 V) = ±5.5 V)",
+   "tol_text": "Table 1: 494.5 to 505.5 V   (Users Manual p. 24: ±(1 % of reading + 5 digits of 0.1 V) = ±5.5 V)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges).",
    "ref": "T1 #7",
    "id": "1-7"
   },
@@ -459,18 +626,23 @@
    "display_unit": "V",
    "factor": 1.0,
    "base_unit": "V",
-   "low": "886.0",
-   "high": "914.0",
+   "low": "886",
+   "high": "914",
    "test": "numeric",
    "applied": {
     "value": 900.0,
     "frequency": null
    },
    "nominal": 900.0,
+   "printed_text": {
+    "low": "886.0",
+    "high": "914.0",
+    "note": "printed with one decimal (886.0) although the range has 1 V resolution; same value, shown as whole volts"
+   },
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 886.0 to 914.0 V   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 1 V) = ±14 V)",
+   "tol_text": "Table 1: 886 to 914 V   (Users Manual p. 24: ±(1 % of reading + 5 digits of 1 V) = ±14 V)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Printed with one decimal (882.0 style) although the 1000 V range is published with 1 V resolution (UNVERIFIED): a typed reading is padded to the printed one decimal.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The 1000 V range has 1 V resolution (Users Manual p. 24): the limits are shown and a typed reading is padded as whole volts. Table 1 prints them with one decimal (886.0 / 914.0); same values.",
    "ref": "T1 #8",
    "id": "1-8"
   },
@@ -478,7 +650,7 @@
    "table": "1",
    "step": 9,
    "section": "DC volts",
-   "switch": "mV⎓  (DC millivolts: the V⎓ position, mV is its yellow alternate function; how it is selected is UNVERIFIED)",
+   "switch": "mV⎓  (DC millivolts: dial on V⎓ / mV, then press the yellow button to select mV; Users Manual p. 12)",
    "range": "500.0 mV",
    "models": [
     "375",
@@ -498,9 +670,9 @@
    },
    "nominal": -0.25,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: -253.0 to -247.0 mV   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 mV) = ±3 mV)",
+   "tol_text": "Table 1: -253.0 to -247.0 mV   (Users Manual p. 24: ±(1 % of reading + 5 digits of 0.1 mV) = ±3 mV)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges).",
    "ref": "T1 #9",
    "id": "1-9"
   },
@@ -508,7 +680,7 @@
    "table": "1",
    "step": 10,
    "section": "DC volts",
-   "switch": "mV⎓  (DC millivolts: the V⎓ position, mV is its yellow alternate function; how it is selected is UNVERIFIED)",
+   "switch": "mV⎓  (DC millivolts: dial on V⎓ / mV, then press the yellow button to select mV; Users Manual p. 12)",
    "range": "500.0 mV",
    "models": [
     "375",
@@ -528,9 +700,9 @@
    },
    "nominal": 0.05,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 49.0 to 51.0 mV   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 mV) = ±1 mV)",
+   "tol_text": "Table 1: 49.0 to 51.0 mV   (Users Manual p. 24: ±(1 % of reading + 5 digits of 0.1 mV) = ±1 mV)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges).",
    "ref": "T1 #10",
    "id": "1-10"
   },
@@ -538,7 +710,7 @@
    "table": "1",
    "step": 11,
    "section": "DC volts",
-   "switch": "mV⎓  (DC millivolts: the V⎓ position, mV is its yellow alternate function; how it is selected is UNVERIFIED)",
+   "switch": "mV⎓  (DC millivolts: dial on V⎓ / mV, then press the yellow button to select mV; Users Manual p. 12)",
    "range": "500.0 mV",
    "models": [
     "375",
@@ -558,9 +730,9 @@
    },
    "nominal": 0.25,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 247.0 to 253.0 mV   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 mV) = ±3 mV)",
+   "tol_text": "Table 1: 247.0 to 253.0 mV   (Users Manual p. 24: ±(1 % of reading + 5 digits of 0.1 mV) = ±3 mV)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges).",
    "ref": "T1 #11",
    "id": "1-11"
   },
@@ -568,7 +740,7 @@
    "table": "1",
    "step": 12,
    "section": "DC volts",
-   "switch": "mV⎓  (DC millivolts: the V⎓ position, mV is its yellow alternate function; how it is selected is UNVERIFIED)",
+   "switch": "mV⎓  (DC millivolts: dial on V⎓ / mV, then press the yellow button to select mV; Users Manual p. 12)",
    "range": "500.0 mV",
    "models": [
     "375",
@@ -588,9 +760,9 @@
    },
    "nominal": 0.45,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 445.0 to 455.0 mV   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 mV) = ±5 mV)",
+   "tol_text": "Table 1: 445.0 to 455.0 mV   (Users Manual p. 24: ±(1 % of reading + 5 digits of 0.1 mV) = ±5 mV)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges).",
    "ref": "T1 #12",
    "id": "1-12"
   },
@@ -598,7 +770,7 @@
    "table": "1",
    "step": 13,
    "section": "Ohms",
-   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance)",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)",
    "range": "600.0 Ω",
    "models": [
     "374",
@@ -619,9 +791,9 @@
    },
    "nominal": 60.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 58.9 to 61.1 Ω   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 Ω) = ±1.1 Ω)",
+   "tol_text": "Table 1: 58.9 to 61.1 Ω   (Users Manual p. 26: ±(1 % of reading + 5 digits of 0.1 Ω) = ±1.1 Ω)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
    "ref": "T1 #13",
    "id": "1-13"
   },
@@ -629,7 +801,7 @@
    "table": "1",
    "step": 14,
    "section": "Ohms",
-   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance)",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)",
    "range": "600.0 Ω",
    "models": [
     "374",
@@ -650,9 +822,9 @@
    },
    "nominal": 300.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 296.5 to 303.5 Ω   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 Ω) = ±3.5 Ω)",
+   "tol_text": "Table 1: 296.5 to 303.5 Ω   (Users Manual p. 26: ±(1 % of reading + 5 digits of 0.1 Ω) = ±3.5 Ω)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
    "ref": "T1 #14",
    "id": "1-14"
   },
@@ -660,7 +832,7 @@
    "table": "1",
    "step": 15,
    "section": "Ohms",
-   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance)",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)",
    "range": "600.0 Ω",
    "models": [
     "374",
@@ -681,9 +853,9 @@
    },
    "nominal": 540.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 534.1 to 545.9 Ω   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.1 Ω) = ±5.9 Ω)",
+   "tol_text": "Table 1: 534.1 to 545.9 Ω   (Users Manual p. 26: ±(1 % of reading + 5 digits of 0.1 Ω) = ±5.9 Ω)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
    "ref": "T1 #15",
    "id": "1-15"
   },
@@ -691,7 +863,7 @@
    "table": "1",
    "step": 16,
    "section": "Ohms",
-   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance)",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)",
    "range": "6000 Ω",
    "models": [
     "374",
@@ -712,9 +884,9 @@
    },
    "nominal": 3000.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 2965 to 3035 Ω   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 1 Ω) = ±35 Ω)",
+   "tol_text": "Table 1: 2965 to 3035 Ω   (Users Manual p. 26: ±(1 % of reading + 5 digits of 1 Ω) = ±35 Ω)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
    "ref": "T1 #16",
    "id": "1-16"
   },
@@ -722,7 +894,7 @@
    "table": "1",
    "step": 17,
    "section": "Ohms",
-   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance)",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)",
    "range": "6000 Ω",
    "models": [
     "374",
@@ -743,9 +915,9 @@
    },
    "nominal": 5400.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 5341 to 5459 Ω   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 1 Ω) = ±59 Ω)",
+   "tol_text": "Table 1: 5341 to 5459 Ω   (Users Manual p. 26: ±(1 % of reading + 5 digits of 1 Ω) = ±59 Ω)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
    "ref": "T1 #17",
    "id": "1-17"
   },
@@ -753,7 +925,7 @@
    "table": "1",
    "step": 18,
    "section": "Ohms",
-   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance)",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)",
    "range": "60.00 kΩ",
    "models": [
     "375",
@@ -773,9 +945,9 @@
    },
    "nominal": 30000.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 29.65 to 30.35 kΩ   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.01 kΩ) = ±0.35 kΩ)",
+   "tol_text": "Table 1: 29.65 to 30.35 kΩ   (Users Manual p. 26: ±(1 % of reading + 5 digits of 0.01 kΩ) = ±0.35 kΩ)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
    "ref": "T1 #18",
    "id": "1-18"
   },
@@ -783,7 +955,7 @@
    "table": "1",
    "step": 19,
    "section": "Ohms",
-   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance)",
+   "switch": "Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)",
    "range": "60.00 kΩ",
    "models": [
     "375",
@@ -803,9 +975,9 @@
    },
    "nominal": 54000.0,
    "accuracy": "±(1 % of reading + 5 digits)",
-   "tol_text": "Table 1: 53.41 to 54.59 kΩ   (published specification, UNVERIFIED: ±(1 % of reading + 5 digits of 0.01 kΩ) = ±0.59 kΩ)",
+   "tol_text": "Table 1: 53.41 to 54.59 kΩ   (Users Manual p. 26: ±(1 % of reading + 5 digits of 0.01 kΩ) = ±0.59 kΩ)",
    "group": "VOHM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
    "ref": "T1 #19",
    "id": "1-19"
   },
@@ -813,7 +985,7 @@
    "table": "1",
    "step": 20,
    "section": "Capacitance",
-   "switch": "Capacitance ⊣⊢  (the Ω position, ⊣⊢ is its yellow alternate function; how it is selected is UNVERIFIED)",
+   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button ONCE to select capacitance (display shows µF); Users Manual p. 14, single press owner-confirmed)",
    "range": "100.0 µF",
    "models": [
     "374",
@@ -834,10 +1006,10 @@
    },
    "nominal": 1e-05,
    "accuracy": "±(1 % of reading + 4 digits)",
-   "tol_text": "Table 1: 9.5 to 10.5 µF   (published specification, UNVERIFIED: ±(1 % of reading + 4 digits of 0.1 µF) = ±0.5 µF)",
+   "tol_text": "Table 1: 9.5 to 10.5 µF   (Users Manual p. 26: ±(1 % of reading + 4 digits of 0.1 µF) = ±0.5 µF)",
    "group": "VOHM",
    "settle": 10,
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Settling time 10 s is an engineering choice (the manual gives none; UNVERIFIED). The 5560A capacitance commands are not verified (existing registry).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Settling time 10 s is an engineering choice (the manual gives none; UNVERIFIED). The 5560A capacitance commands are not verified (existing registry).",
    "ref": "T1 #20",
    "id": "1-20"
   },
@@ -845,7 +1017,7 @@
    "table": "1",
    "step": 21,
    "section": "Capacitance",
-   "switch": "Capacitance ⊣⊢  (the Ω position, ⊣⊢ is its yellow alternate function; how it is selected is UNVERIFIED)",
+   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button ONCE to select capacitance (display shows µF); Users Manual p. 14, single press owner-confirmed)",
    "range": "1000 µF",
    "models": [
     "374",
@@ -866,10 +1038,10 @@
    },
    "nominal": 0.0005,
    "accuracy": "±(1 % of reading + 4 digits)",
-   "tol_text": "Table 1: 491 to 509 µF   (published specification, UNVERIFIED: ±(1 % of reading + 4 digits of 1 µF) = ±9 µF)",
+   "tol_text": "Table 1: 491 to 509 µF   (Users Manual p. 26: ±(1 % of reading + 4 digits of 1 µF) = ±9 µF)",
    "group": "VOHM",
    "settle": 10,
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Settling time 10 s is an engineering choice (the manual gives none; UNVERIFIED). The 5560A capacitance commands are not verified (existing registry).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Settling time 10 s is an engineering choice (the manual gives none; UNVERIFIED). The 5560A capacitance commands are not verified (existing registry).",
    "ref": "T1 #21",
    "id": "1-21"
   },
@@ -877,7 +1049,7 @@
    "table": "1",
    "step": 22,
    "section": "Capacitance",
-   "switch": "Capacitance ⊣⊢  (the Ω position, ⊣⊢ is its yellow alternate function; how it is selected is UNVERIFIED)",
+   "switch": "Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button ONCE to select capacitance (display shows µF); Users Manual p. 14, single press owner-confirmed)",
    "range": "1000 µF",
    "models": [
     "374",
@@ -898,10 +1070,10 @@
    },
    "nominal": 0.0009,
    "accuracy": "±(1 % of reading + 4 digits)",
-   "tol_text": "Table 1: 887 to 913 µF   (published specification, UNVERIFIED: ±(1 % of reading + 4 digits of 1 µF) = ±13 µF)",
+   "tol_text": "Table 1: 887 to 913 µF   (Users Manual p. 26: ±(1 % of reading + 4 digits of 1 µF) = ±13 µF)",
    "group": "VOHM",
    "settle": 10,
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). Settling time 10 s is an engineering choice (the manual gives none; UNVERIFIED). The 5560A capacitance commands are not verified (existing registry).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). Settling time 10 s is an engineering choice (the manual gives none; UNVERIFIED). The 5560A capacitance commands are not verified (existing registry).",
    "ref": "T1 #22",
    "id": "1-22"
   },
@@ -910,7 +1082,7 @@
    "step": 23,
    "section": "AC amps",
    "switch": "A~  (AC amps: detachable jaw closed around the 50-turn coil)",
-   "range": "999.9 A",
+   "range": "",
    "models": [
     "374",
     "375",
@@ -930,12 +1102,12 @@
    },
    "nominal": 10.0,
    "accuracy": "±(2 % of reading + 5 digits)",
-   "tol_text": "Table 1: 9.3 to 10.7 A   (published specification, UNVERIFIED: ±(2 % of reading + 5 digits of 0.1 A) = ±0.7 A)",
-   "report_desc": "999.9 A, 0.2 A x 50 turns",
+   "tol_text": "Table 1: 9.3 to 10.7 A   (Users Manual p. 20: ±(2 % of reading + 5 digits of 0.1 A) = ±0.7 A)",
+   "report_desc": "Jaw, 0.2 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "AC amps, jaw on the 50-turn coil, 999.9 A range: meter reads 10 A @ 50 Hz",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 10 A @ 50 Hz",
    "group": "COIL_AUX",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.2 A in, 10 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (0.2 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.2 A in, 10 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (0.2 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A.",
    "ref": "T1 #23",
    "id": "1-23"
   },
@@ -944,7 +1116,7 @@
    "step": 24,
    "section": "AC amps",
    "switch": "A~  (AC amps: detachable jaw closed around the 50-turn coil)",
-   "range": "999.9 A",
+   "range": "",
    "models": [
     "374",
     "375",
@@ -964,12 +1136,12 @@
    },
    "nominal": 500.0,
    "accuracy": "±(2 % of reading + 5 digits)",
-   "tol_text": "Table 1: 489.5 to 510.5 A   (published specification, UNVERIFIED: ±(2 % of reading + 5 digits of 0.1 A) = ±10.5 A)",
-   "report_desc": "999.9 A, 10 A x 50 turns",
+   "tol_text": "Table 1: 489.5 to 510.5 A   (Users Manual p. 20: ±(2 % of reading + 5 digits of 0.1 A) = ±10.5 A)",
+   "report_desc": "Jaw, 10 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "AC amps, jaw on the 50-turn coil, 999.9 A range: meter reads 500 A @ 50 Hz",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 500 A @ 50 Hz",
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 10 A in, 500 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (10 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 10 A in, 500 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (10 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A.",
    "ref": "T1 #24",
    "id": "1-24"
   },
@@ -978,7 +1150,7 @@
    "step": 25,
    "section": "AC amps",
    "switch": "A~  (AC amps: detachable jaw closed around the 50-turn coil)",
-   "range": "999.9 A",
+   "range": "",
    "models": [
     "376",
     "376-II"
@@ -996,12 +1168,12 @@
    },
    "nominal": 900.0,
    "accuracy": "±(2 % of reading + 5 digits)",
-   "tol_text": "Table 1: 881.5 to 918.5 A   (published specification, UNVERIFIED: ±(2 % of reading + 5 digits of 0.1 A) = ±18.5 A)",
-   "report_desc": "999.9 A, 18 A x 50 turns",
+   "tol_text": "Table 1: 881.5 to 918.5 A   (Users Manual p. 20: ±(2 % of reading + 5 digits of 0.1 A) = ±18.5 A)",
+   "report_desc": "Jaw, 18 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "AC amps, jaw on the 50-turn coil, 999.9 A range: meter reads 900 A @ 50 Hz",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 900 A @ 50 Hz",
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (18 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. UNVERIFIED: the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF). 18 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (18 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point.",
    "ref": "T1 #25",
    "id": "1-25"
   },
@@ -1010,7 +1182,7 @@
    "step": 26,
    "section": "AC amps",
    "switch": "A~  (AC amps: detachable jaw closed around the 50-turn coil)",
-   "range": "999.9 A",
+   "range": "",
    "models": [
     "374",
     "375",
@@ -1030,12 +1202,12 @@
    },
    "nominal": 300.0,
    "accuracy": "±(2.5 % of reading + 5 digits)",
-   "tol_text": "Table 1: 292.0 to 308.0 A   (published specification, UNVERIFIED: ±(2.5 % of reading + 5 digits of 0.1 A) = ±8 A)",
-   "report_desc": "999.9 A, 6 A x 50 turns",
+   "tol_text": "Table 1: 292.0 to 308.0 A   (Users Manual p. 20: ±(2.5 % of reading + 5 digits of 0.1 A) = ±8 A)",
+   "report_desc": "Jaw, 6 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "AC amps, jaw on the 50-turn coil, 999.9 A range: meter reads 300 A @ 440 Hz",
+   "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 300 A @ 440 Hz",
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 6 A in, 300 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (6 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. UNVERIFIED: the 5500A/COIL data recorded in NOTES.md (coil standard sheet) limits 65-440 Hz coil drive to 2.2 A (5500A) / 3 A (5520A) of calibrator output; Table 1 asks for 6 A at 440 Hz. Whether the 5522A / 5560A and the lab's coil can do it is not known: the calibrator refuses an output it cannot make and the run stops there.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 6 A in, 300 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (6 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 6 A at 440 Hz: the lab's coil and calibrator are able to make it (owner-confirmed). If the calibrator refuses the output the run stops at this point.",
    "ref": "T1 #26",
    "id": "1-26"
   },
@@ -1043,8 +1215,8 @@
    "table": "1",
    "step": 27,
    "section": "DC amps",
-   "switch": "A⎓  (DC amps: detachable jaw closed around the 50-turn coil)",
-   "range": "999.9 A",
+   "switch": "A⎓  (DC amps: detachable jaw closed around the 50-turn coil; the yellow button is ZERO, Users Manual p. 11)",
+   "range": "",
    "models": [
     "374",
     "375",
@@ -1064,12 +1236,12 @@
    },
    "nominal": 10.0,
    "accuracy": "±(2 % of reading + 5 digits)",
-   "tol_text": "Table 1: 9.7 to 10.3 A   (published specification, UNVERIFIED: ±(2 % of reading + 5 digits of 0.1 A) = ±0.7 A; the table keeps half of it)",
-   "report_desc": "999.9 A, 0.2 A x 50 turns",
+   "tol_text": "Table 1: 9.7 to 10.3 A   (Users Manual p. 23: ±(2 % of reading + 5 digits of 0.1 A) = ±0.7 A; the table keeps half of it)",
+   "report_desc": "Jaw, 0.2 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "DC amps, jaw on the 50-turn coil, 999.9 A range: meter reads 10 A",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads 10 A",
    "group": "COIL_AUX",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.2 A in, 10 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (0.2 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Not in the Calibration Manual (UNVERIFIED): the meter has a ZERO button (Figure 1); with the jaw closed and nothing in it, a DC amps reading that is not zero may need it. Do not zero with the coil in the jaw.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.2 A in, 10 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (0.2 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. Users Manual p. 11 (DC amps): dial on A⎓, press the yellow button (ZERO) with the jaw clear of any conductor until the display reads 0.0, then close the jaw around the coil. Zero before the calibrator drives current; never with the coil energised. (Whether ZERO has to be repeated before every DC amps point is not stated: UNVERIFIED.)",
    "ref": "T1 #27",
    "id": "1-27"
   },
@@ -1077,8 +1249,8 @@
    "table": "1",
    "step": 28,
    "section": "DC amps",
-   "switch": "A⎓  (DC amps: detachable jaw closed around the 50-turn coil)",
-   "range": "999.9 A",
+   "switch": "A⎓  (DC amps: detachable jaw closed around the 50-turn coil; the yellow button is ZERO, Users Manual p. 11)",
+   "range": "",
    "models": [
     "374",
     "375",
@@ -1098,30 +1270,89 @@
    },
    "nominal": 500.0,
    "accuracy": "±(2 % of reading + 5 digits)",
-   "tol_text": "Table 1: 495.0 to 505.0 A   (published specification, UNVERIFIED: ±(2 % of reading + 5 digits of 0.1 A) = ±10.5 A)",
-   "report_desc": "999.9 A, 10 A x 50 turns",
+   "tol_text": "Table 1: 495.0 to 505.0 A   (Users Manual p. 23: ±(2 % of reading + 5 digits of 0.1 A) = ±10.5 A)",
+   "report_desc": "Jaw, 10 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "DC amps, jaw on the 50-turn coil, 999.9 A range: meter reads 500 A",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads 500 A",
    "check": {
     "verdict": "tighter",
-    "printed_vs_spec": [
-     {
-      "side": "low",
-      "printed": "5",
-      "half_spec": "5.25",
+    "models": {
+     "374": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "5",
+        "half_spec": "5.25",
+        "full_spec": "10.5"
+       },
+       {
+        "side": "high",
+        "printed": "5",
+        "half_spec": "5.25",
+        "full_spec": "10.5"
+       }
+      ],
       "full_spec": "10.5"
      },
-     {
-      "side": "high",
-      "printed": "5",
-      "half_spec": "5.25",
+     "375": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "5",
+        "half_spec": "5.25",
+        "full_spec": "10.5"
+       },
+       {
+        "side": "high",
+        "printed": "5",
+        "half_spec": "5.25",
+        "full_spec": "10.5"
+       }
+      ],
+      "full_spec": "10.5"
+     },
+     "376": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "5",
+        "half_spec": "5.25",
+        "full_spec": "10.5"
+       },
+       {
+        "side": "high",
+        "printed": "5",
+        "half_spec": "5.25",
+        "full_spec": "10.5"
+       }
+      ],
+      "full_spec": "10.5"
+     },
+     "376-II": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "5",
+        "half_spec": "5.25",
+        "full_spec": "10.5"
+       },
+       {
+        "side": "high",
+        "printed": "5",
+        "half_spec": "5.25",
+        "full_spec": "10.5"
+       }
+      ],
       "full_spec": "10.5"
      }
-    ],
-    "full_spec": "10.5"
+    }
    },
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 10 A in, 500 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (10 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. CHECK (printed limit not changed): the printed limit is inside the full specification but is neither the full specification nor half of it: low limit ±5 vs half of the specification ±5.25; high limit ±5 vs half of the specification ±5.25 (full published specification ±10.5 A, UNVERIFIED source).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 10 A in, 500 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (10 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. CHECK (printed limit not changed; Users Manual p. 23): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±5 from the nominal vs half of the specification ±5.25; high limit ±5 from the nominal vs half of the specification ±5.25; full specification ±10.5 A).",
    "ref": "T1 #28",
    "id": "1-28"
   },
@@ -1129,8 +1360,8 @@
    "table": "1",
    "step": 29,
    "section": "DC amps",
-   "switch": "A⎓  (DC amps: detachable jaw closed around the 50-turn coil)",
-   "range": "999.9 A",
+   "switch": "A⎓  (DC amps: detachable jaw closed around the 50-turn coil; the yellow button is ZERO, Users Manual p. 11)",
+   "range": "",
    "models": [
     "376",
     "376-II"
@@ -1148,30 +1379,53 @@
    },
    "nominal": 900.0,
    "accuracy": "±(2 % of reading + 5 digits)",
-   "tol_text": "Table 1: 891.0 to 909.0 A   (published specification, UNVERIFIED: ±(2 % of reading + 5 digits of 0.1 A) = ±18.5 A)",
-   "report_desc": "999.9 A, 18 A x 50 turns",
+   "tol_text": "Table 1: 891.0 to 909.0 A   (Users Manual p. 23: ±(2 % of reading + 5 digits of 0.1 A) = ±18.5 A)",
+   "report_desc": "Jaw, 18 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "DC amps, jaw on the 50-turn coil, 999.9 A range: meter reads 900 A",
+   "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads 900 A",
    "check": {
     "verdict": "tighter",
-    "printed_vs_spec": [
-     {
-      "side": "low",
-      "printed": "9",
-      "half_spec": "9.25",
+    "models": {
+     "376": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "9",
+        "half_spec": "9.25",
+        "full_spec": "18.5"
+       },
+       {
+        "side": "high",
+        "printed": "9",
+        "half_spec": "9.25",
+        "full_spec": "18.5"
+       }
+      ],
       "full_spec": "18.5"
      },
-     {
-      "side": "high",
-      "printed": "9",
-      "half_spec": "9.25",
+     "376-II": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "9",
+        "half_spec": "9.25",
+        "full_spec": "18.5"
+       },
+       {
+        "side": "high",
+        "printed": "9",
+        "half_spec": "9.25",
+        "full_spec": "18.5"
+       }
+      ],
       "full_spec": "18.5"
      }
-    ],
-    "full_spec": "18.5"
+    }
    },
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (18 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. UNVERIFIED: the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF). 18 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point. CHECK (printed limit not changed): the printed limit is inside the full specification but is neither the full specification nor half of it: low limit ±9 vs half of the specification ±9.25; high limit ±9 vs half of the specification ±9.25 (full published specification ±18.5 A, UNVERIFIED source).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (18 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point. CHECK (printed limit not changed; Users Manual p. 23): the printed limit is inside the full specification but is neither the full specification nor half of it. 376, 376-II: tighter (low limit ±9 from the nominal vs half of the specification ±9.25; high limit ±9 from the nominal vs half of the specification ±9.25; full specification ±18.5 A).",
    "ref": "T1 #29",
    "id": "1-29"
   },
@@ -1179,7 +1433,7 @@
    "table": "1",
    "step": 30,
    "section": "iFlex simulated",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
    "range": "2500 A",
    "models": [
     "374",
@@ -1188,6 +1442,7 @@
     "376-II"
    ],
    "kind": "ACV",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1200,12 +1455,12 @@
    },
    "nominal": 100.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 98.2 to 101.8 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 0.1 A) = ±3.5 A; the table keeps half of it)",
+   "tol_text": "Table 1: 98.2 to 101.8 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 0.1 A) = ±3.5 A; the table keeps half of it)",
    "unc_unit": "V",
    "report_desc": "2500 A, 3 mV applied",
    "dsb_desc": "iFlex simulated, 2500 A range: 3 mV AC @ 50 Hz, meter reads 100 A",
    "group": "IFLEX_SIM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 3 mV AC at 50 Hz and the meter reads 100 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 3 mV AC at 50 Hz and the meter reads 100 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21).",
    "ref": "T1 #30",
    "id": "1-30"
   },
@@ -1213,7 +1468,7 @@
    "table": "1",
    "step": 31,
    "section": "iFlex simulated",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
    "range": "2500 A",
    "models": [
     "374",
@@ -1222,6 +1477,7 @@
     "376-II"
    ],
    "kind": "ACV",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1234,12 +1490,12 @@
    },
    "nominal": 1000.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 982 to 1018 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 1 A) = ±35 A; the table keeps half of it)",
+   "tol_text": "Table 1: 982 to 1018 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 1 A) = ±35 A; the table keeps half of it)",
    "unc_unit": "V",
    "report_desc": "2500 A, 30 mV applied",
    "dsb_desc": "iFlex simulated, 2500 A range: 30 mV AC @ 50 Hz, meter reads 1000 A",
    "group": "IFLEX_SIM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 30 mV AC at 50 Hz and the meter reads 1000 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 30 mV AC at 50 Hz and the meter reads 1000 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21).",
    "ref": "T1 #31",
    "id": "1-31"
   },
@@ -1247,7 +1503,7 @@
    "table": "1",
    "step": 32,
    "section": "iFlex simulated",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
    "range": "2500 A",
    "models": [
     "374",
@@ -1256,6 +1512,7 @@
     "376-II"
    ],
    "kind": "ACV",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1268,12 +1525,12 @@
    },
    "nominal": 2000.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 1967 to 2033 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 1 A) = ±65 A; the table keeps half of it)",
+   "tol_text": "Table 1: 1967 to 2033 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 1 A) = ±65 A; the table keeps half of it)",
    "unc_unit": "V",
    "report_desc": "2500 A, 60 mV applied",
    "dsb_desc": "iFlex simulated, 2500 A range: 60 mV AC @ 50 Hz, meter reads 2000 A",
    "group": "IFLEX_SIM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 60 mV AC at 50 Hz and the meter reads 2000 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 60 mV AC at 50 Hz and the meter reads 2000 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21).",
    "ref": "T1 #32",
    "id": "1-32"
   },
@@ -1281,7 +1538,7 @@
    "table": "1",
    "step": 33,
    "section": "iFlex simulated",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
    "range": "2500 A",
    "models": [
     "374",
@@ -1290,6 +1547,7 @@
     "376-II"
    ],
    "kind": "ACV",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1302,12 +1560,12 @@
    },
    "nominal": 2500.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 2460 to 2540 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 1 A) = ±80 A; the table keeps half of it)",
+   "tol_text": "Table 1: 2460 to 2540 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 1 A) = ±80 A; the table keeps half of it)",
    "unc_unit": "V",
    "report_desc": "2500 A, 75 mV applied",
    "dsb_desc": "iFlex simulated, 2500 A range: 75 mV AC @ 50 Hz, meter reads 2500 A",
    "group": "IFLEX_SIM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 75 mV AC at 50 Hz and the meter reads 2500 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 75 mV AC at 50 Hz and the meter reads 2500 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21).",
    "ref": "T1 #33",
    "id": "1-33"
   },
@@ -1315,7 +1573,7 @@
    "table": "1",
    "step": 34,
    "section": "iFlex simulated",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
    "range": "2500 A",
    "models": [
     "374",
@@ -1324,6 +1582,7 @@
     "376-II"
    ],
    "kind": "ACV",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1336,12 +1595,12 @@
    },
    "nominal": 2500.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 2460 to 2540 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 1 A) = ±80 A; the table keeps half of it)",
+   "tol_text": "Table 1: 2460 to 2540 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 1 A) = ±80 A; the table keeps half of it)",
    "unc_unit": "V",
    "report_desc": "2500 A, 750 mV applied",
    "dsb_desc": "iFlex simulated, 2500 A range: 750 mV AC @ 500 Hz, meter reads 2500 A",
    "group": "IFLEX_SIM",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 750 mV AC at 500 Hz and the meter reads 2500 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives 750 mV AC at 500 Hz and the meter reads 2500 A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21).",
    "ref": "T1 #34",
    "id": "1-34"
   },
@@ -1349,8 +1608,8 @@
    "table": "1",
    "step": 35,
    "section": "iFlex with coil",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
-   "range": "999.9 A",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
+   "range": "2500 A",
    "models": [
     "374",
     "375",
@@ -1358,6 +1617,7 @@
     "376-II"
    ],
    "kind": "ACI",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1370,12 +1630,12 @@
    },
    "nominal": 10.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 9.6 to 10.4 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 0.1 A) = ±0.8 A; the table keeps half of it)",
+   "tol_text": "Table 1: 9.6 to 10.4 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 0.1 A) = ±0.8 A; the table keeps half of it)",
    "report_desc": "iFlex, 0.2 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "iFlex loop on the 50-turn coil, 999.9 A range: meter reads 10 A @ 50 Hz",
+   "dsb_desc": "iFlex loop on the 50-turn coil, 2500 A range: meter reads 10 A @ 50 Hz",
    "group": "IFLEX_COIL_AUX",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 0.2 A in, 10 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 0.2 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 0.2 A in, 10 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 0.2 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21).",
    "ref": "T1 #35",
    "id": "1-35"
   },
@@ -1383,8 +1643,8 @@
    "table": "1",
    "step": 36,
    "section": "iFlex with coil",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
-   "range": "999.9 A",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
+   "range": "2500 A",
    "models": [
     "374",
     "375",
@@ -1392,6 +1652,7 @@
     "376-II"
    ],
    "kind": "ACI",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1404,30 +1665,89 @@
    },
    "nominal": 500.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 493.0 to 507.0 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 0.1 A) = ±15.5 A)",
+   "tol_text": "Table 1: 493.0 to 507.0 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 0.1 A) = ±15.5 A)",
    "report_desc": "iFlex, 10 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "iFlex loop on the 50-turn coil, 999.9 A range: meter reads 500 A @ 50 Hz",
+   "dsb_desc": "iFlex loop on the 50-turn coil, 2500 A range: meter reads 500 A @ 50 Hz",
    "check": {
     "verdict": "tighter",
-    "printed_vs_spec": [
-     {
-      "side": "low",
-      "printed": "7",
-      "half_spec": "7.75",
+    "models": {
+     "374": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "7",
+        "half_spec": "7.75",
+        "full_spec": "15.5"
+       },
+       {
+        "side": "high",
+        "printed": "7",
+        "half_spec": "7.75",
+        "full_spec": "15.5"
+       }
+      ],
       "full_spec": "15.5"
      },
-     {
-      "side": "high",
-      "printed": "7",
-      "half_spec": "7.75",
+     "375": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "7",
+        "half_spec": "7.75",
+        "full_spec": "15.5"
+       },
+       {
+        "side": "high",
+        "printed": "7",
+        "half_spec": "7.75",
+        "full_spec": "15.5"
+       }
+      ],
+      "full_spec": "15.5"
+     },
+     "376": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "7",
+        "half_spec": "7.75",
+        "full_spec": "15.5"
+       },
+       {
+        "side": "high",
+        "printed": "7",
+        "half_spec": "7.75",
+        "full_spec": "15.5"
+       }
+      ],
+      "full_spec": "15.5"
+     },
+     "376-II": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "7",
+        "half_spec": "7.75",
+        "full_spec": "15.5"
+       },
+       {
+        "side": "high",
+        "printed": "7",
+        "half_spec": "7.75",
+        "full_spec": "15.5"
+       }
+      ],
       "full_spec": "15.5"
      }
-    ],
-    "full_spec": "15.5"
+    }
    },
    "group": "IFLEX_COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 10 A in, 500 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 10 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. CHECK (printed limit not changed): the printed limit is inside the full specification but is neither the full specification nor half of it: low limit ±7 vs half of the specification ±7.75; high limit ±7 vs half of the specification ±7.75 (full published specification ±15.5 A, UNVERIFIED source).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 10 A in, 500 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 10 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). CHECK (printed limit not changed; Users Manual p. 21): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±7 from the nominal vs half of the specification ±7.75; high limit ±7 from the nominal vs half of the specification ±7.75; full specification ±15.5 A).",
    "ref": "T1 #36",
    "id": "1-36"
   },
@@ -1435,8 +1755,8 @@
    "table": "1",
    "step": 37,
    "section": "iFlex with coil",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
-   "range": "999.9 A",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
+   "range": "2500 A",
    "models": [
     "374",
     "375",
@@ -1444,6 +1764,7 @@
     "376-II"
    ],
    "kind": "ACI",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1456,30 +1777,89 @@
    },
    "nominal": 900.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 887.0 to 913.0 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 0.1 A) = ±27.5 A)",
+   "tol_text": "Table 1: 887.0 to 913.0 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 0.1 A) = ±27.5 A)",
    "report_desc": "iFlex, 18 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "iFlex loop on the 50-turn coil, 999.9 A range: meter reads 900 A @ 50 Hz",
+   "dsb_desc": "iFlex loop on the 50-turn coil, 2500 A range: meter reads 900 A @ 50 Hz",
    "check": {
     "verdict": "tighter",
-    "printed_vs_spec": [
-     {
-      "side": "low",
-      "printed": "13",
-      "half_spec": "13.75",
+    "models": {
+     "374": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "13",
+        "half_spec": "13.75",
+        "full_spec": "27.5"
+       },
+       {
+        "side": "high",
+        "printed": "13",
+        "half_spec": "13.75",
+        "full_spec": "27.5"
+       }
+      ],
       "full_spec": "27.5"
      },
-     {
-      "side": "high",
-      "printed": "13",
-      "half_spec": "13.75",
+     "375": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "13",
+        "half_spec": "13.75",
+        "full_spec": "27.5"
+       },
+       {
+        "side": "high",
+        "printed": "13",
+        "half_spec": "13.75",
+        "full_spec": "27.5"
+       }
+      ],
+      "full_spec": "27.5"
+     },
+     "376": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "13",
+        "half_spec": "13.75",
+        "full_spec": "27.5"
+       },
+       {
+        "side": "high",
+        "printed": "13",
+        "half_spec": "13.75",
+        "full_spec": "27.5"
+       }
+      ],
+      "full_spec": "27.5"
+     },
+     "376-II": {
+      "verdict": "tighter",
+      "printed_vs_spec": [
+       {
+        "side": "low",
+        "printed": "13",
+        "half_spec": "13.75",
+        "full_spec": "27.5"
+       },
+       {
+        "side": "high",
+        "printed": "13",
+        "half_spec": "13.75",
+        "full_spec": "27.5"
+       }
+      ],
       "full_spec": "27.5"
      }
-    ],
-    "full_spec": "27.5"
+    }
    },
    "group": "IFLEX_COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 18 A in, 900 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 18 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. UNVERIFIED: the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF). 18 A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point. CHECK (printed limit not changed): the printed limit is inside the full specification but is neither the full specification nor half of it: low limit ±13 vs half of the specification ±13.75; high limit ±13 vs half of the specification ±13.75 (full published specification ±27.5 A, UNVERIFIED source).",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 18 A in, 900 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 18 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point. CHECK (printed limit not changed; Users Manual p. 21): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±13 from the nominal vs half of the specification ±13.75; high limit ±13 from the nominal vs half of the specification ±13.75; full specification ±27.5 A).",
    "ref": "T1 #37",
    "id": "1-37"
   },
@@ -1487,8 +1867,8 @@
    "table": "1",
    "step": 38,
    "section": "iFlex with coil",
-   "switch": "iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)",
-   "range": "999.9 A",
+   "switch": "iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)",
+   "range": "2500 A",
    "models": [
     "374",
     "375",
@@ -1496,6 +1876,7 @@
     "376-II"
    ],
    "kind": "ACI",
+   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1508,12 +1889,12 @@
    },
    "nominal": 300.0,
    "accuracy": "±(3 % of reading + 5 digits)",
-   "tol_text": "Table 1: 295.2 to 304.8 A   (published specification, UNVERIFIED: ±(3 % of reading + 5 digits of 0.1 A) = ±9.5 A; the table keeps half of it)",
+   "tol_text": "Table 1: 295.2 to 304.8 A   (Users Manual p. 21: ±(3 % of reading + 5 digits of 0.1 A) = ±9.5 A; the table keeps half of it)",
    "report_desc": "iFlex, 6 A x 50 turns",
    "settle": 5,
-   "dsb_desc": "iFlex loop on the 50-turn coil, 999.9 A range: meter reads 300 A @ 440 Hz",
+   "dsb_desc": "iFlex loop on the 50-turn coil, 2500 A range: meter reads 300 A @ 440 Hz",
    "group": "IFLEX_COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (UNVERIFIED). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 6 A in, 300 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 6 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. UNVERIFIED: the 5500A/COIL data recorded in NOTES.md (coil standard sheet) limits 65-440 Hz coil drive to 2.2 A (5500A) / 3 A (5520A) of calibrator output; Table 1 asks for 6 A at 440 Hz. Whether the 5522A / 5560A and the lab's coil can do it is not known: the calibrator refuses an output it cannot make and the run stops there.",
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 6 A in, 300 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 6 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). 6 A at 440 Hz: the lab's coil and calibrator are able to make it (owner-confirmed). If the calibrator refuses the output the run stops at this point.",
    "ref": "T1 #38",
    "id": "1-38"
   }
