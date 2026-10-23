@@ -354,7 +354,7 @@ class Spec(unittest.TestCase):
             self.assertIn("SPEC = 'fluke_376_pv.json'", text, pid)
             self.assertIn(f"MODEL = '{model}'", text, pid)
         self.assertIs(h.App.QUEUE_SUPPORTED, True)               # the shared engine is untouched: the run queue is on for the other handhelds
-        self.assertIs(X.App.QUEUE_SUPPORTED, False)              # the iFlex setting is per meter: no run queue for these procedures
+        self.assertIs(X.App.QUEUE_SUPPORTED, True)               # the run queue is on; the iFlex setting is per queue meter (tests/test_fluke_376_queue.py)
         self.assertTrue(issubclass(X.App, h.App))
 
 
@@ -983,9 +983,10 @@ class IFlexOption(unittest.TestCase):
         self.assertEqual(app.save_fields().keys(), h.App.save_fields(app).keys())
         self.assertEqual(app.report_header(spec['source']), h.App.report_header(app, spec['source']))
 
-    def test_no_run_queue(self):
+    def test_run_queue_is_offered_and_a_single_meter_is_not_a_queue(self):
         app, _ = self.make()
-        self.assertFalse(app.queue_supported())
+        self.assertTrue(app.queue_supported())
+        self.assertFalse(app.queue_wants_run())                  # no meters listed: the procedure runs as a single-meter run
 
 
 if __name__ == '__main__':

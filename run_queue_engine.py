@@ -150,6 +150,13 @@ class QueueMixin:
         self.status.set(f'Showing the results of asset {m.asset}.')
 
     # ------------------------------------------------------------------ set-up window
+    def queue_prepare_meters(self, meters):
+        """Hook: give the meters of a queue being planned their per-meter settings (a procedure option set per meter).  Nothing by default."""
+
+    def queue_total(self, m):
+        """Points of the current list that meter `m` takes part in (all of them unless a per-meter option leaves some out)."""
+        return sum(1 for p in self.points if m.wants(p))
+
     def queue_candidates(self):
         """[(asset, serial)] of this model from Asset History and the instrument list (suggestions for the Add meter box)."""
         out = []
@@ -201,6 +208,7 @@ class QueueMixin:
                 q.add(asset, serial, tech)
             except RQ.QueueError:
                 pass
+        self.queue_prepare_meters(q.meters)
         use_ir = self.use_ir and bool(self.ir)
         info = RQ.summary(self.points, q, self.queue_options(), mode=mode, use_ir=use_ir)
         n = len(q.meters)
@@ -343,7 +351,7 @@ class QueueMixin:
     # ------------------------------------------------------------------ pending points / selections
     def queue_lacking(self, p):
         left = self.is_left
-        return any(str(p['id']) not in m.results(left) for m in self.queue.meters)
+        return any(m.wants(p) and str(p['id']) not in m.results(left) for m in self.queue.meters)
 
     def queue_pending(self, points):
         return [p for p in points if self.queue_lacking(p)]
@@ -474,7 +482,7 @@ class QueueMixin:
             return
         rows = RQ.progress(self.queue, self.points, self.is_left)
         done = sum(r['recorded'] for r in rows)
-        denom = max(1, len(rows) * len(self.points))
+        denom = max(1, sum(r['total'] for r in rows))
         try:
             q.progress.update(head, done / denom, rows, finished=finished, note=note)
         except Exception:
@@ -553,9 +561,9 @@ class QueueMixin:
     def _queue_finish(self, stopped=False):
         q = self._q
         left = self.is_left
-        total = len([p for p in self.points])
         self._queue_save_all()
         for m in self.queue.meters:
+            total = self.queue_total(m)
             done = len(m.results(left))
             fails = sum(1 for r in m.results(left).values() if r.get('result') == 'FAIL')
             m.status = ('Done' if done >= total else 'Stopped' if stopped else 'Incomplete') + (f' - {fails} fail' if fails else '')

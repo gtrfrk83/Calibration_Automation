@@ -60,6 +60,7 @@ MODEL_IDS = {
     'ws': 'WS4104HD',
     'k2000': '2000',
     'a34410a': 'the model, 34410A or 34411A',
+    'dsb': 'the user-built datasheet (a Datasheet Builder sheet is run by the handheld engine; these are its own settings)',
 }
 
 # --------------------------------------------------------------------------------------------------------------------------------
@@ -116,6 +117,11 @@ _t('fgen', 'settle.lfflat', 1.0, 0.2, 120.0, 'Function generator: settle, low-fr
 _t('fgen', 'settle.flat', 1.5, 0.2, 120.0, 'Function generator: settle, flatness')
 _t('fgen', 'settle.other', 1.0, 0.2, 120.0, 'Function generator: settle, other points')
 _t('fgen', 'counter_gate', 1.0, 0.1, 10.0, 'Function generator: frequency counter gate time')
+# User-built datasheets (dsb_runtime.py), stable-reading settle for a reading the program takes from a measuring standard: wait until N consecutive readings
+# agree within a band; the point's ordinary settle time is the minimum, the timeout is the cap.  The values are choices of this program, not manual figures.
+_t('dsb', 'stable.n', 3, 2, 20, 'User-built datasheet: consecutive readings that must agree (UNVERIFIED estimate)', unit='', ptype='int', conditions=True)
+_t('dsb', 'stable.band_counts', 3.0, 1.0, 100.0, 'User-built datasheet: agreement band, in counts of the point\'s resolution (UNVERIFIED estimate)', unit='counts', conditions=True)
+_t('dsb', 'stable.timeout', 30.0, 1.0, 600.0, 'User-built datasheet: stable-reading timeout, the cap on the wait (UNVERIFIED estimate)', conditions=True)
 _t('handheld', 'settle.default', 3.0, 0.5, 120.0, 'Handheld DMM: settle after the output is on (points without their own value)')
 _t('handheld', 'ramp_delay', 5.0, 5.0, 60.0, 'Handheld DMM: delay between high-voltage ramp steps (the manual says 5 s: can only be lengthened)')
 _t('handheld', 'ir_timeout', 45.0, 5.0, 300.0, 'Handheld DMM: infrared reading timeout (points without their own value)', conditions=False)
@@ -141,6 +147,11 @@ PER_POINT = [('point.settle', 'settle_s', 'Settle time for this point', 0.2, 120
              ('handheld.point.settle', 'settle', 'Settle time for this point (handheld)', 0.5, 120.0),
              ('handheld.point.ir_timeout', 'ir_timeout', 'Infrared reading timeout for this point', 5.0, 300.0)]
 
+# per-point versions of the stable-reading settings (a point can carry its own; written into the point as p[field]): (name, field, type, label, lo, hi, unit)
+PER_POINT_DSB = [('dsb.point.stable_n', 'stable_n', 'int', 'Stable reading: consecutive readings that must agree, for this point (UNVERIFIED estimate)', 2, 20, ''),
+                 ('dsb.point.stable_band', 'stable_band', 'float', 'Stable reading: agreement band in counts, for this point (UNVERIFIED estimate)', 1.0, 100.0, 'counts'),
+                 ('dsb.point.stable_timeout', 'stable_timeout', 'float', 'Stable reading: timeout for this point (UNVERIFIED estimate)', 1.0, 600.0, 's')]
+
 TUNABLES: dict = {}          # full name -> dict(engine, key, default, lo, hi, label, unit, type, affects_conditions)
 
 
@@ -152,6 +163,8 @@ def _register():
         procmods.register_param(name, ptype, lo, hi, affects_conditions=cond, label=label, unit=unit)
     for name, field, label, lo, hi in PER_POINT:
         procmods.register_param(name, 'float', lo, hi, affects_conditions=True, per_point=True, point_field=field, label=label, unit='s')
+    for name, field, ptype, label, lo, hi, unit in PER_POINT_DSB:
+        procmods.register_param(name, ptype, lo, hi, affects_conditions=True, per_point=True, point_field=field, label=label, unit=unit)
 
 
 _register()

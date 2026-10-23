@@ -42,7 +42,7 @@ class Dmm(M):
         cls.res = cls.m.match(cls.ds)
 
     def test_every_standard_is_considered(self):
-        self.assertEqual(self.res.standards, ['5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL', 'A2LA-LIGHT', '53131A', '53132A'])
+        self.assertEqual(self.res.standards, ['3458A', '5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL', 'A2LA-LIGHT', '53131A', '53132A'])
 
     def test_dc_volts_all_covered_and_automatable(self):
         s = self.res.summary()['dcv']
@@ -313,10 +313,36 @@ class Scope(M):
                 self.assertIsNone(a.tur)                                       # pass / fail: no tolerance
 
 
+class DriverlessLast(M):
+    """A spec-only standard (no driver: 3458A, 8563E, ...) is offered as a manual candidate, but never outranks a driver-backed one."""
+
+    def test_rank_puts_driverless_after_driver_backed_whatever_the_tur(self):
+        a = dm.Candidate('3458A', covered=True, driver='', tur=100.0, rel_unc=1e-6)
+        b = dm.Candidate('5790B', covered=True, driver='Fluke5790B', tur=2.0, rel_unc=1e-2)
+        self.assertEqual([c.standard for c in dm._rank([a, b], 'GEN_OFFSET')], ['5790B', '3458A'])
+        only = dm.Candidate('3458A', covered=True, driver='', tur=100.0)
+        self.assertEqual([c.standard for c in dm._rank([only], 'GEN_OFFSET')], ['3458A'])      # nothing driver-backed covers: it is offered
+
+    def test_3458a_is_a_driverless_candidate_behind_the_driver_backed_ones(self):
+        ds = db.Datasheet('A', 'G', 'G')
+        ds.set_periods([('1y', 'y')], '1y')
+        off = ds.add_function('GEN_OFFSET')
+        off.add_range('1000', '1e-3')
+        ds.set_spec(off, '1 % of reading + 2 mV')
+        off.add_rule(db.PointRule('o', 'fixed', {'values': ['900 V']}))
+        db.regenerate(off)
+        a = next(iter(self.match(ds).assignments.values()))
+        cov = [c for c in a.candidates if c.covered]
+        self.assertIn('3458A', [c.standard for c in cov])
+        self.assertEqual(a.standard, '5790B')
+        self.assertEqual(next(c for c in cov if c.standard == '3458A').driver, '')
+        self.assertLess([c.standard for c in sorted(cov, key=lambda c: c.rank)].index('5790B'), [c.standard for c in sorted(cov, key=lambda c: c.rank)].index('3458A'))
+
+
 class Drivers(M):
     def test_driver_table_lists_every_standard_and_what_it_can_do(self):
         rows = {r['model']: r for r in dm.driver_table(DB)}
-        self.assertEqual(set(rows), {'5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A', 'A2LA-LIGHT', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL'})
+        self.assertEqual(set(rows), {'3458A', '5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A', 'A2LA-LIGHT', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL'})
         self.assertEqual(rows['5522A']['driver'], 'Fluke5522A')
         self.assertEqual(rows['5522A']['scope_driver'], 'Fluke5522AScope')
         self.assertEqual(rows['5522A']['functions']['DCV']['status'], 'ok')

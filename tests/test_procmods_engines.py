@@ -328,7 +328,7 @@ class Registry(unittest.TestCase):
     def test_every_tunable_is_read_by_the_source_of_its_engine(self):
         files = {'truevolt': 'truevolt_verification.py', 'dacq': 'dacq_verification.py', 'fgen': 'fgen_verification.py',
                  'handheld': 'handheld_dmm.py', 'a34401': 'Procedures/Agilent_34401A.py', 'f8846a': 'Procedures/Fluke_8846A_Verification.py',
-                 'mdo': 'mdo4000c_verification.py', 'ws': 'Procedures/WaveSurfer_WS4104HD.py', 'f8808a': 'fluke8808a_verification.py', 'k2000': 'keithley2000_verification.py', 'a34410a': 'agilent34410a_verification.py'}
+                 'mdo': 'mdo4000c_verification.py', 'ws': 'Procedures/WaveSurfer_WS4104HD.py', 'f8808a': 'fluke8808a_verification.py', 'k2000': 'keithley2000_verification.py', 'a34410a': 'agilent34410a_verification.py', 'dsb': 'dsb_runtime.py'}
         dynamic = ('truevolt.settle.ac_', 'dacq.settle.ac_')
         for name, t in pe.TUNABLES.items():
             src = (ROOT / files[t['engine']]).read_text(encoding='utf-8')

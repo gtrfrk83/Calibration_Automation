@@ -15,6 +15,7 @@ Folder layout (same as before, plus one new file):
   ui_theme.py                        (shared look and feel; must sit next to the Manager)
   datamode.py                        (NEW - As Found / As Left toggle; must sit next to the Manager)
   labregistry.py, labregistry_ui.py  (NEW - asset history; lab_registry.sqlite3 is created beside them on first use)
+  instrument_scan.py, instrument_scan_ui.py  (NEW - 'Find instruments...' button in the Manager: which VISA resource / GPIB channel each instrument is on; read-only identity queries only)
   Procedures\
       Agilent_34401A.py              v54
       Fluke_8846A_Verification.py    v58
@@ -323,7 +324,7 @@ Procedures/Fluke_374_Verification.py, Fluke_375_Verification.py, Fluke_376_Verif
   The 900 V rows (1000 V range, 1 V resolution) are shown and typed as whole volts.
   Calibrator: Fluke 5522A or 5560A (the manual names a 55xxA), automatic or Manual. The meter has no remote interface: you type the display reading in the reading window of each point.
   Prompts as the other handhelds: hook-up dialog only when the hook-up group changes (test leads; coil on the low- or high-current output; iFlex simulation leads; iFlex loop on the coil),
-  "Change the function" at every dial change, ONE high-voltage confirmation per hook-up group (30 V and above). No run queue (the iFlex setting is per meter).
+  "Change the function" at every dial change, ONE high-voltage confirmation per hook-up group (30 V and above). Run queue as the other handhelds, with a per-meter iFlex setting (each queue meter: iFlex supplied, default ON; set in the Connections drawer; its report says Tested / Not tested).
   Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf; the coil points print the calibrator's current uncertainty at the output current (not multiplied by 50, owner-chosen convention),
   the iFlex simulated points the calibrator's AC volts uncertainty (TAR / TUR blank there).
   Not included: the calibration ADJUSTMENT (Table 3). Rebuild the spec after editing the table:  python3 specs/build_fluke_376_spec.py     Demo with:  python Procedures/Fluke_376_Verification.py --demo

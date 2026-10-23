@@ -175,6 +175,7 @@ class Manager:
         banner.pack(fill='x')
         banner.add_pill('Database: ' + DB.name, 'info')
         ui.StatusBar(root, self.status, right=VERSION).pack(side='bottom', fill='x')
+        ui.dock_button(root, 'Find instruments...', self.find_instruments)      # a tool for every tab: which VISA resource / GPIB channel each instrument is on
 
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill='both', expand=True)
@@ -204,6 +205,10 @@ class Manager:
         self.refresh()
         self.refresh_development()
         root.bind('<Control-f>', lambda _e: (self.notebook.select(self.library_frame), self.search_entry.focus_set()))
+
+    def find_instruments(self):
+        import instrument_scan_ui
+        instrument_scan_ui.open_find_instruments(self.root)
 
     # (design width, narrowest width) of the Procedures table columns, in 96-dpi pixels
     TABLE_COLUMNS = {'name': (235, 110), 'manufacturer': (90, 60), 'model': (80, 60), 'category': (175, 90), 'ready': (80, 64), 'verified': (200, 100)}
