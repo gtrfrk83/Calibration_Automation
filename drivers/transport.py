@@ -76,6 +76,8 @@ class Transport:
     def set_timeout(self, seconds: float): pass
     def clear(self): pass
     def go_local(self): pass            # GPIB: address the instrument with GTL (go to local); other buses have nothing to send
+    def set_read_termination(self, term: str): pass      # line end that ends a text read (a driver whose instrument does not assert EOI sets it)
+    def read_raw(self, count: int) -> bytes: raise NotImplementedError      # `count` bytes with no termination handling (binary readings)
 
 
 def bus_of(address: str) -> str:
@@ -157,6 +159,21 @@ class VisaTransport(Transport):
             self._res.clear()
         except Exception:
             pass
+
+    def set_read_termination(self, term):
+        """Text reads stop at `term` (None: only EOI / the end of the message).  Never raises."""
+        if self._res is not None:
+            try:
+                self._res.read_termination = term
+            except Exception:
+                pass
+
+    def read_raw(self, count):
+        """Exactly `count` bytes, whatever they contain (a termination character inside binary data does not stop the read)."""
+        try:
+            return bytes(self._res.read_bytes(int(count), break_on_termchar=False))
+        except Exception as exc:
+            raise TransportError(f'read of {count} bytes failed: {exc}') from exc
 
     def go_local(self):
         """GPIB only: GTL (go to local) addressed to this instrument, which also restores its front panel keys. Never raises."""
