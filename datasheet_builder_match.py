@@ -61,6 +61,8 @@ def _c(status, driver, via='', note=''):
 
 
 _CAL = 'Fluke5522A'
+_5520_NOTE = 'the 5520A remote commands for this output are the 5522A Operators Manual commands; the supplied 5520A Service Manual does not show them (UNVERIFIED on a 5520A)'
+_5520_SCOPE_NOTE = 'the 5520A scope option (SC300) is not in the imported sheet and its SCOPE commands are not confirmed; use a 5522A or 5560A'
 _UNV_CAP = 'capacitance output is not verified on hardware (NOTES.md: capacitance and thermocouple outputs unverified on the 5560A)'
 _UNV_TC = 'thermocouple simulation is not verified on hardware; the error queue is read after it and the output is never enabled after a rejection'
 
@@ -83,6 +85,17 @@ def _calibrator(driver, scope_driver, scope_status, marker_status, scope_note, m
         'SCOPE_TRIGGER': _c(scope_status, scope_driver, 'select_scope_levsine + set_levsine(vpp, f)', scope_note),
         'SCOPE_TIMEBASE': _c(marker_status, scope_driver, 'select_scope_marker + set_marker_period(s)', marker_note),
     }
+
+
+def _calibrator_5520A():
+    """The 5520A's functions: the 5522A's output calls, every one UNVERIFIED on a 5520A (the supplied Service Manual shows only a few commands), the scope kinds not available."""
+    out = {}
+    for kind, cap in _calibrator('Fluke5520A', 'Fluke5520A', NO, NO, '', '').items():
+        if kind.startswith('SCOPE_'):
+            out[kind] = _c(NO, 'Fluke5520A', '', _5520_SCOPE_NOTE)
+        else:
+            out[kind] = _c(UNVERIFIED, cap.driver, cap.via, cap.note or _5520_NOTE)
+    return out
 
 
 @dataclass
@@ -109,6 +122,9 @@ DRIVER_TABLE = {
     '5522A': DriverInfo('5522A', 'Fluke 5522A multi-product calibrator', 'source', 'Fluke5522A',
                         _calibrator('Fluke5522A', 'Fluke5522AScope', UNVERIFIED, UNVERIFIED, _5522_SCOPE_NOTE, _5522_SCOPE_NOTE),
                         scope_driver='Fluke5522AScope'),
+    '5520A': DriverInfo('5520A', 'Fluke 5520A multi-product calibrator', 'source', 'Fluke5520A', _calibrator_5520A(),
+                        notes='The driver reuses the 5522A command set; only ERR?, *CLS, *OPC?, OPER, OUT? and the DC-current OUT form are confirmed by the supplied 5520A Service Manual '
+                              '(Fluke5520A.unverified_summary()). The scope option (SC300) is not in the imported sheet.'),
     '5560A': DriverInfo('5560A', 'Fluke 5560A multi-product calibrator', 'source', 'Fluke5560A',
                         _calibrator('Fluke5560A', 'Fluke5560A', OK, UNVERIFIED, '', _5560_MARK), scope_driver='Fluke5560A',
                         notes='The imported 5560A sheet has no scope-output rows, so scope bandwidth / time base points cannot be costed on it.'),

@@ -193,5 +193,11 @@ class Sim5522ALimitsTransport(SimFlukeTransport):
 def make_8808a_bench(cal='5522A', enforce_cal_limits=True):
     """(bench, calibrator transport, 8808A transport)."""
     bench = SimBench()
-    cal_t = Sim5522ALimitsTransport(bench, cal) if enforce_cal_limits and cal == '5522A' else SimFlukeTransport(bench, cal)
+    if enforce_cal_limits and cal == '5522A':
+        cal_t = Sim5522ALimitsTransport(bench, cal)
+    elif enforce_cal_limits and cal == '5520A':
+        from .simulated_5520a import Sim5520ALimitsTransport          # refuses what the 5520A specification sheet does not publish (calibrator_fit)
+        cal_t = Sim5520ALimitsTransport(bench, cal)
+    else:
+        cal_t = SimFlukeTransport(bench, cal)
     return bench, cal_t, Sim8808ATransport(bench)
