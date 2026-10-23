@@ -328,9 +328,9 @@ def checks_manager_tabs():
     grab('automated')
     m.view_nb.select(m.view_pages['manual'])
     pump(root, 20)
-    check('manual view: empty until something is imported, note shown', m.view_kind == 'manual' and names() == [] and m.view_notes['manual'].winfo_ismapped()
-          and 'type each reading into the test point grid' in str(m.view_notes['manual'].label.cget('text')), names())
-    check('manual view: Run is disabled with nothing selected', str(m.btn_run.cget('state')) == 'disabled' and str(m.btn_demo.cget('state')) == 'disabled')
+    check('manual view: only the installed Fluke 365 until something is imported, note shown', m.view_kind == 'manual' and names() == ['Fluke 365 Clamp Meter Manual Calibration']
+          and m.view_notes['manual'].winfo_ismapped() and 'type each reading into the test point grid' in str(m.view_notes['manual'].label.cget('text')), names())
+    check('manual view: the Fluke 365 is selected, Run and Demo enabled', t.selection() and str(m.btn_run.cget('state')) != 'disabled' and str(m.btn_demo.cget('state')) != 'disabled')
     check('manual view: the import button is on the Procedures tab', any(isinstance(w, ttk.Button) and 'Import Mudcats datasheet' in str(w.cget('text')) for w in walk(m.library_frame)))
     grab('manual_empty')
     m.view_nb.select(m.view_pages['adjustment'])
@@ -414,7 +414,7 @@ def checks_mdd_manual():
     create.invoke()
     pump(root, 40)
     check('import: preview closed, message shown', not win.winfo_exists() and any(b[0] == 'showinfo' and '15 of 17' in b[1][1] for b in boxes), boxes[-1:])
-    check('import: lands in Manual Calibrations, selected', m.view_kind == 'manual' and len(m.table.get_children()) == 1 and m.table.selection()
+    check('import: lands in Manual Calibrations, selected', m.view_kind == 'manual' and len(m.table.get_children()) == 2 and m.table.selection()     # the Fluke 365 and the import
           and m.view_notes['manual'].winfo_ismapped())
     row = m.table.item(m.table.selection()[0], 'values')
     check('manual view: same columns, status and verified text', 'Ready' in row[4] and str(row[5]).startswith('Not verified'), row)
@@ -1524,6 +1524,129 @@ def checks_8808a_adjustment():
 
 
 
+def checks_fluke_365():
+    """The Fluke 365 manual calibration on a real Tk: the Manager lists it under Manual Calibrations only; its run window (the handheld window plus the typed-reading grid):
+    32 points, readings typed straight into the grid (Enter = save and next, padding, out-of-limit FAIL, rejected input), As Left, and the voltage / coil cable-change prompts."""
+    import handheld_dmm as HH
+    import fluke365_verification as F
+    import Calibration_Procedure_Manager as CPM
+    import datamode
+    CPM.init_db()
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    shots = os.environ.get('SHOT_DIR')
+
+    def grab(win, tag):
+        if not shots:
+            return
+        from PIL import ImageGrab
+        win.update()
+        ImageGrab.grab(bbox=(win.winfo_rootx(), win.winfo_rooty(), win.winfo_rootx() + win.winfo_width(), win.winfo_rooty() + win.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shots, f'{tag}_{THEME}.png'))
+    m = CPM.Manager(root)
+    root.geometry('1260x800+0+0')
+    pump(root, 20)
+    names = lambda: [m.table.item(k, 'values')[0] for k in m.table.get_children()]  # noqa: E731
+    check('365: not in Automated Calibrations', m.view_kind == 'verification' and 'Fluke 365 Clamp Meter Manual Calibration' not in names())
+    m.view_nb.select(m.view_pages['manual'])
+    pump(root, 20)
+    check('365: listed in Manual Calibrations', m.view_kind == 'manual' and 'Fluke 365 Clamp Meter Manual Calibration' in names(), names())
+    row = m.table.item(m.table.get_children()[0], 'values')
+    check('365: manufacturer, model, category, status', row[1:4] == ('Fluke', '365', 'Clamp Meter') and 'Ready' in row[4], row)
+    grab(root, 'fluke365_manager_manual')
+    root.destroy()
+    # --- the run window
+    root = tk.Tk()
+    root.report_callback_exception = lambda *a: errs.append(a)
+    spec = HH.load_spec(F.SPEC)
+    app = F.App(root, F.MODEL, demo=False, spec=spec)
+    root.geometry('1320x800+0+0')
+    pump(root, 30)
+    app.asset.set('A-365')
+    app.serial.set('S-365')
+    app.cal_mode.set('Manual  (5522A front panel)')
+    ge, tree = app.grid_entry, app.tree
+    check('365 run window: grid entry attached, 32 points', ge is not None and len(tree.get_children()) == 32 and tree.heading('found')['text'].endswith('As Found'))
+    first = tree.get_children()[0]
+    tree.selection_set(first)
+    tree.focus_force()
+    pump(root, 5)
+    tree.event_generate('<Return>')
+    pump(root, 10)
+    check('365 grid: Enter opens the box on the selected point', ge.is_open() and ge.iid == first)
+    ge.entry.insert(0, '30')
+    ge.entry.event_generate('<Return>')
+    pump(root, 10)
+    rec = app.results[first]
+    check('365 grid: typed 30 padded to 30.0 and judged', (rec['entered'], rec['result'], rec['source']) == ('30.0', 'PASS', 'typed'), rec)
+    check('365 grid: Enter opened the NEXT point, the status line says what is accepted', ge.is_open() and ge.iid == tree.get_children()[1]
+          and 'accept 297.5 to 302.5 V' in app.status.get(), app.status.get())
+    ge.entry.insert(0, 'abc')
+    ge.entry.event_generate('<Return>')
+    pump(root, 10)
+    check('365 grid: text that is not a reading is refused, the box stays', ge.is_open() and ge.iid == tree.get_children()[1] and tree.get_children()[1] not in app.results, app.status.get())
+    ge.var.set('301')
+    ge.entry.event_generate('<Return>')
+    pump(root, 10)
+    check('365 grid: 301 passes point 2', app.results[tree.get_children()[1]]['entered'] == '301.0' and app.results[tree.get_children()[1]]['result'] == 'PASS')
+    ge.cancel()
+    pump(root, 5)
+    last = tree.get_children()[31]                                # DC amps -9.5 A: meter reads -190 A, limits -192.5 .. -187.5
+    tree.selection_set(last)
+    tree.focus_force()
+    pump(root, 5)
+    tree.event_generate('<Return>')
+    pump(root, 10)
+    check('365 grid: Enter opens the box on the last point', ge.is_open() and ge.iid == last)
+    ge.entry.insert(0, '-187.4')
+    ge.entry.event_generate('<Return>')
+    pump(root, 10)
+    check('365 grid: -187.4 is out of tolerance on the last point', app.results[last]['result'] == 'FAIL' and ge.entry is None, app.results.get(last))
+    check('365 grid: the last point closes the box', 'last point' in app.status.get(), app.status.get())
+    app.set_data_mode(datamode.LEFT)
+    pump(root, 10)
+    tree.selection_set(last)
+    tree.focus_force()
+    pump(root, 5)
+    tree.event_generate('<Return>')
+    pump(root, 10)
+    ge.entry.insert(0, '-190')
+    ge.entry.event_generate('<Return>')
+    pump(root, 10)
+    check('365 grid: As Left kept apart', app.left[last]['result'] == 'PASS' and app.found[last]['result'] == 'FAIL' and app.left[last]['data'] == 'As Left')
+    app.set_data_mode(datamode.FOUND)
+    pump(root, 10)
+    tree.selection_set(tree.get_children()[20])                  # AC amps 0.5 A: the point detail shows the coil hook-up
+    pump(root, 10)
+    grab(root, 'fluke365_run_window')
+    # the cable-change prompts of a voltage point and of both coil groups, as the run shows them
+    pts = {p['n']: p for p in app.points}
+
+    def prompt(n, tag):
+        seen = {}
+
+        def go():
+            win = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel)][0]
+            pump(root, 5)
+            seen['clipped'] = [c for c in walk(win) if c.winfo_ismapped() and not inside(win, c)]
+            seen['text'] = ' '.join(str(c.cget('text')) for c in walk(win) if isinstance(c, (ttk.Label, tk.Label)))
+            grab(win, tag)
+            win.destroy()
+        root.after(500, go)
+        seen['ok'] = app._prompt_setup(pts[n])
+        return seen
+    for n, tag, words in ((1, 'fluke365_prompt_voltage', 'VΩ'), (21, 'fluke365_prompt_coil_aux', 'REMOVE the test leads'), (22, 'fluke365_prompt_coil_20a', '20 A')):
+        r = prompt(n, tag)
+        check(f'365 prompt point {n}: shown, nothing clipped, says what it must', not r['clipped'] and words in r['text'], (r['clipped'], r['text'][:300]))
+    check('365: no Tk callback errors', not errs, errs)
+    app.on_close() if hasattr(app, 'on_close') else None
+    try:
+        root.destroy()
+    except tk.TclError:
+        pass
+
+
 if __name__ == '__main__':
     try:
         checks_handheld_dialogs()
@@ -1532,6 +1655,7 @@ if __name__ == '__main__':
         checks_manager_windows()
         checks_manager_tabs()
         checks_mdd_manual()
+        checks_fluke_365()
         checks_standards_specs()
         checks_standards_specs_small()
         checks_import_package()

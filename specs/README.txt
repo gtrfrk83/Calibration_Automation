@@ -53,6 +53,12 @@ Included
                             175 = 52 points, 177 = 51, 179 = 54 (adds 3 temperature points, TEMP kind, degC). Steps are numbered in table order (the tables print no numbers): ids 2-1..2-52 (175), 3-1..3-54 (177 / 179).
                             THREE printed values are corrected (step.printed_limits keeps the printed text; the report row Description says 'limits corrected'); format-only changes keep step.printed_text.
                             Frequency rows (AC / DC volts frequency) are sourced as AC volts and read in Hz / kHz: no_uncertainty true. build_170_spec.py checks every limit against the published accuracy and fails on a disagreement.
+  fluke_365_pv.json         Fluke 365 Detachable Jaw True-rms Clamp Meter Calibration Manual, Table 2 (printed pp. 7-8), 32 points (schema 3, written by build_fluke_365_spec.py from the page images, read twice):
+                            AC volts 6, DC volts 7, ohms 7, AC amps 6, DC amps 6; ids 2-1 .. 2-32. The current rows list the CALIBRATOR current (applied.value 0.5 / 5 / 9.5 A) and the METER limits
+                            (nominal 10 / 100 / 190 A: a 20-turn coil, 20 x); they carry no_uncertainty. groups{COIL_AUX, COIL_20A} are the spec's own cable-change prompts (calibrator low- / high-current
+                            output to the coil, test leads out of the jacks, jaw round all 20 turns); VOHM comes from hookups.py ('fluke365'). step.check = a printed limit that is NOT half of the published
+                            specification (900 ohm lower limit 894; the three 190 A rows +-2.5 against +-2.15): stored as printed, flagged in the note. step.dsb_desc / report_desc word the coil rows.
+                            Tested by tests/test_fluke_365_points.py; options as the other handheld specs (hv_threshold_v 30, auto_ramp false, function_prompt, report_title 'Calibration Data').
   klein_mm325_pv.json       Klein Tools MM325 instruction manual (schema 3, written by build_mm325.py): one point per range at 90 %, AC at 60 Hz;
                             adds groups{} (cable-change prompts + hook-up diagram), dial{} (picture and position of every range) and options{}
                             (range_prompt, hv_threshold_v); per step: dial, dial_text, tol_text, max_on_s / recovery_s (10 A duty limit)

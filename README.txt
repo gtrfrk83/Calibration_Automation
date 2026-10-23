@@ -198,7 +198,7 @@ Procedures/Agilent_34411A_Verification.py
 
 Fluke 110 / 113 / 114 / 115 / 116 / 117 handheld meters (manual-reading procedures)
 -------------------------------------------------------------------------------
-Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179, Klein MM325)
+Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179, Fluke 365 (names in diagrams/README_fluke365.txt), Klein MM325)
   hookups.py holds the connection tables; specs/build_hookups.py (needs Pillow) draws diagrams/hook_<meter>_<calibrator>_<group>.png
   (24 pictures). The text and picture follow the Calibrator selector, because the two calibrators wire differently:
       voltage / ohms        5560A: OUTPUT V/ohm HI / LO            5522A: NORMAL HI / LO
@@ -288,6 +288,18 @@ Procedures/Fluke_77IV_Verification.py   (engine: handheld_dmm.py; spec: specs/fl
   high voltages go straight to the test value (no ramp). Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf.
   Not included: the calibration ADJUSTMENT (Table 3, pp. 14-16), fuse test, diode test (it has no step in Table 2).
   Rebuild the spec after editing the table:  python3 specs/build_77_spec.py     Demo with:  python Procedures/Fluke_77IV_Verification.py --demo
+
+Fluke 365 detachable jaw clamp meter (MANUAL CALIBRATION: lists on the Manual Calibrations tab)
+-------------------------------------------------------------------------------------------------
+Procedures/Fluke_365_Verification.py   (engine: fluke365_verification.py on handheld_dmm.py; spec: specs/fluke_365_pv.json built by specs/build_fluke_365_spec.py; diagrams: diagrams/README_fluke365.txt)
+  32 points = Table 2 "Performance Tests" of the Fluke 365 Calibration Manual (printed pp. 7-8): AC volts 6 (30 / 300 / 570 V at 50 and 400 Hz), DC volts 7 (0, +-30, +-300, +-570 V),
+  ohms 7 (0 ... 5700 ohm), AC amps 6 and DC amps 6 (0.5 / 5 / 9.5 A driven through a 20-turn coil: the meter reads 20 x the calibrator current, the limits are the meter readings).
+  Limits are the table's own, unchanged; four rows whose printed limit is not half of the published specification (900 ohm, and the three 190 A points) are flagged in the point note.
+  Calibrator: Fluke 5522A or 5560A (the manual names a 55xxA), automatic or Manual. The meter has no remote interface: you type the display reading, either in the reading window of
+  Run All Pending or straight into the test point grid (click a point, type, Enter = save and next point). Prompts: hook-up dialog at every change (test leads; coil on the low- or
+  high-current output, with 'remove the test leads from the jacks'), "Change the function" at every dial change, confirmation before every output of 30 V or more.
+  Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf; the coil points print no uncertainty (the coil is not in the suite's standards).
+  Not included: the calibration ADJUSTMENT (not needed). Rebuild the spec after editing the table:  python3 specs/build_fluke_365_spec.py     Demo with:  python Procedures/Fluke_365_Verification.py --demo
 
 Fluke 175 / 177 / 179 (handheld multimeters, one spec for the family)
 -------------------------------------------------------------------
