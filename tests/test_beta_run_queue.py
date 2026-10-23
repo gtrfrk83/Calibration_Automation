@@ -86,14 +86,14 @@ class Model(unittest.TestCase):
         by = {}
         for p in p117:
             by.setdefault((p['kind'], p['group'], p['test']), RQ.share_reason(p, sp['options']))
-        for key in (('DCV', 'VOHM', 'numeric'), ('ACV', 'VOHM', 'numeric'), ('OHM', 'VOHM', 'numeric'), ('OHM', 'VOHM', 'beeper'), ('CAP', 'VOHM', 'numeric'),
-                    ('VISUAL', 'NONE', 'visual')):
-            self.assertIsNone(by[key], key)
-        for key in (('DCI', 'AMP10', 'numeric'), ('ACI', 'AMP10', 'numeric'), ('ACV', 'VOLTALERT', 'visual'), ('NONE', 'NONE', 'numeric')):
-            self.assertTrue(by[key], key)
+        for key in (('DCV', 'VOHM', 'numeric'), ('ACV', 'VOHM', 'numeric'), ('VISUAL', 'NONE', 'visual'), ('NONE', 'NONE', 'numeric')):
+            self.assertIsNone(by[key], key)                      # voltage, yes/no checks and points set by hand with no calibrator output (open input)
+        for key in (('DCI', 'AMP10', 'numeric'), ('ACI', 'AMP10', 'numeric'), ('ACV', 'VOLTALERT', 'visual'), ('OHM', 'VOHM', 'numeric'),
+                    ('OHM', 'VOHM', 'beeper'), ('CAP', 'VOHM', 'numeric')):
+            self.assertTrue(by[key], key)                        # Mike: resistance, capacitance and thermocouple sources are one meter at a time
         self.assertIn('series', by[('DCI', 'AMP10', 'numeric')])
         sp, p116 = pts('116')
-        self.assertIsNone(next(RQ.share_reason(p, sp['options']) for p in p116 if p['kind'] == 'TEMP'))          # temperature is shareable
+        self.assertIn('thermocouple', next(RQ.share_reason(p, sp['options']) for p in p116 if p['kind'] == 'TEMP'))          # temperature: one meter at a time
         self.assertIn('series', next(RQ.share_reason(p, sp['options']) for p in p116 if p['group'] == 'UAMP'))
         sp, p289 = pts('289', 'fluke_287_289_pv.json')
         self.assertIn('4-wire', next(RQ.share_reason(p, sp['options']) for p in p289 if p['group'] == 'OHM4'))
@@ -134,7 +134,7 @@ class Model(unittest.TestCase):
         self.assertEqual([u.meters[0].asset for u in cur], ['A', 'B', 'C'])        # current points: meter 1, then 2, then 3
         for u in cur:
             self.assertTrue(u.prompt)                                                   # a prompt before each meter
-            self.assertTrue(all(p['kind'] in ('DCI', 'ACI') for p in u.points))
+            self.assertTrue(all(RQ.share_reason(p, sp['options']) for p in u.points))              # only points that cannot be shared
 
     def test_plan_one_meter_at_a_time_is_meter_major(self):
         sp, p117 = pts('117')
@@ -154,10 +154,9 @@ class Model(unittest.TestCase):
             q.meters[0].found[p['id']] = {'result': 'PASS'}
             q.meters[1].found[p['id']] = {'result': 'PASS'}
         units = RQ.plan(p117, q, sp['options'])
-        first = units[0]
-        self.assertEqual(first.kind, 'single')                                           # only meter C still needs the first 10 points
-        self.assertEqual([m.asset for m in first.meters], ['C'])
-        self.assertEqual([p['id'] for p in first.points][:10], [p['id'] for p in p117[:10]])
+        first = next(u for u in units if p117[0]['id'] in [p['id'] for p in u.points])
+        self.assertEqual([m.asset for m in first.meters], ['C'])                         # only meter C still needs the first point
+        self.assertTrue(set(p['id'] for p in p117[:10]) & set(p['id'] for p in first.points))
         again = RQ.plan(p117[:3], q, sp['options'], force=True)                          # Rerun Selected measures them on every meter
         self.assertEqual(sum(len(u.points) for u in again if u.shared), len([p for p in p117[:3] if RQ.share_reason(p, sp['options']) is None]))
         self.assertEqual(RQ.plan(p117, q, sp['options'], left=True)[0].kind in ('shared', 'single'), True)      # the As Left set is empty: everything pending
@@ -364,14 +363,14 @@ class PointByPoint(EngineBase):
         for m in app.queue.meters:
             self.assertEqual(len(m.found), len(app.points))
 
-    def test_high_voltage_is_confirmed_once_per_point_and_names_all_meters(self):
+    def test_high_voltage_is_confirmed_once_per_hook_up_group_and_names_all_meters(self):
         sp = h.load_spec('fluke_77iv_pv.json')
         app = self.real(model='77IV', spec=sp)
         self.hn.run_all()
         hv = [p for p in app.points if app._high_voltage(p)]
         self.assertTrue(hv)
         asks = [d for d in self.hn.dialogs if d[0] == 'box' and d[1] == 'askyesno' and d[2] == 'HIGH VOLTAGE']
-        self.assertEqual(len(asks), len(hv))                                                      # once per point (not once per meter)
+        self.assertEqual(len(asks), len({p['group'] for p in hv}))                                # once per hook-up group (Mike), not per point or per meter
         self.assertTrue(all(all(a in d[3] for a in ('4412', '4413', '4415')) for d in asks))
 
     def test_high_voltage_decline_stops_before_the_output(self):

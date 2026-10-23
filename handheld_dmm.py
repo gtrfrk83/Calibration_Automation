@@ -1205,13 +1205,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         if p.get('rel_zero') and 'rel' not in self._stage['done']:
             self._rel_zero(points, i, p, key)
             return
-        if self._high_voltage(p):
+        if self._high_voltage(p) and not self._q_hv_seen(p):
             if not messagebox.askyesno('HIGH VOLTAGE', self._q_hv_text(f'This point outputs {abs(p["applied"]["value"]):g} V'
                                        + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and self._auto_ramp() and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
                                        '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?')):
                 self.busy = False
                 self.status.set('Stopped before a high-voltage point.')
                 return
+            self._q_hv_note(p)
         if p.get('applied') and not self.manual_cal:
             self.status.set(f'Point {p["n"]}/{len(self.points)}: setting the calibrator to {output_text(p)} ...')
 
