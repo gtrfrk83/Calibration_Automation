@@ -285,8 +285,11 @@ class DatasheetList:
         check = check if check is not None else (eng.get('check') or {})
         unv = int(check.get('unverified_points') or 0)
         tail = (f'; {unv} use commands not yet verified on hardware (a real run asks you to accept them)' if unv else '')
+        miss = int(check.get('missing_uncertainties') or 0)
+        if miss:                                                   # rule 5: readings that should carry an uncertainty and have none (and no waiver)
+            tail += f'; missing uncertainties: {miss} (pick a standard or waive them before the next save)'
         if hand == 0:
-            return (f'Ready: {n} of {n} points run by the suite' + tail) if unv else f'Ready: all {n} points run by the suite'
+            return (f'Ready: {n} of {n} points run by the suite' + tail) if tail else f'Ready: all {n} points run by the suite'
         return f'Ready: {run} of {n} points run by the suite, {hand} set by hand' + tail
 
     def _check_for(self, r):
@@ -308,7 +311,7 @@ class DatasheetList:
                     if getattr(self, '_matcher', None) is None:
                         self._matcher = self.matcher_factory() if self.matcher_factory else __import__('datasheet_builder_match').Matcher()
                     s = _rules.list_summary(ds, matcher=self._matcher) or {}
-                    self._cache[key] = dict(unverified_points=s.get('unverified', 0))
+                    self._cache[key] = dict(unverified_points=s.get('unverified', 0), missing_uncertainties=s.get('missing', 0))
             except Exception:
                 self._cache[key] = {}
         return self._cache[key]

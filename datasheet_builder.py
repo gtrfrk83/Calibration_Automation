@@ -1710,6 +1710,12 @@ def save(ds, who='', note='', root=None, db=None):
         except Exception:
             rule_check = None
     try:
+        wnote = _rules.waiver_note(ds) if rule_check is not None else ''          # a waiver is never silent: it is named in the version's history
+        if wnote and wnote not in (note or ''):
+            note = f'{note}; {wnote}' if note else wnote
+    except Exception:
+        pass
+    try:
         if not ds.uid:
             ds.uid = make_uid(ds)
             with _db(db) as con:                         # a different datasheet already uses this name: never take it over silently

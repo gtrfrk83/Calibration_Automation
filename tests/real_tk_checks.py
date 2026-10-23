@@ -1786,7 +1786,9 @@ def checks_dsb_sheet_check():
     check('check: pill shows after the check', win._check_pill_shown, g.check_pill())
     check('check: pill and button inside the window', inside(win, win.check_pill) and inside(win, win.check_b))
     check('check: 1500 V not covered (rule 1, a warning) and unverified commands listed (rule 2)',
-          any(f.rule == 1 for f in chk.findings) and bool(chk.unverified) and chk.ok, [f.code for f in chk.findings])
+          any(f.rule == 1 for f in chk.findings) and bool(chk.unverified), [f.code for f in chk.findings])
+    check('check: the missing uncertainty of 1500 V is an error (rule 5) and keeps the sheet from being ready',
+          [f.code for f in chk.errors()] == ['no_uncertainty'] and 'to fix' in g.check_pill()[0], ([f.code for f in chk.errors()], g.check_pill()))
     key = next(r['key'] for r in g.rows() if r['kind'] == 'point')
     g.select(key, 'tol')
     win.sync()
@@ -1805,7 +1807,7 @@ def checks_dsb_sheet_check():
     w.table.event_generate('<<TreeviewSelect>>')
     pump(root, 20)
     check('check: detail names the fix', 'Apply the fix' in w.detail.get() or 'by hand' in w.detail.get(), w.detail.get())
-    check('check: Apply the fix is enabled for rule 1', str(w.fix_b.cget('state')) == 'normal')
+    check('check: Apply the fix is enabled for rule 1, Waive is not', str(w.fix_b.cget('state')) == 'normal' and str(w.waive_b.cget('state')) == 'disabled')
     shot(w, 'sheetcheck_window')
     cw = w.commands()
     pump(root, 30)
@@ -1818,6 +1820,32 @@ def checks_dsb_sheet_check():
     check('check: Apply the fix enters the point by hand, the rule 1 finding is gone', after is not None and not any(f.rule == 1 for f in after.findings),
           [f.code for f in (after.findings if after else [])])
     shot(w, 'sheetcheck_window_after_fix')
+    five = next(i for i, r in enumerate(w._rows) if r['rule'] == 5 and r['level'] == 'error')
+    w.table.selection_set(str(five))
+    w.table.event_generate('<<TreeviewSelect>>')
+    pump(root, 20)
+    check('check: Waive is enabled for the missing uncertainty', str(w.waive_b.cget('state')) == 'normal' and str(w.fix_b.cget('state')) == 'disabled')
+    shot(w, 'sheetcheck_window_missing_uncertainty')
+
+    def look_at_dialog():
+        dlgs = [d for d in walk(win) if isinstance(d, tk.Toplevel) and str(d.title()) == 'Waive the uncertainty']
+        seen['dlg'] = bool(dlgs)
+        if dlgs:
+            shot(dlgs[0], 'sheetcheck_waive_dialog')
+            dlgs[0].destroy()
+    seen = {}
+    root.after(400, look_at_dialog)
+    check('check: cancelling the waiver dialog changes nothing', w.waive() is None and seen.get('dlg') and bool(g.sheet_check(compute=False).errors()), seen)
+    res = g.waive_finding(w._rows[five]['idx'], 'scope')
+    w.owner.changed(res)
+    g.sheet_check(compute=True)
+    win.refresh()
+    w.reload()
+    pump(root, 30)
+    check('check: waiving records the reason and lifts the block', res.ok and not g.sheet_check(compute=False).errors() and g.check_pill()[0] != '' and 'to fix' not in g.check_pill()[0],
+          (res.message, g.check_pill()))
+    check('check: the waiver is listed, not hidden', any('waiver' in r['text'] for r in w._rows), [r['text'] for r in w._rows])
+    shot(w, 'sheetcheck_window_waived')
     text, fp = win.real_run_question()
     check('check: the real-run question lists the commands to accept', 'accept' in text and bool(fp), text[:80])
     import time

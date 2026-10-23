@@ -53,13 +53,15 @@ class SheetCheckWindow(tk.Toplevel):
         bar.pack(fill='x', pady=(8, 0))
         self.go_b = ttk.Button(bar, text='Go to the row', command=self.go)
         self.fix_b = ttk.Button(bar, text='Apply the fix', style='Accent.TButton', command=self.fix)
+        self.waive_b = ttk.Button(bar, text='Waive...', command=self.waive)
         self.again_b = ttk.Button(bar, text='Check again', command=self.again)
         self.cmds_b = ttk.Button(bar, text='Commands to accept...', command=self.commands)
         close = ttk.Button(bar, text='Close', command=self.destroy)
-        for b in (self.go_b, self.fix_b, self.again_b, self.cmds_b):
+        for b in (self.go_b, self.fix_b, self.waive_b, self.again_b, self.cmds_b):
             b.pack(side='left', padx=(0, 8))
         close.pack(side='right')
         _tip(self.fix_b, 'Rule 1: enter the point by hand (the operator uses their own standard). Rule 3: turn the row into a flagged pass / fail check. One undo step.')
+        _tip(self.waive_b, 'Rule 5: a reading that should have an uncertainty has none. Record why (own standard, zero check, scope does not cover it, or type a reason). The waiver is saved with the sheet and named in its history.')
         _tip(self.again_b, 'Work the check out again for the sheet as it is now (it runs every point on the simulated instruments, which takes a moment).')
         _tip(self.cmds_b, 'The commands a run on real instruments asks you to accept: not verified on hardware, or no manual page reference.')
         self.bind('<Escape>', lambda _e: self.destroy())
@@ -82,7 +84,8 @@ class SheetCheckWindow(tk.Toplevel):
             self.detail.set('Nothing to fix and nothing to warn about.')
         else:
             self.detail.set('')
-        self.fix_b.configure(state='disabled')
+        self.fix_b.configure(state='disabled', text='Apply the fix')
+        self.waive_b.configure(state='disabled')
         self.go_b.configure(state='normal' if rows else 'disabled')
         chk = m.sheet_check(compute=False)
         self.cmds_b.configure(state='normal' if chk is not None and chk.unverified else 'disabled')
@@ -99,7 +102,9 @@ class SheetCheckWindow(tk.Toplevel):
             return
         what = row['text'] or row['title']                       # the table cuts a long line; the full sentence is here
         self.detail.set(f'{what}  What to do: {row["fix"]}' if row['fix'] else what)
-        self.fix_b.configure(state='normal' if row['action'] else 'disabled')
+        self.fix_b.configure(state='normal' if row['action'] not in ('', 'waive') else 'disabled',
+                             text='Remove waiver' if row['action'] == 'unwaive' else 'Apply the fix')
+        self.waive_b.configure(state='normal' if row['action'] == 'waive' else 'disabled')
 
     def go(self):
         row = self._selected()
@@ -117,6 +122,20 @@ class SheetCheckWindow(tk.Toplevel):
         self.owner.refresh()
         return res
 
+    def waive(self):
+        row = self._selected()
+        if row is None or row['action'] != 'waive':
+            return None
+        got = ask_waiver(self, row['count'])
+        if got is None:
+            return None
+        res = self.owner.model.waive_finding(row['idx'], *got)
+        self.owner.changed(res)
+        if res.ok:
+            self.owner.model.sheet_check(compute=True)
+        self.owner.refresh()
+        return res
+
     def again(self):
         self.owner.model.sheet_check(compute=True)
         self.owner.refresh()
@@ -125,6 +144,46 @@ class SheetCheckWindow(tk.Toplevel):
         chk = self.owner.model.sheet_check(compute=False)
         if chk is not None:
             return CommandsWindow(self, chk.pre_run_lines())
+
+
+def ask_waiver(parent, count=1):
+    """The waiver question (rule 5): a reason from the list or typed.  Returns (code, typed text) or None when cancelled.  `count` readings are waived."""
+    import datasheet_builder_rules as rules
+    out = {}
+    win = ui.dialog(parent, 'Waive the uncertainty')
+    body = ttk.Frame(win, padding=14)
+    body.pack(fill='both', expand=True)
+    ttk.Label(body, text=f'{count} reading{"s" * (count != 1)} will have no uncertainty on the report', style='Bold.TLabel').pack(anchor='w')
+    ttk.Label(body, text='Say why. The reason is saved with the sheet, shown in the Sheet check and named in the sheet\'s history; the report leaves the uncertainty blank (never zero).',
+              style='Muted.TLabel', wraplength=ui.px(460), justify='left').pack(anchor='w', pady=(2, 8))
+    labels = [t for _c, t in rules.WAIVER_REASONS]
+    pick = tk.StringVar(value=labels[0])
+    box = ttk.Combobox(body, textvariable=pick, values=labels, state='readonly', width=58)
+    box.pack(anchor='w', fill='x')
+    ttk.Label(body, text='Typed reason (required for "Other", optional otherwise)').pack(anchor='w', pady=(8, 0))
+    typed = tk.StringVar()
+    ent = ttk.Entry(body, textvariable=typed, width=60)
+    ent.pack(anchor='w', fill='x')
+    msg = tk.StringVar()
+    ttk.Label(body, textvariable=msg, style='Muted.TLabel').pack(anchor='w', pady=(4, 0))
+
+    def ok():
+        code = rules.WAIVER_REASONS[labels.index(pick.get())][0]
+        if code == 'other' and not typed.get().strip():
+            msg.set('Type the reason.')
+            ent.focus_set()
+            return
+        out['v'] = (code, typed.get().strip())
+        win.destroy()
+    bar = ttk.Frame(body)
+    bar.pack(fill='x', pady=(10, 0))
+    cancel = ttk.Button(bar, text='Cancel', command=win.destroy)
+    cancel.pack(side='right')
+    ttk.Button(bar, text='Waive', style='Accent.TButton', command=ok).pack(side='right', padx=(0, 8))
+    win.bind('<Escape>', lambda _e: win.destroy())
+    ui.center_on(win, parent)
+    parent.wait_window(win)
+    return out.get('v')
 
 
 class CommandsWindow(tk.Toplevel):

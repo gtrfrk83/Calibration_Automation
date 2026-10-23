@@ -90,6 +90,8 @@ class CheckMixin:
         if chk is None or not 0 <= idx < len(chk.findings):
             return _outcome(False, 'Run the sheet check again: the sheet has changed.')
         f = chk.findings[idx]
+        if f.action == 'waive':
+            return _outcome(False, 'Press "Waive..." and give the reason.')
         if not f.action:
             return _outcome(False, 'This finding has no automatic fix. Read the "what to do" text.')
 
@@ -97,12 +99,28 @@ class CheckMixin:
             if f.action == 'manual_entry':
                 n = rules.manual_entry_for(self.ds, f)
                 return f'{n} point{"s" * (n != 1)} will be entered by hand (the operator uses their own standard).'
+            if f.action == 'unwaive':
+                n = rules.clear_waiver(self.ds, f.point_ids)
+                return f'{n} waiver{"s" * (n != 1)} removed: the uncertainty is missing again until a standard covers the point or it is waived.'
             if f.action == 'make_check':
                 for pid in f.point_ids:
                     rules.make_check_row(self.ds, f.function_id, pid)
                 return f'{len(f.point_ids)} row{"s" * (len(f.point_ids) != 1)} turned into a flagged pass / fail check (answered Yes / No).'
             raise db.DsError('fix', 'Unknown fix.')
         return self._do('sheet check fix', act)
+
+    def waive_finding(self, idx, code, reason=''):
+        """Record a waiver (reason chosen from rules.WAIVER_REASONS or typed) for the points of finding `idx` (rule 5).  One undo step."""
+        chk = self.sheet_check(compute=False)
+        if chk is None or not 0 <= idx < len(chk.findings) or chk.findings[idx].action != 'waive':
+            return _outcome(False, 'Run the sheet check again: the sheet has changed.')
+        f = chk.findings[idx]
+        who = getattr(getattr(self, 'storage', None), 'who', '') or ''
+
+        def act():
+            n = rules.set_waiver(self.ds, f.point_ids, code, reason, who)
+            return f'{n} reading{"s" * (n != 1)} waived: the report shows no uncertainty for {"them" if n != 1 else "it"}. The waiver is saved with the sheet.'
+        return self._do('waive uncertainty', act)
 
     # ---- rule 5 in the inspector
     def uncertainty_line(self, key=None):

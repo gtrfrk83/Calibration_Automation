@@ -84,7 +84,7 @@ class Rule1Coverage(Base):
         self.assertIn('1.5 kV', f[0].text)
         self.assertIn('Apply the fix', f[0].fix)
         self.assertEqual(f[0].point_ids, (pid_of(ds, 1500),))
-        self.assertTrue(chk.ok)                                              # a warning does not block 'ready'
+        self.assertEqual([f.code for f in chk.errors()], ['no_uncertainty'])   # rule 1 itself is a warning; the missing uncertainty (rule 5) is what blocks
 
     def test_manual_entry_fix_removes_the_finding_and_is_one_assignment(self):
         ds = far_sheet()
@@ -283,12 +283,13 @@ class Rule3Units(Base):
     def test_the_mudcats_import_is_clean(self):
         d = Path(tempfile.mkdtemp())
         conv = mc.convert(imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD')))
+        rules.set_waiver(conv.sheet, [rules.WHOLE_SHEET], 'manual_calibration', '', who='import')       # what mdd_convert.register records
         chk = rules.check(conv.sheet, matcher=self.matcher)
         self.assertEqual(chk.errors(), [], [f.text for f in chk.errors()])
         self.assertFalse(chk.dry.available)                                         # a manual calibration drives nothing
         self.assertEqual(codes(chk, 1), [])
         self.assertEqual(chk.unverified, [])
-        self.assertEqual(codes(chk, 5), ['manual_sheet'])                           # one note, not 15 warnings
+        self.assertEqual(set(codes(chk, 5)), {'waived'})                            # the whole-sheet waiver is listed, one line per section
 
 
 # ================================================================================================================================ rule 4
@@ -302,7 +303,7 @@ class Rule4DryRun(Base):
             self.assertEqual(len(chk.dry.points), n, name)
             self.assertEqual([k for k, pr in chk.dry.points.items() if pr.status == 'unsupported'], [], name)
             self.assertEqual(codes(chk, 4, 'error'), [], name)
-            self.assertTrue(chk.ok, name)
+            self.assertEqual({f.rule for f in chk.errors()} - {5}, set(), name)           # (the 34461A fixture has a 750 V @ 50 kHz point no calibrator covers: rule 5)
             self.assertTrue(chk.dry.ran >= 1, name)
 
     def test_commands_are_recorded_per_point_with_the_registry_flags(self):
@@ -390,10 +391,10 @@ class Rule5Sources(Base):
         s = chk.sources[pid_of(ds, 1500)]
         self.assertFalse(s.has_source)
         self.assertTrue(s.text.startswith('none: blank'), s.text)
-        self.assertEqual(s.level, 'warn')
+        self.assertEqual(s.level, 'error')
         f = [f for f in chk.findings if f.rule == 5]
-        self.assertEqual([(x.level, x.code) for x in f], [('warn', 'no_source')])
-        self.assertIn('never zero', f[0].text)
+        self.assertEqual([(x.level, x.code) for x in f], [('error', 'no_uncertainty')])
+        self.assertIn('never shows zero', f[0].text)
         self.assertNotIn(' 0 ', s.text)
 
     def test_a_hand_set_point_has_no_source(self):
@@ -504,7 +505,7 @@ class ModelTests(Base):
         self.assertEqual(level, 'ok')
         text, level = g.uncertainty_line(keys[1])
         self.assertTrue(text.startswith('none: blank'))
-        self.assertEqual(level, 'warn')
+        self.assertEqual(level, 'error')
         self.assertEqual(g.uncertainty_line(next(r['key'] for r in g.rows() if r['kind'] == 'header')), ('', 'ok'))
 
     def test_pre_run_list_is_the_checks_unverified_commands(self):
@@ -549,7 +550,8 @@ class ListColumn(Base):
 
     def test_a_saved_sheet_carries_the_check_summary_in_its_spec(self):
         with tempfile.TemporaryDirectory() as t:
-            ds = dcv_sheet()
+            ds = fx.dmm_34461a_like()
+            rules.set_waiver(ds, ['acv.r750.+750@50000'], 'no_source', '', who='t')            # the one point no calibrator covers (rule 5 would block the save)
             with mock.patch.object(dm, 'Matcher', lambda *a, **k: self.matcher):
                 res = db.save(ds, root=Path(t) / 'us', db=Path(t) / 'reg.sqlite3')
             self.assertEqual(res.status, 'ready')
@@ -562,8 +564,10 @@ class ListColumn(Base):
         with tempfile.TemporaryDirectory() as t:
             store = M.Storage(Path(t) / 'us', Path(t) / 'reg.sqlite3')
             ds = fx.dmm_34461a_like()
+            rules.set_waiver(ds, ['acv.r750.+750@50000'], 'no_source', '', who='t')            # the one point no calibrator covers (rule 5 would block the save)
             with mock.patch.object(dm, 'Matcher', lambda *a, **k: self.matcher):
                 res = db.save(ds, root=Path(t) / 'us', db=Path(t) / 'reg.sqlite3')
+            self.assertEqual(res.status, 'ready')
             spec = json.loads(Path(res.spec_path).read_text())
             del spec['dsb']['engine']['check']
             Path(res.spec_path).write_text(json.dumps(spec))
@@ -670,8 +674,148 @@ class WindowTests(Base):
         self.assertIn('standards sheet', shown[0][0])
         self.assertEqual(shown[0][1], 'ok')
         self.assertTrue(shown[1][0].startswith('none: blank'))
-        self.assertEqual(shown[1][1], 'warn')
+        self.assertEqual(shown[1][1], 'error')
         self.assertIn('uncert', win.panel_box.sections)
+
+
+# ================================================================================================================================ rule 5, owner rule: no publish without an uncertainty or a waiver
+class Rule5Blocking(Base):
+    def save(self, ds, t, name='a'):
+        with mock.patch.object(dm, 'Matcher', lambda *a, **k: self.matcher):
+            return db.save(ds, who='tester', root=Path(t) / ('us' + name), db=Path(t) / f'reg{name}.sqlite3')
+
+    def test_a_reading_with_no_uncertainty_blocks_publishing(self):
+        with tempfile.TemporaryDirectory() as t:
+            res = self.save(far_sheet(), t)
+            self.assertEqual(res.status, 'draft')
+            codes_ = [str(p.code) for p in res.problems]
+            self.assertIn('rule5_no_uncertainty', codes_)
+            self.assertIn('never shows zero', ' '.join(str(p) for p in res.problems))
+
+    def test_the_finding_names_the_row_the_reason_and_the_fix(self):
+        ds = far_sheet()
+        f = [f for f in rules.check(ds, matcher=self.matcher, dry_run_on=False).findings if f.code == 'no_uncertainty'][0]
+        self.assertEqual((f.rule, f.level, f.action), (5, 'error', 'waive'))
+        self.assertIn('1.5 kV', f.text)
+        self.assertIn('no standards sheet covers this point', f.text)
+        self.assertIn('Waive', f.fix)
+        self.assertEqual(f.point_ids, (pid_of(ds, 1500),))
+
+    def test_reasons_are_specific(self):
+        ds = dcv_sheet()
+        pid = pid_of(ds, 5)
+        ds.assignments[pid] = 'MANUAL'
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertIn('no standard selected', chk.sources[pid].text)
+        self.assertEqual(chk.sources[pid].level, 'error')
+
+    def test_a_waiver_lets_the_sheet_publish_and_is_recorded_everywhere(self):
+        ds = far_sheet()
+        pid = pid_of(ds, 1500)
+        rules.set_waiver(ds, [pid], 'scope', '', who='mike')
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual([f.code for f in chk.errors()], [])
+        w = [f for f in chk.findings if f.code == 'waived']
+        self.assertEqual(len(w), 1)                                                   # shown in the check, never silent
+        self.assertIn('scope of accreditation', w[0].text)
+        self.assertIn('mike', w[0].text)
+        self.assertIn('waived', chk.sources[pid].text)
+        self.assertFalse(chk.sources[pid].has_source)                                 # still blank on the report, never zero
+        with tempfile.TemporaryDirectory() as t:
+            res = self.save(ds, t)
+            self.assertEqual(res.status, 'ready')
+            saved = json.loads(Path(res.version_file).read_text())
+            self.assertEqual(saved['options']['uncertainty_waivers'][pid]['code'], 'scope')   # stored in the sheet
+            self.assertEqual(saved['options']['uncertainty_waivers'][pid]['by'], 'mike')
+            hist = db.versions(res.uid, root=Path(t) / 'usa', db=Path(t) / 'rega.sqlite3')
+            self.assertIn('uncertainty waivers: 1 point', hist[0]['note'])             # and in the sheet's history
+            spec = json.loads(Path(res.spec_path).read_text())
+            self.assertEqual((spec['dsb']['engine']['check']['missing_uncertainties'], spec['dsb']['engine']['check']['waived_uncertainties']), (0, 1))
+
+    def test_a_typed_reason_is_required_for_other_and_kept(self):
+        ds = far_sheet()
+        pid = pid_of(ds, 1500)
+        with self.assertRaises(db.DsError):
+            rules.set_waiver(ds, [pid], 'other', '  ', who='m')
+        with self.assertRaises(db.DsError):
+            rules.set_waiver(ds, [pid], 'nonsense', 'x', who='m')
+        rules.set_waiver(ds, [pid], 'other', 'customer supplies the standard', who='m')
+        self.assertEqual(rules.waiver_for(ds, pid)['reason'], 'customer supplies the standard')
+
+    def test_removing_the_waiver_puts_the_error_back(self):
+        ds = far_sheet()
+        pid = pid_of(ds, 1500)
+        rules.set_waiver(ds, [pid], 'no_source', '', who='m')
+        self.assertEqual(rules.clear_waiver(ds, [pid]), 1)
+        self.assertNotIn('uncertainty_waivers', ds.options)
+        self.assertEqual([f.code for f in rules.check(ds, matcher=self.matcher, dry_run_on=False).errors()], ['no_uncertainty'])
+
+    def test_fixing_the_point_publishes_without_a_waiver(self):
+        with tempfile.TemporaryDirectory() as t:
+            self.assertEqual(self.save(dcv_sheet(), t).status, 'ready')
+
+    def test_kinds_that_carry_no_uncertainty_need_no_waiver(self):
+        for name in ('generator_33220a_like', 'scope_tds2000c_like'):
+            chk = rules.check(getattr(fx, name)(), matcher=self.matcher, dry_run_on=False)
+            self.assertEqual([f.code for f in chk.findings if f.rule == 5], [], name)
+        self.assertFalse(rules.should_have(*next(iter(fx.generator_33220a_like().all_points()))))
+
+    def test_a_disabled_point_is_not_checked(self):
+        ds = far_sheet()
+        next(p for _f, p in ds.all_points() if p.nominal == D('1500')).enabled = False
+        self.assertEqual([f.code for f in rules.check(ds, matcher=self.matcher, dry_run_on=False).errors()], [])
+
+    def test_the_mudcats_import_is_recorded_as_waived_for_the_whole_sheet(self):
+        d = Path(tempfile.mkdtemp())
+        parsed = imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD'))
+        conv = mc.convert(parsed)
+        self.assertTrue([f for f in rules.check(conv.sheet, matcher=self.matcher).errors() if f.rule == 5])   # a converted sheet alone is not waived
+        res = mc.register(conv, parsed, 'tester', registry=d / 'reg.sqlite3', root=d / 'us', archive_to=d / 'arch')
+        self.assertTrue(res.ok, res.message)
+        ds = db.load(res.uid, root=d / 'us', db=d / 'reg.sqlite3') if hasattr(db, 'load') else None
+        if ds is not None:
+            w = rules.waivers(ds)[rules.WHOLE_SHEET]
+            self.assertEqual((w['code'], w['by']), ('manual_calibration', 'import (tester)'))
+
+    def test_the_handheld_template_is_not_blocked(self):
+        g = M.GridModel(M.Storage(Path(tempfile.mkdtemp()) / 'us', Path(tempfile.mkdtemp()) / 'r.sqlite3'), matcher_factory=lambda: self.matcher)
+        g.set_header(make='Acme', model='DM-1', title='DM-1 handheld')
+        g.add_handheld_functions()
+        chk = rules.check(g.ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual([f.code for f in chk.errors()], [])                          # sections without points: nothing should have an uncertainty yet
+        dcv = next(f for f in g.ds.functions if f.kind == 'DCV')
+        g.select(f'e:{dcv.id}', 'nominal')
+        g.set_target_function('DC volts')
+        g.commit_cell('5 V')
+        chk = rules.check(g.ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual([f.code for f in chk.errors() if f.rule == 5], [])           # a covered 5 V point
+
+    def test_model_waive_is_one_undo_step_and_unblocks(self):
+        g = Rule5Blocking.grid(self, far_sheet())
+        g.sheet_check()
+        idx = next(r['idx'] for r in g.check_rows(compute=False) if r['code'] == 'no_uncertainty')
+        self.assertFalse(g.apply_check_fix(idx).ok)                                   # waiving needs a reason: the plain fix only says so
+        res = g.waive_finding(idx, 'zero_offset')
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual([f.code for f in g.sheet_check().errors()], [])
+        g.undo()
+        self.assertEqual([f.code for f in g.sheet_check().errors()], ['no_uncertainty'])
+
+    def grid(self, ds):
+        g = M.GridModel(M.Storage(Path(tempfile.mkdtemp()) / 'us', Path(tempfile.mkdtemp()) / 'r.sqlite3'), matcher_factory=lambda: self.matcher)
+        g.ds = ds
+        g._bump()
+        return g
+
+    def test_the_manager_list_says_how_many_are_missing(self):
+        text = M.DatasheetList.automation_text(dict(runnable_version=1, spec_file='x'), dict(missing_uncertainties=3)) if False else None
+        import tempfile as _t
+        d = Path(_t.mkdtemp())
+        spec = d / 's.json'
+        spec.write_text(json.dumps({'dsb': {'engine': {'points': 4, 'runnable': 4, 'hand_set': 0}}}))
+        row = dict(runnable_version=1, spec_file=str(spec))
+        self.assertEqual(M.DatasheetList.automation_text(row, dict(missing_uncertainties=0)), 'Ready: all 4 points run by the suite')
+        self.assertIn('missing uncertainties: 3', M.DatasheetList.automation_text(row, dict(missing_uncertainties=3)))
 
 
 if __name__ == '__main__':

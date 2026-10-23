@@ -39,6 +39,16 @@ MAX_LISTED = 4                  # points named in a finding's text before it say
 SOURCE_MODELS = ('5560A', '5522A', '5520A')
 NO_UNCERTAINTY_FAMILIES = ('scope', 'generator')       # dsb_runtime.decorate sets no_uncertainty for these and for FREQ / PERIOD
 NO_UNCERTAINTY_KINDS = ('FREQ', 'PERIOD')
+SHOULD_HAVE_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'TEMP')   # = handheld_dmm.has_uncertainty (DCV/ACV/DCI/ACI/OHM/CAP/TEMP degC); every other kind has none by design
+WAIVER_KEY = 'uncertainty_waivers'                     # ds.options[WAIVER_KEY] = {point id | '*': dict(code, reason, by, at)}: recorded in every saved version of the sheet
+WHOLE_SHEET = '*'
+WAIVER_REASONS = (('own_standard', 'The operator uses their own standard (entered by hand)'),
+                  ('zero_offset', 'Zero / offset check: no uncertainty applies'),
+                  ('no_source', 'No standard or source exists for this point'),
+                  ('scope', 'The scope of accreditation does not cover this point'),
+                  ('functional', 'Functional pass / fail check'),
+                  ('manual_calibration', 'Manual calibration: the uncertainty is not sourced by this suite'),
+                  ('other', 'Other (typed reason)'))
 UNIT_CHECKED_FAMILIES = ('dmm',)
 UNIT_FREE_KINDS = ('FREQ', 'PERIOD')                   # their labels mix a frequency and a level
 
@@ -55,7 +65,7 @@ class Finding:
     point_ids: tuple = ()
     section: str = ''
     row: str = ''                  # e.g. 'DC volts, 10 V range, 5 V'
-    action: str = ''               # '' | 'manual_entry' | 'make_check': what 'Apply the fix' does
+    action: str = ''               # '' | 'manual_entry' | 'make_check' | 'waive' (asks for a reason) | 'unwaive': what 'Apply the fix' does
     count: int = 1
 
     @property
@@ -83,8 +93,10 @@ class UncertaintySource:
     point_id: str
     text: str                      # 'Fluke 5560A standards sheet (DC voltage / 11 V range)' | 'none: blank (...)'
     has_source: bool
-    level: str = 'ok'              # ok | info | warn
+    level: str = 'ok'              # ok | info | warn | error (should have one and has none)
     standard: str = ''
+    should_have: bool = False      # a kind that carries an uncertainty (SHOULD_HAVE_KINDS)
+    waived: str = ''               # the recorded reason when the author waived it
 
 
 @dataclass
@@ -178,7 +190,8 @@ class SheetCheck:
         """What save() stores in the runnable spec (dsb.engine.check) so the Manager's list can say it without running the check again."""
         c = self.counts()
         return dict(errors=c['errors'], warnings=c['warnings'], unverified_commands=len(self.unverified), unverified_points=len(self.unverified_points()),
-                    dry_run=bool(self.dry.available), fingerprint=self.fingerprint())
+                    dry_run=bool(self.dry.available), fingerprint=self.fingerprint(), missing_uncertainties=missing_count(self.sources),
+                    waived_uncertainties=sum(bool(s.waived) for s in self.sources.values()))
 
 
 # ============================================================================================================== helpers
@@ -376,50 +389,131 @@ def coverage_findings(ds, res):
 
 
 def _no_uncertainty_kind(fn):
-    info = KINDS[fn.kind]
-    return info['family'] in NO_UNCERTAINTY_FAMILIES or fn.kind in NO_UNCERTAINTY_KINDS
+    """True for a kind that carries no uncertainty by design (frequency, period, diode, continuity, scope and generator rows, functional checks ...)."""
+    return fn.kind not in SHOULD_HAVE_KINDS
 
 
-def uncertainty_source(ds, fn, p, a, manual_sheet=False):
-    """Rule 5 for one point from its matcher assignment `a` (None when there is none)."""
-    if manual_sheet:
-        return UncertaintySource(p.id, 'none: blank (manual calibration: nothing is sourced, so no standard gives an uncertainty)', False, INFO)
+def should_have(fn, p):
+    """Rule 5 (owner rule): this reading is supposed to have an uncertainty on the datasheet."""
+    return p.enabled and not _no_uncertainty_kind(fn)
+
+
+# ---- waivers: an explicit, recorded reason why a point that should have an uncertainty has none (never silent: in the sheet, the check and the version history)
+def waivers(ds):
+    w = ds.options.get(WAIVER_KEY)
+    return w if isinstance(w, dict) else {}
+
+
+def waiver_for(ds, point_id):
+    w = waivers(ds)
+    return w.get(point_id) or w.get(WHOLE_SHEET)
+
+
+def waiver_text(w):
+    who = f' ({w["by"]}, {w["at"][:10]})' if w.get('by') and w.get('at') else (f' ({w["by"]})' if w.get('by') else '')
+    return f'{w.get("reason", "")}{who}'
+
+
+def set_waiver(ds, point_ids, code, reason='', who=''):
+    """Record a waiver for each of `point_ids` (WHOLE_SHEET for the whole sheet).  The reason is chosen from WAIVER_REASONS or typed ('other' needs text)."""
+    import datetime
+    label = dict(WAIVER_REASONS).get(code)
+    text = (reason or '').strip()
+    if label is None:
+        raise db.DsError('waiver', 'Choose a reason from the list, or type one.')
+    if code == 'other' and not text:
+        raise db.DsError('waiver', 'Type the reason for the waiver.')
+    w = dict(waivers(ds))
+    for pid in point_ids:
+        w[pid] = dict(code=code, reason=text if (code == 'other' or text) else label, by=who or '', at=datetime.datetime.now().isoformat(timespec='seconds'))
+    ds.options[WAIVER_KEY] = w
+    return len(point_ids)
+
+
+def clear_waiver(ds, point_ids):
+    w = dict(waivers(ds))
+    n = sum(w.pop(pid, None) is not None for pid in point_ids)
+    if w:
+        ds.options[WAIVER_KEY] = w
+    else:
+        ds.options.pop(WAIVER_KEY, None)
+    return n
+
+
+def waiver_note(ds):
+    """A line for the version history of the saved sheet ('' when there are none)."""
+    w = waivers(ds)
+    if not w:
+        return ''
+    ids = {p.id for _f, p in ds.all_points()}
+    n = sum(k in ids for k in w)
+    return f'uncertainty waivers: {n} point{"s" * (n != 1)}' + (' + whole sheet' if WHOLE_SHEET in w else '') if (n or WHOLE_SHEET in w) else ''
+
+
+def uncertainty_source(ds, fn, p, a, manual_sheet=False, pending=False):
+    """Rule 5 for one point from its matcher assignment `a` (None when there is none).  A reading that should have an uncertainty and has none is level
+    'error' (blocks publishing) unless the author recorded a waiver for it.  The uncertainty is never shown as zero."""
     if _no_uncertainty_kind(fn):
         return UncertaintySource(p.id, f'none: blank ({fn.name} rows carry no uncertainty in the report)', False, INFO)
-    if a is None:
-        return UncertaintySource(p.id, 'none: blank (not worked out yet)', False, INFO)
-    if a.status == 'manual':
-        return UncertaintySource(p.id, 'none: blank (set by hand: no standard sheet is used)', False, WARN)
-    if a.status == 'uncovered':
-        return UncertaintySource(p.id, 'none: blank (no standards sheet covers this point)', False, WARN)
-    cand = next((c for c in a.candidates if c.standard == a.standard and c.covered), None)
-    if a.uncertainty is None or not a.uncertainty > 0:
-        why = 'it has no specification sheet imported' if cand is not None and not cand.spec_known else 'its sheet gives no usable uncertainty here'
-        return UncertaintySource(p.id, f'none: blank ({a.standard}: {why})', False, WARN, a.standard)
-    row = f' ({cand.row})' if cand is not None and cand.row else ''
-    return UncertaintySource(p.id, f'{a.standard} standards sheet{row}', True, 'ok', a.standard)
+    src = None
+    cand = None
+    if manual_sheet:
+        why = 'manual calibration: nothing is sourced, so no standard gives an uncertainty'
+    elif a is None and pending:                                     # the sheet's own problems come first; they already block publishing
+        return UncertaintySource(p.id, 'none: blank (not worked out yet: fix the sheet\'s problems first)', False, INFO, '', True)
+    elif a is None:
+        why = 'no standard selected: the standards could not be matched'
+    elif a.status == 'manual':
+        why = 'no standard selected: set by hand, no standards sheet is used'
+    elif a.status == 'uncovered':
+        why = 'no standards sheet covers this point'
+    else:
+        cand = next((c for c in a.candidates if c.standard == a.standard and c.covered), None)
+        if a.uncertainty is None or not a.uncertainty > 0:
+            why = f'{a.standard}: ' + ('it has no specification sheet imported' if cand is not None and not cand.spec_known else 'its sheet gives no usable uncertainty here')
+        else:
+            row = f' ({cand.row})' if cand is not None and cand.row else ''
+            return UncertaintySource(p.id, f'{a.standard} standards sheet{row}', True, 'ok', a.standard, True)
+    std = a.standard if a is not None and a.status not in ('manual', 'uncovered') else ''
+    w = waiver_for(ds, p.id)
+    if w:
+        return UncertaintySource(p.id, f'none: blank, waived ({waiver_text(w)}; {why})', False, INFO, std, True, waiver_text(w))
+    return UncertaintySource(p.id, f'none: blank ({why})', False, ERROR, std, True)
 
 
-def source_findings(ds, res, manual_sheet):
-    """Rule 5: (sources {point id: UncertaintySource}, findings).  A point with no source is called out; many in one section are one finding."""
-    sources, out, none = {}, [], {}
+def source_findings(ds, res, manual_sheet, pending=False):
+    """Rule 5: (sources {point id: UncertaintySource}, findings).  A point that should have an uncertainty and has none is an ERROR (blocks publishing) until
+    the author picks a standard, fixes the point or records a waiver; a waived point is listed (never silent).  Many in one section are one finding."""
+    sources, out, none, waived = {}, [], {}, {}
     for fn, p in ds.all_points():
         if not p.enabled:
             continue
         a = res.assignments.get(p.id) if res is not None else None
-        s = uncertainty_source(ds, fn, p, a, manual_sheet)
+        s = uncertainty_source(ds, fn, p, a, manual_sheet, pending)
         sources[p.id] = s
-        if s.level == WARN:
+        if s.level == ERROR:
             none.setdefault(fn.id, []).append((fn, p, s))
-    if manual_sheet and sources:
-        out.append(Finding(5, INFO, 'manual_sheet', 'This is a manual calibration: no uncertainty is taken from a standards sheet, the uncertainty column stays blank on every row.', '', '', (), '', ''))
+        elif s.waived:
+            waived.setdefault(fn.id, []).append((fn, p, s))
     for fid, items in none.items():
         fn = items[0][0]
         rows = [f'{point_text(fn, p)} {s.text[len("none: blank"):].strip()}' for _f, p, s in items]
-        out.append(Finding(5, WARN, 'no_source', f'{len(items)} point{"s" * (len(items) != 1)} in {fn.name} {"have" if len(items) != 1 else "has"} no uncertainty source, so the uncertainty stays blank (never zero): '
-                           + _names(rows), 'Pick a standard whose sheet covers the point, or accept that the report leaves the uncertainty blank.',
-                           fid, tuple(p.id for _f, p, _s in items), fn.name, rows[0], count=len(items)))
+        out.append(Finding(5, ERROR, 'no_uncertainty', f'{len(items)} reading{"s" * (len(items) != 1)} in {fn.name} should have an uncertainty and {"have" if len(items) != 1 else "has"} none, '
+                           f'so the datasheet cannot be published (the report never shows zero): ' + _names(rows),
+                           'Pick a standard whose sheet covers the point, fix the point (value, range or frequency), or press "Waive..." and record why it has none.',
+                           fid, tuple(p.id for _f, p, _s in items), fn.name, rows[0], action='waive', count=len(items)))
+    for fid, items in waived.items():
+        fn = items[0][0]
+        rows = [f'{point_text(fn, p)} ({s.waived})' for _f, p, s in items]
+        out.append(Finding(5, INFO, 'waived', f'{len(items)} reading{"s" * (len(items) != 1)} in {fn.name} {"have" if len(items) != 1 else "has"} no uncertainty by a recorded waiver: ' + _names(rows),
+                           'The waiver is saved with the sheet and listed in its history. "Remove waiver" puts the error back.', fid, tuple(p.id for _f, p, _s in items), fn.name, rows[0],
+                           action='unwaive', count=len(items)))
     return sources, out
+
+
+def missing_count(sources):
+    """How many readings should have an uncertainty, have none and have no waiver (the Manager list's 'missing uncertainties: N')."""
+    return sum(s.level == ERROR for s in sources.values())
 
 
 # ============================================================================================================== rule 4 (and the command list of rule 2): the dry run
@@ -664,7 +758,7 @@ def check(ds, period=None, matcher=None, match=None, dry_run_on=True, runner=Non
     if why and not bad:
         chk.notes.append(why)
     chk.findings += coverage_findings(ds, res)                                                   # 1
-    chk.sources, src_findings = source_findings(ds, res, manual_sheet)                           # 5
+    chk.sources, src_findings = source_findings(ds, res, manual_sheet, pending=bool(bad))   # 5
     chk.findings += src_findings
     if dry_run_on and not manual_sheet and res is not None:
         chk.dry = dry_run(ds, res, period, runner)                                               # 4
@@ -718,5 +812,7 @@ def list_summary(ds, matcher=None, match=None):
     if res is None:
         return None
     pts = [a for a in res.assignments.values()]
-    return dict(points=len(pts), runnable=sum(a.can_automate for a in pts), unverified=sum(a.status == 'assigned' and a.automation == 'unverified' for a in pts),
+    manual = bool(ds.options.get('manual_entry'))
+    missing = sum(uncertainty_source(ds, fn, p, res.assignments.get(p.id), manual).level == ERROR for fn, p in ds.all_points() if p.enabled)
+    return dict(missing=missing, points=len(pts), runnable=sum(a.can_automate for a in pts), unverified=sum(a.status == 'assigned' and a.automation == 'unverified' for a in pts),
                 by_hand=sum(a.status == 'manual' for a in pts), uncovered=sum(a.status == 'uncovered' for a in pts))

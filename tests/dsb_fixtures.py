@@ -50,6 +50,9 @@ def dmm_34461a_like():
     ds.set_spec(q, '0.01 % of reading + 3 counts')
     q.add_rule(db.PointRule('f', 'fixed', {'values': ['10 Hz', '1 kHz', '100 kHz']}, amplitude='1 V'))
     db.regenerate(f), db.regenerate(a), db.regenerate(o), db.regenerate(i), db.regenerate(c), db.regenerate(q)
+    # 750 V at 50 kHz is beyond every calibrator's table: the Sheet check (rule 5) wants its missing uncertainty waived, in writing, before the sheet publishes
+    import datasheet_builder_rules as rules
+    rules.set_waiver(ds, ['acv.r750.+750@50000'], 'no_source', '', who='fixture')
     return ds
 
 
