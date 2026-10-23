@@ -1121,6 +1121,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         threshold = self.spec.get('options', {}).get('hv_threshold_v', 500)
         return bool(a) and p['kind'] in ('DCV', 'ACV') and abs(a['value']) >= threshold
 
+    def _hv_group_seen(self, key):
+        """options.hv_once_per_group (opt-in, default off: other specs keep the per-point question): the high-voltage question was already
+        answered Yes for this hook-up group."""
+        return bool(self.spec.get('options', {}).get('hv_once_per_group')) and getattr(self, '_hv_ok_key', None) == key
+
     def _prompt_function(self, p):
         """options.function_prompt: each time the meter's rotary switch has to move to a new function, tell the operator (the output is
         in standby meanwhile). Points of group NONE (functional checks, hand-set points) and points that get the dial/range prompt carry their own. True = go on, False = the operator cancelled."""
@@ -1198,6 +1203,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             messagebox.showinfo('Meter rest period', f'The meter manual requires 10 minutes of rest after measuring more than 6 A. '
                                                      f'Wait about {int(wait // 60)} min {int(wait % 60)} s, then press Run again.')
             return
+        if key != previous:
+            self._hv_ok_key = None                         # options.hv_once_per_group: a new hook-up group asks the high-voltage question again
         if key != previous and not self._prompt_setup(p):
             self.busy = False
             self.status.set('Paused for wiring or setup.')
@@ -1228,7 +1235,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         if p.get('rel_zero') and 'rel' not in self._stage['done']:
             self._rel_zero(points, i, p, key)
             return
-        if self._high_voltage(p) and not self._q_hv_seen(p):
+        if self._high_voltage(p) and not self._q_hv_seen(p) and not self._hv_group_seen(key):
             if not messagebox.askyesno('HIGH VOLTAGE', self._q_hv_text(f'This point outputs {abs(p["applied"]["value"]):g} V'
                                        + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and self._auto_ramp() and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
                                        '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?')):
@@ -1236,6 +1243,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 self.status.set('Stopped before a high-voltage point.')
                 return
             self._q_hv_note(p)
+            if self.spec.get('options', {}).get('hv_once_per_group'):
+                self._hv_ok_key = key
         if p.get('applied') and not self.manual_cal:
             self.status.set(f'Point {p["n"]}/{len(self.points)}: setting the calibrator to {output_text(p)} ...')
 
