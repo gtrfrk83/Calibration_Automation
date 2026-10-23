@@ -661,6 +661,11 @@ def register(conv, parsed, who='', replace_uid=None, registry=None, root=None, a
     ds = conv.sheet.copy()
     ds.uid = replace_uid or ''
     ds.options['manual_entry'] = True
+    try:                                   # a manual calibration sources nothing: its missing uncertainty is waived for the whole sheet, in the open (Sheet check rule 5)
+        import datasheet_builder_rules as _rules
+        _rules.set_waiver(ds, [_rules.WHOLE_SHEET], 'manual_calibration', 'manual calibration: imported from .MDD, no automation', who=f'import ({who})' if who else 'import')
+    except Exception:
+        pass
     ds.assignments = {p.id: 'MANUAL' for _f, p in ds.all_points()}
     try:
         arch = mdd_importer_v49.archive_mdd(parsed, archive_to or archive_dir())

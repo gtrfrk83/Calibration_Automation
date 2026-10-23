@@ -21,6 +21,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
+import datasheet_builder_check_ui as CK
 import datasheet_builder_ui_model as M
 import ui_theme as ui
 
@@ -1327,7 +1328,7 @@ class Inspector(ttk.Frame):
     Asymmetrical tolerance, Resolution and decimals, Rules for this section, Row options.  It only shows and collects values:
     M.GridModel.panel_state() fills it and M.GridModel.calc_row() uses what form() returns.  (SpecPanel is the old name.)"""
 
-    SECTION_ORDER = ('point', 'tol', 'multi', 'asym', 'res', 'rules', 'row')
+    SECTION_ORDER = ('point', 'tol', 'uncert', 'multi', 'asym', 'res', 'rules', 'row')
 
     def __init__(self, parent, win, remark_v, run_v):
         super().__init__(parent, padding=(ui.px(12), ui.px(8), ui.px(4), ui.px(8)))
@@ -1376,6 +1377,7 @@ class Inspector(ttk.Frame):
 
         self._build_point(self._section('point', 'Test point', '', True))
         self._build_tolerance(self._section('tol', 'Limits and tolerance', '', True))
+        self._build_uncertainty(self._section('uncert', 'Uncertainty source', '', True, 'Rule 5: which standards sheet the uncertainty of this row comes from. A row with no source keeps the uncertainty blank on the report (never zero).'))
         self._build_multi(self._section('multi', 'Several rows at once', 'Multiple', False, 'Multiple Test Points: make a run of rows between a lowest and a highest value.'))
         self._build_asym(self._section('asym', 'Asymmetrical tolerance', 'Operand', False, 'Asymmetrical Tol and Operand: a different tolerance above and below the nominal.'))
         self._build_res(self._section('res', 'Resolution and decimals', 'Decs · Res', False, 'Display Decs., Meas Res and Auto Res: the display resolution of the range.'))
@@ -1538,6 +1540,15 @@ class Inspector(ttk.Frame):
         self.copy_b = ttk.Button(self.btns, text='Copy tolerance to rows below', command=self.win.copy_down)
         tip(self.calc_b, 'Work out the calibration tolerance of this row from the boxes and put it in the sheet (Enter in any box does the same).')
         tip(self.copy_b, 'Give the rows under this one, in the same section, the same tolerance as this row.')
+
+    def _build_uncertainty(self, body):
+        self.uncert_l = ttk.Label(body, text='', style='Small.TLabel', wraplength=ui.px(250), justify='left')
+        self.uncert_l.pack(anchor='w', fill='x')
+
+    def set_uncertainty(self, text, level='ok'):
+        """Rule 5 for the selected row (text from M.GridModel.uncertainty_line()); a row with no source is shown in the warning colour."""
+        color = {'warn': ui.C['warn'], 'info': ui.C['muted']}.get(level, ui.C['text'])
+        self.uncert_l.configure(text=text or 'Not worked out for this row.', foreground=color)
 
     def _build_multi(self, body):
         self.multi_cb = ttk.Checkbutton(body, text='Make several rows at once', variable=self.b['multi'], command=self.multi_changed)
@@ -1720,6 +1731,7 @@ class Inspector(ttk.Frame):
         else:
             self.copy_b.grid(row=1, column=0, columnspan=2, sticky='ew', pady=(6, 0))
         self.passfail_l.configure(wraplength=w)
+        self.uncert_l.configure(wraplength=w)
 
     def state_passfail(self):
         return bool(self._state.get('passfail'))
@@ -1774,6 +1786,10 @@ class Inspector(ttk.Frame):
         usable = 'normal' if state['can_edit'] else 'disabled'
         for b in (self.calc_b, self.copy_b):
             b.configure(state=usable)
+        try:
+            self.set_uncertainty(*self.win.model.uncertainty_line())
+        except Exception:                                    # the source line is information only: never stop the panel from loading
+            self.set_uncertainty('')
 
     def form(self):
         """The boxes as a form dict for M.GridModel.calc_row()."""
@@ -1796,7 +1812,7 @@ NARROW_BELOW = 1250                      # window width (96-dpi px) under which 
 
 
 # ------------------------------------------------------------------------------------------------------------------------------ the window
-class GridEditorWindow(tk.Toplevel):
+class GridEditorWindow(CK.CheckWindowMixin, tk.Toplevel):
     """One datasheet as a big grid.  Top: title strip with the saved / warnings pills; the sheet bar (Make, Model, Title, Tolerances for, Lock Status,
     Undo / Redo, Standards, More, Preview / Print, Save); below it the Edit Cell bar and the sheet at the left and the row Inspector at the right;
     under the sheet the row count, Show list and Recalc all.  Every decision is in M.GridModel; this class draws it and passes clicks and keys to it."""
@@ -1872,6 +1888,7 @@ class GridEditorWindow(tk.Toplevel):
         self.problem_pill.pack(side='left', padx=(8, 0))
         self.problem_pill.configure(cursor='hand2')
         self.problem_pill.bind('<Button-1>', lambda _e: self.show_problems())
+        self.build_check_pill()                              # the Sheet check pill (shown once the check has been run for this version of the sheet)
         tip(self.problem_pill, lambda: 'Click to open the warnings list.\n' + self.model.problem_summary())
         tk.Frame(self, height=1, background=ui.C['border']).pack(fill='x')
 
@@ -1986,6 +2003,7 @@ class GridEditorWindow(tk.Toplevel):
         b = ttk.Button(foot, text='Show list', style='Compact.TButton', command=self.show_problems)
         b.pack(side='left', padx=(0, 6))
         tip(b, 'Open the warnings list: every problem on the sheet, with the row it is on.')
+        self.build_check_button(foot)
         r = ttk.Button(foot, text='Recalc all', style='Compact.TButton', command=self.recalc)
         r.pack(side='left')
         tip(r, 'Re-run the test point rules and check every row of the sheet.')
@@ -2082,6 +2100,7 @@ class GridEditorWindow(tk.Toplevel):
         self.dirty_pill.set('unsaved changes' if m.dirty else 'saved', 'warn' if m.dirty else 'good')
         c = m.problem_counts()
         self.problem_pill.set(f'{c["errors"]} to fix' if c['errors'] else f'{c["warnings"]} warning(s)' if c['warnings'] else 'no problems', 'bad' if c['errors'] else 'warn' if c['warnings'] else 'good')
+        self.refresh_check()
         self.count_v.set(f'{sum(1 for r in m.rows() if r["kind"] != "blank")} rows')
         self.undo_b.configure(state='normal' if m.can_undo else 'disabled')
         self.redo_b.configure(state='normal' if m.can_redo else 'disabled')
@@ -2285,12 +2304,7 @@ class GridEditorWindow(tk.Toplevel):
         return self.changed(self.model.add_handheld_functions())
 
     launcher = None
-
-    def confirm_real_run(self):
-        """A run on REAL instruments asks first (default No); Try in demo never asks."""
-        title = (self.model.ds.title or self.model.ds.model or 'this datasheet').strip()
-        return bool(messagebox.askyesno('Run on real instruments', f'Run {title} on real instruments? The calibrator will be driven from this program.',
-                                        icon='warning', default='no', parent=self))
+    _accepted_unverified = ''
 
     def run_sheet(self, demo=False):
         """Run / Try in demo: save the sheet (asking first when it has unsaved changes), then start it in its own process like the Procedures list does.
@@ -2300,6 +2314,10 @@ class GridEditorWindow(tk.Toplevel):
         if m.problem_counts()['errors']:
             self.show_problems()
             return self.changed(M.Outcome(False, 'This sheet has problems to fix before it can run. The warnings list shows them.'))
+        blocked = self.check_blocks_run()                      # the build rules (Sheet check): an error there stops the run, demo or real
+        if blocked:
+            return self.changed(M.Outcome(False, blocked))
+        self._accepted_unverified = ''
         if not demo and not self.confirm_real_run():
             return self.changed(M.Outcome(False, 'Not started: the run on real instruments was not confirmed.'))
         if m.dirty or not m.ds.uid:
@@ -2312,6 +2330,8 @@ class GridEditorWindow(tk.Toplevel):
         if entry is None:
             return self.changed(M.Outcome(False, 'This datasheet is not a runnable saved procedure yet. Save it first and fix what the warnings list shows.'))
         line = m.automation_line()
+        if self._accepted_unverified and not demo:               # the operator accepted the list of unverified commands in the question: the run does not ask again
+            entry = dict(entry, accepted_unverified=self._accepted_unverified)
         try:
             import dsb_manager
             (self.launcher or dsb_manager.launch_process)(entry, demo=demo)

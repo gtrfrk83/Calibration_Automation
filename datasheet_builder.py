@@ -1701,6 +1701,24 @@ def save(ds, who='', note='', root=None, db=None):
     if why:                                                  # verified on hardware and locked: no new version, nothing written
         return SaveResult(False, ds.uid, ds.version, 'locked', problems=[DsProblem('locked', why)])
     problems = validate(ds)
+    rule_check = None
+    if not errors(problems):                                  # the build-time rules 1-5 (datasheet_builder_rules): an error there keeps the sheet a draft
+        try:
+            import datasheet_builder_rules as _rules
+            extra, rule_check = _rules.blocking_problems(ds)
+            problems = problems + extra
+        except Exception as exc:                          # the rules module itself could not even be loaded: fail closed too (a draft, never published unchecked)
+            import logging
+            logging.getLogger(__name__).exception('The Datasheet Builder sheet check could not be started')
+            rule_check = None
+            problems = problems + [DsProblem('rule_check_failed', f'The sheet check could not run: {type(exc).__name__}: {exc}. The sheet is saved as a draft and is not published until it can be checked.',
+                                             'error', 'datasheet')]
+    try:
+        wnote = _rules.waiver_note(ds) if rule_check is not None else ''          # a waiver is never silent: it is named in the version's history
+        if wnote and wnote not in (note or ''):
+            note = f'{note}; {wnote}' if note else wnote
+    except Exception:
+        pass
     try:
         if not ds.uid:
             ds.uid = make_uid(ds)
@@ -1740,6 +1758,8 @@ def save(ds, who='', note='', root=None, db=None):
         result.problems += [p for p in exported.problems if p not in result.problems]
         if exported.spec is None:
             exported = None
+        elif rule_check is not None:                          # what the Manager's list says about the sheet without running the check again
+            exported.spec['dsb']['engine']['check'] = rule_check.save_summary()
     status = 'ready' if exported else 'draft'
     kind = classify_kind(ds) if exported else ''
     result.kind = kind

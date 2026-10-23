@@ -1711,6 +1711,7 @@ def main(argv=None):
     ap.add_argument('--fast-demo', action='store_true', dest='fast_demo')
     ap.add_argument('--asset')
     ap.add_argument('--period')
+    ap.add_argument('--accept-unverified', dest='accept_unverified', default='')      # fingerprint of the unverified-command list the Builder showed (rule 2)
     args, _unknown = ap.parse_known_args(sys.argv[1:] if argv is None else argv)
     path = args.spec
     root = tk.Tk()
@@ -1722,6 +1723,11 @@ def main(argv=None):
             return
     try:
         spec = load_spec(path)
+        if not (args.demo or args.fast_demo):
+            import dsb_prerun                         # rule 2: commands not verified on hardware are listed and must be accepted before real instruments run
+            if not dsb_prerun.accepted(root, spec, args.accept_unverified):
+                root.destroy()
+                return
         app = DsbApp(root, spec, demo=args.demo or args.fast_demo, period=args.period, fast_demo=args.fast_demo)
     except (procspec.SpecError, SpecProblem, OSError, ValueError, db.DsError) as exc:
         messagebox.showerror('User-built datasheet', f'{path}\n\n{exc}')

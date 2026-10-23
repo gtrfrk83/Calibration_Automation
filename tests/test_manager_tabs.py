@@ -129,6 +129,8 @@ class SidecarKind(unittest.TestCase):
             hand = fx.dmm_34461a_like()
             hand.title = 'Hand entered'
             hand.options['manual_entry'] = True
+            import datasheet_builder_rules as rules                  # a manual sheet sources nothing: its missing uncertainties are waived for the whole sheet (rule 5)
+            rules.set_waiver(hand, [rules.WHOLE_SHEET], 'manual_calibration', '', who='test')
             self.assertTrue(db.save(hand, root=root, db=reg).ok)
             kinds = {r['name']: r['kind'] for r in dsb_manager.user_rows(root=root, db=reg)}
             self.assertEqual(sorted(kinds.values()), ['manual', 'verification'])

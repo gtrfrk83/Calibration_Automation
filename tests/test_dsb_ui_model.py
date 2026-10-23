@@ -834,7 +834,7 @@ class ListTests(Base):
         gen = self.editor(fx.generator_33220a_like())
         self.assertTrue(gen.save())
         row = next(r for r in lst2.refresh() if r['model'] == '33220A')
-        self.assertRegex(row['automation'], r'^Ready: \d+ of \d+ points run by the suite, \d+ set by hand$')
+        self.assertRegex(row['automation'], r'^Ready: \d+ of \d+ points run by the suite, \d+ set by hand(; \d+ use commands not yet verified on hardware.*)?$')
 
     def test_new_open_duplicate_delete_restore(self):
         uid = self.make()
