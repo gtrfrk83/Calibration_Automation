@@ -210,12 +210,12 @@ class Bench(unittest.TestCase):
         self.assertEqual(len([1 for _t, h, _s in self.prompts if 'Point' in h and 'standard' in _t.lower()]), 5)
 
     # ---- reset once
-    def test_only_the_8808a_app_opts_in(self):
+    def test_only_the_8808a_app_and_the_datasheet_runtime_opt_in(self):
         self.assertIs(reset_startup.AppResetMixin.RESET_ONCE_PER_SESSION, False)
         self.assertIs(E.App.RESET_ONCE_PER_SESSION, True)
         hits = [str(p.relative_to(ROOT)) for p in list(ROOT.glob('*.py')) + list((ROOT / 'Procedures').glob('*.py'))
                 if re.search(r'^\s*RESET_ONCE_PER_SESSION\s*=\s*True', p.read_text(encoding='utf-8'), re.M)]
-        self.assertEqual(hits, ['fluke8808a_verification.py'])
+        self.assertEqual(sorted(hits), ['dsb_runtime.py', 'fluke8808a_verification.py'], 'the 8808A and, for rule 10, the user-built datasheet runtime only')
 
     def test_first_run_resets_second_run_skips_the_reset_and_runs(self):
         self.build()
