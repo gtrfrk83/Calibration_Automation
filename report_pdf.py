@@ -13,6 +13,7 @@ from collections import namedtuple
 from datetime import datetime
 
 COLUMNS = ('Description', 'Nominal', 'Tolerance -', 'Tolerance +', 'UOM', 'As Found', 'OOT', 'As Left', 'Uncertainty')
+LIMIT_HEADINGS = {'Tolerance -': 'Low Limit', 'Tolerance +': 'High Limit'}     # what the two limit columns are called when details['limit_labels'] is set
 TAR_TUR_COLUMNS = ('TAR', 'TUR')          # optional, after Uncertainty; each only when the user ticks its checkbox (default off)
 
 
@@ -446,7 +447,10 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
                               alignment=align if align is not None else 2 if col in right else 1 if col in centre else 0)
 
     has_uncertainty = any(r.get('Uncertainty') for r in rows)
-    data = [[Paragraph(c, style_for(c, head_style)) for c in columns]]
+    # The row keys stay 'Tolerance -' / 'Tolerance +' (snapshots, history and every engine use them); the two columns hold the ABSOLUTE low and high
+    # limits.  A report that asks for it (details['limit_labels'], set by the Datasheet Builder runtime) prints them as Low Limit / High Limit.
+    heading = LIMIT_HEADINGS if details.get('limit_labels') else {}
+    data = [[Paragraph(heading.get(c, c), style_for(c, head_style)) for c in columns]]
     spans, tints, last_section, shade = [], [], None, 0
     for row in rows:
         sec = row.get('Section') or ''

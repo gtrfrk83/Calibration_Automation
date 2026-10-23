@@ -60,7 +60,7 @@ class Sheet:
 
     def calc(self, key, iv=None, floor=None):
         """Select the row's tolerance cell, tick the chips, fill the boxes, press Calc."""
-        self.g.select(key, 'tol')
+        self.g.select(key, 'low')
         form = self.g.panel_state(key)['form']
         form['types'] = [t for t, v in (('iv', iv), ('floor', floor)) if v is not None]
         form['plus'].update(iv=iv or '', floor=floor or '')
@@ -113,7 +113,8 @@ class MockWorkflow(unittest.TestCase):
         pts = self.sheet.points()
         self.assertEqual(len(pts), 14)
         self.assertEqual(self.g.problem_counts(), dict(errors=0, warnings=0))
-        self.assertTrue(all(r['tol'] for r in pts), [r['tol'] for r in pts])
+        self.assertTrue(all(r['low'] and r['high'] and r['low'] != 'open' and r['high'] != 'open' for r in pts), [(r['low'], r['high']) for r in pts])
+        self.assertFalse(any('±' in r['low'] + r['high'] for r in pts))
         self.assertEqual(self.g.problems(), [])
 
     def test_rows_land_on_the_predefined_ranges_and_check_against_hand_arithmetic(self):
@@ -122,10 +123,11 @@ class MockWorkflow(unittest.TestCase):
         self.assertIn('600 V range', rows[('dcv', '+500.0 V')]['function'])
         self.assertIn('600 mA range', rows[('dci', '+500.0 mA')]['function'])
         # 0.5 % of 5 V + 5 mV = 30 mV; 0.5 % of 50 V + 5 mV = 255 mV (the inherited tolerance is worked out again for each row's own value)
-        self.assertEqual(rows[('dcv', '+5.000 V')]['tol'], '±30 mV')
-        self.assertEqual(rows[('dcv', '+50.00 V')]['tol'], '±255 mV')
+        # ... shown as the two absolute limits (nominal -/+ that), padded to the range's resolution
+        self.assertEqual((rows[('dcv', '+5.000 V')]['low'], rows[('dcv', '+5.000 V')]['high']), ('4.970 V', '5.030 V'))
+        self.assertEqual((rows[('dcv', '+50.00 V')]['low'], rows[('dcv', '+50.00 V')]['high']), ('49.745 V', '50.255 V'))
         # the Floor box is in the row's units: 0.0001 on a mA row is 0.0001 mA = 100 nA (1 % of 10 mA = 100 uA, plus 0.1 uA)
-        self.assertEqual(rows[('dci', '+10.00 mA')]['tol'], '±100.1 µA')
+        self.assertEqual((rows[('dci', '+10.00 mA')]['low'], rows[('dci', '+10.00 mA')]['high']), ('9.8999 mA', '10.1001 mA'))
 
     def test_rows_are_sorted_by_range_then_frequency_not_in_the_order_typed(self):
         """The doc: 'Keep the order the manual uses' cannot be done by typing order: AC rows typed 5 V@1k, 50 V@1k, 5 V@20k are listed 5@1k, 5@20k, 50@1k."""

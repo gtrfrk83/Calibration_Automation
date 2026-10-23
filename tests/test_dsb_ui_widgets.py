@@ -76,7 +76,7 @@ class GridWidgetStubTests(unittest.TestCase):
         res = self.type_cell(win, '5 V')
         self.assertTrue(res.ok, res.message)
         key = next(r['key'] for r in win.model.rows() if r['kind'] == 'point')
-        win.model.select(key, 'tol')
+        win.model.select(key, 'low')
         win.sync()
         box = win.panel_box
         box.types['iv'].set(True), box.v['iv'].set('0.05')
@@ -103,7 +103,7 @@ class GridWidgetStubTests(unittest.TestCase):
         self.assertEqual(win.sheet_key(Ev('Right')), 'break')
         self.assertEqual(win.model.sel_col, 'nominal')
         self.assertEqual(win.sheet_key(Ev('Tab')), 'break')
-        self.assertEqual(win.model.sel_col, 'tol')
+        self.assertEqual(win.model.sel_col, 'low')
         self.assertEqual(win.sheet_key(Ev('Down')), 'break')
         self.assertEqual(win.sheet_key(Ev('Up')), 'break')
         self.assertEqual(win.sheet_key(Ev('Return')), 'break')           # starts editing: focus goes to the Edit Cell bar
@@ -283,13 +283,37 @@ class GridWidgetStubTests(unittest.TestCase):
         vw.open_new()
         self.assertIn('Select a version', vw.msg.get())
 
+    def test_inspector_shows_the_computed_limits_and_types_them_on_request(self):
+        win, key = self.build()
+        box = win.panel_box
+        win.model.select(key, 'low')
+        win.sync()
+        row = win.model.row(key)
+        self.assertEqual((box.v['low'].get(), box.v['high'].get()), (row['low'], row['high']))     # the Low / High limit boxes show the calculated limits
+        self.assertFalse(box.b['typed'].get())
+        self.assertEqual(box.form()['typed'], False)
+        box.b['typed'].set(True)                                      # "Type the limits myself", then type the two limits and press Calc
+        box.typed_changed()
+        box.v['low'].set('4.9'), box.v['high'].set('5.2')
+        self.assertEqual((box.form()['low'], box.form()['high'], box.form()['typed']), ('4.9', '5.2', True))
+        res = win.calc()
+        self.assertTrue(res.ok, res.message)
+        row = win.model.row(key)
+        self.assertEqual(row['limits_from'], 'typed')
+        self.assertTrue(box.b['typed'].get())                         # reloaded from the row: it has typed limits now
+        self.assertEqual((box.v['low'].get(), box.v['high'].get()), (row['low'], row['high']))
+        win.model.select(key, 'high')                                 # the cells: the sheet draws both limit columns
+        win.sync()
+        self.assertEqual(len(win.sheet.geo.widths), 5)
+        self.assertEqual([c['key'] for c in self.ui.M.VIEW_COLUMNS][-2:], ['low', 'high'])
+
     # ---- layout B: inspector, status line, Run buttons, handheld template
     def test_inspector_follows_the_selected_row_and_hides(self):
         win, key = self.build()
         box = win.panel_box
         self.assertIsInstance(box, self.ui.Inspector)
         self.assertIs(self.ui.SpecPanel, self.ui.Inspector)
-        win.model.select(key, 'tol')
+        win.model.select(key, 'low')
         win.sync()
         self.assertEqual(box.v['func'].get(), 'DC volts')
         self.assertTrue(box.types['iv'].get())
@@ -426,7 +450,7 @@ class GridWidgetStubTests(unittest.TestCase):
         res = self.type_cell(win, '5 V')
         self.assertTrue(res.ok, res.message)
         key = next(r['key'] for r in win.model.rows() if r['kind'] == 'point')
-        win.model.select(key, 'tol')
+        win.model.select(key, 'low')
         win.sync()
         win.panel_box.types['iv'].set(True), win.panel_box.v['iv'].set('0.05')
         res = win.calc()
