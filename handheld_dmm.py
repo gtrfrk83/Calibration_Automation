@@ -309,6 +309,20 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self._wait(virtualbench.scaled(p.get('settle', self.pm_param('handheld.settle.default', 3.0)), self.virtual), cancel)
 
 
+def limit_line(p):
+    """The text after 'Limit:' in the reading window and the point detail.  Shipped specs print their own `tol_text`.  A step made by the Datasheet
+    Builder (it has a 'dsb' block) shows its LOW and HIGH limit (absolute, in the display unit and padding of the Low limit / High limit columns)
+    and the statement they came from, never a +/- error: 'Low limit 4.9965 V, High limit 5.0035 V  (from 0.05 % of reading + 2 counts)'.
+    Display only: the step's tol_text, low and high are not changed."""
+    text = p.get('tol_text') or ''
+    if not text or not p.get('dsb') or 'low' not in p or 'high' not in p:
+        return text
+    unit = p.get('display_unit', '')
+    typed = (p['dsb'].get('limit') or {}).get('source') == 'override'
+    how = 'typed limits' if typed else (f'from {p["accuracy"]}' if p.get('accuracy') else '')
+    return f'Low limit {p["low"]} {unit}, High limit {p["high"]} {unit}'.replace(' ,', ',').rstrip() + (f'  ({how})' if how else '')
+
+
 # ============================================================================ the reading dialog
 READING_WIDTH = 560         # content width of the reading window in 96-dpi units (layout C; text wraps inside it)
 OUTPUT_ON_NOTE = 'Output is ON'     # the note _out_note gives while the program has the calibrator output on
@@ -413,7 +427,7 @@ def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=Non
         label(inner, 'ACCEPT IF', fg=C['muted'], font='CalSmallBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w', pady=(6, 0))
         label(inner, accept, font='CalBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
         if p.get('tol_text'):
-            label(inner, 'Limit: ' + p['tol_text'], fg=C['muted'], font='CalSmall', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
+            label(inner, 'Limit: ' + limit_line(p), fg=C['muted'], font='CalSmall', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
         if demo_fill is not None:                   # demo only: a clearly marked helper; the operator may type anything instead
             def fill():
                 value = demo_fill()
@@ -885,7 +899,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             return
         p = self.by_id[sel[0]]
         extra = ('  |  ' + p['note']) if p.get('note') else ''
-        limit = f'\nLimit: {p["tol_text"]}' if p.get('tol_text') else ''
+        limit = f'\nLimit: {limit_line(p)}' if p.get('tol_text') else ''
         self.detail.set(f'{describe(p)}\nAccept: {self.accept_text(p)}  |  Meter: {p["switch"]}' + (f', {p["range"]} range' if p['range'] else '') + limit +
                         f'\nSetup: {self.setup_text(p)}{extra}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 

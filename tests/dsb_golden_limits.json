@@ -1,0 +1,216 @@
+{
+ "acv_bands": {
+  "judged": {
+   "1y": [
+    6,
+    "27156d23ff961ba937a6"
+   ]
+  },
+  "limits": "5d0227a65494c21b5669",
+  "points": 6,
+  "problems": "2a09341217f0da893d2d",
+  "spec": {
+   "1y": [
+    6,
+    "e27c740ffd5e1f2bbaa7"
+   ]
+  },
+  "verdicts": {
+   "1y": 18
+  }
+ },
+ "dmm_34461a_like": {
+  "judged": {
+   "1y": [
+    71,
+    "3c96d80d8c51e153f73d"
+   ],
+   "90d": [
+    71,
+    "19ba25221fa046fdafa0"
+   ]
+  },
+  "limits": "c701ad6852dbc2488d0d",
+  "points": 142,
+  "problems": "c0062555086359728f34",
+  "spec": {
+   "1y": [
+    71,
+    "a1e0d4b67c34669cf7a6"
+   ],
+   "90d": [
+    71,
+    "3b5cb51a82da5c1baeb1"
+   ]
+  },
+  "verdicts": {
+   "1y": 213,
+   "90d": 213
+  }
+ },
+ "dmm_asymmetric": {
+  "judged": {
+   "1y": [
+    71,
+    "f13d715393f0ad1b3b5c"
+   ],
+   "90d": [
+    71,
+    "290eb7a48306938caccb"
+   ]
+  },
+  "limits": "c651264320cacd19209e",
+  "points": 142,
+  "problems": "c0062555086359728f34",
+  "spec": {
+   "1y": [
+    71,
+    "a3ed6ae369d8a42e3378"
+   ],
+   "90d": [
+    71,
+    "1c66ce5036ab67a6bf05"
+   ]
+  },
+  "verdicts": {
+   "1y": 213,
+   "90d": 213
+  }
+ },
+ "dmm_outward_rounding": {
+  "judged": {
+   "1y": [
+    71,
+    "179c97b90f4aa7ad27db"
+   ],
+   "90d": [
+    71,
+    "f41f532d989fef73ad29"
+   ]
+  },
+  "limits": "7b1eca7c64f92ed8b228",
+  "points": 142,
+  "problems": "c0062555086359728f34",
+  "spec": {
+   "1y": [
+    71,
+    "bcf20912ab75f0ce0c85"
+   ],
+   "90d": [
+    71,
+    "ebef672b8b4881639a6b"
+   ]
+  },
+  "verdicts": {
+   "1y": 213,
+   "90d": 213
+  }
+ },
+ "dmm_row_statements": {
+  "judged": {
+   "1y": [
+    71,
+    "9d05131d01639d598d81"
+   ],
+   "90d": [
+    71,
+    "e0ff2d5d0cad96816977"
+   ]
+  },
+  "limits": "a75b26203bac35dfe5e9",
+  "points": 142,
+  "problems": "c0062555086359728f34",
+  "spec": {
+   "1y": [
+    71,
+    "6bc82b8d3923fe0f05e7"
+   ],
+   "90d": [
+    71,
+    "0d0d692e93ca777443a2"
+   ]
+  },
+  "verdicts": {
+   "1y": 213,
+   "90d": 213
+  }
+ },
+ "dmm_typed_limits": {
+  "judged": {
+   "1y": [
+    71,
+    "25a4fe0753fbce005ac3"
+   ],
+   "90d": [
+    71,
+    "626b063579d5d46956af"
+   ]
+  },
+  "limits": "67e5f73602f5b9126ff4",
+  "points": 142,
+  "problems": "0038943f11837633bf30",
+  "spec": {
+   "1y": [
+    71,
+    "ce5aadfe1f00fb54071f"
+   ],
+   "90d": [
+    71,
+    "e298afa70f9003af3f1d"
+   ]
+  },
+  "verdicts": {
+   "1y": 213,
+   "90d": 213
+  }
+ },
+ "generator_33220a_like": {
+  "judged": {
+   "1y": [
+    15,
+    "d70b738dc8eb5b6bffc7"
+   ],
+   "90d": [
+    15,
+    "0068697ea3bed7a42258"
+   ]
+  },
+  "limits": "8a8ae84e99800a84ddfe",
+  "points": 30,
+  "problems": "643d5437104296e21d90",
+  "spec": {
+   "1y": [
+    15,
+    "c3f5693d88cab09b3b80"
+   ],
+   "90d": [
+    15,
+    "8048caf0c4dc5f9b7cdf"
+   ]
+  },
+  "verdicts": {
+   "1y": 45,
+   "90d": 45
+  }
+ },
+ "scope_tds2000c_like": {
+  "judged": {
+   "1y": [
+    13,
+    "2bffcdf4dee7c350f473"
+   ]
+  },
+  "limits": "36cfd2785469eca311e0",
+  "points": 15,
+  "problems": "cf1cbb66a638b4860a51",
+  "spec": {
+   "1y": [
+    15,
+    "436cee101fc6c936135c"
+   ]
+  },
+  "verdicts": {
+   "1y": 39
+  }
+ }
+}
