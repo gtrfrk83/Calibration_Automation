@@ -80,7 +80,7 @@ class BlankSheetTests(Base):
         self.assertTrue(all(r['kind'] == 'blank' for r in rows))
         self.assertEqual([r['n'] for r in rows[:3]], [1, 2, 3])
         self.assertEqual([c['title'] for c in M.GRID_COLUMNS],
-                         ['STEP NUM', 'FUNCTION TESTED', 'NOMINAL VALUE', 'AS FOUND', 'AS LEFT', 'Out of Tol', 'CALIBRATION TOLERANCE'])
+                         ['STEP NUM', 'FUNCTION TESTED', 'NOMINAL VALUE', 'AS FOUND', 'AS LEFT', 'Out of Tol', 'LOW LIMIT', 'HIGH LIMIT'])
         self.assertTrue(all(not r['problem'] for r in rows))             # no row is flagged on an empty sheet
 
     def test_typing_a_value_without_a_function_says_what_to_do(self):
@@ -169,7 +169,7 @@ class KeyboardTests(Base):
         self.assertEqual(g.nav('Right'), 'moved')
         self.assertEqual(g.sel_col, 'nominal')
         self.assertEqual(g.nav('Tab'), 'moved')
-        self.assertEqual(g.sel_col, 'tol')                         # Tab skips the read-only columns
+        self.assertEqual(g.sel_col, 'low')                         # Tab skips the read-only columns
         self.assertEqual(g.nav('ISO_Left_Tab'), 'moved')
         self.assertEqual(g.sel_col, 'nominal')
         self.assertEqual(g.nav('Return'), 'edit')
@@ -196,7 +196,9 @@ class CalcTests(Base):
         fn, p = self.g.point_of(key)
         self.assertIsNotNone(p.spec)
         # 0.05 % of 5 V + 0.01 % of 10 V + 20 V
-        self.assertEqual(self.g.tol_display(fn, p), '±20.0035 V')
+        self.assertEqual(self.g.limits_display(fn, p), 'Low limit -15.0035 V, High limit 25.0035 V')         # nominal -/+ (0.05 % of 5 V + 0.01 % of 10 V + 20 V)
+        row = self.g.row(key)
+        self.assertEqual((row['low'], row['high']), ('-15.0035 V', '25.0035 V'))
 
     def test_calc_uses_decimals_not_floats(self):
         key = self.dcv_row('1 V')
@@ -337,19 +339,21 @@ if __name__ == '__main__':
 class ViewColumnsTests(Base):
     """The on-screen grid has no As Found / As Left / Out of Tol columns (view only); the printed sheet still has them."""
 
-    def test_screen_columns_are_step_function_nominal_tolerance(self):
-        self.assertEqual(M.COL_KEYS, ('step', 'function', 'nominal', 'tol'))
-        self.assertEqual(M.EDIT_COLS, ('function', 'nominal', 'tol'))
-        self.assertEqual(len(M.GridGeometry().widths), 4)
+    def test_screen_columns_are_step_function_nominal_low_high(self):
+        self.assertEqual(M.COL_KEYS, ('step', 'function', 'nominal', 'low', 'high'))
+        self.assertEqual(M.EDIT_COLS, ('function', 'nominal', 'low', 'high'))
+        self.assertEqual(len(M.GridGeometry().widths), 5)
+        self.assertNotIn('tol', M.COL_KEYS)                           # no +/- tolerance column next to the limits
 
     def test_printed_sheet_keeps_the_template_columns(self):
         self.dcv_row('5 V')
         self.g.calc_row(next(r['key'] for r in self.g.rows() if r['kind'] == 'point'), self.form(next(r['key'] for r in self.g.rows() if r['kind'] == 'point'), iv='0.05'))
         view = self.g.print_view()
-        self.assertEqual(view['columns'], ['STEP NUM', 'FUNCTION TESTED', 'NOMINAL VALUE', 'AS FOUND', 'AS LEFT', 'Out of Tol', 'CALIBRATION TOLERANCE'])
+        self.assertEqual(view['columns'], ['STEP NUM', 'FUNCTION TESTED', 'NOMINAL VALUE', 'AS FOUND', 'AS LEFT', 'Out of Tol', 'LOW LIMIT', 'HIGH LIMIT'])
         point = next(r for r in view['rows'] if r['kind'] == 'point')
-        self.assertEqual(len(point['cells']), 7)
+        self.assertEqual(len(point['cells']), 8)
         self.assertEqual(point['cells'][3:6], ['', '', ''])
+        self.assertTrue(point['cells'][6] and point['cells'][7] and '±' not in ''.join(point['cells']))
         out = Path(self.tmp.name) / 'blank.pdf'
         try:
             res = self.g.write_sheet_pdf(out)
@@ -358,26 +362,29 @@ class ViewColumnsTests(Base):
         if res.ok:
             self.assertTrue(out.exists())
 
-    def test_navigation_and_selection_work_with_four_columns(self):
+    def test_navigation_and_selection_work_with_five_columns(self):
         key = self.dcv_row('5 V')
         g = self.g
         g.select(key, 'step')
         g.nav('Right')
         self.assertEqual(g.sel_col, 'function')
         g.nav('End')
-        self.assertEqual(g.sel_col, 'tol')
+        self.assertEqual(g.sel_col, 'high')
         g.nav('Right')
-        self.assertEqual(g.sel_col, 'tol')                           # stops at the last column
+        self.assertEqual(g.sel_col, 'high')                          # stops at the last column
         g.nav('Home')
         self.assertEqual(g.sel_col, 'step')
-        g.select(key, 'tol')
+        g.select(key, 'low')
+        g.tab()                                                      # Low limit -> High limit
+        self.assertEqual(g.sel_col, 'high')
         g.tab()                                                      # Tab from the last editable cell goes to the first one of the next row
         self.assertEqual(g.sel_col, 'function')
-        geo = M.GridGeometry(widths=[90, 270, 240, 320], row_h=28, head_h=38, num_w=44)
+        geo = M.GridGeometry(widths=[90, 270, 240, 160, 160], row_h=28, head_h=38, num_w=44)
         self.assertEqual(geo.col_at(44 + 90 + 270 + 240 + 5), 3)
+        self.assertEqual(geo.col_at(44 + 90 + 270 + 240 + 160 + 5), 4)
         self.assertIsNone(geo.col_at(44 + 920 + 1))
         geo.fit(1000)
-        self.assertEqual(len(geo.widths), 4)
+        self.assertEqual(len(geo.widths), 5)
 
     def test_row_dicts_still_carry_the_blank_columns(self):
         self.dcv_row('5 V')

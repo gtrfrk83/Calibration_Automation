@@ -251,7 +251,7 @@ def checks_manager_windows():
     win.bar_v.set('5 V')
     check('grid: type a cell', win.commit_bar('down').ok)
     key = next(r['key'] for r in win.model.rows() if r['kind'] == 'point')
-    win.model.select(key, 'tol')
+    win.model.select(key, 'low')
     win.sync()
     win.panel_box.types['iv'].set(True)
     win.panel_box.v['iv'].set('0.05')
@@ -886,7 +886,7 @@ def checks_dsb_layout():
         pump(root, 40)
         tag = f'dsb {w}x{h}'
         key = [r for r in g.rows() if r['kind'] == 'point'][3]['key']
-        g.select(key, 'tol')
+        g.select(key, 'low')
         win.sync()
         pump(root, 20)
         rows_visible = (win.sheet.winfo_height() - win.sheet.geo.head_h) // win.sheet.geo.row_h
@@ -899,7 +899,7 @@ def checks_dsb_layout():
             win.toggle_inspector()                                  # shown by hand, then the checks below look at the panel
             pump(root, 20)
             check(f'{tag}: shown by hand while narrow', win.inspector_frame.winfo_ismapped() and win._insp_manual)
-        check(f'{tag}: four grid columns', len(win.sheet.geo.widths) == 4 and DM.COL_KEYS == ('step', 'function', 'nominal', 'tol'))
+        check(f'{tag}: five grid columns, Low and High limit', len(win.sheet.geo.widths) == 5 and DM.COL_KEYS == ('step', 'function', 'nominal', 'low', 'high'))
         for name in ('sheet_bar', 'bar', 'save_b', 'run_b', 'demo_b', 'preview_b', 'more_b', 'standards_b', 'undo_b', 'redo_b', 'lock_box', 'show_list_b', 'recalc_b',
                      'sheet', 'inspector_frame'):
             check(f'{tag}: {name} inside the window', inside(win, getattr(win, name)), name)
@@ -914,7 +914,7 @@ def checks_dsb_layout():
                 check(f'{tag}: section "{sec.title}" not wider than the panel', sec.winfo_width() <= canvas.winfo_width() + 2, (sec.winfo_width(), canvas.winfo_width()))
         check(f'{tag}: sheet bar wraps only when it must', (w < 1250) == bool(win._bar_wrapped) or w >= 1250)
         # Enter in a box applies (Calc)
-        before = g.cell_text(key, 'tol')
+        before = g.cell_text(key, 'low')
         box.v['fs'].set('0.01')
         e = next(x for x in box.entries if str(x.cget('textvariable')) == str(box.v['iv']))
         box.types['iv'].set(True), box.v['iv'].set('0.05')
@@ -922,7 +922,22 @@ def checks_dsb_layout():
         pump(root, 5)
         e.event_generate('<Return>')
         pump(root, 10)
-        check(f'{tag}: Enter in a box applies', g.cell_text(key, 'tol') != before or 'calculated' in win.status.get().lower() or win.note.get() != '', (before, g.cell_text(key, 'tol'), win.note.get()))
+        check(f'{tag}: Enter in a box applies', g.cell_text(key, 'low') != before or 'calculated' in win.status.get().lower() or win.note.get() != '', (before, g.cell_text(key, 'low'), win.note.get()))
+        # the limits: read-only while they are calculated, typed on request (the tolerance boxes are hidden then, never both editable)
+        win.sync()
+        pump(root, 10)
+        check(f'{tag}: Low / High limit boxes are read-only while calculated', str(box.low_e.cget('state')) == 'readonly' and str(box.high_e.cget('state')) == 'readonly')
+        check(f'{tag}: limit boxes show the sheet cells', box.v['low'].get() == g.row(key)['low'] and box.v['high'].get() == g.row(key)['high'], (box.v['low'].get(), g.row(key)['low']))
+        check(f'{tag}: limit boxes inside the panel', inside(win, box.low_e) or box.scroll.winfo_ismapped())
+        box.b['typed'].set(True)
+        box.typed_changed()
+        pump(root, 15)
+        check(f'{tag}: typing the limits unlocks the boxes and hides the tolerance boxes', str(box.low_e.cget('state')) == 'normal' and not box.chip_frame.winfo_ismapped()
+              and not any(box.cells[n].winfo_ismapped() for n in box.tol_names))
+        box.b['typed'].set(False)
+        box.typed_changed()
+        pump(root, 15)
+        check(f'{tag}: unticked again: tolerance boxes back, limits read-only', box.chip_frame.winfo_ismapped() and str(box.low_e.cget('state')) == 'readonly')
         # chips toggle with the keyboard
         chip = box.chips[1]
         chip.focus_force()

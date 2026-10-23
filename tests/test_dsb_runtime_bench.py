@@ -75,6 +75,22 @@ class DmmRun(Base):
         self.assertTrue(all(r['source'] == 'typed' and not r['synthetic'] for r in app.found.values()))
         self.assertTrue(all(r['standard'] in ('5560A', '5522A') for r in app.found.values()))
 
+    def test_report_prints_the_absolute_limits_as_low_and_high_limit(self):
+        """The report rows already hold the absolute low / high limits (row keys 'Tolerance -' / 'Tolerance +', unchanged for snapshots and history);
+        a Datasheet Builder report now heads them Low Limit / High Limit.  The numbers and the verdict are the ones the run judged with."""
+        app, io = self.run_dmm()
+        p = next(q for q in app.points if q['id'] == 'dcv.r10.+5')
+        row = app.certificate_row(p, app.found[p['id']])
+        self.assertEqual((row['Tolerance -'], row['Tolerance +']), (p['low'], p['high']))
+        text = self.pdf_text(app)
+        head = next(line for line in text.splitlines() if 'Nominal' in line and 'UOM' in line)
+        self.assertIn('Low Limit', head)
+        self.assertIn('High Limit', head)
+        self.assertNotIn('Tolerance', head)
+        self.assertIn(p['low'], text)
+        self.assertIn(p['high'], text)
+        self.assertIn('RESULT: PASS', text)
+
     def test_wire_reset_first_zero_hz_on_dc_standby_after_each_point(self):
         app, io = self.run_dmm()
         w = H.wire(io)
