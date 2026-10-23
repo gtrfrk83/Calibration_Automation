@@ -56,6 +56,10 @@ METERS = {
     # Fluke 365 clamp meter: the Calibration Manual's Figure 1 (p. 5) labels two jacks 'VΩ' and 'COM'; the current points use the detachable jaw on a 20-turn coil
     # (no test leads in the jacks), so only the voltage / ohms hook-up is described here and the coil hook-ups are the spec's own groups (specs/fluke_365_pv.json)
     'fluke365': dict(name='Fluke 365', jacks={'vohm': 'VΩ', 'com': 'COM'}),
+    # Fluke 374 / 375 / 376 / 376-II clamp meters: the Calibration Manual's Figure 1 (p. 2) labels two jacks 'VΩ' and 'COM' (the iFlex 2 mm jack is named 'far left' on p. 3);
+    # the current points use the detachable jaw or the iFlex loop on a 50-turn coil, and the iFlex simulation uses the iFlex jack, so only the voltage / mV / ohms / capacitance
+    # hook-up is described here and the other hook-ups are the spec's own groups (specs/fluke_376_pv.json)
+    'fluke376': dict(name='Fluke 374 / 375 / 376 / 376-II', jacks={'vohm': 'VΩ', 'com': 'COM'}),
 }
 RED_JACK = {'VOHM': 'vohm', 'UAMP': 'ma', 'AMP10': 'a10'}
 
@@ -67,6 +71,7 @@ AVAILABLE = {
     'fluke77': ('VOHM', 'UAMP', 'AMP10'),
     'fluke170': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
     'fluke365': ('VOHM',),
+    'fluke376': ('VOHM',),
 }
 
 # extra text for particular meters
@@ -88,6 +93,9 @@ EXTRA = {
     ('fluke365', 'VOHM'): dict(caution='Up to 570 V ac or dc is applied to the VΩ and COM jacks (600 V CAT III meter). Use CAT III 600 V leads with the finger guards, connect COM before the live lead '
                                        'and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on (Safety Information, pp. 2-3). '
                                        'Do not touch more than 30 V ac rms, 42 V ac peak or 60 V dc.'),
+    ('fluke376', 'VOHM'): dict(caution='Up to 900 V ac or dc is applied to the VΩ and COM jacks (the jaw is marked CAT III 1000 V, CAT IV 600 V, Figure 1). Use CAT III 1000 V leads with the finger guards, connect COM before the live '
+                                       'lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. The Calibration Manual gives no further safety information '
+                                       '(it refers to the Users Manual).'),
     ('fluke170', 'TEMP'): dict(caution='Use the correct cable (Table 3 note 3). The meter and the thermocouple adapter must be at the same temperature: allow 20 minutes before the temperature points (Table 3 note 4).'),
 }
 GENERIC_CAUTION = {

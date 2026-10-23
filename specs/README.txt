@@ -63,6 +63,13 @@ Included
                             output to the coil, test leads out of the jacks, jaw round all 20 turns); VOHM comes from hookups.py ('fluke365'). step.check = a printed limit that is NOT half of the published
                             specification (900 ohm lower limit 894; the three 190 A rows +-2.5 against +-2.15): stored as printed, flagged in the note. step.dsb_desc / report_desc word the coil rows.
                             Tested by tests/test_fluke_365_points.py; options as the other handheld specs (hv_threshold_v 30, hv_once_per_group true (365 only), auto_ramp false, function_prompt, report_title 'Calibration Data').
+  fluke_376_pv.json         Fluke 374 / 375 / 376 / 376-II Calibration Manual, Table 1 (printed pp. 3-4), 38 points (schema 3, written by build_fluke_376_spec.py from the page images, read twice): a FAMILY spec,
+                            step.models from the X columns (374: 28, 375: 34, 376 and 376-II: 38). AC volts 4, DC volts 8 (4 mV), ohms 7, capacitance 3, AC amps 4, DC amps 3, iFlex simulated 5, iFlex with coil 4;
+                            ids 1-1 .. 1-38. Coil rows list the CALIBRATOR current (applied.value 0.2 / 10 / 18 / 6 A) and the METER limits (nominal 50 x); the iFlex simulated rows are sourced as AC volts (applied.value 0.003 ..
+                            0.75 V) and read in amps, so they carry step.unc_unit 'V' (the unit of the Uncertainty; the only spec that uses it). groups{COIL_AUX, COIL_20A, IFLEX_SIM, IFLEX_COIL_AUX, IFLEX_COIL_20A}
+                            are the spec's own cable-change prompts; VOHM comes from hookups.py ('fluke376'). step.check = a printed limit that is neither the full nor half of the published accuracy (UNVERIFIED source),
+                            stored as printed: 1-1, 1-3 (rounded), 1-28, 1-29, 1-36, 1-37 (tighter). Tested by tests/test_fluke_376_points.py; options as the 365 (hv_threshold_v 30, hv_once_per_group true, auto_ramp false,
+                            function_prompt, report_title 'Calibration Data').
   klein_mm325_pv.json       Klein Tools MM325 instruction manual (schema 3, written by build_mm325.py): one point per range at 90 %, AC at 60 Hz;
                             adds groups{} (cable-change prompts + hook-up diagram), dial{} (picture and position of every range) and options{}
                             (range_prompt, hv_threshold_v); per step: dial, dial_text, tol_text, max_on_s / recovery_s (10 A duty limit)

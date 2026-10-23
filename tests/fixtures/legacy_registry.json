@@ -35,7 +35,8 @@
   "Agilent 34411A Performance Verification": "Agilent_34411A_Verification.py",
   "Keithley 2000 Guided Adjustment": "Keithley_2000_Adjustment.py",
   "Fluke 8808A Guided Adjustment": "Fluke_8808A_Adjustment.py",
-  "Fluke 365 Clamp Meter Performance Verification": "Fluke_365_Verification.py"
+  "Fluke 365 Clamp Meter Performance Verification": "Fluke_365_Verification.py",
+  "Fluke 376 Clamp Meter Performance Verification": "Fluke_376_Verification.py"
  },
  "VERSIONS": {
   "WaveSurfer_WS4104HD.py": "51",
@@ -73,7 +74,8 @@
   "Agilent_34411A_Verification.py": "1",
   "Keithley_2000_Adjustment.py": "1",
   "Fluke_8808A_Adjustment.py": "1",
-  "Fluke_365_Verification.py": "1"
+  "Fluke_365_Verification.py": "1",
+  "Fluke_376_Verification.py": "1"
  },
  "records": [
   [
@@ -327,6 +329,13 @@
    "365",
    "Clamp Meter",
    "Fluke_365_Verification.py"
+  ],
+  [
+   "Fluke 376 Clamp Meter Performance Verification",
+   "Fluke",
+   "376",
+   "Clamp Meter",
+   "Fluke_376_Verification.py"
   ]
  ],
  "FILES": {
@@ -808,6 +817,19 @@
    ],
    "spec": [
     "specs/fluke_365_pv.json"
+   ]
+  },
+  "Fluke_376_Verification.py": {
+   "code": [
+    "Procedures/Fluke_376_Verification.py",
+    "handheld_dmm.py",
+    "hookups.py",
+    "drivers/base.py",
+    "drivers/transport.py",
+    "drivers/fluke_5560a.py"
+   ],
+   "spec": [
+    "specs/fluke_376_pv.json"
    ]
   }
  },
