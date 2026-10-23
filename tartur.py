@@ -47,6 +47,7 @@ def _scope(scope):
 
 # The unit the standard's accuracy and the scope CMC are expressed in, per point kind. A tolerance in any other unit (the handheld frequency
 # and period points are sourced as ACV but read in Hz) is blank, never divided by an uncertainty in a different unit.
+COIL_MODEL = 'A2LA-5500A-COIL'          # the lab's A2LA coil sheet (specs/build_coil_standard.py)
 NATURAL_UNITS = {'DCV': {'V'}, 'ACV': {'V'}, 'DCI': {'A'}, 'ACI': {'A'}, 'FREQ': {'Hz'}, 'CAP': {'F'},
                  'TEMP': {'C', 'degC', '\u00b0C'},        # a degF tolerance (or any other unit) on a thermocouple point is never divided by a degC uncertainty
                  'LUX': {'lux'}, 'FC': {'FC'}, 'LAMBERT': {'La'}, 'UVIRR': {'uW/cm2'},   # light (A2LA-LIGHT sheet): each in its own unit, never converted
@@ -86,7 +87,10 @@ def _compute(p, low, high, standard, scope):
     # TEMP (thermocouple simulation): the scope file has no temperature CMC, so with a calibrator the ratios come from its own degC specification
     # alone (no CMC floor is invented; a CMC entry, if the lab adds one, is used as everywhere else).  Without a calibrator: blank, as before.
     # Light (LUX / FC / LAMBERT / UVIRR): the scope CMC IS the A2LA-LIGHT sheet (no separate scope entry), so with that standard the ratios come from it alone.
-    if cmc is None and not (kind in ('TEMP', 'LUX', 'FC', 'LAMBERT', 'UVIRR') and standard):
+    # Coil (A2LA-5500A-COIL sheet): the scope's coil lines (DC to 3000 A, clamp-on AC to 1025 A) are above the scope file's calibrator ranges, so with THAT standard
+    # (and only that one) a DCI / ACI point is computed from the sheet's own CMC rows; with any other standard nothing changes.
+    coil = kind in ('DCI', 'ACI') and str(standard or '').strip().upper() == COIL_MODEL
+    if cmc is None and not (kind in ('TEMP', 'LUX', 'FC', 'LAMBERT', 'UVIRR') and standard) and not coil:
         return _blank('point is not covered by the scope of accreditation', tolerance=tol)
     ounit = 'ohm' if kind.startswith('OHM') else unit
 
