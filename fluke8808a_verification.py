@@ -23,6 +23,7 @@ sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Man
 import ui_theme as ui
 import ui_shell
 import appdata
+import calibrator_fit
 import datamode
 import procmods_engine
 import reset_startup
@@ -35,7 +36,8 @@ SPEC_PATH = HERE / 'specs' / 'fluke_8808a_pv.json'
 SPEC = POINTS = None
 PERIODS = {'90 days': '90d', '1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
-CALIBRATORS = {'Fluke 5522A': ('5522A', drivers.Fluke5522A), 'Fluke 5560A': ('5560A', drivers.Fluke5560A)}
+CALIBRATORS = {'Fluke 5522A': ('5522A', drivers.Fluke5522A), 'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
+FIT_MODELS = {'Fluke 5520A': '5520A'}     # calibrators whose points are decided by calibrator_fit (their published specification), not by the spec's cal_limits
 PARITY_FORMATS = {'8 data bits, no parity': (8, 'none'), '7 data bits, even parity': (7, 'even'), '7 data bits, odd parity': (7, 'odd')}
 BAUDS = ['9600', '19200', '4800', '2400', '1200', '600', '300']
 GROUP_TITLE = {'ZERO_SHORT': 'Shorted input (zero offset)', 'ZERO_OPEN': 'Open current input (zero offset)', 'VOLT': 'Voltage and frequency inputs',
@@ -138,6 +140,7 @@ def judge(p, reading):
 
 def find_diagram(cal, group):
     """Hook-up picture for a wiring group: diagrams/hook_8808A_<cal>_<GROUP>.png, then diagrams/hook_8808A_<GROUP>.png."""
+    cal = '5522A' if cal == '5520A' else cal             # the 5520A uses the 5522A picture (same NORMAL / AUX terminals; UNVERIFIED)
     for name in (f'hook_{MODEL}_{cal}_{group}', f'hook_{MODEL}_{group}'):
         path = HERE / 'diagrams' / f'{name}.png'
         if path.exists():
@@ -274,7 +277,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.dmm_addr = tk.StringVar(value=s.get('dmm_addr', ports[0] if ports else 'COM1'))
         self.dmm_baud = tk.StringVar(value=s.get('dmm_baud', '9600'))
         self.dmm_format = tk.StringVar(value=s.get('dmm_format', '8 data bits, no parity'))
-        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5522A'))
+        self.cal_offer = calibrator_fit.make_offer('5520A', calibrator_fit.dmm_requests(POINTS), per_point_manual=True, unverified=drivers.Fluke5520A.unverified_summary())
+        self._fit_manual = {r.key: reason for r, reason in self.cal_offer.manual}          # point id -> why the 5520A cannot make it (calibrator_fit)
+        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5522A') if s.get('cal_model', 'Fluke 5522A') in self.cal_choices() else 'Fluke 5522A')
         self.cal_addr = tk.StringVar(value=s.get('cal_addr', 'COM9'))
         self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
         self.period = tk.StringVar(value=s.get('period', PERIOD_LABEL[SPEC['default_period']]))
@@ -296,13 +301,24 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
     @property
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
 
+    def cal_choices(self):
+        """The calibrator picker's values: the 5520A is always offered here (the engine has a per-point path for what a calibrator cannot make); the note under the
+        picker says which points it cannot make."""
+        return calibrator_fit.picker_values(list(CALIBRATORS), {'Fluke 5520A': self.cal_offer})
+
     def is_manual(self, p):
         """True when the selected calibrator cannot make this point: the technician connects another standard (the meter is still read automatically).
         The spec's `cal_limits` names, per calibrator, the points it cannot make and why (5522A: Operators Manual; 5560A: Product Specifications);
-        a calibrator that is not listed for a point drives it."""
-        return p['source'] == 'calibrator' and self.cal_key in (p.get('cal_limits') or {})
+        a calibrator that is not listed for a point drives it.  The 5520A is not in the spec: calibrator_fit decides from its published specification."""
+        if p['source'] != 'calibrator':
+            return False
+        if self.cal_key in FIT_MODELS.values():
+            return p['id'] in self._fit_manual
+        return self.cal_key in (p.get('cal_limits') or {})
 
     def manual_reason(self, p):
+        if self.cal_key in FIT_MODELS.values():
+            return self._fit_manual.get(p['id'], '')
         return (p.get('cal_limits') or {}).get(self.cal_key, '')
 
     def active(self, p):
@@ -357,7 +373,9 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
                           'Echo must stay off. The 8808A has no GPIB or USB port.', style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(
             row=r, column=0, columnspan=2, sticky='w', pady=(2, 6)); r += 1
         ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.cal_model, values=list(CALIBRATORS), width=14, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        calbox = ttk.Combobox(d, textvariable=self.cal_model, values=self.cal_choices(), width=14, state='readonly')
+        calbox.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        calibrator_fit.attach_note(d, self.cal_offer, ui, widgets=(calbox,), row=r); r += 1
         ttk.Label(d, text='Calibrator address').grid(row=r, column=0, sticky='w', pady=4)
         self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
         self.cal_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1

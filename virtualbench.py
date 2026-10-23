@@ -135,10 +135,16 @@ def plausible_answer(key, include_failures=False) -> bool:
 
 
 # ---------------------------------------------------------------------------------------------------------------- simulated transports
+def sim_model(text):
+    """'5522A' / '5520A' / '5560A' from a calibrator choice text (the 5560A when it cannot be told): the model the simulated calibrator introduces itself as."""
+    t = str(text)
+    return '5522A' if '5522' in t else '5520A' if '5520' in t else '5560A'
+
+
 def calibrator_transport(model):
-    """Simulated Fluke 5522A / 5560A for the handheld, DAQ and DMM engines (its own private bench)."""
+    """Simulated Fluke 5522A / 5520A / 5560A for the handheld, DAQ and DMM engines (its own private bench)."""
     bench = _sim.SimBench()
-    t = _sim.SimFlukeTransport(bench, '5522A' if '5522' in str(model) else '5560A')
+    t = _sim.SimFlukeTransport(bench, sim_model(model))
     t.opened = False
     return bench, t
 
@@ -147,12 +153,12 @@ def dmm_pair(model, cal='5560A'):
     """(bench, calibrator transport, DMM transport) for 34401A / 8846A / Truevolt."""
     bench, ft, dt = _sim.make_dmm_bench(model)
     bench.freq_aware = True
-    ft.model = '5522A' if '5522' in str(cal) else '5560A'
+    ft.model = sim_model(cal)
     return bench, ft, dt
 
 
 def dacq_pair(model, cal='5560A', modules=None):
-    return _sim.make_dacq_bench(model, '5522A' if '5522' in str(cal) else '5560A', modules)
+    return _sim.make_dacq_bench(model, sim_model(cal), modules)
 
 
 def status_text(app) -> str:

@@ -33,7 +33,7 @@ GOLDEN = Path(__file__).resolve().parent / 'golden'
 sys.path.insert(0, str(ROOT))
 
 import drivers  # noqa: E402
-from drivers import (Agilent34401A, AgilentAFG, Fluke28x, Fluke5522A, Fluke5560A, Fluke5790B, Fluke8846A, Fluke96270A,  # noqa: E402
+from drivers import (Agilent34401A, AgilentAFG, Fluke28x, Fluke5520A, Fluke5522A, Fluke5560A, Fluke5790B, Fluke8846A, Fluke96270A,  # noqa: E402
                      Instrument, InstrumentError, Keysight33210A, Keysight33220A, Keysight33250A, Keysight34460A, Keysight34461A,
                      Keysight34465A, Keysight34470A, Keysight34970A, Keysight34972A, Keysight53131A, Keysight53132A, ReferenceMeter,
                      TektronixMDO4000C, TektronixTDS2000C, Transport, TransportError, WaveSurfer4104HD)
@@ -83,6 +83,7 @@ COVERAGE = {
                      'set_output_capacitance', 'set_output_temperature', 'set_output_square', 'restore_sine', 'read_error', 'check_error', 'clear_status', 'operate_unverified',
                      'standby_quiet', 'apply_scope_dc'],
             no_command=[]),
+        'Fluke5520A': dict(covered=['open'], no_command=['unverified_summary']),   # reuses the 5522A command set; own registry flags
         'Fluke5522A': dict(covered=['open'], no_command=[]),                # inherits everything; only identity differs
     },
     'scpi_dmm': {
@@ -175,7 +176,7 @@ COVERAGE = {
 }
 
 # Stage 7: reset_to_defaults is defined once, on Instrument, and exercised on each of these concrete drivers (golden cases "Class.reset_to_defaults").
-for _cls in ('Fluke5560A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
+for _cls in ('Fluke5560A', 'Fluke5520A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
              'Keysight53132A', 'Fluke5790B', 'Fluke28x', 'WaveSurfer4104HD', 'TektronixMDO4000C', 'Fluke96270A', 'AgilentAFG', 'ReferenceMeter',
              'TektronixTDS2000C', 'Fluke5522AScope', 'Keithley2000', 'Keysight34410A'):
     for _fixture in COVERAGE.values():
@@ -512,6 +513,9 @@ def cases_fluke_5560a(c):
     ft2 = make_dacq_bench(cal='5522A')[1]
     cal2 = c.inst(Fluke5522A, ft2, opened=False, label='5522A')
     c.run('Fluke5522A.open', cal2.open)
+    ft3 = make_dacq_bench(cal='5520A')[1]
+    cal3 = c.inst(Fluke5520A, ft3, opened=False, label='5520A')
+    c.run('Fluke5520A.open', cal3.open)
 
 
 def cases_scpi_dmm(c):
@@ -1173,6 +1177,9 @@ def resets_fluke_5560a(c):
     ft2 = make_dacq_bench(cal='5522A')[1]
     cal2 = c.inst(Fluke5522A, ft2, label='5522A')
     c.run('Fluke5522A.reset_to_defaults', cal2.reset_to_defaults)
+    ft3 = make_dacq_bench(cal='5520A')[1]
+    cal3 = c.inst(Fluke5520A, ft3, label='5520A')
+    c.run('Fluke5520A.reset_to_defaults', cal3.reset_to_defaults)
     stuck = c.inst(Fluke5560A, Scripted([(r'^OPER\?', '1')]), label='5560A')
     c.run('Fluke5560A.reset_to_defaults[standby not confirmed]', stuck.reset_to_defaults)
 

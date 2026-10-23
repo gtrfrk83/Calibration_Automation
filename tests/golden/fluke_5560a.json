@@ -1035,6 +1035,32 @@
   },
   {
    "call": "",
+   "case": "Fluke5520A.open",
+   "log": [
+    "5520A|>>|*IDN?",
+    "5520A|<<|FLUKE,5520A,SIM0001,1.0"
+   ],
+   "method": "Fluke5520A.open",
+   "result": "returned <Fluke5520A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5520A,SIM0001,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "",
    "case": "Fluke5560A.reset_to_defaults",
    "log": [
     "5560A|>>|*RST",
@@ -1122,6 +1148,62 @@
    ],
    "method": "Fluke5522A.reset_to_defaults",
    "result": "returned ResetReport(instrument='5522A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output in STANDBY (STBY, OPER? = 0)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke5520A.reset_to_defaults",
+   "log": [
+    "5520A|>>|*RST",
+    "5520A|>>|*CLS",
+    "5520A|>>|*OPC?",
+    "5520A|<<|1",
+    "5520A|>>|ERR?",
+    "5520A|<<|0,\"No error\"",
+    "5520A|>>|STBY",
+    "5520A|>>|OPER?",
+    "5520A|<<|0"
+   ],
+   "method": "Fluke5520A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='5520A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output in STANDBY (STBY, OPER? = 0)', ok=True, detail='')], warnings=[])",
    "wire": [
     [
      "W",
