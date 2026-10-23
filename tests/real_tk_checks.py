@@ -1670,8 +1670,8 @@ def checks_fluke_376():
     app.asset.set('A-376')
     app.serial.set('S-376')
     tree = app.tree
-    check('376 run window: 38 points, ordinary handheld window (no typed grid, no run queue)', len(tree.get_children()) == 38 and not hasattr(app, 'grid_entry')
-          and not app.queue_supported() and HH.App.QUEUE_SUPPORTED is True and 'Manual Calibration' not in root.title(), root.title())
+    check('376 run window: 38 points, ordinary handheld window (no typed grid; the run queue is offered, one meter is not a queue)', len(tree.get_children()) == 38 and not hasattr(app, 'grid_entry')
+          and app.queue_supported() and not app.queue_wants_run() and HH.App.QUEUE_SUPPORTED is True and 'Manual Calibration' not in root.title(), root.title())
     boxes = [c for c in walk(root) if isinstance(c, ttk.Checkbutton) and 'iFlex probe supplied' in str(c.cget('text'))]
     check('376 run window: the iFlex check box is shown before Run, ON by default, never skipped silently', len(boxes) == 1 and boxes[0].winfo_ismapped() and app.include_is_on('iflex')
           and 'ON' in str(app._include_labels['iflex'].cget('text')), [str(c.cget('text')) for c in walk(root) if isinstance(c, ttk.Checkbutton)])
@@ -1733,7 +1733,105 @@ def checks_fluke_376():
     except tk.TclError:
         pass
 
+def checks_fluke_376_queue():
+    """The run queue of the 374 / 375 / 376 / 376-II on a real Tk: the Connections drawer lists one 'iFlex supplied' box per queue meter (one ON, one OFF), the chip says so, the
+    set-up list shows the setting per meter, the window box follows the meter shown, a meter with the setting OFF does not show the iFlex points, and a drawer click changes
+    only its own meter.  Screenshots (SHOT_DIR) in the theme of THEME."""
+    import handheld_dmm as HH
+    import iflex_option as XO
+    import run_queue as RQ
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    shots = os.environ.get('SHOT_DIR')
+    patches = [mock.patch.object(messagebox, n, return_value=True) for n in ('askyesno', 'askokcancel', 'askyesnocancel', 'showinfo', 'showwarning', 'showerror')]
+    for pt in patches:
+        pt.start()
 
+    def grab(win, tag):
+        if not shots:
+            return
+        from PIL import ImageGrab
+        win.update()
+        ImageGrab.grab(bbox=(win.winfo_rootx(), win.winfo_rooty(), win.winfo_rootx() + win.winfo_width(), win.winfo_rooty() + win.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shots, f'{tag}_{THEME}.png'))
+    try:
+        app = XO.App(root, '376', demo=False, spec=HH.load_spec('fluke_376_pv.json'))
+        root.geometry('1320x820+0+0')
+        pump(root, 30)
+        btn = next((w for w in walk(root) if isinstance(w, ttk.Button) and w.cget('text') == 'Run queue...'), None)
+        check('376 queue: the Connections drawer has the Run queue... button', btn is not None)
+        app.apply_queue([('4412', 'S-4412', 'Reyes'), ('4413', 'S-4413', 'Reyes')], RQ.POINT_BY_POINT)
+        pump(root, 10)
+        app.set_include('iflex', False, ask=False, meter=app.queue.find('4413'))
+        pump(root, 10)
+        check('376 queue: chip says the setting per meter', app.queue_pill.winfo_manager() and 'iFlex ON for 1 of 2' in str(app.queue_pill.cget('text')), app.queue_chip_text())
+        app.shell.toggle_drawer()
+        pump(root, 30)
+        boxes = [c for c in walk(root) if isinstance(c, ttk.Checkbutton) and 'iFlex supplied' in str(c.cget('text')) and 'probe supplied' not in str(c.cget('text'))]
+        texts = sorted(str(c.cget('text')) for c in boxes)
+        check('376 queue: one iFlex supplied box per meter in the drawer', texts == ['4412: iFlex supplied', '4413: iFlex supplied'] and all(c.winfo_ismapped() for c in boxes), texts)
+        state = {str(c.cget('text')).split(':')[0]: app._inc_row_vars[str(c.cget('text')).split(':')[0]].get() for c in boxes}
+        check('376 queue: 4412 ON, 4413 OFF in the boxes', state == {'4412': True, '4413': False}, state)
+        drawer = boxes[0].master
+        while drawer.master is not None and not isinstance(drawer.master, tk.Tk) and drawer.winfo_width() < 300:
+            drawer = drawer.master
+        notes = [str(c.cget('text')) for c in walk(drawer) if isinstance(c, ttk.Label) and ('points' in str(c.cget('text')))]
+        check('376 queue: each row says its point count and, when OFF, not tested', any('38 points' == n for n in notes) and any('29 points, not tested' in n for n in notes), notes)
+        clipped = [c for c in walk(drawer) if c.winfo_ismapped() and not inside(drawer, c) and c is not drawer]
+        check('376 queue: nothing clipped in the drawer', not clipped, [(str(c), c.cget('text') if hasattr(c, 'cget') and 'text' in c.keys() else '') for c in clipped][:5])
+        app.queue_show('4412')
+        pump(root, 20)
+        cv = boxes[0].master
+        while cv is not None and not isinstance(cv, tk.Canvas):       # the drawer scrolls inside a canvas: show its bottom, where the per-meter boxes are
+            cv = cv.master
+        check('376 queue: the drawer body is a scrolling canvas', cv is not None)
+        cv.yview_moveto(1.0)
+        pump(root, 30)
+        top, bottom = cv.winfo_rooty(), cv.winfo_rooty() + cv.winfo_height()
+        check('376 queue: the per-meter boxes are inside the visible part of the drawer once scrolled to the end',
+              all(c.winfo_rooty() >= top and c.winfo_rooty() + c.winfo_height() <= bottom for c in boxes), [(c.winfo_rooty(), top, bottom) for c in boxes])
+        grab(root, 'fluke376_queue_drawer')
+        check('376 queue: the window box follows the meter shown (4412 ON, 38 points listed)', app.include_is_on('iflex') and len(app.tree.get_children()) == 38
+              and 'Asset 4412' in str(app._include_labels['iflex'].cget('text')), str(app._include_labels['iflex'].cget('text')))
+        app.queue_show('4413')
+        pump(root, 20)
+        check('376 queue: meter 4413 (OFF) shows 29 points and no iFlex section', len(app.tree.get_children()) == 29 and not app.include_is_on('iflex')
+              and not any('iFlex' in str(app.tree.item(k, 'values')[1]) for k in app.tree.get_children()) and 'Asset 4413' in str(app._include_labels['iflex'].cget('text')),
+              len(app.tree.get_children()))
+        grab(root, 'fluke376_queue_meter_off')
+        box = next(c for c in boxes if str(c.cget('text')).startswith('4413'))
+        box.invoke()                                                  # the drawer box of 4413 switched back ON: only 4413 changes
+        pump(root, 20)
+        check('376 queue: a drawer click changes only its own meter', app.queue.find('4413').extra['include'] == {'iflex': True} and app.queue.find('4412').extra['include'] == {'iflex': True}
+              and 'ON for all' in app.queue_chip_text(), (app.queue.find('4413').extra, app.queue_chip_text()))
+        box.invoke()
+        pump(root, 20)
+        # the set-up list: Status column with the setting
+        seen = {}
+
+        def go():
+            win = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel)][-1]
+            pump(root, 8)
+            win.focus_force()
+            pump(root, 5)
+            tv = next((w for w in walk(win) if isinstance(w, ttk.Treeview)), None)
+            seen['rows'] = [tv.item(k, 'values') for k in tv.get_children()] if tv is not None else []
+            seen['clipped'] = [c for c in walk(win) if c.winfo_ismapped() and not inside(win, c)]
+            grab(win, 'fluke376_queue_setup')
+            win.destroy()
+        root.after(500, go)
+        app.open_queue_setup()
+        status = [' '.join(str(v) for v in r) for r in seen.get('rows', [])]
+        check('376 queue: the set-up list shows iFlex ON / OFF per meter', len(status) == 2 and 'iFlex ON' in status[0] and 'iFlex OFF' in status[1] and not seen.get('clipped'), (status, seen.get('clipped')))
+        check('376 queue: no Tk callback errors', not errs, errs)
+    finally:
+        for pt in patches:
+            pt.stop()
+        try:
+            root.destroy()
+        except tk.TclError:
+            pass
 
 
 if __name__ == '__main__':
@@ -1746,6 +1844,7 @@ if __name__ == '__main__':
         checks_mdd_manual()
         checks_fluke_365()
         checks_fluke_376()
+        checks_fluke_376_queue()
         checks_standards_specs()
         checks_standards_specs_small()
         checks_import_package()
