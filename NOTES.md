@@ -406,6 +406,71 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
 - UNVERIFIED for the 34411A: everything unverified for the 34410A (21 registry commands: reply formats and node names), plus that the 34411A answers *IDN? with '34411A' (assumed from the 34410A form `Agilent Technologies,34410A,...`), the USB resource example, the firmware 2.05 threshold (same guide), and that its front panel / terminal layout and the hook-up wording are as the 34410A's (the guides head every procedure "34410A/11A").
 - Tests: `tests/test_34411a_points.py` (family spec flags, a second reading of limits, builder, driver, engine runs for every calibrator x interface, wire transcript equal to the 34410A's, diagram lookup, launcher, `main(model=)`, sidecar / registration). Real-Tk view: the launcher's window (light / dark, drawer, a whole demo run, PDF export) under Xvfb.
 
+## Keysight / Agilent 3458A driver (branch `driver-3458a`; DRIVER ONLY, no procedure; checked on the simulated bench only, never run on a real 3458A or a calibrator)
+
+Files: `drivers/agilent_3458a.py` (class `Agilent3458A`, registry `COMMANDS`), `drivers/simulated_3458a.py` (`make_3458a_bench`), `tests/test_driver_3458a.py`, golden fixture
+`tests/golden/agilent_3458a.json`.  The 3458A talks **HP Multimeter Language over GPIB, not SCPI** (no `*IDN?`, no `*RST`, no `SYST:ERR?`).  Source: the Keysight 3458A User's Guide
+(940 pages; the page numbers below are printed = PDF pages).  Every command text and parameter was read from the rendered page images and read a second time; every `Cmd` carries its page.
+No procedure was created or changed and no shared engine was touched.  The accuracy sheet (`std-3458a`) is a separate piece of work.
+
+Commands implemented (verified = printed in the guide; the page is in the registry):
+reset `RESET` p.332-333 (locked) | `CSB` p.249 | `STB?` p.358 (barrier only) | `ERRSTR?` p.264 | `ERR?` p.262 | `AUXERR?` p.241 | `ID?` p.276 | `REV?` p.334 | `TEMP?` p.370 | `LINE?` p.285 |
+`CALNUM?` p.246 | `OPT?` p.314 | `TERM?` p.371 | `INBUF?` p.277 | `FUNC` p.271-275 | `RANGE` p.324-327 | `ARANGE` p.240 | `NPLC` p.301-303 | `APER` p.239 | `NDIG` p.300 | `AZERO` p.243 |
+`FIXEDZ` p.267 | `LFREQ` p.284 | `DELAY` p.253 | `SETACV` p.342 | `ACBAND` p.236 | `LEVEL` p.281 | `SLOPE` p.343 | `TRIG` p.374 | `TARM` p.366 | `NRDGS` p.304 | `END` p.261 |
+`OFORMAT` p.308 | `QFORMAT` p.322 | `MATH` p.287 | `SMATH` p.344 | `RMATH` p.334 | `ACAL` p.234-235 (locked).  Not implemented on purpose: `CAL`, `SCAL`, `SECURE`, `CALSTR` (calibration writes
+are out of scope), `PRESET`, `TEST`, `ADDRESS`, `LOCK`, `DISP`, `SRQ`/`RQS`/`EMASK` (needs a serial poll the transport does not have), reading memory, `SINT`/`DINT` formats (need `ISCALE?`).
+
+Behaviour:
+- **Reset: `RESET`, not `PRESET`** (p.332-333).  RESET is the power-on state without cycling power: END OFF, OFORMAT ASCII, QFORMAT NORM, NPLC 10, NDIG 7, TRIG AUTO, TARM AUTO, AZERO ON, DCV autorange,
+  INBUF OFF, math off, error / auxiliary error / status registers cleared.  `PRESET NORM` (p.319) is similar but also sets NPLC 1, NDIG 6 and TRIG SYN, which the driver sets itself (confirmed) in `configure()`.
+  The guide says to send the GPIB device clear before RESET from remote (p.333): `reset_to_defaults()` does (`t.clear()`), then RESET, CSB, an `STB?` barrier, drains `ERRSTR?`, sets END ALWAYS (read back) and
+  checks OFORMAT ASCII / numeric queries / INBUF OFF / AZERO ON by read-only queries.  Do not send RESET during an ACAL.
+- **`ID?` answers the text `Keysight 3458A`** (p.228, 276); the brief said HP3458A.  Older firmware may answer `HP3458A`: the identity check matches on `3458A` (both pass; a 34410A or anything else is refused).
+- Reading transfer: TRIG SYN makes the controller's read request the trigger (p.374-375), so `read()` takes a fresh reading each time; TRIG SGL (driver mode: meter in HOLD, `TRIG SGL` before each read) is the alternative;
+  TRIG AUTO / HOLD / EXT are refused by `read()` (AUTO may hand over a stale reading).  `TRIG SGL` cannot be read back (it reverts to HOLD, p.374), so it is the action `trig.sgl`, not a `trig.set` value.
+- Termination: the transport gets read termination LF at connect (module helper `set_read_termination`, which uses the transport's own method or the pyvisa resource; `drivers/transport.py` is NOT edited because 40 procedure sidecars list it); binary readings are read by byte count (helper `read_raw`, same approach) so EOI is not needed;
+  END ALWAYS is still set after the reset.  Query replies are always ASCII (p.309).
+- Formats: ASCII 15 bytes (+CR LF), SREAL IEEE-754 32 bit, DREAL IEEE-754 64 bit, most significant byte first (p.153-154, the guide's own SREAL conversion program is a unit test), overload +-1E+38 (p.309; SREAL rounds slightly
+  below, so the driver treats |x| >= 9.9E+37 as overload and raises `OverloadError`).
+- Timeouts: `reading_timeout()` = max(30 s, 5 s + 2 x integration time at 50 Hz worst case, doubled with autozero on the DC functions, +15 s for AC) and is applied by `configure()`; `acal_timeout()` = 1.25 x the guide's
+  duration + 60 s.  ACAL runs with the bus held (INBUF OFF, p.277): the one write blocks until it ends, so `acal()` raises the transport timeout for it, restores it, never retries the write, checks `INBUF?` first
+  and refuses without `inputs_disconnected=True` (p.235: disconnect every input, 2 hours warm-up, then settle 15 / 30 min).  **ACAL ALL takes 16 minutes (p.235, p.77); the brief's 11 minutes is ACAL OHMS.**
+  (The p.278 INBUF example comment says ">11 MINUTES": the guide contradicts itself, the driver uses the table on p.235.)
+- Writes are set, read back, compared and never retried (`set_confirmed`); only read-only queries retry; the error queue (`ERRSTR?`, 0,"NO ERROR" when empty) is drained after `configure()`, `null()` and `acal()`;
+  the ACAL security code is a secret placeholder (never logged, masked in the golden fixture); GTL goes out at `local()` / `cleanup()`.
+- `state_summary()` (read-only) returns the settings a procedure depends on; it never sends `ERRSTR?`, `ERR?` or `STB?`.  A `start_state` / `start_state_checks` hook was looked for in `origin/dsb-runtime-rules` and does not exist
+  yet, so nothing is wired to it; `state_summary()` is the place to hang it later.
+- Null / offset: `null()` sets MATH NULL, takes a reading that loads the OFFSET register (the input must be in the state to be nulled), optionally writes `SMATH OFFSET,x` (read back with `RMATH OFFSET`); `null_off()`.
+
+UNVERIFIED (not printed in the guide, or only assumed; confirm on the real meter):
+1. The exact reply layout of numeric queries (`NPLC?`, `FUNC?`, `TEMP?` ...): the guide gives the numeric equivalents but not the number format; the parser accepts any number format.  `FUNC?` / `RANGE?` may report the nominal range
+   or the full scale: the driver accepts either (within 0.1 %).
+2. Whether `FUNC <f>,<max_input>` turns autorange off: the guide implies it (p.272); the driver reads `ARANGE?` back and refuses if it is on.
+3. The exponent form `1E-06` (the guide's examples print `1E-3`, `120E-6`): zero-padded exponents are assumed accepted; a rejection shows up as a read-back mismatch or an `ERRSTR?` entry.
+4. `ERRSTR?` numbering in the simulator (100 + the error bit) and the exact message texts; the driver only uses the leading number (0 = no error).
+5. The heuristics for reading and ACAL timeouts (the guide gives integration times and ACAL durations, not total reading times).
+6. `STB?` as a sequencing barrier after RESET (INBUF OFF holds the bus until the command is done, p.277); `STB?` never shows the ready bit (p.358).
+7. `TERM?` numeric reply (1 FRONT, 2 REAR), `INBUF?` 0 / 1, `MATH?` two numbers (NULL = 9), the `OPT?` reply: from the numeric-equivalent tables, never seen on a meter.
+8. The `RMATH OFFSET` register holds the first reading after MATH NULL (p.287, example p.290); the driver assumes the reading it triggers is that one.
+9. GTL / REN behaviour of the 3458A after `go_local()`, the GPIB address (factory 22, p.238; set from the front panel), SDC not altering settings (p.333 uses it before RESET only).
+10. Transfers: one `read_raw` of 4 / 8 bytes per reading with NRDGS 1; multi-reading bursts (NRDGS n) are not used.
+
+Manual misprints met while reading the range tables from the page images (p.273-274): the OHM / OHMF row ">12 to 120" shows a full scale of "120 k-ohm" (it is 120 ohm); the ACI / ACDCI row "0 to .120E-6 -> 100 uA"
+should read 120E-6 (the next row starts at 120E-6).  The driver uses the consistent values.  Both are in the report for Mike; nothing printed was silently changed in any limit table (no limits are in this driver).
+
+DCI, for the later procedure that characterises the DC current of calibrators (100 uA to 1 A):
+- DCI ranges 100 nA, 1 uA, 10 uA, 100 uA, 1 mA, 10 mA, 100 mA, 1 A; `max_input` up to 1.2 selects the 1 A range whose full scale is **1.05 A** (p.273): a calibrator point above 1.05 A reads as overload, and **points above 1 A cannot be
+  measured directly** (the current terminals, `I`, are rated +-1.5 A peak, non-destructive < 1.25 A RMS, p.80; protected by a 1 A 250 V NTD (non-time-delay) fuse, NEVER slow-blow, p.40, 87, 101).  The 5522A / 5560A 2 A to 20 A points need a shunt and
+  a DCV reading, which is a different procedure design.
+- A procedure needs: the Terminals switch (`terminals()` reports FRONT / REAR; it cannot be set remotely) and the hook-up prompt for the I terminals (diagram from Mike); `reset_to_defaults()` once, then `configure('DCI', range, nplc=N, trigger='SYN')`
+  per point (fixed range, never autorange); a zero (open input) `null()` before the points if the lab's method needs it, with the calibrator in standby; settle time after each output change (set by the procedure, not the driver);
+  `read_n()` for averaging; `check_errors()`; calibrator back to standby after each point; ACAL only as a separate, prompted step (inputs disconnected, 2 h warm-up, 15 / 30 min settle) and `temperature()` to decide when it is advisable
+  (+-1 C since the last autocal, p.234); GPIB address 22 unless the lab changed it; no CAL writes.
+- The simulator measures an applied source (`dt.apply('DCI', 1e-3)`) or the bench calibrator; its gain (+2 ppm) and offsets are simulation choices, not facts about a 3458A.
+
+Tests (per file; a single `discover` hangs on test_170_points): `test_driver_3458a`, `test_golden_commands`, `test_reset_startup`, `test_driver_commands_base`, `test_driver_commands_dmm`, `test_cmdreg`.
+Golden transcripts: only `tests/golden/agilent_3458a.json` is new and `tests/golden/fstring_lint_baseline.json` gained the `agilent_3458a` block (all zeros); every other fixture is byte-identical.
+
 ## Testing
 Python with tkinter, `pyvisa`, `pyserial`, `reportlab`. Run any launcher with `--demo` for no hardware.
 Real-window tests (need a display; `xvfb-run -a python -m unittest tests.test_asleft tests.test_specmanager`).

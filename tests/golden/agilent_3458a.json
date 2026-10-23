@@ -1,0 +1,1926 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Agilent3458A.connect",
+   "log": [
+    "3458A|>>|CSB",
+    "3458A|>>|ID?",
+    "3458A|<<|Keysight 3458A",
+    "3458A|>>|OFORMAT?",
+    "3458A|<<|1",
+    "3458A|>>|TRIG?",
+    "3458A|<<|1"
+   ],
+   "method": "Agilent3458A.connect",
+   "result": "returned <Agilent3458A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "set_read_termination",
+     "\n"
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "CSB"
+    ],
+    [
+     "Q",
+     "ID?",
+     "Keysight 3458A"
+    ],
+    [
+     "Q",
+     "OFORMAT?",
+     "1"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.identify",
+   "log": [
+    "3458A|>>|ID?",
+    "3458A|<<|Keysight 3458A"
+   ],
+   "method": "Agilent3458A.identify",
+   "result": "returned 'Keysight 3458A'",
+   "wire": [
+    [
+     "Q",
+     "ID?",
+     "Keysight 3458A"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.local",
+   "log": [],
+   "method": "Agilent3458A.local",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.cleanup",
+   "log": [],
+   "method": "Agilent3458A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.connect[HP3458A firmware text]",
+   "log": [
+    "3458A|>>|CSB",
+    "3458A|>>|ID?",
+    "3458A|<<|HP3458A",
+    "3458A|>>|OFORMAT?",
+    "3458A|<<|1",
+    "3458A|>>|TRIG?",
+    "3458A|<<|1"
+   ],
+   "method": "Agilent3458A.connect",
+   "result": "returned <Agilent3458A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "set_read_termination",
+     "\n"
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "CSB"
+    ],
+    [
+     "Q",
+     "ID?",
+     "HP3458A"
+    ],
+    [
+     "Q",
+     "OFORMAT?",
+     "1"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.connect[wrong model]",
+   "log": [
+    "3458A|>>|CSB",
+    "3458A|>>|ID?",
+    "3458A|<<|Keysight 34410A"
+   ],
+   "method": "Agilent3458A.connect",
+   "result": "raised InstrumentError: Expected a 3458A but the instrument identifies as: 'Keysight 34410A'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "set_read_termination",
+     "\n"
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "CSB"
+    ],
+    [
+     "Q",
+     "ID?",
+     "Keysight 34410A"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.connect[no answer]",
+   "log": [
+    "3458A|>>|CSB",
+    "3458A|>>|ID?"
+   ],
+   "method": "Agilent3458A.connect",
+   "result": "raised InstrumentError: The 3458A did not answer ID? (timeout). Check the GPIB address (factory 22) and the interface.",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "set_read_termination",
+     "\n"
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "CSB"
+    ],
+    [
+     "Q!",
+     "ID?",
+     "timeout"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "'DCI', 0.001, nplc=10",
+   "case": "Agilent3458A.configure[DCI 1 mA]",
+   "log": [
+    "3458A|>>|FUNC DCI,0.001",
+    "3458A|>>|FUNC?",
+    "3458A|<<|6,+1.00000000E-03",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|0",
+    "3458A|>>|NPLC 10",
+    "3458A|>>|NPLC?",
+    "3458A|<<|+1.00000000E+01",
+    "3458A|>>|TRIG SYN",
+    "3458A|>>|TRIG?",
+    "3458A|<<|5",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FUNC DCI,0.001"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "6,+1.00000000E-03"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "0"
+    ],
+    [
+     "W",
+     "NPLC 10"
+    ],
+    [
+     "Q",
+     "NPLC?",
+     "+1.00000000E+01"
+    ],
+    [
+     "W",
+     "TRIG SYN"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "5"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "'DCI', 0.0001, aperture=0.001, ndig=8",
+   "case": "Agilent3458A.configure[DCI 100 uA aperture]",
+   "log": [
+    "3458A|>>|FUNC DCI,0.0001",
+    "3458A|>>|FUNC?",
+    "3458A|<<|6,+1.00000000E-04",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|0",
+    "3458A|>>|APER 0.001",
+    "3458A|>>|APER?",
+    "3458A|<<|+1.00000000E-03",
+    "3458A|>>|NDIG 8",
+    "3458A|>>|NDIG?",
+    "3458A|<<|8",
+    "3458A|>>|TRIG SYN",
+    "3458A|>>|TRIG?",
+    "3458A|<<|5",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FUNC DCI,0.0001"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "6,+1.00000000E-04"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "0"
+    ],
+    [
+     "W",
+     "APER 0.001"
+    ],
+    [
+     "Q",
+     "APER?",
+     "+1.00000000E-03"
+    ],
+    [
+     "W",
+     "NDIG 8"
+    ],
+    [
+     "Q",
+     "NDIG?",
+     "8"
+    ],
+    [
+     "W",
+     "TRIG SYN"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "5"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "'DCI', 1.0, nplc=100",
+   "case": "Agilent3458A.configure[DCI 1 A]",
+   "log": [
+    "3458A|>>|FUNC DCI,1",
+    "3458A|>>|FUNC?",
+    "3458A|<<|6,+1.00000000E+00",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|0",
+    "3458A|>>|NPLC 100",
+    "3458A|>>|NPLC?",
+    "3458A|<<|+1.00000000E+02",
+    "3458A|>>|TRIG SYN",
+    "3458A|>>|TRIG?",
+    "3458A|<<|5",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FUNC DCI,1"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "6,+1.00000000E+00"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "0"
+    ],
+    [
+     "W",
+     "NPLC 100"
+    ],
+    [
+     "Q",
+     "NPLC?",
+     "+1.00000000E+02"
+    ],
+    [
+     "W",
+     "TRIG SYN"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "5"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "'DCV', 10.0, nplc=1, autozero=False",
+   "case": "Agilent3458A.configure[DCV 10 V autozero off]",
+   "log": [
+    "3458A|>>|FUNC DCV,10",
+    "3458A|>>|FUNC?",
+    "3458A|<<|1,+1.00000000E+01",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|0",
+    "3458A|>>|NPLC 1",
+    "3458A|>>|NPLC?",
+    "3458A|<<|+1.00000000E+00",
+    "3458A|>>|AZERO OFF",
+    "3458A|>>|AZERO?",
+    "3458A|<<|0",
+    "3458A|>>|TRIG SYN",
+    "3458A|>>|TRIG?",
+    "3458A|<<|5",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FUNC DCV,10"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "1,+1.00000000E+01"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "0"
+    ],
+    [
+     "W",
+     "NPLC 1"
+    ],
+    [
+     "Q",
+     "NPLC?",
+     "+1.00000000E+00"
+    ],
+    [
+     "W",
+     "AZERO OFF"
+    ],
+    [
+     "Q",
+     "AZERO?",
+     "0"
+    ],
+    [
+     "W",
+     "TRIG SYN"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "5"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "'ACV', 1.0, nplc=10, trigger='SGL'",
+   "case": "Agilent3458A.configure[ACV 1 V single trigger]",
+   "log": [
+    "3458A|>>|FUNC ACV,1",
+    "3458A|>>|FUNC?",
+    "3458A|<<|2,+1.00000000E+00",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|0",
+    "3458A|>>|NPLC 10",
+    "3458A|>>|NPLC?",
+    "3458A|<<|+1.00000000E+01",
+    "3458A|>>|TRIG HOLD",
+    "3458A|>>|TRIG?",
+    "3458A|<<|4",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FUNC ACV,1"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "2,+1.00000000E+00"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "0"
+    ],
+    [
+     "W",
+     "NPLC 10"
+    ],
+    [
+     "Q",
+     "NPLC?",
+     "+1.00000000E+01"
+    ],
+    [
+     "W",
+     "TRIG HOLD"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "4"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     35.4
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "'OHM', 1000.0, nplc=10, trigger='SYN'",
+   "case": "Agilent3458A.configure[OHM 1 kohm]",
+   "log": [
+    "3458A|>>|FUNC OHM,1000",
+    "3458A|>>|FUNC?",
+    "3458A|<<|4,+1.00000000E+03",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|0",
+    "3458A|>>|NPLC 10",
+    "3458A|>>|NPLC?",
+    "3458A|<<|+1.00000000E+01",
+    "3458A|>>|TRIG SYN",
+    "3458A|>>|TRIG?",
+    "3458A|<<|5",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "FUNC OHM,1000"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "4,+1.00000000E+03"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "0"
+    ],
+    [
+     "W",
+     "NPLC 10"
+    ],
+    [
+     "Q",
+     "NPLC?",
+     "+1.00000000E+01"
+    ],
+    [
+     "W",
+     "TRIG SYN"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "5"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "'FREQ', 1.0",
+   "case": "Agilent3458A.configure[bad function]",
+   "log": [],
+   "method": "Agilent3458A.configure",
+   "result": "raised InstrumentError: 3458A: function 'FREQ' is not supported (use one of DCV, ACV, ACDCV, OHM, OHMF, DCI, ACI, ACDCI)",
+   "wire": []
+  },
+  {
+   "call": "'DCV', 0.0",
+   "case": "Agilent3458A.configure[range zero]",
+   "log": [],
+   "method": "Agilent3458A.configure",
+   "result": "raised InstrumentError: 3458A: max_input must be a positive number (autorange is never used), got 0.0",
+   "wire": []
+  },
+  {
+   "call": "'DCI', 2.0",
+   "case": "Agilent3458A.configure[range too high]",
+   "log": [],
+   "method": "Agilent3458A.configure",
+   "result": "raised InstrumentError: 3458A: 2 is above the highest DCI range (max_input up to 1.2)",
+   "wire": []
+  },
+  {
+   "call": "'DCV', 10.0, nplc=2.5",
+   "case": "Agilent3458A.configure[nplc off grid]",
+   "log": [],
+   "method": "Agilent3458A.configure",
+   "result": "raised InstrumentError: 3458A: 2.5 PLC is not on the meter's grid (0 to 1, 1 PLC steps to 10, 10 PLC steps to 1000)",
+   "wire": []
+  },
+  {
+   "call": "'DCV', 10.0, trigger='LEVEL'",
+   "case": "Agilent3458A.configure[bad trigger]",
+   "log": [],
+   "method": "Agilent3458A.configure",
+   "result": "raised InstrumentError: 3458A: trigger 'LEVEL' is not one of AUTO, EXT, SGL, HOLD, SYN",
+   "wire": []
+  },
+  {
+   "call": "'DCV', 10.0, ndig=9",
+   "case": "Agilent3458A.configure[ndig out of range]",
+   "log": [
+    "3458A|>>|FUNC DCV,10",
+    "3458A|>>|FUNC?",
+    "3458A|<<|1,+1.00000000E+01",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|0",
+    "3458A|>>|NPLC 10",
+    "3458A|>>|NPLC?",
+    "3458A|<<|+1.00000000E+01"
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "raised InstrumentError: 3458A: NDIG 9 is outside 3 to 8",
+   "wire": [
+    [
+     "W",
+     "FUNC DCV,10"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "1,+1.00000000E+01"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "0"
+    ],
+    [
+     "W",
+     "NPLC 10"
+    ],
+    [
+     "Q",
+     "NPLC?",
+     "+1.00000000E+01"
+    ]
+   ]
+  },
+  {
+   "call": "'DCI', 0.001",
+   "case": "Agilent3458A.configure[range not accepted]",
+   "log": [
+    "3458A|>>|FUNC DCI,0.001",
+    "3458A|>>|FUNC?",
+    "3458A|<<|6,+1.00000000E+00"
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "raised InstrumentError: 3458A: func.set max_input=0.001 was not accepted: func.query answered '6,+1.00000000E+00'",
+   "wire": [
+    [
+     "W",
+     "FUNC DCI,0.001"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "6,+1.00000000E+00"
+    ]
+   ]
+  },
+  {
+   "call": "'DCI', 0.001",
+   "case": "Agilent3458A.configure[autorange still on]",
+   "log": [
+    "3458A|>>|FUNC DCI,0.001",
+    "3458A|>>|FUNC?",
+    "3458A|<<|6,+1.00000000E-03",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|1"
+   ],
+   "method": "Agilent3458A.configure",
+   "result": "raised InstrumentError: 3458A: autorange is still on after FUNC DCI,0.001: a fixed range was not accepted",
+   "wire": [
+    [
+     "W",
+     "FUNC DCI,0.001"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "6,+1.00000000E-03"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.read[ASCII 1 mA]",
+   "log": [
+    "3458A|<<|+1.00000400E-03"
+   ],
+   "method": "Agilent3458A.read",
+   "result": "returned 0.001000004",
+   "wire": [
+    [
+     "R",
+     "+1.00000400E-03"
+    ]
+   ]
+  },
+  {
+   "call": "3",
+   "case": "Agilent3458A.read_n[3]",
+   "log": [
+    "3458A|<<|+1.00000400E-03",
+    "3458A|<<|+1.00000400E-03",
+    "3458A|<<|+1.00000400E-03"
+   ],
+   "method": "Agilent3458A.read_n",
+   "result": "returned [0.001000004, 0.001000004, 0.001000004]",
+   "wire": [
+    [
+     "R",
+     "+1.00000400E-03"
+    ],
+    [
+     "R",
+     "+1.00000400E-03"
+    ],
+    [
+     "R",
+     "+1.00000400E-03"
+    ]
+   ]
+  },
+  {
+   "call": "0",
+   "case": "Agilent3458A.read_n[0]",
+   "log": [],
+   "method": "Agilent3458A.read_n",
+   "result": "raised InstrumentError: 3458A: count must be at least 1",
+   "wire": []
+  },
+  {
+   "call": "'DREAL'",
+   "case": "Agilent3458A.set_output_format[DREAL]",
+   "log": [
+    "3458A|>>|OFORMAT DREAL",
+    "3458A|>>|OFORMAT?",
+    "3458A|<<|5"
+   ],
+   "method": "Agilent3458A.set_output_format",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OFORMAT DREAL"
+    ],
+    [
+     "Q",
+     "OFORMAT?",
+     "5"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.read[DREAL 1 mA]",
+   "log": [
+    "3458A|<<|<DREAL 8 bytes 3f5062521e74a406>"
+   ],
+   "method": "Agilent3458A.read",
+   "result": "returned 0.001000004",
+   "wire": [
+    [
+     "RB",
+     8,
+     "3f5062521e74a406"
+    ]
+   ]
+  },
+  {
+   "call": "'SREAL'",
+   "case": "Agilent3458A.set_output_format[SREAL]",
+   "log": [
+    "3458A|>>|OFORMAT SREAL",
+    "3458A|>>|OFORMAT?",
+    "3458A|<<|4"
+   ],
+   "method": "Agilent3458A.set_output_format",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OFORMAT SREAL"
+    ],
+    [
+     "Q",
+     "OFORMAT?",
+     "4"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.read[SREAL 1 mA]",
+   "log": [
+    "3458A|<<|<SREAL 4 bytes 3a831291>"
+   ],
+   "method": "Agilent3458A.read",
+   "result": "returned 0.0010000040056183934",
+   "wire": [
+    [
+     "RB",
+     4,
+     "3a831291"
+    ]
+   ]
+  },
+  {
+   "call": "'SINT'",
+   "case": "Agilent3458A.set_output_format[SINT]",
+   "log": [],
+   "method": "Agilent3458A.set_output_format",
+   "result": "raised InstrumentError: 3458A: output format 'SINT' is not supported (ASCII, SREAL, DREAL)",
+   "wire": []
+  },
+  {
+   "call": "'ASCII'",
+   "case": "Agilent3458A.set_output_format[ASCII]",
+   "log": [
+    "3458A|>>|OFORMAT ASCII",
+    "3458A|>>|OFORMAT?",
+    "3458A|<<|1"
+   ],
+   "method": "Agilent3458A.set_output_format",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OFORMAT ASCII"
+    ],
+    [
+     "Q",
+     "OFORMAT?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.read[overload]",
+   "log": [
+    "3458A|<<|+1.00000000E+38"
+   ],
+   "method": "Agilent3458A.read",
+   "result": "raised OverloadError: The 3458A reported an overload (1e+38): the signal does not fit the range, or nothing is connected.",
+   "wire": [
+    [
+     "R",
+     "+1.00000000E+38"
+    ]
+   ]
+  },
+  {
+   "call": "'SGL'",
+   "case": "Agilent3458A.set_trigger[SGL]",
+   "log": [
+    "3458A|>>|TRIG HOLD",
+    "3458A|>>|TRIG?",
+    "3458A|<<|4"
+   ],
+   "method": "Agilent3458A.set_trigger",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "TRIG HOLD"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "4"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.read[single trigger]",
+   "log": [
+    "3458A|>>|TRIG SGL",
+    "3458A|<<|+1.00000400E-03"
+   ],
+   "method": "Agilent3458A.read",
+   "result": "returned 0.001000004",
+   "wire": [
+    [
+     "W",
+     "TRIG SGL"
+    ],
+    [
+     "R",
+     "+1.00000400E-03"
+    ]
+   ]
+  },
+  {
+   "call": "'HOLD'",
+   "case": "Agilent3458A.set_trigger[HOLD]",
+   "log": [
+    "3458A|>>|TRIG HOLD",
+    "3458A|>>|TRIG?",
+    "3458A|<<|4"
+   ],
+   "method": "Agilent3458A.set_trigger",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "TRIG HOLD"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "4"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.read[trigger HOLD refused]",
+   "log": [],
+   "method": "Agilent3458A.read",
+   "result": "raised InstrumentError: 3458A: read() needs TRIG SYN or SGL, the trigger event is HOLD; call configure() or set_trigger()",
+   "wire": []
+  },
+  {
+   "call": "'BOGUS'",
+   "case": "Agilent3458A.set_trigger[bad]",
+   "log": [],
+   "method": "Agilent3458A.set_trigger",
+   "result": "raised InstrumentError: 3458A: trigger 'BOGUS' is not one of AUTO, EXT, SGL, HOLD, SYN",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.read[no reading arrives]",
+   "log": [],
+   "method": "Agilent3458A.read",
+   "result": "raised InstrumentError: 3458A: no reading arrived (trigger SYN, ASCII): simulated read timed out (no reading)",
+   "wire": [
+    [
+     "R!",
+     "simulated read timed out (no reading)"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.null",
+   "log": [
+    "3458A|>>|MATH NULL",
+    "3458A|>>|MATH?",
+    "3458A|<<|9,0",
+    "3458A|<<|+0.00000000E+00",
+    "3458A|>>|RMATH OFFSET",
+    "3458A|<<|+1.00000400E-03",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.null",
+   "result": "returned 0.001000004",
+   "wire": [
+    [
+     "W",
+     "MATH NULL"
+    ],
+    [
+     "Q",
+     "MATH?",
+     "9,0"
+    ],
+    [
+     "R",
+     "+0.00000000E+00"
+    ],
+    [
+     "Q",
+     "RMATH OFFSET",
+     "+1.00000400E-03"
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.offset",
+   "log": [
+    "3458A|>>|RMATH OFFSET",
+    "3458A|<<|+1.00000400E-03"
+   ],
+   "method": "Agilent3458A.offset",
+   "result": "returned 0.001000004",
+   "wire": [
+    [
+     "Q",
+     "RMATH OFFSET",
+     "+1.00000400E-03"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.null_off",
+   "log": [
+    "3458A|>>|MATH OFF",
+    "3458A|>>|MATH?",
+    "3458A|<<|0,0"
+   ],
+   "method": "Agilent3458A.null_off",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "MATH OFF"
+    ],
+    [
+     "Q",
+     "MATH?",
+     "0,0"
+    ]
+   ]
+  },
+  {
+   "call": "2e-06",
+   "case": "Agilent3458A.null[explicit offset]",
+   "log": [
+    "3458A|>>|MATH NULL",
+    "3458A|>>|MATH?",
+    "3458A|<<|9,0",
+    "3458A|<<|+0.00000000E+00",
+    "3458A|>>|SMATH OFFSET,2E-06",
+    "3458A|>>|RMATH OFFSET",
+    "3458A|<<|+2.00000000E-06",
+    "3458A|>>|RMATH OFFSET",
+    "3458A|<<|+2.00000000E-06",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.null",
+   "result": "returned 2e-06",
+   "wire": [
+    [
+     "W",
+     "MATH NULL"
+    ],
+    [
+     "Q",
+     "MATH?",
+     "9,0"
+    ],
+    [
+     "R",
+     "+0.00000000E+00"
+    ],
+    [
+     "W",
+     "SMATH OFFSET,2E-06"
+    ],
+    [
+     "Q",
+     "RMATH OFFSET",
+     "+2.00000000E-06"
+    ],
+    [
+     "Q",
+     "RMATH OFFSET",
+     "+2.00000000E-06"
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.temperature",
+   "log": [
+    "3458A|>>|TEMP?",
+    "3458A|<<|38.90"
+   ],
+   "method": "Agilent3458A.temperature",
+   "result": "returned 38.9",
+   "wire": [
+    [
+     "Q",
+     "TEMP?",
+     "38.90"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.revision",
+   "log": [
+    "3458A|>>|REV?",
+    "3458A|<<|9,2"
+   ],
+   "method": "Agilent3458A.revision",
+   "result": "returned ('9', '2')",
+   "wire": [
+    [
+     "Q",
+     "REV?",
+     "9,2"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.terminals[FRONT]",
+   "log": [
+    "3458A|>>|TERM?",
+    "3458A|<<|1"
+   ],
+   "method": "Agilent3458A.terminals",
+   "result": "returned 'FRONT'",
+   "wire": [
+    [
+     "Q",
+     "TERM?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.terminals[REAR]",
+   "log": [
+    "3458A|>>|TERM?",
+    "3458A|<<|2"
+   ],
+   "method": "Agilent3458A.terminals",
+   "result": "returned 'REAR'",
+   "wire": [
+    [
+     "Q",
+     "TERM?",
+     "2"
+    ]
+   ]
+  },
+  {
+   "call": "'ctx'",
+   "case": "Agilent3458A.check_errors[ok]",
+   "log": [
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "'configuring'",
+   "case": "Agilent3458A.check_errors[two errors]",
+   "log": [
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|103,\"SYNTAX ERROR\"",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|106,\"PARAMETER OUT OF RANGE\"",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.check_errors",
+   "result": "raised InstrumentError: Keysight 3458A reported an error after configuring: 103,\"SYNTAX ERROR\" | 106,\"PARAMETER OUT OF RANGE\"",
+   "wire": [
+    [
+     "Q",
+     "ERRSTR?",
+     "103,\"SYNTAX ERROR\""
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "106,\"PARAMETER OUT OF RANGE\""
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.state_summary",
+   "log": [
+    "3458A|>>|ID?",
+    "3458A|<<|Keysight 3458A",
+    "3458A|>>|REV?",
+    "3458A|<<|9,2",
+    "3458A|>>|FUNC?",
+    "3458A|<<|6,+1.00000000E-03",
+    "3458A|>>|ARANGE?",
+    "3458A|<<|0",
+    "3458A|>>|NPLC?",
+    "3458A|<<|+1.00000000E+01",
+    "3458A|>>|APER?",
+    "3458A|<<|+1.66666667E-01",
+    "3458A|>>|NDIG?",
+    "3458A|<<|8",
+    "3458A|>>|TRIG?",
+    "3458A|<<|5",
+    "3458A|>>|TARM?",
+    "3458A|<<|1",
+    "3458A|>>|NRDGS?",
+    "3458A|<<|1,1",
+    "3458A|>>|END?",
+    "3458A|<<|2",
+    "3458A|>>|OFORMAT?",
+    "3458A|<<|1",
+    "3458A|>>|QFORMAT?",
+    "3458A|<<|1",
+    "3458A|>>|AZERO?",
+    "3458A|<<|0",
+    "3458A|>>|FIXEDZ?",
+    "3458A|<<|0",
+    "3458A|>>|MATH?",
+    "3458A|<<|0,0",
+    "3458A|>>|LFREQ?",
+    "3458A|<<|+5.99998800E+01",
+    "3458A|>>|DELAY?",
+    "3458A|<<|-1.00000000E+00",
+    "3458A|>>|INBUF?",
+    "3458A|<<|0",
+    "3458A|>>|TERM?",
+    "3458A|<<|1",
+    "3458A|>>|TEMP?",
+    "3458A|<<|38.90",
+    "3458A|>>|CALNUM?",
+    "3458A|<<|12"
+   ],
+   "method": "Agilent3458A.state_summary",
+   "result": "returned {'aperture': '+1.66666667E-01', 'autorange': '0', 'autozero': '0', 'calibration number': '12', 'delay': '-1.00000000E+00', 'end': '2', 'fixed input z': '0', 'function,range': '6,+1.00000000E-03', 'id': 'Keysight 3458A', 'input buffer': '0', 'math': '0,0', 'ndig': '8', 'nplc': '+1.00000000E+01', 'output format': '1', 'query format': '1', 'readings': '1,1', 'reference frequency': '+5.99998800E+01', 'revision': '9,2', 'temperature': '38.90', 'terminals': '1', 'trigger arm': '1', 'trigger': '5'}",
+   "wire": [
+    [
+     "Q",
+     "ID?",
+     "Keysight 3458A"
+    ],
+    [
+     "Q",
+     "REV?",
+     "9,2"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "6,+1.00000000E-03"
+    ],
+    [
+     "Q",
+     "ARANGE?",
+     "0"
+    ],
+    [
+     "Q",
+     "NPLC?",
+     "+1.00000000E+01"
+    ],
+    [
+     "Q",
+     "APER?",
+     "+1.66666667E-01"
+    ],
+    [
+     "Q",
+     "NDIG?",
+     "8"
+    ],
+    [
+     "Q",
+     "TRIG?",
+     "5"
+    ],
+    [
+     "Q",
+     "TARM?",
+     "1"
+    ],
+    [
+     "Q",
+     "NRDGS?",
+     "1,1"
+    ],
+    [
+     "Q",
+     "END?",
+     "2"
+    ],
+    [
+     "Q",
+     "OFORMAT?",
+     "1"
+    ],
+    [
+     "Q",
+     "QFORMAT?",
+     "1"
+    ],
+    [
+     "Q",
+     "AZERO?",
+     "0"
+    ],
+    [
+     "Q",
+     "FIXEDZ?",
+     "0"
+    ],
+    [
+     "Q",
+     "MATH?",
+     "0,0"
+    ],
+    [
+     "Q",
+     "LFREQ?",
+     "+5.99998800E+01"
+    ],
+    [
+     "Q",
+     "DELAY?",
+     "-1.00000000E+00"
+    ],
+    [
+     "Q",
+     "INBUF?",
+     "0"
+    ],
+    [
+     "Q",
+     "TERM?",
+     "1"
+    ],
+    [
+     "Q",
+     "TEMP?",
+     "38.90"
+    ],
+    [
+     "Q",
+     "CALNUM?",
+     "12"
+    ]
+   ]
+  },
+  {
+   "call": "'azero.set', mode='ONCE'",
+   "case": "Agilent3458A.set_confirmed[AZERO ONCE]",
+   "log": [
+    "3458A|>>|AZERO ONCE",
+    "3458A|>>|AZERO?",
+    "3458A|<<|2"
+   ],
+   "method": "Agilent3458A.set_confirmed",
+   "result": "returned '2'",
+   "wire": [
+    [
+     "W",
+     "AZERO ONCE"
+    ],
+    [
+     "Q",
+     "AZERO?",
+     "2"
+    ]
+   ]
+  },
+  {
+   "call": "'nope.set'",
+   "case": "Agilent3458A.set_confirmed[unknown key]",
+   "log": [],
+   "method": "Agilent3458A.set_confirmed",
+   "result": "raised InstrumentError: 3458A: 'nope.set' has no read-back comparison",
+   "wire": []
+  },
+  {
+   "call": "'end.set', mode='ALWAYS'",
+   "case": "Agilent3458A.set_confirmed[not accepted]",
+   "log": [
+    "3458A|>>|END ALWAYS",
+    "3458A|>>|END?",
+    "3458A|<<|0"
+   ],
+   "method": "Agilent3458A.set_confirmed",
+   "result": "raised InstrumentError: 3458A: end.set mode='ALWAYS' was not accepted: end.query answered '0'",
+   "wire": [
+    [
+     "W",
+     "END ALWAYS"
+    ],
+    [
+     "Q",
+     "END?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "'DCV', inputs_disconnected=True",
+   "case": "Agilent3458A.acal[DCV]",
+   "log": [
+    "3458A|>>|INBUF?",
+    "3458A|<<|0",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\"",
+    "3458A|>>|ACAL DCV",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\"",
+    "3458A|>>|TEMP?",
+    "3458A|<<|38.90"
+   ],
+   "method": "Agilent3458A.acal",
+   "result": "returned {'run_seconds': 165, 'settle_seconds': 900, 'temperature_c': 38.9, 'type': 'DCV', 'warmup_seconds': 7200}",
+   "wire": [
+    [
+     "Q",
+     "INBUF?",
+     "0"
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     266.25
+    ],
+    [
+     "W",
+     "ACAL DCV"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ],
+    [
+     "Q",
+     "TEMP?",
+     "38.90"
+    ]
+   ]
+  },
+  {
+   "call": "'ALL'",
+   "case": "Agilent3458A.acal[not confirmed]",
+   "log": [],
+   "method": "Agilent3458A.acal",
+   "result": "raised SafetyError: 3458A: disconnect every input signal and confirm (inputs_disconnected=True) before an autocal (UG p. 235)",
+   "wire": []
+  },
+  {
+   "call": "'AC2', inputs_disconnected=True",
+   "case": "Agilent3458A.acal[bad type]",
+   "log": [],
+   "method": "Agilent3458A.acal",
+   "result": "raised InstrumentError: 3458A: ACAL type 'AC2' is not one of ALL, DCV, AC, OHMS",
+   "wire": []
+  },
+  {
+   "call": "'OHMS', code='<secret>', inputs_disconnected=True",
+   "case": "Agilent3458A.acal[secured, correct code]",
+   "log": [
+    "3458A|>>|INBUF?",
+    "3458A|<<|0",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\"",
+    "3458A|>>|ACAL OHMS,********",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\"",
+    "3458A|>>|TEMP?",
+    "3458A|<<|38.90"
+   ],
+   "method": "Agilent3458A.acal",
+   "result": "returned {'run_seconds': 660, 'settle_seconds': 1800, 'temperature_c': 38.9, 'type': 'OHMS', 'warmup_seconds': 7200}",
+   "wire": [
+    [
+     "Q",
+     "INBUF?",
+     "0"
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     885.0
+    ],
+    [
+     "W",
+     "ACAL OHMS,<code masked, 18 chars>"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ],
+    [
+     "Q",
+     "TEMP?",
+     "38.90"
+    ]
+   ]
+  },
+  {
+   "call": "'ALL', code='WRONG_CODE_1', inputs_disconnected=True",
+   "case": "Agilent3458A.acal[secured, wrong code]",
+   "log": [
+    "3458A|>>|INBUF?",
+    "3458A|<<|0",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\"",
+    "3458A|>>|ACAL ALL,********",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|101,\"CALIBRATION ERROR\"",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\""
+   ],
+   "method": "Agilent3458A.acal",
+   "result": "raised InstrumentError: Keysight 3458A reported an error after ACAL ALL: 101,\"CALIBRATION ERROR\"",
+   "wire": [
+    [
+     "Q",
+     "INBUF?",
+     "0"
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     1260.0
+    ],
+    [
+     "W",
+     "ACAL ALL,<code masked, 12 chars>"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "101,\"CALIBRATION ERROR\""
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ]
+   ]
+  },
+  {
+   "call": "'ALL', inputs_disconnected=True",
+   "case": "Agilent3458A.acal[write times out: not repeated]",
+   "log": [
+    "3458A|>>|INBUF?",
+    "3458A|<<|0",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\"",
+    "3458A|>>|ACAL ALL"
+   ],
+   "method": "Agilent3458A.acal",
+   "result": "raised InstrumentError: 3458A: ACAL ALL did not complete within 1260 s (simulated timeout on 'ACAL ALL'). Its state is unknown; it was NOT repeated.",
+   "wire": [
+    [
+     "Q",
+     "INBUF?",
+     "0"
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     1260.0
+    ],
+    [
+     "W!",
+     "ACAL ALL",
+     "simulated timeout on 'ACAL ALL'"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ]
+   ]
+  },
+  {
+   "call": "'DCV', inputs_disconnected=True",
+   "case": "Agilent3458A.acal[INBUF ON]",
+   "log": [
+    "3458A|>>|INBUF?",
+    "3458A|<<|1"
+   ],
+   "method": "Agilent3458A.acal",
+   "result": "raised InstrumentError: 3458A: INBUF is ON: the bus is not held during the autocal, so it cannot be waited for. Run the reset first.",
+   "wire": [
+    [
+     "Q",
+     "INBUF?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.reset_to_defaults",
+   "log": [
+    "3458A|>>|RESET",
+    "3458A|>>|CSB",
+    "3458A|>>|STB?",
+    "3458A|<<|0",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\"",
+    "3458A|>>|END ALWAYS",
+    "3458A|>>|END?",
+    "3458A|<<|2",
+    "3458A|>>|OFORMAT?",
+    "3458A|<<|1",
+    "3458A|>>|QFORMAT?",
+    "3458A|<<|1",
+    "3458A|>>|INBUF?",
+    "3458A|<<|0",
+    "3458A|>>|AZERO?",
+    "3458A|<<|1"
+   ],
+   "method": "Agilent3458A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='3458A', ok=True, exempt=False, steps=[ResetStep(name='reset (RESET)', ok=True, detail=''), ResetStep(name='clear status (CSB)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='EOI after every reading (END ALWAYS)', ok=True, detail='END ALWAYS'), ResetStep(name='known state (OFORMAT ASCII, numeric queries, bus held, autozero on)', ok=True, detail='ASCII, numeric queries, INBUF OFF, autozero on')], warnings=[])",
+   "wire": [
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "RESET"
+    ],
+    [
+     "W",
+     "CSB"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "STB?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ],
+    [
+     "W",
+     "END ALWAYS"
+    ],
+    [
+     "Q",
+     "END?",
+     "2"
+    ],
+    [
+     "Q",
+     "OFORMAT?",
+     "1"
+    ],
+    [
+     "Q",
+     "QFORMAT?",
+     "1"
+    ],
+    [
+     "Q",
+     "INBUF?",
+     "0"
+    ],
+    [
+     "Q",
+     "AZERO?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Agilent3458A.reset_to_defaults[known state not reached]",
+   "log": [
+    "3458A|>>|RESET",
+    "3458A|>>|CSB",
+    "3458A|>>|STB?",
+    "3458A|<<|0",
+    "3458A|>>|ERRSTR?",
+    "3458A|<<|0,\"NO ERROR\"",
+    "3458A|>>|END ALWAYS",
+    "3458A|>>|END?",
+    "3458A|<<|2",
+    "3458A|>>|OFORMAT?",
+    "3458A|<<|5",
+    "3458A|>>|QFORMAT?",
+    "3458A|<<|1",
+    "3458A|>>|INBUF?",
+    "3458A|<<|1",
+    "3458A|>>|AZERO?",
+    "3458A|<<|1",
+    "3458A|!!|RESET step failed: known state (OFORMAT ASCII, numeric queries, bus held, autozero on): output format is not ASCII; the input buffer is ON (the bus is not held while a command runs)"
+   ],
+   "method": "Agilent3458A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='3458A', ok=False, exempt=False, steps=[ResetStep(name='reset (RESET)', ok=True, detail=''), ResetStep(name='clear status (CSB)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='EOI after every reading (END ALWAYS)', ok=True, detail='END ALWAYS'), ResetStep(name='known state (OFORMAT ASCII, numeric queries, bus held, autozero on)', ok=False, detail='InstrumentError: output format is not ASCII; the input buffer is ON (the bus is not held while a command runs)')], warnings=[])",
+   "wire": [
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "RESET"
+    ],
+    [
+     "W",
+     "CSB"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "STB?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "ERRSTR?",
+     "0,\"NO ERROR\""
+    ],
+    [
+     "W",
+     "END ALWAYS"
+    ],
+    [
+     "Q",
+     "END?",
+     "2"
+    ],
+    [
+     "Q",
+     "OFORMAT?",
+     "5"
+    ],
+    [
+     "Q",
+     "QFORMAT?",
+     "1"
+    ],
+    [
+     "Q",
+     "INBUF?",
+     "1"
+    ],
+    [
+     "Q",
+     "AZERO?",
+     "1"
+    ]
+   ]
+  }
+ ],
+ "name": "agilent_3458a",
+ "schema": 1
+}
