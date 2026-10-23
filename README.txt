@@ -15,6 +15,7 @@ Folder layout (same as before, plus one new file):
   ui_theme.py                        (shared look and feel; must sit next to the Manager)
   datamode.py                        (NEW - As Found / As Left toggle; must sit next to the Manager)
   labregistry.py, labregistry_ui.py  (NEW - asset history; lab_registry.sqlite3 is created beside them on first use)
+  instrument_scan.py, instrument_scan_ui.py  (NEW - 'Find instruments...' button in the Manager: which VISA resource / GPIB channel each instrument is on; read-only identity queries only)
   Procedures\
       Agilent_34401A.py              v54
       Fluke_8846A_Verification.py    v58
