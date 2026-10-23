@@ -13,6 +13,8 @@ One shared helper used by every engine and procedure at the start of EVERY run (
     own known-state / outputs-off steps. A reset write is never retried. The first failed step stops everything: every instrument is
     put to standby / off (cleanup) and ResetFailed is raised, so the run ends BEFORE any test point.
   * Success is recorded in the command log as 'Instruments reset to default settings at start: <names>'.
+  * Opt-in exception (Fluke 8808A, at the owner's request): an App that sets AppResetMixin.RESET_ONCE_PER_SESSION = True resets on the FIRST Run of a
+    session only (a session = one connection of that window); later Runs log 'reset skipped: already reset this session' and call reset_skip_run().
 
 Demo mode never calls this (there are no instruments) and writes nothing that could look like evidence.
 """
@@ -155,25 +157,68 @@ class AppResetMixin:
         standards, uuts = self.reset_roles()
         return reset_all(standards, uuts, confirm=None, log=self.reset_log())
 
+    # Opt-in, per App (default False = the Stage 7 rule: reset on EVERY run). True = the reset runs on the first Run of a session only (see SKIP_LINE).
+    RESET_ONCE_PER_SESSION = False
+    _reset_done_for = None          # the connection (self.io) that was reset successfully; a new connection is never equal to it
+
+    def reset_done_this_session(self) -> bool:
+        return bool(self.RESET_ONCE_PER_SESSION) and self.io is not None and self._reset_done_for is self.io
+
+    def reset_forget(self, *_args):
+        """The next Run resets again (a settings change, a failed skip check). Also usable as a Tk variable trace callback."""
+        self._reset_done_for = None
+
+    def reset_skip_run(self):
+        """Worker-thread part of a Run whose reset is skipped: the safe parts (standby / off, connection, status). Apps that set RESET_ONCE_PER_SESSION override it."""
+        raise NotImplementedError('an App with RESET_ONCE_PER_SESSION must define reset_skip_run()')
+
     def reset_then(self, proceed):
         import threading
         if getattr(self, 'fast_demo', self.demo):           # fast demo: no instruments, nothing to reset, nothing logged as evidence (a virtual bench resets its simulated instruments)
             proceed(); return
+        if self.reset_done_this_session():
+            return self._reset_skipped_then(proceed)
         if not self.reset_notice_ok():
             return
         self.status.set('Resetting instruments to default settings ...')
+        io = self.io
 
         def work():
             try:
                 self.reset_run()
+                if self.RESET_ONCE_PER_SESSION:
+                    self._reset_done_for = io                # only a SUCCESSFUL reset counts: a failed one leaves the next Run to reset again
                 self.root.after(0, proceed)
             except Exception as exc:
                 msg = str(exc)
                 self.root.after(0, lambda: self._reset_failed(msg))
         threading.Thread(target=work, daemon=True).start()
 
-    def _reset_failed(self, msg):
+    SKIP_LINE = 'reset skipped: already reset this session'
+
+    def _reset_skipped_then(self, proceed):
+        import threading
+        log = self.reset_log()
+        if log is not None:
+            log.add('--', self.SKIP_LINE, 'RESET')
+        self.status.set('Reset skipped: the instruments were already reset this session. Checking the connection and status ...')
+
+        def work():
+            try:
+                self.reset_skip_run()
+                self.root.after(0, proceed)
+            except Exception as exc:
+                msg = str(exc)
+                self.reset_forget()                          # state unknown: the next Run resets again
+                self.root.after(0, lambda: self._reset_failed(msg, skipped=True))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _reset_failed(self, msg, skipped=False):
         self.busy = False
+        if skipped:
+            self.status.set('Connection / status check failed - run not started: ' + msg.splitlines()[0])
+            self.reset_error('The reset was skipped (already reset this session) but the check before the run failed. The next Run resets the instruments again.\n\n' + msg)
+            return
         self.status.set('Reset failed - run not started: ' + msg.splitlines()[0])
         self.reset_error(msg)
 
