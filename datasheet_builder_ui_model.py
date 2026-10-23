@@ -89,11 +89,25 @@ EXPR_ERROR_HELP = {
     'bad_value': 'A tolerance cannot be negative.',
 }
 
+# The inspector (right-hand row panel) collapses to its slim rail by itself when the window is narrower than this (96-dpi px): below it the grid would
+# drop under about 8 rows or its columns get cramped (the inspector is 290 px under 1250 px).  It opens again when the window grows back.  A choice
+# made by hand (Hide > / the rail button / Ctrl+I) sticks for the session and switches this off.
+INSPECTOR_COLLAPSE_BELOW = 1150
+
+
+def inspector_should_be_open(width, below, manual, is_open):
+    """Whether the inspector should be open for a window `width` px wide (`below` = the scaled threshold).  `manual` is None until the person
+    hides / shows it by hand, then True: a manual choice is never overridden.  Width 1 or less (not on screen yet) changes nothing."""
+    if manual or width <= 1:
+        return is_open
+    return width >= below
+
+
 # the codes of validate() that belong to a flow step (when `where` does not already say)
 _CODE_STEP = {}
 for _c in ('no_make', 'no_model', 'no_title', 'no_periods', 'dup_period', 'bad_period', 'default_period', 'limit_rounding'):
     _CODE_STEP[_c] = S_HEADER
-for _c in ('no_functions', 'bad_kind', 'bad_direction', 'dup_function'):
+for _c in ('no_functions', 'no_test_rows', 'bad_kind', 'bad_direction', 'dup_function'):
     _CODE_STEP[_c] = S_FUNCTIONS
 for _c in ('no_ranges', 'dup_range', 'range_value', 'range_order', 'range_resolution'):
     _CODE_STEP[_c] = S_RANGES
@@ -2072,16 +2086,21 @@ class GridModel(EditorModel):
             'point_outside_range': 'The value is bigger than the range it is on: type a larger full scale in the F.S. box and press Calc.',
             'nominal_outside_limit': 'The nominal value is outside its own limits: check the tolerance.',
             'dup_point': 'Two rows test exactly the same thing.',
-            'no_points': f'{name} has no test rows yet: click the empty row below it and type a value.',
+            'no_points': f'{name} has no test rows yet (skipped when the sheet runs): click the empty row below it and type a value.',
             'no_make': 'Type the make (manufacturer) in the box at the top.',
             'no_model': 'Type the model in the box at the top.',
             'no_title': 'Type a title in the box at the top (the procedure list shows it).',
+            'no_test_rows': 'Nothing to test yet: type a value in the empty row under any section to add its first test row. Sections that stay empty are skipped when the sheet runs.',
             'no_functions': 'Nothing to test yet: click FUNCTION TESTED in the first empty row and choose what the instrument measures or outputs.',
             'no_ranges': f'{name} has no rows yet, so no range either: add a row.',
         }.get(code, msg)
 
+    EMPTY_GROUP_FROM = 2                  # this many empty sections or more: the warnings list shows ONE entry with a count
+
     def problems(self):
-        """validate() as the base class shapes it, minus the 'section has no specification' message of a section whose rows already say so one by one."""
+        """validate() as the base class shapes it, minus the 'section has no specification' message of a section whose rows already say so one by one.
+        An EMPTY section (no rows yet; a template section nobody filled) has one warning, 'no_points': its 'no ranges' and 'no specification'
+        warnings say the same thing and are left out.  They are warnings, never blocking: the run skips an empty section."""
         cached = getattr(self, '_grid_problems', None)
         if cached and cached[0] == self._rev:
             return cached[1]
@@ -2090,18 +2109,47 @@ class GridModel(EditorModel):
             fn = self.ds.function(p['function_id']) if p['function_id'] else None
             if p['code'] == 'no_spec' and not p['point_id'] and fn is not None and fn.points:
                 continue
+            if p['code'] in ('no_spec', 'no_ranges') and p['level'] == 'warn' and fn is not None and not fn.points:
+                continue
             out.append(p)
         self._grid_problems = (self._rev, out)
         return out
 
+    def empty_section_problems(self):
+        """The 'no rows yet' warnings (one per empty section), in sheet order."""
+        return [p for p in self.problems() if p['code'] == 'no_points']
+
+    def problem_counts(self):
+        """errors / warnings as the pill and the summary count them: all the empty-section warnings together are ONE warning once there are
+        EMPTY_GROUP_FROM or more (the same grouping as the warnings list)."""
+        ps = self.problems()
+        e = sum(p['level'] == 'error' for p in ps)
+        w = len(ps) - e
+        n = len(self.empty_section_problems())
+        if n >= self.EMPTY_GROUP_FROM:
+            w -= n - 1
+        return dict(errors=e, warnings=w)
+
     def problem_rows(self):
-        """Every problem for the problems window: dict(level, text, row, key, where, code)."""
+        """Every problem for the problems window: dict(level, text, row, key, where, code).  Errors first.  The warnings 'section has no rows yet' are
+        grouped under ONE entry with a count (it goes to the first empty section) when there are EMPTY_GROUP_FROM or more of them."""
         idx = {r['key']: r['n'] for r in self.rows()}
         out = []
+        empties = self.empty_section_problems()
+        group = len(empties) >= self.EMPTY_GROUP_FROM
         for p in self.problems():
             fn = self.ds.function(p['function_id']) if p['function_id'] else None
             key = f'p:{fn.id}:{p["point_id"]}' if fn and p['point_id'] and fn.point(p['point_id']) else f'h:{fn.id}' if fn else ''
+            if group and p['code'] == 'no_points':
+                continue
             out.append(dict(level=p['level'], text=self.plain_problem(p, fn), row=idx.get(key), key=key, where=p['location'] or 'Whole datasheet', code=p['code']))
+        if group:
+            names = [self.ds.function(p['function_id']).name for p in empties if self.ds.function(p['function_id'])]
+            first = f'h:{empties[0]["function_id"]}'
+            out.append(dict(level='warn', row=idx.get(first), key=first, where='Empty sections', code='empty_sections',
+                            text=f'{len(names)} sections have no test rows yet and are skipped when the sheet runs'
+                                 + (': ' + ', '.join(names) + '.' if len(names) <= 4 else f' (first ones: {", ".join(names[:3])}).')))
+        out.sort(key=lambda d: d['level'] != 'error')
         return out
 
     def problem_summary(self):

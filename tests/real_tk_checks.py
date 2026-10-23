@@ -372,7 +372,7 @@ def checks_dsb_layout():
     root = tk.Tk()
     ui.apply_theme(root)
     root.geometry('200x100+1300+0')
-    for w, h, min_rows in ((1400, 900, 18), (1100, 700, 8)):
+    for w, h, min_rows, auto_open in ((1400, 900, 18, True), (1200, 760, 8, True), (1000, 700, 8, False)):
         g = DM.GridModel(DM.Storage(t / f'u{w}', t / f'r{w}.sqlite3', who='real'), dsb_fixtures.dmm_34461a_like())
         win = U.GridEditorWindow(root, g)
         win.geometry(f'{w}x{h}+0+0')
@@ -384,6 +384,14 @@ def checks_dsb_layout():
         pump(root, 20)
         rows_visible = (win.sheet.winfo_height() - win.sheet.geo.head_h) // win.sheet.geo.row_h
         check(f'{tag}: grid rows', rows_visible >= min_rows, rows_visible)
+        check(f'{tag}: inspector {"open" if auto_open else "auto-collapsed to the rail"}',
+              win.inspector_frame.winfo_ismapped() == auto_open and win.rail.winfo_ismapped() != auto_open and not win._insp_manual,
+              (win.inspector_frame.winfo_ismapped(), win.rail.winfo_ismapped()))
+        if not auto_open:
+            check(f'{tag}: rail button inside the window', inside(win, win.rail_b))
+            win.toggle_inspector()                                  # shown by hand, then the checks below look at the panel
+            pump(root, 20)
+            check(f'{tag}: shown by hand while narrow', win.inspector_frame.winfo_ismapped() and win._insp_manual)
         check(f'{tag}: four grid columns', len(win.sheet.geo.widths) == 4 and DM.COL_KEYS == ('step', 'function', 'nominal', 'tol'))
         for name in ('sheet_bar', 'bar', 'save_b', 'run_b', 'demo_b', 'preview_b', 'more_b', 'standards_b', 'undo_b', 'redo_b', 'lock_box', 'show_list_b', 'recalc_b',
                      'sheet', 'inspector_frame'):
@@ -427,6 +435,94 @@ def checks_dsb_layout():
         win.sync()
         pump(root, 20)
         check(f'{tag}: heading row shows the rules section only', [n for n, s in box.sections.items() if s.winfo_ismapped()] == ['rules'])
+        win.destroy()
+    root.destroy()
+
+
+def checks_dsb_auto_collapse():
+    """The inspector collapses by itself under 1150 px and opens again when the window grows; a hand choice sticks.  Also the template sheet:
+    only warnings (grouped), nothing clipped, the warnings list builds.  Screenshots when DSB_SHOTS is set (folder)."""
+    import datasheet_builder_ui as U
+    import datasheet_builder_ui_model as DM
+    t = Path(tempfile.mkdtemp())
+    root = tk.Tk()
+    ui.apply_theme(root)
+    root.geometry('100x60+1480+930')
+    out = os.environ.get('DSB_SHOTS')
+
+    def shot(win, name):
+        if out:
+            from PIL import ImageGrab
+            pump(root, 30)
+            ImageGrab.grab(bbox=(win.winfo_rootx(), win.winfo_rooty(), win.winfo_rootx() + win.winfo_width(), win.winfo_rooty() + win.winfo_height()),
+                           xdisplay=os.environ['DISPLAY']).save(f'{out}/{name}_{THEME}.png')
+
+    def sized(win, w, h):
+        win.geometry(f'{w}x{h}+0+0')
+        pump(root, 40)
+
+    def state(win):
+        return win.inspector_frame.winfo_ismapped(), win.rail.winfo_ismapped()
+
+    for seq, label in (('auto', 'auto'), ('hand', 'hand')):
+        g = DM.GridModel(DM.Storage(t / f'u{seq}', t / f'r{seq}.sqlite3', who='real'))
+        g.set_header(make='Acme', model='DM-1', title='DM-1 handheld')
+        g.add_handheld_functions()
+        dcv = next(f for f in g.ds.functions if f.kind == 'DCV')
+        g.select(f'e:{dcv.id}', 'nominal')
+        g.set_target_function('DC volts')
+        g.commit_cell('5 V')
+        key = next(r['key'] for r in g.rows() if r['kind'] == 'point')
+        f = g.panel_state(key)['form']
+        f['types'] = ['iv']
+        f['plus'].update(iv='0.05')
+        g.calc_row(key, f)
+        win = U.GridEditorWindow(root, g)
+        sized(win, 1400, 900)
+        check(f'{label}: 1400x900 opens with the inspector', state(win) == (True, False), state(win))
+        check(f'{label}: template sheet has no errors, one grouped warning', g.problem_counts() == dict(errors=0, warnings=1), g.problem_counts())
+        if seq == 'auto':
+            shot(win, 'template_1400x900')
+            win.show_problems()
+            pump(root, 30)
+            dlg = [w for w in win.winfo_children() if isinstance(w, tk.Toplevel)]
+            check('warnings list opens', bool(dlg))
+            if dlg:
+                shot(dlg[-1], 'warnings_list')
+                import time
+                time.sleep(0.5)
+                pump(root, 10)
+                dlg[-1].destroy()
+            sized(win, 1000, 700)
+            check('auto: 1000x700 collapses to the rail', state(win) == (False, True), state(win))
+            rows_visible = (win.sheet.winfo_height() - win.sheet.geo.head_h) // win.sheet.geo.row_h
+            check('auto: 1000x700 grid keeps 8 rows', rows_visible >= 8, rows_visible)
+            check('auto: rail button inside the window', inside(win, win.rail_b))
+            check('auto: collapsing did not take focus', win.focus_get() is not win.rail_b)
+            shot(win, 'template_1000x700')
+            sized(win, 1100, 700)
+            check('auto: 1100 stays collapsed', state(win) == (False, True), state(win))
+            sized(win, 1400, 900)
+            check('auto: growing back opens it again', state(win) == (True, False), state(win))
+            sized(win, 1000, 700)
+            check('auto: and collapses again', state(win) == (False, True))
+            win.event_generate('<Control-i>')
+            pump(root, 20)
+            check('Ctrl+I still shows it', state(win) == (True, False) and win._insp_manual, state(win))
+            sized(win, 1050, 700)
+            check('manual show sticks when narrower still', state(win) == (True, False), state(win))
+            shot(win, 'template_1050x700_shown_by_hand')
+            sized(win, 1400, 900)
+        else:
+            win.toggle_inspector()                                  # hidden by hand while wide
+            pump(root, 20)
+            sized(win, 1000, 700)
+            sized(win, 1450, 900)
+            check('hand: hidden by hand stays hidden when the window grows', state(win) == (False, True), state(win))
+            shot(win, 'template_hidden_1450x900')
+        import time
+        time.sleep(0.5)                                             # let fit_window's delayed callback run before the window goes
+        pump(root, 10)
         win.destroy()
     root.destroy()
 
@@ -805,6 +901,7 @@ if __name__ == '__main__':
         checks_import_package()
         checks_run_queue()
         checks_dsb_layout()
+        checks_dsb_auto_collapse()
         checks_run_queue_app()
     except Exception:
         traceback.print_exc()
