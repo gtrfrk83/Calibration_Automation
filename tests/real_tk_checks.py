@@ -37,6 +37,15 @@ def pump(root, n=10):
         root.update()
 
 
+def settle(root, seconds=0.7):
+    """Pump events for a while: the scroll panels re-check their content height a few times a second."""
+    import time
+    end = time.time() + seconds
+    while time.time() < end:
+        root.update()
+        time.sleep(0.02)
+
+
 def walk(w):
     for c in w.winfo_children():
         yield c
@@ -325,7 +334,7 @@ def checks_manager_tabs():
     check('main tabs: nothing of the old tab is left on the Manager', not any(hasattr(m, a) for a in ('instruments_frame', 'instrument_table', 'refresh_instruments', 'launch_instrument_procedure')))
     check('instruments table: definition and rows untouched by the Manager start-up', before[1] and instruments_snapshot() == before, (before, instruments_snapshot()))
     names = lambda: [t.item(k, 'values')[0] for k in t.get_children()]  # noqa: E731
-    check('tabs: three views', [m.view_nb.tab(x, 'text').strip() for x in m.view_nb.tabs()] == ['Automated Calibrations', 'Manual Calibrations', 'Adjustment'])
+    check('tabs: three views', [m.view_nb.tab(x, 'text').strip() for x in m.view_nb.tabs()] == ['Automated Calibrations', 'Manual Calibrations', 'Adjustments'])
     check('automated view first, no adjustment procedure in it', m.view_kind == 'verification' and names() and not any('Adjustment' in n for n in names()))
     check('tabs: notes hidden on automated', not m.adjust_note.winfo_ismapped() and not m.view_notes['manual'].winfo_ismapped())
     n_ver = len(names())
@@ -376,6 +385,195 @@ def checks_manager_tabs():
     m.category.set(CPM.ALL_CATEGORIES)
     m.refresh()
     check('automated view: back to the full list', len(names()) == n_ver and not m.adjust_note.winfo_ismapped())
+    check('no Tk callback errors', not errs, errs)
+    root.destroy()
+
+
+def _manager_for_small_window(w, h):
+    import Calibration_Procedure_Manager as CPM
+    CPM.init_db()
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    m = CPM.Manager(root)
+    root.geometry(f'{w}x{h}+0+0')
+    pump(root, 25)
+    return CPM, root, m, errs
+
+
+def checks_manager_run_top():
+    """Run procedure and Try in demo mode sit at the TOP of the Procedures tab: mapped and inside the window in all three views at 1267x860 and 900x600,
+    the Selected procedure card and every other tab scroll to their bottom when the window is short (nothing cut off, no scrollbar when it fits)."""
+    shot = os.environ.get('SHOT_DIR')
+
+    def grab(root, tag):
+        if not shot:
+            return
+        from PIL import ImageGrab
+        pump(root, 6)
+        ImageGrab.grab(bbox=(root.winfo_rootx(), root.winfo_rooty(), root.winfo_rootx() + root.winfo_width(), root.winfo_rooty() + root.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'manager_{tag}_{THEME}.png'))
+    for w, h in ((1267, 860), (900, 600)):
+        CPM, root, m, errs = _manager_for_small_window(w, h)
+        for kind, page in m.view_pages.items():
+            m.view_nb.select(page)
+            settle(root, 0.5)
+            tag = f'{w}x{h} {kind}'
+            check(f'{tag}: Run procedure is visible inside the window', inside(root, m.btn_run), (m.btn_run.winfo_rooty(), root.winfo_height()))
+            check(f'{tag}: Try in demo mode is visible inside the window', inside(root, m.btn_demo))
+            check(f'{tag}: Run sits above the table', m.btn_run.winfo_rooty() < m.table.winfo_rooty() and m.btn_demo.winfo_rooty() < m.table.winfo_rooty())
+            check(f'{tag}: Run text', str(m.btn_run.cget('text')).strip().endswith('Run procedure') and 'demo mode' in str(m.btn_demo.cget('text')))
+            check(f'{tag}: import buttons still in the bar', all(any(isinstance(x, ttk.Button) and t in str(x.cget('text')) for x in walk(m.library_frame))
+                                                              for t in ('Import Mudcats', 'Import procedure package', 'Register procedure', 'Remove from library', 'Library folder')))
+            grab(root, f'run_top_{kind}_{w}x{h}')
+            sf = m.card_scroll
+            sel = m.table.selection()
+            if sel:
+                check(f'{tag}: card scrolls to its last button', True)
+                sf.scroll_to(1.0)
+                pump(root, 10)
+                check(f'{tag}: card bottom reachable (Unlock button inside the card view)', not sf.needs_scroll() or
+                      sf.canvas.winfo_rooty() + sf.canvas.winfo_height() + 2 >= m.btn_lock.winfo_rooty() + m.btn_lock.winfo_height(), (sf.needs_scroll(),))
+                check(f'{tag}: card scrollbar only when needed', sf.bar_visible() == sf.needs_scroll())
+                sf.scroll_to(0.0)
+                pump(root, 4)
+                if w == 900:
+                    grab(root, f'card_{kind}_{w}x{h}')
+        if w == 900:
+            sf = m.card_scroll
+            m.view_nb.select(m.view_pages['verification'])
+            pump(root, 20)
+            check('900x600: the card does need to scroll (so the scrollbar is shown)', sf.needs_scroll() and sf.bar_visible())
+            check('900x600: wheel over the card scrolls it', _wheel_scrolls(root, sf, sf.body))
+        tabs = [(m.history_frame, 'history'), (m.specs_frame, 'specs'), (m.datasheets_frame, 'datasheets'), (m.dsb_frame, 'dsb')]
+        for page, name in tabs:
+            m.notebook.select(page)
+            settle(root)
+            tag = f'{w}x{h} {name} tab'
+            check(f'{tag}: scrollbar only when the content does not fit', page.bar_visible() == page.needs_scroll(), (page.bar_visible(), page.needs_scroll()))
+            page.scroll_to(1.0)
+            pump(root, 8)
+            body_bottom = page.body.winfo_rooty() + page.body.winfo_height()
+            check(f'{tag}: scrolling reaches the bottom of the page', body_bottom <= page.canvas.winfo_rooty() + page.canvas.winfo_height() + 2, (body_bottom, page.canvas.winfo_height()))
+            page.scroll_to(0.0)
+            grab(root, f'{name}_{w}x{h}')
+        check(f'{w}x{h}: no Tk callback errors', not errs, errs)
+        root.destroy()
+
+
+def _wheel_scrolls(root, sf, widget):
+    """A wheel event over a widget of the panel moves the panel (Windows MouseWheel and X11 buttons 4 / 5)."""
+    pump(root, 5)
+    sf.scroll_to(0.0)
+    pump(root, 3)
+    before = sf.canvas.yview()[0]
+    where = dict(x=4, y=4, rootx=widget.winfo_rootx() + 4, rooty=widget.winfo_rooty() + 4)
+    if root.tk.call('info', 'patchlevel').startswith('8.'):
+        widget.event_generate('<Button-5>', **where)                      # Tk 8 on X11: wheel = buttons 4 / 5
+    else:
+        widget.event_generate('<MouseWheel>', delta=-120, **where)        # Tk 9 (and Windows): MouseWheel with a delta
+    pump(root, 3)
+    after = sf.canvas.yview()[0]
+    return after > before
+
+
+def checks_manager_row_menu():
+    """Right click on a row of the Procedures table selects it, updates the card and posts the menu (all three views); Shift+F10 on the keyboard; Esc closes;
+    Remove from library asks first."""
+    CPM, root, m, errs = _manager_for_small_window(1267, 860)
+    labels_of = lambda menu: [menu.entrycget(i, 'label') if menu.type(i) != 'separator' else '-' for i in range(int(menu.index('end')) + 1)]  # noqa: E731
+    expect_head = ['Run procedure', 'Try in demo mode (virtual instruments)', '-']
+    for kind, page in m.view_pages.items():
+        m.view_nb.select(page)
+        pump(root, 20)
+        rows = m.table.get_children()
+        if not rows:
+            continue
+        iid = rows[min(2, len(rows) - 1)]                  # not the selected first row: the click must change the selection
+        m.table.see(iid)
+        pump(root, 5)
+        bx = m.table.bbox(iid)
+        check(f'row menu {kind}: row is on screen', bool(bx), bx)
+        m._row_menu = None
+        m.table.event_generate('<Button-3>', x=bx[0] + 30, y=bx[1] + bx[3] // 2)
+        pump(root, 10)
+        check(f'row menu {kind}: right click selected the row under the pointer', m.table.selection() == (iid,), (m.table.selection(), iid))
+        check(f'row menu {kind}: the card follows', m.d_name.get() == m.table.item(iid, 'values')[0], m.d_name.get())
+        menu = m._row_menu
+        check(f'row menu {kind}: menu posted', menu is not None and menu.winfo_ismapped())
+        names = labels_of(menu)
+        check(f'row menu {kind}: labels', names[:3] == expect_head and 'Remove from library' in names and 'Restore previous version...' in names and
+              names[-3:] == ['Copy procedure name', 'Copy file path', 'Show file location'], names)
+        check(f'row menu {kind}: Run enabled like the button', (str(menu.entrycget(0, 'state')) == 'normal') == (str(m.btn_run.cget('state')) == 'normal'))
+        menu.event_generate('<Escape>')
+        pump(root, 8)
+        if menu.winfo_ismapped():
+            menu.unpost()
+            pump(root, 4)
+        check(f'row menu {kind}: closed', not menu.winfo_ismapped())
+        # keyboard
+        m._row_menu = None
+        m.table.focus_set()
+        m.table.event_generate('<Shift-F10>')
+        pump(root, 10)
+        check(f'row menu {kind}: Shift+F10 posts the menu for the selected row', m._row_menu is not None and m._row_menu.winfo_ismapped())
+        m._row_menu.unpost()
+        pump(root, 4)
+    # an empty spot posts nothing; Remove asks first
+    m.view_nb.select(m.view_pages['verification'])
+    pump(root, 20)
+    first = m.table.get_children()[0]
+    m.table.selection_set(first)
+    pump(root, 5)
+    before = len(m.table.get_children())
+    m._row_menu = None
+    with mock.patch.object(CPM.messagebox, 'askyesno', return_value=False) as ask, mock.patch.object(CPM.messagebox, 'showinfo') as info:
+        menu = m.build_row_menu()
+        idx = labels_of(menu).index('Remove from library')
+        menu.invoke(idx)
+        check('row menu: Remove from library asks for confirmation (or explains why it stays)', ask.called or info.called)
+    check('row menu: declining removes nothing', len(m.table.get_children()) == before)
+    check('no Tk callback errors', not errs, errs)
+    root.destroy()
+
+
+def checks_manager_verified_info():
+    """The long verification text is not on the card: a one-line status pill plus an info button that opens the full record (selectable, Esc closes)."""
+    shot = os.environ.get('SHOT_DIR')
+    CPM, root, m, errs = _manager_for_small_window(900, 600)
+    settle(root, 0.5)
+    t = m.table
+    rows = {t.item(k, 'values')[0]: k for k in t.get_children()}
+    kinds = {}
+    for iid in t.get_children():
+        t.selection_set(iid)
+        pump(root, 6)
+        kinds.setdefault(m.d_ver.cget('text'), iid)
+    check('verified info: there are several statuses to look at', len(kinds) >= 2, list(kinds))
+    check('verified info: no long text label on the card', not any(isinstance(w, ttk.Label) and 'Verified on hardware by' in str(w.cget('text')) for w in walk(m.card_scroll.body)))
+    for pill, iid in kinds.items():
+        t.selection_set(iid)
+        pump(root, 8)
+        tag = f'"{pill[:24]}"'
+        check(f'verified info {tag}: info button enabled and in the card', str(m.btn_ver_info.cget('state')) == 'normal' and m.btn_ver_info.winfo_ismapped())
+        win = m.show_verified_details()
+        settle(root, 0.3)
+        check(f'verified info {tag}: popup shows the full text', win is not None and win.winfo_ismapped() and m.d_ver_text.get().split('\n')[0] in m._ver_box.get('1.0', 'end'))
+        check(f'verified info {tag}: popup is on screen', 0 <= win.winfo_rootx() and win.winfo_rootx() + win.winfo_width() <= win.winfo_screenwidth() and win.winfo_rooty() + win.winfo_height() <= win.winfo_screenheight())
+        m._ver_box.tag_add('sel', '1.0', 'end')
+        check(f'verified info {tag}: text can be selected', bool(m._ver_box.tag_ranges('sel')))
+        if shot and pill == list(kinds)[-1] or (shot and 'CHANGED' in pill.upper()):
+            from PIL import ImageGrab
+            root.update()
+            ImageGrab.grab(bbox=(0, 0, 1600, 1000), xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'manager_verified_info_{pill[:8].strip().lower()}_{THEME}.png'))
+        win.event_generate('<Escape>')
+        settle(root, 0.3)
+        if win.winfo_exists():
+            win.destroy()
+        check(f'verified info {tag}: Esc closes it', not win.winfo_exists() or not win.winfo_ismapped())
+    t.selection_remove(*t.selection())
+    m.refresh_details()
+    check('verified info: disabled with nothing selected', str(m.btn_ver_info.cget('state')) == 'disabled')
     check('no Tk callback errors', not errs, errs)
     root.destroy()
 
@@ -2008,6 +2206,9 @@ if __name__ == '__main__':
         checks_edit_point_button()
         checks_manager_windows()
         checks_manager_tabs()
+        checks_manager_run_top()
+        checks_manager_row_menu()
+        checks_manager_verified_info()
         checks_mdd_manual()
         checks_fluke_365()
         checks_fluke_376()

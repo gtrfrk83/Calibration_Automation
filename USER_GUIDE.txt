@@ -13,6 +13,8 @@ Your data
 
 Running a verification
   1. Pick the procedure in the Manager and press Run procedure (or double-click it).
+     The Run procedure and Try in demo mode buttons are at the top of the Procedures tab. Right-click a procedure (or press Shift+F10) for the same actions
+     plus Mark verified / Unlock, Restore previous version, Remove from library, Copy name / path and Show file location.
      "Try in demo mode" needs no instruments. It connects VIRTUAL instruments: you see the same windows as a real run (connection, reset
      notice, hook-up and function prompts, the reading window, per-point windows, Edit point) and every command goes through the real driver to a
      simulated instrument. Where you type the reading (handhelds), a "Fill with a simulated reading (DEMO)" button offers an in-tolerance value;
@@ -114,7 +116,7 @@ Verified on hardware (Procedures list)
 Importing a procedure package (Procedures list)
   A package is a zip file that carries one procedure (its launcher, test points and limits, driver, hook-up diagrams, tests) from another copy of the suite
   or from a colleague. It holds PYTHON PROGRAM CODE that will run on this computer, so only import packages from the lab's own library folder.
-  Library folder: on the Procedure Development tab, under "Procedure packages", press "Choose folder..." and pick the shared folder where the lab keeps its
+  Library folder: on the Procedures tab press "Library folder..." (next to "Import procedure package...") and pick the shared folder where the lab keeps its
   packages (a network drive, for example). It is empty until you set it. The file picker of the import then opens there.
   To import: press "Import procedure package..." (top right of the Procedures list) and pick the zip. A window shows what it is BEFORE anything is written:
   the name and version, who it says made it, where the file is (and whether that is inside the library folder), every file in it and whether the file is new,

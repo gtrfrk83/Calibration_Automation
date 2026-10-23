@@ -1083,6 +1083,150 @@ class Tooltip:
             self.tip = None
 
 
+def themed_menu(parent):
+    """A pop-up (context) menu in the live palette.  Windows draws native menus and ignores the colours; Linux / macOS Tk use them.
+    Build it afresh for each pop-up so a theme change is picked up."""
+    return tk.Menu(parent, tearoff=0, background=C['card'], foreground=C['text'], activebackground=C['select'], activeforeground=C['text'],
+                   disabledforeground=C['faint'], borderwidth=1, relief='flat')
+
+
+def post_menu(menu, x_root, y_root):
+    """Show a pop-up menu and always release its grab afterwards, so it can never stick (the pattern of the other context menus)."""
+    try:
+        menu.tk_popup(x_root, y_root)
+    finally:
+        try:
+            menu.grab_release()
+        except tk.TclError:
+            pass
+
+
+class ScrollFrame(ttk.Frame):
+    """A vertically scrolling panel: put the content in `.body`.
+
+    The body is as wide as the panel; it is at least as tall as the panel (so children that expand still fill it) and as tall as its content
+    needs, and the panel scrolls when the content is taller.  The scrollbar is only shown while there is something to scroll.  The mouse wheel
+    scrolls the panel while the pointer is over it (Windows / macOS MouseWheel, X11 buttons 4 and 5), except over a table, text box or list,
+    which keep their own wheel scrolling.  Colours follow the live ttk theme (light / dark)."""
+    _instances = []
+
+    def __init__(self, parent, width=None, **kw):
+        super().__init__(parent, **kw)
+        bg = ttk.Style(self).lookup('TFrame', 'background') or C['bg']
+        self.canvas = tk.Canvas(self, highlightthickness=0, borderwidth=0, background=bg, width=width or 1, height=1,
+                                yscrollincrement=max(8, px(20)))
+        self.bar = ttk.Scrollbar(self, orient='vertical', command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.bar.set)
+        self.canvas.pack(side='left', fill='both', expand=True)
+        self.body = ttk.Frame(self.canvas)
+        self._win = self.canvas.create_window(0, 0, window=self.body, anchor='nw')
+        self._bar_on = False
+        self._busy = False
+        self._polling = False
+        self.canvas.bind('<Configure>', self._layout, add='+')
+        self.body.bind('<Configure>', self._layout, add='+')
+        ScrollFrame._instances.append(self)
+        self.bind('<Destroy>', lambda e: ScrollFrame._instances.remove(self) if e.widget is self and self in ScrollFrame._instances else None, add='+')
+        top = self.winfo_toplevel()
+        if not getattr(top.master or top, '_cal_wheel', False):                 # once per Tk application (bindings belong to one interpreter)
+            (top.master or top)._cal_wheel = True
+            for seq in ('<MouseWheel>', '<Button-4>', '<Button-5>'):
+                self.bind_all(seq, ScrollFrame._wheel, add='+')
+
+    def _layout(self, _event=None):
+        if self._busy:
+            return
+        self._busy = True
+        try:
+            w, h = self.canvas.winfo_width(), self.canvas.winfo_height()
+            need = self.body.winfo_reqheight()
+            tall = max(h, need)
+            self.canvas.itemconfigure(self._win, width=max(1, w), height=tall)
+            self.canvas.configure(scrollregion=(0, 0, max(1, w), tall))
+            if h > 1:
+                want = need > h
+                if want and not self._bar_on:
+                    self.bar.pack(side='right', fill='y', before=self.canvas)
+                    self._bar_on = True
+                elif not want and self._bar_on:
+                    self.bar.pack_forget()
+                    self._bar_on = False
+                    self.canvas.yview_moveto(0)
+            self._need = need
+            if not self._polling:                                              # a cheap watch for content that re-wraps after the layout
+                self._polling = True
+                self.after(250, self._poll)
+        except tk.TclError:
+            pass
+        finally:
+            self._busy = False
+
+    def _poll(self):
+        """The content's wanted height can change without any size event (a label re-wrapped while the body is still as tall as the panel)."""
+        try:
+            if not self.winfo_exists():
+                return
+            if self.body.winfo_reqheight() != getattr(self, '_need', None):
+                self._layout()
+            self.after(250, self._poll)
+        except tk.TclError:
+            pass
+
+    def needs_scroll(self):
+        return self.body.winfo_reqheight() > self.canvas.winfo_height() > 1
+
+    def bar_visible(self):
+        return self._bar_on
+
+    def scroll_to(self, fraction):
+        self.canvas.yview_moveto(fraction)
+
+    def scroll_into_view(self, widget):
+        """Scroll just far enough that `widget` (a descendant of the body) is fully visible."""
+        self.update_idletasks()
+        top = widget.winfo_rooty() - self.body.winfo_rooty()
+        bottom = top + widget.winfo_height()
+        total = max(1, self.body.winfo_height())
+        view_top = self.canvas.canvasy(0)
+        view_h = self.canvas.winfo_height()
+        if top < view_top:
+            self.canvas.yview_moveto(top / total)
+        elif bottom > view_top + view_h:
+            self.canvas.yview_moveto((bottom - view_h) / total)
+
+    def can_scroll(self, direction):
+        lo, hi = self.canvas.yview()
+        return (direction < 0 and lo > 0.0) or (direction > 0 and hi < 1.0)
+
+    @staticmethod
+    def _wheel(event):
+        try:
+            widget = event.widget.winfo_containing(event.x_root, event.y_root) if hasattr(event.widget, 'winfo_containing') else None
+        except (tk.TclError, KeyError):
+            return None
+        if widget is None or widget.winfo_class() in ('Treeview', 'Text', 'Listbox', 'TCombobox', 'Spinbox', 'TSpinbox'):
+            return None                                                    # tables, text boxes and lists keep their own wheel scrolling
+        steps = 1
+        if getattr(event, 'num', None) == 4:
+            direction = -1
+        elif getattr(event, 'num', None) == 5:
+            direction = 1
+        else:
+            delta = getattr(event, 'delta', 0) or 0
+            if not delta:
+                return None
+            direction = -1 if delta > 0 else 1
+            steps = max(1, abs(int(delta)) // 120)
+        w = widget
+        while w is not None:
+            owner = next((f for f in ScrollFrame._instances if f.canvas is w or f.body is w), None)
+            if owner is not None and (owner.needs_scroll() and owner.can_scroll(direction)):
+                owner.canvas.yview_scroll(direction * steps * 3, 'units')
+                return 'break'
+            w = w.master
+        return None
+
+
 class Settings:
     """Tiny per-user JSON store (ports, window sizes ...). Never raises."""
 

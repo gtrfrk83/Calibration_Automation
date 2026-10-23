@@ -55,7 +55,7 @@ class ImportFlow(unittest.TestCase):
         mgr = self.mgr = object.__new__(CPM.Manager)
         mgr.root, mgr.status = object(), Var()
         mgr.verified = V.Registry(self.t / 'reg.sqlite3', base=self.tree)
-        mgr.refresh, mgr.refresh_development = mock.Mock(), mock.Mock()
+        mgr.refresh = mock.Mock()
         patches = [mock.patch.object(CPM, 'BASE', self.tree), mock.patch.object(CPM, 'messagebox'), mock.patch.object(CPM.packages_ui, 'choose_package'),
                    mock.patch.object(CPM.packages_ui, 'ask_install'), mock.patch.object(CPM.packages_ui, 'show_result'),
                    mock.patch.object(CPM.packages, 'get_library_dir', return_value=str(self.t / 'lib'))]
@@ -109,7 +109,8 @@ class ImportFlow(unittest.TestCase):
     def test_the_manager_has_the_button_and_the_folder_setting(self):
         src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
         self.assertIn("text='Import procedure package...'", src)
-        self.assertIn('Choose folder...', src)
+        self.assertIn("text='Library folder...'", src)          # moved from the removed Procedure Development tab
+        self.assertNotIn('Procedure Development', src)
 
     def test_library_folder_buttons_use_the_setting(self):
         self.mgr.lib_folder = Var()

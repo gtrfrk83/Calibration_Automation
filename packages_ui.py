@@ -75,7 +75,7 @@ def ask_install(parent, pv):
     ui.Notice(outer, packages.CODE_WARNING, 'warn', title='Packages contain program code').pack(fill='x', pady=(0, 6))
     if pv.in_library is not True:
         ui.Notice(outer, 'This file is not inside the lab\'s library folder.' if pv.in_library is False else
-                  'No library folder is set (Procedure Development tab), so nothing shows that this file comes from the lab\'s own library.',
+                  'No library folder is set (press "Library folder..." on the Procedures tab), so nothing shows that this file comes from the lab\'s own library.',
                   'bad' if pv.in_library is False else 'info').pack(fill='x', pady=(0, 6))
     if pv.errors:
         ui.Notice(outer, '\n'.join('- ' + e for e in pv.errors[:12]) + ('\n- ... and more' if len(pv.errors) > 12 else ''), 'bad',
