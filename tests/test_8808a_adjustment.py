@@ -567,6 +567,178 @@ class FailureTests(unittest.TestCase):
         self.assertIn('check the terminal', s.message_warning(st))
 
 
+class TerRetryTests(unittest.TestCase):
+    """The ONE operator-approved *TER attempt after the first function name failed (owner rule): never automatic, never more than one, nothing else re-sent."""
+
+    def failed_first_function(self):
+        s, bench, cal_t, dmm_t = new_session()
+        s.reset(confirm=lambda _t: True)
+        for key in ACKS:
+            s.acknowledge(key)
+        s.enter_calibration()                                      # operator says 'entered', the meter is not
+        with self.assertRaises(cal_driver.CalibrationError):
+            s.start_function(confirmed=True)
+        return s, bench, cal_t, dmm_t
+
+    def ters(self, dmm_t):
+        return [e for e in dmm_t.events if e[0] == 'TER']
+
+    def test_failure_marks_the_entry_failed_and_sends_no_ter_by_itself(self):
+        s, bench, cal_t, dmm_t = self.failed_first_function()
+        self.assertTrue(s.entry_failed and not s.ter_attempted and not s.must_stop)
+        self.assertEqual(self.ters(dmm_t), [])
+
+    def test_retry_needs_explicit_confirmation(self):
+        s, bench, cal_t, dmm_t = self.failed_first_function()
+        with self.assertRaises(adj.AdjustmentError):
+            s.retry_entry_with_ter()
+        self.assertEqual(self.ters(dmm_t), [])
+        self.assertFalse(s.ter_attempted)
+
+    def test_one_confirmed_retry_then_function_needs_its_own_confirmation(self):
+        s, bench, cal_t, dmm_t = self.failed_first_function()
+        funcs = len([e for e in dmm_t.events if e[0] == 'FUNC'])
+        s.retry_entry_with_ter(confirmed=True)
+        self.assertEqual(self.ters(dmm_t), [('TER',)])
+        self.assertEqual(len([e for e in dmm_t.events if e[0] == 'FUNC']), funcs)       # the function name was NOT re-sent by the retry
+        with self.assertRaises(adj.AdjustmentError):
+            s.start_function()                                                         # needs its own confirmation
+        s.start_function(confirmed=True)
+        self.assertTrue(s.entry_verified)
+        with self.assertRaises(adj.AdjustmentError):
+            s.retry_entry_with_ter(confirmed=True)                                      # never a second attempt
+        self.assertEqual(self.ters(dmm_t), [('TER',)])
+        run_all(s, bench)
+        self.assertEqual(len(enters(dmm_t, 2)), 124)                                    # no write repeated
+        self.assertEqual(len(self.ters(dmm_t)), 1)
+
+    def test_a_failing_retry_stops_everything(self):
+        s, bench, cal_t, dmm_t = self.failed_first_function()
+        dmm_t.refuse_ter = 'silent'
+        with self.assertRaises(cal_driver.CalibrationError):
+            s.retry_entry_with_ter(confirmed=True)
+        self.assertTrue(s.must_stop and s.ter_attempted)
+        with self.assertRaises(adj.AdjustmentError):
+            s.retry_entry_with_ter(confirmed=True)
+        with self.assertRaises(adj.AdjustmentError):
+            s.start_function(confirmed=True)
+        self.assertEqual(self.ters(dmm_t), [('TER',)])
+        self.assertEqual([e for e in dmm_t.events if e[0] == 'FUNC'], [])
+
+    def test_still_failing_after_a_good_ter_banner_stops(self):
+        s, bench, cal_t, dmm_t = self.failed_first_function()
+        s.retry_entry_with_ter(confirmed=True)
+        dmm_t.cal_mode = False                                     # the meter drops out again
+        with self.assertRaises(cal_driver.CalibrationError):
+            s.start_function(confirmed=True)
+        self.assertTrue(s.must_stop)
+        with self.assertRaises(adj.AdjustmentError):
+            s.retry_entry_with_ter(confirmed=True)
+        self.assertEqual(len(self.ters(dmm_t)), 1)
+
+    def test_not_offered_when_entry_is_verified_or_ter_already_used_or_points_sent(self):
+        s, bench, cal_t, dmm_t = open_session()
+        with self.assertRaises(adj.AdjustmentError):
+            s.retry_entry_with_ter(confirmed=True)
+        s.start_function(confirmed=True)
+        with self.assertRaises(adj.AdjustmentError):
+            s.retry_entry_with_ter(confirmed=True)                  # verified
+        s2, b2, c2, d2 = new_session()
+        s2.reset(confirm=lambda _t: True)
+        for key in ACKS:
+            s2.acknowledge(key)
+        s2.enter_calibration(use_ter=True)                          # the optional *TER at entry used the attempt
+        self.assertTrue(s2.ter_attempted)
+        self.assertEqual(len([e for e in d2.events if e[0] == 'TER']), 1)
+
+    def test_window_offers_it_only_on_failure_and_marks_it_unverified(self):
+        text = (ROOT / 'Procedures/Fluke_8808A_Adjustment.py').read_text(encoding='utf-8')
+        self.assertIn('_offer_ter', text)
+        self.assertIn('UNVERIFIED', text[text.index('def _offer_ter'):text.index('def _run_step')])
+        self.assertNotIn('retry_entry_with_ter(confirmed=True)', text[:text.index('def _offer_ter')])
+
+
+class AuditSourceTests(unittest.TestCase):
+    def test_characterized_values_carry_the_3458a_source(self):
+        s, bench, cal_t, dmm_t = open_session(scope=('ADC',))
+        s.start_function(confirmed=True)
+        while not s.next_step()['characterize']:
+            do_point(s, bench, s.next_step())
+        st = s.next_step()
+        meter = s.review(st)['meter']
+        s.set_reference(st, characterized=f'{meter * 1.0001:.6g}')
+        s.mark_hookup(st)
+        s.acknowledge_hv(st)
+        s.program_source(st)
+        s.send_point(st, confirmed=True)
+        rows = [r for r in s.audit.sources() if r[0] == st['id']]
+        self.assertTrue(rows)
+        self.assertEqual({r[2] for r in rows}, {'3458A characterised'})
+        self.assertIn('CALREF', {r[1] for r in rows})
+        self.assertEqual({r[0] for r in s.audit.sources()}, {st['id']})       # no other step carries a source
+
+    def test_waiver_is_recorded_as_a_source_too(self):
+        s, bench, cal_t, dmm_t = open_session(scope=('ADC',))
+        s.start_function(confirmed=True)
+        while not s.next_step()['characterize']:
+            do_point(s, bench, s.next_step())
+        st = s.next_step()
+        s.set_reference(st, waive=True)
+        self.assertIn('waived', {r[2] for r in s.audit.sources()}.pop())
+
+    def test_all_eight_characterized_steps_get_a_source_in_a_full_run(self):
+        s, bench, cal_t, dmm_t = open_session(scope=('ADC',))
+        while s.next_step():
+            st = s.next_step()
+            if not s.active_function:
+                s.start_function(confirmed=True)
+            if st['characterize']:
+                s.set_reference(st, characterized=f'{s.review(st)["meter"]:.6g}')
+            else:
+                s.set_reference(st)
+            s.mark_hookup(st)
+            s.acknowledge_hv(st)
+            s.program_source(st)
+            s.send_point(st, confirmed=True)
+        self.assertEqual({r[0] for r in s.audit.sources()}, {st['id'] for st in adj.STEPS if st['characterize']})
+        self.assertEqual(len({st['id'] for st in adj.STEPS if st['characterize']}), 16)
+
+    def test_old_database_gets_the_column_added(self):
+        import sqlite3
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'lab_registry.sqlite3'
+            con = sqlite3.connect(path)
+            con.executescript(adjustment_audit.SCHEMA)               # the original schema: no 'source' column
+            self.assertNotIn('source', {r[1] for r in con.execute('PRAGMA table_info(adjustment_events)')})
+            con.commit()
+            con.close()
+            store = adjustment_audit.AuditStore(demo=False, path=path)
+            cols = {r[1] for r in store.con.execute('PRAGMA table_info(adjustment_events)')}
+            self.assertIn('source', cols)
+            store.start_run('X', 'A', 'S', 'T')
+            store.log('A', 'OK', 'd', 'S001', source='3458A characterised')
+            self.assertEqual(store.sources(), [('S001', 'A', '3458A characterised')])
+            store.close()
+
+
+class ExitWordingTests(unittest.TestCase):
+    def test_abort_and_finish_text_use_the_owner_stated_shift_key(self):
+        s, bench, cal_t, dmm_t = open_session()
+        do_point(s, bench, s.next_step())
+        text = s.abort('test')
+        self.assertIn('SHIFT', text)
+        self.assertIn('owner-stated', text)
+        self.assertNotIn('switch', text.lower())
+        s2, b2, c2, d2 = open_session(scope=('FREQ',))
+        run_all(s2, b2)
+        s2.finish()
+        self.assertIn('SHIFT', [r for r in s2.audit.events() if r[2] == 'EXIT'][0][4])
+        for name in ('fluke8808a_adjustment.py', 'Procedures/Fluke_8808A_Adjustment.py'):
+            src = (ROOT / name).read_text(encoding='utf-8').lower()
+            self.assertNotIn('switching the meter off', src)
+            self.assertNotIn('switch it off', src)
+
+
 class AbortTests(unittest.TestCase):
     def test_abort_inside_a_function_sends_exit_and_says_cal_error(self):
         s, bench, cal_t, dmm_t = open_session()

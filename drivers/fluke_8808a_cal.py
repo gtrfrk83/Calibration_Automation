@@ -254,9 +254,9 @@ class Fluke8808ACal(Fluke8808A):
             self.log.add('!!', f'unrecognised text from the meter after {what}: {" | ".join(reply.unknown)}', self.label)
 
     # ---- the dialog ---------------------------------------------------------------------------------------------------------------------------
-    def enter_cal_mode(self) -> Reply:
+    def enter_cal_mode(self, retry=False) -> Reply:
         """*TER once; the banner "Select a Function or input EXIT to QUIT!" must come back (p. 3-16). Anything else: nothing was changed, the meter is NOT in calibration."""
-        if self.in_cal:
+        if self.in_cal and not retry:
             raise InstrumentError('The calibration mode was already entered in this session (*TER is sent once).')
         self.send('cal.enter')
         reply = self._read_burst()

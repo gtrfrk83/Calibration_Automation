@@ -57,6 +57,8 @@ BY_HAND_COMP = ('5560A', '5520A')              # no compensation command is sent
 ZCOMP_LIMIT = 110e3                            # ohm: 5522A impedance compensation exists only below this (5522A Operators Manual p. 6-49)
 HV_CONFIRM = 100.0                             # volts: a high-voltage confirmation once per hook-up group for the steps that output this much or more
 HI_CURRENT = 2.0                               # amps: a high-current confirmation once per hook-up group (the 10 A terminal and its fuse)
+SOURCE_3458A = '3458A characterised'            # audit 'source' of a value entered for the four characterized DC current ranges (text only: no 3458A driver or specification)
+SOURCE_WAIVED = 'calibrator nominal (characterisation waived)'
 CHAR_TOL = 0.01                                # a characterized value must be within 1 % of the meter's recommended value (this program's guard, UNVERIFIED: the manual states none)
 MATCH_REL = 1e-3                               # the meter's recommended value matches a printed value when within 0.1 %
 OUT_REL_TOL = 1e-6                             # the calibrator's OUT? must equal the value programmed
@@ -366,6 +368,7 @@ class StepRecord:
     calref: str = ''                          # the CALREF argument sent ('' = none)
     calref_status: str = ''                   # 'accepted' | 'unconfirmed' | 'confirmed on display'
     characterized: bool = False
+    source: str = ''                          # where the value entered for a characterized range came from (audit 'source')
     waived: bool = False
     own_standard: bool = False
     cal_readback: float | None = None
@@ -386,6 +389,9 @@ class Session:
         self.records = {s['id']: StepRecord(s['id']) for s in STEPS}
         self.cal_mode = False
         self.entry_verified = False
+        self.entry_failed = False             # the first function name was not answered with a recommended value
+        self.ter_attempted = False            # the ONE operator-approved *TER entry attempt has been used (never more than one)
+        self.must_stop = False
         self.active_function = None
         self.function_done = set()
         self.finished = False
@@ -411,8 +417,8 @@ class Session:
     def dmm(self):
         return self.io.dmm
 
-    def log(self, action, outcome='', detail='', step_id=''):
-        row = self.audit.log(action, outcome, detail, step_id)
+    def log(self, action, outcome='', detail='', step_id='', source=''):
+        row = self.audit.log(action, outcome, detail, step_id, source)
         if row is not None and self.on_log is not None:
             try:
                 self.on_log(row, step_id)
@@ -484,17 +490,45 @@ class Session:
         self.entry_verified = False
         if use_ter:
             self.entry_verified = True
+            self.ter_attempted = True
             self.log('ENTER CAL', 'OK', '*TER sent once (optional, UNVERIFIED path); the meter answered "Select a Function or input EXIT to QUIT!"')
         else:
             self.log('ENTER CAL', 'OPERATOR', 'entered at the front panel with the calibration button, confirmed by the operator; nothing was sent; ' + (
                 'the banner arrived' if reply.idle else 'no banner arrived (the manual does not say whether one should); the mode cannot be verified read-only, the first function name will show it'))
         self.audit.set_status('CAL_MODE')
 
+    def retry_entry_with_ter(self, confirmed=False):
+        """The ONE retry the owner allows (UNVERIFIED): after the first function name was not answered with a recommended value, and only on the operator's explicit confirmation, send the manual's
+        RS-232 entry command *TER ONCE and read what comes back (the banner). Never more than one attempt per session, never when the entry was already verified, never after a point was sent,
+        and nothing else is re-sent: the function name is sent again only by the operator's next, separately confirmed 'start function'. Returns the reply."""
+        if not self.cal_mode or self.finished or self.aborted:
+            raise AdjustmentError('The calibration mode is not open.')
+        if not self.entry_failed or self.entry_verified:
+            raise AdjustmentError('A *TER attempt is only offered after the first function name failed.')
+        if self.ter_attempted:
+            raise AdjustmentError('The single *TER attempt was already used: stop.')
+        if any(r.attempts for r in self.records.values()):
+            raise AdjustmentError('A point was already sent: *TER is not used now.')
+        if not confirmed:
+            raise AdjustmentError('The *TER attempt has not been confirmed by the operator.')
+        self.ter_attempted = True                   # counted before the write: even a failing attempt is the one attempt
+        try:
+            reply = self.dmm.enter_cal_mode(retry=True)
+        except Exception as exc:
+            self.must_stop = True
+            self.log('ENTER CAL RETRY', 'FAILED', '*TER sent once (operator-approved, UNVERIFIED): ' + str(exc).splitlines()[0] + '. Stopping: nothing else is sent.')
+            raise
+        self.entry_failed = False
+        self.log('ENTER CAL RETRY', 'OK', '*TER sent once (operator-approved, UNVERIFIED); the meter answered with the banner. The function name is sent again only on your next confirmation.')
+        return reply
+
     # ---- 3. a function
     def start_function(self, confirmed=False):
         """Select the function of the next step. Needs the operator's confirmation: once a function is selected ALL its points must be calibrated (p. 3-16). Sends the function name once."""
         if not self.cal_mode or self.finished or self.aborted:
             raise AdjustmentError('The calibration mode is not open.')
+        if self.must_stop:
+            raise AdjustmentError('The meter did not enter the calibration mode even after the one *TER attempt: stop (Abort).')
         if self.active_function:
             raise AdjustmentError(f'{self.active_function} is already being calibrated.')
         nxt = self.next_step()
@@ -509,6 +543,10 @@ class Session:
             reply = self.dmm.select_function(fn)
         except Exception as exc:
             self.log('FUNCTION', 'FAILED', f'{fn}: {str(exc).splitlines()[0]}')
+            if not self.entry_verified:
+                self.entry_failed = True
+                if self.ter_attempted:
+                    self.must_stop = True          # the single *TER attempt was already used: nothing more is offered
             raise
         self.active_function = fn
         if not self.entry_verified:
@@ -586,9 +624,11 @@ class Session:
                 raise AdjustmentError(why)
             calref_value = float(value)
             rec.characterized = True
+            rec.source = SOURCE_3458A
         if waive and step['characterize'] and characterized is None:
             rec.waived = True
-            self.log('CHARACTERIZATION', 'WAIVED', f'operator waived the characterized value; the calibrator\'s nominal {si_text(output, step["point"]["unit"])} is used as it is', step['id'])
+            rec.source = SOURCE_WAIVED
+            self.log('CHARACTERIZATION', 'WAIVED', f'operator waived the characterized value; the calibrator\'s nominal {si_text(output, step["point"]["unit"])} is used as it is', step['id'], source=rec.source)
         if calref_value is not None:
             text = cal_driver.reference_text(calref_value if characterized is None else Decimal(str(characterized).strip()), self.rec)
             try:
@@ -597,7 +637,7 @@ class Session:
                 self.log('CALREF', 'FAILED', f'CALREF {text}: {str(exc).splitlines()[0]}', step['id'])
                 raise
             rec.calref, rec.calref_status = text, status
-            self.log('CALREF', 'SENT' if status == 'accepted' else 'UNCONFIRMED', f'CALREF {text} sent once; meter answer: {"=>" if status == "accepted" else "no prompt"}', step['id'])
+            self.log('CALREF', 'SENT' if status == 'accepted' else 'UNCONFIRMED', f'CALREF {text} sent once; meter answer: {"=>" if status == "accepted" else "no prompt"}', step['id'], source=rec.source)
             if status != 'accepted':
                 self.pending_calref = step['id']
                 raise NeedsDisplayConfirmation('The meter did not answer CALREF with "=>" or "!>". Look at the meter display: if it shows the value the program sent, confirm it; otherwise abort.')
@@ -625,7 +665,7 @@ class Session:
         reply = self.dmm.confirm_value()
         rec.messages = list(dict.fromkeys(self.rec_messages + list(reply.messages)))
         self.log('VALUE', 'CONFIRMED', f'first Enter sent: meter recommended {self.rec.raw}' + (f'; calibrator output {si_text(rec.output_value, step["point"]["unit"])}' if rec.output_value is not None else '')
-                 + (f'; CALREF {rec.calref}' if rec.calref else '') + (f'; meter says {", ".join(rec.messages)}' if rec.messages else ''), step['id'])
+                 + (f'; CALREF {rec.calref}' if rec.calref else '') + (f'; meter says {", ".join(rec.messages)}' if rec.messages else ''), step['id'], source=rec.source)
         return reply
 
     def mark_hookup(self, step):
@@ -724,7 +764,7 @@ class Session:
             raise AdjustmentError('The calibrator has not been programmed and switched on for this step.')
         rec.attempts += 1
         rec.at = datetime.now().isoformat(timespec='seconds')
-        self.log('POINT_SENT' if rec.attempts == 1 else 'POINT_RERUN', 'SENT', f'{step["function"]} step {step["n"]}: second Enter sent (starts calibrating; this changes the calibration)', step['id'])
+        self.log('POINT_SENT' if rec.attempts == 1 else 'POINT_RERUN', 'SENT', f'{step["function"]} step {step["n"]}: second Enter sent (starts calibrating; this changes the calibration)', step['id'], source=rec.source)
         try:
             reply = self.dmm.start_point()
         except cal_driver.StepIndeterminate as exc:
@@ -748,7 +788,7 @@ class Session:
 
     def _point_finished(self, step, rec, reply):
         rec.done, rec.failed, rec.indeterminate, rec.errors = True, False, False, []
-        self.log('POINT', 'OK', f'{step["function"]} step {step["n"]}: the meter finished the point' + (' (WAIT... seen)' if reply.wait else ' (no WAIT... line seen)'), step['id'])
+        self.log('POINT', 'OK', f'{step["function"]} step {step["n"]}: the meter finished the point' + (' (WAIT... seen)' if reply.wait else ' (no WAIT... line seen)'), step['id'], source=rec.source)
         self.rec, self.rec_messages = reply.recommended, list(reply.messages)
         self.pending_calref = None
         if reply.idle:
@@ -792,7 +832,7 @@ class Session:
         flags = self.dmm.exit_cal()
         self.exit_flags = flags
         self.cal_mode, self.finished = False, True
-        self.log('EXIT', 'OK', 'EXIT sent; calibration mode left' + (f'; event status: {", ".join(flags)}' if flags else '; event status clean'))
+        self.log('EXIT', 'OK', 'EXIT sent; calibration mode left' + (f'; event status: {", ".join(flags)}' if flags else '; event status clean') + '. If the meter still shows the calibration mode, press the SHIFT key at the front panel (owner-stated, not from the manual pages read).')
         self.audit.set_status('COMPLETED_NOT_VERIFIED')
         return flags
 
@@ -809,11 +849,11 @@ class Session:
         if self.cal_mode or self.dmm.in_cal:
             try:
                 self.dmm.exit_cal()
-                notes.append('EXIT was sent over RS-232 (the manual\'s way to leave the calibration mode, p. 3-16). Look at the meter: if it still shows the calibration mode, leave it at the front panel '
-                             'as your lab procedure says (the manual prints no front-panel exit in the pages used here; switching the meter off is UNVERIFIED).')
+                notes.append('EXIT was sent over RS-232 (the manual\'s way to leave the calibration mode, p. 3-16). Look at the meter: if it still shows the calibration mode, press the SHIFT key at the front panel to leave it '
+                             '(owner-stated, not from the manual pages read).')
             except Exception as exc:
-                notes.append('EXIT could not be confirmed (' + str(exc).splitlines()[0] + '): the meter may still be in the calibration mode; leave it at the front panel as your lab procedure says '
-                             '(the manual prints no front-panel exit in the pages used here; switching the meter off is UNVERIFIED).')
+                notes.append('EXIT could not be confirmed (' + str(exc).splitlines()[0] + '): the meter may still be in the calibration mode; press the SHIFT key at the front panel to leave it '
+                             '(owner-stated, not from the manual pages read).')
             self.cal_mode = False
         done_here = [r for r in sent if STEP_BY_ID[r.step_id]['function'] == in_function and r.done] if in_function else []
         if in_function:

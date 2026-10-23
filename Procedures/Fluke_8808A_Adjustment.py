@@ -435,6 +435,13 @@ class App(virtualbench.VirtualMixin):
                     self._abort_req = True
             except Exception as exc2:
                 messagebox.showerror('Point stopped', str(exc2))
+        except adj.cal_driver.CalibrationError as exc:
+            if s.entry_failed and not s.entry_verified:
+                self._offer_ter(s, exc)
+            else:
+                self.status.set(f'{st["id"]}: ' + str(exc).splitlines()[0])
+                messagebox.showerror(f'Point {st["id"]} stopped', f'{exc}\n\nNothing was repeated automatically. You can repeat the point after fixing the cause, or abort.')
+                self._last_group = None
         except Exception as exc:
             self.status.set(f'{st["id"]}: ' + str(exc).splitlines()[0])
             messagebox.showerror(f'Point {st["id"]} stopped', f'{exc}\n\nNothing was repeated automatically. You can repeat the point after fixing the cause, or abort.')
@@ -450,6 +457,29 @@ class App(virtualbench.VirtualMixin):
         if self._abort_req:
             self._abort_req = False
             self.abort(ask=False)
+
+    def _offer_ter(self, s, exc):
+        """The meter did not answer the first function name with a recommended value. ONE retry is allowed, only on the operator's explicit confirmation: the manual's RS-232 entry command *TER (UNVERIFIED)."""
+        if s.ter_attempted or s.must_stop:
+            messagebox.showerror('Calibration mode not entered', f'{exc}\n\nThe single *TER attempt was already used. Stopping: nothing more is sent. Check the meter and the front-panel entry, then start again.')
+            self._abort_req = True
+            return
+        if not messagebox.askyesno('Meter did not enter calibration mode - try *TER once? (UNVERIFIED)',
+                                   f'{exc}\n\nThe 8808A did not answer the function name with a recommended value, so it is probably not in the calibration mode.\n\n'
+                                   'You may try ONE entry over RS-232 with the manual\'s command *TER (p. 3-16). This is UNVERIFIED: the manual does not say whether *TER works after, or instead of, the front-panel '
+                                   'entry. It is sent ONCE; if it does not work the adjustment stops, and nothing else is sent by the program. The function name is only sent again when you confirm the next '
+                                   'function start.\n\nSend *TER once?', icon='warning'):
+            self.status.set('*TER not sent: stopping.')
+            self._abort_req = True
+            return
+        try:
+            s.retry_entry_with_ter(confirmed=True)
+        except Exception as exc2:
+            self.status.set('*TER did not enter the calibration mode: stopping.')
+            messagebox.showerror('*TER did not work', f'{exc2}\n\nStopping. Nothing else is sent.')
+            self._abort_req = True
+            return
+        self.status.set('*TER sent once (UNVERIFIED) and the banner came back. Press "Run next point" to start the function again.')
 
     def _run_step(self, s, st, rec):
         rerun = False
@@ -542,7 +572,7 @@ class App(virtualbench.VirtualMixin):
                 return
             unexpected = True
         if st['characterize']:
-            text = self.ask_value('Characterized value', f'{st["id"]}  {st["title"]}\n\nThe manual says this range needs the calibrator characterized (it names an 8508A; this lab uses the Keysight 3458A). Enter the value measured with the 3458A '
+            text = self.ask_value('Characterized value', f'{st["id"]}  {st["title"]}\n\nThe manual says this range needs the calibrator characterized (it names an 8508A; this lab uses the Keysight 3458A). Enter the value measured with the 3458A (recorded in the audit log as source "3458A characterised") '
                                   f'(at most 6 significant digits, near {info["meter"]:g}); leave it empty to use the calibrator\'s nominal value.', '')
             if text is None:
                 return
@@ -568,7 +598,7 @@ class App(virtualbench.VirtualMixin):
             return
         finally:
             self._end()
-        msg = 'The calibration mode was left (EXIT).' + (f' The meter reported: {", ".join(flags)}.' if flags else '')
+        msg = 'The calibration mode was left (EXIT). If the meter still shows it, press the SHIFT key at the front panel (owner-stated, not from the manual pages read).' + (f' The meter reported: {", ".join(flags)}.' if flags else '')
         self.status.set(msg + ' Run the As Left performance verification.')
         messagebox.showinfo('Adjustment complete' + (' (DEMO)' if self.demo else ''), msg + '\n\nRun the As Left performance verification now and keep its report.' +
                             ('\n\nDEMO: this was a simulated meter; nothing was recorded as evidence.' if self.demo else ''))
