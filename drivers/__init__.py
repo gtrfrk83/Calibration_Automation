@@ -11,6 +11,7 @@ from .fluke_5560a import Fluke5520A, Fluke5522A, Fluke5560A
 from .fluke_5522a_scope import Fluke5522AScope
 from .lecroy_ws4104hd import WaveSurfer4104HD
 from .keithley_2000 import Fluke5522AComp, Keithley2000
+from .keithley_2000_cal import Keithley2000Cal
 from .keysight_34410a import Keysight34410A
 from .keysight_truevolt import Keysight34460A, Keysight34461A, Keysight34465A, Keysight34470A, KeysightTruevolt
 from .keysight_dacq import Keysight34970A, Keysight34972A, KeysightDacq, channel_for, pair_channel

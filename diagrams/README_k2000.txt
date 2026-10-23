@@ -19,3 +19,11 @@ GROUP (one picture per separate hook-up; the numbers are the Calibration Manual 
             (5522A ZCOMP NONE; 5560A 2-wire mode); the 2000 is on its 2-wire resistance function. The manual's Figure 1-6 shows the SENSE jacks wired: do not copy that.
 
 The 2000 INPUTS switch must be on FRONT for every point; the program reads it (:SYST:FRSW?) before measuring.
+
+ADJUSTMENT (Procedures/Keithley_2000_Adjustment.py)
+---------------------------------------------------
+The guided adjustment shows a picture at every change of wiring, with the same GROUPs plus the two front-terminal groups of the adjustment:
+  SHORT     Keithley 8610 low-thermal shorting plug on the 2000 front INPUT HI / LO and SENSE jacks (Calibration Manual Figure 2-1)
+  OPEN      all cables and accessories removed from the front jacks (p. 3-11); a picture is optional
+  DCV / ACV / DCI / ACI / OHM4   as above, adjustment figures 2-2 (voltage and 4-wire ohms), 2-3 (current), 2-4 (AC voltage); calibrator external sense OFF for DC volts (p. 2-9), ON for all resistance steps (p. 2-10)
+Search order: hook_k2000_ADJ_<cal>_<G>  ->  hook_k2000_ADJ_<G>  ->  hook_k2000_<cal>_<G>  ->  hook_k2000_<G>   (the verification pictures are used when no ADJ picture exists)
