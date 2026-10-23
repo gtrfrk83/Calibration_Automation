@@ -49,13 +49,26 @@ class Budget:
     def emu(self):
         return self.k * self.combined if self.components else None
 
+    @property
+    def value(self):
+        """The larger of the budget (EMU) and the CMC, UNROUNDED (SI), or None when neither exists.  `reported` is this rounded UP to 2 figures; engines that
+        combine several levels (DC gain) or print through uncertainty.format_value use the unrounded value so nothing is rounded twice."""
+        if self.emu is None and self.cmc is None:
+            return None
+        return max(self.emu or 0.0, self.cmc or 0.0)
+
     def add(self, name, u, sensitivity=1.0, source=''):
         self.components.append(Component(name, u, sensitivity, source))
 
 
-def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None, type_a=(), extra=(), scope=None, range_value=None):
+def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None, type_a=(), extra=(), scope=None, range_value=None,
+          direction='output', basis=None, cmc=None):
     """Budget for one applied point.  `standard` is a specmanager.StandardSpec (or model text); `resolution` overrides the sheet-derived
-    calibrator resolution (SI); `type_a` / `extra` are (name, u_k1, sensitivity) tuples."""
+    calibrator resolution (SI); `type_a` / `extra` are (name, u_k1, sensitivity) tuples.
+    Optional (the defaults are what every multimeter engine has always got):
+      direction  row direction of the standard: 'output' (it SOURCES the point, the default) or 'input' (it MEASURES it, e.g. the 5790B reading a generator)
+      basis      scope CMC basis ('generate' when None, or 'measure'): a measuring standard is checked against the laboratory's Measure CMC
+      cmc        a CMC (SI) the caller already worked out (the oscilloscope DC lines of the scope are not in the DMM tables): used instead of the scope lookup"""
     if isinstance(standard, str) or isinstance(standard, int):
         key = standard
         standard = sm.standard(key)
@@ -68,13 +81,15 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
             scope = uncertainty.load()
         except Exception:
             scope = None
-    if scope is not None:
-        b.cmc = scope.dmm(kind, nominal, range_value, frequency)
+    if cmc is not None:
+        b.cmc = cmc
+    elif scope is not None:
+        b.cmc = scope.dmm(kind, nominal, range_value, frequency) if basis is None else scope.dmm(kind, nominal, range_value, frequency, basis=basis)
     if standard is not None:
         if kind == 'TEMP':        # thermocouple simulation (Type K): the calibrator's degC specification, never the magnitude lookup
             hit = standard.lookup_temperature(nominal)
         else:
-            hit = standard.lookup('OHM' if kind in ('OHM2', 'OHM4') else kind, nominal, frequency=frequency)
+            hit = standard.lookup('OHM' if kind in ('OHM2', 'OHM4') else kind, nominal, frequency=frequency, direction=direction)
         b.hit = hit
         if hit is None:
             b.notes.append(f'{standard.model}: no specification row covers this point')
@@ -97,6 +112,29 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
     elif b.cmc is not None:
         b.reported = ceil_sig(b.cmc)
     return b
+
+
+def osc_dc(volts, impedance='1M', standard='5560A', scope=None):
+    """Budget for a DC level a calibrator applies to an oscilloscope input (DC gain, DC offset, DVM DC, trigger level), or None when the laboratory's
+    oscilloscope DC CMC does not cover the level (the point then carries no uncertainty, as before: nothing is extrapolated).
+    CMC (floor)  = the scope's oscilloscope DC line for that input impedance, ABSOLUTE volts (Scope.oscilloscope('offset', ...)).
+    budget       = the calibrator's published DC voltage specification at the level / its coverage divisor, + resolution when the sheet has one, k = 2.
+    Reported     = Budget.value / .reported: the larger of the two, never below the CMC.  If the standard or its sheet row is missing the budget has no
+    components and the CMC alone is reported (the engines never lose a report over a missing sheet)."""
+    if scope is None:
+        scope = uncertainty.load()
+    level = abs(volts)
+    cmc, _unit, _note = scope.oscilloscope('offset', volts=level, impedance=str(impedance))
+    if cmc is None:
+        return None
+    try:
+        return build('DCV', level, 'V', standard=standard, scope=scope, cmc=cmc)
+    except Exception:
+        b = Budget('DCV', level, 'V')
+        b.cmc = cmc
+        b.reported = ceil_sig(cmc)
+        b.notes.append('budget not built: scope CMC used')
+        return b
 
 
 def audit(reported, b, tolerance=1e-12):

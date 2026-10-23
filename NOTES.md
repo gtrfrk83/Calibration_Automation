@@ -496,7 +496,7 @@ New procedure rule: wire the mixin (pm_init / pm_begin_run / pm_attach / pm_chec
   `audit(reported, budget)` returns OK / UNDER CMC / UNDER BUDGET / NOT IN SCOPE.
 - `report_pdf.point_uncertainty(p, standard=None)` uses the budget when the calibrator model is passed (handheld_dmm passes 5522A / 5560A from its calibrator
   choice; truevolt_verification, Procedures/Agilent_34401A.py and Procedures/Fluke_8846A_Verification.py pass 5560A; dacq_verification passes the selected
-  calibrator).  Every multimeter procedure now uses the budget.  The MDO4000C, FGEN and WaveSurfer (oscilloscope / generator) engines are still CMC-only.
+  calibrator).  Every multimeter procedure now uses the budget.  The MDO4000C, FGEN and WaveSurfer (oscilloscope / generator) engines use it for the points that have a matching sheet (branch `uncertainty-engines`, section 'Oscilloscope and generator engines on the uncertainty budget'); the rest of their points, and the TDS2000C, are still CMC-only.
 - Temperature (thermocouple simulation) uncertainty and TAR / TUR, all handheld multimeters (110-series 116, 87V, 287/289, 170-series 179; the Fluke 77 and Klein MM325 have no temperature point):
   the handheld engine sources Type K from the 5522A / 5560A (`TC_TYPE K` + `OUT <t>CEL`, through the 80AK adapter) and the report row now gets an Uncertainty and TAR / TUR from the
   calibrator's published 1-year Type K SIMULATION specification in degC (`specs/standards/fluke_5522a_standard.json` / `fluke_5560a_standard.json`, kind TEMP, direction output, loaded
@@ -835,13 +835,71 @@ Mike (A2LA): "We operate on a 95 spec": the expanded uncertainty printed on a re
   Fluke 8846A: NO change (it is fixed to the 5560A, as are the Truevolt 34460A-70A and the 34401A; the 5560A sheet is untouched).
 - Affected: every report whose Uncertainty / TUR comes from the 5522A: the handheld engine (110-series, 77 IV, 170-series, 87V, 287/289, MM325; default calibrator 5560A; affected when the technician picks the 5522A), `dacq_verification` (34970A / 34972A),
   `agilent34410a_verification`, `keithley2000_verification` and `fluke8808a_verification` (default calibrator 5522A) when the 5522A is selected, and the Datasheet Builder match (`datasheet_builder_match`: its TUR / uncertainty for a 5522A assignment; the automatic choice by TUR can move toward the 5522A where the two were close: spot checks 5522A new vs 5560A printed uncertainty: DC 5 V 63 uV vs 44 uV, AC 1 V 1 kHz 170 uV vs 130 uV, DC 100 mA 32 uV vs 9.8 uV (5560A still ahead), 1 kohm 0.026 vs 0.026 (now a tie: the lab default order, 5560A first, decides)).
-  The scope / generator engines (TDS2000C, MDO4000C, WaveSurfer, 33210A-33250A) use TAR or their own CMC-only budgets: unchanged. A report is never below the A2LA CMC either way.
+  The scope / generator engines (TDS2000C, MDO4000C, WaveSurfer, 33210A-33250A) use TAR or their own CMC-only budgets: unchanged by that branch (the later branch `uncertainty-engines` moved the MDO4000C, WaveSurfer and 33210A-33250A points that have a sheet onto the budget; the 5790B sheet's 99 % divisor 2.576 is part of it). A report is never below the A2LA CMC either way.
 - Reports already issued are NOT changed: `report_snapshots` stores the printed rows (strings, display-scaled, with Uncertainty / TAR / TUR) and `report_snapshot.regenerate` prints them again from the stored record without recomputing (tested: `tests/test_standard_confidence.py`
   `ReprintKeepsIssuedUncertainty`, a reprint after the change is page-identical to the original). An event without a snapshot is rebuilt from history rows with Uncertainty / TAR / TUR BLANK (never recomputed). Only newly generated reports carry the new numbers (a run exported again from a procedure window is a new report).
 - Tests: existing tests that embed 5522A uncertainties were updated and reviewed one by one: `test_specmanager` (divisor, wizard example 1.5 uV / 3.0 uV -> 1.1646 uV / 2.33 uV, audit), `test_standard_5520a` (same-divisor test: the 5520A and 5522A budgets are now equal as stored),
   `test_beta_temp_uncertainty` (5522A Type K budgets, TAR / TUR, PDF rows). Golden transcripts did not change. New `tests/test_standard_confidence.py`.
 - UNVERIFIED / to confirm: (a) the 5522A level was read from the rendered page image of printed p. 1-8 (single "99 %" line); no k factor is printed, 2.576 is the normal-distribution value for 99 % (the 5560A / 5790B print k = 2.58, the table uses 2.576 as the code always did);
   (b) the lab's own 5522A SpecTrack sheet says [Not Specified]: its numbers are the 5522A manual's (four 1-year rows deliberately more conservative, sheet note 8), so they are 99 % numbers; (c) 8563E / 96270A / 8902A keep divisor 2 for want of a printed level; (d) the 5790B /AF 50 MHz row (95 %) shares the 5790B's 2.576.
+## Oscilloscope and generator engines on the uncertainty budget (branch `uncertainty-engines`, part A; simulated bench, stub tests and a real Tk under Xvfb only; never run on hardware)
+Owner ('yes please' to the offer): move the engines that printed the A2LA scope CMC ALONE (MDO4000C, 33210A / 33220A / 33250A, WaveSurfer WS4104HD) onto the budget the multimeter engines use: u(standard) = published accuracy / divisor (+ resolution / sqrt 12 when the sheet has one), EMU = 2 * RSS, reported = `ceil_sig(max(budget, CMC))`. Only points with a matching standards sheet and a well defined budget; the rest stay CMC-only and are listed. Reports already issued are not changed (snapshots). Part B (frequency steps of the handhelds) is a separate commit, see 'Handheld frequency steps print no uncertainty' below.
+
+SURVEY (done before any edit; `report_pdf.scope()` = `specs/a2la_1888_03_cmc.json`; sheets = `specs/standards/*.json`; `tartur.NATURAL_UNITS` guard = a tolerance in one unit is never divided by an uncertainty in another):
+| engine | points that carried an uncertainty (CMC-only) | standard that actually applies the stimulus / measures | sheet in specs/standards? | NATURAL_UNITS guard | decision |
+| MDO4000C `OFFSET` (64 listed), `DVMDC` (36) | scope 'oscilloscope DC' line, absolute V | 5560A SCOPE DCV (the 5560A sources DC) | 5560A 'Voltage, DC' (95 %, divisor 2) | not used by this engine: `tartur.from_values` compares the unit strings (V / V) | CONVERT |
+| MDO4000C `GAIN` (108) | the same line at both levels, quadrature, % of the expected difference | 5560A SCOPE DCV at vneg and vpos | the same DC rows | % tolerance vs % uncertainty; TAR blank (spec in V) | CONVERT (each level, then RSS as before) |
+| MDO4000C `IMP` (25) | 'Resistance - Measure' CMC | the 5560A MEASURES the input resistance | no (the 5560A sheet has no resistance INPUT row) | ohm / ohm | CMC-only |
+| MDO4000C `BW` (224) | scope level-sine flatness CMC (dB -> ratio) | 5560A leveled sine head | no flatness / leveled-sine rows on the 5560A sheet (only the 5522A sheet has them) | ratio | CMC-only |
+| MDO4000C `DELTA` 464, `DVMAC` 20, `DVMFREQ` 24, `ABSAMP`, `PHASE`, `XTALK`, `IMD`, `TPAFUNC`, `REFFREQ`, `AFG*` | N/A today (timing, jitter, RF level / phase, AFG: no CMC, `mdo4000c_reference_cmc.json` all null) | 5560A time mark / 96270A / 33220A / reference meters | no sheet for a time mark; the 96270A sheet is RF level, not these quantities | - | stay N/A (never invented) |
+| MDO4000C `NOISE`, `BAL`, `DANL`, `SPUR`, `TRIGOUT`, `DIGITAL`, `SELFTEST`, `SPC` | N/A (no stimulus, or pass / fail) | - | - | - | stay N/A |
+| WaveSurfer `dcv` (80), `offset` (16), `trigger` (24) | scope 'oscilloscope DC' line, 1 MOhm, absolute V (trigger: the larger of the two bracket steps) | 5560A SCOPE DCV | 5560A 'Voltage, DC' | V / V (TAR only at the sourced level) | CONVERT |
+| WaveSurfer `impedance` (28), `bandwidth` (24) | 'Resistance - Measure' CMC; level-sine flatness CMC (dB) | 5560A measures / leveled sine | no (as for the MDO) | ohm; dB | CMC-only |
+| WaveSurfer `timebase` (1), `noise` | blank | - | - | - | stay blank |
+| 33210A / 33220A / 33250A `ACAMP` sine (6 each), `LFFLAT` sine (3 each) | scope 'AC Voltage - Measure' CMC at the nominal and frequency | Fluke 5790B MEASURES the generator (3458A in the manual; this program uses the 5790B) | 5790B 'Voltage, AC [Sinewave, Absolute]', direction INPUT (99 %, divisor 2.576) | V / V | CONVERT (needs `direction='input'`, `basis='measure'`) |
+| 33210A / 33220A / 33250A `ACAMP` square (1 each) | the same Measure CMC | 5790B | the 5790B sinewave rows do not describe a square wave (the existing TAR rule, same reason) | V / V | CMC-only |
+| 33210A / 33220A / 33250A `TIMEBASE` (1 each) | 'Frequency - Measure' CMC | 53131A / 53132A counter (or typed) | NO sheet (`agilent_53131a_53132a_NOTE.txt`: the Programming Guide has no accuracy table) | Hz / Hz | CMC-only |
+| 33210A / 33220A / 33250A `FLAT` (27 / 42 / 42), `SELFTEST` | blank (no CMC in dB) | power meter (default method) or the 5790B wideband input | the 5790B wideband flatness rows exist, but the default method is a power meter (no sheet) and there is no dB CMC | dB | stay blank |
+Not in the request, untouched: the TDS2000C engine (`tds2000c_verification.py`, seeded verified) has the same CMC-only pattern for its 5560A DC gain points; it is a candidate for the same change on request.
+
+CHANGE (A):
+- `uncertainty_budget.py` (shared, in no procedure fingerprint): `build(..., direction='output', basis=None, cmc=None)` (defaults = the old call, so every multimeter engine is byte for byte as before): `direction='input'` looks the standard up as a MEASURING standard (the 5790B), `basis='measure'` checks it against the lab's Measure CMC, `cmc=` replaces the scope lookup (the oscilloscope DC lines are not in the DMM tables); `Budget.value` = the larger of EMU and CMC, unrounded; new `osc_dc(volts, impedance, standard, scope)` = the DC budget for a level a calibrator applies to a scope input (None where the lab's oscilloscope DC line has no entry: nothing is extrapolated; a missing sheet or a raising lookup falls back to the CMC alone).
+- `mdo4000c_verification.py`: `uncertainty_parts` for OFFSET / DVMDC / GAIN go through `osc_dc` (`CAL_MODEL = '5560A'`); IMP, BW and the reference-file kinds are untouched; the report note names the budget.
+- `fgen_verification.py`: `measure_budget(p)` (5790B, sine ACAMP / LFFLAT only; `STD_MODEL = '5790B'`) and `uncertainty_value` uses it; source text 'budget'; square wave, time base, FLAT as before; the editable `fgen_332xx_reference_cmc.json` value is still floored by the larger of the budget and the CMC.
+- `Procedures/WaveSurfer_WS4104HD.py`: `_dc_budget_value` for dcv / offset / trigger; the PDF footer note passes '5560A' (the footer text is not drawn by the report layer today, `footer_note` is ignored there).
+- No instrument command, limit, pass / fail rule, safety prompt or driver was touched. TAR / TUR code is unchanged (TUR follows the printed value, TAR is the unscaled specification).
+- Tests: new `tests/test_scope_gen_budget.py` (hand-worked values: 5560A 1 V = 7.4 uV and 5 V = 41 uV, 5790B 20 mV at 1 kHz = 3.5 uV -> EMU 2.7174 uV, oscilloscope DC CMC 640 uV at 1 V and 3.04 mV at 5 V, GAIN quadrature 0.81239 % -> 0.82 %; the budget path is proved by making it dominate (divisor patched to 0.001); CMC-only / blank kinds unchanged; WaveSurfer rows, footer and demo flag through the real `write_certificate_pdf`; whole-export PDFs for all three engines through `tests/tartur_scopes_harness.py`).
+
+RESULT, before / after (origin/main vs this branch, every point of every engine run through the same code, `uncertainty_text` / `point_uncertainty` / `scope_uncertainty` and the TAR / TUR strings): NOTHING CHANGED. 0 of 1307 MDO points, 0 of 39 / 54 / 54 generator points, 0 of 173 WaveSurfer points differ in the Uncertainty, TAR or TUR text. Reason: the reported value is the larger of budget and CMC, and the CMC is the larger everywhere today.
+| engine | point | CMC (floor) | budget EMU | budget / CMC | printed before | printed after |
+| MDO | OFFSET +0.9 V into 50 ohm | 2.4 mV | 6.8 uV | 0.3 % | 2.4 mV | 2.4 mV |
+| MDO | OFFSET +5 V into 50 ohm | 14 mV | 41 uV | 0.3 % | 14 mV | 14 mV |
+| MDO | OFFSET +99.5 V into 1 MOhm | 60 mV | 950 uV | 1.6 % | 60 mV | 60 mV |
+| MDO | DVM DC -5 V | 3.1 mV | 41 uV | 1.3 % | 3.1 mV | 3.1 mV |
+| MDO | DVM DC -1 V | 640 uV | 7.4 uV | 1.2 % | 640 uV | 640 uV |
+| MDO | GAIN +/-4.5 mV into 50 ohm (id 124, % of 9 mV) | 0.81239 % (51.7 uV per level, quadrature) | 0.8 uV per level | 1.5 % | 0.82 % | 0.82 % |
+| WaveSurfer | DC gain 6 mV | 44 uV | 860 nV | 2.0 % | 44 uV | 44 uV |
+| WaveSurfer | DC gain 3 V | 1.9 mV | 29 uV | 1.6 % | 1.9 mV | 1.9 mV |
+| WaveSurfer | Offset +10 V | 6.1 mV | 72 uV | 1.2 % | 6.1 mV | 6.1 mV |
+| WaveSurfer | Trigger level 0 mV (steps +/-20 mV) | 52 uV | 990 nV | 1.9 % | 52 uV | 52 uV |
+| 33220A | ACAMP sine 20 mV @ 1 kHz | 2.9 uV | 2.8 uV | 94 % | 2.9 uV | 2.9 uV |
+| 33220A | ACAMP sine 670 mV @ 1 kHz | 20 uV | 19 uV | 92 % | 20 uV | 20 uV |
+| 33220A | ACAMP sine 7 V @ 1 kHz | 170 uV | 150 uV | 87 % | 170 uV | 170 uV |
+| 33220A | LFFLAT sine 670 mV @ 100 kHz | 120 uV | 97 uV | 83 % | 120 uV | 120 uV |
+| 33220A | LFFLAT sine 2 V @ 100 kHz | 340 uV | 250 uV | 73 % | 340 uV | 340 uV |
+| 33220A | LFFLAT sine 7 V @ 100 kHz | 1.2 mV | 1.1 mV | 87 % | 1.2 mV | 1.2 mV |
+So the change is structural today: the DC budgets are 0.3 % to 2.7 % of the oscilloscope DC CMC and cannot matter, but the 5790B budgets are 73 % to 94 % of the AC Measure CMC and WILL decide the printed value as soon as a number moves: the 5790B sheet is stored at 99 % (divisor 2.576, 'Confidence level rule'); at divisor 2 the printed values would be 3.5 uV, 6.1 uV, 9.1 uV, 24 uV, 48 uV, 190 uV (ACAMP 20 mV ... 7 V) and 130 uV, 340 uV, 1.4 mV (LFFLAT): 7 of 9 rise. A resolution term is not in any of these budgets (neither the 5560A nor the 5790B sheet records a resolution; the budget notes say so) and would add to the 5790B figures (the Standards Specs tab can record one).
+
+VERIFIED STATUS (fingerprints worked out with `verified.Registry.file_components` for every sidecar procedure, origin/main vs this branch, 40 procedures; user-built `ds:` procedures use `dsb_runtime.py`, untouched): 5 procedures change fingerprint and show 'Changed since verification' if they were verified:
+- `WaveSurfer_WS4104HD.py` (SEEDED VERIFIED, so it flips): its launcher `Procedures/WaveSurfer_WS4104HD.py` (the whole engine is that file). The printed numbers did not change.
+- `Tektronix_MDO4000C_Verification.py`: `mdo4000c_verification.py`.
+- `Agilent_33220A_Verification.py`, `Agilent_33250A_Verification.py`, `Keysight_33210A_Verification.py`: `fgen_verification.py`.
+- Not flipped: TDS2000C and Fluke 117 (the other two seeded), every multimeter procedure (`uncertainty_budget.py`, `report_pdf.py`, `tartur.py` are in no fingerprint).
+- The owner's own registry is not visible here: MDO and the three generators flip only if they were marked verified there.
+
+UNVERIFIED / to confirm: (a) that the 5560A normal-output DC voltage specification is the right budget for the 5560A SCOPE-mode DC output (the sheet has no scope-mode DC row; the existing TAR already uses the same row); it is far below the CMC either way; (b) the 5790B sheet divisor 2.576 (99 %) for a lab that reports at 95 %: see above, this alone decides 7 of 9 generator values; (c) no resolution term for the 5560A / 5790B (not on the sheets); (d) the oscilloscope DC CMC lines (0.06 % + 40 uV at 1 MOhm, 0.26 % + 40 uV at 50 ohm up to 6.6 V) are the existing scope file; above 6.6 V into 50 ohm the MDO prints N/A as before; (e) the budget does not include the unit under test (resolution, repeatability), as before.
+Run `python -m unittest tests.test_scope_gen_budget`.
+
 ## Run queue sharing rules (Mike, 2026-10-22)
 Resistance / continuity (kind OHM), capacitance (CAP) and thermocouple simulation (TEMP) are NOT shared: one meter at a time (reason: SOURCE_REASON). Points set by hand with no calibrator output (open input) ARE shareable. The high-voltage confirmation is asked once per hook-up group in a shared unit (still once per point outside a queue). Cap stays 8 meters; no queue in the Datasheet Builder.
 

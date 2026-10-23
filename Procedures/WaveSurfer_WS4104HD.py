@@ -3714,18 +3714,28 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return f'{scale*1000:g}mV/Div'
         return f'{scale:g}V/Div'
 
+    @staticmethod
+    def _dc_budget_value(volts, sc):
+        """(value, 'V') for a DC level the Fluke 5560A applies to a 1 MOhm input: the larger of the 5560A budget (its published DC voltage specification /
+        coverage divisor, k = 2) and the scope's oscilloscope DC CMC, unrounded; None when the scope has no entry for the level.  The CMC dominates
+        at every WS4104HD level today (the budget is below 3 % of it); the budget only matters if the sheet or the divisor is edited."""
+        import uncertainty_budget
+        b=uncertainty_budget.osc_dc(volts,'1M','5560A',sc)
+        return (b.value,'V') if b is not None else None
+
     def scope_uncertainty_value(self, kind, r):
-        """(value, unit) of the scope CMC for one result - the number behind scope_uncertainty - or None when the scope has no entry."""
+        """(value, unit) of the uncertainty for one result - the number behind scope_uncertainty - or None when the scope has no entry.
+        DC gain, offset and trigger level: larger of the 5560A budget and the scope CMC; impedance and bandwidth: the scope CMC alone."""
         sc=__import__('report_pdf').scope()
         if sc is None:
             return None
         try:
             if kind=='dcv':
-                value,unit,_=sc.oscilloscope('offset',volts=r['nominal_v'],impedance='1M')   # absolute volts, as the row is in volts
+                return self._dc_budget_value(r['nominal_v'],sc)   # absolute volts, as the row is in volts
             elif kind=='impedance':
                 value,unit,_=sc.oscilloscope('impedance',ohms=r['nominal_ohm'])
             elif kind=='offset':
-                value,unit,_=sc.oscilloscope('offset',volts=r['nominal_v'])
+                return self._dc_budget_value(r['nominal_v'],sc)
             elif kind=='bandwidth':
                 value,unit,_=sc.oscilloscope('bandwidth',volts_pp=r['amplitude_vpp'],frequency=r['high_hz'])
             elif kind=='trigger':
@@ -3735,7 +3745,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                     sourced=max(abs(r['short_v']),abs(r['past_v']))
                 else:
                     sourced=abs(r['level_v'])+TRIG_LIMIT_V          # results saved before the sourced steps were recorded
-                value,unit,_=sc.oscilloscope('offset',volts=sourced,impedance='1M')
+                return self._dc_budget_value(sourced,sc)
             else:
                 return None
         except (KeyError,TypeError,ZeroDivisionError):
@@ -3934,7 +3944,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                                       ('Instrument ID',self.instrument_id.get().strip() or 'NOT ENTERED'),
                                       ('Serial',self.serial.get().strip())],
                 demo=self.any_synthetic(),details=details,
-                footer_note=report_pdf.uncertainty_note(rows),title='Calibration Data',
+                footer_note=report_pdf.uncertainty_note(rows,'5560A'),title='Calibration Data',
                 snapshot_context=report_pdf.context_for(self))
         except ImportError:
             messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab')
