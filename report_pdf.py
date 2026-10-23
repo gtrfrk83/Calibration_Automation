@@ -330,6 +330,20 @@ def context_for(app) -> dict:
         return {}
 
 
+DEMO_FOOTER_TEXT = 'DEMO DATA - NOT CALIBRATION EVIDENCE'
+
+
+def demo_footer_left(text, font, size, margin, page_width, demo_font, demo_size, gap=8.0):
+    """Left page-footer text for a DEMO report: cut with '...' so it ends before the centred red demo line (a long title would print over it)."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    limit = page_width / 2 - stringWidth(DEMO_FOOTER_TEXT, demo_font, demo_size) / 2 - gap - margin
+    if stringWidth(text, font, size) <= limit:
+        return text
+    while text and stringWidth(text + '...', font, size) > limit:
+        text = text[:-1]
+    return text.rstrip() + '...'
+
+
 def write_calibration_pdf(path, rows, header=None, title='Calibration Data', demo=False, details=None, footer_note='', show_tar_tur=None, modifications=None,
                           issued_at=None, reprint_note=None, record_history=True, snapshot_context=None):
     """Write the report; returns the number of data rows.
@@ -528,10 +542,13 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
             except ImportError:
                 software = ''
             self.drawRightString(W - margin, 0.34 * inch, f'{software}Page {self._pageNumber} of {count}')
-            self.drawString(margin, 0.34 * inch, f'Instrument ID: {instrument_id or "-"}   |   {title}')
+            left = f'Instrument ID: {instrument_id or "-"}   |   {title}'
+            if demo:                                   # non-demo footers are unchanged
+                left = demo_footer_left(left, REG, 7, margin, W, BOLD, 8)
+            self.drawString(margin, 0.34 * inch, left)
             if demo:
                 self.setFillColorRGB(0.85, 0.2, 0.2); self.setFont(BOLD, 8)
-                self.drawCentredString(W / 2, 0.34 * inch, 'DEMO DATA - NOT CALIBRATION EVIDENCE')
+                self.drawCentredString(W / 2, 0.34 * inch, DEMO_FOOTER_TEXT)
                 self.setFillAlpha(0.10)
                 self.setFillColorRGB(0.85, 0.1, 0.1); self.setFont(BOLD, 74)
                 self.translate(W / 2, H / 2); self.rotate(45)
