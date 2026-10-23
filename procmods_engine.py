@@ -98,6 +98,8 @@ for _key, _default, _what in (('zero', 2.0, 'settle before a zero-offset reading
                               ('ac', 4.0, 'settle, AC points'), ('freq', 3.0, 'settle, frequency points'),
                               ('ohm_high', 4.0, 'settle, resistance ranges of 10 Mohm and above')):
     _t('f8808a', 'settle.' + _key, _default, 0.2, 120.0, f'8808A: {_what}')
+_t('f8808a', 'settle.dci_10a', 8.0, 0.2, 120.0, '8808A: settle, 10 A DC current range (UNVERIFIED estimate)')
+_t('f8808a', 'settle.dci_low', 6.0, 0.2, 120.0, '8808A: settle, 200 uA and 2000 uA DC current ranges (UNVERIFIED estimate)')
 _t('k2000', 'settle.default', 2.0, 0.2, 120.0, 'Keithley 2000: settle, DC volts and other points')
 _t('k2000', 'settle.ac', 20.0, 0.2, 120.0, 'Keithley 2000: settle, AC volts and AC current (3 Hz detector bandwidth; UNVERIFIED estimate)')
 _t('k2000', 'settle.dci', 3.0, 0.2, 120.0, 'Keithley 2000: settle, DC current')
