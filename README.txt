@@ -219,6 +219,8 @@ handheld_dmm.py   Shared engine for meters with no remote interface. For each po
                   calibrator (Fluke 5560A or 5522A over RS-232, or Manual mode where it only tells you what to set), then
                   a dialog asks you to type what the meter displays (yes/no questions for beeper, display, VoltAlert).
                   Limits are the manual's display-reading limits, compared exactly; readings are stored in base units.
+iflex_option.py   Subclass of the engine for the Fluke 374 / 375 / 376 / 376-II clamp meters: the window option "iFlex probe supplied: run the iFlex tests"
+                  (a spec's options.include_toggles; a spec without it runs as the engine does). Not used by any other procedure.
 specs/fluke_110_series_pv.json
                   Every step of Table 3 (110/114/115/116/117) and Table 4 (113) plus the display / backlight / keypad checks
                   and the 117 VoltAlert test, each tagged with the models it applies to (read from the page images).
@@ -307,17 +309,22 @@ Procedures/Fluke_365_Verification.py   (engine: handheld_dmm.py; spec: specs/flu
   Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf; the coil points print the calibrator's current uncertainty at the output current (point / 20), not multiplied by 20 (owner-chosen convention), TAR / TUR against the meter-reading tolerance.
   Not included: the calibration ADJUSTMENT (not needed). Rebuild the spec after editing the table:  python3 specs/build_fluke_365_spec.py     Demo with:  python Procedures/Fluke_365_Verification.py --demo
 
-Fluke 376 clamp meter (automated performance verification: lists on the Automated Calibrations tab; family spec 374 / 375 / 376 / 376-II, only the 376 is registered)
+Fluke 374 / 375 / 376 / 376-II clamp meters (automated performance verification: four rows on the Automated Calibrations tab, one family spec)
 -------------------------------------------------------------------------------------------------
-Procedures/Fluke_376_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_376_pv.json built by specs/build_fluke_376_spec.py; diagrams: diagrams/README_fluke376.txt)
-  38 points = Table 1 "Performance Tests" of the Fluke 374 / 375 / 376 / 376-II Calibration Manual (printed pp. 3-4): AC volts 4 (10 V and 500 V at 50 Hz, 900 V at 50 Hz, 500 V at 500 Hz),
-  DC volts 8 (-500, 10, 500, 900 V and -250, 50, 250, 450 mV), ohms 7 (60 ohm .. 54 kohm), capacitance 3 (10, 500, 900 uF), AC amps 4 and DC amps 3 (0.2 / 10 / 18 / 6 A driven through the 50-turn
-  coil: the meter reads 50 x the calibrator current), iFlex simulated 5 (3 to 75 mV at 50 Hz, 750 mV at 500 Hz applied to the iFlex input) and iFlex with the 50-turn coil 4.
-  The spec carries the model columns (374: 28 points, 375: 34, 376 and 376-II: 38); this launcher runs the 376.
-  Limits are the table's own, unchanged; six rows whose printed limit is not the full or half published accuracy (NOTES.md: the accuracy is from the fluke.com page, UNVERIFIED) are flagged in the point note.
+Procedures/Fluke_374_Verification.py, Fluke_375_Verification.py, Fluke_376_Verification.py, Fluke_376II_Verification.py
+  (engine: handheld_dmm.py through iflex_option.py; spec: specs/fluke_376_pv.json built by specs/build_fluke_376_spec.py; diagrams: diagrams/README_fluke376.txt, the same seven pictures for all four)
+  Table 1 "Performance Tests" of the Fluke 374 / 375 / 376 / 376-II Calibration Manual (printed pp. 3-4), 38 rows, one X / - column per model: 374 = 28 points, 375 = 34, 376 = 38, 376-II = 38.
+  AC volts 4 (10 V and 500 V at 50 Hz, 900 V at 50 Hz, 500 V at 500 Hz), DC volts 8 (-500, 10, 500, 900 V and -250, 50, 250, 450 mV), ohms 7 (60 ohm .. 54 kohm), capacitance 3 (10, 500, 900 uF),
+  AC amps 4 and DC amps 3 (0.2 / 10 / 18 / 6 A driven through the 50-turn coil: the meter reads 50 x the calibrator current), iFlex simulated 5 (3 to 75 mV at 50 Hz, 750 mV at 500 Hz applied to
+  the iFlex input) and iFlex with the 50-turn coil 4. The 374 has no mV, 30 / 54 kohm, 900 V or 18 A jaw rows; the 375 no 900 V or 18 A jaw rows; all four have all nine iFlex points.
+  iFlex option: the window has a check box "iFlex probe supplied: run the iFlex tests" (default ON). OFF skips the nine iFlex points (and their cable-change and dial prompts) for a meter
+  received without an iFlex: it asks first, never discards a recorded reading, is saved in the progress file and printed on the report ("iFlex tests: Not tested (no iFlex supplied)").
+  Prompts per full run (cable + function + high voltage + reading), iFlex ON / OFF: 374 44 / 31, 375 51 / 38, 376 and 376-II 55 / 42.
+  Limits are the table's own, unchanged; rows whose printed limit differs from the accuracy printed in the 374 FC / 375 FC / 376 FC Users Manual (pp. 20-26) are flagged in the point note (NOTES.md).
+  The 900 V rows (1000 V range, 1 V resolution) are shown and typed as whole volts.
   Calibrator: Fluke 5522A or 5560A (the manual names a 55xxA), automatic or Manual. The meter has no remote interface: you type the display reading in the reading window of each point.
   Prompts as the other handhelds: hook-up dialog only when the hook-up group changes (test leads; coil on the low- or high-current output; iFlex simulation leads; iFlex loop on the coil),
-  "Change the function" at every dial change, ONE high-voltage confirmation per hook-up group (30 V and above). Run queue as the other handhelds.
+  "Change the function" at every dial change, ONE high-voltage confirmation per hook-up group (30 V and above). No run queue (the iFlex setting is per meter).
   Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf; the coil points print the calibrator's current uncertainty at the output current (not multiplied by 50, owner-chosen convention),
   the iFlex simulated points the calibrator's AC volts uncertainty (TAR / TUR blank there).
   Not included: the calibration ADJUSTMENT (Table 3). Rebuild the spec after editing the table:  python3 specs/build_fluke_376_spec.py     Demo with:  python Procedures/Fluke_376_Verification.py --demo

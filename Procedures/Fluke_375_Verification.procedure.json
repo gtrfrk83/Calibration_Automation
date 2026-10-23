@@ -1,0 +1,51 @@
+{
+ "schema": 1,
+ "id": "Fluke_375_Verification",
+ "name": "Fluke 375 Clamp Meter Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "375",
+ "category": "Clamp Meter",
+ "version": "1",
+ "order": 37,
+ "description": "Fluke 374 / 375 / 376 / 376-II Clamp Meter Performance Verification (family spec): this launcher runs the 375, 34 points",
+ "launcher": "Procedures/Fluke_375_Verification.py",
+ "engine": [
+  "handheld_dmm.py",
+  "iflex_option.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_376_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_375_Verification.py",
+   "handheld_dmm.py",
+   "iflex_option.py",
+   "hookups.py#fluke376",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_376_pv.json#375"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke376",
+  "diagram_prefixes": [
+   "hook_fluke376"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_375_Verification.py",
+  "Procedures/Fluke_375_Verification.procedure.json",
+  "specs/fluke_376_pv.json",
+  "specs/build_fluke_376_spec.py",
+  "diagrams/README_fluke376.txt",
+  "tests/test_fluke_376_points.py"
+ ]
+}

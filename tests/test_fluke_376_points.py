@@ -1,5 +1,6 @@
-"""Fluke 376 clamp meter performance verification (Procedures/Fluke_376_Verification.py -> handheld_dmm.main('376', spec=...), the shared handheld engine,
-specs/fluke_376_pv.json built by specs/build_fluke_376_spec.py from the Fluke 374 / 375 / 376 / 376-II Calibration Manual, Table 1, printed pp. 3-4).
+"""Fluke 374 / 375 / 376 / 376-II clamp meter performance verification (Procedures/Fluke_37x_Verification.py -> iflex_option.main(MODEL, spec=...), a subclass of the shared handheld
+engine that adds the 'iFlex probe supplied' window option; specs/fluke_376_pv.json built by specs/build_fluke_376_spec.py from the Calibration Manual, Table 1, printed pp. 3-4, and the
+374 FC / 375 FC / 376 FC Users Manual, printed pp. 20-26, for the accuracy).  The 376 is the model of the detailed tests; the 374, 375 and 376-II have their own classes below.
 
 Part 1: the spec against an INDEPENDENT second transcription of Table 1 (read from the rendered page images at 130, 200 and 260 dpi), the X / - model columns of the family spec (374, 375,
 376, 376-II), the rows whose printed limit is neither the full nor half of the published accuracy (flagged, NOT changed), the coil and iFlex points (calibrator output x 50 = meter reading,
@@ -29,9 +30,9 @@ MODELS = ('374', '375', '376', '376-II')
 
 # Table 1 as read a second time from the page images: step -> (calibrator output as the engine words it, X / - for 374 375 376/376-II, lower limit, upper limit)
 TABLE_1 = {
-    1: ('10 V AC @ 50 Hz', 'XXX', '9.4', '10.7'), 2: ('500 V AC @ 50 Hz', 'XXX', '492.0', '508.0'), 3: ('900 V AC @ 50 Hz', '--X', '882.0', '919.0'),
+    1: ('10 V AC @ 50 Hz', 'XXX', '9.4', '10.7'), 2: ('500 V AC @ 50 Hz', 'XXX', '492.0', '508.0'), 3: ('900 V AC @ 50 Hz', '--X', '882', '919'),
     4: ('500 V AC @ 500 Hz', 'XXX', '492.0', '508.0'),
-    5: ('-500 V DC', 'XXX', '-505.5', '-494.5'), 6: ('10 V DC', 'XXX', '9.4', '10.6'), 7: ('500 V DC', 'XXX', '494.5', '505.5'), 8: ('900 V DC', '--X', '886.0', '914.0'),
+    5: ('-500 V DC', 'XXX', '-505.5', '-494.5'), 6: ('10 V DC', 'XXX', '9.4', '10.6'), 7: ('500 V DC', 'XXX', '494.5', '505.5'), 8: ('900 V DC', '--X', '886', '914'),
     9: ('-250 mV DC', '-XX', '-253.0', '-247.0'), 10: ('50 mV DC', '-XX', '49.0', '51.0'), 11: ('250 mV DC', '-XX', '247.0', '253.0'), 12: ('450 mV DC', '-XX', '445.0', '455.0'),
     13: ('60 Ω', 'XXX', '58.9', '61.1'), 14: ('300 Ω', 'XXX', '296.5', '303.5'), 15: ('540 Ω', 'XXX', '534.1', '545.9'), 16: ('3 kΩ', 'XXX', '2965', '3035'),
     17: ('5.4 kΩ', 'XXX', '5341', '5459'), 18: ('30 kΩ', '-XX', '29.65', '30.35'), 19: ('54 kΩ', '-XX', '53.41', '54.59'),
@@ -61,14 +62,22 @@ OUT_COMMANDS = {
     35: 'OUT 0.2A,50Hz', 36: 'OUT 10A,50Hz', 37: 'OUT 18A,50Hz', 38: 'OUT 6A,440Hz',
 }
 SECTION_COUNTS = {'AC volts': 4, 'DC volts': 8, 'Ohms': 7, 'Capacitance': 3, 'AC amps': 4, 'DC amps': 3, 'iFlex simulated': 5, 'iFlex with coil': 4}
-FUNCTION_PROMPTS = ['V~  (AC volts)', 'V⎓  (DC volts)', 'mV⎓  (DC millivolts: the V⎓ position, mV is its yellow alternate function; how it is selected is UNVERIFIED)',
-                    'Ω  (ohms: the Ω position, shared with continuity and capacitance)',
-                    'Capacitance ⊣⊢  (the Ω position, ⊣⊢ is its yellow alternate function; how it is selected is UNVERIFIED)',
-                    'A~  (AC amps: detachable jaw closed around the 50-turn coil)', 'A⎓  (DC amps: detachable jaw closed around the 50-turn coil)',
-                    'iFlex A~  (iFlex AC current; the iFlex probe plugged in, or the simulation leads)']
-# rows whose printed limit is neither the full nor half of the published accuracy (specs/build_fluke_376_spec.py): flagged, never changed
-FLAGGED = {1: 'rounded', 3: 'rounded', 28: 'tighter', 29: 'tighter', 36: 'tighter', 37: 'tighter'}
+FUNCTION_PROMPTS = ['V~  (AC volts)', 'V⎓  (DC volts)',
+                    'mV⎓  (DC millivolts: dial on V⎓ / mV, then press the yellow button to select mV; Users Manual p. 12)',
+                    'Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)',
+                    'Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button until the display shows µF; Users Manual p. 14)',
+                    'A~  (AC amps: detachable jaw closed around the 50-turn coil)',
+                    'A⎓  (DC amps: detachable jaw closed around the 50-turn coil; the yellow button is ZERO, Users Manual p. 11)',
+                    'iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)']
+# rows whose printed limit is not the full or half accuracy printed in the Users Manual (specs/build_fluke_376_spec.py): flagged per model, never changed
+_LOOSE = {'376': 'looser', '376-II': 'looser'}
+FLAGGED = {1: {'374': 'rounded', '375': 'rounded', **_LOOSE}, 2: _LOOSE, 3: _LOOSE, 4: _LOOSE,
+           28: {m: 'tighter' for m in MODELS}, 29: {m: 'tighter' for m in ('376', '376-II')}, 36: {m: 'tighter' for m in MODELS}, 37: {m: 'tighter' for m in MODELS}}
 IFLEX_SIM = (30, 31, 32, 33, 34)
+IFLEX_POINTS = IFLEX_SIM + (35, 36, 37, 38)
+# the Users Manual (R3 ENG) accuracy as read from the page images: (percent of reading, digits, printed page) by model
+UM_ACCURACY = {'ACV': {'374': ('1.5', 5, 24), '375': ('1.5', 5, 24), '376': ('1', 5, 24)}, 'DCV': ('1', 5, 24), 'MV': ('1', 5, 24), 'OHM': ('1', 5, 26), 'CAP': ('1', 4, 26),
+               'ACA50': ('2', 5, 20), 'ACA440': ('2.5', 5, 20), 'DCA': ('2', 5, 23), 'IFLEX': ('3', 5, 21)}
 COIL_POINTS = tuple(range(23, 30)) + (35, 36, 37, 38)
 # cable-change prompts: the group changes at these points (VOHM, then the coil terminals alternate, then the iFlex leads, then the iFlex loop on the coil)
 CABLE_POINTS = [1, 23, 24, 27, 28, 30, 35, 36]
@@ -77,13 +86,14 @@ FUNCTION_POINTS = [1, 5, 9, 13, 20, 23, 27, 30]
 
 def setUpModule():
     """tkinter is stubbed here, not at import time (see tests/test_87v_points.py)."""
-    global h, H, Flow, SPECS, Spy, SPEC, PTS, BUILDER
+    global h, H, Flow, SPECS, Spy, SPEC, PTS, BUILDER, X
     import _tk_stub
     _tk_stub.install()
     import handheld_dmm as _h
+    import iflex_option as _x
     import dsb_run_harness as _H
     from tests import test_handheld_options as _o
-    h, H, Flow, SPECS, Spy = _h, _H, _o.Flow, _o.SPECS, _o.Spy
+    h, H, Flow, SPECS, Spy, X = _h, _H, _o.Flow, _o.SPECS, _o.Spy, _x
     for m in MODELS:
         SPECS[m] = SPEC_NAME                                     # the shared Flow helper looks the spec up by model; removed again in tearDownModule
     SPEC = h.load_spec(SPEC_NAME)
@@ -137,35 +147,77 @@ class Spec(unittest.TestCase):
             self.assertIn('1-37', {p['id'] for p in h.points_for(SPEC, m)})
         self.assertEqual([n for n, p in enumerate(h.points_for(SPEC, '374'), 1)], [p['n'] for p in h.points_for(SPEC, '374')])     # renumbered 1..28 per model
 
-    def test_limits_against_the_published_accuracy(self):
-        """Every printed limit is inside the published accuracy (UNVERIFIED source: the fluke.com page of the 376); the builder classifies each row.  Flagged rows are stored AS PRINTED."""
+    def test_accuracy_table_is_the_users_manual(self):
+        """The builder's accuracy table (ACC) is the 374 FC / 375 FC / 376 FC Users Manual (pp. 20-26), per model; the 376-II (not in that manual) uses the 376 FC figures."""
+        for key, want in UM_ACCURACY.items():
+            for m in MODELS:
+                w = want[{'376-II': '376'}.get(m, m)] if key == 'ACV' else want
+                self.assertEqual(BUILDER.ACC[m][key], w[:2], (key, m))
+            self.assertEqual(BUILDER.ACC_PAGE[key], f'p. {(want["376"] if key == "ACV" else want)[2]}', key)
+        self.assertNotIn('fluke.com', (ROOT / 'specs' / 'build_fluke_376_spec.py').read_text(encoding='utf-8'))
+        self.assertNotIn('fluke.com', json.dumps(SPEC))
+
+    def test_limits_against_the_users_manual_accuracy(self):
+        """Every printed limit against the Users Manual accuracy, per model; the builder classifies each row.  Flagged rows are stored AS PRINTED."""
         steps, problems, flagged = BUILDER.build_steps()
-        self.assertEqual(problems, [])                              # none looser than the accuracy by more than half a display step
-        self.assertEqual({int(f[0].split('-')[1]): f[1] for f in flagged}, FLAGGED)
-        self.assertEqual({n: p['check']['verdict'] for n, p in PTS.items() if 'check' in p}, FLAGGED)
-        self.assertEqual(PTS[1]['check']['printed_vs_spec'], [dict(side='high', printed='0.7', half_spec='0.325', full_spec='0.65')])        # 10 V high 10.7 vs 10.65
-        self.assertEqual(PTS[3]['check']['printed_vs_spec'], [dict(side='high', printed='19', half_spec='9.25', full_spec='18.5')])         # 900 V ac high 919 vs 918.5
-        self.assertEqual([(c['printed'], c['half_spec']) for c in PTS[28]['check']['printed_vs_spec']], [('5', '5.25')] * 2)               # dc amps 10 A: +-5.0 vs +-10.5 (half 5.25)
-        self.assertEqual([(c['printed'], c['half_spec']) for c in PTS[37]['check']['printed_vs_spec']], [('13', '13.75')] * 2)             # iFlex with coil 18 A
+        self.assertEqual(problems, [])
+        self.assertEqual({int(f[0].split('-')[1]): {m: v for m, v in f[8].items() if v in ('tighter', 'rounded', 'looser')} for f in flagged}, FLAGGED)
+        self.assertEqual({n: sorted(p['check']['models']) for n, p in PTS.items() if 'check' in p}, {n: sorted(d) for n, d in FLAGGED.items()})
+        self.assertEqual({n: {m: c['verdict'] for m, c in p['check']['models'].items()} for n, p in PTS.items() if 'check' in p}, FLAGGED)
+        side = lambda n, m: PTS[n]['check']['models'][m]['printed_vs_spec']
+        self.assertEqual(side(1, '374'), [dict(side='high', printed='0.7', half_spec='0.325', full_spec='0.65')])        # 1.5 %: 10 V high 10.7 vs 10.65 (rounded)
+        self.assertEqual(side(1, '376'), [dict(side='high', printed='0.7', half_spec='0.3', full_spec='0.6')])          # 1 %: +-0.6 V; 10.7 is looser
+        self.assertEqual(side(2, '376'), [dict(side=s_, printed='8', half_spec='2.75', full_spec='5.5') for s_ in ('low', 'high')])       # 500 V: printed +-8.0 (1.5 %) vs +-5.5 (1 %)
+        self.assertEqual(side(3, '376-II'), [dict(side='low', printed='18', half_spec='7', full_spec='14'), dict(side='high', printed='19', half_spec='7', full_spec='14')])
+        self.assertEqual(side(4, '376'), side(2, '376'))
+        self.assertEqual([(c['printed'], c['half_spec']) for c in side(28, '374')], [('5', '5.25')] * 2)               # dc amps 10 A: +-5.0 vs +-10.5 (half 5.25)
+        self.assertEqual([(c['printed'], c['half_spec']) for c in side(37, '375')], [('13', '13.75')] * 2)             # iFlex with coil 18 A
         for n in FLAGGED:                                            # printed limits kept: nothing was corrected
             self.assertEqual((PTS[n]['low'], PTS[n]['high']), TABLE_1[n][2:], n)
-            self.assertIn('CHECK (printed limit not changed)', PTS[n]['note'])
-            self.assertNotIn('printed_limits', PTS[n])
+            self.assertIn('CHECK (printed limit not changed', PTS[n]['note'])
+            self.assertIn('Users Manual', PTS[n]['note'])
         self.assertFalse([n for n, p in PTS.items() if 'printed_limits' in p])
-        # every row not flagged is the full accuracy or half of it, to within half a display step
+        # every row/model not flagged is the full accuracy or half of it, to within half a display step; every flagged one is as flagged (independent arithmetic)
         for n, p in PTS.items():
-            if n in FLAGGED:
-                continue
-            full = BUILDER.spec_halfwidth(NOMINAL[n], BUILDER.ACC[BUILDER.ROWS[n - 1][10]], BUILDER.ROWS[n - 1][11])
-            res = D(BUILDER.ROWS[n - 1][11])
-            for got in (D(NOMINAL[n]) - D(p['low']), D(p['high']) - D(NOMINAL[n])):
-                self.assertTrue(abs(got - full) <= res / 2 or abs(got - full / 2) <= res / 2, (n, got, full))
+            key, res = BUILDER.ROWS[n - 1][10], D(BUILDER.ROWS[n - 1][11])
+            for m in p['models']:
+                pct, digits = (UM_ACCURACY[key][{'376-II': '376'}.get(m, m)] if key == 'ACV' else UM_ACCURACY[key])[:2]
+                full = D(pct) / 100 * abs(D(NOMINAL[n])) + digits * res
+                got = (D(NOMINAL[n]) - D(p['low']), D(p['high']) - D(NOMINAL[n]))
+                if m in FLAGGED.get(n, {}):
+                    kinds = {'looser': any(g > full + res / 2 for g in got), 'rounded': any(full < g <= full + res / 2 for g in got),
+                             'tighter': not all(abs(g - full) <= res / 2 or abs(g - full / 2) <= res / 2 for g in got)}
+                    self.assertTrue(kinds[FLAGGED[n][m]], (n, m, got, full))
+                else:
+                    for g in got:
+                        self.assertTrue(abs(g - full) <= res / 2 or abs(g - full / 2) <= res / 2, (n, m, g, full))
 
-    def test_builder_rejects_a_limit_looser_than_the_accuracy(self):
-        problems, _info, _v = BUILDER.check_row('x', '10', '9.0', '11.0', BUILDER.ACC['ACV'], '0.1')       # +-1.0 V: wider than +-0.65 V
-        self.assertTrue(problems)
-        self.assertEqual(BUILDER.check_row('x', '500', '492.0', '508.0', BUILDER.ACC['ACV'], '0.1')[0], [])
-        self.assertEqual(BUILDER.check_row('x', '500', '492.0', '508.0', BUILDER.ACC['ACV'], '0.1')[2], 'full')
+    def test_builder_flags_a_limit_looser_than_the_accuracy(self):
+        info, verdict = BUILDER.check_row('10', '9.0', '11.0', BUILDER.ACC['376']['ACV'], '0.1')       # +-1.0 V: wider than +-0.6 V
+        self.assertEqual(verdict, 'looser')
+        self.assertTrue(info)
+        self.assertEqual(BUILDER.check_row('500', '492.0', '508.0', BUILDER.ACC['374']['ACV'], '0.1'), ([], 'full'))
+        self.assertEqual(BUILDER.check_row('500', '492.0', '508.0', BUILDER.ACC['376']['ACV'], '0.1')[1], 'looser')      # the same printed limit is looser for a 1 % meter
+
+    def test_the_builder_aborts_on_an_unexpected_verdict(self):
+        saved = dict(BUILDER.EXPECTED_FLAGS)
+        try:
+            BUILDER.EXPECTED_FLAGS.pop(2)
+            self.assertTrue(BUILDER.build_steps()[1])
+        finally:
+            BUILDER.EXPECTED_FLAGS.clear()
+            BUILDER.EXPECTED_FLAGS.update(saved)
+
+    def test_whole_volts_on_the_1000_v_range(self):
+        """900 V rows (1000 V range, 1 V resolution): limits stored and shown as whole volts, the printed text (one decimal) kept."""
+        for n, low, high, printed in ((3, '882', '919', ('882.0', '919.0')), (8, '886', '914', ('886.0', '914.0'))):
+            p = PTS[n]
+            self.assertEqual((p['low'], p['high'], p['range']), (low, high, '1000 V'))
+            self.assertEqual((p['printed_text']['low'], p['printed_text']['high']), printed)
+            self.assertEqual(h.pad_reading(p, '900'), '900')
+            self.assertEqual(D(p['low']), D(printed[0]))
+            self.assertEqual(D(p['high']), D(printed[1]))
+        self.assertEqual({PTS[n]['printed_text']['low'] for n in (3, 8)}, {'882.0', '886.0'})
 
     def test_json_is_what_the_builder_writes(self):
         self.assertEqual(json.loads((ROOT / 'specs' / SPEC_NAME).read_text(encoding='utf-8')), json.loads(json.dumps(BUILDER.build_spec()[0])))
@@ -181,7 +233,7 @@ class Spec(unittest.TestCase):
                 self.assertIn('50 turns', p['report_desc'])
                 self.assertIn('50-turn coil', h.describe(p))
                 self.assertNotIn('unc_unit', p)
-                self.assertEqual(p['range'], '999.9 A')
+                self.assertEqual(p['range'], '2500 A' if p['section'] == 'iFlex with coil' else '', n)       # the jaw range is per model (600.0 / 999.9 A, Users Manual p. 20)
         self.assertEqual({n: p['applied']['value'] for n, p in PTS.items() if n in COIL_POINTS},
                          {23: 0.2, 24: 10.0, 25: 18.0, 26: 6.0, 27: 0.2, 28: 10.0, 29: 18.0, 35: 0.2, 36: 10.0, 37: 18.0, 38: 6.0})
 
@@ -226,6 +278,11 @@ class Spec(unittest.TestCase):
         self.assertIs(o['hv_once_per_group'], True)
         self.assertEqual((o['hookup_meter'], o['hv_threshold_v'], o['report_title']), ('fluke376', 30, 'Calibration Data'))
         self.assertNotIn('ir', o)                                # no remote interface: readings are typed
+        self.assertEqual([d['id'] for d in o['include_toggles']], ['iflex'])
+        self.assertIs(o['include_toggles'][0]['default'], True)         # a meter that has an iFlex gets every test
+        self.assertEqual(o['include_toggles'][0]['off_text'], 'not tested (no iFlex supplied)')
+        self.assertEqual([p['n'] for p in PTS.values() if p.get('include') == 'iflex'], list(IFLEX_POINTS))
+        self.assertFalse([p for p in PTS.values() if p.get('include') and p['section'] not in ('iFlex simulated', 'iFlex with coil')])
 
     def test_groups(self):
         self.assertEqual({n: p['group'] for n, p in PTS.items() if n > 22},
@@ -251,7 +308,12 @@ class Spec(unittest.TestCase):
                 self.assertIn('50-turn', g['title'])
         self.assertIn('2 mm jack', ' '.join(' '.join(s) for s in SPEC['groups']['IFLEX_SIM']['steps']))
         self.assertIn('Slim Reach', ' '.join(' '.join(s) for s in SPEC['groups']['IFLEX_SIM']['steps']))
-        self.assertIn('UNVERIFIED', ' '.join(' '.join(s) for s in SPEC['groups']['COIL_AUX']['steps']))
+        self.assertIn('UNVERIFIED', ' '.join(' '.join(s) for s in SPEC['groups']['COIL_AUX']['steps']))      # how the jaw sits on the coil: still unverified
+        sim = ' '.join(' '.join(s) for s in SPEC['groups']['IFLEX_SIM']['steps'])
+        self.assertIn('owner-confirmed', sim)                       # the far-left 2 mm jack is the iFlex input: no longer UNVERIFIED
+        self.assertNotIn('UNVERIFIED', sim)
+        notes = ' '.join(p['note'] for p in PTS.values() if p['applied']['frequency'] == 440 or p['applied']['value'] == 18)
+        self.assertIn('owner-confirmed', notes)                     # 6 A at 440 Hz and 18 A: the coil and calibrator can do them
         for other in ('fluke365', 'fluke170', 'fluke110', 'fluke87v', 'fluke77', 'mm325'):   # the other meters' tables are untouched by the new entries
             self.assertIn(other, hookups.METERS)
             self.assertNotEqual(hookups.METERS[other]['name'], hookups.METERS['fluke376']['name'])
@@ -264,32 +326,41 @@ class Spec(unittest.TestCase):
             self.assertIn(name, text)
         self.assertFalse(list((ROOT / 'diagrams').glob('hook_fluke376*')))       # diagrams are supplied by the owner: none is invented
 
-    def test_sidecar_is_an_automated_verification(self):
+    def test_sidecars_are_automated_verifications_one_per_model(self):
         import procscan
-        p = next(x for x in procscan.procs(ROOT) if x.id == 'Fluke_376_Verification')
-        self.assertEqual(p.effective_kind, 'verification')
-        self.assertNotIn('Manual', p.name)
-        self.assertEqual((p.model, p.category, p.name), ('376', 'Clamp Meter', 'Fluke 376 Clamp Meter Performance Verification'))
-        self.assertEqual((p.hookup_meter, p.diagram_prefixes), ('fluke376', ('hook_fluke376',)))
-        self.assertIn('hookups.py#fluke376', p.fingerprint_code)         # only this meter's slice of hookups.py: no other procedure is touched
-        self.assertEqual(p.specs, ('specs/fluke_376_pv.json',))
-        for rel in p.own_files:
-            self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertTrue((ROOT / p.launcher).is_file())
-        # only the 376 is registered: the 374, 375 and 376-II are in the spec but have no launcher
-        self.assertEqual([x.id for x in procscan.procs(ROOT) if x.id.startswith('Fluke_37')], ['Fluke_376_Verification'])
+        want = {'374': ('Fluke_374_Verification', 36), '375': ('Fluke_375_Verification', 37), '376': ('Fluke_376_Verification', 35), '376-II': ('Fluke_376II_Verification', 38)}
+        found = {x.id: x for x in procscan.procs(ROOT) if x.id.startswith('Fluke_37')}
+        self.assertEqual(sorted(found), sorted(v[0] for v in want.values()))
+        for model, (pid, order) in want.items():
+            p = found[pid]
+            self.assertEqual(p.effective_kind, 'verification', pid)          # Manager rows classify under Automated Calibrations
+            self.assertNotIn('Manual', p.name)
+            self.assertEqual((p.model, p.category, p.name), (model, 'Clamp Meter', f'Fluke {model} Clamp Meter Performance Verification'), pid)
+            self.assertIn('Fluke 374 / 375 / 376 / 376-II Clamp Meter Performance Verification', p.description, pid)       # the family title
+            self.assertEqual((p.hookup_meter, p.diagram_prefixes), ('fluke376', ('hook_fluke376',)), pid)
+            self.assertIn('hookups.py#fluke376', p.fingerprint_code)         # only this meter's slice of hookups.py: no other procedure is touched
+            self.assertIn('iflex_option.py', p.fingerprint_code)
+            self.assertEqual(p.fingerprint_spec, (f'specs/fluke_376_pv.json#{model}',), pid)
+            self.assertEqual(p.specs, ('specs/fluke_376_pv.json',))
+            self.assertEqual(p.order, order)
+            for rel in p.own_files:
+                self.assertTrue((ROOT / rel).is_file(), rel)
+            self.assertTrue((ROOT / p.launcher).is_file())
 
-    def test_the_launcher_names_the_engine(self):
-        text = (ROOT / 'Procedures' / 'Fluke_376_Verification.py').read_text(encoding='utf-8')
-        self.assertIn('handheld_dmm.main(MODEL, spec=SPEC)', text)
-        self.assertIn("SPEC = 'fluke_376_pv.json'", text)
-        self.assertIn("MODEL = '376'", text)
-        self.assertIs(h.App.QUEUE_SUPPORTED, True)               # the run queue is on, as for the other handhelds
+    def test_the_launchers_name_the_engine(self):
+        for model, pid in (('374', 'Fluke_374_Verification'), ('375', 'Fluke_375_Verification'), ('376', 'Fluke_376_Verification'), ('376-II', 'Fluke_376II_Verification')):
+            text = (ROOT / 'Procedures' / f'{pid}.py').read_text(encoding='utf-8')
+            self.assertIn('iflex_option.main(MODEL, spec=SPEC)', text, pid)
+            self.assertIn("SPEC = 'fluke_376_pv.json'", text, pid)
+            self.assertIn(f"MODEL = '{model}'", text, pid)
+        self.assertIs(h.App.QUEUE_SUPPORTED, True)               # the shared engine is untouched: the run queue is on for the other handhelds
+        self.assertIs(X.App.QUEUE_SUPPORTED, False)              # the iFlex setting is per meter: no run queue for these procedures
+        self.assertTrue(issubclass(X.App, h.App))
 
 
 class Padding(unittest.TestCase):
     def test_typed_readings_are_padded_to_the_resolution(self):
-        for n, typed, want in ((1, '10', '10.0'), (3, '900', '900.0'), (9, '-250', '-250.0'), (16, '3000', '3000'), (18, '30', '30.00'), (19, '54', '54.00'),
+        for n, typed, want in ((1, '10', '10.0'), (3, '900', '900'), (8, '900', '900'), (9, '-250', '-250.0'), (16, '3000', '3000'), (18, '30', '30.00'), (19, '54', '54.00'),
                                (20, '10', '10.0'), (21, '500', '500'), (23, '10', '10.0'), (30, '100', '100.0'), (31, '1000', '1000'), (34, '2500', '2500')):
             self.assertEqual(h.pad_reading(PTS[n], typed), want, n)
 
@@ -303,8 +374,10 @@ class Padding(unittest.TestCase):
         self.assertEqual(h.judge_numeric(PTS[1], '10.8')[0], 'FAIL')
         self.assertEqual(h.judge_numeric(PTS[1], '9.4')[0], 'PASS')
         self.assertEqual(h.judge_numeric(PTS[1], '9.3')[0], 'FAIL')
-        self.assertEqual(h.judge_numeric(PTS[3], '919.0')[0], 'PASS')
-        self.assertEqual(h.judge_numeric(PTS[3], '920.0')[0], 'FAIL')
+        self.assertEqual(h.judge_numeric(PTS[3], '919')[0], 'PASS')
+        self.assertEqual(h.judge_numeric(PTS[3], '920')[0], 'FAIL')
+        self.assertEqual(h.judge_numeric(PTS[3], '881')[0], 'FAIL')
+        self.assertEqual(h.judge_numeric(PTS[3], '882')[0], 'PASS')
         self.assertEqual(h.judge_numeric(PTS[9], '-253.0')[0], 'PASS')
         self.assertEqual(h.judge_numeric(PTS[9], '-253.1')[0], 'FAIL')
         self.assertEqual(h.judge_numeric(PTS[18], '30.35')[0], 'PASS')
@@ -457,14 +530,14 @@ class EndToEnd(unittest.TestCase):
     def tearDown(self):
         self.hn.stop()
 
-    def make(self, model='5522A', demo=False):
+    def make(self, model='5522A', demo=False, meter=None):
         io = None
         if not demo:
             from drivers.simulated import make_bench
             bench, _a, _b = make_bench()
             io = h.IO(f'Fluke {model}', 'sim', transport=Spy(bench, model))
             io.auto_ramp = False
-        app = h.App(self.hn.root, MODEL, demo=demo, spec=h.load_spec(SPEC_NAME), io_factory=(lambda: io) if io else None, fast_demo=demo)
+        app = X.App(self.hn.root, meter or MODEL, demo=demo, spec=h.load_spec(SPEC_NAME), io_factory=(lambda: io) if io else None, fast_demo=demo)
         app.asset.set('A-376')
         app.serial.set('S-376')
         app.cal_mode.set(h.CAL_CHOICES[1] if model == '5522A' else h.CAL_CHOICES[0])
@@ -551,7 +624,8 @@ class EndToEnd(unittest.TestCase):
         self.assertNotIn('Performance Verification', text)
         self.assertIn('Fluke 376', text)
         flat = ' '.join(text.split())
-        self.assertIn('999.9 A, 18 A x 50 turns', flat)
+        self.assertIn('Jaw, 18 A x 50 turns', flat)
+        self.assertIn('iFlex, 18 A x 50 turns', flat)
         self.assertIn('2500 A, 75 mV applied', flat)
         self.assertNotIn('DEMO', text.upper().replace('DEMONSTRAT', ''))          # a real run is never marked demo
         self.assertRegex(text, r'Uncertainty\s+TAR\s+TUR')
@@ -614,6 +688,304 @@ class EndToEnd(unittest.TestCase):
         self.assertTrue(app.any_synthetic())
         out, seen, text = self.pdf(app)
         self.assertIn('DEMO', text.upper())
+
+
+OFF_COUNTS = {'374': 19, '375': 25, '376': 29, '376-II': 29}
+ON_COUNTS = {'374': 28, '375': 34, '376': 38, '376-II': 38}
+
+
+def _off_points(model):
+    pts = [p for p in h.points_for(SPEC, model) if p.get('include') != 'iflex']
+    for n, p in enumerate(pts, 1):
+        p['n'] = n
+    return pts
+
+
+def _flow(model, off=False, calibrator=True, once=True):
+    f = Flow(model, calibrator=calibrator)
+    f.spec['options']['hv_once_per_group'] = once
+    if off:
+        f.app.points = _off_points(model)
+    f.run()
+    return f
+
+
+def _prompt_counts(f):
+    return dict(cable=sum(1 for e in f.events if e[0] == 'setup'), function=len(f.functions()), hv=sum(1 for e in f.events if e[0] == 'hv'), reading=sum(1 for e in f.events if e[0] == 'point'))
+
+
+class IFlexPrompts(unittest.TestCase):
+    """Prompt counts with the iFlex option ON and OFF, per model (the same prompt flow the engine runs, dialogs recorded)."""
+    def test_counts_per_model_on_and_off(self):
+        want = {('374', False): (8, 7, 1, 28), ('374', True): (5, 6, 1, 19), ('375', False): (8, 8, 1, 34), ('375', True): (5, 7, 1, 25),
+                ('376', False): (8, 8, 1, 38), ('376', True): (5, 7, 1, 29), ('376-II', False): (8, 8, 1, 38), ('376-II', True): (5, 7, 1, 29)}
+        for (model, off), counts in want.items():
+            got = _prompt_counts(_flow(model, off))
+            self.assertEqual((got['cable'], got['function'], got['hv'], got['reading']), counts, (model, off))
+        totals = {k: sum(v) for k, v in want.items()}
+        self.assertEqual((totals[('376', False)], totals[('376', True)]), (55, 42))
+        self.assertEqual({m: (totals[(m, False)], totals[(m, True)]) for m in MODELS}, {'374': (44, 31), '375': (51, 38), '376': (55, 42), '376-II': (55, 42)})
+
+    def test_off_never_asks_for_an_iflex_prompt(self):
+        for model in MODELS:
+            f = _flow(model, True)
+            self.assertEqual([e[1] for e in f.events if e[0] == 'point'], list(range(1, OFF_COUNTS[model] + 1)), model)       # renumbered, no gap
+            self.assertFalse([sw for _n, sw in f.functions() if 'iFlex' in sw], model)
+            self.assertFalse([e for e in f.events if e[0] == 'setup' and e[1] > OFF_COUNTS[model]], model)
+            self.assertTrue(all(p.get('include') != 'iflex' for p in f.app.points), model)
+
+    def test_off_376_cable_and_function_points(self):
+        f = _flow('376', True)
+        self.assertEqual([e[1] for e in f.events if e[0] == 'setup'], [1, 23, 24, 27, 28])         # VOHM, the coil AUX / 20 A moves; no iFlex leads, no iFlex loop
+        self.assertEqual([int(n) for n, _sw in f.functions()], [1, 5, 9, 13, 20, 23, 27])
+        self.assertEqual([sw for _n, sw in f.functions()], FUNCTION_PROMPTS[:7])
+
+    def test_per_point_rule_counts(self):
+        """With the per-point high-voltage rule of the other handhelds the 376 asks 6 times either way (no iFlex point is high voltage): 60 ON, 47 OFF."""
+        on, off = _prompt_counts(_flow('376', False, once=False)), _prompt_counts(_flow('376', True, once=False))
+        self.assertEqual((sum(on.values()), sum(off.values())), (60, 47))
+
+
+class IFlexOption(unittest.TestCase):
+    """The window option on the real App (iflex_option.App) and the simulated bench."""
+    def setUp(self):
+        self.hn = H.Harness().start()
+        EndToEnd.make = EndToEnd.make
+
+    def tearDown(self):
+        self.hn.stop()
+
+    def make(self, meter=MODEL, cal='5522A', demo=False):
+        return EndToEnd.make(self, cal, demo=demo, meter=meter)
+
+    def ask(self, kind='askyesno'):
+        return [d for d in self.hn.dialogs if d[0] == 'box' and d[2] == 'Skip the iFlex tests']
+
+    def pdf(self, app):
+        return EndToEnd.pdf(self, app)
+
+    def test_default_is_on_and_nothing_is_skipped(self):
+        for model in MODELS:
+            app, _ = self.make(meter=model)
+            self.assertTrue(app.include_is_on('iflex'))
+            self.assertEqual(len(app.points), ON_COUNTS[model], model)
+            self.assertEqual(app._include_vars['iflex'].get(), True)
+            self.assertIn('ON', app.include_text())
+            self.assertEqual(sum(1 for p in app.points if p.get('include') == 'iflex'), 9, model)      # all four models have all nine iFlex points (the X columns)
+
+    def test_off_asks_first_says_what_happens_and_changes_the_list(self):
+        app, _ = self.make()
+        self.assertTrue(app.set_include('iflex', False))
+        q = self.ask()
+        self.assertEqual(len(q), 1)
+        self.assertIn('9 iFlex point(s) will not be run', q[0][3])
+        self.assertIn('not tested (no iFlex supplied)', q[0][3])
+        self.assertEqual(len(app.points), 29)
+        self.assertEqual([p['n'] for p in app.points], list(range(1, 30)))
+        self.assertEqual(set(app.by_id), {p['id'] for p in app.points})
+        self.assertIn('OFF', app.include_text())
+        self.assertNotIn('iFlex simulated', [s for s in (p['section'] for p in app.points)])
+        self.assertTrue(app.set_include('iflex', True, ask=False))
+        self.assertEqual(len(app.points), 38)
+        self.assertEqual([p['id'] for p in app.points], [f'1-{n}' for n in range(1, 39)])        # back in manual order, ids unchanged
+        self.assertFalse(app.set_include('iflex', True))                                           # no change, no entry in the log
+        self.assertEqual([e['value'] for e in app._include_log], [False, True])
+
+    def test_declining_keeps_it_on(self):
+        app, _ = self.make()
+        self.hn.box_answer['askyesno'] = False
+        var = app._include_vars['iflex']
+        var.set(False)                                              # the operator clicks the box ...
+        app._on_include_click('iflex')                              # ... the question is answered No
+        self.assertTrue(app.include_is_on('iflex'))
+        self.assertEqual(var.get(), True)
+        self.assertEqual(len(app.points), 38)
+        self.assertEqual(app._include_log, [])
+
+    def test_a_click_applies_the_box(self):
+        app, _ = self.make()
+        app._include_vars['iflex'].set(False)
+        app._on_include_click('iflex')
+        self.assertFalse(app.include_is_on('iflex'))
+        self.assertEqual(app._include_vars['iflex'].get(), False)
+        self.assertEqual(len(app.points), 29)
+
+    def test_it_cannot_change_during_a_run(self):
+        app, _ = self.make()
+        app.busy = True
+        self.assertFalse(app.set_include('iflex', False))
+        self.assertTrue(app.include_is_on('iflex'))
+        self.assertEqual(len(app.points), 38)
+        self.assertEqual(self.ask(), [])
+        app._include_vars['iflex'].set(False)
+        app._on_include_click('iflex')
+        self.assertEqual(app._include_vars['iflex'].get(), True)           # the box shows the setting in force
+        app.busy = False
+
+    def test_full_run_off_for_every_model(self):
+        for model in MODELS:
+            app, io = self.make(meter=model)
+            self.assertTrue(app.set_include('iflex', False))
+            self.hn.default_reading = H.typed_nominal
+            self.assertTrue(self.hn.run_all(), model)
+            self.assertEqual(len(app.found), OFF_COUNTS[model], model)
+            self.assertEqual({r['result'] for r in app.found.values()}, {'PASS'}, model)
+            self.assertFalse([k for k in app.found if int(k.split('-')[1]) >= 30], model)           # no iFlex point was run
+            texts = [t for _i, t in H.wire(io)]
+            outs = [t for t in texts if t.startswith('OUT ') and not t.endswith('?')]
+            self.assertEqual(outs, [OUT_COMMANDS[int(p['id'].split('-')[1])] for p in app.points], model)         # not a single iFlex output
+            self.assertEqual(texts[-1], 'STBY', model)
+            titles = [d[1] for d in self.hn.dialogs if d[0] == 'confirm']
+            self.assertEqual(titles.count('Change the cables'), 5, model)
+            self.assertEqual(titles.count('Change the function'), {'374': 6}.get(model, 7), model)
+            self.assertEqual(len([d for d in self.hn.dialogs if d[0] == 'reading']), OFF_COUNTS[model], model)
+            self.assertFalse([d for d in self.hn.dialogs if d[0] == 'confirm' and ('iFlex' in ' '.join(d[3]) or 'iFlex' in str(d[2]))], model)
+            self.assertEqual(len([d for d in self.hn.dialogs if d[0] == 'box' and d[2] == 'HIGH VOLTAGE']), 1, model)
+            self.hn.stop()
+            self.hn = H.Harness().start()
+
+    def test_full_run_on_for_every_model(self):
+        for model in MODELS:
+            app, io = self.make(meter=model)
+            self.hn.default_reading = H.typed_nominal
+            self.assertTrue(self.hn.run_all(), model)
+            self.assertEqual(len(app.found), ON_COUNTS[model], model)
+            titles = [d[1] for d in self.hn.dialogs if d[0] == 'confirm']
+            self.assertEqual(titles.count('Change the cables'), 8, model)
+            self.assertEqual(titles.count('Change the function'), 7 if model == '374' else 8, model)
+            self.assertEqual(self.ask(), [], model)                              # ON: nothing was asked
+            self.hn.stop()
+            self.hn = H.Harness().start()
+
+    def test_turning_it_off_after_readings_keeps_them(self):
+        app, io = self.make()
+        self.hn.default_reading = H.typed_nominal
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(len(app.found), 38)
+        for n in range(31, 39):                                     # only the first iFlex point (1-30) keeps a reading
+            del app.found[f'1-{n}']
+        self.assertTrue(app.set_include('iflex', False))
+        self.assertIn('1 reading(s) already recorded stay', self.ask()[0][3])
+        self.assertEqual(len(app.points), 30)                       # 29 + the recorded 1-30
+        self.assertEqual(app.points[-1]['id'], '1-30')
+        self.assertEqual(len(app.found), 30)                        # nothing was discarded
+        self.assertEqual(app.found['1-30']['result'], 'PASS')
+        self.assertIn('1 recorded earlier kept', app.include_text())
+        self.assertEqual(app._include_log[-1]['recorded'], 30)
+        rows = app.certificate_rows()
+        self.assertEqual(len(rows), 30)                             # the recorded iFlex reading stays in the report
+        header = dict(app.report_header(app.spec['source']))
+        self.assertIn('1 reading(s) recorded before it was turned off are included', header['iFlex tests'])
+
+    def test_checkpoint_round_trip_of_the_setting(self):
+        app, io = self.make()
+        self.assertTrue(app.set_include('iflex', False))
+        self.hn.default_reading = H.typed_nominal
+        self.assertTrue(self.hn.run_all())
+        app.save()
+        path = app._checkpoint_path()
+        data = json.loads(path.read_text())
+        self.assertEqual(data['include'], {'iflex': False})
+        self.assertEqual([(e['id'], e['value']) for e in data['include_log']], [('iflex', False)])
+        self.assertEqual(len(data['results']), 29)
+        self.assertEqual(data['model'], '376')
+        # a new window: default ON; loading the progress file restores OFF and the 29-point list
+        app2, _ = self.make()
+        self.assertTrue(app2.include_is_on('iflex'))
+        self.assertEqual(len(app2.points), 38)
+        with mock.patch.object(h.filedialog, 'askopenfilename', lambda **k: str(path)):
+            app2.load()
+        self.assertFalse(app2.include_is_on('iflex'))
+        self.assertEqual(len(app2.points), 29)
+        self.assertEqual(app2._include_vars['iflex'].get(), False)
+        self.assertEqual(len(app2.found), 29)
+        self.assertEqual(app2._include_log, app._include_log)
+        # ... and a progress file saved ON puts it back ON, and one saved before the option existed (no 'include' key) is ON
+        data['include'] = {'iflex': True}
+        path.write_text(json.dumps(data))
+        with mock.patch.object(h.filedialog, 'askopenfilename', lambda **k: str(path)):
+            app2.load()
+        self.assertTrue(app2.include_is_on('iflex'))
+        self.assertEqual(len(app2.points), 38)
+        app2.set_include('iflex', False, ask=False)                 # (saves the progress of this window over the file, so the old-format file is written after it)
+        data.pop('include')
+        data.pop('include_log')
+        path.write_text(json.dumps(data))
+        with mock.patch.object(h.filedialog, 'askopenfilename', lambda **k: str(path)):
+            app2.load()
+        self.assertTrue(app2.include_is_on('iflex'))                # the default, never a silent skip
+        self.assertEqual(app2._include_log, [])
+
+    def test_a_checkpoint_off_with_a_recorded_iflex_point_loads_it(self):
+        app, io = self.make()
+        self.hn.default_reading = H.typed_nominal
+        self.assertTrue(self.hn.run_all())
+        app.found.pop('1-35')
+        app._include['iflex'] = False
+        app.save()
+        app2, _ = self.make()
+        with mock.patch.object(h.filedialog, 'askopenfilename', lambda **k: str(app._checkpoint_path())):
+            app2.load()
+        self.assertFalse(app2.include_is_on('iflex'))
+        self.assertEqual(len(app2.points), 29 + 8)                  # the 8 recorded iFlex readings are kept, the missing 1-35 is not asked for
+        self.assertNotIn('1-35', app2.by_id)
+
+    def test_pdf_with_the_iflex_tests_on(self):
+        app, io = self.make()
+        self.hn.default_reading = H.typed_nominal
+        self.assertTrue(self.hn.run_all())
+        out, seen, text = self.pdf(app)
+        flat = ' '.join(text.split())
+        self.assertIn('iFlex tests: Tested (iFlex supplied)', flat)
+        self.assertNotIn('Not tested', flat)
+        self.assertIn('iFlex, 18 A x 50 turns', flat)
+        self.assertIn('2500 A, 75 mV applied', flat)
+        self.assertEqual(len(app.certificate_rows()), 38)
+        self.assertNotIn('DEMO', text.upper().replace('DEMONSTRAT', ''))
+        self.assertIn('Calibration Data', text)
+
+    def test_pdf_with_the_iflex_tests_off(self):
+        app, io = self.make()
+        self.assertTrue(app.set_include('iflex', False))
+        self.hn.default_reading = H.typed_nominal
+        self.assertTrue(self.hn.run_all())
+        out, seen, text = self.pdf(app)
+        import ui_theme as ui
+        self.assertEqual(seen['initialfile'], ui.report_filename('A-376'))          # named asset#-date, as always
+        flat = ' '.join(text.split())
+        self.assertIn('iFlex tests: Not tested (no iFlex supplied)', flat)
+        self.assertNotIn('iFlex, 18 A', flat)                                        # the points that were not run have no row
+        self.assertNotIn('mV applied', flat)
+        self.assertIn('Jaw, 18 A x 50 turns', flat)
+        self.assertEqual(len(app.certificate_rows()), 29)
+        self.assertNotIn('Cover', text)
+        self.assertNotIn('DEMO', text.upper().replace('DEMONSTRAT', ''))             # a real run is never marked demo
+        self.assertIn('RESULT: PASS', text.upper())
+        self.assertNotIn('PENDING', text.upper())                                    # not shown as failed or pending
+        self.assertIn('not tested (no iFlex supplied).', app.source_note())          # the report note repeats the setting
+
+    def test_demo_off_stays_demo(self):
+        app, _ = self.make(demo=True)
+        self.assertTrue(app.set_include('iflex', False))
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(len(app.found), 29)
+        self.assertTrue(all(r['synthetic'] for r in app.found.values()))
+        out, seen, text = self.pdf(app)
+        self.assertIn('DEMO', text.upper())
+        self.assertIn('Not tested (no iFlex supplied)', ' '.join(text.split()))
+
+    def test_a_spec_without_the_option_runs_like_the_engine(self):
+        spec = h.load_spec(SPEC_NAME)
+        spec['options'].pop('include_toggles')
+        app = X.App(self.hn.root, MODEL, spec=spec)
+        self.assertEqual(len(app.points), 38)
+        self.assertFalse(hasattr(app, 'include_bar'))
+        self.assertEqual(app.save_fields().keys(), h.App.save_fields(app).keys())
+        self.assertEqual(app.report_header(spec['source']), h.App.report_header(app, spec['source']))
+
+    def test_no_run_queue(self):
+        app, _ = self.make()
+        self.assertFalse(app.queue_supported())
 
 
 if __name__ == '__main__':
