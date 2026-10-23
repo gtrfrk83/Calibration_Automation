@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))   # shared modules sit next to the Manager
+# the shared engine (handheld_dmm); iflex_option.App is a subclass of handheld_dmm.App that adds the iFlex window option
+import handheld_dmm
 import iflex_option
 
 MODEL = '375'
