@@ -335,7 +335,7 @@ def checks_manager_tabs():
     grab('manual_empty')
     m.view_nb.select(m.view_pages['adjustment'])
     pump(root, 20)
-    check('adjustment view: only adjustment procedures', m.view_kind == 'adjustment' and sorted(names()) == sorted(['Fluke 8846A Guided Adjustment', 'Keithley 2000 Guided Adjustment']), names())
+    check('adjustment view: only adjustment procedures', m.view_kind == 'adjustment' and sorted(names()) == sorted(['Fluke 8808A Guided Adjustment', 'Fluke 8846A Guided Adjustment', 'Keithley 2000 Guided Adjustment']), names())
     check('adjustment view: note shown, manual note hidden', m.adjust_note.winfo_ismapped() and not m.view_notes['manual'].winfo_ismapped())
     check('adjustment view: first row selected, Run enabled', t.selection() and str(m.btn_run.cget('state')) != 'disabled')
     check('adjustment view: category list is the view\'s', list(m.category_box['values']) == [CPM.ALL_CATEGORIES, 'Digital Multimeter Adjustment'], m.category_box['values'])
