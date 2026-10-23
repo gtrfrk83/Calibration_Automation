@@ -11,11 +11,12 @@ A queue with fewer than two meters is not a queue: the procedure runs exactly as
 WHICH POINTS CAN BE SHARED (point by point).  `share_reason(p, options)` returns None when the point may be shared, else one sentence saying why it
 cannot; such points (and the points around them that cannot be shared either) fall back to one meter at a time, with a prompt that says why.
 
-  shareable by default   DC / AC voltage (incl. frequency and the high-voltage points), resistance (2-wire, continuity / beeper), capacitance,
-                         temperature (thermocouple simulation), and the no-calibrator yes / no checks (display test ...).
-  never shared           current (DCI / ACI, groups AMP10 / UAMP: the meters would have to be in series), 4-wire resistance (group OHM4: sense
-                         leads), VoltAlert (the meter is held against the plug), scope outputs, the duty-cycle / square-wave special sources
-                         (kinds DUTY / SQUARE), and numeric points with no calibrator output (set by hand for one meter).
+  shareable by default   DC / AC voltage (incl. frequency and the high-voltage points; the HV question is asked once per hook-up group), the
+                         no-calibrator yes / no checks (display test ...) and points set up by hand with no calibrator output (open input ...).
+  never shared           current (DCI / ACI, groups AMP10 / UAMP: the meters would have to be in series), resistance / continuity (kind OHM),
+                         capacitance (CAP) and thermocouple simulation (TEMP) (Mike: these are connected to one meter at a time), 4-wire
+                         resistance (group OHM4: sense leads), VoltAlert (the meter is held against the plug), scope outputs, the duty-cycle /
+                         square-wave special sources (kinds DUTY / SQUARE).
   explicit flags         a point may carry `queue_share: true | false` (wins over the defaults), and a spec may carry
                          `options.queue_share: false` (the whole family is one-meter-only), `options.queue_single_kinds: [...]`,
                          `options.queue_single_groups: [...]`.  No shipped spec carries any of these today (editing a spec would change what a
@@ -36,7 +37,7 @@ OHM4_REASON = '4-wire resistance: each meter needs its own sense leads'
 VOLTALERT_REASON = 'VoltAlert: the meter is held against the plug one at a time'
 SCOPE_REASON = 'oscilloscope output: one instrument at a time'
 SPECIAL_REASON = 'special source (duty cycle / square wave with offset): connected to one meter at a time'
-HAND_REASON = 'this point is set up by hand for one meter (no shared calibrator output)'
+SOURCE_REASON = 'resistance, capacitance and thermocouple sources: connected to one meter at a time (lab rule)'
 FLAGGED_REASON = 'this point is flagged one-meter-only in the procedure'
 FAMILY_REASON = 'this meter family is flagged one-meter-only in the procedure'
 IR_REASON = 'readings are taken over one IR cable, so one meter at a time'
@@ -182,8 +183,8 @@ def share_reason(p, options=None):
         return SCOPE_REASON
     if kind in ('DUTY', 'SQUARE'):
         return SPECIAL_REASON
-    if not p.get('applied') and p.get('test') == 'numeric':
-        return HAND_REASON
+    if kind in ('OHM', 'CAP', 'TEMP'):
+        return SOURCE_REASON
     return None
 
 

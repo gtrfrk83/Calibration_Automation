@@ -95,10 +95,21 @@ class QueueMixin:
         return f' Every meter in the queue: {self._q_names()}.'
 
     def _q_hv_text(self, text):
-        """The high-voltage question, naming every meter on the leads when several are wired together (asked once per point, as before)."""
+        """The high-voltage question, naming every meter on the leads when several are wired together (asked once per hook-up group in a shared unit, once per point otherwise)."""
         if not self._q_shared():
             return text
         return text.replace('Enable output?', f'Meters on the calibrator: {self._q_names()}. Enable output?')
+
+    def _q_hv_seen(self, p):
+        """Shared unit: the high-voltage question is asked once per hook-up group (Mike's rule), not once per point."""
+        if not self._q_shared():
+            return False
+        return p.get('group') in getattr(self._q.unit, 'hv_groups', set())
+
+    def _q_hv_note(self, p):
+        if self._q_shared():
+            unit = self._q.unit
+            unit.hv_groups = set(getattr(unit, 'hv_groups', set())) | {p.get('group')}
 
     # ------------------------------------------------------------------ context swap
     def _queue_activate(self, m):
