@@ -23,6 +23,8 @@ Sidecar fields (schema 1):
                   a code entry 'hookups.py#fluke110' means hookups.py with the data of the other meters left out (see verified.py).
     hookup        {'meter': hookups.py meter key or null, 'diagram_prefixes': ['hook_fluke110', ...]}: which diagrams/ files belong to it
     seed_verified true for the procedures the lab owner has attested as verified on hardware (verified.SEED is derived from this), seed_order their order
+    kind          optional, 'verification' or 'adjustment': which Manager tab lists the procedure.  Left out, it follows the category / name
+                  (classify(): 'adjust' in the category or the display name = adjustment, everything else = verification).  Changes no behaviour of the procedure.
     own_files     the files that belong to this procedure alone (what tools/make_package.py ships; shared files are listed in fingerprint but
                   not shipped, the target suite must already have them)
     tests         optional list of test files
@@ -41,6 +43,20 @@ SIDECAR_SUFFIX = '.procedure.json'
 SCHEMA = 1
 ID_RE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_\-]{0,80}$')
 DEFAULT_ORDER = 1000
+KIND_VERIFICATION = 'verification'
+KIND_ADJUSTMENT = 'adjustment'
+KINDS = (KIND_VERIFICATION, KIND_ADJUSTMENT)
+
+
+def classify(name='', category='', kind='') -> str:
+    """Which list a procedure belongs to: an explicit valid `kind` wins, else 'adjust...' in the category or the display name means adjustment,
+    everything else is a performance verification.  Pure text rules; used by the Manager's two tabs."""
+    k = str(kind or '').strip().lower()
+    if k in KINDS:
+        return k
+    if re.search(r'adjust', f'{category} {name}', re.IGNORECASE):
+        return KIND_ADJUSTMENT
+    return KIND_VERIFICATION
 
 
 class ScanProblem(ValueError):
@@ -86,6 +102,11 @@ class Proc:
     own_files: tuple = ()
     tests: tuple = ()
     sidecar: str = ''                                    # 'Procedures/<id>.procedure.json'
+    kind: str = ''                                       # '' (derive, see classify), 'verification' or 'adjustment'
+
+    @property
+    def effective_kind(self) -> str:
+        return classify(self.name, self.category, self.kind)
 
     @property
     def launcher_name(self) -> str:
@@ -149,6 +170,11 @@ def parse_sidecar(doc, stem: str) -> Proc:
         if not isinstance(v, str):
             raise ScanProblem(f'"{k}" must be text')
         text[k] = v
+    kind = doc.get('kind', '')
+    if kind is None:
+        kind = ''
+    if not isinstance(kind, str) or kind not in ('', *KINDS):
+        raise ScanProblem('"kind" must be "verification" or "adjustment" (or left out)')
     order = doc.get('order', DEFAULT_ORDER)
     seed_order = doc.get('seed_order', DEFAULT_ORDER)
     if any(isinstance(v, bool) or not isinstance(v, int) for v in (order, seed_order)):
@@ -178,7 +204,7 @@ def parse_sidecar(doc, stem: str) -> Proc:
     return Proc(id=pid, name=name.strip(), manufacturer=text['manufacturer'], model=text['model'], category=text['category'],
                 description=text['description'], version=text['version'], order=order, launcher=launcher, engine=engine, drivers=tuple(drivers),
                 specs=specs, fingerprint_code=fp_code, fingerprint_spec=fp_spec, hookup_meter=meter, diagram_prefixes=prefixes,
-                seed_verified=bool(doc.get('seed_verified', False)), seed_order=int(doc.get('seed_order', DEFAULT_ORDER)), own_files=own, tests=tests, sidecar=f'Procedures/{stem}{SIDECAR_SUFFIX}')
+                seed_verified=bool(doc.get('seed_verified', False)), seed_order=int(doc.get('seed_order', DEFAULT_ORDER)), own_files=own, tests=tests, sidecar=f'Procedures/{stem}{SIDECAR_SUFFIX}', kind=kind)
 
 
 def scan_folder(folder) -> ScanResult:
