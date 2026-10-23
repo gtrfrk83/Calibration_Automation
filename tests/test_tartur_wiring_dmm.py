@@ -150,6 +150,9 @@ class Exports(unittest.TestCase):
             if n == 'handheld_Fluke_287.pdf':
                 self.check_temperature_rows_only(n)  # the 287 temperature rows (3-1 .. 3-3) now print a thermocouple-simulation Uncertainty (temperature uncertainty branch)
                 continue
+            if n == 'handheld_Fluke_115.pdf':
+                self.check_frequency_rows_only(n)    # the 115 AC volts + Hz step (3-17) no longer prints the calibrator's VOLTAGE uncertainty as 'mHz' (branch uncertainty-engines, part B)
+                continue
             if self.is_demo(self.off / n):
                 self.check_demo_footer_only(n)       # the demo footer's long left text is now cut with '...' so it cannot overprint the red DEMO DATA line
                 continue
@@ -184,6 +187,8 @@ class Exports(unittest.TestCase):
             self.check_87v_rows_only(n)
         elif n == 'handheld_Fluke_287.pdf':
             self.check_temperature_rows_only(n)
+        elif n == 'handheld_Fluke_115.pdf':
+            self.check_frequency_rows_only(n)
         else:
             self.assertEqual(self.body_words(self.base / n), self.body_words(self.off / n), n)
         old, new = self.footer_left(self.base / n), self.footer_left(self.off / n)
@@ -195,8 +200,17 @@ class Exports(unittest.TestCase):
         changed = [l[2:] for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
         self.assertTrue(changed)
         for l in changed:
-            self.assertRegex(l, r'Min / Max|^\s*6 V range|Type K range', l)
-        self.assertLessEqual(len(changed), 14)
+            self.assertRegex(l, r'Min / Max|^\s*6 V range|Type K range|(\u00b5|m)Hz$|Same N/A$', l)
+        self.assertLessEqual(len(changed), 24)
+
+    def check_frequency_rows_only(self, n):
+        """Only the frequency step rows differ: the voltage uncertainty with a Hz unit ('1.3 mHz') is now blank ('N/A')."""
+        import difflib
+        txt = lambda d: self.layout_lines(d / n)
+        changed = [l for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
+        self.assertEqual(len(changed), 2, changed)
+        for l in changed:
+            self.assertRegex(l[2:], r'kHz [\d.]+ Same (N/A|[\d.]+ (\u00b5|m)Hz)$', l)
 
     def check_temperature_rows_only(self, n):
         """Only the Temperature rows differ from the baseline, and only in the Uncertainty cell (N/A before, 'x.xx degC' now)."""

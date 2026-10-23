@@ -52,9 +52,9 @@ def rows(first, last, section, switch, ranges, kind, **extra):
 ACV_SW, DCV_SW = 'V~  (AC volts)', 'V⎓  (DC volts)'
 for n, rng in zip(range(1, 11), ['600 mV', '600 mV', '6 V', '6 V', '60 V', '60 V', '600 V', '600 V', '1000 V', '1000 V']):
     ROWS[n] = ('AC volts', 'mV  (AC millivolts)' if rng == '600 mV' else ACV_SW, rng, 'ACV', {})
-rows(11, 12, 'AC volts frequency', 'Hz  (frequency, AC volts input)', '600 mV', 'ACV', note='The meter displays FREQUENCY on this step (the calibrator applies the voltage shown at that frequency).')
-rows(13, 13, 'AC volts frequency sensitivity', 'Hz  (frequency, AC volts input)', '6 V', 'ACV', note='The meter displays FREQUENCY on this step.')
-rows(14, 14, 'AC volts frequency sensitivity', 'Hz  (frequency, AC volts input)', '60 V', 'ACV', note='The meter displays FREQUENCY on this step.')
+rows(11, 12, 'AC volts frequency', 'Hz  (frequency, AC volts input)', '600 mV', 'ACV', note='The meter displays FREQUENCY on this step (the calibrator applies the voltage shown at that frequency).', no_uncertainty=True)
+rows(13, 13, 'AC volts frequency sensitivity', 'Hz  (frequency, AC volts input)', '6 V', 'ACV', note='The meter displays FREQUENCY on this step.', no_uncertainty=True)
+rows(14, 14, 'AC volts frequency sensitivity', 'Hz  (frequency, AC volts input)', '60 V', 'ACV', note='The meter displays FREQUENCY on this step.', no_uncertainty=True)
 rows(15, 15, 'DC volts frequency trigger level', 'Hz  (frequency, DC volts input)', '', 'NONE',
      setup='Set the calibrator or a function generator to 3.4 Vpp at 1000 Hz and connect it to the meter VΩ and COM inputs (this step has no automatic calibrator output). Select the DC volts frequency (Hz) function.')
 # Duty cycle: the calibrator sources the square wave (87 Series V Calibration Manual Table 3 step 16, p. 9: 5 V, 1 kHz, DC offset 2.5 V Sq. Wave).
