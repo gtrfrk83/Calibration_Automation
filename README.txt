@@ -259,6 +259,8 @@ only a Measure entry. uncertainty.Scope.dmm(..., basis='measure') gives the Meas
 entries for the WaveSurfer; Resistance - Measure for scope input impedance. A point on the boundary of two bands takes the
 LARGER CMC. Points the scope does not cover (RMS noise, DC current zero, 10 A AC) are left blank and counted in the footnote.
 The value is the CMC (k = 2) and excludes the unit under test.
+Coil lines (5500A/COIL DC rows, Clamp-On Only AC rows, transconductance amplifier/coil AC rows, scope pp. 9 and 30) are in the table too, so currents above 30.2 A are covered
+(added by specs/build_a2la_cmc_coil_rows.py; the same lines are standards sheets A2LA-5500A-COIL and A2LA-CURRENT-AMP-COIL).
 To update after a scope revision: replace specs/a2la_1888_03_cmc.json (see specs/README.txt).
 
 Klein Tools MM325 (manual-ranging digital multimeter)

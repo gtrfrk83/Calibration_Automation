@@ -7,7 +7,7 @@
  "valid_to": "2028-01-31",
  "standard": "ISO/IEC 17025:2017 & ANSI/NCSL Z540-1-1994",
  "cmc_note": "CMC = expanded uncertainty at approximately 95 % confidence (k = 2). It excludes the unit under test (resolution, repeatability, drift); a certificate value may be larger.",
- "source": "Calibration Scope of Accreditation, Section V Electrical - DC/Low Frequency, pp. 8-32; Section XII Time & Frequency",
+ "source": "Calibration Scope of Accreditation, Section V Electrical - DC/Low Frequency, pp. 8-32; Section XII Time & Frequency; coil lines pp. 9 and 30",
  "entries": [
   {
    "parameter": "DC Voltage \u2013 Measure",
@@ -1551,8 +1551,8 @@
   {
    "parameter": "DC Current \u2013 Generate",
    "kind": "DCI",
-   "standard": "Multifunction calibrator (both listed sets)",
-   "notes": "",
+   "standard": "Multifunction calibrator (both listed sets) / transconductance amplifier/coil",
+   "notes": "Coil lines added (p. 9 of 47, comment Transconductance amplifier/coil): (2 to 20) A 90 uA/A + 0.1 mA, (20 to 120) A 80 uA/A + 8 mA, (120 to 3000) A 0.8 % + 0.08 A.",
    "bands": [
     {
      "lo": 0,
@@ -1657,6 +1657,27 @@
      "hi": 30.2,
      "rel": 0.00086,
      "abs": 0.00054,
+     "rng": 0.0
+    },
+    {
+     "lo": 2,
+     "hi": 20,
+     "rel": 9e-05,
+     "abs": 0.0001,
+     "rng": 0.0
+    },
+    {
+     "lo": 20,
+     "hi": 120,
+     "rel": 8e-05,
+     "abs": 0.008,
+     "rng": 0.0
+    },
+    {
+     "lo": 120,
+     "hi": 3000,
+     "rel": 0.008,
+     "abs": 0.08,
      "rng": 0.0
     }
    ],
@@ -2582,8 +2603,8 @@
   {
    "parameter": "AC Current \u2013 Generate",
    "kind": "ACI",
-   "standard": "Multifunction calibrator / transconductance amplifier",
-   "notes": "Bands by the generated current and frequency (not by instrument range); overlapping sets: larger CMC used.",
+   "standard": "Multifunction calibrator / transconductance amplifier / coil (Clamp-On Only: multifunction calibrator/coil)",
+   "notes": "Bands by the generated current and frequency (not by instrument range); overlapping sets: larger CMC used. Coil lines added (p. 30 of 47): (20.5 to 3000) A (16 to 850) Hz 0.7 % + 0.84 A and (0.85 to 6) kHz 0.8 % + 0.84 A (Transconductance amplifier/coil); Clamp-On Only (20.5 to 1025) A (45 to 65) Hz 0.8 %, (65 to 440) Hz 0.99 % (Multifunction calibrator/coil).",
    "ranges": [
     {
      "lo": 0.0,
@@ -3125,6 +3146,46 @@
        "f_hi": 10000.0,
        "rel": 0.031,
        "abs": 0.7,
+       "rng": 0.0
+      }
+     ]
+    },
+    {
+     "lo": 20.5,
+     "hi": 1025.0,
+     "rows": [
+      {
+       "f_lo": 45.0,
+       "f_hi": 65.0,
+       "rel": 0.008,
+       "abs": 0.0,
+       "rng": 0.0
+      },
+      {
+       "f_lo": 65.0,
+       "f_hi": 440.0,
+       "rel": 0.0099,
+       "abs": 0.0,
+       "rng": 0.0
+      }
+     ]
+    },
+    {
+     "lo": 20.5,
+     "hi": 3000.0,
+     "rows": [
+      {
+       "f_lo": 16.0,
+       "f_hi": 850.0,
+       "rel": 0.007,
+       "abs": 0.84,
+       "rng": 0.0
+      },
+      {
+       "f_lo": 850.0,
+       "f_hi": 6000.0,
+       "rel": 0.008,
+       "abs": 0.84,
        "rng": 0.0
       }
      ]

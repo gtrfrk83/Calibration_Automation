@@ -1,0 +1,159 @@
+{
+ "schema": 1,
+ "standard": {
+  "manufacturer": "Applied Technical Services, LLC. (A2LA 1888.03)",
+  "model": "A2LA-CURRENT-AMP-COIL",
+  "description": "Transconductance amplifier/coil (A2LA scope, AC current)",
+  "confidence_text": "approximately the 95 % level, usually k = 2 (A2LA scope, footnote 2)",
+  "confidence_pct": 95.0,
+  "reference": "Calibration Scope of Accreditation, A2LA 1888.03, rev. 07/07/2026, section V, printed p. 30 of 47 (AC Current - Generate (cont), (20.5 to 3000) A, Transconductance amplifier/coil)",
+  "revision": "07/07/2026",
+  "author": "written by specs/build_current_amp_coil_standard.py from the scope page",
+  "approved_by": "",
+  "approve_date": "",
+  "source_pdf": "1888-03.pdf",
+  "sheet_generated": "",
+  "built": "2026-10-23T13:46:45"
+ },
+ "notes": {
+  "1": "SOURCE: the laboratory's own A2LA scope of accreditation, certificate 1888.03 (revised 07/07/2026), section V. Electrical - DC/Low Frequency, printed p. 30 of 47, \"AC Current - Generate (cont)\", range (20.5 to 3000) A, comment \"Transconductance amplifier/coil\": (16 to 850) Hz 0.7 % + 0.84 A; (0.85 to 6) kHz 0.8 % + 0.84 A. Built by specs/build_current_amp_coil_standard.py.",
+  "2": "VERIFICATION: both lines (column header CMC 2, 5, 9 (+/-), Frequency column) were read from the RENDERED PAGE IMAGE of p. 30 of 47, twice (170 dpi and 260 dpi crops), on 2026-10-23; the page carries \"(A2LA Cert. No. 1888.03) Revised 07/07/2026\". No other AC Current - Generate line mentions a coil. The extracted text was used only to find the page.",
+  "3": "CONFIDENCE: footnote 2 of the scope: a CMC is an EXPANDED uncertainty at approximately the 95 % level of confidence, usually using a coverage factor of k = 2. Stored as confidence_pct 95, so the coverage divisor is 2.0 (u of the standard = CMC / 2).",
+  "4": "TERMS: footnote 5: the first percentage is a percentage of the READING; footnote 9: a percent of the reading plus a fixed floor. Stored as rel (0.007 and 0.008 of reading) and abs (0.84 A), computed in Decimal. No 90 day / 1 yr columns: each row is stored once, under the period \"1 yr\".",
+  "5": "ROWS: kind ACI, direction \"output\" (the lab generates the current), amperes as printed. The frequency band of the second row is printed (0.85 to 6) kHz and stored as 850 to 6000 Hz; the two bands meet at 850 Hz, where the larger limit is used (the scope CMC rule). An AC point needs a frequency inside a band; below 16 Hz or above 6 kHz nothing is covered.",
+  "6": "NOT PART OF THIS SHEET: the 5500A/COIL lines of the scope (sheet A2LA-5500A-COIL) and the coil datasheet's clamp / coil interaction uncertainty, which is not combined into anything here. Not wired into any calibrator picker (the pickers choose the instrument that is commanded); found by model id (uncertainty_budget.build(..., standard=\"A2LA-CURRENT-AMP-COIL\"), tartur)."
+ },
+ "limits": [
+  {
+   "function": "Current, AC [Transconductance amplifier/coil]",
+   "limit": "(20.5 to 3000) A: (16 to 850) Hz 0.7 % + 0.84 A; (0.85 to 6) kHz 0.8 % + 0.84 A.",
+   "page": "30"
+  }
+ ],
+ "functions": [
+  {
+   "name": "Current, AC [Transconductance amplifier/coil]",
+   "direction": "output",
+   "page": 30,
+   "ranges": [
+    {
+     "label": "(20.5 to 3000) A, (16 to 850) Hz",
+     "page": 30,
+     "params": [
+      {
+       "tag": "",
+       "lo": 20.5,
+       "hi": 3000.0,
+       "unit": "A",
+       "text": "20.5 A to 3000 A",
+       "annot": "",
+       "notes": [
+        4,
+        5
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 16.0,
+       "hi": 850.0,
+       "unit": "Hz",
+       "text": "16 Hz to 850 Hz",
+       "annot": "",
+       "notes": [
+        4,
+        5
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.007,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.84,
+       "unit": "A",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.7 % I.V. + 0.84 A)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(20.5 to 3000) A  (16 to 850) Hz  0.7 % + 0.84 A",
+     "kind": "ACI",
+     "variant": "Transconductance amplifier/coil",
+     "amp_lo": 20.5,
+     "amp_hi": 3000.0,
+     "unit": "A",
+     "freq_lo": 16.0,
+     "freq_hi": 850.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "(20.5 to 3000) A, (0.85 to 6) kHz",
+     "page": 30,
+     "params": [
+      {
+       "tag": "",
+       "lo": 20.5,
+       "hi": 3000.0,
+       "unit": "A",
+       "text": "20.5 A to 3000 A",
+       "annot": "",
+       "notes": [
+        4,
+        5
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 850.0,
+       "hi": 6000.0,
+       "unit": "Hz",
+       "text": "850 Hz to 6000 Hz",
+       "annot": "",
+       "notes": [
+        4,
+        5
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.008,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.84,
+       "unit": "A",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.8 % I.V. + 0.84 A)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(20.5 to 3000) A  (0.85 to 6) kHz  0.8 % + 0.84 A",
+     "kind": "ACI",
+     "variant": "Transconductance amplifier/coil",
+     "amp_lo": 20.5,
+     "amp_hi": 3000.0,
+     "unit": "A",
+     "freq_lo": 850.0,
+     "freq_hi": 6000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  }
+ ],
+ "problems": [
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "This is the laboratory's own CMC (expanded, approximately 95 %, usually k = 2), not a manufacturer specification. No 90 day / 1 yr columns; stored under the period \"1 yr\"."
+  }
+ ]
+}

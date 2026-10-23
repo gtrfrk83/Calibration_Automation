@@ -84,7 +84,7 @@ NOTES = {
          'A CMC has no 90 day / 1 yr column: each row is stored once, under the period "1 yr" (the default period of every standard).',
     '5': 'DC ROWS (p. 9 of 47): scope parameter "DC Current - Generate", comment "Transconductance amplifier/coil", column header "Parameter/Equipment | Range | CMC (+/-) | Comments" '
          '- there is NO frequency column, these are DC ranges (rows kind DCI). Stored with direction "output" (the lab generates the current) and no frequency. '
-         'The comment says "Transconductance amplifier/coil", NOT "Multifunction calibrator/coil": see note 9 (OWNER QUESTION).',
+         'The scope comment on these rows is "Transconductance amplifier/coil"; the owner confirmed (2026-10-23) that these DC rows are the 5500A/COIL\'s.',
     '6': 'AC ROWS (p. 30 of 47): scope parameter "AC Current - Generate (cont)", sub-heading "Clamp-On Only", range (20.5 to 1025) A, Frequency column (45 to 65) Hz 0.8 % and '
          '(65 to 440) Hz 0.99 % (percent of reading only), comment "Multifunction calibrator/coil". "Clamp-On Only" is kept as a qualifier of the row (the bracket of the function name, '
          'the repo\'s variant field). A frequency inside a band is required for a lookup; at 65 Hz both bands match and the larger limit is used (the scope CMC rule).',
@@ -98,13 +98,13 @@ NOTES = {
          '80I-1000; +/-(0.50 % of effective output + 0.5 A) for clamps like the Fluke 80i-kw, 80i-400, 80i-410, 80i-500, 80i-1010, Fluke 31, Fluke 33 or equivalent. It is a contribution of '
          'the clamp meter / coil pair, which the scope CMC excludes; the repo has no second-term mechanism for a standard, so it is recorded here only and combined with nothing '
          '(no combination rule is invented; whether and how it enters the uncertainty is an OWNER DECISION).',
-    '9': 'EFFECTIVE CURRENT AND WHICH LINES BELONG TO THE COIL: the scope ranges are the current the clamp sees ("effective output" in the datasheet). The Clamp-On Only upper limit '
-         '1025 A = 20.5 A x 50 turns (an inference: the maximum current of the scope\'s multifunction-calibrator ranges times the coil\'s turns, not stated by the scope). Observations for the owner: '
-         '(a) the datasheet limits the 65-440 Hz current to 2.19999 A (5500A) or 2.99999 A (5520A), i.e. 110 A or 150 A effective, while the 65-440 Hz row is listed to 1025 A; '
-         '(b) the DC rows run to 3000 A, beyond 50 x 20 A = 1000 A, and their comment is "Transconductance amplifier/coil". Both are stored as printed on the scope.',
-    '10': 'NOT STORED: the scope\'s other coil-related lines (AC Current - Generate (20.5 to 3000) A, (16 to 850) Hz 0.7 % + 0.84 A and (0.85 to 6) kHz 0.8 % + 0.84 A, "Transconductance '
-          'amplifier/coil"; DC Power - Generate, "Multifunction calibrator with current coil") because they were not asked for; and the clamp meter\'s own contribution (resolution, repeatability, '
-          'positioning in the jaws). The CMC excludes the unit under test; a certificate value may be larger.',
+    '9': 'EFFECTIVE CURRENT: the scope ranges are the current the clamp sees ("effective output" in the datasheet). The Clamp-On Only upper limit '
+         '1025 A = 20.5 A x 50 turns (an inference: the maximum current of the scope\'s multifunction-calibrator ranges times the coil\'s turns, not stated by the scope). Observation for the owner: '
+         'the datasheet limits the 65-440 Hz current to 2.19999 A (5500A) or 2.99999 A (5520A), i.e. 110 A or 150 A effective, while the 65-440 Hz row is listed to 1025 A. Stored as printed on the scope.',
+    '10': 'NOT STORED HERE: the scope\'s AC Current - Generate (20.5 to 3000) A lines, (16 to 850) Hz 0.7 % + 0.84 A and (0.85 to 6) kHz 0.8 % + 0.84 A, "Transconductance amplifier/coil", '
+          'are on their own sheet A2LA-CURRENT-AMP-COIL (specs/build_current_amp_coil_standard.py). Also not stored: DC Power - Generate with current coil, and the clamp meter\'s own contribution '
+          '(resolution, repeatability, positioning in the jaws). The CMC excludes the unit under test; a certificate value may be larger. All five lines here and the two amplifier/coil lines are '
+          'also in the lab CMC table (specs/a2la_1888_03_cmc.json, specs/build_a2la_cmc_coil_rows.py).',
     '11': 'USE: the lookups find this sheet by its model id (uncertainty_budget.build(kind, ..., standard="A2LA-5500A-COIL"), tartur.standard_accuracy, tartur.compute(..., standard=...)). '
           'It is NOT offered in any calibrator picker: those choose the instrument that is commanded, and the coil is not commanded. The Fluke 365 procedure uses a 20-turn coil '
           'and keeps the regular calibrator current uncertainty, unscaled (owner decision); nothing here changes it.',
@@ -159,8 +159,6 @@ def problems_for(data):
         probs.append(dict(level='warn', where='standard', what='UNVERIFIED against the rendered pages: pp. 9 and 30 of the A2LA scope were not read from page images. Check the five lines, then rebuild.'))
     probs.append(dict(level='warn', where='standard', what='This is the laboratory\'s own CMC (expanded, approximately 95 %, usually k = 2), not a manufacturer specification. '
                                                           'No 90 day / 1 yr columns; stored under the period "1 yr".'))
-    probs.append(dict(level='warn', where='Current, DC [Transconductance amplifier/coil]', what='Comment on the scope is "Transconductance amplifier/coil", not "Multifunction calibrator/coil"; '
-                                                                                               'the three DC rows run to 3000 A, beyond 50 turns x 20 A. Stored as printed (note 9).'))
     probs.append(dict(level='warn', where='Current, AC [Clamp-On Only, Multifunction calibrator/coil] / (65 to 440) Hz', what='The datasheet limits 65-440 Hz drive to 2.19999 A (5500A) / 2.99999 A (5520A), '
                                                                                                                             'about 110 / 150 A effective, below the 1025 A of the scope row (note 9). Stored as printed.'))
     probs.append(dict(level='warn', where='standard', what='The datasheet\'s clamp/coil interaction uncertainty (0.25 % or 0.50 % of effective output + 0.5 A) is NOT added to these rows: '

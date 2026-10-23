@@ -35,6 +35,7 @@ EXPECTED = {
     '8902A': (None, 2.0),      # no level printed
     'A2LA-LIGHT': (95.0, 2.0),  # the lab's own A2LA CMC (scope footnote 2: expanded, approximately 95 %, usually k = 2)
     'A2LA-5500A-COIL': (95.0, 2.0),  # the lab's own A2LA CMC lines for the 5500A/COIL (same footnote 2)
+    'A2LA-CURRENT-AMP-COIL': (95.0, 2.0),  # the lab's own A2LA CMC lines, AC current with a transconductance amplifier and coil (same footnote 2)
 }
 TABLE = {99.0: 2.576, 95.0: 2.0, None: 2.0}
 
