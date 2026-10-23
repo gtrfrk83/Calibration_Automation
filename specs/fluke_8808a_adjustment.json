@@ -6,8 +6,8 @@
  "method": "RS-232 Calibration (Manual): *TER and the function / CALREF / Enter dialog (pp. 3-16, 3-17)",
  "general": [
   "This procedure changes the calibration constants of the Fluke 8808A. The manual: \"Meter adjustments, or calibration, should be performed at the desired interval, or whenever a verification test indicates a Meter function is out of tolerance\" (p. 3-11). Run the performance verification (As Found) first and again afterwards (As Left).",
-  "Warm-up: one half hour to full uncertainty specifications (General Specifications, p. 1-9). The equipment is that of Table 3-1 (p. 3-3): Fluke 5700A with 5725A amplifier (volts, current), Fluke 271 or equivalent for frequency, Fluke 5520A for the resistance adjustment, the low thermal 4-wire short (Fluke PN 2653346) for the DC zero points.",
-  "Method used here: \"RS-232 Calibration (Manual)\" (p. 3-16): *TER, then for each function the function name, an optional CALREF, the Enter key to confirm the value, the Enter key to start the point. The 8808A has no front-panel-free \"save\": the manual describes no save, lock, password or date command.",
+  "Warm-up: one half hour to full uncertainty specifications (General Specifications, p. 1-9). The equipment is that of Table 3-1 (p. 3-3): Fluke 5700A with 5725A amplifier (volts, current), Fluke 271 or equivalent for frequency, Fluke 5520A for the resistance adjustment, the low thermal 4-wire short (Fluke PN 2653346) for the DC volts and the zero ohm points.",
+  "Method used here: the dialog of \"RS-232 Calibration (Manual)\" (p. 3-16): for each function the function name, an optional CALREF, the Enter key to confirm the value, the Enter key to start the point. The calibration mode is entered by the operator at the front panel with the calibration button (owner policy); *TER, which the manual shows as the RS-232 entry, is an optional, UNVERIFIED path that is off by default. The manual describes no save, lock, password or date command.",
   "Once a function is selected, ALL of its calibration points must be calibrated before the calibration process is left; otherwise a CAL ERROR shows in the display (p. 3-16). Each function is therefore run as a whole.",
   "Current: use the mA input terminal for the low ranges (ADC ranges 1 to 4, AAC ranges 1 and 2) and the 10 A input terminal for the high ranges (ADC ranges 5 and 6, AAC ranges 3 and 4); for a ZERO point of a current function all test leads are removed (p. 3-16).",
   "Frequency: set the calibrator to 1.9 volts for the frequency calibration input (p. 3-16).",
@@ -76,7 +76,7 @@
    "frequency_spec_pct": "0.0025",
    "resistance_accuracy_pct": "0.0045"
   },
-  "note": "Table 3-9 names the Fluke 5700A / 5725A for volts and current, the Fluke 5520A for frequency and resistance, and says the 5520A must be characterized with an 8508A on four DC current ranges (200 uA, 2000 uA, 200 mA, 2 A)."
+  "note": "Table 3-9 names the Fluke 5700A / 5725A for volts and current, the Fluke 5520A for frequency and resistance, and says the 5520A must be characterized with an 8508A on four DC current ranges (200 uA, 2000 uA, 200 mA, 2 A); this lab characterizes with a Keysight / Agilent 3458A."
  },
  "times": {
   "warmup_min": 30,
@@ -1849,18 +1849,13 @@
     "unit": "ohm",
     "text": "0 Ω"
    },
-   "source": {
-    "kind": "OHM",
-    "value": "0",
-    "unit": "ohm",
-    "frequency": null
-   },
-   "group": "OHM4",
+   "source": null,
+   "group": "ZERO_SHORT",
    "zero": true,
    "wire": 4,
    "page": "p. 3-13 (Table 3-9, step 55)",
    "printed_input": "0 Ω, 4Wire",
-   "description": "Zero point of OHMS, 200 Ω range",
+   "description": "Zero point of OHMS, 200 Ω range; made with the low thermal 4-wire short on INPUT and SENSE (owner policy), no calibrator output",
    "list_value": null,
    "conflict": false,
    "characterize": false

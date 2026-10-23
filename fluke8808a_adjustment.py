@@ -68,7 +68,7 @@ PARITY_FORMATS = {'8 data bits, no parity': (8, 'none'), '7 data bits, even pari
 BAUDS = ['9600', '19200', '4800', '2400', '1200', '600', '300']
 CAL_INTERFACES = ('RS-232', 'GPIB')
 CAL_PORT_DEFAULT = {'RS-232': 'COM9', 'GPIB': 'GPIB0::4::INSTR'}
-GROUP_TITLE = {'ZERO_SHORT': 'the 4-wire short (DC volts zero)', 'VOLT': 'voltage / frequency inputs', 'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'ZERO_OPEN': 'open current inputs (zero)',
+GROUP_TITLE = {'ZERO_SHORT': 'the 4-wire short (DC volts and ohms zero)', 'VOLT': 'voltage / frequency inputs', 'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'ZERO_OPEN': 'open current inputs (zero)',
                'IMA': 'current, mA terminal', 'I2A': 'current, 10 A terminal (2 A ranges)', 'I10A': 'current, 10 A terminal (10 A ranges)'}
 
 
@@ -112,7 +112,7 @@ def point_value(step) -> float:
 def point_text(step):
     """The point as the manual prints it with a clean SI unit (display only): '-199.9 mV', '1.9 V at 500 Hz' ..."""
     if step['zero']:
-        return {'VDC': '0 V (4-wire short)', 'VAC': '0 V (calibrator STANDBY)', 'AAC': '0 A (inputs open)', 'ADC': '0 A (inputs open)', 'OHMS': '0 Ω'}[step['function']]
+        return {'VDC': '0 V (4-wire short)', 'VAC': '0 V (calibrator STANDBY)', 'AAC': '0 A (inputs open)', 'ADC': '0 A (inputs open)', 'OHMS': '0 Ω (4-wire short)'}[step['function']]
     p = step['point']
     return si_text(p['value'], p['unit'])
 
@@ -189,13 +189,22 @@ def own_standard_reasons(cal_key):
 
 
 def hookup_text(step, cal_key):
+    text = _hookup_text(step, cal_key)
+    if step.get('characterize'):
+        text += (' CHARACTERIZED RANGE: the manual says the calibrator must be characterized here; measure its output with the Keysight / Agilent 3458A (the manual names an 8508A) and have the '
+                 'value ready: the program asks for it before this point.')
+    return text
+
+
+def _hookup_text(step, cal_key):
     """The physical set-up for a step (Figures 3-1 to 3-5 and the notes of pp. 3-11, 3-16, 3-17).  Calibrator terminal names follow the verification procedure's wording (UNVERIFIED)."""
     five60 = cal_key == '5560A'
     out = 'OUTPUT V/ohm HI / LO' if five60 else 'NORMAL HI / LO'
     g = step['group']
     if g == 'ZERO_SHORT':
         return ('Disconnect the calibrator leads. Fit the low thermal 4-wire short (Fluke PN 2653346) across the meter INPUT HI / LO and SENSE HI / LO (Table 3-1; "Volts DC: zero points using '
-                'the 4-wire short", p. 3-12). The calibrator stays in STANDBY. Keep drafts away from the low-thermal connections.')
+                'the 4-wire short", p. 3-12). The calibrator stays in STANDBY and no calibrator output is used. ' + ('This is also the ZERO OHM point (lab policy: the 4-wire short, not the calibrator\'s 0 ohm; '
+                'the meter shows 4WIRE, p. 3-14). ' if step['function'] == 'OHMS' else '') + 'Keep drafts away from the low-thermal connections.')
     if g == 'ZERO_OPEN':
         return ('Remove ALL test leads from the meter\'s current inputs (mA and 10 A); nothing connected ("Open, no connection", p. 3-14 / 3-15; "if ZERO point is calibrated all test leads shall '
                 'be removed", p. 3-16). The calibrator stays in STANDBY. If the meter says "Disconnect Test Leads!" it means exactly this.')
@@ -222,16 +231,6 @@ def hookup_text(step, cal_key):
         return (f'Calibrator {amps} (high current) to the meter 10 A input terminal and COM (Figure 3-5). High ranges use the 10 A terminal (ADC ranges 5 and 6, AAC ranges 3 and 4; p. 3-16). '
                 'The meter says "Connect to 10A socket". Check the leads, the calibrator range and the 10 A fuse first.')
     return step.get('note', '')
-
-
-def find_diagram(cal_key, group):
-    """diagrams/hook_8808A_ADJ_<cal>_<GROUP>.png, hook_8808A_ADJ_<GROUP>.png, then the verification pictures hook_8808A_<cal>_<GROUP>.png / hook_8808A_<GROUP>.png (see diagrams/README_8808a.txt)."""
-    cal_key = '5522A' if cal_key == '5520A' else cal_key          # the 5520A uses the 5522A picture (same NORMAL / AUX terminals; UNVERIFIED), as the verification does
-    for name in (f'hook_8808A_ADJ_{cal_key}_{group}', f'hook_8808A_ADJ_{group}', f'hook_8808A_{cal_key}_{group}', f'hook_8808A_{group}'):
-        path = HERE / 'diagrams' / f'{name}.png'
-        if path.exists():
-            return path
-    return None
 
 
 def serial_kwargs(baud, fmt='8 data bits, no parity'):
@@ -386,6 +385,7 @@ class Session:
         self.acks = set()
         self.records = {s['id']: StepRecord(s['id']) for s in STEPS}
         self.cal_mode = False
+        self.entry_verified = False
         self.active_function = None
         self.function_done = set()
         self.finished = False
@@ -459,10 +459,13 @@ class Session:
         self.log('PREPARE', 'OK', f'*IDN? {self.io.ident}; event status clean')
 
     # ---- 2. the calibration mode
-    def enter_calibration(self):
-        """*TER, once. Needs the operator's confirmations. The meter must answer with the banner."""
+    def enter_calibration(self, use_ter=False):
+        """The calibration mode is entered by the OPERATOR at the front panel with the calibration button (owner policy): nothing is sent to enter it. Needs the operator's confirmations
+        (the 'panel' one says the button was pressed). The manual prints no query that shows the calibration mode, so it cannot be verified read-only: the first function name must be answered
+        with a recommended value (start_function), and until then the mode is only 'entered by the operator'.  use_ter=True (off by default, UNVERIFIED) sends *TER once instead, the RS-232
+        entry the manual shows on p. 3-16; the banner must then come back."""
         for need, why in (('conditions', 'warm-up and conditions'), ('as_found', 'the As Found performance verification'), ('authorised', 'authorisation to adjust'),
-                          ('notice', 'the "this changes the instrument calibration" notice'), ('ready', 'that the meter is ready for the calibration mode (CAL seal / Cal Enable button per your lab)')):
+                          ('notice', 'the "this changes the instrument calibration" notice'), ('panel', 'that you entered the calibration mode at the front panel with the calibration button')):
             if need not in self.acks:
                 raise AdjustmentError(f'Not confirmed yet: {why}.')
         if self.audit.run_id is None:
@@ -470,12 +473,21 @@ class Session:
         if self.cal_mode:
             raise AdjustmentError('The calibration mode is already open.')
         try:
-            self.dmm.enter_cal_mode()
+            if use_ter:
+                self.dmm.enter_cal_mode()
+            else:
+                reply = self.dmm.adopt_manual_entry()
         except Exception as exc:
             self.log('ENTER CAL', 'FAILED', str(exc).splitlines()[0])
             raise
         self.cal_mode = True
-        self.log('ENTER CAL', 'OK', '*TER sent once; the meter answered "Select a Function or input EXIT to QUIT!"')
+        self.entry_verified = False
+        if use_ter:
+            self.entry_verified = True
+            self.log('ENTER CAL', 'OK', '*TER sent once (optional, UNVERIFIED path); the meter answered "Select a Function or input EXIT to QUIT!"')
+        else:
+            self.log('ENTER CAL', 'OPERATOR', 'entered at the front panel with the calibration button, confirmed by the operator; nothing was sent; ' + (
+                'the banner arrived' if reply.idle else 'no banner arrived (the manual does not say whether one should); the mode cannot be verified read-only, the first function name will show it'))
         self.audit.set_status('CAL_MODE')
 
     # ---- 3. a function
@@ -499,6 +511,9 @@ class Session:
             self.log('FUNCTION', 'FAILED', f'{fn}: {str(exc).splitlines()[0]}')
             raise
         self.active_function = fn
+        if not self.entry_verified:
+            self.entry_verified = True
+            self.log('ENTER CAL', 'VERIFIED', f'{fn} was answered with a recommended value: the meter is in the calibration mode')
         self.rec, self.rec_messages = reply.recommended, list(reply.messages)
         self.log('FUNCTION', 'STARTED', f'{fn} selected; {len(function_steps(fn))} points must all be calibrated; the meter recommends {self.rec.raw}')
         return reply
@@ -545,7 +560,7 @@ class Session:
 
           choose='meter'  : the calibrator is set to the meter's own recommended value (default). A value that is neither Table 3-9's nor the list's needs `unexpected_ack`.
           choose='table'  : only when the meter recommends the list value: the calibrator is set to Table 3-9's value and CALREF <that value> is sent (set, answer read, never retried).
-          characterized   : text of a value measured by the operator's reference (the 8508A of the manual's note); CALREF <value> is sent, the calibrator stays at the meter's recommended value.
+          characterized   : text of a value measured by the operator's reference (the Keysight 3458A of this lab; the manual's note names an 8508A); CALREF <value> is sent, the calibrator stays at the meter's recommended value.
                             A step flagged `characterize` needs it, or `waive=True` (an explicit operator decision, logged): then no CALREF is sent.
         Returns the value the calibrator must output.  The first Enter (confirm value) is sent last, once."""
         self.check_order(step)
@@ -562,7 +577,7 @@ class Session:
         if choose == 'table':
             calref_value = info['table']
         if step['characterize'] and characterized is None and not waive:
-            raise AdjustmentError('This range needs the calibrator characterized (the manual: "need characterize 5520A with 8508A"): enter the characterized value, or waive it explicitly.')
+            raise AdjustmentError('This range needs the calibrator characterized (the manual: "need characterize 5520A with 8508A"; this lab characterizes with a Keysight 3458A): enter the value measured with the 3458A, or waive it explicitly.')
         if characterized is not None:
             if choose == 'table':
                 raise AdjustmentError('A characterized value cannot be combined with the Table 3-9 choice.')
@@ -794,8 +809,11 @@ class Session:
         if self.cal_mode or self.dmm.in_cal:
             try:
                 self.dmm.exit_cal()
+                notes.append('EXIT was sent over RS-232 (the manual\'s way to leave the calibration mode, p. 3-16). Look at the meter: if it still shows the calibration mode, leave it at the front panel '
+                             'as your lab procedure says (the manual prints no front-panel exit in the pages used here; switching the meter off is UNVERIFIED).')
             except Exception as exc:
-                notes.append('EXIT could not be confirmed (' + str(exc).splitlines()[0] + '): the meter may still be in the calibration mode; switch it off and on again.')
+                notes.append('EXIT could not be confirmed (' + str(exc).splitlines()[0] + '): the meter may still be in the calibration mode; leave it at the front panel as your lab procedure says '
+                             '(the manual prints no front-panel exit in the pages used here; switching the meter off is UNVERIFIED).')
             self.cal_mode = False
         done_here = [r for r in sent if STEP_BY_ID[r.step_id]['function'] == in_function and r.done] if in_function else []
         if in_function:

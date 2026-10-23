@@ -102,7 +102,7 @@ COVERAGE = {
                                     'check_errors', 'ensure_run_state', 'session_check'], no_command=[]),
     },
     'fluke_8808a_cal': {
-        'Fluke8808ACal': dict(covered=['write', 'enter_cal_mode', 'select_function', 'set_reference', 'confirm_value', 'start_point', 'read_late', 'exit_cal', 'cleanup'], no_command=[]),
+        'Fluke8808ACal': dict(covered=['write', 'enter_cal_mode', 'adopt_manual_entry', 'select_function', 'set_reference', 'confirm_value', 'start_point', 'read_late', 'exit_cal', 'cleanup'], no_command=[]),
     },
     'keysight_truevolt': {
         'KeysightTruevolt': dict(covered=['connect', 'cleanup', 'set_nplc', 'set_ac_filter', 'configure_point', 'configure_frequency_point',
@@ -1368,7 +1368,14 @@ def cases_8808a_cal(c):
     dt.refuse_ter = 'error'
     c.run('Fluke8808ACal.enter_cal_mode[error prompt]', d.enter_cal_mode)
     dt.refuse_ter = None
-    c.quiet(d.enter_cal_mode)
+    bench, ft, dt = make_8808a_cal_bench('5522A', enforce_cal_limits=False)
+    d = c.inst(Fluke8808ACal, dt, opened=False, label='8808A')
+    c.quiet(d.connect)
+    c.quiet(lambda: (setattr(d, 'QUIET_S', 0.01), setattr(d, 'COMMAND_GAP_S', 0.0), setattr(d, 'POINT_TIMEOUT_S', 0.05)))
+    c.run('Fluke8808ACal.select_function[front-panel entry missing]', d.select_function, 'VDC')
+    dt.enter_panel(banner=True)
+    c.run('Fluke8808ACal.adopt_manual_entry[banner]', d.adopt_manual_entry)
+    c.run('Fluke8808ACal.adopt_manual_entry[twice]', d.adopt_manual_entry)
     c.quiet(d.select_function, 'VDC')
     c.quiet(d.confirm_value)
     dt.hang_points.add('S001')
