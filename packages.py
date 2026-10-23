@@ -793,8 +793,11 @@ def package_filename(proc) -> str:
     return f'{proc.id}_v{re.sub(r"[^A-Za-z0-9._-]", "_", proc.version or "0")}.zip'
 
 
-def collect_files(proc, base: Path, extra=()) -> list:
-    """The files that go into the package of `proc`: its own files (sidecar, launcher ...), the diagrams named by its hook-up prefixes, extras."""
+def collect_files(proc, base: Path, extra=(), only=()) -> list:
+    """The files that go into the package of `proc`: its own files (sidecar, launcher ...), the diagrams named by its hook-up prefixes, extras.
+    `only` (a fix package): just the sidecar (the format needs it) and these files; everything else the procedure uses is listed in `requires`."""
+    if only:
+        return list(dict.fromkeys([proc.sidecar, *only]))
     paths = [proc.sidecar, proc.launcher, *proc.own_files, *proc.tests, *extra]
     for prefix in proc.diagram_prefixes:
         paths += sorted(f'diagrams/{p.name}' for p in (base / 'diagrams').glob(f'{prefix}_*.png'))
@@ -806,14 +809,14 @@ def collect_files(proc, base: Path, extra=()) -> list:
 
 
 def build_package(proc_id, base=None, out_dir='.', registry=None, extra_files=(), with_verified_mark=False, author='', min_suite=None,
-                  created=None) -> Path:
+                  created=None, only=()) -> Path:
     """Write the package of one installed procedure and return its path.  The zip is reproducible (fixed time stamps, sorted names)."""
     base = Path(base) if base else HERE
     proc = procscan.find(proc_id, base)
     if proc is None:
         raise PackageError(f'"{proc_id}" is not a registered procedure (no Procedures/<id>.procedure.json).')
     files = {}
-    for rel in collect_files(proc, base, extra_files):
+    for rel in collect_files(proc, base, extra_files, only):
         reason = check_member_path(rel)
         if reason:
             raise PackageError(f'{rel}: cannot be packaged ({reason}).')

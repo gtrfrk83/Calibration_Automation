@@ -90,17 +90,42 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
 - Ohms limits are "STD +/- tol" in the manual (STD = the 5700A reading). The calibrator setting is used as STD (the 5522A / 5560A reading is not read back), so the limits are
   setting +/- tol (`std_relative`).
 - Interface (Users Manual Table 4-1, p. 4-4): RS-232 only, no IEEE-488, no USB. 9600 baud, 8 data bits, no parity, 1 stop bit, echo off; changed from the front panel only.
-  The engine's baud / format boxes are the lab's choice if those settings were changed. Echo must be OFF: the driver refuses to run on a reply that carries a prompt.
+  The engine's baud / format boxes are the lab's choice if those settings were changed. Echo should be OFF; see 'Prompts, echo and the *RST failure' below for what the driver does when prompts appear anyway.
 - Commands (page references are in `drivers/fluke_8808a.py` COMMANDS; all verified in the Users Manual except as listed): `*IDN?`, `*RST` ("power-up reset", Table 4-8 p. 4-16),
   `*CLS`, `*OPC?`, `*ESR?`, `REMS`, `LOCS`, `VDC VAC ADC AAC OHMS FREQ`, `WIRE2 WIRE4`, `FIXED`, `AUTO?`, `RANGE n`, `RANGE1?`, `RATE S`, `RATE?`, `FORMAT 1`, `FORMAT?`,
   `TRIGGER 1`, `TRIGGER?`, `MEAS1?`, `SERIAL?`, `*STB?` (registered, not used). Everything is set once, read back and compared where a query exists; no write is retried.
 - Flagged, not verified or not stated by the manual: (1) `FUNC1?` reply text (registered `verified=False`); (2) the wire mode has no query, so the operator confirms the 2W / 4W
   annunciator in the hook-up prompt (the program selects the function and WIRE2 / WIRE4 first); (3) there is no state query for REMS / LOCS; (4) whether `*RST` leaves remote mode
   and whether it touches the RS-232 settings is not stated: REMS is sent again afterwards and the settings it needs are set and read back (`FORMAT 1`, `TRIGGER 1`, `RATE S`);
-  (5) with echo off there is no prompt, so `COMMAND_GAP_S` (0.15 s) between commands and `RESET_SETTLE_S` (3 s) after `*RST` are this driver's choices, not manual figures; `*OPC?`
+  (5) with echo off the manual says there is no prompt (but a real bench showed `=>` after `*RST`, see below), so `COMMAND_GAP_S` (0.15 s) between commands and `RESET_SETTLE_S` (3 s) after `*RST` are this driver's choices, not manual figures; `*OPC?`
   after the per-point set-up is the "done" signal; (6) that `MEAS1?` right after a range change is a fresh reading is not stated: the first of two `MEAS1?` is discarded;
   (7) there is no error queue: errors are bits of `*ESR?` (mask 0x3C, Table 4-6 p. 4-12), read once per check because the read clears it (never retried); (8) the simulator's
   power-up FORMAT (2) is a simulation choice.
+- Prompts, echo and the *RST failure (branch `fix-8808a-prompts`, from main 3a7a9a5; reply handling only, no command / limit / pass-fail rule / safety prompt changed).
+  The failing real-bench run (Echo OFF set at the front panel, print rate 0): `*IDN?` answered with no prompt; `*RST` (3 s settle), `*CLS`, `*OPC?` read `=>` (should be 1), `*ESR?` read `=>` (should be an
+  integer), so the reset failed with '*ESR? did not return a number' and the run did not start. An earlier run with Echo ON: after `*RST`, `*CLS` the `*OPC?` read gave `0` and `*ESR?` gave `=>`.
+  Fix in `drivers/fluke_8808a.py`: (1) after the `*RST` settle the input is flushed (`_discard_input`, the transport's clear, as `connect()` does) and a log line says so; (2) a query reply line that is only a
+  prompt is not the reply. A prompt FOLLOWS the command it answers (p. 4-6), so one arriving before this query's reply belongs to an earlier command: `=>` is dropped (logged `[prompt, skipped]`), `?>` / `!>`
+  is raised as an InstrumentError naming the commands sent before the query (the last one is the likely owner), the input is flushed, and nothing is retried. At most 5 lines (+2 per earlier command on
+  record, for echo) are read for one reply; if the reply never comes the transport's own timeout error is raised as before. (3) Prompts do not fail the run: the driver counts them and the reset report / command log
+  carry 'prompts returned: Echo appears to be ON or was restored by *RST - turn Echo off at the front panel'. An echoed copy of the command (Echo ON) is skipped in the middle of a run and logged `[echo of the
+  command, skipped]`; an earlier command's echo is skipped only if it cannot be a reply (a bare mnemonic such as VDC counts only once an echoed query was seen: a heuristic). At `*IDN?` an echoed command text
+  REFUSES the connection with a clear message (safer than reading on: the echo may be glued to the reply or lag behind it, so the whole session could be paired wrongly; it costs one front-panel change);
+  a prompt on the same line as the `*IDN?` reply is still refused as before. (4) Every raw line read is logged; a skipped one carries its marker. (5) The engine saves the command log when a reset fails
+  (`App._reset_failed`, before the dialog) and `IO.save_log` appends only lines not yet saved, so closing the window later does not repeat them. Engines at the suite root cannot travel in a package: that part
+  ships only with a full build; the package carries the driver fix.
+  - Verified in the manual (rendered pages): Table 4-1 p. 4-4 factory Echo off; p. 4-3 echo setting; p. 4-6 'When Echo is on, characters sent to the Meter are echoed ... and prompts are returned. When Echo is
+    off, characters are not echoed, and prompts are not returned'; p. 4-6 the three prompts (`=>` no error, `?>` command error, `!>` execution / device-dependent error), sent after the response; p. 4-8 wait for the prompt
+    before the next command; Table 4-8 p. 4-16 `*RST` 'performs power-up reset'; p. 3-25 'baud rate, parity, and echo mode are not changed when power is cycled'; pp. 3-24/3-25 a stored configuration (S1 - S6)
+    includes the Echo setting and the RS-232 settings.
+  - Observed on the bench (the log only): `=>` lines were read after `*RST` although Echo was set OFF first. NOT established: whether the reset restores Echo / prompts, whether the manual's Echo-off sentence
+    does not cover the reset, or whether the lines are the prompts of `*RST` / `*CLS` arriving late. The two stray `=>` in the failing log fit one prompt for `*RST` and one for `*CLS` (`*OPC?` and `*ESR?` each
+    read one), but the log cannot prove it.
+  - Unverified: when the real meter sends the prompts (the simulator's modes `echo`, `prompts`, `prompts_after_reset`, `banner` are simulation choices); the real Echo-ON line layout (whether the echo is a line,
+    glued to the reply or character by character); whether a `?>` / `!>` ever arrives with Echo off; that the flush after the settle catches everything (a prompt arriving later is skipped by the reader instead);
+    that `*RST` is why the prompts appear. `*RST`, `*CLS`, `*OPC?`, `*ESR?` and their order are unchanged.
+  - Tests: `tests/test_8808a_prompts.py` (simulated bench, scripted transport, engine log saving), golden cases `Fluke8808A.*[prompts ...]` in `tests/golden_capture.py`; the reset / send golden cases changed only by the
+    flush (`ctl clear`) and its log line. `--only` of `tools/make_package.py` builds a fix package (sidecar + named files).
 - Reset (Stage 7): `*RST` is manual-verified (p. 4-16), so `Fluke8808A` is in the verified-reset list of tests/test_reset_startup.py. The reset can erase settings stored on the meter (Users Manual).
 - Calibrators: Fluke 5522A or 5560A. The manual names a 5700A + 5725A (voltage, current, 750 V), a Fluke 271 (frequency) and a 5520A (resistance adjust). Points the 5522A cannot
   make: T3-3 #26-28 (750 V ac above 10 kHz, 5522A Operators Manual p. 1-12), T3-7 #14 (10 A ac at 40 Hz, below the 45 Hz of 3 A and up, p. 1-14), T3-8 #6 (1000 kHz, above 500 kHz).
