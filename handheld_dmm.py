@@ -33,6 +33,7 @@ import hookups
 import ui_theme as ui
 import ui_shell
 import appdata
+import calibrator_fit
 import datamode
 import drivers
 import procmods_engine
@@ -45,6 +46,9 @@ SPEC_PATH = HERE / 'specs' / 'fluke_110_series_pv.json'
 READ_TYPED, READ_IR = 'Type the reading', 'Read over IR (Fluke IR cable)'
 CAL_CHOICES = ['Fluke 5560A  (automatic output)', 'Fluke 5522A  (automatic output)', 'Manual  (5560A front panel)', 'Manual  (5522A front panel)']
 OLD_CAL_CHOICES = {'Manual  (I set the calibrator)': 'Manual  (5560A front panel)'}
+# The 5520A is added to the picker per procedure, and only when its published specification covers every output the procedure asks for (calibrator_fit);
+# see App.cal_choices.  The 5522A / 5560A entries above are unchanged.
+CAL_5520A_AUTO, CAL_5520A_MANUAL = 'Fluke 5520A  (automatic output)', 'Manual  (5520A front panel)'
 
 WIRING = {
     'VOHM': 'Calibrator NORMAL HI / LO output to the meter VΩ and COM input terminals.',
@@ -199,7 +203,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.virtual = bool(virtual)
         if self.virtual:
             virtualbench.mark_log(self.log)
-        cls = drivers.Fluke5522A if '5522' in model_name else drivers.Fluke5560A
+        cls = drivers.Fluke5522A if '5522' in model_name else drivers.Fluke5520A if '5520' in model_name else drivers.Fluke5560A
         t = transport or drivers.open_visa(address, timeout=20, baud=baud)
         self.cal = cls(t, self.log, label=cls.MODEL)
         try:
@@ -603,6 +607,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         self.info = self.spec['models'][model]
         self.points = self.build_points()
         self.by_id = {p['id']: p for p in self.points}
+        self.cal_offer = self.calibrator_offer()               # the 5520A: in the picker only when its published specification covers this procedure's points
         self.pm_init('handheld', model, demo=demo, lists=[self.points], on_change=self._pm_points_changed)   # procedure modifications
         self.io, self._busy, self.stop = None, False, False
         self.io_factory = io_factory
@@ -615,7 +620,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         self.settings = ui.Settings(self.settings_name())
         self.asset, self.serial = tk.StringVar(), tk.StringVar()
         _saved = self.settings.get('cal_mode', CAL_CHOICES[0])
-        self.cal_mode = tk.StringVar(value=OLD_CAL_CHOICES.get(_saved, _saved))
+        _saved = OLD_CAL_CHOICES.get(_saved, _saved)
+        self.cal_mode = tk.StringVar(value=_saved if _saved in self.cal_choices() or '5520' not in _saved else CAL_CHOICES[0])   # a saved 5520A choice the picker no longer offers falls back to the default
         self.cal_addr = tk.StringVar(value=self.settings.get('cal_addr', 'COM9'))
         self.cal_baud = tk.StringVar(value=self.settings.get('cal_baud', '9600'))
         self.ir = self.spec.get('options', {}).get('ir')
@@ -637,6 +643,19 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
     def build_points(self):
         """The point list of this run (a hook: user-built datasheets, dsb_runtime.py, add their scope / generator points)."""
         return points_for(self.spec, self.model)
+
+    def calibrator_offer(self):
+        """calibrator_fit.Offer for the Fluke 5520A: offered only when every output this procedure asks for is inside the 5520A's published specification
+        (a hook: user-built datasheets route their points through the Datasheet Builder match and override it)."""
+        return calibrator_fit.make_offer('5520A', calibrator_fit.handheld_requests(self.points), unverified=drivers.Fluke5520A.unverified_summary())
+
+    def cal_choices(self):
+        """The calibrator picker's values: the 5560A / 5522A entries as always, then the 5520A (automatic and front-panel) when its specification covers the procedure."""
+        out = list(CAL_CHOICES)
+        if self.cal_offer.offered:
+            out.insert(2, CAL_5520A_AUTO)
+            out.append(CAL_5520A_MANUAL)
+        return out
 
     def settings_name(self):
         return f'{self.brand.lower()}{self.model}'
@@ -695,7 +714,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         ttk.Label(d, text=self.info.get('model_note', 'the "C" version uses the same steps'), style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=1, column=0, columnspan=2, sticky='w')
         ttk.Separator(d).grid(row=2, column=0, columnspan=2, sticky='ew', pady=(10, 10))
         ttk.Label(d, text='Calibrator').grid(row=3, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.cal_mode, values=CAL_CHOICES, state='readonly', width=34).grid(row=3, column=1, sticky='ew', padx=(10, 0), pady=4)
+        calbox = ttk.Frame(d)
+        calbox.grid(row=3, column=1, sticky='ew', padx=(10, 0), pady=4)
+        self.cal_combo = ttk.Combobox(calbox, textvariable=self.cal_mode, values=self.cal_choices(), state='readonly', width=34)
+        self.cal_combo.pack(fill='x')
+        calibrator_fit.attach_note(calbox, self.cal_offer, ui, widgets=(self.cal_combo,), wrap=250)
         ttk.Label(d, text='Address').grid(row=4, column=0, sticky='w', pady=4)
         self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
         self.cal_entry.grid(row=4, column=1, sticky='ew', padx=(10, 0), pady=4)
@@ -782,7 +805,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         out = output_text(p) if p.get('applied') else '—'
         return (p['n'], f'{describe(p)}   ({step})', out, low, high, (low + ' … ' + high) if numeric else '', found, '', left, shown), (res.lower() or 'pending',)
 
-    def pm_driver_classes(self): return (drivers.Fluke5560A, drivers.Fluke5522A)
+    def pm_driver_classes(self): return (drivers.Fluke5560A, drivers.Fluke5522A, drivers.Fluke5520A)
 
     def pm_point_fields(self, view):
         """Developer-mode fields of a handheld point.  The nominal (base units) is what the calibrator is told to output and what the reading
@@ -813,7 +836,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             return procmods_plan.Plan(note='This point has no calibrator output (nothing is sourced), so no instrument command is sent for it.')
         if self.manual_cal:
             return procmods_plan.Plan(note='The calibrator is set to Manual: the technician sets its output by hand, so no instrument command is sent.')
-        model = '5522A' if '5522' in self.cal_mode.get() else '5560A'
+        model = '5522A' if '5522' in self.cal_mode.get() else '5520A' if '5520' in self.cal_mode.get() else '5560A'
         auto_ramp = self._auto_ramp()
 
         def build(mods):
@@ -1660,9 +1683,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         return details
 
     def calibrator_model(self):
-        """Model of the calibrator in use ('5560A' / '5522A'), for the uncertainty budget."""
+        """Model of the calibrator in use ('5560A' / '5522A' / '5520A'), for the uncertainty budget."""
         text = self.cal_mode.get()
-        return '5522A' if '5522A' in text else '5560A' if '5560A' in text else None
+        return '5522A' if '5522A' in text else '5520A' if '5520A' in text else '5560A' if '5560A' in text else None
 
     def temperature_note(self):
         """Footer text (kept with the issued report; the PDF itself does not print the footer) for the thermocouple-simulation points, or '' when the run

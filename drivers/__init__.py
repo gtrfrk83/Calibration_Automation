@@ -7,7 +7,7 @@ Add a model by copying drivers/TEMPLATE.md's checklist - see README.txt in this 
 """
 from .base import Instrument, InstrumentError, SafetyError
 from .fluke_5560a import SERIAL_DEFAULT as FLUKE_5560A_SERIAL
-from .fluke_5560a import Fluke5522A, Fluke5560A
+from .fluke_5560a import Fluke5520A, Fluke5522A, Fluke5560A
 from .fluke_5522a_scope import Fluke5522AScope
 from .lecroy_ws4104hd import WaveSurfer4104HD
 from .keithley_2000 import Fluke5522AComp, Keithley2000

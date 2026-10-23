@@ -209,8 +209,8 @@ class SimFlukeComp(SimFlukeTransport):
     def _handle(self, cmd):
         u = cmd.upper()
         if u.startswith('ZCOMP'):
-            if self.model == '5560A':
-                raise TransportError(f'simulated 5560A: unknown command {cmd!r}')       # the 5560A manual is not in the project: no ZCOMP is assumed
+            if self.model in ('5560A', '5520A'):
+                raise TransportError(f'simulated {self.model}: unknown command {cmd!r}')       # the 5560A manual is not in the project and the supplied 5520A manual does not show ZCOMP: none is assumed
             if u == 'ZCOMP?':
                 return self.zcomp
             mode = u.split()[1]

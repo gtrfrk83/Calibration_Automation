@@ -41,6 +41,7 @@ from types import SimpleNamespace
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import appdata
+import calibrator_fit
 import drivers
 import fgen_verification as fg
 import handheld_dmm as hh
@@ -58,7 +59,7 @@ SCOPE_OPS = {'SCOPE_GAIN': 'scope_dc', 'SCOPE_OFFSET': 'scope_dc', 'SCOPE_BW': '
 LEVEL_KINDS = ('GEN_AMPL', 'ACV')                     # a measuring standard reads an AC level (V rms)
 FREQ_KINDS = ('GEN_FREQ', 'FREQ', 'PERIOD')           # ... or a frequency / period
 GROUP = {'scope_dc': 'SCOPE_DC', 'scope_bw': 'SCOPE_SINE', 'scope_trigger': 'SCOPE_SINE', 'scope_marker': 'SCOPE_MARKER'}
-SOURCE_MODELS = ('5560A', '5522A')
+SOURCE_MODELS = ('5560A', '5522A', '5520A')      # '5520A': DMM-type points only (its published specification decides which: calibrator_fit); no scope option
 COUNTERS = ('53131A', '53132A')
 REF_HZ = {'scope_bw': 50e3, 'std_flat': 1e3}          # default reference frequency (step.dsb.stimulus.settings['ref_frequency'] overrides; the model has no field for it yet)
 WIDEBAND_ABOVE_HZ = 1e6                               # 5790B: INPUT1 up to here, the WIDEBAND input above (UNVERIFIED assumption; settings['std_input'] overrides)
@@ -229,8 +230,16 @@ class Route:
 
 
 def limit_problem(p, model):
-    """Why this standard's scope output cannot make the point (None when it can)."""
+    """Why this standard's output cannot make the point (None when it can)."""
     run = p['run']
+    if model == '5520A':
+        if run['op'] != 'dmm':
+            return 'the 5520A scope option is not in the imported sheet and its commands are not confirmed: scope and generator points use a 5522A or 5560A'
+        for req in calibrator_fit.handheld_requests([p]):
+            verdict = calibrator_fit.check('5520A', req)
+            if not verdict.ok:
+                return verdict.reason
+        return None
     if run['op'] in ('scope_bw', 'scope_trigger') and model in SOURCE_MODELS:
         lim, a, f = tds.SOURCE_LIMITS, run['amplitude'], run['frequency']
         ref = run.get('reference_hz') if run['op'] == 'scope_bw' else None
@@ -302,7 +311,7 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
                 self.drivers[model] = self._open(model, addrs.get(model) or {}, t.get(model))
             self.cal = next((self.drivers[m] for m in SOURCE_MODELS if m in self.drivers), None)
             for m in SOURCE_MODELS:
-                if m in self.drivers and scope:
+                if m in self.drivers and scope and m != '5520A':        # a 5520A has no scope route here: its reset sends no SCOPE command
                     self.drivers[m].RESET_SCOPE_OFF = True           # the reset leaves the calibrator in standby with SCOPE OFF (the tests select their own mode)
             self.pm_attach(mods, *self.pm_drivers())
         except Exception:
@@ -314,7 +323,8 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
         def tr(timeout, **kw):
             return transport if transport is not None else drivers.open_visa(fg.to_visa(addr['address']), timeout=timeout, **kw)
         if model in SOURCE_MODELS:
-            cls = drivers.Fluke5560A if model == '5560A' else (drivers.Fluke5522AScope if self.scope else drivers.Fluke5522A)
+            cls = (drivers.Fluke5560A if model == '5560A' else drivers.Fluke5520A if model == '5520A' else
+                   (drivers.Fluke5522AScope if self.scope else drivers.Fluke5522A))
             d = cls(tr(20, baud=int(addr.get('baud', 9600))), self.log, label=model)
             self.drivers[model] = d                                  # visible to close() if the open fails
             d.open(verify_model=True)
@@ -527,6 +537,12 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     def build_points(self):
         return runtime_points(self.spec, self.model)
 
+    def calibrator_offer(self):
+        """The 5520A for a user-built datasheet: it is offered, and a DMM-type point it cannot source is routed by hand with the reason (limit_problem); scope and
+        generator points never go to it.  The note under the picker counts those points."""
+        reqs = [r for p in self.points if (p.get('run') or {}).get('op') == 'dmm' and p['run']['direction'] == 'measure' for r in calibrator_fit.handheld_requests([p])]
+        return calibrator_fit.make_offer('5520A', reqs, per_point_manual=True, unverified=drivers.Fluke5520A.unverified_summary())
+
     def settings_name(self):
         return 'dsb_' + ''.join(c if c.isalnum() else '_' for c in (self.dsb.get('uid') or self.model))
 
@@ -616,9 +632,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
 
     # ---- standards and connection -------------------------------------------------------------------------------------
     def engine_model(self):
-        """The calibrator chosen in the engine's own box ('5560A' / '5522A'), None for Manual."""
+        """The calibrator chosen in the engine's own box ('5560A' / '5522A' / '5520A'), None for Manual."""
         text = self.cal_mode.get()
-        return None if text.startswith('Manual') else ('5522A' if '5522A' in text else '5560A')
+        return None if text.startswith('Manual') else ('5522A' if '5522A' in text else '5520A' if '5520A' in text else '5560A')
 
     def standards_needed(self):
         out = []
@@ -627,6 +643,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
             if m and m not in out:
                 out.append(m)
         for m in SOURCE_MODELS:
+            if m == '5520A' and not self.cal_offer.offered:
+                continue
             if m not in out and any(p['run']['direction'] == 'measure' for p in self.points):
                 out.append(m)
         return out
