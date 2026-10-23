@@ -426,6 +426,130 @@ class HandheldTemplateTests(Base):
         self.assertEqual([f.kind for f in self.g.ds.functions], ['ACV'])
 
 
+class EmptySectionTests(Base):
+    """An empty section ('no rows yet') is a WARNING: the sheet saves as runnable and the run skips it.  Everything else stays blocking."""
+
+    def filled_template(self):
+        self.g.set_header(make='Acme', model='DM-1', title='DM-1 PV')
+        self.assertTrue(self.g.add_handheld_functions().ok)
+        dcv = next(f for f in self.g.ds.functions if f.kind == 'DCV')
+        self.g.select(f'e:{dcv.id}', 'nominal')
+        self.assertTrue(self.g.set_target_function('DC volts').ok)
+        self.assertTrue(self.g.commit_cell('5 V').ok)
+        key = next(r['key'] for r in self.g.rows() if r['kind'] == 'point')
+        self.assertTrue(self.g.calc_row(key, self.form(key, iv='0.05')).ok)
+        return dcv, key
+
+    def levels(self):
+        return sorted({(p['code'], p['level']) for p in self.g.problems()})
+
+    def test_core_validate_makes_the_empty_section_messages_warnings(self):
+        self.g.set_target_function('DC volts')
+        fn = self.g.ds.functions[0] if self.g.ds.functions else self.g._function_for(self.g.resolve_function('DC volts'))
+        found = {(p.code, p.level) for p in db.validate(self.g.ds) if getattr(p, 'where', '').startswith(fn.id)}
+        self.assertEqual(found, {('no_ranges', 'warn'), ('no_spec', 'warn'), ('no_points', 'warn')})
+
+    def test_filled_row_without_tolerance_is_still_an_error(self):
+        self.dcv_row('5 V')
+        codes = {(p['code'], p['level']) for p in self.g.problems()}
+        self.assertIn(('no_spec', 'error'), codes)
+        self.assertGreater(self.g.problem_counts()['errors'], 0)
+
+    def test_template_with_one_filled_section_has_no_errors_and_one_grouped_warning(self):
+        self.filled_template()
+        self.assertEqual(self.g.problem_counts(), dict(errors=0, warnings=1))
+        self.assertEqual(self.g.problem_summary(), '1 warning.')
+        rows = self.g.problem_rows()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual((rows[0]['level'], rows[0]['code']), ('warn', 'empty_sections'))
+        self.assertIn('9 sections have no test rows yet and are skipped when the sheet runs', rows[0]['text'])
+        self.assertTrue(rows[0]['key'].startswith('h:'))
+        self.assertIsNotNone(rows[0]['row'])
+
+    def test_no_redundant_per_section_messages(self):
+        self.filled_template()
+        self.assertEqual({p['code'] for p in self.g.problems()}, {'no_points'})
+
+    def test_one_empty_section_is_listed_on_its_own(self):
+        self.g.set_header(make='Acme', model='DM-1', title='DM-1 PV')
+        self.assertTrue(self.g.add_handheld_functions(['DCV', 'ACV']).ok)
+        dcv = self.g.ds.functions[0]
+        self.g.select(f'e:{dcv.id}', 'nominal')
+        self.g.set_target_function('DC volts')
+        self.assertTrue(self.g.commit_cell('5 V').ok)
+        key = next(r['key'] for r in self.g.rows() if r['kind'] == 'point')
+        self.assertTrue(self.g.calc_row(key, self.form(key, iv='0.05')).ok)
+        rows = self.g.problem_rows()
+        self.assertEqual([r['code'] for r in rows], ['no_points'])
+        self.assertIn('AC volts', rows[0]['text'])
+        self.assertEqual(self.g.problem_counts(), dict(errors=0, warnings=1))
+
+    def test_errors_list_first_and_other_errors_stay_blocking(self):
+        self.filled_template()
+        key = next(r['key'] for r in self.g.rows() if r['kind'] == 'point')
+        self.g.select(key, 'nominal')
+        self.assertTrue(self.g.commit_cell('5 V').ok)                    # same value again: no change
+        self.g.set_header(make='')                                       # a header error
+        c = self.g.problem_counts()
+        self.assertEqual(c['errors'], 1)
+        rows = self.g.problem_rows()
+        self.assertEqual([r['level'] for r in rows], ['error', 'warn'])
+        res = self.g.save_sheet()
+        self.assertFalse(res.ok)
+        self.assertTrue(res.detail.get('needs_draft'))
+
+    def test_a_sheet_with_no_test_row_anywhere_is_blocked(self):
+        self.g.set_header(make='Acme', model='DM-1', title='DM-1 PV')
+        self.assertTrue(self.g.add_handheld_functions().ok)
+        rows = self.g.problem_rows()
+        self.assertEqual([r['code'] for r in rows], ['no_test_rows', 'empty_sections'])
+        self.assertEqual(self.g.problem_counts(), dict(errors=1, warnings=1))
+        self.assertFalse(self.g.save_sheet().ok)
+
+    def test_saves_as_runnable_and_the_runnable_spec_has_no_empty_section(self):
+        dcv, key = self.filled_template()
+        res = self.g.save_sheet()
+        self.assertTrue(res.ok, res.message)
+        entry = self.store.entries()[0]
+        self.assertEqual(entry['tag'], 'user-built')
+        spec = json.loads(Path(entry['spec_path']).read_text())
+        self.assertEqual(len(spec['steps']), 1)
+        self.assertEqual({s['dsb']['function'] for s in spec['steps']}, {dcv.id})
+        self.assertEqual(spec['dsb']['engine']['points'], 1)
+
+    def test_the_blank_printout_still_lists_empty_section_headings(self):
+        """Unchanged on purpose: the blank datasheet (preview / PDF) prints each section heading, filled or not, so the template can be filled in by hand."""
+        self.filled_template()
+        view = self.g.print_view()
+        self.assertEqual(sum(r['kind'] == 'header' for r in view['rows']), len(M.GridModel.HANDHELD_KINDS))
+        self.assertEqual(sum(r['kind'] == 'point' for r in view['rows']), 1)
+
+
+class InspectorAutoTests(unittest.TestCase):
+    below = 1150
+
+    def should(self, width, manual=False, is_open=True):
+        return M.inspector_should_be_open(width, self.below, manual, is_open)
+
+    def test_threshold_is_1150(self):
+        self.assertEqual(M.INSPECTOR_COLLAPSE_BELOW, 1150)
+
+    def test_narrow_closes_wide_opens(self):
+        self.assertFalse(self.should(1000))
+        self.assertFalse(self.should(1149, is_open=False))
+        self.assertTrue(self.should(1150, is_open=False))
+        self.assertTrue(self.should(1400, is_open=False))
+        self.assertTrue(self.should(1400))
+
+    def test_a_manual_choice_is_never_overridden(self):
+        self.assertTrue(self.should(900, manual=True, is_open=True))
+        self.assertFalse(self.should(1600, manual=True, is_open=False))
+
+    def test_a_window_not_on_screen_yet_changes_nothing(self):
+        self.assertTrue(self.should(1, is_open=True))
+        self.assertFalse(self.should(1, is_open=False))
+
+
 class AutomationLineTests(Base):
     def test_counts_from_the_matcher_and_the_sentence(self):
         self.dcv_row('5 V')

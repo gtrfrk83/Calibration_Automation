@@ -315,12 +315,22 @@ class GridWidgetStubTests(unittest.TestCase):
         win.sheet_key(Ev('x', 'x'))
         self.assertEqual(win.status.get(), win.issue.get())
 
+    def answers(self, **by_title):
+        """askyesno stand-in: answers by dialog title (default True) and records (title, message, kwargs)."""
+        seen = []
+
+        def fake(title, message, **kw):
+            seen.append((title, message, kw))
+            return by_title.get(title, True)
+        fake.seen = seen
+        return fake
+
     def test_run_saves_then_launches_and_demo_adds_demo(self):
         win, key = self.build()
         calls = []
         win.launcher = lambda entry, demo=False: calls.append((entry['spec_path'], demo))
         with mock.patch.object(self.ui.messagebox, 'askyesno', return_value=False) as ask:
-            self.assertIsNone(win.run_sheet(False))                    # unsaved: asks, and "no" saves and runs nothing
+            self.assertIsNone(win.run_sheet(True))                     # unsaved: asks, and "no" saves and runs nothing
             self.assertTrue(ask.called)
         self.assertEqual(calls, [])
         self.assertTrue(win.model.dirty)
@@ -332,10 +342,121 @@ class GridWidgetStubTests(unittest.TestCase):
         self.assertTrue(calls[0][1])
         self.assertTrue(calls[0][0].endswith('.json'))
         self.assertIn('demo', win.status.get())
-        with mock.patch.object(self.ui.messagebox, 'askyesno') as ask:   # saved and unchanged: no question
+        fake = self.answers()
+        with mock.patch.object(self.ui.messagebox, 'askyesno', fake):   # saved and unchanged: real run asks only the real-run question
             self.assertTrue(win.run_sheet(False).ok)
-            self.assertFalse(ask.called)
+        self.assertEqual([s[0] for s in fake.seen], ['Run on real instruments'])
         self.assertEqual(calls[1][1], False)
+
+    def test_run_on_real_instruments_asks_first_default_no_and_demo_never_asks(self):
+        win, key = self.build()
+        calls = []
+        win.launcher = lambda entry, demo=False: calls.append(demo)
+        # unsaved sheet: the real-run question comes first; answering No stops everything (no save, no launch)
+        fake = self.answers(**{'Run on real instruments': False})
+        with mock.patch.object(self.ui.messagebox, 'askyesno', fake):
+            res = win.run_sheet(False)
+        self.assertFalse(res.ok)
+        self.assertEqual([s[0] for s in fake.seen], ['Run on real instruments'])
+        title, message, kw = fake.seen[0]
+        self.assertEqual(message, f'Run {win.model.ds.title} on real instruments? The calibrator will be driven from this program.')
+        self.assertEqual(kw.get('default'), 'no')
+        self.assertTrue(win.model.dirty)
+        self.assertEqual(calls, [])
+        # Yes: then the save question, then it launches
+        fake = self.answers()
+        with mock.patch.object(self.ui.messagebox, 'askyesno', fake):
+            self.assertTrue(win.run_sheet(False).ok)
+        self.assertEqual([s[0] for s in fake.seen], ['Run on real instruments', 'Save before running'])
+        self.assertEqual(calls, [False])
+        # demo: no real-run question at all
+        fake = self.answers()
+        with mock.patch.object(self.ui.messagebox, 'askyesno', fake):
+            self.assertTrue(win.run_sheet(True).ok)
+        self.assertEqual(fake.seen, [])
+        self.assertEqual(calls, [False, True])
+
+    def resize(self, win, width):
+        win._window_size(type('E', (), dict(widget=win, width=width, height=700))())
+
+    def test_inspector_collapses_when_narrow_and_returns_when_wide(self):
+        win = self.new_window()
+        self.assertTrue(win._insp_open)
+        self.resize(win, 1400)
+        self.assertTrue(win._insp_open)
+        self.resize(win, 1000)
+        self.assertFalse(win._insp_open)
+        self.resize(win, 1149)
+        self.assertFalse(win._insp_open)
+        self.resize(win, 1150)
+        self.assertTrue(win._insp_open)
+        self.resize(win, 1)                                           # not on screen yet: nothing changes
+        self.assertTrue(win._insp_open)
+
+    def test_hand_choice_sticks_for_the_session(self):
+        win = self.new_window()
+        self.resize(win, 1000)
+        self.assertFalse(win._insp_open)
+        win.toggle_inspector()                                        # shown by hand while narrow: stays open
+        self.assertTrue(win._insp_open)
+        self.resize(win, 900)
+        self.assertTrue(win._insp_open)
+        win.toggle_inspector()                                        # hidden by hand: stays hidden when the window grows
+        self.assertFalse(win._insp_open)
+        self.resize(win, 1600)
+        self.assertFalse(win._insp_open)
+
+    def test_ctrl_i_is_a_hand_choice_too(self):
+        win = self.new_window()
+        win.toggle_inspector()
+        self.assertFalse(win._insp_open)
+        self.resize(win, 1500)
+        self.assertFalse(win._insp_open)
+
+    def build_from_template(self):
+        """A handheld-template sheet with ONE row filled (DC volts); the nine other sections stay empty."""
+        with mock.patch.object(self.ui, 'ask_new_sheet', return_value=True):
+            win = self.panel.new()
+        win.make_v.set('Acme'), win.model_v.set('DM-1'), win.title_v.set('DM-1 PV')
+        win.commit_header()
+        dcv = next(f for f in win.model.ds.functions if f.kind == 'DCV')
+        win.model.select(f'e:{dcv.id}', 'nominal')
+        win.model.set_target_function('DC volts')
+        win.sync()
+        res = self.type_cell(win, '5 V')
+        self.assertTrue(res.ok, res.message)
+        key = next(r['key'] for r in win.model.rows() if r['kind'] == 'point')
+        win.model.select(key, 'tol')
+        win.sync()
+        win.panel_box.types['iv'].set(True), win.panel_box.v['iv'].set('0.05')
+        res = win.calc()
+        self.assertTrue(res.ok, res.message)
+        return win, key
+
+    def test_template_sheet_with_empty_sections_has_only_warnings_and_saves_and_runs(self):
+        win, key = self.build_from_template()
+        c = win.model.problem_counts()
+        self.assertEqual(c['errors'], 0, win.model.problem_rows())
+        self.assertEqual(c['warnings'], 1)                            # the nine empty sections are ONE entry
+        rows = win.model.problem_rows()
+        self.assertEqual([r['code'] for r in rows], ['empty_sections'])
+        self.assertIn('9 sections', rows[0]['text'])
+        self.assertIn('skipped', rows[0]['text'])
+        calls = []
+        win.launcher = lambda entry, demo=False: calls.append(demo)
+        with mock.patch.object(self.ui.messagebox, 'askyesno', return_value=True):
+            res = win.run_sheet(True)
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(calls, [True])
+        entry = self.store.entries()[0]
+        spec = json.loads(Path(entry['spec_path']).read_text())
+        self.assertEqual(len(spec['steps']), 1)                       # only the filled section reaches the runnable spec
+
+    def test_empty_section_row_says_it_is_skipped(self):
+        win, key = self.build_from_template()
+        head = next(r for r in win.model.rows() if r['kind'] == 'header' and r['fid'] != win.model.point_of(key)[0].id)
+        self.assertIn('skipped when the sheet runs', head['problem'])
+        self.assertEqual(head['level'], 'warn')
 
     def test_run_never_launches_a_sheet_with_problems(self):
         win = self.new_window()

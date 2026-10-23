@@ -1745,6 +1745,7 @@ class GridEditorWindow(tk.Toplevel):
         self._keep = False
         self._bar_wrapped = None
         self._insp_open = True
+        self._insp_manual = False                            # True once Mike hides / shows the inspector by hand: then the window width no longer decides
         self._insp_narrow = None
         self.note = tk.StringVar()                          # the last action's message ('Not done: ...' for a refusal)
         self.issue = tk.StringVar()                         # the selected row's problem, or why its cell cannot be typed in
@@ -1927,6 +1928,8 @@ class GridEditorWindow(tk.Toplevel):
 
     # ---- the inspector: hide / show, width
     def toggle_inspector(self):
+        """Hide > / the rail button / Ctrl+I: a choice made by hand.  It sticks for the session (the window width no longer opens or closes it)."""
+        self._insp_manual = True
         self._insp_open = not self._insp_open
         self._set_inspector_width()
         if not self._insp_open:
@@ -1934,6 +1937,15 @@ class GridEditorWindow(tk.Toplevel):
         else:
             self.sheet.focus_set()
         return 'break'
+
+    def _auto_inspector(self, width):
+        """Open or close the inspector for the window width (unless it was set by hand).  Returns True when it changed.  Focus is left alone."""
+        want = M.inspector_should_be_open(width, ui.px(M.INSPECTOR_COLLAPSE_BELOW), self._insp_manual, self._insp_open)
+        if want == self._insp_open:
+            return False
+        self._insp_open = want
+        self._set_inspector_width()
+        return True
 
     def _set_inspector_width(self):
         if self._insp_open:
@@ -1948,7 +1960,11 @@ class GridEditorWindow(tk.Toplevel):
             self.rail.grid(row=1, column=1, rowspan=3, sticky='ns', padx=(ui.px(10), 0), pady=(8, 0))
 
     def _window_size(self, e):
-        if e.widget is self and self._insp_open:
+        if e.widget is not self:
+            return
+        if self._auto_inspector(e.width):
+            return
+        if self._insp_open:
             narrow = e.width < ui.px(NARROW_BELOW)
             if narrow != self._insp_narrow:
                 self._set_inspector_width()
@@ -2205,6 +2221,12 @@ class GridEditorWindow(tk.Toplevel):
 
     launcher = None
 
+    def confirm_real_run(self):
+        """A run on REAL instruments asks first (default No); Try in demo never asks."""
+        title = (self.model.ds.title or self.model.ds.model or 'this datasheet').strip()
+        return bool(messagebox.askyesno('Run on real instruments', f'Run {title} on real instruments? The calibrator will be driven from this program.',
+                                        icon='warning', default='no', parent=self))
+
     def run_sheet(self, demo=False):
         """Run / Try in demo: save the sheet (asking first when it has unsaved changes), then start it in its own process like the Procedures list does.
         A sheet with problems is never run: the warnings list opens instead."""
@@ -2213,6 +2235,8 @@ class GridEditorWindow(tk.Toplevel):
         if m.problem_counts()['errors']:
             self.show_problems()
             return self.changed(M.Outcome(False, 'This sheet has problems to fix before it can run. The warnings list shows them.'))
+        if not demo and not self.confirm_real_run():
+            return self.changed(M.Outcome(False, 'Not started: the run on real instruments was not confirmed.'))
         if m.dirty or not m.ds.uid:
             if not messagebox.askyesno('Save before running', 'The suite runs the SAVED datasheet. Save this one now and ' + ('try it in demo?' if demo else 'run it?'), parent=self):
                 return None

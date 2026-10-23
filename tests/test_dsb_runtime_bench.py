@@ -205,6 +205,39 @@ class Resume(Base):
             self.assertTrue(any(d[0] == 'box' and d[1] == 'showerror' for d in self.h.dialogs), key)
 
 
+class EmptySectionRun(Base):
+    """A sheet started from the handheld template still has empty sections when it is run: they are skipped, with no error and nothing printed for them."""
+
+    def sheet_with_empty_sections(self):
+        ds = fx.dmm_34461a_like()
+        have = {f.kind for f in ds.functions}
+        added = [ds.add_function(k).name for k in ('DCI', 'ACI', 'OHM2', 'CONT', 'CAP', 'FREQ', 'TEMP', 'DIODE') if k not in have]
+        self.assertTrue(added)
+        return ds, added
+
+    def test_export_skips_empty_sections_and_still_validates(self):
+        ds, added = self.sheet_with_empty_sections()
+        self.assertEqual([], [str(p) for p in dsp.db.errors(dsp.db.validate(ds))])
+        res = dsp.export_spec(ds)
+        self.assertIsNotNone(res.spec)
+        plain = dsp.export_spec(fx.dmm_34461a_like()).spec
+        self.assertEqual([s['nominal'] for s in res.spec['steps']], [s['nominal'] for s in plain['steps']])
+        import procspec
+        self.assertEqual([], list(procspec.validate_manual_reading(res.spec)))
+
+    def test_run_is_the_same_as_without_the_empty_sections_and_prints_no_empty_section(self):
+        ds, added = self.sheet_with_empty_sections()
+        app = self.h.make_app(spec_of(ds), io=cal_io())
+        self.h.default_reading = H.typed_nominal
+        self.assertTrue(self.h.run_all())
+        self.assertEqual(len(app.found), len(app.points))
+        self.assertEqual({r['result'] for r in app.found.values()}, {'PASS'})
+        text = self.pdf_text(app)
+        self.assertIn('DC volts', text)
+        for name in added:
+            self.assertNotIn(name, text)
+
+
 class ScopeRun(Base):
     def reading(self, p):
         run = p['run']

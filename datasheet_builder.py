@@ -1355,6 +1355,9 @@ def validate(ds):
     all_ids = {}
     for fn in ds.functions:
         _validate_function(ds, fn, add, seen_f, all_ids)
+    if ds.functions and not any(p.enabled for fn in ds.functions for p in fn.points):
+        # empty sections are only warnings (the run skips them), but a sheet with no test row at all has nothing to run
+        add('no_test_rows', 'The datasheet has no test rows yet.', where='datasheet')
     for pid, model in ds.assignments.items():
         if pid not in all_ids:
             add('assignment_unknown_point', f'The standard assignment for {pid!r} names a point that does not exist.', 'warn', 'datasheet')
@@ -1381,7 +1384,8 @@ def _validate_function(ds, fn, add, seen_f, all_ids):
     if fn.display_unit and info['unit'] in _NO_PREFIX and fn.display_unit not in ('',):
         add('unit_mismatch', f'{info["unit"] or "this function"} is shown without an SI prefix.', where=w)
     if not fn.ranges:
-        add('no_ranges', f'{fn.name}: no ranges defined.', where=w)
+        # a section with no rows yet (a template, or a section still to be filled) is only a warning: the run skips it
+        add('no_ranges', f'{fn.name}: no ranges defined.', 'warn' if not fn.points else 'error', w)
     seen_r = set()
     prev = None
     for rng in fn.ranges:
@@ -1408,7 +1412,7 @@ def _validate_function(ds, fn, add, seen_f, all_ids):
         # a function with no table is fine when every enabled point carries its own specification or typed limits (the datasheet grid)
         bare = [p for p in fn.points if p.enabled and p.spec is None and not all(any(v not in (None, '') for v in (p.overrides.get(per) or {}).values()) for per in periods)]
         if bare or not fn.points:
-            add('no_spec', f'{fn.name}: no specification entered, so no limits can be calculated.', where=w)
+            add('no_spec', f'{fn.name}: no specification entered, so no limits can be calculated.', 'warn' if not fn.points else 'error', w)
     for i, e in enumerate(fn.spec):
         ew = f'{w}/spec{i + 1}'
         if e.range_id is not None and fn.range(e.range_id) is None:
