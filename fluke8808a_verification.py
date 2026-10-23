@@ -193,6 +193,12 @@ def list_com_ports():
         return []
 
 
+# Settle time from OPER to the first MEAS1? for DC current at 10 A and on the 200 uA / 2000 uA ranges: the bench showed readings taken too early (owner, 2026-10-23).
+# These two values are ENGINEERING ESTIMATES, NOT from a manual: tune them on the real meter (procedure modifications 'f8808a.settle.dci_10a' / 'f8808a.settle.dci_low').
+DCI_10A_SETTLE_S = 8.0
+DCI_LOW_SETTLE_S = 6.0
+
+
 class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the 8808A and the calibrator, both through the instrument drivers."""
 
@@ -274,6 +280,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p['kind'] == 'FREQ': return self.pm_param('f8808a.settle.freq', 3.0)
         if p['kind'] in ('ACV', 'ACI'): return self.pm_param('f8808a.settle.ac', 4.0)
         if p['kind'] in ('OHM2', 'OHM4') and p['range'] >= 1e7: return self.pm_param('f8808a.settle.ohm_high', 4.0)
+        if p['kind'] == 'DCI' and p['range'] >= 10.0: return self.pm_param('f8808a.settle.dci_10a', DCI_10A_SETTLE_S)      # UNVERIFIED estimate (see below)
+        if p['kind'] == 'DCI' and p['range'] <= 2.1e-3: return self.pm_param('f8808a.settle.dci_low', DCI_LOW_SETTLE_S)   # 200 uA / 2000 uA ranges: UNVERIFIED estimate
         return self.pm_param('f8808a.settle.default', 2.0)
 
     def _read(self):
