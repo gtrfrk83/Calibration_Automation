@@ -41,24 +41,24 @@ class Fix(unittest.TestCase):
 class Convert(Fix):
     def test_counts_and_unconvertible_points_are_listed(self):
         c = self.conv
-        self.assertEqual((c.total, c.converted, c.skipped), (17, 14, 3))
+        self.assertEqual((c.total, c.converted, c.skipped), (17, 15, 2))
         skipped = {r['no']: r['message'] for r in c.rows if r['status'] == 'skipped'}
-        self.assertEqual(set(skipped), {15, 16, 17})
-        self.assertIn('furlong', skipped[15])
+        self.assertEqual(set(skipped), {16, 17})
         self.assertIn('above', skipped[16])
         self.assertIn('not numbers', skipped[17])
-        self.assertEqual(sorted(i.point for i in c.issues if i.level == 'error'), [15, 16, 17])
+        self.assertEqual(sorted(i.point for i in c.issues if i.level == 'error'), [16, 17])
 
     def test_uncertain_points_are_flagged_not_hidden(self):
         codes = {(i.point, i.code) for i in self.conv.issues if i.level == 'warn'}
-        self.assertIn((6, 'kind_guessed'), codes)          # neither AC nor DC named
+        self.assertIn((6, 'kind_inherited'), codes)        # neither AC nor DC named: taken from the section above, flagged
         self.assertIn((9, 'nominal_midpoint'), codes)      # a range printed as the nominal
-        self.assertEqual(self.conv.uncertain, 2)
+        self.assertIn((15, 'limit_unit_unknown'), codes)   # unrecognised limit unit: kept as a pass / fail check
+        self.assertEqual(self.conv.uncertain, 3)         # 6 (AC/DC inherited), 9 (range as nominal), 15 (unit not recognised)
 
     def test_kinds_units_frequency_and_limits_as_printed(self):
         pts = {int(p.id.rsplit('.p', 1)[1]): (fn, p) for fn, p in self.conv.sheet.all_points()}
         self.assertEqual([pts[n][0].kind for n in (1, 4, 6, 7, 9, 10, 11, 12, 13, 14)],
-                         ['DCV', 'ACV', 'DCV', 'OHM2', 'CAP', 'CHECK', 'FREQ', 'TEMPF', 'PCT', 'COND'])
+                         ['DCV', 'ACV', 'ACV', 'OHM2', 'CAP', 'CHECK', 'FREQ', 'TEMPF', 'PCT', 'COND'])
         fn, p = pts[4]
         self.assertEqual(str(p.frequency), '60')
         fn, p = pts[11]
@@ -70,6 +70,14 @@ class Convert(Fix):
         fn, p = pts[1]
         self.assertEqual(p.overrides['365d'], {'low': '0.099', 'high': '0.101'})  # tolerance unit mV
         self.assertEqual(self.conv.sheet.periods[0].label, '365 Days')
+
+    def test_unrecognised_limit_unit_becomes_a_check_with_the_limits_in_the_note(self):
+        row = self.conv.rows[14]
+        self.assertEqual((row['status'], row['kind']), ('uncertain', 'CHECK'))
+        fn, p = next((f, p) for f, p in self.conv.sheet.all_points() if p.id.endswith('.p0015'))
+        self.assertEqual(fn.kind, 'CHECK')
+        self.assertIn('0.99 to 1.01', p.note)
+        self.assertIn('furlong', p.note)
 
     def test_sheet_validates_and_every_point_is_manual(self):
         self.assertEqual(db.errors(db.validate(self.conv.sheet)), [])
@@ -85,7 +93,7 @@ class Convert(Fix):
         self.assertNotIn('1.0001', c.sheet.to_json())
 
     def test_no_point_converted_raises(self):
-        p = mdd_synth.write_mdd(self.d / 'bad.MDD', rows=[('X', '1 V', '[x] furlong', '', '1', '2')])
+        p = mdd_synth.write_mdd(self.d / 'bad.MDD', rows=[('X', '1 V', '[x] V', '', '2', '1')])
         with self.assertRaises(ValueError):
             mc.convert(imp.parse_mdd(p))
 
@@ -186,7 +194,7 @@ class ManualRun(Fix):
         self.assertTrue(a.manual_entry)
         self.assertIsNotNone(a.grid_entry)
         self.assertFalse(a.wants_connection())
-        self.assertEqual(len(a.points), 14)
+        self.assertEqual(len(a.points), 15)
 
     def test_typed_readings_are_padded_judged_and_rejected_when_not_numbers(self):
         a = self.app
@@ -226,7 +234,7 @@ class ManualRun(Fix):
     def test_run_all_pending_uses_the_same_path(self):
         self.h.default_reading = H.typed_nominal
         self.assertTrue(self.h.run_all())
-        self.assertEqual(len(self.app.found), 14)
+        self.assertEqual(len(self.app.found), 15)
 
     def test_pdf_is_calibration_data_with_the_typed_readings(self):
         a = self.app
@@ -255,6 +263,31 @@ class OwnerFlag(unittest.TestCase):
         self.assertEqual(db.classify_kind(ed.ds), 'manual')
         ed.set_manual_entry(False)
         self.assertEqual(db.classify_kind(ed.ds), 'verification')
+
+
+class ReportTag(ManualRun):
+    def test_manual_calibration_rows_have_no_manual_tag(self):
+        a = self.app
+        for p in a.points:
+            a.type_reading(p, 'y') if p['test'] != 'numeric' else a.type_reading(p, H.typed_nominal(p))
+        txt = self.pdf_text(a)
+        self.assertNotIn('[manual]', txt)
+        self.assertNotIn('set up / read by the operator', txt)
+
+    def test_automated_datasheet_keeps_its_manual_tag(self):
+        import dsb_fixtures as fx
+        import datasheet_builder_specs as dsp
+        spec = dsp.export_spec(fx.dmm_34461a_like(), plan=dm.match_datasheet(fx.dmm_34461a_like())).spec
+        h = H.Harness().start()
+        try:
+            a = h.make_app(spec)
+            a.cal_mode.set(rt.hh.CAL_CHOICES[2])
+            h.default_reading = H.typed_nominal
+            self.assertTrue(h.run_all())
+            row = a.certificate_row(a.points[0], a.found[a.points[0]['id']])
+            self.assertIn('[manual]', row['Description'])         # not a manual calibration: unchanged
+        finally:
+            h.stop()
 
 
 class GridEntryLogic(unittest.TestCase):
