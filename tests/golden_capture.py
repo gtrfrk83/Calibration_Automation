@@ -97,7 +97,7 @@ COVERAGE = {
     },
     'fluke_8808a': {
         'Fluke8808A': dict(covered=['write', 'query', 'send', 'identify', 'connect', 'remote', 'local', 'cleanup', 'configure_point', 'read',
-                                    'check_errors'], no_command=[]),
+                                    'check_errors', 'ensure_run_state', 'session_check'], no_command=[]),
     },
     'keysight_truevolt': {
         'KeysightTruevolt': dict(covered=['connect', 'cleanup', 'set_nplc', 'set_ac_filter', 'configure_point', 'configure_frequency_point',
@@ -621,6 +621,15 @@ def cases_8808a(c):
     et.echo = True
     ed = c.inst(Fluke8808A, et, opened=False, label='8808A')
     c.run('Fluke8808A.connect[echo of *IDN?]', ed.connect)
+    # a Run that skips the once-per-session reset (owner request): REMS + read-first FORMAT / TRIGGER / RATE, and *IDN? + one *ESR?
+    sb, sft, st = make_8808a_bench('5522A', enforce_cal_limits=False)
+    sd = c.inst(Fluke8808A, st, opened=False, label='8808A')
+    c.quiet(sd.connect)
+    c.run('Fluke8808A.ensure_run_state[format 2 set once]', sd.ensure_run_state)
+    c.run('Fluke8808A.ensure_run_state[nothing to set]', sd.ensure_run_state)
+    c.run('Fluke8808A.session_check[ok]', sd.session_check)
+    st.esr |= 0x10
+    c.run('Fluke8808A.session_check[execution error logged]', sd.session_check)
 
 
 def cases_truevolt(c):

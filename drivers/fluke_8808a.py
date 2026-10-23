@@ -307,6 +307,36 @@ class Fluke8808A(Instrument):
                 ('slow rate (RATE S, read back)', lambda: self._set_check('rate.set', 'rate.query', 'S', 'RATE S', rate='S')),
                 ('event status after the reset', lambda: self.check_errors('the reset') or 'no error bits')]
 
+    def ensure_run_state(self):
+        """A Run that skips the reset (the 8808A window resets once per session): put the meter in the state `_reset_extra` leaves it in, without *RST.
+        REMS is sent once (no query exists, so it cannot be read back: flagged). FORMAT 1, TRIGGER 1 and RATE S are READ first (read-only); a setting that is
+        already right is not written, one that is not is set once, read back and compared (never retried). Returns a one-line summary."""
+        self.remote()
+        changed = []
+        for key, query_key, want, what, vals in (('format.set', 'format.query', 1, 'FORMAT 1', dict(fmt=1)),
+                                                 ('trigger.set', 'trigger.query', 1, 'TRIGGER 1', dict(mode=1)),
+                                                 ('rate.set', 'rate.query', 'S', 'RATE S', dict(rate='S'))):
+            reply = self.ask(query_key).strip()
+            got = self._int(reply) if isinstance(want, int) else reply.upper()
+            if got != want:
+                self._set_check(key, query_key, want, what, **vals)
+                changed.append(what)
+        return 'REMS sent; ' + (('set again: ' + ', '.join(changed)) if changed else 'FORMAT 1, TRIGGER 1, RATE S already as needed')
+
+    def session_check(self):
+        """Read-only checks for a Run that skips the reset: the meter still answers *IDN? as an 8808A, and *ESR? is read ONCE (it clears itself, so it is not
+        retried). Error bits found are logged and returned (like leftovers after a reset), they do not stop the run: the per-point checks follow."""
+        reply = self.identify()
+        if self.IDN_MATCH and not any(m.upper() in reply.upper() for m in self.IDN_MATCH):
+            raise InstrumentError(f'Unexpected DMM identification: {reply}')
+        bits = self._int(self.ask('err.query'))
+        if bits is None:
+            raise InstrumentError('*ESR? did not return a number')
+        flags = [name for bit, name in ESR_NAMES.items() if bits & bit]
+        for f in flags:
+            self.log.add('!!', f'event status before the run: {f}', self.label)
+        return flags
+
     def _reset_drain(self, rep, limit=10):
         """The 8808A has no error queue: *ESR? is read ONCE (it clears itself, so it is not retried). Power-on (bit 7) and operation-complete (bit 0) are normal
         after a reset; error bits are reported as warnings, like leftover error-queue entries on the other drivers."""

@@ -1759,6 +1759,195 @@
   },
   {
    "call": "",
+   "case": "Fluke8808A.ensure_run_state[format 2 set once]",
+   "log": [
+    "8808A|>>|REMS",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|2",
+    "8808A|>>|FORMAT 1",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|RATE?",
+    "8808A|<<|S"
+   ],
+   "method": "Fluke8808A.ensure_run_state",
+   "result": "returned 'REMS sent; set again: FORMAT 1'",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "2"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FORMAT 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.ensure_run_state[nothing to set]",
+   "log": [
+    "8808A|>>|REMS",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|RATE?",
+    "8808A|<<|S"
+   ],
+   "method": "Fluke8808A.ensure_run_state",
+   "result": "returned 'REMS sent; FORMAT 1, TRIGGER 1, RATE S already as needed'",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.session_check[ok]",
+   "log": [
+    "8808A|>>|*IDN?",
+    "8808A|<<|FLUKE, 8808A, SIM0001, 1.0 D1.0",
+    "8808A|>>|*ESR?",
+    "8808A|<<|0"
+   ],
+   "method": "Fluke8808A.session_check",
+   "result": "returned []",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE, 8808A, SIM0001, 1.0 D1.0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808A.session_check[execution error logged]",
+   "log": [
+    "8808A|>>|*IDN?",
+    "8808A|<<|FLUKE, 8808A, SIM0001, 1.0 D1.0",
+    "8808A|>>|*ESR?",
+    "8808A|<<|16",
+    "8808A|!!|event status before the run: execution error"
+   ],
+   "method": "Fluke8808A.session_check",
+   "result": "returned ['execution error']",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE, 8808A, SIM0001, 1.0 D1.0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "16"
+    ]
+   ]
+  },
+  {
+   "call": "",
    "case": "Fluke8808A.reset_to_defaults",
    "log": [
     "8808A|>>|*RST",
