@@ -98,7 +98,7 @@ class SidecarKind(unittest.TestCase):
         src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
         self.assertIn("'  Automated Calibrations  '", src)
         self.assertIn("'  Manual Calibrations  '", src)
-        self.assertIn("'  Adjustment  '", src)
+        self.assertIn("'  Adjustments  '", src)
         self.assertNotIn('Performance Verification', src)
         self.assertIn("changes the instrument's calibration", src)
         self.assertIn('type each reading into the test point grid', src)
@@ -115,7 +115,7 @@ class SidecarKind(unittest.TestCase):
         self.assertNotIn('DROP TABLE', src)
         import re
         tabs = re.findall(r"self\.notebook\.add\(self\.\w+, text='\s*([^']+?)\s*'\)", src)
-        self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Mudcats Datasheet Importer', 'Datasheet Builder', 'Procedure Development'])
+        self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Mudcats Datasheet Importer', 'Datasheet Builder'])
         self.assertIn('FROM instruments', (ROOT / 'labregistry.py').read_text(encoding='utf-8'))
 
     def test_user_datasheet_rows_carry_their_kind(self):

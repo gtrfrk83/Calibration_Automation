@@ -6,7 +6,6 @@ Standalone procedures remain runnable independently.
 Keep ui_theme.py and mdd_importer_v49.py in the same folder as this file.
 """
 import datetime
-import hashlib
 import json
 import os
 import re
@@ -33,6 +32,7 @@ import mdd_import_ui    # import preview: a Mudcats .MDD becomes a manual calibr
 import dsb_manager      # user-built datasheets are listed (not stored) in the Procedures table
 import packages          # procedure packages: export / inspect / install a procedure as a zip (packages.py)
 import packages_ui
+import procedure_menu    # the right-click menu of a Procedures row (which entries, and when they are enabled)
 import procscan         # the procedures register themselves: Procedures/<id>.procedure.json (procscan.py)
 import verified         # 'Verified on hardware': the Procedures list marks, shows and locks verified procedures
 import verified_ui
@@ -59,14 +59,17 @@ def scan_procedures():
 
 ALL_CATEGORIES = 'All categories'
 # The Procedures tab has three views (tabs): Automated Calibrations (stored kind 'verification': the value is unchanged so no sidecar, package or
-# registry row needs a migration), Manual Calibrations (kind 'manual': no instrument automation, readings are typed into the grid) and Adjustment.
+# registry row needs a migration), Manual Calibrations (kind 'manual': no instrument automation, readings are typed into the grid) and Adjustments (label only; the stored kind stays 'adjustment').
 # A procedure's view comes from its sidecar `kind` or, left out, from its category / name (procscan.classify); user-built datasheets take the kind saved with
 # them (all-manual or imported from a .MDD = manual); unknown scripts are automated.
 VIEW_TABS = ((procscan.KIND_VERIFICATION, '  Automated Calibrations  '), (procscan.KIND_MANUAL, '  Manual Calibrations  '),
-             (procscan.KIND_ADJUSTMENT, '  Adjustment  '))
-VIEW_NAMES = {procscan.KIND_VERIFICATION: 'Automated Calibrations', procscan.KIND_MANUAL: 'Manual Calibrations', procscan.KIND_ADJUSTMENT: 'Adjustment'}
+             (procscan.KIND_ADJUSTMENT, '  Adjustments  '))
+VIEW_NAMES = {procscan.KIND_VERIFICATION: 'Automated Calibrations', procscan.KIND_MANUAL: 'Manual Calibrations', procscan.KIND_ADJUSTMENT: 'Adjustments'}
 ADJUSTMENT_NOTE = ("Adjustment changes the instrument's calibration. Adjustment procedures are separate from the calibration checks: "
                    "to check an instrument without changing it, use the Automated Calibrations or Manual Calibrations tab.")
+RUN_HINT = 'Run procedure uses real instruments. Demo mode uses VIRTUAL instruments; nothing from a demo is calibration evidence.'
+DEMO_EXPLANATION = ('Run procedure uses real instruments. Demo mode connects VIRTUAL instruments: the windows of a real run appear and commands go to '
+                    'simulated instruments, so you can rehearse safely. Nothing from a demo is calibration evidence.')
 MANUAL_NOTE = ("Manual calibrations have no instrument automation: you set the standards yourself and type each reading into the test point grid "
                "(Enter saves it and moves to the next point). Import a Mudcats .MDD datasheet to add one.")
 
@@ -164,7 +167,7 @@ class Manager:
         self.root = root
         ui.apply_theme(root)
         root.title('Calibration Procedure Manager')
-        ui.fit_window(root, 1260, 800, min_w=1000, min_h=580)
+        ui.fit_window(root, 1260, 800, min_w=900, min_h=580)
         self.demo = tk.BooleanVar(value=False)
         self.fast_demo = tk.BooleanVar(value=False)       # demo without windows or commands (the old quick demo)
         self.status = tk.StringVar(value='Select a procedure, then press Run Procedure.')
@@ -181,30 +184,33 @@ class Manager:
         self.notebook.pack(fill='both', expand=True)
         ui.TabStrip(self.notebook)
         self.library_frame = ttk.Frame(self.notebook, padding=16)
-        self.history_frame = ttk.Frame(self.notebook, padding=16)
-        self.specs_frame = ttk.Frame(self.notebook, padding=16)
-        self.datasheets_frame = ttk.Frame(self.notebook, padding=16)
-        self.dsb_frame = ttk.Frame(self.notebook, padding=16)
-        self.development_frame = ttk.Frame(self.notebook, padding=16)
+        self.history_frame = self._scroll_page()
+        self.specs_frame = self._scroll_page()
+        self.datasheets_frame = self._scroll_page()
+        self.dsb_frame = self._scroll_page()
         self.notebook.add(self.library_frame, text='  Procedures  ')
         self.notebook.add(self.history_frame, text='  Asset History  ')
         self.notebook.add(self.specs_frame, text='  Standards Specs  ')
         self.notebook.add(self.datasheets_frame, text='  Mudcats Datasheet Importer  ')
         self.notebook.add(self.dsb_frame, text='  Datasheet Builder  ')
-        self.notebook.add(self.development_frame, text='  Procedure Development  ')
         self.build_library_tab()
-        self.build_development_tab()
         self.build_datasheets_tab()
         self.build_datasheet_builder_tab()
-        self.history_panel = labregistry_ui.HistoryPanel(self.history_frame)
+        self.history_panel = labregistry_ui.HistoryPanel(self.history_frame.content)
         self.history_panel.pack(fill='both', expand=True)
-        self.specs_panel = specmanager_ui.SpecManagerPanel(self.specs_frame)
+        self.specs_panel = specmanager_ui.SpecManagerPanel(self.specs_frame.content)
         self.specs_panel.pack(fill='both', expand=True)
         ui.polish(root)
         self.notebook.bind('<<NotebookTabChanged>>', self._tab_changed)
         self.refresh()
-        self.refresh_development()
         root.bind('<Control-f>', lambda _e: (self.notebook.select(self.library_frame), self.search_entry.focus_set()))
+
+    def _scroll_page(self):
+        """A tab page that scrolls when its content is taller than the window (ui.ScrollFrame); put the content in `.content`."""
+        page = ui.ScrollFrame(self.notebook)
+        page.content = ttk.Frame(page.body, padding=16)
+        page.content.pack(fill='both', expand=True)
+        return page
 
     def find_instruments(self):
         import instrument_scan_ui
@@ -247,9 +253,6 @@ class Manager:
         elif tab is self.dsb_frame:
             self.dsb_panel.refresh()
             self.status.set('Build your own datasheet from a manufacturer specification; each save is a new version and a runnable procedure.')
-        else:
-            self.refresh_development()
-            self.status.set('Maintainer tools: test, update and roll back procedure scripts.')
 
     # ------------------------------------------------------------------ small helpers
     def _empty_state(self, table, text):
@@ -281,6 +284,17 @@ class Manager:
         self.view_notes = {procscan.KIND_ADJUSTMENT: ui.Notice(outer, text=ADJUSTMENT_NOTE, kind='warn'),
                            procscan.KIND_MANUAL: ui.Notice(outer, text=MANUAL_NOTE, kind='info')}
         self.adjust_note = self.view_notes[procscan.KIND_ADJUSTMENT]
+        # Run / demo live at the TOP of the tab, directly under the view strip, so a short window never hides them; the row wraps (ui.flow_row) when narrow
+        runbar = ttk.Frame(outer)
+        runbar.pack(fill='x', pady=(10, 0))
+        self.btn_run = ttk.Button(runbar, text='▶  Run procedure', style='Accent.TButton', command=self.run_selected)
+        self.btn_run.pack(side='left')
+        self.btn_demo = ttk.Button(runbar, text='Try in demo mode (virtual instruments)', command=lambda: self.run_selected(demo=True))
+        self.btn_demo.pack(side='left', padx=8)
+        ttk.Checkbutton(runbar, text='Fast demo (no windows)', variable=self.fast_demo).pack(side='left', padx=(4, 0))
+        ttk.Label(outer, text=RUN_HINT, style='Small.TLabel', wraplength=ui.px(800), justify='left').pack(fill='x', pady=(4, 0))
+        ui.Tooltip(self.btn_run, 'Run the selected procedure on the real instruments.')
+        ui.Tooltip(self.btn_demo, DEMO_EXPLANATION)
         bar = ttk.Frame(outer)
         bar.pack(fill='x', pady=(8, 8))
         ttk.Label(bar, text='Find').pack(side='left')
@@ -293,7 +307,10 @@ class Manager:
         ttk.Button(bar, text='Clear', style='Quiet.TButton', command=lambda: (self.search.set(''), self.category.set(ALL_CATEGORIES))).pack(side='left', padx=6)
         ttk.Button(bar, text='Remove from library', command=self.remove).pack(side='right')
         ttk.Button(bar, text='Register procedure...', command=self.add).pack(side='right', padx=8)
-        ttk.Button(bar, text='Import procedure package...', command=self.import_package).pack(side='right')
+        self.btn_library = ttk.Button(bar, text='Library folder...', command=self.choose_library_folder)    # where the lab keeps its procedure packages (the Import picker opens there)
+        self.btn_library.pack(side='right')
+        ui.Tooltip(self.btn_library, lambda: 'Library folder for procedure packages (the Import procedure package... picker opens here):\n' + self.library_folder_text())
+        ttk.Button(bar, text='Import procedure package...', command=self.import_package).pack(side='right', padx=(0, 8))
         ttk.Button(bar, text='Import Mudcats datasheet (.mdd)...', command=self.import_mdd_procedure).pack(side='right', padx=8)
 
         split = ttk.Frame(outer)
@@ -311,35 +328,147 @@ class Manager:
         self.table.tag_configure('verified', foreground=ui.C['good'])
         self.empty_lib = self._empty_state(self.table, 'No procedures match.\nUse "Register procedure..." to add one.')
         self.table.bind('<Double-1>', lambda _: self.run_selected())
-        self.table.bind('<<TreeviewSelect>>', lambda _: (self.refresh_details(), self.refresh_development()))
+        self.table.bind('<<TreeviewSelect>>', lambda _: self.refresh_details())
         self.table.bind('<Return>', lambda _: self.run_selected())
 
         card = ttk.LabelFrame(split, text='Selected procedure', padding=16)
         card.grid(row=0, column=1, sticky='nsew', padx=(14, 0))
         card.configure(width=ui.px(340))
+        self.card_scroll = ui.ScrollFrame(card, width=ui.px(310))      # the card scrolls when the window is too short for it (nothing in it is ever cut off)
+        self.card_scroll.pack(fill='both', expand=True)
+        card = self.card_scroll.body
+        self.lib_folder = tk.StringVar(value=self.library_folder_text())
         self.d_name = tk.StringVar(); self.d_sub = tk.StringVar(); self.d_desc = tk.StringVar(); self.d_path = tk.StringVar()
         ttk.Label(card, textvariable=self.d_name, style='Section.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
         ttk.Label(card, textvariable=self.d_sub, style='Muted.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(2, 8))
         self.d_pill = ui.Pill(card, '', 'neutral')
         self.d_pill.pack(anchor='w')
-        self.d_ver = ui.Pill(card, '', 'neutral')                  # 'VERIFIED ON HARDWARE <date> - LOCKED' / 'CHANGED SINCE' / 'UNLOCKED' / 'NOT VERIFIED'
-        self.d_ver.pack(anchor='w', pady=(6, 0))
-        self.d_ver_text = tk.StringVar()
-        ttk.Label(card, textvariable=self.d_ver_text, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(4, 0))
+        ver_row = ttk.Frame(card)
+        ver_row.pack(anchor='w', pady=(6, 0))
+        self.d_ver = ui.Pill(ver_row, '', 'neutral')               # the one-line status: 'VERIFIED ON HARDWARE <date> - LOCKED' / 'CHANGED SINCE' / 'UNLOCKED' / 'NOT VERIFIED'
+        self.d_ver.pack(side='left')
+        self.d_ver_text = tk.StringVar()                           # the full text (verified.Status.detail_lines): shown by the info button, not on the card
+        self.btn_ver_info = ttk.Button(ver_row, text='\u24d8', style='Quiet.TButton', width=3, command=self.show_verified_details)
+        self.btn_ver_info.pack(side='left', padx=(6, 0))
+        ui.Tooltip(self.btn_ver_info, 'Show the full verification record')
         ttk.Label(card, textvariable=self.d_desc, wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 4))
         ttk.Label(card, textvariable=self.d_path, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
-        self.btn_run = ttk.Button(card, text='▶  Run procedure', style='Accent.TButton', command=self.run_selected)
-        self.btn_run.pack(fill='x', pady=(18, 6))
-        self.btn_demo = ttk.Button(card, text='Try in demo mode (virtual instruments)', command=lambda: self.run_selected(demo=True))
-        self.btn_demo.pack(fill='x')
-        ttk.Checkbutton(card, text='Fast demo (no windows)', variable=self.fast_demo).pack(anchor='w', pady=(4, 0))
         self.d_mod = ui.Pill(card, '', 'warn')                    # 'MODIFIED (n)': saved model-wide procedure changes exist
         self.btn_verify = ttk.Button(card, text='Mark verified on hardware...', command=self.mark_verified)
-        self.btn_verify.pack(fill='x', pady=(6, 0))
+        self.btn_verify.pack(fill='x', pady=(18, 0))
         self.btn_lock = ttk.Button(card, text='Unlock for editing...', command=self.toggle_lock)
         self.btn_lock.pack(fill='x', pady=(6, 0))
-        ttk.Label(card, text='Run procedure uses real instruments. Demo mode connects VIRTUAL instruments: the windows of a real run appear and commands go to simulated instruments, so you can rehearse safely. Nothing from a demo is calibration evidence.',
-                  style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 0))
+        self._build_row_menu_bindings()
+
+    # ------------------------------------------------------------------ right-click menu of a procedure row
+    def _build_row_menu_bindings(self):
+        for seq in ('<Button-3>', '<Button-2>', '<Control-Button-1>'):         # right click (middle button / Ctrl-click on macOS)
+            self.table.bind(seq, self._row_menu_pointer, add='+')
+        for seq in ('<Shift-F10>', '<Key-Menu>'):                               # the keyboard: Shift+F10 / the Menu key, on the selected row
+            try:
+                self.table.bind(seq, self._row_menu_key, add='+')
+            except tk.TclError:
+                pass
+
+    def _row_menu_pointer(self, event):
+        row = self.table.identify_row(event.y)
+        if not row:
+            return 'break'
+        self.table.focus_set()
+        self.table.selection_set(row)
+        self.table.focus(row)
+        self.refresh_details()                                  # the card and the buttons follow the row right away (the menu reads their state)
+        self.post_row_menu(event.x_root, event.y_root)
+        return 'break'
+
+    def _row_menu_key(self, _event=None):
+        sel = self.table.selection()
+        if not sel:
+            return 'break'
+        self.table.see(sel[0])
+        self.table.update_idletasks()
+        box = self.table.bbox(sel[0])
+        x = self.table.winfo_rootx() + (box[0] + 24 if box else 24)
+        y = self.table.winfo_rooty() + (box[1] + box[3] if box else 24)
+        self.refresh_details()
+        self.post_row_menu(x, y)
+        return 'break'
+
+    def _can_show_location(self):
+        return sys.platform in ('win32', 'darwin') or shutil.which('xdg-open') is not None
+
+    def row_menu_items(self):
+        """procedure_menu entries for the selected row (None without one); the enabled rules are the card's buttons' own."""
+        rec = self._selected_row()
+        if not rec:
+            return None
+        script = rec[5]
+        user = self._user_rows().get(str(rec[0]))
+        found = script_file(script).is_file() and (user is None or Path(user['spec_path']).is_file())
+        state = lambda b: (str(b.cget('text')), str(b.cget('state')) != 'disabled')  # noqa: E731
+        record = self._selected_record()
+        managed = self._managed_path(record)
+        restorable = bool(managed and managed.is_file() and self._available_backups(record))      # a managed script with at least one saved backup
+        return procedure_menu.items(found, state(self.btn_verify), state(self.btn_lock), self._can_show_location() and script_file(script).is_file(),
+                                    has_path=bool(script), restorable=restorable)
+
+    def build_row_menu(self):
+        entries = self.row_menu_items()
+        if entries is None:
+            return None
+        actions = {procedure_menu.RUN: self.run_selected, procedure_menu.DEMO: lambda: self.run_selected(demo=True),
+                   procedure_menu.VERIFY: self.mark_verified, procedure_menu.LOCK: self.toggle_lock, procedure_menu.REMOVE: self.remove, procedure_menu.RESTORE: self.restore_previous,
+                   procedure_menu.COPY_NAME: self.copy_procedure_name, procedure_menu.COPY_PATH: self.copy_procedure_path,
+                   procedure_menu.SHOW: self.show_procedure_location}
+        menu = ui.themed_menu(self.table)
+        for e in entries:
+            if e is None:
+                menu.add_separator()
+            else:
+                menu.add_command(label=e.label, command=actions[e.key], state='normal' if e.enabled else 'disabled')
+        return menu
+
+    def post_row_menu(self, x_root, y_root):
+        menu = self.build_row_menu()
+        if menu is None:
+            return None
+        self._row_menu = menu
+        menu.bind('<Escape>', lambda _e: menu.unpost(), add='+')
+        ui.post_menu(menu, x_root, y_root)
+        return menu
+
+    def _copy(self, text, what):
+        self.root.clipboard_clear()
+        self.root.clipboard_append(text)
+        self.status.set(f'Copied the {what} to the clipboard.')
+
+    def copy_procedure_name(self):
+        rec = self._selected_row()
+        if rec:
+            self._copy(str(rec[1]), 'procedure name')
+
+    def copy_procedure_path(self):
+        rec = self._selected_row()
+        if rec and rec[5]:
+            self._copy(str(script_file(rec[5])), 'file path')
+
+    def show_procedure_location(self):
+        rec = self._selected_row()
+        if not rec or not rec[5]:
+            return
+        path = script_file(rec[5])
+        if not path.is_file():
+            messagebox.showerror('Procedure not found', f'Cannot locate the procedure script:\n{path}')
+            return
+        try:
+            if sys.platform == 'win32':
+                subprocess.Popen(['explorer', '/select,', str(path)])
+            elif sys.platform == 'darwin':
+                subprocess.Popen(['open', '-R', str(path)])
+            else:
+                subprocess.Popen(['xdg-open', str(path.parent)])
+        except OSError as exc:
+            messagebox.showerror('Could not open the folder', str(exc))
 
     def _view_changed(self, _event=None):
         kind = next((k for k, page in self.view_pages.items() if str(page) == self.view_nb.select()), procscan.KIND_VERIFICATION)
@@ -377,6 +506,7 @@ class Manager:
             self.btn_run.configure(state='disabled'); self.btn_demo.configure(state='disabled')
             self.d_mod.pack_forget()
             self.d_ver.set('', 'neutral'); self.d_ver_text.set('')
+            self.btn_ver_info.configure(state='disabled')
             self.btn_verify.configure(state='disabled'); self.btn_lock.configure(state='disabled')
             return
         id_, name, mfr, model, cat, script, desc = rec
@@ -394,7 +524,7 @@ class Manager:
         n = self._mod_counts().get((model or '').casefold(), 0)
         if n:
             self.d_mod.set(procmods_ui_model.chip_text(n), 'warn')
-            self.d_mod.pack(anchor='w', pady=(6, 0), before=self.btn_run)
+            self.d_mod.pack(anchor='w', pady=(6, 0), before=self.btn_verify)
         else:
             self.d_mod.pack_forget()
         self.show_verified(rec)
@@ -421,11 +551,55 @@ class Manager:
         entry, status = self._ver_status(rec)
         self.d_ver.set(status.pill, status.tone)
         self.d_ver_text.set('\n'.join(status.detail_lines()))
+        self.btn_ver_info.configure(state='normal')
         state = verified.ui_state(status)
         for button, key in ((self.btn_verify, 'verify'), (self.btn_lock, 'lock')):
             text, enabled = state[key]
             button.configure(text=text, state='normal' if enabled else 'disabled')
         return status
+
+    def show_verified_details(self):
+        """The full verification text (who, when, notes, what changed) in a small window under the info button: selectable, closes on Esc or a click elsewhere."""
+        text = self.d_ver_text.get().strip()
+        if not text:
+            return None
+        old = getattr(self, '_ver_pop', None)
+        if old is not None and old.winfo_exists():
+            old.destroy()
+            self._ver_pop = None
+            return None
+        win = tk.Toplevel(self.root)
+        self._ver_pop = win
+        win.title('Verification record')
+        win.transient(self.root)
+        win.configure(background=ui.C['border'])
+        box = tk.Text(win, width=52, wrap='word', borderwidth=0, highlightthickness=0, padx=ui.px(10), pady=ui.px(8), background=ui.C['card'],
+                      foreground=ui.C['text'], insertbackground=ui.C['text'], selectbackground=ui.C['select'], selectforeground=ui.C['text'],
+                      font='TkDefaultFont', cursor='arrow')
+        box.insert('1.0', text)
+        box.configure(height=min(16, max(3, sum(len(x) // 46 + 1 for x in text.split('\n')))), state='disabled')
+        box.pack(padx=1, pady=1, fill='both', expand=True)
+        win.update_idletasks()
+        b = self.btn_ver_info
+        x = min(b.winfo_rootx(), max(0, win.winfo_screenwidth() - win.winfo_reqwidth() - 8))
+        y = b.winfo_rooty() + b.winfo_height() + 4
+        if y + win.winfo_reqheight() > win.winfo_screenheight() - 8:
+            y = max(0, b.winfo_rooty() - win.winfo_reqheight() - 4)
+        win.geometry(f'+{x}+{y}')
+        self._ver_box = box
+
+        def close(_e=None):
+            if win.winfo_exists():
+                win.destroy()
+            self._ver_pop = None
+
+        def focus_left(_e=None):
+            win.after(120, lambda: None if not win.winfo_exists() or str(win.focus_get()).startswith(str(win)) else close())
+        win.bind('<Escape>', close)
+        win.bind('<FocusOut>', focus_left)
+        box.bind('<Escape>', close)
+        win.after(50, lambda: (win.focus_force(), box.focus_set()) if win.winfo_exists() else None)
+        return win
 
     def mark_verified(self):
         rec = self._selected_row()
@@ -655,40 +829,15 @@ class Manager:
         self.refresh()
         self.status.set(f'Removed "{name}" from the library (script file kept).')
 
-    # ------------------------------------------------------------------ Procedure development tab
-    def build_development_tab(self):
-        frame = self.development_frame
-        ui.Notice(frame, 'For maintainers. Installing an update replaces the procedure script after saving a backup. '
-                         'Syntax checking does not prove an instrument procedure is safe - install trusted code only. '
-                         'Databases, checkpoints and reports are never overwritten.', 'warn', title='Handle with care').pack(fill='x')
-        self.dev_info = tk.StringVar(value='Select a procedure on the Procedures tab.')
-        box = ttk.LabelFrame(frame, text='Selected procedure', padding=14)
-        box.pack(fill='x', pady=(14, 10))
-        ttk.Label(box, textvariable=self.dev_info, wraplength=900, justify='left').pack(anchor='w', fill='x')
-        bar = ttk.Frame(box)
-        bar.pack(fill='x', pady=(12, 0))
-        ttk.Button(bar, text='Test in demo mode', command=self.test_demo).pack(side='left', padx=(0, 8))
-        ttk.Button(bar, text='Install update (.py)...', style='Accent.TButton', command=self.install_update).pack(side='left', padx=(0, 8))
-        ttk.Button(bar, text='Restore previous version...', command=self.restore_previous).pack(side='left')
-        lib = ttk.LabelFrame(frame, text='Procedure packages', padding=14)
-        lib.pack(fill='x', pady=(0, 10))
-        self.lib_folder = tk.StringVar()
-        ttk.Label(lib, text='Library folder (where the lab keeps its procedure packages; the "Import procedure package..." picker opens here):',
-                  style='Muted.TLabel', wraplength=900, justify='left').pack(anchor='w')
-        row = ttk.Frame(lib)
-        row.pack(fill='x', pady=(6, 0))
-        ttk.Label(row, textvariable=self.lib_folder, wraplength=620, justify='left').pack(side='left', fill='x', expand=True)
-        ttk.Button(row, text='Clear', command=lambda: self.set_library_folder('')).pack(side='right')
-        ttk.Button(row, text='Choose folder...', command=self.choose_library_folder).pack(side='right', padx=(0, 8))
-        self._show_library_folder()
-        ttk.Label(frame, text='Saved backups of this procedure', style='Section.TLabel').pack(anchor='w', pady=(6, 6))
-        self.backup_table = ui.make_table(frame, ('file', 'when'), ('Backup file', 'Saved'), (560, 200), anchors={'file': 'w', 'when': 'w'}, height=6, zebra=True)
-        self.backup_empty = self._empty_state(self.backup_table, 'No backups yet - one is created automatically\nthe first time you install an update.')
-
     # ------------------------------------------------------------------ procedure packages (packages.py)
-    def _show_library_folder(self):
+    LIBRARY_NOT_SET = '(not set: the picker opens in the folder you used last)'
+
+    def library_folder_text(self):
         folder = packages.get_library_dir()
-        self.lib_folder.set(folder if folder else '(not set: the picker opens in the folder you used last)')
+        return folder if folder else self.LIBRARY_NOT_SET
+
+    def _show_library_folder(self):
+        self.lib_folder.set(self.library_folder_text())
 
     def set_library_folder(self, folder):
         try:
@@ -718,7 +867,6 @@ class Manager:
             messagebox.showerror('Import failed', str(exc), parent=self.root)
             return
         self.refresh()                                       # the scan finds a new procedure; a verified one that changed shows its state
-        self.refresh_development()
         self.status.set(f'Imported {result.name} version {result.version} ({len(result.written)} file(s) written).')
         packages_ui.show_result(self.root, result, preview)
 
@@ -742,36 +890,6 @@ class Manager:
         except ValueError:
             return None
         return path if path.suffix.lower() == '.py' else None
-
-    def refresh_development(self):
-        if not hasattr(self, 'dev_info'):
-            return
-        self.backup_table.delete(*self.backup_table.get_children())
-        rec = self._selected_record()
-        if not rec:
-            self.dev_info.set('Select a procedure on the Procedures tab first.')
-            self._toggle_empty(self.backup_table, True)
-            return
-        path = self._managed_path(rec)
-        if not path:
-            self.dev_info.set(f'{rec[1]} - external or unmanaged script; register or copy it under Procedures before using updates.')
-            self._toggle_empty(self.backup_table, True)
-            return
-        version = VERSIONS.get(path.name, 'custom')
-        backups = self._available_backups(rec)
-        self.dev_info.set(f'{rec[1]}\n{path.relative_to(BASE)}   |   bundled baseline v{version}   |   {len(backups)} backup(s)')
-        for b in backups:
-            when = datetime.datetime.fromtimestamp(b.stat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')
-            self.backup_table.insert('', 'end', values=(b.name, when))
-        self._toggle_empty(self.backup_table, not backups)
-
-    def test_demo(self):
-        rec = self._selected_record()
-        if not rec:
-            messagebox.showinfo('Select a procedure', 'Select a procedure in the Procedures tab first.')
-            return
-        if self._launch(rec[1], rec[2], True):
-            self.status.set(f'Demo launched: {rec[1]}')
 
     def _validated_update(self, source):
         if not source.is_file() or source.suffix.lower() != '.py':
@@ -804,47 +922,9 @@ class Manager:
             if os.path.exists(tmp):
                 os.unlink(tmp)
 
-    def install_update(self):
-        rec = self._selected_record()
-        path = self._managed_path(rec)
-        if not path or not path.is_file():
-            messagebox.showerror('Not managed', 'Select a procedure whose script is in the Procedures folder.'); return
-        chosen = filedialog.askopenfilename(parent=self.root, title=f'Choose updated script for {rec[1]}', filetypes=[('Python scripts', '*.py')])
-        if not chosen:
-            return
-        source = Path(chosen).resolve()
-        if source == path:
-            messagebox.showerror('Same file', 'Choose the downloaded update file, not the installed procedure.'); return
-        try:
-            raw = self._validated_update(source)
-        except Exception as exc:
-            messagebox.showerror('Update rejected', str(exc)); return
-        old_digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        new_digest = hashlib.sha256(raw).hexdigest()
-        if old_digest == new_digest:
-            messagebox.showinfo('Already installed', 'The selected file is identical to the installed procedure.'); return
-        if not messagebox.askyesno('Confirm procedure update', f'Update: {rec[1]}\n\nFrom: {source.name}\nTo: {path.relative_to(BASE)}\n\nA backup will be created first.\n\nInstall only trusted procedure code; syntax validation does not prove instrument safety.'):
-            return
-        try:
-            backup = self._backup(rec, path)
-            self._atomic_replace(raw, path)
-        except Exception as exc:
-            messagebox.showerror('Update failed', f'{exc}\n\nCheck the backup before continuing.'); return
-        self.refresh_development()
-        self.refresh()                                                   # a verified procedure now is unlocked and shows 'Changed since verification'
-        self.status.set(f'Updated {rec[1]}; backup saved as {backup.name}. Restart any open procedure windows to use it.')
-        messagebox.showinfo('Update installed', f'Updated {rec[1]}.\nBackup: {backup}\n\nClose and reopen any running procedure windows.')
-
     def _available_backups(self, rec):
         folder = BACKUPS / str(rec[0])
         return sorted(folder.glob('*.py'), reverse=True) if folder.exists() else []
-
-    def view_backups(self):
-        rec = self._selected_record()
-        if not rec:
-            messagebox.showinfo('Select procedure', 'Select a procedure first.'); return
-        backups = self._available_backups(rec)
-        messagebox.showinfo('Procedure backups', '\n'.join(p.name for p in backups[:25]) if backups else 'No backups yet.')
 
     def restore_previous(self):
         rec = self._selected_record(); path = self._managed_path(rec)
@@ -876,7 +956,7 @@ class Manager:
                 self._backup(rec, path); self._atomic_replace(raw, path)
             except Exception as exc:
                 messagebox.showerror('Restore failed', str(exc), parent=win); return
-            win.destroy(); self.refresh_development(); self.refresh(); self.status.set(f'Restored {rec[1]} from {source.name}')
+            win.destroy(); self.refresh(); self.status.set(f'Restored {rec[1]} from {source.name}')
             messagebox.showinfo('Restored', 'Previous procedure restored. Reopen any running procedure windows.')
         row = ttk.Frame(win); row.pack(fill='x', padx=16, pady=14)
         ttk.Button(row, text='Cancel', command=win.destroy).pack(side='right')
@@ -885,7 +965,7 @@ class Manager:
 
     # ------------------------------------------------------------------ Datasheet Builder tab
     def build_datasheet_builder_tab(self):
-        self.dsb_panel = datasheet_builder_ui.DatasheetBuilderPanel(self.dsb_frame, on_saved=self._dsb_saved, status=self.status)
+        self.dsb_panel = datasheet_builder_ui.DatasheetBuilderPanel(self.dsb_frame.content, on_saved=self._dsb_saved, status=self.status)
         self.dsb_panel.pack(fill='both', expand=True)
 
     def _dsb_saved(self):
@@ -894,7 +974,7 @@ class Manager:
 
     # ------------------------------------------------------------------ Datasheets tab
     def build_datasheets_tab(self):
-        area = self.datasheets_frame
+        area = self.datasheets_frame.content
         ttk.Label(area, text='Import Cal Processor .MDD files as read-only templates. You can review everything before it is saved, '
                              'and the embedded scripts are never executed.', style='Muted.TLabel', wraplength=950, justify='left').pack(anchor='w', pady=(0, 10))
         buttons = ttk.Frame(area)

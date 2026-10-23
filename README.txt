@@ -156,7 +156,7 @@ Procedures/Keithley_2000_Adjustment.py
                   Rev. F, pp. 2-14 to 2-19): 13 DC steps (front short and open, +10 V, -10 V, +100 V, 4-wire 1 kohm to 10 Mohm, 10 mA to 1 A) and 13 AC steps
                   (10 mV to 700 V at 1 kHz and 50 kHz, 100 mA to 2 A) in the manual's order, with a Fluke 5560A, 5522A or 5520A as the source (the manual's
                   Table 2-1 ratios are shown in the window: the 5522A and 5520A meet none, the 5560A four of the 24). Category 'Digital Multimeter Adjustment',
-                  sidecar kind 'adjustment' (Adjustment tab). THIS CHANGES THE INSTRUMENT CALIBRATION: both instruments are reset first, the operator
+                  sidecar kind 'adjustment' (Adjustments tab). THIS CHANGES THE INSTRUMENT CALIBRATION: both instruments are reset first, the operator
                   confirms warm-up, the As Found verification and authority, then types the calibration code (asked at run time, sent once, NEVER stored,
                   logged or written to the audit record). Every step asks for the hook-up, programs and reads back the calibrator, waits to settle, asks again
                   and sends the command ONCE (never repeated automatically); the calibrator goes to standby after each step. Nothing is stored in the
@@ -169,7 +169,7 @@ Procedures/Fluke_8808A_Adjustment.py
                   Guided ADJUSTMENT (calibration) of the Fluke 8808A by the RS-232 calibration dialog of the Calibration Manual (Oct 2008, pp. 3-16 / 3-17,
                   Table 3-9): 124 steps in the manual's order (DC volts 21, AC volts 21, frequency 12, resistance 28, AC current 17, DC current 25) with a Fluke
                   5522A, 5560A or 5520A as the source (one point, 1.9 V at 750 kHz, needs your own standard; the zero ohm point uses the 4-wire short). Category
-                  'Digital Multimeter Adjustment', sidecar kind 'adjustment' (Adjustment tab). THIS CHANGES THE INSTRUMENT CALIBRATION. YOU enter the calibration
+                  'Digital Multimeter Adjustment', sidecar kind 'adjustment' (Adjustments tab). THIS CHANGES THE INSTRUMENT CALIBRATION. YOU enter the calibration
                   mode at the 8808A front panel with the calibration button and confirm it; the program sends nothing to enter it (an optional, UNVERIFIED
                   *TER is off by default; if the meter does not answer the first function name the program offers ONE operator-confirmed *TER, UNVERIFIED) and checks it only when the meter answers the first function name. The manual has no password, SAVE or lock for the
                   8808A, so every function start and EVERY POINT is confirmed by the operator, the calibrator's output is programmed, read back and operated for
