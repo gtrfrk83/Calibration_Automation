@@ -133,6 +133,12 @@ KINDS = {   # unit = SI base unit of the nominal / limits; legacy = the name the
     'TEMP': dict(unit='degC', name='Temperature (simulated)', family='dmm', direction='measure', ac=False, switch='Temperature'),
     'DIODE': dict(unit='V', name='Diode test', family='dmm', direction='measure', ac=False, switch='Diode test'),
     'CONT': dict(unit='ohm', name='Continuity', family='dmm', direction='measure', ac=False, passfail=True, switch='Continuity'),
+    # kinds the Cal Processor (.MDD) import needs (mdd_convert.py); they are also usable in the Datasheet Builder.  None of them has an automatic
+    # source or measurement: they are run by typing the reading (the matcher finds no standard for them and the point is done by hand).
+    'TEMPF': dict(unit='degF', name='Temperature (°F)', family='dmm', direction='measure', ac=False, switch='Temperature'),
+    'COND': dict(unit='S', name='Conductance', family='dmm', direction='measure', ac=False, switch='nS  (conductance)'),
+    'PCT': dict(unit='%', name='Percent reading (duty cycle ...)', family='dmm', direction='measure', ac=False, switch='%  (duty cycle)'),
+    'CHECK': dict(unit='', name='Functional check (pass / fail)', family='dmm', direction='measure', ac=False, passfail=True, switch='Functional check'),
     'SCOPE_GAIN': dict(unit='V', name='Scope DC gain', family='scope', direction='measure', ac=False, legacy='GAIN', switch='Vertical (DC gain)'),
     'SCOPE_OFFSET': dict(unit='V', name='Scope DC offset', family='scope', direction='measure', ac=False, legacy='OFFSET', switch='Vertical (offset)'),
     'SCOPE_BW': dict(unit='dB', name='Scope bandwidth', family='scope', direction='measure', ac=True, amplitude=True, legacy='BW', switch='Bandwidth'),
@@ -155,8 +161,8 @@ _PREFIXES = {'p': -12, 'n': -9, 'µ': -6, 'μ': -6, 'u': -6, 'm': -3, '': 0, 'k'
 _PREFIX_ORDER = [('p', -12), ('n', -9), ('µ', -6), ('m', -3), ('', 0), ('k', 3), ('M', 6), ('G', 9)]
 _NO_PREFIX = ('degC', 'degF', 'dB', '%', 'ratio', '')
 _SYMBOL = {'ohm': 'Ω', 'degC': '°C', 'degF': '°F'}
-_UNIT_ALIASES = [('ohms', 'ohm'), ('ohm', 'ohm'), ('Ω', 'ohm'), ('Ω', 'ohm'), ('degC', 'degC'), ('°C', 'degC'), ('Hz', 'Hz'), ('hz', 'Hz'),
-                 ('dB', 'dB'), ('db', 'dB'), ('sec', 's'), ('V', 'V'), ('A', 'A'), ('F', 'F'), ('s', 's'), ('C', 'degC')]
+_UNIT_ALIASES = [('S', 'S'), ('ohms', 'ohm'), ('ohm', 'ohm'), ('Ω', 'ohm'), ('Ω', 'ohm'), ('degC', 'degC'), ('°C', 'degC'), ('Hz', 'Hz'), ('hz', 'Hz'),
+                 ('dB', 'dB'), ('db', 'dB'), ('sec', 's'), ('V', 'V'), ('A', 'A'), ('F', 'F'), ('s', 's'), ('C', 'degC'), ('degF', 'degF'), ('°F', 'degF'), ('%', '%')]
 
 
 def kind_info(kind):
@@ -1455,12 +1461,13 @@ def _validate_function(ds, fn, add, seen_f, all_ids):
             add('point_outside_range', f'Point {p.id}: {fmt(p.nominal)} {info["unit"]} is outside range {rng.id} (limit {fmt(rng.top)}).', where=pw)
         elif rng is not None and info.get('value') and not (0 < abs(p.nominal) <= rng.top):
             add('point_outside_range', f'Point {p.id}: {fmt(p.nominal)} is outside range {rng.id} (limit {fmt(rng.top)}).', where=pw)
+        manual = bool(ds.options.get('manual_entry')) and info['family'] == 'dmm'      # a manual calibration: nothing is sourced, so a missing frequency / amplitude is only a warning
         if info.get('ac') and (p.frequency is None or p.frequency <= 0):
-            add('no_frequency', f'Point {p.id}: {fn.kind} needs a frequency above zero.', where=pw)
+            add('no_frequency', f'Point {p.id}: {fn.kind} needs a frequency above zero.', 'warn' if manual else 'error', pw)
         if not info.get('ac') and p.frequency is not None and not info.get('value') and info['family'] != 'generator':
             add('freq_not_allowed', f'Point {p.id}: {fn.kind} has no frequency, but one is set.', 'warn', pw)
         if info.get('amplitude') and (p.amplitude is None or p.amplitude <= 0) and fn.kind not in ('SCOPE_TIMEBASE', 'GEN_FREQ'):
-            add('no_amplitude', f'Point {p.id}: {fn.kind} needs the stimulus amplitude.', where=pw)
+            add('no_amplitude', f'Point {p.id}: {fn.kind} needs the stimulus amplitude.', 'warn' if manual else 'error', pw)
         if info.get('value') in ('frequency', 'period') and p.nominal <= 0:
             add('point_outside_range', f'Point {p.id}: a {info["value"]} must be above zero.', where=pw)
         key = (p.range_id, fmt(p.nominal), fmt(p.frequency) if p.frequency is not None else None, fmt(p.amplitude) if p.amplitude is not None else None,
@@ -1548,7 +1555,8 @@ CREATE TABLE IF NOT EXISTS user_datasheets (
     deleted INTEGER NOT NULL DEFAULT 0,
     deleted_at TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT '',
-    updated_at TEXT NOT NULL DEFAULT ''
+    updated_at TEXT NOT NULL DEFAULT '',
+    kind TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS user_datasheet_versions (
     datasheet_id INTEGER NOT NULL REFERENCES user_datasheets(id) ON DELETE CASCADE,
@@ -1572,6 +1580,8 @@ def _db(path=None):
     try:
         con.execute('PRAGMA foreign_keys=ON')
         con.executescript(REG_SCHEMA)
+        if 'kind' not in {r[1] for r in con.execute('PRAGMA table_info(user_datasheets)')}:      # a registry made before the Manual Calibrations tab
+            con.execute("ALTER TABLE user_datasheets ADD COLUMN kind TEXT NOT NULL DEFAULT ''")
         yield con
         con.commit()
     finally:
@@ -1607,6 +1617,7 @@ class SaveResult:
     spec_path: str = ''
     version_file: str = ''
     problems: list = field(default_factory=list)
+    kind: str = ''                   # 'manual' | 'verification' (which Manager tab lists it); '' when no runnable spec was written
 
 
 def _paths(uid, root=None):
@@ -1624,6 +1635,28 @@ def lock_reason(uid, db=None):
     except ImportError:
         return ''
     return verified.Registry(db, seed=db is None).lock_reason(proc_key=verified.DS_PREFIX + str(uid))
+
+
+KIND_AUTOMATED, KIND_MANUAL = 'verification', 'manual'      # the Manager's procscan.KIND_* values ('verification' = the Automated Calibrations tab)
+
+
+def classify_kind(ds):
+    """Which Manager tab lists this datasheet once it is saved: 'manual' when no automation applies, else 'verification' (Automated Calibrations).
+    Manual = the owner flagged it (ds.options['manual_entry']) or the standards matcher finds NO point that a standard could source / measure
+    (datasheet_builder_match: every point is 'manual' or uncovered).  Read only; any problem (no standards sheet, matcher error) means 'verification',
+    the behaviour before the Manual Calibrations tab existed."""
+    if ds.options.get('manual_entry'):
+        return KIND_MANUAL
+    if not any(p.enabled for _fn, p in ds.all_points()):
+        return KIND_AUTOMATED
+    try:
+        import datasheet_builder_match as dm
+        res = dm.match_datasheet(ds)
+        if res.assignments and not any(a.can_automate for a in res.assignments.values()):
+            return KIND_MANUAL
+    except Exception:
+        pass
+    return KIND_AUTOMATED
 
 
 def save(ds, who='', note='', root=None, db=None):
@@ -1676,6 +1709,8 @@ def save(ds, who='', note='', root=None, db=None):
         if exported.spec is None:
             exported = None
     status = 'ready' if exported else 'draft'
+    kind = classify_kind(ds) if exported else ''
+    result.kind = kind
     try:
         vdir.mkdir(parents=True, exist_ok=True)
         vfile = vdir / f'v{version:04d}.datasheet.json'
@@ -1698,15 +1733,17 @@ def save(ds, who='', note='', root=None, db=None):
             row = con.execute('SELECT id,created_at,runnable_version,spec_file,deleted FROM user_datasheets WHERE uid=?', (ds.uid,)).fetchone()
             npts = sum(len(f.points) for f in ds.functions)
             if row is None:
-                did = con.execute('INSERT INTO user_datasheets(uid,make,model,title,tag,current_version,runnable_version,status,points,spec_file,created_at,updated_at)'
-                                  ' VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+                did = con.execute('INSERT INTO user_datasheets(uid,make,model,title,tag,current_version,runnable_version,status,points,spec_file,created_at,updated_at,kind)'
+                                  ' VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
                                   (ds.uid, ds.make, ds.model, ds.title, TAG, version, version if exported else 0, status, npts,
-                                   str(runnable) if exported else '', ds.created, _now())).lastrowid
+                                   str(runnable) if exported else '', ds.created, _now(), kind)).lastrowid
             else:
                 did = row[0]
                 con.execute('UPDATE user_datasheets SET make=?,model=?,title=?,current_version=?,runnable_version=?,status=?,points=?,spec_file=?,updated_at=? WHERE id=?',
                             (ds.make, ds.model, ds.title, version, version if exported else row[2], status, npts,
                              str(runnable) if exported else row[3], _now(), did))
+                if exported:                                       # the kind follows the runnable version (a draft keeps the earlier one)
+                    con.execute('UPDATE user_datasheets SET kind=? WHERE id=?', (kind, did))
             con.execute('INSERT INTO user_datasheet_versions(datasheet_id,version,saved_at,who,note,file,sha256,status,points,problems_json) VALUES(?,?,?,?,?,?,?,?,?,?)',
                         (did, version, _now(), who, note, str(vfile), hashlib.sha256(text.encode('utf-8')).hexdigest(), status, npts,
                          json.dumps([{'code': p.code, 'level': getattr(p, 'level', 'error'), 'message': str(p), 'where': getattr(p, 'where', '')} for p in result.problems])))
@@ -1771,10 +1808,10 @@ def versions(uid, root=None, db=None):
 def list_datasheets(include_deleted=False, root=None, db=None):
     """[{uid, make, model, title, tag, version, runnable_version, status, points, spec_file, deleted, updated_at}], newest first.  Registry first;
     when it is unreadable the datasheet files themselves are listed."""
-    keys = ('uid', 'make', 'model', 'title', 'tag', 'version', 'runnable_version', 'status', 'points', 'spec_file', 'deleted', 'updated_at')
+    keys = ('uid', 'make', 'model', 'title', 'tag', 'version', 'runnable_version', 'status', 'points', 'spec_file', 'deleted', 'updated_at', 'kind')
     try:
         with _db(db) as con:
-            q = 'SELECT uid,make,model,title,tag,current_version,runnable_version,status,points,spec_file,deleted,updated_at FROM user_datasheets'
+            q = 'SELECT uid,make,model,title,tag,current_version,runnable_version,status,points,spec_file,deleted,updated_at,kind FROM user_datasheets'
             if not include_deleted:
                 q += ' WHERE deleted=0'
             rows = con.execute(q + ' ORDER BY updated_at DESC, id DESC').fetchall()
@@ -1797,7 +1834,7 @@ def list_datasheets(include_deleted=False, root=None, db=None):
                     run_v = 0
             out.append(dict(uid=d.name, make=ds.make, model=ds.model, title=ds.title, tag=TAG, version=ds.version, runnable_version=run_v,
                             status='ready' if run_v else 'draft', points=sum(len(f.points) for f in ds.functions),
-                            spec_file=str(sp) if run_v else '', deleted=0, updated_at=''))
+                            spec_file=str(sp) if run_v else '', deleted=0, updated_at='', kind=''))
     except (OSError, DsError, ValueError):
         pass
     return out
@@ -1893,14 +1930,15 @@ def import_json(path, who='', root=None, db=None):
 
 
 def procedure_entries(root=None, db=None):
-    """The 'user-built' rows for the Manager's Procedures list: [{uid, name, manufacturer, model, category, tag, spec_path, version, status}] for every
-    non-deleted datasheet that has a runnable spec file on disk."""
+    """The 'user-built' rows for the Manager's Procedures list: [{uid, name, manufacturer, model, category, tag, spec_path, version, status, kind}] for every
+    non-deleted datasheet that has a runnable spec file on disk.  kind = 'manual' (Manual Calibrations tab) or 'verification' (Automated Calibrations)."""
     out = []
     for r in list_datasheets(root=root, db=db):
         sp = r['spec_file']
         if r['runnable_version'] and sp and Path(sp).is_file():
             out.append(dict(uid=r['uid'], name=f"{r['make']} {r['model']} - {r['title']}".strip(' -'), manufacturer=r['make'], model=r['model'],
-                            category='User-built', tag=TAG, spec_path=sp, version=r['runnable_version'], status=r['status']))
+                            category='User-built', tag=TAG, spec_path=sp, version=r['runnable_version'], status=r['status'],
+                            kind=r.get('kind') or KIND_AUTOMATED))
     return out
 
 

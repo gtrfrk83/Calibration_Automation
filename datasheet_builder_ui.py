@@ -224,6 +224,9 @@ class HeaderPage(Page):
         self.outward = tk.BooleanVar(value=False)
         ttk.Checkbutton(self, text='Round the limits outward to the display resolution (never tighter than the exact limit)', variable=self.outward,
                         command=self.set_rounding).pack(anchor='w', pady=(12, 0))
+        self.manual = tk.BooleanVar(value=False)
+        ttk.Checkbutton(self, text='Manual calibration: no automation, the technician types every reading into the test point grid (listed under Manual Calibrations)',
+                        variable=self.manual, command=self.set_manual).pack(anchor='w', pady=(6, 0))
 
     def commit(self):
         ds = self.model.ds
@@ -241,6 +244,7 @@ class HeaderPage(Page):
         fill(self.periods, [dict(r, default_text='yes' if r['default'] else '') for r in self.model.period_rows()], 'id', ('id', 'label', 'default_text'))
         self.preset_box.configure(values=[f"{p['id']}  ({p['label']})" for p in self.model.period_presets() if not p['used']])
         self.outward.set(ds.options.get('limit_rounding') == 'outward')
+        self.manual.set(bool(ds.options.get('manual_entry')))
 
     def add_preset(self):
         self.commit()
@@ -276,6 +280,9 @@ class HeaderPage(Page):
     def set_rounding(self):
         self.commit()
         self.say(self.model.set_limit_rounding(self.outward.get()))
+
+    def set_manual(self):
+        self.say(self.model.set_manual_entry(self.manual.get()))
 
 
 class FunctionsPage(Page):

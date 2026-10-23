@@ -729,6 +729,13 @@ class EditorModel:
             self.ds.options['limit_rounding'] = 'outward' if outward else 'exact'
         return self._do('limit rounding', act, 'Limits are rounded outward to the display resolution.' if outward else 'Limits are exact.')
 
+    def set_manual_entry(self, on):
+        """Flag the datasheet as a MANUAL calibration (every reading is typed into the run window's test point grid; the Manager lists it under Manual Calibrations)."""
+        def act():
+            self.ds.options['manual_entry'] = bool(on)
+        return self._do('manual calibration', act, 'This is a manual calibration: readings are typed into the grid (Manual Calibrations tab).' if on
+                        else 'Automation is used where a standard can do the point (Automated Calibrations tab).')
+
     # ------------------------------------------------------------------------------------------------------------------ 2. functions
     def kind_choices(self):
         """[dict(kind, name, unit, symbol, group, group_label, direction, ac)] grouped for the picker."""

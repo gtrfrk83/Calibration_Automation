@@ -1,4 +1,4 @@
-"""The Procedures tab's two views (Performance Verification / Adjustment): how a procedure is classified, the optional sidecar field `kind`, and that the
+"""The Procedures tab's three views (Automated Calibrations / Manual Calibrations / Adjustment): how a procedure is classified, the optional sidecar field `kind`, and that the
 field passes through the package build / inspect / install unchanged.  No tkinter needed (the windows are checked by `checks_manager_tabs` in
 tests/real_tk_checks.py, run by tests/test_beta_real_tk_windows.py).   Run:  python -m unittest tests.test_manager_tabs"""
 import json
@@ -41,6 +41,14 @@ class Classify(unittest.TestCase):
         self.assertEqual(procscan.classify('Some Procedure', 'Oscilloscope', 'adjustment'), 'adjustment')
         self.assertEqual(procscan.classify('Some Adjustment', 'x', 'Adjustment'), 'adjustment')          # case does not matter
         self.assertEqual(procscan.classify('Some Adjustment', 'x', 'nonsense'), 'adjustment')            # not a valid kind: the default applies
+        self.assertEqual(procscan.classify('Some Procedure', 'Digital Multimeter', 'manual'), 'manual')   # the new Manual Calibrations kind
+        self.assertEqual(procscan.classify('Some Adjustment', 'x', 'manual'), 'manual')                   # explicit kind wins over the wording
+
+    def test_manual_is_never_a_default(self):
+        """Only an explicit sidecar kind (or a saved datasheet's kind) puts a procedure in Manual Calibrations; no wording does, so nothing moves tabs by itself."""
+        for name, cat in (('Manual Calibration', 'Manual'), ('Hand-entered', 'manual calibrations')):
+            self.assertEqual(procscan.classify(name, cat), 'verification')
+        self.assertEqual(procscan.KINDS, ('verification', 'adjustment', 'manual'))
 
     def test_installed_procedures(self):
         by = {p.id: p.effective_kind for p in procscan.procs(ROOT)}
@@ -60,6 +68,7 @@ class SidecarKind(unittest.TestCase):
         self.assertEqual(procscan.parse_sidecar(sidecar(), K2).kind, '')
         self.assertEqual(procscan.parse_sidecar(sidecar(kind='adjustment'), K2).effective_kind, 'adjustment')
         self.assertEqual(procscan.parse_sidecar(sidecar(kind='verification', name='K2 Adjustment'), K2).effective_kind, 'verification')
+        self.assertEqual(procscan.parse_sidecar(sidecar(kind='manual'), K2).effective_kind, 'manual')
         self.assertEqual(procscan.parse_sidecar(sidecar(kind=None), K2).kind, '')
 
     def test_bad_value_is_refused_like_any_other_bad_field(self):
@@ -85,12 +94,43 @@ class SidecarKind(unittest.TestCase):
         self.assertEqual([list(p.registration) for p in procs], LEGACY['records'])
         self.assertEqual(len(procscan.Proc('a', 'b', kind='adjustment').registration), 5)
 
-    def test_manager_source_has_the_two_tabs_and_the_note(self):
+    def test_manager_source_has_the_three_tabs_and_the_notes(self):
         src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertIn("'  Performance Verification  '", src)
+        self.assertIn("'  Automated Calibrations  '", src)
+        self.assertIn("'  Manual Calibrations  '", src)
         self.assertIn("'  Adjustment  '", src)
+        self.assertNotIn('Performance Verification', src)
         self.assertIn("changes the instrument's calibration", src)
-        self.assertIn('separate from performance verification', src)
+        self.assertIn('type each reading into the test point grid', src)
+
+    def test_user_datasheet_rows_carry_their_kind(self):
+        import dsb_manager
+        import datasheet_builder as db
+        import dsb_fixtures as fx
+        with tempfile.TemporaryDirectory() as d:
+            root, reg = Path(d) / 'us', Path(d) / 'reg.sqlite3'
+            auto = fx.dmm_34461a_like()
+            self.assertTrue(db.save(auto, root=root, db=reg).ok)
+            hand = fx.dmm_34461a_like()
+            hand.title = 'Hand entered'
+            hand.options['manual_entry'] = True
+            self.assertTrue(db.save(hand, root=root, db=reg).ok)
+            kinds = {r['name']: r['kind'] for r in dsb_manager.user_rows(root=root, db=reg)}
+            self.assertEqual(sorted(kinds.values()), ['manual', 'verification'])
+            self.assertEqual(kinds[[n for n in kinds if 'Hand' in n][0]], 'manual')
+
+    def test_registry_without_the_kind_column_is_migrated(self):
+        import sqlite3
+        import datasheet_builder as db
+        import dsb_fixtures as fx
+        with tempfile.TemporaryDirectory() as d:
+            root, reg = Path(d) / 'us', Path(d) / 'old.sqlite3'
+            con = sqlite3.connect(reg)
+            con.executescript(db.REG_SCHEMA.replace(",\n    kind TEXT NOT NULL DEFAULT ''", ''))
+            con.commit(); con.close()
+            self.assertNotIn('kind', {r[1] for r in sqlite3.connect(reg).execute('PRAGMA table_info(user_datasheets)')})
+            self.assertTrue(db.save(fx.dmm_34461a_like(), root=root, db=reg).ok)
+            self.assertEqual([r['kind'] for r in db.list_datasheets(root=root, db=reg)], ['verification'])
 
 
 class PackagesKeepKind(unittest.TestCase):

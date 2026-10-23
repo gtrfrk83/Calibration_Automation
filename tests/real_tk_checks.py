@@ -300,7 +300,7 @@ def checks_manager_windows():
     root.destroy()
 
 def checks_manager_tabs():
-    """The Procedures tab's two views: Performance Verification and Adjustment (shared table, search / category filters, verified column, Run buttons)."""
+    """The Procedures tab's three views: Automated Calibrations, Manual Calibrations and Adjustment (shared table, search / category filters, verified column, Run buttons)."""
     import Calibration_Procedure_Manager as CPM
     CPM.init_db()
     root = tk.Tk()
@@ -311,9 +311,9 @@ def checks_manager_tabs():
     pump(root, 20)
     t = m.table
     names = lambda: [t.item(k, 'values')[0] for k in t.get_children()]  # noqa: E731
-    check('tabs: two views', [m.view_nb.tab(x, 'text').strip() for x in m.view_nb.tabs()] == ['Performance Verification', 'Adjustment'])
-    check('verification view first, no adjustment procedure in it', m.view_kind == 'verification' and names() and not any('Adjustment' in n for n in names()))
-    check('tabs: note hidden on verification', not m.adjust_note.winfo_ismapped())
+    check('tabs: three views', [m.view_nb.tab(x, 'text').strip() for x in m.view_nb.tabs()] == ['Automated Calibrations', 'Manual Calibrations', 'Adjustment'])
+    check('automated view first, no adjustment procedure in it', m.view_kind == 'verification' and names() and not any('Adjustment' in n for n in names()))
+    check('tabs: notes hidden on automated', not m.adjust_note.winfo_ismapped() and not m.view_notes['manual'].winfo_ismapped())
     n_ver = len(names())
     check('tabs: verified column kept', 'verified' in t['columns'] and all(str(t.item(k, 'values')[5]) for k in t.get_children()))
     shot = os.environ.get('SHOT_DIR')
@@ -325,32 +325,199 @@ def checks_manager_tabs():
         root.update()
         ImageGrab.grab(bbox=(root.winfo_rootx(), root.winfo_rooty(), root.winfo_rootx() + root.winfo_width(), root.winfo_rooty() + root.winfo_height()),
                        xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'manager_{tag}_{THEME}.png'))
-    grab('verification')
+    grab('automated')
+    m.view_nb.select(m.view_pages['manual'])
+    pump(root, 20)
+    check('manual view: empty until something is imported, note shown', m.view_kind == 'manual' and names() == [] and m.view_notes['manual'].winfo_ismapped()
+          and 'type each reading into the test point grid' in str(m.view_notes['manual'].label.cget('text')), names())
+    check('manual view: Run is disabled with nothing selected', str(m.btn_run.cget('state')) == 'disabled' and str(m.btn_demo.cget('state')) == 'disabled')
+    check('manual view: the import button is on the Procedures tab', any(isinstance(w, ttk.Button) and 'Import Mudcats datasheet' in str(w.cget('text')) for w in walk(m.library_frame)))
+    grab('manual_empty')
     m.view_nb.select(m.view_pages['adjustment'])
     pump(root, 20)
     check('adjustment view: only adjustment procedures', m.view_kind == 'adjustment' and sorted(names()) == sorted(['Fluke 8846A Guided Adjustment', 'Keithley 2000 Guided Adjustment']), names())
-    check('adjustment view: note shown', m.adjust_note.winfo_ismapped())
+    check('adjustment view: note shown, manual note hidden', m.adjust_note.winfo_ismapped() and not m.view_notes['manual'].winfo_ismapped())
     check('adjustment view: first row selected, Run enabled', t.selection() and str(m.btn_run.cget('state')) != 'disabled')
     check('adjustment view: category list is the view\'s', list(m.category_box['values']) == [CPM.ALL_CATEGORIES, 'Digital Multimeter Adjustment'], m.category_box['values'])
     check('adjustment view: verified status shown', str(t.item(t.get_children()[0], 'values')[5]).startswith(('Not verified', 'Verified', 'Changed', 'Unlocked')), t.item(t.get_children()[0], 'values'))
     grab('adjustment')
-    m.search.set('klein')               # a verification-only procedure (Keithley 2000 now has an adjustment procedure too)
+    m.search.set('klein')               # an automated-only procedure (Keithley 2000 now has an adjustment procedure too)
     pump(root, 10)
-    check('adjustment view: search with no hit', names() == [] and '1 match in the Performance Verification tab' in m.table._empty.cget('text'), m.table._empty.cget('text'))
+    check('adjustment view: search with no hit', names() == [] and '1 in the Automated Calibrations tab' in m.table._empty.cget('text'), m.table._empty.cget('text'))
     m.search.set('8846')
     pump(root, 10)
     check('adjustment view: search hit', names() == ['Fluke 8846A Guided Adjustment'], names())
     m.view_nb.select(m.view_pages['verification'])
     pump(root, 10)
-    check('verification view: search keeps working', len(names()) == 1 and 'Performance Verification' in names()[0], names())
+    check('automated view: search keeps working', len(names()) == 1 and 'Performance Verification' in names()[0], names())
     m.search.set('')
     m.category.set('Oscilloscope')
     m.refresh()
-    check('verification view: category filter', names() and all(t.item(k, 'values')[3] == 'Oscilloscope' for k in t.get_children()))
+    check('automated view: category filter', names() and all(t.item(k, 'values')[3] == 'Oscilloscope' for k in t.get_children()))
     m.category.set(CPM.ALL_CATEGORIES)
     m.refresh()
-    check('verification view: back to the full list', len(names()) == n_ver and not m.adjust_note.winfo_ismapped())
+    check('automated view: back to the full list', len(names()) == n_ver and not m.adjust_note.winfo_ismapped())
     check('no Tk callback errors', not errs, errs)
+    root.destroy()
+
+
+def checks_mdd_manual():
+    """A (synthetic) Mudcats .MDD imported from the Manager as a manual calibration: the import preview, the new procedure in the Manual Calibrations tab (and only
+    there), then its run window with the readings typed straight into the test point grid (Enter = save and next point), As Left, rejected input, and the PDF."""
+    import json
+    import subprocess
+    import time
+    sys.path.insert(0, str(ROOT / 'tests'))
+    import mdd_synth
+    import Calibration_Procedure_Manager as CPM
+    import datamode
+    import dsb_runtime as rt
+    import mdd_convert as mc
+    import mdd_importer_v49 as imp
+    CPM.init_db()
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    shots = os.environ.get('SHOT_DIR')
+    boxes = []
+    patches = [mock.patch.object(messagebox, n, side_effect=lambda *a, _n=n, **k: boxes.append((_n, a)) or True)
+               for n in ('showinfo', 'showwarning', 'showerror', 'askyesno', 'askokcancel')]
+    for pt in patches:
+        pt.start()
+
+    def grab(win, tag):
+        if not shots:
+            return
+        from PIL import ImageGrab
+        win.update()
+        ImageGrab.grab(bbox=(win.winfo_rootx(), win.winfo_rooty(), win.winfo_rootx() + win.winfo_width(), win.winfo_rooty() + win.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shots, f'{tag}_{THEME}.png'))
+    m = CPM.Manager(root)
+    root.geometry('1260x800+0+0')
+    pump(root, 20)
+    path = mdd_synth.write_mdd(Path(tempfile.mkdtemp()) / 'Synthetic Fluke 87V (365 Days).MDD')
+    win = m.import_mdd_procedure(str(path))
+    pump(root, 30)
+    check('import preview: window opened', win is not None and win.winfo_exists())
+    grid = next(w for w in walk(win) if isinstance(w, ttk.Treeview))
+    rows = [grid.item(k, 'values') for k in grid.get_children()]
+    check('import preview: one row per MDD point', len(rows) == 17, len(rows))
+    stat = {int(r[0]): r[6] for r in rows}
+    check('import preview: unconvertible points are named', [n for n, v in stat.items() if v == 'NOT converted'] == [15, 16, 17], stat)
+    check('import preview: uncertain points are flagged', [n for n, v in stat.items() if v == 'CHECK'] == [6, 9], stat)
+    texts = ' '.join(str(w.cget('text')) for w in walk(win) if isinstance(w, ttk.Label))
+    check('import preview: counts shown', '14 of 17 points converted' in texts and '3 NOT converted' in texts and '2 to check' in texts, texts[:400])
+    check('import preview: nothing created before approval', not any(r['kind'] == 'manual' for r in __import__('dsb_manager').user_rows()))
+    win.geometry('1180x760+20+20')
+    grab(win, 'mdd_import_preview')
+    create = next(w for w in walk(win) if isinstance(w, ttk.Button) and w.cget('text') == 'Create manual procedure')
+    create.invoke()
+    pump(root, 40)
+    check('import: preview closed, message shown', not win.winfo_exists() and any(b[0] == 'showinfo' and '14 of 17' in b[1][1] for b in boxes), boxes[-1:])
+    check('import: lands in Manual Calibrations, selected', m.view_kind == 'manual' and len(m.table.get_children()) == 1 and m.table.selection()
+          and m.view_notes['manual'].winfo_ismapped())
+    row = m.table.item(m.table.selection()[0], 'values')
+    check('manual view: same columns, status and verified text', 'Ready' in row[4] and str(row[5]).startswith('Not verified'), row)
+    check('manual view: Run and Demo enabled', str(m.btn_run.cget('state')) != 'disabled' and str(m.btn_demo.cget('state')) != 'disabled')
+    grab(root, 'manager_manual')
+    m.view_nb.select(m.view_pages['verification'])
+    pump(root, 20)
+    check('automated view: the imported sheet is not listed', not any('Handheld' in m.table.item(k, 'values')[0] and 'Multimeter, Digital' in m.table.item(k, 'values')[0] for k in m.table.get_children()))
+    m.search.set('Handheld')
+    pump(root, 10)
+    check('automated view: search points to the Manual tab', m.table.get_children() == () and '1 in the Manual Calibrations tab' in m.table._empty.cget('text'), m.table._empty.cget('text'))
+    m.search.set('')
+    # --- the same file again: the person is asked, nothing is overwritten
+    win2 = m.import_mdd_procedure(str(path))
+    pump(root, 30)
+    labels = ' '.join(str(w.cget('text')) for w in walk(win2) if isinstance(w, (ttk.Label, ttk.Radiobutton)))
+    check('import again: existing procedure is reported with a choice', 'imported before' in labels and 'NEW VERSION' in labels and 'separate new procedure' in labels, labels[:600])
+    next(w for w in walk(win2) if isinstance(w, ttk.Button) and w.cget('text') == 'Cancel').invoke()
+    pump(root, 10)
+    check('import again: cancel creates nothing', len(__import__('datasheet_builder').list_datasheets()) == 1)
+    root.destroy()
+    # --- the run window
+    root = tk.Tk()
+    root.report_callback_exception = lambda *a: errs.append(a)
+    ent = __import__('datasheet_builder').procedure_entries()[0]
+    spec = json.loads(Path(ent['spec_path']).read_text(encoding='utf-8'))
+    app = rt.DsbApp(root, spec, demo=False)
+    root.geometry('1280x860+0+0')
+    pump(root, 30)
+    app.asset.set('A-4412')
+    app.serial.set('S-1')
+    ge = app.grid_entry
+    tree = app.tree
+    check('run window: manual mode with the grid entry, no instrument connection asked', app.manual_entry and ge is not None and not app.wants_connection())
+    check('run window: As Found / As Left columns, one row per point', tree.heading('found')['text'].endswith('As Found') and tree.heading('left')['text'].endswith('As Left') and len(tree.get_children()) == 14,
+          (tree.heading('found')['text'], len(tree.get_children())))
+    first = tree.get_children()[1]                                  # 1.000 V, limits 0.9990 .. 1.0010 (4 decimals)
+    tree.selection_set(first)
+    tree.focus_force()
+    pump(root, 5)
+    tree.event_generate('<Return>')
+    pump(root, 10)
+    check('grid: Enter on the selected point opens the reading box', ge.is_open() and ge.iid == first)
+    ge.entry.insert(0, '1')
+    ge.entry.event_generate('<Return>')
+    pump(root, 10)
+    rec = app.results[first]
+    check('grid: typed 1 is padded to the point resolution and judged', (rec['entered'], rec['result'], rec['source']) == ('1.0000', 'PASS', 'typed'), rec)
+    nxt = tree.get_children()[2]
+    check('grid: Enter saved and opened the NEXT point', ge.is_open() and ge.iid == nxt)
+    check('grid: the status line says what is accepted', 'accept 9.990 to 10.010 V' in app.status.get(), app.status.get())
+    ge.entry.insert(0, 'nan')
+    ge.entry.event_generate('<Return>')
+    pump(root, 5)
+    check('grid: NaN is refused, the box stays', ge.is_open() and ge.iid == nxt and nxt not in app.results and 'number' in app.status.get().lower(), app.status.get())
+    ge.var.set('10.05')
+    ge.entry.event_generate('<Return>')
+    pump(root, 5)
+    check('grid: an out-of-limit reading is stored as FAIL', app.results[nxt]['result'] == 'FAIL', app.results[nxt])
+    grab(root, 'mdd_manual_grid')
+    ge.entry.event_generate('<Escape>')
+    pump(root, 5)
+    check('grid: Esc closes the box', not ge.is_open())
+    tree.selection_set(tree.get_children()[3])
+    tree.focus_force()
+    pump(root, 5)
+    tree.event_generate('<Key>', keysym='5')                         # typing on a selected row starts the box with that character
+    pump(root, 5)
+    check('grid: typing on a selected point opens the box', ge.is_open() and ge.var.get() in ('5', ''), ge.var.get())
+    ge.entry.event_generate('<Escape>')
+    # fill the rest by typing, then As Left
+    for iid in tree.get_children():
+        p = app.by_id[iid]
+        if iid in app.results:
+            continue
+        app.type_reading(p, 'y') if p['test'] != 'numeric' else app.type_reading(p, f'{(float(p["low"]) + float(p["high"])) / 2:.6f}')
+    pump(root, 10)
+    check('all points have an As Found result', len(app.found) == 14, len(app.found))
+    app.set_data_mode(datamode.LEFT)
+    pump(root, 10)
+    tree.selection_set(first)
+    check('As Left: the box opens on the point', ge.open(first), app.status.get())
+    ge.var.set('1.0001')
+    ge.entry.focus_force()
+    pump(root, 5)
+    ge.entry.event_generate('<Return>')
+    pump(root, 5)
+    check('As Left: stored', first in app.left, app.status.get())
+    check('As Left: the box sits on the As Left column and keeps As Found apart', app.left[first]['result'] == 'PASS' and app.found[first]['entered'] == '1.0000'
+          and app.left[first]['data'] == 'As Left', (app.left.get(first), app.found.get(first)))
+    grab(root, 'mdd_manual_as_left')
+    ge.close()
+    out = str(Path(tempfile.mkdtemp()) / 'A-4412-2026-10-23.pdf')
+    import report_dialog
+    d = {'technician': 'T', 'temperature': '23', 'humidity': '45', 'standards': [{'description': 'bench standard', 'serial': '1', 'due': ''}], 'procedure': '', 'show_tar_tur': True}
+    with mock.patch.object(report_dialog, 'ask_details', lambda parent, proc='': d), mock.patch.object(rt.hh.filedialog, 'asksaveasfilename', lambda **k: out):
+        app.export_pdf()
+    pump(root, 10)
+    txt = subprocess.run(['pdftotext', '-layout', out, '-'], capture_output=True, text=True).stdout
+    check('PDF: Calibration Data with the typed readings, not marked demo', 'Calibration Data' in txt and '1.0001' in txt and 'OUT OF TOLERANCE' in txt and 'DEMO' not in txt.upper(), txt[:1500])
+    check('no Tk callback errors', not errs, errs)
+    for pt in patches:
+        pt.stop()
     root.destroy()
 
 
@@ -1309,6 +1476,7 @@ if __name__ == '__main__':
         checks_edit_point_button()
         checks_manager_windows()
         checks_manager_tabs()
+        checks_mdd_manual()
         checks_standards_specs()
         checks_standards_specs_small()
         checks_import_package()

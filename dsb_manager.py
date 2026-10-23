@@ -26,7 +26,8 @@ def is_user_iid(iid) -> bool:
 
 
 def user_rows(root=None, db=None) -> list:
-    """[{iid, name, manufacturer, model, category, tag, script, spec_path, version, status, uid, description}] for the Procedures list."""
+    """[{iid, name, manufacturer, model, category, tag, script, spec_path, version, status, uid, kind, description}] for the Procedures list.
+    kind 'manual' = no instrument automation (Manual Calibrations tab), 'verification' = Automated Calibrations."""
     try:
         import datasheet_builder
         entries = datasheet_builder.procedure_entries(root=root, db=db)
@@ -36,8 +37,9 @@ def user_rows(root=None, db=None) -> list:
     for e in entries:
         out.append(dict(iid=IID_PREFIX + e['uid'], name=e['name'], manufacturer=e.get('manufacturer', ''), model=e.get('model', ''),
                         category=e.get('category') or 'User-built', tag=e.get('tag') or TAG, script=LAUNCHER, spec_path=e['spec_path'],
-                        version=e.get('version'), status=e.get('status', ''), uid=e['uid'],
-                        description=f'User-built datasheet (Datasheet Builder), saved version {e.get("version")}'
+                        version=e.get('version'), status=e.get('status', ''), uid=e['uid'], kind=e.get('kind') or 'verification',
+                        description=('Manual calibration (no instrument automation: readings are typed into the grid), ' if (e.get('kind') == 'manual') else 'User-built datasheet (Datasheet Builder), ')
+                        + f'saved version {e.get("version")}'
                                     + ('' if e.get('status') in (None, '', 'ready') else f' - {e.get("status")}')))
     return out
 
