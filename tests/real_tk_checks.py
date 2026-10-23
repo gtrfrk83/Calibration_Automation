@@ -403,17 +403,17 @@ def checks_mdd_manual():
     rows = [grid.item(k, 'values') for k in grid.get_children()]
     check('import preview: one row per MDD point', len(rows) == 17, len(rows))
     stat = {int(r[0]): r[6] for r in rows}
-    check('import preview: unconvertible points are named', [n for n, v in stat.items() if v == 'NOT converted'] == [15, 16, 17], stat)
-    check('import preview: uncertain points are flagged', [n for n, v in stat.items() if v == 'CHECK'] == [6, 9], stat)
+    check('import preview: unconvertible points are named', [n for n, v in stat.items() if v == 'NOT converted'] == [16, 17], stat)
+    check('import preview: uncertain points are flagged', [n for n, v in stat.items() if v == 'CHECK'] == [6, 9, 15], stat)
     texts = ' '.join(str(w.cget('text')) for w in walk(win) if isinstance(w, ttk.Label))
-    check('import preview: counts shown', '14 of 17 points converted' in texts and '3 NOT converted' in texts and '2 to check' in texts, texts[:400])
+    check('import preview: counts shown', '15 of 17 points converted' in texts and '2 NOT converted' in texts and '3 to check' in texts, texts[:400])
     check('import preview: nothing created before approval', not any(r['kind'] == 'manual' for r in __import__('dsb_manager').user_rows()))
     win.geometry('1180x760+20+20')
     grab(win, 'mdd_import_preview')
     create = next(w for w in walk(win) if isinstance(w, ttk.Button) and w.cget('text') == 'Create manual procedure')
     create.invoke()
     pump(root, 40)
-    check('import: preview closed, message shown', not win.winfo_exists() and any(b[0] == 'showinfo' and '14 of 17' in b[1][1] for b in boxes), boxes[-1:])
+    check('import: preview closed, message shown', not win.winfo_exists() and any(b[0] == 'showinfo' and '15 of 17' in b[1][1] for b in boxes), boxes[-1:])
     check('import: lands in Manual Calibrations, selected', m.view_kind == 'manual' and len(m.table.get_children()) == 1 and m.table.selection()
           and m.view_notes['manual'].winfo_ismapped())
     row = m.table.item(m.table.selection()[0], 'values')
@@ -449,7 +449,7 @@ def checks_mdd_manual():
     ge = app.grid_entry
     tree = app.tree
     check('run window: manual mode with the grid entry, no instrument connection asked', app.manual_entry and ge is not None and not app.wants_connection())
-    check('run window: As Found / As Left columns, one row per point', tree.heading('found')['text'].endswith('As Found') and tree.heading('left')['text'].endswith('As Left') and len(tree.get_children()) == 14,
+    check('run window: As Found / As Left columns, one row per point', tree.heading('found')['text'].endswith('As Found') and tree.heading('left')['text'].endswith('As Left') and len(tree.get_children()) == 15,
           (tree.heading('found')['text'], len(tree.get_children())))
     first = tree.get_children()[1]                                  # 1.000 V, limits 0.9990 .. 1.0010 (4 decimals)
     tree.selection_set(first)
@@ -492,7 +492,7 @@ def checks_mdd_manual():
             continue
         app.type_reading(p, 'y') if p['test'] != 'numeric' else app.type_reading(p, f'{(float(p["low"]) + float(p["high"])) / 2:.6f}')
     pump(root, 10)
-    check('all points have an As Found result', len(app.found) == 14, len(app.found))
+    check('all points have an As Found result', len(app.found) == 15, len(app.found))
     app.set_data_mode(datamode.LEFT)
     pump(root, 10)
     tree.selection_set(first)

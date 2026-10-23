@@ -1,0 +1,37 @@
+</Data Sheet Header>
+App_Name	Manufacturer	Model	Description	Procedure_Name	CalInterval	App_Version
+text	text	text	text	text	text	text
+Cal Processor	Fluke 	87 Series V 	Multimeter, Digital - Handheld	EXCERPT	365	2.5.2.180
+<Data Sheet Header/>
+</Test Points>
+TP_ID	IsHeaderRow	DS_PageNo	Text_Function	Text_Nominal	Text_AsFound	Text_AsLeft	Text_OutOfTol	Text_Tolerance	Text_SpecStatement	Tol_Low	Tol_High
+text	text	text	text	text	text	text	text	text	text	text	text
+1	0	1	AC Volts Accuracy: 600mV Range	330.0 mV~@ 60 Hz	330.0	Same		327.3 to 332.7 mV~[EMU           ]	4:1 Req.: [ �0.20530303% ]    Spec: [ � (0.7% I.V. + 0.4 mV) ]	327.3	332.7
+2	0	1	|	600.0 mV~@ 13 kHz	606.2	Same		586.0 to 614.0 mV~[EMU           ]	4:1 Req.: [ �0.58333333% ]    Spec: [ � (2% I.V. + 2 mV) ]	586	614
+3	0	1	6V Range	3.300 V~@ 60 Hz				3.275 to 3.325 V~[EMU           ]	4:1 Req.: [ �0.19015152% ]    Spec: [ � (0.7% I.V. + 0.002 V) ]	3.275	3.325
+4	0	1	|	3.300 V~@ 20 kHz	3.290	Same		3.214 to 3.386 V~[EMU           ]	4:1 Req.: [ �0.65151515% ]    Spec: [ � (2% I.V. + 0.02 V) ]	3.214	3.386
+11	0	1	AC Volts Frequency~600mV Range	99.95 kHz~@ 150 mV	99.95	Same		99.94 to 99.96 kHz~[EMU           ]	4:1 Req.: [ �0.00375125% ]    Spec: [ � (0.005% I.V. + 0.01 kHz) ]	99.94	99.96
+13	0	1	AC Voltage: Freq: Sensitivity~6V Range	99.95 kHz~@ 0.7 V	99.95	Same		99.94 to 99.96 kHz~[EMU           ]	4:1 Req.: [ �0.00375125% ]    Spec: [ � (0.005% I.V. + 0.01 kHz) ]	99.94	99.96
+15	0	1	DC Voltage: Freq: Trigger Lvl	1000.0 Hz~@ 3.4 Vpp	1000.0	Same		999.8 to 1000.2 Hz~[EMU           ]	4:1 Req.: [ �0.00500000% ]    Spec: [ � 0.2 Hz ]	999.8	1000.2
+16	0	1	DC Voltage: Freq: Duty Cycle~6V Range	50.0 %	49.9	Same		49.7 to 50.3 %~[EMU           ]	4:1 Req.: [ �0.15000000% ]    Spec: [ � 0.3 % ]	49.7	50.3
+18	0	2	DC Voltage Accuracy: 6V Range	3.300 V	3.300	Same		3.298 to 3.302 V~[EMU           ]	4:1 Req.: [ �0.02007576% ]    Spec: [ � (0.05% I.V. + 0.001 V) ]	3.298	3.302
+19	0	2	60V Range	33.00 V	33.00	Same		32.98 to 33.02 V~[EMU           ]	4:1 Req.: [ �0.02007576% ]    Spec: [ � (0.05% I.V. + 0.01 V) ]	32.98	33.02
+22	0	2	600mV Range	33.0 mV	33.0	Same		32.9 to 33.1 mV~[EMU           ]	4:1 Req.: [ �0.10075758% ]    Spec: [ � (0.1% I.V. + 0.1 mV) ]	32.9	33.1
+24	0	2	Resistance: 600 Ohm Range	330.0 Ohm	330.0	Same		329.2 to 330.8 Ohm~[EMU           ]	4:1 Req.: [ �0.06515152% ]    Spec: [ � (0.2% I.V. + 0.2 Ohm) ]	329.2	330.8
+25	0	2	6 kOhm Range	3.300 kOhm	3.300	Same		3.293 to 3.307 kOhm~[EMU           ]	4:1 Req.: [ �0.05757576% ]    Spec: [ � (0.2% I.V. + 0.001 kOhm) ]	3.293	3.307
+30	0	2	Conductance: 60nS Range	0.00 nS	-0.04	Same		-0.30 to 0.30 nS	4:1 Req.: [ �0.00000000% ]    Spec: [ � 0.3 nS ]	-0.3	0.3
+31	0	2	|	10.00 nS	9.96	Same		9.60 to 10.40 nS	4:1 Req.: [ �1.00000000% ]    Spec: [ � 0.4 nS ]	9.6	10.4
+32	0	2	Diode Test	3.000 V	2.999	Same		2.939 to 3.061 V~[EMU           ]	4:1 Req.: [ �0.50833333% ]    Spec: [ � (2% I.V. + 0.001 V) ]	2.939	3.061
+33	0	2	AC Current: 6A Range	3.000 A~@ 60 Hz	2.999	Same		2.968 to 3.032 A~[EMU           ]	4:1 Req.: [ �0.26666667% ]    Spec: [ � (1% I.V. + 0.002 A) ]	2.968	3.032
+36	0	3	10A Range	10.00 A	10.00	Same		9.96 to 10.04 A~[EMU           ]	4:1 Req.: [ �0.10000000% ]    Spec: [ � (0.2% I.V. + 0.02 A) ]	9.96	10.04
+38	0	3	AC Curren: 600mA Range	330.0 mA~@ 60 Hz	330.0	Same		326.5 to 333.5 mA~[EMU           ]	4:1 Req.: [ �0.26515152% ]    Spec: [ � (1% I.V. + 0.2 mA) ]	326.5	333.5
+41	0	3	AC Current: 600�A Range	330.0 �A~@ 60 Hz	330.0	Same		326.5 to 333.5 �A~[EMU           ]	4:1 Req.: [ �0.26515152% ]    Spec: [ � (1% I.V. + 0.2 �A) ]	326.5	333.5
+43	0	3	DC Current: 600�A Range	330.0 �A	330.0	Same		329.0 to 331.0 �A~[EMU           ]	4:1 Req.: [ �0.08030303% ]    Spec: [ � (0.2% I.V. + 0.4 �A) ]	329	331
+45	0	3	Capacitance: 10nF Range: Open	0.21 to 31 nF	PASS	Same		Pass/Fail		0	0
+47	0	3	100�F Range	9.50 �F	9.50	Same		9.21 to 9.79 �F~[EMU           ]	4:1 Req.: [ �0.77631579% ]    Spec: [ � (1% I.V. + 0.2 �F) ]	9.21	9.79
+48	0	3	Low Pass Filter: 400V @ 400Hz	372 to 408 V	PASS	Same		Pass/Fail		0	0
+50	0	3	DC Voltage: Min/Max: Max	6.000 V	6.018	Same		5.896 to 6.104 V~[EMU           ]	4:1 Req.: [ �0.43333333% ]    Spec: [ � 0.104 V ]	5.896	6.104
+52	0	4	Min/Max: Min	-2.000 V	-2.008	Same		-2.102 to -1.898 V~[EMU           ]	4:1 Req.: [ �1.27500000% ]    Spec: [ � 0.102 V ]	-2.102	-1.898
+53	0	4	Temperature: Type K	32.0 �F				30.2 to 33.8 �F~[EMU           ]	4:1 Req.: [ �1.40625000% ]    Spec: [ � 1.8 �F ]	30.2	33.8
+54	0	4	|	212.0 �F				210.2 to 213.8 �F~[EMU           ]	4:1 Req.: [ �0.21226415% ]    Spec: [ � 1.8 �F ]	210.2	213.8
+<Test Points/>

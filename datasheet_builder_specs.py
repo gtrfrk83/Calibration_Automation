@@ -62,6 +62,8 @@ def display_prefix(fn, rng):
         return ''
     if rng.display_unit:
         return rng.display_unit
+    if 'display_prefix' in rng.settings:         # a range of a Cal Processor import: shown in the unit the datasheet prints ('' = the base unit, whatever the size)
+        return rng.settings['display_prefix']
     if fn.display_unit:
         return fn.display_unit
     fs = rng.full_scale
