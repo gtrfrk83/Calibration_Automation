@@ -49,6 +49,7 @@ def _scope(scope):
 # and period points are sourced as ACV but read in Hz) is blank, never divided by an uncertainty in a different unit.
 NATURAL_UNITS = {'DCV': {'V'}, 'ACV': {'V'}, 'DCI': {'A'}, 'ACI': {'A'}, 'FREQ': {'Hz'}, 'CAP': {'F'},
                  'TEMP': {'C', 'degC', '\u00b0C'},        # a degF tolerance (or any other unit) on a thermocouple point is never divided by a degC uncertainty
+                 'LUX': {'lux'}, 'FC': {'FC'}, 'LAMBERT': {'La'}, 'UVIRR': {'uW/cm2'},   # light (A2LA-LIGHT sheet): each in its own unit, never converted
                  'DUTY': set(), 'SQUARE': set(),          # square-wave sources: no ratio (the reading is not in the unit of the calibrator's uncertainty)
                  'OHM': {'ohm', 'Ohm', '\u03a9'}, 'OHM2': {'ohm', 'Ohm', '\u03a9'}, 'OHM4': {'ohm', 'Ohm', '\u03a9'}}
 
@@ -84,7 +85,8 @@ def _compute(p, low, high, standard, scope):
     cmc = sc.dmm(kind, p['nominal'], p.get('range'), freq)
     # TEMP (thermocouple simulation): the scope file has no temperature CMC, so with a calibrator the ratios come from its own degC specification
     # alone (no CMC floor is invented; a CMC entry, if the lab adds one, is used as everywhere else).  Without a calibrator: blank, as before.
-    if cmc is None and not (kind == 'TEMP' and standard):
+    # Light (LUX / FC / LAMBERT / UVIRR): the scope CMC IS the A2LA-LIGHT sheet (no separate scope entry), so with that standard the ratios come from it alone.
+    if cmc is None and not (kind in ('TEMP', 'LUX', 'FC', 'LAMBERT', 'UVIRR') and standard):
         return _blank('point is not covered by the scope of accreditation', tolerance=tol)
     ounit = 'ohm' if kind.startswith('OHM') else unit
 

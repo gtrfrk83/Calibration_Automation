@@ -151,7 +151,8 @@ FUNCTION_KINDS = [  # (regex on the function name, kind) - first match wins
     (r'^voltage, dc', 'DCV'), (r'^voltage, ac', 'ACV'), (r'^current, dc', 'DCI'), (r'^current, ac', 'ACI'),
     (r'^resistance', 'OHM'), (r'^capacitance', 'CAP'), (r'^inductance', 'IND'), (r'^conductance', 'COND'),
     (r'^frequency', 'FREQ'), (r'^temperature', 'TEMP'), (r'^power, dc', 'POWDC'), (r'^power, ac', 'POWAC'),
-    (r'^phase', 'PHASE'), (r'^rpm', 'RPM'), (r'^rise time', 'RISE'), (r'^aberrations', 'ABER'), (r'^flatness', 'FLAT'), (r'^time', 'TIME'),
+    (r'^phase', 'PHASE'), (r'^light\b.*365 nm', 'UVIRR'), (r'^light\b.*\(fc\)', 'FC'), (r'^light\b.*\(lux\)', 'LUX'),
+    (r'^light\b.*\(la\)', 'LAMBERT'), (r'^rpm', 'RPM'), (r'^rise time', 'RISE'), (r'^aberrations', 'ABER'), (r'^flatness', 'FLAT'), (r'^time', 'TIME'),
 ]
 
 

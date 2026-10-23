@@ -1,0 +1,242 @@
+{
+ "schema": 1,
+ "standard": {
+  "manufacturer": "Applied Technical Services, LLC. (A2LA 1888.03)",
+  "model": "A2LA-LIGHT",
+  "description": "Light measurement (A2LA scope CMC, radiometer standards)",
+  "confidence_text": "approximately the 95 % level, usually k = 2 (A2LA scope, footnote 2)",
+  "confidence_pct": 95.0,
+  "reference": "Calibration Scope of Accreditation, A2LA 1888.03, rev. 07/07/2026, printed p. 45 of 47, section X. Optical Quantities (Light - Measure)",
+  "revision": "07/07/2026",
+  "author": "written by specs/build_light_standard.py from the scope text",
+  "approved_by": "",
+  "approve_date": "",
+  "source_pdf": "1888-03.pdf",
+  "sheet_generated": "",
+  "built": "2026-10-23T10:28:44"
+ },
+ "notes": {
+  "1": "SOURCE: the laboratory's own A2LA scope of accreditation, certificate 1888.03 (revised 07/07/2026), printed p. 45 of 47, section X. Optical Quantities, parameter \"Light - Measure\": White (0 to 3000) FC, (0 to 35 000) lux, (0 to 100 000) La, each CMC 2.9 %; Black @ 365 nm (0 to 3000) uW/cm2, CMC 5.0 %. Comments: \"Radiometer standards.\" Page 45 of 47 is the scope's own page numbering. Built by specs/build_light_standard.py.",
+  "2": "VERIFICATION: the Light row (column header CMC 2, 5, 12 (+/-), four ranges, 2.9 % / 2.9 % / 2.9 % / 5.0 %, units FC, lux, La, micro-W/cm2) was read from the RENDERED PAGE IMAGE of p. 45 of 47 (cert. 1888.03, revised 07/07/2026) on 2026-10-23.",
+  "3": "CONFIDENCE: footnote 2 of the scope: the CMC is the smallest uncertainty the laboratory can achieve, an EXPANDED uncertainty at approximately the 95 % level, usually k = 2. Stored as confidence_pct 95, so the coverage divisor is 2.0 (u of the standard = CMC / 2). Wording kept in confidence_text.",
+  "4": "PERCENTAGE: footnote 5 of the scope: the first percentage is a percentage of the READING unless otherwise noted. Each row is +/-(CMC % I.V.) with no fixed term and no full-scale term, so the uncertainty is CMC x |reading| (2.9 % of 10 000 lux = 290 lux). The figure is not a floor-limited value: nothing is added at the bottom of a range.",
+  "5": "INSTRUMENT TYPE: footnote 12 of the scope: the parameter defines the type of instrument calibrated (light meters / radiometers). The scope comment is \"Radiometer standards\": the laboratory's reference is a radiometer-based standard, so this CMC is the uncertainty of the lab's standard for the light level it applies to the unit under test.",
+  "6": "UNITS (as listed on the scope, each its own unit, nothing converted): FC, lux, La, uW/cm2 (printed with the micro sign and a superscript 2; the stored unit is ASCII \"uW/cm2\"). For information only, never used in a calculation: 1 FC = 10.763910416709722 lux (lux is the SI unit of illuminance); 1 La = 10000/pi cd/m2 (a luminance unit, not an illuminance). The three white-light rows are the same CMC (2.9 %) on three different scales, so a lux value is never looked up in the FC or La rows.",
+  "7": "DIRECTION AND PERIOD: the scope parameter is \"Measure\"; the sheet stores direction \"output\" (the light level the lab's standard establishes at the unit under test), which is what the default lookup (specmanager, tartur.standard_accuracy) asks for. A CMC has no 90 day / 1 yr column: it is stored once, under the period \"1 yr\" (the default period of every standard).",
+  "8": "NOT STORED: stability, non-uniformity, spectral mismatch or distance-dependent terms of the radiometer standard, and the unit under test (resolution, repeatability, drift). The CMC excludes the unit under test; a certificate value may be larger. No other wavelength, no spectral irradiance and no radiometric unit other than uW/cm2 at 365 nm is on the scope."
+ },
+ "limits": [
+  {
+   "function": "Light [White]",
+   "limit": "FC 0 to 3000; lux 0 to 35 000; La 0 to 100 000; CMC 2.9 % of reading on each scale.",
+   "page": "45"
+  },
+  {
+   "function": "Light [Black @ 365 nm]",
+   "limit": "0 to 3000 uW/cm2 at 365 nm; CMC 5.0 % of reading.",
+   "page": "45"
+  }
+ ],
+ "functions": [
+  {
+   "name": "Light [White] (FC)",
+   "direction": "output",
+   "page": 45,
+   "ranges": [
+    {
+     "label": "0 to 3000 FC",
+     "page": 45,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 3000.0,
+       "unit": "FC",
+       "text": "0 FC to 3000 FC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.029,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2.9 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(0 to 3000) FC",
+     "kind": "FC",
+     "variant": "White",
+     "amp_lo": 0.0,
+     "amp_hi": 3000.0,
+     "unit": "FC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Light [White] (lux)",
+   "direction": "output",
+   "page": 45,
+   "ranges": [
+    {
+     "label": "0 to 35000 lux",
+     "page": 45,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 35000.0,
+       "unit": "lux",
+       "text": "0 lux to 35000 lux",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.029,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2.9 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(0 to 35 000) lux",
+     "kind": "LUX",
+     "variant": "White",
+     "amp_lo": 0.0,
+     "amp_hi": 35000.0,
+     "unit": "lux",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Light [White] (La)",
+   "direction": "output",
+   "page": 45,
+   "ranges": [
+    {
+     "label": "0 to 100000 La",
+     "page": 45,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 100000.0,
+       "unit": "La",
+       "text": "0 La to 100000 La",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.029,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2.9 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(0 to 100 000) La",
+     "kind": "LAMBERT",
+     "variant": "White",
+     "amp_lo": 0.0,
+     "amp_hi": 100000.0,
+     "unit": "La",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Light [Black @ 365 nm] (uW/cm2)",
+   "direction": "output",
+   "page": 45,
+   "ranges": [
+    {
+     "label": "0 to 3000 uW/cm2",
+     "page": 45,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 3000.0,
+       "unit": "uW/cm2",
+       "text": "0 uW/cm2 to 3000 uW/cm2",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(5.0 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(0 to 3000) µW/cm²",
+     "kind": "UVIRR",
+     "variant": "Black @ 365 nm",
+     "amp_lo": 0.0,
+     "amp_hi": 3000.0,
+     "unit": "uW/cm2",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  }
+ ],
+ "problems": [
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "This is the laboratory's own CMC (expanded, approximately 95 %, usually k = 2), not a manufacturer specification. No fixed term and no period columns; stored under the period \"1 yr\"."
+  },
+  {
+   "level": "warn",
+   "where": "Light [White] (FC) / (La)",
+   "what": "FC and La are not SI illuminance units; they are kept as the scope lists them and not converted to lux (the CMC is a percentage, so no conversion is needed)."
+  }
+ ]
+}
