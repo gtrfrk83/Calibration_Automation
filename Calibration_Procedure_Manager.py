@@ -57,6 +57,11 @@ def scan_procedures():
 
 
 ALL_CATEGORIES = 'All categories'
+# The Procedures tab has two views (tabs): performance verification and adjustment.  A procedure's view comes from its sidecar `kind`
+# or, left out, from its category / name (procscan.classify); user-built datasheets and unknown scripts are verifications.
+VIEW_TABS = ((procscan.KIND_VERIFICATION, '  Performance Verification  '), (procscan.KIND_ADJUSTMENT, '  Adjustment  '))
+ADJUSTMENT_NOTE = ("Adjustment changes the instrument's calibration. Adjustment procedures are separate from performance verification: "
+                   "to check an instrument without changing it, use the Performance Verification tab.")
 
 
 def find_wavesurfer():
@@ -146,11 +151,13 @@ scan_procedures()
 
 
 class Manager:
+    view_kind = procscan.KIND_VERIFICATION                        # the Procedures view in front (class default; __init__ and the tabs set it)
+    _empty_lib_default = 'No procedures match.\nUse "Register procedure..." to add one.'
     def __init__(self, root):
         self.root = root
         ui.apply_theme(root)
         root.title('Calibration Procedure Manager')
-        ui.fit_window(root, 1260, 740, min_w=1000, min_h=580)
+        ui.fit_window(root, 1260, 800, min_w=1000, min_h=580)
         self.demo = tk.BooleanVar(value=False)
         self.fast_demo = tk.BooleanVar(value=False)       # demo without windows or commands (the old quick demo)
         self.status = tk.StringVar(value='Select a procedure, then press Run Procedure.')
@@ -235,8 +242,19 @@ class Manager:
     # ------------------------------------------------------------------ Procedures tab
     def build_library_tab(self):
         outer = self.library_frame
+        # two views of the same list: the notebook only carries the tab strip (its pages are empty); the table and the card below are shared
+        self.view_nb = ttk.Notebook(outer, height=1)
+        self.view_pages = {}
+        for kind, text in VIEW_TABS:
+            page = ttk.Frame(self.view_nb)
+            self.view_pages[kind] = page
+            self.view_nb.add(page, text=text)
+        self.view_nb.pack(fill='x')
+        ui.TabStrip(self.view_nb)
+        self.view_nb.bind('<<NotebookTabChanged>>', self._view_changed)
+        self.adjust_note = ui.Notice(outer, text=ADJUSTMENT_NOTE, kind='warn')
         bar = ttk.Frame(outer)
-        bar.pack(fill='x', pady=(0, 10))
+        bar.pack(fill='x', pady=(8, 8))
         ttk.Label(bar, text='Find').pack(side='left')
         self.search_entry = ttk.Entry(bar, textvariable=self.search, width=30)
         self.search_entry.pack(side='left', padx=(8, 12))
@@ -255,7 +273,7 @@ class Manager:
         split.rowconfigure(0, weight=1)
         cols = ('name', 'manufacturer', 'model', 'category', 'ready', 'verified')
         self.table = ui.make_table(split, cols, ('Procedure', 'Manufacturer', 'Model', 'Category', 'Status', 'Verified on hardware'),
-                                   (235, 90, 80, 150, 80, 200), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w', 'verified': 'w'},
+                                   (235, 90, 80, 175, 80, 200), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w', 'verified': 'w'},
                                    zebra=True, pack=False, stretch={'manufacturer': False, 'model': False, 'category': False, 'ready': False, 'verified': False})
         self.table.master.grid(row=0, column=0, sticky='nsew')
         self.table.tag_configure('missing', foreground=ui.C['bad'])
@@ -292,6 +310,27 @@ class Manager:
         self.btn_lock.pack(fill='x', pady=(6, 0))
         ttk.Label(card, text='Run procedure uses real instruments. Demo mode connects VIRTUAL instruments: the windows of a real run appear and commands go to simulated instruments, so you can rehearse safely. Nothing from a demo is calibration evidence.',
                   style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 0))
+
+    def _view_changed(self, _event=None):
+        kind = next((k for k, page in self.view_pages.items() if str(page) == self.view_nb.select()), procscan.KIND_VERIFICATION)
+        if kind == self.view_kind:
+            return
+        self.view_kind = kind
+        self.category.set(ALL_CATEGORIES)                       # the category list belongs to the view
+        if kind == procscan.KIND_ADJUSTMENT:
+            self.adjust_note.pack(fill='x', pady=(8, 0), after=self.view_nb)
+        else:
+            self.adjust_note.pack_forget()
+        self.refresh()
+
+    def _kind_of(self, id_, name, category, script):
+        """'verification' | 'adjustment' of a list row: the sidecar's kind (or its category / name default) for a scanned procedure, the same text rule for any other."""
+        if dsb_manager.is_user_iid(id_) or not script:
+            return procscan.KIND_VERIFICATION
+        proc = self._scanned.get(Path(str(script)).name.casefold())
+        if proc is not None:
+            return proc.effective_kind
+        return procscan.classify(name, category)
 
     def refresh_details(self):
         rec = self._selected_row()
@@ -419,15 +458,22 @@ class Manager:
             rows = conn.execute('SELECT id,name,manufacturer,model,category,script_path FROM procedures WHERE enabled=1 ORDER BY manufacturer,model,name').fetchall()
         self._user = {r['iid']: r for r in dsb_manager.user_rows()}          # user-built datasheets: listed after the library rows, never written to the database
         rows = rows + [(r['iid'], r['name'], r['manufacturer'], r['model'], r['category'], r['script']) for r in self._user.values()]
-        cats = sorted({r[4] for r in rows if r[4]})
+        self._scanned = {p.launcher_name.casefold(): p for p in procscan.procs(BASE)}
+        kinds = {r[0]: self._kind_of(r[0], r[1], r[4], r[5]) for r in rows}
+        in_view = [r for r in rows if kinds[r[0]] == self.view_kind]
+        cats = sorted({r[4] for r in in_view if r[4]})
         self.category_box['values'] = [ALL_CATEGORIES] + cats
+        if self.category.get() != ALL_CATEGORIES and self.category.get() not in cats:
+            self.category.set(ALL_CATEGORIES)
         term = self.search.get().strip().lower()
         cat = self.category.get()
         keep = self.table.selection()
         self.table.delete(*self.table.get_children())
         shown = 0
         mods = self._mod_counts(refresh=True)
-        listed = [r for r in rows if not (cat != ALL_CATEGORIES and r[4] != cat) and not (term and term not in ' '.join((r[1], r[2], r[3], r[4])).lower())]
+        match = lambda r: not (cat != ALL_CATEGORIES and r[4] != cat) and not (term and term not in ' '.join((r[1], r[2], r[3], r[4])).lower())  # noqa: E731
+        listed = [r for r in in_view if match(r)]
+        elsewhere = sum(1 for r in rows if kinds[r[0]] != self.view_kind and match(r)) if term else 0
         entries = [self._ver_entry(r) for r in listed]
         self._ver_cache = self._verified().statuses(entries)          # one registry read; fingerprints only for verified procedures
         for (id_, name, mfr, model, category, script), entry in zip(listed, entries):
@@ -440,13 +486,18 @@ class Manager:
                      (f'  {procmods_ui_model.chip_text(n_mod)}' if n_mod else '')
             self.table.insert('', 'end', iid=str(id_), values=(name, mfr, model, category, status, vstat.text if vstat is not None else 'Not verified'), tags=tags)
             shown += 1
+        text = self._empty_lib_default
+        if shown == 0 and elsewhere:
+            other = 'Adjustment' if self.view_kind == procscan.KIND_VERIFICATION else 'Performance Verification'
+            text = f'No procedures match in this tab.\n{elsewhere} match in the {other} tab.'
+        self.table._empty.configure(text=text)                  # the label _toggle_empty shows
         self._toggle_empty(self.table, shown == 0)
         if keep and self.table.exists(keep[0]):
             self.table.selection_set(keep[0])
         elif shown:
             self.table.selection_set(self.table.get_children()[0])
         self.refresh_details()
-        self.status.set(f'{shown} of {len(rows)} procedure(s) shown. Double-click a procedure to run it.')
+        self.status.set(f'{shown} of {len(in_view)} procedure(s) shown. Double-click a procedure to run it.')
 
     def _mod_counts(self, refresh=False):
         """{model: n} of saved model-wide procedure changes (one query per list refresh; never blocks the list if the registry is unreadable)."""
