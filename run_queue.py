@@ -56,6 +56,12 @@ class QueueMeter:
         self.found, self.left = {}, {}                 # the two result sets (datamode): this meter only
         self.last_high_current = None                  # monotonic time of this meter's last high-current point (rest rule)
         self.note = ''
+        self.skip = None                               # optional per-meter filter: skip(p) True = this meter does not run point p (a procedure option set per meter)
+        self.extra = {}                                # per-meter settings of a procedure option, saved in the queue file next to asset / serial / tech
+
+    def wants(self, p):
+        """False when this meter does not take part in point `p` (default: every meter runs every point)."""
+        return not (self.skip is not None and self.skip(p))
 
     def results(self, left=False):
         return self.left if left else self.found
@@ -127,7 +133,7 @@ class RunQueue:
 
     # ---- saved queue (so a resumed run finds the same list) ---------------------------------------------------------
     def to_dict(self, model='', demo=False):
-        return dict(version=1, model=model, demo=bool(demo), mode=self.mode, meters=[dict(asset=m.asset, serial=m.serial, tech=m.tech) for m in self.meters])
+        return dict(version=1, model=model, demo=bool(demo), mode=self.mode, meters=[dict(m.extra, asset=m.asset, serial=m.serial, tech=m.tech) for m in self.meters])
 
     def load_dict(self, data, model='', demo=False):
         """Fill from a saved queue; False (nothing changed) when it belongs to another model / a demo run."""
@@ -136,7 +142,9 @@ class RunQueue:
         meters = []
         for row in data.get('meters') or []:
             if isinstance(row, dict) and str(row.get('asset', '')).strip():
-                meters.append(QueueMeter(row['asset'], row.get('serial', ''), row.get('tech', '')))
+                qm = QueueMeter(row['asset'], row.get('serial', ''), row.get('tech', ''))
+                qm.extra = {k: v for k, v in row.items() if k not in ('asset', 'serial', 'tech')}
+                meters.append(qm)
         if len({clean_key(m.asset) for m in meters}) != len(meters):
             return False
         self.meters = meters[:MAX_METERS]
@@ -216,7 +224,7 @@ def plan(points, queue, options=None, mode=None, use_ir=False, force=False, left
     meters = list(queue.meters)
 
     def needs(p):
-        return meters if force else [m for m in meters if str(p['id']) not in m.results(left)]
+        return [m for m in meters if m.wants(p)] if force else [m for m in meters if m.wants(p) and str(p['id']) not in m.results(left)]
 
     units = []
     if mode == ONE_AT_A_TIME or use_ir or len(meters) < 2:
@@ -251,6 +259,7 @@ def plan(points, queue, options=None, mode=None, use_ir=False, force=False, left
     out = []
     for u in units:
         if u.kind == 'shared':
+            u.meters = [m for m in u.meters if any(m.wants(p) for p in u.points)]       # a meter that takes part in none of the unit's points is not wired for it
             out.append(u)
             continue
         # a single unit: one run per meter (queue order) over the points that meter still needs
@@ -268,16 +277,19 @@ def summary(points, queue, options=None, mode=None, use_ir=False):
     mode = mode or queue.mode
     n = len(queue.meters)
     pts = list(points)
-    alone = len(pts) * max(n, 1)
-    shared = [p for p in pts if share_reason(p, options) is None]
-    single = [p for p in pts if share_reason(p, options) is not None]
+    want = {id(p): sum(1 for m in queue.meters if m.wants(p)) for p in pts}          # meters taking part in each point (all of them unless a per-meter option skips it)
+    alone = sum(want.values())
+    shared = [p for p in pts if share_reason(p, options) is None and want[id(p)] >= min(2, n)]
+    single = [p for p in pts if p not in shared]
     if mode == ONE_AT_A_TIME or use_ir or n < 2:
         settings, shared_n = alone, 0
     else:
         shared_n = len(shared)
-        settings = shared_n + len(single) * n
+        settings = shared_n + sum(want[id(p)] for p in single)
     reasons = {}
     for p in single:
+        if share_reason(p, options) is None:
+            continue
         reasons.setdefault(share_reason(p, options), 0)
         reasons[share_reason(p, options)] += 1
     return dict(points=len(pts), meters=n, settings=settings, alone=alone, saved=alone - settings, shared=shared_n, single=len(single) if mode == POINT_BY_POINT and not use_ir else len(pts),
@@ -286,10 +298,10 @@ def summary(points, queue, options=None, mode=None, use_ir=False):
 
 def progress(queue, points, left=False):
     """Per meter: recorded / failed counts for the progress window.  A 'point' is one test point of the procedure."""
-    total = len(points)
     order = {str(p['id']): p['n'] for p in points}
     rows = []
     for m in queue.meters:
+        total = sum(1 for p in points if m.wants(p))                 # a per-meter option can leave points out for one meter
         res = m.results(left)
         rec = [k for k in res if k in order]
         fails = sorted((order[k] for k in rec if res[k].get('result') == 'FAIL'))
