@@ -188,6 +188,53 @@ def conditions(parts):
     return found, rest
 
 
+_FFFD = '\ufffd'
+
+
+def repair_units(text, context=''):
+    """The MDD received here holds U+FFFD where the file had a micro or degree sign (the byte was lost before the file reached us).  Only the unit positions
+    are repaired, from the context: '�A', '�V', '�s', '�S', '�Hz', '�Ohm' = micro; '�F' = degree F when the function text is about temperature, else microfarad.
+    Returns (text, repaired?).  Anything else keeps its U+FFFD (the unit is then unknown and the point becomes a check)."""
+    if _FFFD not in text:
+        return text, False
+    ctx = context.lower()
+    deg = 'temp' in ctx or 'thermo' in ctx or 'type k' in ctx
+
+    def one(m):
+        return ('\u00b0' if deg else '\u00b5') + m.group(1) if m.group(1) == 'F' else '\u00b5' + m.group(1)
+    new = re.sub(_FFFD + r'(F|Hz|Ohm|[AVsS])(?![A-Za-z])', one, text)
+    return new, new != text
+
+
+def spec_text(text):
+    """A specification statement for the note: the lost plus-minus sign (U+FFFD before a number, bracket or space) is shown as +/-."""
+    return re.sub(_FFFD + r'(?=\s*[\d(.])', '\u00b1', text)
+
+
+_BARE_RANGE = re.compile(r'^[\d.,]+\s*[A-Za-z\u00b5\u03bc\u03a9\u00b0%\ufffd]*\s*Range$', re.I)
+
+
+def section_name(func_first, prev):
+    """The section of a point from its function text.  '|' (and a bare range label such as '60V Range') continue the section above; 'AC Volts Accuracy: 600mV Range'
+    is the section 'AC Volts Accuracy' (the range text goes to the point's label)."""
+    t = func_first.strip()
+    if not t or t == '|' or _BARE_RANGE.match(t):
+        return prev or ''
+    m = re.match(r'^(.*?):\s*[^:]*\bRange\b[^:]*(?::.*)?$', t)
+    name = clean(m.group(1)) if m and m.group(1).strip() else t
+    if prev and name != prev and len(name) > 4 and prev.lower().startswith(name.lower()):
+        return prev                                            # 'AC Curren' (a typo in the file) is the section 'AC Current'
+    return name
+
+
+def range_text(*texts):
+    for t in texts:
+        m = re.search(r'([\d.]+\s*[A-Za-z\u00b5\u03bc\u03a9\u00b0%\ufffd]*\s*Range)\b', t or '')
+        if m:
+            return clean(m.group(1), 40)
+    return ''
+
+
 def period_from(interval):
     """(period id, label) from CalInterval ('365 Days' -> ('365d', '365 Days')); an unreadable text gives ('mdd', text)."""
     t = clean(interval)
@@ -195,6 +242,8 @@ def period_from(interval):
     if m:
         n, unit = int(m.group(1)), (m.group(2) or 'd').lower()
         sym = 'd' if unit.startswith('d') else 'm' if unit.startswith('mo') else 'y'
+        if not m.group(2):
+            t = f'{n} Days'                         # Cal Processor prints the interval as a bare number of days ('365')
         return f'{n}{sym}', t
     return 'mdd', t or 'as printed in the MDD'
 
@@ -252,20 +301,20 @@ def convert(parsed, make=None, model=None, title=None, manual_entry=True) -> Con
     make = clean(make if make is not None else hd['Manufacturer'], 80)
     model = clean(model if model is not None else hd['Model'], 80)
     interval = hd['CalInterval']
-    title = clean(title if title is not None else f"{hd['Description'] or hd['Procedure_Name'] or 'Cal Processor datasheet'}" + (f' ({interval})' if interval else ''), 120)
+    title = clean(title if title is not None else f"{hd['Description'] or hd['Procedure_Name'] or 'Cal Processor datasheet'}" + (f' ({period_from(interval)[1]})' if interval else ''), 120)
     pid, plabel = period_from(interval)
     # ---- 1. every MDD point -> a candidate (or an error row) -------------------------------------------------------------------------------------------
-    groups, last = [], None
+    groups, last, prev_section = [], None, ''
     readings_seen = 0
     for n, raw in enumerate(points, 1):
         tp = clean(raw.get('TP_ID', ''), 40)
         row = dict(no=n, tp_id=tp, section='', kind='', nominal=clean(raw.get('Text_Nominal', '')).replace('~', ' | '), unit='', low='', high='',
                    frequency='', status='ok', message='')
         conv.rows.append(row)
-        if any(clean(raw.get(k, '')) for k in ('Text_AsFound', 'Text_AsLeft', 'Text_OutOfTol')):
+        if clean(raw.get('Text_AsFound', '')) or clean(raw.get('Text_AsLeft', '')) not in ('', 'Same') or clean(raw.get('Text_OutOfTol', '')):
             readings_seen += 1
         try:
-            cand = _candidate(raw, n, tp, conv)
+            cand = _candidate(raw, n, tp, conv, prev_section)
         except _Skip as sk:
             row.update(status='skipped', message=sk.message)
             conv.issues.append(Issue('error', sk.code, sk.message, n, tp))
@@ -278,6 +327,9 @@ def convert(parsed, make=None, model=None, title=None, manual_entry=True) -> Con
             if level == 'warn':
                 row.update(status='uncertain', message=(row['message'] + '; ' if row['message'] else '') + msg)
         cand['n'], cand['tp'] = n, tp
+        if cand.get('shown'):
+            row['nominal'] = cand['shown']
+        prev_section = cand['section']
         key = (cand['section'], cand['kind'])
         if last is None or last.name != key[0] or last.kind != key[1]:
             last = _Group(*key)
@@ -357,19 +409,40 @@ class _Skip(Exception):
         self.code, self.message = code, message
 
 
-def _candidate(raw, n, tp, conv):
+def _candidate(raw, n, tp, conv, prev_section=''):
+    out = _candidate0(raw, n, tp, conv, prev_section)
+    out['shown'] = out.pop('_shown', '')
+    return out
+
+
+def _candidate0(raw, n, tp, conv, prev_section=''):
     """The converted fields of one MDD point, or raises _Skip(code, reason)."""
     func_first, func_rest = cell_parts(raw.get('Text_Function', ''))
-    nom_first, nom_rest = cell_parts(raw.get('Text_Nominal', ''))
-    tol_first, tol_rest = cell_parts(raw.get('Text_Tolerance', ''))
-    spec = clean(raw.get('Text_SpecStatement', '')).replace('~', ' ')
+    section = section_name(func_first, prev_section)
+    context = ' '.join([section, func_first] + func_rest)
+    repaired = False
+    fixed = []
+    for cell in ('Text_Nominal', 'Text_Tolerance'):
+        t, r = repair_units(str(raw.get(cell, '')), context)
+        repaired = repaired or r
+        fixed.append(t)
+    nom_first, nom_rest = cell_parts(fixed[0])
+    tol_first, tol_rest = cell_parts(fixed[1])
+    func_first_fixed, _r = repair_units(func_first, context)
+    spec = spec_text(clean(raw.get('Text_SpecStatement', '')).replace('~', ' '))
+    spec, r2 = repair_units(spec, context)
     low_raw, high_raw = clean(raw.get('Tol_Low', ''), 60), clean(raw.get('Tol_High', ''), 60)
     notes = []
-    cond, other = conditions(nom_rest + func_rest)
+    if repaired:
+        notes.append(('warn', 'unit_char_repaired', 'The file has a lost micro / degree character in the unit; it was restored from the function text (check the unit).'))
+    cond, other = conditions(nom_rest + func_rest + [func_first])
     passfail = tol_first.lower().startswith('pass/fail')
     nominal = split_value_unit(nom_first)
-    section = func_first or ''
+    shown = ' | '.join([nom_first] + list(nom_rest))
     label = nom_first + (' @ ' + ' @ '.join(x.lstrip('@ ').strip() for x in nom_rest if x.strip().startswith('@')) if any(x.strip().startswith('@') for x in nom_rest) else '')
+    rng_txt = range_text(func_first, *func_rest)
+    if rng_txt:
+        label += f' ({rng_txt})'
     page = clean(raw.get('DS_PageNo', ''), 20)
     note_bits = [f'MDD point {n}' + (f' (TP {tp}' + (f', page {page}' if page else '') + ')' if tp else '')]
     if spec:
@@ -390,8 +463,12 @@ def _candidate(raw, n, tp, conv):
             raise _Skip('limits_inverted', f'The low limit {low_raw} is above the high limit {high_raw}.')
         tol_unit = re.sub(r'\[.*?\]', '', tol_first).split()[-1] if re.sub(r'\[.*?\]', '', tol_first).split() else ''
         unit_t = parse_unit(tol_unit)
-        if unit_t is None and tol_unit:
-            raise _Skip('unit_unknown', f'The unit "{tol_unit}" of the limits is not one this import knows.')
+        if unit_t is None and tol_unit:                                   # unrecognised unit: a pass / fail check, the printed limits kept in the note
+            note += f'. Limits as printed (unit "{tol_unit}" not recognised): {low_raw} to {high_raw}'
+            notes.append(('warn', 'limit_unit_unknown', f'The unit "{tol_unit}" of the limits is not recognised: converted as a pass / fail check; the printed limits '
+                                                         f'{low_raw} to {high_raw} are kept in the point note.'))
+            return dict(_shown=shown, section=section or 'Functional checks', kind='CHECK', unit_text='pass / fail', low_text=low_raw, high_text=high_raw, frequency=None,
+                        nominal=D(0), label=label or func_first, note=note, decimals=0, lo=None, hi=None, prefix='', notes=notes, amplitude=None)
         if unit_t is None:
             unit_t = parse_unit(nominal[1]) if nominal and nominal[1] else None
             if unit_t is None:
@@ -409,7 +486,7 @@ def _candidate(raw, n, tp, conv):
             raise _Skip('empty_point', 'The point has no function text and no nominal.')
         notes.append(('warn' if not passfail else 'info', 'functional_check',
                       'No numeric limits are printed: converted as a pass / fail functional check (the technician answers Yes / No).'))
-        fields = dict(section=section or 'Functional checks', kind='CHECK', unit_text='pass / fail', low_text='', high_text='', frequency=None, nominal=D(0),
+        fields = dict(_shown=shown, section=section or 'Functional checks', kind='CHECK', unit_text='pass / fail', low_text='', high_text='', frequency=None, nominal=D(0),
                       label=label or func_first, note=note, decimals=0, lo=None, hi=None, prefix='', notes=notes, amplitude=None)
         return fields
     prefix, base, exp, unote = unit_t
@@ -434,9 +511,16 @@ def _candidate(raw, n, tp, conv):
             raise _Skip('unit_mismatch', f'The nominal is in {nominal[1]} but the limits are in {prefix}{base}: not the same quantity.')
         value_si = to_si(nominal[0], nom_unit[2])
     lo_si, hi_si = to_si(low, exp), to_si(high, exp)
-    kind, guess = infer_kind(base, ' '.join([func_first] + func_rest), nom_rest, 'frequency' in cond, unote or (nom_unit[3] if nom_unit else ''))
+    kctx = ' '.join([section, func_first] + func_rest)
+    inherited = False
+    if not re.search(r'\b(ac|dc|vac|vdc|aac|adc)\b', kctx.lower()) and prev_section:
+        kctx += ' ' + prev_section                                 # 'Min/Max: Min' follows 'DC Voltage: Min/Max: Max'
+        inherited = bool(re.search(r'\b(ac|dc|vac|vdc|aac|adc)\b', prev_section.lower()))
+    kind, guess = infer_kind(base, kctx, nom_rest, 'frequency' in cond, unote or (nom_unit[3] if nom_unit else ''))
     if kind is None:
         raise _Skip('unit_unknown', f'No test type is known for the unit {base}.')
+    if inherited and not guess:
+        notes.append(('warn', 'kind_inherited', 'AC / DC is not named for this point; it is taken from the section above (check it).'))
     if guess:
         notes.append(('warn', 'kind_guessed', guess[0].upper() + guess[1:] + '.'))
     if unote and unote != 'rms':
@@ -449,7 +533,7 @@ def _candidate(raw, n, tp, conv):
     amplitude = cond.get('level') if kind in ('FREQ', 'PERIOD') else None
     if kind in ('FREQ', 'PERIOD') and amplitude is None:
         notes.append(('warn', 'no_amplitude', 'Frequency / period reading without an input level in the nominal text (none is invented).'))
-    return dict(section=section or db.KINDS[kind]['name'], kind=kind, unit_text=f'{prefix}{db.unit_symbol(base)}', low_text=low_raw, high_text=high_raw,
+    return dict(_shown=shown, section=section or db.KINDS[kind]['name'], kind=kind, unit_text=f'{prefix}{db.unit_symbol(base)}', low_text=low_raw, high_text=high_raw,
                 frequency=cond.get('frequency') if kind in ('ACV', 'ACI', 'FREQ', 'PERIOD', 'DIODE', 'DCV', 'DCI') or 'frequency' in cond else None,
                 nominal=value_si, label=label, note=note, decimals=decimals, lo=lo_si, hi=hi_si, prefix=prefix, notes=notes, amplitude=amplitude,
                 base=base)
@@ -473,7 +557,7 @@ def _fill_function(ds, fn, group, period):
                 fs = fs * (D(1) + D(10) ** -9)                 # equal sizes (1 V and 1000 mV): distinct, ascending; the size is never shown
             rid = f'r{len(fn.ranges) + 1}'
             by_prefix[pre] = fn.add_range(fs, id=rid, display_unit=pre if db.KINDS[fn.kind]['unit'] not in db._NO_PREFIX else '',
-                                          settings={'unspecified': True})
+                                          settings={'unspecified': True, 'display_prefix': pre})
     for it in items:
         p = db.Point(f'{fn.id}.p{it["n"]:04d}', by_prefix[it['prefix']].id, it['nominal'], it['frequency'], it['amplitude'],
                      label=it['label'], origin=f'{SOURCE_TAG}:{it["tp"]}', note=it['note'])

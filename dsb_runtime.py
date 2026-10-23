@@ -1249,7 +1249,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
             if a and a.get('uncertainty'):
                 import uncertainty
                 row['Uncertainty'] = uncertainty.format_value(a['uncertainty'], run.get('unit') or p.get('base_unit'))
-        row['Description'] = f'{row["Description"]}  [{std}]'
+        if not (self.manual_entry and std in ('', 'manual')):         # a manual calibration's rows carry no '[manual]' tag (all of it is by hand)
+            row['Description'] = f'{row["Description"]}  [{std}]'
         return row
 
     def plan_values(self, p, std):
@@ -1301,7 +1302,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
                   ('Limits applied', f'User-built datasheet, {label}'), ('Source', src['document'])]
         if shown:
             header.append(('Standards', shown))
-        if used.get('manual'):
+        if used.get('manual') and not self.manual_entry:
             header.append(('By hand', f'{used["manual"]} point(s) set up / read by the operator ([manual])'))
         unverified = sorted({(rec.get('route') or {}).get('standard') for rec in list(self.found.values()) + list(self.left.values())
                              if (rec.get('route') or {}).get('status') == 'unverified'} - {None, ''})
