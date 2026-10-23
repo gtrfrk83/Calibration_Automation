@@ -202,6 +202,27 @@ class Manager:
         self.refresh_development()
         root.bind('<Control-f>', lambda _e: (self.notebook.select(self.library_frame), self.search_entry.focus_set()))
 
+    # (design width, narrowest width) of the Procedures table columns, in 96-dpi pixels
+    TABLE_COLUMNS = {'name': (235, 110), 'manufacturer': (90, 60), 'model': (80, 60), 'category': (175, 90), 'ready': (80, 64), 'verified': (200, 100)}
+
+    def _fit_table_columns(self, avail):
+        """Give the Procedures table columns the width of the table: design widths when it fits (the spare goes to the name), otherwise every column
+        shrinks towards its narrowest width in proportion to how much it has to give, so no column (Verified on hardware) is cut off."""
+        if avail < 60:
+            return
+        want = {c: ui.px(w) for c, (w, _n) in self.TABLE_COLUMNS.items()}
+        least = {c: ui.px(n) for c, (_w, n) in self.TABLE_COLUMNS.items()}
+        over = sum(want.values()) - avail
+        if over > 0:
+            give = {c: want[c] - least[c] for c in want}
+            total = sum(give.values())
+            for c in want:
+                want[c] -= over * give[c] / total if total else 0
+        else:
+            want['name'] -= over
+        for c, w in want.items():
+            self.table.column(c, width=int(w))
+
     def _tab_changed(self, _event=None):
         tab = self.notebook.nametowidget(self.notebook.select())
         if tab is self.library_frame:
@@ -276,6 +297,7 @@ class Manager:
                                    (235, 90, 80, 175, 80, 200), anchors={'name': 'w', 'manufacturer': 'w', 'model': 'w', 'category': 'w', 'verified': 'w'},
                                    zebra=True, pack=False, stretch={'manufacturer': False, 'model': False, 'category': False, 'ready': False, 'verified': False})
         self.table.master.grid(row=0, column=0, sticky='nsew')
+        self.table.bind('<Configure>', lambda e: self._fit_table_columns(e.width), add='+')     # on a narrow window the columns give way instead of being clipped
         self.table.tag_configure('missing', foreground=ui.C['bad'])
         self.table.tag_configure('modified', foreground=ui.C['warn'])
         self.table.tag_configure('verified', foreground=ui.C['good'])
