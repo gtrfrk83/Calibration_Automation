@@ -161,23 +161,26 @@ class Sheet(unittest.TestCase):
         b = ub.build('ACI', 500.0, 'A', standard=self.s, frequency=50.0, scope=None)
         self.assertAlmostEqual(b.emu, 4.0, 9)
 
-    def test_tartur_with_this_standard_only(self):
+    def test_tartur_with_this_standard_and_the_scope_coil_rows(self):
+        # the lab CMC table (specs/a2la_1888_03_cmc.json) now carries the coil lines, so the ratios are computed with any standard
         r = tartur.compute({'kind': 'DCI', 'unit': 'A', 'nominal': 100.0}, 99.0, 101.0, standard=MODEL)
         self.assertAlmostEqual(r['tolerance'], 1.0, 12)
         self.assertAlmostEqual(r['accuracy'], 0.016, 9)
         self.assertAlmostEqual(r['tar'], 1.0 / 0.016, 6)
         self.assertEqual(r['reason'], '')
         r = tartur.compute({'kind': 'ACI', 'unit': 'A', 'nominal': 500.0, 'frequency': 50.0}, 495.0, 505.0, standard=MODEL)
-        self.assertAlmostEqual(r['accuracy'], 4.0, 9)
-        self.assertAlmostEqual(r['tur'], 5.0 / 4.0, 6)
+        self.assertAlmostEqual(r['accuracy'], 4.0, 9)                      # TAR: the sheet's 0.8 % of 500 A
+        self.assertAlmostEqual(r['tar'], 5.0 / 4.0, 6)
+        self.assertAlmostEqual(r['uncertainty'], 4.4, 6)                    # reported: never below the scope CMC (0.7 % + 0.84 A of 500 A = 4.34 A, rounded up)
+        self.assertAlmostEqual(r['tur'], 5.0 / 4.4, 6)
         lim, unit = tartur.standard_accuracy(MODEL, 'DCI', 100.0)
         self.assertAlmostEqual(lim, 0.016, 12)
         self.assertEqual(unit, 'A')
-        # nothing else changed: a calibrator standard, or none, still finds no scope entry at 100 A, so the ratios stay blank
-        for std in ('5522A', '5560A', None):
+        # a calibrator has no specification row at 100 A: TAR blank, the TUR comes from the scope CMC
+        for std in ('5522A', '5560A'):
             r = tartur.compute({'kind': 'DCI', 'unit': 'A', 'nominal': 100.0}, 99.0, 101.0, standard=std)
-            self.assertIsNone(r['tur'], std)
-            self.assertEqual(r['reason'], 'point is not covered by the scope of accreditation')
+            self.assertIsNone(r['tar'], std)
+            self.assertIsNotNone(r['tur'], std)
 
     def test_not_a_calibrator_picker_entry(self):
         # handheld_dmm imports tkinter (absent in some test environments): read its picker list as text.  The picker chooses the instrument that is COMMANDED; the coil is not.
