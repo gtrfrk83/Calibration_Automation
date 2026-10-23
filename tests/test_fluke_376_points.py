@@ -65,7 +65,7 @@ SECTION_COUNTS = {'AC volts': 4, 'DC volts': 8, 'Ohms': 7, 'Capacitance': 3, 'AC
 FUNCTION_PROMPTS = ['V~  (AC volts)', 'V⎓  (DC volts)',
                     'mV⎓  (DC millivolts: dial on V⎓ / mV, then press the yellow button to select mV; Users Manual p. 12)',
                     'Ω  (ohms: the Ω position, shared with continuity and capacitance; the display must show Ω)',
-                    'Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button until the display shows µF; Users Manual p. 14)',
+                    'Capacitance ⊣⊢  (dial on the Ω position, then press the yellow button ONCE to select capacitance (display shows µF); Users Manual p. 14, single press owner-confirmed)',
                     'A~  (AC amps: detachable jaw closed around the 50-turn coil)',
                     'A⎓  (DC amps: detachable jaw closed around the 50-turn coil; the yellow button is ZERO, Users Manual p. 11)',
                     'iFlex A~  (dial on iFlex A~; the iFlex probe plugged in, or the simulation leads)']
