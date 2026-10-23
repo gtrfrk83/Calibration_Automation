@@ -52,5 +52,12 @@ def launch_args(row, demo=False, asset=None, python=None) -> list:
     return args
 
 
+def launch_process(row, demo=False, asset=None, python=None, popen=None):
+    """Start one user-built row in its own process, the way the Manager does (`Calibration_Procedure_Manager._launch`): the generic launcher with the spec
+    file, working directory = Procedures/.  `demo` adds only --demo (the virtual bench).  Returns the process; raises OSError when it cannot start."""
+    import subprocess
+    return (popen or subprocess.Popen)(launch_args(row, demo=demo, asset=asset, python=python), cwd=str(BASE / 'Procedures'))
+
+
 def status_text(row, found=True) -> str:
     return ('Ready' if found else 'Missing') + f'  [{TAG}]'

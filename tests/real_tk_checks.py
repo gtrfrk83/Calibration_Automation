@@ -235,7 +235,8 @@ def checks_manager_windows():
     check('unlock', rec is not None and not rec.locked)
 
     # Datasheet Builder grid
-    win = m.dsb_panel.new()
+    with mock.patch('datasheet_builder_ui.ask_new_sheet', return_value=False):          # the New question is modal: answer it (blank)
+        win = m.dsb_panel.new()
     pump(root, 20)
     check('grid editor opens', win.winfo_exists())
     check('grid: pills filled before any edit', win.dirty_pill.cget('text') != '' and win.problem_pill.cget('text') != '')
@@ -358,6 +359,75 @@ def checks_handheld_dialogs():
     check('reading window: Skip', r['result']['action'] == 'skip')
     r = drive(reading(p36), lambda w: [b for b in walk(w) if isinstance(b, ttk.Button) and b.cget('text') == 'Stop run'][0].invoke())
     check('reading window: Stop', r['result']['action'] == 'stop')
+    root.destroy()
+
+
+def checks_dsb_layout():
+    """Datasheet Builder layout B on a real Tk: nothing clipped at 1100x700 and 1400x900, the grid keeps its rows, the inspector hides and shows,
+    Enter in an inspector box applies (Calc), Tab order starts at the sheet bar, the grid has no As Found / As Left / Out of Tol columns."""
+    import datasheet_builder_ui as U
+    import datasheet_builder_ui_model as DM
+    from tests import dsb_fixtures
+    t = Path(tempfile.mkdtemp())
+    root = tk.Tk()
+    ui.apply_theme(root)
+    root.geometry('200x100+1300+0')
+    for w, h, min_rows in ((1400, 900, 18), (1100, 700, 8)):
+        g = DM.GridModel(DM.Storage(t / f'u{w}', t / f'r{w}.sqlite3', who='real'), dsb_fixtures.dmm_34461a_like())
+        win = U.GridEditorWindow(root, g)
+        win.geometry(f'{w}x{h}+0+0')
+        pump(root, 40)
+        tag = f'dsb {w}x{h}'
+        key = [r for r in g.rows() if r['kind'] == 'point'][3]['key']
+        g.select(key, 'tol')
+        win.sync()
+        pump(root, 20)
+        rows_visible = (win.sheet.winfo_height() - win.sheet.geo.head_h) // win.sheet.geo.row_h
+        check(f'{tag}: grid rows', rows_visible >= min_rows, rows_visible)
+        check(f'{tag}: four grid columns', len(win.sheet.geo.widths) == 4 and DM.COL_KEYS == ('step', 'function', 'nominal', 'tol'))
+        for name in ('sheet_bar', 'bar', 'save_b', 'run_b', 'demo_b', 'preview_b', 'more_b', 'standards_b', 'undo_b', 'redo_b', 'lock_box', 'show_list_b', 'recalc_b',
+                     'sheet', 'inspector_frame'):
+            check(f'{tag}: {name} inside the window', inside(win, getattr(win, name)), name)
+        box = win.panel_box
+        # everything in the inspector is reachable: inside its frame, or scrollable (the scrollbar is shown when the content is taller)
+        canvas = box.canvas
+        check(f'{tag}: inspector content fits or scrolls', box.inner.winfo_reqheight() <= canvas.winfo_height() or box.scroll.winfo_ismapped(),
+              (box.inner.winfo_reqheight(), canvas.winfo_height()))
+        check(f'{tag}: inspector width inside the window', win.inspector_frame.winfo_rootx() + win.inspector_frame.winfo_width() <= win.winfo_rootx() + win.winfo_width() + 2)
+        for sec in box.sections.values():
+            if sec.winfo_ismapped():
+                check(f'{tag}: section "{sec.title}" not wider than the panel', sec.winfo_width() <= canvas.winfo_width() + 2, (sec.winfo_width(), canvas.winfo_width()))
+        check(f'{tag}: sheet bar wraps only when it must', (w < 1250) == bool(win._bar_wrapped) or w >= 1250)
+        # Enter in a box applies (Calc)
+        before = g.cell_text(key, 'tol')
+        box.v['fs'].set('0.01')
+        e = next(x for x in box.entries if str(x.cget('textvariable')) == str(box.v['iv']))
+        box.types['iv'].set(True), box.v['iv'].set('0.05')
+        e.focus_force()
+        pump(root, 5)
+        e.event_generate('<Return>')
+        pump(root, 10)
+        check(f'{tag}: Enter in a box applies', g.cell_text(key, 'tol') != before or 'calculated' in win.status.get().lower() or win.note.get() != '', (before, g.cell_text(key, 'tol'), win.note.get()))
+        # chips toggle with the keyboard
+        chip = box.chips[1]
+        chip.focus_force()
+        was = box.types['fs'].get()
+        chip.event_generate('<space>')
+        pump(root, 5)
+        check(f'{tag}: chip toggles with space', box.types['fs'].get() != was)
+        # hide / show
+        win.toggle_inspector()
+        pump(root, 20)
+        check(f'{tag}: inspector hidden leaves a rail', not win.inspector_frame.winfo_ismapped() and win.rail.winfo_ismapped() and inside(win, win.rail_b))
+        win.toggle_inspector()
+        pump(root, 20)
+        check(f'{tag}: inspector shown again', win.inspector_frame.winfo_ismapped())
+        # a section heading and a blank row
+        g.select([r for r in g.rows() if r['kind'] == 'header'][0]['key'], 'function')
+        win.sync()
+        pump(root, 20)
+        check(f'{tag}: heading row shows the rules section only', [n for n, s in box.sections.items() if s.winfo_ismapped()] == ['rules'])
+        win.destroy()
     root.destroy()
 
 
@@ -734,6 +804,7 @@ if __name__ == '__main__':
         checks_manager_windows()
         checks_import_package()
         checks_run_queue()
+        checks_dsb_layout()
         checks_run_queue_app()
     except Exception:
         traceback.print_exc()

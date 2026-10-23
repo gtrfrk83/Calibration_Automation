@@ -283,6 +283,99 @@ class GridWidgetStubTests(unittest.TestCase):
         vw.open_new()
         self.assertIn('Select a version', vw.msg.get())
 
+    # ---- layout B: inspector, status line, Run buttons, handheld template
+    def test_inspector_follows_the_selected_row_and_hides(self):
+        win, key = self.build()
+        box = win.panel_box
+        self.assertIsInstance(box, self.ui.Inspector)
+        self.assertIs(self.ui.SpecPanel, self.ui.Inspector)
+        win.model.select(key, 'tol')
+        win.sync()
+        self.assertEqual(box.v['func'].get(), 'DC volts')
+        self.assertTrue(box.types['iv'].get())
+        header = next(r['key'] for r in win.model.rows() if r['kind'] == 'header')
+        win.model.select(header, 'function')
+        win.sync()                                                    # a section heading: the panel shows only the section rules
+        self.assertIn('section heading', win.status.get())
+        win.toggle_inspector()
+        self.assertFalse(win._insp_open)
+        win.toggle_inspector()
+        self.assertTrue(win._insp_open)
+
+    def test_one_status_line_carries_messages_then_row_problems(self):
+        win, key = self.build()
+        win.model.select(key, 'nominal')
+        win.sync()
+        win.bar_v.set('abc')
+        win.commit_bar('down')
+        self.assertTrue(win.status.get().startswith('Cannot do that'))
+        win.model.select(key, 'step')
+        win.sync()                                                    # moving the selection clears the old message
+        self.assertFalse(win.status.get().startswith('Cannot do that'))
+        win.sheet_key(Ev('x', 'x'))
+        self.assertEqual(win.status.get(), win.issue.get())
+
+    def test_run_saves_then_launches_and_demo_adds_demo(self):
+        win, key = self.build()
+        calls = []
+        win.launcher = lambda entry, demo=False: calls.append((entry['spec_path'], demo))
+        with mock.patch.object(self.ui.messagebox, 'askyesno', return_value=False) as ask:
+            self.assertIsNone(win.run_sheet(False))                    # unsaved: asks, and "no" saves and runs nothing
+            self.assertTrue(ask.called)
+        self.assertEqual(calls, [])
+        self.assertTrue(win.model.dirty)
+        with mock.patch.object(self.ui.messagebox, 'askyesno', return_value=True):
+            res = win.run_sheet(True)
+        self.assertTrue(res.ok, res.message)
+        self.assertFalse(win.model.dirty)
+        self.assertEqual(len(calls), 1)
+        self.assertTrue(calls[0][1])
+        self.assertTrue(calls[0][0].endswith('.json'))
+        self.assertIn('demo', win.status.get())
+        with mock.patch.object(self.ui.messagebox, 'askyesno') as ask:   # saved and unchanged: no question
+            self.assertTrue(win.run_sheet(False).ok)
+            self.assertFalse(ask.called)
+        self.assertEqual(calls[1][1], False)
+
+    def test_run_never_launches_a_sheet_with_problems(self):
+        win = self.new_window()
+        win.function_chosen(self.dcv_label(win))
+        self.type_cell(win, '5 V')                                    # a row without a tolerance: an error
+        self.assertGreater(win.model.problem_counts()['errors'], 0)
+        calls = []
+        win.launcher = lambda entry, demo=False: calls.append(entry)
+        with mock.patch.object(self.ui.messagebox, 'askyesno', return_value=True):
+            res = win.run_sheet(False)
+        self.assertFalse(res.ok)
+        self.assertEqual(calls, [])
+        self.assertIn('problems', res.message)
+
+    def test_launch_process_uses_the_managers_command_line(self):
+        import dsb_manager
+        seen = {}
+        dsb_manager.launch_process(dict(spec_path='/x/y.json'), demo=True, popen=lambda args, cwd=None: seen.update(args=args, cwd=cwd))
+        self.assertEqual(seen['args'][1:], [str(dsb_manager.BASE / dsb_manager.LAUNCHER), '--spec', '/x/y.json', '--demo'])
+        self.assertTrue(seen['cwd'].endswith('Procedures'))
+
+    def test_new_sheet_is_blank_unless_the_template_is_chosen(self):
+        win = self.panel.new()                                        # the stub dialog is not answered: blank, as before
+        self.assertEqual(win.model.ds.functions, [])
+        with mock.patch.object(self.ui, 'ask_new_sheet', return_value=True):
+            tpl = self.panel.new()
+        self.assertEqual(len(tpl.model.ds.functions), len(M.GridModel.HANDHELD_KINDS))
+        with mock.patch.object(self.ui, 'ask_new_sheet', return_value=None):
+            self.assertIsNone(self.panel.new())                       # cancelled
+
+    def test_more_menu_add_handheld_functions(self):
+        win = self.new_window()
+        with mock.patch.object(self.ui.messagebox, 'askyesno', return_value=False):
+            self.assertIsNone(win.add_handheld())
+        self.assertEqual(win.model.ds.functions, [])
+        with mock.patch.object(self.ui.messagebox, 'askyesno', return_value=True):
+            self.assertTrue(win.add_handheld().ok)
+            self.assertFalse(win.add_handheld().ok)                   # nothing left to add
+        self.assertEqual(len(win.model.ds.functions), len(M.GridModel.HANDHELD_KINDS))
+
     def test_helpers(self):
         self.assertEqual(self.ui.selected(object()), ())
         self.assertEqual(self.ui.label_of([('a', 'A'), ('b', 'B')], 'b'), 'B')

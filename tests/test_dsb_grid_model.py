@@ -332,3 +332,127 @@ class PrintTests(Base):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ViewColumnsTests(Base):
+    """The on-screen grid has no As Found / As Left / Out of Tol columns (view only); the printed sheet still has them."""
+
+    def test_screen_columns_are_step_function_nominal_tolerance(self):
+        self.assertEqual(M.COL_KEYS, ('step', 'function', 'nominal', 'tol'))
+        self.assertEqual(M.EDIT_COLS, ('function', 'nominal', 'tol'))
+        self.assertEqual(len(M.GridGeometry().widths), 4)
+
+    def test_printed_sheet_keeps_the_template_columns(self):
+        self.dcv_row('5 V')
+        self.g.calc_row(next(r['key'] for r in self.g.rows() if r['kind'] == 'point'), self.form(next(r['key'] for r in self.g.rows() if r['kind'] == 'point'), iv='0.05'))
+        view = self.g.print_view()
+        self.assertEqual(view['columns'], ['STEP NUM', 'FUNCTION TESTED', 'NOMINAL VALUE', 'AS FOUND', 'AS LEFT', 'Out of Tol', 'CALIBRATION TOLERANCE'])
+        point = next(r for r in view['rows'] if r['kind'] == 'point')
+        self.assertEqual(len(point['cells']), 7)
+        self.assertEqual(point['cells'][3:6], ['', '', ''])
+        out = Path(self.tmp.name) / 'blank.pdf'
+        try:
+            res = self.g.write_sheet_pdf(out)
+        except ImportError:
+            return
+        if res.ok:
+            self.assertTrue(out.exists())
+
+    def test_navigation_and_selection_work_with_four_columns(self):
+        key = self.dcv_row('5 V')
+        g = self.g
+        g.select(key, 'step')
+        g.nav('Right')
+        self.assertEqual(g.sel_col, 'function')
+        g.nav('End')
+        self.assertEqual(g.sel_col, 'tol')
+        g.nav('Right')
+        self.assertEqual(g.sel_col, 'tol')                           # stops at the last column
+        g.nav('Home')
+        self.assertEqual(g.sel_col, 'step')
+        g.select(key, 'tol')
+        g.tab()                                                      # Tab from the last editable cell goes to the first one of the next row
+        self.assertEqual(g.sel_col, 'function')
+        geo = M.GridGeometry(widths=[90, 270, 240, 320], row_h=28, head_h=38, num_w=44)
+        self.assertEqual(geo.col_at(44 + 90 + 270 + 240 + 5), 3)
+        self.assertIsNone(geo.col_at(44 + 920 + 1))
+        geo.fit(1000)
+        self.assertEqual(len(geo.widths), 4)
+
+    def test_row_dicts_still_carry_the_blank_columns(self):
+        self.dcv_row('5 V')
+        r = next(r for r in self.g.rows() if r['kind'] == 'point')
+        self.assertTrue(all(k in r for k in ('found', 'left', 'oot')))
+
+
+class HandheldTemplateTests(Base):
+    def test_a_new_sheet_is_blank_by_default(self):
+        self.assertEqual(self.g.ds.functions, [])
+        self.assertEqual(M.DatasheetList(self.store).new().ds.functions, [])
+
+    def test_template_adds_the_handheld_sections_once(self):
+        res = self.g.add_handheld_functions()
+        self.assertTrue(res.ok, res.message)
+        kinds = [f.kind for f in self.g.ds.functions]
+        self.assertEqual(kinds, list(M.GridModel.HANDHELD_KINDS))
+        self.assertTrue(all(t['present'] for t in self.g.handheld_template()))
+        self.assertEqual(sum(r['kind'] == 'header' for r in self.g.rows()), len(M.GridModel.HANDHELD_KINDS))
+        again = self.g.add_handheld_functions()
+        self.assertFalse(again.ok)
+        self.assertEqual(len(self.g.ds.functions), len(M.GridModel.HANDHELD_KINDS))
+        self.assertTrue(self.g.undo().ok)                              # one undo step
+        self.assertEqual(self.g.ds.functions, [])
+
+    def test_template_keeps_existing_sections_and_rows(self):
+        self.dcv_row('5 V')
+        before = [f.id for f in self.g.ds.functions]
+        self.assertTrue(self.g.add_handheld_functions().ok)
+        self.assertEqual(self.g.ds.functions[0].id, before[0])
+        self.assertEqual(len(self.g.ds.functions[0].points), 1)
+        self.assertEqual(sum(f.kind == 'DCV' for f in self.g.ds.functions), 1)
+
+    def test_list_new_with_handheld_and_rows_can_be_typed(self):
+        g = M.DatasheetList(self.store).new(handheld=True)
+        self.assertEqual(len(g.ds.functions), len(M.GridModel.HANDHELD_KINDS))
+        self.assertTrue(g.dirty)
+        g.select(next(r['key'] for r in g.rows() if r['kind'] == 'blank'), 'nominal')
+        self.assertTrue(g.set_target_function('DC volts').ok)
+        res = g.commit_cell('5 V')
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(len(g.ds.function(next(f.id for f in g.ds.functions if f.kind == 'DCV')).points), 1)
+
+    def test_only_named_kinds_and_only_handheld_kinds(self):
+        self.assertTrue(self.g.add_handheld_functions(['ACV', 'SCOPE_BW']).ok)
+        self.assertEqual([f.kind for f in self.g.ds.functions], ['ACV'])
+
+
+class AutomationLineTests(Base):
+    def test_counts_from_the_matcher_and_the_sentence(self):
+        self.dcv_row('5 V')
+        key = next(r['key'] for r in self.g.rows() if r['kind'] == 'point')
+        self.assertTrue(self.g.calc_row(key, self.form(key, iv='0.05')).ok)
+        self.g.match_result = _FakeMatch(self.g.ds.functions[0].id, dict(points=10, assigned=8, uncovered=2, manual=1, automatable=6, unverified=2))
+        self.g.match_rev, self.g.match_period = self.g._rev, self.g.period
+        c = self.g.automation_counts()
+        self.assertEqual(c, dict(points=10, ok=4, unverified=2, uncovered=2, by_hand=2))
+        line = self.g.automation_line()
+        self.assertIn('4 run automatically', line)
+        self.assertIn('2 run automatically but their commands are not yet verified', line)
+        self.assertIn('2 set by hand', line)
+        self.assertIn('2 not covered', line)
+
+    def test_no_counts_while_the_sheet_has_problems(self):
+        self.g.set_target_function('DC volts')
+        self.assertIsNone(self.g.automation_counts(compute=False))
+        self.assertIn('not worked out yet', self.g.automation_line(compute=False))
+
+
+class _FakeMatch:
+    def __init__(self, fid, total):
+        self._fid, self._t = fid, total
+
+    def summary(self):
+        return {self._fid: dict(self._t)}
+
+
+from unittest import mock  # noqa: E402,F401
