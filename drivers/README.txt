@@ -22,6 +22,8 @@ One driver per instrument MODEL. Procedures call intent-level methods
                         page reference and a verified flag (21 of 46 unverified: reply formats and a few node names the guides do not print)
                         Keysight34411A in the same file is the 34411A (subclass: *IDN? match and message text only; every command is the 34410A's)
   simulated_34410a.py   Simulated 34410A (or 34411A: make_34410a_bench(..., model='34411A')) on the simulated calibrator (GPIB / USB behaviour, Front/Rear switch, overflow, error queue)
+  agilent_3458a.py      Keysight / Agilent 3458A (GPIB, HP Multimeter Language, not SCPI: FUNC / NPLC / TRIG SYN reads in ASCII, SREAL, DREAL, null, ACAL, error queue); every command has a verified flag and a User's Guide page
+  simulated_3458a.py    Simulated 3458A measuring an applied source or the bench calibrator (make_3458a_bench)
   keysight_332xx.py     Keysight/Agilent 33210A, 33220A, 33250A generators under test (settings one at a time with the
                         output OFF - never APPLy -, OUTP? confirmed, *TST? self-test)
   keysight_5313x.py     Agilent / HP 53131A and 53132A counters (frequency: input, gate, expected frequency, reference

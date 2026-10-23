@@ -263,7 +263,7 @@ class ExampleTests(Base):
         ed, fid = self.built()
         r = ed.example(fid, '0.05 % of reading + 0.01 % of range', range_id='r10')
         self.assertTrue(r['ok'])
-        self.assertEqual(r['text'], 'At 5 V on the 10 V range the limit is ±3.5 mV (4.9965 V to 5.0035 V).')
+        self.assertEqual(r['text'], 'At 5 V on the 10 V range the low limit is 4.9965 V and the high limit is 5.0035 V.')
         self.assertEqual((r['low'], r['high'], r['plus']), (db.D('4.9965'), db.D('5.0035'), db.D('0.0035')))
         self.assertEqual(r['normalised'], '±(0.05 % of reading + 0.01 % of range)')
         self.assertEqual(r['parts'], ['0.05 % of reading = 2.5 mV', '0.01 % of range = 1 mV'])
@@ -274,7 +274,7 @@ class ExampleTests(Base):
     def test_example_other_reading_counts_and_small_prefix(self):
         ed, fid = self.built()
         r = ed.example(fid, '2 counts', range_id='r10', reading='1 V')
-        self.assertEqual(r['text'], 'At 1 V on the 10 V range the limit is ±20 µV (0.99998 V to 1.00002 V).')
+        self.assertEqual(r['text'], 'At 1 V on the 10 V range the low limit is 0.99998 V and the high limit is 1.00002 V.')
         r = ed.example(fid, '20 ppm of reading', range_id='r1', reading='0.5 V')
         self.assertEqual(r['plus'], db.D('0.00001'))
         r = ed.example(fid, 'max(0.01 % of reading, 50 uV)', range_id='r10', reading='0.1 V')
@@ -287,7 +287,7 @@ class ExampleTests(Base):
         r = ed.example(ed.fid, '0.1 % of reading', range_id='r10', f_lo='1 kHz', f_hi='10 kHz', minus_text='0.2 % of reading')
         self.assertTrue(r['ok'])
         self.assertIn('and 5.5 kHz', r['text'])
-        self.assertIn('-10 mV / +5 mV', r['text'])
+        self.assertIn('low limit is 4.99 V and the high limit is 5.005 V', r['text'])
 
     def test_example_errors_are_plain_language(self):
         ed, fid = self.built()
@@ -923,7 +923,7 @@ class MoreModelTests(Base):
         ed = self.editor(fx.dmm_34461a_like())
         r = ed.example_for_entry('dcv', 0, '90d')
         self.assertTrue(r['ok'], r['text'])
-        self.assertIn('limit is', r['text'])
+        self.assertIn('low limit is', r['text'])
         self.assertTrue(ed.set_period_label('90d', '3 months'))
         self.assertEqual(ed.ds.periods[0].label, '3 months')
         self.assertFalse(ed.set_period_label('nope', 'x'))

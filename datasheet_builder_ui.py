@@ -7,10 +7,11 @@
 The tab lists the user datasheets (New / Open / Duplicate / Delete + Restore / Export JSON / Import JSON / Version history).  Opening one shows
 the grid editor window: a spreadsheet-like sheet (one row per test point; the blank As Found / As Left / Out of Tol columns are not shown on screen,
 only on the printed sheet) with a sheet bar (Make, Model, Title, Tolerances for, Lock Status, Undo / Redo, Standards, More, Preview / Print, Save) and an Edit Cell bar
-above it, and a right-hand Inspector for the selected row (Test point, Tolerance, Several rows at once, Asymmetrical tolerance, Resolution and decimals, Rules for this
+above it, and a right-hand Inspector for the selected row (Test point, Limits and tolerance, Several rows at once, Asymmetrical tolerance, Resolution and decimals, Rules for this
 section, Row options).  The older detail pages (Ranges, Specification table, Sections, Details, Standards and automation) open from the More menu.  One status line
 at the bottom (and one clickable warnings pill at the top, Show list under the sheet) carries messages.  Anyone can use it (there is no developer-mode lock).
-Display-only SI scaling: the model formats values, the datasheet keeps SI.
+Display-only SI scaling: the model formats values, the datasheet keeps SI.  A tolerance is shown as its LOW LIMIT and HIGH LIMIT (absolute values), never as +/- an
+error; the tolerance statement is only shown where it is edited (the Inspector's formula boxes, the status line).
 
 NOTE: these widgets were written without a display.  They have been imported and constructed under tests/_tk_stub.py only (every class constructs
 and every handler runs); the windows have NEVER been looked at on a real screen, so layout, wrapping, sizes and colours are unchecked.
@@ -1211,7 +1212,7 @@ class PreviewWindow(tk.Toplevel):
         ttk.Label(body, text=view['subtitle'], style='Muted.TLabel').pack(anchor='w')
         ui.Notice(body, kind='warn', text=view['notice']).pack(fill='x', pady=(6, 8))
         keys = tuple(f'c{i}' for i in range(len(view['columns'])))
-        self.table = ui.make_table(body, keys, view['columns'], (70, 220, 170, 110, 110, 60, 260), anchors={'c1': 'w', 'c2': 'w', 'c6': 'w'}, height=14, zebra=False)
+        self.table = ui.make_table(body, keys, view['columns'], (70, 220, 160, 100, 100, 60, 140, 140), anchors={'c1': 'w', 'c2': 'w', 'c6': 'w', 'c7': 'w'}, height=14, zebra=False)
         for i, row in enumerate(view['rows']):
             self.table.insert('', 'end', iid=str(i), values=row['cells'], tags=('pending',) if row['kind'] == 'header' else ())
         self.msg = tk.StringVar()
@@ -1322,7 +1323,7 @@ class Section(ttk.Frame):
 
 
 class Inspector(ttk.Frame):
-    """The right-hand panel for the selected row (it replaces the old bottom strip and tool column): Test point, Tolerance, Several rows at once,
+    """The right-hand panel for the selected row (it replaces the old bottom strip and tool column): Test point, Limits and tolerance, Several rows at once,
     Asymmetrical tolerance, Resolution and decimals, Rules for this section, Row options.  It only shows and collects values:
     M.GridModel.panel_state() fills it and M.GridModel.calc_row() uses what form() returns.  (SpecPanel is the old name.)"""
 
@@ -1334,8 +1335,8 @@ class Inspector(ttk.Frame):
         self.sides = {'plus': M.GridModel.blank_side(), 'minus': M.GridModel.blank_side()}
         self.operand_now = 'plus'
         self.v = {k: tk.StringVar() for k in ('nominal', 'units', 'freq', 'level', 'expect', 'iv', 'fs', 'fs_scale', 'floor', 'db', 'calc', 'multi_high', 'multi_n',
-                                              'decs', 'res', 'operand', 'multi_mode', 'func', 'definition')}
-        self.b = {k: tk.BooleanVar(value=False) for k in ('iv_ppm', 'multi', 'asym', 'auto_res')}
+                                              'decs', 'res', 'operand', 'multi_mode', 'func', 'definition', 'low', 'high')}
+        self.b = {k: tk.BooleanVar(value=False) for k in ('iv_ppm', 'multi', 'asym', 'auto_res', 'typed')}
         self.types = {k: tk.BooleanVar(value=False) for k in M.SPEC_ORDER}
         self.cells = {}
         self.entries = []
@@ -1374,7 +1375,7 @@ class Inspector(ttk.Frame):
         inner.bind('<Configure>', lambda _e: self._inner_size())
 
         self._build_point(self._section('point', 'Test point', '', True))
-        self._build_tolerance(self._section('tol', 'Tolerance', '', True))
+        self._build_tolerance(self._section('tol', 'Limits and tolerance', '', True))
         self._build_multi(self._section('multi', 'Several rows at once', 'Multiple', False, 'Multiple Test Points: make a run of rows between a lowest and a highest value.'))
         self._build_asym(self._section('asym', 'Asymmetrical tolerance', 'Operand', False, 'Asymmetrical Tol and Operand: a different tolerance above and below the nominal.'))
         self._build_res(self._section('res', 'Resolution and decimals', 'Decs · Res', False, 'Display Decs., Meas Res and Auto Res: the display resolution of the range.'))
@@ -1495,6 +1496,19 @@ class Inspector(ttk.Frame):
 
     def _build_tolerance(self, body):
         self.tol_body = body
+        # The limits come first: LOW and HIGH (absolute).  Calculated from the tolerance below they are read-only; "Type the limits myself" makes them
+        # the row's limits and hides the tolerance boxes (the two are never shown as editable at once).
+        self.typed_cb = ttk.Checkbutton(body, text='Type the limits myself', variable=self.b['typed'], command=self.typed_changed)
+        self.typed_cb.pack(anchor='w')
+        tip(self.typed_cb, 'Off: the Low limit and High limit are worked out from the tolerance below and cannot be typed here. On: you type the two limits '
+                           '(absolute values, in the Units) and the row is checked against them; the tolerance boxes are hidden.')
+        self.limit_cells = ttk.Frame(body)
+        self.limit_cells.pack(fill='x')
+        self.limit_names = ('low', 'high')
+        self.low_e = self._cell(self.limit_cells, 'low', 'Low limit', self.v['low'], 'The lowest reading that passes (absolute value, for example 4.9965 V). A bare number is in the Units.')
+        self.high_e = self._cell(self.limit_cells, 'high', 'High limit', self.v['high'], 'The highest reading that passes (absolute value, for example 5.0035 V). A bare number is in the Units.')
+        self.limit_note = ttk.Label(body, text='', style='Small.TLabel', wraplength=ui.px(250), justify='left')
+        self.limit_note.pack(anchor='w', pady=(0, 4))
         self.chip_frame = ttk.Frame(body)
         self.chip_frame.pack(fill='x', pady=(0, 2))
         self.chips = []
@@ -1590,6 +1604,9 @@ class Inspector(ttk.Frame):
     def multi_changed(self):
         self.show_fields()
 
+    def typed_changed(self):
+        self.show_fields()
+
     def auto_changed(self):
         self.res_e.configure(state='disabled' if self.b['auto_res'].get() else 'normal')
 
@@ -1625,21 +1642,45 @@ class Inspector(ttk.Frame):
         want = {'func': True, 'nominal': True, 'units': True, 'freq': fields.get('frequency', False), 'level': fields.get('amplitude', False),
                 'expect': fields.get('expect', False),
                 'iv': self.types['iv'].get(), 'fs': self.types['fs'].get(), 'fs_scale': self.types['fs'].get(), 'floor': self.types['floor'].get(),
-                'db': self.types['db'].get(), 'calc': self.types['calc'].get()}
+                'db': self.types['db'].get(), 'calc': self.types['calc'].get(), 'low': True, 'high': True}
         passfail = bool(st.get('passfail'))
-        if passfail:
+        typed = bool(self.b['typed'].get()) and not passfail
+        if passfail or typed:
             for k in self.tol_names:
                 want[k] = False
+        if passfail:
+            want['low'] = want['high'] = False
+            self.typed_cb.pack_forget()
+            self.limit_note.pack_forget()
+        else:
+            if self.typed_cb.winfo_manager() != 'pack':
+                self.typed_cb.pack(anchor='w', before=self.limit_cells)
+            if self.limit_note.winfo_manager() != 'pack':
+                nxt = next((w for w in (self.chip_frame, self.tol_cells) if w.winfo_manager() == 'pack'), self.btns)
+                self.limit_note.pack(anchor='w', pady=(0, 4), before=nxt)
+            for e in (self.low_e, self.high_e):
+                e.configure(state='normal' if typed else 'readonly')
+            self.limit_note.configure(text='These are the limits the row is checked against.' if typed
+                                      else 'Calculated from the tolerance below; they are read-only here.')
         self._visible = want
         self._arrange_all()
+        if passfail and self.tol_cells.winfo_manager() != 'pack':
+            self.tol_cells.pack(fill='x', before=self.btns)
         if passfail:
             for chip in self.chips:
                 chip.grid_remove()
             self.chip_frame.pack_forget()
             self.hint_l.pack_forget()
             self.passfail_l.pack(anchor='w', before=self.tol_cells)
+        elif typed:                                  # the tolerance boxes are gone (a Tk frame whose boxes were all removed keeps its old height, so it is unpacked too)
+            self.passfail_l.pack_forget()
+            self.chip_frame.pack_forget()
+            self.hint_l.pack_forget()
+            self.tol_cells.pack_forget()
         else:
             self.passfail_l.pack_forget()
+            if self.tol_cells.winfo_manager() != 'pack':
+                self.tol_cells.pack(fill='x', before=self.btns)
             if not self.chip_frame.winfo_ismapped():
                 self.chip_frame.pack(fill='x', pady=(0, 2), before=self.tol_cells)
             if any(self.types[k].get() for k in M.SPEC_ORDER):
@@ -1664,6 +1705,7 @@ class Inspector(ttk.Frame):
         if not self._visible:
             self._visible = {}
         self._arrange(self.point_body, self.point_names, wide=('func',))
+        self._arrange(self.limit_cells, self.limit_names)
         self._arrange(self.tol_cells, self.tol_names, wide=('calc',))
         self._arrange(self.multi_cells, ('multi_high', 'multi_n'))
         self._arrange(self.res_cells, ('decs', 'res'))
@@ -1703,8 +1745,9 @@ class Inspector(ttk.Frame):
         form = state['form']
         self.sides = {'plus': dict(form['plus']), 'minus': dict(form['minus'])}
         self.operand_now = 'plus'
-        for k in ('nominal', 'units', 'freq', 'level', 'expect', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode'):
+        for k in ('nominal', 'units', 'freq', 'level', 'expect', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode', 'low', 'high'):
             self.v[k].set(form[k])
+        self.b['typed'].set(bool(form['typed']))
         for k in M.SPEC_ORDER:
             self.types[k].set(k in form['types'])
         self.b['multi'].set(bool(form['multi'])), self.b['asym'].set(bool(form['asym'])), self.b['auto_res'].set(bool(form['auto_res']))
@@ -1740,7 +1783,7 @@ class Inspector(ttk.Frame):
                     operand='-' if self.v['operand'].get() == '-' else '+', fs_scale=self.v['fs_scale'].get(), nominal=self.v['nominal'].get(), units=self.v['units'].get(),
                     freq=self.v['freq'].get(), level=self.v['level'].get(), expect=self.v['expect'].get() or 'on', multi=bool(self.b['multi'].get()),
                     multi_mode=self.v['multi_mode'].get() or 'span', multi_high=self.v['multi_high'].get(), multi_n=self.v['multi_n'].get(), decs=self.v['decs'].get(),
-                    res=self.v['res'].get(), auto_res=bool(self.b['auto_res'].get()))
+                    res=self.v['res'].get(), auto_res=bool(self.b['auto_res'].get()), typed=bool(self.b['typed'].get()), low=self.v['low'].get(), high=self.v['high'].get())
 
     def definition_id(self, label):
         return next((d['id'] for d in self._defs if d['label'] == label), None)

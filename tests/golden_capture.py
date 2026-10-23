@@ -40,6 +40,7 @@ from drivers import (Agilent34401A, AgilentAFG, Fluke28x, Fluke5520A, Fluke5522A
                      TektronixMDO4000C, TektronixTDS2000C, Transport, TransportError, WaveSurfer4104HD)
 from drivers import Fluke5522AScope  # noqa: E402
 from drivers import Fluke5522AComp, Keithley2000, Keithley2000Cal, Keysight34410A, Keysight34411A  # noqa: E402
+from drivers import Agilent3458A  # noqa: E402
 from drivers import fluke_28x  # noqa: E402
 from drivers.keysight_332xx import Keysight332xx  # noqa: E402
 from drivers.keysight_5313x import Keysight5313x  # noqa: E402
@@ -58,6 +59,7 @@ from drivers.simulated_k2000 import make_k2000_bench  # noqa: E402
 from drivers.simulated_k2000_cal import SIM_CODE, make_k2000_cal_bench  # noqa: E402
 from drivers.simulated_k2000_cal import _steps as k2000_cal_steps  # noqa: E402
 from drivers.simulated_34410a import make_34410a_bench  # noqa: E402
+from drivers.simulated_3458a import make_3458a_bench  # noqa: E402
 from drivers.simulated_mdo import make_mdo_bench  # noqa: E402
 from drivers.simulated_tds import make_tds_bench  # noqa: E402
 
@@ -184,6 +186,11 @@ COVERAGE = {
     'keysight_34411a': {                                              # the family subclass of the 34410A driver (same module; its own fixture so the 34410A transcripts stay as recorded)
         'Keysight34411A': dict(covered=['connect', 'configure_point', 'read', 'firmware_warning'], no_command=[]),     # inherited methods, exercised on the subclass
     },
+    'agilent_3458a': {
+        'Agilent3458A': dict(covered=['identify', 'connect', 'local', 'cleanup', 'reset_to_defaults', 'set_confirmed', 'configure', 'set_trigger', 'set_output_format', 'read',
+                                      'read_n', 'null', 'null_off', 'offset', 'temperature', 'revision', 'terminals', 'check_errors', 'state_summary', 'acal'],
+                             no_command=['reading_timeout', 'acal_timeout', 'acal_info']),      # pure arithmetic / tables
+    },
     'reference_instruments': {
         'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup'], no_command=[]),
         'AgilentAFG': dict(covered=['connect', 'sine', 'square', 'output', 'cleanup'], no_command=['max_hz']),   # property
@@ -201,7 +208,7 @@ for _cls in ('Fluke5560A', 'Fluke5520A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
-              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keithley_2000_cal', 'fluke_8808a_cal', 'keysight_34410a']
+              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keithley_2000_cal', 'fluke_8808a_cal', 'keysight_34410a', 'agilent_3458a']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
 ENGINES = ('truevolt_34470A', 'dacq_34970A', 'dacq_34972A', 'fgen_33220A', 'mdo4000c', 'tds2000c', 'agilent_34401a', 'fluke_8846a', 'handheld_5522a',
@@ -255,6 +262,7 @@ def pinned():
 
 _SECRET_WIRE = re.compile(r'^(CAL:SEC:STAT\s+(?:ON|OFF),)(.*)$', re.I)
 _SECRET_CODE = re.compile(r"^(:?CAL:PROT:CODE\s+)'(.*)'$", re.I)        # Keithley 2000: :CAL:PROT:CODE '<code>'
+_SECRET_ACAL = re.compile(r'^(ACAL\s+\w+,)(.*)$', re.I)                    # 3458A: ACAL <type>,<security code>
 
 
 def mask_wire(text):
@@ -262,7 +270,7 @@ def mask_wire(text):
     m = _SECRET_WIRE.match(text)
     if m:
         return f'{m.group(1)}<password masked, {len(m.group(2))} chars>'
-    m = _SECRET_CODE.match(text)
+    m = _SECRET_CODE.match(text) or _SECRET_ACAL.match(text)
     return f'{m.group(1)}<code masked, {len(m.group(2))} chars>' if m else text
 
 
@@ -338,6 +346,22 @@ class RecordingTransport(Transport):
     def clear(self): self._rec('ctl', 'clear'); self.inner.clear()
     def set_timeout(self, seconds): self._rec('ctl', 'set_timeout', float(seconds)); return self.inner.set_timeout(seconds)
     def go_local(self): self._rec('ctl', 'go_local'); return self.inner.go_local()
+    def set_read_termination(self, term):
+        self._rec('ctl', 'set_read_termination', term)
+        method = getattr(self.inner, 'set_read_termination', None)
+        return method(term) if callable(method) else None
+
+    def read_raw(self, count):
+        try:
+            method = getattr(self.inner, 'read_raw', None)
+            if not callable(method):
+                raise TransportError('this transport cannot read binary data')
+            data = method(count)
+        except TransportError as exc:
+            self._rec('RB!', int(count), str(exc))
+            raise
+        self._rec('RB', int(count), bytes(data).hex())
+        return data
 
     def _unknown(self, exc):
         return self.fallback is not None and 'unknown command' in str(exc)
@@ -715,6 +739,89 @@ def cases_34410a(c):
     c.run('Keysight34410A.firmware_warning[current]', d.firmware_warning)
 
 
+def cases_3458a(c):
+    """The 3458A on its simulator (an applied 1 mA DC current), plus scripted fakes for the branches a simulator cannot reach."""
+    bench, ft, dt = make_3458a_bench('5522A')
+    d = c.inst(Agilent3458A, dt, opened=False, label='3458A')
+    c.run('Agilent3458A.connect', d.connect)
+    c.run('Agilent3458A.identify', d.identify)
+    c.run('Agilent3458A.local', d.local)
+    c.run('Agilent3458A.cleanup', d.cleanup)
+    old = c.inst(Agilent3458A, Scripted([(r'^ID\?', 'HP3458A'), (r'^OFORMAT\?', '1'), (r'^TRIG\?', '1')]), opened=False, label='3458A')
+    c.run('Agilent3458A.connect[HP3458A firmware text]', old.connect)
+    wrong = c.inst(Agilent3458A, Scripted([(r'^ID\?', 'Keysight 34410A')]), opened=False, label='3458A')
+    c.run('Agilent3458A.connect[wrong model]', wrong.connect)
+    dead = c.inst(Agilent3458A, Scripted([(r'^ID\?', TransportError('timeout'))]), opened=False, label='3458A')
+    c.run('Agilent3458A.connect[no answer]', dead.connect)
+    c.quiet(d.reset_to_defaults)
+    dt.apply('DCI', 1e-3)
+    points = [('DCI 1 mA', ('DCI', 1e-3), dict(nplc=10)), ('DCI 100 uA aperture', ('DCI', 1e-4), dict(aperture=1e-3, ndig=8)), ('DCI 1 A', ('DCI', 1.0), dict(nplc=100)),
+              ('DCV 10 V autozero off', ('DCV', 10.0), dict(nplc=1, autozero=False)), ('ACV 1 V single trigger', ('ACV', 1.0), dict(nplc=10, trigger='SGL')),
+              ('OHM 1 kohm', ('OHM', 1000.0), dict(nplc=10, trigger='SYN'))]
+    for tag, args, kw in points:
+        c.run(f'Agilent3458A.configure[{tag}]', d.configure, *args, **kw)
+    c.run('Agilent3458A.configure[bad function]', d.configure, 'FREQ', 1.0)
+    c.run('Agilent3458A.configure[range zero]', d.configure, 'DCV', 0.0)
+    c.run('Agilent3458A.configure[range too high]', d.configure, 'DCI', 2.0)
+    c.run('Agilent3458A.configure[nplc off grid]', d.configure, 'DCV', 10.0, nplc=2.5)
+    c.run('Agilent3458A.configure[bad trigger]', d.configure, 'DCV', 10.0, trigger='LEVEL')
+    c.run('Agilent3458A.configure[ndig out of range]', d.configure, 'DCV', 10.0, ndig=9)
+    refused = c.inst(Agilent3458A, Scripted([(r'^FUNC\?', '6,+1.00000000E+00'), (r'^ARANGE\?', '0')]), label='3458A')
+    c.run('Agilent3458A.configure[range not accepted]', refused.configure, 'DCI', 1e-3)
+    auto = c.inst(Agilent3458A, Scripted([(r'^FUNC\?', '6,+1.00000000E-03'), (r'^ARANGE\?', '1')]), label='3458A')
+    c.run('Agilent3458A.configure[autorange still on]', auto.configure, 'DCI', 1e-3)
+    c.quiet(d.configure, 'DCI', 1e-3, nplc=10)
+    c.run('Agilent3458A.read[ASCII 1 mA]', d.read)
+    c.run('Agilent3458A.read_n[3]', d.read_n, 3)
+    c.run('Agilent3458A.read_n[0]', d.read_n, 0)
+    for fmt in ('DREAL', 'SREAL'):
+        c.run(f'Agilent3458A.set_output_format[{fmt}]', d.set_output_format, fmt)
+        c.run(f'Agilent3458A.read[{fmt} 1 mA]', d.read)
+    c.run('Agilent3458A.set_output_format[SINT]', d.set_output_format, 'SINT')
+    c.run('Agilent3458A.set_output_format[ASCII]', d.set_output_format, 'ASCII')
+    dt.apply('DCI', 0.5)
+    c.run('Agilent3458A.read[overload]', d.read)
+    dt.apply('DCI', 1e-3)
+    c.run('Agilent3458A.set_trigger[SGL]', d.set_trigger, 'SGL')
+    c.run('Agilent3458A.read[single trigger]', d.read)
+    c.run('Agilent3458A.set_trigger[HOLD]', d.set_trigger, 'HOLD')
+    c.run('Agilent3458A.read[trigger HOLD refused]', d.read)
+    c.run('Agilent3458A.set_trigger[bad]', d.set_trigger, 'BOGUS')
+    c.quiet(d.set_trigger, 'SYN')
+    dt.drop_readings = True
+    c.run('Agilent3458A.read[no reading arrives]', d.read)
+    dt.drop_readings = False
+    c.run('Agilent3458A.null', d.null)
+    c.run('Agilent3458A.offset', d.offset)
+    c.run('Agilent3458A.null_off', d.null_off)
+    c.run('Agilent3458A.null[explicit offset]', d.null, 2e-6)
+    c.quiet(d.null_off)
+    c.run('Agilent3458A.temperature', d.temperature)
+    c.run('Agilent3458A.revision', d.revision)
+    c.run('Agilent3458A.terminals[FRONT]', d.terminals)
+    dt.terminals = 'REAR'
+    c.run('Agilent3458A.terminals[REAR]', d.terminals)
+    dt.terminals = 'FRONT'
+    c.run('Agilent3458A.check_errors[ok]', d.check_errors, 'ctx')
+    dt.errors = [(103, 'SYNTAX ERROR'), (106, 'PARAMETER OUT OF RANGE')]
+    c.run('Agilent3458A.check_errors[two errors]', d.check_errors, 'configuring')
+    c.run('Agilent3458A.state_summary', d.state_summary)
+    c.run('Agilent3458A.set_confirmed[AZERO ONCE]', d.set_confirmed, 'azero.set', mode='ONCE')
+    c.run('Agilent3458A.set_confirmed[unknown key]', d.set_confirmed, 'nope.set')
+    c.run('Agilent3458A.set_confirmed[not accepted]', c.inst(Agilent3458A, Scripted([(r'^END\?', '0')]), label='3458A').set_confirmed, 'end.set', mode='ALWAYS')
+    c.run('Agilent3458A.acal[DCV]', d.acal, 'DCV', inputs_disconnected=True)
+    c.run('Agilent3458A.acal[not confirmed]', d.acal, 'ALL')
+    c.run('Agilent3458A.acal[bad type]', d.acal, 'AC2', inputs_disconnected=True)
+    dt.security_code = SENTINEL_PASSWORD
+    c.run('Agilent3458A.acal[secured, correct code]', d.acal, 'OHMS', code=SENTINEL_PASSWORD, inputs_disconnected=True)
+    c.run('Agilent3458A.acal[secured, wrong code]', d.acal, 'ALL', code='WRONG_CODE_1', inputs_disconnected=True)
+    dt.security_code = None
+    bench.fail_next = 'ACAL'
+    c.run('Agilent3458A.acal[write times out: not repeated]', d.acal, 'ALL', inputs_disconnected=True)
+    buffered = c.inst(Agilent3458A, Scripted([(r'^INBUF\?', '1')]), label='3458A')
+    c.run('Agilent3458A.acal[INBUF ON]', buffered.acal, 'DCV', inputs_disconnected=True)
+
+
 def cases_34411a(c):
     """The 34411A is the 34410A driver with its own *IDN? text: the same wire strings, so only the model-specific paths are recorded here."""
     for bus in ('GPIB', 'USB'):
@@ -737,6 +844,16 @@ def cases_34411a(c):
     c.quiet(old.connect)
     c.run('Keysight34411A.firmware_warning[old]', old.firmware_warning)
     c.run('Keysight34411A.firmware_warning[current]', d.firmware_warning)
+
+
+def resets_3458a(c):
+    bench, ft, dt = make_3458a_bench('5522A')
+    d = c.inst(Agilent3458A, dt, label='3458A')
+    dt.errors = [(103, 'SYNTAX ERROR')]
+    c.run('Agilent3458A.reset_to_defaults', d.reset_to_defaults)
+    bad = c.inst(Agilent3458A, Scripted([(r'^STB\?', '0'), (r'^ERRSTR\?', '0,"NO ERROR"'), (r'^END\?', '2'), (r'^OFORMAT\?', '5'), (r'^QFORMAT\?', '1'),
+                                         (r'^INBUF\?', '1'), (r'^AZERO\?', '1')]), label='3458A')
+    c.run('Agilent3458A.reset_to_defaults[known state not reached]', bad.reset_to_defaults)
 
 
 def resets_34411a(c):
@@ -1502,6 +1619,11 @@ def _with_resets(cases, resets):
     return both
 
 
+def cases_3458a_all(c):
+    cases_3458a(c)
+    resets_3458a(c)
+
+
 DRIVER_CASES = {
     'base': _with_resets(cases_base, resets_base), 'fluke_5560a': _with_resets(cases_fluke_5560a, resets_fluke_5560a),
     'scpi_dmm': _with_resets(cases_scpi_dmm, resets_scpi_dmm), 'fluke_8808a': _with_resets(cases_8808a, resets_8808a), 'keysight_truevolt': _with_resets(cases_truevolt, resets_truevolt),
@@ -1515,6 +1637,7 @@ DRIVER_CASES = {
     'fluke_8808a_cal': _with_resets(cases_8808a_cal, resets_8808a_cal),
     'keysight_34410a': _with_resets(cases_34410a, resets_34410a),
     'keysight_34411a': _with_resets(cases_34411a, resets_34411a),
+    'agilent_3458a': cases_3458a_all,
 }
 
 

@@ -760,6 +760,22 @@ class Limit:
         return 'No limit'
 
 
+def limits_phrase(low, high, unit, formula='', typed=False, low_text=None, high_text=None):
+    """'Low limit 4.9965 V, High limit 5.0035 V  (from 0.05 % of reading + 0.01 % of range)': the two absolute limits, never a +/- error.
+    Display only (exact digits, one shared SI prefix) unless the caller passes its own low_text / high_text."""
+    sides = [x for x in (low, high) if x is not None]
+    prefix = best_prefix(max(abs(x) for x in sides), unit)[0] if sides else ''
+
+    def one(value, given):
+        if given is not None:
+            return given
+        return 'open' if value is None else format_si(value, unit, prefix=prefix)
+    text = f'Low limit {one(low, low_text)}, High limit {one(high, high_text)}'
+    if typed:
+        return text + '  (typed limits)'
+    return text + (f'  (from {formula})' if formula else '')
+
+
 @dataclass
 class Function:
     id: str
@@ -890,7 +906,9 @@ class Function:
         return lim
 
     def tol_text(self, point, period, ds=None):
-        """Human check text such as '±(0.05 % of reading + 0.01 % of range) = ±3.5 mV' for the point's governing entry."""
+        """Human check text such as '±(0.05 % of reading + 0.01 % of range) = ±3.5 mV' for the point's governing entry.  NOT FOR DISPLAY any more: it is
+        the `tol_text` of the runnable spec, which procmods hashes into a point's identity (an existing procedure modification would go stale if
+        the text changed), so it stays byte for byte as it was.  Screens and reports show limits_text() (Low and High limit) instead."""
         tops = self.governing(point)
         if not tops or period not in tops[0].exprs:
             return ''
@@ -900,6 +918,20 @@ class Function:
         if lim.symmetric:
             return f'{base} = ±{format_si(lim.plus, self.unit)}'
         return f'{base} = -{format_si(lim.minus, self.unit)} / +{format_si(lim.plus, self.unit)}'
+
+    def limits_text(self, point, period, ds=None, low_text=None, high_text=None):
+        """The limits of the point in words, LOW and HIGH (absolute values), with the statement they were calculated from:
+        'Low limit 4.9965 V, High limit 5.0035 V  (from 0.05 % of reading + 0.01 % of range)'; typed limits say '(typed limits)'.  '' when the point has
+        no limit yet.  low_text / high_text: the caller's own display strings for the two limits (the run window passes the ones it prints, scaled and
+        padded); the default is the exact value with one shared SI prefix.  Display only: no limit is changed or rounded here."""
+        ov = point.overrides.get(period)
+        typed = bool(ov) and (ov.get('low') not in (None, '') or ov.get('high') not in (None, ''))
+        tops = self.governing(point)
+        if not typed and (not tops or period not in tops[0].exprs):
+            return ''
+        lim = self.limit_for(point, period, ds)
+        formula = '' if typed else (tops[0].printed.get(period) or tops[0].exprs[period].text(self.unit))
+        return limits_phrase(lim.low, lim.high, self.unit, formula, typed, low_text, high_text)
 
     def to_dict(self):
         return {'id': self.id, 'kind': self.kind, 'name': self.name, 'direction': self.direction, 'display_unit': self.display_unit,
@@ -1315,14 +1347,14 @@ def clear_override(fn, pid, period=None):
 
 
 def point_limits(ds, fn, point, period=None):
-    """dict(low, high, nominal, minus, plus, accept, tol_text, source, ambiguous) for the editor / preview, SI values as Decimal; error text in 'error'."""
+    """dict(low, high, nominal, minus, plus, accept, tol_text (= the Low / High limit wording, limits_text), source, ambiguous) for the editor / preview, SI values as Decimal; error text in 'error'."""
     period = period or ds.default_period
     try:
         lim = fn.limit_for(point, period, ds)
     except DsError as e:
         return {'error': str(e), 'code': e.code}
     return dict(low=lim.low, high=lim.high, nominal=lim.nominal, minus=lim.minus, plus=lim.plus, accept=lim.accept_text(fn.unit),
-                tol_text=fn.tol_text(point, period, ds), source=lim.source, ambiguous=lim.ambiguous, one_sided=lim.one_sided)
+                tol_text=fn.limits_text(point, period, ds), source=lim.source, ambiguous=lim.ambiguous, one_sided=lim.one_sided)
 
 
 # ============================================================================================================== validation

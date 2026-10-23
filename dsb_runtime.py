@@ -1685,6 +1685,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
     def report_details(self, details):
         """The 'standards used' list gains the standards that actually did the points (their serial numbers and due dates are the technician's)."""
         details = dict(details or {})
+        details['limit_labels'] = True                      # the two limit columns print as Low Limit / High Limit (their values are the absolute limits, as always)
         have = list(details.get('standards') or [])
         if not self.demo:
             for model, n in sorted(self.used_standards().items()):
