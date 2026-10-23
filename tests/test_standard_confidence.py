@@ -33,6 +33,7 @@ EXPECTED = {
     '8563E': (None, 2.0),      # no level printed
     '96270A': (None, 2.0),     # no level printed
     '8902A': (None, 2.0),      # no level printed
+    'A2LA-LIGHT': (95.0, 2.0),  # the lab's own A2LA CMC (scope footnote 2: expanded, approximately 95 %, usually k = 2)
 }
 TABLE = {99.0: 2.576, 95.0: 2.0, None: 2.0}
 

@@ -19,18 +19,19 @@ OMEGA = 'Ω'
 DIVIDE = '÷'
 DOT = '·'
 
-KIND_ORDER = ['DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP', 'IND', 'COND', 'FREQ', 'TEMP', 'POWDC', 'POWAC', 'PHASE']
+KIND_ORDER = ['DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP', 'IND', 'COND', 'FREQ', 'TEMP', 'POWDC', 'POWAC', 'PHASE', 'LUX', 'FC', 'LAMBERT', 'UVIRR']
 KIND_NAMES = {'DCV': 'DC volts', 'ACV': 'AC volts', 'DCI': 'DC current', 'ACI': 'AC current', 'OHM': 'Resistance', 'CAP': 'Capacitance',
               'IND': 'Inductance', 'COND': 'Conductance', 'FREQ': 'Frequency', 'TEMP': 'Temperature', 'POWDC': 'DC power', 'POWAC': 'AC power',
               'PHASE': 'Phase', 'RPM': 'Rotation speed', 'RISE': 'Rise time', 'ABER': 'Aberrations', 'FLAT': 'Flatness', 'TIME': 'Time',
+              'LUX': 'Illuminance (lux)', 'FC': 'Illuminance (foot-candle)', 'LAMBERT': 'Luminance (lambert)', 'UVIRR': 'UV irradiance (365 nm)',
               'OTHER': 'Other'}
-KIND_CHIP = {'POWDC': 'Power DC', 'POWAC': 'Power AC', 'OTHER': 'Other'}
+KIND_CHIP = {'POWDC': 'Power DC', 'POWAC': 'Power AC', 'LUX': 'Lux', 'LAMBERT': 'Lambert', 'UVIRR': 'UV 365 nm', 'OTHER': 'Other'}
 
 _NUM = r'[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?'
 _SCALABLE = ('V', 'A', 'F', 'Hz', 'W', 'H', 'S', 's', 'ohm', 'Vpp', 'App')
 _STEPS = (9, 6, 3, 0, -3, -6, -9, -12)
 _PREFIX_SYMBOL = {9: 'G', 6: 'M', 3: 'k', 0: '', -3: 'm', -6: MICRO, -9: 'n', -12: 'p'}
-_SYMBOL = {'ohm': OMEGA, 'Ohm': OMEGA, 'degC': '°C', 'degF': '°F', 'deg': '°', 'sec': 's'}
+_SYMBOL = {'ohm': OMEGA, 'Ohm': OMEGA, 'degC': '°C', 'degF': '°F', 'deg': '°', 'sec': 's', 'uW/cm2': 'µW/cm²'}   # uW/cm2 (light sheet) is stored ASCII, shown as printed on the scope
 
 
 # ------------------------------------------------------------------------------------------------------------ decimal helpers
