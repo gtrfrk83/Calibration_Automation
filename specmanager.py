@@ -129,6 +129,13 @@ def parse_spec(text):
                 out['fs_value'] = v
                 out['unit'] = out['unit'] or u
                 continue
+            m = re.match(rf'^({_NUM})\s*(ppm|%)\s*of range\{{"Range" = ({_NUM})\s*(\S+)\}}$', term)     # a DMM's 'ppm / % of range' (3458A): the named range, not the full-scale reading
+            if m:
+                v, u, _ = to_base(m.group(3), m.group(4))
+                out['fs_rel'] += float(m.group(1)) * (1e-6 if m.group(2) == 'ppm' else 1e-2)
+                out['fs_value'] = v
+                out['unit'] = out['unit'] or u
+                continue
             m = re.match(rf'^({_NUM})\s*(\S.*)$', term)
             if m:
                 v, u, _ = to_base(m.group(1), m.group(2))
@@ -618,9 +625,11 @@ TC_RESOLUTION = {'5522A': (0.01, '5522A Operators Manual p. 1-17, Temperature Ca
                  '5560A': (0.01, '5560A Product Specifications (Rev. 8, 6/26) printed p. 15, TC Specifications: resolution 0.01 degC')}
 
 DEFAULT_VARIANT = {   # preferred / excluded words in the function's bracket text, per kind (the person can pass variant= to override)
+    # 'sync, acband <= 2 mhz' (3458A, the best-accuracy AC mode) is preferred in a plain lookup where it covers the point; no other sheet has that text.
     # 'auxiliary' (5520A dual-output AUX rows) and '7 day' (5520A resistance floor with only a 7 day ohms zero) are excluded from a plain lookup; no other sheet has either word.
-    'DCV': dict(prefer=(), exclude=('auxiliary',)),
-    'ACV': dict(prefer=('sinewave',), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated', 'auxiliary')),
+    # 'option 002' (3458A high-stability DC volts, the lab's unit per the owner) is preferred in a plain lookup; the standard-stability rows stay selectable with variant='standard stability'.
+    'DCV': dict(prefer=('option 002',), exclude=('auxiliary',)),
+    'ACV': dict(prefer=('sinewave', 'sync, acband <= 2 mhz'), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated', 'auxiliary')),
     'ACI': dict(prefer=('lcomp off',), exclude=('non-sinewave', 'squarewave', 'trianglewave')),
     'OHM': dict(prefer=('4-wire',), exclude=('7 day',)),
     'FREQ': dict(prefer=('field service',), exclude=('scope', 'duty')),

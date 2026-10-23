@@ -487,7 +487,8 @@ def _tur_bucket(c):
 def _rank(cands, kind):
     default = lab_default(kind)
     cov = [c for c in cands if c.covered]
-    cov.sort(key=lambda c: (-_tur_bucket(c), default.index(c.standard) if c.standard in default else len(default),
+    # a candidate without a driver (spec-only sheet: 3458A, 8563E, 8902A, light, coils) never outranks one with a driver: the plan must not lose automation
+    cov.sort(key=lambda c: (0 if c.driver else 1, -_tur_bucket(c), default.index(c.standard) if c.standard in default else len(default),
                             c.rel_unc if c.rel_unc is not None else math.inf, c.standard))
     for i, c in enumerate(cov, 1):
         c.rank = i
