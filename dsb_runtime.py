@@ -39,6 +39,7 @@ import threading
 import time
 import tkinter as tk
 from dataclasses import dataclass, field
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -58,6 +59,8 @@ import ui_theme as ui
 import datasheet_builder as db
 import datasheet_builder_match as dm
 import datasheet_builder_specs as dsp
+import dsb_override
+import dsb_rules as rules
 import procspec
 
 SCOPE_KINDS = ('SCOPE_GAIN', 'SCOPE_OFFSET', 'SCOPE_BW', 'SCOPE_TIMEBASE', 'SCOPE_TRIGGER')
@@ -143,6 +146,13 @@ def spec_for_period(spec, period) -> dict:
     if head.get('plan'):
         new['dsb']['plan'] = head['plan']
     new['dsb']['version'], new['dsb']['uid'] = head.get('version'), head.get('uid')
+    return new
+
+
+def _with_rules(spec) -> dict:
+    """The spec with the run-time options of the Datasheet Builder rules (a copy; the saved spec file is not touched): one high-voltage question per hook-up group (rule 9)."""
+    new = dict(spec)
+    new['options'] = dict(spec.get('options') or {}, hv_once_per_group=True)
     return new
 
 
@@ -336,16 +346,21 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
     """The standards of one run: calibrators that source (5560A / 5522A), a 5790B and counters that measure.  Every driver is an open
     drivers.Instrument; settings are written, read back and compared by the drivers; nothing is retried."""
 
-    def __init__(self, addrs, counter_ref='EXT', transports=None, mods=None, scope=False, virtual=False):
-        """addrs: {model: {'address': VISA text, 'baud': int}}; transports: {model: transport} (simulated benches)."""
+    def __init__(self, addrs, counter_ref='EXT', transports=None, mods=None, scope=False, virtual=False, extra=()):
+        """addrs: {model: {'address': VISA text, 'baud': int}}; transports: {model: transport} (simulated benches).
+        extra: [(label, driver, role)] drivers that are already open, role 'standard' or 'uut' (an instrument under test the program talks to): they are reset
+        with the others (a 'uut' after the operator notice), start-state checked and closed with the run.  None today in a normal run; benches and tests use it."""
         self.log = drivers.CommandLog()
         self.virtual = bool(virtual)
         if self.virtual:
             virtualbench.mark_log(self.log)
         self.drivers, self.counter_ref = {}, counter_ref
+        self.extra = [(str(lbl), drv, role) for lbl, drv, role in extra]
         self.scope = scope
         self.cal = None
         self._hot = set()
+        self._saved_lines = 0                    # command-log lines already written to disk (save_log appends only the new ones)
+        self._clock = time.monotonic             # the stable-reading timeout's clock (tests replace it)
         self.standby_ok = True
         t = transports or {}
         try:
@@ -394,10 +409,34 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
         return [d for m, d in self.drivers.items() if m not in SOURCE_MODELS]
 
     def reset_roles(self):
-        return self.sources() + self.measuring(), []              # sources first; the unit under test has no remote interface here (typed readings)
+        # sources first; the unit under test has no remote interface here (typed readings) unless a driver for it was attached (extra, role 'uut')
+        return (self.sources() + self.measuring() + [d for _l, d, r in self.extra if r != 'uut'],
+                [d for _l, d, r in self.extra if r == 'uut'])
 
     def pm_drivers(self):
-        return tuple(self.drivers.values())
+        return tuple(self.drivers.values()) + tuple(d for _l, d, _r in self.extra)
+
+    # ---- rule 7: start-state check (read-only) ----------------------------------------------------------------------------
+    def start_state_items(self):
+        """[(label, driver)] of every open instrument of the run, the unit under test last."""
+        items = [(m, d) for m, d in self.drivers.items()] + [(lbl, d) for lbl, d, r in self.extra if r != 'uut'] + [(lbl, d) for lbl, d, r in self.extra if r == 'uut']
+        return items
+
+    def has_start_state_checks(self) -> bool:
+        return any(rules.declared_probes(d) for _l, d in self.start_state_items())
+
+    def start_state_check(self):
+        """Run every declared probe once (read-only) and log it.  Returns [dsb_rules.ProbeResult].  Never writes to an instrument."""
+        return rules.run_probes(self.start_state_items(), self.log)
+
+    def session_check(self):
+        """A Run that skips the reset (already reset this session): every calibrator is put in STANDBY and the read-back must say so (OPER? = 0), else SafetyError.
+        Read-only apart from the STBY itself, which is the standing rule before every point."""
+        for d in self.sources():
+            d.standby_quiet()
+            if d.ask('oper.query').strip() != '0':
+                raise drivers.SafetyError(f'{d.label}: STANDBY could not be confirmed (OPER? is not 0). Check the front panel before running.')
+        self.log.add('--', 'session check: calibrator(s) in STANDBY (read back)', 'SESSION')
 
     def standby(self):
         """Every source to STANDBY (quiet), then the ones that were operated are read back; an unconfirmed standby is logged and flagged, never raised
@@ -420,7 +459,7 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
             self.standby()
         except Exception:
             pass
-        for d in self.drivers.values():
+        for d in list(self.drivers.values()) + [d for _l, d, _r in self.extra]:
             try:
                 d.cleanup()
             except Exception:
@@ -430,6 +469,24 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
             except Exception:
                 pass
         self.save_log()
+
+    def save_log(self):
+        """Append the command-log lines that are not on disk yet (rule 11: the log is saved before an error dialog and again at close; nothing is written twice).
+        A virtual (demo) session is never evidence and writes nothing."""
+        if virtualbench.log_is_virtual(self.log):
+            return
+        lines = self.log.lines()
+        new = lines[self._saved_lines:]
+        if not new:
+            return
+        try:
+            folder = Path.home() / '.calibration_suite'
+            folder.mkdir(parents=True, exist_ok=True)
+            with open(folder / 'command_log.txt', 'a', encoding='utf-8') as f:
+                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  user-built datasheet session' + ('' if self._saved_lines == 0 else ' (continued)') + '\n' + '\n'.join(new) + '\n')
+            self._saved_lines = len(lines)
+        except OSError:
+            pass
 
     # ---- the source side ----------------------------------------------------------------------------------------
     def _runner(self, model):
@@ -451,6 +508,8 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
         if run['op'] == 'dmm':
             super().apply(p, cancel)
             self._hot.add(self.cal.label)
+            if self.cal.ask('oper.query').strip() != '1':        # rule 6: the engine sends OPER without a read-back; a user-built sheet reads it (read-only) and refuses to go on
+                raise drivers.InstrumentError(f'{self.cal.label} did not confirm OPERATE for {hh.describe(p)}; the reading would be against no output.')
             return
         self.standby()
         cal = self.cal
@@ -485,8 +544,10 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
         self._wait(virtualbench.scaled(self._settle(p), self.virtual), cancel)
 
     # ---- the measuring side -------------------------------------------------------------------------------------
-    def read_level(self, p, freq, route):
-        """V rms of the unit under test's output at `freq` on the 5790B (fgen_verification's _std_volts does the reading and the frequency check)."""
+    def read_level(self, p, freq, route, conv=None, cancel=None):
+        """V rms of the unit under test's output at `freq` on the 5790B (fgen_verification's _std_volts does the reading and the frequency check).  The settings are
+        written, read back and compared ONCE; the reading is then polled until it is stable (rule 8, `stable_read`: every poll is a read-only MEAS?) and the LAST
+        reading is returned exactly as read.  conv: how a reading is compared for stability (default: V rms divided by the waveform factor, the datasheet's unit)."""
         std = self.drivers[route.standard]
         run = p['run']
         inp = (run['settings'].get('std_input') or ('WBND' if freq > WIDEBAND_ABOVE_HZ else 'INPUT1')).upper()
@@ -497,9 +558,35 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
         level = run['nominal'] if run['kind'] in ('GEN_AMPL', 'ACV') else (run['amplitude'] or 1.0)
         expected_rms = abs(level) * rms_factor(run)
         std.set_range_for(expected_rms)
-        return fg.IO._std_volts(SimpleNamespace(std=std), freq), dict(input=inp, range_expected_v=expected_rms)
+        rf = rms_factor(run)
+        volts, _res = self.stable_read(p, lambda: fg.IO._std_volts(SimpleNamespace(std=std), freq), conv or (lambda v: v / rf), cancel=cancel)
+        return volts, dict(input=inp, range_expected_v=expected_rms)
 
-    def read_frequency(self, p, route):
+    # ---- rule 8: settle by stable reading ----------------------------------------------------------------------------------
+    def stable_spec(self, p):
+        """The stable-reading settings for point p: tunables 'dsb.stable.*' (procedure modifications, UNVERIFIED estimates), a point may carry its own
+        (stable_n / stable_band / stable_timeout); the fixed settle time of the point is the MINIMUM.  The band is in the datasheet's base unit."""
+        n = int(p.get('stable_n') or self.pm_param('dsb.stable.n', 3))
+        counts = float(p.get('stable_band') or self.pm_param('dsb.stable.band_counts', 3.0))
+        timeout = float(p.get('stable_timeout') or self.pm_param('dsb.stable.timeout', 30.0))
+        factor = float(p.get('factor') or 1.0)
+        return rules.StableSpec(n=n, band=rules.default_band(p, counts) * factor, minimum_s=virtualbench.scaled(self._settle(p), self.virtual),
+                                timeout_s=virtualbench.scaled(timeout, self.virtual))
+
+    def stable_read(self, p, read, conv, cancel=None):
+        """`read()` = ONE read-only query returning the instrument's raw reading; `conv(raw)` = the value compared (datasheet base unit).  Returns (raw reading of
+        the LAST poll, StableResult); the outcome goes to the command log (a timeout as a '!!' line).  No averaging: what is recorded is what was read last."""
+        box = {}
+
+        def one():
+            box['raw'] = read()
+            return conv(box['raw'])
+        _value, res = rules.settle_stable(one, self.stable_spec(p), cancel=cancel, wait=self._wait, clock=self._clock)
+        unit = hh.SYMBOL.get(p.get('base_unit'), p.get('base_unit') or '')
+        self.log.add('--' if res.stable else '!!', f'{p["id"]}: ' + res.text(unit), 'SETTLE')
+        return box['raw'], res
+
+    def read_frequency(self, p, route, cancel=None):
         """Hz on a 53131A / 53132A: channel 1, 50 ohm, AC, 1 s gate, the expected frequency; the timebase selected and checked (same calls as fgen_verification)."""
         c = self.drivers[route.standard]
         run = p['run']
@@ -509,23 +596,24 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
         src, _auto = c.reference()
         if src != self.counter_ref:
             raise drivers.InstrumentError(f'Counter timebase is {src}, expected {self.counter_ref}.')
-        f = c.frequency()
+        f, _res = self.stable_read(p, c.frequency, lambda hz: (1.0 / hz) if run['kind'] == 'PERIOD' else hz, cancel=cancel)
         raw = dict(counter=(c.idn.split(',')[1].strip() if ',' in (c.idn or '') else c.idn), gate_s=COUNTER_GATE_S,
                    reference=(f'EXT {ref_hz / 1e6:g} MHz (checked)' if self.counter_ref == 'EXT' and ref_hz else 'INT'))
         return f, raw
 
-    def measure(self, p, route, refs=None):
+    def measure(self, p, route, refs=None, cancel=None):
         """(reading in the datasheet's unit, raw dict) for a unit-under-test OUTPUT point read by `route`'s standard.  `refs` = the flatness references taken so far."""
         run = p['run']
+        db = lambda v: 20.0 * math.log10(v)
         try:
             if run['op'] == 'std_level':
-                v, raw = self.read_level(p, run['frequency'] or 1000.0, route)
+                v, raw = self.read_level(p, run['frequency'] or 1000.0, route, cancel=cancel)
                 return v / rms_factor(run), dict(raw, vrms=v)
             if run['op'] == 'std_freq':
-                f, raw = self.read_frequency(p, route)
+                f, raw = self.read_frequency(p, route, cancel=cancel)
                 return ((1.0 / f) if run['kind'] == 'PERIOD' else f), dict(raw, hz=f)
             if run['op'] == 'std_flat':
-                v, raw = self.read_level(p, run['frequency'], route)
+                v, raw = self.read_level(p, run['frequency'], route, conv=db, cancel=cancel)
                 ref = (refs or {}).get(self.flat_key(p))
                 if ref is None:
                     raise drivers.InstrumentError('The flatness reference has not been measured.')
@@ -538,10 +626,10 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
     def flat_key(p):
         return f'{p["run"]["kind"]}|{p["table"]}|{p["run"]["amplitude"]}|{p["range"]}'
 
-    def read_reference(self, p, route):
+    def read_reference(self, p, route, cancel=None):
         """Flatness: the level at the reference frequency (the unit under test has been set to it by the operator)."""
         try:
-            v, raw = self.read_level(dict(p, run=dict(p['run'])), p['run']['reference_hz'], route)
+            v, raw = self.read_level(dict(p, run=dict(p['run'])), p['run']['reference_hz'], route, conv=lambda x: 20.0 * math.log10(x), cancel=cancel)
             return v, raw
         finally:
             self.release()
@@ -556,18 +644,23 @@ class DsbIO(hh.IO, reset_startup.IOResetMixin):
 
 
 # ============================================================================================================== the application
-class DsbApp(hh.App, reset_startup.AppResetMixin):
-    """The handheld engine's window for a user-built datasheet."""
+class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin):
+    """The handheld engine's window for a user-built datasheet.  The run-time rules of the Datasheet Builder (NOTES.md 'DSB run-time rules implemented') are
+    added here and in DsbIO; the engine itself (handheld_dmm.py) is not edited."""
+    RESET_ONCE_PER_SESSION = True      # rule 10 (reset_startup pattern): the first Run of a session resets; later Runs only check the connection and the start state
+    MANUAL_OVERRIDE = True             # rule 13: right-click a point > Enter reading manually (dsb_override.py; the 8808A's mixin)
 
     def __init__(self, root, spec, demo=False, io_factory=None, period=None, fast_demo=False):
         self.manual_entry = bool((spec.get('options') or {}).get('manual_entry'))      # a manual calibration (see the module docstring)
-        spec = with_plan(spec)
+        self.section_mode = {}                                                          # rule 12: {section: auto | hand | skip}
+        spec = _with_rules(with_plan(spec))
         self.dsb = spec['dsb']
         self.grid_entry = None
         self.period = period or self.dsb.get('period')
         if self.period != self.dsb.get('period'):
-            spec = spec_for_period(spec, self.period)
+            spec = _with_rules(spec_for_period(spec, self.period))
         self._cur = None
+        self._hookup_seen = None
         self.std_addr = {}
         self.dsb_ref = {}
         self.counter_ref = tk.StringVar(value='EXT')
@@ -577,9 +670,175 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         super().__init__(root, self.dsb['model'], demo=demo, spec=spec, io_factory=io_factory, fast_demo=fast_demo)
         self.counter_ref.set(self.settings.get('counter_ref', 'EXT'))
 
+    # ---- rule 12: per-section modes (Automated / Typed by hand / Not tested) --------------------------------------------------------
+    def allowed_modes(self):
+        return (rules.HAND, rules.SKIP) if self.manual_entry else rules.MODES
+
+    def _init_modes(self, pts):
+        """The modes for the sections of `pts`, in their order: what was set before is kept, a new section starts Automated (a manual calibration: Typed by hand)."""
+        sections = list(dict.fromkeys(p['section'] for p in pts))
+        self.section_mode = rules.normalise_modes(self.section_mode, sections, default=rules.HAND if self.manual_entry else rules.AUTO, allowed=self.allowed_modes())
+
+    def mode_of(self, p) -> str:
+        return self.section_mode.get(p['section'], rules.HAND if self.manual_entry else rules.AUTO)
+
+    def is_skipped(self, p) -> bool:
+        return self.mode_of(p) == rules.SKIP
+
+    def hand_point(self, p) -> bool:
+        """True when nothing is sourced or read by the program for p: a manual calibration, or a section set to Typed by hand."""
+        return self.manual_entry or self.mode_of(p) == rules.HAND
+
+    def skipped_unrecorded(self, p) -> bool:
+        """A point of a Not-tested section with no reading (a reading recorded before the section was switched off stays, and is reported)."""
+        return self.is_skipped(p) and not (self.found.get(str(p['id'])) or self.left.get(str(p['id'])))
+
+    def any_auto(self, points) -> bool:
+        return any(not self.hand_point(p) and not self.is_skipped(p) for p in points)
+
+    def set_section_mode(self, section, mode, quiet=False) -> bool:
+        """Switch one section.  Never discards a recorded point: only what the run does with the section's points changes.  Refused while a run is in progress."""
+        if mode not in self.allowed_modes() or section not in self.section_mode:
+            return False
+        if self.busy:
+            self.status.set('Stop the run first: the section setting cannot be changed while points are being run.')
+            self._sync_mode_box()
+            return False
+        if self.section_mode[section] == mode:
+            return True
+        self.section_mode[section] = mode
+        text = f'Section "{section}" is now {rules.MODE_LABEL[mode]}.'
+        self._relabel_current(section)
+        self.refresh()
+        self._sync_mode_box()
+        if not quiet:
+            self.status.set(text + ' ' + rules.MODE_HINT[mode])
+        self._log_note(text)
+        if self.asset.get().strip():
+            self.save(silent=True)                           # the setting is part of the progress file
+        return True
+
+    def _log_note(self, text):
+        io = self.io
+        if io is not None and not self.demo:
+            try:
+                io.log.add('--', text, 'OPERATOR')
+            except Exception:
+                pass
+
+    def section_label(self, section) -> str:
+        m = self.section_mode.get(section, rules.AUTO)
+        return section if m == rules.AUTO else f'{section}  ({"hand" if m == rules.HAND else "skip"})'
+
+    def _label_map(self):
+        return {self.section_label(s): s for s in self.section_mode}
+
+    def _relabel_current(self, section):
+        sh = self.shell
+        try:
+            if self.show_section.get() == section:
+                sh.current = self.section_label(section)
+        except Exception:
+            pass
+
+    def pick_section(self, name):
+        """Sidebar / drop-down choice: the shown names carry the mode, the Show filter works on the section itself."""
+        self.show_section.set(self._label_map().get(name, name))
+        self._sync_mode_box()
+        self.refresh()
+
+    def _build_section_bar(self):
+        """The control of rule 12: in the bar above the test points, next to the Show boxes; acts on the section chosen in the sidebar."""
+        try:
+            bar = self.shell.section_picker.master
+        except Exception:
+            return
+        box = ttk.Frame(bar)
+        box.pack(side='left', padx=(24, 0))
+        self.section_caption = tk.StringVar(value='Section mode: choose a section on the left')
+        ttk.Label(box, textvariable=self.section_caption, style='Muted.TLabel').pack(side='left', padx=(0, 6))
+        self.section_mode_var = tk.StringVar(value='')
+        self.section_mode_box = ttk.Combobox(box, textvariable=self.section_mode_var, values=[rules.MODE_LABEL[m] for m in self.allowed_modes()], state='disabled', width=15)
+        self.section_mode_box.pack(side='left')
+        self.section_mode_box.bind('<<ComboboxSelected>>', lambda _e: self._on_mode_chosen())
+        try:
+            self.tree.tag_configure('skipped', foreground=ui.C['muted'])
+        except Exception:
+            pass
+        self._sync_mode_box()
+
+    def _shown_section(self):
+        sec = self.show_section.get()
+        return sec if sec in self.section_mode else None
+
+    def _sync_mode_box(self):
+        box = getattr(self, 'section_mode_box', None)
+        if box is None:
+            return
+        sec = self._shown_section()
+        try:
+            if sec is None:
+                self.section_caption.set('Section mode: choose a section on the left')
+                self.section_mode_var.set('')
+                box.configure(state='disabled')
+            else:
+                short = sec if len(sec) <= 26 else sec[:25] + '...'
+                self.section_caption.set(f'Mode of "{short}":')
+                self.section_mode_var.set(rules.MODE_LABEL[self.section_mode[sec]])
+                box.configure(state='disabled' if self.busy else 'readonly')
+        except Exception:
+            pass
+
+    def _on_mode_chosen(self):
+        sec = self._shown_section()
+        mode = rules.LABEL_MODE.get(self.section_mode_var.get())
+        if sec is not None and mode is not None:
+            self.set_section_mode(sec, mode)
+
+    def update_summary(self):
+        """Progress ring and sidebar: a Not-tested section never counts as pending or failed (a point recorded before it was switched off still counts)."""
+        active = [p for p in self.points if not self.skipped_unrecorded(p)]
+        self.update_shell_progress(active)
+        order, groups = [], {}
+        for p in self.points:
+            if self.skipped_unrecorded(p):
+                groups.setdefault(p['section'], [])
+                if p['section'] not in order:
+                    order.append(p['section'])
+                continue
+            if p['section'] not in groups:
+                groups[p['section']] = []
+                order.append(p['section'])
+            groups[p['section']].append(self.results.get(str(p['id']), {}).get('result', ''))
+        self.shell.set_sections([(self.section_label(s), groups[s].count('PASS'), groups[s].count('FAIL'), len(groups[s])) for s in order])
+
+    def not_tested_sections(self):
+        """[(section, points without a reading)] for every section set to Not tested (for the report and the notice)."""
+        out = []
+        for s, m in self.section_mode.items():
+            if m == rules.SKIP:
+                n = sum(1 for p in self.points if p['section'] == s and self.skipped_unrecorded(p))
+                if n:
+                    out.append((s, n))
+        return out
+
+    def grid_allows(self, p):
+        """(allowed, why not) for a reading typed into the test point grid: only where the program reads nothing (rule 12)."""
+        if self.manual_entry or self.all_hand_set():
+            return (True, '') if not self.is_skipped(p) else (False, f'Section "{p["section"]}" is set to Not tested.')
+        m = self.mode_of(p)
+        if m == rules.HAND:
+            return True, ''
+        if m == rules.SKIP:
+            return False, f'Section "{p["section"]}" is set to Not tested. Change its mode to type readings.'
+        return False, (f'Section "{p["section"]}" is Automated: its readings come from the run. Set the section to Typed by hand to type them here, '
+                       f'or right-click the point > Enter reading manually.')
+
     # ---- hooks of the handheld engine -----------------------------------------------------------------------------
     def build_points(self):
-        return runtime_points(self.spec, self.model)
+        pts = runtime_points(self.spec, self.model)
+        self._init_modes(pts)
+        return pts
 
     def calibrator_offer(self):
         """The 5520A for a user-built datasheet: it is offered, and a DMM-type point it cannot source is routed by hand with the reason (limit_problem); scope and
@@ -598,8 +857,15 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
 
     def save_fields(self):
         d = super().save_fields()
-        d['dsb'] = dict(uid=self.dsb.get('uid'), version=self.dsb.get('version'), period=self.period)
+        d['dsb'] = dict(uid=self.dsb.get('uid'), version=self.dsb.get('version'), period=self.period, sections=dict(self.section_mode))
         return d
+
+    def load_results(self, data):
+        super().load_results(data)
+        saved = (data.get('dsb') or {}).get('sections')
+        if isinstance(saved, dict):                              # the section settings of the run that was saved (rule 12); a file without them leaves the window's
+            self.section_mode = rules.normalise_modes({**self.section_mode, **saved}, list(self.section_mode), allowed=self.allowed_modes())
+            self._sync_mode_box()
 
     def checkpoint_problem(self, data):
         c = data.get('dsb')
@@ -616,7 +882,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
 
     def reading_labels(self, p):
         run = p.get('run') or {}
-        if self.manual_entry:
+        if self.hand_point(p):
             return dict(device='UNIT UNDER TEST', source='TEST POINT')
         if run.get('op', 'dmm') == 'dmm':
             return {}
@@ -627,6 +893,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     # ---- window -------------------------------------------------------------------------------------------------------
     def _build_ui(self):
         super()._build_ui()
+        self._build_section_bar()
         if self.manual_entry:
             self._build_manual_ui()
             self._attach_grid_entry()
@@ -717,9 +984,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
 
     def _attach_grid_entry(self):
         """Typed readings straight into the test point grid (manual_grid.py) for a manual calibration, and for any datasheet whose every point is done by hand."""
-        if not (self.manual_entry or self.all_hand_set()):
-            return
-        import manual_grid
+        import manual_grid                      # always attached: a section can be switched to Typed by hand before Run (grid_allows decides per point)
         self.grid_entry = manual_grid.GridEntry(self, self.tree)
 
     def all_hand_set(self) -> bool:
@@ -741,6 +1006,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         in words for text that is not a reading (empty, not a number, NaN / infinity, a comma, a unit) and RuntimeError when it cannot be recorded now."""
         if self.busy:
             raise RuntimeError('A run is in progress: finish or stop it before typing readings into the grid.')
+        ok, why = self.grid_allows(p)
+        if not ok:
+            raise RuntimeError(why)
         asset = self.asset.get().strip()
         if not asset:
             raise RuntimeError('Enter the instrument ID first.')
@@ -771,12 +1039,15 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
 
     def _row(self, p):
         values, tags = super()._row(p)
-        if not self.manual_entry:
-            return values, tags
-        values = list(values)
-        values[1] = f'{p["section"]}' + (f'   ({p["range"]})' if p.get('range') else '')
-        values[2] = nominal_text(p)
-        return tuple(values), tags
+        if self.manual_entry:
+            values = list(values)
+            values[1] = f'{p["section"]}' + (f'   ({p["range"]})' if p.get('range') else '')
+            values[2] = nominal_text(p)
+            values = tuple(values)
+        if self.skipped_unrecorded(p):                       # rule 12: never shown as pending or failed
+            values = tuple(values[:-1]) + ('⊘ not tested',)
+            tags = ('skipped',)
+        return values, tags
 
     def on_period(self):
         new = self.period_var.get()
@@ -787,13 +1058,14 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
             messagebox.showinfo('Specification period', 'Readings are already recorded, so the period cannot be changed now. Start a new run to use another period.')
             return
         try:
-            self.spec = spec_for_period(self.spec, new)
+            self.spec = _with_rules(spec_for_period(self.spec, new))
         except SpecProblem as exc:
             self.period_var.set(self.period)
             messagebox.showerror('Specification period', str(exc))
             return
         self.period = new
         self.points[:] = runtime_points(self.spec, self.model)
+        self._init_modes(self.points)
         self.by_id = {p['id']: p for p in self.points}
         self.refresh()
         self.status.set(f'Limits now follow the {new} specification.')
@@ -893,9 +1165,18 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
     def route(self, p):
         if self.fast_demo:
             return Route(False, '', _assigned(p), 'manual', 'demo mode')
+        if self.hand_point(p) and not self.manual_entry:
+            return Route(False, '', _assigned(p), 'manual', 'section set to Typed by hand')
         connected = self.io.models() if self.io is not None else set()
         eng = self.engine_model()
         return route_for(p, connected, prefer=[eng] if eng else [])
+
+    def pm_live_context(self):
+        """The Edit-procedure window also lists this runtime's own settings (rule 8: the stable-reading settle), not only the handheld engine's."""
+        import procmods_engine as pme
+        ctx = super().pm_live_context()
+        ctx.defaults = {**pme.defaults_for('dsb'), **dict(ctx.defaults or {})}
+        return ctx
 
     def pm_plan_point(self, p):
         """The commands DsbIO.apply sends for a SOURCE point of the datasheet (the calibrator sets the stimulus the meter is read against), then
@@ -932,6 +1213,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         if self.manual_entry:
             return True
         p = self._cur
+        if p is not None and self.hand_point(p):
+            return True
         if p is not None and p.get('run') and p['run']['direction'] == 'measure':
             r = p.get('_route')
             return not (r is not None and r.auto)
@@ -953,17 +1236,26 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         if not self.asset.get().strip():
             messagebox.showwarning('Instrument ID', 'Enter an instrument ID.')
             return
+        asked = len(points)
+        points = [p for p in points if not self.is_skipped(p)]                 # rule 12: a Not-tested section is never run
+        if not points:
+            self.status.set('The selected point(s) are in a section set to Not tested: nothing to run. Change the section\'s mode to run it.')
+            return
+        if len(points) < asked:
+            self.status.set(f'{asked - len(points)} selected point(s) are in sections set to Not tested and are left out.')
         points = self.pm_begin_run(points, self.asset.get().strip())
         if not points:
             self.status.set('Every selected point is skipped by a procedure modification.')
             return
         if not self.confirm_found_overwrite(points):
             return
-        if not self.fast_demo and (self.wants_connection() or (self.virtual and self.engine_model())) and self.io is None:
+        if not self.fast_demo and self.any_auto(points) and (self.wants_connection() or (self.virtual and self.engine_model())) and self.io is None:
             self.test_connection()
             if self.io is None:
                 return
         self.dsb_ref = {}                                           # references (bandwidth, flatness) are taken again at the start of every run
+        self._hookup_seen = None                                    # rule 9: the cables are asked once at the start of a Run and again only when the hook-up changes
+        self._hv_ok_key = None
         if self.io is not None:
             self.io.auto_ramp = self._auto_ramp()                   # the datasheet's option (default: straight to the test value, no ramp)
         self.stop = False
@@ -973,6 +1265,53 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
 
     def reset_extra_uuts(self):
         return []
+
+    # ---- rule 10 (reset once per session) and rule 7 (start-state check before the first point) ------------------------------------
+    def reset_skip_run(self):
+        """Worker-thread part of a Run that skips the reset: the calibrators are put in standby and the read-back is checked (the start-state check follows)."""
+        self.io.session_check()
+
+    def reset_then(self, proceed):
+        """The engine's reset (first Run of a session) or its skip, then the start-state check of every instrument that declares one, then the first point."""
+        super().reset_then(lambda: self._start_state_then(proceed))
+
+    def _start_state_then(self, proceed):
+        io = self.io
+        if io is None or self.fast_demo or not getattr(io, 'has_start_state_checks', lambda: False)():
+            proceed()
+            return
+        self.status.set('Checking the instruments\' start state (read-only) ...')
+
+        def done(results, exc):
+            if exc is not None:
+                self._save_cmd_log()
+                self._error(exc)
+                return
+            if not rules.failed(results):
+                proceed()
+                return
+            self.busy = False
+            self.status.set('Start-state check failed - run not started: ' + '; '.join(f'{r.instrument}: {r.name}' for r in rules.failed(results)))
+            self._save_cmd_log()
+            messagebox.showerror('Check the instrument settings', rules.failure_text(results))
+        self._work(io.start_state_check, done)
+
+    def _save_cmd_log(self):
+        """Rule 11: the command log goes to disk BEFORE an error dialog (what the instruments were told and answered is the evidence of the failure)."""
+        io = self.io
+        if io is not None:
+            try:
+                io.save_log()
+            except Exception:
+                pass
+
+    def _error(self, exc):
+        self._save_cmd_log()
+        super()._error(exc)
+
+    def _reset_failed(self, msg, skipped=False):
+        self._save_cmd_log()
+        super()._reset_failed(msg, skipped)
 
     def _next(self, points, i, previous):
         self._cur = points[i] if (i < len(points) and not self.stop) else None
@@ -988,12 +1327,12 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
             self.io.log.add('--', f'{p["id"]}: ' + (f'using {r.standard}: ' if r.auto else 'done by hand: ') + r.reason, 'ROUTE')
 
     def _prompt_setup(self, p):
-        if self.manual_entry:                       # nothing is rewired or driven: the technician only types readings
+        if self.hand_point(p):                      # nothing is rewired or driven: the technician only types readings
             return True
         return self._prompt_setup_driven(p)
 
     def _prompt_function(self, p):
-        if self.manual_entry:
+        if self.hand_point(p):
             return True
         if p.get('run') and p['run']['op'] != 'dmm':
             self._last_switch = p['switch']           # the wiring / set-up prompt of scope and generator points already says what to change
@@ -1001,7 +1340,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         return super()._prompt_function(p)
 
     def _high_voltage(self, p):
-        if self.manual_entry:                       # the program outputs nothing
+        if self.hand_point(p):                      # the program outputs nothing
             return False
         run = p.get('run') or {}
         if run.get('op') == 'scope_dc' and run.get('nominal') is not None:
@@ -1023,14 +1362,19 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         steps = []
         if run['op'] != 'std_flat' or not r.auto:
             steps.append(('Unit under test', self.uut_steps(p)))
+        hook = None
         if r.auto:
             std = r.standard
             if std == '5790B':
                 inp = (run['settings'].get('std_input') or ('WBND' if (run['frequency'] or 0) > WIDEBAND_ABOVE_HZ else 'INPUT1')).upper()
-                steps.append(('Connect', f'Unit under test output to the 5790B {STD_INPUT_TEXT.get(inp, inp)} input. The 5790B input impedance is not the generator\'s '
-                                         f'load: set the unit under test\'s load / termination as the datasheet says.'))
+                hook = (std, inp)
+                text = (f'Unit under test output to the 5790B {STD_INPUT_TEXT.get(inp, inp)} input. The 5790B input impedance is not the generator\'s '
+                        f'load: set the unit under test\'s load / termination as the datasheet says.')
             else:
-                steps.append(('Connect', f'Unit under test output to the {std} channel 1 input (50 Ω, AC coupled). The counter timebase is {self.counter_ref.get()}.'))
+                hook = (std, self.counter_ref.get())
+                text = f'Unit under test output to the {std} channel 1 input (50 Ω, AC coupled). The counter timebase is {self.counter_ref.get()}.'
+            if hook != self._hookup_seen:                              # rule 9: the cable prompt only when the hook-up changes (the unit-under-test steps stay: they set the point)
+                steps.append(('Connect', text))
             steps.append(('Reading', f'The program reads the {std} itself' + (' (the reference frequency first, then the test frequency)' if run['op'] == 'std_flat' else '') + '.'))
             if r.substituted:
                 steps.append(('Standard', f'The datasheet assigns {r.assigned}; {r.standard} is used instead ({r.reason}).'))
@@ -1039,7 +1383,10 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
                           (' as the level relative to the reference frequency, in dB.' if run['op'] == 'std_flat' else '.') +
                           (f' Done by hand: {r.reason}.' if r.reason else '')))
         steps.append(('Afterwards', 'Switch the unit under test output OFF when the reading has been taken.'))
-        return ui.confirm_steps(self.root, 'Check the setup', f'Set up for {p["section"]}', steps, facts=facts, ok='Done - continue')
+        ok = ui.confirm_steps(self.root, 'Check the setup', f'Set up for {p["section"]}', steps, facts=facts, ok='Done - continue')
+        if ok and hook is not None:
+            self._hookup_seen = hook
+        return ok
 
     def _out_note(self, p, on):
         run = p.get('run')
@@ -1122,14 +1469,32 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
         self._work(lambda: self.io.apply_reference(p, cancel=lambda: self.stop), done)
 
     def _ask_standard(self, points, i, p, key):
-        """The routed measuring standard reads the unit under test's output; on a problem the operator chooses: type the reading, skip, stop."""
+        """The routed measuring standard reads the unit under test's output; on a problem the operator chooses: type the reading, skip, stop.
+        Rule 8: the reading is polled until it is stable.  Rule 13: a reading typed (right-click > Enter reading manually) while the point is measured replaces
+        the automatic one when it arrives."""
         run, route = p['run'], p['_route']
-        self.status.set(f'Point {p["n"]}/{len(self.points)}: reading the {route.standard} ...')
+        self.status.set(f'Point {p["n"]}/{len(self.points)}: reading the {route.standard} (waiting for a stable reading) ...')
+        self._mo_current = p
 
         def finish(out, exc):
             if exc is None:
                 reading, raw = out
-                self._store_measured(p, reading, raw, route)
+                typed = self.mo_take_pending(p)
+                self._mo_current = None
+                if typed is not None:                               # typed by the technician while the standard was being read: the log keeps the automatic reading
+                    self.mo_commit(p, typed, auto=float(reading))
+                    if self.io is not None:
+                        self.io.standby()
+                else:
+                    self._store_measured(p, reading, raw, route)
+                self.root.after(30, lambda: self._next(points, i + 1, key))
+                return
+            armed = self.mo_take_pending(p) if not isinstance(exc, hh.Cancelled) else None
+            self._mo_current = None
+            if armed is not None:                                   # the automatic reading failed but a typed one was armed: use it (logged with the reason)
+                self.mo_commit(p, armed, auto=None, why=str(exc))
+                if self.io is not None:
+                    self.io.standby()
                 self.root.after(30, lambda: self._next(points, i + 1, key))
                 return
             if isinstance(exc, hh.Cancelled):
@@ -1138,6 +1503,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
             if not isinstance(exc, (drivers.InstrumentError, drivers.TransportError)) and not isinstance(exc, OSError):
                 self._error(exc)
                 return
+            self._save_cmd_log()                                    # rule 11: the log is on disk before the dialog
             choice = messagebox.askyesnocancel('Measuring standard', f'{route.standard} could not give a reading for this point:\n\n{exc}\n\n'
                                                'Yes = type the standard\'s reading by hand.   No = skip this point.   Cancel = stop the run.')
             if choice is None:
@@ -1153,15 +1519,16 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
                 self._ask(points, i, p, key)
 
         def measure():
+            cancel = lambda: self.stop
             if run['op'] == 'std_flat':
                 key_ = DsbIO.flat_key(p)
                 if key_ not in self.dsb_ref:
                     self._confirm_on_ui(f'Reference frequency', [('Unit under test', f'Set the unit under test to the REFERENCE frequency {hh._fmt(run["reference_hz"], "Hz")} '
                                                                   f'(same level {hh._fmt(run["amplitude"], "V")}).')], p)
-                    v, _raw = self.io.read_reference(p, route)
+                    v, _raw = self.io.read_reference(p, route, cancel=cancel)
                     self.dsb_ref[key_] = v
                 self._confirm_on_ui('Test frequency', [('Unit under test', f'Set the unit under test to {hh._fmt(run["frequency"], "Hz")} (same level).')], p)
-            return self.io.measure(p, route, refs=self.dsb_ref)
+            return self.io.measure(p, route, refs=self.dsb_ref, cancel=cancel)
         self._work(measure, finish)
 
     def _confirm_on_ui(self, heading, steps, p):
@@ -1304,6 +1671,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin):
             header.append(('Standards', shown))
         if used.get('manual') and not self.manual_entry:
             header.append(('By hand', f'{used["manual"]} point(s) set up / read by the operator ([manual])'))
+        skipped = self.not_tested_sections()
+        if skipped:                                                    # rule 12: a section switched to Not tested is listed, never printed as failed or pending
+            header.append(('Not tested', '; '.join(f'{s} ({n} point(s))' for s, n in skipped)))
         unverified = sorted({(rec.get('route') or {}).get('standard') for rec in list(self.found.values()) + list(self.left.values())
                              if (rec.get('route') or {}).get('status') == 'unverified'} - {None, ''})
         if unverified:

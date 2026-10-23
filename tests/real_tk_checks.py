@@ -196,7 +196,7 @@ def checks_manager_windows():
     # the Verified column must fit inside the table's visible width
     total = sum(int(t.column(c, 'width')) for c in t['columns'])
     check('table columns fit the table', total <= t.winfo_width() + 4, (total, t.winfo_width()))
-    check('verified text in the row', str(t.item(pick, 'values')[5]).startswith(('Not verified', 'Verified')))
+    check('verified text in the row', str(t.item(pick, 'values')[5]).startswith(('Not verified', 'Verified')), t.item(pick, 'values'))
 
     def drive(fn):
         def go():
@@ -1696,6 +1696,47 @@ def checks_fluke_376():
 
 
 
+def checks_dsb_sections():
+    """Rule 12 on a real Tk: the section-mode control in the bar above the test points, the sidebar labels, a Not-tested section never pending."""
+    sys.path.insert(0, str(ROOT / 'tests'))
+    import dsb_fixtures as fx
+    import datasheet_builder_match as dm
+    import datasheet_builder_specs as dsp
+    import dsb_rules
+    import dsb_runtime as rt
+    root = tk.Tk()
+    ui.apply_theme(root)
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    root.geometry('1280x820+0+0')
+    ds = fx.dmm_34461a_like()
+    app = rt.DsbApp(root, dsp.export_spec(ds, plan=dm.match_datasheet(ds)).spec, demo=True)
+    pump(root, 20)
+    box = app.section_mode_box
+    secs = list(app.section_mode)
+    check('sections: the control is there, disabled until a section is chosen', str(box.cget('state')) == 'disabled' and tuple(box.cget('values')) == ('Automated', 'Typed by hand', 'Not tested'))
+    app.show_section.set(secs[1])
+    app.shell.section_picker.event_generate('<<ListboxSelect>>') if hasattr(app.shell.section_picker, 'event_generate') else None
+    app._sync_mode_box()
+    pump(root, 10)
+    check('sections: a chosen section enables it and names the section', str(box.cget('state')) == 'readonly' and secs[1] in app.section_caption.get(), app.section_caption.get())
+    box.set('Not tested')
+    box.event_generate('<<ComboboxSelected>>')
+    pump(root, 10)
+    check('sections: choosing Not tested changes the mode', app.section_mode[secs[1]] == dsb_rules.SKIP, app.section_mode)
+    check('sections: the sidebar label says so', app.section_label(secs[1]).endswith('(skip)'), app.section_label(secs[1]))
+    check('sections: none of its points is pending', all(app.skipped_unrecorded(p) for p in app.points if p['section'] == secs[1]))
+    app.busy = True
+    app._sync_mode_box()
+    check('sections: disabled during a run', str(box.cget('state')) == 'disabled')
+    app.busy = False
+    check('sections: no Tk callback errors', not errs, errs)
+    try:
+        root.destroy()
+    except tk.TclError:
+        pass
+
+
 if __name__ == '__main__':
     try:
         checks_handheld_dialogs()
@@ -1716,6 +1757,7 @@ if __name__ == '__main__':
         checks_run_queue_app()
         checks_k2000_adjustment()
         checks_8808a_adjustment()
+        checks_dsb_sections()
     except Exception:
         traceback.print_exc()
         sys.exit(1)

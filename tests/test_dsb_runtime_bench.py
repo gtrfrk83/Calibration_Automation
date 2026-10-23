@@ -95,8 +95,8 @@ class DmmRun(Base):
     def test_high_voltage_points_ask_once_and_output_once(self):
         app, io = self.run_dmm()
         hv = [d for d in self.h.dialogs if d[0] == 'box' and d[2] == 'HIGH VOLTAGE']
-        self.assertTrue(hv)
-        self.assertTrue(any('1000 V' in d[3] for d in hv))
+        self.assertEqual(len(hv), 1, 'rule 9: one high-voltage question per hook-up group (all of these points are in the one voltage / ohms hook-up)')
+        self.assertTrue(any(p['applied']['value'] == 1000 for p in app.points if p['run']['kind'] == 'DCV'), 'the group does reach 1000 V')
         o = [t for _i, t in outs(H.wire(io))]
         self.assertEqual(len(o), len(set(zip(o, range(len(o))))), 'each point is output exactly once')
         self.assertEqual(sum(1 for t in o if t.startswith('OUT 1000V')), 1)

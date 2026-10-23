@@ -80,6 +80,12 @@ class GridEntry:
         p = self.point(iid)
         if p is None:
             return False
+        allows = getattr(self.app, 'grid_allows', None)            # an app may allow typing for some points only (user-built datasheets: a section set to Typed by hand)
+        if allows is not None:
+            ok, why = allows(p)
+            if not ok:
+                self.say(why)
+                return False
         self.close()
         try:
             self.tree.selection_set(iid)
@@ -215,6 +221,10 @@ class GridEntry:
         if self.entry is not None or not ch or not (ch.isalnum() or ch in '-+.'):
             return None
         sel = self.tree.selection()
+        allows = getattr(self.app, 'grid_allows', None)
+        q = self.point(sel[0]) if sel else None
+        if allows is not None and q is not None and not allows(q)[0]:
+            return None                                               # typing on a row that cannot take a reading is not a command: no message for every key
         if sel and self.open(sel[0], first=ch):
             self.entry.icursor('end')
             return 'break'
