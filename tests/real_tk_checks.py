@@ -1599,6 +1599,84 @@ def checks_fluke_365():
         pass
 
 
+def checks_fluke_376():
+    """The Fluke 376 performance verification on a real Tk: the Manager lists it under Automated Calibrations only; its run window is the ordinary handheld window
+    (38 points, no typed grid, Performance Verification wording); the voltage, coil, iFlex simulation and iFlex-on-coil cable-change prompts."""
+    import handheld_dmm as HH
+    import Calibration_Procedure_Manager as CPM
+    CPM.init_db()
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    shots = os.environ.get('SHOT_DIR')
+
+    def grab(win, tag):
+        if not shots:
+            return
+        from PIL import ImageGrab
+        win.update()
+        ImageGrab.grab(bbox=(win.winfo_rootx(), win.winfo_rooty(), win.winfo_rootx() + win.winfo_width(), win.winfo_rooty() + win.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shots, f'{tag}_{THEME}.png'))
+    m = CPM.Manager(root)
+    root.geometry('1260x800+0+0')
+    pump(root, 20)
+    names = lambda: [m.table.item(k, 'values')[0] for k in m.table.get_children()]  # noqa: E731
+    check('376: listed in Automated Calibrations', m.view_kind == 'verification' and 'Fluke 376 Clamp Meter Performance Verification' in names(), names())
+    for k in m.table.get_children():
+        if m.table.item(k, 'values')[0].startswith('Fluke 376'):
+            m.table.selection_set(k)
+            m.table.see(k)
+            row = m.table.item(k, 'values')
+    pump(root, 10)
+    check('376: manufacturer, model, category, status', row[1:4] == ('Fluke', '376', 'Clamp Meter') and 'Ready' in row[4], row)
+    grab(root, 'fluke376_manager_automated')
+    m.view_nb.select(m.view_pages['manual'])
+    pump(root, 20)
+    check('376: not in Manual Calibrations', not any(n.startswith('Fluke 376') for n in names()), names())
+    root.destroy()
+    # --- the run window
+    root = tk.Tk()
+    root.report_callback_exception = lambda *a: errs.append(a)
+    spec = HH.load_spec('fluke_376_pv.json')
+    app = HH.App(root, '376', demo=False, spec=spec)
+    root.geometry('1320x800+0+0')
+    pump(root, 30)
+    app.asset.set('A-376')
+    app.serial.set('S-376')
+    tree = app.tree
+    check('376 run window: 38 points, ordinary handheld window (no typed grid, queue on)', len(tree.get_children()) == 38 and not hasattr(app, 'grid_entry')
+          and app.QUEUE_SUPPORTED is True and 'Manual Calibration' not in root.title(), root.title())
+    tree.selection_set(tree.get_children()[29])                  # iFlex simulation 3 mV: the point detail shows the iFlex hook-up
+    pump(root, 10)
+    grab(root, 'fluke376_run_window')
+    pts = {p['n']: p for p in app.points}
+
+    def prompt(n, tag):
+        seen = {}
+
+        def go():
+            win = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel)][0]
+            pump(root, 5)
+            seen['clipped'] = [c for c in walk(win) if c.winfo_ismapped() and not inside(win, c)]
+            seen['text'] = ' '.join(str(c.cget('text')) for c in walk(win) if isinstance(c, (ttk.Label, tk.Label)))
+            grab(win, tag)
+            win.destroy()
+        root.after(500, go)
+        seen['ok'] = app._prompt_setup(pts[n])
+        return seen
+    for n, tag, words in ((1, 'fluke376_prompt_voltage', 'VΩ'), (23, 'fluke376_prompt_coil_aux', 'REMOVE the test leads'), (24, 'fluke376_prompt_coil_20a', '20 A'),
+                          (30, 'fluke376_prompt_iflex_sim', '2 mm jack'), (35, 'fluke376_prompt_iflex_coil', 'iFlex loop')):
+        r = prompt(n, tag)
+        check(f'376 prompt point {n}: shown, nothing clipped, says what it must', not r['clipped'] and words in r['text'], (r['clipped'], r['text'][:300]))
+    check('376: no Tk callback errors', not errs, errs)
+    try:
+        root.destroy()
+    except tk.TclError:
+        pass
+
+
+
+
 if __name__ == '__main__':
     try:
         checks_handheld_dialogs()
@@ -1608,6 +1686,7 @@ if __name__ == '__main__':
         checks_manager_tabs()
         checks_mdd_manual()
         checks_fluke_365()
+        checks_fluke_376()
         checks_standards_specs()
         checks_standards_specs_small()
         checks_import_package()

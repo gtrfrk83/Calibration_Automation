@@ -1571,8 +1571,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             unc = ''
             if self.has_uncertainty(p):
                 unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
-                                                        frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None),
-                                                        standard=self.calibrator_model())
+                                                        frequency=p['applied'].get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None),
+                                                        standard=self.calibrator_model())      # unc_unit (opt-in, Fluke 376 iFlex simulation): the source is volts, the reading is amps
             a = p.get('applied') or {}
             freq = a.get('frequency') if p['kind'] in ('ACV', 'ACI') and p['display_unit'] != 'kHz' and not p.get('no_freq_suffix') else None      # no_freq_suffix: opt-in per point (Fluke 170 series Hz-unit frequency rows)
             row = report_pdf.cert_row(f'{p["range"]} range' if p['range'] else describe(p), p['nominal'], clean(Decimal(p['low'])), clean(Decimal(p['high'])),

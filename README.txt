@@ -202,7 +202,7 @@ Procedures/Agilent_34411A_Verification.py
 
 Fluke 110 / 113 / 114 / 115 / 116 / 117 handheld meters (manual-reading procedures)
 -------------------------------------------------------------------------------
-Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179, Fluke 365 (names in diagrams/README_fluke365.txt), Klein MM325)
+Hook-up diagrams (all handheld meters: Fluke 110-117, Fluke 87V, Fluke 77 Series IV, Fluke 175 / 177 / 179, Fluke 365 (names in diagrams/README_fluke365.txt), Fluke 376 (names in diagrams/README_fluke376.txt), Klein MM325)
   hookups.py holds the connection tables; specs/build_hookups.py (needs Pillow) draws diagrams/hook_<meter>_<calibrator>_<group>.png
   (24 pictures). The text and picture follow the Calibrator selector, because the two calibrators wire differently:
       voltage / ohms        5560A: OUTPUT V/ohm HI / LO            5522A: NORMAL HI / LO
@@ -306,6 +306,21 @@ Procedures/Fluke_365_Verification.py   (engine: handheld_dmm.py; spec: specs/flu
   "Change the function" at every dial change, ONE high-voltage confirmation per hook-up group (30 V and above). Run queue as the other handhelds.
   Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf; the coil points print the calibrator's current uncertainty at the output current (point / 20), not multiplied by 20 (owner-chosen convention), TAR / TUR against the meter-reading tolerance.
   Not included: the calibration ADJUSTMENT (not needed). Rebuild the spec after editing the table:  python3 specs/build_fluke_365_spec.py     Demo with:  python Procedures/Fluke_365_Verification.py --demo
+
+Fluke 376 clamp meter (automated performance verification: lists on the Automated Calibrations tab; family spec 374 / 375 / 376 / 376-II, only the 376 is registered)
+-------------------------------------------------------------------------------------------------
+Procedures/Fluke_376_Verification.py   (engine: handheld_dmm.py; spec: specs/fluke_376_pv.json built by specs/build_fluke_376_spec.py; diagrams: diagrams/README_fluke376.txt)
+  38 points = Table 1 "Performance Tests" of the Fluke 374 / 375 / 376 / 376-II Calibration Manual (printed pp. 3-4): AC volts 4 (10 V and 500 V at 50 Hz, 900 V at 50 Hz, 500 V at 500 Hz),
+  DC volts 8 (-500, 10, 500, 900 V and -250, 50, 250, 450 mV), ohms 7 (60 ohm .. 54 kohm), capacitance 3 (10, 500, 900 uF), AC amps 4 and DC amps 3 (0.2 / 10 / 18 / 6 A driven through the 50-turn
+  coil: the meter reads 50 x the calibrator current), iFlex simulated 5 (3 to 75 mV at 50 Hz, 750 mV at 500 Hz applied to the iFlex input) and iFlex with the 50-turn coil 4.
+  The spec carries the model columns (374: 28 points, 375: 34, 376 and 376-II: 38); this launcher runs the 376.
+  Limits are the table's own, unchanged; six rows whose printed limit is not the full or half published accuracy (NOTES.md: the accuracy is from the fluke.com page, UNVERIFIED) are flagged in the point note.
+  Calibrator: Fluke 5522A or 5560A (the manual names a 55xxA), automatic or Manual. The meter has no remote interface: you type the display reading in the reading window of each point.
+  Prompts as the other handhelds: hook-up dialog only when the hook-up group changes (test leads; coil on the low- or high-current output; iFlex simulation leads; iFlex loop on the coil),
+  "Change the function" at every dial change, ONE high-voltage confirmation per hook-up group (30 V and above). Run queue as the other handhelds.
+  Report: PDF 'Calibration Data', asset-MM-DD-YYYY.pdf; the coil points print the calibrator's current uncertainty at the output current (not multiplied by 50, owner-chosen convention),
+  the iFlex simulated points the calibrator's AC volts uncertainty (TAR / TUR blank there).
+  Not included: the calibration ADJUSTMENT (Table 3). Rebuild the spec after editing the table:  python3 specs/build_fluke_376_spec.py     Demo with:  python Procedures/Fluke_376_Verification.py --demo
 
 Fluke 175 / 177 / 179 (handheld multimeters, one spec for the family)
 -------------------------------------------------------------------
