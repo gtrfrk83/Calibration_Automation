@@ -4,13 +4,13 @@
   "manufacturer": "Fluke",
   "model": "5522A",
   "description": "Calibrator",
-  "confidence_text": "[Not Specified]",
+  "confidence_text": "99 % (5522A Operators Manual, General Specifications, printed p. 1-8: \"Specification Confidence Interval 99 %\"; the SpecTrack sheet itself prints [Not Specified])",
   "reference": "Mfg Specs: I Drive",
   "revision": "0",
   "author": "B.Miles",
   "approved_by": "Pack Jr, Robert E",
   "approve_date": "3/19/2026",
-  "confidence_pct": null,
+  "confidence_pct": 99.0,
   "source_pdf": "5522_specs.pdf",
   "sheet_generated": "10/21/2026 12:40:18 PM",
   "built": "2026-10-21T12:57:19"
@@ -23,7 +23,8 @@
   "5": "2.5 Vpp into 50 Ohm",
   "6": "Frequency limited to 1 kHz with LCOMP ON",
   "7": "Frequency limited to 440 Hz with LCOMP ON",
-  "8": "Four 1-year rows are deliberately MORE CONSERVATIVE than the 5522A manual (R0, printed pp.1-9 and 1-11), so that a reported uncertainty can never fall below the laboratory's A2LA scope. Kept on purpose; do not 'correct' them to the manual. Row / this file / manual: DC current 329.999 mA: 100 ppm + 30 uA / 100 ppm + 2.5 uA; DC current 1.1 to 2.99999 A: 380 ppm + 480 uA / 380 ppm + 40 uA; Resistance 11 to 32.99999 Mohm: 500 ppm / 250 ppm (floor 2500 ohm unchanged); Resistance 110 to 329.9999 Mohm: 6000 ppm / 3000 ppm (floor 100000 ohm unchanged). Instruction from the laboratory, 2026-10-21. Limits in this file are unchanged by this note."
+  "8": "Four 1-year rows are deliberately MORE CONSERVATIVE than the 5522A manual (R0, printed pp.1-9 and 1-11), so that a reported uncertainty can never fall below the laboratory's A2LA scope. Kept on purpose; do not 'correct' them to the manual. Row / this file / manual: DC current 329.999 mA: 100 ppm + 30 uA / 100 ppm + 2.5 uA; DC current 1.1 to 2.99999 A: 380 ppm + 480 uA / 380 ppm + 40 uA; Resistance 11 to 32.99999 Mohm: 500 ppm / 250 ppm (floor 2500 ohm unchanged); Resistance 110 to 329.9999 Mohm: 6000 ppm / 3000 ppm (floor 100000 ohm unchanged). Instruction from the laboratory, 2026-10-21. Limits in this file are unchanged by this note.",
+  "9": "CONFIDENCE LEVEL: 99 %, set 2026-10-22 on the 5522A Operators Manual, General Specifications, printed p. 1-8 (PDF page 28 of \"5522 manual.pdf\"), read from the rendered page image: \"Specification Confidence Interval ... 99 %\". The SpecTrack sheet this file was built from prints [Not Specified], so the earlier import carried no level and the budget fell back to divisor 2. With 99 % the coverage divisor is 2.576 (specmanager.divisor). Only this metadata changed; no specification number was touched. See NOTES.md, \"Confidence level rule (lab reports at 95 %, k = 2)\"."
  },
  "functions": [
   {
@@ -28027,11 +28028,6 @@
   }
  ],
  "problems": [
-  {
-   "level": "warn",
-   "where": "standard",
-   "what": "Confidence level is not specified on the sheet; set the coverage divisor in the manager before relying on this standard."
-  },
   {
    "level": "warn",
    "where": "Current, AC [Sinewave, LCOMP on] / 32.999 mA, 10 Hz to 100 Hz (p.10)",

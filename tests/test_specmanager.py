@@ -25,14 +25,14 @@ class T(unittest.TestCase):
         cls.sc = uncertainty.load()
 
     def test_divisor(self):
-        self.assertEqual(self.a.divisor()[0], 2.0)
-        self.assertEqual(self.b.divisor()[0], 2.0)
+        self.assertAlmostEqual(self.a.divisor()[0], 2.576, 9)      # 5522A: the manual prints 99 % (since 2026-10-22; was no level, divisor 2)
+        self.assertEqual(self.b.divisor()[0], 2.0)                 # 5560A: the 95 % column is stored
 
-    def test_wizard_example(self):                       # 100 mV on the 5522A: 1.5 uV standard, 28.9 nV resolution, EMU 3 uV
+    def test_wizard_example(self):                       # 100 mV on the 5522A: 3 uV / 2.576 = 1.1646 uV standard, 28.9 nV resolution, EMU 2.33 uV (was 1.5 uV and 3.0 uV with divisor 2)
         b = ub.build('DCV', 0.1, 'V', standard=self.a, scope=self.sc)
-        self.assertAlmostEqual(b.components[0].u, 1.5e-6, 12)
+        self.assertAlmostEqual(b.components[0].u, 3e-6 / 2.576, 12)
         self.assertAlmostEqual(b.components[1].u, 28.87e-9, 11)
-        self.assertAlmostEqual(b.emu, 3.0e-6, 8)
+        self.assertAlmostEqual(b.emu, 2.33e-6, 8)
 
     def test_reported_never_below_cmc_or_budget(self):
         for kind, v, f in [('DCV', .1, None), ('DCV', 10, None), ('ACV', 1, 1e3), ('DCI', .01, None), ('OHM', 100, None)]:
@@ -44,7 +44,7 @@ class T(unittest.TestCase):
     def test_audit(self):
         b = ub.build('DCV', 0.1, 'V', standard=self.a, scope=self.sc)
         self.assertEqual(ub.audit(1e-6, b)[0], ub.UNDER_CMC)
-        self.assertEqual(ub.audit(2.5e-6, b)[0], ub.UNDER_BUDGET)
+        self.assertEqual(ub.audit(2.2e-6, b)[0], ub.UNDER_BUDGET)      # CMC 1.69 uV < 2.2 uV < budget 2.33 uV (was 2.5 uV < 3.0 uV with divisor 2)
         self.assertEqual(ub.audit(b.reported, b)[0], ub.OK)
         self.assertEqual(ub.audit(1.0, ub.build('DCV', 5e6, 'V', standard=self.a, scope=self.sc))[0], ub.NOT_IN_SCOPE)
 
