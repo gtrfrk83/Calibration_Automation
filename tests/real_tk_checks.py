@@ -1467,6 +1467,61 @@ def checks_k2000_adjustment():
     app.disconnect()
     app.on_close()
 
+def checks_8808a_adjustment():
+    """Fluke 8808A guided adjustment (demo on the simulated 8808A): the calibration-change notice is visible, nothing is clipped at 1300x860, the whole flow runs
+    (connect, record, enter calibration mode, 124 points, EXIT), the window cannot be closed while the calibration mode is open, and nothing is recorded in a demo."""
+    import importlib
+    mod = importlib.import_module('Fluke_8808A_Adjustment')
+    root = tk.Tk()
+    app = mod.App(root, demo=True)
+    root.geometry('1300x860+0+0')
+    pump(root, 30)
+    notice = [w for w in walk(root) if isinstance(w, ttk.Label) and 'no SAVE step' in str(w.cget('text'))]
+    check('8808a adjustment: change notice shown', bool(notice) and inside(root, notice[0]))
+    clipped = [str(w.cget('text')) for w in walk(root) if isinstance(w, (ttk.Button, ttk.Combobox, ttk.Entry)) and w.winfo_ismapped() and not inside(root, w)]
+    check('8808a adjustment: nothing clipped', not clipped, clipped)
+    check('8808a adjustment: starts closed and unconnected', str(app.btn_start['state']) == 'disabled' and str(app.btn_enter['state']) == 'disabled' and str(app.btn_run['state']) == 'disabled')
+    app.asset.set('8808A-REAL-TK')
+    app.serial.set('SIM1')
+    app.tech.set('Tester')
+    with mock.patch.object(messagebox, 'askyesno', return_value=True), mock.patch.object(messagebox, 'askyesnocancel', return_value=True), \
+            mock.patch.object(messagebox, 'askokcancel', return_value=True), mock.patch.object(messagebox, 'showinfo'), mock.patch.object(messagebox, 'showwarning') as warn, \
+            mock.patch.object(messagebox, 'showerror') as err, mock.patch.object(ui, 'confirm_steps', return_value=True), mock.patch.object(app, 'ask_value', side_effect=lambda t, p, default: default):
+        app.connect()
+        pump(root, 5)
+        check('8808a adjustment: connected (demo)', app.io is not None and 'DEMO' in app.pill_meter.cget('text'))
+        app.start_record()
+        check('8808a adjustment: record started, mode still closed', app.session is not None and not app.session.cal_mode and 'closed' in app.pill_cal.cget('text'))
+        app.enter_calibration()
+        check('8808a adjustment: calibration mode open', app.session.cal_mode and 'OPEN' in app.pill_cal.cget('text'))
+        app.on_close()
+        check('8808a adjustment: cannot be closed while the mode is open', root.winfo_exists() and warn.called)
+        n = 0
+        while app.session.next_step() and n < 400:
+            st = app.session.next_step()
+            if st['id'] in mod.adj.own_standard_ids(app.session.cal_key):
+                app._bench.external = ('V', 1.9, float(st['point']['value']))
+            else:
+                app._bench.external = None
+            app.run_next()
+            n += 1
+        pump(root, 5)
+        check('8808a adjustment: all 124 points ran, none failed', app.session.all_done() and not err.called and len(app.io.dmm.t.constants) == 124, (n, err.call_args_list[:1]))
+        check('8808a adjustment: Finish is offered only now', str(app.btn_finish['state']) == 'normal' and str(app.btn_run['state']) == 'disabled')
+        app.finish()
+        pump(root, 5)
+    check('8808a adjustment: finished and mode left', app.session.finished and not app.session.cal_mode and 'closed' in app.pill_cal.cget('text'))
+    rows = [app.log_table.item(i, 'values') for i in app.log_table.get_children()]
+    check('8808a adjustment: audit log filled', len(rows) > 500, len(rows))
+    check('8808a adjustment: demo record is in memory only', app.audit.path == ':memory:' and 'DEMO' in app.pill_run.cget('text'))
+    shots = os.environ.get('PKG_SHOTS')
+    if shots:
+        from PIL import ImageGrab
+        x, y = root.winfo_rootx(), root.winfo_rooty()
+        ImageGrab.grab(bbox=(x, y, x + root.winfo_width(), y + root.winfo_height()), xdisplay=os.environ['DISPLAY']).save(Path(shots) / f'8808a_adjustment_{THEME}.png')
+    app.disconnect()
+    app.on_close()
+
 
 
 if __name__ == '__main__':
@@ -1486,6 +1541,7 @@ if __name__ == '__main__':
         checks_dsb_dialogs_fit()
         checks_run_queue_app()
         checks_k2000_adjustment()
+        checks_8808a_adjustment()
     except Exception:
         traceback.print_exc()
         sys.exit(1)

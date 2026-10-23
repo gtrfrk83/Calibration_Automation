@@ -1,0 +1,795 @@
+{
+ "entries": [
+  {
+   "call": "'VDC'",
+   "case": "Fluke8808ACal.select_function[before *TER]",
+   "log": [],
+   "method": "Fluke8808ACal.select_function",
+   "result": "raised InstrumentError: A function can only be selected in the calibration mode while the meter is idle (not inside another function).",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.enter_cal_mode",
+   "log": [
+    "8808A|>>|*TER",
+    "8808A|<<|Select a Function or input EXIT to QUIT!"
+   ],
+   "method": "Fluke8808ACal.enter_cal_mode",
+   "result": "returned Reply(lines=['Select a Function or input EXIT to QUIT!'], prompts=[], recommended=None, messages=[], wait=False, idle=True, unknown=[])",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "*TER"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "Select a Function or input EXIT to QUIT!"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.enter_cal_mode[twice]",
+   "log": [],
+   "method": "Fluke8808ACal.enter_cal_mode",
+   "result": "raised InstrumentError: The calibration mode was already entered in this session (*TER is sent once).",
+   "wire": []
+  },
+  {
+   "call": "'XYZ'",
+   "case": "Fluke8808ACal.select_function[bad name]",
+   "log": [],
+   "method": "Fluke8808ACal.select_function",
+   "result": "raised InstrumentError: XYZ is not a calibration function of the 8808A (VDC, VAC, ADC, AAC, OHMS, FREQ).",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.confirm_value[no value yet]",
+   "log": [],
+   "method": "Fluke8808ACal.confirm_value",
+   "result": "raised InstrumentError: There is no recommended value to confirm.",
+   "wire": []
+  },
+  {
+   "call": "'VDC'",
+   "case": "Fluke8808ACal.select_function[VDC]",
+   "log": [
+    "8808A|>>|VDC",
+    "8808A|<<|0 V, 0 HZ"
+   ],
+   "method": "Fluke8808ACal.select_function",
+   "result": "returned Reply(lines=['0 V, 0 HZ'], prompts=[], recommended=Recommended(value=0.0, unit='V', scale=Decimal('1'), hz=0.0, w4=False, raw='0 V, 0 HZ'), messages=[], wait=False, idle=False, unknown=[])",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "VDC"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "0 V, 0 HZ"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "'1e3'",
+   "case": "Fluke8808ACal.set_reference[bad text]",
+   "log": [],
+   "method": "Fluke8808ACal.set_reference",
+   "result": "raised InstrumentError: CALREF takes a plain number, not '1e3'.",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.confirm_value",
+   "log": [
+    "8808A|>>|<Enter key: empty line>",
+    "8808A|<<|=>"
+   ],
+   "method": "Fluke8808ACal.confirm_value",
+   "result": "returned Reply(lines=['=>'], prompts=['=>'], recommended=None, messages=[], wait=False, idle=False, unknown=[])",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     ""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.start_point[zero point]",
+   "log": [
+    "8808A|>>|<Enter key: empty line>",
+    "8808A|<<|WAIT...",
+    "8808A|<<|-0.1999 V, 0 HZ"
+   ],
+   "method": "Fluke8808ACal.start_point",
+   "result": "returned Reply(lines=['WAIT...', '-0.1999 V, 0 HZ'], prompts=[], recommended=Recommended(value=-0.1999, unit='V', scale=Decimal('1'), hz=0.0, w4=False, raw='-0.1999 V, 0 HZ'), messages=[], wait=True, idle=False, unknown=[])",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     ""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "WAIT..."
+    ],
+    [
+     "R",
+     "-0.1999 V, 0 HZ"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "'-0.1999'",
+   "case": "Fluke8808ACal.set_reference",
+   "log": [
+    "8808A|>>|CALREF -0.1999",
+    "8808A|<<|=>"
+   ],
+   "method": "Fluke8808ACal.set_reference",
+   "result": "returned 'accepted'",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "CALREF -0.1999"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "'-0.1999'",
+   "case": "Fluke8808ACal.set_reference[no prompt]",
+   "log": [
+    "8808A|>>|CALREF -0.1999"
+   ],
+   "method": "Fluke8808ACal.set_reference",
+   "result": "returned 'unconfirmed'",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "CALREF -0.1999"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.confirm_value[second]",
+   "log": [
+    "8808A|>>|<Enter key: empty line>",
+    "8808A|<<|=>"
+   ],
+   "method": "Fluke8808ACal.confirm_value",
+   "result": "returned Reply(lines=['=>'], prompts=['=>'], recommended=None, messages=[], wait=False, idle=False, unknown=[])",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     ""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "=>"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.start_point[nothing applied: refused]",
+   "log": [
+    "8808A|>>|<Enter key: empty line>",
+    "8808A|<<|!>"
+   ],
+   "method": "Fluke8808ACal.start_point",
+   "result": "raised CalibrationError: Fluke 8808A: the meter returned '!>' after the Enter key (start calibrating): it understood it but did not execute it (execution error). Nothing was sent again.",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     ""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "!>"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.read_late",
+   "log": [],
+   "method": "Fluke8808ACal.read_late",
+   "result": "returned Reply(lines=[], prompts=[], recommended=None, messages=[], wait=False, idle=False, unknown=[])",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.exit_cal",
+   "log": [
+    "8808A|>>|EXIT",
+    "8808A|>>|*ESR?",
+    "8808A|<<|0"
+   ],
+   "method": "Fluke8808ACal.exit_cal",
+   "result": "returned []",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "EXIT"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.cleanup[not in calibration]",
+   "log": [
+    "8808A|>>|LOCS"
+   ],
+   "method": "Fluke8808ACal.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "LOCS"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.enter_cal_mode[no banner]",
+   "log": [
+    "8808A|>>|*TER"
+   ],
+   "method": "Fluke8808ACal.enter_cal_mode",
+   "result": "raised CalibrationError: Fluke 8808A: *TER was not answered with \"Select a Function or input EXIT to QUIT!\" (got: nothing). The meter is not in the calibration mode. The manual describes the CAL seal and the Cal Enable button only for the front-panel method (p. 3-11) and does not say whether *TER needs them.",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "*TER"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.enter_cal_mode[error prompt]",
+   "log": [
+    "8808A|>>|*TER",
+    "8808A|<<|!>"
+   ],
+   "method": "Fluke8808ACal.enter_cal_mode",
+   "result": "raised CalibrationError: Fluke 8808A: the meter returned '!>' after *TER: it understood it but did not execute it (execution error). Nothing was sent again.",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "*TER"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "!>"
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.start_point[no completion]",
+   "log": [
+    "8808A|>>|<Enter key: empty line>",
+    "8808A|<<|WAIT..."
+   ],
+   "method": "Fluke8808ACal.start_point",
+   "result": "raised StepIndeterminate: The meter did not say the point was finished within 0.05 s (last text: WAIT...). The Enter key was NOT sent again: look at the meter display (flashing star = still calibrating) before deciding.",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     ""
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R",
+     "WAIT..."
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "sleep",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "sleep",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "sleep",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "sleep",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "sleep",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.cleanup[in calibration]",
+   "log": [
+    "8808A|>>|EXIT",
+    "8808A|>>|LOCS"
+   ],
+   "method": "Fluke8808ACal.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "EXIT"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     0.01
+    ],
+    [
+     "R!",
+     "simulated read timed out (no pending reply)"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     "LOCS"
+    ]
+   ]
+  },
+  {
+   "call": "''",
+   "case": "Fluke8808ACal.write[Enter key]",
+   "log": [
+    "8808A|>>|<Enter key: empty line>"
+   ],
+   "method": "Fluke8808ACal.write",
+   "result": "returned None",
+   "wire": [
+    [
+     "sleep",
+     0.0
+    ],
+    [
+     "W",
+     ""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Fluke8808ACal.reset_to_defaults",
+   "log": [
+    "8808A|>>|*RST",
+    "8808A|--|input buffer cleared after the *RST settle: stray prompts / banner lines are not read as replies",
+    "8808A|>>|*CLS",
+    "8808A|>>|*OPC?",
+    "8808A|<<|1",
+    "8808A|>>|*ESR?",
+    "8808A|<<|0",
+    "8808A|>>|REMS",
+    "8808A|>>|FORMAT 1",
+    "8808A|>>|FORMAT?",
+    "8808A|<<|1",
+    "8808A|>>|TRIGGER 1",
+    "8808A|>>|TRIGGER?",
+    "8808A|<<|1",
+    "8808A|>>|RATE S",
+    "8808A|>>|RATE?",
+    "8808A|<<|S",
+    "8808A|>>|*ESR?",
+    "8808A|<<|0"
+   ],
+   "method": "Fluke8808ACal.reset_to_defaults",
+   "result": "returned ResetReport(instrument='8808A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='*ESR? = 0'), ResetStep(name='re-enter remote (REMS)', ok=True, detail=''), ResetStep(name='reply format 1 (FORMAT 1, read back)', ok=True, detail='1'), ResetStep(name='internal trigger (TRIGGER 1, read back)', ok=True, detail='1'), ResetStep(name='slow rate (RATE S, read back)', ok=True, detail='S'), ResetStep(name='event status after the reset', ok=True, detail='no error bits')], warnings=[])",
+   "wire": [
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "REMS"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "FORMAT 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "FORMAT?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "TRIGGER 1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "TRIGGER?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "W",
+     "RATE S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "RATE?",
+     "S"
+    ],
+    [
+     "sleep",
+     0.15
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  }
+ ],
+ "name": "fluke_8808a_cal",
+ "schema": 1
+}

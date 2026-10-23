@@ -1,0 +1,3874 @@
+{
+ "schema": 1,
+ "kind": "bench-dmm-adjustment-dialog",
+ "instrument": "Fluke 8808A",
+ "source": "Fluke 8808A Digital Multimeter Calibration Manual (October 2008)",
+ "method": "RS-232 Calibration (Manual): *TER and the function / CALREF / Enter dialog (pp. 3-16, 3-17)",
+ "general": [
+  "This procedure changes the calibration constants of the Fluke 8808A. The manual: \"Meter adjustments, or calibration, should be performed at the desired interval, or whenever a verification test indicates a Meter function is out of tolerance\" (p. 3-11). Run the performance verification (As Found) first and again afterwards (As Left).",
+  "Warm-up: one half hour to full uncertainty specifications (General Specifications, p. 1-9). The equipment is that of Table 3-1 (p. 3-3): Fluke 5700A with 5725A amplifier (volts, current), Fluke 271 or equivalent for frequency, Fluke 5520A for the resistance adjustment, the low thermal 4-wire short (Fluke PN 2653346) for the DC zero points.",
+  "Method used here: \"RS-232 Calibration (Manual)\" (p. 3-16): *TER, then for each function the function name, an optional CALREF, the Enter key to confirm the value, the Enter key to start the point. The 8808A has no front-panel-free \"save\": the manual describes no save, lock, password or date command.",
+  "Once a function is selected, ALL of its calibration points must be calibrated before the calibration process is left; otherwise a CAL ERROR shows in the display (p. 3-16). Each function is therefore run as a whole.",
+  "Current: use the mA input terminal for the low ranges (ADC ranges 1 to 4, AAC ranges 1 and 2) and the 10 A input terminal for the high ranges (ADC ranges 5 and 6, AAC ranges 3 and 4); for a ZERO point of a current function all test leads are removed (p. 3-16).",
+  "Frequency: set the calibrator to 1.9 volts for the frequency calibration input (p. 3-16).",
+  "When the meter returns \"W4\" after the recommended value, 4-wire compensation is enabled on the input (p. 3-17). When it returns \"Disconnect Test Leads!\" all test leads are removed; \"Connect to mA socket!\" / \"Connect to 10A socket\" name the terminal to use (p. 3-17).",
+  "Send EXIT to leave the calibration mode at any time; a function that has not been completely calibrated then shows CAL ERROR (p. 3-16)."
+ ],
+ "equipment": {
+  "table": "Table 3-1 (p. 3-3)",
+  "rows": [
+   [
+    "Volts dc",
+    "Calibrator",
+    "Fluke 5700A",
+    "Figure 3-1"
+   ],
+   [
+    "Volts dc",
+    "4-wire short",
+    "Fluke low thermal 4-wire short or equivalent (Fluke PN 2653346)",
+    ""
+   ],
+   [
+    "Volts ac",
+    "Calibrator + amplifier",
+    "Fluke 5700A + Fluke 5725A",
+    "Figure 3-1"
+   ],
+   [
+    "Resistance",
+    "Calibrator",
+    "Fluke 5700A",
+    "Figures 3-2 and 3-3"
+   ],
+   [
+    "Amps dc",
+    "Calibrator + amplifier",
+    "Fluke 5700A + Fluke 5725A",
+    "Figures 3-4 and 3-5"
+   ],
+   [
+    "Amps dc",
+    "4-wire short",
+    "Fluke low thermal 4-wire short or equivalent (Fluke PN 2653346)",
+    ""
+   ],
+   [
+    "Amps ac",
+    "Calibrator + amplifier",
+    "Fluke 5700A + Fluke 5725A",
+    "Figures 3-4 and 3-5"
+   ],
+   [
+    "Frequency",
+    "Function generator",
+    "Fluke 271 or equivalent",
+    "Requires frequency specification better than 0.0025 %"
+   ],
+   [
+    "Resistance adjust",
+    "Calibrator",
+    "Fluke 5520A",
+    "Requires resistance accuracy better than 0.0045 %"
+   ]
+  ],
+  "requirements": {
+   "frequency_spec_pct": "0.0025",
+   "resistance_accuracy_pct": "0.0045"
+  },
+  "note": "Table 3-9 names the Fluke 5700A / 5725A for volts and current, the Fluke 5520A for frequency and resistance, and says the 5520A must be characterized with an 8508A on four DC current ranges (200 uA, 2000 uA, 200 mA, 2 A)."
+ },
+ "times": {
+  "warmup_min": 30,
+  "point_timeout_s": 180,
+  "quiet_s": 1.5,
+  "settle_s": {
+   "DCV": 8,
+   "ACV": 15,
+   "DCI": 8,
+   "ACI": 15,
+   "OHM": 8,
+   "OHM_HIGH": 15,
+   "FREQ": 8
+  }
+ },
+ "times_note": "Only warmup_min is a manual figure (p. 1-9). point_timeout_s, quiet_s and the settle times are ENGINEERING CHOICES of this program (UNVERIFIED: the manual gives no duration for a point and no reply timing).",
+ "functions": [
+  {
+   "id": "VDC",
+   "command": "VDC",
+   "order": 1,
+   "title": "Volts DC",
+   "section": "Volts DC: zero point with the 4-wire short, gains with the 5700A / 5725A (Table 3-9, steps 1 to 21)",
+   "steps": [
+    "S001",
+    "S002",
+    "S003",
+    "S004",
+    "S005",
+    "S006",
+    "S007",
+    "S008",
+    "S009",
+    "S010",
+    "S011",
+    "S012",
+    "S013",
+    "S014",
+    "S015",
+    "S016",
+    "S017",
+    "S018",
+    "S019",
+    "S020",
+    "S021"
+   ],
+   "count": 21
+  },
+  {
+   "id": "VAC",
+   "command": "VAC",
+   "order": 2,
+   "title": "Volts AC",
+   "section": "Volts AC: zero with the calibrator in standby or disconnected, gains at 1 kHz with the 5700A / 5725A (steps 22 to 42)",
+   "steps": [
+    "S022",
+    "S023",
+    "S024",
+    "S025",
+    "S026",
+    "S027",
+    "S028",
+    "S029",
+    "S030",
+    "S031",
+    "S032",
+    "S033",
+    "S034",
+    "S035",
+    "S036",
+    "S037",
+    "S038",
+    "S039",
+    "S040",
+    "S041",
+    "S042"
+   ],
+   "count": 21
+  },
+  {
+   "id": "FREQ",
+   "command": "FREQ",
+   "order": 3,
+   "title": "Frequency",
+   "section": "Frequency: 1.9 V at 500 Hz to 750 kHz, \"adjust using 5520A\" (steps 43 to 54)",
+   "steps": [
+    "S043",
+    "S044",
+    "S045",
+    "S046",
+    "S047",
+    "S048",
+    "S049",
+    "S050",
+    "S051",
+    "S052",
+    "S053",
+    "S054"
+   ],
+   "count": 12
+  },
+  {
+   "id": "OHMS",
+   "command": "OHMS",
+   "order": 4,
+   "title": "Resistance (4-wire, then 2-wire)",
+   "section": "Ohms: \"adjust using 5520A\": 4-wire steps 55 to 66, 2-wire steps 67 to 82",
+   "steps": [
+    "S055",
+    "S056",
+    "S057",
+    "S058",
+    "S059",
+    "S060",
+    "S061",
+    "S062",
+    "S063",
+    "S064",
+    "S065",
+    "S066",
+    "S067",
+    "S068",
+    "S069",
+    "S070",
+    "S071",
+    "S072",
+    "S073",
+    "S074",
+    "S075",
+    "S076",
+    "S077",
+    "S078",
+    "S079",
+    "S080",
+    "S081",
+    "S082"
+   ],
+   "count": 28
+  },
+  {
+   "id": "AAC",
+   "command": "AAC",
+   "order": 5,
+   "title": "Current AC",
+   "section": "Current AC: zero with the inputs open, gains at 500 Hz with the 5700A / 5725A (steps 83 to 99)",
+   "steps": [
+    "S083",
+    "S084",
+    "S085",
+    "S086",
+    "S087",
+    "S088",
+    "S089",
+    "S090",
+    "S091",
+    "S092",
+    "S093",
+    "S094",
+    "S095",
+    "S096",
+    "S097",
+    "S098",
+    "S099"
+   ],
+   "count": 17
+  },
+  {
+   "id": "ADC",
+   "command": "ADC",
+   "order": 6,
+   "title": "Current DC",
+   "section": "Current DC: zero with the inputs open, gains with the 5700A / 5725A; the 5520A must be characterized with an 8508A on four ranges (steps 100 to 124)",
+   "steps": [
+    "S100",
+    "S101",
+    "S102",
+    "S103",
+    "S104",
+    "S105",
+    "S106",
+    "S107",
+    "S108",
+    "S109",
+    "S110",
+    "S111",
+    "S112",
+    "S113",
+    "S114",
+    "S115",
+    "S116",
+    "S117",
+    "S118",
+    "S119",
+    "S120",
+    "S121",
+    "S122",
+    "S123",
+    "S124"
+   ],
+   "count": 25
+  }
+ ],
+ "steps": [
+  {
+   "id": "S001",
+   "n": 1,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": null,
+   "range": null,
+   "title": "DC volts 0 mV/0V (zero)",
+   "point": {
+    "value": "0",
+    "unit": "V",
+    "text": "0 mV/0V"
+   },
+   "source": null,
+   "group": "ZERO_SHORT",
+   "zero": true,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 1)",
+   "printed_input": "0 mV",
+   "description": "Zero point of VDC, all ranges",
+   "list_value": null,
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S002",
+   "n": 2,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 1,
+   "range": 0.2,
+   "title": "DC volts -199.9 mV",
+   "point": {
+    "value": "-0.1999",
+    "unit": "V",
+    "text": "-199.9 mV"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-0.1999",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 2)",
+   "printed_input": "-199.9 mV",
+   "description": "Gain of VDC, 0.2 V range",
+   "list_value": "-0.1999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S003",
+   "n": 3,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 1,
+   "range": 0.2,
+   "title": "DC volts -100 mV",
+   "point": {
+    "value": "-0.1",
+    "unit": "V",
+    "text": "-100 mV"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-0.1",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 3)",
+   "printed_input": "-100 mV",
+   "description": "Gain of VDC, 0.2 V range",
+   "list_value": "-0.1",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S004",
+   "n": 4,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 1,
+   "range": 0.2,
+   "title": "DC volts 100 mV",
+   "point": {
+    "value": "0.1",
+    "unit": "V",
+    "text": "100 mV"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "0.1",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 4)",
+   "printed_input": "100 mV",
+   "description": "Gain of VDC, 0.2 V range",
+   "list_value": "0.1",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S005",
+   "n": 5,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 1,
+   "range": 0.2,
+   "title": "DC volts 199.9 mV",
+   "point": {
+    "value": "0.1999",
+    "unit": "V",
+    "text": "199.9 mV"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "0.1999",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 5)",
+   "printed_input": "199.9 mV",
+   "description": "Gain of VDC, 0.2 V range",
+   "list_value": "0.1999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S006",
+   "n": 6,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 2,
+   "range": 2.0,
+   "title": "DC volts -1.999 V",
+   "point": {
+    "value": "-1.999",
+    "unit": "V",
+    "text": "-1.999 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-1.999",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 6)",
+   "printed_input": "-1.999 V",
+   "description": "Gain of VDC, 2 V range",
+   "list_value": "-1.999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S007",
+   "n": 7,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 2,
+   "range": 2.0,
+   "title": "DC volts -1 V",
+   "point": {
+    "value": "-1",
+    "unit": "V",
+    "text": "-1 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-1",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 7)",
+   "printed_input": "-1 V",
+   "description": "Gain of VDC, 2 V range",
+   "list_value": "-1.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S008",
+   "n": 8,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 2,
+   "range": 2.0,
+   "title": "DC volts 1 V",
+   "point": {
+    "value": "1",
+    "unit": "V",
+    "text": "1 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "1",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 8)",
+   "printed_input": "1 V",
+   "description": "Gain of VDC, 2 V range",
+   "list_value": "1.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S009",
+   "n": 9,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 2,
+   "range": 2.0,
+   "title": "DC volts 1.999 V",
+   "point": {
+    "value": "1.999",
+    "unit": "V",
+    "text": "1.999 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "1.999",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 9)",
+   "printed_input": "1.999 V",
+   "description": "Gain of VDC, 2 V range",
+   "list_value": "1.999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S010",
+   "n": 10,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 3,
+   "range": 20.0,
+   "title": "DC volts -19.99 V",
+   "point": {
+    "value": "-19.99",
+    "unit": "V",
+    "text": "-19.99 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-19.99",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 10)",
+   "printed_input": "-19.99 V",
+   "description": "Gain of VDC, 20 V range",
+   "list_value": "-19.990",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S011",
+   "n": 11,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 3,
+   "range": 20.0,
+   "title": "DC volts -10 V",
+   "point": {
+    "value": "-10",
+    "unit": "V",
+    "text": "-10 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-10",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 11)",
+   "printed_input": "-10 V",
+   "description": "Gain of VDC, 20 V range",
+   "list_value": "-10.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S012",
+   "n": 12,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 3,
+   "range": 20.0,
+   "title": "DC volts 10 V",
+   "point": {
+    "value": "10",
+    "unit": "V",
+    "text": "10 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "10",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 12)",
+   "printed_input": "10 V",
+   "description": "Gain of VDC, 20 V range",
+   "list_value": "10.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S013",
+   "n": 13,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 3,
+   "range": 20.0,
+   "title": "DC volts 19.99 V",
+   "point": {
+    "value": "19.99",
+    "unit": "V",
+    "text": "19.99 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "19.99",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 13)",
+   "printed_input": "19.99 V",
+   "description": "Gain of VDC, 20 V range",
+   "list_value": "19.990",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S014",
+   "n": 14,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 4,
+   "range": 200.0,
+   "title": "DC volts -199.9 V",
+   "point": {
+    "value": "-199.9",
+    "unit": "V",
+    "text": "-199.9 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-199.9",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 14)",
+   "printed_input": "-199.9 V",
+   "description": "Gain of VDC, 200 V range",
+   "list_value": "-199.90",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S015",
+   "n": 15,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 4,
+   "range": 200.0,
+   "title": "DC volts -100 V",
+   "point": {
+    "value": "-100",
+    "unit": "V",
+    "text": "-100 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-100",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 15)",
+   "printed_input": "-100 V",
+   "description": "Gain of VDC, 200 V range",
+   "list_value": "-100.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S016",
+   "n": 16,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 4,
+   "range": 200.0,
+   "title": "DC volts 100 V",
+   "point": {
+    "value": "100",
+    "unit": "V",
+    "text": "100 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "100",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 16)",
+   "printed_input": "100 V",
+   "description": "Gain of VDC, 200 V range",
+   "list_value": "100.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S017",
+   "n": 17,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 4,
+   "range": 200.0,
+   "title": "DC volts 199.9 V",
+   "point": {
+    "value": "199.9",
+    "unit": "V",
+    "text": "199.9 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "199.9",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 17)",
+   "printed_input": "199.9 V",
+   "description": "Gain of VDC, 200 V range",
+   "list_value": "199.9",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S018",
+   "n": 18,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 5,
+   "range": 1000.0,
+   "title": "DC volts -1000 V",
+   "point": {
+    "value": "-1000",
+    "unit": "V",
+    "text": "-1000 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-1000",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 18)",
+   "printed_input": "-1000 V",
+   "description": "Gain of VDC, 1000 V range",
+   "list_value": "-1000.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S019",
+   "n": 19,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 5,
+   "range": 1000.0,
+   "title": "DC volts -500 V",
+   "point": {
+    "value": "-500",
+    "unit": "V",
+    "text": "-500 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "-500",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 19)",
+   "printed_input": "-500 V",
+   "description": "Gain of VDC, 1000 V range",
+   "list_value": "-500.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S020",
+   "n": 20,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 5,
+   "range": 1000.0,
+   "title": "DC volts 500 V",
+   "point": {
+    "value": "500",
+    "unit": "V",
+    "text": "500 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "500",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 20)",
+   "printed_input": "500 V",
+   "description": "Gain of VDC, 1000 V range",
+   "list_value": "500.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S021",
+   "n": 21,
+   "function": "VDC",
+   "command": "VDC",
+   "range_no": 5,
+   "range": 1000.0,
+   "title": "DC volts 1000 V",
+   "point": {
+    "value": "1000",
+    "unit": "V",
+    "text": "1000 V"
+   },
+   "source": {
+    "kind": "DCV",
+    "value": "1000",
+    "unit": "V",
+    "frequency": null
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 21)",
+   "printed_input": "1000 V",
+   "description": "Gain of VDC, 1000 V range",
+   "list_value": "1000.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S022",
+   "n": 22,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": null,
+   "range": null,
+   "title": "AC volts 0 mV/0 V (zero)",
+   "point": {
+    "value": "0",
+    "unit": "V",
+    "text": "0 mV/0 V"
+   },
+   "source": null,
+   "group": "VOLT",
+   "zero": true,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 22)",
+   "printed_input": "0 mV",
+   "description": "Zero point of VAC, all ranges",
+   "list_value": null,
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S023",
+   "n": 23,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 1,
+   "range": 0.2,
+   "title": "AC volts 10 mV",
+   "point": {
+    "value": "0.01",
+    "unit": "V",
+    "text": "10 mV"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "0.01",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 23)",
+   "printed_input": "10 mV@1 kHz",
+   "description": "Gain of VAC, 0.2 V range",
+   "list_value": "0.05",
+   "conflict": true,
+   "characterize": false
+  },
+  {
+   "id": "S024",
+   "n": 24,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 1,
+   "range": 0.2,
+   "title": "AC volts 100 mV",
+   "point": {
+    "value": "0.1",
+    "unit": "V",
+    "text": "100 mV"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "0.1",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 24)",
+   "printed_input": "100 mV@1 kHz",
+   "description": "Gain of VAC, 0.2 V range",
+   "list_value": "0.10",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S025",
+   "n": 25,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 1,
+   "range": 0.2,
+   "title": "AC volts 150 mV",
+   "point": {
+    "value": "0.15",
+    "unit": "V",
+    "text": "150 mV"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "0.15",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 25)",
+   "printed_input": "150 mV@1 kHz",
+   "description": "Gain of VAC, 0.2 V range",
+   "list_value": "0.15",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S026",
+   "n": 26,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 1,
+   "range": 0.2,
+   "title": "AC volts 199.9 mV",
+   "point": {
+    "value": "0.1999",
+    "unit": "V",
+    "text": "199.9 mV"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "0.1999",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 26)",
+   "printed_input": "199.9 mV@1 kHz",
+   "description": "Gain of VAC, 0.2 V range",
+   "list_value": "0.1999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S027",
+   "n": 27,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 2,
+   "range": 2.0,
+   "title": "AC volts 0.1 V",
+   "point": {
+    "value": "0.1",
+    "unit": "V",
+    "text": "0.1 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "0.1",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 27)",
+   "printed_input": "0.1 V@1 kHz",
+   "description": "Gain of VAC, 2 V range",
+   "list_value": "0.5",
+   "conflict": true,
+   "characterize": false
+  },
+  {
+   "id": "S028",
+   "n": 28,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 2,
+   "range": 2.0,
+   "title": "AC volts 1 V",
+   "point": {
+    "value": "1",
+    "unit": "V",
+    "text": "1 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 28)",
+   "printed_input": "1 V@1 kHz",
+   "description": "Gain of VAC, 2 V range",
+   "list_value": "1.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S029",
+   "n": 29,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 2,
+   "range": 2.0,
+   "title": "AC volts 1.5 V",
+   "point": {
+    "value": "1.5",
+    "unit": "V",
+    "text": "1.5 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.5",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 29)",
+   "printed_input": "1.5 V@1 kHz",
+   "description": "Gain of VAC, 2 V range",
+   "list_value": "1.5",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S030",
+   "n": 30,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 2,
+   "range": 2.0,
+   "title": "AC volts 1.999 V",
+   "point": {
+    "value": "1.999",
+    "unit": "V",
+    "text": "1.999 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.999",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-12 (Table 3-9, step 30)",
+   "printed_input": "1.999 V@1 kHz",
+   "description": "Gain of VAC, 2 V range",
+   "list_value": "1.999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S031",
+   "n": 31,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 3,
+   "range": 20.0,
+   "title": "AC volts 1 V",
+   "point": {
+    "value": "1",
+    "unit": "V",
+    "text": "1 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 31)",
+   "printed_input": "1 V@1 kHz",
+   "description": "Gain of VAC, 20 V range",
+   "list_value": "5.0",
+   "conflict": true,
+   "characterize": false
+  },
+  {
+   "id": "S032",
+   "n": 32,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 3,
+   "range": 20.0,
+   "title": "AC volts 10 V",
+   "point": {
+    "value": "10",
+    "unit": "V",
+    "text": "10 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "10",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 32)",
+   "printed_input": "10 V@1 kHz",
+   "description": "Gain of VAC, 20 V range",
+   "list_value": "10.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S033",
+   "n": 33,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 3,
+   "range": 20.0,
+   "title": "AC volts 15 V",
+   "point": {
+    "value": "15",
+    "unit": "V",
+    "text": "15 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "15",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 33)",
+   "printed_input": "15 V@1 kHz",
+   "description": "Gain of VAC, 20 V range",
+   "list_value": "15.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S034",
+   "n": 34,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 3,
+   "range": 20.0,
+   "title": "AC volts 19.99 V",
+   "point": {
+    "value": "19.99",
+    "unit": "V",
+    "text": "19.99 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "19.99",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 34)",
+   "printed_input": "19.99 V@1 kHz",
+   "description": "Gain of VAC, 20 V range",
+   "list_value": "19.99",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S035",
+   "n": 35,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 4,
+   "range": 200.0,
+   "title": "AC volts 10 V",
+   "point": {
+    "value": "10",
+    "unit": "V",
+    "text": "10 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "10",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 35)",
+   "printed_input": "10 V@1 kHz",
+   "description": "Gain of VAC, 200 V range",
+   "list_value": "50.0",
+   "conflict": true,
+   "characterize": false
+  },
+  {
+   "id": "S036",
+   "n": 36,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 4,
+   "range": 200.0,
+   "title": "AC volts 100 V",
+   "point": {
+    "value": "100",
+    "unit": "V",
+    "text": "100 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "100",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 36)",
+   "printed_input": "100 V@1 kHz",
+   "description": "Gain of VAC, 200 V range",
+   "list_value": "100.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S037",
+   "n": 37,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 4,
+   "range": 200.0,
+   "title": "AC volts 150 V",
+   "point": {
+    "value": "150",
+    "unit": "V",
+    "text": "150 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "150",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 37)",
+   "printed_input": "150 V@1 kHz",
+   "description": "Gain of VAC, 200 V range",
+   "list_value": "150.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S038",
+   "n": 38,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 4,
+   "range": 200.0,
+   "title": "AC volts 199.9 V",
+   "point": {
+    "value": "199.9",
+    "unit": "V",
+    "text": "199.9 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "199.9",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 38)",
+   "printed_input": "199.9 V@1 kHz",
+   "description": "Gain of VAC, 200 V range",
+   "list_value": "199.9",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S039",
+   "n": 39,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 5,
+   "range": 750.0,
+   "title": "AC volts 37.5 V",
+   "point": {
+    "value": "37.5",
+    "unit": "V",
+    "text": "37.5 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "37.5",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 39)",
+   "printed_input": "37.5 V@1 kHz",
+   "description": "Gain of VAC, 750 V range",
+   "list_value": "100.0",
+   "conflict": true,
+   "characterize": false
+  },
+  {
+   "id": "S040",
+   "n": 40,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 5,
+   "range": 750.0,
+   "title": "AC volts 200 V",
+   "point": {
+    "value": "200",
+    "unit": "V",
+    "text": "200 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "200",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 40)",
+   "printed_input": "200 V@1 kHz",
+   "description": "Gain of VAC, 750 V range",
+   "list_value": "200.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S041",
+   "n": 41,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 5,
+   "range": 750.0,
+   "title": "AC volts 500 V",
+   "point": {
+    "value": "500",
+    "unit": "V",
+    "text": "500 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "500",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 41)",
+   "printed_input": "500 V@1 kHz",
+   "description": "Gain of VAC, 750 V range",
+   "list_value": "500.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S042",
+   "n": 42,
+   "function": "VAC",
+   "command": "VAC",
+   "range_no": 5,
+   "range": 750.0,
+   "title": "AC volts 750 V",
+   "point": {
+    "value": "750",
+    "unit": "V",
+    "text": "750 V"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "750",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 42)",
+   "printed_input": "750 V@1 kHz",
+   "description": "Gain of VAC, 750 V range",
+   "list_value": "750.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S043",
+   "n": 43,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 1,
+   "range": 2000.0,
+   "title": "Frequency 500 Hz",
+   "point": {
+    "value": "500",
+    "unit": "Hz",
+    "text": "500 Hz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "500"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 43)",
+   "printed_input": "1.9 V@500 Hz",
+   "description": "Frequency",
+   "list_value": "500",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S044",
+   "n": 44,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 1,
+   "range": 2000.0,
+   "title": "Frequency 1 kHz",
+   "point": {
+    "value": "1000",
+    "unit": "Hz",
+    "text": "1 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "1000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 44)",
+   "printed_input": "1.9 V@1 kHz",
+   "description": "Frequency",
+   "list_value": "1000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S045",
+   "n": 45,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 1,
+   "range": 2000.0,
+   "title": "Frequency 1.5 kHz",
+   "point": {
+    "value": "1500",
+    "unit": "Hz",
+    "text": "1.5 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "1500"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 45)",
+   "printed_input": "1.9 V@1.5 kHz",
+   "description": "Frequency",
+   "list_value": "1500",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S046",
+   "n": 46,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 2,
+   "range": 20000.0,
+   "title": "Frequency 5 kHz",
+   "point": {
+    "value": "5000",
+    "unit": "Hz",
+    "text": "5 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "5000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 46)",
+   "printed_input": "1.9 V@5 kHz",
+   "description": "Frequency",
+   "list_value": "5000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S047",
+   "n": 47,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 2,
+   "range": 20000.0,
+   "title": "Frequency 10 kHz",
+   "point": {
+    "value": "10000",
+    "unit": "Hz",
+    "text": "10 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "10000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 47)",
+   "printed_input": "1.9 V@10 kHz",
+   "description": "Frequency",
+   "list_value": "10000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S048",
+   "n": 48,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 2,
+   "range": 20000.0,
+   "title": "Frequency 15 kHz",
+   "point": {
+    "value": "15000",
+    "unit": "Hz",
+    "text": "15 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "15000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 48)",
+   "printed_input": "1.9 V@15 kHz",
+   "description": "Frequency",
+   "list_value": "15000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S049",
+   "n": 49,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 3,
+   "range": 200000.0,
+   "title": "Frequency 50 kHz",
+   "point": {
+    "value": "50000",
+    "unit": "Hz",
+    "text": "50 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "50000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 49)",
+   "printed_input": "1.9 V@50 kHz",
+   "description": "Frequency",
+   "list_value": "50000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S050",
+   "n": 50,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 3,
+   "range": 200000.0,
+   "title": "Frequency 100 kHz",
+   "point": {
+    "value": "100000",
+    "unit": "Hz",
+    "text": "100 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "100000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 50)",
+   "printed_input": "1.9 V@100 kHz",
+   "description": "Frequency",
+   "list_value": "100000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S051",
+   "n": 51,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 3,
+   "range": 200000.0,
+   "title": "Frequency 150 kHz",
+   "point": {
+    "value": "150000",
+    "unit": "Hz",
+    "text": "150 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "150000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 51)",
+   "printed_input": "1.9 V@150 kHz",
+   "description": "Frequency",
+   "list_value": "150000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S052",
+   "n": 52,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 4,
+   "range": 1000000.0,
+   "title": "Frequency 250 kHz",
+   "point": {
+    "value": "250000",
+    "unit": "Hz",
+    "text": "250 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "250000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 52)",
+   "printed_input": "1.9 V@250 kHz",
+   "description": "Frequency",
+   "list_value": "250000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S053",
+   "n": 53,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 4,
+   "range": 1000000.0,
+   "title": "Frequency 500 kHz",
+   "point": {
+    "value": "500000",
+    "unit": "Hz",
+    "text": "500 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "500000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 53)",
+   "printed_input": "1.9 V@500 kHz",
+   "description": "Frequency",
+   "list_value": "500000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S054",
+   "n": 54,
+   "function": "FREQ",
+   "command": "FREQ",
+   "range_no": 4,
+   "range": 1000000.0,
+   "title": "Frequency 750 kHz",
+   "point": {
+    "value": "750000",
+    "unit": "Hz",
+    "text": "750 kHz"
+   },
+   "source": {
+    "kind": "ACV",
+    "value": "1.9",
+    "unit": "V",
+    "frequency": "750000"
+   },
+   "group": "VOLT",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-13 (Table 3-9, step 54)",
+   "printed_input": "1.9 V@750 kHz",
+   "description": "Frequency",
+   "list_value": "750000",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S055",
+   "n": 55,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 1,
+   "range": 200.0,
+   "title": "Resistance 0 Ω (zero)",
+   "point": {
+    "value": "0",
+    "unit": "ohm",
+    "text": "0 Ω"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "0",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": true,
+   "wire": 4,
+   "page": "p. 3-13 (Table 3-9, step 55)",
+   "printed_input": "0 Ω, 4Wire",
+   "description": "Zero point of OHMS, 200 Ω range",
+   "list_value": null,
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S056",
+   "n": 56,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 1,
+   "range": 200.0,
+   "title": "Resistance 50 Ω",
+   "point": {
+    "value": "50",
+    "unit": "ohm",
+    "text": "50 Ω"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "50",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-13 (Table 3-9, step 56)",
+   "printed_input": "50 Ω, 4Wire",
+   "description": "Gain of OHMS, 200 Ω range",
+   "list_value": "0.5E+2",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S057",
+   "n": 57,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 1,
+   "range": 200.0,
+   "title": "Resistance 100 Ω",
+   "point": {
+    "value": "100",
+    "unit": "ohm",
+    "text": "100 Ω"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "100",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-13 (Table 3-9, step 57)",
+   "printed_input": "100 Ω, 4Wire",
+   "description": "Gain of OHMS, 200 Ω range",
+   "list_value": "1.0E+2",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S058",
+   "n": 58,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 1,
+   "range": 200.0,
+   "title": "Resistance 150 Ω",
+   "point": {
+    "value": "150",
+    "unit": "ohm",
+    "text": "150 Ω"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "150",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-13 (Table 3-9, step 58)",
+   "printed_input": "150 Ω, 4Wire",
+   "description": "Gain of OHMS, 200 Ω range",
+   "list_value": "1.5E+2",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S059",
+   "n": 59,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 2,
+   "range": 2000.0,
+   "title": "Resistance 1 Ω",
+   "point": {
+    "value": "1",
+    "unit": "ohm",
+    "text": "1 Ω"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "1",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-13 (Table 3-9, step 59)",
+   "printed_input": "1 Ω, 4Wire",
+   "description": "Gain of OHMS, 2000 Ω range",
+   "list_value": "1.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S060",
+   "n": 60,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 2,
+   "range": 2000.0,
+   "title": "Resistance 0.5 kΩ",
+   "point": {
+    "value": "500",
+    "unit": "ohm",
+    "text": "0.5 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "500",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-13 (Table 3-9, step 60)",
+   "printed_input": "0.5 kΩ, 4Wire",
+   "description": "Gain of OHMS, 2000 Ω range",
+   "list_value": "0.5E+3",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S061",
+   "n": 61,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 2,
+   "range": 2000.0,
+   "title": "Resistance 1 kΩ",
+   "point": {
+    "value": "1000",
+    "unit": "ohm",
+    "text": "1 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "1000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-13 (Table 3-9, step 61)",
+   "printed_input": "1 kΩ, 4Wire",
+   "description": "Gain of OHMS, 2000 Ω range",
+   "list_value": "1.0E+3",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S062",
+   "n": 62,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 2,
+   "range": 2000.0,
+   "title": "Resistance 1.5 kΩ",
+   "point": {
+    "value": "1500",
+    "unit": "ohm",
+    "text": "1.5 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "1500",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-13 (Table 3-9, step 62)",
+   "printed_input": "1.5 kΩ, 4Wire",
+   "description": "Gain of OHMS, 2000 Ω range",
+   "list_value": "1.5E+3",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S063",
+   "n": 63,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 3,
+   "range": 20000.0,
+   "title": "Resistance 10 Ω",
+   "point": {
+    "value": "10",
+    "unit": "ohm",
+    "text": "10 Ω"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "10",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-14 (Table 3-9, step 63)",
+   "printed_input": "10 Ω, 4Wire",
+   "description": "Gain of OHMS, 20000 Ω range",
+   "list_value": "10.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S064",
+   "n": 64,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 3,
+   "range": 20000.0,
+   "title": "Resistance 5 kΩ",
+   "point": {
+    "value": "5000",
+    "unit": "ohm",
+    "text": "5 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "5000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-14 (Table 3-9, step 64)",
+   "printed_input": "5 kΩ, 4Wire",
+   "description": "Gain of OHMS, 20000 Ω range",
+   "list_value": "0.5E+4",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S065",
+   "n": 65,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 3,
+   "range": 20000.0,
+   "title": "Resistance 10 kΩ",
+   "point": {
+    "value": "10000",
+    "unit": "ohm",
+    "text": "10 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "10000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-14 (Table 3-9, step 65)",
+   "printed_input": "10 kΩ, 4Wire",
+   "description": "Gain of OHMS, 20000 Ω range",
+   "list_value": "1.0E+4",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S066",
+   "n": 66,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 3,
+   "range": 20000.0,
+   "title": "Resistance 15 kΩ",
+   "point": {
+    "value": "15000",
+    "unit": "ohm",
+    "text": "15 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "15000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM4",
+   "zero": false,
+   "wire": 4,
+   "page": "p. 3-14 (Table 3-9, step 66)",
+   "printed_input": "15 kΩ, 4Wire",
+   "description": "Gain of OHMS, 20000 Ω range",
+   "list_value": "1.5E+4",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S067",
+   "n": 67,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 4,
+   "range": 200000.0,
+   "title": "Resistance 100 Ω",
+   "point": {
+    "value": "100",
+    "unit": "ohm",
+    "text": "100 Ω"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "100",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 67)",
+   "printed_input": "100 Ω, 2Wire",
+   "description": "Gain of OHMS, 200000 Ω range",
+   "list_value": "100.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S068",
+   "n": 68,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 4,
+   "range": 200000.0,
+   "title": "Resistance 50 kΩ",
+   "point": {
+    "value": "50000",
+    "unit": "ohm",
+    "text": "50 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "50000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 68)",
+   "printed_input": "50 kΩ, 2Wire",
+   "description": "Gain of OHMS, 200000 Ω range",
+   "list_value": "0.5E+5",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S069",
+   "n": 69,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 4,
+   "range": 200000.0,
+   "title": "Resistance 100 kΩ",
+   "point": {
+    "value": "100000",
+    "unit": "ohm",
+    "text": "100 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "100000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 69)",
+   "printed_input": "100 kΩ, 2Wire",
+   "description": "Gain of OHMS, 200000 Ω range",
+   "list_value": "1.0E+5",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S070",
+   "n": 70,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 4,
+   "range": 200000.0,
+   "title": "Resistance 150 kΩ",
+   "point": {
+    "value": "150000",
+    "unit": "ohm",
+    "text": "150 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "150000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 70)",
+   "printed_input": "150 kΩ, 2Wire",
+   "description": "Gain of OHMS, 200000 Ω range",
+   "list_value": "1.5E+5",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S071",
+   "n": 71,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 5,
+   "range": 2000000.0,
+   "title": "Resistance 1 kΩ",
+   "point": {
+    "value": "1000",
+    "unit": "ohm",
+    "text": "1 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "1000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 71)",
+   "printed_input": "1 kΩ, 2Wire",
+   "description": "Gain of OHMS, 2e+06 Ω range",
+   "list_value": "1000.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S072",
+   "n": 72,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 5,
+   "range": 2000000.0,
+   "title": "Resistance 0.5 MΩ",
+   "point": {
+    "value": "500000",
+    "unit": "ohm",
+    "text": "0.5 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "500000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 72)",
+   "printed_input": "0.5 MΩ, 2Wire",
+   "description": "Gain of OHMS, 2e+06 Ω range",
+   "list_value": "0.5E+6",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S073",
+   "n": 73,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 5,
+   "range": 2000000.0,
+   "title": "Resistance 1 MΩ",
+   "point": {
+    "value": "1000000",
+    "unit": "ohm",
+    "text": "1 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "1000000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 73)",
+   "printed_input": "1 MΩ, 2Wire",
+   "description": "Gain of OHMS, 2e+06 Ω range",
+   "list_value": "1.0E+6",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S074",
+   "n": 74,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 5,
+   "range": 2000000.0,
+   "title": "Resistance 1.5 MΩ",
+   "point": {
+    "value": "1500000",
+    "unit": "ohm",
+    "text": "1.5 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "1500000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 74)",
+   "printed_input": "1.5 MΩ, 2Wire",
+   "description": "Gain of OHMS, 2e+06 Ω range",
+   "list_value": "1.5E+6",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S075",
+   "n": 75,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 6,
+   "range": 20000000.0,
+   "title": "Resistance 10 kΩ",
+   "point": {
+    "value": "10000",
+    "unit": "ohm",
+    "text": "10 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "10000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 75)",
+   "printed_input": "10 kΩ, 2Wire",
+   "description": "Gain of OHMS, 2e+07 Ω range",
+   "list_value": "10000.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S076",
+   "n": 76,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 6,
+   "range": 20000000.0,
+   "title": "Resistance 5 MΩ",
+   "point": {
+    "value": "5000000",
+    "unit": "ohm",
+    "text": "5 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "5000000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 76)",
+   "printed_input": "5 MΩ, 2Wire",
+   "description": "Gain of OHMS, 2e+07 Ω range",
+   "list_value": "0.5E+7",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S077",
+   "n": 77,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 6,
+   "range": 20000000.0,
+   "title": "Resistance 10 MΩ",
+   "point": {
+    "value": "10000000",
+    "unit": "ohm",
+    "text": "10 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "10000000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 77)",
+   "printed_input": "10 MΩ, 2Wire",
+   "description": "Gain of OHMS, 2e+07 Ω range",
+   "list_value": "1.0E+7",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S078",
+   "n": 78,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 6,
+   "range": 20000000.0,
+   "title": "Resistance 15 MΩ",
+   "point": {
+    "value": "15000000",
+    "unit": "ohm",
+    "text": "15 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "15000000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 78)",
+   "printed_input": "15 MΩ, 2Wire",
+   "description": "Gain of OHMS, 2e+07 Ω range",
+   "list_value": "1.5E+7",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S079",
+   "n": 79,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 7,
+   "range": 100000000.0,
+   "title": "Resistance 100 kΩ",
+   "point": {
+    "value": "100000",
+    "unit": "ohm",
+    "text": "100 kΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "100000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 79)",
+   "printed_input": "100 kΩ, 2Wire",
+   "description": "Gain of OHMS, 1e+08 Ω range",
+   "list_value": "1.0E+5",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S080",
+   "n": 80,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 7,
+   "range": 100000000.0,
+   "title": "Resistance 20 MΩ",
+   "point": {
+    "value": "20000000",
+    "unit": "ohm",
+    "text": "20 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "20000000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 80)",
+   "printed_input": "20 MΩ, 2Wire",
+   "description": "Gain of OHMS, 1e+08 Ω range",
+   "list_value": "0.2E+8",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S081",
+   "n": 81,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 7,
+   "range": 100000000.0,
+   "title": "Resistance 50 MΩ",
+   "point": {
+    "value": "50000000",
+    "unit": "ohm",
+    "text": "50 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "50000000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 81)",
+   "printed_input": "50 MΩ, 2Wire",
+   "description": "Gain of OHMS, 1e+08 Ω range",
+   "list_value": "0.5E+8",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S082",
+   "n": 82,
+   "function": "OHMS",
+   "command": "OHMS",
+   "range_no": 7,
+   "range": 100000000.0,
+   "title": "Resistance 100 MΩ",
+   "point": {
+    "value": "100000000",
+    "unit": "ohm",
+    "text": "100 MΩ"
+   },
+   "source": {
+    "kind": "OHM",
+    "value": "100000000",
+    "unit": "ohm",
+    "frequency": null
+   },
+   "group": "OHM2",
+   "zero": false,
+   "wire": 2,
+   "page": "p. 3-14 (Table 3-9, step 82)",
+   "printed_input": "100 MΩ, 2Wire",
+   "description": "Gain of OHMS, 1e+08 Ω range",
+   "list_value": "1.0E+8",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S083",
+   "n": 83,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": null,
+   "range": null,
+   "title": "AC current 0 mA/0 A (zero)",
+   "point": {
+    "value": "0",
+    "unit": "A",
+    "text": "0 mA/0 A"
+   },
+   "source": null,
+   "group": "ZERO_OPEN",
+   "zero": true,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 83)",
+   "printed_input": "Open, no connection",
+   "description": "Zero point of AAC, all ranges",
+   "list_value": null,
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S084",
+   "n": 84,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 1,
+   "range": 0.02,
+   "title": "AC current 1 mA",
+   "point": {
+    "value": "0.001",
+    "unit": "A",
+    "text": "1 mA"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.001",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 84)",
+   "printed_input": "1 mA@500 Hz",
+   "description": "Gain of AAC, 0.02 A range",
+   "list_value": "0.001",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S085",
+   "n": 85,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 1,
+   "range": 0.02,
+   "title": "AC current 5 mA",
+   "point": {
+    "value": "0.005",
+    "unit": "A",
+    "text": "5 mA"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.005",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 85)",
+   "printed_input": "5 mA@500 Hz",
+   "description": "Gain of AAC, 0.02 A range",
+   "list_value": "0.005",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S086",
+   "n": 86,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 1,
+   "range": 0.02,
+   "title": "AC current 10 mA",
+   "point": {
+    "value": "0.01",
+    "unit": "A",
+    "text": "10 mA"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.01",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 86)",
+   "printed_input": "10 mA@500 Hz",
+   "description": "Gain of AAC, 0.02 A range",
+   "list_value": "0.01",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S087",
+   "n": 87,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 1,
+   "range": 0.02,
+   "title": "AC current 19.99 mA",
+   "point": {
+    "value": "0.01999",
+    "unit": "A",
+    "text": "19.99 mA"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.01999",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 87)",
+   "printed_input": "19.99 mA@500 Hz",
+   "description": "Gain of AAC, 0.02 A range",
+   "list_value": "0.01999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S088",
+   "n": 88,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 2,
+   "range": 0.2,
+   "title": "AC current 10 mA",
+   "point": {
+    "value": "0.01",
+    "unit": "A",
+    "text": "10 mA"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.01",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 88)",
+   "printed_input": "10 mA@500 Hz",
+   "description": "Gain of AAC, 0.2 A range",
+   "list_value": "0.01",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S089",
+   "n": 89,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 2,
+   "range": 0.2,
+   "title": "AC current 50 mA",
+   "point": {
+    "value": "0.05",
+    "unit": "A",
+    "text": "50 mA"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.05",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 89)",
+   "printed_input": "50 mA@500 Hz",
+   "description": "Gain of AAC, 0.2 A range",
+   "list_value": "0.05",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S090",
+   "n": 90,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 2,
+   "range": 0.2,
+   "title": "AC current 100 mA",
+   "point": {
+    "value": "0.1",
+    "unit": "A",
+    "text": "100 mA"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.1",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 90)",
+   "printed_input": "100 mA@500 Hz",
+   "description": "Gain of AAC, 0.2 A range",
+   "list_value": "0.1",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S091",
+   "n": 91,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 2,
+   "range": 0.2,
+   "title": "AC current 199.9 mA",
+   "point": {
+    "value": "0.1999",
+    "unit": "A",
+    "text": "199.9 mA"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.1999",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 91)",
+   "printed_input": "199.9 mA@500 Hz",
+   "description": "Gain of AAC, 0.2 A range",
+   "list_value": "0.1999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S092",
+   "n": 92,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 3,
+   "range": 2.0,
+   "title": "AC current 0.1 A",
+   "point": {
+    "value": "0.1",
+    "unit": "A",
+    "text": "0.1 A"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.1",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "I2A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 92)",
+   "printed_input": "0.1 A@500 Hz",
+   "description": "Gain of AAC, 2 A range",
+   "list_value": "0.01",
+   "conflict": true,
+   "characterize": false
+  },
+  {
+   "id": "S093",
+   "n": 93,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 3,
+   "range": 2.0,
+   "title": "AC current 0.5 A",
+   "point": {
+    "value": "0.5",
+    "unit": "A",
+    "text": "0.5 A"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.5",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "I2A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 93)",
+   "printed_input": "0.5 A@500 Hz",
+   "description": "Gain of AAC, 2 A range",
+   "list_value": "0.5",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S094",
+   "n": 94,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 3,
+   "range": 2.0,
+   "title": "AC current 1 A",
+   "point": {
+    "value": "1",
+    "unit": "A",
+    "text": "1 A"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "1",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "I2A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 94)",
+   "printed_input": "1 A@500 Hz",
+   "description": "Gain of AAC, 2 A range",
+   "list_value": "1.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S095",
+   "n": 95,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 3,
+   "range": 2.0,
+   "title": "AC current 1.999 A",
+   "point": {
+    "value": "1.999",
+    "unit": "A",
+    "text": "1.999 A"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "1.999",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "I2A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-14 (Table 3-9, step 95)",
+   "printed_input": "1.999 A@500 Hz",
+   "description": "Gain of AAC, 2 A range",
+   "list_value": "1.999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S096",
+   "n": 96,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 4,
+   "range": 10.0,
+   "title": "AC current 0.5 A",
+   "point": {
+    "value": "0.5",
+    "unit": "A",
+    "text": "0.5 A"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "0.5",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "I10A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 96)",
+   "printed_input": "0.5 A@500 Hz",
+   "description": "Gain of AAC, 10 A range",
+   "list_value": "1.0",
+   "conflict": true,
+   "characterize": false
+  },
+  {
+   "id": "S097",
+   "n": 97,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 4,
+   "range": 10.0,
+   "title": "AC current 2 A",
+   "point": {
+    "value": "2",
+    "unit": "A",
+    "text": "2 A"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "2",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "I10A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 97)",
+   "printed_input": "2 A@500 Hz",
+   "description": "Gain of AAC, 10 A range",
+   "list_value": "2.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S098",
+   "n": 98,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 4,
+   "range": 10.0,
+   "title": "AC current 5 A",
+   "point": {
+    "value": "5",
+    "unit": "A",
+    "text": "5 A"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "5",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "I10A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 98)",
+   "printed_input": "5 A@500 Hz",
+   "description": "Gain of AAC, 10 A range",
+   "list_value": "5.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S099",
+   "n": 99,
+   "function": "AAC",
+   "command": "AAC",
+   "range_no": 4,
+   "range": 10.0,
+   "title": "AC current 10 A",
+   "point": {
+    "value": "10",
+    "unit": "A",
+    "text": "10 A"
+   },
+   "source": {
+    "kind": "ACI",
+    "value": "10",
+    "unit": "A",
+    "frequency": "500"
+   },
+   "group": "I10A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 99)",
+   "printed_input": "10 A@500 Hz",
+   "description": "Gain of AAC, 10 A range",
+   "list_value": "10.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S100",
+   "n": 100,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": null,
+   "range": null,
+   "title": "DC current 0 µA/0 mA/0 A (zero)",
+   "point": {
+    "value": "0",
+    "unit": "A",
+    "text": "0 µA/0 mA/0 A"
+   },
+   "source": null,
+   "group": "ZERO_OPEN",
+   "zero": true,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 100)",
+   "printed_input": "Open, no connection",
+   "description": "Zero point of ADC, all ranges",
+   "list_value": null,
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S101",
+   "n": 101,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 1,
+   "range": 0.0002,
+   "title": "DC current -199.9 µA",
+   "point": {
+    "value": "-0.0001999",
+    "unit": "A",
+    "text": "-199.9 µA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-0.0001999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 101)",
+   "printed_input": "-199.9 µA",
+   "description": "Gain of ADC, 0.0002 A range",
+   "list_value": "-0.0001999",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S102",
+   "n": 102,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 1,
+   "range": 0.0002,
+   "title": "DC current -100 µA",
+   "point": {
+    "value": "-0.0001",
+    "unit": "A",
+    "text": "-100 µA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-0.0001",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 102)",
+   "printed_input": "-100 µA",
+   "description": "Gain of ADC, 0.0002 A range",
+   "list_value": "-0.0001",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S103",
+   "n": 103,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 1,
+   "range": 0.0002,
+   "title": "DC current 100 µA",
+   "point": {
+    "value": "0.0001",
+    "unit": "A",
+    "text": "100 µA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "0.0001",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 103)",
+   "printed_input": "100 µA",
+   "description": "Gain of ADC, 0.0002 A range",
+   "list_value": "0.0001",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S104",
+   "n": 104,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 1,
+   "range": 0.0002,
+   "title": "DC current 199.9 µA",
+   "point": {
+    "value": "0.0001999",
+    "unit": "A",
+    "text": "199.9 µA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "0.0001999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 104)",
+   "printed_input": "199.9 µA",
+   "description": "Gain of ADC, 0.0002 A range",
+   "list_value": "0.0001999",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S105",
+   "n": 105,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 2,
+   "range": 0.002,
+   "title": "DC current -1999 µA",
+   "point": {
+    "value": "-0.001999",
+    "unit": "A",
+    "text": "-1999 µA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-0.001999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 105)",
+   "printed_input": "-1999 µA",
+   "description": "Gain of ADC, 0.002 A range",
+   "list_value": "-0.001999",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S106",
+   "n": 106,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 2,
+   "range": 0.002,
+   "title": "DC current -1000 µA",
+   "point": {
+    "value": "-0.001",
+    "unit": "A",
+    "text": "-1000 µA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-0.001",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 106)",
+   "printed_input": "-1000 µA",
+   "description": "Gain of ADC, 0.002 A range",
+   "list_value": "-0.001",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S107",
+   "n": 107,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 2,
+   "range": 0.002,
+   "title": "DC current 1000 µA",
+   "point": {
+    "value": "0.001",
+    "unit": "A",
+    "text": "1000 µA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "0.001",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 107)",
+   "printed_input": "1000 µA",
+   "description": "Gain of ADC, 0.002 A range",
+   "list_value": "0.001",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S108",
+   "n": 108,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 2,
+   "range": 0.002,
+   "title": "DC current 1999 µA",
+   "point": {
+    "value": "0.001999",
+    "unit": "A",
+    "text": "1999 µA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "0.001999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 108)",
+   "printed_input": "1999 µA",
+   "description": "Gain of ADC, 0.002 A range",
+   "list_value": "0.001999",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S109",
+   "n": 109,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 3,
+   "range": 0.02,
+   "title": "DC current -19.99 mA",
+   "point": {
+    "value": "-0.01999",
+    "unit": "A",
+    "text": "-19.99 mA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-0.01999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 109)",
+   "printed_input": "-19.99 mA",
+   "description": "Gain of ADC, 0.02 A range",
+   "list_value": "-0.01999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S110",
+   "n": 110,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 3,
+   "range": 0.02,
+   "title": "DC current -10 mA",
+   "point": {
+    "value": "-0.01",
+    "unit": "A",
+    "text": "-10 mA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-0.01",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 110)",
+   "printed_input": "-10 mA",
+   "description": "Gain of ADC, 0.02 A range",
+   "list_value": "-0.01",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S111",
+   "n": 111,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 3,
+   "range": 0.02,
+   "title": "DC current 10 mA",
+   "point": {
+    "value": "0.01",
+    "unit": "A",
+    "text": "10 mA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "0.01",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 111)",
+   "printed_input": "10 mA",
+   "description": "Gain of ADC, 0.02 A range",
+   "list_value": "0.01",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S112",
+   "n": 112,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 3,
+   "range": 0.02,
+   "title": "DC current 19.99 mA",
+   "point": {
+    "value": "0.01999",
+    "unit": "A",
+    "text": "19.99 mA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "0.01999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 112)",
+   "printed_input": "19.99 mA",
+   "description": "Gain of ADC, 0.02 A range",
+   "list_value": "0.01999",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S113",
+   "n": 113,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 4,
+   "range": 0.2,
+   "title": "DC current -199.9 mA",
+   "point": {
+    "value": "-0.1999",
+    "unit": "A",
+    "text": "-199.9 mA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-0.1999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 113)",
+   "printed_input": "-199.9 mA",
+   "description": "Gain of ADC, 0.2 A range",
+   "list_value": "-0.1999",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S114",
+   "n": 114,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 4,
+   "range": 0.2,
+   "title": "DC current -100 mA",
+   "point": {
+    "value": "-0.1",
+    "unit": "A",
+    "text": "-100 mA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-0.1",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 114)",
+   "printed_input": "-100 mA",
+   "description": "Gain of ADC, 0.2 A range",
+   "list_value": "-0.1",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S115",
+   "n": 115,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 4,
+   "range": 0.2,
+   "title": "DC current 100 mA",
+   "point": {
+    "value": "0.1",
+    "unit": "A",
+    "text": "100 mA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "0.1",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 115)",
+   "printed_input": "100 mA",
+   "description": "Gain of ADC, 0.2 A range",
+   "list_value": "0.1",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S116",
+   "n": 116,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 4,
+   "range": 0.2,
+   "title": "DC current 199.9 mA",
+   "point": {
+    "value": "0.1999",
+    "unit": "A",
+    "text": "199.9 mA"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "0.1999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "IMA",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 116)",
+   "printed_input": "199.9 mA",
+   "description": "Gain of ADC, 0.2 A range",
+   "list_value": "0.1999",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S117",
+   "n": 117,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 5,
+   "range": 2.0,
+   "title": "DC current -1.999 A",
+   "point": {
+    "value": "-1.999",
+    "unit": "A",
+    "text": "-1.999 A"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-1.999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "I2A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 117)",
+   "printed_input": "-1.999 A",
+   "description": "Gain of ADC, 2 A range",
+   "list_value": "-1.999",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S118",
+   "n": 118,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 5,
+   "range": 2.0,
+   "title": "DC current -1 A",
+   "point": {
+    "value": "-1",
+    "unit": "A",
+    "text": "-1 A"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-1",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "I2A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 118)",
+   "printed_input": "-1 A",
+   "description": "Gain of ADC, 2 A range",
+   "list_value": "-1.0",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S119",
+   "n": 119,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 5,
+   "range": 2.0,
+   "title": "DC current 1 A",
+   "point": {
+    "value": "1",
+    "unit": "A",
+    "text": "1 A"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "1",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "I2A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 119)",
+   "printed_input": "1 A",
+   "description": "Gain of ADC, 2 A range",
+   "list_value": "1.0",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S120",
+   "n": 120,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 5,
+   "range": 2.0,
+   "title": "DC current 1.999 A",
+   "point": {
+    "value": "1.999",
+    "unit": "A",
+    "text": "1.999 A"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "1.999",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "I2A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 120)",
+   "printed_input": "1.999 A",
+   "description": "Gain of ADC, 2 A range",
+   "list_value": "1.999",
+   "conflict": false,
+   "characterize": true
+  },
+  {
+   "id": "S121",
+   "n": 121,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 6,
+   "range": 10.0,
+   "title": "DC current -10 A",
+   "point": {
+    "value": "-10",
+    "unit": "A",
+    "text": "-10 A"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-10",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "I10A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 121)",
+   "printed_input": "-10 A",
+   "description": "Gain of ADC, 10 A range",
+   "list_value": "-10.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S122",
+   "n": 122,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 6,
+   "range": 10.0,
+   "title": "DC current -5 A",
+   "point": {
+    "value": "-5",
+    "unit": "A",
+    "text": "-5 A"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "-5",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "I10A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 122)",
+   "printed_input": "-5 A",
+   "description": "Gain of ADC, 10 A range",
+   "list_value": "-5.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S123",
+   "n": 123,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 6,
+   "range": 10.0,
+   "title": "DC current 5 A",
+   "point": {
+    "value": "5",
+    "unit": "A",
+    "text": "5 A"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "5",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "I10A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 123)",
+   "printed_input": "5 A",
+   "description": "Gain of ADC, 10 A range",
+   "list_value": "5.0",
+   "conflict": false,
+   "characterize": false
+  },
+  {
+   "id": "S124",
+   "n": 124,
+   "function": "ADC",
+   "command": "ADC",
+   "range_no": 6,
+   "range": 10.0,
+   "title": "DC current 10 A",
+   "point": {
+    "value": "10",
+    "unit": "A",
+    "text": "10 A"
+   },
+   "source": {
+    "kind": "DCI",
+    "value": "10",
+    "unit": "A",
+    "frequency": null
+   },
+   "group": "I10A",
+   "zero": false,
+   "wire": null,
+   "page": "p. 3-15 (Table 3-9, step 124)",
+   "printed_input": "10 A",
+   "description": "Gain of ADC, 10 A range",
+   "list_value": "10.0",
+   "conflict": false,
+   "characterize": false
+  }
+ ],
+ "discrepancies": [
+  {
+   "steps": [
+    "S023",
+    "S027",
+    "S031",
+    "S035",
+    "S039",
+    "S092",
+    "S096"
+   ],
+   "text": "Table 3-9 and the Calibration Points lists (pp. 3-17, 3-18) print different first gain points for the AC volts ranges (steps 23, 27, 31, 35, 39) and the 2 A / 10 A AC current ranges (steps 92, 96); the meter's own recommended value decides."
+  }
+ ]
+}

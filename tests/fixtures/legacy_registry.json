@@ -33,7 +33,8 @@
   "Keithley 2000 Performance Verification": "Keithley_2000_Verification.py",
   "Agilent 34410A Performance Verification": "Agilent_34410A_Verification.py",
   "Agilent 34411A Performance Verification": "Agilent_34411A_Verification.py",
-  "Keithley 2000 Guided Adjustment": "Keithley_2000_Adjustment.py"
+  "Keithley 2000 Guided Adjustment": "Keithley_2000_Adjustment.py",
+  "Fluke 8808A Guided Adjustment": "Fluke_8808A_Adjustment.py"
  },
  "VERSIONS": {
   "WaveSurfer_WS4104HD.py": "51",
@@ -69,7 +70,8 @@
   "Keithley_2000_Verification.py": "1",
   "Agilent_34410A_Verification.py": "1",
   "Agilent_34411A_Verification.py": "1",
-  "Keithley_2000_Adjustment.py": "1"
+  "Keithley_2000_Adjustment.py": "1",
+  "Fluke_8808A_Adjustment.py": "1"
  },
  "records": [
   [
@@ -309,6 +311,13 @@
    "2000",
    "Digital Multimeter Adjustment",
    "Keithley_2000_Adjustment.py"
+  ],
+  [
+   "Fluke 8808A Guided Adjustment",
+   "Fluke",
+   "8808A",
+   "Digital Multimeter Adjustment",
+   "Fluke_8808A_Adjustment.py"
   ]
  ],
  "FILES": {
@@ -762,6 +771,21 @@
    ],
    "spec": [
     "specs/keithley_2000_adjustment.json"
+   ]
+  },
+  "Fluke_8808A_Adjustment.py": {
+   "code": [
+    "Procedures/Fluke_8808A_Adjustment.py",
+    "fluke8808a_adjustment.py",
+    "adjustment_audit.py",
+    "drivers/base.py",
+    "drivers/transport.py",
+    "drivers/fluke_8808a.py",
+    "drivers/fluke_8808a_cal.py",
+    "drivers/fluke_5560a.py"
+   ],
+   "spec": [
+    "specs/fluke_8808a_adjustment.json"
    ]
   }
  },

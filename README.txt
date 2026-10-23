@@ -165,6 +165,19 @@ Procedures/Keithley_2000_Adjustment.py
                   Engine: keithley2000_adjustment.py + adjustment_audit.py; driver: drivers/keithley_2000_cal.py; spec: specs/keithley_2000_adjustment.json
                   (specs/build_k2000_adjustment_spec.py). Demo (simulated meter, nothing saved): python Procedures/Keithley_2000_Adjustment.py --demo
 
+Procedures/Fluke_8808A_Adjustment.py
+                  Guided ADJUSTMENT (calibration) of the Fluke 8808A by the RS-232 calibration dialog of the Calibration Manual (Oct 2008, pp. 3-16 / 3-17,
+                  Table 3-9): 124 steps in the manual's order (DC volts 21, AC volts 21, frequency 12, resistance 28, AC current 17, DC current 25) with a Fluke
+                  5522A, 5560A or 5520A as the source (one point, 1.9 V at 750 kHz, needs your own standard). Category 'Digital Multimeter Adjustment', sidecar
+                  kind 'adjustment' (Adjustment tab). THIS CHANGES THE INSTRUMENT CALIBRATION: the 8808A has no password, SAVE or lock in the manual, so every
+                  function start and EVERY POINT is confirmed by the operator, the calibrator's output is programmed, read back and operated for each point, and
+                  the meter's Enter key is sent ONCE per point (never repeated automatically); the calibrator goes to standby after each point. The meter's own
+                  recommended value is compared with the manual (seven first-gain points differ between Table 3-9 and the Calibration Points lists); the four
+                  characterized DC current ranges ask for the characterized value (CALREF). Audit record: tables in lab_registry.sqlite3 (a demo run writes
+                  nothing). Run the performance verification before (As Found) and after (As Left): this program does not. Not built: the front-panel method, a
+                  PDF record. Engine: fluke8808a_adjustment.py + adjustment_audit.py; driver: drivers/fluke_8808a_cal.py; spec: specs/fluke_8808a_adjustment.json
+                  (specs/build_8808a_adjustment.py). Demo (simulated meter, nothing saved): python Procedures/Fluke_8808A_Adjustment.py --demo
+
 Procedures/Agilent_34410A_Verification.py
                   Two-way verification of the Agilent / Keysight 34410A 6.5-digit multimeter from the 34410A/11A/L4411A Service Guide, chapter 3
                   Verification Tests (printed pp. 68-87): zero offset (front and rear terminals), DC volts, DC current, resistance, frequency, AC volts and AC
