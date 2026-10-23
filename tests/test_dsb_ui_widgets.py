@@ -359,7 +359,9 @@ class GridWidgetStubTests(unittest.TestCase):
         self.assertFalse(res.ok)
         self.assertEqual([s[0] for s in fake.seen], ['Run on real instruments'])
         title, message, kw = fake.seen[0]
-        self.assertEqual(message, f'Run {win.model.ds.title} on real instruments? The calibrator will be driven from this program.')
+        base = f'Run {win.model.ds.title} on real instruments? The calibrator will be driven from this program.'
+        self.assertTrue(message.startswith(base), message)              # rule 2: the unverified commands (if any) are listed after the question
+        self.assertTrue(message == base or 'Yes means you accept them' in message, message)
         self.assertEqual(kw.get('default'), 'no')
         self.assertTrue(win.model.dirty)
         self.assertEqual(calls, [])

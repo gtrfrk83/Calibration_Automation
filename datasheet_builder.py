@@ -1669,6 +1669,14 @@ def save(ds, who='', note='', root=None, db=None):
     if why:                                                  # verified on hardware and locked: no new version, nothing written
         return SaveResult(False, ds.uid, ds.version, 'locked', problems=[DsProblem('locked', why)])
     problems = validate(ds)
+    rule_check = None
+    if not errors(problems):                                  # the build-time rules 1-5 (datasheet_builder_rules): an error there keeps the sheet a draft
+        try:
+            import datasheet_builder_rules as _rules
+            extra, rule_check = _rules.blocking_problems(ds)
+            problems = problems + extra
+        except Exception:
+            rule_check = None
     try:
         if not ds.uid:
             ds.uid = make_uid(ds)
@@ -1708,6 +1716,8 @@ def save(ds, who='', note='', root=None, db=None):
         result.problems += [p for p in exported.problems if p not in result.problems]
         if exported.spec is None:
             exported = None
+        elif rule_check is not None:                          # what the Manager's list says about the sheet without running the check again
+            exported.spec['dsb']['engine']['check'] = rule_check.save_summary()
     status = 'ready' if exported else 'draft'
     kind = classify_kind(ds) if exported else ''
     result.kind = kind

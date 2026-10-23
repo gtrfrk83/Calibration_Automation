@@ -1694,6 +1694,83 @@ def checks_fluke_376():
         pass
 
 
+def checks_dsb_sheet_check():
+    """Datasheet Builder 'Sheet check' (build-time rules 1-5): the pill, the window (findings, detail, buttons), 'Apply the fix' (enter by hand), the Commands
+    window, the inspector's 'Uncertainty source' line; nothing clipped.  Screenshots when DSB_SHOTS is set (folder)."""
+    import datasheet_builder as db
+    import datasheet_builder_ui as U
+    import datasheet_builder_ui_model as DM
+    t = Path(tempfile.mkdtemp())
+    root = tk.Tk()
+    ui.apply_theme(root)
+    root.geometry('100x60+1480+930')
+    out = os.environ.get('DSB_SHOTS')
+
+    def shot(win, name):
+        if out:
+            from PIL import ImageGrab
+            pump(root, 30)
+            ImageGrab.grab(bbox=(win.winfo_rootx(), win.winfo_rooty(), win.winfo_rootx() + win.winfo_width(), win.winfo_rooty() + win.winfo_height()),
+                           xdisplay=os.environ['DISPLAY']).save(f'{out}/{name}_{THEME}.png')
+
+    ds = db.Datasheet('Acme', 'RM-1', 'Rules DCV')
+    fn = ds.add_function('DCV', id='dcv')
+    for fs, rid in ((10, 'r10'), (1500, 'r1500')):
+        fn.add_range(fs, id=rid)
+    ds.set_spec(fn, '0.05 % of reading + 0.01 % of range')
+    for v, rid in ((5, 'r10'), (1500, 'r1500')):
+        db.add_point(fn, v, range_id=rid)
+    g = DM.GridModel(DM.Storage(t / 'u', t / 'r.sqlite3', who='real'), ds)
+    win = U.GridEditorWindow(root, g)
+    win.geometry('1400x900+0+0')
+    pump(root, 40)
+    check('check: no pill before the first check', g.check_pill()[0] == '' and not win._check_pill_shown)
+    chk = g.sheet_check(compute=True)
+    win.refresh()
+    pump(root, 20)
+    check('check: pill shows after the check', win._check_pill_shown, g.check_pill())
+    check('check: pill and button inside the window', inside(win, win.check_pill) and inside(win, win.check_b))
+    check('check: 1500 V not covered (rule 1, a warning) and unverified commands listed (rule 2)',
+          any(f.rule == 1 for f in chk.findings) and bool(chk.unverified) and chk.ok, [f.code for f in chk.findings])
+    key = next(r['key'] for r in g.rows() if r['kind'] == 'point')
+    g.select(key, 'tol')
+    win.sync()
+    pump(root, 20)
+    unc = g.uncertainty_line()
+    check('check: uncertainty source line for the selected point', bool(unc[0]), unc)
+    check('check: Uncertainty source section is in the inspector', 'uncert' in win.panel_box.sections)
+    shot(win, 'sheetcheck_editor')
+    w = win.show_check(compute=False)
+    pump(root, 40)
+    check('check: window opens with findings', w.winfo_exists() and len(w.table.get_children()) >= 1, len(w.table.get_children()))
+    for name in ('go_b', 'fix_b', 'again_b', 'cmds_b', 'table'):
+        check(f'check: {name} inside the window', inside(w, getattr(w, name)), name)
+    first = next(i for i, r in enumerate(w._rows) if r['rule'] == 1)
+    w.table.selection_set(str(first))
+    w.table.event_generate('<<TreeviewSelect>>')
+    pump(root, 20)
+    check('check: detail names the fix', 'Apply the fix' in w.detail.get() or 'by hand' in w.detail.get(), w.detail.get())
+    check('check: Apply the fix is enabled for rule 1', str(w.fix_b.cget('state')) == 'normal')
+    shot(w, 'sheetcheck_window')
+    cw = w.commands()
+    pump(root, 30)
+    check('check: Commands window opens', cw is not None and cw.winfo_exists())
+    shot(cw, 'sheetcheck_commands')
+    cw.destroy()
+    w.fix()
+    pump(root, 30)
+    after = g.sheet_check(compute=False)
+    check('check: Apply the fix enters the point by hand, the rule 1 finding is gone', after is not None and not any(f.rule == 1 for f in after.findings),
+          [f.code for f in (after.findings if after else [])])
+    shot(w, 'sheetcheck_window_after_fix')
+    text, fp = win.real_run_question()
+    check('check: the real-run question lists the commands to accept', 'accept' in text and bool(fp), text[:80])
+    import time
+    time.sleep(0.5)
+    pump(root, 10)
+    w.destroy()
+    win.destroy()
+    root.destroy()
 
 
 if __name__ == '__main__':
@@ -1712,6 +1789,7 @@ if __name__ == '__main__':
         checks_run_queue()
         checks_dsb_layout()
         checks_dsb_auto_collapse()
+        checks_dsb_sheet_check()
         checks_dsb_dialogs_fit()
         checks_run_queue_app()
         checks_k2000_adjustment()

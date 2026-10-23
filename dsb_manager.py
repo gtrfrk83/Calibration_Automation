@@ -51,6 +51,8 @@ def launch_args(row, demo=False, asset=None, python=None) -> list:
         args.append('--demo')
     if asset:
         args += ['--asset', asset]
+    if row.get('accepted_unverified') and not demo:        # the Builder showed the list of unverified commands and the operator accepted it (rule 2); the run does not ask again
+        args += ['--accept-unverified', str(row['accepted_unverified'])]
     return args
 
 

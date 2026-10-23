@@ -26,6 +26,7 @@ from decimal import Decimal
 from pathlib import Path
 
 import datasheet_builder as db
+from datasheet_builder_check_model import CheckMixin      # the Sheet check (build-time rules 1-5), GridModel only
 
 D = Decimal
 
@@ -267,8 +268,10 @@ class DatasheetList:
         return self._cache[key]
 
     @staticmethod
-    def automation_text(row):
-        """What the suite can do with the saved datasheet today, from the runnable spec's engine summary."""
+    def automation_text(row, check=None):
+        """What the suite can do with the saved datasheet today, from the runnable spec's engine summary.  `check` = dict(unverified_points, unverified_commands)
+        from the sheet check (saved with the spec, or worked out from the standards matcher): points whose commands are not verified on hardware are NOT
+        counted as plainly 'run by the suite' (a real run lists their commands first and the operator must accept them)."""
         if row.get('deleted'):
             return 'Deleted (can be restored)'
         if not row.get('runnable_version'):
@@ -279,9 +282,36 @@ class DatasheetList:
         n, run, hand = eng.get('points', 0), eng.get('runnable', 0), eng.get('hand_set', 0)
         if not n:
             return 'Ready (no points)'
+        check = check if check is not None else (eng.get('check') or {})
+        unv = int(check.get('unverified_points') or 0)
+        tail = (f'; {unv} use commands not yet verified on hardware (a real run asks you to accept them)' if unv else '')
         if hand == 0:
-            return f'Ready: all {n} points run by the suite'
-        return f'Ready: {run} of {n} points run by the suite, {hand} set by hand'
+            return (f'Ready: {n} of {n} points run by the suite' + tail) if unv else f'Ready: all {n} points run by the suite'
+        return f'Ready: {run} of {n} points run by the suite, {hand} set by hand' + tail
+
+    def _check_for(self, r):
+        """The check summary the Automation column needs: the one saved with the spec, else (a sheet saved before the Sheet check existed) the standards
+        matcher's count of points with unverified commands.  None when neither can be had."""
+        if r.get('deleted') or not r.get('runnable_version'):
+            return None
+        eng = _read_engine(r.get('spec_file', ''))
+        if eng.get('check') is not None:
+            return eng['check']
+        key = ('check', r['uid'], r['version'])
+        if key not in self._cache:
+            try:
+                import datasheet_builder_rules as _rules
+                ds = self.storage.load(r['uid'], r['version'])
+                if ds is None or ds.options.get('manual_entry'):
+                    self._cache[key] = {}
+                else:
+                    if getattr(self, '_matcher', None) is None:
+                        self._matcher = self.matcher_factory() if self.matcher_factory else __import__('datasheet_builder_match').Matcher()
+                    s = _rules.list_summary(ds, matcher=self._matcher) or {}
+                    self._cache[key] = dict(unverified_points=s.get('unverified', 0))
+            except Exception:
+                self._cache[key] = {}
+        return self._cache[key]
 
     def rows(self):
         q = self.search.strip().lower()
@@ -292,7 +322,7 @@ class DatasheetList:
             if q and q not in text:
                 continue
             out.append(dict(uid=r['uid'], make=r['make'], model=r['model'], title=r['title'], version=r['version'], functions=funcs, function_count=nfun,
-                            points=r['points'], automation=self.automation_text(r), saved=r.get('updated_at', ''), status=r['status'],
+                            points=r['points'], automation=self.automation_text(r, self._check_for(r)), saved=r.get('updated_at', ''), status=r['status'],
                             deleted=bool(r['deleted']), tag=r.get('tag', db.TAG)))
         return out
 
@@ -1665,7 +1695,10 @@ class EditorModel:
             listed = any(e['uid'] == res.uid for e in self.storage.entries())
             msg = f'Saved version {res.version}: "{res.uid}" is a runnable procedure with the user-built tag' + ('.' if listed else ', but it was not found in the procedure entries: check the data folder.')
         else:
-            msg = f'Saved version {res.version} as a DRAFT (not runnable): ' + ', '.join(f'{c}' for c in [f"{counts['errors']} error(s)"]) + '. Any earlier runnable version is unchanged.'
+            rule_errs = [p for p in res.problems if getattr(p, 'level', 'error') == 'error' and str(getattr(p, 'code', '')).startswith('rule')]
+            msg = f'Saved version {res.version} as a DRAFT (not runnable): ' + ', '.join(f'{c}' for c in [f"{counts['errors'] + len(rule_errs)} error(s)"]) + '. Any earlier runnable version is unchanged.'
+            if rule_errs:
+                msg += ' The sheet check found: ' + str(rule_errs[0])
         return Outcome(True, msg, res)
 
     def version_rows(self):
@@ -1870,7 +1903,7 @@ class Resolved:
     kind: str = ''
 
 
-class GridModel(EditorModel):
+class GridModel(CheckMixin, EditorModel):
     """The datasheet grid: everything the window needs, with no tkinter.
 
         g = GridModel(Storage())                      # or GridModel.open(storage, uid)
