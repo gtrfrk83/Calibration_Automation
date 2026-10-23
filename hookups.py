@@ -53,6 +53,9 @@ METERS = {
     # Fluke 175 / 177 / 179: the Calibration Information (pp. 2, 3, 9) names the jacks VΩ, 400 mA, 10 A and COM; their ORDER on the case is not shown in it (Figure 1 p. 3 draws
     # only the VΩ jack and one current jack): UNVERIFIED, confirm on the real meter
     'fluke170': dict(name='Fluke 175 / 177 / 179', jacks={'vohm': 'VΩ', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'}),
+    # Fluke 365 clamp meter: the Calibration Manual's Figure 1 (p. 5) labels two jacks 'VΩ' and 'COM'; the current points use the detachable jaw on a 20-turn coil
+    # (no test leads in the jacks), so only the voltage / ohms hook-up is described here and the coil hook-ups are the spec's own groups (specs/fluke_365_pv.json)
+    'fluke365': dict(name='Fluke 365', jacks={'vohm': 'VΩ', 'com': 'COM'}),
 }
 RED_JACK = {'VOHM': 'vohm', 'UAMP': 'ma', 'AMP10': 'a10'}
 
@@ -63,6 +66,7 @@ AVAILABLE = {
     'fluke87v': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
     'fluke77': ('VOHM', 'UAMP', 'AMP10'),
     'fluke170': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
+    'fluke365': ('VOHM',),
 }
 
 # extra text for particular meters
@@ -81,6 +85,9 @@ EXTRA = {
                                        'For AC current, short the VΩ input to COM or leave it unconnected (p. 9).'),
     ('fluke170', 'AMP10'): dict(caution='The 10A input is fused at 11 A: never apply more than the point being tested (manual pp. 2, 3, 18). Use leads rated for 10 A. '
                                         'The meter shows LEAd when the rotary switch moves to or from the A position (p. 2). For AC current, short the VΩ input to COM or leave it unconnected (p. 9).'),
+    ('fluke365', 'VOHM'): dict(caution='Up to 570 V ac or dc is applied to the VΩ and COM jacks (600 V CAT III meter). Use CAT III 600 V leads with the finger guards, connect COM before the live lead '
+                                       'and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on (Safety Information, pp. 2-3). '
+                                       'Do not touch more than 30 V ac rms, 42 V ac peak or 60 V dc.'),
     ('fluke170', 'TEMP'): dict(caution='Use the correct cable (Table 3 note 3). The meter and the thermocouple adapter must be at the same temperature: allow 20 minutes before the temperature points (Table 3 note 4).'),
 }
 GENERIC_CAUTION = {

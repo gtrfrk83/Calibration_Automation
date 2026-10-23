@@ -54,7 +54,9 @@ class Classify(unittest.TestCase):
         by = {p.id: p.effective_kind for p in procscan.procs(ROOT)}
         self.assertEqual([k for k, v in by.items() if v == 'adjustment'], ['Fluke_8846A_Adjustment', 'Keithley_2000_Adjustment', 'Fluke_8808A_Adjustment'])
         self.assertEqual(by['Fluke_8846A_Verification'], 'verification')
-        self.assertTrue(all(v == 'verification' for k, v in by.items() if k not in ('Fluke_8808A_Adjustment', 'Fluke_8846A_Adjustment', 'Keithley_2000_Adjustment')))
+        self.assertTrue(all(v == 'verification' for k, v in by.items() if k not in ('Fluke_8808A_Adjustment', 'Fluke_8846A_Adjustment', 'Keithley_2000_Adjustment',
+                                                                                     'Fluke_365_Verification')))
+        self.assertEqual([k for k, v in by.items() if v == 'manual'], ['Fluke_365_Verification'])        # the Fluke 365 clamp meter: the first installed Manual Calibration (sidecar kind 'manual')
         self.assertGreater(len(by), 20)
 
     def test_every_registered_adjustment_by_category_name_is_in_the_adjustment_view(self):

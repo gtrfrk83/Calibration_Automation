@@ -1,0 +1,1100 @@
+{
+ "schema": 3,
+ "kind": "manual-reading",
+ "options": {
+  "hookup_meter": "fluke365",
+  "hv_threshold_v": 30,
+  "auto_ramp": false,
+  "function_prompt": true,
+  "report_title": "Calibration Data"
+ },
+ "source": {
+  "document": "Fluke 365 Detachable Jaw True-rms Clamp Meter - Calibration Manual (R0, 2010)",
+  "pages": "5-8 (printed): specifications pp. 5-6, Table 2 pp. 7-8 (PDF pages 13-16); safety p. 2-3; Table 3 (equipment) p. 8",
+  "cite": "Fluke 365 Calibration Manual, Table 2 Performance Tests, printed pp. 7-8; limits unchanged, four rows flagged against the published specification (see Source)",
+  "limits": "Manufacturer limits, Table 2, as printed",
+  "report_note": "Limits are those of the manufacturer's Table 2 (Fluke 365 Calibration Manual, printed pp. 7-8), unchanged. The current points are driven through a 20-turn coil (calibrator current x 20 = the reading shown); no uncertainty is printed for them.",
+  "note": "Table 2 (32 rows: AC volts 6, DC volts 7, ohms 7, AC amps 6, DC amps 6; printed pp. 7-8 of the 365 Calibration Manual). The table has no step numbers: steps are numbered in table order. Table 3 (printed p. 8) names a calibrator with 4.5 digit resolution (Fluke 55xxA recommended) and a 20-turn wired coil; the procedure drives a Fluke 5522A or 5560A (or you set the calibrator by hand). The current rows are driven through the 20-turn coil: the calibrator output is 0.5 / 5 / 9.5 A and the meter reads 20 x that (limits are meter readings). The 365 has no remote interface: you type the display reading. Limits are as printed (nothing is corrected); where a printed limit is not half of the published specification (printed p. 5) the point says so: 900 ohm (lower limit 894, the pattern gives 893) and the three 190 A points (187.5 to 192.5, the pattern gives 187.8 to 192.2). High-voltage points go straight to the test value (the manual prescribes no ramp). Current points: test leads out of the jacks (p. 2), coil UNVERIFIED (turns wiring, jaw placement, calibrator compliance with the coil, 5522A LCOMP). The adjustment procedure (Tables 3 and 4, printed pp. 8-10) is not part of this procedure."
+ },
+ "models": {
+  "365": {
+   "name": "Fluke 365",
+   "brand": "Fluke",
+   "model_note": "Fluke 365 detachable jaw true-rms clamp meter (200 A, 600 V, 4 digit display): Table 2, 32 points"
+  }
+ },
+ "groups": {
+  "COIL_AUX": {
+   "title": "Change the cables: 20-turn coil on the calibrator low-current output",
+   "summary": "Calibrator low-current output (5522A AUX HI / AUX LO; 5560A VI AUX / OUTPUT LO) -> 20-turn coil -> the meter jaw closed around all 20 turns. No test leads in the meter jacks.",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Test leads",
+     "REMOVE the test leads from the VΩ and COM jacks: the manual says not to measure current while the test leads are in the input jacks (Safety Information, p. 2)."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Coil",
+     "The wired coil is 20 turns (Table 3, printed p. 8). Connect its two ends to the calibrator: Fluke 5522A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use wire and plugs rated for the current."
+    ],
+    [
+     "Jaw",
+     "Close the detachable jaw around ALL 20 turns of the coil together, jaw fully closed, the coil centred in the opening, the coil leads kept away from the meter body. The meter then reads 20 x the calibrator current. (The manual gives no jaw placement beyond \"20 turn coil\": UNVERIFIED.)"
+    ],
+    [
+     "LCOMP",
+     "Fluke 5522A: for the AC points switch inductive-load compensation (LCOMP) ON at the calibrator front panel (5522A Operators Manual: used to drive multi-turn coils and current clamps). The program does not set it: UNVERIFIED for this coil."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "caution": "This point drives current through a coil. Keep the calibrator in STANDBY whenever you touch the coil or leads. Do not exceed the jaw rating (600 V or 200 A, Safety Information p. 3).",
+   "diagram": "diagrams/hook_fluke365_COIL_AUX.png"
+  },
+  "COIL_20A": {
+   "title": "Change the cables: 20-turn coil on the calibrator high-current output",
+   "summary": "Calibrator high-current output (5522A 20 A / AUX LO; 5560A 30A / OUTPUT LO) -> 20-turn coil -> the meter jaw closed around all 20 turns. No test leads in the meter jacks.",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Test leads",
+     "REMOVE the test leads from the VΩ and COM jacks: the manual says not to measure current while the test leads are in the input jacks (Safety Information, p. 2)."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire (in manual-calibrator mode, put it in STANDBY yourself)."
+    ],
+    [
+     "Coil",
+     "Move the two ends of the 20-turn coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil wire, plugs and leads must carry up to 9.5 A."
+    ],
+    [
+     "Jaw",
+     "The detachable jaw stays closed around ALL 20 turns of the coil (centred, jaw fully closed, leads away from the meter body). The meter reads 20 x the calibrator current: 5 A reads 100 A, 9.5 A reads 190 A."
+    ],
+    [
+     "LCOMP",
+     "Fluke 5522A: AC points with LCOMP ON, as for the low-current points (not set by the program; UNVERIFIED for this coil)."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "caution": "Up to 9.5 A flows in the coil. Keep the calibrator in STANDBY whenever you touch the coil or leads; check that the coil and leads are not warm after a long run. Do not exceed the jaw rating (600 V or 200 A, Safety Information p. 3).",
+   "diagram": "diagrams/hook_fluke365_COIL_20A.png"
+  }
+ },
+ "steps": [
+  {
+   "table": "2",
+   "step": 1,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "29.5",
+   "high": "30.5",
+   "test": "numeric",
+   "applied": {
+    "value": 30.0,
+    "frequency": 50.0
+   },
+   "nominal": 30.0,
+   "accuracy": "±(1.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 29.5 to 30.5 V   (published specification: ±(1.5 % of reading + 5 digits of 0.1 V) = ±0.95 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #1",
+   "id": "2-1"
+  },
+  {
+   "table": "2",
+   "step": 2,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "297.5",
+   "high": "302.5",
+   "test": "numeric",
+   "applied": {
+    "value": 300.0,
+    "frequency": 50.0
+   },
+   "nominal": 300.0,
+   "accuracy": "±(1.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 297.5 to 302.5 V   (published specification: ±(1.5 % of reading + 5 digits of 0.1 V) = ±5 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #2",
+   "id": "2-2"
+  },
+  {
+   "table": "2",
+   "step": 3,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "565.5",
+   "high": "574.5",
+   "test": "numeric",
+   "applied": {
+    "value": 570.0,
+    "frequency": 50.0
+   },
+   "nominal": 570.0,
+   "accuracy": "±(1.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 565.5 to 574.5 V   (published specification: ±(1.5 % of reading + 5 digits of 0.1 V) = ±9.05 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #3",
+   "id": "2-3"
+  },
+  {
+   "table": "2",
+   "step": 4,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "29.5",
+   "high": "30.5",
+   "test": "numeric",
+   "applied": {
+    "value": 30.0,
+    "frequency": 400.0
+   },
+   "nominal": 30.0,
+   "accuracy": "±(1.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 29.5 to 30.5 V   (published specification: ±(1.5 % of reading + 5 digits of 0.1 V) = ±0.95 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #4",
+   "id": "2-4"
+  },
+  {
+   "table": "2",
+   "step": 5,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "297.5",
+   "high": "302.5",
+   "test": "numeric",
+   "applied": {
+    "value": 300.0,
+    "frequency": 400.0
+   },
+   "nominal": 300.0,
+   "accuracy": "±(1.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 297.5 to 302.5 V   (published specification: ±(1.5 % of reading + 5 digits of 0.1 V) = ±5 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #5",
+   "id": "2-5"
+  },
+  {
+   "table": "2",
+   "step": 6,
+   "section": "AC volts",
+   "switch": "V~  (AC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "ACV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "565.5",
+   "high": "574.5",
+   "test": "numeric",
+   "applied": {
+    "value": 570.0,
+    "frequency": 400.0
+   },
+   "nominal": 570.0,
+   "accuracy": "±(1.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 565.5 to 574.5 V   (published specification: ±(1.5 % of reading + 5 digits of 0.1 V) = ±9.05 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #6",
+   "id": "2-6"
+  },
+  {
+   "table": "2",
+   "step": 7,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-0.3",
+   "high": "0.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: -0.3 to 0.3 V   (published specification: ±(1 % of reading + 5 digits of 0.1 V) = ±0.5 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #7",
+   "id": "2-7"
+  },
+  {
+   "table": "2",
+   "step": 8,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "29.6",
+   "high": "30.4",
+   "test": "numeric",
+   "applied": {
+    "value": 30.0,
+    "frequency": null
+   },
+   "nominal": 30.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 29.6 to 30.4 V   (published specification: ±(1 % of reading + 5 digits of 0.1 V) = ±0.8 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #8",
+   "id": "2-8"
+  },
+  {
+   "table": "2",
+   "step": 9,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "298.2",
+   "high": "301.8",
+   "test": "numeric",
+   "applied": {
+    "value": 300.0,
+    "frequency": null
+   },
+   "nominal": 300.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 298.2 to 301.8 V   (published specification: ±(1 % of reading + 5 digits of 0.1 V) = ±3.5 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #9",
+   "id": "2-9"
+  },
+  {
+   "table": "2",
+   "step": 10,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "566.9",
+   "high": "573.1",
+   "test": "numeric",
+   "applied": {
+    "value": 570.0,
+    "frequency": null
+   },
+   "nominal": 570.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 566.9 to 573.1 V   (published specification: ±(1 % of reading + 5 digits of 0.1 V) = ±6.2 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #10",
+   "id": "2-10"
+  },
+  {
+   "table": "2",
+   "step": 11,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-30.4",
+   "high": "-29.6",
+   "test": "numeric",
+   "applied": {
+    "value": -30.0,
+    "frequency": null
+   },
+   "nominal": -30.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: -30.4 to -29.6 V   (published specification: ±(1 % of reading + 5 digits of 0.1 V) = ±0.8 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #11",
+   "id": "2-11"
+  },
+  {
+   "table": "2",
+   "step": 12,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-301.8",
+   "high": "-298.2",
+   "test": "numeric",
+   "applied": {
+    "value": -300.0,
+    "frequency": null
+   },
+   "nominal": -300.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: -301.8 to -298.2 V   (published specification: ±(1 % of reading + 5 digits of 0.1 V) = ±3.5 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #12",
+   "id": "2-12"
+  },
+  {
+   "table": "2",
+   "step": 13,
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts)",
+   "range": "600.0 V",
+   "models": [
+    "365"
+   ],
+   "kind": "DCV",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "-573.1",
+   "high": "-566.9",
+   "test": "numeric",
+   "applied": {
+    "value": -570.0,
+    "frequency": null
+   },
+   "nominal": -570.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: -573.1 to -566.9 V   (published specification: ±(1 % of reading + 5 digits of 0.1 V) = ±6.2 V; the table keeps half of it)",
+   "group": "VOHM",
+   "ref": "T2 #13",
+   "id": "2-13"
+  },
+  {
+   "table": "2",
+   "step": 14,
+   "section": "Ohms",
+   "switch": "Ω  (ohms; the position shared with continuity)",
+   "range": "600.0 Ω",
+   "models": [
+    "365"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "0.0",
+   "high": "0.3",
+   "test": "numeric",
+   "applied": {
+    "value": 0.0,
+    "frequency": null
+   },
+   "nominal": 0.0,
+   "printed_text": {
+    "low": "0",
+    "high": "0.3",
+    "note": "printed with fewer decimals than the display resolution; same value"
+   },
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 0.0 to 0.3 Ω   (published specification: ±(1 % of reading + 5 digits of 0.1 Ω) = ±0.5 Ω; the table keeps half of it)",
+   "group": "VOHM",
+   "note": "Table 2 does not say whether the limits include test lead resistance (UNVERIFIED). At 0 ohm the whole 0.3 ohm upper limit is in play, so use the shortest leads; the lower limit is printed 0 (the meter cannot read below zero), the specification would allow -0.5 ohm.",
+   "ref": "T2 #14",
+   "id": "2-14"
+  },
+  {
+   "table": "2",
+   "step": 15,
+   "section": "Ohms",
+   "switch": "Ω  (ohms; the position shared with continuity)",
+   "range": "600.0 Ω",
+   "models": [
+    "365"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "29.6",
+   "high": "30.4",
+   "test": "numeric",
+   "applied": {
+    "value": 30.0,
+    "frequency": null
+   },
+   "nominal": 30.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 29.6 to 30.4 Ω   (published specification: ±(1 % of reading + 5 digits of 0.1 Ω) = ±0.8 Ω; the table keeps half of it)",
+   "group": "VOHM",
+   "note": "Table 2 does not say whether the limits include test lead resistance (UNVERIFIED).",
+   "ref": "T2 #15",
+   "id": "2-15"
+  },
+  {
+   "table": "2",
+   "step": 16,
+   "section": "Ohms",
+   "switch": "Ω  (ohms; the position shared with continuity)",
+   "range": "600.0 Ω",
+   "models": [
+    "365"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "298.2",
+   "high": "301.8",
+   "test": "numeric",
+   "applied": {
+    "value": 300.0,
+    "frequency": null
+   },
+   "nominal": 300.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 298.2 to 301.8 Ω   (published specification: ±(1 % of reading + 5 digits of 0.1 Ω) = ±3.5 Ω; the table keeps half of it)",
+   "group": "VOHM",
+   "note": "Table 2 does not say whether the limits include test lead resistance (UNVERIFIED).",
+   "ref": "T2 #16",
+   "id": "2-16"
+  },
+  {
+   "table": "2",
+   "step": 17,
+   "section": "Ohms",
+   "switch": "Ω  (ohms; the position shared with continuity)",
+   "range": "600.0 Ω",
+   "models": [
+    "365"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "566.9",
+   "high": "573.1",
+   "test": "numeric",
+   "applied": {
+    "value": 570.0,
+    "frequency": null
+   },
+   "nominal": 570.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 566.9 to 573.1 Ω   (published specification: ±(1 % of reading + 5 digits of 0.1 Ω) = ±6.2 Ω; the table keeps half of it)",
+   "group": "VOHM",
+   "note": "Table 2 does not say whether the limits include test lead resistance (UNVERIFIED).",
+   "ref": "T2 #17",
+   "id": "2-17"
+  },
+  {
+   "table": "2",
+   "step": 18,
+   "section": "Ohms",
+   "switch": "Ω  (ohms; the position shared with continuity)",
+   "range": "6000 Ω",
+   "models": [
+    "365"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "894",
+   "high": "907",
+   "test": "numeric",
+   "applied": {
+    "value": 900.0,
+    "frequency": null
+   },
+   "nominal": 900.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 894 to 907 Ω   (published specification: ±(1 % of reading + 5 digits of 1 Ω) = ±14 Ω; the table keeps half of it)",
+   "check": {
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "6",
+      "half_spec": "7",
+      "full_spec": "14"
+     }
+    ],
+    "full_spec": "14"
+   },
+   "group": "VOHM",
+   "note": "Table 2 does not say whether the limits include test lead resistance (UNVERIFIED). CHECK (printed limit not changed): low limit ±6 vs half of the specification ±7 (full published specification ±14 Ω; the printed limit is inside it).",
+   "ref": "T2 #18",
+   "id": "2-18"
+  },
+  {
+   "table": "2",
+   "step": 19,
+   "section": "Ohms",
+   "switch": "Ω  (ohms; the position shared with continuity)",
+   "range": "6000 Ω",
+   "models": [
+    "365"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "2982",
+   "high": "3018",
+   "test": "numeric",
+   "applied": {
+    "value": 3000.0,
+    "frequency": null
+   },
+   "nominal": 3000.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 2982 to 3018 Ω   (published specification: ±(1 % of reading + 5 digits of 1 Ω) = ±35 Ω; the table keeps half of it)",
+   "group": "VOHM",
+   "note": "Table 2 does not say whether the limits include test lead resistance (UNVERIFIED).",
+   "ref": "T2 #19",
+   "id": "2-19"
+  },
+  {
+   "table": "2",
+   "step": 20,
+   "section": "Ohms",
+   "switch": "Ω  (ohms; the position shared with continuity)",
+   "range": "6000 Ω",
+   "models": [
+    "365"
+   ],
+   "kind": "OHM",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "5669",
+   "high": "5731",
+   "test": "numeric",
+   "applied": {
+    "value": 5700.0,
+    "frequency": null
+   },
+   "nominal": 5700.0,
+   "accuracy": "±(1 % of reading + 5 digits)",
+   "tol_text": "Table 2: 5669 to 5731 Ω   (published specification: ±(1 % of reading + 5 digits of 1 Ω) = ±62 Ω; the table keeps half of it)",
+   "group": "VOHM",
+   "note": "Table 2 does not say whether the limits include test lead resistance (UNVERIFIED).",
+   "ref": "T2 #20",
+   "id": "2-20"
+  },
+  {
+   "table": "2",
+   "step": 21,
+   "section": "AC amps",
+   "switch": "A~  (AC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.6",
+   "high": "10.4",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": 50.0
+   },
+   "nominal": 10.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: 9.6 to 10.4 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±0.7 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 0.5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "AC amps, 20-turn coil, 200.0 A range: meter reads 10 A @ 50 Hz",
+   "group": "COIL_AUX",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 0.5 A in, 10 A on the meter. The limits are the meter readings (Table 2, printed p. 8).",
+   "ref": "T2 #21",
+   "id": "2-21"
+  },
+  {
+   "table": "2",
+   "step": 22,
+   "section": "AC amps",
+   "switch": "A~  (AC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "98.7",
+   "high": "101.3",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 50.0
+   },
+   "nominal": 100.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: 98.7 to 101.3 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±2.5 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "AC amps, 20-turn coil, 200.0 A range: meter reads 100 A @ 50 Hz",
+   "group": "COIL_20A",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 5 A in, 100 A on the meter. The limits are the meter readings (Table 2, printed p. 8).",
+   "ref": "T2 #22",
+   "id": "2-22"
+  },
+  {
+   "table": "2",
+   "step": 23,
+   "section": "AC amps",
+   "switch": "A~  (AC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "187.5",
+   "high": "192.5",
+   "test": "numeric",
+   "applied": {
+    "value": 9.5,
+    "frequency": 50.0
+   },
+   "nominal": 190.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: 187.5 to 192.5 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±4.3 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 9.5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "AC amps, 20-turn coil, 200.0 A range: meter reads 190 A @ 50 Hz",
+   "check": {
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "2.5",
+      "half_spec": "2.15",
+      "full_spec": "4.3"
+     },
+     {
+      "side": "high",
+      "printed": "2.5",
+      "half_spec": "2.15",
+      "full_spec": "4.3"
+     }
+    ],
+    "full_spec": "4.3"
+   },
+   "group": "COIL_20A",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 9.5 A in, 190 A on the meter. The limits are the meter readings (Table 2, printed p. 8). CHECK (printed limit not changed): low limit ±2.5 vs half of the specification ±2.15; high limit ±2.5 vs half of the specification ±2.15 (full published specification ±4.3 A; the printed limit is inside it).",
+   "ref": "T2 #23",
+   "id": "2-23"
+  },
+  {
+   "table": "2",
+   "step": 24,
+   "section": "AC amps",
+   "switch": "A~  (AC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.6",
+   "high": "10.4",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": 400.0
+   },
+   "nominal": 10.0,
+   "accuracy": "±(2.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 9.6 to 10.4 A   (published specification: ±(2.5 % of reading + 5 digits of 0.1 A) = ±0.75 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 0.5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "AC amps, 20-turn coil, 200.0 A range: meter reads 10 A @ 400 Hz",
+   "group": "COIL_AUX",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 0.5 A in, 10 A on the meter. The limits are the meter readings (Table 2, printed p. 8).",
+   "ref": "T2 #24",
+   "id": "2-24"
+  },
+  {
+   "table": "2",
+   "step": 25,
+   "section": "AC amps",
+   "switch": "A~  (AC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "98.5",
+   "high": "101.5",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": 400.0
+   },
+   "nominal": 100.0,
+   "accuracy": "±(2.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 98.5 to 101.5 A   (published specification: ±(2.5 % of reading + 5 digits of 0.1 A) = ±3 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "AC amps, 20-turn coil, 200.0 A range: meter reads 100 A @ 400 Hz",
+   "group": "COIL_20A",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 5 A in, 100 A on the meter. The limits are the meter readings (Table 2, printed p. 8).",
+   "ref": "T2 #25",
+   "id": "2-25"
+  },
+  {
+   "table": "2",
+   "step": 26,
+   "section": "AC amps",
+   "switch": "A~  (AC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "ACI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "187.4",
+   "high": "192.6",
+   "test": "numeric",
+   "applied": {
+    "value": 9.5,
+    "frequency": 400.0
+   },
+   "nominal": 190.0,
+   "accuracy": "±(2.5 % of reading + 5 digits)",
+   "tol_text": "Table 2: 187.4 to 192.6 A   (published specification: ±(2.5 % of reading + 5 digits of 0.1 A) = ±5.25 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 9.5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "AC amps, 20-turn coil, 200.0 A range: meter reads 190 A @ 400 Hz",
+   "group": "COIL_20A",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 9.5 A in, 190 A on the meter. The limits are the meter readings (Table 2, printed p. 8).",
+   "ref": "T2 #26",
+   "id": "2-26"
+  },
+  {
+   "table": "2",
+   "step": 27,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.6",
+   "high": "10.4",
+   "test": "numeric",
+   "applied": {
+    "value": 0.5,
+    "frequency": null
+   },
+   "nominal": 10.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: 9.6 to 10.4 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±0.7 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 0.5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "DC amps, 20-turn coil, 200.0 A range: meter reads 10 A",
+   "group": "COIL_AUX",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 0.5 A in, 10 A on the meter. The limits are the meter readings (Table 2, printed p. 8). Not in the Calibration Manual (UNVERIFIED): the meter has a ZERO button (Figure 1); with the jaw closed and nothing in it, a DC amps reading that is not zero may need it. Do not zero with the coil in the jaw.",
+   "ref": "T2 #27",
+   "id": "2-27"
+  },
+  {
+   "table": "2",
+   "step": 28,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "98.7",
+   "high": "101.3",
+   "test": "numeric",
+   "applied": {
+    "value": 5.0,
+    "frequency": null
+   },
+   "nominal": 100.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: 98.7 to 101.3 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±2.5 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "DC amps, 20-turn coil, 200.0 A range: meter reads 100 A",
+   "group": "COIL_20A",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 5 A in, 100 A on the meter. The limits are the meter readings (Table 2, printed p. 8).",
+   "ref": "T2 #28",
+   "id": "2-28"
+  },
+  {
+   "table": "2",
+   "step": 29,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "187.5",
+   "high": "192.5",
+   "test": "numeric",
+   "applied": {
+    "value": 9.5,
+    "frequency": null
+   },
+   "nominal": 190.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: 187.5 to 192.5 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±4.3 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, 9.5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "DC amps, 20-turn coil, 200.0 A range: meter reads 190 A",
+   "check": {
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "2.5",
+      "half_spec": "2.15",
+      "full_spec": "4.3"
+     },
+     {
+      "side": "high",
+      "printed": "2.5",
+      "half_spec": "2.15",
+      "full_spec": "4.3"
+     }
+    ],
+    "full_spec": "4.3"
+   },
+   "group": "COIL_20A",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: 9.5 A in, 190 A on the meter. The limits are the meter readings (Table 2, printed p. 8). CHECK (printed limit not changed): low limit ±2.5 vs half of the specification ±2.15; high limit ±2.5 vs half of the specification ±2.15 (full published specification ±4.3 A; the printed limit is inside it).",
+   "ref": "T2 #29",
+   "id": "2-29"
+  },
+  {
+   "table": "2",
+   "step": 30,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-10.4",
+   "high": "-9.6",
+   "test": "numeric",
+   "applied": {
+    "value": -0.5,
+    "frequency": null
+   },
+   "nominal": -10.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: -10.4 to -9.6 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±0.7 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, -0.5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "DC amps, 20-turn coil, 200.0 A range: meter reads -10 A",
+   "group": "COIL_AUX",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: -0.5 A in, -10 A on the meter. The limits are the meter readings (Table 2, printed p. 8).",
+   "ref": "T2 #30",
+   "id": "2-30"
+  },
+  {
+   "table": "2",
+   "step": 31,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-101.3",
+   "high": "-98.7",
+   "test": "numeric",
+   "applied": {
+    "value": -5.0,
+    "frequency": null
+   },
+   "nominal": -100.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: -101.3 to -98.7 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±2.5 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, -5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "DC amps, 20-turn coil, 200.0 A range: meter reads -100 A",
+   "group": "COIL_20A",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: -5 A in, -100 A on the meter. The limits are the meter readings (Table 2, printed p. 8).",
+   "ref": "T2 #31",
+   "id": "2-31"
+  },
+  {
+   "table": "2",
+   "step": 32,
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps, detachable jaw on the 20-turn coil)",
+   "range": "200.0 A",
+   "models": [
+    "365"
+   ],
+   "kind": "DCI",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "-192.5",
+   "high": "-187.5",
+   "test": "numeric",
+   "applied": {
+    "value": -9.5,
+    "frequency": null
+   },
+   "nominal": -190.0,
+   "accuracy": "±(2 % of reading + 5 digits)",
+   "tol_text": "Table 2: -192.5 to -187.5 A   (published specification: ±(2 % of reading + 5 digits of 0.1 A) = ±4.3 A; the table keeps half of it)",
+   "no_uncertainty": true,
+   "report_desc": "200.0 A, -9.5 A x 20 turns",
+   "settle": 5,
+   "dsb_desc": "DC amps, 20-turn coil, 200.0 A range: meter reads -190 A",
+   "check": {
+    "printed_vs_spec": [
+     {
+      "side": "low",
+      "printed": "2.5",
+      "half_spec": "2.15",
+      "full_spec": "4.3"
+     },
+     {
+      "side": "high",
+      "printed": "2.5",
+      "half_spec": "2.15",
+      "full_spec": "4.3"
+     }
+    ],
+    "full_spec": "4.3"
+   },
+   "group": "COIL_20A",
+   "note": "The calibrator drives the 20-turn coil and the meter reads 20 x the calibrator current: -9.5 A in, -190 A on the meter. The limits are the meter readings (Table 2, printed p. 8). CHECK (printed limit not changed): low limit ±2.5 vs half of the specification ±2.15; high limit ±2.5 vs half of the specification ±2.15 (full published specification ±4.3 A; the printed limit is inside it).",
+   "ref": "T2 #32",
+   "id": "2-32"
+  }
+ ]
+}
