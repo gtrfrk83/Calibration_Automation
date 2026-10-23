@@ -354,8 +354,8 @@ NOTES = {
     '1': 'SOURCE: Fluke 5520A Service Manual (supplied PDF 5520A_Manual.pdf), Chapter 1 Specifications, printed pp. 1-6 to 1-25 = PDF pp. 22-41 (printed 1-N = PDF N + 16). Rows carry the PDF page. '
          'Every value was read from rendered page images (130 dpi page, then a 200 dpi crop read a second time), not from extracted text.',
     '2': 'CONFIDENCE LEVEL: "Specification Confidence Interval 99 %" (General Specifications, printed p. 1-7, PDF p. 23). The sheet stores confidence_pct 99, so the coverage divisor is 2.576 '
-         '(specmanager.divisor). The 5522A sheet is stored with NO confidence level (divisor 2) although its manual also says 99 %; the 5560A sheet is stored at 95 % (divisor 2). Not harmonised: see NOTES.md. '
-         'To budget the 5520A the way the 5522A sheet is budgeted, set the divisor to 2 in Standards Specs (logged).',
+         '(specmanager.divisor). Harmonised 2026-10-22 (the lab reports at 95 %, k = 2): the 5522A sheet is now also stored at 99 % (its Operators Manual p. 1-8 prints 99 %), the 5560A sheet is stored at its printed 95 % column (divisor 2). '
+         'See NOTES.md, "Confidence level rule". To budget the 5520A with divisor 2 instead, set it in Standards Specs (logged).',
     '3': 'CONDITIONS (printed pp. 1-6, 1-7): valid after a 30 minute warm-up (or twice the time off); tcal = ambient temperature at calibration, tcal 15 to 35 degC; the tables hold for tcal +/-5 degC; outside it add 0.1 x '
          '(90 day or 1 year specification) per degC; zero cal every 7 days or when the ambient changes by more than 5 degC; the tightest ohms specification needs an ohms zero cal every 12 hours within +/-1 degC. '
          'The absolute uncertainty includes stability, temperature coefficient, linearity, line and load regulation and the traceability of the standards used for calibration: nothing is to be added for the temperature range indicated. '

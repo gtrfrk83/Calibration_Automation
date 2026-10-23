@@ -165,15 +165,16 @@ class Sheet(unittest.TestCase):
         self.assertIn('manual', b.components[1].source)
 
     def test_same_divisor_gives_the_5522a_budget(self):
-        """The two sheets carry the same 1 yr numbers at 10 V DC; only the stored confidence level differs (99 % vs none). With the divisor set to 2 they agree."""
+        """The two sheets carry the same 1 yr numbers at 10 V DC and, since 2026-10-22, the same stored level (99 %, divisor 2.576: the 5522A manual p. 1-8 prints
+        99 % too), so the budgets agree as stored.  (Before, the 5522A sheet had no level, divisor 2, and the 5520A budget was smaller.)"""
         b99 = ub.build('DCV', 10.0, 'V', standard=self.s, scope=self.sc)
         b52 = ub.build('DCV', 10.0, 'V', standard=self.a, scope=self.sc)
-        self.assertLess(b99.emu, b52.emu)
-        sm.set_standard_field(self.s.id, 'divisor', 2.0, who='test', reason='harmonise with the 5522A', path=self.db)
+        self.assertAlmostEqual(b99.emu, b52.emu, 12)
+        self.assertEqual(b99.reported, b52.reported)
+        sm.set_standard_field(self.s.id, 'divisor', 2.0, who='test', reason='divisor 2 for the test', path=self.db)
         try:
             b2 = ub.build('DCV', 10.0, 'V', standard=sm.standard('5520A', self.db), scope=self.sc)
-            self.assertAlmostEqual(b2.emu, b52.emu, 12)
-            self.assertEqual(b2.reported, b52.reported)
+            self.assertGreater(b2.emu, b52.emu)                              # a divisor of 2 gives the larger budget
         finally:
             sm.set_standard_field(self.s.id, 'divisor', None, path=self.db)
 

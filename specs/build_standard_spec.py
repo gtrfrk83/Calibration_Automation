@@ -26,6 +26,12 @@ sys.path.insert(0, str(HERE.parent))
 import specmanager as sm  # noqa: E402  (units, parsing helpers live there so the UI importer shares them)
 
 X_FUNCTION, X_RANGE, X_PARAM = 83, 97, 110
+# Confidence level printed in the manufacturer's manual where the SpecTrack sheet says [Not Specified] (NOTES.md, "Confidence level rule").
+MANUAL_CONFIDENCE = {
+    '5522A': (99.0, '99 % (5522A Operators Manual, General Specifications, printed p. 1-8: "Specification Confidence Interval 99 %"; '
+                    'the SpecTrack sheet itself prints [Not Specified])'),
+}
+
 HEADER_FIELDS = {'Manufacturer': 'manufacturer', 'Model': 'model', 'Description': 'description', 'Confidence Level': 'confidence_text',
                  'Reference': 'reference', 'Revision': 'revision', 'Author': 'author', 'Approved By': 'approved_by', 'Approve Date': 'approve_date'}
 
@@ -114,7 +120,10 @@ def build(pdf_path):
                 print(f"WARNING unparsed line(s) under {f['name']} / {r['label']}: {r['raw_other']}", file=sys.stderr)
     conf = header.get('confidence_text', '')
     m = re.search(r'(\d+(?:\.\d+)?)\s*%', conf)
-    return dict(schema=1, standard=dict(header, confidence_pct=float(m.group(1)) if m else None, source_pdf=Path(pdf_path).name,
+    pct = float(m.group(1)) if m else None
+    if pct is None and header.get('model') in MANUAL_CONFIDENCE:      # sheet prints [Not Specified]; the manufacturer manual states the level
+        pct, header['confidence_text'] = MANUAL_CONFIDENCE[header['model']]
+    return dict(schema=1, standard=dict(header, confidence_pct=pct, source_pdf=Path(pdf_path).name,
                                           sheet_generated=generated, built=datetime.now().isoformat(timespec='seconds')),
                 notes={str(k): v for k, v in notes.items()}, functions=functions)
 

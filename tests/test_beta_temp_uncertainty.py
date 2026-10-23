@@ -14,9 +14,10 @@ point, and TAR = half-width of the pass/fail limits / that specification.  Numbe
       divisor 2).  1 year, 95 %, degC:  -200..-100 0.22   -100..-25 0.10   -25..120 0.09   120..1000 0.16   1000..1372 0.27
       (the 99 % / 1 year column prints 0.28 0.13 0.11 0.21 0.35; 90 day 95 %: 0.17 0.08 0.07 0.13 0.22).  Resolution 0.01 degC (printed p. 15).
 
-Budget (uncertainty_budget): u = spec / 2, plus the calibrator resolution / sqrt(12) when known (0.01 degC for both calibrators),
+Budget (uncertainty_budget): u = spec / divisor (5522A 99 % -> 2.576; 5560A 95 % column -> 2), plus the calibrator resolution / sqrt(12) when known (0.01 degC for both calibrators),
 EMU = 2 * sqrt(sum u^2), rounded UP to 2 significant figures; no CMC floor (the scope file has no temperature entry).
-  5522A  0 / 100 degC: 2*sqrt(0.08^2 + 0.002887^2) = 0.160104 -> 0.17      400: 0.260069 -> 0.27      -40: 0.180086 -> 0.19
+  5522A  (sheet at 99 %, divisor 2.576, since 2026-10-22; before: divisor 2 -> 0.17 / 0.27 / 0.19)
+         0 / 100 degC: 2*sqrt((0.16/2.576)^2 + 0.002887^2) = 0.124358 -> 0.13      400: 0.201946 -> 0.21      -40: 0.139871 -> 0.14      1000: 0.310613 -> 0.32
   5560A  0 / 100 degC: 2*sqrt(0.045^2 + 0.002887^2) = 0.090185 -> 0.091   400: 0.160104 -> 0.17   -40: 0.100167 -> 0.11   1000: 0.270062 -> 0.28
 """
 import copy
@@ -128,12 +129,12 @@ class Data(unittest.TestCase):
 
     # ---- budget
     def test_5522a_budget_hand_worked(self):
-        for v, spec, rep in ((0, 0.16, 0.17), (100, 0.16, 0.17), (400, 0.26, 0.27), (-40, 0.18, 0.19)):
+        for v, spec, rep in ((0, 0.16, 0.13), (100, 0.16, 0.13), (400, 0.26, 0.21), (-40, 0.18, 0.14)):   # 99 % sheet: spec / 2.576 (was / 2: 0.17 0.17 0.27 0.19)
             b = ub.build('TEMP', v, 'degC', standard=self.s22, scope=self.sc)
             self.assertEqual(len(b.components), 2, v)
-            self.assertAlmostEqual(b.components[0].u, spec / 2, 12)
+            self.assertAlmostEqual(b.components[0].u, spec / 2.576, 12)
             self.assertAlmostEqual(b.components[1].u, 0.01 / 12 ** 0.5, 12)
-            self.assertAlmostEqual(b.emu, 2 * ((spec / 2) ** 2 + (0.01 ** 2) / 12) ** 0.5, 12)
+            self.assertAlmostEqual(b.emu, 2 * ((spec / 2.576) ** 2 + (0.01 ** 2) / 12) ** 0.5, 12)
             self.assertIsNone(b.cmc)                           # the scope file has no temperature entry: nothing is invented
             self.assertEqual(b.reported, rep, v)
             self.assertGreaterEqual(b.reported, b.emu)
@@ -191,7 +192,7 @@ class Data(unittest.TestCase):
         self.assertEqual(b.cmc, 0.5)
         self.assertEqual(b.reported, 0.5)                                       # never below the CMC
         self.assertEqual(ub.audit(0.4, b)[0], ub.UNDER_CMC)
-        self.assertEqual(ub.build('TEMP', 400, 'degC', standard=self.s22, scope=self.scope_with(-200, 1372, 0.1)).reported, 0.27)   # budget larger than the CMC
+        self.assertEqual(ub.build('TEMP', 400, 'degC', standard=self.s22, scope=self.scope_with(-200, 1372, 0.1)).reported, 0.21)   # budget larger than the CMC
         r = tartur.compute(pt(400), 395, 405, self.s22, sc)
         self.assertEqual(r['uncertainty'], 0.5)
         self.assertEqual(tartur.format_ratio(r['tur']), '10.0:1')
@@ -212,11 +213,11 @@ class Data(unittest.TestCase):
         return tartur.format_ratio(r['tar']), tartur.format_ratio(r['tur']), r
 
     def test_tar_tur_5522a(self):
-        self.assertEqual(self.ratios(self.s22, 0, -1.0, 1.0)[:2], ('6.2:1', '5.8:1'))            # 1/0.16 = 6.25, 1/0.17 = 5.88 (rounded DOWN)
-        self.assertEqual(self.ratios(self.s22, 100, 98.0, 102.0)[:2], ('12.5:1', '11.7:1'))     # 2/0.16, 2/0.17
-        self.assertEqual(self.ratios(self.s22, 400, 395.0, 405.0)[:2], ('19.2:1', '18.5:1'))    # 5/0.26, 5/0.27
-        self.assertEqual(self.ratios(self.s22, -40, -41.4, -38.6)[:2], ('7.7:1', '7.3:1'))      # 1.4/0.18, 1.4/0.19
-        self.assertEqual(self.ratios(self.s22, 1000, 989.0, 1011.0)[:2], ('27.5:1', '26.8:1'))  # border: 0.40 -> 11/0.40, 11/0.41
+        self.assertEqual(self.ratios(self.s22, 0, -1.0, 1.0)[:2], ('6.2:1', '7.6:1'))            # 1/0.16 = 6.25, 1/0.13 = 7.69 (rounded DOWN; TUR was 5.8 with 0.17)
+        self.assertEqual(self.ratios(self.s22, 100, 98.0, 102.0)[:2], ('12.5:1', '15.3:1'))     # 2/0.16, 2/0.13
+        self.assertEqual(self.ratios(self.s22, 400, 395.0, 405.0)[:2], ('19.2:1', '23.8:1'))    # 5/0.26, 5/0.21
+        self.assertEqual(self.ratios(self.s22, -40, -41.4, -38.6)[:2], ('7.7:1', '10.0:1'))     # 1.4/0.18, 1.4/0.14
+        self.assertEqual(self.ratios(self.s22, 1000, 989.0, 1011.0)[:2], ('27.5:1', '34.3:1'))  # border: 0.40 -> 11/0.40, 11/0.32
 
     def test_tar_tur_5560a(self):
         self.assertEqual(self.ratios(self.s56, 0, -1.0, 1.0)[:2], ('11.1:1', '10.9:1'))
@@ -227,7 +228,7 @@ class Data(unittest.TestCase):
 
     def test_tar_tur_use_degC_for_everything(self):
         r = self.ratios(self.s22, 0, -1.0, 1.0)[2]
-        self.assertEqual((r['tolerance'], r['accuracy'], r['uncertainty']), (1.0, 0.16, 0.17))
+        self.assertEqual((r['tolerance'], r['accuracy'], r['uncertainty']), (1.0, 0.16, 0.13))
 
     def test_out_of_range_is_blank(self):
         for std in (self.s22, self.s56):
@@ -328,10 +329,10 @@ LINE = re.compile(r'^\s*(?:Temperature|Type K range)\s+(-?[\d.]+) °C\s+(-?[\d.]
 class Reports(unittest.TestCase):
     """The real export code of the handheld engine (demo readings, tkinter stubbed) with the TAR and TUR columns on."""
     EXPECT = {   # engine: [(nominal, uncertainty text, TAR, TUR)] per calibrator, from the hand-worked values in the module docstring
-        '5522A': {'Fluke_116': [('0.0', '0.17 °C', '6.2:1', '5.8:1'), ('400.0', '0.27 °C', '19.2:1', '18.5:1')],
-                  'Fluke_179': [('0.0', '0.17 °C', '6.2:1', '5.8:1'), ('-40.0', '0.19 °C', '7.7:1', '7.3:1'), ('400.0', '0.27 °C', '19.2:1', '18.5:1')],
-                  'Fluke_87V': [('0.0', '0.17 °C', '6.2:1', '5.8:1'), ('100.0', '0.17 °C', '12.5:1', '11.7:1')],
-                  'Fluke_287': [('0.0', '0.17 °C', '6.2:1', '5.8:1'), ('100.0', '0.17 °C', '12.5:1', '11.7:1'), ('1000.0', '0.41 °C', '27.5:1', '26.8:1')]},
+        '5522A': {'Fluke_116': [('0.0', '0.13 °C', '6.2:1', '7.6:1'), ('400.0', '0.21 °C', '19.2:1', '23.8:1')],
+                  'Fluke_179': [('0.0', '0.13 °C', '6.2:1', '7.6:1'), ('-40.0', '0.14 °C', '7.7:1', '10.0:1'), ('400.0', '0.21 °C', '19.2:1', '23.8:1')],
+                  'Fluke_87V': [('0.0', '0.13 °C', '6.2:1', '7.6:1'), ('100.0', '0.13 °C', '12.5:1', '15.3:1')],
+                  'Fluke_287': [('0.0', '0.13 °C', '6.2:1', '7.6:1'), ('100.0', '0.13 °C', '12.5:1', '15.3:1'), ('1000.0', '0.32 °C', '27.5:1', '34.3:1')]},
         '5560A': {'Fluke_116': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('400.0', '0.17 °C', '31.2:1', '29.4:1')],
                   'Fluke_179': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('-40.0', '0.11 °C', '14.0:1', '12.7:1'), ('400.0', '0.17 °C', '31.2:1', '29.4:1')],
                   'Fluke_87V': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('100.0', '0.091 °C', '22.2:1', '21.9:1')],
@@ -372,7 +373,7 @@ class Reports(unittest.TestCase):
 
     def test_row_dicts_carry_the_uncertainty_in_degC(self):
         for cal in self.out:
-            for tag, want in (('116', ['0.17 °C', '0.27 °C']), ('179', ['0.17 °C', '0.19 °C', '0.27 °C'])):
+            for tag, want in (('116', ['0.13 °C', '0.21 °C']), ('179', ['0.13 °C', '0.14 °C', '0.21 °C'])):
                 rows = self.out[cal]['handheld:Fluke ' + tag]['rows']
                 got = [r['Unc'] for r in rows if r['UOM'] == '°C']
                 if cal == '5560A':

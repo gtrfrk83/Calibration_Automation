@@ -412,9 +412,39 @@ def import_data(data, who='', replace=True, path=None):
         return None
 
 
+_CONF_SYNCED = set()
+
+
+def sync_confidence(directory=SPEC_DIR, path=None):
+    """Bring the confidence level of an ALREADY imported standard in line with its shipped sheet, but only where the database has none.
+    Metadata only (confidence_pct / confidence_text, logged in spec_changes as 'sync'): no spec row and no explicit divisor is touched, and a level somebody
+    set or the database already holds is never overwritten.  Needed because seed() skips models that are already loaded, so a lab database created before
+    a sheet got its level (5522A: 99 %, 2026-10-22) would otherwise keep dividing by 2.  Returns the number of standards updated."""
+    n = 0
+    try:
+        with _db(path) as con:
+            for f in sorted(Path(directory).glob('*_standard.json')):
+                try:
+                    s = json.loads(f.read_text(encoding='utf-8'))['standard']
+                except (OSError, ValueError, KeyError):
+                    continue
+                pct = s.get('confidence_pct')
+                row = con.execute('SELECT id,confidence_pct,confidence_text FROM standards WHERE model=?', (s.get('model', ''),)).fetchone()
+                if pct is None or row is None or row[1] is not None:
+                    continue
+                con.execute('UPDATE standards SET confidence_pct=?, confidence_text=? WHERE id=?', (pct, s.get('confidence_text', ''), row[0]))
+                _log(con, row[0], None, 'confidence_pct', row[1], pct, 'sync', 'shipped sheet states the confidence level (printed in the manufacturer manual)')
+                _log(con, row[0], None, 'confidence_text', row[2], s.get('confidence_text', ''), 'sync', 'shipped sheet states the confidence level')
+                n += 1
+    except sqlite3.Error:
+        return n
+    return n
+
+
 def seed(directory=SPEC_DIR, path=None):
     """Load every specs/standards/*.json whose model is not in the database yet.  Returns the number loaded."""
     count = 0
+    sync_confidence(directory, path)
     for f in sorted(Path(directory).glob('*_standard.json')):
         try:
             data = json.loads(f.read_text(encoding='utf-8'))
@@ -446,6 +476,9 @@ def standard(key, path=None):
     """Standard by id, model ('5522A', 'Fluke 5522A'), or asset id; None if not found."""
     if key in (None, ''):
         return None
+    if str(path or DB) not in _CONF_SYNCED:         # once per process and database: confidence level of an older import (see sync_confidence)
+        _CONF_SYNCED.add(str(path or DB))
+        sync_confidence(path=path)
     try:
         with _db(path) as con:
             row = None
