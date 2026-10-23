@@ -25,6 +25,12 @@ specification, Keysight 34410A/11A/L4411A User's Guide chapter 5 "Specifications
 A printed limit that equals the formula result "without" a footnote adder where the footnote applies is kept as printed and flagged in the point
 ('flags' + 'printed_limits'): see DC volts 1000 V (footnote 5: +0.02 mV per volt above 500 V).
 
+MODEL FAMILY (34411A): the page images show that every table above is headed "34410A/11A" and that the only Service Guide verification text specific to another
+model is the L4411A zero-offset procedure (p. 68: one set of input terminals, no Front/Rear switch; the L4411A is NOT built).  The 34410A and the 34411A therefore
+share this file; models{} holds the per-model flags (read from the images of printed pp. 7, 20 and 27): title, the *IDN? text, and the capability differences the
+verification does not use (reading rate, reading memory, shortest NPLC, digitizer / pre-trigger / level trigger).  A point without a 'models' key applies to every
+model of the family; no point has one.
+
 Run:  python specs/build_34410a_spec.py
 """
 import json
@@ -328,6 +334,18 @@ def opt_cap():
     return rows
 
 
+MODELS = {
+    '34410A': dict(title='34410A Performance Verification', idn_match=['34410A'], max_readings_per_s=10000, reading_memory=50000, min_nplc=0.006,
+                   digitizer=False, pretrigger=False, level_trigger=False, front_rear_switch=True),
+    '34411A': dict(title='34411A Performance Verification', idn_match=['34411A'], max_readings_per_s=50000, reading_memory=1000000, min_nplc=0.001,
+                   digitizer=True, pretrigger=True, level_trigger=True, front_rear_switch=True),
+}
+MODELS_NOTE = ('Service Guide printed p. 7 "Key Differences" (34410A: up to 10,000 readings/s, 50,000 readings of memory; 34411A: up to 50,000 readings/s, 1 million readings, '
+               'pretriggering, internal level triggering and digitizer specifications), p. 20 (NPLC 0.001 and 0.002 only for the 34411A) and p. 27 (Additional 34411A '
+               'Specifications: 15 kHz typical bandwidth at a 20 us aperture, timebase 19.9524 us). The verification tables (pp. 68-87) are the same for both: no point is '
+               'model specific. The digitizer flags are information only: nothing in the performance verification uses them.')
+
+
 def build():
     def sec(id, title, page, setup, points, source='calibrator', terminal='FRONT', optional=False, group=None):
         s = dict(id=id, title=title, page=page, source=source, terminal=terminal, setup=setup, points=points)
@@ -367,6 +385,7 @@ def build():
                  'Shielded twisted-pair PTFE cables, shields to earth ground at one place (p. 67).',
                  'Select 100 NPLC for DC volts, DC current and resistance; the 3 Hz (slow) AC filter for AC volts and AC current (pp. 69-82).',
                  'Without adjustment use a guard band of no more than 80 % of the specification (p. 66): not applied.'],
+        family=['34410A', '34411A'], models=MODELS, models_note=MODELS_NOTE,
         measure=dict(nplc=100, ac_bandwidth=3, freq_aperture_s=1,
                      note='100 NPLC (DC volts, DC current, resistance, zero offset), AC bandwidth 3 Hz (AC volts, AC current), frequency CONF:FREQ DEF,MIN (1 s aperture): '
                           'the conditions the tables state (footnote [1] of each table, pp. 69-82).'),

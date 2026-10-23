@@ -18,3 +18,7 @@ GROUP names (one picture per wiring group):
     CAP          capacitance (optional): the capacitance standard on INPUT HI/LO
 
 Examples:  hook_34410a_5560A_DCV.png   hook_34410a_5522A_OHM4.png   hook_34410a_ZERO_SHORT.png
+
+The Keysight 34411A (same front panel, terminals and Front/Rear switch) uses the same pictures. For it the procedure looks first for
+    diagrams/hook_34411a_<CAL>_<GROUP>.png, then diagrams/hook_34411a_<GROUP>.png, then the hook_34410a_ names above,
+so a 34411A-specific picture is optional. The 34410A procedure never looks for hook_34411a_ files.

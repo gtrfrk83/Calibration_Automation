@@ -38,7 +38,7 @@ from drivers import (Agilent34401A, AgilentAFG, Fluke28x, Fluke5522A, Fluke5560A
                      Keysight34465A, Keysight34470A, Keysight34970A, Keysight34972A, Keysight53131A, Keysight53132A, ReferenceMeter,
                      TektronixMDO4000C, TektronixTDS2000C, Transport, TransportError, WaveSurfer4104HD)
 from drivers import Fluke5522AScope  # noqa: E402
-from drivers import Fluke5522AComp, Keithley2000, Keysight34410A  # noqa: E402
+from drivers import Fluke5522AComp, Keithley2000, Keysight34410A, Keysight34411A  # noqa: E402
 from drivers import fluke_28x  # noqa: E402
 from drivers.keysight_332xx import Keysight332xx  # noqa: E402
 from drivers.keysight_5313x import Keysight5313x  # noqa: E402
@@ -167,6 +167,9 @@ COVERAGE = {
         'Keysight34410A': dict(covered=['connect', 'local', 'cleanup', 'range_ok', 'configure_point', 'read', 'front_rear', 'check_errors', 'firmware_warning'],
                                no_command=['bus', 'firmware']),               # properties: derived from the transport / the *IDN? text already read
     },
+    'keysight_34411a': {                                              # the family subclass of the 34410A driver (same module; its own fixture so the 34410A transcripts stay as recorded)
+        'Keysight34411A': dict(covered=['connect', 'configure_point', 'read', 'firmware_warning'], no_command=[]),     # inherited methods, exercised on the subclass
+    },
     'reference_instruments': {
         'Fluke96270A': dict(covered=['connect', 'check_error', 'set_rf', 'output', 'cleanup'], no_command=[]),
         'AgilentAFG': dict(covered=['connect', 'sine', 'square', 'output', 'cleanup'], no_command=['max_hz']),   # property
@@ -177,7 +180,7 @@ COVERAGE = {
 # Stage 7: reset_to_defaults is defined once, on Instrument, and exercised on each of these concrete drivers (golden cases "Class.reset_to_defaults").
 for _cls in ('Fluke5560A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
              'Keysight53132A', 'Fluke5790B', 'Fluke28x', 'WaveSurfer4104HD', 'TektronixMDO4000C', 'Fluke96270A', 'AgilentAFG', 'ReferenceMeter',
-             'TektronixTDS2000C', 'Fluke5522AScope', 'Keithley2000', 'Keysight34410A'):
+             'TektronixTDS2000C', 'Fluke5522AScope', 'Keithley2000', 'Keysight34410A', 'Keysight34411A'):
     for _fixture in COVERAGE.values():
         if _cls in _fixture:
             _fixture[_cls]['covered'].append('reset_to_defaults')
@@ -188,7 +191,7 @@ LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevo
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
 ENGINES = ('truevolt_34470A', 'dacq_34970A', 'dacq_34972A', 'fgen_33220A', 'mdo4000c', 'tds2000c', 'agilent_34401a', 'fluke_8846a', 'handheld_5522a',
-           'wavesurfer_dcv', 'keithley_2000', 'keysight_34410a')
+           'wavesurfer_dcv', 'keithley_2000', 'keysight_34410a', 'keysight_34411a')
 
 
 # =====================================================================================================================================
@@ -662,6 +665,37 @@ def cases_34410a(c):
     c.quiet(old.connect)
     c.run('Keysight34410A.firmware_warning[old]', old.firmware_warning)
     c.run('Keysight34410A.firmware_warning[current]', d.firmware_warning)
+
+
+def cases_34411a(c):
+    """The 34411A is the 34410A driver with its own *IDN? text: the same wire strings, so only the model-specific paths are recorded here."""
+    for bus in ('GPIB', 'USB'):
+        bench, ft, dt = make_34410a_bench('5522A', bus, '34411A')
+        d = c.inst(Keysight34411A, dt, opened=False, label='34411A')
+        c.run(f'Keysight34411A.connect[{bus}]', d.connect)
+    bench, ft, dt = make_34410a_bench('5522A', 'GPIB', '34411A')
+    d = c.inst(Keysight34411A, dt, opened=False, label='34411A')
+    c.quiet(d.connect)
+    c.quiet(ft.open)
+    for tag, p in (('DCV', dict(kind='DCV', range=10.0, plc=100)), ('ACV', dict(kind='ACV', range=1.0, ac_bandwidth=3)), ('OHM4', dict(kind='OHM4', range=1000.0)),
+                   ('FREQ', dict(kind='FREQ', range=10.0, aperture_s=1))):
+        c.run(f'Keysight34411A.configure_point[{tag}]', d.configure_point, p)
+    c.quiet(d.configure_point, dict(kind='DCV', range=10.0))
+    c.quiet(ft.write, 'OUT 5V,0Hz'); c.quiet(ft.write, 'OPER')
+    c.run('Keysight34411A.read[5 V on 10 V]', d.read)
+    other = c.inst(Keysight34411A, Scripted([(r'\*IDN\?', 'Agilent Technologies,34410A,MY1,2.35-2.35-0.09-46-09')]), opened=False, label='34411A')
+    c.run('Keysight34411A.connect[a 34410A answers]', other.connect)
+    old = c.inst(Keysight34411A, Scripted([(r'\*IDN\?', 'Agilent Technologies,34411A,MY1,1.07-1.07-0.01-1-1')]), opened=False, label='34411A')
+    c.quiet(old.connect)
+    c.run('Keysight34411A.firmware_warning[old]', old.firmware_warning)
+    c.run('Keysight34411A.firmware_warning[current]', d.firmware_warning)
+
+
+def resets_34411a(c):
+    for bus in ('GPIB', 'USB'):
+        bench, ft, dt = make_34410a_bench('5522A', bus, '34411A')
+        d = c.inst(Keysight34411A, dt, label='34411A')
+        c.run(f'Keysight34411A.reset_to_defaults[{bus}]', d.reset_to_defaults)
 
 
 def cases_k2000(c):
@@ -1305,6 +1339,7 @@ DRIVER_CASES = {
     'fluke_5522a_scope': _with_resets(cases_5522a_scope, resets_5522a_scope), 'reference_instruments': _with_resets(cases_reference, resets_reference),
     'keithley_2000': _with_resets(cases_k2000, resets_k2000),
     'keysight_34410a': _with_resets(cases_34410a, resets_34410a),
+    'keysight_34411a': _with_resets(cases_34411a, resets_34411a),
 }
 
 

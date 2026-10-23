@@ -1,0 +1,1522 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "agilent34410a_verification.IO.__init__",
+   "log": [
+    "5522A|>>|*IDN?",
+    "5522A|<<|FLUKE,5522A,SIM0001,1.0",
+    "5522A|>>|*CLS",
+    "34411A|>>|*CLS",
+    "34411A|>>|*IDN?",
+    "34411A|<<|Agilent Technologies,34411A,MY00000001,2.35-2.35-0.09-46-09",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\""
+   ],
+   "method": "agilent34410a_verification.IO.__init__",
+   "result": "returned <agilent34410a_verification.IO object>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5522A,SIM0001,1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,34411A,MY00000001,2.35-2.35-0.09-46-09"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "agilent34410a_verification.IO.reset_at_start",
+   "log": [
+    "5522A|>>|*RST",
+    "5522A|>>|*CLS",
+    "5522A|>>|*OPC?",
+    "5522A|<<|1",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|STBY",
+    "5522A|>>|OPER?",
+    "5522A|<<|0",
+    "34411A|>>|*RST",
+    "34411A|>>|*CLS",
+    "34411A|>>|*OPC?",
+    "34411A|<<|1",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "34411A|>>|SENS:VOLT:DC:ZERO:AUTO?",
+    "34411A|<<|1",
+    "RESET|--|Instruments reset to default settings at start: 5522A, 34411A"
+   ],
+   "method": "agilent34410a_verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:ZERO:AUTO?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Front DC current, 100.0 µA range (input open)', 'error': 2.5e-08, 'group': 'ZERO_OPEN', 'id': 1, 'input': 'open', 'kind': 'DCI', 'limits': {'1y': 2.5e-08, '24h': 2e-08, '90d': 2.5e-08}, 'nominal': 0.0, 'optional': False, 'page': '69 (and 68, steps 1-3)', 'plc': 100, 'printed_limits': {'1y': '0.025 uA', '24h': '0.02 uA', '90d': '0.025 uA'}, 'quick': False, 'range': 0.0001, 'section': 'zero_front', 'section_title': 'Zero offset - front terminals', 'setup': 'Install the 34172B low-thermal 4-terminal short (or equivalent) across the FRONT terminals; leave the current input OPEN for the DC current ranges. Select the FRONT terminals with the Front/Rear switch. 100 NPLC. The calibrator stays in STANDBY.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "agilent34410a_verification.IO.measure[DCI#1]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:CURR:DC 0.0001",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"CURR:DC\"",
+    "34411A|>>|SENS:CURR:DC:RANG?",
+    "34411A|<<|+1.000000E-04",
+    "34411A|>>|SENS:CURR:DC:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:CURR:DC:NPLC 100",
+    "34411A|>>|SENS:CURR:DC:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "34411A|>>|READ?",
+    "34411A|<<|+0.000000000E+00",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 0.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 0.0001"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"CURR:DC\""
+    ],
+    [
+     "Q",
+     "SENS:CURR:DC:RANG?",
+     "+1.000000E-04"
+    ],
+    [
+     "Q",
+     "SENS:CURR:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:CURR:DC:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:CURR:DC:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+0.000000000E+00"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Front DC volts, 100.0 mV range (input shorted)', 'error': 3.5e-06, 'group': 'ZERO_SHORT', 'id': 7, 'input': 'short', 'kind': 'DCV', 'limits': {'1y': 3.5e-06, '24h': 3e-06, '90d': 3.5e-06}, 'nominal': 0.0, 'optional': False, 'page': '69 (and 68, steps 1-3)', 'plc': 100, 'printed_limits': {'1y': '3.5 uV', '24h': '3 uV', '90d': '3.5 uV'}, 'quick': True, 'range': 0.1, 'section': 'zero_front', 'section_title': 'Zero offset - front terminals', 'setup': 'Install the 34172B low-thermal 4-terminal short (or equivalent) across the FRONT terminals; leave the current input OPEN for the DC current ranges. Select the FRONT terminals with the Front/Rear switch. 100 NPLC. The calibrator stays in STANDBY.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "agilent34410a_verification.IO.measure[DCV#7]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:VOLT:DC 0.1",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"VOLT:DC\"",
+    "34411A|>>|SENS:VOLT:DC:RANG?",
+    "34411A|<<|+1.000000E-01",
+    "34411A|>>|SENS:VOLT:DC:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:VOLT:DC:NPLC 100",
+    "34411A|>>|SENS:VOLT:DC:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "34411A|>>|READ?",
+    "34411A|<<|+4.000000000E-07",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 4e-07",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"VOLT:DC\""
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:RANG?",
+     "+1.000000E-01"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:VOLT:DC:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+4.000000000E-07"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Front 4-wire ohms, 100.0 Ω range (input shorted)', 'error': 0.004, 'group': 'ZERO_SHORT', 'id': 12, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 0.004, '24h': 0.003, '90d': 0.004}, 'nominal': 0.0, 'optional': False, 'page': '69 (and 68, steps 1-3)', 'plc': 100, 'printed_limits': {'1y': '4 mohm', '24h': '3 mohm', '90d': '4 mohm'}, 'quick': False, 'range': 100.0, 'section': 'zero_front', 'section_title': 'Zero offset - front terminals', 'setup': 'Install the 34172B low-thermal 4-terminal short (or equivalent) across the FRONT terminals; leave the current input OPEN for the DC current ranges. Select the FRONT terminals with the Front/Rear switch. 100 NPLC. The calibrator stays in STANDBY.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "agilent34410a_verification.IO.measure[OHM4#12]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:FRES 100",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"FRES\"",
+    "34411A|>>|SENS:FRES:RANG?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SENS:FRES:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:FRES:NPLC 100",
+    "34411A|>>|SENS:FRES:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "34411A|>>|READ?",
+    "34411A|<<|+5.000000000E-04",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 0.0005",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:FRES 100"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"FRES\""
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:FRES:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:FRES:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+5.000000000E-04"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Front 4-wire ohms, 1.000 MΩ range (input shorted)', 'error': 10.0, 'group': 'ZERO_SHORT', 'id': 16, 'input': 'short', 'kind': 'OHM4', 'limits': {'1y': 10.0, '24h': 10.0, '90d': 10.0}, 'nominal': 0.0, 'optional': False, 'page': '69 (and 68, steps 1-3)', 'plc': 100, 'printed_limits': {'1y': '10 ohm', '24h': '10 ohm', '90d': '10 ohm'}, 'quick': False, 'range': 1000000.0, 'section': 'zero_front', 'section_title': 'Zero offset - front terminals', 'setup': 'Install the 34172B low-thermal 4-terminal short (or equivalent) across the FRONT terminals; leave the current input OPEN for the DC current ranges. Select the FRONT terminals with the Front/Rear switch. 100 NPLC. The calibrator stays in STANDBY.', 'source': 'none', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "agilent34410a_verification.IO.measure[OHM4#16]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:FRES 1000000",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"FRES\"",
+    "34411A|>>|SENS:FRES:RANG?",
+    "34411A|<<|+1.000000E+06",
+    "34411A|>>|SENS:FRES:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:FRES:NPLC 100",
+    "34411A|>>|SENS:FRES:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "34411A|>>|READ?",
+    "34411A|<<|+5.000000000E-04",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 0.0005",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:FRES 1000000"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"FRES\""
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG?",
+     "+1.000000E+06"
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:FRES:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:FRES:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "Q",
+     "READ?",
+     "+5.000000000E-04"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DC volts 100.0 mV, 100.0 mV range', 'error': 8.5e-06, 'group': 'DCV', 'id': 37, 'kind': 'DCV', 'limits': {'1y': 8.5e-06, '24h': 6e-06, '90d': 7.5e-06}, 'nominal': 0.1, 'optional': False, 'page': '71', 'plc': 100, 'printed_limits': {'1y': '8.5 uV', '24h': '6 uV', '90d': '7.5 uV'}, 'quick': False, 'range': 0.1, 'section': 'dcv', 'section_title': 'DC volts gain', 'setup': 'Calibrator voltage output to the front INPUT HI / LO; 100 NPLC; each range in the order of the table.', 'source': 'calibrator', 'table_nominal': '100 mV', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "agilent34410a_verification.IO.measure[DCV#37]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:VOLT:DC 0.1",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"VOLT:DC\"",
+    "34411A|>>|SENS:VOLT:DC:RANG?",
+    "34411A|<<|+1.000000E-01",
+    "34411A|>>|SENS:VOLT:DC:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:VOLT:DC:NPLC 100",
+    "34411A|>>|SENS:VOLT:DC:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|OUT 0.1V,0Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "34411A|>>|READ?",
+    "34411A|<<|+1.000006000E-01",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 0.1000006",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:VOLT:DC 0.1"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"VOLT:DC\""
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:RANG?",
+     "+1.000000E-01"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:VOLT:DC:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:DC:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.1V,0Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000006000E-01"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'DC current 100.0 µA, 100.0 µA range', 'error': 7.5e-08, 'group': 'DCI', 'id': 44, 'kind': 'DCI', 'limits': {'1y': 7.5e-08, '24h': 3e-08, '90d': 6.5e-08}, 'nominal': 0.0001, 'optional': False, 'page': '73', 'plc': 100, 'printed_limits': {'1y': '0.075 uA', '24h': '0.03 uA', '90d': '0.065 uA'}, 'quick': False, 'range': 0.0001, 'section': 'dci', 'section_title': 'DC current gain', 'setup': 'Calibrator current output to the front 3 A (I) terminal and INPUT LO; 100 NPLC. Check the 3 A fuse first.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "agilent34410a_verification.IO.measure[DCI#44]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:CURR:DC 0.0001",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"CURR:DC\"",
+    "34411A|>>|SENS:CURR:DC:RANG?",
+    "34411A|<<|+1.000000E-04",
+    "34411A|>>|SENS:CURR:DC:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:CURR:DC:NPLC 100",
+    "34411A|>>|SENS:CURR:DC:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|OUT 0.0001A,0Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "34411A|>>|READ?",
+    "34411A|<<|+1.000002000E-04",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 0.0001000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:CURR:DC 0.0001"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"CURR:DC\""
+    ],
+    [
+     "Q",
+     "SENS:CURR:DC:RANG?",
+     "+1.000000E-04"
+    ],
+    [
+     "Q",
+     "SENS:CURR:DC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:CURR:DC:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:CURR:DC:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.0001A,0Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E-04"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '4-wire ohms 100.0 Ω, 100.0 Ω range', 'error': 0.014, 'group': 'OHM4', 'id': 50, 'kind': 'OHM4', 'limits': {'1y': 0.014, '24h': 0.006, '90d': 0.012}, 'nominal': 100.0, 'optional': False, 'page': '75', 'plc': 100, 'printed_limits': {'1y': '14 mohm', '24h': '6 mohm', '90d': '12 mohm'}, 'quick': False, 'range': 100.0, 'section': 'ohm', 'section_title': 'Resistance gain', 'setup': '4-wire ohms: calibrator force to INPUT HI / LO and sense to SENSE HI / LO (external sense on); 100 NPLC. The 100 Mohm point is 2-wire ohms.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "agilent34410a_verification.IO.measure[OHM4#50]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:FRES 100",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"FRES\"",
+    "34411A|>>|SENS:FRES:RANG?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SENS:FRES:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:FRES:NPLC 100",
+    "34411A|>>|SENS:FRES:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|OUT 100OHM",
+    "5522A|>>|ZCOMP WIRE4",
+    "5522A|>>|ZCOMP?",
+    "5522A|<<|WIRE4",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "34411A|>>|READ?",
+    "34411A|<<|+1.000007000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 100.0007",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:FRES 100"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"FRES\""
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:FRES:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:FRES:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 100OHM"
+    ],
+    [
+     "W",
+     "ZCOMP WIRE4"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "WIRE4"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000007000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '4-wire ohms 1.000 MΩ, 1.000 MΩ range', 'error': 130.0, 'group': 'OHM4', 'id': 54, 'kind': 'OHM4', 'limits': {'1y': 130.0, '24h': 30.0, '90d': 110.0}, 'nominal': 1000000.0, 'optional': False, 'page': '75', 'plc': 100, 'printed_limits': {'1y': '130 ohm', '24h': '30 ohm', '90d': '110 ohm'}, 'quick': False, 'range': 1000000.0, 'section': 'ohm', 'section_title': 'Resistance gain', 'setup': '4-wire ohms: calibrator force to INPUT HI / LO and sense to SENSE HI / LO (external sense on); 100 NPLC. The 100 Mohm point is 2-wire ohms.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "agilent34410a_verification.IO.measure[OHM4#54]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:FRES 1000000",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"FRES\"",
+    "34411A|>>|SENS:FRES:RANG?",
+    "34411A|<<|+1.000000E+06",
+    "34411A|>>|SENS:FRES:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:FRES:NPLC 100",
+    "34411A|>>|SENS:FRES:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|OUT 1000000OHM",
+    "5522A|>>|ZCOMP NONE",
+    "5522A|>>|ZCOMP?",
+    "5522A|<<|NONE",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "34411A|>>|READ?",
+    "34411A|<<|+1.000002000E+06",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 1000002.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:FRES 1000000"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"FRES\""
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG?",
+     "+1.000000E+06"
+    ],
+    [
+     "Q",
+     "SENS:FRES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:FRES:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:FRES:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 1000000OHM"
+    ],
+    [
+     "W",
+     "ZCOMP NONE"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "NONE"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E+06"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': '2-wire ohms 100.0 MΩ, 100.0 MΩ range', 'error': 801000.0, 'group': 'OHM2', 'id': 56, 'kind': 'OHM2', 'limits': {'1y': 801000.0, '24h': 201000.0, '90d': 601000.0}, 'nominal': 100000000.0, 'note': 'Table footnote 2: verify only, no adjustment. 2-wire ohms.', 'optional': False, 'page': '75', 'plc': 100, 'printed_limits': {'1y': '801 kohm', '24h': '201 kohm', '90d': '601 kohm'}, 'quick': False, 'range': 100000000.0, 'section': 'ohm', 'section_title': 'Resistance gain', 'setup': '4-wire ohms: calibrator force to INPUT HI / LO and sense to SENSE HI / LO (external sense on); 100 NPLC. The 100 Mohm point is 2-wire ohms.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'ohm'}",
+   "case": "agilent34410a_verification.IO.measure[OHM2#56]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:RES 100000000",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"RES\"",
+    "34411A|>>|SENS:RES:RANG?",
+    "34411A|<<|+1.000000E+08",
+    "34411A|>>|SENS:RES:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:RES:NPLC 100",
+    "34411A|>>|SENS:RES:NPLC?",
+    "34411A|<<|+1.000000E+02",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|OUT 100000000OHM",
+    "5522A|>>|ZCOMP NONE",
+    "5522A|>>|ZCOMP?",
+    "5522A|<<|NONE",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "34411A|>>|READ?",
+    "34411A|<<|+1.000002000E+08",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 100000200.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:RES 100000000"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"RES\""
+    ],
+    [
+     "Q",
+     "SENS:RES:RANG?",
+     "+1.000000E+08"
+    ],
+    [
+     "Q",
+     "SENS:RES:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:RES:NPLC 100"
+    ],
+    [
+     "Q",
+     "SENS:RES:NPLC?",
+     "+1.000000E+02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 100000000OHM"
+    ],
+    [
+     "W",
+     "ZCOMP NONE"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "NONE"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     4.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E+08"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'amplitude': 0.01, 'aperture_s': 1, 'description': 'Frequency 40.00 Hz at 10.00 mV rms, 100.0 mV range', 'error': 0.028, 'group': 'FREQ', 'id': 57, 'kind': 'FREQ', 'limits': {'1y': 0.028, '24h': 0.02, '90d': 0.024}, 'nominal': 40.0, 'optional': False, 'page': '77', 'printed_limits': {'1y': '28 mHz', '24h': '20 mHz', '90d': '24 mHz'}, 'quick': False, 'range': 0.1, 'section': 'freq', 'section_title': 'Frequency gain', 'setup': \"Frequency function, default range, minimum resolution (1 s aperture). Calibrator AC voltage (a generator is the manual's standard) to INPUT HI / LO.\", 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'Hz'}",
+   "case": "agilent34410a_verification.IO.measure[FREQ#57]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:FREQ DEF,MIN",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"FREQ\"",
+    "34411A|>>|SENS:FREQ:APER 1",
+    "34411A|>>|SENS:FREQ:APER?",
+    "34411A|<<|+1.000000E+00",
+    "34411A|>>|SENS:FREQ:VOLT:RANG 0.1",
+    "34411A|>>|SENS:FREQ:VOLT:RANG?",
+    "34411A|<<|+1.000000E-01",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|OUT 0.01V,40Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "34411A|>>|READ?",
+    "34411A|<<|+4.000002000E+01",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 40.00002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:FREQ DEF,MIN"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"FREQ\""
+    ],
+    [
+     "W",
+     "SENS:FREQ:APER 1"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:APER?",
+     "+1.000000E+00"
+    ],
+    [
+     "W",
+     "SENS:FREQ:VOLT:RANG 0.1"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:VOLT:RANG?",
+     "+1.000000E-01"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.01V,40Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+4.000002000E+01"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter', 'error': 9e-05, 'filter_hz': 3, 'frequency': 1000.0, 'group': 'ACV', 'id': 59, 'kind': 'ACV', 'limits': {'1y': 9e-05, '24h': 4e-05, '90d': 8e-05}, 'nominal': 0.1, 'optional': False, 'page': '79', 'printed_limits': {'1y': '90 uV', '24h': '40 uV', '90d': '80 uV'}, 'quick': False, 'range': 0.1, 'section': 'acv', 'section_title': 'AC volts', 'setup': 'AC volts, 3 Hz (slow) filter. Calibrator voltage output to the front INPUT HI / LO; each range in the order of the table.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'V'}",
+   "case": "agilent34410a_verification.IO.measure[ACV#59]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:VOLT:AC 0.1",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"VOLT:AC\"",
+    "34411A|>>|SENS:VOLT:AC:RANG?",
+    "34411A|<<|+1.000000E-01",
+    "34411A|>>|SENS:VOLT:AC:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:VOLT:AC:BAND 3",
+    "34411A|>>|SENS:VOLT:AC:BAND?",
+    "34411A|<<|+3.000000E+00",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|OUT 0.1V,1000Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "34411A|>>|READ?",
+    "34411A|<<|+1.000002000E-01",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 0.1000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:VOLT:AC 0.1"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"VOLT:AC\""
+    ],
+    [
+     "Q",
+     "SENS:VOLT:AC:RANG?",
+     "+1.000000E-01"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:VOLT:AC:BAND 3"
+    ],
+    [
+     "Q",
+     "SENS:VOLT:AC:BAND?",
+     "+3.000000E+00"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.1V,1000Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     9.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E-01"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'AC current 100.0 µA @ 1.000 kHz, 100.0 µA range, 3 Hz filter', 'error': 1.4e-07, 'filter_hz': 3, 'frequency': 1000.0, 'group': 'ACI', 'id': 75, 'kind': 'ACI', 'limits': {'1y': 1.4e-07, '24h': 1.4e-07, '90d': 1.4e-07}, 'nominal': 0.0001, 'optional': False, 'page': '81', 'printed_limits': {'1y': '0.14 uA', '24h': '0.14 uA', '90d': '0.14 uA'}, 'quick': False, 'range': 0.0001, 'section': 'aci', 'section_title': 'AC current', 'setup': 'AC current, 3 Hz (slow) filter. Calibrator current output to the front 3 A (I) terminal and INPUT LO.', 'source': 'calibrator', 'terminal': 'FRONT', 'unit': 'A'}",
+   "case": "agilent34410a_verification.IO.measure[ACI#75]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:CURR:AC 0.0001",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"CURR:AC\"",
+    "34411A|>>|SENS:CURR:AC:RANG?",
+    "34411A|<<|+1.000000E-04",
+    "34411A|>>|SENS:CURR:AC:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SENS:CURR:AC:BAND 3",
+    "34411A|>>|SENS:CURR:AC:BAND?",
+    "34411A|<<|+3.000000E+00",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|OUT 0.0001A,1000Hz",
+    "5522A|>>|ERR?",
+    "5522A|<<|0,\"No error\"",
+    "5522A|>>|OPER",
+    "34411A|>>|READ?",
+    "34411A|<<|+1.000002000E-04",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 0.0001000002",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:CURR:AC 0.0001"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"CURR:AC\""
+    ],
+    [
+     "Q",
+     "SENS:CURR:AC:RANG?",
+     "+1.000000E-04"
+    ],
+    [
+     "Q",
+     "SENS:CURR:AC:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:CURR:AC:BAND 3"
+    ],
+    [
+     "Q",
+     "SENS:CURR:AC:BAND?",
+     "+3.000000E+00"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 0.0001A,1000Hz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     9.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+1.000002000E-04"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'description': 'Capacitance 1.000 µF, 1.000 µF range', 'error': 5e-09, 'group': 'CAP', 'id': 102, 'kind': 'CAP', 'limits': {'1y': 5e-09, '24h': 5e-09, '90d': 5e-09}, 'nominal': 1e-06, 'note': \"Optional test (Service Guide p. 87), 1 year limit printed; the specification has one column for 24 hour / 90 day / 1 year, so the same limit is used for all three. Specification is with Math Null (User's Guide p. 136); null the test-lead capacitance with the leads open before connecting the standard.\", 'optional': True, 'page': '87', 'printed_limits': {'1y': '0.005 uF'}, 'quick': False, 'range': 1e-06, 'section': 'cap', 'section_title': 'Capacitance, optional tests', 'setup': 'Optional capacitance tests (Service Guide p. 86): a 1 uF capacitance standard (IET SCA-1uF) connected by the technician, 2-wire.', 'source': 'manual', 'terminal': 'FRONT', 'unit': 'F'}",
+   "case": "agilent34410a_verification.IO.measure[CAP#102]",
+   "log": [
+    "5522A|>>|STBY",
+    "34411A|>>|ROUT:TERM?",
+    "34411A|<<|FRON",
+    "34411A|>>|CONF:CAP 1e-06",
+    "34411A|>>|SENS:FUNC?",
+    "34411A|<<|\"CAP\"",
+    "34411A|>>|SENS:CAP:RANG?",
+    "34411A|<<|+1.000000E-06",
+    "34411A|>>|SENS:CAP:RANG:AUTO?",
+    "34411A|<<|0",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "34411A|>>|READ?",
+    "34411A|<<|+0.000000E+00",
+    "34411A|>>|SYST:ERR?",
+    "34411A|<<|+0,\"No error\"",
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.measure",
+   "result": "returned 0.0",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ROUT:TERM?",
+     "FRON"
+    ],
+    [
+     "W",
+     "CONF:CAP 1e-06"
+    ],
+    [
+     "Q",
+     "SENS:FUNC?",
+     "\"CAP\""
+    ],
+    [
+     "Q",
+     "SENS:CAP:RANG?",
+     "+1.000000E-06"
+    ],
+    [
+     "Q",
+     "SENS:CAP:RANG:AUTO?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "agilent34410a_verification.IO.close",
+   "log": [
+    "5522A|>>|STBY"
+   ],
+   "method": "agilent34410a_verification.IO.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "ctl",
+     "go_local"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_keysight_34411a",
+ "schema": 1
+}
