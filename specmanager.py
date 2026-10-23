@@ -525,6 +525,17 @@ def assets_of(standard_id, path=None):
         return []
 
 
+def problems_of(standard_id, path=None):
+    """The issues found when the sheet was read (stored at import in problems_json): [{'level', 'where', 'what'}].  Read only."""
+    try:
+        with _db(path) as con:
+            row = con.execute('SELECT problems_json FROM standards WHERE id=?', (standard_id,)).fetchone()
+        out = json.loads(row[0] or '[]') if row else []
+    except (sqlite3.Error, ValueError):
+        return []
+    return [p for p in out if isinstance(p, dict)]
+
+
 def log_for(standard_id, limit=200, path=None):
     try:
         with _db(path) as con:
