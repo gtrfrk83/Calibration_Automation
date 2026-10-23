@@ -37,9 +37,38 @@ RULE_TITLES = {1: 'Calibrator coverage', 2: 'Unverified commands', 3: 'Units and
 ERROR, WARN, INFO = 'error', 'warn', 'info'
 MAX_LISTED = 4                  # points named in a finding's text before it says 'and n more'
 SOURCE_MODELS = ('5560A', '5522A', '5520A')
-NO_UNCERTAINTY_FAMILIES = ('scope', 'generator')       # dsb_runtime.decorate sets no_uncertainty for these and for FREQ / PERIOD
-NO_UNCERTAINTY_KINDS = ('FREQ', 'PERIOD')
-SHOULD_HAVE_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'TEMP')   # = handheld_dmm.has_uncertainty (DCV/ACV/DCI/ACI/OHM/CAP/TEMP degC); every other kind has none by design
+# ---- which readings should carry an uncertainty (rule 5): derived from the laboratory's CMC table, not typed in twice.
+# CMC_KIND_MAP says which Datasheet Builder kinds each entry of specs/a2la_1888_03_cmc.json covers (the table's 'entries[].kind' values and the 'oscilloscope'
+# sections).  A kind (or section) that is in the table but not in this map is a hole: tests.test_datasheet_builder_rules fails until it is mapped.
+CMC_KIND_MAP = {'DCV': ('DCV',), 'DCI': ('DCI',), 'OHM': ('OHM2', 'OHM4'), 'CAP': ('CAP',), 'ACV': ('ACV',), 'ACI': ('ACI',),
+                'FREQ': ('FREQ', 'PERIOD', 'GEN_FREQ', 'SCOPE_TIMEBASE'),                      # Time & Frequency
+                'oscilloscope.dc': ('SCOPE_GAIN', 'SCOPE_OFFSET', 'GEN_OFFSET'),
+                'oscilloscope.flatness': ('SCOPE_BW', 'GEN_FLAT'),
+                'oscilloscope.amplitude': ('GEN_AMPL',)}
+# Kinds the suite resolves an uncertainty for TODAY: the standards matcher / handheld_dmm.has_uncertainty give a value (TEMP in degC is not in the CMC table but the
+# handheld procedures print one, so it stays).  Every other should-have kind is an ERROR until the author waives it ('not_implemented').
+RESOLVABLE_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'TEMP')
+EXTRA_SHOULD_HAVE = ('TEMP',)
+
+
+def cmc_table_keys(path=None):
+    """The kinds and oscilloscope sections the CMC table carries: {'DCV', 'OHM', ..., 'oscilloscope.dc', ...}."""
+    import json
+    from pathlib import Path
+    f = Path(path) if path else Path(__file__).resolve().parent / 'specs' / 'a2la_1888_03_cmc.json'
+    data = json.loads(f.read_text(encoding='utf-8'))
+    return {e['kind'] for e in data.get('entries', [])} | {f'oscilloscope.{k}' for k in (data.get('oscilloscope') or {})}
+
+
+def should_have_kinds(path=None):
+    """Datasheet Builder kinds that should carry an uncertainty: every kind the CMC table covers (CMC_KIND_MAP), plus EXTRA_SHOULD_HAVE.  Read from the table each call set-up."""
+    out = set(EXTRA_SHOULD_HAVE)
+    for key in cmc_table_keys(path):
+        out.update(CMC_KIND_MAP.get(key, ()))
+    return frozenset(out)
+
+
+SHOULD_HAVE_KINDS = should_have_kinds()
 WAIVER_KEY = 'uncertainty_waivers'                     # ds.options[WAIVER_KEY] = {point id | '*': dict(code, reason, by, at)}: recorded in every saved version of the sheet
 WHOLE_SHEET = '*'
 WAIVER_REASONS = (('own_standard', 'The operator uses their own standard (entered by hand)'),
@@ -48,6 +77,7 @@ WAIVER_REASONS = (('own_standard', 'The operator uses their own standard (entere
                   ('scope', 'The scope of accreditation does not cover this point'),
                   ('functional', 'Functional pass / fail check'),
                   ('manual_calibration', 'Manual calibration: the uncertainty is not sourced by this suite'),
+                  ('not_implemented', 'Uncertainty calculation for this kind is not implemented in the suite yet'),
                   ('other', 'Other (typed reason)'))
 UNIT_CHECKED_FAMILIES = ('dmm',)
 UNIT_FREE_KINDS = ('FREQ', 'PERIOD')                   # their labels mix a frequency and a level
@@ -221,33 +251,46 @@ _EXTRA_ALIASES = [('Ohms', 'ohm'), ('Ohm', 'ohm'), ('OHMS', 'ohm'), ('OHM', 'ohm
 def text_unit(text):
     """('none', '') no quantity at the start; ('bare', '') a number with no unit; ('ok', base unit) a unit this program knows; ('unknown', word) a unit it does not.
     A trailing rms / pp / dc / ac on a volt or amp unit is ignored ('Vrms', 'mVpp')."""
+    st, base, _variant = text_unit_ex(text)
+    return st, base
+
+
+def text_unit_ex(text):
+    """text_unit plus a third item: '' when the unit is written the program's own way, else a short note saying which spelling was accepted and why (rule 3 lists them)."""
     text = re.sub(r'^\s*[+-]?(?:\d+[.,]?\d*|[.]\d+)\s+to\s+', '', str(text or ''))        # 'a to b unit' (a printed range): the unit is after b
     m = _QTY.match(text)
     if not m:
-        return 'none', ''
+        return 'none', '', ''
     word = (m.group('unit') or '').strip()
     if not word:
-        return 'bare', ''
+        return 'bare', '', ''
     cand = [word]
     stripped = re.sub(r'(rms|pp|dc|ac|p)$', '', word, flags=re.I)
     if stripped and stripped != word:
         cand.append(stripped)
+    own = {a for a, _b in db._UNIT_ALIASES}
     for w in cand:
         for alias, base in list(db._UNIT_ALIASES) + _EXTRA_ALIASES:
             if w.endswith(alias):
                 prefix = w[:-len(alias)].strip()
+                note = []
                 if prefix == 'K':
                     prefix = 'k'
+                    note.append('capital K read as kilo')
                 if prefix in db._PREFIXES and (prefix == '' or base not in db._NO_PREFIX):
-                    return 'ok', base
+                    if alias not in own:
+                        note.append(f'"{alias}" read as {db.unit_symbol(base)}')
+                    if w is not word:
+                        note.append(f'trailing "{word[len(w):]}" ignored')
+                    return 'ok', base, '; '.join(note)
         try:                                                    # the Cal Processor import's own unit reader (Vpp, Ohm, Ohms ...)
             import mdd_convert
             known = mdd_convert.parse_unit(w)
         except Exception:
             known = None
         if known is not None:
-            return 'ok', known[1]
-    return 'unknown', word
+            return 'ok', known[1], f'read by the .MDD import as {db.unit_symbol(known[1])}'
+    return 'unknown', word, ''
 
 
 # ============================================================================================================== rule 3: units and kinds
@@ -255,6 +298,7 @@ def unit_findings(ds):
     """Rule 3.  Pure data check of the unit texts a sheet carries: range labels and point labels of multimeter functions, the amplitude unit of generator
     functions, and the absolute units printed in an accuracy statement."""
     out = []
+    variants = {}                                          # the label text of every unit spelling accepted although it is not the program's own: listed in one note
     for fn in ds.functions:
         info = KINDS.get(fn.kind)
         if info is None:
@@ -282,7 +326,9 @@ def unit_findings(ds):
         for rng in fn.ranges:
             if not rng.label:
                 continue
-            st, base = text_unit(rng.label)
+            st, base, var = text_unit_ex(rng.label)
+            if st == 'ok' and var and base == unit:
+                variants.setdefault(re.sub(r'^\s*[+-]?[\d.,eE+-]+\s*(to\s+[+-]?[\d.,eE+-]+\s*)?', '', rng.label).strip() or rng.label, var)
             if st == 'unknown':
                 out.append(Finding(3, ERROR, 'unit_unknown', f'{fn.name}: the range label "{rng.label}" has a unit ({base}) that is not known.',
                                    f'Write the range with {shown(unit)} (for example "20 {shown(unit)}") or clear the label.', fn.id, (), fn.name, rng.label))
@@ -294,7 +340,9 @@ def unit_findings(ds):
         for p in fn.points:
             if not p.label or not p.enabled:
                 continue
-            st, base = text_unit(p.label)
+            st, base, var = text_unit_ex(p.label)
+            if st == 'ok' and var and base == unit:
+                variants.setdefault(re.sub(r'^\s*[+-]?[\d.,eE+-]+\s*(to\s+[+-]?[\d.,eE+-]+\s*)?', '', p.label).strip() or p.label, var)
             if st == 'unknown' or (st == 'ok' and base != unit):
                 bad.append((p, st, base))
         for p, st, base in bad:
@@ -314,6 +362,9 @@ def unit_findings(ds):
                         seen.add((text, base))
                         out.append(Finding(3, WARN, 'unit_mismatch', f'{fn.name}: the accuracy statement "{text}" has a fixed term in {shown(base)} but this section tests {shown(unit)}.',
                                            'Check the statement against the manual; a term in another unit is not converted.', fn.id, (), fn.name, text))
+    if variants:
+        out.append(Finding(3, INFO, 'unit_variants', f'{len(variants)} unit spelling{"s" * (len(variants) != 1)} accepted as written, not an error: '
+                           + '; '.join(f'"{w}" ({why})' for w, why in sorted(variants.items())), 'Nothing to do. Write the unit the program\'s own way if you prefer.', '', (), 'Whole datasheet', ''))
     return out
 
 
@@ -389,13 +440,13 @@ def coverage_findings(ds, res):
 
 
 def _no_uncertainty_kind(fn):
-    """True for a kind that carries no uncertainty by design (frequency, period, diode, continuity, scope and generator rows, functional checks ...)."""
+    """True for a kind that carries no uncertainty by design: not in the CMC table (diode, continuity, trigger, functional checks, conductance ...)."""
     return fn.kind not in SHOULD_HAVE_KINDS
 
 
 def should_have(fn, p):
     """Rule 5 (owner rule): this reading is supposed to have an uncertainty on the datasheet."""
-    return p.enabled and not _no_uncertainty_kind(fn)
+    return p.enabled and fn.kind in SHOULD_HAVE_KINDS
 
 
 # ---- waivers: an explicit, recorded reason why a point that should have an uncertainty has none (never silent: in the sheet, the check and the version history)
@@ -457,6 +508,14 @@ def uncertainty_source(ds, fn, p, a, manual_sheet=False, pending=False):
         return UncertaintySource(p.id, f'none: blank ({fn.name} rows carry no uncertainty in the report)', False, INFO)
     src = None
     cand = None
+    if fn.kind not in RESOLVABLE_KINDS:
+        why = 'the suite has no uncertainty calculation for this kind yet'
+        a = None
+        std = ''
+        w = waiver_for(ds, p.id)
+        if w:
+            return UncertaintySource(p.id, f'none: blank, waived ({waiver_text(w)}; {why})', False, INFO, std, True, waiver_text(w))
+        return UncertaintySource(p.id, f'none: blank ({why})', False, ERROR, std, True)
     if manual_sheet:
         why = 'manual calibration: nothing is sourced, so no standard gives an uncertainty'
     elif a is None and pending:                                     # the sheet's own problems come first; they already block publishing
@@ -500,7 +559,9 @@ def source_findings(ds, res, manual_sheet, pending=False):
         rows = [f'{point_text(fn, p)} {s.text[len("none: blank"):].strip()}' for _f, p, s in items]
         out.append(Finding(5, ERROR, 'no_uncertainty', f'{len(items)} reading{"s" * (len(items) != 1)} in {fn.name} should have an uncertainty and {"have" if len(items) != 1 else "has"} none, '
                            f'so the datasheet cannot be published (the report never shows zero): ' + _names(rows),
-                           'Pick a standard whose sheet covers the point, fix the point (value, range or frequency), or press "Waive..." and record why it has none.',
+                           ('The suite cannot calculate an uncertainty for this kind yet: press "Waive..." and choose "Uncertainty calculation for this kind is not implemented in the suite yet" '
+                            '(or another reason).' if fn.kind not in RESOLVABLE_KINDS else
+                            'Pick a standard whose sheet covers the point, fix the point (value, range or frequency), or press "Waive..." and record why it has none.'),
                            fid, tuple(p.id for _f, p, _s in items), fn.name, rows[0], action='waive', count=len(items)))
     for fid, items in waived.items():
         fn = items[0][0]
@@ -634,11 +695,25 @@ def _prime_bench(rt, fbench, run, model, freq=None):
         fbench.counter_model = model
 
 
+# Routine housekeeping that never asks the operator for anything: read-only status / identity queries and *CLS (clears the status registers; no instrument
+# configuration or output changes).  ONLY these are left out of the pre-run list (rule 2).  Never add a command that configures, sources or measures, and never
+# a write such as '*RST' or '*OPC' (without the question mark): those stay on the list until they are verified and tied to a manual page.
+HOUSEKEEPING = frozenset({'*CLS', '*IDN?', '*ESR?', '*STB?', '*OPC?', 'ID?', 'ERR?', 'ERROR?', 'SYST:ERR?', 'SYST:ERR:NEXT?', 'SYSTEM:ERROR?', 'SYSTEM:ERROR:NEXT?', 'SYST:ERR:COUN?'})
+
+
+def is_housekeeping(wire):
+    """True when the command as sent (`wire`) is one of HOUSEKEEPING: compared on its header only, upper-cased ('syst:err?' = 'SYST:ERR?')."""
+    head = (wire or '').strip().split(None, 1)[0].upper().lstrip(':') if (wire or '').strip() else ''
+    return head in HOUSEKEEPING
+
+
 def unverified_uses(dry):
     """Rule 2: the commands the dry run recorded whose registry entry is not verified, or has no manual page reference, or is not in the registry."""
     uses = {}
     for pid, pr in dry.points.items():
         for e in pr.commands:
+            if is_housekeeping(e.wire):                    # routine status / identity query or *CLS: never asked (see HOUSEKEEPING)
+                continue
             reg = (getattr(dry, 'registries', {}) or {}).get(e.driver) or {}
             cmd = reg.get(e.key) if e.key else None
             if cmd is not None and cmd.verified and (cmd.ref or '').strip():
@@ -776,11 +851,16 @@ def check(ds, period=None, matcher=None, match=None, dry_run_on=True, runner=Non
 
 
 def blocking_problems(ds, period=None, matcher=None):
-    """For datasheet_builder.save(): (problems, SheetCheck).  `problems` are the error findings as DsProblems; a check that crashes blocks nothing."""
+    """For datasheet_builder.save(): (problems, SheetCheck).  `problems` are the error findings as DsProblems.  FAILS CLOSED: a check that crashes returns one error
+    ('the sheet check could not run: <error>'), so the sheet is saved as a draft and never published unchecked; the traceback goes to the log."""
     try:
         chk = check(ds, period, matcher=matcher)
     except Exception as exc:
-        return [], None
+        import logging
+        import traceback
+        logging.getLogger(__name__).error('The Datasheet Builder sheet check crashed:\n%s', traceback.format_exc())
+        return [db.DsProblem('rule_check_failed', f'The sheet check could not run: {type(exc).__name__}: {exc}. The sheet is saved as a draft and is not published until it can be checked.',
+                             'error', 'datasheet')], None
     return [f.to_problem() for f in chk.errors()], chk
 
 
@@ -791,7 +871,7 @@ def point_source(ds, function_id, point_id, matcher=None, period=None):
     if p is None:
         return None
     manual_sheet = bool(ds.options.get('manual_entry'))
-    if manual_sheet or _no_uncertainty_kind(fn):
+    if manual_sheet or _no_uncertainty_kind(fn) or fn.kind not in RESOLVABLE_KINDS:
         return uncertainty_source(ds, fn, p, None, manual_sheet)
     res, _why = _match(_one_point(ds, fn, p), period or ds.default_period, matcher, None)
     return uncertainty_source(ds, fn, p, res.assignments.get(p.id) if res is not None else None)

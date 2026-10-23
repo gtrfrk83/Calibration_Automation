@@ -1707,8 +1707,12 @@ def save(ds, who='', note='', root=None, db=None):
             import datasheet_builder_rules as _rules
             extra, rule_check = _rules.blocking_problems(ds)
             problems = problems + extra
-        except Exception:
+        except Exception as exc:                          # the rules module itself could not even be loaded: fail closed too (a draft, never published unchecked)
+            import logging
+            logging.getLogger(__name__).exception('The Datasheet Builder sheet check could not be started')
             rule_check = None
+            problems = problems + [DsProblem('rule_check_failed', f'The sheet check could not run: {type(exc).__name__}: {exc}. The sheet is saved as a draft and is not published until it can be checked.',
+                                             'error', 'datasheet')]
     try:
         wnote = _rules.waiver_note(ds) if rule_check is not None else ''          # a waiver is never silent: it is named in the version's history
         if wnote and wnote not in (note or ''):

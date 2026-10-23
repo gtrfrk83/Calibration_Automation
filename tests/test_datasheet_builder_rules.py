@@ -45,6 +45,16 @@ def dcv_sheet(points=((5, 'r10'),), ranges=((10, 'r10'),), spec='0.05 % of readi
     return ds
 
 
+def cap_sheet():
+    """A capacitance sheet: the 5560A's capacitance commands are not verified on hardware, so a real run lists them (a DC volts sheet lists nothing: only routine ERR? is unverified)."""
+    ds = db.Datasheet('Acme', 'RM-2', 'Rules CAP')
+    fn = ds.add_function('CAP', id='cap')
+    fn.add_range('0.00000001', resolution='0.000000000001', id='r10n')
+    ds.set_spec(fn, '1 % of reading + 2 counts')
+    db.add_point(fn, '0.000000001', range_id='r10n')
+    return ds
+
+
 def pid_of(ds, nominal):
     """The id of the point whose nominal is `nominal` (the ids carry a sign: 'dcv.r1500.+1500')."""
     return next(p.id for _f, p in ds.all_points() if p.nominal == D(str(nominal)))
@@ -151,12 +161,15 @@ class Rule2Unverified(Base):
         self.assertFalse(ok & {(u.driver, u.key) for u in chk.unverified})
 
     def test_fingerprint_changes_with_the_list_and_not_with_the_values(self):
-        a = self.check(dcv_sheet(points=((5, 'r10'),))).fingerprint()
-        b = self.check(dcv_sheet(points=((5, 'r10'), (7, 'r10')))).fingerprint()
-        c = self.check(self.capacitance_sheet()).fingerprint()
-        self.assertEqual(a, b)
+        a = self.check(cap_sheet()).fingerprint()
+        ds = cap_sheet()
+        db.add_point(ds.functions[0], '0.000000002', range_id='r10n')
+        b = self.check(ds).fingerprint()
+        c = self.check(dcv_sheet()).fingerprint()
+        self.assertEqual(a, b)                                                  # more points, same commands: same list
         self.assertNotEqual(a, c)
-        self.assertTrue(a and c)
+        self.assertTrue(a)
+        self.assertEqual(c, '')                                                 # a DC volts sheet has only exempt unverified commands
 
     def test_without_the_dry_run_the_driver_table_still_names_the_unverified_standards(self):
         with mock.patch.object(rules, '_runner_modules', side_effect=ImportError('no tkinter')):
@@ -179,7 +192,7 @@ class PreRunAcceptance(Base):
         return dsp.export_spec(ds, plan=dm.match_datasheet(ds, matcher=None) if False else self.matcher.match(ds)).spec
 
     def test_a_list_is_asked_once_and_declining_stops_the_run(self):
-        spec = self.spec_of(dcv_sheet())
+        spec = self.spec_of(cap_sheet())
         with mock.patch.object(rules.dm if hasattr(rules, 'dm') else dm, 'Matcher', lambda *a, **k: self.matcher):
             asked = []
             self.assertFalse(dsb_prerun.accepted(None, spec, '', ask=lambda info: asked.append(info) or False))
@@ -189,7 +202,7 @@ class PreRunAcceptance(Base):
             self.assertTrue(dsb_prerun.accepted(None, spec, '', ask=lambda info: True))
 
     def test_the_fingerprint_the_builder_passed_skips_the_second_question(self):
-        ds = dcv_sheet()
+        ds = cap_sheet()
         spec = self.spec_of(ds)
         with mock.patch.object(dm, 'Matcher', lambda *a, **k: self.matcher):
             fp = dsb_prerun.pre_run(spec)['fingerprint']
@@ -231,7 +244,7 @@ class Rule3Units(Base):
 
     def test_matching_labels_pass(self):
         for label in ('5 V', '5.000 V', '5000 mV', '1 to 10 V', '5 Vrms'):
-            self.assertEqual(codes(self.check(self.with_label(label), dry_run_on=False), 3), [], label)
+            self.assertEqual([c for c in codes(self.check(self.with_label(label), dry_run_on=False), 3) if c != 'unit_variants'], [], label)
 
     def test_a_label_in_another_unit_is_an_error_and_never_converted(self):
         chk = self.check(self.with_label('5 mA'), dry_run_on=False)
@@ -405,10 +418,10 @@ class Rule5Sources(Base):
         self.assertFalse(s.has_source)
         self.assertIn('set by hand', s.text)
 
-    def test_kinds_the_report_leaves_blank_say_so_without_a_warning(self):
+    def test_kinds_the_suite_cannot_resolve_are_blank_and_waived_in_the_fixture(self):
         chk = self.check(fx.generator_33220a_like(), dry_run_on=False)
-        self.assertTrue(all(not s.has_source and s.level == 'info' for s in chk.sources.values()))
-        self.assertEqual(codes(chk, 5), [])
+        self.assertTrue(all(not s.has_source and s.level == 'info' and s.waived for s in chk.sources.values()))
+        self.assertEqual(set(codes(chk, 5)), {'waived'})
 
     def test_many_uncovered_points_in_one_section_are_one_finding(self):
         pts = tuple((1100 + 50 * i, 'r2000') for i in range(6))
@@ -446,7 +459,7 @@ class ModelTests(Base):
         return g
 
     def test_check_is_cached_until_the_next_edit(self):
-        g = self.grid(dcv_sheet())
+        g = self.grid(cap_sheet())
         self.assertIsNone(g.sheet_check(compute=False))
         self.assertEqual(g.check_pill(), ('', 'good'))
         a = g.sheet_check()
@@ -492,7 +505,7 @@ class ModelTests(Base):
         self.assertEqual(g.sheet_check().errors(), [])
 
     def test_a_finding_with_no_automatic_fix_says_so(self):
-        g = self.grid(dcv_sheet())
+        g = self.grid(cap_sheet())
         g.sheet_check()
         i = next(r['idx'] for r in g.check_rows(compute=False) if r['rule'] == 2)
         self.assertFalse(g.apply_check_fix(i).ok)
@@ -509,7 +522,7 @@ class ModelTests(Base):
         self.assertEqual(g.uncertainty_line(next(r['key'] for r in g.rows() if r['kind'] == 'header')), ('', 'ok'))
 
     def test_pre_run_list_is_the_checks_unverified_commands(self):
-        g = self.grid(dcv_sheet())
+        g = self.grid(cap_sheet())
         info = g.pre_run_list()
         self.assertTrue(info['count'] and info['lines'] and info['fingerprint'])
         self.assertEqual(info['fingerprint'], g.sheet_check().fingerprint())
@@ -634,8 +647,8 @@ class WindowTests(Base):
         self.assertEqual(calls, [])
 
     def test_real_run_question_lists_the_unverified_commands_and_passes_the_fingerprint(self):
-        win = self.window(dcv_sheet())
-        win.model.ds.make, win.model.ds.model, win.model.ds.title = 'Acme', 'RM-1', 'Rules DCV'
+        win = self.window(cap_sheet())
+        win.model.ds.make, win.model.ds.model, win.model.ds.title = 'Acme', 'RM-2', 'Rules CAP'
         seen, entries = [], []
         win.launcher = lambda entry, demo=False: entries.append((dict(entry), demo))
         with mock.patch.object(self.ui.messagebox, 'askyesno', lambda title, message, **kw: seen.append((title, message, kw)) or True):
@@ -754,11 +767,15 @@ class Rule5Blocking(Base):
         with tempfile.TemporaryDirectory() as t:
             self.assertEqual(self.save(dcv_sheet(), t).status, 'ready')
 
-    def test_kinds_that_carry_no_uncertainty_need_no_waiver(self):
-        for name in ('generator_33220a_like', 'scope_tds2000c_like'):
-            chk = rules.check(getattr(fx, name)(), matcher=self.matcher, dry_run_on=False)
-            self.assertEqual([f.code for f in chk.findings if f.rule == 5], [], name)
-        self.assertFalse(rules.should_have(*next(iter(fx.generator_33220a_like().all_points()))))
+    def test_kinds_outside_the_cmc_table_need_no_waiver(self):
+        ds = db.Datasheet('Acme', 'RM-3', 'Rules DIODE')
+        fn = ds.add_function('DIODE', id='dio')
+        fn.add_range('3', resolution='0.0001', id='r3')
+        ds.set_spec(fn, '0.1 % of reading + 2 counts')
+        db.add_point(fn, '0.5', range_id='r3')
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual([f.code for f in chk.findings if f.rule == 5], [])
+        self.assertFalse(rules.should_have(fn, fn.points[0]))
 
     def test_a_disabled_point_is_not_checked(self):
         ds = far_sheet()
@@ -816,6 +833,195 @@ class Rule5Blocking(Base):
         row = dict(runnable_version=1, spec_file=str(spec))
         self.assertEqual(M.DatasheetList.automation_text(row, dict(missing_uncertainties=0)), 'Ready: all 4 points run by the suite')
         self.assertIn('missing uncertainties: 3', M.DatasheetList.automation_text(row, dict(missing_uncertainties=3)))
+
+
+# ================================================================================================================================ rule 2 exemptions, fail closed, notes
+class HousekeepingExempt(Base):
+    def test_only_read_only_status_queries_and_cls_are_exempt(self):
+        for wire in ('*CLS', '*IDN?', '*ESR?', '*STB?', '*OPC?', 'ID?', 'ERR?', 'SYST:ERR?', ':SYST:ERR?', 'syst:err?', 'SYSTEM:ERROR? ', ':SYSTem:ERRor?'.upper()):
+            self.assertTrue(rules.is_housekeeping(wire), wire)
+        for wire in ('*RST', '*OPC', 'OUT 1V', 'OUT 0.0001A,0Hz', 'OUT?', 'STBY', 'OPER', ':ROSC:EXT:CHEC ON', 'SCOPE?', '*SRE 32', '*ESE 1', ':CONF:VOLT', ''):
+            self.assertFalse(rules.is_housekeeping(wire), wire)
+
+    def test_a_sheet_whose_only_unverified_commands_are_housekeeping_asks_nothing(self):
+        chk = self.check(dcv_sheet())
+        self.assertTrue(chk.dry.available, chk.dry.reason)
+        self.assertEqual(chk.unverified, [])
+        self.assertEqual(chk.fingerprint(), '')
+        self.assertEqual([f.code for f in chk.findings if f.rule == 2], [])
+        spec = dsp.export_spec(dcv_sheet(), plan=self.matcher.match(dcv_sheet())).spec
+        with mock.patch.object(dm, 'Matcher', lambda *a, **k: self.matcher):
+            self.assertTrue(dsb_prerun.accepted(None, spec, '', ask=lambda info: self.fail('the operator was asked')))
+
+    def test_the_real_run_question_does_not_mention_acceptance_then(self):
+        g = M.GridModel(M.Storage(Path(tempfile.mkdtemp()) / 'us', Path(tempfile.mkdtemp()) / 'r.sqlite3'), matcher_factory=lambda: self.matcher)
+        g.ds = dcv_sheet()
+        g._bump()
+        info = g.pre_run_list()
+        self.assertEqual((info['count'], info['lines'], info['fingerprint']), (0, [], ''))
+
+    def test_commands_that_configure_source_or_measure_are_still_listed_and_the_exempt_ones_are_not(self):
+        chk = self.check(cap_sheet())
+        lines = ' '.join(chk.pre_run_lines())
+        self.assertIn('OUT 1NF', lines)
+        self.assertNotIn('ERR?', lines)
+        self.assertTrue(all(not rules.is_housekeeping(u.wire) for u in chk.unverified))
+        sent = {e.wire for pr in chk.dry.points.values() for e in pr.commands}
+        self.assertTrue(any(rules.is_housekeeping(w) for w in sent))             # they ARE sent; they are only left off the list
+
+
+class FailClosed(Base):
+    def test_a_crash_in_the_check_is_one_error_with_the_reason(self):
+        with mock.patch.object(rules, 'check', side_effect=RuntimeError('boom')), self.assertLogs('datasheet_builder_rules', 'ERROR') as log:
+            problems, chk = rules.blocking_problems(dcv_sheet())
+        self.assertIsNone(chk)
+        self.assertEqual([(p.code, p.level) for p in problems], [('rule_check_failed', 'error')])
+        self.assertIn('The sheet check could not run: RuntimeError: boom', str(problems[0]))
+        self.assertIn('Traceback', log.output[0])                                   # the traceback is in the log
+
+    def test_save_makes_a_draft_and_never_publishes_unchecked(self):
+        with tempfile.TemporaryDirectory() as t, mock.patch.object(rules, 'check', side_effect=RuntimeError('boom')), self.assertLogs('datasheet_builder_rules', 'ERROR'):
+            res = db.save(dcv_sheet(), root=Path(t) / 'us', db=Path(t) / 'reg.sqlite3')
+            self.assertEqual(res.status, 'draft')
+            self.assertIsNone(res.spec_path or None)
+            self.assertIn('rule_check_failed', [str(p.code) for p in res.problems])
+            self.assertIn('could not run', ' '.join(str(p) for p in res.problems))
+
+    def test_when_the_rules_module_cannot_even_be_loaded_it_is_a_draft_too(self):
+        import builtins
+        real = builtins.__import__
+
+        def no_rules(name, *a, **k):
+            if name == 'datasheet_builder_rules':
+                raise ImportError('gone')
+            return real(name, *a, **k)
+        with tempfile.TemporaryDirectory() as t, mock.patch.object(builtins, '__import__', no_rules), self.assertLogs('datasheet_builder', 'ERROR'):
+            res = db.save(dcv_sheet(), root=Path(t) / 'us', db=Path(t) / 'reg.sqlite3')
+        self.assertEqual(res.status, 'draft')
+        self.assertIn('rule_check_failed', [str(p.code) for p in res.problems])
+
+    def test_a_working_check_still_publishes(self):
+        with tempfile.TemporaryDirectory() as t, mock.patch.object(dm, 'Matcher', lambda *a, **k: self.matcher):
+            self.assertEqual(db.save(dcv_sheet(), root=Path(t) / 'us', db=Path(t) / 'reg.sqlite3').status, 'ready')
+
+
+class Attribution(Base):
+    def test_the_mdd_import_waiver_is_attributed(self):
+        d = Path(tempfile.mkdtemp())
+        parsed = imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD'))
+        conv = mc.convert(parsed)
+        res = mc.register(conv, parsed, 'tester', registry=d / 'reg.sqlite3', root=d / 'us', archive_to=d / 'arch')
+        self.assertTrue(res.ok, res.message)
+        ds = db.load(res.uid, root=d / 'us', db=d / 'reg.sqlite3')
+        w = rules.waivers(ds)[rules.WHOLE_SHEET]
+        self.assertEqual(w['reason'], 'manual calibration: imported from .MDD, no automation')
+        self.assertEqual(w['by'], 'import (tester)')
+        chk = rules.check(ds, matcher=self.matcher)
+        note = [f for f in chk.findings if f.code == 'waived']
+        self.assertTrue(note and all('imported from .MDD, no automation' in f.text and 'import (tester)' in f.text for f in note))
+        self.assertIn('uncertainty waivers', db.versions(res.uid, root=d / 'us', db=d / 'reg.sqlite3')[0]['note'])
+
+    def test_accepted_unit_spellings_are_listed_in_a_note(self):
+        ds = dcv_sheet()
+        p = ds.functions[0].points[0]
+        p.label = '5 Vrms'
+        ds.functions[0].ranges[0].label = '10 VDC'
+        chk = self.check(ds, dry_run_on=False)
+        f = [f for f in chk.findings if f.code == 'unit_variants']
+        self.assertEqual(len(f), 1)
+        self.assertEqual(f[0].level, 'info')
+        self.assertIn('"Vrms"', f[0].text)
+        self.assertIn('"VDC"', f[0].text)
+        self.assertEqual(rules.text_unit_ex('1 kOhm')[2], '"Ohm" read as \u03a9')
+        self.assertEqual(rules.text_unit_ex('5 V')[2], '')                          # the program's own spelling: no note
+
+
+# ================================================================================================================================ rule 5: the set comes from the CMC table
+def strip_waivers(ds):
+    ds.options.pop(rules.WAIVER_KEY, None)
+    return ds
+
+
+def one_point_sheet(kind, nominal, fs, spec='0.01 % of reading + 2 counts', **settings):
+    ds = db.Datasheet('Acme', 'RM-9', f'Rules {kind}')
+    fn = ds.add_function(kind, id='f', **({'settings': settings} if settings else {}))
+    fn.add_range(fs, resolution='1e-9', id='r1')
+    ds.set_spec(fn, spec)
+    db.add_point(fn, nominal, range_id='r1')
+    return ds
+
+
+class Rule5CmcSet(Base):
+    def test_every_kind_and_section_of_the_cmc_table_is_mapped_and_in_the_set(self):
+        keys = rules.cmc_table_keys()
+        self.assertTrue({'DCV', 'DCI', 'OHM', 'CAP', 'ACI', 'ACV', 'FREQ', 'oscilloscope.dc', 'oscilloscope.flatness', 'oscilloscope.amplitude'} <= keys)
+        missing = sorted(k for k in keys if k not in rules.CMC_KIND_MAP)
+        self.assertEqual(missing, [], 'a kind in specs/a2la_1888_03_cmc.json that the Sheet check does not know: add it to CMC_KIND_MAP')
+        for k in keys:
+            for kind in rules.CMC_KIND_MAP[k]:
+                self.assertIn(kind, db.KINDS, k)
+                self.assertIn(kind, rules.SHOULD_HAVE_KINDS, (k, kind))
+
+    def test_a_new_kind_in_the_table_is_picked_up_from_the_file(self):
+        d = Path(tempfile.mkdtemp())
+        data = json.loads((ROOT / 'specs' / 'a2la_1888_03_cmc.json').read_text(encoding='utf-8'))
+        data['entries'].append(dict(data['entries'][0], kind='NEWKIND'))
+        (d / 'cmc.json').write_text(json.dumps(data), encoding='utf-8')
+        self.assertIn('NEWKIND', rules.cmc_table_keys(d / 'cmc.json'))
+        self.assertNotIn('NEWKIND', rules.CMC_KIND_MAP)                                  # the test above would fail on it
+
+    def test_a_kind_removed_from_the_table_leaves_the_set(self):
+        d = Path(tempfile.mkdtemp())
+        data = json.loads((ROOT / 'specs' / 'a2la_1888_03_cmc.json').read_text(encoding='utf-8'))
+        data['entries'] = [e for e in data['entries'] if e['kind'] != 'FREQ']
+        (d / 'cmc.json').write_text(json.dumps(data), encoding='utf-8')
+        self.assertNotIn('FREQ', rules.should_have_kinds(d / 'cmc.json'))
+        self.assertIn('FREQ', rules.SHOULD_HAVE_KINDS)
+
+    def test_what_can_be_resolved_today_and_what_only_by_waiver(self):
+        self.assertEqual(set(rules.RESOLVABLE_KINDS), {'DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'TEMP'})
+        only_by_waiver = rules.SHOULD_HAVE_KINDS - set(rules.RESOLVABLE_KINDS)
+        self.assertEqual(only_by_waiver, {'FREQ', 'PERIOD', 'GEN_FREQ', 'SCOPE_TIMEBASE', 'SCOPE_GAIN', 'SCOPE_OFFSET', 'SCOPE_BW', 'GEN_AMPL', 'GEN_FLAT', 'GEN_OFFSET'})
+
+    def test_a_frequency_point_blocks_publishing_until_it_is_waived(self):
+        ds = one_point_sheet('FREQ', '1000', '300000')
+        ds.functions[0].points[0].amplitude = D('1')
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        f = [f for f in chk.errors() if f.code == 'no_uncertainty']
+        self.assertEqual(len(f), 1, [x.text for x in chk.findings])
+        self.assertIn('no uncertainty calculation for this kind yet', f[0].text)
+        self.assertIn('not implemented', f[0].fix)
+        with tempfile.TemporaryDirectory() as t:
+            res = db.save(ds, root=Path(t) / 'us', db=Path(t) / 'reg.sqlite3')
+            self.assertEqual(res.status, 'draft')
+            pid = ds.functions[0].points[0].id
+            rules.set_waiver(ds, [pid], 'not_implemented', '', who='mike')
+            self.assertEqual([x.code for x in rules.check(ds, matcher=self.matcher, dry_run_on=False).errors()], [])
+            ok = db.save(ds, root=Path(t) / 'us2', db=Path(t) / 'reg2.sqlite3')
+            self.assertEqual(ok.status, 'ready')
+            self.assertIn('not implemented in the suite yet', json.dumps(json.loads(Path(ok.version_file).read_text())['options']))
+
+    def test_a_scope_amplitude_point_blocks_publishing_until_it_is_waived(self):
+        for name in ('generator_33220a_like', 'scope_tds2000c_like'):
+            ds = strip_waivers(getattr(fx, name)())
+            chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+            self.assertTrue([f for f in chk.errors() if f.code == 'no_uncertainty'], name)
+            with tempfile.TemporaryDirectory() as t:
+                self.assertEqual(db.save(ds, root=Path(t) / 'us', db=Path(t) / 'reg.sqlite3').status, 'draft', name)
+            self.assertEqual(rules.check(getattr(fx, name)(), matcher=self.matcher, dry_run_on=False).errors(), [], name)       # the fixture carries its waivers
+
+    def test_the_waiver_list_offers_the_not_implemented_reason(self):
+        self.assertIn(('not_implemented', 'Uncertainty calculation for this kind is not implemented in the suite yet'), rules.WAIVER_REASONS)
+
+    def test_the_dmm_kinds_still_resolve_without_a_waiver(self):
+        self.assertEqual([f.code for f in rules.check(dcv_sheet(), matcher=self.matcher, dry_run_on=False).errors()], [])
+
+    def test_the_mudcats_import_is_covered_by_its_whole_sheet_waiver_even_with_frequency_rows(self):
+        d = Path(tempfile.mkdtemp())
+        conv = mc.convert(imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD')))
+        self.assertTrue([f for f in rules.check(conv.sheet, matcher=self.matcher, dry_run_on=False).errors() if f.rule == 5])
+        rules.set_waiver(conv.sheet, [rules.WHOLE_SHEET], 'manual_calibration', 'manual calibration: imported from .MDD, no automation', who='import (t)')
+        self.assertEqual(rules.check(conv.sheet, matcher=self.matcher, dry_run_on=False).errors(), [])
 
 
 if __name__ == '__main__':

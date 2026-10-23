@@ -1773,6 +1773,10 @@ def checks_dsb_sheet_check():
     ds.set_spec(fn, '0.05 % of reading + 0.01 % of range')
     for v, rid in ((5, 'r10'), (1500, 'r1500')):
         db.add_point(fn, v, range_id=rid)
+    cap = ds.add_function('CAP', id='cap')                  # the 5560A capacitance commands are not verified: the pre-run list has something to show (ERR? alone is exempt)
+    cap.add_range('0.00000001', resolution='0.000000000001', id='r10n')
+    ds.set_spec(cap, '1 % of reading + 2 counts')
+    db.add_point(cap, '0.000000001', range_id='r10n')
     g = DM.GridModel(DM.Storage(t / 'u', t / 'r.sqlite3', who='real'), ds)
     win = U.GridEditorWindow(root, g)
     win.geometry('1400x900+0+0')

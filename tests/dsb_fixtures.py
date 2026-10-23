@@ -5,6 +5,17 @@ import datasheet_builder as db
 PERIODS = [('90d', '90 days'), ('1y', '1 year')]
 
 
+def waive_unimplemented(ds):
+    """Rule 5: the suite has no uncertainty calculation for frequency, period, scope or generator rows yet, so a sheet that has them publishes only with a recorded waiver
+    for each of those points.  The fixtures carry that waiver (the author's explicit choice, in the sheet) so they save as 'ready' like before."""
+    import datasheet_builder_rules as rules
+    ids = [p.id for fn, p in ds.all_points() if fn.kind in rules.SHOULD_HAVE_KINDS and fn.kind not in rules.RESOLVABLE_KINDS]
+    if ids:
+        rules.set_waiver(ds, ids, 'not_implemented', '', who='fixture')
+    return ds
+
+
+
 def dmm_34461a_like():
     """DC volts, AC volts (frequency bands), 2-wire ohms, DC current, capacitance, frequency: a 34461A-like sheet, periods 90d / 1y."""
     ds = db.Datasheet('Keysight', '34461A', '34461A example datasheet', revision='example')
@@ -53,7 +64,7 @@ def dmm_34461a_like():
     # 750 V at 50 kHz is beyond every calibrator's table: the Sheet check (rule 5) wants its missing uncertainty waived, in writing, before the sheet publishes
     import datasheet_builder_rules as rules
     rules.set_waiver(ds, ['acv.r750.+750@50000'], 'no_source', '', who='fixture')
-    return ds
+    return waive_unimplemented(ds)
 
 
 def acv_bands_sheet():
@@ -93,7 +104,7 @@ def generator_33220a_like():
     fl.add_rule(db.PointRule('fl', 'frequency_sweep', {'nominal': '0'}, frequencies={'mode': 'list', 'values': ['10 kHz', '100 kHz', '1 MHz', '10 MHz', '20 MHz']}, amplitude='1 V'))
     for fn in ds.functions:
         db.regenerate(fn)
-    return ds
+    return waive_unimplemented(ds)
 
 
 def scope_tds2000c_like():
@@ -117,4 +128,4 @@ def scope_tds2000c_like():
     tr.add_rule(db.PointRule('tr', 'frequency_sweep', {'nominal': '1'}, frequencies={'mode': 'list', 'values': ['10 MHz', '100 MHz']}, amplitude='0.5 V'))
     for fn in ds.functions:
         db.regenerate(fn)
-    return ds
+    return waive_unimplemented(ds)
