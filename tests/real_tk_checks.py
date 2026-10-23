@@ -402,8 +402,8 @@ def _manager_for_small_window(w, h):
 
 
 def checks_manager_run_top():
-    """Run procedure and Try in demo mode sit at the TOP of the Procedures tab: mapped and inside the window in all three views at 1267x860 and 900x600,
-    the Selected procedure card and every other tab scroll to their bottom when the window is short (nothing cut off, no scrollbar when it fits)."""
+    """Run and Try in demo mode live in the Selected procedure card, in its pinned part: mapped, inside the window and inside the card in all three views at
+    1267x860 and 900x600 with no scrolling needed to reach them (nor the Mark verified / Unlock buttons); the card's own text and the other tabs scroll."""
     shot = os.environ.get('SHOT_DIR')
 
     def grab(root, tag):
@@ -413,38 +413,52 @@ def checks_manager_run_top():
         pump(root, 6)
         ImageGrab.grab(bbox=(root.winfo_rootx(), root.winfo_rooty(), root.winfo_rootx() + root.winfo_width(), root.winfo_rooty() + root.winfo_height()),
                        xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'manager_{tag}_{THEME}.png'))
+
+    def in_card(card, widget):
+        card.update_idletasks()
+        return (widget.winfo_ismapped() and card.winfo_rootx() <= widget.winfo_rootx() and widget.winfo_rootx() + widget.winfo_width() <= card.winfo_rootx() + card.winfo_width() + 1
+                and card.winfo_rooty() <= widget.winfo_rooty() and widget.winfo_rooty() + widget.winfo_height() <= card.winfo_rooty() + card.winfo_height() + 1)
     for w, h in ((1267, 860), (900, 600)):
         CPM, root, m, errs = _manager_for_small_window(w, h)
+        card = m.btn_run.master.master.master                      # run_row -> pinned -> LabelFrame
+        check('card: the buttons are in the Selected procedure card', str(card.cget('text')) == 'Selected procedure', card)
         for kind, page in m.view_pages.items():
             m.view_nb.select(page)
             settle(root, 0.5)
             tag = f'{w}x{h} {kind}'
-            check(f'{tag}: Run procedure is visible inside the window', inside(root, m.btn_run), (m.btn_run.winfo_rooty(), root.winfo_height()))
-            check(f'{tag}: Try in demo mode is visible inside the window', inside(root, m.btn_demo))
-            check(f'{tag}: Run sits above the table', m.btn_run.winfo_rooty() < m.table.winfo_rooty() and m.btn_demo.winfo_rooty() < m.table.winfo_rooty())
-            check(f'{tag}: Run text', str(m.btn_run.cget('text')).strip().endswith('Run procedure') and 'demo mode' in str(m.btn_demo.cget('text')))
+            if not m.table.selection() and m.table.get_children():
+                m.table.selection_set(m.table.get_children()[0])
+                settle(root, 0.2)
+            for name, b in (('Run', m.btn_run), ('Try in demo mode', m.btn_demo), ('Mark verified', m.btn_verify), ('Unlock', m.btn_lock), ('info', m.btn_ver_info)):
+                check(f'{tag}: {name} is inside the window and the card', inside(root, b) and in_card(card, b), (b.winfo_rooty(), root.winfo_height()))
+            check(f'{tag}: Run and demo are not in the scrolling part', m.card_scroll.body not in [m.btn_run.master, m.btn_demo.master] and
+                  not str(m.btn_run).startswith(str(m.card_scroll)))
+            check(f'{tag}: texts', str(m.btn_run.cget('text')).endswith('Run') and str(m.btn_demo.cget('text')) == 'Try in demo mode')
+            check(f'{tag}: no big run row above the table', not any(isinstance(x, ttk.Button) and 'virtual instruments' in str(x.cget('text')) for x in walk(m.library_frame)))
             check(f'{tag}: import buttons still in the bar', all(any(isinstance(x, ttk.Button) and t in str(x.cget('text')) for x in walk(m.library_frame))
                                                               for t in ('Import Mudcats', 'Import procedure package', 'Register procedure', 'Remove from library', 'Library folder')))
-            grab(root, f'run_top_{kind}_{w}x{h}')
+            check(f'{tag}: the demo hint is on the card', any(isinstance(x, ttk.Label) and 'nothing from a demo is calibration evidence' in str(x.cget('text')) for x in walk(card)))
+            check(f'{tag}: the fast demo box is on the card', any(isinstance(x, ttk.Checkbutton) and 'Fast demo' in str(x.cget('text')) for x in walk(card)))
+            grab(root, f'run_in_card_{kind}_{w}x{h}')
             sf = m.card_scroll
-            sel = m.table.selection()
-            if sel:
-                check(f'{tag}: card scrolls to its last button', True)
-                sf.scroll_to(1.0)
-                pump(root, 10)
-                check(f'{tag}: card bottom reachable (Unlock button inside the card view)', not sf.needs_scroll() or
-                      sf.canvas.winfo_rooty() + sf.canvas.winfo_height() + 2 >= m.btn_lock.winfo_rooty() + m.btn_lock.winfo_height(), (sf.needs_scroll(),))
-                check(f'{tag}: card scrollbar only when needed', sf.bar_visible() == sf.needs_scroll())
-                sf.scroll_to(0.0)
-                pump(root, 4)
-                if w == 900:
-                    grab(root, f'card_{kind}_{w}x{h}')
+            sf.scroll_to(1.0)
+            pump(root, 6)
+            check(f'{tag}: the scrolling part reaches its bottom', not sf.needs_scroll() or sf.canvas.yview()[1] >= 0.999)
+            sf.scroll_to(0.0)
+            pump(root, 4)
+        check(f'{w}x{h}: Run is enabled for the selected ready procedure', str(m.btn_run.cget('state')) != 'disabled')
         if w == 900:
-            sf = m.card_scroll
             m.view_nb.select(m.view_pages['verification'])
-            pump(root, 20)
-            check('900x600: the card does need to scroll (so the scrollbar is shown)', sf.needs_scroll() and sf.bar_visible())
-            check('900x600: wheel over the card scrolls it', _wheel_scrolls(root, sf, sf.body))
+            settle(root, 0.4)
+            m.table.selection_set(m.table.get_children()[0])
+            long_text = 'Long description line. ' * 25
+            m.d_desc.set(long_text)
+            settle(root, 0.6)
+            sf = m.card_scroll
+            check('900x600: a long description scrolls inside the card (scrollbar shown)', sf.needs_scroll() and sf.bar_visible())
+            check('900x600: the wheel over the card text scrolls it', _wheel_scrolls(root, sf, sf.body))
+            check('900x600: Run stays in view while the text scrolls', inside(root, m.btn_run) and in_card(card, m.btn_run))
+            m.refresh_details()
         tabs = [(m.history_frame, 'history'), (m.specs_frame, 'specs'), (m.datasheets_frame, 'datasheets'), (m.dsb_frame, 'dsb')]
         for page, name in tabs:
             m.notebook.select(page)
@@ -550,7 +564,7 @@ def checks_manager_verified_info():
         pump(root, 6)
         kinds.setdefault(m.d_ver.cget('text'), iid)
     check('verified info: there are several statuses to look at', len(kinds) >= 2, list(kinds))
-    check('verified info: no long text label on the card', not any(isinstance(w, ttk.Label) and 'Verified on hardware by' in str(w.cget('text')) for w in walk(m.card_scroll.body)))
+    check('verified info: no long text label on the card', not any(isinstance(w, ttk.Label) and 'Verified on hardware by' in str(w.cget('text')) for w in walk(m.library_frame)))
     for pill, iid in kinds.items():
         t.selection_set(iid)
         pump(root, 8)

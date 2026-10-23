@@ -275,6 +275,10 @@ def apply_theme(root):
     round_button('Accent.TButton', dict(normal=(C['primary'], C['primary']), hover=(C['primary_hi'], C['primary_hi']),
                                         pressed=(C['primary_lo'], C['primary_lo']), disabled=(C['primary_off'], C['primary_off'])),
                  C['on_primary'], C['on_primary'])
+    round_button('AccentCompact.TButton', dict(normal=(C['primary'], C['primary']), hover=(C['primary_hi'], C['primary_hi']),
+                                               pressed=(C['primary_lo'], C['primary_lo']), disabled=(C['primary_off'], C['primary_off'])),
+                 C['on_primary'], C['on_primary'])
+    s.configure('AccentCompact.TButton', padding=(px(10), px(2)), font=f_small)    # the small primary button (Run in the Selected procedure card)
     round_button('Danger.TButton', dict(normal=(C['danger'],) * 2, hover=(C['danger_hi'],) * 2,
                                         pressed=(C['danger_lo'],) * 2, disabled=(C['danger_off'],) * 2),
                  '#FFFFFF', '#FFFFFF')

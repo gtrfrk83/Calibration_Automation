@@ -67,7 +67,11 @@ VIEW_TABS = ((procscan.KIND_VERIFICATION, '  Automated Calibrations  '), (procsc
 VIEW_NAMES = {procscan.KIND_VERIFICATION: 'Automated Calibrations', procscan.KIND_MANUAL: 'Manual Calibrations', procscan.KIND_ADJUSTMENT: 'Adjustments'}
 ADJUSTMENT_NOTE = ("Adjustment changes the instrument's calibration. Adjustment procedures are separate from the calibration checks: "
                    "to check an instrument without changing it, use the Automated Calibrations or Manual Calibrations tab.")
-RUN_HINT = 'Run procedure uses real instruments. Demo mode uses VIRTUAL instruments; nothing from a demo is calibration evidence.'
+RUN_HINT = 'Run uses real instruments. Demo uses virtual instruments; nothing from a demo is calibration evidence.'
+RUN_TIP = 'Run the selected procedure on the real instruments.'
+# short card-button texts; the full text of each stays as the button's tooltip and in the row menu (verified.ui_state gives the full ones)
+SHORT_VERIFY = {'Mark verified on hardware...': 'Mark verified...', 'Mark verified again...': 'Verify again...', 'Unlock for editing...': 'Unlock...',
+                'Lock again (nothing changed)': 'Lock again'}
 DEMO_EXPLANATION = ('Run procedure uses real instruments. Demo mode connects VIRTUAL instruments: the windows of a real run appear and commands go to '
                     'simulated instruments, so you can rehearse safely. Nothing from a demo is calibration evidence.')
 MANUAL_NOTE = ("Manual calibrations have no instrument automation: you set the standards yourself and type each reading into the test point grid "
@@ -284,19 +288,8 @@ class Manager:
         self.view_notes = {procscan.KIND_ADJUSTMENT: ui.Notice(outer, text=ADJUSTMENT_NOTE, kind='warn'),
                            procscan.KIND_MANUAL: ui.Notice(outer, text=MANUAL_NOTE, kind='info')}
         self.adjust_note = self.view_notes[procscan.KIND_ADJUSTMENT]
-        # Run / demo live at the TOP of the tab, directly under the view strip, so a short window never hides them; the row wraps (ui.flow_row) when narrow
-        runbar = ttk.Frame(outer)
-        runbar.pack(fill='x', pady=(10, 0))
-        self.btn_run = ttk.Button(runbar, text='▶  Run procedure', style='Accent.TButton', command=self.run_selected)
-        self.btn_run.pack(side='left')
-        self.btn_demo = ttk.Button(runbar, text='Try in demo mode (virtual instruments)', command=lambda: self.run_selected(demo=True))
-        self.btn_demo.pack(side='left', padx=8)
-        ttk.Checkbutton(runbar, text='Fast demo (no windows)', variable=self.fast_demo).pack(side='left', padx=(4, 0))
-        ttk.Label(outer, text=RUN_HINT, style='Small.TLabel', wraplength=ui.px(800), justify='left').pack(fill='x', pady=(4, 0))
-        ui.Tooltip(self.btn_run, 'Run the selected procedure on the real instruments.')
-        ui.Tooltip(self.btn_demo, DEMO_EXPLANATION)
         bar = ttk.Frame(outer)
-        bar.pack(fill='x', pady=(8, 8))
+        bar.pack(fill='x', pady=(10, 8))
         ttk.Label(bar, text='Find').pack(side='left')
         self.search_entry = ttk.Entry(bar, textvariable=self.search, width=30)
         self.search_entry.pack(side='left', padx=(8, 12))
@@ -305,13 +298,13 @@ class Manager:
         self.category_box.pack(side='left')
         self.category_box.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
         ttk.Button(bar, text='Clear', style='Quiet.TButton', command=lambda: (self.search.set(''), self.category.set(ALL_CATEGORIES))).pack(side='left', padx=6)
-        ttk.Button(bar, text='Remove from library', command=self.remove).pack(side='right')
-        ttk.Button(bar, text='Register procedure...', command=self.add).pack(side='right', padx=8)
-        self.btn_library = ttk.Button(bar, text='Library folder...', command=self.choose_library_folder)    # where the lab keeps its procedure packages (the Import picker opens there)
+        ttk.Button(bar, text='Remove from library', style='Compact.TButton', command=self.remove).pack(side='right')
+        ttk.Button(bar, text='Register procedure...', style='Compact.TButton', command=self.add).pack(side='right', padx=4)
+        self.btn_library = ttk.Button(bar, text='Library folder...', style='Compact.TButton', command=self.choose_library_folder)    # where the lab keeps its procedure packages (the Import picker opens there)
         self.btn_library.pack(side='right')
         ui.Tooltip(self.btn_library, lambda: 'Library folder for procedure packages (the Import procedure package... picker opens here):\n' + self.library_folder_text())
-        ttk.Button(bar, text='Import procedure package...', command=self.import_package).pack(side='right', padx=(0, 8))
-        ttk.Button(bar, text='Import Mudcats datasheet (.mdd)...', command=self.import_mdd_procedure).pack(side='right', padx=8)
+        ttk.Button(bar, text='Import procedure package...', style='Compact.TButton', command=self.import_package).pack(side='right', padx=(0, 4))
+        ttk.Button(bar, text='Import Mudcats datasheet (.mdd)...', style='Compact.TButton', command=self.import_mdd_procedure).pack(side='right', padx=(0, 4))
 
         split = ttk.Frame(outer)
         split.pack(fill='both', expand=True)
@@ -331,33 +324,58 @@ class Manager:
         self.table.bind('<<TreeviewSelect>>', lambda _: self.refresh_details())
         self.table.bind('<Return>', lambda _: self.run_selected())
 
-        card = ttk.LabelFrame(split, text='Selected procedure', padding=16)
+        card = ttk.LabelFrame(split, text='Selected procedure', padding=(8, 4, 8, 6))
         card.grid(row=0, column=1, sticky='nsew', padx=(14, 0))
-        card.configure(width=ui.px(340))
-        self.card_scroll = ui.ScrollFrame(card, width=ui.px(310))      # the card scrolls when the window is too short for it (nothing in it is ever cut off)
-        self.card_scroll.pack(fill='both', expand=True)
-        card = self.card_scroll.body
+        card.configure(width=ui.px(370))
+        # Run / demo and the verification buttons are PINNED (never inside the scrolling part, so a short window never hides them); the title, description
+        # and file info above them scroll when the window is too short for them
+        pinned = ttk.Frame(card)
+        pinned.pack(side='bottom', fill='x')                       # packed first: it keeps its height however short the window is
+        self.card_scroll = ui.ScrollFrame(card, width=ui.px(340))
+        self.card_scroll.pack(side='top', fill='both', expand=True)
+        body = self.card_scroll.body
         self.lib_folder = tk.StringVar(value=self.library_folder_text())
         self.d_name = tk.StringVar(); self.d_sub = tk.StringVar(); self.d_desc = tk.StringVar(); self.d_path = tk.StringVar()
-        ttk.Label(card, textvariable=self.d_name, style='Section.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
-        ttk.Label(card, textvariable=self.d_sub, style='Muted.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(2, 8))
-        self.d_pill = ui.Pill(card, '', 'neutral')
+        ttk.Label(body, textvariable=self.d_name, style='Section.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
+        ttk.Label(body, textvariable=self.d_sub, style='Muted.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(2, 6))
+        self.d_pill = ui.Pill(body, '', 'neutral')
         self.d_pill.pack(anchor='w')
-        ver_row = ttk.Frame(card)
-        ver_row.pack(anchor='w', pady=(6, 0))
+        self.d_desc_label = ttk.Label(body, textvariable=self.d_desc, wraplength=ui.px(300), justify='left')
+        self.d_desc_label.pack(anchor='w', pady=(8, 4))
+        ttk.Label(body, textvariable=self.d_path, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
+        self.d_mod = ui.Pill(body, '', 'warn')                    # 'MODIFIED (n)': saved model-wide procedure changes exist
+        # pinned block: status line, Run / demo, verification buttons
+        ttk.Separator(pinned).pack(fill='x', pady=(4, 2))
+        ver_row = ttk.Frame(pinned)
+        ver_row.pack(anchor='w')
         self.d_ver = ui.Pill(ver_row, '', 'neutral')               # the one-line status: 'VERIFIED ON HARDWARE <date> - LOCKED' / 'CHANGED SINCE' / 'UNLOCKED' / 'NOT VERIFIED'
         self.d_ver.pack(side='left')
         self.d_ver_text = tk.StringVar()                           # the full text (verified.Status.detail_lines): shown by the info button, not on the card
-        self.btn_ver_info = ttk.Button(ver_row, text='\u24d8', style='Quiet.TButton', width=3, command=self.show_verified_details)
+        self.btn_ver_info = ttk.Button(ver_row, text='\u24d8', style='Quiet.TButton', width=2, command=self.show_verified_details)
         self.btn_ver_info.pack(side='left', padx=(6, 0))
         ui.Tooltip(self.btn_ver_info, 'Show the full verification record')
-        ttk.Label(card, textvariable=self.d_desc, wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(10, 4))
-        ttk.Label(card, textvariable=self.d_path, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w')
-        self.d_mod = ui.Pill(card, '', 'warn')                    # 'MODIFIED (n)': saved model-wide procedure changes exist
-        self.btn_verify = ttk.Button(card, text='Mark verified on hardware...', command=self.mark_verified)
-        self.btn_verify.pack(fill='x', pady=(18, 0))
-        self.btn_lock = ttk.Button(card, text='Unlock for editing...', command=self.toggle_lock)
-        self.btn_lock.pack(fill='x', pady=(6, 0))
+        run_row = ttk.Frame(pinned)
+        run_row.pack(fill='x', pady=(2, 0))
+        run_row.columnconfigure(0, weight=2, uniform='run')
+        run_row.columnconfigure(1, weight=3, uniform='run')
+        self.btn_run = ttk.Button(run_row, text='\u25b6 Run', style='AccentCompact.TButton', command=self.run_selected)
+        self.btn_run.grid(row=0, column=0, sticky='ew', padx=(0, 3))
+        self.btn_demo = ttk.Button(run_row, text='Try in demo mode', style='Compact.TButton', command=lambda: self.run_selected(demo=True))
+        self.btn_demo.grid(row=0, column=1, sticky='ew', padx=(3, 0))
+        ui.Tooltip(self.btn_run, RUN_TIP)
+        ui.Tooltip(self.btn_demo, DEMO_EXPLANATION)
+        ttk.Checkbutton(pinned, text='Fast demo (no windows)', variable=self.fast_demo).pack(anchor='w', pady=(2, 0))
+        ttk.Label(pinned, text=RUN_HINT, style='Small.TLabel', wraplength=ui.px(300), justify='left').pack(anchor='w', pady=(2, 0))
+        ver_btns = ttk.Frame(pinned)
+        ver_btns.pack(fill='x', pady=(4, 0))
+        ver_btns.columnconfigure((0, 1), weight=1, uniform='ver')
+        self.btn_verify = ttk.Button(ver_btns, text='Mark verified...', style='Compact.TButton', command=self.mark_verified)
+        self.btn_verify.grid(row=0, column=0, sticky='ew', padx=(0, 3))
+        self.btn_lock = ttk.Button(ver_btns, text='Unlock...', style='Compact.TButton', command=self.toggle_lock)
+        self.btn_lock.grid(row=0, column=1, sticky='ew', padx=(3, 0))
+        for b in (self.btn_verify, self.btn_lock):
+            b.full_text = ''
+            ui.Tooltip(b, lambda b=b: b.full_text)
         self._build_row_menu_bindings()
 
     # ------------------------------------------------------------------ right-click menu of a procedure row
@@ -405,7 +423,7 @@ class Manager:
         script = rec[5]
         user = self._user_rows().get(str(rec[0]))
         found = script_file(script).is_file() and (user is None or Path(user['spec_path']).is_file())
-        state = lambda b: (str(b.cget('text')), str(b.cget('state')) != 'disabled')  # noqa: E731
+        state = lambda b: (b.full_text or str(b.cget('text')), str(b.cget('state')) != 'disabled')  # noqa: E731
         record = self._selected_record()
         managed = self._managed_path(record)
         restorable = bool(managed and managed.is_file() and self._available_backups(record))      # a managed script with at least one saved backup
@@ -524,7 +542,7 @@ class Manager:
         n = self._mod_counts().get((model or '').casefold(), 0)
         if n:
             self.d_mod.set(procmods_ui_model.chip_text(n), 'warn')
-            self.d_mod.pack(anchor='w', pady=(6, 0), before=self.btn_verify)
+            self.d_mod.pack(anchor='w', pady=(6, 0), before=self.d_desc_label)
         else:
             self.d_mod.pack_forget()
         self.show_verified(rec)
@@ -555,7 +573,8 @@ class Manager:
         state = verified.ui_state(status)
         for button, key in ((self.btn_verify, 'verify'), (self.btn_lock, 'lock')):
             text, enabled = state[key]
-            button.configure(text=text, state='normal' if enabled else 'disabled')
+            button.full_text = text                                  # the full wording (tooltip, row menu); the card button shows the short one
+            button.configure(text=SHORT_VERIFY.get(text, text), state='normal' if enabled else 'disabled')
         return status
 
     def show_verified_details(self):

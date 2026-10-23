@@ -304,13 +304,15 @@ class IndexTests(unittest.TestCase):
         self.assertEqual(self.mgr.d_ver.kind, 'good')
         self.assertIn('LOCKED', self.mgr.d_ver.text)
         self.assertEqual((self.mgr.btn_verify.opts['state'], self.mgr.btn_lock.opts['state']), ('disabled', 'normal'))
-        self.assertEqual(self.mgr.btn_lock.opts['text'], 'Unlock for editing...')
+        self.assertEqual(self.mgr.btn_lock.full_text, 'Unlock for editing...')          # the card button shows the short 'Unlock...'
+        self.assertEqual(self.mgr.btn_lock.opts['text'], 'Unlock...')
 
     def test_card_for_an_unverified_procedure(self):
         self.select('Fluke 116 Performance Verification')
         self.assertEqual(self.mgr.d_ver.text, 'NOT VERIFIED ON HARDWARE')
         self.assertEqual((self.mgr.btn_verify.opts['state'], self.mgr.btn_lock.opts['state']), ('normal', 'disabled'))
-        self.assertEqual(self.mgr.btn_verify.opts['text'], 'Mark verified on hardware...')
+        self.assertEqual(self.mgr.btn_verify.full_text, 'Mark verified on hardware...')          # the card button shows the short text
+        self.assertEqual(self.mgr.btn_verify.opts['text'], 'Mark verified...')
 
     def test_nothing_selected_disables_both(self):
         self.mgr.table.sel = []
@@ -351,9 +353,11 @@ class IndexTests(unittest.TestCase):
         self.iid = {r['values'][0]: i for i, r in self.mgr.table.rows.items()}
         self.assertEqual(self.cell('Fluke 117 Performance Verification'), 'Verified 2026-10-22  [UNLOCKED]')
         self.select('Fluke 117 Performance Verification')
-        self.assertEqual(self.mgr.btn_lock.opts['text'], 'Lock again (nothing changed)')
+        self.assertEqual(self.mgr.btn_lock.full_text, 'Lock again (nothing changed)')
+        self.assertEqual(self.mgr.btn_lock.opts['text'], 'Lock again')
         self.assertEqual(self.mgr.btn_lock.opts['state'], 'normal')
-        self.assertEqual(self.mgr.btn_verify.opts['text'], 'Mark verified again...')
+        self.assertEqual(self.mgr.btn_verify.full_text, 'Mark verified again...')          # the card button shows the short text
+        self.assertEqual(self.mgr.btn_verify.opts['text'], 'Verify again...')
 
     def test_unlock_cancelled_stays_locked(self):
         self.select('Fluke 117 Performance Verification')
@@ -401,7 +405,8 @@ class IndexTests(unittest.TestCase):
         self.select('Fluke 117 Performance Verification')
         self.assertEqual(self.mgr.d_ver.kind, 'warn')
         self.assertIn('handheld_dmm.py', self.mgr.d_ver_text.get())
-        self.assertEqual(self.mgr.btn_verify.opts['text'], 'Mark verified on hardware...')
+        self.assertEqual(self.mgr.btn_verify.full_text, 'Mark verified on hardware...')          # the card button shows the short text
+        self.assertEqual(self.mgr.btn_verify.opts['text'], 'Mark verified...')
         self.assertEqual(self.mgr.btn_verify.opts['state'], 'normal')
         self.assertEqual(self.mgr.btn_lock.opts['state'], 'disabled')
         self.assertEqual(self.mgr.verified.lock_reason(model='117'), '', 'auto-unlocked: editable until it is verified again')

@@ -57,10 +57,21 @@ class ManagerSource(unittest.TestCase):
         self.assertIn('def restore_previous', self.src)
         self.assertIn('procedure_menu.RESTORE: self.restore_previous', self.src)
 
-    def test_run_buttons_are_built_before_the_table_and_card(self):
-        self.assertLess(self.src.index('self.btn_run = ttk.Button(runbar'), self.src.index('self.table = ui.make_table('))
-        self.assertLess(self.src.index('self.btn_demo = ttk.Button(runbar'), self.src.index("card = ttk.LabelFrame(split, text='Selected procedure'"))
+    def test_run_buttons_are_in_the_pinned_part_of_the_card(self):
+        card = self.src.index("card = ttk.LabelFrame(split, text='Selected procedure'")
+        self.assertIn("self.btn_run = ttk.Button(run_row, text='\\u25b6 Run'", self.src)
+        self.assertIn("self.btn_demo = ttk.Button(run_row, text='Try in demo mode'", self.src)
+        self.assertGreater(self.src.index('self.btn_run = ttk.Button(run_row'), card)
+        self.assertNotIn('runbar', self.src)                                       # the big row under the view strip is gone
+        # pinned: packed to the bottom of the card BEFORE the scrolling part, so a short window never squeezes it out
+        self.assertLess(self.src.index("pinned.pack(side='bottom'"), self.src.index('self.card_scroll = ui.ScrollFrame(card'))
         self.assertIn("Select a procedure, then press Run procedure (or Try in demo mode).", self.src)
+
+    def test_short_verify_texts_keep_the_full_text(self):
+        for full, short in (('Mark verified on hardware...', 'Mark verified...'), ('Mark verified again...', 'Verify again...'),
+                            ('Unlock for editing...', 'Unlock...'), ('Lock again (nothing changed)', 'Lock again')):
+            self.assertIn(f"'{full}': '{short}'", self.src)
+        self.assertIn('b.full_text', self.src)
 
     def test_every_tab_page_can_scroll(self):
         self.assertEqual(self.src.count('= self._scroll_page()'), 4)
