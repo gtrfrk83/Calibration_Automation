@@ -47,6 +47,8 @@ from drivers.keysight_dacq import KeysightDacq  # noqa: E402
 from drivers.keysight_truevolt import KeysightTruevolt  # noqa: E402
 from drivers.scpi_dmm import ScpiDmm  # noqa: E402
 from drivers.fluke_8808a import Fluke8808A  # noqa: E402
+from drivers.fluke_8808a_cal import Fluke8808ACal  # noqa: E402
+from drivers.simulated_8808a_cal import make_8808a_cal_bench  # noqa: E402
 from drivers.simulated_8808a import make_8808a_bench  # noqa: E402
 from drivers.simulated import make_bench, make_dacq_bench, make_dmm_bench  # noqa: E402
 from drivers.simulated_28x import SimFluke28x  # noqa: E402
@@ -98,6 +100,9 @@ COVERAGE = {
     'fluke_8808a': {
         'Fluke8808A': dict(covered=['write', 'query', 'send', 'identify', 'connect', 'remote', 'local', 'cleanup', 'configure_point', 'read',
                                     'check_errors', 'ensure_run_state', 'session_check'], no_command=[]),
+    },
+    'fluke_8808a_cal': {
+        'Fluke8808ACal': dict(covered=['write', 'enter_cal_mode', 'select_function', 'set_reference', 'confirm_value', 'start_point', 'read_late', 'exit_cal', 'cleanup'], no_command=[]),
     },
     'keysight_truevolt': {
         'KeysightTruevolt': dict(covered=['connect', 'cleanup', 'set_nplc', 'set_ac_filter', 'configure_point', 'configure_frequency_point',
@@ -188,7 +193,7 @@ COVERAGE = {
 
 # Stage 7: reset_to_defaults is defined once, on Instrument, and exercised on each of these concrete drivers (golden cases "Class.reset_to_defaults").
 for _cls in ('Fluke5560A', 'Fluke5520A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
-             'Keysight53132A', 'Fluke5790B', 'Fluke28x', 'WaveSurfer4104HD', 'TektronixMDO4000C', 'Fluke96270A', 'AgilentAFG', 'ReferenceMeter',
+             'Fluke8808ACal', 'Keysight53132A', 'Fluke5790B', 'Fluke28x', 'WaveSurfer4104HD', 'TektronixMDO4000C', 'Fluke96270A', 'AgilentAFG', 'ReferenceMeter',
              'TektronixTDS2000C', 'Fluke5522AScope', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A'):
     for _fixture in COVERAGE.values():
         if _cls in _fixture:
@@ -196,7 +201,7 @@ for _cls in ('Fluke5560A', 'Fluke5520A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
-              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keithley_2000_cal', 'keysight_34410a']
+              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keithley_2000_cal', 'fluke_8808a_cal', 'keysight_34410a']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
 ENGINES = ('truevolt_34470A', 'dacq_34970A', 'dacq_34972A', 'fgen_33220A', 'mdo4000c', 'tds2000c', 'agilent_34401a', 'fluke_8846a', 'handheld_5522a',
@@ -1330,6 +1335,54 @@ def cases_k2000_cal(c):
     c.run('Keithley2000Cal.unlock[wrong code, stays locked]', still.unlock, 'WRONG123')
 
 
+def cases_8808a_cal(c):
+    """The 8808A RS-232 calibration dialog (*TER, function name, CALREF, the Enter key, EXIT). Simulated meter: reply formats are NOT facts about the real meter."""
+    bench, ft, dt = make_8808a_cal_bench('5522A', enforce_cal_limits=False)
+    d = c.inst(Fluke8808ACal, dt, opened=False, label='8808A')
+    c.quiet(d.connect)
+    c.quiet(lambda: (d.t.set_timeout(0.01), setattr(d, 'QUIET_S', 0.01), setattr(d, 'COMMAND_GAP_S', 0.0)))
+    c.run('Fluke8808ACal.select_function[before *TER]', d.select_function, 'VDC')
+    c.run('Fluke8808ACal.enter_cal_mode', d.enter_cal_mode)
+    c.run('Fluke8808ACal.enter_cal_mode[twice]', d.enter_cal_mode)
+    c.run('Fluke8808ACal.select_function[bad name]', d.select_function, 'XYZ')
+    c.run('Fluke8808ACal.confirm_value[no value yet]', d.confirm_value)
+    c.run('Fluke8808ACal.select_function[VDC]', d.select_function, 'VDC')
+    c.run('Fluke8808ACal.set_reference[bad text]', d.set_reference, '1e3')
+    c.run('Fluke8808ACal.confirm_value', d.confirm_value)
+    c.run('Fluke8808ACal.start_point[zero point]', d.start_point)
+    c.run('Fluke8808ACal.set_reference', d.set_reference, '-0.1999')
+    dt.cal_prompts = False
+    c.run('Fluke8808ACal.set_reference[no prompt]', d.set_reference, '-0.1999')
+    dt.cal_prompts = True
+    c.run('Fluke8808ACal.confirm_value[second]', d.confirm_value)
+    c.run('Fluke8808ACal.start_point[nothing applied: refused]', d.start_point)
+    c.run('Fluke8808ACal.read_late', d.read_late)
+    c.run('Fluke8808ACal.exit_cal', d.exit_cal)
+    c.run('Fluke8808ACal.cleanup[not in calibration]', d.cleanup)
+    bench, ft, dt = make_8808a_cal_bench('5522A', enforce_cal_limits=False)
+    d = c.inst(Fluke8808ACal, dt, opened=False, label='8808A')
+    c.quiet(d.connect)
+    c.quiet(lambda: (setattr(d, 'QUIET_S', 0.01), setattr(d, 'COMMAND_GAP_S', 0.0), setattr(d, 'POINT_TIMEOUT_S', 0.05)))
+    dt.refuse_ter = 'silent'
+    c.run('Fluke8808ACal.enter_cal_mode[no banner]', d.enter_cal_mode)
+    dt.refuse_ter = 'error'
+    c.run('Fluke8808ACal.enter_cal_mode[error prompt]', d.enter_cal_mode)
+    dt.refuse_ter = None
+    c.quiet(d.enter_cal_mode)
+    c.quiet(d.select_function, 'VDC')
+    c.quiet(d.confirm_value)
+    dt.hang_points.add('S001')
+    c.run('Fluke8808ACal.start_point[no completion]', d.start_point)
+    c.run('Fluke8808ACal.cleanup[in calibration]', d.cleanup)
+    c.run('Fluke8808ACal.write[Enter key]', d.write, '')
+
+
+def resets_8808a_cal(c):
+    bench, ft, dt = make_8808a_cal_bench('5522A', enforce_cal_limits=False)
+    d = c.inst(Fluke8808ACal, dt, label='8808A')
+    c.run('Fluke8808ACal.reset_to_defaults', d.reset_to_defaults)
+
+
 def resets_k2000_cal(c):
     for fw in ('A20', 'A19'):
         bench, ft, dt = make_k2000_cal_bench('5522A', 'GPIB', fw)
@@ -1452,6 +1505,7 @@ DRIVER_CASES = {
     'fluke_5522a_scope': _with_resets(cases_5522a_scope, resets_5522a_scope), 'reference_instruments': _with_resets(cases_reference, resets_reference),
     'keithley_2000': _with_resets(cases_k2000, resets_k2000),
     'keithley_2000_cal': _with_resets(cases_k2000_cal, resets_k2000_cal),
+    'fluke_8808a_cal': _with_resets(cases_8808a_cal, resets_8808a_cal),
     'keysight_34410a': _with_resets(cases_34410a, resets_34410a),
     'keysight_34411a': _with_resets(cases_34411a, resets_34411a),
 }

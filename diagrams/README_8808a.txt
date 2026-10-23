@@ -18,3 +18,10 @@ GROUP (one picture per separate hook-up; Calibration Manual Figures 3-1 to 3-5 s
   IMA          calibrator current to the mA terminal and COM, ranges 200 uA to 200 mA (Figure 3-4)
   I2A          calibrator current to the 10 A terminal and COM, 2 A range (Figure 3-4)
   I10A         calibrator current to the 10 A terminal and COM, 10 A range (Figure 3-5)
+
+ADJUSTMENT (Procedures/Fluke_8808A_Adjustment.py)
+-------------------------------------------------
+The guided adjustment shows a picture at every change of wiring, with the same GROUPs (the DC volts zero uses ZERO_SHORT; the AC volts zero and the zero ohms point use the VOLT / OHM groups with the calibrator in STANDBY / at 0 ohm; the two current zeros use ZERO_OPEN).
+Calibrator external sense is OFF for volts and ON for the four-wire ohms steps. The calibrator buttons / terminals are named in the dialog text.
+Search order: hook_8808A_ADJ_<cal>_<G>  ->  hook_8808A_ADJ_<G>  ->  hook_8808A_<cal>_<G>  ->  hook_8808A_<G>   (the verification pictures are used when no ADJ picture exists; a 5520A uses the 5522A pictures)
+The picture of one point shows the wiring only; it does not say whether the meter is in the calibration mode.

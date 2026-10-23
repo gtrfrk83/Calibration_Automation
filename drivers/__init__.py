@@ -17,6 +17,7 @@ from .keysight_truevolt import Keysight34460A, Keysight34461A, Keysight34465A, K
 from .keysight_dacq import Keysight34970A, Keysight34972A, KeysightDacq, channel_for, pair_channel
 from .scpi_dmm import Agilent34401A, Fluke8846A, ScpiDmm
 from .fluke_8808a import Fluke8808A
+from .fluke_8808a_cal import Fluke8808ACal
 from .tektronix_mdo4000c import TektronixMDO4000C
 from .tektronix_tds2000c import TektronixTDS2000C
 from .reference_instruments import AgilentAFG, Fluke96270A, ReferenceMeter
