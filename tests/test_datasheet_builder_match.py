@@ -42,7 +42,7 @@ class Dmm(M):
         cls.res = cls.m.match(cls.ds)
 
     def test_every_standard_is_considered(self):
-        self.assertEqual(self.res.standards, ['5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL', 'A2LA-LIGHT', '53131A', '53132A'])
+        self.assertEqual(self.res.standards, ['3458A', '5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL', 'A2LA-LIGHT', '53131A', '53132A'])
 
     def test_dc_volts_all_covered_and_automatable(self):
         s = self.res.summary()['dcv']
@@ -229,8 +229,8 @@ class Generator(M):
 
     def test_frequency_goes_to_a_counter_without_numbers(self):
         a = self.res.assignments['gen_freq.r20000000.+10000000~1']
-        self.assertEqual((a.status, a.standard, a.automation), ('assigned', '53132A', 'unverified'))
-        self.assertIsNone(a.tur)
+        # since the 3458A sheet was imported it has numbers (frequency, 3458A p. 34) and so outranks the number-less counter; it has no driver yet ('no')
+        self.assertEqual((a.status, a.standard, a.automation), ('assigned', '3458A', 'no'))
         cand = next(c for c in a.candidates if c.standard == '53132A')
         self.assertFalse(cand.spec_known)
         self.assertTrue(any('no specification sheet' in n for n in cand.notes))
@@ -243,9 +243,13 @@ class Generator(M):
 
     def test_offset_is_covered_by_the_5790b_spec_but_cannot_be_automated(self):
         a = self.res.assignments['gen_offset.r5.+2']
-        self.assertEqual((a.status, a.standard, a.automation), ('assigned', '5790B', 'no'))
+        # the 3458A (DC volts, no driver yet) now ranks first on TUR; the 5790B stays a covered candidate
+        self.assertEqual((a.status, a.standard, a.automation), ('assigned', '3458A', 'no'))
+        self.assertTrue(any(c.standard == '5790B' and c.covered for c in a.candidates))
         self.assertFalse(a.can_automate)
-        self.assertIn('DC mode', a.automation_note)
+        self.assertIn('no driver', a.automation_note)
+        self.assertEqual(dm.automation_status('5790B', 'GEN_OFFSET').status, 'no')
+        self.assertIn('DC mode', dm.automation_status('5790B', 'GEN_OFFSET').note)
 
     def test_flatness_to_20_mhz_on_the_wideband_input(self):
         for a in self.res.assignments.values():
@@ -316,7 +320,7 @@ class Scope(M):
 class Drivers(M):
     def test_driver_table_lists_every_standard_and_what_it_can_do(self):
         rows = {r['model']: r for r in dm.driver_table(DB)}
-        self.assertEqual(set(rows), {'5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A', 'A2LA-LIGHT', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL'})
+        self.assertEqual(set(rows), {'3458A', '5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A', 'A2LA-LIGHT', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL'})
         self.assertEqual(rows['5522A']['driver'], 'Fluke5522A')
         self.assertEqual(rows['5522A']['scope_driver'], 'Fluke5522AScope')
         self.assertEqual(rows['5522A']['functions']['DCV']['status'], 'ok')

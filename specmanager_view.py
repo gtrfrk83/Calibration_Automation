@@ -120,6 +120,7 @@ def split_unit(text):
 _HEAD = re.compile(r'^\[(?P<period>[^\]]*)\]\s*Accuracy:\s*(?P<body>.*)$', re.S)
 _REL = re.compile(rf'^({_NUM})\s*(ppm|%)\s*I\.V\.$')
 _FS = re.compile(rf'^({_NUM})\s*%\s*F\.S\.\{{"Full Scale" = ({_NUM})\s*(\S+)\}}$')
+_RNG = re.compile(rf'^({_NUM})\s*(ppm|%)\s*of range\{{"Range" = ({_NUM})\s*(\S+)\}}$')       # DMM 'ppm / % of range' (3458A)
 _ABS = re.compile(rf'^({_NUM})\s*(\S.*)$')
 
 
@@ -134,6 +135,13 @@ def _term(term):
         if fs is None:
             return None
         return f'{plain(Decimal(m.group(1)))} % FS ({si_text(fs, sym, exact=True)})'
+    m = _RNG.match(term)
+    if m:
+        factor, sym, _a = split_unit(m.group(4))
+        rng = Decimal(m.group(3)) * factor if factor is not None else None
+        if rng is None:
+            return None
+        return f'{plain(Decimal(m.group(1)))} {m.group(2)} of range ({si_text(rng, sym, exact=True)})'
     m = _ABS.match(term)
     if m:
         num = Decimal(m.group(1))
