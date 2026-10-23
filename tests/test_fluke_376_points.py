@@ -185,6 +185,14 @@ class Spec(unittest.TestCase):
         self.assertEqual({n: p['applied']['value'] for n, p in PTS.items() if n in COIL_POINTS},
                          {23: 0.2, 24: 10.0, 25: 18.0, 26: 6.0, 27: 0.2, 28: 10.0, 29: 18.0, 35: 0.2, 36: 10.0, 37: 18.0, 38: 6.0})
 
+    def test_current_uncertainty_is_looked_up_at_the_applied_current_below_the_coil_cmc_rows(self):
+        """Every ACI / DCI point is looked up at the calibrator current (18 A at most), below the 20.5 A at which the lab CMC table's coil lines (coil-standard-2) start,
+        so those rows never touch this procedure; the meter reading (up to 900 A) is never the lookup value."""
+        amps = [p['applied']['value'] for p in PTS.values() if p['kind'] in ('ACI', 'DCI')]
+        self.assertEqual(len(amps), 11)
+        self.assertLess(max(amps), 20.5)
+        self.assertEqual(max(amps), 18.0)
+
     def test_the_iflex_simulation_points(self):
         """Printed p. 3: the calibrator drives mV into the iFlex input and the meter reads amps (30 uV per A at 50 Hz, 300 uV per A at 500 Hz)."""
         for n in IFLEX_SIM:
