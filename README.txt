@@ -49,10 +49,9 @@ Asset history and per-asset results
 -----------------------------------
 Asset History tab (Manager): every PDF report you export is recorded (instrument ID, serial, procedure, technician, date, every point
 with limits and as-found value). Pick an instrument, a report and a test point (double-click) to see its drift across reports as a % of the
-tolerance used; 'Open report PDF' opens the saved file. The Instruments tab gains 'Last report' and 'Next due' columns (last report + the
-interval entered for that instrument; overdue rows are red). Demo reports are never recorded; exporting the same file again replaces its record.
-Launching a procedure from the Instruments tab now fills in the Instrument ID, and typing a known ID fills an empty Serial number and shows
-the last report / next due date in the status bar.
+tolerance used; 'Open report PDF' opens the saved file. (The Manager's Instruments tab, which showed 'Last report' and 'Next due', was removed:
+assets are tracked in other software.) Demo reports are never recorded; exporting the same file again replaces its record.
+Typing a known Instrument ID in a procedure window fills an empty Serial number and shows the last report / next due date in the status bar.
 
 WaveSurfer v56: the trigger level uncertainty is now the laboratory's DC voltage CMC (A2LA scope, 1 MOhm: 0.06 % of the level + 40 uV)
   at the DC voltage the Fluke sources for the point. The two bracket steps (20 mV short of and 20 mV past the trigger level) decide

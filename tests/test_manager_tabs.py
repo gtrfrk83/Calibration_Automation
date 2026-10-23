@@ -103,6 +103,21 @@ class SidecarKind(unittest.TestCase):
         self.assertIn("changes the instrument's calibration", src)
         self.assertIn('type each reading into the test point grid', src)
 
+    def test_manager_has_no_instruments_tab_but_keeps_the_instruments_table(self):
+        """The Instruments tab was removed (assets are tracked in other software); the table stays in calibration_procedures.sqlite3 because labregistry reads it.
+        The start-up of the Manager with a real instruments table is checked on a real Tk (`checks_manager_tabs`)."""
+        src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
+        self.assertNotIn("'  Instruments  '", src)
+        for gone in ('instruments_frame', 'build_instruments_tab', 'refresh_instruments', 'instrument_editor', 'launch_instrument_procedure', 'selected_instrument',
+                     'Instruments tab'):
+            self.assertNotIn(gone, src)
+        self.assertIn('CREATE TABLE IF NOT EXISTS instruments', src)             # schema creation / migration unchanged
+        self.assertNotIn('DROP TABLE', src)
+        import re
+        tabs = re.findall(r"self\.notebook\.add\(self\.\w+, text='\s*([^']+?)\s*'\)", src)
+        self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Mudcats Datasheet Importer', 'Datasheet Builder', 'Procedure Development'])
+        self.assertIn('FROM instruments', (ROOT / 'labregistry.py').read_text(encoding='utf-8'))
+
     def test_user_datasheet_rows_carry_their_kind(self):
         import dsb_manager
         import datasheet_builder as db

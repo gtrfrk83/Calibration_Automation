@@ -12,7 +12,7 @@ Your data
   Help > Import data from another copy...  and choose the released copy's folder. Files are COPIED; the original is not changed.
 
 Running a verification
-  1. Pick the procedure in the Manager (or double-click the instrument in Instruments) and press Run procedure.
+  1. Pick the procedure in the Manager and press Run procedure (or double-click it).
      "Try in demo mode" needs no instruments. It connects VIRTUAL instruments: you see the same windows as a real run (connection, reset
      notice, hook-up and function prompts, the reading window, per-point windows, Edit point) and every command goes through the real driver to a
      simulated instrument. Where you type the reading (handhelds), a "Fill with a simulated reading (DEMO)" button offers an in-tolerance value;

@@ -301,8 +301,17 @@ def checks_manager_windows():
 
 def checks_manager_tabs():
     """The Procedures tab's three views: Automated Calibrations, Manual Calibrations and Adjustment (shared table, search / category filters, verified column, Run buttons)."""
+    import sqlite3
     import Calibration_Procedure_Manager as CPM
     CPM.init_db()
+
+    def instruments_snapshot():             # the table's definition and every row, as stored
+        with sqlite3.connect(CPM.DB) as con:
+            return (con.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='instruments'").fetchall(),
+                    con.execute('SELECT * FROM instruments ORDER BY id').fetchall())
+    with sqlite3.connect(CPM.DB) as con:    # this run's own throw-away data folder: one registered instrument that must survive the start-up untouched
+        con.execute("INSERT OR IGNORE INTO instruments(asset_id,manufacturer,model,serial_number,interval_months,notes) VALUES ('TAB-1','Fluke','8846A','SN-TAB',12,'kept')")
+    before = instruments_snapshot()
     root = tk.Tk()
     errs = []
     root.report_callback_exception = lambda *a: errs.append(a)
@@ -310,6 +319,11 @@ def checks_manager_tabs():
     root.geometry('1260x800+0+0')
     pump(root, 20)
     t = m.table
+    tabs = [m.notebook.tab(x, 'text').strip() for x in m.notebook.tabs()]
+    check('main tabs: no Instruments tab', 'Instruments' not in tabs and tabs[0] == 'Procedures', tabs)
+    check('main tabs: opens on Procedures', m.notebook.nametowidget(m.notebook.select()) is m.library_frame)
+    check('main tabs: nothing of the old tab is left on the Manager', not any(hasattr(m, a) for a in ('instruments_frame', 'instrument_table', 'refresh_instruments', 'launch_instrument_procedure')))
+    check('instruments table: definition and rows untouched by the Manager start-up', before[1] and instruments_snapshot() == before, (before, instruments_snapshot()))
     names = lambda: [t.item(k, 'values')[0] for k in t.get_children()]  # noqa: E731
     check('tabs: three views', [m.view_nb.tab(x, 'text').strip() for x in m.view_nb.tabs()] == ['Automated Calibrations', 'Manual Calibrations', 'Adjustment'])
     check('automated view first, no adjustment procedure in it', m.view_kind == 'verification' and names() and not any('Adjustment' in n for n in names()))
@@ -326,6 +340,11 @@ def checks_manager_tabs():
         ImageGrab.grab(bbox=(root.winfo_rootx(), root.winfo_rooty(), root.winfo_rootx() + root.winfo_width(), root.winfo_rooty() + root.winfo_height()),
                        xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'manager_{tag}_{THEME}.png'))
     grab('automated')
+    if shot:                                # the Manager's tab strip alone (top of the window)
+        from PIL import ImageGrab
+        root.update()
+        ImageGrab.grab(bbox=(root.winfo_rootx(), root.winfo_rooty(), root.winfo_rootx() + root.winfo_width(), root.winfo_rooty() + 130),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'manager_tabstrip_{THEME}.png'))
     m.view_nb.select(m.view_pages['manual'])
     pump(root, 20)
     check('manual view: empty until something is imported, note shown', m.view_kind == 'manual' and names() == [] and m.view_notes['manual'].winfo_ismapped()
