@@ -3,7 +3,7 @@
 Test points and limits are NOT written in this file: they are loaded from specs/keysight_34410a_pv.json, built by specs/build_34410a_spec.py from the
 Keysight 34410A/11A/L4411A Service Guide chapter 3 "Verification Tests" (printed pp. 68-87).  The tables print three intervals (24 hour, 90 day, 1 year); the
 default is the 1 year limit.  Two-way: the program sets the function, range and speed over GPIB or USB (USBTMC through the project's VISA transport; the 34410A has
-no RS-232), sources the point from a Fluke 5560A, 5522A or 5520A, reads the meter back with READ? and judges it.  Hardware I/O is OFF in demo mode.
+no RS-232), sources the point from a Fluke 5560A or 5522A (or a 5520A, when its published specification covers every point), reads the meter back with READ? and judges it.  Hardware I/O is OFF in demo mode.
 Never run unattended: wiring confirmations are required.
 
     import agilent34410a_verification
@@ -24,6 +24,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
 import ui_theme as ui
 import ui_shell
+import calibrator_fit
 import procspec
 import drivers
 import appdata
@@ -41,7 +42,7 @@ PERIODS = {'24 hours': '24h', '90 days': '90d', '1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
 # The calibrators.  The 5520A uses the existing 5522A-family driver (same OUT / OPER / STBY / ERR? set, its IDN_MATCH includes 5520); the ZCOMP compensation command is the
 # 5522A's (Operators Manual p. 6-49) and is NOT assumed to exist on a 5520A, so a 5520A (like the 5560A) is set to 4-wire by the operator.
-CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp), 'Fluke 5520A': ('5520A', drivers.Fluke5522A)}
+CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
 INTERFACES = ('GPIB', 'USB')
 DEFAULT_ADDR = {'GPIB': 'GPIB0::22::INSTR', 'USB': 'USB0::0x0957::0x0607::MY00000000::INSTR'}      # GPIB factory address 22 (UG p. 90); the USB IDs are an UNVERIFIED example
 HV_CONFIRM = 100.0                      # volts: a high-voltage confirmation before any DC / AC volts point of this size or more
@@ -258,7 +259,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.addrs = {i: s.get(f'dmm_addr_{i}', DEFAULT_ADDR[i]) for i in INTERFACES}
         self._iface_shown = self.interface.get()
         self.dmm_addr = tk.StringVar(value=self.addrs[self._iface_shown])
-        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in CALIBRATORS else 'Fluke 5560A')
+        self.cal_offer = calibrator_fit.make_offer('5520A', calibrator_fit.dmm_requests(POINTS), unverified=drivers.Fluke5520A.unverified_summary())
+        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in self.cal_choices() else 'Fluke 5560A')
         self.cal_addr = tk.StringVar(value=s.get('cal_addr', 'COM9'))        # calibrators are typically on RS-232
         self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
         self.period = tk.StringVar(value=s.get('period', PERIOD_LABEL[SPEC['default_period']]))
@@ -280,6 +282,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     # ------------------------------------------------------------------ selection
     @property
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
+
+    def cal_choices(self):
+        """The calibrator picker's values: the 5520A only when its published specification covers every point of the procedure (calibrator_fit).  It does not cover the
+        three 300 kHz AC volts points, so it is not offered here (a saved 5520A choice falls back to the 5560A)."""
+        return calibrator_fit.picker_values(list(CALIBRATORS), {'Fluke 5520A': self.cal_offer})
 
     def active(self, p):
         if p['optional'] and not self.include_optional.get(): return False
@@ -343,7 +350,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                           'The IDs in the example are not verified for your bench.',
                   style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=r, column=0, columnspan=2, sticky='w', pady=(2, 8)); r += 1
         ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.cal_model, values=list(CALIBRATORS), width=14, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        calbox = ttk.Combobox(d, textvariable=self.cal_model, values=self.cal_choices(), width=14, state='readonly')
+        calbox.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        calibrator_fit.attach_note(d, self.cal_offer, ui, widgets=(calbox,), row=r); r += 1
         ttk.Label(d, text='Calibrator port').grid(row=r, column=0, sticky='w', pady=4)
         self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
         self.cal_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1
@@ -672,8 +681,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def standard_for(self, p):
         """The standard that applied a point, for the uncertainty / TAR / TUR: the selected 5522A or 5560A.  Not for a zero-offset point (no source), the technician's
-        capacitance standard, or a 5520A (no specification sheet for it is in the repository: the scope CMC alone applies, TAR is blank)."""
-        return None if (p['source'] != 'calibrator' or self.cal_key not in ('5522A', '5560A')) else self.cal_key
+        capacitance standard.  The 5520A has its own sheet (specs/standards/fluke_5520a_standard.json)."""
+        return None if (p['source'] != 'calibrator' or self.cal_key not in ('5522A', '5560A', '5520A')) else self.cal_key
 
     def certificate_rows(self):
         """Recorded points as 'Calibration Data' rows (display units scaled; limits shown as absolute low/high)."""
@@ -703,7 +712,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             if details.get('show_tar_tur'):
                 import tartur_wiring
                 rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [tartur_wiring.point_fields(p, self.standard_for(p)) for p in pts])
-            std = self.cal_key if self.cal_key in ('5522A', '5560A') else None
+            std = self.cal_key if self.cal_key in ('5522A', '5560A', '5520A') else None
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Keysight {MODEL}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
                                                                  ('Limits applied', self.period.get()), ('Source', 'Keysight 34410A/11A/L4411A Service Guide, pp. 68-87 (Verification Tests)')],
                                              demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, std), snapshot_context=report_pdf.context_for(self))

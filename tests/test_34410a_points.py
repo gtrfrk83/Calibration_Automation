@@ -382,13 +382,21 @@ class Flow(unittest.TestCase):
         self.assertEqual(A.to_visa('TCPIP0::10.0.0.5::inst0::INSTR', 'USB'), 'TCPIP0::10.0.0.5::inst0::INSTR')       # a full resource passes through for either choice
         self.assertTrue(A.to_cal_visa('COM9').upper().startswith('ASRL'))
 
-    def test_calibrator_selector_offers_the_5520a_through_the_existing_driver(self):
+    def test_the_5520a_has_its_own_driver_and_is_not_offered_where_it_cannot_source_the_points(self):
+        """CHANGED (picker-5520a): the 5520A used the 5522A driver and was always offered.  It now has Fluke5520A (command status restated for the 5520A), and the picker
+        offers it only when its published specification covers every calibrator point: it does not cover the three 300 kHz AC volts points (10 V, 50 V, 70 V), so the
+        34410A picker no longer lists it.  The engine still runs with it (CALIBRATORS), and the report uses its own specification sheet now that one exists."""
         import drivers
         self.assertEqual(list(A.CALIBRATORS), ['Fluke 5560A', 'Fluke 5522A', 'Fluke 5520A'])
-        self.assertIs(A.CALIBRATORS['Fluke 5520A'][1], drivers.Fluke5522A)
-        self.assertIn('5520', drivers.Fluke5522A.IDN_MATCH)
+        self.assertIs(A.CALIBRATORS['Fluke 5520A'][1], drivers.Fluke5520A)
+        self.assertEqual(drivers.Fluke5520A.IDN_MATCH, ('5520',))
         a = self.app(cal='Fluke 5520A')
-        self.assertIsNone(a.standard_for(PTS[40]))                           # no specification sheet for it on file: the scope CMC alone applies
+        self.assertFalse(a.cal_offer.offered)
+        self.assertEqual(sorted(r.label for r, _v in a.cal_offer.fit.excluded),
+                         ['AC volts 10.00 V @ 300.0 kHz, 10.00 V range, 3 Hz filter', 'AC volts 50.00 V @ 300.0 kHz, 100.0 V range, 3 Hz filter',
+                          'AC volts 70.00 V @ 300.0 kHz, 750.0 V range, 3 Hz filter'])      # 100 mV and 1 V at 300 kHz are inside its 500 kHz range
+        self.assertEqual(a.cal_choices(), ['Fluke 5560A', 'Fluke 5522A'])
+        self.assertEqual(a.standard_for(PTS[40]), '5520A' if PTS[40]['source'] == 'calibrator' else None)      # its own sheet (specs/standards/fluke_5520a_standard.json)
         self.assertIn('sends no compensation command', a.setup_text(next(p for p in PTS if p['group'] == 'OHM4')))
 
     def test_usb_run_ends_with_a_local_reminder(self):

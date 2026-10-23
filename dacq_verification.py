@@ -4,7 +4,7 @@ Test points and limits are NOT written in this file: they are loaded from specs/
 specs/build_dacq_spec.py from the 34970A/34972A Service Guide, Chapter 4, pp. 80-87). Default limits: 1 year.
 
 Bench: the 34970A (RS-232, selectable COM port) or the 34972A (USB), a 34901A multiplexer (or 34902A, no current tests),
-and a Fluke 5560A or 5522A calibrator as the source. The program configures the DMM for every point (function, range,
+and a Fluke 5560A or 5522A calibrator (or a 5520A, when its published specification covers every point) as the source. The program configures the DMM for every point (function, range,
 10 PLC / 3 Hz AC filter / frequency gate), selects the channel, drives the calibrator and reads the result. It pauses
 for a hook-up diagram whenever the wiring changes and never runs unattended. Hardware I/O is OFF in demo mode.
 
@@ -22,6 +22,7 @@ import ui_theme as ui
 import ui_shell
 import appdata
 import datamode
+import calibrator_fit
 import procmods_engine
 import reset_startup
 import virtualbench
@@ -32,7 +33,7 @@ from drivers.keysight_dacq import channel_for, pair_channel
 MODEL = SPEC_PATH = SPEC = POINTS = None
 PERIODS = {'24 hours': '24h', '90 days': '90d', '1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
-CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522A)}
+CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522A), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
 PARITY_FORMATS = {'8 data bits, no parity': (8, 'none'), '7 data bits, even parity': (7, 'even'), '7 data bits, odd parity': (7, 'odd')}
 FLOW = {'XON/XOFF (instrument default)': 'xon_xoff', 'None': 'none', 'RTS/CTS': 'rts_cts'}
 BAUDS = ['57600', '115200', '38400', '19200', '9600', '4800', '2400', '1200']
@@ -57,6 +58,7 @@ def configure(model):
 
 def find_diagram(model, cal, group):
     """Hook-up picture for a wiring group: diagrams/hook_<model>_<cal>_<GROUP>.png, then the shared hook_dacq_ names."""
+    cal = '5522A' if cal == '5520A' else cal           # the 5520A uses the 5522A picture (same NORMAL / AUX terminals; UNVERIFIED)
     for name in (f'hook_{model}_{cal}_{group}', f'hook_dacq_{cal}_{group}', f'hook_{model}_{group}', f'hook_dacq_{group}'):
         path = HERE / 'diagrams' / f'{name}.png'
         if path.exists():
@@ -208,7 +210,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.dmm_baud = tk.StringVar(value=s.get('dmm_baud', '57600'))
         self.dmm_format = tk.StringVar(value=s.get('dmm_format', '8 data bits, no parity'))
         self.dmm_flow = tk.StringVar(value=s.get('dmm_flow', 'XON/XOFF (instrument default)'))
-        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A'))
+        self.cal_offer = calibrator_fit.make_offer('5520A', calibrator_fit.dmm_requests(POINTS), unverified=drivers.Fluke5520A.unverified_summary())
+        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in self.cal_choices() else 'Fluke 5560A')
         self.cal_addr = tk.StringVar(value=s.get('cal_addr', 'COM9'))
         self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
         self.module = tk.StringVar(value=s.get('module', '34901A'))
@@ -232,6 +235,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     # ------------------------------------------------------------------ selection
     @property
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
+
+    def cal_choices(self):
+        """The calibrator picker's values: the 5520A only when its published specification covers every point of the procedure (calibrator_fit)."""
+        return calibrator_fit.picker_values(list(CALIBRATORS), {'Fluke 5520A': self.cal_offer})
 
     def active(self, p):
         if p.get('skip'): return False                               # a point skipped by a procedure modification
@@ -308,7 +315,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                       style='Muted.TLabel', wraplength=wrap, justify='left').grid(row=r, column=0, columnspan=2, sticky='w', pady=(0, 6)); r += 1
             find_text = 'Find instruments'
         ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.cal_model, values=list(CALIBRATORS), width=14, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        calbox = ttk.Combobox(d, textvariable=self.cal_model, values=self.cal_choices(), width=14, state='readonly')
+        calbox.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        calibrator_fit.attach_note(d, self.cal_offer, ui, widgets=(calbox,), row=r); r += 1
         ttk.Label(d, text='Calibrator address').grid(row=r, column=0, sticky='w', pady=4)
         self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
         self.cal_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1

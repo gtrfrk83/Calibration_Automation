@@ -3,7 +3,7 @@
 Test points and limits are NOT written in this file: they are loaded from specs/keithley_2000_pv.json, built by specs/build_k2000_spec.py from the
 Keithley Model 2000 Multimeter Calibration Manual (2000-905-01 Rev. F) section 1, Tables 1-2 to 1-6 (pp. 1-7 to 1-13).  The manual prints one interval only
 (1 year, 18 to 28 C).  Two-way: the program sets the function and range over GPIB or RS-232 (SCPI, Model 2000 User Manual 2000-900 Rev. J chapters 4 and 5),
-sources the point from a Fluke 5560A or 5522A, reads the 2000 back with :READ? and judges it.  Hardware I/O is OFF in demo mode.  Never run unattended:
+sources the point from a Fluke 5560A or 5522A (or a 5520A, when its published specification covers every point), reads the 2000 back with :READ? and judges it.  Hardware I/O is OFF in demo mode.  Never run unattended:
 wiring confirmations are required.
 
     import keithley2000_verification
@@ -20,6 +20,7 @@ sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Man
 import ui_theme as ui
 import ui_shell
 import procspec
+import calibrator_fit
 import drivers
 import appdata
 import datamode
@@ -34,7 +35,10 @@ POINTS = procspec.flatten(SPEC)
 procspec.apply_period(POINTS, SPEC['default_period'])
 PERIODS = {'1 year': '1y'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
-CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp)}
+CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
+# The 5520A is in the picker only when its published specification covers every output of the procedure (calibrator_fit); it gets no ZCOMP (not a 5520A command
+# the supplied manual shows): like the 5560A, the operator sets its own 4-wire mode.
+CAL_OFFERED_ONLY_IF_FIT = ('Fluke 5520A',)
 INTERFACES = ('GPIB', 'RS-232')
 CAL_INTERFACES = ('RS-232', 'GPIB')       # the calibrator: RS-232 is preselected (lab: the calibrators are usually hooked up over RS-232), GPIB stays selectable
 CAL_PORT_DEFAULT = {'RS-232': 'COM9', 'GPIB': 'GPIB0::4::INSTR'}   # editable; the GPIB address is only an example (UNVERIFIED, set the calibrator's real address)
@@ -55,6 +59,7 @@ def configure(model=MODEL):
 
 def find_diagram(cal, group):
     """Hook-up picture for a wiring group: diagrams/hook_k2000_<cal>_<GROUP>.png, then diagrams/hook_k2000_<GROUP>.png (see diagrams/README_k2000.txt)."""
+    cal = '5522A' if cal == '5520A' else cal                 # the 5520A uses the 5522A picture (same NORMAL / AUX terminals; UNVERIFIED)
     for name in (f'hook_k2000_{cal}_{group}', f'hook_k2000_{group}'):
         path = HERE / 'diagrams' / f'{name}.png'
         if path.exists():
@@ -248,7 +253,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.dmm_baud = tk.StringVar(value=s.get('dmm_baud', '4800'))
         self.dmm_term = tk.StringVar(value=s.get('dmm_term', 'LF'))
         self.dmm_flow = tk.StringVar(value=s.get('dmm_flow', 'None'))
-        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A'))
+        self.cal_offer = calibrator_fit.make_offer('5520A', calibrator_fit.dmm_requests(POINTS), unverified=drivers.Fluke5520A.unverified_summary())
+        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in self.cal_choices() else 'Fluke 5560A')
         self.cal_interface = tk.StringVar(value=s.get('cal_interface', CAL_INTERFACES[0]))       # RS-232 preselected
         if self.cal_interface.get() not in CAL_INTERFACES: self.cal_interface.set(CAL_INTERFACES[0])
         self.cal_addr = tk.StringVar(value=s.get('cal_addr', CAL_PORT_DEFAULT[self.cal_interface.get()]))
@@ -271,6 +277,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     # ------------------------------------------------------------------ selection
     @property
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
+
+    def cal_choices(self):
+        """The calibrator picker's values: the 5520A only when its published specification covers every point (calibrator_fit)."""
+        return [n for n in CALIBRATORS if n not in CAL_OFFERED_ONLY_IF_FIT or self.cal_offer.offered]
 
     def active(self, p):
         if p.get('skip'): return False                               # a point skipped by a procedure modification
@@ -329,7 +339,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                           'language (the RS-232 interface supports SCPI only). 8 data bits, no parity, 1 stop bit.',
                   style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=r, column=0, columnspan=2, sticky='w', pady=(2, 8)); r += 1
         ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.cal_model, values=list(CALIBRATORS), width=14, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        calbox = ttk.Combobox(d, textvariable=self.cal_model, values=self.cal_choices(), width=14, state='readonly')
+        calbox.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
+        calibrator_fit.attach_note(d, self.cal_offer, ui, widgets=(calbox,), row=r); r += 1
         ttk.Label(d, text='Calibrator interface').grid(row=r, column=0, sticky='w', pady=4)
         ci = ttk.Combobox(d, textvariable=self.cal_interface, values=list(CAL_INTERFACES), width=10, state='readonly')
         ci.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
@@ -447,6 +459,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def setup_text(self, p):
         g = p['group']
         five60 = self.cal_key == '5560A'
+        by_hand = self.cal_key in ('5560A', '5520A')              # no compensation command is sent: the operator sets the calibrator's own 4-wire / 2-wire mode
         out = 'OUTPUT V/ohm HI / LO' if five60 else 'NORMAL HI / LO'
         base = 'Shielded cable, shield to the calibrator LO. '
         if g == 'DCV':
@@ -458,13 +471,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return (f'Calibrator {amps} to the 2000 AMPS and INPUT LO jacks (Figure {"1-3" if g == "DCI" else "1-4"}). Check the calibrator range, its fuse and the 2000 AMPS fuse '
                     '(3 A, 250 V) first.')
         if g == 'OHM4':
-            comp = ('The program sets the 5522A impedance compensation (ZCOMP) to WIRE4 below 110 kohm and NONE from 110 kohm up.' if not five60 else
-                    'Set the 5560A\'s own 4-wire (external sense) mode for the points below 110 kohm; the program sends no compensation command to a 5560A.')
+            comp = ('The program sets the 5522A impedance compensation (ZCOMP) to WIRE4 below 110 kohm and NONE from 110 kohm up.' if not by_hand else
+                    f'Set the {self.cal_key}\'s own 4-wire (external sense) mode for the points below 110 kohm; the program sends no compensation command to a {self.cal_key}.')
             return (f'4-wire: calibrator {out} (force) to the 2000 INPUT HI / LO and the calibrator SENSE HI / LO to the 2000 SENSE Ohms 4 WIRE HI / LO (Figure 1-5); '
                     f'calibrator external sense ON. {comp}')
         if g == 'OHM100M':
-            comp = ('The program sets the 5522A impedance compensation (ZCOMP) to NONE.' if not five60 else
-                    'Set the 5560A to its 2-wire mode (external sense off); the program sends no compensation command to a 5560A.')
+            comp = ('The program sets the 5522A impedance compensation (ZCOMP) to NONE.' if not by_hand else
+                    f'Set the {self.cal_key} to its 2-wire mode (external sense off); the program sends no compensation command to a {self.cal_key}.')
             return (f'Pure 2-wire hook-up: calibrator {out} to the 2000 INPUT HI / LO only. NO sense leads: nothing on the 2000 SENSE Ohms 4 WIRE jacks and the calibrator '
                     f'external sense OFF; shielded cable. The program selects the 2000 2-wire resistance function (not 4-wire). {comp}')
         return p['setup']

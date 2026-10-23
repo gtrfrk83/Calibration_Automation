@@ -437,3 +437,58 @@ class Fluke5522A(Fluke5560A):
         'wave.sine.offset0': dataclasses.replace(COMMANDS['wave.sine.offset0'], verified=True, ref='5522A Operators Manual pp. 6-48, 6-13, 5-28 (WAVE, DC_OFFSET, coupled commands)',
                                                  description='One compound line of coupled commands, sent in standby after a square-wave point'),
     }
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+# Fluke 5520A.  Only the 5520A SERVICE MANUAL (5520A_Manual.pdf) has been supplied: its calibration chapter prints the CAL_* commands and one sample MET/CAL
+# program (Figure 3-9, printed pp. 3-18 and 3-19) that sends a handful of normal commands.  The Operators Manual / Programmers Guide (the normal command set
+# and the serial settings) were NOT supplied.  The 5520A therefore reuses the Fluke5522A driver, but a command is marked verified here ONLY when that sample
+# program (or the error list, pp. 4-8 to 4-11) shows it on a 5520A; every other command keeps the 5522A's text with verified=False and a reference that says
+# so.  A command that is not verified is still SENT (the procedures read the error queue after setting an output and never operate after a rejection);
+# nothing is invented.  Confirmed from the sample program (checked against the rendered pages 2026-10-23):
+#   *CLS, *RST, *OPC?, ERR? (reply "code,message": the program takes field 1), OPER, OUT <value><unit>, 0HZ  (current, explicit 0 Hz), OUT? (field 5 = frequency).
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+_REF_5520 = '5520A Service Manual, Fig. 3-9 sample MET/CAL program (printed pp. 3-18, 3-19)'
+_NOT_5520 = 'Not in the 5520A Service Manual (only the CAL_* commands and one sample program are printed); the text is the 5522A Operators Manual command, UNVERIFIED on a 5520A'
+_CONFIRMED_5520 = {
+    'status.clear': _REF_5520 + ': *CLS (steps 1.004 and 1.052)',
+    'err.query': _REF_5520 + ': ERR? (step 1.005); the program takes field 1 of the reply as the error code',
+    'oper.on': _REF_5520 + ': OPER (steps 1.019 and 1.052)',
+    'opc.query': _REF_5520 + ': *OPC? (steps 1.004, 1.019)',
+    'out.query': _REF_5520 + ': OUT? (step 1.057); field 5 of the reply is the frequency (step 1.058)',
+    'out.amps.dc': _REF_5520 + ': "OUT 3.2999mA, 0HZ" (step 1.019): a current with an explicit 0 Hz; the driver writes the base unit A',
+}
+
+
+def _commands_5520():
+    out = {}
+    for key, cmd in cmdreg.merge_commands(Fluke5522A).items():
+        if key in _CONFIRMED_5520:
+            out[key] = dataclasses.replace(cmd, verified=True, ref=_CONFIRMED_5520[key])
+        elif key == 'reset':
+            out[key] = dataclasses.replace(cmd, verified=False, ref=_REF_5520 + ' sends *CLS;*RST; *OPC? (step 1.004) so the command exists, but this manual does not say what *RST leaves '
+                                           '(the 5522A Operators Manual p. 6-36 says STBY); the driver confirms STBY and OPER? = 0 afterwards, UNVERIFIED on a 5520A')
+        else:
+            out[key] = dataclasses.replace(cmd, verified=False, ref=_NOT_5520)
+    return out
+
+
+class Fluke5520A(Fluke5522A):
+    """Fluke 5520A.  Same OUT / OPER / STBY / ERR? command set as the 5522A for the outputs the DMM procedures use, with the verification status of each
+    command restated for the 5520A (see the comment above): confirmed commands carry a 5520A Service Manual page, everything else is UNVERIFIED.
+    NOT assumed to exist on a 5520A: ZCOMP (impedance compensation: the operator sets the 4-wire mode, as on the 5560A), the SCOPE option commands.
+    Serial settings: the 5520A Service Manual says only that SERIAL 1 FROM HOST is the host port (pp. 1-4, 1-5) and that the host cable is a Fluke PM8914 (p. 3-28);
+    baud, parity, data bits and terminators are NOT stated, so the repository default (9600 8N1, write CR, read CRLF) is UNVERIFIED for the 5520A."""
+    MODEL = 'Fluke 5520A'
+    IDN_MATCH = ('5520',)
+    COMMANDS = _commands_5520()
+
+    @classmethod
+    def unverified_summary(cls):
+        """One paragraph for a picker tooltip, built from the registry (so it cannot drift): how many registered commands a 5520A manual page confirms."""
+        reg = cmdreg.merge_commands(cls)
+        ok = sorted(k for k, c in reg.items() if c.verified)
+        no = sorted(k for k, c in reg.items() if not c.verified)
+        return (f'5520A remote commands: {len(ok)} of {len(reg)} registered commands are confirmed by the supplied 5520A Service Manual ({", ".join(dict.fromkeys(reg[k].template.split()[0] for k in ok))}); '
+                f'the other {len(no)} (what *RST leaves, STBY, OPER?, OUT volts / amps / ohms, capacitance, thermocouple, waveform ...) and the serial settings (baud, parity, terminators) are UNVERIFIED '
+                f'because the Operators Manual was not supplied. The program reads the error queue after every setting and never operates after a rejection.')

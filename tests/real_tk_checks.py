@@ -299,6 +299,61 @@ def checks_manager_windows():
     check('no callback errors', not errs, errs)
     root.destroy()
 
+def checks_manager_tabs():
+    """The Procedures tab's two views: Performance Verification and Adjustment (shared table, search / category filters, verified column, Run buttons)."""
+    import Calibration_Procedure_Manager as CPM
+    CPM.init_db()
+    root = tk.Tk()
+    errs = []
+    root.report_callback_exception = lambda *a: errs.append(a)
+    m = CPM.Manager(root)
+    root.geometry('1260x800+0+0')
+    pump(root, 20)
+    t = m.table
+    names = lambda: [t.item(k, 'values')[0] for k in t.get_children()]  # noqa: E731
+    check('tabs: two views', [m.view_nb.tab(x, 'text').strip() for x in m.view_nb.tabs()] == ['Performance Verification', 'Adjustment'])
+    check('verification view first, no adjustment procedure in it', m.view_kind == 'verification' and names() and not any('Adjustment' in n for n in names()))
+    check('tabs: note hidden on verification', not m.adjust_note.winfo_ismapped())
+    n_ver = len(names())
+    check('tabs: verified column kept', 'verified' in t['columns'] and all(str(t.item(k, 'values')[5]) for k in t.get_children()))
+    shot = os.environ.get('SHOT_DIR')
+
+    def grab(tag):
+        if not shot:
+            return
+        from PIL import ImageGrab
+        root.update()
+        ImageGrab.grab(bbox=(root.winfo_rootx(), root.winfo_rooty(), root.winfo_rootx() + root.winfo_width(), root.winfo_rooty() + root.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'manager_{tag}_{THEME}.png'))
+    grab('verification')
+    m.view_nb.select(m.view_pages['adjustment'])
+    pump(root, 20)
+    check('adjustment view: only adjustment procedures', m.view_kind == 'adjustment' and names() == ['Fluke 8846A Guided Adjustment'], names())
+    check('adjustment view: note shown', m.adjust_note.winfo_ismapped())
+    check('adjustment view: first row selected, Run enabled', t.selection() and str(m.btn_run.cget('state')) != 'disabled')
+    check('adjustment view: category list is the view\'s', list(m.category_box['values']) == [CPM.ALL_CATEGORIES, 'Digital Multimeter Adjustment'], m.category_box['values'])
+    check('adjustment view: verified status shown', str(t.item(t.get_children()[0], 'values')[5]).startswith(('Not verified', 'Verified', 'Changed', 'Unlocked')), t.item(t.get_children()[0], 'values'))
+    grab('adjustment')
+    m.search.set('keithley')
+    pump(root, 10)
+    check('adjustment view: search with no hit', names() == [] and '1 match in the Performance Verification tab' in m.table._empty.cget('text'), m.table._empty.cget('text'))
+    m.search.set('8846')
+    pump(root, 10)
+    check('adjustment view: search hit', names() == ['Fluke 8846A Guided Adjustment'], names())
+    m.view_nb.select(m.view_pages['verification'])
+    pump(root, 10)
+    check('verification view: search keeps working', len(names()) == 1 and 'Performance Verification' in names()[0], names())
+    m.search.set('')
+    m.category.set('Oscilloscope')
+    m.refresh()
+    check('verification view: category filter', names() and all(t.item(k, 'values')[3] == 'Oscilloscope' for k in t.get_children()))
+    m.category.set(CPM.ALL_CATEGORIES)
+    m.refresh()
+    check('verification view: back to the full list', len(names()) == n_ver and not m.adjust_note.winfo_ismapped())
+    check('no Tk callback errors', not errs, errs)
+    root.destroy()
+
+
 def checks_handheld_dialogs():
     """The 'Change the function' window (layout C) and the reading window (layout C): nothing clips, Enter = OK / Record, Esc = Cancel."""
     import handheld_dmm as HH
@@ -923,6 +978,7 @@ if __name__ == '__main__':
         checks_point_window()
         checks_edit_point_button()
         checks_manager_windows()
+        checks_manager_tabs()
         checks_import_package()
         checks_run_queue()
         checks_dsb_layout()

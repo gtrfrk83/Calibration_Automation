@@ -371,6 +371,19 @@ class Flow(ModelSelected):
         self.assertTrue(self.hn.run_all())
         self.assertFalse([t for d, t in VH.wire(b.io) if 'ZCOMP' in t])
 
+    def test_calibrator_picker_is_the_34410a_picker(self):
+        """picker-5520A: the 5520A is offered only where its published sheet covers every point; the 34411A has the 34410A's points, so the picker is the same
+        (the three 300 kHz AC volts points keep the 5520A out) and the engine still runs with it when it is selected."""
+        a = self.app()
+        self.assertFalse(a.cal_offer.offered)
+        self.assertEqual(a.cal_choices(), ['Fluke 5560A', 'Fluke 5522A'])
+        self.assertEqual(list(A.CALIBRATORS), ['Fluke 5560A', 'Fluke 5522A', 'Fluke 5520A'])
+        self.assertEqual(sorted(r.label for r, _v in a.cal_offer.fit.excluded),
+                         ['AC volts 10.00 V @ 300.0 kHz, 10.00 V range, 3 Hz filter', 'AC volts 50.00 V @ 300.0 kHz, 100.0 V range, 3 Hz filter',
+                          'AC volts 70.00 V @ 300.0 kHz, 750.0 V range, 3 Hz filter'])
+        a.cal_model.set('Fluke 5520A')
+        self.assertEqual(a.standard_for(next(p for p in PTS if p['source'] == 'calibrator')), '5520A')
+
     def test_interface_selector_remembers_one_address_per_interface(self):
         a = self.app()
         a.dmm_addr.set('GPIB0::9::INSTR')
