@@ -249,7 +249,7 @@ class IndexTests(unittest.TestCase):
         mgr.verified = V.Registry(self.db, seed=True)
         for name in ('d_name', 'd_sub', 'd_desc', 'd_path', 'd_ver_text'):
             setattr(mgr, name, Var())
-        for name in ('d_pill', 'd_ver', 'd_mod', 'btn_run', 'btn_demo', 'btn_verify', 'btn_lock'):
+        for name in ('d_pill', 'd_ver', 'd_mod', 'btn_run', 'btn_demo', 'btn_verify', 'btn_lock', 'btn_ver_info'):
             setattr(mgr, name, Widget())
         mgr._mod_counts = lambda refresh=False: {}
         self.patches = [mock.patch.object(CPM, 'messagebox'), mock.patch.object(CPM, 'simpledialog'),
