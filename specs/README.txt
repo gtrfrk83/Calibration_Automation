@@ -33,7 +33,8 @@ Included
   standards/a2la_light_standard.json  the lab's own A2LA scope CMC for Light - Measure (cert. 1888.03, p. 45 of 47) as a standards sheet 'A2LA-LIGHT': FC / lux / La 2.9 %, uW/cm2 at 365 nm 5.0 % of reading,
                             95 % (k = 2); written by build_light_standard.py (read from the rendered page image); units kept as printed, nothing converted.
   standards/keysight_3458a_standard.json  Keysight / Agilent 3458A 8.5-digit DMM accuracy (data sheet 5965-4971E pp. 8-35) as a MEASURING standard 'input': DC volts (std / Option 002 / transfer),
-                            ohms 2- and 4-wire, DC and AC current, AC volts (SYNC / ANA / RNDM), frequency; 24 hour / 90 day / 1 yr / 2 yr, 'ppm of range' terms (range = range name);
+                            ohms 2- and 4-wire, DC and AC current, AC volts (SYNC / ANA / RNDM), frequency; periods 1 yr (default) and 90 day, 'ppm of range' terms (range = range name);
+                            Option 002 DC volts is the plain-lookup default (the lab's unit), Standard stability is the variant;
                             no confidence level printed (k = 2 assumed); written by build_3458a_standard.py (read from rendered page images).
   standards/a2la_5500a_coil_standard.json  the lab's own A2LA scope CMC lines for the Fluke 5500A/COIL as a standards sheet 'A2LA-5500A-COIL' (cert. 1888.03): DC Current - Generate (2 to 20) A 90 uA/A + 0.1 mA,
                             (20 to 120) A 80 uA/A + 8 mA, (120 to 3000) A 0.8 % + 0.08 A (p. 9, Transconductance amplifier/coil) and AC Current - Generate, Clamp-On Only (20.5 to 1025) A, 45-65 Hz 0.8 %,

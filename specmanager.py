@@ -627,7 +627,8 @@ TC_RESOLUTION = {'5522A': (0.01, '5522A Operators Manual p. 1-17, Temperature Ca
 DEFAULT_VARIANT = {   # preferred / excluded words in the function's bracket text, per kind (the person can pass variant= to override)
     # 'sync, acband <= 2 mhz' (3458A, the best-accuracy AC mode) is preferred in a plain lookup where it covers the point; no other sheet has that text.
     # 'auxiliary' (5520A dual-output AUX rows) and '7 day' (5520A resistance floor with only a 7 day ohms zero) are excluded from a plain lookup; no other sheet has either word.
-    'DCV': dict(prefer=(), exclude=('auxiliary',)),
+    # 'option 002' (3458A high-stability DC volts, the lab's unit per the owner) is preferred in a plain lookup; the standard-stability rows stay selectable with variant='standard stability'.
+    'DCV': dict(prefer=('option 002',), exclude=('auxiliary',)),
     'ACV': dict(prefer=('sinewave', 'sync, acband <= 2 mhz'), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated', 'auxiliary')),
     'ACI': dict(prefer=('lcomp off',), exclude=('non-sinewave', 'squarewave', 'trianglewave')),
     'OHM': dict(prefer=('4-wire',), exclude=('7 day',)),

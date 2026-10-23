@@ -229,8 +229,8 @@ class Generator(M):
 
     def test_frequency_goes_to_a_counter_without_numbers(self):
         a = self.res.assignments['gen_freq.r20000000.+10000000~1']
-        # since the 3458A sheet was imported it has numbers (frequency, 3458A p. 34) and so outranks the number-less counter; it has no driver yet ('no')
-        self.assertEqual((a.status, a.standard, a.automation), ('assigned', '3458A', 'no'))
+        self.assertEqual((a.status, a.standard, a.automation), ('assigned', '53132A', 'unverified'))
+        self.assertIsNone(a.tur)
         cand = next(c for c in a.candidates if c.standard == '53132A')
         self.assertFalse(cand.spec_known)
         self.assertTrue(any('no specification sheet' in n for n in cand.notes))
@@ -243,13 +243,9 @@ class Generator(M):
 
     def test_offset_is_covered_by_the_5790b_spec_but_cannot_be_automated(self):
         a = self.res.assignments['gen_offset.r5.+2']
-        # the 3458A (DC volts, no driver yet) now ranks first on TUR; the 5790B stays a covered candidate
-        self.assertEqual((a.status, a.standard, a.automation), ('assigned', '3458A', 'no'))
-        self.assertTrue(any(c.standard == '5790B' and c.covered for c in a.candidates))
+        self.assertEqual((a.status, a.standard, a.automation), ('assigned', '5790B', 'no'))
         self.assertFalse(a.can_automate)
-        self.assertIn('no driver', a.automation_note)
-        self.assertEqual(dm.automation_status('5790B', 'GEN_OFFSET').status, 'no')
-        self.assertIn('DC mode', dm.automation_status('5790B', 'GEN_OFFSET').note)
+        self.assertIn('DC mode', a.automation_note)
 
     def test_flatness_to_20_mhz_on_the_wideband_input(self):
         for a in self.res.assignments.values():
@@ -315,6 +311,32 @@ class Scope(M):
             if a.function_id == 'scope_trigger':
                 self.assertEqual(a.status, 'assigned')
                 self.assertIsNone(a.tur)                                       # pass / fail: no tolerance
+
+
+class DriverlessLast(M):
+    """A spec-only standard (no driver: 3458A, 8563E, ...) is offered as a manual candidate, but never outranks a driver-backed one."""
+
+    def test_rank_puts_driverless_after_driver_backed_whatever_the_tur(self):
+        a = dm.Candidate('3458A', covered=True, driver='', tur=100.0, rel_unc=1e-6)
+        b = dm.Candidate('5790B', covered=True, driver='Fluke5790B', tur=2.0, rel_unc=1e-2)
+        self.assertEqual([c.standard for c in dm._rank([a, b], 'GEN_OFFSET')], ['5790B', '3458A'])
+        only = dm.Candidate('3458A', covered=True, driver='', tur=100.0)
+        self.assertEqual([c.standard for c in dm._rank([only], 'GEN_OFFSET')], ['3458A'])      # nothing driver-backed covers: it is offered
+
+    def test_3458a_is_a_driverless_candidate_behind_the_driver_backed_ones(self):
+        ds = db.Datasheet('A', 'G', 'G')
+        ds.set_periods([('1y', 'y')], '1y')
+        off = ds.add_function('GEN_OFFSET')
+        off.add_range('1000', '1e-3')
+        ds.set_spec(off, '1 % of reading + 2 mV')
+        off.add_rule(db.PointRule('o', 'fixed', {'values': ['900 V']}))
+        db.regenerate(off)
+        a = next(iter(self.match(ds).assignments.values()))
+        cov = [c for c in a.candidates if c.covered]
+        self.assertIn('3458A', [c.standard for c in cov])
+        self.assertEqual(a.standard, '5790B')
+        self.assertEqual(next(c for c in cov if c.standard == '3458A').driver, '')
+        self.assertLess([c.standard for c in sorted(cov, key=lambda c: c.rank)].index('5790B'), [c.standard for c in sorted(cov, key=lambda c: c.rank)].index('3458A'))
 
 
 class Drivers(M):

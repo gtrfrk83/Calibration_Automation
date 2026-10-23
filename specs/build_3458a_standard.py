@@ -4,10 +4,10 @@
 
 SOURCE: '3458A Multimeter - Reliably Accurate Measurement Every Time', Keysight data sheet 5965-4971E (published June 10, 2026), 44 pages, supplied as
 'hp3458a_specs.pdf'.  The page numbers below are the data sheet's own printed numbers (they equal the PDF page numbers).  Tables used:
-    p. 12  DC voltage accuracy (24 hour / 90 day / 1 year / 2 year; ppm of reading + ppm of range; Option 002 values in parentheses), footnotes 1-6
+    p. 12  DC voltage accuracy (only 90 day and 1 year are stored; ppm of reading + ppm of range; Option 002 values in parentheses), footnotes 1-6
     p. 13  DC voltage transfer accuracy / linearity (10 min, Tref +/-0.5 degC)
     p. 16  Resistance accuracy (4-wire, OHMF; PRESET; NPLC 100; OCOMP ON), footnotes 1-4
-    p. 17  Two-wire ohms: offset errors added to the four-wire accuracy (24 hour 50 mOhm, 90 day 150 mOhm, 1 year 250 mOhm, 2 year 500 mOhm)
+    p. 17  Two-wire ohms: offset errors added to the four-wire accuracy (90 day 150 mOhm, 1 year 250 mOhm; the 24 hour and 2 year offsets are not stored)
     p. 20  DC current accuracy (ppm of reading + ppm of range), footnotes 1-6
     p. 24  AC voltage, synchronous sub-sampled mode (SETACV SYNC), ACBAND <= 2 MHz and > 2 MHz; one column '24-hour to 2 year' (% of reading + % of range)
     p. 27  AC voltage, analog mode (SETACV ANA); one column '24-hour to 2 year'
@@ -20,9 +20,7 @@ settling, noise rejection, reading rates, digitizing, math, the AC transfer accu
 VERIFICATION STATUS: every number was read from RENDERED PAGE IMAGES (pdftoppm at 130 to 300 dpi, viewed as PNG), never from the extracted text, and each stored table
 was read twice (the whole page, then a high-resolution crop of the table); the two readings agree.  The independent second transcription is in
 tests/test_standard_3458a.py.  Read once only (information in the notes, not used by any lookup): the temperature coefficients of the AC functions, the ACDCV / ACDCI
-additional-error tables and the frequency / period characteristics.  Two printed cells are NOT readable in the data sheet itself (see PROBLEMS): the 2 year 1000 V DC
-volts cell (the page prints '1   10) + 0.1', in the text layer as well as in the rendering) and the 1 GOhm with-ACAL temperature coefficient (printed '1  2').
-Those two are not stored.  Set VERIFIED_AGAINST_IMAGE = False if the data sheet is replaced until the new pages have been read the same way.
+additional-error tables and the frequency / period characteristics.  One printed cell is NOT readable in the data sheet itself: the 1 GOhm with-ACAL temperature coefficient (printed '1  2'); it is not stored.  Set VERIFIED_AGAINST_IMAGE = False if the data sheet is replaced until the new pages have been read the same way.
 
 CONFIDENCE LEVEL: the data sheet states NONE.  Pages 8 to 35 were read for the words confidence / sigma / k = 2 / 99 % / 95 % / coverage / guaranteed / warranted and
 nothing of the kind is printed; the text only says the accuracy is 'relative to the calibration standards' (p. 8).  The sheet is stored with confidence_pct
@@ -35,8 +33,8 @@ How the repository form holds a DMM specification (no schema change):
     data sheet says (p. 8) 'Range means the name of the scale, e.g. 1 V, 10 V; range does not mean the full-scale reading, e.g. 1.2 V, 12 V'.  Printed text form
     '0.3 ppm of range{"Range" = 1 V}' (new, additive: specmanager.parse_spec and the Standards Specs view accept it; the old '% F.S.{"Full Scale" = ..}' form is unchanged).
   * a fixed term (two-wire ohms offset) -> spec['abs'] (ohm).
-  * periods are free text: '24 hour', '90 day', '1 yr', '2 yr' (and '10 min' for the DC transfer accuracy).  The default period of a standard is '1 yr'.  The AC and
-    frequency tables print ONE column '24-hour to 2 year', so the same specification is stored under all four periods.
+  * periods are free text: '90 day', '1 yr' (owner: no 24 hour, no 2 year) and '10 min' for the DC transfer accuracy.  The default period of a standard is '1 yr'.  The AC and
+    frequency tables print ONE column '24-hour to 2 year', so the same specification is stored under both periods.
   * each range is a bipolar row (amp_lo = -full scale, amp_hi = +full scale), so specmanager picks the SMALLEST range that holds the value, as the instrument does
     (a 200 uA current is on the 1 mA range, whose full scale is 1.2 mA).  AC rows carry the frequency band (freq_lo, freq_hi); an unprinted (blank) band has no row.
   * direction 'input': the 3458A MEASURES (same as the 5790B, 8563E and 8902A sheets).  specmanager.lookup defaults to direction 'output', so callers pass
@@ -58,7 +56,7 @@ import specmanager as sm  # noqa: E402
 VERIFIED_AGAINST_IMAGE = True            # all stored tables read from rendered page images, twice (see the docstring); False re-adds the warnings
 SOURCE_PDF = 'hp3458a_specs.pdf'
 MODEL = '3458A'
-PERIODS = ['24 hour', '90 day', '1 yr', '2 yr']
+PERIODS = ['90 day', '1 yr']       # owner: the lab uses 1 yr (default) and 90 day only; the 24 hour and 2 year columns are not stored
 CONFIDENCE_TEXT = ('[Not Specified] - the Keysight 3458A data sheet (5965-4971E, pp. 8-35) prints no confidence level and no coverage factor; '
                    'it states only that the accuracy is relative to the calibration standards (p. 8)')
 
@@ -75,11 +73,9 @@ def num(x):
 # ------------------------------------------------------------------------------------------------------------ the tables as printed
 # DC voltage, p. 12.  range name (V) / full scale (V) / maximum resolution (V) / accuracy per period 'ppm of reading + ppm of range' (Option 002 reading in parentheses)
 DCV_RANGES = [('100 mV', '0.1', '0.12', '1e-8'), ('1 V', '1', '1.2', '1e-8'), ('10 V', '10', '12', '1e-7'), ('100 V', '100', '120', '1e-6'), ('1000 V', '1000', '1050', '1e-5')]
-DCV = {            # period -> per range 'reading (option 002 reading) + range'; None = printed cell unreadable (not stored)
-    '24 hour': ['2.5 + 3', '1.5 + 0.3', '0.5 + 0.05', '2.5 + 0.3', '2.5 + 0.1'],
+DCV = {            # period -> per range 'reading (option 002 reading) + range'
     '90 day': ['5.0 (3.5) + 3', '4.6 (3.1) + 0.3', '4.1 (2.6) + 0.05', '6.0 (4.5) + 0.3', '6.0 (4.5) + 0.1'],
     '1 yr': ['9 (5) + 3', '8 (4) + 0.3', '8 (4) + 0.05', '10 (6) + 0.3', '10 (6) + 0.1'],
-    '2 yr': ['14 (10) + 3', '14 (10) + 0.3', '14 (10) + 0.05', '14 (10) + 0.3', None],
 }
 # DC voltage transfer accuracy / linearity, p. 13: 10 min, Tref +/-0.5 degC, ppm of reading + ppm of range
 DCV_TRANSFER = ['0.5 + 0.5', '0.3 + 0.1', '0.05 + 0.05', '0.5 + 0.1', '1.5 + 0.05']
@@ -89,21 +85,17 @@ OHM_RANGES = [('10 ohm', '10', '12', '1e-5'), ('100 ohm', '100', '120', '1e-5'),
               ('100 kohm', '100000', '120000', '1e-2'), ('1 Mohm', '1000000', '1200000', '1e-1'), ('10 Mohm', '10000000', '12000000', '1'),
               ('100 Mohm', '100000000', '120000000', '10'), ('1 Gohm', '1000000000', '1200000000', '100')]
 OHM = {
-    '24 hour': ['5 + 3', '3 + 3', '2 + 0.2', '2 + 0.2', '2 + 0.2', '10 + 1', '50 + 5', '500 + 10', '0.5% + 10'],
     '90 day': ['15 + 5', '10 + 5', '8 + 0.5', '8 + 0.5', '8 + 0.5', '12 + 2', '50 + 10', '500 + 10', '0.5% + 10'],
     '1 yr': ['15 + 5', '12 + 5', '10 + 0.5', '10 + 0.5', '10 + 0.5', '15 + 2', '50 + 10', '500 + 10', '0.5% + 10'],
-    '2 yr': ['20 + 10', '20 + 10', '15 + 1', '15 + 1', '15 + 1', '20 + 4', '75 + 10', '0.1% + 10', '1% + 10'],
 }
-OHM2_OFFSET = {'24 hour': '0.05', '90 day': '0.15', '1 yr': '0.25', '2 yr': '0.5'}      # ohm: 50 mOhm / 150 mOhm / 250 mOhm / 500 mOhm (p. 17)
+OHM2_OFFSET = {'90 day': '0.15', '1 yr': '0.25'}      # ohm: 150 mOhm / 250 mOhm (p. 17; the printed 24 hour and 2 year offsets are not stored)
 
 # DC current, p. 20.  range name (A) / full scale / maximum resolution
 DCI_RANGES = [('100 nA', '1e-7', '1.2e-7', '1e-12'), ('1 uA', '1e-6', '1.2e-6', '1e-12'), ('10 uA', '1e-5', '1.2e-5', '1e-12'), ('100 uA', '1e-4', '1.2e-4', '1e-11'),
               ('1 mA', '1e-3', '1.2e-3', '1e-10'), ('10 mA', '1e-2', '1.2e-2', '1e-9'), ('100 mA', '1e-1', '1.2e-1', '1e-8'), ('1 A', '1', '1.05', '1e-7')]
 DCI = {
-    '24 hour': ['10 + 400', '10 + 40', '10 + 7', '10 + 6', '10 + 4', '10 + 4', '25 + 4', '100 + 10'],
     '90 day': ['30 + 400', '15 + 40', '15 + 10', '15 + 8', '15 + 5', '15 + 5', '30 + 5', '100 + 10'],
     '1 yr': ['30 + 400', '20 + 40', '20 + 10', '20 + 8', '20 + 5', '20 + 5', '35 + 5', '110 + 10'],
-    '2 yr': ['35 + 400', '25 + 40', '25 + 10', '25 + 8', '25 + 5', '25 + 5', '40 + 5', '115 + 10'],
 }
 DCI_TYPICAL = (0, 1, 2)         # 100 nA, 1 uA, 10 uA: footnote 6 'Typical accuracy'
 
@@ -240,9 +232,8 @@ NOTES = {
          'Built by specs/build_3458a_standard.py.',
     '2': 'VERIFICATION: every stored number was read from RENDERED PAGE IMAGES (never the extracted text), each table twice (whole page, then a 300 dpi crop of the table); '
          'the two readings agree. Notes that only quote the temperature coefficients of the AC functions, the ACDCV / ACDCI additional errors and the frequency / period '
-         'characteristics were read once (information; no lookup uses them). Two printed cells could not be read in the data sheet itself and are NOT stored: '
-         'DC volts 1000 V, 2 year (printed "1   10) + 0.1": the standard-stability number is missing; the Option 002 figure "10)" and the range term 0.1 are visible but not complete), '
-         'and the 1 GOhm resistance temperature coefficient WITH ACAL (printed "1   2").',
+         'characteristics were read once (information; no lookup uses them). The 1 GOhm resistance temperature coefficient WITH ACAL (printed "1   2") could not be read '
+         'in the data sheet itself and is NOT stored.',
     '3': 'CONFIDENCE LEVEL: NOT STATED. The data sheet (pp. 8-35) prints no confidence level, sigma, coverage factor k, or "99 %" / "95 %"; p. 8 says only that the accuracy is '
          'relative to the calibration standards. Stored as confidence_pct None ("[Not Specified]"), so the repository rule for such a sheet applies: coverage divisor 2.0 ASSUMED '
          '(the same treatment as the 8563E, 8902A and 96270A sheets). Set the divisor in Standards Specs if the lab decides otherwise (a Keysight spec limit is often treated as a '
@@ -251,18 +242,18 @@ NOTES = {
          'used for the last external calibration; the data sheet gives the factory figure and it is NOT added to any stored row: DC volts +2 ppm of reading (p. 12 footnote 5), '
          'resistance +3 ppm of reading, traceability of 10 kOhm (p. 16 footnote 3), DC current +5 ppm of reading, the sum of the 10 V and 10 kOhm values (p. 20 footnote 5), '
          'AC volts +2 ppm of reading, traceability of 10 V DC (pp. 24, 27), AC current +5 ppm of reading (p. 32 footnote 2). When the lab calibrates its own 3458A the '
-         'traceability of THAT calibration replaces these factory figures.',
+         'traceability of THAT calibration replaces these factory figures. OPEN ITEM: the owner is unsure whether the factory adders should be added; they stay NOT stored until decided.',
     '5': 'RANGE (p. 8): "Range means the name of the scale, e.g., 1 V, 10 V, etc.; range does not mean the full-scale reading, e.g., 1.2 V, 12 V". The ppm / % of range term is '
          'therefore taken against the range NAME (0.1 V on the 100 mV range, 1 V, 10 V, 100 V, 1000 V; 1 uA on the 1 uA range ...), stored as fs_value; the row spans -full scale '
          'to +full scale (full scale as printed: 120 mV, 1.2 V, 12 V, 120 V, 1050 V; resistance 12 ohm ... 1.2 Gohm; DC current 120 nA ... 1.05 A; AC volts 12 mV ... 120 V and 700 V on the 1000 V range; AC current 120 uA ... 1.05 A).',
-    '6': 'PERIODS: DC volts, resistance and DC current print four columns (24 hour / 90 day / 1 year / 2 year). Conditions: 24 hour = fixed range (> 4 min), MATH NULL, Tcal +/-1 degC; '
-         '90 day / 1 year / 2 year = within 24 hours and +/-1 degC of the last ACAL, Tcal +/-5 degC, MATH NULL, fixed range (p. 12 footnotes 4, 5; p. 16 footnote 3; p. 20 footnotes 4, 5). '
+    '6': 'PERIODS (owner: the lab uses 1 year specifications): only "90 day" and "1 yr" are stored (the printed 24 hour and 2 year columns are NOT stored); the default period of the standard is "1 yr". '
+         'Conditions: 90 day / 1 year = within 24 hours and +/-1 degC of the last ACAL, Tcal +/-5 degC, MATH NULL, fixed range (p. 12 footnote 5; p. 16 footnote 3; p. 20 footnote 5). '
          'Specifications are for PRESET; NPLC 100 (resistance: PRESET; NPLC 100; OCOMP ON; OHMF). AC volts, AC current and frequency print ONE column "24-hour to 2 year" '
-         '(pp. 24, 27, 29, 32, 34): the same specification is stored under all four periods. The default period of the standard is "1 yr".',
-    '7': 'OPTION 002 (high stability, p. 12 footnote 5): the DC volts "ppm of reading" figures in parentheses are for Option 002. Stored as a second function "Voltage, DC [Option 002 high stability]"; '
-         'the plain function holds the standard-stability figures. A plain DC volts lookup returns the larger limit (standard stability); pass variant="Option 002" for the option. '
-         'Only the DC volts table has parenthesised figures; the 24 hour column has none (same for both). Which of the two the lab\'s 3458A has is NOT KNOWN (the ordering page: "8 ppm Stability" standard, '
-         '"3458A-002 High stability (4 ppm/year) reference" option).',
+         '(pp. 24, 27, 29, 32, 34): the same specification is stored under both periods.',
+    '7': 'OPTION 002 (high stability, p. 12 footnote 5): the DC volts "ppm of reading" figures in parentheses are for Option 002 (only the DC volts table has parenthesised figures). '
+         'PER THE OWNER the lab\'s 3458A HAS Option 002, so "Voltage, DC [Option 002 high stability]" is the DEFAULT of a plain DC volts lookup (specmanager.DEFAULT_VARIANT prefer "option 002"). '
+         'The standard-stability figures (8 ppm / year) are stored as the alternate function "Voltage, DC [Standard stability]", selectable with variant="Standard stability". '
+         'Ordering page: "8 ppm Stability" standard, "3458A-002 High stability (4 ppm/year) reference" option.',
     '8': 'DC VOLTS EXTRA TERMS, NOT STORED (p. 12): without MATH NULL add 0.15 ppm of range to 10 V, 0.7 ppm of range to 1 V and 7 ppm of range to 0.1 V; without MATH NULL and for a fixed range of '
          'less than 4 minutes add 0.25 ppm of range to 10 V, 1.7 ppm of range to 1 V and 17 ppm of range to 0.1 V. Footnote 6 (1000 V range): "Add 12 ppm X (Vin / 1000)2 additional errors for '
          'inputs > 100 vV" (printed so; read as 12 ppm x (Vin/1000)^2 of reading for inputs above 100 V: 12 ppm at 1000 V). Footnote 6 is NOT in any stored 1000 V row.',
@@ -308,10 +299,10 @@ NOTES = {
 }
 
 LIMITS = [
-    dict(function='Voltage, DC', limit='Accuracy per range, 24 hour / 90 day / 1 year / 2 year, ppm of reading + ppm of range (PRESET; NPLC 100; MATH NULL; ACAL within 24 h, +/-1 degC; Tcal +/-5 degC).', page='12'),
+    dict(function='Voltage, DC', limit='Accuracy per range, 90 day / 1 year, ppm of reading + ppm of range (PRESET; NPLC 100; MATH NULL; ACAL within 24 h, +/-1 degC; Tcal +/-5 degC).', page='12'),
     dict(function='Resistance', limit='Four-wire (OHMF) accuracy per range plus two-wire offset 50 / 150 / 250 / 500 mOhm; ppm of reading + ppm of range (0.5 %, 0.1 %, 1 % on the top ranges).', page='16-17'),
     dict(function='Current, DC', limit='100 nA to 1 A ranges; 100 nA, 1 uA and 10 uA typical.', page='20'),
-    dict(function='Voltage, AC', limit='SYNC (<= 2 MHz and > 2 MHz), ANA, RNDM: % of reading + % of range per frequency band, 24 hour to 2 year.', page='24, 27, 29'),
+    dict(function='Voltage, AC', limit='SYNC (<= 2 MHz and > 2 MHz), ANA, RNDM: % of reading + % of range per frequency band (one printed column, stored under 90 day and 1 yr).', page='24, 27, 29'),
     dict(function='Current, AC', limit='100 uA to 1 A: % of reading + % of range per frequency band; 5 kHz to 100 kHz typical.', page='32'),
     dict(function='Frequency', limit='0.05 % of reading (1 Hz - 40 Hz); 0.01 % of reading (40 Hz - 100 MHz).', page='34'),
 ]
@@ -321,7 +312,7 @@ LIMITS = [
 def dc_rows():
     funcs = []
     # DC volts, standard stability (and Option 002 with the parenthesised readings)
-    for title, option in (('Voltage, DC', False), ('Voltage, DC [Option 002 high stability]', True)):
+    for title, option in (('Voltage, DC [Option 002 high stability]', True), ('Voltage, DC [Standard stability]', False)):
         f = dict(name=title, direction='input', page=12, ranges=[])
         for i, (rname_, rv, fs, res) in enumerate(DCV_RANGES):
             specs = []
@@ -434,13 +425,11 @@ def problems_for(data):
     probs.append(dict(level='warn', where='standard', what='CONFIDENCE LEVEL NOT STATED by the data sheet (5965-4971E): confidence_pct is empty and the coverage divisor 2 is an ASSUMPTION '
                                                           '(repository rule for a sheet without a level). Decide the divisor in Standards Specs.'))
     probs.append(dict(level='warn', where='standard', what='The accuracy is RELATIVE to the calibration standards (p. 8). The factory traceability adders (DC volts 2 ppm, resistance 3 ppm, DC current 5 ppm, '
-                                                          'AC volts 2 ppm, AC current 5 ppm of reading) are not added to any row.'))
-    probs.append(dict(level='warn', where='Voltage, DC / 1000 V range (p. 12)', what='The 2 year cell of the 1000 V row is not readable in the data sheet (printed "1   10) + 0.1"). No 2 yr specification '
-                                                                                     'is stored for the 1000 V range of either DC volts function; a 2 yr lookup above 120 V returns nothing.'))
+                                                          'AC volts 2 ppm, AC current 5 ppm of reading) are not added to any row. OPEN ITEM: the owner has not decided whether they are wanted.'))
     probs.append(dict(level='warn', where='Voltage, DC / 1000 V range (p. 12 footnote 6)', what='Footnote 6, "Add 12 ppm X (Vin / 1000)2 additional errors for inputs > 100 vV", is not in the stored 1000 V rows '
                                                                                                 'and is printed with typing errors; it is a note only.'))
-    probs.append(dict(level='warn', where='Voltage, DC [Option 002 high stability]', what='Which stability (standard 8 ppm, or Option 002 4 ppm) the lab\'s 3458A has is not known; a plain lookup returns the standard-stability '
-                                                                                         'figure (the larger limit).'))
+    probs.append(dict(level='warn', where='Voltage, DC [Option 002 high stability]', what='Option 002 (high stability) is the DEFAULT of a plain DC volts lookup because the owner says the lab\'s 3458A has it; '
+                                                                                         'the standard-stability rows are stored as the variant "Standard stability".'))
     probs.append(dict(level='warn', where='Current, DC / 100 nA, 1 uA, 10 uA', what='Typical accuracy (p. 20 footnote 6), not warranted.'))
     probs.append(dict(level='warn', where='Current, DC', what='The highest range is 1 A (full scale 1.05 A): there is no row for a current above 1.05 A (2 A).'))
     probs.append(dict(level='warn', where='Voltage, AC [SETACV RNDM, ...] (p. 29)', what='The random-sampled table prints no conditions of its own (its footnote 1 is the temperature-coefficient one); the SYNC / ANA conditions are assumed.'))

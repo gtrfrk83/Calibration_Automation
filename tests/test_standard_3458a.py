@@ -22,17 +22,20 @@ JSON_PATH = os.path.join(HERE, 'specs', 'standards', 'keysight_3458a_standard.js
 MODEL = '3458A'
 
 # (function name, range label) -> {period: (ppm_or_pct of reading as printed, unit '' ppm / '%', range term as printed)}
+STD = 'Voltage, DC [Standard stability]'
+OPT = 'Voltage, DC [Option 002 high stability]'
 KEY = {
-    ('Voltage, DC', '10 V range'): {'24 hour': ('0.5', '0.05'), '90 day': ('4.1', '0.05'), '1 yr': ('8', '0.05'), '2 yr': ('14', '0.05')},
-    ('Voltage, DC', '100 mV range'): {'1 yr': ('9', '3'), '2 yr': ('14', '3')},
-    ('Voltage, DC [Option 002 high stability]', '10 V range'): {'90 day': ('2.6', '0.05'), '1 yr': ('4', '0.05'), '2 yr': ('10', '0.05')},
-    ('Voltage, DC [Option 002 high stability]', '100 mV range'): {'90 day': ('3.5', '3'), '1 yr': ('5', '3')},
-    ('Resistance [4-wire (OHMF)]', '10 kohm range'): {'24 hour': ('2', '0.2'), '1 yr': ('10', '0.5'), '2 yr': ('15', '1')},
-    ('Current, DC', '1 mA range'): {'24 hour': ('10', '4'), '1 yr': ('20', '5')},
+    (STD, '10 V range'): {'90 day': ('4.1', '0.05'), '1 yr': ('8', '0.05')},
+    (STD, '100 mV range'): {'1 yr': ('9', '3')},
+    (OPT, '10 V range'): {'90 day': ('2.6', '0.05'), '1 yr': ('4', '0.05')},
+    (OPT, '100 mV range'): {'90 day': ('3.5', '3'), '1 yr': ('5', '3')},
+    (OPT, '1000 V range'): {'1 yr': ('6', '0.1')},
+    ('Resistance [4-wire (OHMF)]', '10 kohm range'): {'90 day': ('8', '0.5'), '1 yr': ('10', '0.5')},
+    ('Current, DC', '1 mA range'): {'90 day': ('15', '5'), '1 yr': ('20', '5')},
     ('Current, DC', '100 mA range'): {'1 yr': ('35', '5')},
-    ('Current, DC', '1 A range'): {'1 yr': ('110', '10'), '2 yr': ('115', '10')},
+    ('Current, DC', '1 A range'): {'1 yr': ('110', '10')},
 }
-OHM2_OFFSET = {'24 hour': '0.05', '90 day': '0.15', '1 yr': '0.25', '2 yr': '0.5'}
+OHM2_OFFSET = {'90 day': '0.15', '1 yr': '0.25'}
 
 
 class Sheet(unittest.TestCase):
@@ -81,36 +84,57 @@ class Sheet(unittest.TestCase):
                     self.assertEqual(sp['fs_rel'], float(D(rg) / D(1000000)))
 
     def test_ppm_of_range_is_exact_decimal_and_uses_the_range_name(self):
-        sp = next(s for s in self.rng[('Voltage, DC', '10 V range')]['specs'] if s['period'] == '1 yr')
+        sp = next(s for s in self.rng[(STD, '10 V range')]['specs'] if s['period'] == '1 yr')
         self.assertEqual((sp['rel'], sp['fs_rel'], sp['fs_value'], sp['abs']), (8e-06, 5e-08, 10.0, 0.0))
         self.assertEqual(sp['raw'], '[1 yr] Accuracy: +/-(8 ppm I.V. + 0.05 ppm of range{"Range" = 10 V})')
         p = sm.parse_spec(sp['raw'])
         self.assertEqual((p['rel'], p['fs_rel'], p['fs_value']), (8e-06, 5e-08, 10.0))
-        h = self.hit('DCV', 10.0)
+        h = self.hit('DCV', 10.0, variant='standard stability')
         self.assertAlmostEqual(h.limit, 80.5e-6, 12)                      # 8 ppm of 10 V + 0.05 ppm of the 10 V range
         # range is the range NAME, not full scale: 5 V reading on the 10 V range
-        self.assertAlmostEqual(self.hit('DCV', 5.0).limit, 5 * 8e-6 + 10 * 0.05e-6, 12)
-        self.assertAlmostEqual(self.hit('DCV', 1.0).limit, 8e-6 + 0.3e-6, 12)      # 1 V sits on the 1 V range (symmetric, smallest holding range)
+        self.assertAlmostEqual(self.hit('DCV', 5.0, variant='standard stability').limit, 5 * 8e-6 + 10 * 0.05e-6, 12)
+        self.assertAlmostEqual(self.hit('DCV', 1.0, variant='standard stability').limit, 8e-6 + 0.3e-6, 12)   # 1 V sits on the 1 V range
 
-    def test_periods(self):
-        self.assertEqual(b.PERIODS, ['24 hour', '90 day', '1 yr', '2 yr'])
-        self.assertEqual(self.s.period, '1 yr')
-        self.assertAlmostEqual(self.hit('DCV', 10.0, period='24 hour').limit, 5.5e-6, 12)
-        self.assertAlmostEqual(self.hit('DCV', 10.0, period='90 day').limit, 41.5e-6, 12)
-        self.assertAlmostEqual(self.hit('DCV', 10.0, period='2 yr').limit, 140.5e-6, 12)
+    def test_option_002_is_the_default_of_a_plain_lookup_standard_stability_is_the_alternate(self):
+        # owner: the lab's 3458A has Option 002 (high stability)
+        h = self.hit('DCV', 10.0)
+        self.assertEqual(h.row['function'], OPT)
+        self.assertAlmostEqual(h.limit, 10 * 4e-6 + 10 * 0.05e-6, 12)                 # 4 ppm + 0.05 ppm of range = 40.5 uV at 10 V, 1 yr
         self.assertAlmostEqual(self.hit('DCV', 10.0, variant='option 002').limit, 40.5e-6, 12)
+        alt = self.hit('DCV', 10.0, variant='standard stability')
+        self.assertEqual(alt.row['function'], STD)
+        self.assertAlmostEqual(alt.limit, 80.5e-6, 12)
+        self.assertEqual([f['name'] for f in self.data['functions']][:2], [OPT, STD])
+        self.assertIn('Option 002', self.data['notes']['7'])
+        self.assertIn('OWNER', self.data['notes']['7'])
+        # only the DC volts table has Option 002 figures: resistance / current have a single set
+        self.assertEqual(sorted({r['function'] for r in self.s.rows if 'option' in (r['variant'] + r['function']).lower()}), [OPT])
+
+    def test_periods_are_90_day_and_1_yr_only(self):
+        self.assertEqual(b.PERIODS, ['90 day', '1 yr'])
+        self.assertEqual(self.s.period, '1 yr')
+        self.assertAlmostEqual(self.hit('DCV', 10.0, period='90 day').limit, 10 * 2.6e-6 + 0.5e-6, 12)
+        self.assertAlmostEqual(self.hit('DCV', 10.0, variant='standard stability', period='90 day').limit, 41.5e-6, 12)
+        for per in ('24 hour', '2 yr'):
+            self.assertIsNone(self.hit('DCV', 10.0, period=per))
         # the transfer table has its own period
         h = self.hit('DCV', 10.0, variant='transfer', period='10 min')
         self.assertAlmostEqual(h.limit, 10 * 0.05e-6 + 10 * 0.05e-6, 12)
-        # AC and frequency print a single column: stored under all four periods
+        # AC and frequency print a single column: stored under both periods
         for r in self.s.rows:
             if r['kind'] in ('ACV', 'ACI', 'FREQ'):
-                self.assertEqual([x['period'] for x in r['specs']], ['24 hour', '90 day', '1 yr', '2 yr'])
+                self.assertEqual([x['period'] for x in r['specs']], ['90 day', '1 yr'])
+        used = {sp['period'] for r in self.s.rows for sp in r['specs']}
+        self.assertEqual(used, {'90 day', '1 yr', '10 min'})
+        text = json.dumps(self.data['functions'])
+        self.assertNotIn('24 hour', text)
+        self.assertNotIn('2 yr', text)
 
-    def test_missing_unreadable_cell_is_not_invented(self):
-        self.assertEqual([s['period'] for s in self.rng[('Voltage, DC', '1000 V range')]['specs']], ['24 hour', '90 day', '1 yr'])
-        self.assertIsNone(self.hit('DCV', 1000.0, period='2 yr'))
-        self.assertTrue(any('1000 V' in p['what'] for p in self.data['problems']))
+    def test_no_flag_about_an_unreadable_cell_and_1000_v_has_1_yr(self):
+        self.assertEqual([s['period'] for s in self.rng[(OPT, '1000 V range')]['specs']], ['90 day', '1 yr'])
+        self.assertAlmostEqual(self.hit('DCV', 1000.0).limit, 1000 * 6e-6 + 1000 * 0.1e-6, 9)
+        self.assertFalse(any('2 year' in p['what'] or '2 yr' in p['what'] for p in self.data['problems']))
+        self.assertTrue(any('OPEN ITEM' in p['what'] for p in self.data['problems']))         # factory adders: owner undecided
 
     def test_resistance_two_wire_offsets_and_four_wire(self):
         self.assertAlmostEqual(self.hit('OHM', 10e3).limit, 10e3 * 10e-6 + 10e3 * 0.5e-6, 9)         # 0.105 ohm
@@ -156,21 +180,21 @@ class Sheet(unittest.TestCase):
 
     def test_view_shows_range_term_and_scales_for_display_only(self):
         rows = sm.rows_of(next(x for x in sm.standards(self.db) if x['model'] == MODEL)['id'], path=self.db)
-        dcv = next(r for r in rows if r['kind'] == 'DCV' and r['function'] == 'Voltage, DC' and r['amp_hi'] == 12.0)
+        dcv = next(r for r in rows if r['kind'] == 'DCV' and r['function'] == OPT and r['amp_hi'] == 12.0)
         text = view.spec_cell(dcv, '1 yr')[0]
         self.assertIn('of range', text)
-        self.assertIn('8 ppm', text)
-        self.assertEqual(dcv['specs'][2]['fs_value'], 10.0)                       # stored in base units
+        self.assertIn('4 ppm', text)
+        self.assertEqual(dcv['specs'][1]['fs_value'], 10.0)                       # stored in base units
         self.assertGreater(len(view.group_rows(rows)), 0)
 
     def test_budget_and_tartur_see_the_sheet_as_input(self):
         lim, unit = tartur.standard_accuracy(MODEL, 'DCV', 10.0, direction='input')
-        self.assertAlmostEqual(lim, 80.5e-6, 12)
+        self.assertAlmostEqual(lim, 40.5e-6, 12)
         self.assertEqual(unit, 'V')
         bud = ub.build('DCV', 10.0, 'V', standard=self.s, scope=None, direction='input') if 'direction' in ub.build.__code__.co_varnames else None
         if bud is not None:
-            self.assertAlmostEqual(bud.hit.limit, 80.5e-6, 12)
-            self.assertAlmostEqual(bud.emu, 80.5e-6, 12)                         # k = 2 assumed gives back the expanded limit
+            self.assertAlmostEqual(bud.hit.limit, 40.5e-6, 12)
+            self.assertAlmostEqual(bud.emu, 40.5e-6, 12)                         # k = 2 assumed gives back the expanded limit
         else:
             self.assertIsNone(ub.build('DCV', 10.0, 'V', standard=self.s, scope=None).hit)   # default direction is 'output': documented in NOTES.md
 
