@@ -291,8 +291,12 @@ class DatasheetList:
         return 'No datasheets yet.\nPress "New" to build one, or "Import JSON..." to bring one in.'
 
     # ---- actions
-    def new(self):
-        return GridModel(self.storage, matcher_factory=self.matcher_factory)
+    def new(self, handheld=False):
+        """A blank sheet (the default), or one that starts with the handheld multimeter sections (`handheld=True`)."""
+        g = GridModel(self.storage, matcher_factory=self.matcher_factory)
+        if handheld:
+            g.add_handheld_functions()
+        return g
 
     def open(self, uid, version=None):
         """An EditorModel for the datasheet (latest or the given version), or None with `self.last_error` set.  A procedure that is verified on
@@ -1680,8 +1684,16 @@ GRID_COLUMNS = (
     dict(key='oot', title='Out of Tol', width=64, edit=False, align='center'),
     dict(key='tol', title='CALIBRATION TOLERANCE', width=250, edit=True, align='w'),
 )
-COL_KEYS = tuple(c['key'] for c in GRID_COLUMNS)
-EDIT_COLS = tuple(c['key'] for c in GRID_COLUMNS if c['edit'])
+# GRID_COLUMNS is the PRINTED datasheet (the template still has As Found / As Left / Out of Tol).  The on-screen grid shows only VIEW_COLUMNS: the blank
+# As Found / As Left / Out of Tol columns are not needed while building (view only; the row dicts still carry them, print_view() still prints them).
+VIEW_COLUMNS = (
+    dict(key='step', title='STEP NUM', width=90, edit=False, align='center'),
+    dict(key='function', title='FUNCTION TESTED', width=270, edit=True, align='w'),
+    dict(key='nominal', title='NOMINAL VALUE', width=240, edit=True, align='w'),
+    dict(key='tol', title='CALIBRATION TOLERANCE', width=320, edit=True, align='w'),
+)
+COL_KEYS = tuple(c['key'] for c in VIEW_COLUMNS)
+EDIT_COLS = tuple(c['key'] for c in VIEW_COLUMNS if c['edit'])
 MIN_ROWS = 16                      # the sheet always shows at least this many rows, so it looks like a blank datasheet
 SPARE_ROWS = 2                     # and always at least this many empty ones at the end
 MAX_MULTI = 500                    # most rows one "Multiple Test Points" can make at once
@@ -1767,7 +1779,7 @@ class GridGeometry:
     The heading stays at the top; row r is `row_h` tall and sits at head_h + r * row_h - top (top = how far the rows are scrolled up)."""
 
     def __init__(self, widths=None, row_h=30, head_h=40, num_w=44):
-        self.base = list(widths or [c['width'] for c in GRID_COLUMNS])
+        self.base = list(widths or [c['width'] for c in VIEW_COLUMNS])
         self.widths = list(self.base)
         self.row_h, self.head_h, self.num_w = row_h, head_h, num_w
 
@@ -2499,6 +2511,62 @@ class GridModel(EditorModel):
             return Outcome(True, f'Section "{fn.name}" added. Click the empty row under it and type a value.', f'h:{fn.id}')
         return self._do('add section', act)
 
+    # ---- handheld multimeter template (a starting set of sections; the sheet itself still starts blank)
+    HANDHELD_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'CONT', 'CAP', 'FREQ', 'TEMP', 'DIODE')
+
+    def handheld_template(self):
+        """[dict(kind, name, present)]: the handheld multimeter functions the builder can start a sheet with, and whether the sheet has one already."""
+        have = {f.kind for f in self.ds.functions}
+        return [dict(kind=k, name=db.KINDS[k]['name'], present=k in have) for k in self.HANDHELD_KINDS]
+
+    def add_handheld_functions(self, kinds=None):
+        """Add one empty section per handheld multimeter function (DC / AC volts, DC / AC current, resistance, continuity, capacitance, frequency,
+        temperature, diode) that the sheet does not have yet.  Built from the builder's own function catalogue (the same sections 'New section' makes);
+        nothing is copied from a vendor spec.  Ranges come with the rows you type (each row finds or makes its range).  One undo step."""
+        want = [k for k in (kinds or self.HANDHELD_KINDS) if k in self.HANDHELD_KINDS]
+        box = {}
+
+        def act():
+            have = {f.kind for f in self.ds.functions}
+            made = [self._new_section(k) for k in want if k not in have]
+            if not made:
+                raise db.DsError('template', 'The sheet already has a section for every handheld function.')
+            box['first'] = made[0].id
+            return Outcome(True, f'Added {len(made)} section(s): ' + ', '.join(f.name for f in made) + '. Click the empty row under a section and type a value to add its rows.', f'h:{made[0].id}')
+        res = self._do('add handheld functions', act)
+        if res.ok and box.get('first'):
+            self.fid = box['first']
+        return res
+
+    # ---- what the suite can automate (for the Run buttons)
+    def automation_counts(self, compute=True):
+        """dict(points, ok, unverified, by_hand, uncovered) from the standards matcher, or None when it cannot be worked out yet (problems in the sheet, no
+        points, standards not loadable).  `compute=False` only reads a match that is already fresh."""
+        if not self.match_fresh():
+            if not compute or self.problem_counts()['errors']:
+                return None
+            if not self.run_match().ok:
+                return None
+        t = self.match_summary()['total']
+        if not t['points']:
+            return None
+        return dict(points=t['points'], ok=t['automatable'] - t['unverified'], unverified=t['unverified'], uncovered=t['uncovered'],
+                    by_hand=t['points'] - t['automatable'] - t['uncovered'])
+
+    def automation_line(self, compute=True):
+        """One sentence: how many points the suite runs by itself, how many have unverified commands, how many are set by hand."""
+        c = self.automation_counts(compute)
+        if c is None:
+            return 'Automation: not worked out yet (fix the warnings first, or add some rows).'
+        parts = [f'{c["ok"]} run automatically']
+        if c['unverified']:
+            parts.append(f'{c["unverified"]} run automatically but their commands are not yet verified on hardware')
+        if c['by_hand']:
+            parts.append(f'{c["by_hand"]} set by hand')
+        if c['uncovered']:
+            parts.append(f'{c["uncovered"]} not covered by any standard')
+        return f'Automation, of {c["points"]} points: ' + '; '.join(parts) + '.'
+
     # ---- tolerance cell
     def _build_entry(self, fn, p, plus_text, minus_text=''):
         """The point's own SpecEntry with `plus_text` (and `minus_text` for an asymmetric tolerance) for the period on show; periods the point has no
@@ -2667,7 +2735,7 @@ class GridModel(EditorModel):
             else:
                 parts.append(v.lstrip('±').strip())
         if not parts:
-            raise db.DsError('spec_type', 'Tick at least one of the Select Spec Types, then fill in its box.')
+            raise db.DsError('spec_type', 'Tick at least one tolerance type (% of reading, % of range, Floor, ± dB or Calculator), then fill in its box.')
         return ' + '.join(parts)
 
     def form_spec_texts(self, fn, form):

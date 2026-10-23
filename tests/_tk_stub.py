@@ -3,6 +3,10 @@ import sys
 import types
 
 
+# methods that must answer with real numbers (the window code does arithmetic on them)
+_NUMBERS = {'winfo_reqwidth': 100, 'winfo_reqheight': 20, 'winfo_width': 1, 'winfo_height': 1, 'winfo_ismapped': False, 'yview': (0.0, 1.0)}
+
+
 class _Dummy:
     def __init__(self, *a, **k):
         pass
@@ -10,6 +14,8 @@ class _Dummy:
     def __getattr__(self, name):
         if name.startswith('__'):
             raise AttributeError(name)
+        if name in _NUMBERS:
+            return lambda *a, **k: _NUMBERS[name]
         return _Dummy()
 
     def __call__(self, *a, **k):

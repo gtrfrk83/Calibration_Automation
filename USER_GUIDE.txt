@@ -53,6 +53,27 @@ Run queue: several handheld meters in one session (Fluke 110 series, 77 IV, 87V,
   separately), and user-built datasheets (Datasheet Builder).
   Demo mode: the queue runs on the virtual bench; "Fill with a simulated reading (DEMO)" fills every box; reports are marked DEMO and nothing reaches Asset History.
 
+Datasheet Builder window (Procedures window > Datasheet Builder > New / Open)
+  One row per test point. Click a cell, type, press Enter (Enter in the Edit Cell bar goes down a row, Tab goes right). The sheet shows STEP NUM, FUNCTION TESTED,
+  NOMINAL VALUE and CALIBRATION TOLERANCE; the blank As Found / As Left / Out of Tol columns are only on the printed sheet (Preview / Print), where they still are.
+  Top (sheet bar): Make, Model, Title, Tolerances for, Lock Status, Undo / Redo, Standards, More, Preview / Print, Try in demo, Run, Save (Ctrl+S). The pill at the top
+  right ("20 warnings") opens the warnings list; so does "Show list" under the sheet. "Recalc all" re-checks every row. One line at the bottom shows the last message,
+  else the problem of the selected row.
+  Row panel (right): everything for the SELECTED row. Test point (what the row tests, Nominal Value, Units; Frequency / Signal level on AC rows). Tolerance: tick the
+  kinds of tolerance the manual prints (% of reading, % of range, Floor, +/- dB, Calculator) and only those boxes appear; Calc applies the boxes to the row (Enter in
+  any box does the same); "Copy tolerance to rows below". Closed sections, click to open: Several rows at once (Multiple Test Points), Different tolerance above and
+  below (Asymmetrical), Resolution and decimals (Display Decs. / Meas Res / Auto Res), Rules for this section (Test Point Definitions). A section that is switched on
+  shows ON. Row options: a remark for the operator, and Run this row. Hover over a box for the technical name. "Hide >" (or Ctrl+I) hides the panel to give the sheet
+  the room; the narrow "<" strip brings it back. In a narrow window the panel is narrower and scrolls.
+  Symbol buttons at the right of the Edit Cell bar put a symbol (+/-, degree, micro ...) or the row's unit into the box you are typing in.
+  More: Add handheld functions, Test point calculator, Ranges, Specification table, Sections and function settings, Details and time periods, What can the suite drive
+  today?, Version history.
+  Run / Try in demo: the suite runs the SAVED datasheet, so you are asked to save first when there are changes; a sheet with problems is not run (the warnings list
+  opens). Run starts it like the Run button in the Procedures list; Try in demo starts it with virtual instruments (report marked DEMO). Hover over either button to see
+  how many points the suite runs by itself, how many have unverified commands and how many are set by hand.
+  New datasheet: starts blank. Tick "Start from a handheld template" to begin with an empty section for each handheld multimeter function (DC / AC volts, DC / AC current,
+  2-wire ohms, continuity, capacitance, frequency, temperature, diode test); the same is in More > Add handheld functions for a sheet you already have. You type the rows.
+
 As Found and As Left
   "Collecting data" = As Found: the first measurements, before any adjustment.
   If the instrument was adjusted, switch to As Left and run the points again. The As Found readings are kept.
