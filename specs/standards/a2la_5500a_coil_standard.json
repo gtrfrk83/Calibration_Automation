@@ -1,0 +1,329 @@
+{
+ "schema": 1,
+ "standard": {
+  "manufacturer": "Applied Technical Services, LLC. (A2LA 1888.03)",
+  "model": "A2LA-5500A-COIL",
+  "description": "Fluke 5500A/COIL (A2LA scope)",
+  "confidence_text": "approximately the 95 % level, usually k = 2 (A2LA scope, footnote 2)",
+  "confidence_pct": 95.0,
+  "reference": "Calibration Scope of Accreditation, A2LA 1888.03, rev. 07/07/2026, section V, printed p. 9 of 47 (DC Current - Generate, Transconductance amplifier/coil) and p. 30 of 47 (AC Current - Generate (cont), Clamp-On Only, Multifunction calibrator/coil); Fluke 5500A/COIL technical data (10/2026)",
+  "revision": "07/07/2026",
+  "author": "written by specs/build_coil_standard.py from the scope pages",
+  "approved_by": "",
+  "approve_date": "",
+  "source_pdf": "1888-03.pdf",
+  "sheet_generated": "",
+  "built": "2026-10-23T13:22:17"
+ },
+ "notes": {
+  "1": "SOURCE: the laboratory's own A2LA scope of accreditation, certificate 1888.03 (revised 07/07/2026), section V. Electrical - DC/Low Frequency. DC rows: printed p. 9 of 47, \"DC Current - Generate\" (last block): (2 to 20) A 90 uA/A + 0.1 mA; (20 to 120) A 80 uA/A + 8 mA; (120 to 3000) A 0.8 % + 0.08 A; comment \"Transconductance amplifier/coil\". AC rows: printed p. 30 of 47, \"AC Current - Generate (cont)\", \"Clamp-On Only\", (20.5 to 1025) A: (45 to 65) Hz 0.8 %; (65 to 440) Hz 0.99 %; comment \"Multifunction calibrator/coil\". Built by specs/build_coil_standard.py.",
+  "2": "VERIFICATION: the five lines above (and the column headers: CMC 2, 5, 9 (+/-); no frequency column on p. 9, a Frequency column on p. 30) were read from the RENDERED PAGE IMAGES of pp. 9 and 30 of 47, each read twice (full page, then a 200 dpi crop), on 2026-10-23. Both pages carry \"(A2LA Cert. No. 1888.03) Revised 07/07/2026\". The coil datasheet values in note 7 were also read from the rendered pages. The extracted text was used only to find the pages.",
+  "3": "CONFIDENCE: footnote 2 of the scope: a CMC is an EXPANDED uncertainty at approximately the 95 % level of confidence, usually using a coverage factor of k = 2. Stored as confidence_pct 95, so the coverage divisor is 2.0 (u of the standard = CMC / 2). Wording kept in confidence_text.",
+  "4": "TERMS: footnote 5: the first percentage is a percentage of the READING unless otherwise noted; footnote 9: a CMC is a percent or fraction of the reading plus a fixed floor. Stored in the repo's usual form: rel (fraction of the reading) and abs (fixed term, amperes), computed in Decimal: 90 uA/A = 90 ppm = 9e-05 and 80 uA/A = 8e-05 of reading, 0.8 % = 0.008, 0.99 % = 0.0099; 0.1 mA = 1e-04 A, 8 mA = 0.008 A, 0.08 A. The two AC rows have no fixed term (the scope prints a bare percentage). A CMC has no 90 day / 1 yr column: each row is stored once, under the period \"1 yr\" (the default period of every standard).",
+  "5": "DC ROWS (p. 9 of 47): scope parameter \"DC Current - Generate\", comment \"Transconductance amplifier/coil\", column header \"Parameter/Equipment | Range | CMC (+/-) | Comments\" - there is NO frequency column, these are DC ranges (rows kind DCI). Stored with direction \"output\" (the lab generates the current) and no frequency. The comment says \"Transconductance amplifier/coil\", NOT \"Multifunction calibrator/coil\": see note 9 (OWNER QUESTION).",
+  "6": "AC ROWS (p. 30 of 47): scope parameter \"AC Current - Generate (cont)\", sub-heading \"Clamp-On Only\", range (20.5 to 1025) A, Frequency column (45 to 65) Hz 0.8 % and (65 to 440) Hz 0.99 % (percent of reading only), comment \"Multifunction calibrator/coil\". \"Clamp-On Only\" is kept as a qualifier of the row (the bracket of the function name, the repo's variant field). A frequency inside a band is required for a lookup; at 65 Hz both bands match and the larger limit is used (the scope CMC rule).",
+  "7": "COIL DATASHEET (Fluke 5500A/COIL | 50-Turn Current Coil, technical data 10/2026, read from the rendered pages; facts only, none is used in a calculation): number of turns 50; maximum current 11 A rms continuous, 20 A rms for 2 minutes; duty-cycle derating: below 11 A continuous, above 11 A 2 minutes ON / 8 minutes OFF; maximum voltage 3 V rms; frequency of operation DC, 45-440 Hz (should not exceed the rms voltage rating): for the 5500A current output DC and 45-65 Hz 0-11 A, 65-440 Hz 0-2.19999 A; for the 5520A current output DC and 45-65 Hz 0-20 A, 65-440 Hz 0-2.99999 A (assumes a Fluke 80i-600 clamp or equivalent; other clamps may limit the drive to less); minimum inside diameter of the clamp jaws 2.54 cm (1 in.); statement of calibration practices included, with a 17025 accredited report. The coil multiplies the calibrator current by 50 (effective output = 50 x calibrator current).",
+  "8": "COIL / CLAMP INTERACTION UNCERTAINTY (datasheet, NOT added to the scope rows): +/-(0.25 % of effective output + 0.5 A) for toroidal-wound current clamps such as the Fluke 80I and 80I-1000; +/-(0.50 % of effective output + 0.5 A) for clamps like the Fluke 80i-kw, 80i-400, 80i-410, 80i-500, 80i-1010, Fluke 31, Fluke 33 or equivalent. It is a contribution of the clamp meter / coil pair, which the scope CMC excludes; the repo has no second-term mechanism for a standard, so it is recorded here only and combined with nothing (no combination rule is invented; whether and how it enters the uncertainty is an OWNER DECISION).",
+  "9": "EFFECTIVE CURRENT AND WHICH LINES BELONG TO THE COIL: the scope ranges are the current the clamp sees (\"effective output\" in the datasheet). The Clamp-On Only upper limit 1025 A = 20.5 A x 50 turns (an inference: the maximum current of the scope's multifunction-calibrator ranges times the coil's turns, not stated by the scope). Observations for the owner: (a) the datasheet limits the 65-440 Hz current to 2.19999 A (5500A) or 2.99999 A (5520A), i.e. 110 A or 150 A effective, while the 65-440 Hz row is listed to 1025 A; (b) the DC rows run to 3000 A, beyond 50 x 20 A = 1000 A, and their comment is \"Transconductance amplifier/coil\". Both are stored as printed on the scope.",
+  "10": "NOT STORED: the scope's other coil-related lines (AC Current - Generate (20.5 to 3000) A, (16 to 850) Hz 0.7 % + 0.84 A and (0.85 to 6) kHz 0.8 % + 0.84 A, \"Transconductance amplifier/coil\"; DC Power - Generate, \"Multifunction calibrator with current coil\") because they were not asked for; and the clamp meter's own contribution (resolution, repeatability, positioning in the jaws). The CMC excludes the unit under test; a certificate value may be larger.",
+  "11": "USE: the lookups find this sheet by its model id (uncertainty_budget.build(kind, ..., standard=\"A2LA-5500A-COIL\"), tartur.standard_accuracy, tartur.compute(..., standard=...)). It is NOT offered in any calibrator picker: those choose the instrument that is commanded, and the coil is not commanded. The Fluke 365 procedure uses a 20-turn coil and keeps the regular calibrator current uncertainty, unscaled (owner decision); nothing here changes it."
+ },
+ "limits": [
+  {
+   "function": "Current, DC [Transconductance amplifier/coil]",
+   "limit": "(2 to 20) A 90 uA/A + 0.1 mA; (20 to 120) A 80 uA/A + 8 mA; (120 to 3000) A 0.8 % + 0.08 A.",
+   "page": "9"
+  },
+  {
+   "function": "Current, AC [Clamp-On Only, Multifunction calibrator/coil]",
+   "limit": "(20.5 to 1025) A: (45 to 65) Hz 0.8 %; (65 to 440) Hz 0.99 %.",
+   "page": "30"
+  },
+  {
+   "function": "5500A/COIL datasheet",
+   "limit": "50 turns; 11 A rms continuous, 20 A rms 2 min; interaction +/-(0.25 % or 0.50 % of effective output + 0.5 A), not added; jaws >= 2.54 cm.",
+   "page": "1-2"
+  }
+ ],
+ "functions": [
+  {
+   "name": "Current, DC [Transconductance amplifier/coil]",
+   "direction": "output",
+   "page": 9,
+   "ranges": [
+    {
+     "label": "(2 to 20) A",
+     "page": 9,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2.0,
+       "hi": 20.0,
+       "unit": "A",
+       "text": "2 A to 20 A",
+       "annot": "",
+       "notes": [
+        5,
+        7
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 9e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0001,
+       "unit": "A",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(90 ppm I.V. + 0.1 mA)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(2 to 20) A  90 µA/A + 0.1 mA",
+     "kind": "DCI",
+     "variant": "Transconductance amplifier/coil",
+     "amp_lo": 2.0,
+     "amp_hi": 20.0,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "(20 to 120) A",
+     "page": 9,
+     "params": [
+      {
+       "tag": "",
+       "lo": 20.0,
+       "hi": 120.0,
+       "unit": "A",
+       "text": "20 A to 120 A",
+       "annot": "",
+       "notes": [
+        5,
+        7
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 8e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.008,
+       "unit": "A",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(80 ppm I.V. + 8 mA)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(20 to 120) A  80 µA/A + 8 mA",
+     "kind": "DCI",
+     "variant": "Transconductance amplifier/coil",
+     "amp_lo": 20.0,
+     "amp_hi": 120.0,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "(120 to 3000) A",
+     "page": 9,
+     "params": [
+      {
+       "tag": "",
+       "lo": 120.0,
+       "hi": 3000.0,
+       "unit": "A",
+       "text": "120 A to 3000 A",
+       "annot": "",
+       "notes": [
+        5,
+        7
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.008,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.08,
+       "unit": "A",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.8 % I.V. + 0.08 A)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(120 to 3000) A  0.8 % + 0.08 A",
+     "kind": "DCI",
+     "variant": "Transconductance amplifier/coil",
+     "amp_lo": 120.0,
+     "amp_hi": 3000.0,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Current, AC [Clamp-On Only, Multifunction calibrator/coil]",
+   "direction": "output",
+   "page": 30,
+   "ranges": [
+    {
+     "label": "(20.5 to 1025) A, 45 Hz to 65 Hz",
+     "page": 30,
+     "params": [
+      {
+       "tag": "",
+       "lo": 20.5,
+       "hi": 1025.0,
+       "unit": "A",
+       "text": "20.5 A to 1025 A",
+       "annot": "",
+       "notes": [
+        6,
+        7,
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 45.0,
+       "hi": 65.0,
+       "unit": "Hz",
+       "text": "45 Hz to 65 Hz",
+       "annot": "",
+       "notes": [
+        6,
+        7,
+        8
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.008,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.8 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(20.5 to 1025) A  (45 to 65) Hz  0.8 %",
+     "kind": "ACI",
+     "variant": "Clamp-On Only, Multifunction calibrator/coil",
+     "amp_lo": 20.5,
+     "amp_hi": 1025.0,
+     "unit": "A",
+     "freq_lo": 45.0,
+     "freq_hi": 65.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "(20.5 to 1025) A, 65 Hz to 440 Hz",
+     "page": 30,
+     "params": [
+      {
+       "tag": "",
+       "lo": 20.5,
+       "hi": 1025.0,
+       "unit": "A",
+       "text": "20.5 A to 1025 A",
+       "annot": "",
+       "notes": [
+        6,
+        7,
+        8
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 65.0,
+       "hi": 440.0,
+       "unit": "Hz",
+       "text": "65 Hz to 440 Hz",
+       "annot": "",
+       "notes": [
+        6,
+        7,
+        8
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0099,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.99 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "(20.5 to 1025) A  (65 to 440) Hz  0.99 %",
+     "kind": "ACI",
+     "variant": "Clamp-On Only, Multifunction calibrator/coil",
+     "amp_lo": 20.5,
+     "amp_hi": 1025.0,
+     "unit": "A",
+     "freq_lo": 65.0,
+     "freq_hi": 440.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  }
+ ],
+ "problems": [
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "This is the laboratory's own CMC (expanded, approximately 95 %, usually k = 2), not a manufacturer specification. No 90 day / 1 yr columns; stored under the period \"1 yr\"."
+  },
+  {
+   "level": "warn",
+   "where": "Current, DC [Transconductance amplifier/coil]",
+   "what": "Comment on the scope is \"Transconductance amplifier/coil\", not \"Multifunction calibrator/coil\"; the three DC rows run to 3000 A, beyond 50 turns x 20 A. Stored as printed (note 9)."
+  },
+  {
+   "level": "warn",
+   "where": "Current, AC [Clamp-On Only, Multifunction calibrator/coil] / (65 to 440) Hz",
+   "what": "The datasheet limits 65-440 Hz drive to 2.19999 A (5500A) / 2.99999 A (5520A), about 110 / 150 A effective, below the 1025 A of the scope row (note 9). Stored as printed."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "The datasheet's clamp/coil interaction uncertainty (0.25 % or 0.50 % of effective output + 0.5 A) is NOT added to these rows: no second-term mechanism exists for a standard (note 8)."
+  }
+ ]
+}
