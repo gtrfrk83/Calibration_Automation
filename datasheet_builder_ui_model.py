@@ -2657,7 +2657,10 @@ class GridModel(CheckMixin, EditorModel):
                 fs.insert(fs.index(after) + 1, fn)
             self.fid = fn.id
             return Outcome(True, f'Section "{fn.name}" added. Click the empty row under it and type a value.', f'h:{fn.id}')
-        return self._do('add section', act)
+        res = self._do('add section', act)
+        if res.ok and isinstance(res.detail, str) and res.detail.startswith('h:'):
+            self.select('e:' + res.detail[2:], 'nominal')           # the cursor goes to the empty row directly under the new heading
+        return res
 
     # ---- handheld multimeter template (a starting set of sections; the sheet itself still starts blank)
     HANDHELD_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'CONT', 'CAP', 'FREQ', 'TEMP', 'DIODE')
@@ -2684,6 +2687,7 @@ class GridModel(CheckMixin, EditorModel):
         res = self._do('add handheld functions', act)
         if res.ok and box.get('first'):
             self.fid = box['first']
+            self.select('e:' + box['first'], 'nominal')
         return res
 
     # ---- what the suite can automate (for the Run buttons)

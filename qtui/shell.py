@@ -35,7 +35,7 @@ from __future__ import annotations
 from typing import Callable
 
 from PySide6.QtCore import QEvent, QPointF, QRectF, QSize, Qt, QTimer
-from PySide6.QtGui import QColor, QFontMetrics, QKeySequence, QPainter, QPen, QShortcut
+from PySide6.QtGui import QColor, QFontMetrics, QIcon, QKeySequence, QPainter, QPen, QShortcut
 from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QMainWindow, QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy, QVBoxLayout,
                                QWidget)
 
@@ -507,8 +507,14 @@ class Shell:
         return n
 
     # ------------------------------------------------------------------ action bar
+    ACTION_ICONS = {'Save progress': 'save', 'Load progress': 'load', 'Export Report (PDF)': 'export', 'Rerun Selected': 'rerun', 'Edit point': 'edit',
+                    'Run Shown Section': 'play'}                    # the buttons whose text carries no glyph of its own get a drawn icon (text unchanged)
+
     def add_action(self, text, command, accent=False, danger=False, side='left', short=None, state=None, **kw):
         b = H.Button(text)
+        glyph = self.ACTION_ICONS.get(text)
+        if glyph:
+            W.follow_theme(b, lambda b=b, g=glyph, hot=accent: self._set_action_icon(b, g, 'on_primary' if hot else 'text'))
         b.setCursor(Qt.CursorShape.PointingHandCursor)
         b.setAutoDefault(False)
         if danger:
@@ -524,6 +530,15 @@ class Shell:
         if state:
             b.configure(state=state)
         return b
+
+    @staticmethod
+    def _set_action_icon(b, glyph, token):
+        t = theme.tokens()
+        ic = QIcon()
+        ic.addPixmap(theme.pixmap(glyph, t[token], 16), QIcon.Mode.Normal)
+        ic.addPixmap(theme.pixmap(glyph, t['disabled_fg'], 16), QIcon.Mode.Disabled)
+        b.setIcon(ic)
+        b.setIconSize(QSize(16, 16))
 
     # ------------------------------------------------------------------ sections (sidebar / drop-down)
     def set_sections(self, rows):

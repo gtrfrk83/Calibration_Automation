@@ -99,6 +99,17 @@ class BlankSheetTests(Base):
         self.assertEqual(rows_kind(self.g, self.g.row_index() - 1), 'header')
         self.assertEqual(self.g.sel_key, f'e:{self.g.fid}')
 
+    def test_a_new_section_or_the_handheld_template_puts_the_cursor_under_the_heading(self):
+        self.assertTrue(self.g.add_section('DC volts'))
+        self.assertEqual(self.g.sel_key, f'e:{self.g.fid}')
+        self.assertEqual(rows_kind(self.g, self.g.row_index() - 1), 'header')
+        self.assertTrue(self.g.add_section('AC volts'))
+        self.assertEqual(rows_kind(self.g, self.g.row_index() - 1), 'header')
+        self.assertEqual(self.g.sel_col, 'nominal')
+        g2 = M.GridModel(self.store)
+        self.assertTrue(g2.add_handheld_functions())
+        self.assertEqual((g2.row_index(), g2.sel_key), (1, f'e:{g2.fid}'))
+
     def test_typing_a_value_without_a_function_says_what_to_do(self):
         self.g.select('b:0', 'nominal')
         res = self.g.commit_cell('5 V')

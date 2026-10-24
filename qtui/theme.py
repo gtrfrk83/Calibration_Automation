@@ -269,6 +269,40 @@ def _draw(name: str, p: QPainter, s: float, col: QColor):
         path.lineTo(QPointF(s * 0.45, s * 0.65))
         path.lineTo(QPointF(s * 0.70, s * 0.36))
         p.drawPath(path)
+    elif name == 'save':                                   # a floppy disk
+        p.drawRoundedRect(QRectF(s * 0.16, s * 0.16, s * 0.68, s * 0.68), s * 0.08, s * 0.08)
+        p.drawRect(QRectF(s * 0.32, s * 0.16, s * 0.34, s * 0.22))
+        p.drawRect(QRectF(s * 0.30, s * 0.55, s * 0.40, s * 0.29))
+    elif name == 'load':                                   # an open folder
+        path = QPainterPath(QPointF(s * 0.12, s * 0.80))
+        for x, y in ((0.12, 0.26), (0.40, 0.26), (0.48, 0.36), (0.86, 0.36), (0.86, 0.80)):
+            path.lineTo(QPointF(s * x, s * y))
+        path.closeSubpath()
+        p.drawPath(path)
+    elif name == 'export':                                 # a page with an arrow leaving it
+        path = QPainterPath(QPointF(s * 0.56, s * 0.14))
+        for x, y in ((0.20, 0.14), (0.20, 0.86), (0.72, 0.86), (0.72, 0.60)):
+            path.lineTo(QPointF(s * x, s * y))
+        p.drawPath(path)
+        p.drawLine(QPointF(s * 0.42, s * 0.58), QPointF(s * 0.84, s * 0.16))
+        p.drawLine(QPointF(s * 0.60, s * 0.16), QPointF(s * 0.84, s * 0.16))
+        p.drawLine(QPointF(s * 0.84, s * 0.16), QPointF(s * 0.84, s * 0.40))
+    elif name == 'rerun':                                  # a circular arrow
+        p.drawArc(QRectF(s * 0.18, s * 0.18, s * 0.64, s * 0.64), 60 * 16, 270 * 16)
+        p.drawLine(QPointF(s * 0.68, s * 0.14), QPointF(s * 0.66, s * 0.32))
+        p.drawLine(QPointF(s * 0.68, s * 0.14), QPointF(s * 0.84, s * 0.26))
+    elif name == 'edit':                                   # a pencil
+        path = QPainterPath(QPointF(s * 0.18, s * 0.82))
+        for x, y in ((0.24, 0.62), (0.66, 0.20), (0.80, 0.34), (0.38, 0.76)):
+            path.lineTo(QPointF(s * x, s * y))
+        path.closeSubpath()
+        p.drawPath(path)
+    elif name == 'play':
+        path = QPainterPath(QPointF(s * 0.30, s * 0.18))
+        path.lineTo(QPointF(s * 0.82, s * 0.50))
+        path.lineTo(QPointF(s * 0.30, s * 0.82))
+        path.closeSubpath()
+        p.drawPath(path)
     elif name == 'inbox':
         p.drawRoundedRect(QRectF(s * 0.14, s * 0.22, s * 0.72, s * 0.56), s * 0.08, s * 0.08)
         p.drawLine(QPointF(s * 0.14, s * 0.56), QPointF(s * 0.38, s * 0.56))
@@ -278,7 +312,7 @@ def _draw(name: str, p: QPainter, s: float, col: QColor):
         p.drawLine(QPointF(s * 0.42, s * 0.66), QPointF(s * 0.58, s * 0.66))
 
 
-ICON_NAMES = ('search', 'clear', 'close', 'check', 'dash', 'dot', 'chevron_down', 'chevron_up', 'info', 'warn', 'error', 'good', 'inbox')
+ICON_NAMES = ('search', 'clear', 'close', 'check', 'dash', 'dot', 'chevron_down', 'chevron_up', 'info', 'warn', 'error', 'good', 'inbox', 'save', 'load', 'export', 'rerun', 'edit', 'play')
 
 
 def pixmap(name: str, color: str, size: int = 16, dpr: float = 2.0) -> QPixmap:
@@ -440,11 +474,11 @@ QPushButton[role="ghost"] {{ background: transparent; border: 1px solid transpar
 QPushButton[role="ghost"]:hover {{ background: {t['select']}; }}
 QPushButton[role="ghost"]:focus {{ border: 2px solid {t['focus']}; padding: 5px 13px; }}
 QPushButton[role="ghost"]:disabled {{ background: transparent; color: {t['disabled_fg']}; }}
-QPushButton[role="seg"] {{ background: transparent; border: 1px solid transparent; border-radius: {(m.control_h - 8) // 2}px; padding: 3px 14px; min-height: {m.control_h - 14}px;
+QPushButton[role="seg"] {{ background: transparent; border: 1px solid transparent; border-radius: {(m.control_h - 8) // 2}px; padding: 4px 14px; min-height: {m.control_h - 14}px;
     color: {t['muted']}; }}
 QPushButton[role="seg"]:hover:!checked {{ background: {t['btn_hi']}; color: {t['text']}; }}
 QPushButton[role="seg"]:checked {{ background: {t['primary']}; color: {t['on_primary']}; font-weight: 600; }}
-QPushButton[role="seg"]:focus {{ border: 2px solid {t['text']}; padding: 2px 13px; }}
+QPushButton[role="seg"]:focus {{ border: 2px solid {t['text']}; padding: 3px 13px; }}
 QPushButton[role="seg"]:disabled {{ color: {t['disabled_fg']}; background: transparent; }}
 QPushButton[role="info"] {{ border-radius: 12px; padding: 0; min-width: 24px; max-width: 24px; min-height: 24px; max-height: 24px; color: {t['primary']}; font-weight: 700;
     background: {t['info_bg']}; border: 1px solid transparent; }}

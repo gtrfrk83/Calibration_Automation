@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Callable, Iterable, Sequence
 
 from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QAction, QKeyEvent
+from PySide6.QtGui import QAction, QFont, QFontMetrics, QKeyEvent
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QDialog, QFrame, QHBoxLayout, QLabel, QLineEdit, QProgressBar, QPushButton, QSizePolicy,
                                QTabBar, QVBoxLayout, QWidget)
 
@@ -346,6 +346,9 @@ class SegmentedFilter(QFrame):
             b.setAutoDefault(False)
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             b.installEventFilter(self)
+            f = b.font()
+            f.setWeight(QFont.Weight.DemiBold)                      # the chosen segment is semi-bold: size for it, so no font (or Windows scaling) can clip the text
+            b.setMinimumHeight(QFontMetrics(f).height() + 14)
             self._group.addButton(b)
             row.addWidget(b)
             self._buttons[key] = b
