@@ -1135,3 +1135,103 @@ Run-time rules 6 - 13 for 2-way automated Datasheet Builder sheets (`dsb_runtime
 - History window: id, time, who, reason, source, backup file name, SHA-256 before / after, JSON diff; Compare with current file; Restore; Export history (PDF via reportlab and `report_pdf._fonts`, else CSV).
 - Tests: `python -m unittest tests.test_spec_editor` (no Tk; includes pre-existing vs introduced errors: typed values, byte-identical round trip of all 11 sheets, diff / revert, per-row issue list, atomic write with failure injection, log failure, append-only, backup naming, restore, hand-edit state, rebuild, exports); `checks_spec_editor` in `tests/real_tk_checks.py` (1100x700: edit a cell, pending panel, red tag + icon + tooltip, dialog blocks without a reason, history entry; screenshots with SHOT_DIR).
 - UNVERIFIED / not done: the cell highlight is overlay labels, only seen on Xvfb Tk 9 (never Windows / Segoe UI); `problems` (stored sheet issues) are not recomputed after an edit; `params` (raw parse) is not updated by span / frequency edits; the Notes tab and JSON editing of qualifiers / raw fields are lightly tested; PDF layout seen only as a file, not in a viewer; the Standards Specs model itself stays read-only.
+
+- Tests: `python -m unittest tests.test_spec_editor` (54, no Tk: typed values, byte-identical round trip of all 11 sheets, diff / revert, per-row issue list, atomic write with failure injection, log failure, append-only, backup naming, restore, hand-edit state, rebuild, exports); `checks_spec_editor` in `tests/real_tk_checks.py` (1100x700: edit a cell, pending panel, red tag + icon + tooltip, dialog blocks without a reason, history entry; screenshots with SHOT_DIR).
+- UNVERIFIED / not done: the cell highlight is overlay labels, only seen on Xvfb Tk 9 (never Windows / Segoe UI); the draft's 'Open source page...' is not implemented; `problems` (stored sheet issues) are not recomputed after an edit; `params` (raw parse) is not updated by span / frequency edits; an existing blocking error would block unrelated saves (shipped sheets have none); the Notes tab and JSON editing of qualifiers / raw fields are lightly tested; PDF layout seen only as a file, not in a viewer; the Standards Specs model itself stays read-only.
+
+## Readiness check and stop-on-surprise (branch `readiness-check`; simulated bench and a real Tk 9 under Xvfb only, never run on hardware)
+
+Why: every new automated procedure has needed several revisions on real hardware (8808A `=>` / `?>` prompt characters and `*TER` answering `?>`; DCI settle tunables not registered; the Datasheet Builder prompting for an unverified `ERR?`; a driver editing shared `drivers/transport.py` (in 40 sidecars) and flipping verified procedures; too many prompts in a fully automated procedure; points with no uncertainty). The two tools below find what the simulated bench can show before the owner does, and stop a real run at the first thing it did not expect. No new logging system: both read the existing `CommandLog` (the run log / transcript).
+
+### 1. Readiness check (no hardware): `tools/readiness_check.py`
+
+    python tools/readiness_check.py <procedure id | launcher | sidecar>  [--verbose] [--json out.json] [--no-run] [--strict] [--base REF] [--registry lab_registry.sqlite3]
+    python tools/readiness_check.py --all [--json out.json]      one summary table, about 3 minutes
+
+Manager: right-click a Procedures row, **Readiness check (no hardware)...** (runs the same tool in a subprocess and shows the report; `procedure_menu.READINESS`, `Calibration_Procedure_Manager.readiness_check`; the whole Manager diff is that menu item and one method). Exit code 1 only for a FAIL (`--strict`: WARN too).
+
+It runs the procedure's whole flow once on the virtual bench of `--demo` (`tools/readiness_run.py` in a fresh interpreter with a throw-away HOME and tkinter replaced by the test stub, so dialogs are recorded and answered, never shown), then reads the command log and the dialogs. WaveSurfer (canned-data demo) and the three guided adjustments (the demo issues no CAL commands on purpose) get the static checks only. One procedure takes 1 to 10 s (MDO4000C about 10 s).
+
+| check | what it reports | level |
+|---|---|---|
+| commands | every command sent, with its COMMANDS verified flag and manual page; UNVERIFIED listed; wire text sent without a registry entry (cannot carry a flag or be overridden); `*IDN?` exempt | WARN when any is unverified or unregistered, PASS otherwise |
+| tunables | `pm_param` names (static + asked at run time) not registered in `procmods_engine`, a different default, an unknown engine prefix (the 8808A DCI settle case) | FAIL |
+| prompts | operator prompts per measured point; hook-up / safety / setup prompts are the procedure; flagged: the same prompt 3 or more times (high-voltage questions differ by voltage), or more than 0.8 per point (and 12 or more) when the procedure reads its own meter (TDS2000C, verified, is 0.71). Typed-reading procedures are exempt | WARN |
+| uncertainty | points that should print an uncertainty (Datasheet Builder rule 5, `tartur.NATURAL_UNITS`, `no_uncertainty`, same functions the report uses) and print none: inside the scope of accreditation = FAIL, scope not covering it = INFO (WARN when 5 or more or 10 percent), coverage unknown = WARN | FAIL / WARN / INFO |
+| readback | a registered write whose declared read-back query is not sent within the next 120 commands of that instrument (the comparison itself is in the engine's code and is not visible here; that is `surprise.py`); output-enable without OPER? / OUTP? is INFO | WARN |
+| outputs | an output ON at the end of the run = FAIL; switched on again after a recorded point without standby / off = WARN (a sweep inside one point is normal) | FAIL / WARN |
+| housekeeping | an unverified err / esr / stb / opc / status query that the dry run sent and that is not on the Datasheet Builder HOUSEKEEPING list (it would prompt) | WARN |
+| diagrams | hook-up picture names the run looked for (`hookups.py`) that are not in `diagrams/`, and prefixes with no picture at all | WARN |
+| fingerprint | sidecar `fingerprint.code` / `.spec` against the files the run really used (driver MRO, engine imports, the procedure's own spec); shared files listed (INFO) | WARN when incomplete |
+| shared | files changed on the branch against `origin/main` (merge-base) plus uncommitted, which fingerprints they sit in, which procedures flip to "Changed since verification", and whether one of the verified ones does (seeded list, or `--registry` for the real one) | FAIL if a verified one flips, WARN otherwise |
+| surprise | a NEW procedure (not on the base) whose driver classes do not inherit `surprise.SurpriseMixin` | WARN |
+| sidecar | the sidecar parses and names files that exist | FAIL |
+
+Calibration (so it does not flood): a finding that is true for most existing procedures is INFO. Details of INFO lines are hidden unless `--verbose`. Thresholds are constants at the top of the file.
+
+Findings over every registered procedure (`--all`, 40 sidecars, 0 FAIL): all of them WARN for the same thing, **unverified commands in use** (handheld meters 2 to 7, 8808A 4, truevolt 5, 34970A / 72A 10, 34410A / 11A 23, K2000 37, MDO4000C 47, the three generators 33 to 34 of 36). Beyond that:
+
+| finding | procedures |
+|---|---|
+| hook-up pictures missing from `diagrams/` | 8808A (9 files, e.g. `hook_8808A_5522A_VOLT.png`), 34970A / 34972A (10 each), 34410A (10) / 34411A (11), K2000 verification (7) and adjustment (1), Fluke 365 / 374 / 375 / 376 / 376-II (2 each), TDS2000C (1), 33210A / 33220A / 33250A (no `hook_332xx*` picture at all) |
+| sidecar fingerprint list incomplete | 34460A / 61A / 65A / 70A: `drivers/scpi_dmm.py` (class used in the run) is not listed; 33210A / 33220A / 33250A: `specs/fgen_332xx_reference_cmc.json` is read by the run but not in the spec fingerprint |
+| same prompt shown more than once | Agilent 34401A (the OHM2 / OHM4 rewire prompt 7x each), 8808A (the 10 A terminal prompt 3x) |
+| raw wire text not in any COMMANDS registry | TDS2000C (89 kinds) |
+
+Not fixed here (existing procedures are untouched). Not covered: whether a reply FORMAT is what the real instrument sends, settle times, front-panel steps, prompt characters (only the instrument tells; see the questionnaire), WaveSurfer and the adjustments (static only). Tests: `tests/test_readiness_check.py` (synthetic transcripts for each check, exit codes, one simulated run, hardware libraries blocked).
+
+### 2. Stop on surprise: `surprise.py`
+
+A procedure runs at full speed and pauses ONLY on (a) a reply not in the expected format (empty, timeout, a prompt character `=>` `?>` `!>` where a value was expected), (b) a write whose read-back does not match what was set, (c) a non-empty error queue after a write. ONE dialog (command as logged, reply, expected, the last 20 log lines) with **Stop** / **Continue**; closing it is Stop; the default button is Stop. Stop raises `SurpriseStop` (an `InstrumentError`), so each engine's existing handler puts the instruments in standby / off and shows its error. Continue is logged (`!! SURPRISE ...`, `!! SURPRISE: operator chose Continue`). A clean run never asks.
+
+Rules kept: a write is sent once and never retried (`set_checked` = send, read back, compare, then the error queue); only a read-only query that timed out is retried, once. Nothing retries automatically after a surprise. Passwords stay masked (the dialog shows the logged form). Without a handler (headless) a surprise is a Stop. The worker thread asks the Tk thread through `root.after` (`surprise.tk_handler(root)`), so it needs the Manager's mainloop; if the dialog cannot be built the answer is Stop. **Demo mode is unaffected**: on a virtual command log the guard is off (`enable_surprise` / `attach_guard` do nothing) unless `force=True` (tests only).
+
+Survey result: today each driver compares its own read-back and raises `InstrumentError`; the engines' worker threads catch `Exception`, call `standby()` and show an error dialog (stop only: no Continue, no last-lines view); error queues are drained at reset (`Instrument._reset_drain`) and read in a few drivers after a write (`err.query` in keysight_dacq, keysight_332xx, keysight_5313x, fluke_8808a via `*ESR?` bits). No single shared hook exists without editing `drivers/base.py` (`send` / `ask` / `query`), which is in all 40 sidecars.
+
+How it is wired (opt-in, no shared file edited):
+- **New drivers** (default): `drivers/_template.py` now declares `class ModelName(SurpriseMixin, Instrument)` and its example setter is `return self.set_checked('something.set', value)` (the read-back command is the one named in `Cmd.readback`); reads use `ask_checked(key, expect='float'|'int'|'any'|regex)`; `errq_checkpoint()` reads `err.query` once (set `ERR_CLEAN` on the class if the empty reply is not `0,"No error"`). The engine of a new procedure calls `inst.enable_surprise(surprise.tk_handler(root))` after connecting. The readiness check warns when a new procedure's driver lacks the mixin.
+- **Existing procedures**: not wired. `surprise.attach_guard(instrument, handler)` wraps one instrument OBJECT (empty reply / prompt character on `ask`) without touching its class, but calling it needs an edit in an engine or driver file. Blast radius of wiring, from the sidecar fingerprints in this tree (each file listed: those procedures flip to "Changed since verification"; seeded verified: Fluke 117, TDS2000C, WaveSurfer):
+
+| where the edit would go | procedures that flip | seeded verified that flip |
+|---|---|---|
+| `drivers/base.py` or `drivers/transport.py` (the one shared hook) | all 40 | all three |
+| `drivers/fluke_5560a.py` (calibrator driver) | 36 | all three |
+| `handheld_dmm.py` (all handheld engines) | 19: 87V, 110, 113, 114, 115, 116, 117, Klein MM325, 175, 177, 179, 287, 289, 77IV, 365, 374, 375, 376, 376-II | Fluke 117 |
+| `truevolt_verification.py` (+ `drivers/keysight_truevolt.py`) | 4: 34460A, 34461A, 34465A, 34470A | none |
+| `fgen_verification.py` | 3: 33210A, 33220A, 33250A (`drivers/reference_instruments.py` also adds the MDO4000C) | none |
+| `dacq_verification.py` | 2: 34970A, 34972A | none |
+| `agilent34410a_verification.py` | 2: 34410A, 34411A | none |
+| `drivers/scpi_dmm.py` | 3: 34401A, 8846A verification and adjustment | none |
+| one engine / launcher only (`fluke8808a_verification.py`, `mdo4000c_verification.py`, `keithley2000_verification.py`, `tds2000c_verification.py`, `Procedures/<launcher>.py`) | 1 each | TDS2000C if `tds2000c_verification.py` |
+| the new `surprise.py` / `drivers/_template.py` / `tools/` / `tests/` | 0 (in no fingerprint) | none |
+
+Recommendation (the flip decision is the owner's): wire the unverified procedures first, one engine per branch (`truevolt_verification.py`, `fgen_verification.py`, `dacq_verification.py`, `agilent34410a_verification.py`: 11 procedures, none verified), and leave Fluke 117 / TDS2000C / WaveSurfer until they are re-verified anyway. Never wire through `drivers/base.py`.
+
+Tests: `tests/test_surprise.py` (fault injection with a scripted instrument: bad reply, empty, prompt character, mismatched read-back, error-queue entry, timeout; no write repeated; clean run asks nothing; demo unaffected; masked password; shared files do not import `surprise`), `tests/real_tk_surprise.py` (real Tk 9 under Xvfb with a worker thread and `mainloop`: Continue, Stop, window close, text of the dialog, 20-line tail, no dialog on a clean run; run by `tests.test_surprise.RealTkDialog`; it needs a Python with tkinter, e.g. the uv 3.13), `tests/real_tk_checks.py::checks_manager_row_menu` (the menu item).
+
+### 3. New-procedure checklist (suggested text for the new-procedure skill)
+
+1. Intake: manual pages for every command; run the questionnaire below BEFORE writing code.
+2. Drivers inherit `SurpriseMixin`; every set goes through `set_checked` with `Cmd.readback`; every query through `ask_checked(expect=...)`; never an f-string command; `verified=True` only with a page in `ref`; do not edit `drivers/base.py`, `drivers/transport.py`, `handheld_dmm.py` or another engine (list any shared edit in the report and ask first).
+3. Register every `pm_param` name with `_t(...)` in `procmods_engine` (same default) and give the engine prefix a `MODEL_IDS` entry.
+4. Housekeeping queries (`SYST:ERR?`, `*ESR?`, `*OPC?`, `*STB?`) go through the registry using the standard headers so the Datasheet Builder does not prompt; if the model's header differs, say so and ask.
+5. Prompts: hook-up, safety and set-up only; none per point in an automated procedure; one picture name per hook-up in `hookups.py` (the readiness check lists missing `diagrams/` names; the owner supplies the PNGs).
+6. Every point that the lab's scope of accreditation covers prints an uncertainty (and TAR / TUR where there is a specification row).
+7. Outputs to standby / off after each point; `cleanup()` never raises.
+8. Sidecar: list the engine, every driver in the MRO (and `surprise.py` if a driver imports it), the spec and `hookups.py`; run `python tools/readiness_check.py <id>` until it has no FAIL and every WARN is explained in the final summary; make sure the shared-file check says no existing procedure flips.
+9. Final summary: UNVERIFIED commands and limits (from the readiness report), shared-file touches, missing pictures, what was not run on hardware.
+
+Owner questionnaire at build time (ask before coding; answers go in the driver docstring and the spec):
+- Interface and wire: the exact prompt character(s) the instrument returns (`=>` `?>` `!>` or none), command and reply terminators, echo on or off, baud / parity for RS-232, what `*IDN?` returns verbatim.
+- Does it answer `*OPC?`, `*ESR?`, `SYST:ERR?` (or what is the error query)? What does an empty error queue look like verbatim?
+- Settle times seen on the bench per function / range (the first reading after a range change, DCI, AC, resistance, frequency), and whether the reading keeps drifting for a minute.
+- Front-panel steps the operator must do that remote control cannot (terminal selection, current jack, filters, local lockout, self-cal, warm-up time) and which of them are safety relevant.
+- Error behaviour: what the instrument does on a bad command (beep, error queue entry, hangs, no reply), whether a reply can be late, whether it needs a delay after `*RST` or after a range change.
+- What the owner has seen go wrong on the previous model of the same family.
+
+### Unverified in this branch
+
+- Every reply format and prompt character the checks assume is generic (`=>` `?>` `!>`, numeric replies, `0,"No error"` / `+0,"No error"` for an empty queue); no real instrument was available. Drivers with another format must set `ERR_CLEAN` or `expect`.
+- The Manager menu item runs the tool with `sys.executable`; a frozen build without a Python interpreter shows the "not found" message (not tried on Windows).
+- The real-Tk dialog was seen under Xvfb with Tk 9 only, not on Windows.
+- `--all` takes about 3 minutes; the MDO4000C run is the longest.

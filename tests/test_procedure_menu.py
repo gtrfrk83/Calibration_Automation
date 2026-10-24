@@ -23,7 +23,7 @@ def by_key(items):
 
 class MenuItems(unittest.TestCase):
     def test_labels_and_order(self):
-        self.assertEqual(PM.labels(entries()), ['Run procedure', 'Try in demo mode (virtual instruments)', '-', 'Mark verified on hardware...', 'Unlock for editing...', '-',
+        self.assertEqual(PM.labels(entries()), ['Run procedure', 'Try in demo mode (virtual instruments)', 'Readiness check (no hardware)...', '-', 'Mark verified on hardware...', 'Unlock for editing...', '-',
                                                 'Restore previous version...', 'Remove from library', '-', 'Copy procedure name', 'Copy file path', 'Show file location'])
 
     def test_run_and_demo_follow_the_ready_pill(self):

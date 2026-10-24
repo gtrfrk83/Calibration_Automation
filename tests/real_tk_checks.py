@@ -496,7 +496,7 @@ def checks_manager_row_menu():
     Remove from library asks first."""
     CPM, root, m, errs = _manager_for_small_window(1267, 860)
     labels_of = lambda menu: [menu.entrycget(i, 'label') if menu.type(i) != 'separator' else '-' for i in range(int(menu.index('end')) + 1)]  # noqa: E731
-    expect_head = ['Run procedure', 'Try in demo mode (virtual instruments)', '-']
+    expect_head = ['Run procedure', 'Try in demo mode (virtual instruments)', 'Readiness check (no hardware)...', '-']
     for kind, page in m.view_pages.items():
         m.view_nb.select(page)
         pump(root, 20)
@@ -516,7 +516,7 @@ def checks_manager_row_menu():
         menu = m._row_menu
         check(f'row menu {kind}: menu posted', menu is not None and menu.winfo_ismapped())
         names = labels_of(menu)
-        check(f'row menu {kind}: labels', names[:3] == expect_head and 'Remove from library' in names and 'Restore previous version...' in names and
+        check(f'row menu {kind}: labels', names[:4] == expect_head and 'Remove from library' in names and 'Restore previous version...' in names and
               names[-3:] == ['Copy procedure name', 'Copy file path', 'Show file location'], names)
         check(f'row menu {kind}: Run enabled like the button', (str(menu.entrycget(0, 'state')) == 'normal') == (str(m.btn_run.cget('state')) == 'normal'))
         menu.event_generate('<Escape>')
@@ -547,6 +547,18 @@ def checks_manager_row_menu():
         menu.invoke(idx)
         check('row menu: Remove from library asks for confirmation (or explains why it stays)', ask.called or info.called)
     check('row menu: declining removes nothing', len(m.table.get_children()) == before)
+    # Readiness check: runs tools/readiness_check.py in a subprocess and shows its text in a window (the subprocess is faked here)
+    shown = []
+    fake = mock.Mock(stdout='READINESS TEXT', stderr='', returncode=0)
+    with mock.patch.object(CPM.subprocess, 'run', return_value=fake) as run:
+        menu = m.build_row_menu()
+        menu.invoke(labels_of(menu).index('Readiness check (no hardware)...'))
+        settle(root, 1.0)
+        check('row menu: Readiness check runs the tool for the selected row', run.called and 'readiness_check.py' in ' '.join(map(str, run.call_args[0][0])), run.call_args)
+    wins = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel) and w.title().startswith('Readiness check')]
+    check('row menu: Readiness check shows its report', len(wins) == 1 and 'READINESS TEXT' in wins[0].winfo_children()[0].get('1.0', 'end'), [w.title() for w in root.winfo_children() if isinstance(w, tk.Toplevel)])
+    for w in wins:
+        w.destroy()
     check('no Tk callback errors', not errs, errs)
     root.destroy()
 

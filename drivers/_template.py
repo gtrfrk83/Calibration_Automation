@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import cmdreg
 from cmdreg import Cmd, Placeholder
+from surprise import SurpriseMixin     # stop-on-surprise (opt-in per run: enable_surprise); see surprise.py and NOTES.md
 from .base import Instrument, InstrumentError, SafetyError
 from .transport import SerialSettings
 
@@ -35,19 +36,18 @@ COMMANDS['opc.query'] = cmdreg.opc_cmd(verified=False, ref='<manual, page of *OP
 # If the model has *CLS / an error queue, also register 'status.clear' and 'err.query' (risk 'locked') so reset_to_defaults() clears and drains them.
 
 
-class ModelName(Instrument):
+class ModelName(SurpriseMixin, Instrument):
     MODEL = 'Maker Model'
     IDN_MATCH = ('MODEL',)          # text that must appear in *IDN? (or override identify() if no *IDN?)
     DEFAULT_TIMEOUT = 10.0
     COMMANDS = COMMANDS
 
-    # Pattern for every setting: write, read back, compare, raise InstrumentError on mismatch.
+    # Pattern for every setting: write ONCE, read back, compare, then read the error queue.  set_checked does all of it (the read-back command is
+    # the one named in Cmd.readback); a mismatch / unexpected reply / non-empty queue raises InstrumentError, or - when the run called
+    # enable_surprise(handler) - shows ONE Stop / Continue dialog.  Reads go through ask_checked(key, expect='float') (reply format check).
+    # If the model's empty-queue reply is not '0,"No error"', set ERR_CLEAN on the class.
     def set_something(self, value):
-        self.send('something.set', value=value)
-        got = float(self.ask('something.get'))
-        if not self.close_to(got, value):
-            raise InstrumentError(f'SOME:CMD: set {value}, instrument reports {got}')
-        return got
+        return self.set_checked('something.set', value)
 
     # No safe software reset at all (read-only remote protocol, ...)? Instead of COMMANDS['reset'] declare, on the class:
     #   RESET_EXEMPT = 'why there is no reset'          RESET_KNOWN_STATE = 'how its state is established instead'
