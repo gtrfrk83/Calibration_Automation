@@ -1,7 +1,7 @@
 """Tektronix MDO4000C (MDO4024C / 4034C / 4054C / 4104C) performance verification, driven from the manufacturer's test record.
 
 Test points and limits come from specs/tektronix_mdo4000c_pv.json (MDO4000C Series Specifications and Performance Verification,
-077-1178-01 Rev B). The technician selects the model and the installed options (SA3 / SA6, AFG, DVM, digital channels, TPA-N-PRE);
+077-1178-01 Rev B). The technician selects the model and the installed options (SA3 / SA6, AFG, DVM, TPA-N-PRE);
 only the points that apply are listed and run.
 
 Stimulus:   Fluke 5560A (SCOPE DCV / LEVSINE / MEASR / square) for the analog tests, Fluke 96270A for the RF tests (a second RF
@@ -58,18 +58,18 @@ def set_virtual_pace(on):
 # which points apply
 # ======================================================================================================================
 class Config:
-    def __init__(self, model='4104C', sa='None', afg=False, dvm=False, dig=True, tpa=False):
-        self.model, self.sa, self.afg, self.dvm, self.dig, self.tpa = model, sa, afg, dvm, dig, tpa
+    def __init__(self, model='4104C', sa='None', afg=False, dvm=False, tpa=False):
+        self.model, self.sa, self.afg, self.dvm, self.tpa = model, sa, afg, dvm, tpa
 
     def as_dict(self):
-        return dict(model=self.model, sa=self.sa, afg=self.afg, dvm=self.dvm, dig=self.dig, tpa=self.tpa)
+        return dict(model=self.model, sa=self.sa, afg=self.afg, dvm=self.dvm, tpa=self.tpa)
 
     def applies(self, p):
         if p.get('models') and self.model not in p['models']:
             return False
         for token in p.get('req') or []:
             ok = {'SA': self.sa in ('SA3', 'SA6'), 'SA6': self.sa == 'SA6', 'noSA': self.sa == 'None', 'AFG': self.afg, 'DVM': self.dvm,
-                  'DIG': self.dig, 'TPA': self.tpa, 'noTPA': not self.tpa}[token]
+                  'TPA': self.tpa, 'noTPA': not self.tpa}[token]
             if not ok:
                 return False
         return True
@@ -685,50 +685,6 @@ class Runner:
         sd = s.delay_stddev(ch, samples=100, wait=self.io.pm_param('mdo.delta_wait', 8.0))
         return sd, dict(source=src)
 
-    # ---- digital threshold ----------------------------------------------------------------------------------------------------------
-    def find_edge(self, d, centre, rising):
-        """Smallest grid voltage (10 mV) where D<d> is static HIGH when `rising`, or largest where it is static LOW otherwise."""
-        s = self.io.scope
-        step = 0.010
-        grid = lambda v: round(round(v / step) * step, 6)
-        lo, hi = grid(centre - 0.4), grid(centre + 0.4)
-        want_high = lambda v: (self.apply_dc(v), s.digital_state(d, settle=self.io.pm_param('mdo.digital_settle', 3.0)))[1]
-        # make sure the bracket really straddles the threshold (manual: start at +/-400 mV, widen to +/-500 mV)
-        for _ in range(4):
-            if want_high(lo) != 'low': lo = grid(lo - 0.1)
-            else: break
-        for _ in range(4):
-            if want_high(hi) != 'high': hi = grid(hi + 0.1)
-            else: break
-        while round((hi - lo) / step) > 1:
-            self.check()
-            mid = grid((lo + hi) / 2)
-            state = want_high(mid)
-            if rising:
-                if state == 'high': hi = mid
-                else: lo = mid
-            else:
-                if state == 'low': lo = mid
-                else: hi = mid
-        return hi if rising else lo
-
-    def do_digital(self, p):
-        d = int(p['ch'][1:])
-        self.wire(('DIG', d), f'Digital threshold - D{d}', [
-            ('Disconnect', 'Remove other cables. The P6616 logic probe must be connected to the oscilloscope.'),
-            ('Connect', f'Fluke 5560A SCOPE output to probe channel D{d} through the BNC-to-0.1 inch pin adapter. Connect the ground lead of the same probe pod too.')])
-        s, cal = self.io.scope, self.io.cal
-        self.fresh_scope(('DIG', d))
-        s.digital_on()
-        s.digital_threshold(d, p['threshold'])
-        s.timebase(4e-6)
-        s.trigger_edge(f'D{d}', mode='NORMal')
-        cal.standby_quiet(); cal.select_scope_dcv('1M'); cal.set_dc_volts(p['threshold']); cal.operate()
-        vs_minus = self.find_edge(d, p['threshold'], rising=True)       # Vs-: first static HIGH when increasing
-        vs_plus = self.find_edge(d, p['threshold'], rising=False)       # Vs+: first static LOW when decreasing
-        cal.standby_quiet()
-        return (vs_minus + vs_plus) / 2.0, dict(vs_minus=vs_minus, vs_plus=vs_plus)      # VsAvg = (Vs- + Vs+) / 2
-
     # ---- RF -------------------------------------------------------------------------------------------------------------------------------
     def rf_out(self, inst, f, level):
         inst.set_rf(f, level)
@@ -973,7 +929,6 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.v_sa = tk.StringVar(value=g('sa', 'None'))
         self.v_afg = tk.BooleanVar(value=g('afg', 'False') == 'True')
         self.v_dvm = tk.BooleanVar(value=g('dvm', 'False') == 'True')
-        self.v_dig = tk.BooleanVar(value=g('dig', 'True') == 'True')
         self.v_tpa = tk.BooleanVar(value=g('tpa', 'False') == 'True')
         self.addr = {k: tk.StringVar(value=g(k, d)) for k, d in (
             ('scope', 'USB0::0x0699::0x0415::C000000::INSTR'), ('cal', 'COM9'), ('cal_baud', '9600'), ('rf1', ''), ('rf2', ''), ('gen', ''), ('dmm', ''), ('counter', ''), ('power', ''))}
@@ -993,7 +948,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     # ---- selection ---------------------------------------------------------------------------------------------------
     def read_cfg(self):
-        self.cfg = Config(self.v_model.get(), self.v_sa.get(), self.v_afg.get(), self.v_dvm.get(), self.v_dig.get(), self.v_tpa.get())
+        self.cfg = Config(self.v_model.get(), self.v_sa.get(), self.v_afg.get(), self.v_dvm.get(), self.v_tpa.get())
         if self.cfg.model == '4024C' and False:
             pass
         return self.cfg
@@ -1039,10 +994,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         sa = ttk.Combobox(d, textvariable=self.v_sa, values=['None', 'SA3', 'SA6'], width=10, state='readonly'); sa.grid(row=1, column=1, padx=(10, 0), pady=4, sticky='w')
         checks = [ttk.Checkbutton(d, text='AFG (MDO4AFG)', variable=self.v_afg, command=self.on_config),
                   ttk.Checkbutton(d, text='DVM', variable=self.v_dvm, command=self.on_config),
-                  ttk.Checkbutton(d, text='Digital channels (P6616)', variable=self.v_dig, command=self.on_config),
                   ttk.Checkbutton(d, text='TPA-N-PRE attached', variable=self.v_tpa, command=self.on_config)]
         for i, c in enumerate(checks): c.grid(row=2 + i, column=0, columnspan=2, sticky='w', pady=1)
-        self.btn_read_opts = ttk.Button(d, text='Read options from scope', command=self.read_options); self.btn_read_opts.grid(row=6, column=0, columnspan=2, sticky='w', pady=(8, 0))
+        self.btn_read_opts = ttk.Button(d, text='Read options from scope', command=self.read_options); self.btn_read_opts.grid(row=5, column=0, columnspan=2, sticky='w', pady=(8, 0))
         self.cfg_widgets = [m, sa] + checks
         for w in (m, sa): w.bind('<<ComboboxSelected>>', lambda _e: self.on_config())
         ttk.Separator(d).grid(row=7, column=0, columnspan=2, sticky='ew', pady=(12, 10))
@@ -1089,7 +1043,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.read_cfg()
         if save:
             for k, v in (('model', self.v_model.get()), ('sa', self.v_sa.get()), ('afg', str(self.v_afg.get())), ('dvm', str(self.v_dvm.get())),
-                         ('dig', str(self.v_dig.get())), ('tpa', str(self.v_tpa.get()))):
+                         ('tpa', str(self.v_tpa.get()))):
                 self.settings.set(k, v)
             self.settings.save()
         self.refresh()
@@ -1423,7 +1377,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         c = data.get('config', {})
         self.v_model.set(c.get('model', self.v_model.get())); self.v_sa.set(c.get('sa', 'None'))
-        for var, key in ((self.v_afg, 'afg'), (self.v_dvm, 'dvm'), (self.v_dig, 'dig'), (self.v_tpa, 'tpa')): var.set(bool(c.get(key, var.get())))
+        for var, key in ((self.v_afg, 'afg'), (self.v_dvm, 'dvm'), (self.v_tpa, 'tpa')): var.set(bool(c.get(key, var.get())))
         self.load_results(data)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_config(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s).')

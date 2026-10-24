@@ -129,7 +129,6 @@ _t('mdo', 'pause_scale', 1.0, 0.25, 10.0, "MDO4000C: multiplier on the procedure
 _t('mdo', 'reconnect_attempts', 36, 1, 120, 'MDO4000C: attempts to reconnect after the power cycle', unit='', ptype='int', conditions=False)
 _t('mdo', 'reconnect_wait', 5.0, 1.0, 60.0, 'MDO4000C: wait between reconnect attempts', conditions=False)
 _t('mdo', 'delta_wait', 8.0, 1.0, 120.0, 'MDO4000C: wait for the channel-to-channel delay statistics')
-_t('mdo', 'digital_settle', 3.0, 0.5, 30.0, 'MDO4000C: settle before a digital-channel state read')
 _t('ws', 'rms_delay', 3, 0.2, 120.0, 'WaveSurfer: RMS noise settle')
 _t('ws', 'rms_samples', 5, 1, 100, 'WaveSurfer: RMS noise samples', unit='', ptype='int', conditions=False)
 _t('ws', 'dcv_settle', 3.0, 0.5, 30.0, 'WaveSurfer: DC voltage settle after OPER')

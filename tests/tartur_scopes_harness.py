@@ -21,7 +21,7 @@ def mdo_found():
     M.SLEEP_SCALE = 0
     bench, t = make_mdo_bench()
     io = M.IO(dict(cal_baud=9600), transports=t)
-    cfg = M.Config('4104C', 'SA6', True, True, True, True)
+    cfg = M.Config(model='4104C', sa='SA6', afg=True, dvm=True, tpa=True)
     class FakeApp:
         stop = False
         def __init__(s): s.io, s.cfg = io, cfg
@@ -94,7 +94,7 @@ import mdo4000c_verification as M
 M.filedialog.asksaveasfilename=save; M.messagebox.showerror=lambda *a,**k: errors.append(a)
 found=mdo_found()
 app=M.App.__new__(M.App)
-app.cfg=M.Config('4104C','SA6',True,True,True,True); app._found=found; app._left={k:dict(v,reading=v['reading']*1.0001 if isinstance(v['reading'],(int,float)) else v['reading']) for k,v in list(found.items())[10:40]}
+app.cfg=M.Config(model='4104C',sa='SA6',afg=True,dvm=True,tpa=True); app._found=found; app._left={k:dict(v,reading=v['reading']*1.0001 if isinstance(v['reading'],(int,float)) else v['reading']) for k,v in list(found.items())[10:40]}
 app.asset=V('A1'); app.serial=V('S1'); app.status=V(); app.root=None
 app.any_synthetic=lambda: False
 current['path']=out+'/mdo.pdf'; app.export_pdf()

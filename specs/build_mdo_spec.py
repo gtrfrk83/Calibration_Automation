@@ -10,12 +10,12 @@ import json, re, sys
 sys.path.insert(0, '/home/claude/scratch/mdo')
 MODELS = ['4024C', '4034C', '4054C', '4104C']
 MM = 1e-3
-PAGES = {'selftest': 85, 'imp': 86, 'bal': 88, 'gain': 90, 'off': 94, 'bw': 96, 'noise': 99, 'ref': 101, 'dt': 103, 'dig': 105,
+PAGES = {'selftest': 85, 'imp': 86, 'bal': 88, 'gain': 90, 'off': 94, 'bw': 96, 'noise': 99, 'ref': 101, 'dt': 103,
          'phase': 109, 'danl': 112, 'abs': 118, 'imd': 122, 'spur': 126, 'xt': 128, 'trig': 130, 'tpa': 131, 'tpadanl': 134,
          'afgf': 139, 'afga': 140, 'afgo': 140, 'dvmdc': 141, 'dvmac': 142, 'dvmf': 143}
 TITLES = {'selftest': 'Self test and signal path compensation', 'imp': 'Input impedance', 'bal': 'DC balance', 'gain': 'DC gain accuracy',
           'off': 'DC offset accuracy', 'bw': 'Analog bandwidth', 'noise': 'Random noise (sample mode)', 'ref': 'Reference frequency error',
-          'dt': 'Delta-time measurement accuracy', 'dig': 'Digital threshold accuracy', 'phase': 'Phase noise at 1 GHz',
+          'dt': 'Delta-time measurement accuracy', 'phase': 'Phase noise at 1 GHz',
           'danl': 'Displayed average noise level (DANL)', 'abs': 'Absolute amplitude accuracy', 'imd': 'Third-order intermodulation',
           'spur': 'Residual spurious response', 'xt': 'Crosstalk to RF channel', 'trig': 'Trigger output', 'tpa': 'TPA-N-PRE functional check',
           'tpadanl': 'DANL with TPA-N-PRE attached', 'afgf': 'AFG frequency accuracy', 'afga': 'AFG amplitude accuracy',
@@ -153,10 +153,7 @@ for rec in dt:
                 0.0, None, hi, 's', ch=ch, vscale=vs, vpp=vpp, hscale=blk['hscale'], freq=blk['freq'], models=models,
                 req=['SA' if rec['sa'] else 'noSA'], stim='cal')
 
-# ---- digital thresholds -----------------------------------------------------------------------------------------------------
-for d in range(16):
-    for thr, lo, hi in ((0.0, -0.1, 0.1), (4.0, 3.78, 4.22)):
-        add('dig', 'DIGITAL', f'D{d} threshold {thr:g} V', thr, lo, hi, 'V', ch=f'D{d}', threshold=thr, req=['DIG'])
+# ---- digital thresholds (logic probe, D0-D15): REMOVED at the owner's request; not built, not run. -----------------------------------
 
 # ---- RF ---------------------------------------------------------------------------------------------------------------------
 for off, lim, span, rbw in ((10e3, -108, 50e3, 250), (100e3, -110, 500e3, 1e3), (1e6, -120, 5e6, 50e3)):
@@ -227,8 +224,11 @@ for ch in CH:
             req=['DVM'], freq=f, stim='cal', **({'note': note} if note else {}))
 
 # ---- write -------------------------------------------------------------------------------------------------------------------
+# ids stay what they were when the 32 digital-threshold points (old ids 1058-1089) existed, so saved sessions keyed by point id still match:
+# the points after them keep their old ids and 1058-1089 are simply unused.
+REMOVED_DIG_FIRST, REMOVED_DIG_COUNT = 1058, 32
 for i, p in enumerate(points, 1):
-    p['id'] = i
+    p['id'] = i + (REMOVED_DIG_COUNT if i >= REMOVED_DIG_FIRST else 0)
 spec = dict(schema=2, manufacturer='Tektronix', model='MDO4000C', models=MODELS,
             title='MDO4000C Series Performance Verification',
             source=dict(document='MDO4000C Series Specifications and Performance Verification (077-1178-01 Rev B)', pages='33-143 (test record pp. 35-83)',

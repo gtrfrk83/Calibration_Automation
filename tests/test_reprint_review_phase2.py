@@ -100,7 +100,7 @@ class Adapters(unittest.TestCase):
     def test_not_in_scope_and_no_uncertainty_counts_per_engine(self):
         """Owner audit: a point with no stimulus from a calibrator or measuring standard (WaveSurfer RMS noise) is 'No uncertainty required' (grey, locked, not
         in Needs attention); 'Not in scope' stays only for points that use a standard but have no scope entry."""
-        want = {'ws': (0, 36), 'mdo': (22, 21), 'fgen': (42, 1), 'tds': (1, 3)}
+        want = {'ws': (0, 36), 'mdo': (19, 21), 'fgen': (42, 1), 'tds': (1, 3)}
         for name, (nis, nou) in want.items():
             app, _m = built(name)
             specs, d = M.specs_for(app)
@@ -338,10 +338,12 @@ class Report(unittest.TestCase):
 
 class ZeroFlips(unittest.TestCase):
     EDITED = ('report_review_adapters.py',)
+    EDITED_LATER = ('mdo4000c_verification.py',)      # edited by later work (logic probe removal), not by phase 2
 
     def test_no_engine_or_launcher_file_is_changed(self):
         base = subprocess.run(['git', 'diff', '--name-only', 'origin/main'], cwd=ROOT, capture_output=True, text=True).stdout.split()
-        engines = [f for f in base if f.endswith('_verification.py') or f.startswith('Procedures/') or f.endswith('.procedure.json')]
+        engines = [f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.endswith('.procedure.json'))
+                   and f not in self.EDITED_LATER]
         self.assertEqual(engines, [], 'phase 2 edits no engine, procedure or sidecar file')
 
     def test_adapters_are_in_no_fingerprint_list(self):

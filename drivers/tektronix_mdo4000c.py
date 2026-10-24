@@ -20,7 +20,6 @@ from .transport import SerialSettings
 _REF = 'MDO4000/B/C Series Programmer Manual'
 _CH = {'ch': Placeholder('str', '', '1')}                       # analog channel number as text (the caller passes str(ch))
 _SLOT = {'slot': Placeholder('int', '', 1)}
-_D = {'d': Placeholder('int', '', 0)}
 
 
 def _c(template, name, description='', *, kind='set', readback=None, risk='normal', verified=True, placeholders=None, ref=_REF):
@@ -122,10 +121,6 @@ COMMANDS = {
     'wfm.yzero': _q('WFMOutpre:YZEro?', 'Y zero'),
     'wfm.ptoff': _q('WFMOutpre:PT_Off?', 'Point offset'),
     'wfm.curve': _q('CURVe?', 'Waveform data'),
-    # digital channels
-    'dig.on': _c('SELect:D{d} ON', 'Digital channel on', placeholders=_D),
-    'dig.thr.set': _c('D{d}:THReshold {value:.9g}', 'Digital threshold (V)', readback='dig.thr.get', placeholders={**_D, **_f('value', '.9g', 1.4)}),
-    'dig.thr.get': _q('D{d}:THReshold?', 'Digital threshold read-back', placeholders=_D),
     # RF / spectrum (NOT verified)
     'rf.on': _c('SELect:RF_NORMal ON', 'RF normal trace on', _RF_NOTE, verified=False),
     'rf.avg_on': _c('SELect:RF_AVErage ON', 'RF average trace on', _RF_NOTE, verified=False),
@@ -406,25 +401,6 @@ class TektronixMDO4000C(Instrument):
             if ys[i - 1] < mid <= ys[i]:
                 return xs[i - 1] + (mid - ys[i - 1]) / (ys[i] - ys[i - 1]) * (xs[i] - xs[i - 1])
         raise InstrumentError('No rising edge found in the acquired record; check the time-mark signal and trigger.')
-
-    # ---- digital channels -------------------------------------------------------------------------------------------------
-    def digital_on(self):
-        for d in range(16):
-            self.send('dig.on', d=d)
-
-    def digital_threshold(self, d, volts):
-        self.set_verified('dig.thr.set', 'dig.thr.get', volts, rel=1e-3, abs_=1e-3, label=f'D{d}:THReshold', d=d)
-
-    def digital_state(self, d, settle=3.0):
-        """'high', 'low' or 'toggling' for digital channel D<d> after a settle time."""
-        time.sleep(settle)
-        self.send('acq.run')
-        time.sleep(0.5)
-        self.send('acq.stop')
-        _xs, ys = self.fetch(f'D{d}')
-        if all(y > 0.5 for y in ys): return 'high'
-        if all(y <= 0.5 for y in ys): return 'low'
-        return 'toggling'
 
     # ---- RF / spectrum -------------------------------------------------------------------------------------------------------
     def rf_cmd(self, key, **fmt):

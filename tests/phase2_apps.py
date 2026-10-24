@@ -51,7 +51,7 @@ def mdo_app(per_kind=3):
     M.SLEEP_SCALE = 0
     bench, t = make_mdo_bench()
     io = M.IO(dict(cal_baud=9600), transports=t)
-    cfg = M.Config('4104C', 'SA6', True, True, True, True)
+    cfg = M.Config('4104C', 'SA6', True, True, True)
 
     class FakeApp:
         stop = False

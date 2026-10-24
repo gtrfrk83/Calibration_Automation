@@ -241,7 +241,7 @@ def build_a34410a(mods):
 def build_mdo(mods):
     bench, t = make_mdo_bench()
     io = M.IO(dict(cal_baud=9600), transports={k: gc.RecordingTransport(v) for k, v in t.items()}, mods=mods)
-    cfg = M.Config('4104C', 'SA6', True, True, True, True)
+    cfg = M.Config('4104C', 'SA6', True, True, True)
 
     class FakeApp:
         stop = False
