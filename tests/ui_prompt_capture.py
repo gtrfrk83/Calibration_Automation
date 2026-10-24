@@ -152,13 +152,45 @@ class TkLevelHarness(VH.VHarness):
         return self.box_answer.get(kind, True)
 
 
+class _HarnessPort(ui_port.ScriptedUiPort):
+    """ScriptedUiPort whose reading windows are answered like the Tk-level harness answers them (VHarness: hn.readings / hn.default_reading / hn.fill, and for the
+    queue window hn.queue_*), so a scenario scripted with those hooks (the shared run-queue scenarios) gets the same readings behind the port.  An explicit rule of
+    `answers` still wins, and the record is the port's own."""
+
+    def __init__(self, answers, hn):
+        super().__init__(answers)
+        self.hn = hn
+
+    def ask_reading(self, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
+                    limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None):
+        rec = record('ask_reading', f'point {p["id"]}', out_text, None, mode=mode, device=device, source=source, unit=unit, phase=phase or None,
+                     question=question, annunciator=bool(annunciator), fill_offered=demo_fill is not None, note=out_note)
+        ans = self.answers.for_(rec, None)
+        if ans is None:
+            ans = VH.VHarness._ask_reading_v(self.hn, None, p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate, phase, limit_s,
+                                             on_expire, device, source, demo_fill)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def ask_readings(self, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                     source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading='', *, parent=None):
+        rec = record('ask_readings', f'point {p["id"]}', out_text, None, device=device, source=source, unit=unit, phase=phase or None, heading=heading or None,
+                     meters=[list(m) for m in meters], fill_offered=demo_fill is not None, note=out_note, tol_text=tol_text or None)
+        ans = self.answers.for_(rec, None)
+        if ans is None:
+            ans = VH.VHarness._ask_readings(self.hn, None, p, total, out_text, out_note, accept, meters, unit=unit, judge=judge, limit_s=limit_s,
+                                            on_expire=on_expire, device=device, source=source, demo_fill=demo_fill, tol_text=tol_text, phase=phase, heading=heading)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+
 class PortHarness(TkLevelHarness):
     """The same scripted operator behind ui_port.ScriptedUiPort: every prompt must arrive through the port.  The Tk-level recorders stay installed underneath: a
     prompt that bypasses the port lands in `.prompts` (the scenarios assert it stays empty), a prompt through the port lands in `.port.prompts`."""
 
     def start(self):
         super().start()
-        self.port = ui_port.ScriptedUiPort(self.answers)
+        self.port = _HarnessPort(self.answers, self)
         self._old_ui = ui_port.set_ui(self.port)
         for name, real in _HH_WINDOWS.items():          # the handheld engine's reading windows reach the ScriptedUiPort through the module's own entry points
             p = mock.patch.object(VH.hh, name, real)
@@ -512,10 +544,9 @@ def _run_handheld_families(make_harness):
     return out
 
 
-# Scenarios compared at the Tk level only, until the shared helper they reach is ported (those prompts would bypass the port, so the ScriptedUiPort sequence is shorter):
-# the run queue prompts through run_queue_engine.py ('One meter at a time', 'Resume saved progress'), a shared helper of the shared-helpers package.  Remove the entry
-# when that helper goes through the port.
-TK_LEVEL_ONLY = {'handheld_families': {'virtual_queue_117_two_meters'}}
+# Scenarios compared at the Tk level only, until the shared helper they reach is ported: {scenario key: {scenario name}}.  Empty since the run queue
+# (run_queue_engine) prompts through the port: handheld_families/virtual_queue_117_two_meters gives the same sequence behind ScriptedUiPort.
+TK_LEVEL_ONLY = {}
 
 
 class _FakeTree:
@@ -706,7 +737,7 @@ def _run_shared(make_harness):
     """The prompts the SHARED helpers show, on the engines that inherit them: the run queue (handheld_dmm.App on the simulated 5522A: a point-by-point run, a
     one-meter-at-a-time run with the swap prompt, the resume question, the report / set-up dialogs), the manual-override small dialogs, the As Found / As Left
     question and the Show-box notices (datamode), a technician note (procmods_engine) and a failed reset (reset_startup), the last four on the 8808A.
-    The reading windows (ask_readings) are scripted by the harness and not part of the record."""
+    The multi-meter reading windows (kind 'ask_readings') are scripted by the harness and left out of the record (finish() drops them)."""
     import handheld_dmm as hh
     import run_queue as RQ
     import fluke8808a_verification as E
@@ -748,8 +779,12 @@ def _run_shared(make_harness):
         return hn
 
     def finish(name, hn):
-        out[name] = list(hn.log) if hasattr(hn, 'port') else hn.prompts
-        ORIGINS[name] = list(hn.log.origins) if hasattr(hn, 'port') else None
+        # The fixture predates the recording of the multi-meter reading window (kind 'ask_readings', recorded by the harness since WP-H): left out here, it is
+        # covered by handheld_families.  Everything else is the sequence recorded on the unported helpers.
+        seq = hn.log if hasattr(hn, 'port') else hn.prompts
+        keep = [i for i, r in enumerate(seq) if r['kind'] != 'ask_readings']
+        out[name] = [seq[i] for i in keep]
+        ORIGINS[name] = [hn.log.origins[i] for i in keep] if hasattr(hn, 'port') else None
         hn.stop()
 
     hn = begin(make_harness(None))
