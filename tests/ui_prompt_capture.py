@@ -509,6 +509,11 @@ def _run_adj8846a(make_harness):
 SCENARIOS = {'a34410a': _run_a34410a, 'f8808a': _run_f8808a, 'handheld': _run_handheld, 'adjustments': _run_adjustments, 'adj8846a': _run_adj8846a}
 
 
+# ---- WP-B (bench DMM engines): Truevolt, DACQ, Keithley 2000, 34401A, 8846A.  APPEND-ONLY block; the scenarios live in tests/ui_prompt_capture_wpb.py.
+import ui_prompt_capture_wpb as _wpb  # noqa: E402
+SCENARIOS.update(_wpb.SCENARIOS)
+
+
 def capture(name, harness_class=TkLevelHarness):
     return SCENARIOS[name](lambda answers=None: harness_class(answers))
 

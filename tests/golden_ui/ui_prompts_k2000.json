@@ -1,0 +1,695 @@
+{
+ "dialogs_misc": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter an instrument ID.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select a test point first.",
+   "title": "Selection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded results to export yet.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keithley 2000: KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "boom",
+   "title": "Measurement stopped"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "A point may be active. Stop and close?",
+   "title": "Active run"
+  }
+ ],
+ "export_and_load_cancelled": [
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "Keithley 2000 performance verification"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "Keithley 2000 performance verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "A-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": "",
+   "kind": "choose_file",
+   "options": {
+    "filetypes": [
+     [
+      "Checkpoint",
+      "*.json"
+     ]
+    ]
+   },
+   "text": "",
+   "title": ""
+  }
+ ],
+ "first_prompt_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keithley 2000: KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Conditions met - start",
+    "Cancel"
+   ],
+   "caution": "The program restores the 2000 factory defaults (*RST) before the first point, then sets function, range, speed and filter for every point.",
+   "facts": [
+    [
+     "Limits",
+     "1 year, 18 to 28 C"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 2000 must have been on for at least one hour (Cal Manual p. 1-3). Allow the calibrator its own warm-up time as well."
+    ],
+    [
+     "Environment",
+     "Ambient 18 to 28 C and relative humidity below 80 % (p. 1-3)."
+    ],
+    [
+     "Inputs",
+     "Set the INPUTS switch to FRONT. The program reads the switch and stops if it is on REAR."
+    ],
+    [
+     "Direct connections",
+     "Connect the calibrator straight to the 2000: no scanner or other switching equipment (p. 1-6)."
+    ]
+   ],
+   "text": "Warm-up and conditions",
+   "title": "Before the verification"
+  }
+ ],
+ "high_voltage_refused": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keithley 2000: KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Conditions met - start",
+    "Cancel"
+   ],
+   "caution": "The program restores the 2000 factory defaults (*RST) before the first point, then sets function, range, speed and filter for every point.",
+   "facts": [
+    [
+     "Limits",
+     "1 year, 18 to 28 C"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 2000 must have been on for at least one hour (Cal Manual p. 1-3). Allow the calibrator its own warm-up time as well."
+    ],
+    [
+     "Environment",
+     "Ambient 18 to 28 C and relative humidity below 80 % (p. 1-3)."
+    ],
+    [
+     "Inputs",
+     "Set the INPUTS switch to FRONT. The program reads the switch and stops if it is on REAR."
+    ],
+    [
+     "Direct connections",
+     "Connect the calibrator straight to the 2000: no scanner or other switching equipment (p. 1-6)."
+    ]
+   ],
+   "text": "Warm-up and conditions",
+   "title": "Before the verification"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 2000.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 37"
+    ],
+    [
+     "Test",
+     "DC volts 100.0 mV, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "1-7 (Table 1-2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_5560A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded cable, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the 2000 INPUT HI / LO (Figure 1-1); low-thermal connections for the 100 mV and 1 V ranges."
+    ],
+    [
+     "REL zero",
+     "With the calibrator at 0.00000 mV DC the program enables REL on the 100 mV range and leaves it on for the DC volts points (p. 1-7)."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  }
+ ],
+ "virtual_run": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keithley 2000: KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Conditions met - start",
+    "Cancel"
+   ],
+   "caution": "The program restores the 2000 factory defaults (*RST) before the first point, then sets function, range, speed and filter for every point.",
+   "facts": [
+    [
+     "Limits",
+     "1 year, 18 to 28 C"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 2000 must have been on for at least one hour (Cal Manual p. 1-3). Allow the calibrator its own warm-up time as well."
+    ],
+    [
+     "Environment",
+     "Ambient 18 to 28 C and relative humidity below 80 % (p. 1-3)."
+    ],
+    [
+     "Inputs",
+     "Set the INPUTS switch to FRONT. The program reads the switch and stops if it is on REAR."
+    ],
+    [
+     "Direct connections",
+     "Connect the calibrator straight to the 2000: no scanner or other switching equipment (p. 1-6)."
+    ]
+   ],
+   "text": "Warm-up and conditions",
+   "title": "Before the verification"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 2000.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 37"
+    ],
+    [
+     "Test",
+     "DC volts 100.0 mV, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "1-7 (Table 1-2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_5560A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded cable, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the 2000 INPUT HI / LO (Figure 1-1); low-thermal connections for the 100 mV and 1 V ranges."
+    ],
+    [
+     "REL zero",
+     "With the calibrator at 0.00000 mV DC the program enables REL on the 100 mV range and leaves it on for the DC volts points (p. 1-7)."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs -100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs -1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "11 of 37"
+    ],
+    [
+     "Test",
+     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "1-9 (Table 1-3)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_5560A_ACV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded cable, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the 2000 INPUT HI / LO (Figure 1-2)."
+    ],
+    [
+     "Speed",
+     "AC uses detector bandwidth 3 (slow) with the digital filter off: one reading takes about 2 s and the program waits 20 s (default, tunable) after the output is on for the detector to settle."
+    ]
+   ],
+   "text": "Connect for AC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 700 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 219 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "21 of 37"
+    ],
+    [
+     "Test",
+     "DC current 10.00 mA, 10.00 mA range"
+    ],
+    [
+     "Manual page",
+     "1-10 (Table 1-4)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_5560A_DCI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator VI AUX output and OUTPUT LO to the 2000 AMPS and INPUT LO jacks (Figure 1-3). Check the calibrator range, its fuse and the 2000 AMPS fuse (3 A, 250 V) first."
+    ]
+   ],
+   "text": "Connect for DC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "29 of 37"
+    ],
+    [
+     "Test",
+     "AC current 1.000 A @ 1.000 kHz, 1.000 A range"
+    ],
+    [
+     "Manual page",
+     "1-11 (Table 1-5)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_5560A_ACI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator VI AUX output and OUTPUT LO to the 2000 AMPS and INPUT LO jacks (Figure 1-4). Check the calibrator range, its fuse and the 2000 AMPS fuse (3 A, 250 V) first."
+    ],
+    [
+     "Speed",
+     "AC uses detector bandwidth 3 (slow) with the digital filter off: one reading takes about 2 s and the program waits 20 s (default, tunable) after the output is on for the detector to settle."
+    ]
+   ],
+   "text": "Connect for AC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "31 of 37"
+    ],
+    [
+     "Test",
+     "4-wire ohms 100.0 Ω, 100.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "1-12 to 1-13 (Table 1-6)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_5560A_OHM4.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire: calibrator OUTPUT V/ohm HI / LO (force) to the 2000 INPUT HI / LO and the calibrator SENSE HI / LO to the 2000 SENSE Ohms 4 WIRE HI / LO (Figure 1-5); calibrator external sense ON. Set the 5560A's own 4-wire (external sense) mode for the points below 110 kohm; the program sends no compensation command to a 5560A."
+    ]
+   ],
+   "text": "Connect for 4-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "37 of 37"
+    ],
+    [
+     "Test",
+     "2-wire ohms 100.0 MΩ, 100.0 MΩ range"
+    ],
+    [
+     "Manual page",
+     "1-12 to 1-13 (Table 1-6)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_5560A_OHM100M.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Pure 2-wire hook-up: calibrator OUTPUT V/ohm HI / LO to the 2000 INPUT HI / LO only. NO sense leads: nothing on the 2000 SENSE Ohms 4 WIRE jacks and the calibrator external sense OFF; shielded cable. The program selects the 2000 2-wire resistance function (not 4-wire). Set the 5560A to its 2-wire mode (external sense off); the program sends no compensation command to a 5560A."
+    ]
+   ],
+   "text": "Connect for 100 Mohm (2-wire)",
+   "title": "Rewire / verify before enabling output"
+  }
+ ],
+ "warmup_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keithley 2000: KEITHLEY INSTRUMENTS INC.,MODEL 2000,0SIM0001,A19  /A02\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Conditions met - start",
+    "Cancel"
+   ],
+   "caution": "The program restores the 2000 factory defaults (*RST) before the first point, then sets function, range, speed and filter for every point.",
+   "facts": [
+    [
+     "Limits",
+     "1 year, 18 to 28 C"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 2000 must have been on for at least one hour (Cal Manual p. 1-3). Allow the calibrator its own warm-up time as well."
+    ],
+    [
+     "Environment",
+     "Ambient 18 to 28 C and relative humidity below 80 % (p. 1-3)."
+    ],
+    [
+     "Inputs",
+     "Set the INPUTS switch to FRONT. The program reads the switch and stops if it is on REAR."
+    ],
+    [
+     "Direct connections",
+     "Connect the calibrator straight to the 2000: no scanner or other switching equipment (p. 1-6)."
+    ]
+   ],
+   "text": "Warm-up and conditions",
+   "title": "Before the verification"
+  }
+ ]
+}
