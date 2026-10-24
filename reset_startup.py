@@ -136,12 +136,12 @@ class AppResetMixin:
         return self.io.log if self.io is not None else None
 
     def reset_ask(self, text) -> bool:
-        from tkinter import messagebox
-        return messagebox.askokcancel('Reset instruments', text, icon='warning')
+        from ui_port import ui as port
+        return port.ask_ok_cancel('Reset instruments', text, icon='warning')
 
     def reset_error(self, text):
-        from tkinter import messagebox
-        messagebox.showerror('Reset failed - run not started', text)
+        from ui_port import ui as port
+        port.message('error', 'Reset failed - run not started', text)
 
     def reset_notice_ok(self) -> bool:
         """The unit-under-test notice on the UI thread (before any instrument is touched). False = declined: the run is ended."""

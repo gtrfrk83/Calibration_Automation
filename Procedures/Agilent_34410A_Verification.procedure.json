@@ -23,6 +23,9 @@
   "code": [
    "Procedures/Agilent_34410A_Verification.py",
    "agilent34410a_verification.py",
+   "agilent34410a_view_tk.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "surprise.py",
    "procspec.py",
    "drivers/base.py",

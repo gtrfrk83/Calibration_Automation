@@ -1,0 +1,1650 @@
+{
+ "dialogs_misc": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter an instrument ID.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select a test point first.",
+   "title": "Selection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded results to export yet.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Demo mode uses no hardware, so there is nothing to connect.",
+   "title": "Demo mode"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "boom",
+   "title": "Measurement stopped"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "A point may be active. Stop and close?",
+   "title": "Active run"
+  }
+ ],
+ "high_voltage_refused": [
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8808A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "32 of 105"
+    ],
+    [
+     "Test",
+     "DC volts 1.000 kV, 1.000 kV range"
+    ],
+    [
+     "Manual page",
+     "3-4 (Table 3-2, step 16)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_VOLT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator NORMAL HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Connect for Voltage and frequency inputs",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 1000 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  }
+ ],
+ "run_5522A_all_points": [
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "The 8808A needs a half-hour warm-up with the cover on before verification (Calibration Manual, p. 1-9 / chapter 3). The specifications are only valid in the slow (5-1/2 digit) rate, which the program selects.\n\nHas the meter been on for at least half an hour?",
+   "title": "Warm-up"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8808A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source. The program does not turn its output on for these points.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 105"
+    ],
+    [
+     "Test",
+     "Zero offset, DC volts, 200.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "3-4 (Table 3-2, step 1)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Disconnect the calibrator. Fit the low-thermal 4-wire short (Fluke PN 2653346, Calibration Manual Table 3-1) across INPUT HI / LO and SENSE HI / LO. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Shorted input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source. The program does not turn its output on for these points.",
+   "facts": [
+    [
+     "Next point",
+     "16 of 105"
+    ],
+    [
+     "Test",
+     "Zero offset, DC current, 200.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 1)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Leave the current inputs (mA and 10 A terminals) OPEN with nothing connected. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Open current input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source. The program does not turn its output on for these points.",
+   "facts": [
+    [
+     "Next point",
+     "20 of 105"
+    ],
+    [
+     "Test",
+     "Zero offset, DC current, 2.000 A range (input open)"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 13)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Insert a test lead into the 10 A terminal and leave its free end OPEN (nothing connected to the other end of the lead). The meter detects the current input jack itself and only allows the 2 A and 10 A ranges when a test lead is in the 10 A jack (Users Manual p. 3-14, Automatic Input Terminal Detection). The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Open current input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "22 of 105"
+    ],
+    [
+     "Test",
+     "DC volts 190.0 mV, 200.0 mV range"
+    ],
+    [
+     "Manual page",
+     "3-4 (Table 3-2, step 2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_VOLT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator NORMAL HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Connect for Voltage and frequency inputs",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 190 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "59 of 105"
+    ],
+    [
+     "Manual page",
+     "3-5 (Table 3-3, step 26)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Voltage and frequency inputs (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 750.0 V at 20.00 kHz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator NORMAL HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Point 59: AC volts 750.0 V @ 20.00 kHz, 750.0 V range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 750 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "60 of 105"
+    ],
+    [
+     "Manual page",
+     "3-5 (Table 3-3, step 27)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Voltage and frequency inputs (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 750.0 V at 50.00 kHz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator NORMAL HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Point 60: AC volts 750.0 V @ 50.00 kHz, 750.0 V range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 750 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "61 of 105"
+    ],
+    [
+     "Manual page",
+     "3-5 (Table 3-3, step 28)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5522A: 330 V to 1020 V is specified 45 Hz to 10 kHz only (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12). The manual uses a 5725A amplifier."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Voltage and frequency inputs (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 750.0 V at 100.0 kHz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator NORMAL HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Point 61: AC volts 750.0 V @ 100.0 kHz, 750.0 V range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 750 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "62 of 105"
+    ],
+    [
+     "Test",
+     "Frequency 20.00 Hz at 100.0 mV rms, 2.000 kHz range"
+    ],
+    [
+     "Manual page",
+     "3-11 (Table 3-8, step 1)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_VOLT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator NORMAL HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Voltage and frequency inputs",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "67 of 105"
+    ],
+    [
+     "Manual page",
+     "3-11 (Table 3-8, step 6)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5522A: the ac voltage output stops at 500 kHz (5522A Operators Manual, Detailed Specifications, AC voltage, printed p. 1-12); this point is at 1000 kHz. The manual uses a Fluke 271 function generator."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Voltage and frequency inputs (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 100.0 mV rms at 1.000 MHz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator NORMAL HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Point 67: Frequency 1.000 MHz at 100.0 mV rms, 1.000 MHz range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "68 of 105"
+    ],
+    [
+     "Test",
+     "4-wire ohms 190.0 Ω, 200.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "3-6 (Table 3-4, step 2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_OHM4.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire (Figure 3-2): calibrator NORMAL HI / LO to INPUT HI / LO and the calibrator SENSE HI / LO to the meter SENSE 4W HI / LO. Turn the calibrator's external sense (EX SNS / EXT SENSE) ON at its front panel."
+    ],
+    [
+     "Annunciator",
+     "The program has selected the ohms function with 4W. Confirm the 4W annunciator is lit on the meter display (the 8808A cannot report the wire mode over RS-232)."
+    ]
+   ],
+   "text": "Connect for 4-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "71 of 105"
+    ],
+    [
+     "Test",
+     "2-wire ohms 190.0 Ω, 200.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "3-7 / 3-8 (Table 3-5, step 2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_OHM2.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "2-wire (Figure 3-3): calibrator NORMAL HI / LO to INPUT HI / LO. Calibrator external sense ON and its 2-wire compensation ON, as the manual figure shows; the program does not change them."
+    ],
+    [
+     "Annunciator",
+     "The program has selected the ohms function with 2W. Confirm the 2W annunciator is lit on the meter display (the 8808A cannot report the wire mode over RS-232)."
+    ]
+   ],
+   "text": "Connect for 2-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "78 of 105"
+    ],
+    [
+     "Test",
+     "DC current 190.0 µA, 200.0 µA range"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_IMA.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output (AUX CURRENT HI and LO) to the meter mA terminal and COM (Figure 3-4). Check the calibrator range and the fuse first."
+    ]
+   ],
+   "text": "Connect for Current, mA terminal",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "86 of 105"
+    ],
+    [
+     "Test",
+     "DC current 1.900 A, 2.000 A range"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 14)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_I2A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output (AUX CURRENT HI and LO) to the meter 10 A terminal and COM for the 2 A range (Figure 3-4). Check the calibrator range and the fuse first."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (2 A range)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "88 of 105"
+    ],
+    [
+     "Test",
+     "DC current 10.00 A, 10.00 A range"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 17)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_I10A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "The calibrator 20 A output terminals to the meter 10 A terminal and COM (Figure 3-5). Use heavy leads and keep them short."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (10 A range)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "90 of 105"
+    ],
+    [
+     "Test",
+     "AC current 1.000 mA @ 45.00 Hz, 20.00 mA range"
+    ],
+    [
+     "Manual page",
+     "3-10 (Table 3-7, step 1)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_IMA.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output (AUX CURRENT HI and LO) to the meter mA terminal and COM (Figure 3-4). Check the calibrator range and the fuse first."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Current, mA terminal",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "98 of 105"
+    ],
+    [
+     "Test",
+     "AC current 100.0 mA @ 45.00 Hz, 2.000 A range"
+    ],
+    [
+     "Manual page",
+     "3-10 (Table 3-7, step 9)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_I2A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output (AUX CURRENT HI and LO) to the meter 10 A terminal and COM for the 2 A range (Figure 3-4). Check the calibrator range and the fuse first."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (2 A range)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "102 of 105"
+    ],
+    [
+     "Test",
+     "AC current 500.0 mA @ 45.00 Hz, 10.00 A range"
+    ],
+    [
+     "Manual page",
+     "3-10 (Table 3-7, step 13)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_I10A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "The calibrator 20 A output terminals to the meter 10 A terminal and COM (Figure 3-5). Use heavy leads and keep them short."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (10 A range)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "103 of 105"
+    ],
+    [
+     "Manual page",
+     "3-10 (Table 3-7, step 14)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5522A: 3 A to 10.9999 A ac is specified 45 Hz to 5 kHz only (5522A Operators Manual, Detailed Specifications, AC current, printed p. 1-14); this point is at 40 Hz."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Current, 10 A terminal (10 A range) (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 10.00 A at 40.00 Hz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "The calibrator 20 A output terminals to the meter 10 A terminal and COM (Figure 3-5). Use heavy leads and keep them short."
+    ]
+   ],
+   "text": "Point 103: AC current 10.00 A @ 40.00 Hz, 10.00 A range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "104 of 105"
+    ],
+    [
+     "Test",
+     "AC current 10.00 A @ 45.00 Hz, 10.00 A range"
+    ],
+    [
+     "Manual page",
+     "3-10 (Table 3-7, step 15)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5522A_I10A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "The calibrator 20 A output terminals to the meter 10 A terminal and COM (Figure 3-5). Use heavy leads and keep them short."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (10 A range)",
+   "title": "Rewire / verify before enabling output"
+  }
+ ],
+ "run_5560A_all_points": [
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "The 8808A needs a half-hour warm-up with the cover on before verification (Calibration Manual, p. 1-9 / chapter 3). The specifications are only valid in the slow (5-1/2 digit) rate, which the program selects.\n\nHas the meter been on for at least half an hour?",
+   "title": "Warm-up"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8808A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source. The program does not turn its output on for these points.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 105"
+    ],
+    [
+     "Test",
+     "Zero offset, DC volts, 200.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "3-4 (Table 3-2, step 1)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Disconnect the calibrator. Fit the low-thermal 4-wire short (Fluke PN 2653346, Calibration Manual Table 3-1) across INPUT HI / LO and SENSE HI / LO. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Shorted input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source. The program does not turn its output on for these points.",
+   "facts": [
+    [
+     "Next point",
+     "16 of 105"
+    ],
+    [
+     "Test",
+     "Zero offset, DC current, 200.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 1)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Leave the current inputs (mA and 10 A terminals) OPEN with nothing connected. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Open current input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source. The program does not turn its output on for these points.",
+   "facts": [
+    [
+     "Next point",
+     "20 of 105"
+    ],
+    [
+     "Test",
+     "Zero offset, DC current, 2.000 A range (input open)"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 13)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Insert a test lead into the 10 A terminal and leave its free end OPEN (nothing connected to the other end of the lead). The meter detects the current input jack itself and only allows the 2 A and 10 A ranges when a test lead is in the 10 A jack (Users Manual p. 3-14, Automatic Input Terminal Detection). The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Open current input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "22 of 105"
+    ],
+    [
+     "Test",
+     "DC volts 190.0 mV, 200.0 mV range"
+    ],
+    [
+     "Manual page",
+     "3-4 (Table 3-2, step 2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_VOLT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Connect for Voltage and frequency inputs",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 190 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "59 of 105"
+    ],
+    [
+     "Manual page",
+     "3-5 (Table 3-3, step 26)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5560A: the 1020 V range (above 330 V, so 750 V) is specified 3 Hz to 10 kHz only; the 330 V range stops at 100 kHz (5560A Product Specifications, ACV Specifications, printed p. 4). The manual uses a 5725A amplifier."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Voltage and frequency inputs (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 750.0 V at 20.00 kHz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Point 59: AC volts 750.0 V @ 20.00 kHz, 750.0 V range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 750 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "60 of 105"
+    ],
+    [
+     "Manual page",
+     "3-5 (Table 3-3, step 27)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5560A: the 1020 V range (above 330 V, so 750 V) is specified 3 Hz to 10 kHz only; the 330 V range stops at 100 kHz (5560A Product Specifications, ACV Specifications, printed p. 4). The manual uses a 5725A amplifier."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Voltage and frequency inputs (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 750.0 V at 50.00 kHz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Point 60: AC volts 750.0 V @ 50.00 kHz, 750.0 V range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 750 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "61 of 105"
+    ],
+    [
+     "Manual page",
+     "3-5 (Table 3-3, step 28)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5560A: the 1020 V range (above 330 V, so 750 V) is specified 3 Hz to 10 kHz only; the 330 V range stops at 100 kHz (5560A Product Specifications, ACV Specifications, printed p. 4). The manual uses a 5725A amplifier."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Voltage and frequency inputs (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 750.0 V at 100.0 kHz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Point 61: AC volts 750.0 V @ 100.0 kHz, 750.0 V range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point puts 750 V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "62 of 105"
+    ],
+    [
+     "Test",
+     "Frequency 20.00 Hz at 100.0 mV rms, 2.000 kHz range"
+    ],
+    [
+     "Manual page",
+     "3-11 (Table 3-8, step 1)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_VOLT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Voltage and frequency inputs",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard applied - measure",
+    "Cancel"
+   ],
+   "caution": "The meter is read automatically once you press Continue. Apply the value first and let it settle.",
+   "facts": [
+    [
+     "Next point",
+     "67 of 105"
+    ],
+    [
+     "Manual page",
+     "3-11 (Table 3-8, step 6)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Why",
+     "5560A: the ac voltage output stops at 500 kHz (5560A Product Specifications, ACV Specifications, printed pp. 3-4); this point is at 1000 kHz. The manual uses a Fluke 271 function generator."
+    ],
+    [
+     "Standard",
+     "Disconnect the calibrator. Connect your own standard to the meter as for Voltage and frequency inputs (Calibration Manual Table 3-1 names a 5725A amplifier for 750 V and a Fluke 271 function generator for frequency) and apply 100.0 mV rms at 1.000 MHz. Use a standard with enough accuracy for the limits."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO. Calibrator OUTPUT V/ohm HI / LO to the meter INPUT HI / LO (Figure 3-1)."
+    ]
+   ],
+   "text": "Point 67: Frequency 1.000 MHz at 100.0 mV rms, 1.000 MHz range",
+   "title": "Your own standard is needed"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "68 of 105"
+    ],
+    [
+     "Test",
+     "4-wire ohms 190.0 Ω, 200.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "3-6 (Table 3-4, step 2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_OHM4.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire (Figure 3-2): calibrator OUTPUT V/ohm HI / LO to INPUT HI / LO and the calibrator SENSE HI / LO to the meter SENSE 4W HI / LO. Turn the calibrator's external sense (EX SNS / EXT SENSE) ON at its front panel."
+    ],
+    [
+     "Annunciator",
+     "The program has selected the ohms function with 4W. Confirm the 4W annunciator is lit on the meter display (the 8808A cannot report the wire mode over RS-232)."
+    ]
+   ],
+   "text": "Connect for 4-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "71 of 105"
+    ],
+    [
+     "Test",
+     "2-wire ohms 190.0 Ω, 200.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "3-7 / 3-8 (Table 3-5, step 2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_OHM2.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "2-wire (Figure 3-3): calibrator OUTPUT V/ohm HI / LO to INPUT HI / LO. Calibrator external sense ON and its 2-wire compensation ON, as the manual figure shows; the program does not change them."
+    ],
+    [
+     "Annunciator",
+     "The program has selected the ohms function with 2W. Confirm the 2W annunciator is lit on the meter display (the 8808A cannot report the wire mode over RS-232)."
+    ]
+   ],
+   "text": "Connect for 2-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "78 of 105"
+    ],
+    [
+     "Test",
+     "DC current 190.0 µA, 200.0 µA range"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 2)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_IMA.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output (VI AUX output and OUTPUT LO) to the meter mA terminal and COM (Figure 3-4). Check the calibrator range and the fuse first."
+    ]
+   ],
+   "text": "Connect for Current, mA terminal",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "86 of 105"
+    ],
+    [
+     "Test",
+     "DC current 1.900 A, 2.000 A range"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 14)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_I2A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output (VI AUX output and OUTPUT LO) to the meter 10 A terminal and COM for the 2 A range (Figure 3-4). Check the calibrator range and the fuse first."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (2 A range)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "88 of 105"
+    ],
+    [
+     "Test",
+     "DC current 10.00 A, 10.00 A range"
+    ],
+    [
+     "Manual page",
+     "3-9 / 3-10 (Table 3-6, step 17)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_I10A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "The calibrator 30A and OUTPUT LO terminals (12 A range) to the meter 10 A terminal and COM (Figure 3-5). Use heavy leads and keep them short."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (10 A range)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "90 of 105"
+    ],
+    [
+     "Test",
+     "AC current 1.000 mA @ 45.00 Hz, 20.00 mA range"
+    ],
+    [
+     "Manual page",
+     "3-10 (Table 3-7, step 1)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_IMA.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output (VI AUX output and OUTPUT LO) to the meter mA terminal and COM (Figure 3-4). Check the calibrator range and the fuse first."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Current, mA terminal",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "98 of 105"
+    ],
+    [
+     "Test",
+     "AC current 100.0 mA @ 45.00 Hz, 2.000 A range"
+    ],
+    [
+     "Manual page",
+     "3-10 (Table 3-7, step 9)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_I2A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output (VI AUX output and OUTPUT LO) to the meter 10 A terminal and COM for the 2 A range (Figure 3-4). Check the calibrator range and the fuse first."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (2 A range)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "102 of 105"
+    ],
+    [
+     "Test",
+     "AC current 500.0 mA @ 45.00 Hz, 10.00 A range"
+    ],
+    [
+     "Manual page",
+     "3-10 (Table 3-7, step 13)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_8808A_5560A_I10A.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "The calibrator 30A and OUTPUT LO terminals (12 A range) to the meter 10 A terminal and COM (Figure 3-5). Use heavy leads and keep them short."
+    ],
+    [
+     "Rate",
+     "The program selects the slow reading rate (the specifications apply to it); AC readings take a few seconds."
+    ]
+   ],
+   "text": "Connect for Current, 10 A terminal (10 A range)",
+   "title": "Rewire / verify before enabling output"
+  }
+ ],
+ "warmup_refused": [
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "The 8808A needs a half-hour warm-up with the cover on before verification (Calibration Manual, p. 1-9 / chapter 3). The specifications are only valid in the slow (5-1/2 digit) rate, which the program selects.\n\nHas the meter been on for at least half an hour?",
+   "title": "Warm-up"
+  }
+ ]
+}
