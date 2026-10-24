@@ -73,6 +73,10 @@ class GeometryTests(unittest.TestCase):
         self.assertEqual(g.widths, [60, 120])
 
 
+def rows_kind(g, i):
+    return g.rows()[i]['kind']
+
+
 class BlankSheetTests(Base):
     def test_blank_sheet_looks_like_a_template(self):
         rows = self.g.rows()
@@ -82,6 +86,18 @@ class BlankSheetTests(Base):
         self.assertEqual([c['title'] for c in M.GRID_COLUMNS],
                          ['STEP NUM', 'FUNCTION TESTED', 'NOMINAL VALUE', 'AS FOUND', 'AS LEFT', 'Out of Tol', 'LOW LIMIT', 'HIGH LIMIT'])
         self.assertTrue(all(not r['problem'] for r in rows))             # no row is flagged on an empty sheet
+
+    def test_adding_a_function_puts_the_cursor_on_the_empty_row_under_its_heading(self):
+        self.assertEqual(self.g.sel_key, 'b:0')                          # a blank sheet starts on its first spare row
+        self.assertTrue(self.g.add_function('ACV'))
+        rows = self.g.rows()
+        self.assertEqual([r['kind'] for r in rows[:3]], ['header', 'blank', 'blank'])
+        self.assertEqual(self.g.row_index(), 1)                          # row 2 (the empty row under the heading), not row 3
+        self.assertEqual(self.g.sel_key, f'e:{self.g.fid}')
+        self.assertEqual(self.g.sel_col, 'nominal')
+        self.assertTrue(self.g.add_function('DCV'))                      # a second section: again the row under ITS heading
+        self.assertEqual(rows_kind(self.g, self.g.row_index() - 1), 'header')
+        self.assertEqual(self.g.sel_key, f'e:{self.g.fid}')
 
     def test_typing_a_value_without_a_function_says_what_to_do(self):
         self.g.select('b:0', 'nominal')

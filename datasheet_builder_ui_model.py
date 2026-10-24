@@ -3164,6 +3164,7 @@ class GridModel(CheckMixin, EditorModel):
         res = super().add_function(kind, name, direction)
         if res.ok:
             res.message = f'Added the section "{self.fn().name}". Click the empty row under it and type a value.'
+            self.select(f'e:{res.detail}', 'nominal')      # the cursor goes to the empty row directly under the new heading (it used to stay on a spare row two lines down)
         return res
 
     def add_rule(self, fid, form, rule_id=None):
