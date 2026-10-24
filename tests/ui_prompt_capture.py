@@ -861,6 +861,11 @@ def _run_shared(make_harness):
 SCENARIOS['shared'] = _run_shared
 
 
+# ---- QT-H (user-built datasheet runtime: dsb_runtime / dsb_override / dsb_prerun): the scenarios live in tests/ui_prompt_capture_dsb.py.  APPEND-ONLY block.
+import ui_prompt_capture_dsb as _dsb  # noqa: E402
+SCENARIOS.update(_dsb.SCENARIOS)
+
+
 def capture(name, harness_class=TkLevelHarness):
     return SCENARIOS[name](lambda answers=None: harness_class(answers))
 

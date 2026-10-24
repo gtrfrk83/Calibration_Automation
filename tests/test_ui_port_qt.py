@@ -35,8 +35,9 @@ if HAVE_QT:
 
 import ui_port  # noqa: E402  (toolkit-free)
 
-# prompts of windows that are not dialogs of this package: report_details (covered elsewhere) and the WP-H handheld windows (their Qt twins are not merged yet)
-SKIP_KINDS = ('ask_reading', 'ask_readings', 'ask_range', 'ask_ir_problem', 'report_details')
+# prompts of windows that are not dialogs of this package: report_details (covered elsewhere) and the handheld windows (proved in tests/test_qt_views_handheld.py)
+SKIP_KINDS = ('ask_reading', 'ask_readings', 'ask_range', 'ask_ir_problem', 'report_details',
+              'ask_typed', 'prerun_list', 'prerun_result')            # the last three: the user datasheet's own windows (tests/test_qt_dsb_runtime.py)
 LAST = {}                                  # record -> what its dialog showed (filled by the per-prompt test, reused by the sequence test)
 FIXTURES = sorted(glob.glob(str(ROOT / 'tests' / 'golden_ui' / 'ui_prompts_*.json')))
 DATE = '1-2-2026'
@@ -657,14 +658,13 @@ class Plumbing(QtCase):
         missing = [n for n in names if not hasattr(ui_port_qt.QtUiPort, n)]
         self.assertEqual(missing, [])
 
-    def test_handheld_methods_are_present_or_name_wp_h(self):
-        port = ui_port_qt.QtUiPort()
-        try:
-            port.ask_range({'id': 'x'}, 1, {}, 'standby', parent=self.win)
-        except NotImplementedError as exc:
-            self.assertIn('WP-H', str(exc))
-        except ImportError:
-            pass                                             # merged WP-H without its Qt view: the clear ImportError names the missing module
+    def test_handheld_methods_are_the_qt_windows(self):
+        """QT-H: the five handheld methods are implemented here (no NotImplementedError fallback); their windows are proved in tests/test_qt_views_handheld.py."""
+        for name in ('ask_reading', 'ask_readings', 'ask_range', 'ask_ir_problem', 'progress_window'):
+            fn = getattr(ui_port_qt.QtUiPort, name)
+            self.assertEqual(fn.__module__, 'ui_port_qt', name)
+            self.assertNotIn('WP-H', (fn.__doc__ or '') + fn.__code__.co_consts.__repr__(), name)
+        self.assertEqual(self.port.view('handheld_dmm_view').__name__, 'handheld_dmm_view_qt')
 
 
 class Selector(unittest.TestCase):
