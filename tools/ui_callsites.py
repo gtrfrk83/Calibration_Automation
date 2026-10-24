@@ -77,6 +77,8 @@ class _Visitor(ast.NodeVisitor):
         if kind is None:
             return None
         kws = {k.arg: _src(k.value) for k in node.keywords if k.arg and k.arg not in DROP_KW}
+        if kind in ('ask_text', 'ask_number') and 'initial' in kws:       # WP-G: the port's `initial=` is the manifest's Tk spelling `initialvalue=` (recorded before any port)
+            kws['initialvalue'] = kws.pop('initial')
         return {'where': '.'.join(self.stack) or '<module>', 'kind': kind, 'args': [_src(a) for a in args], 'kw': dict(sorted(kws.items()))}
 
 

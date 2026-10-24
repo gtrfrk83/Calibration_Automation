@@ -25,6 +25,9 @@
   "code": [
    "Procedures/Agilent_33250A_Verification.py",
    "fgen_verification.py",
+   "fgen_view_tk.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "surprise.py",
    "drivers/base.py",
    "drivers/transport.py",

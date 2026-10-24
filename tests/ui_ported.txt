@@ -11,3 +11,6 @@ k2000: keithley2000_verification.py k2000_view_tk.py Procedures/Keithley_2000_Ve
 a34401a: Procedures/Agilent_34401A.py a34401a_view_tk.py Procedures/Agilent_34401A.procedure.json
 f8846a: Procedures/Fluke_8846A_Verification.py f8846a_view_tk.py Procedures/Fluke_8846A_Verification.procedure.json
 f8808a: fluke8808a_verification.py f8808a_view_tk.py Procedures/Fluke_8808A_Verification.procedure.json
+fgen: fgen_verification.py fgen_view_tk.py Procedures/Agilent_33220A_Verification.procedure.json Procedures/Agilent_33250A_Verification.procedure.json Procedures/Keysight_33210A_Verification.procedure.json
+mdo4000c: mdo4000c_verification.py mdo4000c_view_tk.py Procedures/Tektronix_MDO4000C_Verification.procedure.json
+tds2000c: tds2000c_verification.py tds2000c_view_tk.py Procedures/Tektronix_TDS2000C_Verification.procedure.json
