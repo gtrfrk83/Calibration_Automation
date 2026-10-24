@@ -37,12 +37,10 @@ import math
 import sys
 import threading
 import time
-import tkinter as tk
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk
 from types import SimpleNamespace
 
 HERE = Path(__file__).resolve().parent
@@ -55,13 +53,13 @@ import handheld_dmm as hh
 import reset_startup
 import tds2000c_verification as tds
 import virtualbench
-import ui_theme as ui
 import datasheet_builder as db
 import datasheet_builder_match as dm
 import datasheet_builder_specs as dsp
 import dsb_override
 import dsb_rules as rules
 import procspec
+from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 
 SCOPE_KINDS = ('SCOPE_GAIN', 'SCOPE_OFFSET', 'SCOPE_BW', 'SCOPE_TIMEBASE', 'SCOPE_TRIGGER')
 SCOPE_OPS = {'SCOPE_GAIN': 'scope_dc', 'SCOPE_OFFSET': 'scope_dc', 'SCOPE_BW': 'scope_bw', 'SCOPE_TIMEBASE': 'scope_marker', 'SCOPE_TRIGGER': 'scope_trigger'}
@@ -663,8 +661,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         self._hookup_seen = None
         self.std_addr = {}
         self.dsb_ref = {}
-        self.counter_ref = tk.StringVar(value='EXT')
-        self.period_var = tk.StringVar(value=self.period)
+        self.counter_ref = port.var('EXT')
+        self.period_var = port.var(self.period)
         if self.dsb.get('uid'):
             self.pm_proc_key = 'ds:' + str(self.dsb['uid'])      # verified.py: this datasheet's own verified / locked state, not its model's
         super().__init__(root, self.dsb['model'], demo=demo, spec=spec, io_factory=io_factory, fast_demo=fast_demo)
@@ -747,25 +745,13 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         self._sync_mode_box()
         self.refresh()
 
+    @property
+    def dsb_view(self): return port.view('dsb_runtime_view')                  # the toolkit's window code: dsb_runtime_view_tk (Tk) / dsb_runtime_view_qt (Qt)
+
     def _build_section_bar(self):
         """The control of rule 12: in the bar above the test points, next to the Show boxes; acts on the section chosen in the sidebar."""
-        try:
-            bar = self.shell.section_picker.master
-        except Exception:
-            return
-        box = ttk.Frame(bar)
-        box.pack(side='left', padx=(24, 0))
-        self.section_caption = tk.StringVar(value='Section mode: choose a section on the left')
-        ttk.Label(box, textvariable=self.section_caption, style='Muted.TLabel').pack(side='left', padx=(0, 6))
-        self.section_mode_var = tk.StringVar(value='')
-        self.section_mode_box = ttk.Combobox(box, textvariable=self.section_mode_var, values=[rules.MODE_LABEL[m] for m in self.allowed_modes()], state='disabled', width=15)
-        self.section_mode_box.pack(side='left')
-        self.section_mode_box.bind('<<ComboboxSelected>>', lambda _e: self._on_mode_chosen())
-        try:
-            self.tree.tag_configure('skipped', foreground=ui.C['muted'])
-        except Exception:
-            pass
-        self._sync_mode_box()
+        if self.dsb_view.build_section_bar(self, [rules.MODE_LABEL[m] for m in self.allowed_modes()]):
+            self._sync_mode_box()
 
     def _shown_section(self):
         sec = self.show_section.get()
@@ -899,31 +885,15 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             self._attach_grid_entry()
             return
         self._attach_grid_entry()
-        d = self.shell.drawer_body
-        row = 20
-        ttk.Separator(d).grid(row=row, column=0, columnspan=2, sticky='ew', pady=(12, 10))
-        ttk.Label(d, text='Standards used by this datasheet', style='Bold.TLabel').grid(row=row + 1, column=0, columnspan=2, sticky='w')
-        row += 2
+        rows = []
         for model in self.standards_needed():
             info = dm.DRIVER_TABLE.get(model)
-            self.std_addr[model] = tk.StringVar(value=self.settings.get('addr_' + model, ''))
-            ttk.Label(d, text=f'{model}' + (f' ({info.role})' if info else '')).grid(row=row, column=0, sticky='w', pady=4)
-            ttk.Entry(d, textvariable=self.std_addr[model], width=34).grid(row=row, column=1, sticky='ew', padx=(10, 0), pady=4)
-            row += 1
-        if any(m in COUNTERS for m in self.std_addr):
-            ttk.Label(d, text='Counter timebase').grid(row=row, column=0, sticky='w', pady=4)
-            ttk.Combobox(d, textvariable=self.counter_ref, values=['EXT', 'INT'], state='readonly', width=9).grid(row=row, column=1, sticky='w', padx=(10, 0), pady=4)
-            row += 1
+            self.std_addr[model] = port.var(self.settings.get('addr_' + model, ''))
+            rows.append((model, f'{model}' + (f' ({info.role})' if info else '')))
         periods = [p['id'] for p in self.dsb.get('periods', [])]
-        if len(periods) > 1:
-            ttk.Label(d, text='Specification period').grid(row=row, column=0, sticky='w', pady=4)
-            box = ttk.Combobox(d, textvariable=self.period_var, values=periods, state='readonly', width=9)
-            box.grid(row=row, column=1, sticky='w', padx=(10, 0), pady=4)
-            box.bind('<<ComboboxSelected>>', lambda _e: self.on_period())
-            row += 1
-        ttk.Label(d, text='A blank address means that standard is operated by hand: the program tells you what to set or asks for its reading. '
-                          'The calibrator box above is the fallback for points whose assigned standard is not connected.',
-                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=row, column=0, columnspan=2, sticky='w', pady=(6, 0))
+        self.dsb_view.build_standards(self, rows, any(m in COUNTERS for m in self.std_addr), periods if len(periods) > 1 else [],
+                                      'A blank address means that standard is operated by hand: the program tells you what to set or asks for its reading. '
+                                      'The calibrator box above is the fallback for points whose assigned standard is not connected.')
         manual = sum(1 for p in self.points if not _assigned(p))
         self.shell.notice(f'User-built datasheet "{self.dsb.get("title")}", version {self.dsb.get("version")}. Limits are calculated from the specification the '
                           f'author entered; points a connected standard cannot make are done by hand and marked [manual] in the report.'
@@ -937,19 +907,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             widget = getattr(self, name, None)
             if widget is not None:
                 widget.configure(state='disabled')
-        holder = self.shell.notice_holder
-        for child in list(holder.winfo_children()):                 # the stock text ('the calibrator is programmed and enabled ...') does not apply
-            label = getattr(child, 'label', None)
-            try:
-                if label is not None and str(label.cget('text')).startswith('For each point the calibrator is programmed'):
-                    child.destroy()
-            except Exception:
-                pass
-        d = self.shell.drawer_body
-        ttk.Separator(d).grid(row=20, column=0, columnspan=2, sticky='ew', pady=(12, 10))
-        ttk.Label(d, text='Manual calibration', style='Bold.TLabel').grid(row=21, column=0, columnspan=2, sticky='w')
-        ttk.Label(d, text='No instrument is connected or driven by this program. You set the stimulus with your own standards and type what the unit under test shows.',
-                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=22, column=0, columnspan=2, sticky='w', pady=(6, 0))
+        self.dsb_view.build_manual_drawer(self, 'For each point the calibrator is programmed', 'Manual calibration',
+                                          'No instrument is connected or driven by this program. You set the stimulus with your own standards and type what the unit under test shows.')
         self.shell.notice(f'Manual calibration "{self.dsb.get("title")}", version {self.dsb.get("version")}. ' + self.GRID_HELP +
                           ' Limits are those of the source datasheet.', 'info')
         self.tree.heading('nominal', text='Nominal')
@@ -957,35 +916,16 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
 
     def _retitle_manual(self):
         """The stock banner says 'Performance Verification' and 'the calibrator output is set for you': neither is true of a manual calibration."""
-        old = ' Performance Verification'
-        try:
-            title = str(self.root.title())
-            if old in title:
-                self.root.title(title.replace(old, ' Manual Calibration'))
-        except Exception:
-            pass
-
-        def walk(w):
-            for c in w.winfo_children():
-                yield c
-                yield from walk(c)
-        try:
-            for w in walk(self.root):
-                text = str(w.cget('text')) if 'text' in w.keys() else ''
-                if text.endswith('  -  Performance Verification'):
-                    w.configure(text=text.replace('Performance Verification', 'Manual Calibration'))
-            src = self.spec.get('source', {}).get('document', '')
-            self.shell.subtitle.set(f'Manual calibration: you set the stimulus with your own standards and type each reading  |  {len(self.points)} points  |  {src}')
-        except Exception:
-            pass
+        src = self.spec.get('source', {}).get('document', '')
+        self.dsb_view.retitle_manual(self, 'Performance Verification', 'Manual Calibration',
+                                     f'Manual calibration: you set the stimulus with your own standards and type each reading  |  {len(self.points)} points  |  {src}')
 
     GRID_HELP = ('Click a test point and type the reading (without the unit): Enter saves it and opens the next point, Esc closes the box, '
                  'Up / Down move. Run All Pending asks for each point in its own window instead.')
 
     def _attach_grid_entry(self):
         """Typed readings straight into the test point grid (manual_grid.py) for a manual calibration, and for any datasheet whose every point is done by hand."""
-        import manual_grid                      # always attached: a section can be switched to Typed by hand before Run (grid_allows decides per point)
-        self.grid_entry = manual_grid.GridEntry(self, self.tree)
+        self.dsb_view.attach_grid_entry(self)             # always attached: a section can be switched to Typed by hand before Run (grid_allows decides per point)
 
     def all_hand_set(self) -> bool:
         """True when the standards plan has an assignment for every point and none of them can be automated (datasheet_builder_match): all points are hand-set."""
@@ -1055,13 +995,13 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             return
         if self.found or self.left:
             self.period_var.set(self.period)
-            messagebox.showinfo('Specification period', 'Readings are already recorded, so the period cannot be changed now. Start a new run to use another period.')
+            port.message('info', 'Specification period', 'Readings are already recorded, so the period cannot be changed now. Start a new run to use another period.')
             return
         try:
             self.spec = _with_rules(spec_for_period(self.spec, new))
         except SpecProblem as exc:
             self.period_var.set(self.period)
-            messagebox.showerror('Specification period', str(exc))
+            port.message('error', 'Specification period', str(exc))
             return
         self.period = new
         self.points[:] = runtime_points(self.spec, self.model)
@@ -1129,30 +1069,30 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
 
     def test_connection(self):
         if self.fast_demo:
-            messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.')
+            port.message('info', 'Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.')
             return
         if self.manual_entry:
-            messagebox.showinfo('Manual calibration', 'This is a manual calibration: nothing is connected or driven by the program. Type the readings into the grid.')
+            port.message('info', 'Manual calibration', 'This is a manual calibration: nothing is connected or driven by the program. Type the readings into the grid.')
             return
         if self.virtual and not self.engine_model():
-            messagebox.showinfo('Manual', 'The calibrator is set to Manual: every point is done by hand. The program tells you what to set and asks for the readings.')
+            port.message('info', 'Manual', 'The calibrator is set to Manual: every point is done by hand. The program tells you what to set and asks for the readings.')
             return
         if not self.virtual and not self.wants_connection():
-            messagebox.showinfo('Manual', 'No standard has an address: every point is done by hand. The program will tell you what to set and ask for the readings.')
+            port.message('info', 'Manual', 'No standard has an address: every point is done by hand. The program will tell you what to set and ask for the readings.')
             return
         self.status.set('Connecting ...')
-        self.root.update_idletasks()
+        port.flush(self.root)
         try:
             self.connect()
         except Exception as exc:
             self.disconnect()
             self._set_conn(False)
             self.status.set('Connection error: ' + str(exc))
-            messagebox.showerror('Connection error', str(exc))
+            port.message('error', 'Connection error', str(exc))
             return
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
         self.status.set('Connected: ' + self.io.ident + tag + '. Outputs are NOT enabled.')
-        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'{self.io.ident}{tag}\nOutputs are not enabled.')
+        port.message('info', 'Connected' + (' (DEMO)' if self.virtual else ''), f'{self.io.ident}{tag}\nOutputs are not enabled.')
 
     def _save_settings(self):
         super()._save_settings()
@@ -1234,7 +1174,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         if self.busy or not points:
             return
         if not self.asset.get().strip():
-            messagebox.showwarning('Instrument ID', 'Enter an instrument ID.')
+            port.message('warning', 'Instrument ID', 'Enter an instrument ID.')
             return
         asked = len(points)
         points = [p for p in points if not self.is_skipped(p)]                 # rule 12: a Not-tested section is never run
@@ -1293,7 +1233,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             self.busy = False
             self.status.set('Start-state check failed - run not started: ' + '; '.join(f'{r.instrument}: {r.name}' for r in rules.failed(results)))
             self._save_cmd_log()
-            messagebox.showerror('Check the instrument settings', rules.failure_text(results))
+            port.message('error', 'Check the instrument settings', rules.failure_text(results))
         self._work(io.start_state_check, done)
 
     def _save_cmd_log(self):
@@ -1383,7 +1323,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
                           (' as the level relative to the reference frequency, in dB.' if run['op'] == 'std_flat' else '.') +
                           (f' Done by hand: {r.reason}.' if r.reason else '')))
         steps.append(('Afterwards', 'Switch the unit under test output OFF when the reading has been taken.'))
-        ok = ui.confirm_steps(self.root, 'Check the setup', f'Set up for {p["section"]}', steps, facts=facts, ok='Done - continue')
+        ok = port.operator_prompt('Check the setup', f'Set up for {p["section"]}', steps, facts=facts, ok='Done - continue', parent=self.root)
         if ok and hook is not None:
             self._hookup_seen = hook
         return ok
@@ -1431,7 +1371,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
 
         def wait():
             if not state['done']:
-                self.root.after(40, wait)
+                port.after(self.root, 40, wait)
                 return
             then(state['out'], state['exc'])
         threading.Thread(target=work, daemon=True).start()
@@ -1453,11 +1393,11 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             if exc is not None:
                 self._error(exc)
                 return
-            ok = ui.confirm_steps(self.root, 'Reference level', 'Bandwidth reference',
+            ok = port.operator_prompt('Reference level', 'Bandwidth reference',
                                   [('Output', f'The calibrator outputs {hh._fmt(run["amplitude"], "V")} p-p at the reference frequency {hh._fmt(run["reference_hz"], "Hz")}.'),
                                    ('Scope', 'Set the vertical scale so the trace is easy to read and note the amplitude (or set the measurement / cursors).'),
                                    ('Next', f'The program then applies {hh._fmt(run["frequency"], "Hz")}; type the response relative to the reference, in dB.')],
-                                  facts=[('Point', f'{p["n"]} of {len(self.points)}'), ('Test', hh.describe(p))], ok='Reference noted - continue')
+                                  facts=[('Point', f'{p["n"]} of {len(self.points)}'), ('Test', hh.describe(p))], ok='Reference noted - continue', parent=self.root)
             self._safe_standby()
             if not ok:
                 self.busy = False
@@ -1487,7 +1427,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
                         self.io.standby()
                 else:
                     self._store_measured(p, reading, raw, route)
-                self.root.after(30, lambda: self._next(points, i + 1, key))
+                port.after(self.root, 30, lambda: self._next(points, i + 1, key))
                 return
             armed = self.mo_take_pending(p) if not isinstance(exc, hh.Cancelled) else None
             self._mo_current = None
@@ -1495,7 +1435,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
                 self.mo_commit(p, armed, auto=None, why=str(exc))
                 if self.io is not None:
                     self.io.standby()
-                self.root.after(30, lambda: self._next(points, i + 1, key))
+                port.after(self.root, 30, lambda: self._next(points, i + 1, key))
                 return
             if isinstance(exc, hh.Cancelled):
                 self._ask_abort()
@@ -1504,15 +1444,15 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
                 self._error(exc)
                 return
             self._save_cmd_log()                                    # rule 11: the log is on disk before the dialog
-            choice = messagebox.askyesnocancel('Measuring standard', f'{route.standard} could not give a reading for this point:\n\n{exc}\n\n'
-                                               'Yes = type the standard\'s reading by hand.   No = skip this point.   Cancel = stop the run.')
+            choice = port.ask_yes_no_cancel('Measuring standard', f'{route.standard} could not give a reading for this point:\n\n{exc}\n\n'
+                                            'Yes = type the standard\'s reading by hand.   No = skip this point.   Cancel = stop the run.')
             if choice is None:
                 self.busy = False
                 self.stop = True
                 self.status.set('Stopped. Progress is saved.')
                 self.save()
             elif choice is False:
-                self.root.after(30, lambda: self._next(points, i + 1, key))
+                port.after(self.root, 30, lambda: self._next(points, i + 1, key))
             else:
                 self._stage['typed'] = True
                 p['_route'] = Route(False, '', route.assigned, 'manual', f'{route.standard} gave no reading: {exc}')
@@ -1533,17 +1473,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
 
     def _confirm_on_ui(self, heading, steps, p):
         """A dialog asked from a worker thread: the main thread shows it, the worker waits for the answer (Stopped if declined)."""
-        box, ev = [], threading.Event()
-
-        def ask():
-            try:
-                box.append(ui.confirm_steps(self.root, 'Set the unit under test', heading, steps,
-                                            facts=[('Point', f'{p["n"]} of {len(self.points)}'), ('Test', hh.describe(p))], ok='Set - read it'))
-            finally:
-                ev.set()
-        self.root.after(0, ask)
-        ev.wait()
-        if not box or not box[0]:
+        ok = port.call_from_worker(self.root, lambda: port.operator_prompt('Set the unit under test', heading, steps,
+                                   facts=[('Point', f'{p["n"]} of {len(self.points)}'), ('Test', hh.describe(p))], ok='Set - read it', parent=self.root))
+        if not ok:
             raise hh.Cancelled()
 
     def _store_measured(self, p, reading, raw, route):
@@ -1713,26 +1645,27 @@ def main(argv=None):
     ap.add_argument('--period')
     ap.add_argument('--accept-unverified', dest='accept_unverified', default='')      # fingerprint of the unverified-command list the Builder showed (rule 2)
     args, _unknown = ap.parse_known_args(sys.argv[1:] if argv is None else argv)
-    path = args.spec
-    root = tk.Tk()
-    if not path:
-        folder = appdata.data_dir() / 'user_specs'
-        path = filedialog.askopenfilename(title='Open a user-built datasheet', initialdir=str(folder), filetypes=[('Datasheet spec', '*.json')])
+
+    def build(root):
+        path = args.spec
         if not path:
-            root.destroy()
-            return
-    try:
-        spec = load_spec(path)
-        if not (args.demo or args.fast_demo):
-            import dsb_prerun                         # rule 2: commands not verified on hardware are listed and must be accepted before real instruments run
-            if not dsb_prerun.accepted(root, spec, args.accept_unverified):
-                root.destroy()
+            folder = appdata.data_dir() / 'user_specs'
+            path = port.choose_file(title='Open a user-built datasheet', initialdir=str(folder), filetypes=[('Datasheet spec', '*.json')])
+            if not path:
+                port.close(root)
                 return
-        app = DsbApp(root, spec, demo=args.demo or args.fast_demo, period=args.period, fast_demo=args.fast_demo)
-    except (procspec.SpecError, SpecProblem, OSError, ValueError, db.DsError) as exc:
-        messagebox.showerror('User-built datasheet', f'{path}\n\n{exc}')
-        root.destroy()
-        return
-    if args.asset:
-        app.asset.set(args.asset)
-    root.mainloop()
+        try:
+            spec = load_spec(path)
+            if not (args.demo or args.fast_demo):
+                import dsb_prerun                         # rule 2: commands not verified on hardware are listed and must be accepted before real instruments run
+                if not dsb_prerun.accepted(root, spec, args.accept_unverified):
+                    port.close(root)
+                    return
+            app = DsbApp(root, spec, demo=args.demo or args.fast_demo, period=args.period, fast_demo=args.fast_demo)
+        except (procspec.SpecError, SpecProblem, OSError, ValueError, db.DsError) as exc:
+            port.message('error', 'User-built datasheet', f'{path}\n\n{exc}')
+            port.close(root)
+            return
+        if args.asset:
+            app.asset.set(args.asset)
+    port.run_app(build)

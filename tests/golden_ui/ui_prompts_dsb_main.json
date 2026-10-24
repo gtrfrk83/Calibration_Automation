@@ -1,0 +1,29 @@
+{
+ "main_bad_spec": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "<tests>/no_such_datasheet.json\n\n[Errno 2] No such file or directory: '<tests>/no_such_datasheet.json'",
+   "title": "User-built datasheet"
+  }
+ ],
+ "main_open_file_cancelled": [
+  {
+   "answer": "",
+   "kind": "choose_file",
+   "options": {
+    "filetypes": [
+     [
+      "Datasheet spec",
+      "*.json"
+     ]
+    ],
+    "title": "Open a user-built datasheet"
+   },
+   "text": "",
+   "title": ""
+  }
+ ]
+}

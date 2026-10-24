@@ -134,6 +134,8 @@ def run_app(factory: Callable[[QMainWindow], Any], *, title: str | None = None, 
     except BaseException:
         _excepthook(*sys.exc_info())
         return 1
+    if win.property('_calsuite_closing'):          # the factory closed the window (a launcher whose file question was cancelled): no event loop
+        return 0
     if show:
         win.show()
     try:

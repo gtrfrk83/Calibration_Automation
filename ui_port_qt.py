@@ -21,7 +21,7 @@ What differs from the Tk port, and what is deliberately the same (observable beh
 * `report_details` shows the Qt review window when a Qt screen module `qtui.screens.report_review` exists and covers the engine (its `ask(parent, procedure)` -> dict | None |
   UNAVAILABLE), otherwise the plain 'Report details' popup (the Qt copy of report_dialog.ask_details_plain).
 * `surprise_handler(win)` is surprise.tk_handler's poller with a Qt schedule; the Stop / Continue window is `surprise_view_qt.dialog` (a Qt view module, reached through view()).
-* The handheld windows (ask_reading / ask_range / ask_ir_problem) and `progress_window` / `ask_readings` come from the WP-H interface; see the end of this file.
+* The handheld windows (ask_reading / ask_range / ask_ir_problem: handheld_dmm_view_qt; ask_readings / progress_window: run_queue_ui_qt) are at the end of this file.
 * A secret (ask_text show='*') is masked in the entry and never logged by this module.
 
 This module imports PySide6 and qtui only; no Tk.
@@ -303,51 +303,31 @@ def _report_details_plain(parent, procedure: str = ''):
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
-# HANDHELD WINDOWS (ui_port.py 'Handheld reading windows', work package WP-H).  Like the Tk port, the windows are the toolkit's view code: handheld_dmm_view_qt (reading,
-# IR problem, dial) and a Qt run-queue window module.  Until WP-H merged them these raise NotImplementedError naming WP-H (a missing Qt twin is a clear error, never a
-# silent skip).
+# HANDHELD WINDOWS (ui_port.py 'Handheld reading windows', work package WP-H; Qt side QT-H).  Like the Tk port, the windows are the toolkit's view code: handheld_dmm_view_qt
+# (reading, IR problem, dial) and run_queue_ui_qt (the run-queue reading window and its progress window).  `parent` is resolved to a widget like every prompt's.
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
-def _wp_h_missing(what):
-    raise NotImplementedError(f'{what}: the Qt handheld windows belong to work package WP-H (handheld_dmm_view_qt / run-queue window) and have not been merged')
-
-
-def _handheld_view(self, what):
-    try:
-        return self.view('handheld_dmm_view')
-    except ImportError:
-        _wp_h_missing(what)
-
-
 def _ask_reading(self, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
                  limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None):
-    return _handheld_view(self, 'ask_reading').ask_reading(prompts.resolve_parent(parent), p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate,
-                                                          phase, limit_s, on_expire, device, source, demo_fill)
+    return self.view('handheld_dmm_view').ask_reading(prompts.resolve_parent(parent), p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate,
+                                                      phase, limit_s, on_expire, device, source, demo_fill)
 
 
 def _ask_readings(self, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
                   source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading='', *, parent=None):
-    try:
-        mod = importlib.import_module('run_queue_ui_qt')
-    except ImportError:
-        _wp_h_missing('ask_readings')
-    return mod.ask_readings(prompts.resolve_parent(parent), p, total, out_text, out_note, accept, meters, unit, judge, limit_s, on_expire, device, source, demo_fill,
-                            tol_text, phase, heading)
+    return importlib.import_module('run_queue_ui_qt').ask_readings(prompts.resolve_parent(parent), p, total, out_text, out_note, accept, meters, unit, judge, limit_s,
+                                                                   on_expire, device, source, demo_fill, tol_text, phase, heading)
 
 
 def _ask_range(self, p, total, dial, standby_text, *, parent=None):
-    return _handheld_view(self, 'ask_range').ask_range(prompts.resolve_parent(parent), p, total, dial, standby_text)
+    return self.view('handheld_dmm_view').ask_range(prompts.resolve_parent(parent), p, total, dial, standby_text)
 
 
 def _ask_ir_problem(self, p, total, problems, shown, *, parent=None):
-    return _handheld_view(self, 'ask_ir_problem').ask_ir_problem(prompts.resolve_parent(parent), p, total, problems, shown)
+    return self.view('handheld_dmm_view').ask_ir_problem(prompts.resolve_parent(parent), p, total, problems, shown)
 
 
 def _progress_window(self, win, title='Queue progress', on_show=None, on_export=None):
-    try:
-        mod = importlib.import_module('run_queue_ui_qt')
-    except ImportError:
-        _wp_h_missing('progress_window')
-    return mod.QueueProgress(win, **_kw(title=title if title != 'Queue progress' else None, on_show=on_show, on_export=on_export))
+    return importlib.import_module('run_queue_ui_qt').QueueProgress(win, **_kw(title=title if title != 'Queue progress' else None, on_show=on_show, on_export=on_export))
 
 
 QtUiPort.ask_reading = _ask_reading
