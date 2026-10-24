@@ -759,6 +759,15 @@ def expected_fingerprint(proc, run):
     if not run.get('classes'):
         for d in proc.drivers:
             exp.setdefault(f'drivers/{d}.py', 'driver module named in the sidecar')
+    for f in list(exp):                  # stop-on-surprise: an engine / driver that imports surprise.py depends on it
+        if f.endswith('.py') and f != 'surprise.py':
+            t = _parse(f)
+            if t is not None:
+                for node in ast.walk(t):
+                    names = [a.name for a in node.names] if isinstance(node, ast.Import) else [node.module] if isinstance(node, ast.ImportFrom) and node.module and not node.level else []
+                    if 'surprise' in names:
+                        exp.setdefault('surprise.py', f'stop-on-surprise module imported by {f}')
+                        break
     return exp
 
 

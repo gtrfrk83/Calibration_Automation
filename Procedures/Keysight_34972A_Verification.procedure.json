@@ -23,6 +23,7 @@
   "code": [
    "Procedures/Keysight_34972A_Verification.py",
    "dacq_verification.py",
+   "surprise.py",
    "procspec.py",
    "drivers/base.py",
    "drivers/transport.py",
