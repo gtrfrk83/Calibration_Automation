@@ -112,7 +112,7 @@ def cell_texts(w, idx):
     """The visible text of every cell of the row, as the table shows it (without the check box column)."""
     t = w.table
     row = next(r for r in w.model.rows if r.spec.idx == idx)
-    return tuple(t.source_model.columns[c].text(row) for c in range(1, len(t.source_model.columns)))
+    return tuple(col.text(row) for col in t.source_model.columns[1:] if col.key != 'scope_raw')       # the Qt-only scope expression column is not part of the Tk row values
 
 
 @unittest.skipUnless(READY, WHY)

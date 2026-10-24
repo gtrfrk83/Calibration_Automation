@@ -307,6 +307,18 @@ class Row:
         return self.cur.standard if not self.spec.locked else self.spec.default_std
 
     @property
+    def scope_text(self) -> str:
+        """The A2LA scope's own expression for this point (e.g. '8.9 µV/V + 0.8 µV'), '' when the scope does not cover it.  Display only."""
+        q = self.spec.q
+        if self.spec.calc is not None or not q or q.get('source') == 'none':
+            return ''
+        try:
+            sc = scope()
+            return sc.dmm_text(q['kind'], q['nominal'], q.get('range'), q.get('frequency')) if sc is not None else ''
+        except Exception:
+            return ''
+
+    @property
     def changed(self) -> bool:
         """The person changed this row (a standard, or a typed uncertainty)."""
         return self.typed is not None or self.std_changed

@@ -240,13 +240,14 @@ class ReviewWindow(QDialog):
             Column('budget', self.HEADS[4], width=128, align='right', mono=True, getter=lambda r: M.fmt(r.cur.budget, r.cur.unit) or '—'),
             Column('scope', self.HEADS[5], width=148, align='right', mono=True,
                    getter=lambda r: M.fmt(r.cur.cmc, r.cur.unit) or ('not in scope' if r.cur.status != M.NO_UNC else '—')),
+            Column('scope_raw', 'Scope CMC (as published)', width=190, mono=True, getter=lambda r: r.scope_text or '—'),
             Column('reported', self.HEADS[6], width=160, align='right', mono=True, bold=True, getter=self._reported_text, editable=lambda r: r.can_type()),
             Column('tur', self.HEADS[7], width=110, align='right', mono=True, getter=lambda r: r.tur_text or '—'),
             Column('status', self.HEADS[8], width=186, kind='badge', getter=self._status_text, badge=lambda v, r: BADGE.get(self._status_text(r), 'neutral')),
         ]
         blue = lambda r: 'info' if r.status == M.CHANGED else None            # a changed standard turns the row's text blue (the status badge still says what the uncertainty did)
         for col in cols:
-            if col.key in ('step', 'point', 'tol', 'budget', 'scope', 'reported', 'tur'):
+            if col.key in ('step', 'point', 'tol', 'budget', 'scope', 'scope_raw', 'reported', 'tur'):
                 col.tone = blue
             elif col.key == 'std':
                 _locked = col.tone

@@ -69,6 +69,49 @@ class Scope:
         hits = [_u(b, value) for b in entry['bands'] if _inside(value, b['lo'], b['hi'])]
         return max(hits) if hits else None
 
+    def dmm_text(self, kind, nominal, range_value=None, frequency=None, basis='generate'):
+        """The scope's own expression for the band that `dmm` uses, e.g. '8.9 µV/V + 0.8 µV' ('' when the scope does not cover the point).
+        Rebuilt from the stored relative / absolute / range terms (the scope file keeps numbers, not the printed text): the relative term is shown per
+        unit of the measurand (µV/V), the absolute term in the measurand's unit.  Display only: it never feeds a limit or an uncertainty."""
+        kind = 'OHM' if kind in ('OHM2', 'OHM4') else kind
+        entry = self.entries.get((basis, kind)) or self.entries.get(('measure', kind))
+        if entry is None or kind == 'TEMP':
+            return ''
+        if entry.get('basis') == 'generate':
+            range_value = None
+        unit = _SCOPE_UNIT.get(kind, '')
+        value = abs(nominal)
+        best = None
+        if kind in ('ACV', 'ACI'):
+            if frequency is None:
+                return ''
+            selector = value if (kind == 'ACV' or range_value is None) else range_value
+            by_range = kind == 'ACI' and range_value is not None
+            for block in entry['ranges']:
+                if (block['lo'] <= selector <= block['hi']):
+                    for row in block['rows']:
+                        if _inside(frequency, row['f_lo'], row['f_hi']):
+                            u = _u(row, value, selector if by_range else 0.0)
+                            if best is None or u > best[0]:
+                                best = (u, row)
+        else:
+            for b in entry['bands']:
+                if _inside(value, b['lo'], b['hi']):
+                    u = _u(b, value)
+                    if best is None or u > best[0]:
+                        best = (u, b)
+        if best is None:
+            return ''
+        band = best[1]
+        parts = []
+        if band.get('rel'):
+            parts.append(_si_text(band['rel'], f'{unit}/{unit}' if unit else ''))
+        if band.get('abs'):
+            parts.append(_si_text(band['abs'], unit))
+        if band.get('rng'):
+            parts.append(_si_text(band['rng'], f'{unit}/{unit}') + ' of range')
+        return ' + '.join(parts)
+
     def _ac(self, entry, value, selector, frequency, by_range):
         if frequency is None:
             return None
@@ -115,6 +158,19 @@ class Scope:
                 return 20 * math.log10(1 + max(hits)), 'dB', 'oscilloscope level-sine flatness CMC converted to dB'
             return None, '', 'frequency outside the flatness scope'
         return None, '', 'no scope entry for this test (e.g. RMS noise)'
+
+
+_SCOPE_UNIT = {'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A', 'OHM': 'Ohm', 'CAP': 'F', 'FREQ': 'Hz'}
+
+
+def _si_text(value, unit):
+    """3 significant figures with the first SI prefix that gives 0.1 to 1000 (micro first, as the scope prints): 8.9 µV/V, 0.8 µV, 1.1 mOhm."""
+    for prefix, scale in (('µ', 1e6), ('n', 1e9), ('m', 1e3), ('', 1.0), ('p', 1e12)):
+        m = value * scale
+        if 0.1 <= m < 1000:
+            first, _, rest = unit.partition('/')
+            return f'{m:.3g} {prefix}{first}' + (f'/{rest}' if rest else '')
+    return f'{value:.3g} {unit}'
 
 
 def round_up(value, sig=2):
