@@ -29,6 +29,10 @@ try:
 except ImportError:
     HAVE_QT = False
 
+import surprise  # noqa: E402  (toolkit-free)
+import datamode  # noqa: E402
+import manual_override as MO  # noqa: E402
+
 if HAVE_QT:
     import importlib
     import unittest.mock
@@ -36,9 +40,6 @@ if HAVE_QT:
     from PySide6.QtTest import QTest
     from PySide6.QtWidgets import QApplication, QGridLayout, QHBoxLayout, QLineEdit, QPushButton, QVBoxLayout, QWidget
     import ui_port
-    import surprise
-    import datamode
-    import manual_override as MO
     from qtui import app as qapp
     from qtui.table import Column, DataTable
     from qtui.widgets import Banner, ModalDialog
