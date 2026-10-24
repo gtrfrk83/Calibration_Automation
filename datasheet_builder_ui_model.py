@@ -1745,12 +1745,15 @@ VIEW_COLUMNS = (
     dict(key='step', title='STEP NUM', width=90, edit=False, align='center'),
     dict(key='function', title='FUNCTION TESTED', width=270, edit=True, align='w'),
     dict(key='nominal', title='NOMINAL VALUE', width=240, edit=True, align='w'),
-    dict(key='low', title='LOW LIMIT', width=160, edit=True, align='w'),
-    dict(key='high', title='HIGH LIMIT', width=160, edit=True, align='w'),
+    dict(key='low', title='LOW LIMIT', width=160, edit=False, align='w'),
+    dict(key='high', title='HIGH LIMIT', width=160, edit=False, align='w'),
 )
 # The tolerance is shown as the two ABSOLUTE limits (nominal -/+ tolerance, worked out with the same exact Decimal limit maths as ever), never as a +/- error.
-# What is stored does not change: a tolerance statement (symmetric, or with a different minus side) or a typed Low / High pair (Point.overrides).  The
-# statement itself is edited in the Inspector (Limits and tolerance section) and shown in the status line; typing a number in a limit cell types that limit.
+# The two limit cells are READ-ONLY displays: the limits are made only by the tolerance calculator (Inspector, section Limits and tolerance: the chips and
+# boxes, Asymmetrical tolerance, Calc).  What is stored does not change: a tolerance statement (symmetric, or with a different minus side); an OLD sheet may
+# still hold a stored Low / High pair (Point.overrides), which is read, judged and printed as before but can no longer be written from here.
+TYPED_LIMITS_NOTE = ('This row has limits that were typed earlier. They are stored as they are, marked "typed" in the sheet, and still used. Press Calc to work the limits out from a tolerance instead (the typed limits are then replaced), or Clear typed limits.')
+LIMITS_HINT = 'Limits come from the tolerance calculator: use "Limits and tolerance" in the row panel and press Calc.'
 COL_KEYS = tuple(c['key'] for c in VIEW_COLUMNS)
 EDIT_COLS = tuple(c['key'] for c in VIEW_COLUMNS if c['edit'])
 MIN_ROWS = 16                      # the sheet always shows at least this many rows, so it looks like a blank datasheet
@@ -2049,8 +2052,27 @@ class GridModel(CheckMixin, EditorModel):
             s += ', level ' + db.format_si(p.amplitude, 'V')
         return s
 
-    def parse_nominal(self, fn, text):
-        """Read a nominal cell: '<value> [@ <frequency>] [, level <amplitude>]'.  Returns dict(nominal, frequency, amplitude) as text (None when absent)."""
+    def typing_prefix(self, fn, p=None):
+        """The SI prefix a bare number typed in the NOMINAL cell is taken in: the prefix the cell itself shows (the range's display unit, else the function's,
+        else the one the row's value is shown in; a zero row is shown without a prefix, so it is taken in the base unit), so typing 5 on a row shown in mV gives 5 mV.  A row that does not exist yet has no range: only the
+        function's display unit counts (else the base unit, as before).  Display only: the value is stored as an exact SI number either way."""
+        if fn is None or not fn.unit or fn.unit in db._NO_PREFIX:
+            return ''
+        if p is not None:
+            return self._prefix_for(fn, fn.range(p.range_id), [p.nominal])
+        return _prefix_value(fn.display_unit) if fn.display_unit else ''
+
+    def typing_unit(self, fn, p=None):
+        """'mV' for a row shown in mV, 'V' for volts: the unit spelling a bare number typed in the nominal cell (or the Inspector's Units box) is in."""
+        return (self.typing_prefix(fn, p) + db.unit_symbol(fn.unit)) if fn is not None else ''
+
+    def bare_unit(self, fn, p=None):
+        """typing_unit() when the cell shows a prefixed unit (mV), else '' (a bare number is the base unit, exactly as before)."""
+        return self.typing_unit(fn, p) if self.typing_prefix(fn, p) else ''
+
+    def parse_nominal(self, fn, text, bare_unit=''):
+        """Read a nominal cell: '<value> [@ <frequency>] [, level <amplitude>]'.  Returns dict(nominal, frequency, amplitude) as text (None when absent).
+        A bare number in the value part is taken in `bare_unit` ('mV' = the unit the cell shows) when one is given; an explicit unit ('4950 mV', '5 V') stays as typed."""
         t = (text or '').strip()
         if not t:
             raise db.DsError('nominal', 'Type the value to test, for example 5 V.')
@@ -2066,6 +2088,10 @@ class GridModel(CheckMixin, EditorModel):
             db.parse_quantity(freq, 'Hz')
         if level is not None:
             db.parse_quantity(level)
+        if bare_unit:
+            num, unit_part = split_unit_text(t)
+            if num and not unit_part:
+                t = f'{num} {bare_unit}'
         db.parse_quantity(t, fn.unit or None)
         return dict(nominal=t, frequency=freq, amplitude=level)
 
@@ -2151,7 +2177,7 @@ class GridModel(CheckMixin, EditorModel):
             'point_outside_range': 'The value is bigger than the range it is on: type a larger full scale in the F.S. box and press Calc.',
             'nominal_outside_limit': 'The nominal value is outside its own limits: check the tolerance.',
             'dup_point': 'Two rows test exactly the same thing.',
-            'limit_open': 'Only one limit is typed: type the other limit too (the Low limit and the High limit are both needed to run).',
+            'limit_open': 'Only one limit is stored for this row (typed earlier): the run needs both. Press Calc to work both limits out from a tolerance, or Clear typed limits.',
             'no_points': f'{name} has no test rows yet (skipped when the sheet runs): click the empty row below it and type a value.',
             'no_make': 'Type the make (manufacturer) in the box at the top.',
             'no_model': 'Type the model in the box at the top.',
@@ -2184,7 +2210,7 @@ class GridModel(CheckMixin, EditorModel):
             for pt in fn.points:
                 if pt.enabled and any((ov.get('low') in (None, '')) != (ov.get('high') in (None, '')) for ov in pt.overrides.values()):
                     loc = self.locate(pt.id, 'limit_open')
-                    out.append(dict(level='error', code='limit_open', message=f'Point {pt.id}: only one limit is typed; type the other too.', where=pt.id, step=loc['step'],
+                    out.append(dict(level='error', code='limit_open', message=f'Point {pt.id}: only one limit is stored (typed earlier); use the tolerance calculator (Calc) to give the row both limits.', where=pt.id, step=loc['step'],
                                     function_id=loc['function_id'], range_id=loc['range_id'], point_id=loc['point_id'], spec_index=loc['spec_index'],
                                     location=loc['text']))
         self._grid_problems = (self._rev, out)
@@ -2338,6 +2364,8 @@ class GridModel(CheckMixin, EditorModel):
             return False, 'As Found, As Left and Out of Tol are filled in when the datasheet is used, so they stay blank here.'
         if col == 'step':
             return False, 'Step numbers are worked out from the order of the rows.'
+        if col in ('low', 'high'):
+            return False, LIMITS_HINT
         if self.locked:
             return False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.'
         if r['kind'] == 'header' and col != 'function':
@@ -2446,19 +2474,15 @@ class GridModel(CheckMixin, EditorModel):
                 return Outcome(True, 'Nothing typed.')
             if col == 'function':
                 return self.set_target_function(text)
-            if col == 'nominal':
-                return self._create_from_text(text)
-            return Outcome(False, 'Type the value to test in the NOMINAL VALUE cell first; the limits come after.')
+            return self._create_from_text(text)
         if col == 'function':
             return self.move_point(key, text) if text else Outcome(False, 'A row has to test something. Choose a function, or delete the row.')
         if col == 'nominal':
             return self.clear_row(key) if not text else self._edit_nominal(fn, p, text)
-        if col in ('low', 'high'):
-            return self._edit_limit(fn, p, col, text)
         return Outcome(False, 'That cell cannot be edited.')
 
     def clear_cell(self, key=None, col=None):
-        """The Delete key: nominal clears the whole row, a Low or High limit clears the row's tolerance (both limits), function does nothing."""
+        """The Delete key: nominal clears the whole row; the limit cells are read-only (cell_editable says so); function does nothing."""
         key, col = key or self.sel_key, col or self.sel_col
         ok, why = self.cell_editable(key, col)
         if not ok:
@@ -2470,9 +2494,6 @@ class GridModel(CheckMixin, EditorModel):
             return Outcome(False, 'To remove a whole section use Delete row on its heading (its rows go too; Undo brings them back).')
         if col == 'nominal':
             return self.clear_row(key)
-        if col in ('low', 'high'):
-            fn, p = self.point_of(key)
-            return self._edit_limit(fn, p, col, '')
         return Outcome(False, 'The function of a row cannot be cleared: choose another function instead.')
 
     def _rename_section(self, fn, text):
@@ -2547,7 +2568,7 @@ class GridModel(CheckMixin, EditorModel):
             fn = self.target_function()
             if fn is None:
                 raise db.DsError('function', 'Choose what this row tests first: use the function box under the sheet, or type it in FUNCTION TESTED.')
-            parts = self.parse_nominal(fn, text)
+            parts = self.parse_nominal(fn, text, self.bare_unit(fn))
             p, notes = self._create_point(fn, parts['nominal'], parts['frequency'], parts['amplitude'])
             self.fid = fn.id
             box['key'] = f'p:{fn.id}:{p.id}'
@@ -2560,7 +2581,7 @@ class GridModel(CheckMixin, EditorModel):
         pid = p.id
 
         def act():
-            parts = self.parse_nominal(fn, text)
+            parts = self.parse_nominal(fn, text, self.bare_unit(fn, fn.point(pid)))
             value = db.parse_quantity(parts['nominal'], fn.unit or None)
             q = self._find_duplicate(fn, value, parts['frequency'], parts['amplitude'])
             if q is not None and q.id != pid:
@@ -2720,69 +2741,26 @@ class GridModel(CheckMixin, EditorModel):
         p.overrides.pop(self.period, None)                   # typed limits would win over the statement: the new statement replaces them
         p.edited = True
 
-    # What a person types in a limit cell: a plain quantity is that LIMIT ('4.95', '4.95 V', '-3 dB'); anything that is a tolerance STATEMENT is the
-    # tolerance ('±5 mV', '0.05 % of reading + 2 counts', 'max(...)').  A leading + or - sign alone is a limit's sign, never a statement.
-    _STATEMENT = re.compile(r'^\s*(?:±|\+/-|\+-)|%|\bppm\b|\b(?:rdg|reading|range|counts?|digits?|lsd|f\.?s\.?|i\.?v\.?)\b|^\s*(?:max|min)\s*\(', re.I)
-
-    @classmethod
-    def is_statement(cls, text):
-        """True when `text` typed in a limit cell is a tolerance statement (± or a percentage / counts formula) and not a limit value."""
-        return bool(cls._STATEMENT.search(text or ''))
-
-    def _typed_pair(self, fn, pid, lo, hi, what):
-        db.set_override(fn, pid, self.period, lo, hi)
-        q = fn.point(pid)
-        return Outcome(True, f'{what} {self.limits_display(fn, q)}.', f'p:{fn.id}:{pid}')
-
-    def _edit_limit(self, fn, p, col, text):
-        """Type in a Low limit or High limit cell.  How it is written back (what is stored does not change; this is the only conversion):
-          - a plain quantity ('4.95', '4.95 V') becomes that limit: the row gets TYPED limits (Point.overrides: the typed Low / High pair, which beat any
-            statement); the other limit keeps its current value, so the pair is always complete;
-          - 'low to high' types both at once;
-          - a tolerance statement ('±5 mV', '0.05 % of reading + 2 counts') sets the row's tolerance statement exactly as before and the limits are
-            calculated from it (a symmetric ±x is stored as the usual symmetric statement); typed limits of the period are dropped;
-          - nothing (Delete) clears the row's tolerance, both limits.
-        Typing the number a limit already has changes nothing (so Enter on a calculated cell never turns it into a typed one by accident)."""
+    def clear_typed_limits(self, key=None):
+        """Drop the stored Low / High pair of the row for the period on show (an old sheet may still hold one; the Builder no longer writes them).  The
+        limits then come from the row's tolerance statement; with none they are empty until the tolerance calculator (Calc) gives the row one.  One undo
+        step.  The pairs of the other periods are not touched."""
+        key = key or self.sel_key
+        fn, p = self.point_of(key)
+        if self.locked:
+            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+        if p is None or self.typed_limits(p) is None:
+            return Outcome(False, 'This row has no typed limits.')
         pid = p.id
-        which = col
 
         def act():
             q = fn.point(pid)
-            if fn.info.get('passfail'):
-                raise db.DsError('tol', 'This function is pass / fail: there are no limits to type.')
-            t = text.strip()
-            if not t:
-                q.spec = None
-                q.overrides.pop(self.period, None)
-                return Outcome(True, 'Tolerance cleared: both limits are empty.', f'p:{fn.id}:{pid}')
-            m = re.match(r'^(.+?)\s+to\s+(.+)$', t, re.I)
-            if m:
-                lo, hi = m.group(1).strip(), m.group(2).strip()
-                if split_unit_text(hi)[1] and not split_unit_text(lo)[1]:
-                    lo = f'{lo} {split_unit_text(hi)[1]}'
-                try:
-                    db.parse_quantity(lo, fn.unit or None), db.parse_quantity(hi, fn.unit or None)
-                except db.DsError:
-                    pass                                    # not two quantities: it is read as a statement below
-                else:
-                    return self._typed_pair(fn, pid, lo, hi, 'Typed limits set:')
-            try:
-                value = db.parse_quantity(t, fn.unit or None)
-            except db.DsError:
-                if not self.is_statement(t):
-                    raise
-                self._set_spec(fn, q, t)
-                info = db.point_limits(self.ds, fn, q, self.period)
-                if info.get('error'):
-                    raise db.DsError('tol', info['error'])
-                return Outcome(True, f'Tolerance set: {self.limits_display(fn, q)}.', f'p:{fn.id}:{pid}')
-            lim = self.limit_of(fn, q)
-            cur = (lim.low, lim.high) if lim is not None else (None, None)
-            if cur[which == 'high'] is not None and cur[which == 'high'] == value:
-                return Outcome(True, 'No change: that is the limit already.', f'p:{fn.id}:{pid}')
-            lo, hi = (value, cur[1]) if which == 'low' else (cur[0], value)
-            return self._typed_pair(fn, pid, lo, hi, 'Typed limit set:')
-        return self._do('edit cell', act)
+            q.overrides.pop(self.period, None)
+            q.edited = True
+            shown = self.limits_display(fn, q)
+            return Outcome(True, 'Typed limits cleared. ' + (f'Now {shown}.' if shown else 'The row has no tolerance yet: use the tolerance calculator and press Calc.'),
+                           f'p:{fn.id}:{pid}')
+        return self._do('clear typed limits', act)
 
     # ------------------------------------------------------------------------------------------------------------------ the boxes under the sheet
     @staticmethod
@@ -2791,8 +2769,8 @@ class GridModel(CheckMixin, EditorModel):
 
     def blank_form(self, fn=None):
         """What the boxes show for a new row: % of I.V. ticked, symmetric, one test point, Auto Res on."""
-        return dict(types=['iv'], plus=self.blank_side(), minus=self.blank_side(), asym=False, operand='+', fs_scale='', nominal='', typed=False, low='', high='',
-                    units=db.unit_symbol(fn.unit) if fn else '', freq='', level='', expect='on', multi=False, multi_mode='span', multi_high='', multi_n='5',
+        return dict(types=['iv'], plus=self.blank_side(), minus=self.blank_side(), asym=False, operand='+', fs_scale='', nominal='', low='', high='',
+                    units=self.typing_unit(fn) if fn else '', freq='', level='', expect='on', multi=False, multi_mode='span', multi_high='', multi_n='5',
                     decs='', res='', auto_res=True, remark='', run=True)
 
     def _side_from_expr(self, fn, expr):
@@ -2850,7 +2828,7 @@ class GridModel(CheckMixin, EditorModel):
                   unit_choices=unit_choices(fn.unit) if fn else [], passfail=bool(fn and fn.info.get('passfail')), note='',
                   fields=dict(frequency=bool(fn and (fn.info.get('ac') or fn.info['family'] == 'generator' or fn.info.get('value'))),
                               amplitude=bool(fn and fn.info.get('amplitude')), expect=bool(fn and fn.kind == 'CONT')),
-                  new_row=r['kind'] == 'blank', can_edit=not self.locked and r['kind'] != 'header')
+                  new_row=r['kind'] == 'blank', can_edit=not self.locked and r['kind'] != 'header', typed_limits=False)
         form = self.blank_form(fn)
         if r['kind'] == 'header':
             st['note'] = 'This is a section heading. Click a test row to see and change its tolerance.'
@@ -2870,14 +2848,15 @@ class GridModel(CheckMixin, EditorModel):
                     form['res'] = self.fmt_value(fn, rng, rng.resolution, pre)
             if not st['passfail']:
                 self._form_from_spec(fn, p, form)
-                lo_t, hi_t = self.limit_cells(fn, p)                      # the Low / High limit boxes: calculated (read-only in the window) or typed
-                form.update(low='' if lo_t in ('open', 'no limit') else lo_t, high='' if hi_t in ('open', 'no limit') else hi_t, typed=self.typed_limits(p) is not None)
-                if p.spec is not None and self.typed_limits(p) is None and self.formula_text(fn, p):
-                    st['note'] = (f'Limits calculated from: {self.formula_text(fn, p)}. Change it in the row panel; typing a number in a limit cell types that limit instead.')
+                lo_t, hi_t = self.limit_cells(fn, p)                      # the Low / High limit boxes: always read-only displays of the calculated limits
+                form.update(low='' if lo_t in ('open', 'no limit') else lo_t, high='' if hi_t in ('open', 'no limit') else hi_t)
+                st['typed_limits'] = self.typed_limits(p) is not None
+                if p.spec is not None and not st['typed_limits'] and self.formula_text(fn, p):
+                    st['note'] = f'Limits calculated from: {self.formula_text(fn, p)}. Change it in the row panel and press Calc.'
                 if p.spec is None and fn.governing(p):
                     st['note'] = 'This row follows the specification table (More > Specification table). Press Calc to give it a tolerance of its own.'
-                if any((p.overrides.get(self.period) or {}).get(k) not in (None, '') for k in ('low', 'high')):
-                    st['note'] = 'This row has typed limits. Untick "Type the limits myself" and press Calc to calculate them from a tolerance instead.'
+                if st['typed_limits']:
+                    st['note'] = TYPED_LIMITS_NOTE
         elif r['kind'] == 'blank' and fn is not None:
             st['note'] = f'New row in {fn.name}.'
         st['form'] = form
@@ -2958,17 +2937,11 @@ class GridModel(CheckMixin, EditorModel):
         p.edited = True
         msg = note
         if not fn.info.get('passfail'):
-            if form.get('typed'):
-                # typed limits: the Low and High boxes are the limits (absolute).  Stored as the row's typed pair (Point.overrides); the tolerance statement,
-                # if the row has one, stays as it was and is simply not used while the typed pair is there.
-                lo_t, hi_t = str(form.get('low') or '').strip(), str(form.get('high') or '').strip()
-                if not lo_t or not hi_t:
-                    raise db.DsError('tol', 'Type both the Low limit and the High limit, or untick "Type the limits myself" to calculate them from a tolerance.')
-                db.set_override(fn, p.id, self.period, with_units(lo_t, units), with_units(hi_t, units))
-                p.edited = True
-            else:
-                plus, minus = self.form_spec_texts(fn, form)
-                self._set_spec(fn, p, plus, minus)
+            had_typed = self.typed_limits(p) is not None
+            plus, minus = self.form_spec_texts(fn, form)
+            self._set_spec(fn, p, plus, minus)                    # the new statement replaces any stored typed Low / High pair of the period
+            if had_typed:
+                note = ('The typed limits of this row were replaced by the calculated ones. ' + note).strip()
             info = db.point_limits(self.ds, fn, p, self.period)
             if info.get('error'):
                 raise db.DsError('tol', info['error'])
@@ -3063,8 +3036,6 @@ class GridModel(CheckMixin, EditorModel):
             if fn is None:
                 raise db.DsError('function', 'Choose what these rows test first: use the function box above the spec boxes.')
             units = form.get('units') or db.unit_symbol(fn.unit)
-            if form.get('typed') and not fn.info.get('passfail'):
-                raise db.DsError('multi', 'Several rows at once get their limits from a tolerance (the limits follow each row\'s value): untick "Type the limits myself" first.')
             values = self.multi_values(fn, form)
             freq = with_units(form.get('freq', ''), 'Hz') if str(form.get('freq', '')).strip() else None
             level = str(form.get('level', '')).strip() or None

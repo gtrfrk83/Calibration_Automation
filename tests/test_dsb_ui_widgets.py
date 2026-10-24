@@ -1,7 +1,9 @@
 """datasheet_builder_ui widgets under tests/_tk_stub.py: only proves the module imports, every widget class constructs and every handler runs and
 reaches the model without raising.  It does NOT show what the windows look like: that has never been checked on a real display.
-(The file name sorts after test_beta on purpose: installing the stub earlier would turn test_beta's import error into running tests.)"""
+(The file name sorts after test_beta on purpose: installing the stub earlier would turn test_beta's import inspect
+import error into running tests.)"""
 import importlib.util
+import inspect
 import json
 import sys
 import tempfile
@@ -103,7 +105,7 @@ class GridWidgetStubTests(unittest.TestCase):
         self.assertEqual(win.sheet_key(Ev('Right')), 'break')
         self.assertEqual(win.model.sel_col, 'nominal')
         self.assertEqual(win.sheet_key(Ev('Tab')), 'break')
-        self.assertEqual(win.model.sel_col, 'low')
+        self.assertEqual(win.model.sel_col, 'function')                   # the limit cells are read-only: Tab goes on to the next row
         self.assertEqual(win.sheet_key(Ev('Down')), 'break')
         self.assertEqual(win.sheet_key(Ev('Up')), 'break')
         self.assertEqual(win.sheet_key(Ev('Return')), 'break')           # starts editing: focus goes to the Edit Cell bar
@@ -283,29 +285,65 @@ class GridWidgetStubTests(unittest.TestCase):
         vw.open_new()
         self.assertIn('Select a version', vw.msg.get())
 
-    def test_inspector_shows_the_computed_limits_and_types_them_on_request(self):
+    def test_inspector_shows_the_computed_limits_read_only_and_there_is_no_typed_mode(self):
         win, key = self.build()
         box = win.panel_box
         win.model.select(key, 'low')
         win.sync()
         row = win.model.row(key)
         self.assertEqual((box.v['low'].get(), box.v['high'].get()), (row['low'], row['high']))     # the Low / High limit boxes show the calculated limits
-        self.assertFalse(box.b['typed'].get())
-        self.assertEqual(box.form()['typed'], False)
-        box.b['typed'].set(True)                                      # "Type the limits myself", then type the two limits and press Calc
-        box.typed_changed()
-        box.v['low'].set('4.9'), box.v['high'].set('5.2')
-        self.assertEqual((box.form()['low'], box.form()['high'], box.form()['typed']), ('4.9', '5.2', True))
-        res = win.calc()
+        src = inspect.getsource(self.ui)                              # the stub cannot say what a widget is; the real Tk check (real_tk_checks) looks at the widgets
+        self.assertNotIn('Type the limits myself', src)
+        self.assertNotIn('typed_cb', src)
+        self.assertNotIn('typed_changed', src)
+        self.assertNotIn('typed', box.b)
+        self.assertNotIn('typed', box.form())
+        self.assertNotIn('low', box.form())
+        self.assertFalse(win.model.panel_state(key)['typed_limits'])      # no stored typed limits on this row: no Clear button
+        res = win.calc()                                              # Calc works the limits out from the tolerance boxes, as always
         self.assertTrue(res.ok, res.message)
-        row = win.model.row(key)
-        self.assertEqual(row['limits_from'], 'typed')
-        self.assertTrue(box.b['typed'].get())                         # reloaded from the row: it has typed limits now
-        self.assertEqual((box.v['low'].get(), box.v['high'].get()), (row['low'], row['high']))
         win.model.select(key, 'high')                                 # the cells: the sheet draws both limit columns
         win.sync()
         self.assertEqual(len(win.sheet.geo.widths), 5)
         self.assertEqual([c['key'] for c in self.ui.M.VIEW_COLUMNS][-2:], ['low', 'high'])
+
+    def test_typing_in_a_limit_cell_shows_the_hint_and_does_not_edit(self):
+        win, key = self.build()
+        before = (win.model.row(key)['low'], win.model.row(key)['high'], win.model.dirty)
+        win.model.select(key, 'low')
+        win.sync()
+        self.assertEqual(win.sheet_key(Ev('4', '4')), 'break')            # a printable key in a read-only limit cell: the hint, no edit bar
+        self.assertEqual(win.issue.get(), self.ui.M.LIMITS_HINT)
+        self.assertEqual(win.status.get(), self.ui.M.LIMITS_HINT)
+        self.assertEqual(win.sheet_key(Ev('Return')), 'break')
+        self.assertEqual(win.status.get(), self.ui.M.LIMITS_HINT)
+        self.assertFalse(win.model.cell_editable()[0])
+        win.sheet_key(Ev('Delete'))                                       # Delete does not clear the tolerance either
+        self.assertEqual((win.model.row(key)['low'], win.model.row(key)['high'], win.model.dirty), before)
+
+    def test_stored_typed_limits_are_marked_and_can_be_cleared_from_the_inspector(self):
+        win, key = self.build()
+        fn, p = win.model.point_of(key)
+        p.overrides['1y'] = {'low': '4.9', 'high': '5.2'}
+        win.model._bump()
+        win.model.select(key, 'low')
+        win.sync()
+        box = win.panel_box
+        self.assertEqual(win.model.row(key)['limits_from'], 'typed')
+        self.assertTrue(win.model.panel_state(key)['typed_limits'])
+        self.assertEqual(win.model.panel_state(key)['note'], self.ui.M.TYPED_LIMITS_NOTE)
+        win.sheet.redraw()                                                # the grid draws the small "typed" marker next to the stored limits
+        res = win.clear_typed_limits()
+        self.assertTrue(res.ok, res.message)
+        self.assertNotEqual(win.model.row(key)['limits_from'], 'typed')
+        self.assertFalse(win.model.panel_state(key)['typed_limits'])
+
+    def test_the_period_is_a_label_not_a_picker(self):
+        win, key = self.build()
+        src = inspect.getsource(self.ui)
+        self.assertNotIn('def period_chosen', src)
+        self.assertNotIn('ComboboxSelected>>\', lambda _e: self.period_chosen', src)
+        self.assertIn('period_box = ttk.Label', src)
 
     # ---- layout B: inspector, status line, Run buttons, handheld template
     def test_inspector_follows_the_selected_row_and_hides(self):

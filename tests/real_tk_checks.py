@@ -1153,15 +1153,47 @@ def checks_dsb_layout():
         check(f'{tag}: Low / High limit boxes are read-only while calculated', str(box.low_e.cget('state')) == 'readonly' and str(box.high_e.cget('state')) == 'readonly')
         check(f'{tag}: limit boxes show the sheet cells', box.v['low'].get() == g.row(key)['low'] and box.v['high'].get() == g.row(key)['high'], (box.v['low'].get(), g.row(key)['low']))
         check(f'{tag}: limit boxes inside the panel', inside(win, box.low_e) or box.scroll.winfo_ismapped())
-        box.b['typed'].set(True)
-        box.typed_changed()
+        check(f'{tag}: no "Type the limits myself" check box', not hasattr(box, 'typed_cb') and 'typed' not in box.b)
+        check(f'{tag}: tolerance chips and boxes always shown, limits stay read-only', box.chip_frame.winfo_ismapped() and str(box.low_e.cget('state')) == 'readonly'
+              and str(box.high_e.cget('state')) == 'readonly' and str(box.clear_typed_b.winfo_manager()) == '')
+        for col in ('low', 'high'):                                 # typing in a limit cell: nothing is edited, the status line gives the hint
+            g.select(key, col)
+            win.sync()
+            win.sheet.focus_force()
+            pump(root, 5)
+            was = (g.row(key)['low'], g.row(key)['high'], g.dirty)
+            win.sheet.event_generate('<Key>', keysym='4')
+            pump(root, 10)
+            check(f'{tag}: typing in the {col} limit cell shows the hint and edits nothing', win.status.get() == DM.LIMITS_HINT and str(win.bar.cget('state')) == 'readonly'
+                  and (g.row(key)['low'], g.row(key)['high'], g.dirty) == was and win.focus_get() is not win.bar, (win.status.get(), was))
+        # a bare number is taken in the unit the row shows: 5 on a mV row is 5 mV
+        mv = next(r for r in g.rows() if r['kind'] == 'point' and r['fid'] == 'dcv' and r['nominal'] == '+50.0000 mV')
+        g.select(mv['key'], 'nominal')
+        win.sync()
+        win.bar_v.set('5')
+        win.bar.focus_force()
+        win.bar.event_generate('<Return>')
         pump(root, 15)
-        check(f'{tag}: typing the limits unlocks the boxes and hides the tolerance boxes', str(box.low_e.cget('state')) == 'normal' and not box.chip_frame.winfo_ismapped()
-              and not any(box.cells[n].winfo_ismapped() for n in box.tol_names))
-        box.b['typed'].set(False)
-        box.typed_changed()
+        got = [r for r in g.rows() if r['kind'] == 'point' and r['fid'] == 'dcv' and r['nominal'].endswith('mV') and r['nominal'].startswith('+5.0000 ')]
+        check(f'{tag}: typing 5 on a mV row gives 5 mV', bool(got) and g.point_of(got[0]['key'])[1].nominal == DM.db.D('0.005'), [r['nominal'] for r in g.rows() if r['kind'] == 'point'][:8])
+        g.select(key, 'low')
+        win.sync()
+        pump(root, 10)
+        # a stored (older) typed Low / High pair: shown with a small marker, read-only, and cleared from the panel (or replaced by Calc)
+        fn_, p_ = g.point_of(key)
+        p_.overrides[g.period] = {'low': '4.9', 'high': '5.2'}
+        g._bump()
+        win.sync()
+        win.sheet.redraw()
         pump(root, 15)
-        check(f'{tag}: unticked again: tolerance boxes back, limits read-only', box.chip_frame.winfo_ismapped() and str(box.low_e.cget('state')) == 'readonly')
+        marks = [i for i in win.sheet.find_all() if win.sheet.type(i) == 'text' and win.sheet.itemcget(i, 'text') == 'typed']
+        check(f'{tag}: a stored typed pair is marked in the grid and offers Clear typed limits', g.row(key)['limits_from'] == 'typed' and len(marks) >= 2
+              and str(box.clear_typed_b.winfo_manager()) == 'pack' and str(box.low_e.cget('state')) == 'readonly' and 'typed earlier' in box.limit_note.cget('text'), (len(marks),))
+        check(f'{tag}: Clear typed limits button inside the panel', inside(win, box.clear_typed_b) or box.scroll.winfo_ismapped())
+        box.clear_typed_b.invoke()
+        pump(root, 15)
+        check(f'{tag}: Clear typed limits removes the marker and the button', g.row(key)['limits_from'] != 'typed' and str(box.clear_typed_b.winfo_manager()) == ''
+              and not [i for i in win.sheet.find_all() if win.sheet.type(i) == 'text' and win.sheet.itemcget(i, 'text') == 'typed'])
         # chips toggle with the keyboard
         chip = box.chips[1]
         chip.focus_force()

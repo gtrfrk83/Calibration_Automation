@@ -175,135 +175,135 @@ class GridShowsLimits(unittest.TestCase):
         self.assertNotIn('%', row['low'] + row['high'])
 
 
-class EditingLimitCells(unittest.TestCase):
+def stored(g):
+    """Everything about the sheet that is stored (a limit cell must never change any of it)."""
+    return json.dumps(g.ds.to_dict(), sort_keys=True, default=str)
+
+
+class LimitCellsAreReadOnly(unittest.TestCase):
+    """The Low / High limit cells show what the tolerance calculator works out and cannot be typed in: no 'Type the limits myself', no typed-limit path."""
+
     def setUp(self):
         self.g = grid(fx.dmm_34461a_like())
         self.row = next(r for r in points(self.g, 'dcv') if r['nominal'] == '+5.00000 V')
         self.key = self.row['key']
         self.fn, self.p = self.g.point_of(self.key)
 
-    def now(self):
-        return self.g.row(self.key)
+    def test_the_limit_columns_are_not_editable_and_the_hint_names_the_calculator(self):
+        for col in ('low', 'high'):
+            ok, why = self.g.cell_editable(self.key, col)
+            self.assertFalse(ok)
+            self.assertEqual(why, M.LIMITS_HINT)
+        self.assertIn('tolerance calculator', M.LIMITS_HINT)
+        self.assertEqual(M.EDIT_COLS, ('function', 'nominal'))
+        blank = next(r['key'] for r in self.g.rows() if r['kind'] == 'blank')
+        self.assertFalse(self.g.cell_editable(blank, 'low')[0])
 
-    def test_typing_a_number_in_low_types_that_limit_and_keeps_the_high_one(self):
-        before = limit_si(self.g, self.now())
-        res = self.g.commit_cell('4.95', self.key, 'low', move='stay')
-        self.assertTrue(res.ok, res.message)
-        self.assertEqual(limit_si(self.g, self.now()), (D('4.95'), before[1]))
-        self.assertEqual(self.p.overrides['1y'], {'low': '4.95', 'high': db.fmt(before[1])})     # stored as the typed pair (absolute SI strings)
-        self.assertEqual(self.now()['limits_from'], 'typed')
-        self.assertIsNone(self.p.spec)                                # the function's table is not touched
-        self.assertEqual(self.p.overrides.get('90d'), None)           # only the period on show
-
-    def test_typing_a_number_in_high_with_a_unit(self):
-        res = self.g.commit_cell('5050 mV', self.key, 'high', move='stay')
-        self.assertTrue(res.ok, res.message)
-        self.assertEqual(limit_si(self.g, self.now())[1], D('5.05'))
-
-    def test_enter_on_a_calculated_cell_without_changing_it_does_not_turn_it_into_typed_limits(self):
-        text = self.g.cell_text(self.key, 'low')
-        res = self.g.commit_cell(text, self.key, 'low', move='stay')
-        self.assertTrue(res.ok)
-        self.assertIn('No change', res.message)
-        self.assertEqual(self.p.overrides, {})
-        self.assertEqual(self.now()['limits_from'], 'formula')
-
-    def test_low_to_high_types_both(self):
-        res = self.g.commit_cell('4.9 to 5.2 V', self.key, 'low', move='stay')
-        self.assertTrue(res.ok, res.message)
-        self.assertEqual(limit_si(self.g, self.now()), (D('4.9'), D('5.2')))
-
-    def test_a_plus_minus_value_is_a_symmetric_tolerance_as_before(self):
-        res = self.g.commit_cell('±5 mV', self.key, 'high', move='stay')
-        self.assertTrue(res.ok, res.message)
-        lo, hi = limit_si(self.g, self.now())
-        nominal = self.p.nominal
-        self.assertEqual((lo, hi), (nominal - D('0.005'), nominal + D('0.005')))
-        self.assertIsNotNone(self.p.spec)
-        self.assertEqual(self.p.spec.exprs['1y'].printed, '±5 mV')
-        self.assertEqual(self.p.overrides, {})
-        self.assertEqual(self.now()['limits_from'], 'formula')
-        self.assertNotIn('±', self.now()['low'] + self.now()['high'])
-
-    def test_a_formula_typed_in_a_limit_cell_sets_the_tolerance_statement(self):
-        res = self.g.commit_cell('0.05 % of reading + 2 counts', self.key, 'low', move='stay')
-        self.assertTrue(res.ok, res.message)
-        res_counts = self.fn.range(self.p.range_id).resolution
-        tol = self.p.nominal * D('0.0005') + 2 * res_counts
-        self.assertEqual(limit_si(self.g, self.now()), (self.p.nominal - tol, self.p.nominal + tol))
-        self.assertEqual(self.now()['formula'], '0.05 % of reading + 2 counts')
-
-    def test_a_formula_after_typed_limits_replaces_them(self):
-        self.g.commit_cell('4.9 to 5.2', self.key, 'low', move='stay')
-        self.assertEqual(self.now()['limits_from'], 'typed')
-        self.g.commit_cell('0.1 % of reading', self.key, 'high', move='stay')
-        self.assertEqual(self.now()['limits_from'], 'formula')
+    def test_typing_anything_in_a_limit_cell_changes_nothing(self):
+        before = stored(self.g)
+        for col in ('low', 'high'):
+            for text in ('4.95', '5050 mV', '4.9 to 5.1', '±5 mV', '0.05 % of reading', 'abc', '-1'):
+                res = self.g.commit_cell(text, self.key, col, move='stay')
+                self.assertFalse(res.ok, (col, text))
+                self.assertEqual(res.message, M.LIMITS_HINT)
+        self.assertEqual(stored(self.g), before)
         self.assertEqual(self.p.overrides, {})
 
-    def test_negative_numbers_are_limits_not_statements(self):
-        self.assertFalse(M.GridModel.is_statement('-3'))
-        self.assertFalse(M.GridModel.is_statement('-3 mV'))
-        self.assertFalse(M.GridModel.is_statement('+4.99 V'))
-        self.assertTrue(M.GridModel.is_statement('±3 mV'))
-        self.assertTrue(M.GridModel.is_statement('0.01 %'))
-        self.assertTrue(M.GridModel.is_statement('2 counts'))
-        self.assertTrue(M.GridModel.is_statement('max(0.01 %, 50 uV)'))
+    def test_delete_on_a_limit_cell_does_not_clear_the_tolerance(self):
+        before = stored(self.g)
+        for col in ('low', 'high'):
+            self.g.select(self.key, col)
+            res = self.g.clear_cell()
+            self.assertFalse(res.ok)
+            self.assertEqual(res.message, M.LIMITS_HINT)
+        self.assertEqual(stored(self.g), before)
 
-    def test_delete_clears_both_limits(self):
-        self.g.commit_cell('4.9 to 5.2', self.key, 'low', move='stay')
-        self.g.select(self.key, 'high')
-        res = self.g.clear_cell()
+    def test_the_typed_limit_code_is_gone(self):
+        for name in ('_edit_limit', '_typed_pair', 'is_statement'):
+            self.assertFalse(hasattr(M.GridModel, name), name)
+        self.assertNotIn('typed', self.g.blank_form())
+
+    def test_tab_skips_the_limit_cells(self):
+        self.g.select(self.key, 'nominal')
+        self.g.tab()
+        self.assertEqual(self.g.sel_col, 'function')
+        self.assertNotEqual(self.g.sel_key, self.key)
+
+    def test_the_edit_bar_still_shows_the_calculated_limit(self):
+        self.g.select(self.key, 'low')
+        self.assertEqual(self.g.cell_text(), self.row['low'])
+
+    def test_the_calculator_changes_the_displayed_limits_and_undo_brings_them_back(self):
+        before = (self.row['low'], self.row['high'])
+        form = self.g.panel_state(self.key)['form']
+        form.update(types=['iv'])
+        form['plus'].update(iv='0.1')
+        res = self.g.calc_row(self.key, form)
         self.assertTrue(res.ok, res.message)
-        self.assertIn('both limits', res.message)
-        self.assertEqual(self.p.overrides, {})
-
-    def test_bad_text_changes_nothing_and_says_what_to_type(self):
-        before = (dict(self.p.overrides), self.p.spec)
-        res = self.g.commit_cell('abc', self.key, 'low', move='stay')
-        self.assertFalse(res.ok)
-        self.assertEqual((dict(self.p.overrides), self.p.spec), before)
-
-    def test_inverted_limits_are_flagged_on_the_row(self):
-        self.g.commit_cell('6', self.key, 'low', move='stay')
-        row = self.now()
-        self.assertEqual(row['level'], 'error')
-        self.assertEqual(set(row['bad']) & {'low', 'high'}, {'low', 'high'})
-
-    def test_undo_brings_the_calculated_limits_back(self):
-        before = (self.now()['low'], self.now()['high'])
-        self.g.commit_cell('4.9', self.key, 'low', move='stay')
-        self.assertNotEqual((self.now()['low'], self.now()['high']), before)
+        self.assertEqual(limit_si(self.g, self.g.row(self.key)), (self.p.nominal * D('0.999'), self.p.nominal * D('1.001')))
         self.assertTrue(self.g.undo().ok)
-        self.assertEqual((self.now()['low'], self.now()['high']), before)
+        self.assertEqual((self.g.row(self.key)['low'], self.g.row(self.key)['high']), before)
 
-    def test_a_new_row_with_only_one_limit_typed_is_an_error_until_the_other_is_typed(self):
-        g = grid(db.Datasheet('A', 'B', 'c'))
-        self.assertTrue(g.set_target_function('DC volts').ok)
-        g.select('b:0', 'nominal')
-        self.assertTrue(g.commit_cell('5 V').ok)
-        key = points(g)[0]['key']
-        res = g.commit_cell('4.9', key, 'low', move='stay')
-        self.assertTrue(res.ok, res.message)
-        row = g.row(key)
-        self.assertEqual((row['low'], row['high']), ('4.9 V', 'open'))
-        self.assertIn('limit_open', [p['code'] for p in g.problems()])
-        self.assertEqual(row['level'], 'error')
-        self.assertTrue(g.commit_cell('5.1', key, 'high', move='stay').ok)
-        self.assertNotIn('limit_open', [p['code'] for p in g.problems()])
-        self.assertEqual((g.row(key)['low'], g.row(key)['high']), ('4.9 V', '5.1 V'))
 
-    def test_percent_units_function_takes_a_percent_limit(self):
-        ds = db.Datasheet('A', 'B', 'c')
-        ds.set_periods([('1y', '1 year')], '1y')
-        f = ds.add_function('PCT')
-        f.add_range('100', '0.1')
-        ds.set_spec(f, '0.5 % of reading')
-        db.add_point(f, 50)
-        g = grid(ds)
-        key = points(g)[0]['key']
-        res = g.commit_cell('49 %', key, 'low', move='stay')
+class StoredTypedLimitsStillWork(unittest.TestCase):
+    """An old sheet may hold a stored Low / High pair (Point.overrides): it is read, judged and printed as before, shown with a marker, and can be cleared
+    (or replaced by the calculator).  Nothing is dropped silently."""
+
+    def setUp(self):
+        self.g = grid(dsb_golden.sheets()['dmm_typed_limits'])
+        self.fn = self.g.ds.function('dcv')
+        self.p = self.fn.points[2]                                    # typed 4.9 .. 5.2 for the 1y period
+        self.key = f'p:dcv:{self.p.id}'
+
+    def test_it_is_shown_as_the_stored_pair_with_a_marker_flag(self):
+        row = self.g.row(self.key)
+        self.assertEqual(row['limits_from'], 'typed')
+        self.assertEqual((shown_si(self.g, row, 'low'), shown_si(self.g, row, 'high')), (D('4.9'), D('5.2')))
+        st = self.g.panel_state(self.key)
+        self.assertTrue(st['typed_limits'])
+        self.assertEqual(st['note'], M.TYPED_LIMITS_NOTE)
+        self.assertFalse(self.g.panel_state(points(self.g, 'dcv')[-1]['key'])['typed_limits'])
+
+    def test_it_cannot_be_edited_in_the_cell(self):
+        before = stored(self.g)
+        self.assertFalse(self.g.commit_cell('4.5', self.key, 'low', move='stay').ok)
+        self.assertEqual(stored(self.g), before)
+
+    def test_clear_typed_limits_removes_the_pair_of_the_period_on_show_only(self):
+        self.p.overrides['90d'] = {'low': '1', 'high': '2'}           # another period's pair is stored data: it must stay
+        res = self.g.clear_typed_limits(self.key)
         self.assertTrue(res.ok, res.message)
-        self.assertEqual(limit_si(g, g.row(key))[0], D('49'))
+        self.assertNotIn('1y', self.p.overrides)
+        self.assertEqual(self.p.overrides['90d'], {'low': '1', 'high': '2'})
+        self.assertNotEqual(self.g.row(self.key)['limits_from'], 'typed')
+        self.assertFalse(self.g.clear_typed_limits(self.key).ok)       # nothing left to clear
+        self.assertTrue(self.g.undo().ok)
+        self.assertEqual(self.g.ds.function('dcv').points[2].overrides['1y'], {'low': '4.9', 'high': '5.2'})
+
+    def test_calc_replaces_the_pair_and_says_so(self):
+        form = self.g.panel_state(self.key)['form']
+        form.update(types=['iv'])
+        form['plus'].update(iv='0.1')
+        res = self.g.calc_row(self.key, form)
+        self.assertTrue(res.ok, res.message)
+        self.assertIn('typed limits of this row were replaced', res.message)
+        self.assertNotIn('1y', self.p.overrides)
+        self.assertEqual(self.g.row(self.key)['limits_from'], 'formula')
+
+    def test_calc_with_no_tolerance_given_keeps_the_pair(self):
+        form = self.g.panel_state(self.key)['form']
+        form.update(types=[])
+        self.assertFalse(self.g.calc_row(self.key, form).ok)
+        self.assertEqual(self.p.overrides['1y'], {'low': '4.9', 'high': '5.2'})
+
+    def test_a_row_with_one_stored_limit_is_still_an_error(self):
+        g = grid(fx.dmm_34461a_like())
+        row = next(r for r in points(g, 'dcv') if r['nominal'] == '+5.00000 V')
+        p = g.point_of(row['key'])[1]
+        p.overrides['1y'] = {'low': '4.9', 'high': ''}
+        g._bump()
+        self.assertIn('limit_open', [x['code'] for x in g.problems()])
+        self.assertEqual(g.row(row['key'])['level'], 'error')
 
 
 class InspectorPath(unittest.TestCase):
@@ -313,54 +313,31 @@ class InspectorPath(unittest.TestCase):
         self.key = self.row['key']
         self.fn, self.p = self.g.point_of(self.key)
 
-    def test_panel_state_carries_the_limit_boxes(self):
-        form = self.g.panel_state(self.key)['form']
-        self.assertFalse(form['typed'])
+    def test_panel_state_carries_the_limit_boxes_and_no_typed_mode(self):
+        st = self.g.panel_state(self.key)
+        form = st['form']
+        self.assertNotIn('typed', form)
+        self.assertFalse(st['typed_limits'])
         self.assertEqual((form['low'], form['high']), (self.row['low'], self.row['high']))
 
-    def test_typed_form_stores_the_pair_and_both_boxes_are_needed(self):
+    def test_the_limit_boxes_are_ignored_by_calc(self):
         form = self.g.panel_state(self.key)['form']
-        form.update(typed=True, low='4.9', high='')
-        res = self.g.calc_row(self.key, form)
-        self.assertFalse(res.ok)
-        self.assertIn('both', res.message)
-        self.assertEqual(self.p.overrides, {})
-        form.update(high='5.2')
-        res = self.g.calc_row(self.key, form)
-        self.assertTrue(res.ok, res.message)
-        self.assertIn('Low limit 4.90000 V, High limit 5.20000 V', res.message)
-        self.assertEqual(limit_si(self.g, self.g.row(self.key)), (D('4.9'), D('5.2')))
-        self.assertTrue(self.g.panel_state(self.key)['form']['typed'])
-
-    def test_unticking_and_calc_goes_back_to_a_calculated_tolerance(self):
-        form = self.g.panel_state(self.key)['form']
-        form.update(typed=True, low='4.9', high='5.2')
-        self.g.calc_row(self.key, form)
-        form = self.g.panel_state(self.key)['form']
-        form.update(typed=False, types=['iv'])
-        form['plus'].update(iv='0.1')
-        res = self.g.calc_row(self.key, form)
-        self.assertTrue(res.ok, res.message)
-        self.assertEqual(self.p.overrides, {})
-        self.assertEqual(self.g.row(self.key)['limits_from'], 'formula')
-        self.assertEqual(limit_si(self.g, self.g.row(self.key)), (self.p.nominal * D('0.999'), self.p.nominal * D('1.001')))
-
-    def test_calc_without_touching_the_limit_boxes_calculates_as_before(self):
-        form = self.g.panel_state(self.key)['form']
-        form.update(types=['iv'])
+        form.update(types=['iv'], low='1', high='2')
         form['plus'].update(iv='0.05')
         res = self.g.calc_row(self.key, form)
         self.assertTrue(res.ok, res.message)
         self.assertIn('Low limit', res.message)
         self.assertNotIn('±', res.message)
         self.assertEqual(self.p.overrides, {})
+        self.assertEqual(limit_si(self.g, self.g.row(self.key)), (self.p.nominal * D('0.9995'), self.p.nominal * D('1.0005')))
 
-    def test_several_rows_at_once_need_a_tolerance_not_typed_limits(self):
+    def test_several_rows_at_once_get_their_limits_from_the_tolerance(self):
         form = self.g.panel_state(self.key)['form']
-        form.update(typed=True, low='1', high='2', multi=True, multi_high='9', multi_n='3')
+        form.update(types=['iv'], multi=True, nominal='6', multi_high='9', multi_n='3')
+        form['plus'].update(iv='0.1')
         res = self.g.calc_row(self.key, form)
-        self.assertFalse(res.ok)
-        self.assertIn('Type the limits myself', res.message)
+        self.assertTrue(res.ok, res.message)
+        self.assertIn('rows added', res.message)
 
     def test_asymmetric_formula_shows_both_computed_limits(self):
         form = self.g.panel_state(self.key)['form']
@@ -371,6 +348,74 @@ class InspectorPath(unittest.TestCase):
         lo, hi = limit_si(self.g, self.g.row(self.key))
         self.assertEqual((lo, hi), (self.p.nominal * D('0.98'), self.p.nominal * D('1.01')))
         self.assertTrue(self.g.row(self.key)['formula'].startswith('1 %'))
+
+
+class BareNumberIsInTheUnitShown(unittest.TestCase):
+    """A bare number typed in a NOMINAL cell is taken in the unit the row shows: 5 on a mV row is 5 mV (not 5 V).  An explicit unit stays as typed."""
+
+    def setUp(self):
+        self.g = grid(fx.dmm_34461a_like())
+
+    def row(self, nominal):
+        return next(r for r in points(self.g, 'dcv') if r['nominal'] == nominal)
+
+    def nominal_of(self, key):
+        return self.g.point_of(key)[1].nominal
+
+    def test_5_on_a_mV_row_is_5_mV(self):
+        r = self.row('+50.0000 mV')
+        res = self.g.commit_cell('5', r['key'], 'nominal', move='stay')
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(self.nominal_of(res.detail), D('0.005'))
+        self.assertEqual(self.g.row(res.detail)['nominal'], '+5.0000 mV')       # zero padded to the range resolution (100 nV on the 100 mV range)
+
+    def test_explicit_units_stay_as_typed(self):
+        r = self.row('+50.0000 mV')
+        res = self.g.commit_cell('0.02 V', r['key'], 'nominal', move='stay')
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(self.nominal_of(res.detail), D('0.02'))
+        r = self.row('+5.00000 V')
+        res = self.g.commit_cell('4950 mV', r['key'], 'nominal', move='stay')
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(self.nominal_of(res.detail), D('4.95'))
+
+    def test_5_on_a_volt_row_is_5_V(self):
+        r = self.row('+10.0000 V')
+        res = self.g.commit_cell('7', r['key'], 'nominal', move='stay')
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(self.nominal_of(res.detail), D('7'))
+
+    def test_a_new_row_follows_the_functions_display_unit(self):
+        fn = self.g.ds.function('dcv')
+        self.assertEqual(self.g.bare_unit(fn), '')                   # automatic: a bare number is the base unit, as it always was
+        fn.display_unit = 'm'
+        self.assertEqual(self.g.bare_unit(fn), 'mV')
+        self.assertEqual(self.g.blank_form(fn)['units'], 'mV')
+        self.g._bump()
+        self.assertTrue(self.g.set_target_function('DC volts').ok)
+        key = next(r['key'] for r in self.g.rows() if r['kind'] == 'blank')
+        res = self.g.commit_cell('3', key, 'nominal', move='stay')
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(self.nominal_of(res.detail), D('0.003'))
+
+    def test_the_range_display_unit_wins(self):
+        fn = self.g.ds.function('dcv')
+        fn.range('r10').display_unit = 'm'
+        self.g._bump()
+        r = self.row('+5000.00 mV')
+        res = self.g.commit_cell('4000', r['key'], 'nominal', move='stay')
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(self.nominal_of(res.detail), D('4'))
+
+    def test_the_inspector_units_box_agrees(self):
+        r = self.row('+50.0000 mV')
+        form = self.g.panel_state(r['key'])['form']
+        self.assertEqual(form['units'], 'mV')
+        form.update(nominal='5', types=['iv'])
+        form['plus'].update(iv='0.1')
+        res = self.g.calc_row(r['key'], form)
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(self.g.point_of(r['key'])[1].nominal, D('0.005'))
 
 
 class RunWindowAndReport(unittest.TestCase):
