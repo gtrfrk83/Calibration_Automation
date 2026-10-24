@@ -137,6 +137,54 @@ def osc_dc(volts, impedance='1M', standard='5560A', scope=None):
         return b
 
 
+RF_LEVEL_FLOOR_DBM = -48.0       # the printed RF level accuracy rows read 'down to -48 dBm' (96270A Technical Data p.6, Leveling Head O/P)
+
+
+def rf_level(level_dbm, frequencies, standard='96270A', scope=None, cmc=None):
+    """Budget (dB) for an RF level the Fluke 96270A applies to the MDO4000C RF input (absolute amplitude / level flatness sweep), or None when the standard's
+    sheet does not cover EVERY swept frequency at that level (nothing is extrapolated, interpolated or taken from a 'typical' row).
+    Uses only the sheet's 'RF Level Accuracy ... [Leveling Head O/P]' rows 'down to -48 dBm' (bands 0-100 kHz, 100 kHz-128 MHz, 4 GHz), in dB as printed.
+    A sweep takes the LARGEST limit of the bands it crosses (the larger limit at a border, as everywhere).  u = limit / divisor (sheet level, k = 2 when none
+    is printed), + resolution only if the sheet row has one, RSS, k = 2.  `cmc` (dB) is the scope CMC where the lab scope has an entry; there is none for RF
+    level today, so the default is no floor: reported = ceil_sig(max(EMU, CMC)) when one is given."""
+    if isinstance(standard, (str, int)):
+        key = standard
+        standard = sm.standard(key)
+        if standard is None:
+            sm.seed()
+            standard = sm.standard(key)
+    freqs = [f for f in frequencies]
+    if standard is None or not freqs or level_dbm < RF_LEVEL_FLOOR_DBM:
+        return None
+    rows = [r for r in standard.rows if r['function'].startswith('RF Level Accuracy') and 'Leveling Head O/P' in r['function']
+            and 'down to -48 dBm' in r['label'] and r['unit'] == 'dB' and r['direction'] == 'output' and r['freq_lo'] is not None]
+    worst = None
+    for f in freqs:
+        hits = []
+        for r in rows:
+            if r['freq_lo'] <= f <= r['freq_hi']:
+                spec = next((x for x in r['specs'] if x['period'] == standard.period and not x.get('error')), None)
+                if spec is not None:
+                    hits.append(sm.Hit(r, spec, level_dbm))
+        if not hits:
+            return None
+        h = max(hits, key=lambda x: x.limit)
+        if worst is None or h.limit > worst.limit:
+            worst = h
+    b = Budget('RFLEVEL', level_dbm, 'dB', standard, max(freqs))
+    b.hit = worst
+    b.cmc = cmc
+    div, why = standard.divisor()
+    b.add(f'{standard.model} level accuracy', worst.limit / div, 1.0, f'{worst.limit:.6g} dB / {div:g} ({why})')
+    res, _src = standard.resolution(worst)
+    if res:
+        b.add('Resolution', res / math.sqrt(12), 1.0, f'{res:.6g} / sqrt(12)')
+    else:
+        b.notes.append('level resolution is not recorded on the sheet row: not included')
+    b.reported = ceil_sig(max(b.emu, b.cmc or 0.0))
+    return b
+
+
 def audit(reported, b, tolerance=1e-12):
     """Compare an uncertainty someone reported (SI base units) with the budget `b`.  Returns (status, text).
     UNDER CMC is the accreditation problem: nothing may be reported below the scope CMC."""

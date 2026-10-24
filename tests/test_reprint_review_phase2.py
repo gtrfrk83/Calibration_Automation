@@ -86,6 +86,9 @@ class Adapters(unittest.TestCase):
             for s, row in zip(specs, rows):
                 e = M.evaluate(s, s.default_std)
                 want = row.get('Uncertainty', '')
+                if s.engine_printed is not None:               # MDO4000C RF level rows: the 96270A value replaces the engine's N/A
+                    self.assertEqual(s.engine_printed.get('Uncertainty'), want)
+                    want = s.printed['Uncertainty']
                 self.assertEqual(e.unc_text, '' if want == 'N/A' else want, (name, s.step, s.description))
 
     def test_asset_number_is_found_for_every_engine(self):
@@ -97,7 +100,7 @@ class Adapters(unittest.TestCase):
     def test_not_in_scope_and_no_uncertainty_counts_per_engine(self):
         """Owner audit: a point with no stimulus from a calibrator or measuring standard (WaveSurfer RMS noise) is 'No uncertainty required' (grey, locked, not
         in Needs attention); 'Not in scope' stays only for points that use a standard but have no scope entry."""
-        want = {'ws': (0, 36), 'mdo': (25, 21), 'fgen': (42, 1), 'tds': (1, 3)}
+        want = {'ws': (0, 36), 'mdo': (22, 21), 'fgen': (42, 1), 'tds': (1, 3)}
         for name, (nis, nou) in want.items():
             app, _m = built(name)
             specs, d = M.specs_for(app)
@@ -125,7 +128,8 @@ class Adapters(unittest.TestCase):
             app, _m = built(name)
             specs, d = M.specs_for(app)
             model = M.ReviewModel(specs, d, asset=ASSET[name])
-            self.assertEqual(model.changes(), [], name)
+            # only the MDO4000C RF level rows carry a default of their own (96270A, replaces the engine's N/A): nothing the person did
+            self.assertEqual([c for c in model.changes() if not (c['original_standard'] is None and c['standard'] == '96270A')], [], name)
             self.assertEqual(model.counts()['changed'], 0)
 
     def test_read_only_rows_are_locked_and_only_not_in_scope_accepts_typing(self):
@@ -154,6 +158,8 @@ class Adapters(unittest.TestCase):
             free = [s for s in specs if not s.locked]
             self.assertTrue(free, name)
             for s in free:
+                if s.options == ['96270A']:                    # MDO4000C RF level rows: 96270A only (test_reprint_review_mdo_96270a)
+                    continue
                 self.assertIn('5560A', M.offered_standards(s))
 
     def test_dc_standard_change_by_hand(self):
@@ -204,11 +210,11 @@ class Adapters(unittest.TestCase):
                 self.assertTrue(r.reported_text, r.reported_text)
                 self.assertGreater(r.typed['value'], 0)
                 self.assertEqual(r.tar_text, '')
-                ch = model.changes('Tech', '2026-01-01T00:00:00')[0]
+                ch = [c for c in model.changes('Tech', '2026-01-01T00:00:00') if c['manual']][0]
                 self.assertTrue(ch['manual'])
                 self.assertEqual(ch['entered_by'], 'Tech')
                 model.set_typed(i, '')
-                self.assertEqual(model.changes(), [])
+                self.assertEqual([c for c in model.changes() if c['manual']], [])
                 found += 1
                 break
         self.assertGreater(found, 2, 'fgen, TDS (or MDO) and WaveSurfer all have not-in-scope rows')
@@ -275,7 +281,11 @@ class Report(unittest.TestCase):
             export(name, app, mod, a, R.DETAILS)
             specs, d = M.specs_for(app)
             model = M.ReviewModel(specs, d, asset=ASSET[name])
-            export(name, app, mod, b, dict(R.DETAILS, uncertainty_review=M.review_block([model])))
+            block = M.review_block([model])
+            if name == 'mdo':                                   # the 96270A default of the RF level rows is the one intended difference
+                for rv in block['reviews']:
+                    rv['changes'] = [c for c in rv['changes'] if c['original_standard'] is not None]
+            export(name, app, mod, b, dict(R.DETAILS, uncertainty_review=block))
             self.assertEqual(R.differences(a, b, None), [], name)
             self.assertEqual(R.pdf_text(a), R.pdf_text(b), name)
             # ...and a changed review reprints only the Uncertainty / TAR / TUR cells: same page count, same header cells
