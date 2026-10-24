@@ -1,0 +1,11657 @@
+[
+ {
+  "bars": {
+   "bw_progress": [
+    0,
+    24
+   ],
+   "dc_progress": [
+    0,
+    80
+   ],
+   "imp_progress": [
+    0,
+    28
+   ],
+   "offset_progress": [
+    0,
+    16
+   ],
+   "progress": [
+    0,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "idle",
+  "msg": "Instrument WS-1: no saved results yet.",
+  "sections": [
+   [
+    "RMS noise",
+    0,
+    0,
+    36
+   ],
+   [
+    "DC voltage",
+    0,
+    0,
+    80
+   ],
+   [
+    "Input impedance",
+    0,
+    0,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    0,
+    0,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    0,
+    0,
+    24
+   ],
+   [
+    "Time base",
+    0,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    0,
+    0,
+    24
+   ]
+  ],
+  "show": [
+   "All functions",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "0 of 24 bandwidth points recorded",
+   "dc_status": "0 of 80 DCV points recorded. Automatic Fluke control is OFF until enabled.",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "0 of 28 impedance points recorded.",
+   "offset_status": "0 of 16 offset-position DCV points recorded",
+   "progress_text": "Ready — 0 of 36 ranges",
+   "status": "Disconnected",
+   "tb_status": "0 of 1 time base point recorded",
+   "trig_status": "0 of 24 trigger level points recorded"
+  },
+  "tabs": [
+   "RMS Noise",
+   "DC Voltage",
+   "Input Impedance",
+   "Offset / P1 Mean",
+   "Bandwidth / LEVSINE",
+   "Time Base",
+   "Trigger Level"
+  ],
+  "title": "Calibration Suite  |  WaveSurfer 4104HD | Calibration Verification  |  v70 Beta 2",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "",
+       "",
+       "Vpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "",
+       "",
+       "Vpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "",
+       "4.84",
+       "7.16",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "",
+       "-7.16",
+       "-4.84",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "",
+       "13.6",
+       "16.4",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "",
+       "5.839",
+       "6.161",
+       "",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "",
+       "-6.161",
+       "-5.839",
+       "",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "",
+       "",
+       "+4.45",
+       "+4.55",
+       "V",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "",
+       "",
+       "-4.55",
+       "-4.45",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "",
+       "",
+       "+9.739",
+       "+10.261",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "",
+       "",
+       "+9.739",
+       "+10.261",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "",
+       "",
+       "-10.261",
+       "-9.739",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "",
+       "",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "",
+       "V",
+       "",
+       "30.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "",
+       "V",
+       "",
+       "38.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "",
+       "V",
+       "",
+       "44.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "",
+       "V",
+       "",
+       "51.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "",
+       "V",
+       "",
+       "52.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "RMS noise  ·  CH1   2 mV/div   Noise level (minimum dB)",
+       "",
+       "30.00 dB",
+       "",
+       "≥ 30.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "2",
+       "RMS noise  ·  CH1   5 mV/div   Noise level (minimum dB)",
+       "",
+       "38.00 dB",
+       "",
+       "≥ 38.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "3",
+       "RMS noise  ·  CH1   10 mV/div   Noise level (minimum dB)",
+       "",
+       "44.00 dB",
+       "",
+       "≥ 44.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 209,
+    "tail": [
+     [
+      [
+       "208",
+       "Trigger level  ·  CH4   100 mV/div   Trigger level, positive slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "209",
+       "Trigger level  ·  CH4   100 mV/div   Trigger level, negative slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    0,
+    24
+   ],
+   "dc_progress": [
+    0,
+    80
+   ],
+   "imp_progress": [
+    0,
+    28
+   ],
+   "offset_progress": [
+    0,
+    16
+   ],
+   "progress": [
+    0,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": false,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": false,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": false,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": false,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": true,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    false,
+    false
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "dcv busy",
+  "msg": "Instrument WS-1: no saved results yet.",
+  "sections": [
+   [
+    "RMS noise",
+    0,
+    0,
+    36
+   ],
+   [
+    "DC voltage",
+    0,
+    0,
+    80
+   ],
+   [
+    "Input impedance",
+    0,
+    0,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    0,
+    0,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    0,
+    0,
+    24
+   ],
+   [
+    "Time base",
+    0,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    0,
+    0,
+    24
+   ]
+  ],
+  "show": [
+   "All functions",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "0 of 24 bandwidth points recorded",
+   "dc_status": "0 of 80 DCV points recorded. Automatic Fluke control is OFF until enabled.",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "0 of 28 impedance points recorded.",
+   "offset_status": "0 of 16 offset-position DCV points recorded",
+   "progress_text": "Ready — 0 of 36 ranges",
+   "status": "Disconnected",
+   "tb_status": "0 of 1 time base point recorded",
+   "trig_status": "0 of 24 trigger level points recorded"
+  },
+  "tabs": [
+   "RMS Noise",
+   "DC Voltage",
+   "Input Impedance",
+   "Offset / P1 Mean",
+   "Bandwidth / LEVSINE",
+   "Time Base",
+   "Trigger Level"
+  ],
+  "title": "Calibration Suite  |  WaveSurfer 4104HD | Calibration Verification  |  v70 Beta 2",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "",
+       "",
+       "Vpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "",
+       "",
+       "Vpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "",
+       "4.84",
+       "7.16",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "",
+       "-7.16",
+       "-4.84",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "",
+       "13.6",
+       "16.4",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "",
+       "5.839",
+       "6.161",
+       "",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "",
+       "-6.161",
+       "-5.839",
+       "",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "",
+       "",
+       "+4.45",
+       "+4.55",
+       "V",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "",
+       "",
+       "-4.55",
+       "-4.45",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "",
+       "",
+       "+9.739",
+       "+10.261",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "",
+       "",
+       "+9.739",
+       "+10.261",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "",
+       "",
+       "-10.261",
+       "-9.739",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "",
+       "",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "",
+       "V",
+       "",
+       "30.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "",
+       "V",
+       "",
+       "38.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "",
+       "V",
+       "",
+       "44.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "",
+       "V",
+       "",
+       "51.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "",
+       "V",
+       "",
+       "52.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "RMS noise  ·  CH1   2 mV/div   Noise level (minimum dB)",
+       "",
+       "30.00 dB",
+       "",
+       "≥ 30.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "2",
+       "RMS noise  ·  CH1   5 mV/div   Noise level (minimum dB)",
+       "",
+       "38.00 dB",
+       "",
+       "≥ 38.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "3",
+       "RMS noise  ·  CH1   10 mV/div   Noise level (minimum dB)",
+       "",
+       "44.00 dB",
+       "",
+       "≥ 44.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 209,
+    "tail": [
+     [
+      [
+       "208",
+       "Trigger level  ·  CH4   100 mV/div   Trigger level, positive slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "209",
+       "Trigger level  ·  CH4   100 mV/div   Trigger level, negative slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    0,
+    24
+   ],
+   "dc_progress": [
+    0,
+    80
+   ],
+   "imp_progress": [
+    0,
+    28
+   ],
+   "offset_progress": [
+    0,
+    16
+   ],
+   "progress": [
+    0,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": false
+   },
+   "connect_button": {
+    "enabled": false,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": false,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": false,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": true,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "noise running",
+  "msg": "Instrument WS-1: no saved results yet.",
+  "sections": [
+   [
+    "RMS noise",
+    0,
+    0,
+    36
+   ],
+   [
+    "DC voltage",
+    0,
+    0,
+    80
+   ],
+   [
+    "Input impedance",
+    0,
+    0,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    0,
+    0,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    0,
+    0,
+    24
+   ],
+   [
+    "Time base",
+    0,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    0,
+    0,
+    24
+   ]
+  ],
+  "show": [
+   "All functions",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "0 of 24 bandwidth points recorded",
+   "dc_status": "0 of 80 DCV points recorded. Automatic Fluke control is OFF until enabled.",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "0 of 28 impedance points recorded.",
+   "offset_status": "0 of 16 offset-position DCV points recorded",
+   "progress_text": "Ready — 0 of 36 ranges",
+   "status": "Disconnected",
+   "tb_status": "0 of 1 time base point recorded",
+   "trig_status": "0 of 24 trigger level points recorded"
+  },
+  "tabs": [
+   "RMS Noise",
+   "DC Voltage",
+   "Input Impedance",
+   "Offset / P1 Mean",
+   "Bandwidth / LEVSINE",
+   "Time Base",
+   "Trigger Level"
+  ],
+  "title": "Calibration Suite  |  WaveSurfer 4104HD | Calibration Verification  |  v70 Beta 2",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "",
+       "",
+       "mVpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "",
+       "",
+       "Vpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "",
+       "",
+       "Vpp",
+       "",
+       "dB",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "",
+       "4.84",
+       "7.16",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "",
+       "-7.16",
+       "-4.84",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "",
+       "13.6",
+       "16.4",
+       "",
+       "mV",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "",
+       "5.839",
+       "6.161",
+       "",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "",
+       "-6.161",
+       "-5.839",
+       "",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "",
+       "49",
+       "51",
+       "Ω",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "",
+       "",
+       "+4.45",
+       "+4.55",
+       "V",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "",
+       "",
+       "-4.55",
+       "-4.45",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "",
+       "",
+       "+9.739",
+       "+10.261",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "",
+       "",
+       "+9.739",
+       "+10.261",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "",
+       "",
+       "-10.261",
+       "-9.739",
+       "V",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "",
+       "",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "",
+       "V",
+       "",
+       "30.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "",
+       "V",
+       "",
+       "38.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "",
+       "V",
+       "",
+       "44.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "",
+       "V",
+       "",
+       "51.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "",
+       "V",
+       "",
+       "52.00",
+       "",
+       "dB",
+       "—",
+       ""
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "",
+       "—"
+      ],
+      [
+       "next"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "RMS noise  ·  CH1   2 mV/div   Noise level (minimum dB)",
+       "",
+       "30.00 dB",
+       "",
+       "≥ 30.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "2",
+       "RMS noise  ·  CH1   5 mV/div   Noise level (minimum dB)",
+       "",
+       "38.00 dB",
+       "",
+       "≥ 38.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "3",
+       "RMS noise  ·  CH1   10 mV/div   Noise level (minimum dB)",
+       "",
+       "44.00 dB",
+       "",
+       "≥ 44.00 dB",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 209,
+    "tail": [
+     [
+      [
+       "208",
+       "Trigger level  ·  CH4   100 mV/div   Trigger level, positive slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ],
+     [
+      [
+       "209",
+       "Trigger level  ·  CH4   100 mV/div   Trigger level, negative slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "",
+       "",
+       "",
+       "—"
+      ],
+      [
+       "pending"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "demo data",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "All functions",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "RMS noise  ·  CH1   2 mV/div   Noise level (minimum dB)",
+       "",
+       "30.00 dB",
+       "",
+       "≥ 30.00 dB",
+       "33.20 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "RMS noise  ·  CH1   5 mV/div   Noise level (minimum dB)",
+       "",
+       "38.00 dB",
+       "",
+       "≥ 38.00 dB",
+       "41.90 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "RMS noise  ·  CH1   10 mV/div   Noise level (minimum dB)",
+       "",
+       "44.00 dB",
+       "",
+       "≥ 44.00 dB",
+       "48.60 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 209,
+    "tail": [
+     [
+      [
+       "208",
+       "Trigger level  ·  CH4   100 mV/div   Trigger level, positive slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "Within ±20 mV mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "209",
+       "Trigger level  ·  CH4   100 mV/div   Trigger level, negative slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "Within ±20 mV mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "function RMS noise",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "RMS noise",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "CH1   2 mV/div   Noise level (minimum dB)",
+       "",
+       "30.00 dB",
+       "",
+       "≥ 30.00 dB",
+       "33.20 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "CH1   5 mV/div   Noise level (minimum dB)",
+       "",
+       "38.00 dB",
+       "",
+       "≥ 38.00 dB",
+       "41.90 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "CH1   10 mV/div   Noise level (minimum dB)",
+       "",
+       "44.00 dB",
+       "",
+       "≥ 44.00 dB",
+       "48.60 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "35",
+       "CH4   500 mV/div   Noise level (minimum dB)",
+       "",
+       "51.00 dB",
+       "",
+       "≥ 51.00 dB",
+       "55.60 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "36",
+       "CH4   1 V/div   Noise level (minimum dB)",
+       "",
+       "52.00 dB",
+       "",
+       "≥ 52.00 dB",
+       "54.50 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "function DC voltage",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "DC voltage",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "37",
+       "CH1   2 mV/div   DC gain, 1 MΩ",
+       "+6.00 mV",
+       "+4.84 mV",
+       "+7.16 mV",
+       "+4.84 mV … +7.16 mV",
+       "+5.6752 mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "38",
+       "CH1   2 mV/div   DC gain, 1 MΩ",
+       "-6.00 mV",
+       "-7.16 mV",
+       "-4.84 mV",
+       "-7.16 mV … -4.84 mV",
+       "-6.1624 mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "39",
+       "CH1   5 mV/div   DC gain, 1 MΩ",
+       "+15.0 mV",
+       "+13.6 mV",
+       "+16.4 mV",
+       "+13.6 mV … +16.4 mV",
+       "+15.000 mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "115",
+       "CH4   2 V/div   DC gain, 1 MΩ",
+       "+6.000 V",
+       "+5.839 V",
+       "+6.161 V",
+       "+5.839 V … +6.161 V",
+       "+6.02254 V",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "116",
+       "CH4   2 V/div   DC gain, 1 MΩ",
+       "-6.000 V",
+       "-6.161 V",
+       "-5.839 V",
+       "-6.161 V … -5.839 V",
+       "-5.95492 V",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "function Input impedance",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "Input impedance",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "117",
+       "C1   20 mV/div   50 Ohm @ 20 mV/Div (D50)",
+       "50 Ω",
+       "49 Ω",
+       "51 Ω",
+       "49 Ω … 51 Ω",
+       "49.85 Ω",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "118",
+       "C1   200 mV/div   50 Ohm @ 200 mV/Div (D50)",
+       "50 Ω",
+       "49 Ω",
+       "51 Ω",
+       "49 Ω … 51 Ω",
+       "49.90 Ω",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "119",
+       "C1   20 mV/div   1 MOhm @ 20 mV/Div (D1M)",
+       "1.00 MΩ",
+       "0.98 MΩ",
+       "1.02 MΩ",
+       "0.98 MΩ … 1.02 MΩ",
+       "1.0250 MΩ",
+       "",
+       "",
+       "✖ FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "143",
+       "EXT   EXT   50 Ohm @ EXT (D50)",
+       "50 Ω",
+       "49 Ω",
+       "51 Ω",
+       "49 Ω … 51 Ω",
+       "50.10 Ω",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "144",
+       "EXT5   EXT   50 Ohm @ EXT5 (D50)",
+       "50 Ω",
+       "49 Ω",
+       "51 Ω",
+       "49 Ω … 51 Ω",
+       "50.15 Ω",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "function Offset (P1 mean)",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "Offset (P1 mean)",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "145",
+       "CH1   20 mV/div   Offset -4.50 V",
+       "+4.50 V",
+       "+4.45 V",
+       "+4.55 V",
+       "+4.45 V … +4.55 V",
+       "+4.48400 V",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "146",
+       "CH1   20 mV/div   Offset +4.50 V",
+       "-4.50 V",
+       "-4.55 V",
+       "-4.45 V",
+       "-4.55 V … -4.45 V",
+       "-4.50800 V",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "147",
+       "CH1   2 V/div   Offset -10.000 V",
+       "+10.000 V",
+       "+9.739 V",
+       "+10.261 V",
+       "+9.739 V … +10.261 V",
+       "+10.000000 V",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "159",
+       "CH4   2 V/div   Offset -10.000 V",
+       "+10.000 V",
+       "+9.739 V",
+       "+10.261 V",
+       "+9.739 V … +10.261 V",
+       "+10.083520 V",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "160",
+       "CH4   2 V/div   Offset +10.000 V",
+       "-10.000 V",
+       "-10.261 V",
+       "-9.739 V",
+       "-10.261 V … -9.739 V",
+       "-10.083520 V",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "function Bandwidth (LEVSINE)",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "Bandwidth (LEVSINE)",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "161",
+       "CH1   10 mV/div   Full BW, 60 mVpp 50 kHz vs 1 GHz",
+       "0 dB",
+       "-3.000 dB",
+       "+3.000 dB",
+       "-3.000 dB … +3.000 dB",
+       "-1.200 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "162",
+       "CH1   20 mV/div   Full BW, 120 mVpp 50 kHz vs 1 GHz",
+       "0 dB",
+       "-3.000 dB",
+       "+3.000 dB",
+       "-3.000 dB … +3.000 dB",
+       "-1.340 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "163",
+       "CH1   50 mV/div   Full BW, 300 mVpp 50 kHz vs 1 GHz",
+       "0 dB",
+       "-3.000 dB",
+       "+3.000 dB",
+       "-3.000 dB … +3.000 dB",
+       "-1.480 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "183",
+       "CH4   200 mV/div   Full BW, 1.2 Vpp 50 kHz vs 1 GHz",
+       "0 dB",
+       "-3.000 dB",
+       "+3.000 dB",
+       "-3.000 dB … +3.000 dB",
+       "-1.760 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "184",
+       "CH4   500 mV/div   Full BW, 3 Vpp 50 kHz vs 1 GHz",
+       "0 dB",
+       "-3.000 dB",
+       "+3.000 dB",
+       "-3.000 dB … +3.000 dB",
+       "-1.900 dB",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "function Time base",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "Time base",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "185",
+       "CH1   10 µs marker   Frequency error at 100 kHz",
+       "0.000 Hz",
+       "-0.350 Hz",
+       "+0.350 Hz",
+       "-0.350 Hz … +0.350 Hz",
+       "+0.0102 Hz",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "function Trigger level",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "Trigger level",
+   "All points"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "186",
+       "CH1   100 mV/div   Trigger level, positive slope",
+       "+0.00 mV",
+       "-20.00 mV",
+       "+20.00 mV",
+       "-20.00 mV … +20.00 mV",
+       "Within ±20 mV mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "187",
+       "CH1   100 mV/div   Trigger level, negative slope",
+       "+0.00 mV",
+       "-20.00 mV",
+       "+20.00 mV",
+       "-20.00 mV … +20.00 mV",
+       "Within ±20 mV mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "188",
+       "CH1   100 mV/div   Trigger level, positive slope",
+       "+300.00 mV",
+       "+280.00 mV",
+       "+320.00 mV",
+       "+280.00 mV … +320.00 mV",
+       "Within ±20 mV mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "208",
+       "CH4   100 mV/div   Trigger level, positive slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "Within ±20 mV mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "209",
+       "CH4   100 mV/div   Trigger level, negative slope",
+       "-300.00 mV",
+       "-320.00 mV",
+       "-280.00 mV",
+       "-320.00 mV … -280.00 mV",
+       "Within ±20 mV mV",
+       "",
+       "",
+       "✔ PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   }
+  }
+ },
+ {
+  "bars": {
+   "bw_progress": [
+    24,
+    24
+   ],
+   "dc_progress": [
+    80,
+    80
+   ],
+   "imp_progress": [
+    28,
+    28
+   ],
+   "offset_progress": [
+    16,
+    16
+   ],
+   "progress": [
+    36,
+    36
+   ]
+  },
+  "buttons": {
+   "btn_clear": {
+    "enabled": true,
+    "text": "Clear function results"
+   },
+   "btn_rerun": {
+    "enabled": true,
+    "text": "Rerun Selected"
+   },
+   "btn_run": {
+    "enabled": true,
+    "text": "▶  Run All Pending"
+   },
+   "btn_scope": {
+    "enabled": true,
+    "text": "Test scope"
+   },
+   "btn_section": {
+    "enabled": true,
+    "text": "Run Shown Section"
+   },
+   "btn_stop": {
+    "enabled": false,
+    "text": "■  Stop"
+   },
+   "channel_select": {
+    "enabled": true
+   },
+   "connect_button": {
+    "enabled": true,
+    "text": "Test Connection"
+   },
+   "dc_next_button": {
+    "enabled": true,
+    "text": "Start / Next DCV Point"
+   },
+   "imp_next_button": {
+    "enabled": true,
+    "text": "Measure Next Impedance Point"
+   },
+   "mode_buttons": [
+    true,
+    true
+   ],
+   "resume_button": {
+    "enabled": false,
+    "text": "▶  Resume Test"
+   },
+   "retest_button": {
+    "enabled": true,
+    "text": "Rerun Selected Test Point"
+   },
+   "start_button": {
+    "enabled": true,
+    "text": "▶  Start Test"
+   },
+   "stop_button": {
+    "enabled": false,
+    "text": "■  Stop"
+   }
+  },
+  "chip": "Scope: not connected",
+  "label": "failed only",
+  "msg": "Completed 36 of 36 ranges",
+  "sections": [
+   [
+    "RMS noise",
+    35,
+    1,
+    36
+   ],
+   [
+    "DC voltage",
+    79,
+    1,
+    80
+   ],
+   [
+    "Input impedance",
+    27,
+    1,
+    28
+   ],
+   [
+    "Offset (P1 mean)",
+    15,
+    1,
+    16
+   ],
+   [
+    "Bandwidth (LEVSINE)",
+    23,
+    1,
+    24
+   ],
+   [
+    "Time base",
+    1,
+    0,
+    1
+   ],
+   [
+    "Trigger level",
+    23,
+    1,
+    24
+   ]
+  ],
+  "show": [
+   "All functions",
+   "Failed (OOT)"
+  ],
+  "status": {
+   "bw_status": "DEMO DATA — 24 synthetic bandwidth points",
+   "dc_status": "DEMO DATA — 80 synthetic DCV points",
+   "detail": "Select a test point to see its limits and setup.",
+   "imp_status": "DEMO DATA — 28 synthetic impedance points",
+   "offset_status": "DEMO DATA — 16 synthetic offset points",
+   "progress_text": "Completed 36 of 36 ranges",
+   "status": "DEMO MODE — Synthetic data only; no instrument measurements",
+   "tb_status": "DEMO DATA — 1 synthetic time base point",
+   "trig_status": "DEMO DATA — 24 synthetic trigger level points"
+  },
+  "tabs": [
+   "  RMS Noise  ✔  ",
+   "  DC Voltage  ✔  ",
+   "  Input Impedance  ✔  ",
+   "  Offset / P1 Mean  ✔  ",
+   "  Bandwidth / LEVSINE  ✔  ",
+   "  Time Base  ✔  ",
+   "  Trigger Level  ✔  "
+  ],
+  "title": "DEMO DATA ONLY — WaveSurfer Calibration Export Tester",
+  "trees": {
+   "bw_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "amplitude",
+     "ref",
+     "high",
+     "vunit",
+     "db",
+     "dunit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "60",
+       "59.70",
+       "52.00",
+       "mVpp",
+       "-1.200",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "120",
+       "119.52",
+       "102.43",
+       "mVpp",
+       "-1.340",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "50 mV/div",
+       "300",
+       "299.10",
+       "252.24",
+       "mVpp",
+       "-1.480",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Stimulus",
+     "50 kHz",
+     "1 GHz",
+     "Units",
+     "Response",
+     "Units",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "200 mV/div",
+       "1.2",
+       "1.196",
+       "0.977",
+       "Vpp",
+       "-1.760",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "3",
+       "2.99",
+       "2.41",
+       "Vpp",
+       "-1.900",
+       "dB",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "dc_tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "nominal",
+     "observed",
+     "low",
+     "high",
+     "error",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "6.00",
+       "5.6752",
+       "4.84",
+       "7.16",
+       "-0.3248",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "-6.00",
+       "-6.1624",
+       "-7.16",
+       "-4.84",
+       "-0.1624",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "15.0",
+       "15.000",
+       "13.6",
+       "16.4",
+       "0",
+       "mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Error",
+     "Units",
+     "Result"
+    ],
+    "n": 80,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "6.000",
+       "6.02254",
+       "5.839",
+       "6.161",
+       "+0.02254",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-6.000",
+       "-5.95492",
+       "-6.161",
+       "-5.839",
+       "+0.04508",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "imp_tree": {
+    "columns": [
+     "point",
+     "channel",
+     "coupling",
+     "scale",
+     "nominal",
+     "measured",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "1",
+       "C1",
+       "D50",
+       "20 mV/div",
+       "50",
+       "49.85",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "2",
+       "C1",
+       "D50",
+       "200 mV/div",
+       "50",
+       "49.90",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "3",
+       "C1",
+       "D1M",
+       "20 mV/div",
+       "1.00",
+       "1.0250",
+       "0.98",
+       "1.02",
+       "MΩ",
+       "FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Input",
+     "Coupling",
+     "Range",
+     "Nominal",
+     "Measured",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 28,
+    "tail": [
+     [
+      [
+       "27",
+       "EXT",
+       "D50",
+       "EXT",
+       "50",
+       "50.10",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "28",
+       "EXT5",
+       "D50",
+       "EXT",
+       "50",
+       "50.15",
+       "49",
+       "51",
+       "Ω",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "offset_tree": {
+    "columns": [
+     "ch",
+     "scale",
+     "offset",
+     "source",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "units",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "-4.50",
+       "+4.50",
+       "+4.48400",
+       "-0.01600",
+       "+4.45",
+       "+4.55",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "20 mV/div",
+       "+4.50",
+       "-4.50",
+       "-4.50800",
+       "-0.00800",
+       "-4.55",
+       "-4.45",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.000000",
+       "0",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "Scope offset",
+     "Fluke source",
+     "P1 Mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 16,
+    "tail": [
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "-10.000",
+       "+10.000",
+       "+10.083520",
+       "+0.083520",
+       "+9.739",
+       "+10.261",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "2 V/div",
+       "+10.000",
+       "-10.000",
+       "-10.083520",
+       "-0.083520",
+       "-10.261",
+       "-9.739",
+       "V",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "tb_tree": {
+    "columns": [
+     "period",
+     "nominal",
+     "mean",
+     "error",
+     "low",
+     "high",
+     "unit",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "10 µs",
+       "100000",
+       "100000.01",
+       "+0.0102",
+       "-0.350",
+       "+0.350",
+       "Hz",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Marker",
+     "Nominal",
+     "P1 Freq mean",
+     "Error",
+     "Lower limit",
+     "Upper limit",
+     "Units",
+     "Result"
+    ],
+    "n": 1,
+    "tail": []
+   },
+   "tree": {
+    "columns": [
+     "channel",
+     "scale",
+     "rms",
+     "runit",
+     "db",
+     "minimum",
+     "margin",
+     "dunit",
+     "result",
+     "samples"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "2 mV/div",
+       "120.3",
+       "µV",
+       "33.20",
+       "30.00",
+       "+3.20",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "5 mV/div",
+       "110.5",
+       "µV",
+       "41.90",
+       "38.00",
+       "+3.90",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "10 mV/div",
+       "102.2",
+       "µV",
+       "48.60",
+       "44.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Range",
+     "RMS noise",
+     "Units",
+     "Noise level",
+     "Minimum",
+     "Margin",
+     "Units",
+     "Result",
+     "Samples"
+    ],
+    "n": 36,
+    "tail": [
+     [
+      [
+       "CH4",
+       "500 mV/div",
+       "2.282",
+       "mV",
+       "55.60",
+       "51.00",
+       "+4.60",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "1 V/div",
+       "5.180",
+       "mV",
+       "54.50",
+       "52.00",
+       "+2.50",
+       "dB",
+       "PASS",
+       "5"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "trig_tree": {
+    "columns": [
+     "ch",
+     "level",
+     "slope",
+     "low",
+     "high",
+     "outcome",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Positive",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+0.00",
+       "Negative",
+       "-20.00",
+       "+20.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH1",
+       "+300.00",
+       "Positive",
+       "+280.00",
+       "+320.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ],
+    "headings": [
+     "Channel",
+     "Level (mV)",
+     "Slope",
+     "Lower (mV)",
+     "Upper (mV)",
+     "Outcome",
+     "Result"
+    ],
+    "n": 24,
+    "tail": [
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Positive",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ],
+     [
+      [
+       "CH4",
+       "-300.00",
+       "Negative",
+       "-320.00",
+       "-280.00",
+       "Within ±20 mV",
+       "PASS"
+      ],
+      [
+       "pass"
+      ]
+     ]
+    ]
+   },
+   "utree": {
+    "columns": [
+     "n",
+     "description",
+     "nominal",
+     "low",
+     "high",
+     "limits",
+     "found",
+     "error",
+     "left",
+     "result"
+    ],
+    "head": [
+     [
+      [
+       "13",
+       "RMS noise  ·  CH2   20 mV/div   Noise level (minimum dB)",
+       "",
+       "48.00 dB",
+       "",
+       "≥ 48.00 dB",
+       "46.90 dB",
+       "",
+       "",
+       "✖ FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ],
+     [
+      [
+       "45",
+       "DC voltage  ·  CH1   50 mV/div   DC gain, 1 MΩ",
+       "+150 mV",
+       "+145 mV",
+       "+155 mV",
+       "+145 mV … +155 mV",
+       "+155.60 mV",
+       "",
+       "",
+       "✖ FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ],
+     [
+      [
+       "119",
+       "Input impedance  ·  C1   20 mV/div   1 MOhm @ 20 mV/Div (D1M)",
+       "1.00 MΩ",
+       "0.98 MΩ",
+       "1.02 MΩ",
+       "0.98 MΩ … 1.02 MΩ",
+       "1.0250 MΩ",
+       "",
+       "",
+       "✖ FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ],
+    "headings": [
+     "#",
+     "Description",
+     "Nominal",
+     "Low limit",
+     "High limit",
+     "Limits",
+     "● As Found",
+     "Error",
+     "As Left",
+     "Result"
+    ],
+    "n": 6,
+    "tail": [
+     [
+      [
+       "173",
+       "Bandwidth (LEVSINE)  ·  CH3   10 mV/div   Full BW, 60 mVpp 50 kHz vs 1 GHz",
+       "0 dB",
+       "-3.000 dB",
+       "+3.000 dB",
+       "-3.000 dB … +3.000 dB",
+       "-3.400 dB",
+       "",
+       "",
+       "✖ FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ],
+     [
+      [
+       "195",
+       "Trigger level  ·  CH2   100 mV/div   Trigger level, negative slope",
+       "+300.00 mV",
+       "+280.00 mV",
+       "+320.00 mV",
+       "+280.00 mV … +320.00 mV",
+       "Triggered 20 mV early mV",
+       "",
+       "",
+       "✖ FAIL"
+      ],
+      [
+       "fail"
+      ]
+     ]
+    ]
+   }
+  }
+ }
+]
