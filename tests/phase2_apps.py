@@ -169,7 +169,8 @@ def wavesurfer_app():
     app.any_synthetic = lambda: False
     W.RMSNoiseApp.__getattr__ = lambda self, n: (_ for _ in ()).throw(AttributeError(n)) if n.startswith('__') else Var('10')
     try:
-        with mock.patch.object(W.messagebox, 'showinfo', lambda *a, **k: None, create=True):
+        import tkinter.messagebox as tk_messagebox                     # the WaveSurfer prompts through ui_port (TkUiPort -> tkinter.messagebox)
+        with mock.patch.object(tk_messagebox, 'showinfo', lambda *a, **k: None, create=True):
             app.load_demo_data()
     finally:
         del W.RMSNoiseApp.__getattr__
