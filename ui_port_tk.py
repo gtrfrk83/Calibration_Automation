@@ -113,6 +113,29 @@ class TkUiPort:
     def view(self, name):
         return importlib.import_module(f'{name}_tk')
 
+    # ==== APPEND-ONLY BLOCK, WP-H (handheld): the reading windows and the progress window ===============================================
+    # The windows are the code the engine carried, moved: handheld_dmm_view_tk (reading, IR problem, dial) and run_queue_ui (run-queue reading window, progress).
+    def ask_reading(self, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
+                    limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None):
+        return self.view('handheld_dmm_view').ask_reading(parent, p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate, phase,
+                                                          limit_s, on_expire, device, source, demo_fill)
+
+    def ask_readings(self, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                     source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading='', *, parent=None):
+        import run_queue_ui
+        return run_queue_ui.ask_readings(parent, p, total, out_text, out_note, accept, meters, unit, judge, limit_s, on_expire, device, source, demo_fill,
+                                         tol_text, phase, heading)
+
+    def ask_range(self, p, total, dial, standby_text, *, parent=None):
+        return self.view('handheld_dmm_view').ask_range(parent, p, total, dial, standby_text)
+
+    def ask_ir_problem(self, p, total, problems, shown, *, parent=None):
+        return self.view('handheld_dmm_view').ask_ir_problem(parent, p, total, problems, shown)
+
+    def progress_window(self, win, title='Queue progress', on_show=None, on_export=None):
+        import run_queue_ui
+        return run_queue_ui.QueueProgress(win, **_kw(title=title if title != 'Queue progress' else None, on_show=on_show, on_export=on_export))
+
     # ---- APPENDED BY WP-A (adjustment launchers; append-only block) -----------------------------------------------------------------------
     def ask_value(self, title, prompt, default, *, parent=None):
         """The value-entry window of Keithley_2000_Adjustment / Fluke_8808A_Adjustment (their former App.ask_value), moved unchanged; `parent` was self.root."""
