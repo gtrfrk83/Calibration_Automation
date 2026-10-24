@@ -213,7 +213,7 @@ class PeakMinMax(unittest.TestCase):
         f = Flow('87V')
         ev = f.events
         n48, n49 = PTS['1-48']['n'], PTS['1-49']['n']
-        real_confirm, real_ask = h.ui.confirm_steps, h.messagebox.askyesno
+        real_confirm, real_ask = h.ui.confirm_steps, sys.modules['tkinter.messagebox'].askyesno
 
         def confirm(root, title, sub, steps, **k):
             first = k['facts'][0][1].split()[0] if k.get('facts') else ''
@@ -224,12 +224,12 @@ class PeakMinMax(unittest.TestCase):
             else:
                 ev.append(('other', title))
             return True
-        h.ui.confirm_steps, h.messagebox.askyesno = confirm, lambda *a, **k: True
+        h.ui.confirm_steps, sys.modules['tkinter.messagebox'].askyesno = confirm, lambda *a, **k: True
         try:
             f.app._last_switch = None
             f.app._next(f.app.points, 0, None)
         finally:
-            h.ui.confirm_steps, h.messagebox.askyesno = real_confirm, real_ask
+            h.ui.confirm_steps, sys.modules['tkinter.messagebox'].askyesno = real_confirm, real_ask
         functions = [e[1] for e in ev if e[0] == 'function']
         self.assertIn(str(n48), functions)
         self.assertNotIn(str(n49), functions)                                      # same function as 1-48: the dial is not asked again

@@ -48,6 +48,9 @@ class TkLevel(unittest.TestCase):
     def test_adjustment_launchers(self):
         self.check('adjustments')
 
+    def test_handheld_other_families(self):
+        self.check('handheld_families')
+
     def test_shared_helpers(self):                      # WP-S: run queue, manual override, data mode, note, reset (recorded on the unported helpers)
         self.check('shared')
 
@@ -65,6 +68,8 @@ class Port(unittest.TestCase):
             want, got = recorded(name), canon(C.capture(name, C.PortHarness))      # the scenario asserts that no Tk-level prompt was recorded
             self.assertEqual(sorted(got), sorted(want))
             for scenario in want:
+                if scenario in C.TK_LEVEL_ONLY.get(name, ()):
+                    continue                       # reaches a shared helper that still prompts through Tk (see ui_prompt_capture.TK_LEVEL_ONLY)
                 self.assertEqual(got[scenario], want[scenario], f'{name}: scenario {scenario}')
 
 
