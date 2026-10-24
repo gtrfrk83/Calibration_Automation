@@ -28,6 +28,7 @@
    "keithley2000_adjustment.py",
    "adjustment_audit.py",
    "keithley2000_adjust_view_tk.py",
+   "keithley2000_adjust_view_qt.py",
    "ui_port.py",
    "ui_port_tk.py",
    "drivers/base.py",
@@ -50,6 +51,7 @@
  "own_files": [
   "Procedures/Keithley_2000_Adjustment.py",
   "keithley2000_adjust_view_tk.py",
+  "keithley2000_adjust_view_qt.py",
   "Procedures/Keithley_2000_Adjustment.procedure.json",
   "specs/keithley_2000_adjustment.json",
   "specs/build_k2000_adjustment_spec.py",
