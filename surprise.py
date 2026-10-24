@@ -284,7 +284,8 @@ def _last_exchange(inst, since=0):
             if i == 0:
                 continue                         # the closing 'No error' of a drain loop
             break                                # an earlier, separate check
-        bad.append(r)
+        if r.strip():
+            bad.append(r)                        # (empty answers are not listed: an all-empty drain leaves the reply '', a bad reply)
     bad.reverse()
     return cmd, ' | '.join(bad) if bad else (last or '')
 
@@ -309,6 +310,8 @@ def checked(instrument, call, *args, kind='errqueue', expected='empty error queu
         raise
     except InstrumentError as exc:
         cmd, reply = _last_exchange(instrument, start)           # only what the check itself sent
+        if check_reply(reply, 'any'):                            # no usable answer at all (empty, or a prompt character): a bad reply, never Continue
+            g.surprise('reply', cmd, reply, f'a reply ({check_reply(reply, "any")})', str(exc), stop_only=True)
         g.surprise(kind, cmd, reply, expected, str(exc), stop_only=stop_only)
         return None
 

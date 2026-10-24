@@ -617,10 +617,307 @@ class DacqApp(AppCase):
         self.assertFalse(self.hn.boxes('showerror'))
 
 
+# =============================================================================================================================== 34410A / 34411A
+class A34410IO(unittest.TestCase):
+    """agilent34410a_verification.IO on the simulated bench.  The meter's SYST:ERR? is asked at connect (1), after the configuration (2) and after the reading (3)
+    of the first point."""
+    MODEL = '34410A'
+    CAL = 'Fluke 5560A'
+
+    def build(self, dmm_rules=(), cal_rules=(), dialog=None):
+        import agilent34410a_verification as A
+        from drivers.simulated_34410a import make_34410a_bench
+        A.configure(self.MODEL)
+        self.A = A
+        _b, ft, dt = make_34410a_bench(A.CALIBRATORS[self.CAL][0], 'GPIB', self.MODEL)
+        self.dt, self.ft = FaultTransport(dt, *dmm_rules), FaultTransport(ft, *cal_rules)
+        io = A.IO('sim', 'sim', self.CAL, 9600, 'GPIB', transports=(self.dt, self.ft), mods=None, virtual=True)
+        io.log.virtual = False
+        if dialog is not None:
+            io.enable_surprise(dialog)
+        self.io = io
+        return io
+
+    def points(self, n=3):
+        return [p for p in self.A.POINTS if p['source'] == 'calibrator' and p['terminal'] != 'REAR' and p['kind'] in ('DCV', 'DCI', 'ACV')][:n]
+
+    def test_clean_run_asks_nothing_and_sends_the_same_commands(self):
+        plain = self.build()
+        r0 = [plain.measure(p) for p in self.points()]
+        log0 = stable_log(plain)
+        d = Dialog()
+        io = self.build(dialog=d)
+        self.assertEqual(len(io.guards), 2)
+        r1 = [io.measure(p) for p in self.points()]
+        self.assertEqual(r0, r1)
+        self.assertEqual(stable_log(io), log0)
+        self.assertEqual((d.count, surprise_lines(io)), (0, []))
+
+    def test_demo_log_is_never_guarded(self):
+        io = self.build()
+        io.log.virtual = True
+        self.assertEqual(io.enable_surprise(Dialog()), [])
+
+    def test_bad_read_reply_is_a_stop_only_surprise(self):
+        for bad in ('', '=>', '?>', 'abc'):
+            d = Dialog(True)
+            io = self.build(dmm_rules=[Rule('READ?', bad, nth=2)], dialog=d)
+            ps = self.points()
+            io.measure(ps[0])
+            with self.assertRaises(surprise.SurpriseStop):
+                io.measure(ps[1])
+            self.assertEqual(d.count, 1, bad)
+            self.assertEqual((d.seen[0].kind, d.seen[0].stop_only, d.seen[0].command), ('reply', True, 'READ?'), bad)
+            self.assertEqual(self.dt.queries.count('READ?'), 2)
+            self.assertEqual(self.ft.writes.count('OPER'), 2)
+            self.assertEqual(self.ft.writes[-1], 'STBY', "the engine's own finally: put the calibrator in standby")
+
+    def test_one_timeout_is_retried_once_two_are_a_surprise(self):
+        d = Dialog()
+        io = self.build(dmm_rules=[Rule('READ?', timeout=True, nth=1, times=1)], dialog=d)
+        io.measure(self.points(1)[0])
+        self.assertEqual((d.count, self.dt.queries.count('READ?'), self.ft.writes.count('OPER')), (0, 2, 1))
+        d2 = Dialog()
+        io = self.build(dmm_rules=[Rule('READ?', timeout=True, nth=1, times=2)], dialog=d2)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.points(1)[0])
+        self.assertEqual((d2.count, d2.seen[0].reply, d2.seen[0].stop_only), (1, '', True))
+
+    # ---- (b) read-back mismatch: the meter's set / read back / compare of the configuration ----
+    def test_readback_mismatch_of_the_configuration_is_a_stop_only_surprise(self):
+        cases = (('SENS:FUNC?', '"VOLT:AC"'), ('SENS:VOLT:DC:RANG?', '+5.000000E+00'), ('SENS:VOLT:DC:RANG:AUTO?', '1'), ('SENS:VOLT:DC:NPLC?', '+1.000000E+01'))
+        for query, bad in cases:
+            d = Dialog(True)
+            io = self.build(dmm_rules=[Rule(query, bad)], dialog=d)
+            p = self.points(1)[0]                                                    # a DC volts point
+            with self.assertRaises(surprise.SurpriseStop):
+                io.measure(p)
+            s = d.seen[0]
+            self.assertEqual((d.count, s.kind, s.stop_only, s.command, s.reply), (1, 'readback', True, query, bad), query)
+            self.assertEqual([w for w in self.dt.writes if w.startswith('CONF:')], ['CONF:VOLT:DC 0.1'], 'the write is sent once, never repeated')
+            self.assertEqual([w for w in self.ft.writes if w.startswith('OUT')], [], 'no output after a configuration that did not read back')
+            self.assertNotIn('OPER', self.ft.writes)
+            self.assertEqual(self.ft.writes[-1], 'STBY')
+            self.assertTrue(any('SURPRISE readback' in t for t in surprise_lines(io)))
+
+    def test_without_the_guard_a_readback_mismatch_still_raises_as_before(self):
+        io = self.build(dmm_rules=[Rule('SENS:VOLT:DC:RANG?', '+5.000000E+00')])
+        with self.assertRaises(self.A.drivers.InstrumentError) as cm:
+            io.measure(self.points(1)[0])
+        self.assertNotIsInstance(cm.exception, surprise.SurpriseStop)
+
+    # ---- (c) error queue after a write ----
+    def test_dmm_error_queue_after_configure_stop_and_continue(self):
+        rule = lambda: [Rule('SYST:ERR?', '-113,"Undefined header"', nth=2)]
+        d = Dialog(False)
+        io = self.build(dmm_rules=rule(), dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.points(1)[0])
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only), (1, 'errqueue', False))
+        self.assertIn('-113', s.reply)
+        self.assertEqual([w for w in self.ft.writes if w.startswith('OUT')], [])
+        self.assertEqual(self.ft.writes[-1], 'STBY')
+        d = Dialog(True)
+        io = self.build(dmm_rules=rule(), dialog=d)
+        p = self.points(1)[0]
+        self.assertEqual(io.measure(p), self.build().measure(p), 'Continue: measured exactly as in a clean run')
+        self.assertEqual(sum(1 for w in self.ft.writes if w.startswith('OUT')), 1)
+        self.assertTrue(any('operator chose Continue' in t for t in surprise_lines(io)))
+
+    def test_dmm_error_queue_after_the_reading_continue_keeps_the_reading(self):
+        d = Dialog(True)
+        io = self.build(dmm_rules=[Rule('SYST:ERR?', '-221,"Settings conflict"', nth=3)], dialog=d)
+        p = self.points(1)[0]
+        v = io.measure(p)
+        self.assertEqual(v, self.build().measure(p))
+        self.assertEqual((d.count, d.seen[0].kind, d.seen[0].stop_only), (1, 'errqueue', False))
+        self.assertEqual(self.ft.writes[-1], 'STBY')
+
+    def test_unreadable_error_queue_is_a_stop_only_bad_reply(self):
+        d = Dialog(True)
+        io = self.build(dmm_rules=[Rule('SYST:ERR?', '', nth=2, times=30)], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.points(1)[0])
+        self.assertEqual((d.count, d.seen[0].kind, d.seen[0].stop_only), (1, 'reply', True))
+        self.assertEqual([w for w in self.ft.writes if w.startswith('OUT')], [])
+
+    def test_calibrator_error_queue_after_output_is_stop_only_and_never_operates(self):
+        d = Dialog(True)
+        io = self.build(cal_rules=[Rule('ERR?', '-222,"Data out of range"', after='OUT')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.points(1)[0])
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only), (1, 'errqueue', True))
+        self.assertNotIn('OPER', self.ft.writes)
+        self.assertEqual(sum(1 for w in self.ft.writes if w.startswith('OUT')), 1)
+        self.assertEqual(self.ft.writes[-1], 'STBY')
+
+    def test_standby_not_confirmed_is_still_a_hard_stop_with_no_dialog(self):
+        import reset_startup
+        d = Dialog(True)
+        io = self.build(cal_rules=[Rule('OPER?', '1', after='STBY')], dialog=d)
+        with self.assertRaises(reset_startup.ResetFailed):
+            io.reset_at_start()
+        self.assertEqual(d.count, 0)
+
+
+class A34411IO(A34410IO):
+    MODEL = '34411A'
+
+
+class A34410IO5522A(A34410IO):
+    """The 5522A as the source: its ZCOMP set / read back / compare (resistance points) is the second read-back of this engine."""
+    CAL = 'Fluke 5522A'
+
+    def ohm_point(self):
+        return [p for p in self.A.POINTS if p['kind'] == 'OHM4' and p['source'] == 'calibrator'][0]
+
+    def test_zcomp_readback_mismatch_is_a_stop_only_surprise(self):
+        d = Dialog(True)
+        io = self.build(cal_rules=[Rule('ZCOMP?', 'NONE')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.ohm_point())
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only, s.command, s.reply), (1, 'readback', True, 'ZCOMP?', 'NONE'))
+        self.assertEqual(self.ft.writes.count('ZCOMP WIRE4'), 1, 'sent once, never repeated')
+        self.assertNotIn('OPER', self.ft.writes)
+        self.assertEqual(self.ft.writes[-1], 'STBY')
+
+    def test_zcomp_clean(self):
+        d = Dialog()
+        io = self.build(dialog=d)
+        self.assertAlmostEqual(io.measure(self.ohm_point()), 100.0, delta=0.01)
+        self.assertEqual(d.count, 0)
+        self.assertIn('ZCOMP WIRE4', self.ft.writes)
+
+
+class A34410App(AppCase):
+    MODEL = '34410A'
+    HEADER = [('Instrument', 'Keysight 34410A'), ('Instrument ID', 'A1'), ('Serial', 'S1')]
+
+    def make(self, dmm_rules=(), cal_rules=(), guard=True):
+        import agilent34410a_verification as A
+        import drivers.simulated_34410a as sim
+        A.configure(self.MODEL)
+        A.messagebox = h.messagebox
+        dialog = self.dialog
+        real = sim.make_34410a_bench
+
+        def bench(cal='5522A', bus='GPIB', model='34410A'):
+            b, ft, dt = real(cal, bus, model)
+            return b, FaultTransport(ft, *cal_rules), FaultTransport(dt, *dmm_rules)
+        self.patch(sim, 'make_34410a_bench', bench)
+        if guard:
+            orig = A.IO
+
+            class Guarded(orig):
+                def __init__(self, *a, **k):
+                    super().__init__(*a, **k)
+                    self.enable_surprise(dialog, force=True)
+            self.patch(A, 'IO', Guarded)
+        app = A.App(self.hn.root, demo=True, fast_demo=False)
+        app.asset.set('A1')
+        app.serial.set('S1')
+        self.hn.app = app
+        return app
+
+    restart = TruevoltApp.restart
+
+    def test_clean_run_is_identical_with_and_without_the_guard(self):
+        app0 = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        ref = (stable_log(app0.io), results_view(app0), report_bytes(app0, self.HEADER), VH.wire(app0.io))
+        self.restart()
+        app1 = self.make(guard=True)
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 0)
+        self.assertTrue(app1.io.guards)
+        got = (stable_log(app1.io), results_view(app1), report_bytes(app1, self.HEADER), VH.wire(app1.io))
+        self.assertEqual(got[0], ref[0])
+        self.assertEqual(got[1], ref[1])
+        self.assertEqual(got[2][1], ref[2][1], 'same report rows')
+        self.assertEqual(got[2][0], ref[2][0], 'same PDF bytes')
+        self.assertEqual(got[3], ref[3])
+
+    def test_a_real_connection_wires_the_guard_with_the_apps_handler(self):
+        import agilent34410a_verification as A
+        from drivers.simulated_34410a import make_34410a_bench
+        A.configure(self.MODEL)
+        A.messagebox = h.messagebox
+        _b, ft, dt = make_34410a_bench('5560A', 'GPIB', self.MODEL)
+        self.patch(A.drivers, 'open_visa', lambda addr, **k: ft if addr.upper().startswith('ASRL') else dt)
+        app = A.App(self.hn.root, demo=False, fast_demo=False)
+        self.hn.app = app
+        self.patch(app, '_surprise_handler', lambda: self.dialog)
+        app.test_connections()
+        self.assertIsNotNone(app.io)
+        self.assertEqual([g.handler for g in app.io.guards], [self.dialog, self.dialog])
+        self.assertFalse(app.io.log.virtual)
+
+    def test_demo_without_the_forced_guard_never_prompts(self):
+        with mock.patch.object(surprise, 'tk_handler', side_effect=AssertionError('demo must not build a dialog')):
+            app = self.make(guard=False)
+            self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 0)
+        self.assertEqual(app.io.guards, [])
+
+    def test_demo_and_fast_demo_never_make_a_handler(self):
+        import agilent34410a_verification as A
+        for demo, fast in ((True, False), (True, True)):
+            app = A.App.__new__(A.App)
+            app.demo, app._fast_demo = demo, fast
+            with mock.patch.object(surprise, 'tk_handler', side_effect=AssertionError):
+                self.assertIsNone(app._surprise_handler())
+        app = A.App.__new__(A.App)
+        app.demo, app._fast_demo, app.root = False, False, object()
+        with mock.patch.object(surprise, 'tk_handler', return_value=lambda s: False) as tk:
+            self.assertIs(app._surprise_handler(), app._surprise_handler())
+        tk.assert_called_once_with(app.root)
+
+    def test_stop_on_a_readback_mismatch_goes_through_the_engines_standby_and_error_dialog(self):
+        app = self.make(dmm_rules=[Rule('SENS:FUNC?', '"VOLT:AC"', nth=3)])
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 1)
+        self.assertFalse(app.busy)
+        self.assertTrue(self.hn.boxes('showerror'))
+        self.assertEqual(VH.wire(app.io)[-1], ('5560A', 'STBY'))
+        self.assertEqual(self.dialog.seen[0].kind, 'readback')
+
+    def test_writes_are_never_repeated_after_a_surprise(self):
+        clean = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        clean_wire = VH.wire(clean.io)
+        self.restart()
+        app = self.make(dmm_rules=[Rule('READ?', '', nth=3)])
+        self.assertTrue(self.hn.run_all())
+        wire = VH.wire(app.io)
+        while wire and wire[-1] == ('5560A', 'STBY'):          # this engine's own finally and its worker's except block both put the calibrator in standby
+            wire.pop()
+        self.assertEqual(wire, clean_wire[:len(wire)], 'up to the surprise the run sent exactly what the clean run sent; nothing was repeated')
+        self.assertEqual(VH.wire(app.io)[-1], ('5560A', 'STBY'))
+
+    def test_continue_on_a_dmm_error_queue_entry_records_every_point_like_a_clean_run(self):
+        clean = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        ref = results_view(clean)
+        self.restart(Dialog(True))
+        app = self.make(dmm_rules=[Rule('SYST:ERR?', '-113,"Undefined header"', nth=5)])
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 1)
+        self.assertEqual(results_view(app), ref)
+        self.assertFalse(self.hn.boxes('showerror'))
+
+
+class A34411App(A34410App):
+    MODEL = '34411A'
+    HEADER = [('Instrument', 'Keysight 34411A'), ('Instrument ID', 'A1'), ('Serial', 'S1')]
+
+
 # =============================================================================================================================== real Tk
 class RealTkEngines(unittest.TestCase):
     """The real engine window on a real Tk 9 under Xvfb, a worker thread and mainloop (tests/real_tk_surprise_engine.py)."""
-    ENGINES = ('truevolt', 'dacq')
+    ENGINES = ('truevolt', 'dacq', 'a34410')
 
     def run_one(self, engine, scenario):
         import os

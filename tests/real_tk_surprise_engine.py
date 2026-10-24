@@ -72,6 +72,25 @@ class Setup:
         self.expect_continue = dict(recorded=3, text='-113')
         self.prepare = lambda app: None
 
+    def a34410(self):
+        import agilent34410a_verification as A
+        from drivers.simulated_34410a import make_34410a_bench
+        self.mod = A
+        A.configure('34410A')
+        _b, ft, dt = make_34410a_bench('5560A', 'GPIB', '34410A')
+        d_rules = []
+        if self.scenario == 'stop':
+            d_rules = [Rule('READ?', '=>', nth=2)]
+        elif self.scenario == 'continue':
+            d_rules = [Rule('SYST:ERR?', '-113,"Undefined header"', nth=3)]              # connect (1), after the configuration of point 1 (2), after its reading (3)
+        self.dmm, self.cal = FaultTransport(dt, *d_rules), FaultTransport(ft)
+        self.points = [p for p in A.POINTS if p['source'] == 'calibrator' and p['terminal'] != 'REAR' and p['kind'] in ('DCV', 'DCI')][:3]
+        self.app_args = ()
+        self.open_visa = lambda addr, **k: self.cal if addr.upper().startswith('ASRL') else self.dmm
+        self.expect_stop = dict(recorded=1, text='READ?')
+        self.expect_continue = dict(recorded=3, text='-113')
+        self.prepare = lambda app: None
+
     def dacq(self):
         import dacq_verification as D
         from drivers.simulated import make_dacq_bench
