@@ -365,6 +365,11 @@ import ui_prompt_capture_wpg as _wpg  # noqa: E402
 SCENARIOS.update(_wpg.SCENARIOS)
 
 
+# ---- WP-B (bench DMM engines): Truevolt, DACQ, Keithley 2000, 34401A, 8846A.  APPEND-ONLY block; the scenarios live in tests/ui_prompt_capture_wpb.py.
+import ui_prompt_capture_wpb as _wpb  # noqa: E402
+SCENARIOS.update(_wpb.SCENARIOS)
+
+
 def capture(name, harness_class=TkLevelHarness):
     return SCENARIOS[name](lambda answers=None: harness_class(answers))
 
