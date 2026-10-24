@@ -76,9 +76,8 @@ def last_run_id(asset='A-100'):
 @contextlib.contextmanager
 def _export_patches(mod, details, out):
     import report_dialog
-    import tkinter.filedialog as tk_filedialog                           # a ported engine (WaveSurfer) has no `filedialog` name: TkUiPort -> tkinter.filedialog
     with mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: dict(details)), \
-            mock.patch.object(getattr(mod, 'filedialog', tk_filedialog), 'asksaveasfilename', lambda **k: str(out)):
+            mock.patch.object(getattr(mod, 'filedialog', None) or __import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: str(out)):
         yield
 
 

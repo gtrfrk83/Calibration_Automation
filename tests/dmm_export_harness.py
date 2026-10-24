@@ -177,7 +177,7 @@ def dump(root, outdir, show, specs=ENGINES, home=None, cal_mode=None):
             with contextlib.ExitStack() as st:
                 st.enter_context(mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: dict(details)))
                 st.enter_context(mock.patch.object(report_pdf, 'datetime', _Clock))
-                st.enter_context(mock.patch.object(mod.filedialog, 'asksaveasfilename', lambda **k: str(pdf)))
+                st.enter_context(mock.patch.object(getattr(mod, 'filedialog', None) or __import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: str(pdf)))
                 for n in names:
                     pass
                 mod.ui.report_filename  # attribute exists

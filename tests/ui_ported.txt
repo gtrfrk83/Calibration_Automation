@@ -3,3 +3,9 @@
 # and the older 'no engine file is edited' branch guards (test_reprint_review_*), which must not trip on a port.  Add your line when you port; keep one engine per line.
 a34410a: agilent34410a_verification.py agilent34410a_view_tk.py Procedures/Agilent_34410A_Verification.procedure.json Procedures/Agilent_34411A_Verification.procedure.json
 wavesurfer: Procedures/WaveSurfer_WS4104HD.py wavesurfer_view_tk.py Procedures/WaveSurfer_WS4104HD.procedure.json
+truevolt: truevolt_verification.py truevolt_view_tk.py Procedures/Keysight_34460A_Verification.procedure.json Procedures/Keysight_34461A_Verification.procedure.json Procedures/Keysight_34465A_Verification.procedure.json Procedures/Keysight_34470A_Verification.procedure.json
+dacq: dacq_verification.py dacq_view_tk.py Procedures/Keysight_34970A_Verification.procedure.json Procedures/Keysight_34972A_Verification.procedure.json
+k2000: keithley2000_verification.py k2000_view_tk.py Procedures/Keithley_2000_Verification.procedure.json
+a34401a: Procedures/Agilent_34401A.py a34401a_view_tk.py Procedures/Agilent_34401A.procedure.json
+f8846a: Procedures/Fluke_8846A_Verification.py f8846a_view_tk.py Procedures/Fluke_8846A_Verification.procedure.json
+f8808a: fluke8808a_verification.py f8808a_view_tk.py Procedures/Fluke_8808A_Verification.procedure.json

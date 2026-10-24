@@ -56,11 +56,10 @@ def engine_rows(name, app):
 
 def export(name, app, mod, out, details):
     """The engine's own export path (dialog and file chooser replaced)."""
-    import tkinter.filedialog as tk_filedialog, tkinter.messagebox as tk_messagebox      # a ported engine (WaveSurfer) has no such names: TkUiPort -> tkinter's modules
     with mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: dict(details)), \
-            mock.patch.object(getattr(mod, 'filedialog', tk_filedialog), 'asksaveasfilename', lambda **k: str(out)), \
-            mock.patch.object(getattr(mod, 'messagebox', tk_messagebox), 'showinfo', lambda *a, **k: None, create=True), \
-            mock.patch.object(getattr(mod, 'messagebox', tk_messagebox), 'showerror', lambda *a, **k: (_ for _ in ()).throw(AssertionError(a)), create=True):
+            mock.patch.object(getattr(mod, 'filedialog', None) or __import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: str(out)), \
+            mock.patch.object(getattr(mod, 'messagebox', None) or __import__('ui_port_tk').messagebox, 'showinfo', lambda *a, **k: None, create=True), \
+            mock.patch.object(getattr(mod, 'messagebox', None) or __import__('ui_port_tk').messagebox, 'showerror', lambda *a, **k: (_ for _ in ()).throw(AssertionError(a)), create=True):
         if name == 'ws':
             app.write_certificate_pdf(str(out), ['noise', 'dcv', 'impedance', 'offset', 'bandwidth', 'timebase', 'trigger'], dict(details))
         else:
@@ -251,8 +250,7 @@ class Discovery(unittest.TestCase):
                 mock.patch.object(app, 'write_certificate_pdf', lambda *a, **k: 1, create=True), \
                 mock.patch.object(type(app), 'sync_asset', lambda self: True, create=True):
             import WaveSurfer_WS4104HD as W
-            import tkinter.filedialog as tk_filedialog                  # the WaveSurfer prompts through ui_port (TkUiPort -> tkinter.filedialog)
-            with mock.patch.object(tk_filedialog, 'asksaveasfilename', lambda **k: ''):
+                    with mock.patch.object(tk_filedialog, 'asksaveasfilename', lambda **k: ''):
                 app.export_calibration_section('dcv')
         self.assertEqual(len(seen), 1)
         sections = {r.spec.section for r in seen[0].rows}
