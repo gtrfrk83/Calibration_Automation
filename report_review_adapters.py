@@ -138,6 +138,8 @@ def mdo_specs(app, mod):
                 opts.insert(0, std)
             spec.default_std, spec.locked, spec.options, spec.std_label = std, '', opts, ''
             spec.calc = _dc_calc(levels, term, vdiff, tol, unit, std, printed, default_ratio, acc_for)
+        elif k == 'ABSAMP' and expects and _rf_budget(p) is not None:
+            _rf_level_spec(spec, p, tol, printed, default_ratio)
         else:
             sc = report_pdf.scope()
             spec.calc = _read_only_calc(app, p, mod, row, default_ratio, expects, sc)
@@ -146,6 +148,49 @@ def mdo_specs(app, mod):
                 spec.std_label = ''
         specs.append(spec)
     return specs, M.first_default(specs)
+
+
+RF_STD = '96270A'
+
+
+def _rf_budget(p, standard=RF_STD, scope=None):
+    """MDO4000C absolute amplitude / level flatness sweep: the Fluke 96270A level accuracy over every frequency the sweep sets (uncertainty_budget.rf_level),
+    or None when the sheet does not cover the whole sweep.  The lab scope has no RF level CMC, so there is no floor (cmc None)."""
+    import uncertainty_budget as ub
+    freqs, f = [], p['f_start']
+    while f <= p['f_stop'] * (1 + 1e-9):
+        freqs.append(f)
+        f += p['f_step']
+    return ub.rf_level(p['level_dbm'], freqs, standard, scope=scope)
+
+
+def _rf_level_spec(spec, p, tol, printed, default_ratio):
+    """The 96270A is the default and only standard of an MDO4000C RF level row it covers.  The engine prints N/A for these rows; the review carries the 96270A
+    value into the report (PointSpec.engine_printed -> Row.applied -> changes).  Units stay dB (no conversion): TUR = +/-tolerance / reported, TAR = tolerance /
+    the sheet's printed limit, both only because tolerance, limit and uncertainty are all in dB."""
+    import tartur
+    import uncertainty
+
+    def calc(standard):
+        b = _rf_budget(p)
+        if b is None:
+            return M.make_evaluation('dB', RF_STD, '', None, None, None, '', '', True)
+        rep = b.reported
+        r = tartur.ratio_fields(tartur.from_values(tol, 'dB', b.hit.limit, 'dB', rep, 'dB'))
+        status_cmc = b.cmc
+        return M.make_evaluation('dB', RF_STD, uncertainty.format_value(rep, 'dB'), b.emu, status_cmc, rep, r.get('TAR', ''), r.get('TUR', ''), True)
+    ev = calc(RF_STD)
+    # a row with no scope entry that has a standard budget is 'As budgeted' (make_evaluation would call it 'Not in scope')
+    def calc_ok(standard, _c=calc):
+        e = _c(standard)
+        if e.cmc is None and e.reported:
+            e.status = M.AS_BUDGETED
+        return e
+    spec.calc = calc_ok
+    ev = calc_ok(RF_STD)
+    spec.engine_printed = dict(spec.printed)
+    spec.printed = dict(Uncertainty=ev.unc_text, TAR=ev.tar, TUR=ev.tur)
+    spec.default_std, spec.options, spec.locked, spec.std_label = RF_STD, [RF_STD], '', ''
 
 
 def _read_only_calc(app, p, mod, row, default_ratio, expects, sc):
