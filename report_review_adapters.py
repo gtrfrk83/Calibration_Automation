@@ -157,11 +157,7 @@ def _rf_budget(p, standard=RF_STD, scope=None):
     """MDO4000C absolute amplitude / level flatness sweep: the Fluke 96270A level accuracy over every frequency the sweep sets (uncertainty_budget.rf_level),
     or None when the sheet does not cover the whole sweep.  The lab scope has no RF level CMC, so there is no floor (cmc None)."""
     import uncertainty_budget as ub
-    freqs, f = [], p['f_start']
-    while f <= p['f_stop'] * (1 + 1e-9):
-        freqs.append(f)
-        f += p['f_step']
-    return ub.rf_level(p['level_dbm'], freqs, standard, scope=scope)
+    return ub.rf_level_sweep(p, standard, scope=scope)
 
 
 def _rf_level_spec(spec, p, tol, printed, default_ratio):

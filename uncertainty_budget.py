@@ -185,6 +185,16 @@ def rf_level(level_dbm, frequencies, standard='96270A', scope=None, cmc=None):
     return b
 
 
+def rf_level_sweep(p, standard='96270A', scope=None, cmc=None):
+    """rf_level() for one MDO4000C absolute amplitude / flatness point (`level_dbm`, `f_start`, `f_step`, `f_stop`): every frequency the engine sets.
+    The one place the sweep frequencies are worked out - the engine, the review window and the report all call it."""
+    freqs, f = [], p['f_start']
+    while f <= p['f_stop'] * (1 + 1e-9):
+        freqs.append(f)
+        f += p['f_step']
+    return rf_level(p['level_dbm'], freqs, standard, scope=scope, cmc=cmc)
+
+
 def audit(reported, b, tolerance=1e-12):
     """Compare an uncertainty someone reported (SI base units) with the budget `b`.  Returns (status, text).
     UNDER CMC is the accreditation problem: nothing may be reported below the scope CMC."""
