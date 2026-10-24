@@ -115,7 +115,7 @@ class SidecarKind(unittest.TestCase):
         self.assertNotIn('DROP TABLE', src)
         import re
         tabs = re.findall(r"self\.notebook\.add\(self\.\w+, text='\s*([^']+?)\s*'\)", src)
-        self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Mudcats Datasheet Importer', 'Datasheet Builder'])
+        self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder'])
         self.assertIn('FROM instruments', (ROOT / 'labregistry.py').read_text(encoding='utf-8'))
 
     def test_user_datasheet_rows_carry_their_kind(self):

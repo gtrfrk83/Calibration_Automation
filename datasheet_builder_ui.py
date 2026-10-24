@@ -2482,7 +2482,7 @@ class DatasheetBuilderPanel(ttk.Frame):
         self.editors = {}
         help_label(self, 'Build a datasheet for any instrument from its manufacturer\'s specification: you describe the functions, ranges and accuracy, the builder works out the '
                          'test points and limits, finds which of your standards can supply them, and saves a procedure the suite can run. Everything you save is kept as a numbered '
-                         'version. This is separate from the Mudcats Datasheet Importer tab (Cal Processor .MDD templates).', 950).pack(anchor='w', pady=(0, 10))
+                         'version. (Cal Processor .MDD files are imported with the Procedures tab button.)', 950).pack(anchor='w', pady=(0, 10))
         bar = ttk.Frame(self)
         bar.pack(fill='x', pady=(0, 8))
         ttk.Button(bar, text='New...', style='Accent.TButton', command=self.new).pack(side='left', padx=(0, 8))

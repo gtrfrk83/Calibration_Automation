@@ -52,7 +52,7 @@ class ManagerSource(unittest.TestCase):
         for gone in ('development_frame', 'build_development_tab', 'refresh_development', 'Procedure Development', 'def install_update', 'Install update', 'def test_demo', 'dev_info', 'backup_table'):
             self.assertNotIn(gone, self.src)
         tabs = re.findall(r"self\.notebook\.add\(self\.\w+, text='\s*([^']+?)\s*'\)", self.src)
-        self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Mudcats Datasheet Importer', 'Datasheet Builder'])
+        self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder'])
         self.assertIn("text='Library folder...'", self.src)
         self.assertIn('def restore_previous', self.src)
         self.assertIn('procedure_menu.RESTORE: self.restore_previous', self.src)
@@ -74,7 +74,7 @@ class ManagerSource(unittest.TestCase):
         self.assertIn('b.full_text', self.src)
 
     def test_every_tab_page_can_scroll(self):
-        self.assertEqual(self.src.count('= self._scroll_page()'), 4)
+        self.assertEqual(self.src.count('= self._scroll_page()'), 3)
         self.assertIn('ui.ScrollFrame(card', self.src)
 
 
