@@ -48,6 +48,9 @@ class TkLevel(unittest.TestCase):
     def test_adjustment_launchers(self):
         self.check('adjustments')
 
+    def test_adjustment_launcher_8846a(self):
+        self.check('adj8846a')
+
 
 class Port(unittest.TestCase):
     def test_every_ported_engine_prompts_only_through_the_port(self):
