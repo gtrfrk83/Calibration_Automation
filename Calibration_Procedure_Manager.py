@@ -6,7 +6,6 @@ Standalone procedures remain runnable independently.
 Keep ui_theme.py and mdd_importer_v49.py in the same folder as this file.
 """
 import datetime
-import json
 import os
 import re
 import shutil
@@ -19,7 +18,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import ui_theme as ui
-from mdd_importer_v49 import parse_mdd, import_mdd, init_datasheet_db
+from mdd_importer_v49 import init_datasheet_db      # only the table creation: templates saved by the old Mudcats tab stay in the database (read-only, no longer viewable)
 import appdata
 import suite_info
 import labregistry
@@ -190,15 +189,12 @@ class Manager:
         self.library_frame = ttk.Frame(self.notebook, padding=16)
         self.history_frame = self._scroll_page()
         self.specs_frame = self._scroll_page()
-        self.datasheets_frame = self._scroll_page()
         self.dsb_frame = self._scroll_page()
         self.notebook.add(self.library_frame, text='  Procedures  ')
         self.notebook.add(self.history_frame, text='  Asset History  ')
         self.notebook.add(self.specs_frame, text='  Standards Specs  ')
-        self.notebook.add(self.datasheets_frame, text='  Mudcats Datasheet Importer  ')
         self.notebook.add(self.dsb_frame, text='  Datasheet Builder  ')
         self.build_library_tab()
-        self.build_datasheets_tab()
         self.build_datasheet_builder_tab()
         self.history_panel = labregistry_ui.HistoryPanel(self.history_frame.content)
         self.history_panel.pack(fill='both', expand=True)
@@ -252,8 +248,6 @@ class Manager:
         elif tab is self.specs_frame:
             self.specs_panel.refresh()
             self.status.set('Published specifications of the calibrators used as standards; they set the lowest uncertainty that may be reported.')
-        elif tab is self.datasheets_frame:
-            self.status.set('Import Cal Processor .MDD datasheets as read-only templates.')
         elif tab is self.dsb_frame:
             self.dsb_panel.refresh()
             self.status.set('Build your own datasheet from a manufacturer specification; each save is a new version and a runnable procedure.')
@@ -1025,38 +1019,7 @@ class Manager:
         """A datasheet was saved, deleted, restored or imported: the Procedures list is refreshed (the runnable spec has changed)."""
         self.refresh()
 
-    # ------------------------------------------------------------------ Datasheets tab
-    def build_datasheets_tab(self):
-        area = self.datasheets_frame.content
-        ttk.Label(area, text='Import Cal Processor .MDD files as read-only templates. You can review everything before it is saved, '
-                             'and the embedded scripts are never executed.', style='Muted.TLabel', wraplength=950, justify='left').pack(anchor='w', pady=(0, 10))
-        buttons = ttk.Frame(area)
-        buttons.pack(fill='x', pady=(0, 10))
-        ttk.Button(buttons, text='Import .MDD...', style='Accent.TButton', command=self.choose_mdd).pack(side='left', padx=(0, 8))
-        ttk.Button(buttons, text='View test points', command=self.view_imported_points).pack(side='left', padx=(0, 8))
-        ttk.Button(buttons, text='Import as manual calibration...', command=self.import_mdd_procedure).pack(side='left', padx=(0, 8))
-        ttk.Button(buttons, text='Refresh', command=self.refresh_datasheets).pack(side='left')
-        cols = ('id', 'manufacturer', 'model', 'procedure', 'points', 'filename', 'date')
-        self.ds_table = ui.make_table(area, cols, ('ID', 'Manufacturer', 'Model', 'Procedure', 'Points', 'Source file', 'Imported'),
-                                      (50, 140, 150, 160, 70, 380, 150), zebra=True, anchors={'manufacturer': 'w', 'model': 'w', 'procedure': 'w', 'filename': 'w'},
-                                      stretch={'id': False, 'points': False, 'date': False})
-        self.empty_ds = self._empty_state(self.ds_table, 'No datasheets imported yet.\nPress "Import .MDD..." to add your first one.')
-        self.ds_table.bind('<Double-1>', lambda _: self.view_imported_points())
-        self.ds_status = tk.StringVar(value='No datasheet selected.')
-        self.refresh_datasheets()
-
-    def refresh_datasheets(self):
-        for item in self.ds_table.get_children():
-            self.ds_table.delete(item)
-        with sqlite3.connect(DB) as conn:
-            init_datasheet_db(conn)
-            rows = conn.execute('''SELECT id,manufacturer,model,procedure_name,test_count,source_filename,imported_at
-                                 FROM datasheet_templates ORDER BY imported_at DESC,id DESC''').fetchall()
-        for n, row in enumerate(rows):
-            self.ds_table.insert('', 'end', iid=str(row[0]), values=row, tags=('even' if n % 2 == 0 else 'odd',))
-        self._toggle_empty(self.ds_table, not rows)
-        self.status.set(f'{len(rows)} imported datasheet(s).')
-
+    # ------------------------------------------------------------------ Mudcats .MDD import (Procedures tab button; the old Mudcats tab was removed)
     def import_mdd_procedure(self, path=None):
         """Import a Mudcats .MDD as a MANUAL calibration procedure (mdd_import_ui: preview first, nothing is created until it is approved)."""
         path = path or filedialog.askopenfilename(title='Choose Cal Processor datasheet', filetypes=[('Cal Processor datasheet', '*.mdd *.MDD'), ('All files', '*.*')])
@@ -1074,73 +1037,6 @@ class Manager:
         if self.table.exists(iid):
             self.table.selection_set(iid)
             self.table.see(iid)
-
-    def choose_mdd(self):
-        path = filedialog.askopenfilename(title='Choose Cal Processor datasheet', filetypes=[('Cal Processor datasheet', '*.mdd *.MDD'), ('All files', '*.*')])
-        if not path:
-            return
-        try:
-            parsed = parse_mdd(path)
-        except (OSError, ValueError) as exc:
-            messagebox.showerror('Cannot read datasheet', str(exc), parent=self.root)
-            return
-        h = parsed['header']
-        win = ui.dialog(self.root, 'Preview MDD import - review before saving')
-        ui.fit_window(win, 1180, 660, min_w=800, min_h=480)
-        head = ttk.Frame(win, padding=(16, 14, 16, 6)); head.pack(fill='x')
-        ttk.Label(head, text=f"{h.get('Manufacturer', '').strip()}  {h.get('Model', '').strip()}", style='Header.TLabel').pack(side='left')
-        ui.Pill(head, f"{len(parsed['points'])} test points", 'info').pack(side='right')
-        ttk.Label(win, text=f"Procedure: {h.get('Procedure_Name', '').strip() or '-'}", style='Muted.TLabel').pack(anchor='w', padx=16)
-        ui.Notice(win, 'Original nominal values, limits, readings and specifications are preserved exactly. Check them against the source before approving.', 'info').pack(fill='x', padx=16, pady=10)
-        bar = ttk.Frame(win, padding=12)
-        bar.pack(side='bottom', fill='x')
-        body = ttk.Frame(win, padding=(16, 0)); body.pack(fill='both', expand=True)
-        self._point_grid(body, parsed['points'])
-        def approve():
-            try:
-                tid, created, count = import_mdd(DB, path)
-            except (OSError, ValueError, sqlite3.Error) as exc:
-                messagebox.showerror('Import failed', str(exc), parent=win)
-                return
-            win.destroy()
-            self.refresh_datasheets()
-            self.ds_table.selection_set(str(tid))
-            self.ds_table.see(str(tid))
-            messagebox.showinfo('Datasheet import', f'{count} test points ' + ('saved to database.' if created else 'already imported; no duplicate created.'), parent=self.root)
-        ttk.Button(bar, text='Cancel', command=win.destroy).pack(side='right')
-        ttk.Button(bar, text='Approve and import', style='Accent.TButton', command=approve).pack(side='right', padx=8)
-
-    def _point_grid(self, parent, points):
-        cols = ('no', 'function', 'nominal', 'tolerance', 'low', 'high', 'found', 'left')
-        grid = ui.make_table(parent, cols, ('No.', 'Function', 'Nominal', 'Tolerance', 'Low', 'High', 'As found', 'As left'),
-                             (55, 260, 190, 255, 90, 90, 90, 90), zebra=True, hscroll=True,
-                             anchors={'function': 'w', 'nominal': 'w', 'tolerance': 'w'})
-        clean = lambda t: re.sub(r'\s+', ' ', (t or '').replace('~', ' | ')).strip()
-        for n, p in enumerate(points, 1):
-            grid.insert('', 'end', values=(n, clean(p.get('Text_Function', '')), clean(p.get('Text_Nominal', '')),
-                        clean(p.get('Text_Tolerance', '')), p.get('Tol_Low', ''), p.get('Tol_High', ''),
-                        p.get('Text_AsFound', ''), p.get('Text_AsLeft', '')), tags=('even' if n % 2 else 'odd',))
-        return grid
-
-    def view_imported_points(self):
-        sel = self.ds_table.selection()
-        if not sel:
-            messagebox.showinfo('Select datasheet', 'Select an imported datasheet first.', parent=self.root)
-            return
-        with sqlite3.connect(DB) as conn:
-            row = conn.execute('SELECT manufacturer,model,procedure_name FROM datasheet_templates WHERE id=?', (int(sel[0]),)).fetchone()
-            records = conn.execute('SELECT original_fields_json FROM datasheet_test_points WHERE template_id=? ORDER BY point_order', (int(sel[0]),)).fetchall()
-        if not row:
-            return
-        win = ui.dialog(self.root, 'Imported datasheet - ' + ' '.join(str(x) for x in row), modal=False)
-        ui.fit_window(win, 1180, 640, min_w=800, min_h=480)
-        head = ttk.Frame(win, padding=(16, 14, 16, 8)); head.pack(fill='x')
-        ttk.Label(head, text=f'{row[0]} {row[1]}  -  {row[2]}', style='Header.TLabel').pack(side='left')
-        ui.Pill(head, f'{len(records)} points', 'info').pack(side='right')
-        bar = ttk.Frame(win, padding=12); bar.pack(side='bottom', fill='x')
-        ttk.Button(bar, text='Close', command=win.destroy).pack(side='right')
-        body = ttk.Frame(win, padding=(16, 0)); body.pack(fill='both', expand=True)
-        self._point_grid(body, [json.loads(r[0]) for r in records])
 
 
 if __name__ == '__main__':

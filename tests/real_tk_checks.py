@@ -421,6 +421,7 @@ def checks_manager_run_top():
     for w, h in ((1267, 860), (900, 600)):
         CPM, root, m, errs = _manager_for_small_window(w, h)
         card = m.btn_run.master.master.master                      # run_row -> pinned -> LabelFrame
+        check(f'{w}x{h}: tabs', [m.notebook.tab(x, 'text').strip() for x in m.notebook.tabs()] == ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder'])
         check('card: the buttons are in the Selected procedure card', str(card.cget('text')) == 'Selected procedure', card)
         for kind, page in m.view_pages.items():
             m.view_nb.select(page)
@@ -459,7 +460,7 @@ def checks_manager_run_top():
             check('900x600: the wheel over the card text scrolls it', _wheel_scrolls(root, sf, sf.body))
             check('900x600: Run stays in view while the text scrolls', inside(root, m.btn_run) and in_card(card, m.btn_run))
             m.refresh_details()
-        tabs = [(m.history_frame, 'history'), (m.specs_frame, 'specs'), (m.datasheets_frame, 'datasheets'), (m.dsb_frame, 'dsb')]
+        tabs = [(m.history_frame, 'history'), (m.specs_frame, 'specs'), (m.dsb_frame, 'dsb')]
         for page, name in tabs:
             m.notebook.select(page)
             settle(root)
