@@ -200,26 +200,28 @@ class Exports(unittest.TestCase):
         changed = [l[2:] for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
         self.assertTrue(changed)
         for l in changed:
-            self.assertRegex(l, r'Min / Max|^\s*6 V range|Type K range|(\u00b5|m)Hz$|Same N/A$', l)
+            self.assertRegex(l, r'Min / Max|^\s*6 V range|Type K range|(\u00b5|m|n|p)Hz$', l)
         self.assertLessEqual(len(changed), 24)
 
     def check_frequency_rows_only(self, n):
-        """Only the frequency step rows differ: the voltage uncertainty with a Hz unit ('1.3 mHz') is now blank ('N/A')."""
+        """Only the frequency step rows differ: the voltage uncertainty with a Hz unit ('1.3 mHz') is now the Frequency - Measure CMC ('360 nHz')."""
         import difflib
         txt = lambda d: self.layout_lines(d / n)
         changed = [l for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
         self.assertEqual(len(changed), 2, changed)
         for l in changed:
-            self.assertRegex(l[2:], r'kHz [\d.]+ Same (N/A|[\d.]+ (\u00b5|m)Hz)$', l)
+            self.assertRegex(l[2:], r'kHz [\d.]+ Same [\d.]+ (\u00b5|m|n|p)Hz$', l)
 
     def check_temperature_rows_only(self, n):
         """Only the Temperature rows differ from the baseline, and only in the Uncertainty cell (N/A before, 'x.xx degC' now)."""
         import difflib
         txt = lambda d: self.layout_lines(d / n)
         changed = [l for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
-        self.assertEqual(len(changed), 6, changed)
+        self.assertEqual(len(changed), 8, changed)
         for l in changed:
-            self.assertRegex(l[2:], r'^\s*Temperature\s', l)
+            if not re.match(r'^\s*Temperature\s', l[2:]):          # the 4-24 frequency row: the voltage uncertainty with a Hz unit became the Frequency - Measure CMC
+                self.assertRegex(l[2:], r'45\.\d+ Hz .*Same [\d.]+ (\u00b5|m|n|p)Hz$', l)
+                continue
             self.assertRegex(l[2:], r'N/A\s*$' if l[0] == '-' else r'\d+(\.\d+)? \u00b0C\s*$', l)
 
     def test_on_pdf_has_columns_and_values(self):

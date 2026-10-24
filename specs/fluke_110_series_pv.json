@@ -565,7 +565,7 @@
    },
    "nominal": 50000.0,
    "note": "The meter displays FREQUENCY on this step. With a Fluke 9100 the calibrator frequency mode must be used.",
-   "no_uncertainty": true,
+   "unc_kind": "FREQ",
    "id": "3-17"
   },
   {

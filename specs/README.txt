@@ -101,7 +101,8 @@ Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, f
   step.printed_limits       optional record of limits as printed when the spec uses corrected ones (not read by the engine).
   step.printed_text         optional (Fluke 170 series): the printed limit text when the spec writes the same numbers at the display resolution (50.1 -> 50.10); not read by the engine.
   step.no_freq_suffix       optional true (Fluke 170 series Hz-unit frequency rows): the report Nominal has no 'at f Hz' suffix.
-  step.no_uncertainty       optional true (Fluke 170 series frequency rows): the report row gets no Uncertainty (and TAR / TUR stay blank); the 77 IV (2-17), 110-series (3-17) and 87V (1-11 .. 1-14) frequency steps set it too since branch uncertainty-engines (they used to print the voltage uncertainty with a Hz unit). The 287 / 289 step 4-24 has the same quirk and does not set it yet.
+  step.no_uncertainty       optional true (Fluke 170 series frequency rows): the report row gets no Uncertainty (and TAR / TUR stay blank).
+  step.unc_kind             optional 'FREQ' (Fluke 77 IV 2-17, 110-series 3-17, 87V 1-11 .. 1-14, 287 / 289 4-24): the step sources AC volts and reads a frequency; the Uncertainty is the lab's 'Frequency - Measure' CMC at the applied frequency, on its own (no calibrator budget), TUR against it, TAR blank.
 
 Square-wave sources in handheld specs (additive; handheld_dmm.py, procspec.validate_manual_reading)
   step.kind                 DUTY    square-wave source, the meter reads the duty cycle (%) (87V 1-16)

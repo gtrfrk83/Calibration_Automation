@@ -491,7 +491,7 @@
    "group": "VOHM",
    "note": "The meter displays FREQUENCY on this step (the calibrator applies 5 V at 50 kHz). Table 2 footnote 1: press the YELLOW button to access this function.",
    "report_desc": "99.99 kHz range (5 V applied)",
-   "no_uncertainty": true,
+   "unc_kind": "FREQ",
    "ref": "T2 #17",
    "id": "2-17"
   },
