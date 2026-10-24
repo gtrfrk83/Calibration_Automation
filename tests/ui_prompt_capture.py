@@ -36,6 +36,10 @@ from ui_port import Answers, operator_record, plain, record  # noqa: E402  (the 
 
 GOLDEN_UI = ROOT / 'tests' / 'golden_ui'
 
+# the handheld module's own window entry points as imported (the harnesses replace them with scripted ones; PortHarness puts them back so the engine's call goes
+# through ui_port.ui to the ScriptedUiPort)
+_HH_WINDOWS = {n: getattr(VH.hh, n) for n in ('ask_reading', 'ask_readings', 'ask_range', 'ask_ir_problem')}
+
 TK_KIND = {'showinfo': 'info', 'showwarning': 'warning', 'showerror': 'error', 'askyesno': 'ask_yes_no', 'askokcancel': 'ask_ok_cancel',
            'askretrycancel': 'ask_retry_cancel', 'askyesnocancel': 'ask_yes_no_cancel'}
 
@@ -62,7 +66,8 @@ class TkLevelHarness(VH.VHarness):
                 pats.append((mb, name, self._mk_ask(kind)))
         pats += [(fd, 'askopenfilename', self._file('choose_file')), (fd, 'asksaveasfilename', self._file('save_file')),
                  (sd, 'askfloat', self._simple('ask_number')), (sd, 'askinteger', self._simple('ask_number')), (sd, 'askstring', self._simple('ask_text')),
-                 (report_dialog, 'ask_details', self._details), (VH.hh.ui, 'confirm_steps', self._confirm)]
+                 (report_dialog, 'ask_details', self._details), (VH.hh.ui, 'confirm_steps', self._confirm),
+                 (VH.hh, 'ask_range', self._ask_range_v), (VH.hh, 'ask_ir_problem', self._ask_ir_problem_v)]
         for obj, name, val in pats:
             p = mock.patch.object(obj, name, val, create=True)
             p.start()
@@ -122,8 +127,61 @@ class TkLevelHarness(VH.VHarness):
                                    question=question, annunciator=bool(annunciator), fill_offered=demo_fill is not None, note=out_note))
         return ans
 
+    def _ask_readings(self, parent, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                      source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading=''):
+        """run_queue_ui.ask_readings (UiPort.ask_readings): recorded as kind 'ask_readings'."""
+        ans = super()._ask_readings(parent, p, total, out_text, out_note, accept, meters, unit=unit, judge=judge, limit_s=limit_s, on_expire=on_expire,
+                                    device=device, source=source, demo_fill=demo_fill, tol_text=tol_text, phase=phase, heading=heading)
+        self.prompts.append(record('ask_readings', f'point {p["id"]}', out_text, ans, device=device, source=source, unit=unit, phase=phase or None, heading=heading or None,
+                                   meters=[list(m) for m in meters], fill_offered=demo_fill is not None, note=out_note, tol_text=tol_text or None))
+        return ans
+
+    def _ask_range_v(self, parent, p, total, dial, standby_text):
+        rec = record('ask_range', f'point {p["id"]}', p.get('dial_text') or p['switch'], None, range=p['range'], standby=standby_text)
+        ans = self.answers.for_(rec, self.range_answer)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def _ask_ir_problem_v(self, parent, p, total, problems, shown):
+        rec = record('ask_ir_problem', f'point {p["id"]}', '; '.join(problems), None, shown=shown or None)
+        ans = self.answers.for_(rec, 'stop')
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
     def _box(self, kind, args):                     # unused here (the Tk functions are replaced above) but keeps VHarness helpers consistent
         return self.box_answer.get(kind, True)
+
+
+class _HarnessPort(ui_port.ScriptedUiPort):
+    """ScriptedUiPort whose reading windows are answered like the Tk-level harness answers them (VHarness: hn.readings / hn.default_reading / hn.fill, and for the
+    queue window hn.queue_*), so a scenario scripted with those hooks (the shared run-queue scenarios) gets the same readings behind the port.  An explicit rule of
+    `answers` still wins, and the record is the port's own."""
+
+    def __init__(self, answers, hn):
+        super().__init__(answers)
+        self.hn = hn
+
+    def ask_reading(self, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
+                    limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None):
+        rec = record('ask_reading', f'point {p["id"]}', out_text, None, mode=mode, device=device, source=source, unit=unit, phase=phase or None,
+                     question=question, annunciator=bool(annunciator), fill_offered=demo_fill is not None, note=out_note)
+        ans = self.answers.for_(rec, None)
+        if ans is None:
+            ans = VH.VHarness._ask_reading_v(self.hn, None, p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate, phase, limit_s,
+                                             on_expire, device, source, demo_fill)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def ask_readings(self, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                     source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading='', *, parent=None):
+        rec = record('ask_readings', f'point {p["id"]}', out_text, None, device=device, source=source, unit=unit, phase=phase or None, heading=heading or None,
+                     meters=[list(m) for m in meters], fill_offered=demo_fill is not None, note=out_note, tol_text=tol_text or None)
+        ans = self.answers.for_(rec, None)
+        if ans is None:
+            ans = VH.VHarness._ask_readings(self.hn, None, p, total, out_text, out_note, accept, meters, unit=unit, judge=judge, limit_s=limit_s,
+                                            on_expire=on_expire, device=device, source=source, demo_fill=demo_fill, tol_text=tol_text, phase=phase, heading=heading)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
 
 
 class PortHarness(TkLevelHarness):
@@ -132,8 +190,12 @@ class PortHarness(TkLevelHarness):
 
     def start(self):
         super().start()
-        self.port = ui_port.ScriptedUiPort(self.answers)
+        self.port = _HarnessPort(self.answers, self)
         self._old_ui = ui_port.set_ui(self.port)
+        for name, real in _HH_WINDOWS.items():          # the handheld engine's reading windows reach the ScriptedUiPort through the module's own entry points
+            p = mock.patch.object(VH.hh, name, real)
+            p.start()
+            self.patches.append(p)
         return self
 
     def stop(self):
@@ -362,6 +424,131 @@ def _run_adjustments(make_harness):
     return out
 
 
+def _run_handheld_families(make_harness):
+    """The handheld families the first handheld fixture does not cover (it has the 77 IV, 117 and 87 V): the 170 series (179), the 287 / 289 (REL offset, IR option), the 365,
+    the 376 (iFlex option through iflex_option.App), the Klein MM325 (dial picture: ask_range), a manual calibrator, the run queue (ask_readings), the IR problem
+    window, the HIGH VOLTAGE refusal and the small dialogs.  Virtual bench, the Fill button answers the reading windows."""
+    import handheld_dmm as hh
+    import iflex_option
+    out = {}
+
+    def new(answers=None, model='117', spec=None, engine=None, cal=None):
+        hn = make_harness(answers)
+        hn.start()
+        mod = engine or hh
+        app = mod.App(hn.root, model, demo=True, spec=hh.load_spec(spec) if spec else None, fast_demo=False)
+        app.asset.set('A-1'); app.serial.set('S-1')
+        app.demo_failures = None
+        app.demo_failures_on = False
+        if cal:
+            app.cal_mode.set(cal)
+        hn.app = app
+        return hn, app
+
+    def prompts(hn):
+        return hn.port.prompts if hasattr(hn, 'port') else hn.prompts
+
+    def done(name, hn):
+        out[name] = prompts(hn)
+        hn.stop()
+
+    for key, model, spec in (('170_179', '179', 'fluke_170_series_pv.json'), ('289', '289', 'fluke_287_289_pv.json'), ('365', '365', 'fluke_365_pv.json'),
+                             ('mm325', 'MM325', 'klein_mm325_pv.json')):
+        hn, app = new(model=model, spec=spec)
+        assert hn.run_all(), key
+        done(f'virtual_run_{key}', hn)
+
+    hn, app = new(model='376', spec='fluke_376_pv.json', engine=iflex_option)          # the iFlex option: refused, then accepted, then the run without the iFlex points
+    hn.answers.rules.append(lambda r: False if r.get('title') == 'Skip the iFlex tests' else None)
+    app.set_include('iflex', False)                       # operator says No: nothing changes
+    hn.answers.rules.clear()
+    app.set_include('iflex', False)                       # operator says Yes: the iFlex points leave the run
+    assert hn.run_all()
+    done('virtual_run_376_iflex_off', hn)
+
+    hn, app = new(model='376', spec='fluke_376_pv.json', engine=iflex_option)
+    assert hn.run_all()
+    done('virtual_run_376_iflex_on', hn)
+
+    hn, app = new(Answers([lambda r: 'stop' if r['kind'] == 'ask_range' and r['title'] == 'point 3' else ('skip' if r['kind'] == 'ask_range' and r['title'] == 'point 2' else None)]),
+                  model='MM325', spec='klein_mm325_pv.json')
+    hn.run_all()                                          # the dial window: skip one point, stop at the third
+    done('mm325_range_skip_then_stop', hn)
+
+    hn, app = new(cal=hh.CAL_CHOICES[2])                  # calibrator set by hand: 'Set this on the calibrator and press OPERATE'
+    assert app.manual_cal
+    assert hn.run_all()
+    done('virtual_run_117_manual_calibrator', hn)
+
+    hn, app = new(Answers([lambda r: False if r.get('title') == 'HIGH VOLTAGE' else None]), model='365', spec='fluke_365_pv.json')
+    hn.run_all()
+    done('high_voltage_refused_365', hn)
+
+    hn, app = new(Answers([lambda r: False if r.get('title') == 'Change the function' else None]), model='179', spec='fluke_170_series_pv.json')
+    hn.run_all()
+    done('function_change_cancelled_179', hn)
+
+    hn, app = new(Answers([lambda r: False if r.get('title') == 'Set the REL offset' else None]), model='289', spec='fluke_287_289_pv.json')
+    hn.run_all()
+    done('rel_offset_cancelled_289', hn)
+
+    hn, app = new()                                       # a run queue of two meters on the virtual bench: one reading window for both
+    app.apply_queue([('4412', 'S-4412', 'T 1'), ('4413', 'S-4413', 'T 2')], 'point_by_point')
+    hn.fill = True
+    assert hn.run_all()
+    done('virtual_queue_117_two_meters', hn)
+
+    hn, app = new(Answers([lambda r: 'type' if r['kind'] == 'ask_ir_problem' else None]), model='289', spec='fluke_287_289_pv.json')
+    from unittest import mock as _m
+    app.cal_mode.set(hh.CAL_CHOICES[2])                   # calibrator by hand: nothing to connect
+    ir_point = next(p for p in app.points if p['test'] == 'numeric' and p.get('ir') and not p.get('rel_zero'))
+    problem = _m.patch.object(hh, 'ir_read', side_effect=hh.SetupProblem(['The meter is in the wrong function'], 'V DC, auto range'))
+    problem.start(); hn.patches.append(problem)
+    app.meter, app.ir = object(), app.spec['options']['ir']
+    app.read_mode.set(hh.READ_IR)
+    app.busy = True
+    app._next([ir_point], 0, None)                        # IR read fails with a set-up problem; the operator chooses 'Type the reading instead'
+    hn.pump(30)
+    done('ir_set_up_problem_289', hn)
+
+    hn, app = new()                                       # the small dialogs of the handheld window
+    app.asset.set('')
+    app.execute(app.points[:1])                           # no instrument ID -> warning
+    app.asset.set('A-1')
+    app.tree.selection.return_value = ()                  # Rerun Selected with nothing selected -> info
+    app.rerun()
+    app.export_pdf()                                      # nothing recorded yet -> info
+    app.test_connection()                                 # virtual: connects the simulated calibrator -> info 'Connected (DEMO)'
+    app._fast_demo = True
+    app.test_connection()                                 # fast demo -> info
+    app._fast_demo = False
+    app.cal_mode.set(hh.CAL_CHOICES[2])
+    app.test_connection()                                 # manual calibrator -> info
+    app.test_ir()                                         # virtual: the IR cable is not simulated -> info
+    app._error(RuntimeError('boom'))                      # a failure -> error
+    app.busy = True
+    hn.answers.rules.append(lambda r: False if r.get('title') == 'Active run' else None)
+    app.on_close()                                        # busy: 'Stop and close?' -> No (stays open)
+    hn.answers.rules.clear()
+    app.busy = False
+    done('dialogs_misc', hn)
+
+    hn, app = new()                                       # export with results: details window cancelled; load: file dialog cancelled
+    assert hn.run_all() is True
+    prompts(hn).clear()
+    app.export_pdf()                                      # report details -> None (cancelled)
+    hn.answers.rules.append(lambda r: {} if r['kind'] == 'report_details' else None)
+    app.export_pdf()                                      # report details given, save-as cancelled ('')
+    app.load()                                            # open-file cancelled ('')
+    done('export_and_load_cancelled', hn)
+    return out
+
+
+# Scenarios compared at the Tk level only, until the shared helper they reach is ported: {scenario key: {scenario name}}.  Empty since the run queue
+# (run_queue_engine) prompts through the port: handheld_families/virtual_queue_117_two_meters gives the same sequence behind ScriptedUiPort.
+TK_LEVEL_ONLY = {}
+
+
 class _FakeTree:
     """The step table of the 8846A adjustment window: only what the engine's handlers call (selection, set, item, bind, ...)."""
 
@@ -519,6 +706,8 @@ SCENARIOS['wavesurfer'] = _run_wavesurfer
 # ---- WP-B (bench DMM engines): Truevolt, DACQ, Keithley 2000, 34401A, 8846A.  APPEND-ONLY block; the scenarios live in tests/ui_prompt_capture_wpb.py.
 import ui_prompt_capture_wpb as _wpb  # noqa: E402
 SCENARIOS.update(_wpb.SCENARIOS)
+# ---- WP-H (handheld): the other handheld families (the first handheld fixture is the 'handheld' scenario above).  APPEND-ONLY block.
+SCENARIOS['handheld_families'] = _run_handheld_families
 
 
 # ---- WP-S (shared helpers: run_queue_engine, manual_override, datamode, procmods_engine, reset_startup, surprise): APPEND-ONLY block ---------------------------------
@@ -548,7 +737,7 @@ def _run_shared(make_harness):
     """The prompts the SHARED helpers show, on the engines that inherit them: the run queue (handheld_dmm.App on the simulated 5522A: a point-by-point run, a
     one-meter-at-a-time run with the swap prompt, the resume question, the report / set-up dialogs), the manual-override small dialogs, the As Found / As Left
     question and the Show-box notices (datamode), a technician note (procmods_engine) and a failed reset (reset_startup), the last four on the 8808A.
-    The reading windows (ask_readings) are scripted by the harness and not part of the record."""
+    The multi-meter reading windows (kind 'ask_readings') are scripted by the harness and left out of the record (finish() drops them)."""
     import handheld_dmm as hh
     import run_queue as RQ
     import fluke8808a_verification as E
@@ -590,8 +779,12 @@ def _run_shared(make_harness):
         return hn
 
     def finish(name, hn):
-        out[name] = list(hn.log) if hasattr(hn, 'port') else hn.prompts
-        ORIGINS[name] = list(hn.log.origins) if hasattr(hn, 'port') else None
+        # The fixture predates the recording of the multi-meter reading window (kind 'ask_readings', recorded by the harness since WP-H): left out here, it is
+        # covered by handheld_families.  Everything else is the sequence recorded on the unported helpers.
+        seq = hn.log if hasattr(hn, 'port') else hn.prompts
+        keep = [i for i, r in enumerate(seq) if r['kind'] != 'ask_readings']
+        out[name] = [seq[i] for i in keep]
+        ORIGINS[name] = [hn.log.origins[i] for i in keep] if hasattr(hn, 'port') else None
         hn.stop()
 
     hn = begin(make_harness(None))
