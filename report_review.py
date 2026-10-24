@@ -23,6 +23,7 @@ import report_review_model as M
 import ui_theme as ui
 
 UNAVAILABLE = object()
+COVERED = ('certificate_rows_and_points', 'certificate_pairs', 'certificate_source_records')       # multimeters / fgen, MDO4000C, TDS2000C / WaveSurfer
 SHORT = {'As budgeted': 'budgeted', 'Raised to scope': 'raised', 'Not in scope': 'not in scope', 'Standard changed': 'changed', M.MANUAL: 'manual'}
 
 
@@ -32,13 +33,42 @@ def find_app(parent):
     for o in gc.get_objects():
         try:
             t = type(o)
-            if t.__module__ in ('builtins', 'tkinter', 'tkinter.ttk') or not hasattr(t, 'certificate_rows_and_points'):
+            if t.__module__ in ('builtins', 'tkinter', 'tkinter.ttk') or not any(hasattr(t, a) for a in COVERED):
                 continue
             if o.__dict__.get('root') is parent:
                 found.append(o)
         except Exception:
             continue
     return found[0] if len(found) == 1 else None
+
+
+def hint_kinds(app):
+    """WaveSurfer only: which result kinds the export that opened the dialog will print.  Its per-tab export asks the details BEFORE it builds the report,
+    so the kind is only in the caller (`export_calibration_section(kind)`); read it from the stack, read-only, and fall back to every kind with data
+    (None) when it cannot be seen.  No other engine needs this."""
+    try:
+        f = sys._getframe(3)
+        for _ in range(6):
+            if f is None:
+                break
+            if f.f_code.co_name == 'export_calibration_section' and f.f_locals.get('self') is app and isinstance(f.f_locals.get('kind'), str):
+                return [f.f_locals['kind']]
+            f = f.f_back
+    except Exception:
+        pass
+    return None
+
+
+def asset_of(app) -> str:
+    """The asset number the technician entered (WaveSurfer calls the field instrument_id)."""
+    for name in ('asset', 'instrument_id'):
+        var = getattr(app, name, None)
+        if var is not None and hasattr(var, 'get'):
+            try:
+                return str(var.get()).strip()
+            except Exception:
+                pass
+    return ''
 
 
 def is_demo(app) -> bool:
@@ -63,10 +93,10 @@ def ask(parent, procedure='', app=None):
             for m in meters:
                 if m is not None:
                     app._queue_activate(m)
-                specs, default = M.specs_for(app)
+                specs, default = M.specs_for(app, kinds=hint_kinds(app) if hasattr(app, 'certificate_source_records') else None)
                 if not specs:
                     return UNAVAILABLE
-                models.append(M.ReviewModel(specs, default, asset=str(app.asset.get()), procedure=procedure))
+                models.append(M.ReviewModel(specs, default, asset=asset_of(app), procedure=procedure))
         finally:
             if meters != [None] and keep is not None:
                 app._queue_activate(keep)
@@ -204,7 +234,7 @@ class ReviewWindow:
         if s.locked and s.q.get('kind') == 'FREQ':
             std = M.LOCKED_FREQUENCY
         elif s.locked:
-            std = '—'
+            std = s.std_label or '—'
         else:
             std = M.label(r.standard) + '  ▾'
         unit = e.unit

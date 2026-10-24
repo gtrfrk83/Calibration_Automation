@@ -238,9 +238,9 @@ class ReportPath(unittest.TestCase):
 
     def test_mismatched_index_is_ignored(self):
         rows = [{'Description': 'x', 'Nominal': '1 V', 'Uncertainty': 'a', 'Section': ''}, {'Description': 'y', 'Nominal': '2 V', 'Uncertainty': 'b', 'Section': ''}]
-        block = {'reviews': [{'asset': 'A-1', 'changes': [dict(idx=0, description='y', nominal='2 V', uncertainty='ZZ', tar='', tur=''),
+        block = {'reviews': [{'asset': 'A-1', 'changes': [dict(idx=0, description='nothing like it', nominal='2 V', uncertainty='ZZ', tar='', tur=''),
                                                            dict(idx=1, description='y', nominal='2 V', uncertainty='NEW', tar='', tur=''),
-                                                           dict(idx=9, description='y', nominal='2 V', uncertainty='ZZ')]}]}
+                                                           dict(idx=9, description='no such row', nominal='2 V', uncertainty='ZZ')]}]}
         out = report_pdf.apply_uncertainty_review(rows, {'uncertainty_review': block}, [('Instrument ID', 'A-1')])
         self.assertEqual([r['Uncertainty'] for r in out], ['a', 'NEW'])
         same = report_pdf.apply_uncertainty_review(rows, {'uncertainty_review': block}, [('Instrument ID', 'OTHER')])

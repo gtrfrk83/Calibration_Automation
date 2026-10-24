@@ -65,6 +65,10 @@ class PointSpec:
     locked: str = ''               # '' = changeable; else the plain reason
     printed: dict = field(default_factory=dict)      # Uncertainty / TAR / TUR exactly as the engine built them
     has_ratio_cols: bool = False
+    calc: object = None            # oscilloscope / generator engines (report_review_adapters): callable(standard) -> Evaluation, instead of the multimeter path
+    options: list | None = None    # the standards this row can use (None: worked out from the sheets)
+    expects: bool = False          # the point should carry an uncertainty: with no scope entry it is 'Not in scope' (and may take a typed value)
+    std_label: str = ''            # what the Standard column says for a row with no drop-down ('Scope CMC', 'Fluke 5790B', 'Reference file')
 
 
 @dataclass
@@ -91,6 +95,11 @@ def _unit_of(q):
 
 def evaluate(spec: PointSpec, standard) -> Evaluation:
     """Recalculate one row for `standard` (a model key or None).  Never raises."""
+    if spec.calc is not None:
+        try:
+            return spec.calc(standard)
+        except Exception:
+            return make_evaluation(spec.unit, standard, '', None, None, None, '', '', spec.expects)
     import report_pdf
     import tartur
     import uncertainty
@@ -132,8 +141,25 @@ def evaluate(spec: PointSpec, standard) -> Evaluation:
                       f.get('TAR', ''), f.get('TUR', ''), status, unit)
 
 
+def make_evaluation(unit, standard, text, emu, cmc, rep, tar, tur, expects=False) -> Evaluation:
+    """An Evaluation from numbers an adapter already has; the status follows the same rules as evaluate()."""
+    text = '' if text in (None, 'N/A') else text
+    if not text and not (expects and cmc is None):
+        status = NO_UNC
+    elif cmc is None:
+        status = NOT_IN_SCOPE if (expects or text) else NO_UNC
+    elif emu is not None and emu < cmc * (1 - 1e-9):
+        status = RAISED
+    else:
+        status = AS_BUDGETED
+    return Evaluation(standard, emu if _finite(emu) else None, cmc if _finite(cmc) else None, rep if _finite(rep) else None, text, tar or '', tur or '',
+                      status, unit)
+
+
 def offered_standards(spec: PointSpec) -> list:
     """Model keys the drop-down offers for this row: calibrators whose published sheet has a row covering the point (the default is always listed)."""
+    if spec.options is not None:
+        return list(spec.options) if not spec.locked else ([spec.default_std] if spec.default_std else [])
     if spec.locked:
         return [spec.default_std] if spec.default_std else []
     import uncertainty_budget as ub
@@ -168,8 +194,10 @@ def tolerance_text(spec: PointSpec) -> str:
     try:
         import tartur
         t = tartur.half_width(spec.low, spec.high)
-        if t is None or not spec.unit or spec.unit in tartur.NO_UNITS:
-            return ''
+        if t is not None and spec.unit == 'dB':
+            return f'\u00b1 {t:g} dB'
+        if t is None or not spec.unit or spec.unit in tartur.NO_UNITS or spec.unit not in _SI_UNITS:
+            return f'\u00b1 {t:g} {spec.unit}'.strip() if t is not None else ''
         import report_pdf
         return '± ' + report_pdf._si(t, spec.unit)
     except Exception:
@@ -179,9 +207,10 @@ def tolerance_text(spec: PointSpec) -> str:
 # ---- a typed uncertainty for a row the lab scope does not cover
 _PREFIX = {'': Decimal(1), 'p': Decimal('1e-12'), 'n': Decimal('1e-9'), 'u': Decimal('1e-6'), 'm': Decimal('1e-3'), 'k': Decimal('1e3'), 'M': Decimal('1e6'),
            'G': Decimal('1e9')}
-_UNIT_NAMES = {'V': ('v',), 'A': ('a',), 'ohm': ('ohm', 'ohms', '\u03c9'), 'Hz': ('hz',), 'F': ('f',), 'C': ('c', 'degc', '\u00b0c'), 'degC': ('c', 'degc', '\u00b0c'),
+_UNIT_NAMES = {'s': ('s', 'sec'), 'V': ('v',), 'A': ('a',), 'ohm': ('ohm', 'ohms', '\u03c9'), 'Hz': ('hz',), 'F': ('f',), 'C': ('c', 'degc', '\u00b0c'), 'degC': ('c', 'degc', '\u00b0c'),
                '\u00b0C': ('c', 'degc', '\u00b0c')}
 _NUMBER = None
+_SI_UNITS = ('V', 'A', 'ohm', 'Hz', 'F', 's', 'C', 'degC', '\u00b0C')
 
 
 def parse_uncertainty(text, unit, shown_scale=Decimal(1)):
@@ -198,12 +227,17 @@ def parse_uncertainty(text, unit, shown_scale=Decimal(1)):
         return None, 0, 'Enter a number with its unit, for example 3.5 mV.'
     num, tail = m.group(1), (m.group(2) or '').strip()
     names = _UNIT_NAMES.get(unit)
-    if names is None:
-        return None, 0, 'This kind of point cannot take a typed uncertainty.'
+    prefixes = _PREFIX
+    if names is None:                                        # dB, dBm, dBc/Hz, div ...: the unit as written, no SI prefix
+        names = ((unit or '').lower(),)
+        prefixes = {'': Decimal(1)}
+        if unit in ('dB',):
+            prefixes = _PREFIX
+            names = ('db',)
     factor = shown_scale
     if tail:
         factor = None
-        for pre, mult in _PREFIX.items():
+        for pre, mult in prefixes.items():
             if tail.startswith(pre) and tail[len(pre):].lower() in names:
                 factor = mult
                 break
@@ -228,6 +262,9 @@ def format_manual(value, unit, sig=2):
     if unit in ('C', 'degC', '\u00b0C'):
         dp = max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)
         return f'{value:.{dp}f} \u00b0C'
+    if unit not in _SI_UNITS:                                 # dB, dBm, dBc/Hz, div ...: printed with the figures typed, no prefix
+        dp = max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)
+        return f'{value:.{dp}f} {unit}'.strip()
     number, symbol = ui.si_one(value, '\u03a9' if unit == 'ohm' else unit, sig=sig)
     return f'{number} {symbol}'.replace('\u03a9', 'Ohm')
 
@@ -241,6 +278,8 @@ def entry_scale(spec, ev):
         unit = _unit_of(spec.q)
         if unit in ('C', 'degC', '\u00b0C'):
             return Decimal(1), '\u00b0C'
+        if unit not in _SI_UNITS:
+            return Decimal(1), unit
         scale, symbol = ui.si_scale(ref, '\u03a9' if unit == 'ohm' else unit)
         return Decimal(str(scale)), symbol.replace('\u03a9', 'ohm')
     except Exception:
@@ -330,7 +369,7 @@ class Row:
 
     @property
     def needs_attention(self) -> bool:
-        return self.cur.status in (RAISED, NOT_IN_SCOPE) or self.typed is not None
+        return self.cur.status == NOT_IN_SCOPE or self.typed is not None
 
 
 class ReviewModel:
@@ -516,18 +555,23 @@ def _handheld_spec(app, i, p, row) -> PointSpec:
                      p['base_unit'], std, locked, printed)
 
 
-def specs_for(app):
-    """(specs, default_standard) for an engine App with certificate_rows_and_points(); raises TypeError for an engine this phase does not cover."""
+def specs_for(app, kinds=None):
+    """(specs, default_standard) for an engine App.  Multimeter engines (certificate_rows_and_points) are built here; the oscilloscope / generator
+    engines (certificate_pairs: fgen, MDO4000C, TDS2000C; WaveSurfer: certificate_source_records) by report_review_adapters.
+    `kinds` (WaveSurfer only): the result kinds the report will print, when the caller knows them.  Raises TypeError for an engine not covered."""
     if not hasattr(app, 'certificate_rows_and_points'):
-        raise TypeError('engine has no certificate_rows_and_points')
+        import report_review_adapters as A
+        return A.specs_for(app, kinds)
     rows, pts = app.certificate_rows_and_points()
     handheld = hasattr(app, 'has_uncertainty') and hasattr(app, 'calibrator_model')
     out = []
     for i, (row, p) in enumerate(zip(rows, pts)):
         out.append(_handheld_spec(app, i, p, row) if handheld else _spec_point_spec(app, i, p, row))
-    default = None
-    for s in out:
+    return out, first_default(out)
+
+
+def first_default(specs):
+    for s in specs:
         if not s.locked and s.default_std:
-            default = s.default_std
-            break
-    return out, default
+            return s.default_std
+    return None
