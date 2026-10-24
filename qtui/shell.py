@@ -45,7 +45,7 @@ from . import widgets as W
 from .theme import M
 from .vars import QtVar, bind
 
-COMPACT_BELOW = 1100            # window width (logical px) under which the sidebar folds into a drop-down
+COMPACT_BELOW = 1180            # window width (logical px) under which the sidebar folds into a drop-down (Tk: 1100; the Qt full table needs ~1170 for a readable Description)
 SIDEBAR_W = 224
 DRAWER_MAX, DRAWER_MIN = 480, 300
 

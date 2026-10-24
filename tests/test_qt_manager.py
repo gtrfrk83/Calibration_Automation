@@ -273,7 +273,7 @@ class Menus(QtCase):
         self.assertEqual(texts[:4], ['About Calibration Suite', 'Open my data folder', 'Import data from another copy...', 'Save diagnostic log for support'])
         self.assertIn('Appearance', texts)
         self.assertEqual(self.win.help_actions['about'].shortcut().toString(), 'F1')
-        self.assertEqual([a.text() for a in self.win.appearance_menu.actions()], ['Dark  (current)'])          # only dark is offered for now
+        self.assertEqual([a.text() for a in self.win.appearance_menu.actions()], ['Dark', 'Light'])          # both themes are offered (light enabled 2026-10-24)
         self.win.help_actions['about'].trigger()
         self.assertEqual(self.boxes[-1][1], 'About Calibration Suite')
         self.assertIn('Your data folder:', self.boxes[-1][2])

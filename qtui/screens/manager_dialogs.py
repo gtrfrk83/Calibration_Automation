@@ -16,7 +16,7 @@ import verified
 from qtui import theme
 from qtui.table import Column, DataTable
 from qtui.theme import M
-from qtui.widgets import Badge, Banner, MessageDialog, ModalDialog, label
+from qtui.widgets import Badge, Banner, MessageDialog, ModalDialog, follow_tokens, label
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,8 +60,9 @@ def _field_row(grid: QFormLayout, text, edit, hint=''):
     row.setContentsMargins(0, 0, 0, 0)
     row.setSpacing(M.md)
     row.addWidget(edit, 1)
-    if hint:
-        row.addWidget(label(hint, 'hint'))
+    note = label(hint, 'hint')
+    note.setMinimumWidth(230)                              # one hint column: the fields of the form all end at the same place
+    row.addWidget(note)
     grid.addRow(label(text), box)
 
 
@@ -73,7 +74,7 @@ def _remembered():
 
 
 def _verified_dialog(parent, title, heading, lead, ok_text):
-    dlg = ModalDialog(parent, title, width=620)
+    dlg = ModalDialog(parent, title, width=760)
     dlg.title_label.setText(heading)
     dlg.sub_label.setText(lead)
     dlg.sub_label.setVisible(True)
@@ -83,7 +84,7 @@ def _verified_dialog(parent, title, heading, lead, ok_text):
 def _finish(dlg, grid, ok_text, error, submit):
     dlg.body.addLayout(grid)
     error.setProperty('role', 'hint')
-    error.setStyleSheet(f"color: {theme.tokens()['bad']};")          # one dynamic colour, taken from the token
+    follow_tokens(error, lambda: f"color: {theme.tokens()['bad']};")          # one dynamic colour, taken from the token (and kept after a theme switch)
     error.setWordWrap(True)
     dlg.body.addWidget(error)
     dlg.add_button('Cancel', cancel=True)

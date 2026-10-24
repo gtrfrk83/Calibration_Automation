@@ -29,7 +29,7 @@ import virtualbench
 from qtui import theme
 from qtui.screens import common
 from qtui.table import Column, DataTable
-from qtui.widgets import Card, ModalDialog, label
+from qtui.widgets import Card, ModalDialog, follow_theme, follow_tokens, label
 
 WIDTH = 760                       # content width of the reading window, device-independent px
 
@@ -125,7 +125,7 @@ class _MeterRow(QFrame):
         row.addWidget(self.skip)
 
     def set_focused(self, on):
-        self.setStyleSheet(_box_style('meterRow', 'primary' if on else 'border', 2 if on else 1, 'bg'))
+        follow_tokens(self, lambda: _box_style('meterRow', 'primary' if on else 'border', 2 if on else 1, 'bg'))
 
 
 class ReadingsDialog(ModalDialog):
@@ -163,7 +163,7 @@ class ReadingsDialog(ModalDialog):
         orow.addLayout(ocol, 1)
         mark = QLabel()
         done = str(out_note).startswith('Output is ON')
-        mark.setPixmap(theme.pixmap('good' if done else 'dot', theme.tokens()['good' if done else 'muted'], 22))
+        follow_theme(mark, lambda: mark.setPixmap(theme.pixmap('good' if done else 'dot', theme.tokens()['good' if done else 'muted'], 22)))
         mark.setAccessibleName('Output is on' if done else 'Output is not on yet')
         orow.addWidget(mark, 0, Qt.AlignmentFlag.AlignTop)
         out.body.addLayout(orow)
@@ -192,7 +192,7 @@ class ReadingsDialog(ModalDialog):
         self.body.addWidget(_caps(f'WHAT DOES EACH {device} SHOW?', 'primary'))
         card = QFrame()
         card.setObjectName('meterBox')
-        card.setStyleSheet(_box_style('meterBox', 'primary', 2, 'card'))
+        follow_tokens(card, lambda: _box_style('meterBox', 'primary', 2, 'card'))
         cl = QVBoxLayout(card)
         cl.setContentsMargins(12, 10, 12, 6)
         cl.setSpacing(6)
@@ -422,7 +422,7 @@ class _ModeCard(QFrame):
 
     def set_selected(self, on):
         self.radio.setChecked(on)
-        self.setStyleSheet(_box_style('modeCard', 'primary' if on else 'border', 2, 'card'))
+        follow_tokens(self, lambda: _box_style('modeCard', 'primary' if on else 'border', 2, 'card'))
 
     def mousePressEvent(self, ev):
         self.chosen.emit(self.value)
@@ -518,7 +518,7 @@ class QueueSetupDialog(ModalDialog):
         info = self.summarize(list(self.state['meters']), self.state['mode'])
         kind = info.get('kind', 'good')
         edge = {'good': 'good_dot', 'warn': 'warn_dot', 'bad': 'bad_dot'}.get(kind, 'border')
-        self.sum_frame.setStyleSheet(_box_style('summaryCard', edge, 2, 'card'))
+        follow_tokens(self.sum_frame, lambda: _box_style('summaryCard', edge, 2, 'card'))
         self.sum_head.setText(info.get('title', ''))
         self.sum_head.set_tone({'good': 'good', 'warn': 'warn', 'bad': 'bad'}.get(kind, 'text'))
         self.sum_body.setText(info.get('body', '') + ''.join('\n' + w for w in info.get('warnings', [])))
@@ -668,7 +668,7 @@ class QueueProgress:
             bad = row['failed'] > 0
             fr = QFrame()
             fr.setObjectName('progressRow')
-            fr.setStyleSheet(_box_style('progressRow', 'bad_dot' if bad else 'border', 2, 'card'))
+            follow_tokens(fr, lambda bad=bad: _box_style('progressRow', 'bad_dot' if bad else 'border', 2, 'card'))
             lay = QHBoxLayout(fr)
             lay.setContentsMargins(12, 10, 12, 10)
             who = label(f'Asset {row["asset"]}', 'section')
