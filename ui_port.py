@@ -39,9 +39,27 @@ CONTRACT (every method is called on the UI thread unless the text says otherwise
     surprise_handler(win) -> handler          the Stop / Continue dialog of surprise.py, made ON the UI thread (see surprise.tk_handler)
     view(name) -> module                      the toolkit's window code for an engine: module `<name>_<toolkit>` (agilent34410a_view -> agilent34410a_view_tk)
 
+  Handheld reading windows (handheld_dmm.py; modal, blocking, UI thread; `parent` as everywhere is never part of the recorded prompt):
+    ask_reading(p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='', limit_s=None, on_expire=None,
+                device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None) -> dict(action='record'|'skip'|'stop', text=, ann=, yes=)
+                                        the reading window for point `p` (a handheld_dmm point dict): mode 'numeric' (type the display; `validate(text)` raises ValueError for
+                                        an unusable entry, which the window shows and stays open) or 'yesno' (answer `question`); `accept` is the 'ACCEPT IF' line;
+                                        `limit_s` / `on_expire`: a countdown after which `on_expire()` is called once; `demo_fill()` (virtual bench only) is the
+                                        'Fill with a simulated reading' button; closing the window = 'stop'.  Tk: handheld_dmm_view_tk.ask_reading
+    ask_readings(p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT',
+                 demo_fill=None, tol_text='', phase='', heading='', *, parent=None) -> dict(action=, texts={key: text|None}, no_reading=[keys])
+                                        the run-queue window: one box per meter (`meters` = [(key, asset label, serial)]), each judged live by judge(key, text) ->
+                                        (state, padded_text, note) (ValueError = not a reading); demo_fill(index) fills a box.  Tk: run_queue_ui.ask_readings
+    ask_range(p, total, dial, standby_text, *, parent=None) -> 'ok' | 'skip' | 'stop'
+                                        'Turn the dial to ...' with the dial picture (`dial` = the spec's dial block) and the target position marked
+    ask_ir_problem(p, total, problems, shown, *, parent=None) -> 'retry' | 'type' | 'skip' | 'stop'
+                                        the meter (read over IR) is not set up as the point needs
+    progress_window(win, title='Queue progress', on_show=None, on_export=None) -> object with update(heading, fraction, rows, finished=False, note=''), close(), alive()
+                                        the non-modal run-queue progress window (Tk: run_queue_ui.QueueProgress).  Added to the interface; run_queue_engine still builds it
+                                        through its own `queue_progress_factory` until the shared-helpers package routes that through this method.
+
 NOT in the interface yet (each has real call sites; the work package that ports them adds the method AND a ScriptedUiPort implementation, then a line here):
-    ask_reading / ask_readings / ask_range    handheld_dmm.py custom reading windows (Toplevel with entries, timer, Fill button)
-    progress window                           run_queue_ui.QueueProgress, used by handheld_dmm / run_queue_engine
+    (ask_reading / ask_readings / ask_range / ask_ir_problem / progress_window are in the interface now: see 'Handheld reading windows' below)
     result / table windows                    ui_shell.results_table, ui_theme.make_table: today part of the engine's own window (see 'view')
     custom dialogs                            ui_theme.dialog + Toplevel in Fluke_8808A_Adjustment / Keithley_2000_Adjustment / WaveSurfer; surprise.py's own Toplevel
 """
@@ -122,6 +140,22 @@ class ScriptedVar:
     def trace_add(self, mode, callback):
         self._cbs.append(callback)
         return str(len(self._cbs))
+
+
+class ScriptedProgress:
+    """The non-modal progress window of a test: keeps every update() (heading, fraction, rows, finished, note)."""
+
+    def __init__(self):
+        self.updates, self.closed = [], False
+
+    def update(self, heading, fraction, rows, finished=False, note=''):
+        self.updates.append((heading, fraction, [dict(r) for r in rows], finished, note))
+
+    def alive(self):
+        return not self.closed
+
+    def close(self):
+        self.closed = True
 
 
 class ScriptedUiPort:
@@ -233,6 +267,58 @@ class ScriptedUiPort:
     def view(self, name):
         import importlib
         return importlib.import_module(f'{name}_tk')   # the scripted port builds nothing itself: tests that need a window use the Tk view over the stub
+
+
+    # ==== APPEND-ONLY BLOCK, WP-H (handheld): the reading windows and the progress window ======================================================
+    # The scripted operator answers like tests/virtual_harness.VHarness did: a rule of `answers` (record -> answer) wins; otherwise the 'Fill with a simulated
+    # reading' button when the engine offers it (virtual bench), otherwise the window is closed ('stop').  Records: kinds ask_reading / ask_readings / ask_range /
+    # ask_ir_problem (ui_prompt_capture records the same form from the Tk-level harness).
+    def ask_reading(self, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
+                    limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None):
+        rec = record('ask_reading', f'point {p["id"]}', out_text, None, mode=mode, device=device, source=source, unit=unit, phase=phase or None,
+                     question=question, annunciator=bool(annunciator), fill_offered=demo_fill is not None, note=out_note)
+        ans = self.answers.for_(rec, None)
+        if ans is None:
+            typed = demo_fill() if demo_fill is not None else None
+            if mode == 'numeric':
+                if typed is None:
+                    ans = dict(action='stop', text='', ann=False, yes=None)
+                else:
+                    if validate:
+                        validate(typed)
+                    ans = dict(action='record', text=typed, ann=False, yes=None)
+            else:
+                ans = dict(action='record', text='', ann=False, yes=bool(True if typed is None else typed))
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def ask_readings(self, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                     source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading='', *, parent=None):
+        rec = record('ask_readings', f'point {p["id"]}', out_text, None, device=device, source=source, unit=unit, phase=phase or None, heading=heading or None,
+                     meters=[list(m) for m in meters], fill_offered=demo_fill is not None, note=out_note, tol_text=tol_text or None)
+        ans = self.answers.for_(rec, None)
+        if ans is None:
+            texts, ans = {}, dict(action='stop', texts={}, no_reading=[])
+            for idx, (key, _label, _serial) in enumerate(meters):
+                val = demo_fill(idx) if demo_fill is not None else None
+                if val is None:
+                    break
+                judge(key, val)
+                texts[key] = val
+            else:
+                ans = dict(action='record', texts=texts, no_reading=[])
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def ask_range(self, p, total, dial, standby_text, *, parent=None):
+        return self._ask(record('ask_range', f'point {p["id"]}', p.get('dial_text') or p['switch'], range=p['range'], standby=standby_text), 'ok')
+
+    def ask_ir_problem(self, p, total, problems, shown, *, parent=None):
+        return self._ask(record('ask_ir_problem', f'point {p["id"]}', '; '.join(problems), shown=shown or None), 'stop')
+
+    def progress_window(self, win, title='Queue progress', on_show=None, on_export=None):
+        self.events.append(('progress_window', (title,)))
+        return ScriptedProgress()
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------

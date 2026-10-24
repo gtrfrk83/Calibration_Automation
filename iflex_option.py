@@ -26,14 +26,13 @@ Behaviour
 from __future__ import annotations
 
 import re
-import tkinter as tk
 from datetime import datetime
-from tkinter import messagebox, ttk
 
 import handheld_dmm
 import run_queue as RQ
-import ui_theme as ui
+import ui_port
 import virtualbench
+from ui_port import ui as port          # every dialog, variable and window operation goes through the UI port (ui_port.py)
 
 
 def _key(asset):
@@ -41,6 +40,10 @@ def _key(asset):
 
 
 class App(handheld_dmm.App):
+    IFLEX_VIEW = 'iflex_option_view'                        # the toolkit's window code for the include boxes: iflex_option_view_tk (Tk), later _qt
+
+    @property
+    def iflex_view(self): return port.view(self.IFLEX_VIEW)
 
     # ------------------------------------------------------------------ the options
     def include_defs(self):
@@ -202,7 +205,7 @@ class App(handheld_dmm.App):
                     f'and the report will state "{d.get("off_text", "not tested")}".')
             if recorded:
                 text += f'\n\n{recorded} reading(s) already recorded stay in the list and in the report.'
-            if not messagebox.askyesno('Skip the iFlex tests', text):
+            if not port.ask_yes_no('Skip the iFlex tests', text):
                 return False
         inc[key] = value
         log = m.include_log if m is not None else self._include_log
@@ -250,18 +253,7 @@ class App(handheld_dmm.App):
         defs = self.include_defs()
         if not defs:
             return
-        self._include_vars, self._include_labels = {}, {}
-        bar = ttk.Frame(self.shell.content)
-        slaves = self.shell.content.pack_slaves()
-        bar.pack(side='top', fill='x', pady=(0, 6), **({'before': slaves[0]} if slaves else {}))
-        self.include_bar = bar
-        for d in defs:
-            var = tk.BooleanVar(self.root, value=self._include.get(d['id'], True))
-            self._include_vars[d['id']] = var
-            ttk.Checkbutton(bar, text=d['label'], variable=var, command=lambda k=d['id']: self._on_include_click(k)).pack(side='left')
-            label = ttk.Label(bar, text=self.include_text(d['id'], short=True), style='Muted.TLabel')
-            label.pack(side='left', padx=(12, 0))
-            self._include_labels[d['id']] = label
+        self.iflex_view.build_include_bar(self)
         self.refresh()
 
     def _on_include_click(self, key):
@@ -273,7 +265,7 @@ class App(handheld_dmm.App):
         for key, var in getattr(self, '_include_vars', {}).items():
             if bool(var.get()) != self._include.get(key, True):
                 var.set(self._include.get(key, True))
-            self._include_labels[key].configure(text=self.include_text(key, short=True))
+            self.iflex_view.set_include_label(self, key, self.include_text(key, short=True))
         self._rebuild_include_rows()
         sub = self.shell.subtitle.get() if hasattr(self, 'shell') else None
         if isinstance(sub, str):                                   # the banner says how many points the window has
@@ -292,7 +284,7 @@ class App(handheld_dmm.App):
             for key, var in self._include_vars.items():
                 if bool(var.get()) != self._include.get(key, True):
                     var.set(self._include.get(key, True))
-                self._include_labels[key].configure(text=self.include_text(key, short=True))
+                self.iflex_view.set_include_label(self, key, self.include_text(key, short=True))
 
     def _seeds_from_queue(self):
         seeds = {}
@@ -400,42 +392,13 @@ class App(handheld_dmm.App):
         nxt = super().build_queue_drawer(d, row)
         if not self.include_defs():
             return nxt
-        self._inc_rows = ttk.Frame(d)
-        self._inc_rows.grid(row=nxt, column=0, columnspan=2, sticky='ew', pady=(6, 0))
-        self._inc_row_vars, self._inc_row_notes, self._inc_rows_sig = {}, {}, None
+        self.iflex_view.build_include_rows(self, d, nxt)
         self._rebuild_include_rows()
         return nxt + 1
 
     def _rebuild_include_rows(self):
         """The Connections drawer: one 'iFlex supplied' check box for every meter of the queue (the window box is the one of the meter shown)."""
-        box = getattr(self, '_inc_rows', None)
-        if box is None:
-            return
-        meters, defs = list(self.queue.meters), self.include_defs()
-        sig = tuple(m.asset for m in meters)
-        if defs and meters and sig == getattr(self, '_inc_rows_sig', None):          # same meters: update the boxes in place (the box being clicked stays)
-            for m in meters:
-                inc = self._ensure_meter(m)
-                self._inc_row_vars[m.asset].set(bool(inc.get(defs[0]['id'], True)))
-                self._inc_row_notes[m.asset].configure(text=self._meter_include_note(m, defs[0]))
-            return
-        for w in list(box.winfo_children()):
-            w.destroy()
-        self._inc_row_vars, self._inc_row_notes, self._inc_rows_sig = {}, {}, sig
-        if not meters or not defs:
-            return
-        d = defs[0]
-        ttk.Label(box, text=f'{self._inc_label(None)} probe, per meter', style='Bold.TLabel').grid(row=0, column=0, sticky='w')
-        box.columnconfigure(0, weight=1)
-        for r, m in enumerate(meters):
-            inc = self._ensure_meter(m)
-            var = tk.BooleanVar(self.root, value=bool(inc.get(d['id'], True)))
-            self._inc_row_vars[m.asset] = var
-            ttk.Checkbutton(box, text=f'{m.asset}: {self._inc_label(None)} supplied', variable=var,
-                            command=lambda m=m, v=var: self._on_meter_include_click(m, v)).grid(row=1 + 2 * r, column=0, sticky='w', pady=(4, 0))
-            note = ttk.Label(box, text=self._meter_include_note(m, d), style='Muted.TLabel', wraplength=ui.px(320), justify='left')
-            note.grid(row=2 + 2 * r, column=0, sticky='w', padx=(24, 0))
-            self._inc_row_notes[m.asset] = note
+        self.iflex_view.rebuild_include_rows(self)
 
     def _meter_include_note(self, m, d):
         inc = self._ensure_meter(m)
@@ -493,7 +456,8 @@ def main(model, argv=None, spec=None):
     """spec: a spec file name inside specs/ (or a path)."""
     import sys
     argv = sys.argv if argv is None else argv
-    root = tk.Tk()
-    demo, fast = virtualbench.flags(argv)
-    App(root, model, demo=demo, spec=handheld_dmm.load_spec(spec) if spec else None, fast_demo=fast)
-    root.mainloop()
+
+    def build(root):
+        demo, fast = virtualbench.flags(argv)
+        App(root, model, demo=demo, spec=handheld_dmm.load_spec(spec) if spec else None, fast_demo=fast)
+    port.run_app(build)

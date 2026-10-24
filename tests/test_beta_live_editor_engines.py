@@ -433,6 +433,7 @@ class Coverage(unittest.TestCase):
                 texts += [(ROOT / f'{v}_tk.py').read_text(encoding='utf-8') for v in re.findall(r"^\s+VIEW = '(\w+)'", t, re.M)]
             if path.name == 'User_Datasheet.py':
                 texts.append((ROOT / 'handheld_dmm.py').read_text(encoding='utf-8'))
+                texts.append((ROOT / 'handheld_dmm_view_tk.py').read_text(encoding='utf-8'))        # its window code (ui_port.py)
             self.assertTrue(any('pm_live_attach(' in t for t in texts), f'{path.name}: no in-run editor and not listed in NOT_WIRED')
 
 
