@@ -17,7 +17,7 @@ import sys
 import threading
 from pathlib import Path
 
-from PySide6.QtCore import QPoint, Qt, QTimer
+from PySide6.QtCore import QEvent, QObject, QPoint, Qt, QTimer
 from PySide6.QtGui import QAction, QGuiApplication, QKeySequence, QShortcut
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QMainWindow, QMenu, QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy,
                                QStackedWidget, QStatusBar, QVBoxLayout, QWidget)
@@ -87,6 +87,29 @@ class VerificationPopup(QFrame):
         if y + self.height() > scr.bottom() - 8:
             y = max(scr.top(), anchor.mapToGlobal(QPoint(0, 0)).y() - self.height() - 4)
         self.move(max(scr.left(), x), y)
+
+
+class _ShareWidth(QObject):
+    """Keeps the procedure list readable in a wide window: the width beyond `base` is shared between the columns by `weights` (the last column, which
+    stretches, keeps the rest), so the list does not become one huge Procedure column with the others pushed to the far right."""
+    def __init__(self, table, base_widths, weights):
+        super().__init__(table)
+        self.table, self.base, self.weights = table, base_widths, weights
+        table.viewport().installEventFilter(self)
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Resize:
+            QTimer.singleShot(0, self.apply)
+        return False
+
+    def apply(self):
+        try:
+            hh = self.table.horizontalHeader()
+            extra = max(0, self.table.viewport().width() - sum(self.base) - 220)
+            for i, (w, k) in enumerate(zip(self.base, self.weights)):
+                hh.resizeSection(i, int(w + extra * k))
+        except RuntimeError:
+            pass                                                   # the table went away
 
 
 class ManagerWindow(QMainWindow):
@@ -321,15 +344,16 @@ class ManagerWindow(QMainWindow):
 
         split = QHBoxLayout()
         split.setSpacing(M.lg)
-        cols = [Column('name', 'Procedure', 235, stretch=True, getter=lambda r: r.name, tone=lambda r: 'bad' if not r.found else 'warn' if r.n_mod else None),
+        cols = [Column('name', 'Procedure', 235, getter=lambda r: r.name, tone=lambda r: 'bad' if not r.found else 'warn' if r.n_mod else None),
                 Column('manufacturer', 'Manufacturer', 112, getter=lambda r: r.manufacturer),
                 Column('model', 'Model', 90, getter=lambda r: r.model),
                 Column('category', 'Category', 150, getter=lambda r: r.category),
                 Column('ready', 'Status', 80, getter=lambda r: r.status, tone=lambda r: 'bad' if not r.found else 'warn' if r.n_mod else 'good'),
-                Column('verified', 'Verified on hardware', 185, getter=lambda r: r.verified,
+                Column('verified', 'Verified on hardware', 185, stretch=True, getter=lambda r: r.verified,
                        tone=lambda r: 'good' if 'verified' in r.tags else 'warn' if r.vkind in ('changed', 'unlocked') else 'muted')]
         self.table = DataTable(cols, [], row_key=lambda r: r.iid, multi=False, empty_text=mm.EMPTY_LIBRARY)
         self.table.setMinimumWidth(480)
+        self._share = _ShareWidth(self.table, (285, 112, 90, 150, 80), (0.30, 0.12, 0.08, 0.15, 0.08))   # a wide window shares its extra width between the columns
         self.table.selectionChangedRows.connect(lambda _r: self.refresh_details())
         self.table.rowActivated.connect(lambda _r: self.run_selected())
         # the right-click menu of a row replaces the table's own copy menu (Menu key / Shift+F10 reach the same slot)
