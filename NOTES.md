@@ -1272,7 +1272,7 @@ Survey result: today each driver compares its own read-back and raises `Instrume
 
 How it is wired (opt-in, no shared file edited):
 - **New drivers** (default): `drivers/_template.py` now declares `class ModelName(SurpriseMixin, Instrument)` and its example setter is `return self.set_checked('something.set', value)` (the read-back command is the one named in `Cmd.readback`); reads use `ask_checked(key, expect='float'|'int'|'any'|regex)`; `errq_checkpoint()` reads `err.query` once (set `ERR_CLEAN` on the class if the empty reply is not `0,"No error"`). The engine of a new procedure calls `inst.enable_surprise(surprise.tk_handler(root))` after connecting. The readiness check warns when a new procedure's driver lacks the mixin.
-- **Existing procedures**: not wired. `surprise.attach_guard(instrument, handler)` wraps one instrument OBJECT (empty reply / prompt character on `ask`) without touching its class, but calling it needs an edit in an engine or driver file. Blast radius of wiring, from the sidecar fingerprints in this tree (each file listed: those procedures flip to "Changed since verification"; seeded verified: Fluke 117, TDS2000C, WaveSurfer):
+- **Existing procedures**: not wired on `readiness-check` (the engines wired afterwards are listed in 2b below). `surprise.attach_guard(instrument, handler)` wraps one instrument OBJECT (empty reply / prompt character on `ask`) without touching its class, but calling it needs an edit in an engine or driver file. Blast radius of wiring, from the sidecar fingerprints in this tree (each file listed: those procedures flip to "Changed since verification"; seeded verified: Fluke 117, TDS2000C, WaveSurfer):
 
 | where the edit would go | procedures that flip | seeded verified that flip |
 |---|---|---|
@@ -1290,6 +1290,28 @@ How it is wired (opt-in, no shared file edited):
 Recommendation (the flip decision is the owner's): wire the unverified procedures first, one engine per branch (`truevolt_verification.py`, `fgen_verification.py`, `dacq_verification.py`, `agilent34410a_verification.py`: 11 procedures, none verified), and leave Fluke 117 / TDS2000C / WaveSurfer until they are re-verified anyway. Never wire through `drivers/base.py`.
 
 Tests: `tests/test_surprise.py` (fault injection with a scripted instrument: bad reply, empty, prompt character, mismatched read-back, error-queue entry, timeout; no write repeated; clean run asks nothing; demo unaffected; masked password; shared files do not import `surprise`), `tests/real_tk_surprise.py` (real Tk 9 under Xvfb with a worker thread and `mainloop`: Continue, Stop, window close, text of the dialog, 20-line tail, no dialog on a clean run; run by `tests.test_surprise.RealTkDialog`; it needs a Python with tkinter, e.g. the uv 3.13), `tests/real_tk_checks.py::checks_manager_row_menu` (the menu item).
+
+#### 2b. Existing engines wired for stop-on-surprise (branch `surprise-wiring`; simulated bench and a real Tk 9 under Xvfb only, never on hardware)
+
+Owner decision: wire the unverified engines one at a time, from the ENGINE file only (no driver, `drivers/base.py`, `drivers/transport.py` or `handheld_dmm.py` edit). Done so far: `truevolt_verification.py` (4 procedures). Still open: `dacq_verification.py`, `agilent34410a_verification.py` (this branch, later commits) and `fgen_verification.py` (another branch edits it; later).
+
+What the engine-level wiring is (the same in every wired engine):
+- `IO.__init__(..., surprise_handler=None)` and `IO.enable_surprise(handler, force=False)`: `surprise.attach_guard` on each instrument OBJECT (class untouched) with `expect={'read': 'float'}` and `stop_only=True`, so an empty reply / a prompt character (`=>` `?>` `!>`) / a non-number where a reading is expected / a query that timed out twice is a surprise; a query that times out ONCE is retried once (read-only, the standing rule). `enable_surprise` returns `[]` on a demo (virtual) command log, so the simulated bench never prompts; `force=True` is for tests only.
+- `App._surprise_handler()` makes `surprise.tk_handler(self.root)` on the Tk thread (the Test connections / Run handler, once per window) and gives it to the real `IO`; it returns None in every demo mode (virtual and fast), so a demo never builds a dialog.
+- The error-queue checks the engine already makes after a write go through `surprise.checked(instrument, driver_check, ...)`: with no guard that is exactly the driver call as before (same commands, same exception); with a guard the driver's own `InstrumentError` ("queue not empty") becomes the ONE Stop / Continue dialog (command as logged, reply, the last 20 log lines). The driver still decides what is an error; nothing is copied. `SafetyError` (a safe state not confirmed) and `SurpriseStop` pass through untouched.
+- Stop raises `SurpriseStop` (an `InstrumentError`), so the engine's existing worker handler runs: outputs to standby (`io.standby()`), the engine's error dialog, `busy` cleared; the points before it stay recorded. Continue returns and the point goes on / is recorded exactly as it always is; `!! SURPRISE ...` and `!! SURPRISE: operator chose Continue` are in the command log (the run log saved with the session). Nothing is recorded differently, no pass / fail logic changed.
+- A surprise is **Stop only** (no Continue button; the guard stops whatever the handler answers: `Surprise.stop_only`) where going on would use a reply that is not there, or would enable an output after a refusal. Everything else offers Continue.
+- A write is never retried (the guard only re-asks a read-only query after a timeout).
+
+Truevolt (34460A / 34461A / 34465A / 34470A):
+| surprise | where | dialog |
+|---|---|---|
+| empty / prompt character / non-number reply to `READ?`; any reply problem on the DMM or the 5560A (`ROUT:TERM?`, `OPER?`, `ERR?` ...); a timeout twice | every `ask` of both instruments | Stop only |
+| DMM error queue not empty after `CONF` / `NPLC` / `BAND` (`dmm.check_errors`) | `IO.measure` | Stop / Continue |
+| 5560A error queue not empty after `OUT` (`cal.check_error`) | `IO.measure` | Stop only: the calibrator refused the setting and the next step is `OPER` |
+| read-back mismatch | none in this engine's point path (writes are verified through the error queue). The only confirmations are the calibrator's `STBY` / `OPER?` states, which stay a `SafetyError` / `InstrumentError` hard stop (reset fails, outputs to standby), never a Continue question | n/a |
+
+Tests: `tests/test_surprise_wiring.py` (per engine: every fault type injected into a simulated transport with `tests/surprise_faults.py`; exactly one dialog; Stop-only where stated; no write repeated; Stop ends in `STBY`; Continue records the same results as a clean run; a clean run asks nothing and gives the same command log, results, report rows and PDF bytes with and without the guard; demo never builds a dialog; a real connection wires the guard with the window's handler) and `tests/real_tk_surprise_engine.py` (the real engine window on a real Tk 9 under Xvfb: a worker thread meets the fault, the dialog appears on the Tk thread with the right buttons, Stop / Continue do what is promised). Found: on the sandbox's uv Python 3.12 / Tk 9.0.3 a worker thread's `root.after(...)` never runs (the engines' own `work()` threads do this), so the real-Tk engine test uses the newest Python with tkinter (3.13); not specific to the wiring.
 
 ### 3. New-procedure checklist (suggested text for the new-procedure skill)
 
