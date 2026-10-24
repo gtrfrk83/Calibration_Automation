@@ -33,7 +33,7 @@ class Annunciator(unittest.TestCase):
     def test_reading_dialog_has_no_tick_box(self):
         src = Path(h.__file__).read_text(encoding='utf-8')
         self.assertIn("annunciator=False, validate=validate", src)
-        self.assertIn("askyesno('AC annunciator'", src)
+        self.assertIn("ask_yes_no('AC annunciator'", src)
 
 
 if __name__ == '__main__':

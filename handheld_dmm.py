@@ -21,17 +21,15 @@ import re
 import sys
 import threading
 import time
-import tkinter as tk
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import hookups
-import ui_theme as ui
-import ui_shell
+import ui_port
+import ui_theme as ui                  # only its toolkit-free helpers here (Settings, report_filename); the window code is in handheld_dmm_view_tk.py
 import appdata
 import calibrator_fit
 import datamode
@@ -40,7 +38,7 @@ import procmods_engine
 import reset_startup
 import run_queue_engine
 import virtualbench
-from run_queue_ui import ask_readings          # the one-window reading entry for a run queue (several meters, one point)
+from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 
 SPEC_PATH = HERE / 'specs' / 'fluke_110_series_pv.json'
 READ_TYPED, READ_IR = 'Type the reading', 'Read over IR (Fluke IR cable)'
@@ -331,191 +329,25 @@ OUTPUT_ON_NOTE = 'Output is ON'     # the note _out_note gives while the program
 def ask_reading(parent, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
                 limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None):
     """One modal dialog. mode 'numeric' (type the display) or 'yesno' (answer a question).
-    Returns dict(action='record'|'skip'|'stop', text=, ann=, yes=)."""
-    result = dict(action='stop', text='', ann=False, yes=None)
-    win = ui.dialog(parent, f'Point {p["n"]} of {total}')
-    win.resizable(False, False)
-    C = ui.C
-    outer = tk.Frame(win, background=C['bg'])
-    outer.pack(fill='both', expand=True, padx=ui.px(22), pady=(ui.px(16), ui.px(14)))
-    outer.grid_columnconfigure(0, weight=1)
-    width = ui.px(READING_WIDTH)
-    wrap_all = width
-    sty = ttk.Style(win)                       # ttk widgets inside the white cards take the card colour
-    for name, base in (('ReadCard.TCheckbutton', 'TCheckbutton'), ('ReadCard.TRadiobutton', 'TRadiobutton')):
-        sty.configure(name, background=C['card'])
-    row_n = [0]
+    Returns dict(action='record'|'skip'|'stop', text=, ann=, yes=).  The window is the toolkit's (UiPort.ask_reading; Tk: handheld_dmm_view_tk.ask_reading).
+    Kept as a module function: the test harnesses and run_queue_engine call it as handheld_dmm.ask_reading."""
+    return ui_port.ui.ask_reading(p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate, phase, limit_s, on_expire, device, source, demo_fill,
+                                  parent=parent)
 
-    def put(widget, pady=(0, 0)):
-        widget.grid(row=row_n[0], column=0, sticky='ew', pady=pady)
-        row_n[0] += 1
 
-    def label(parent, text, fg=None, font=None, bg=None, wrap=None, **kw):
-        return tk.Label(parent, text=text, background=bg or C['bg'], foreground=fg or C['text'], font=font or 'TkDefaultFont', anchor='w',
-                        justify='left', wraplength=wrap or wrap_all, **kw)
-    put(label(outer, f'Point {p["n"]} of {total}  -  {p["section"]}' + (f'  -  {phase}' if phase else ''), fg=C['muted'], font='CalSmall'))
-    put(label(outer, describe(p), font='CalH2', fg=C['navy']), pady=(2, 10))
-
-    def row_card(caption, big, note, kind, big_font='CalBold'):
-        """A rounded card: a marker circle, the caption in muted capitals, the main text, an optional muted second text."""
-        def build(inner, wrap):
-            mark = ui.status_circle(inner, kind, background=C['card'])
-            mark.grid(row=0, column=0, rowspan=3, sticky='n', padx=(0, ui.px(12)))
-            tw = wrap - ui.px(22) - ui.px(12)
-            label(inner, caption, fg=C['muted'], font='CalSmallBold', bg=C['card'], wrap=tw).grid(row=0, column=1, sticky='w')
-            label(inner, big, font=big_font, bg=C['card'], wrap=tw).grid(row=1, column=1, sticky='w')
-            if note:
-                label(inner, note, fg=C['muted'], font='CalSmall', bg=C['card'], wrap=tw).grid(row=2, column=1, sticky='w')
-        put(ui.rounded_card(outer, width, build), pady=(0, ui.px(8)))
-    meter = p.get('dsb_device') or (f'Rotary switch / function: {p["switch"]}' + (f'\nRange: {p["range"]}' if p['range'] else ''))
-    row_card(device, meter, p.get('note'), 'done')                  # the operator has just confirmed the meter set-up (function / hook-up prompts)
-    if p.get('applied') or p['group'] != 'NONE':
-        row_card(source, out_text, out_note, 'done' if str(out_note).startswith(OUTPUT_ON_NOTE) else 'todo', big_font='CalMetric')
-    counter = tk.StringVar()
-    clock = {'job': None, 'expired': False}
-    if limit_s is not None:
-        tk.Label(outer, textvariable=counter, foreground=C.get('bad', '#B3261E'), background=C['bg'], font='CalBold', anchor='w', wraplength=wrap_all,
-                 justify='left').grid(row=row_n[0], column=0, sticky='ew', pady=(0, 8))
-        row_n[0] += 1
-        end = time.monotonic() + max(0.0, limit_s)
-
-        def tick():
-            try:
-                left = end - time.monotonic()
-                if left <= 0:
-                    if not clock['expired']:
-                        clock['expired'] = True
-                        if on_expire:
-                            on_expire()
-                    counter.set('Time limit reached - the output has been switched off. Enter the reading you saw.' if on_expire
-                                else 'Time limit reached - put the calibrator in STANDBY now, then enter the reading.')
-                    return
-                counter.set(f'Take the reading within {left:.0f} s - the output switches off automatically.' if on_expire
-                            else f'Take the reading within {left:.0f} s, then put the calibrator in STANDBY.')
-                clock['job'] = win.after(250, tick)
-            except tk.TclError:
-                pass
-        tick()
-
-    entry = None
-    yes = tk.StringVar(value='')
-    ann = tk.BooleanVar(value=False)
-    error = tk.StringVar(value='')
-    text = tk.StringVar()
-    fillers = {}
-
-    def reading_card(inner, wrap):
-        nonlocal entry
-        nonlocal_bg = C['card']
-        if mode == 'numeric':
-            label(inner, f'WHAT DOES THE {device} SHOW?', fg=C['primary'], font='CalSmallBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
-            row = tk.Frame(inner, background=nonlocal_bg)
-            row.pack(fill='x', pady=(6, 0))
-            entry = ttk.Entry(row, textvariable=text, font='CalMetric', width=14)
-            entry.pack(side='left')
-            label(row, unit, font='CalH2', bg=nonlocal_bg, wrap=wrap).pack(side='left', padx=(10, 0))
-            if annunciator:
-                ttk.Checkbutton(inner, text='The AC annunciator is ON', variable=ann, style='ReadCard.TCheckbutton').pack(anchor='w', pady=(6, 0))
-        else:
-            label(inner, 'YOUR ANSWER', fg=C['primary'], font='CalSmallBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
-            label(inner, question, font='CalBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w', pady=(6, 4))
-            row = tk.Frame(inner, background=nonlocal_bg)
-            row.pack(anchor='w')
-            ttk.Radiobutton(row, text='Yes - as stated', variable=yes, value='y', style='ReadCard.TRadiobutton').pack(side='left')
-            ttk.Radiobutton(row, text='No - it does not', variable=yes, value='n', style='ReadCard.TRadiobutton').pack(side='left', padx=(16, 0))
-        label(inner, '', fg=C.get('bad', '#B3261E'), bg=nonlocal_bg, wrap=wrap, textvariable=error).pack(anchor='w')
-        label(inner, 'ACCEPT IF', fg=C['muted'], font='CalSmallBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w', pady=(6, 0))
-        label(inner, accept, font='CalBold', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
-        if p.get('tol_text'):
-            label(inner, 'Limit: ' + limit_line(p), fg=C['muted'], font='CalSmall', bg=nonlocal_bg, wrap=wrap).pack(anchor='w')
-        if demo_fill is not None:                   # demo only: a clearly marked helper; the operator may type anything instead
-            def fill():
-                value = demo_fill()
-                if mode == 'numeric':
-                    text.set(value)
-                    entry.focus_set()
-                else:
-                    yes.set('y' if value else 'n')
-            ttk.Button(inner, text=virtualbench.FILL_TEXT, command=fill).pack(anchor='w', pady=(10, 0))
-            label(inner, 'DEMO: this value is made up by the program; you may type any reading you like. Nothing here is calibration evidence.',
-                  fg=C.get('warn', '#B26A00'), font='CalSmall', bg=nonlocal_bg, wrap=wrap).pack(anchor='w', pady=(4, 0))
-    put(ui.rounded_card(outer, width, reading_card, outline=C['primary'], outline_w=2, radius=10, pad=(16, 12)), pady=(ui.px(4), 0))
-
-    def done(action):
-        result['action'] = action
-        if clock['job']:
-            try:
-                win.after_cancel(clock['job'])
-            except tk.TclError:
-                pass
-        if action == 'record':
-            if mode == 'numeric':
-                try:
-                    if validate:
-                        validate(text.get())
-                except ValueError as exc:
-                    error.set(str(exc))
-                    return
-                result.update(text=text.get(), ann=ann.get())
-            else:
-                if not yes.get():
-                    error.set('Choose Yes or No.')
-                    return
-                result['yes'] = yes.get() == 'y'
-        win.destroy()
-
-    bar = tk.Frame(outer, background=C['bg'])
-    bar.grid(row=row_n[0], column=0, sticky='ew', pady=(ui.px(16), 0))
-    bar.grid_columnconfigure(1, weight=1)
-    ok = ttk.Button(bar, text='Record  (Enter)', style='Accent.TButton', command=lambda: done('record'))
-    ok.grid(row=0, column=3)
-    ttk.Button(bar, text='Skip point', command=lambda: done('skip')).grid(row=0, column=2, padx=(0, 8))
-    ttk.Button(bar, text='Stop run', style='Danger.TButton', command=lambda: done('stop')).grid(row=0, column=0)
-    win.bind('<Return>', lambda _e: done('record'))
-    win.protocol('WM_DELETE_WINDOW', lambda: done('stop'))
-    ui.center_on(win, parent.winfo_toplevel())
-    (entry or ok).focus_set()
-    win.wait_window()
-    return result
+def ask_readings(parent, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None,
+                 device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading=''):
+    """The one-window reading entry for a run queue (several meters, one point): UiPort.ask_readings (Tk: run_queue_ui.ask_readings).
+    Kept as a module function: run_queue_engine calls it as handheld_dmm.ask_readings."""
+    return ui_port.ui.ask_readings(p, total, out_text, out_note, accept, meters, unit, judge, limit_s, on_expire, device, source, demo_fill, tol_text, phase, heading,
+                                   parent=parent)
 
 
 # ============================================================================ the IR set-up / reading problem dialog
 def ask_ir_problem(parent, p, total, problems, shown):
     """The meter (read over IR) is not set up as the point needs, or the reading did not settle.
-    Returns 'retry', 'type' (type this reading instead), 'skip' or 'stop'."""
-    result = {'v': 'stop'}
-    win = ui.dialog(parent, f'Point {p["n"]} of {total} - check the meter')
-    win.resizable(False, False)
-    outer = ttk.Frame(win, padding=(ui.px(22), ui.px(16), ui.px(22), ui.px(14)))
-    outer.pack(fill='both', expand=True)
-    ttk.Label(outer, text=f'Point {p["n"]} of {total}  -  {p["section"]}', style='Small.TLabel').pack(anchor='w')
-    ttk.Label(outer, text='The meter is not ready for this point', style='Section.TLabel').pack(anchor='w', pady=(2, 8))
-    for line in problems:
-        ttk.Label(outer, text='•  ' + line, style='Bold.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w')
-    ttk.Label(outer, text='METER SHOULD BE', style='MetricCap.TLabel').pack(anchor='w', pady=(10, 0))
-    ttk.Label(outer, text=f'{p["switch"]}' + (f', range {p["range"]}' if p['range'] else ''), wraplength=ui.px(520), justify='left').pack(anchor='w')
-    if shown:
-        ttk.Label(outer, text='METER REPORTS', style='MetricCap.TLabel').pack(anchor='w', pady=(8, 0))
-        ttk.Label(outer, text=shown, style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w')
-    ttk.Label(outer, text='The calibrator is in STANDBY. Fix the meter and press Re-check: the output is set again and the meter re-read.',
-              style='Small.TLabel', wraplength=ui.px(520), justify='left').pack(anchor='w', pady=(10, 0))
-
-    def done(value):
-        result['v'] = value
-        win.destroy()
-    bar = ttk.Frame(outer)
-    bar.pack(fill='x', pady=(14, 0))
-    ok = ttk.Button(bar, text='Re-check  (Enter)', style='Accent.TButton', command=lambda: done('retry'))
-    ok.pack(side='right')
-    ttk.Button(bar, text='Type the reading instead', command=lambda: done('type')).pack(side='right', padx=(0, 8))
-    ttk.Button(bar, text='Skip point', command=lambda: done('skip')).pack(side='right', padx=(0, 8))
-    ttk.Button(bar, text='Stop run', style='Danger.TButton', command=lambda: done('stop')).pack(side='left')
-    win.bind('<Return>', lambda _e: done('retry'))
-    win.protocol('WM_DELETE_WINDOW', lambda: done('stop'))
-    ui.center_on(win, parent.winfo_toplevel())
-    ok.focus_set()
-    win.wait_window()
-    return result['v']
+    Returns 'retry', 'type' (type this reading instead), 'skip' or 'stop'.  The window is the toolkit's (UiPort.ask_ir_problem)."""
+    return ui_port.ui.ask_ir_problem(p, total, problems, shown, parent=parent)
 
 
 def ir_text(p, r):
@@ -552,62 +384,8 @@ class SetupProblem(Exception):
 # ============================================================================ the range-selection dialog
 def ask_range(parent, p, total, dial, standby_text):
     """'Turn the dial to ...' with a picture of the dial and the target position marked.
-    Returns 'ok' (continue), 'skip' (skip the point) or 'stop'."""
-    result = {'v': 'stop'}
-    win = ui.dialog(parent, f'Point {p["n"]} of {total} - select the range')
-    win.resizable(False, False)
-    outer = ttk.Frame(win, padding=(ui.px(22), ui.px(16), ui.px(22), ui.px(14)))
-    outer.pack(fill='both', expand=True)
-    main = ttk.Frame(outer)
-    main.pack(fill='both', expand=True)
-    width, height = dial['size']
-    canvas = tk.Canvas(main, width=width, height=height, background=ui.C['bg'], highlightthickness=0)
-    canvas.pack(side='left', anchor='n', padx=(0, ui.px(20)))
-    try:
-        photo = tk.PhotoImage(master=win, file=str(HERE / dial['image']))
-        canvas.create_image(0, 0, image=photo, anchor='nw')
-        canvas.image = photo
-    except tk.TclError:
-        pass
-    pos = dial['positions'].get(p.get('dial'))
-    if pos:
-        cx, cy = dial['center']
-        radius = dial['knob_radius']
-        canvas.create_oval(cx - radius, cy - radius, cx + radius, cy + radius, fill='#1b1d21', outline='#9aa0aa', width=3)
-        theta = math.radians(pos['angle'])
-        ux, uy = math.sin(theta), -math.cos(theta)           # unit vector from the centre toward the selected position
-        nx, ny = -uy, ux
-        tip = (cx + ux * (radius - 6), cy + uy * (radius - 6))
-        canvas.create_polygon(tip[0], tip[1], cx + nx * 14 - ux * 8, cy + ny * 14 - uy * 8, cx - nx * 14 - ux * 8, cy - ny * 14 - uy * 8,
-                              fill='#ffb300', outline='')
-        canvas.create_oval(cx - 7, cy - 7, cx + 7, cy + 7, fill='#55606e', outline='')
-        canvas.create_rectangle(pos['x'] - 30, pos['y'] - 17, pos['x'] + 30, pos['y'] + 17, outline='#ffb300', width=3)
-    box = ttk.Frame(main)
-    box.pack(side='left', fill='both', expand=True, anchor='n')
-    ttk.Label(box, text=f'Point {p["n"]} of {total}  -  {p["section"]}', style='Small.TLabel').pack(anchor='w')
-    ttk.Label(box, text='Turn the dial to', style='MetricCap.TLabel').pack(anchor='w', pady=(10, 0))
-    ttk.Label(box, text=p.get('dial_text') or p['switch'], style='Section.TLabel', wraplength=ui.px(360), justify='left').pack(anchor='w')
-    ttk.Label(box, text='Range', style='MetricCap.TLabel').pack(anchor='w', pady=(10, 0))
-    ttk.Label(box, text=p['range'], style='Reading.TLabel').pack(anchor='w')
-    if p.get('note'):
-        ttk.Label(box, text=p['note'], style='Small.TLabel', wraplength=ui.px(360), justify='left').pack(anchor='w', pady=(8, 0))
-    ttk.Label(box, text=standby_text, style='Small.TLabel', wraplength=ui.px(360), justify='left').pack(anchor='w', pady=(10, 0))
-
-    def done(value):
-        result['v'] = value
-        win.destroy()
-    bar = ttk.Frame(outer)
-    bar.pack(fill='x', pady=(14, 0))
-    ok = ttk.Button(bar, text='Range selected - continue  (Enter)', style='Accent.TButton', command=lambda: done('ok'))
-    ok.pack(side='right')
-    ttk.Button(bar, text='Skip point', command=lambda: done('skip')).pack(side='right', padx=(0, 8))
-    ttk.Button(bar, text='Stop run', style='Danger.TButton', command=lambda: done('stop')).pack(side='left')
-    win.bind('<Return>', lambda _e: done('ok'))
-    win.protocol('WM_DELETE_WINDOW', lambda: done('stop'))
-    ui.center_on(win, parent.winfo_toplevel())
-    ok.focus_set()
-    win.wait_window()
-    return result['v']
+    Returns 'ok' (continue), 'skip' (skip the point) or 'stop'.  The window is the toolkit's (UiPort.ask_range)."""
+    return ui_port.ui.ask_range(p, total, dial, standby_text, parent=parent)
 
 
 # ============================================================================ application
@@ -626,33 +404,30 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         self.io, self._busy, self.stop = None, False, False
         self.io_factory = io_factory
         self.results = {}
-        ui.apply_theme(root)
-        root.title(f'{self.info["name"]} | Performance Verification' + (' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1320, 800, min_w=1000, min_h=640)
+        self.ui_view.setup_window(self)
         self.brand = self.info.get('brand', 'Fluke')
         self.last_high_current = None
         self.settings = ui.Settings(self.settings_name())
-        self.asset, self.serial = tk.StringVar(), tk.StringVar()
+        self.asset, self.serial = port.var(), port.var()
         _saved = self.settings.get('cal_mode', CAL_CHOICES[0])
         _saved = OLD_CAL_CHOICES.get(_saved, _saved)
-        self.cal_mode = tk.StringVar(value=_saved if _saved in self.cal_choices() or '5520' not in _saved else CAL_CHOICES[0])   # a saved 5520A choice the picker no longer offers falls back to the default
-        self.cal_addr = tk.StringVar(value=self.settings.get('cal_addr', 'COM9'))
-        self.cal_baud = tk.StringVar(value=self.settings.get('cal_baud', '9600'))
+        self.cal_mode = port.var(_saved if _saved in self.cal_choices() or '5520' not in _saved else CAL_CHOICES[0])   # a saved 5520A choice the picker no longer offers falls back to the default
+        self.cal_addr = port.var(self.settings.get('cal_addr', 'COM9'))
+        self.cal_baud = port.var(self.settings.get('cal_baud', '9600'))
         self.ir = self.spec.get('options', {}).get('ir')
         saved = self.settings.get('read_mode', READ_TYPED)
-        self.read_mode = tk.StringVar(value=saved if saved in (READ_TYPED, READ_IR) else READ_TYPED)
-        self.ir_addr = tk.StringVar(value=self.settings.get('ir_addr', 'COM5'))
-        self.status = tk.StringVar()
-        self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
-        self.show_section, self.show_status = tk.StringVar(value='All sections'), tk.StringVar(value='All points')
+        self.read_mode = port.var(saved if saved in (READ_TYPED, READ_IR) else READ_TYPED)
+        self.ir_addr = port.var(self.settings.get('ir_addr', 'COM5'))
+        self.status = port.var()
+        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.show_section, self.show_status = port.var('All sections'), port.var('All points')
         self._build_ui()
         self.status.set(('DEMO MODE (virtual instruments): the windows of a real run appear; commands go to a simulated calibrator. Enter an Instrument ID, then press Run All.' if self.virtual else
                          'FAST DEMO: no commands are sent and no readings are asked for. Enter an Instrument ID, then press Run All.') if demo else
                         'Step 1: enter the Instrument ID. Step 2: choose the calibrator and press Test connection (or choose Manual). Step 3: Run All.')
-        root.protocol('WM_DELETE_WINDOW', self.on_close)
-        root.bind('<Control-s>', lambda _e: self.save())
-        import labregistry
-        labregistry.attach(root, self.asset, self.serial, self.status.set)
+        port.on_close(root, self.on_close)
+        port.bind_key(root, '<Control-s>', self.save)
+        self.ui_view.finish_window(self)
 
     def build_points(self):
         """The point list of this run (a hook: user-built datasheets, dsb_runtime.py, add their scope / generator points)."""
@@ -688,10 +463,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         if not value and self._q is not None:
             self._queue_aborted()                  # a run queue was paused / failed: keep every meter's progress
         if hasattr(self, 'btn_run'):
-            idle = 'disabled' if value else 'normal'
-            for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
-                b.configure(state=idle)
-            self.btn_stop.configure(state='normal' if value else 'disabled')
+            self.ui_view.sync_buttons(self, value)
 
     @property
     def manual_cal(self):
@@ -702,91 +474,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         return bool(self.ir) and self.read_mode.get() == READ_IR
 
     # ------------------------------------------------------------------ layout
-    def _build_ui(self):
-        root = self.root
-        src = self.spec['source']
-        sh = self.shell = ui_shell.Shell(root, f'{self.info["name"]}  -  Performance Verification',
-                                         f'Manual-reading procedure: the calibrator output is set for you, you read the meter  |  {len(self.points)} points  |  {src["document"]}',
-                                         demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
-        self.status = sh.status_var
-        self.conn_pill = sh.add_chip(self.chip_text() if self.demo else 'Not connected', 'neutral')
-        if self.queue_supported():
-            self.queue_pill = ui.Pill(sh.chip_frame, '', 'info')           # 'Run queue: n meters', shown only while a queue of two or more is set
-        sh.build_identity(self.asset, self.serial)
-        self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
-        self.summary = sh.build_progress()
-        if self.demo:
-            sh.notice(self.banner_text(), 'warn', title=virtualbench.BANNER_TITLE)
-        else:
-            extra = ' You are prompted to turn the dial to each range and to change cables, with a hook-up diagram.' if self.spec.get('options', {}).get('range_prompt') else ''
-            sh.notice('For each point the calibrator is programmed and enabled, then you read the meter and type the value exactly as displayed (without the unit). '
-                      'Wiring and high-voltage confirmations are required.' + extra + ' Check the meter fuses and battery before starting.', 'info')
+    VIEW = 'handheld_dmm_view'                             # the toolkit's window code: handheld_dmm_view_tk (Tk), later _qt
 
-        d = sh.drawer_body; d.columnconfigure(1, weight=1)
-        ttk.Label(d, text='Model').grid(row=0, column=0, sticky='w', pady=4)
-        ttk.Label(d, text=self.info['name'], style='Bold.TLabel').grid(row=0, column=1, sticky='w', padx=(10, 0))
-        ttk.Label(d, text=self.info.get('model_note', 'the "C" version uses the same steps'), style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=1, column=0, columnspan=2, sticky='w')
-        ttk.Separator(d).grid(row=2, column=0, columnspan=2, sticky='ew', pady=(10, 10))
-        ttk.Label(d, text='Calibrator').grid(row=3, column=0, sticky='w', pady=4)
-        calbox = ttk.Frame(d)
-        calbox.grid(row=3, column=1, sticky='ew', padx=(10, 0), pady=4)
-        self.cal_combo = ttk.Combobox(calbox, textvariable=self.cal_mode, values=self.cal_choices(), state='readonly', width=34)
-        self.cal_combo.pack(fill='x')
-        calibrator_fit.attach_note(calbox, self.cal_offer, ui, widgets=(self.cal_combo,), wrap=250)
-        ttk.Label(d, text='Address').grid(row=4, column=0, sticky='w', pady=4)
-        self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
-        self.cal_entry.grid(row=4, column=1, sticky='ew', padx=(10, 0), pady=4)
-        ttk.Label(d, text='Baud').grid(row=5, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.cal_baud, values=['9600', '19200', '4800', '2400', '1200'], width=9, state='readonly').grid(row=5, column=1, sticky='w', padx=(10, 0), pady=4)
-        ttk.Label(d, text='Examples: COM9   ASRL9::INSTR   GPIB0::6::INSTR.  In Manual mode the program tells you what to set and you press OPERATE yourself.',
-                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=6, column=0, columnspan=2, sticky='w', pady=(6, 0))
-        if self.ir:
-            ttk.Separator(d).grid(row=7, column=0, columnspan=2, sticky='ew', pady=(12, 10))
-            ttk.Label(d, text='Meter reading').grid(row=8, column=0, sticky='w', pady=4)
-            ttk.Combobox(d, textvariable=self.read_mode, values=[READ_TYPED, READ_IR], state='readonly', width=34).grid(row=8, column=1, sticky='ew', padx=(10, 0), pady=4)
-            ttk.Label(d, text='IR cable port').grid(row=9, column=0, sticky='w', pady=4)
-            irrow = ttk.Frame(d); irrow.grid(row=9, column=1, sticky='w', padx=(10, 0))
-            ttk.Entry(irrow, textvariable=self.ir_addr, width=9).pack(side='left', padx=(0, 8))
-            self.btn_ir = ttk.Button(irrow, text='Test IR', command=self.test_ir); self.btn_ir.pack(side='left')
-            ttk.Label(d, text='Read over IR needs the Fluke IR-to-USB cable on the meter\'s IR port (115200 baud). Without it, choose Type the reading.',
-                      style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=10, column=0, columnspan=2, sticky='w', pady=(6, 0))
-        if self.virtual:
-            ttk.Separator(d).grid(row=11, column=0, columnspan=2, sticky='ew', pady=(12, 10))
-            self.demo_failures = tk.BooleanVar(value=False)
-            ttk.Checkbutton(d, text='Demo: include some failures in the simulated fill', variable=self.demo_failures).grid(row=12, column=0, columnspan=2, sticky='w')
-            ttk.Label(d, text='The calibrator is a virtual 5522A / 5560A (simulated). Press Test connection to connect it; no cable or address is needed. '
-                              'The "Fill with a simulated reading" button in the reading window enters a made-up value; you may type your own.',
-                      style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=13, column=0, columnspan=2, sticky='w', pady=(6, 0))
-        if self.queue_supported():
-            self.build_queue_drawer(d, 14)
-        btns = sh.drawer_footer
-        self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
-        self.btn_test = ttk.Button(btns, text='Test connection', command=self.test_connection, style='Accent.TButton'); self.btn_test.pack(side='left')
+    @property
+    def ui_view(self): return port.view(self.VIEW)
 
-        self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
-        self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
-        self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
-        self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
-        sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
-        self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
-        sh.add_action('Save progress', self.save, side='right', short='Save')
-        self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
-
-        body = sh.content
-        info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
-        ttk.Label(info, textvariable=self.detail, wraplength=1000, justify='left', style='Muted.TLabel').pack(anchor='w', fill='x')
-        ttk.Label(info, text=src['note'], style='Small.TLabel', wraplength=1000, justify='left').pack(anchor='w', pady=(4, 0))
-        filt = ttk.Frame(body); filt.pack(side='top', fill='x', pady=(0, 6))
-        ttk.Label(filt, text='Test points', style='Bold.TLabel').pack(side='left')
-        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly'); c2.pack(side='right')
-        ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='right', padx=(0, 6))
-        c2.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
-        self.tree = ui_shell.results_table(self, body, name_width=330, nominal_title='Calibrator output', error=False)
-        self.tree.column('nominal', width=ui.px(150))
-        ui_shell.small_window(self, self.tree, filt)
-        self.tree.bind('<<TreeviewSelect>>', self.on_select)
-        self.refresh()
-        ui.polish(root)
+    def _build_ui(self): self.ui_view.build_ui(self)
 
     # ------------------------------------------------------------------ table
     def _visible(self, p):
@@ -867,20 +560,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
     def pm_point_title(self, p): return describe(p)
 
     def refresh(self):
-        keep = self.tree.selection()
-        self.tree.delete(*self.tree.get_children())
-        for p in self.points:
-            if self._visible(p):
-                values, tags = self._row(p)
-                self.tree.insert('', 'end', iid=p['id'], values=values, tags=tags)
-        if keep and self.tree.exists(keep[0]):
-            self.tree.selection_set(keep[0])
+        keep = self.ui_view.table_selection(self)
+        self.ui_view.table_set_rows(self, ((p['id'], *self._row(p)) for p in self.points if self._visible(p)), keep)
         self.update_summary()
 
     def _update_row(self, p):
-        if self.tree.exists(p['id']):
+        if self.ui_view.table_has(self, p['id']):
             values, tags = self._row(p)
-            self.tree.item(p['id'], values=values, tags=tags)
+            self.ui_view.table_update_row(self, p['id'], values, tags)
         self.update_summary()
 
     def update_summary(self):
@@ -894,7 +581,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         return p.get('question') or ' / '.join(c['question'] for c in p['checks'])
 
     def on_select(self, _event=None):
-        sel = self.tree.selection()
+        sel = self.ui_view.table_selection(self)
         if not sel:
             return
         p = self.by_id[sel[0]]
@@ -936,7 +623,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         except Exception as exc:
             self.status.set(f'Instrument search needs pyvisa and a VISA backend ({exc}). You can still type an address.')
             return
-        self.cal_entry['values'] = found
+        self.ui_view.set_choices(self, 'cal', found)
         self.status.set(f'{len(found)} VISA resource(s) found: ' + (', '.join(found) if found else 'none'))
 
     def _address(self):
@@ -964,24 +651,24 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
 
     def test_connection(self):
         if self.fast_demo:
-            messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.')
+            port.message('info', 'Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.')
             return
         if self.manual_cal:
-            messagebox.showinfo('Manual calibrator', 'Manual mode: no connection is needed. The program will tell you what to set on the calibrator.')
+            port.message('info', 'Manual calibrator', 'Manual mode: no connection is needed. The program will tell you what to set on the calibrator.')
             return
         self.status.set('Connecting ...')
-        self.root.update_idletasks()
+        port.flush(self.root)
         try:
             self.connect()
         except Exception as exc:
             self.disconnect()
             self._set_conn(False)
             self.status.set('Connection error: ' + str(exc))
-            messagebox.showerror('Connection error', str(exc))
+            port.message('error', 'Connection error', str(exc))
             return
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
         self.status.set('Connected: ' + self.io.ident + tag + '. Calibrator output is NOT enabled.')
-        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'{self.io.ident}{tag}\nCalibrator output is not enabled.')
+        port.message('info', 'Connected' + (' (DEMO)' if self.virtual else ''), f'{self.io.ident}{tag}\nCalibrator output is not enabled.')
 
     def disconnect(self):
         if self.io:
@@ -1026,17 +713,17 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
     def test_ir(self):
         if self.demo:
             self.read_mode.set(READ_TYPED)
-            messagebox.showinfo('Demo mode', 'The IR cable is not simulated: in demo mode the readings are typed (or filled with the simulated reading).')
+            port.message('info', 'Demo mode', 'The IR cable is not simulated: in demo mode the readings are typed (or filled with the simulated reading).')
             return
         try:
             self.connect_meter()
         except Exception as exc:
             self.status.set('IR connection error: ' + str(exc))
-            messagebox.showerror('IR connection', str(exc))
+            port.message('error', 'IR connection', str(exc))
             return
         self.read_mode.set(READ_IR)
         self.status.set('Meter on the IR cable: ' + self.meter.idn)
-        messagebox.showinfo('IR connection', f'{self.meter.idn}\nReadings will be collected over IR.')
+        port.message('info', 'IR connection', f'{self.meter.idn}\nReadings will be collected over IR.')
 
     def _set_conn(self, ok):
         self.conn_pill.set(self.chip_text() if self.virtual else 'Connected' if ok else 'Connection failed' if ok is False else 'Demo - no hardware' if self.demo else 'Manual calibrator' if self.manual_cal else 'Not connected',
@@ -1059,12 +746,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         self.run_shown_section(self.points)
 
     def rerun(self):
-        sel = self.tree.selection()
+        sel = self.ui_view.table_selection(self)
         if sel:
             self._queue_force = True                       # a run queue measures the chosen point again on every meter
             self.execute([self.by_id[sel[0]]])
         else:
-            messagebox.showinfo('Selection', 'Select a test point first.')
+            port.message('info', 'Selection', 'Select a test point first.')
 
     def execute(self, points):
         if self.busy or not points:
@@ -1073,7 +760,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             return self.queue_execute(points)
         self.__dict__.pop('_queue_force', None)
         if not self.asset.get().strip():
-            messagebox.showwarning('Instrument ID', 'Enter an instrument ID.')
+            port.message('warning', 'Instrument ID', 'Enter an instrument ID.')
             return
         points = self.pm_begin_run(points, self.asset.get().strip())     # load the saved modifications for this asset (patches self.points)
         if not points:
@@ -1113,8 +800,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 steps = [(lead, detail.replace('The program switches the output off after 30 s.', 'Switch the calibrator to STANDBY after 30 s.')) for lead, detail in steps]
             facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
             image = group['diagram'] if group.get('diagram') and Path(group['diagram']).is_absolute() else (HERE / group['diagram'] if group.get('diagram') else None)
-            return ui.confirm_steps(self.root, 'Change the cables', group['title'], steps + self._qsteps(), facts=self._qfacts(facts), caution=group.get('caution'),
-                                    ok='Connections checked - continue', image=image if image and image.is_file() else None)
+            return port.operator_prompt('Change the cables', group['title'], steps + self._qsteps(), facts=self._qfacts(facts), caution=group.get('caution'),
+                                        ok='Connections checked - continue', image=image if image and image.is_file() else None, parent=self.root)
         steps = []
         if p['group'] == 'NONE':
             steps.append(('Set up', p['setup']))
@@ -1125,7 +812,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 steps.append(('This test', p['setup']))
         facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
         caution = None if p['group'] == 'NONE' else 'Continue only after physically verifying the connections.'
-        return ui.confirm_steps(self.root, 'Check the setup', f'Set up for {p["section"]}', steps + self._qsteps(), facts=self._qfacts(facts), caution=caution, ok='Done - continue')
+        return port.operator_prompt('Check the setup', f'Set up for {p["section"]}', steps + self._qsteps(), facts=self._qfacts(facts), caution=caution, ok='Done - continue', parent=self.root)
 
     def _auto_ramp(self):
         return bool(self.spec.get('options', {}).get('auto_ramp', True))
@@ -1157,10 +844,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         standby = ('Keep the calibrator in STANDBY while you turn the rotary switch.' if self.manual_cal
                    else 'The calibrator output is OFF (standby) while you turn the rotary switch.')
         facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
-        if not ui.confirm_steps(self.root, 'Change the function', p['section'],
-                                [('Rotary switch', f'Turn the meter to: {p["switch"]}'), ('Standby', standby)] + self._qsteps(),
-                                facts=self._qfacts(facts), ok='Done - continue', layout='function_change',
-                                card=function_change_card(p, len(self.points), standby + self._qnote())):
+        if not port.operator_prompt('Change the function', p['section'],
+                                    [('Rotary switch', f'Turn the meter to: {p["switch"]}'), ('Standby', standby)] + self._qsteps(),
+                                    facts=self._qfacts(facts), ok='Done - continue', layout='function_change',
+                                    card=function_change_card(p, len(self.points), standby + self._qnote()), parent=self.root):
             return False
         self._last_switch = p['switch']
         return True
@@ -1196,17 +883,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             self._error(exc)
             return
         if p is None:                                                # skipped by an edit made during the run
-            self.root.after(30, lambda: self._next(points, i + 1, previous))
+            port.after(self.root, 30, lambda: self._next(points, i + 1, previous))
             return
         key = self._group_key(p)
-        if self.tree.exists(p['id']):
-            self.tree.selection_set(p['id'])
-            self.tree.see(p['id'])
+        if self.ui_view.table_has(self, p['id']):
+            self.ui_view.table_select(self, p['id'], see=True)
         if self._q is not None:
             self._queue_tick(p)
         if self.fast_demo:
             self._fast_demo_record(p)
-            self.root.after(20, lambda: self._next(points, i + 1, key))
+            port.after(self.root, 20, lambda: self._next(points, i + 1, key))
             return
         if self.io:
             self.io.standby()
@@ -1214,7 +900,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         if wait > 0:
             self.busy = False
             self.status.set(f'Paused: the meter must rest {wait / 60:.1f} more minutes after a high-current point.')
-            messagebox.showinfo('Meter rest period', f'The meter manual requires 10 minutes of rest after measuring more than 6 A. '
+            port.message('info', 'Meter rest period', f'The meter manual requires 10 minutes of rest after measuring more than 6 A. '
                                                      f'Wait about {int(wait // 60)} min {int(wait % 60)} s, then press Run again.')
             return
         if key != previous:
@@ -1234,14 +920,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             self.save()
             return
         if choice == 'skip':
-            self.root.after(30, lambda: self._next(points, i + 1, key))
+            port.after(self.root, 30, lambda: self._next(points, i + 1, key))
             return
         if self._stage['id'] != p['id']:
             self._stage = {'id': p['id'], 'done': set()}
         if p.get('prompt') and 'prompt' not in self._stage['done']:
-            if not ui.confirm_steps(self.root, 'Meter setup', p['section'], [('Meter', p['prompt'])] + self._qsteps(),
-                                    facts=self._qfacts([('Point', f'{p["n"]} of {len(self.points)}'), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]),
-                                    ok='Done - continue'):
+            if not port.operator_prompt('Meter setup', p['section'], [('Meter', p['prompt'])] + self._qsteps(),
+                                        facts=self._qfacts([('Point', f'{p["n"]} of {len(self.points)}'), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]),
+                                        ok='Done - continue', parent=self.root):
                 self.busy = False
                 self.status.set('Paused at the meter setup.')
                 return
@@ -1250,7 +936,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             self._rel_zero(points, i, p, key)
             return
         if self._high_voltage(p) and not self._q_hv_seen(p) and not self._hv_group_seen(key):
-            if not messagebox.askyesno('HIGH VOLTAGE', self._q_hv_text(f'This point outputs {abs(p["applied"]["value"]):g} V'
+            if not port.ask_yes_no('HIGH VOLTAGE', self._q_hv_text(f'This point outputs {abs(p["applied"]["value"]):g} V'
                                        + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and not p.get('ramp') and self._auto_ramp() and abs(p['applied']['value']) > IO.RAMP_ABOVE else '') +
                                        '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?')):
                 self.busy = False
@@ -1289,10 +975,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 steps = [('Calibrator', f'Set {output_text(zero_point)} and press OPERATE.'), ('REL', z['text'])]
             else:
                 steps = [('REL', z['text'])]
-            ok = ui.confirm_steps(self.root, 'Set the REL offset', f'{p["section"]}: REL offset',
-                                  steps + self._qsteps(), facts=self._qfacts([('Point', f'{p["n"]} of {len(self.points)}'),
-                                                ('Calibrator output', output_text(zero_point) if zero_point else 'none (STANDBY)')]),
-                                  caution='The program checks over IR that REL is on.' if self.use_ir else None, ok='REL set - continue')
+            ok = port.operator_prompt('Set the REL offset', f'{p["section"]}: REL offset',
+                                      steps + self._qsteps(), facts=self._qfacts([('Point', f'{p["n"]} of {len(self.points)}'),
+                                                    ('Calibrator output', output_text(zero_point) if zero_point else 'none (STANDBY)')]),
+                                      caution='The program checks over IR that REL is on.' if self.use_ir else None, ok='REL set - continue', parent=self.root)
             if self.io and not self.manual_cal:
                 self._safe_standby()
             if not ok:
@@ -1300,7 +986,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 self.status.set('Paused at the REL offset.')
                 return
             self._stage['done'].add('rel')
-            self.root.after(30, lambda: self._next(points, i, key))
+            port.after(self.root, 30, lambda: self._next(points, i, key))
 
         if zero_point is None or self.manual_cal or not self.io:
             ask()
@@ -1318,7 +1004,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
 
         def wait():
             if not state['done']:
-                self.root.after(40, wait)
+                port.after(self.root, 40, wait)
             elif isinstance(state['exc'], Cancelled):
                 self._ask_abort()
             elif state['exc'] is not None:
@@ -1331,7 +1017,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
     def _poll(self, points, i, p, key, state):
         """The worker thread only sets flags; every Tk call happens here on the main thread."""
         if not state['done']:
-            self.root.after(40, lambda: self._poll(points, i, p, key, state))
+            port.after(self.root, 40, lambda: self._poll(points, i, p, key, state))
         elif isinstance(state['exc'], Cancelled):
             self._ask_abort()
         elif state['exc'] is not None:
@@ -1346,7 +1032,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
     def _error(self, exc):
         self.busy = False
         self.status.set('Error - run stopped: ' + str(exc))
-        messagebox.showerror('Calibrator stopped', str(exc))
+        port.message('error', 'Calibrator stopped', str(exc))
 
     def _out_note(self, p, on):
         if not p.get('applied'):
@@ -1383,7 +1069,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 idn = f'no reply ({exc})'
             ok = idn.upper().startswith(f'FLUKE {self.model}')
             self._store(p, entered=f'ID: {idn}', reading=None, result='PASS' if ok else 'FAIL', source='IR')
-            self.root.after(30, lambda: self._next(points, i + 1, key))
+            port.after(self.root, 30, lambda: self._next(points, i + 1, key))
             return
         if p['test'] == 'numeric':
             def validate(text):
@@ -1401,7 +1087,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 entered = pad_reading(p, r['text'])
                 ann = True
                 if p.get('annunciator'):
-                    ann = bool(messagebox.askyesno('AC annunciator', f'{describe(p)}\n\nIs the AC annunciator ON in the meter display?\n\n'
+                    ann = bool(port.ask_yes_no('AC annunciator', f'{describe(p)}\n\nIs the AC annunciator ON in the meter display?\n\n'
                                                    'Yes = it is on.  No = it is not (the point then fails).'))
                 result, base = judge_numeric(p, entered, ann)
                 self._store(p, entered=entered, reading=base, result=result, annunciator=ann if p.get('annunciator') else None,
@@ -1430,7 +1116,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             self.io.standby()
         if r['action'] == 'stop':
             self.stop = True
-        self.root.after(30, lambda: self._next(points, i + 1, key))
+        port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _ask_ir(self, points, i, p, key):
         """Read the point over IR on a worker thread; on a set-up problem put the calibrator in STANDBY and ask the technician."""
@@ -1447,7 +1133,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
 
         def wait():
             if not state['done']:
-                self.root.after(60, wait)
+                port.after(self.root, 60, wait)
                 return
             exc = state['exc']
             if exc is None:
@@ -1457,7 +1143,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                             ir=dict(display=disp.summary(), unit=r.unit, last=[x.display_text() for x in history[-5:]]))
                 if self.io and not self.manual_cal:
                     self._safe_standby()
-                self.root.after(30, lambda: self._next(points, i + 1, key))
+                port.after(self.root, 30, lambda: self._next(points, i + 1, key))
                 return
             if self.io and not self.manual_cal:
                 self._safe_standby()
@@ -1474,7 +1160,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 self.status.set('Stopped. The calibrator is in STANDBY. Progress is saved.')
                 self.save()
             elif choice == 'skip':
-                self.root.after(30, lambda: self._next(points, i + 1, key))
+                port.after(self.root, 30, lambda: self._next(points, i + 1, key))
             elif choice == 'type':
                 self._stage['typed'] = True
                 self._reapply(points, i, p, key)
@@ -1551,19 +1237,19 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         return None
 
     def load(self):
-        path = filedialog.askopenfilename(filetypes=[('Checkpoint', '*.json')])
+        path = port.choose_file(filetypes=[('Checkpoint', '*.json')])
         if not path:
             return
         data = json.loads(Path(path).read_text())
         if data.get('model') != self.model:
-            messagebox.showerror('Wrong model', f'This checkpoint is for the Fluke {data.get("model")}.')
+            port.message('error', 'Wrong model', f'This checkpoint is for the Fluke {data.get("model")}.')
             return
         problem = self.checkpoint_problem(data)
         if problem:
-            messagebox.showerror('Wrong datasheet', problem)
+            port.message('error', 'Wrong datasheet', problem)
             return
         if self.file_has_synthetic(data) and not self.demo:
-            if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):
+            if not port.ask_yes_no('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):
                 return
         self.asset.set(data.get('asset', ''))
         self.serial.set(data.get('serial', ''))
@@ -1666,19 +1352,18 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             return
         rows, pts = self.certificate_rows_and_points()
         if not rows:
-            messagebox.showinfo('No results', 'No recorded results to export yet.')
+            port.message('info', 'No results', 'No recorded results to export yet.')
             return
         try:
             import report_pdf
-            import report_dialog
         except ImportError as exc:
-            messagebox.showerror('Report export', str(exc))
+            port.message('error', 'Report export', str(exc))
             return
-        details = report_dialog.ask_details(self.root, f'{self.info["name"]} performance verification')
+        details = port.report_details(f'{self.info["name"]} performance verification', parent=self.root)
         if details is None:
             return
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        path = filedialog.asksaveasfilename(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
+        path = port.save_file(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
         if not path:
             return
         demo = self.any_synthetic()
@@ -1692,10 +1377,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                                              footer_note=' '.join(x for x in (report_pdf.uncertainty_note(rows, self.calibrator_model()), self.temperature_note(), self.source_note()) if x),
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:
-            messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab')
+            port.message('error', 'PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab')
             return
         except Exception as exc:
-            messagebox.showerror('PDF export error', str(exc))
+            port.message('error', 'PDF export error', str(exc))
             return
         self.status.set(f'Exported {len(rows)} rows: {path}')
 
@@ -1744,18 +1429,19 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         return ' '.join(x for x in (note, 'Meter readings: ' + '; '.join(parts) + '.') if x)
 
     def on_close(self):
-        if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'):
+        if self.busy and not port.ask_yes_no('Active run', 'A point may be active. Stop and close?'):
             return
         self.stop = True
         self._save_settings()
         self.disconnect()
-        self.root.destroy()
+        port.close(self.root)
 
 
 def main(model, argv=None, spec=None):
     """spec: a spec file name inside specs/ (or a path); the Fluke 110-series spec when omitted."""
     argv = sys.argv if argv is None else argv
-    root = tk.Tk()
-    demo, fast = virtualbench.flags(argv)
-    App(root, model, demo=demo, spec=load_spec(spec) if spec else None, fast_demo=fast)
-    root.mainloop()
+
+    def build(root):
+        demo, fast = virtualbench.flags(argv)
+        App(root, model, demo=demo, spec=load_spec(spec) if spec else None, fast_demo=fast)
+    port.run_app(build)
