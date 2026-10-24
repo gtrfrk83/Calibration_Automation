@@ -513,6 +513,9 @@ import ui_prompt_capture_wpg as _wpg  # noqa: E402
 SCENARIOS.update(_wpg.SCENARIOS)
 
 
+# ---- WP-W (WaveSurfer 4104HD): the scenario lives in tests/ui_prompt_capture_ws.py (append-only block; other packages add their own lines below / above) --------------
+from ui_prompt_capture_ws import _run_wavesurfer  # noqa: E402
+SCENARIOS['wavesurfer'] = _run_wavesurfer
 # ---- WP-B (bench DMM engines): Truevolt, DACQ, Keithley 2000, 34401A, 8846A.  APPEND-ONLY block; the scenarios live in tests/ui_prompt_capture_wpb.py.
 import ui_prompt_capture_wpb as _wpb  # noqa: E402
 SCENARIOS.update(_wpb.SCENARIOS)
