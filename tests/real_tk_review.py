@@ -60,7 +60,8 @@ def click_cell(tree, iid, col):
 
 def run(spec, tag):
     D.stub_tk()
-    ui.DEMO_SUFFIX = ' [DEMO]' if DEMO else ''
+    import ui_theme_core
+    ui_theme_core.DEMO_SUFFIX = ' [DEMO]' if DEMO else ''          # the rebound values live in ui_theme_core (ui_theme.DEMO_SUFFIX reads through)
     root = tk.Tk()
     root.report_callback_exception = lambda *a: errors.append(a)
     ui.apply_theme(root)

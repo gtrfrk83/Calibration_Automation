@@ -353,6 +353,8 @@ class AppMixin(unittest.TestCase):
         def after(self, _ms, fn): fn()
 
     def app(self, demo=False, answer=True, break_cal=False):
+        import ui_port
+        self.addCleanup(ui_port.set_ui, ui_port.set_ui(ui_port.ScriptedUiPort()))        # the worker hands proceed / failure to the UI thread through the port (no Tk here)
         b, ft, dt = make_dmm_bench('34470A')
         cal = Fluke5560A(ft, CommandLog(), label='5560A'); dmm = Keysight34470A(dt, cal.log, label='34470A'); cal.open(); dmm.open()
         cal.log.entries.clear()
