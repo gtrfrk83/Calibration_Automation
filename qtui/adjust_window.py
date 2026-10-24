@@ -241,7 +241,59 @@ class FieldGrid(QWidget):
         self._reflow()
 
     def minimumSizeHint(self):
-        return super().minimumSizeHint().boundedTo(self.sizeHint())
+        # one column is the narrowest the pairs can be laid out in: the card (and so the page) may shrink to that, the pairs wrap in _reflow
+        return QSize(self._fit(1), super().minimumSizeHint().height())
+
+
+class FlowRow(QWidget):
+    """A row of buttons that wraps onto further rows when the window is too narrow for them (a plain HBox would widen the page and bring in a horizontal scroll bar)."""
+
+    def __init__(self, widgets, spacing=None):
+        super().__init__()
+        self._w = list(widgets)
+        self._sp = M.sm if spacing is None else spacing
+        self._col = QVBoxLayout(self)
+        self._col.setContentsMargins(0, 0, 0, 0)
+        self._col.setSpacing(self._sp)
+        self._packing = None
+        self._pack(10 ** 6)
+
+    def _pack(self, width):
+        rows, cur, used = [], [], 0
+        for w in self._w:
+            need = w.sizeHint().width()
+            if cur and used + self._sp + need > width:
+                rows.append(cur)
+                cur, used = [], 0
+            used += (self._sp if cur else 0) + need
+            cur.append(w)
+        rows.append(cur)
+        key = tuple(len(r) for r in rows)
+        if key == self._packing:
+            return
+        self._packing = key
+        while self._col.count():
+            item = self._col.takeAt(0)
+            lay = item.layout()
+            if lay is not None:
+                while lay.count():
+                    lay.takeAt(0)
+        for r in rows:
+            h = QHBoxLayout()
+            h.setContentsMargins(0, 0, 0, 0)
+            h.setSpacing(self._sp)
+            for w in r:
+                h.addWidget(w)
+            h.addStretch(1)
+            self._col.addLayout(h)
+        self.updateGeometry()
+
+    def resizeEvent(self, ev):
+        super().resizeEvent(ev)
+        self._pack(max(self.width(), 50))
+
+    def minimumSizeHint(self):
+        return QSize(max((w.sizeHint().width() for w in self._w), default=0), super().minimumSizeHint().height())
 
 
 def who_card(self, width=20):
@@ -265,16 +317,65 @@ def hint_row(self):
     return row
 
 
+class _ReflowBar(QWidget):
+    """The action buttons on one row while they fit; when the window is narrower the buttons that act (left) stay on the first row and the 'Show audit log' tick box
+    with the closing buttons (right) move to a second row, instead of forcing a horizontal scroll bar on the page."""
+
+    def __init__(self, left, right, check):
+        super().__init__()
+        self._left, self._right, self._check = list(left), list(reversed(list(right))), check
+        col = QVBoxLayout(self)
+        col.setContentsMargins(0, 0, 0, 0)
+        col.setSpacing(M.sm)
+        self._rows = (QHBoxLayout(), QHBoxLayout())
+        for r in self._rows:
+            r.setContentsMargins(0, 0, 0, 0)
+            r.setSpacing(M.sm)
+            col.addLayout(r)
+        self._wrapped = None
+        self._place(False)
+
+    def _row_w(self, widgets):
+        sp = self._rows[0].spacing()
+        return sum(w.sizeHint().width() for w in widgets) + sp * max(0, len(widgets) - 1)
+
+    def _need_one(self):
+        return self._row_w(self._left + [self._check] + self._right) + 3 * self._rows[0].spacing()
+
+    def _place(self, wrapped):
+        if wrapped == self._wrapped:
+            return
+        self._wrapped = wrapped
+        for r in self._rows:
+            while r.count():
+                r.takeAt(0)
+        top, bottom = self._rows
+        for w in self._left:
+            top.addWidget(w)
+        top.addStretch(1)
+        row = bottom if wrapped else top
+        if wrapped:
+            bottom.addStretch(1)
+        row.addWidget(self._check)
+        for w in self._right:
+            row.addWidget(w)
+        self.updateGeometry()
+
+    def resizeEvent(self, ev):
+        super().resizeEvent(ev)
+        self._place(self.width() < self._need_one())
+
+    def minimumSizeHint(self):
+        h = super().minimumSizeHint().height()
+        return QSize(max(self._row_w(self._left), self._row_w([self._check] + self._right)), h)
+
+
 def button_bar(left, right, show_log_var, on_toggle):
-    """The action buttons: `left` in order from the left; `right` (close first, then abort ...) from the right edge; the 'Show audit log' tick box next to them."""
-    bar = QHBoxLayout()
-    bar.setSpacing(M.sm)
-    for b in left:
-        bar.addWidget(b)
-    bar.addStretch(1)
-    bar.addWidget(ui.checkbutton(None, 'Show audit log', show_log_var, on_toggle))
-    for b in reversed(right):
-        bar.addWidget(b)
+    """The action buttons: `left` in order from the left; `right` (close first, then abort ...) from the right edge; the 'Show audit log' tick box next to them.
+    Returns a layout (the callers add it to the page); the bar wraps to two rows in a narrow window."""
+    bar = QVBoxLayout()
+    bar.setContentsMargins(0, 0, 0, 0)
+    bar.addWidget(_ReflowBar(left, right, ui.checkbutton(None, 'Show audit log', show_log_var, on_toggle)))
     return bar
 
 

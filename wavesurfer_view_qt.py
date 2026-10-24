@@ -24,6 +24,7 @@ from PySide6.QtWidgets import QApplication, QDialog, QTabWidget, QWidget
 import datamode
 import qtui.shell_helpers as H
 import suite_info
+from qtui.bench_view import DetailBox, fit_wrapped, share_columns
 from qtui.screens import help_menu
 from qtui.shell import Shell, results_table, small_window
 from ui_port import ui as port
@@ -220,9 +221,12 @@ def build_unified(self):
     bl.addSpacing(6)
     self.utree = results_table(self, body, name_width=380, error=False)
     small_window(self, self.utree, filt)
+    share_columns(self.utree, sh)
     self.detail = port.var('Select a test point to see its limits and setup.')
     bl.addSpacing(8)
-    bl.addWidget(H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=1000))
+    info = H.frame(None, 'v', spacing=4)
+    info.layout().addWidget(fit_wrapped(H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=1000), self.detail))
+    bl.addWidget(DetailBox(info))
     self.utree.bind('<<TreeviewSelect>>', self.on_unified_select)
     self.refresh_unified(force=True)
     port.after(self.root, 500, self._unified_tick)
