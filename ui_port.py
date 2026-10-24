@@ -375,3 +375,27 @@ class _Proxy:
 
 
 ui = _Proxy()
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------
+# APPENDED BY QT-F1 (append-only block): the toolkit selector
+# ----------------------------------------------------------------------------------------------------------------------------------------------------
+TOOLKITS = ('tk', 'qt')
+
+
+def select_toolkit(name=None):
+    """Install the UiPort of one toolkit and return it.  `name` 'tk' | 'qt'; None -> the environment variable CALSUITE_UI ('qt' | 'tk'), default 'tk'.
+    Call it once, before any window or engine exists (the launchers do).  'tk' is the default and is what get_ui() creates by itself; 'qt' imports ui_port_qt (PySide6).
+    An unknown value is an error (a typo in CALSUITE_UI must not silently run the other toolkit)."""
+    import os
+    choice = (name if name is not None else os.environ.get('CALSUITE_UI', '') or 'tk').strip().lower()
+    if choice not in TOOLKITS:
+        raise ValueError(f'unknown toolkit {choice!r}: use one of {TOOLKITS} (CALSUITE_UI)')
+    if choice == 'qt':
+        import ui_port_qt
+        port = ui_port_qt.QtUiPort()
+    else:
+        import ui_port_tk
+        port = ui_port_tk.TkUiPort()
+    set_ui(port)
+    return port
