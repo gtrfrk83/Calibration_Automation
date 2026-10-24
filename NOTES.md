@@ -1236,7 +1236,7 @@ It runs the procedure's whole flow once on the virtual bench of `--demo` (`tools
 
 | check | what it reports | level |
 |---|---|---|
-| commands | every command sent, with its COMMANDS verified flag and manual page; UNVERIFIED listed; wire text sent without a registry entry (cannot carry a flag or be overridden); `*IDN?` exempt | WARN when any is unverified or unregistered, PASS otherwise |
+| commands | every command sent, with its COMMANDS verified flag and manual page; unverified ones listed; wire text sent without a registry entry (cannot carry a flag or be overridden); `*IDN?` exempt | unverified commands in use: INFO note (owner decision; the list is still printed, for the final summary; exit codes and `--strict` unchanged); WARN for wire text with no registry entry or a verified command with no page; PASS otherwise |
 | tunables | `pm_param` names (static + asked at run time) not registered in `procmods_engine`, a different default, an unknown engine prefix (the 8808A DCI settle case) | FAIL |
 | prompts | operator prompts per measured point; hook-up / safety / setup prompts are the procedure; flagged: the same prompt 3 or more times (high-voltage questions differ by voltage), or more than 0.8 per point (and 12 or more) when the procedure reads its own meter (TDS2000C, verified, is 0.71). Typed-reading procedures are exempt | WARN |
 | uncertainty | points that should print an uncertainty (Datasheet Builder rule 5, `tartur.NATURAL_UNITS`, `no_uncertainty`, same functions the report uses) and print none: inside the scope of accreditation = FAIL, scope not covering it = INFO (WARN when 5 or more or 10 percent), coverage unknown = WARN | FAIL / WARN / INFO |
@@ -1251,7 +1251,7 @@ It runs the procedure's whole flow once on the virtual bench of `--demo` (`tools
 
 Calibration (so it does not flood): a finding that is true for most existing procedures is INFO. Details of INFO lines are hidden unless `--verbose`. Thresholds are constants at the top of the file.
 
-Findings over every registered procedure (`--all`, 40 sidecars, 0 FAIL): all of them WARN for the same thing, **unverified commands in use** (handheld meters 2 to 7, 8808A 4, truevolt 5, 34970A / 72A 10, 34410A / 11A 23, K2000 37, MDO4000C 47, the three generators 33 to 34 of 36). Beyond that:
+Findings over every registered procedure (`--all`, 40 sidecars, 0 FAIL): all of them had the same finding, **unverified commands in use** (now an INFO note, no longer a WARN; handheld meters 2 to 7, 8808A 4, truevolt 5, 34970A / 72A 10, 34410A / 11A 23, K2000 37, MDO4000C 47, the three generators 33 to 34 of 36). Beyond that:
 
 | finding | procedures |
 |---|---|

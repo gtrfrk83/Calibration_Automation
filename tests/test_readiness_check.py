@@ -59,8 +59,9 @@ class Commands(unittest.TestCase):
     def test_unverified_and_unregistered_are_listed(self):
         rep = analyse(RC.check_commands, 'OUT 1 V', 'OUT?', 'UNK 3', 'WHATEVER 1', '*IDN?')
         f = [x for x in rep.findings if x.check == 'commands']
-        self.assertEqual(f[0].level, RC.WARN)
-        self.assertIn('1 UNVERIFIED', f[0].text)
+        self.assertEqual(f[0].level, RC.INFO, 'unverified commands in use are a note, not a warning')
+        self.assertIn('1 unverified command(s) in use', f[0].text)
+        self.assertTrue(f[0].show)
         self.assertTrue(any('UNK 3' in d for d in f[0].details))
         self.assertTrue(any(x.level == RC.WARN and 'NOT in any COMMANDS registry' in x.text for x in f))
         self.assertFalse(any('IDN' in d for x in f for d in x.details), '*IDN? is exempt')
@@ -70,6 +71,24 @@ class Commands(unittest.TestCase):
         self.assertEqual(levels(rep, 'commands')[0], RC.PASS)
         rep = analyse(RC.check_commands, 'NOREF')
         self.assertIn(RC.WARN, levels(rep, 'commands'))
+
+
+    def test_unverified_alone_does_not_warn_and_the_list_is_still_printed(self):
+        rep = analyse(RC.check_commands, 'OUT 1 V', 'OUT?', 'UNK 3')
+        self.assertNotIn(RC.WARN, [f.level for f in rep.findings if f.check == 'commands'])
+        self.assertEqual(rep.worst, RC.INFO)
+        rep.proc.engine = ['e.py']
+        text = RC.render(rep)
+        self.assertIn('unverified command(s) in use', text)
+        self.assertIn('UNK 3', text, 'the list stays visible without --verbose (it goes into the final summary)')
+
+    def test_exit_code_ignores_the_note_but_a_real_warn_still_counts(self):
+        # the exit rule in main(): FAIL, or WARN with --strict.  A report with only the unverified note is clean even under --strict.
+        note = analyse(RC.check_commands, 'UNK 3')
+        self.assertNotIn(RC.WARN, note.counts)
+        self.assertNotIn(RC.FAIL, note.counts)
+        warn = analyse(RC.check_commands, 'OUT 1 V', 'OUT?', 'WHATEVER 1')
+        self.assertIn(RC.WARN, warn.counts, 'wire text with no registry entry is still a WARN')
 
 
 class Readback(unittest.TestCase):
