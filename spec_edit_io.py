@@ -174,7 +174,8 @@ def save_edit(doc: se.SpecDoc, *, edited_by, reason, source, backup=True, rebuil
     _check_inputs(edited_by, reason, source)
     rep = se.validate(doc)
     if not rep.can_save:
-        raise SaveError(f'{len(rep.errors)} validation error{"s" if len(rep.errors) != 1 else ""} must be fixed first: {rep.errors[0].message}')
+        ne = rep.new_errors
+        raise SaveError(f'{len(ne)} validation error{"s" if len(ne) != 1 else ""} introduced by this edit must be fixed first: {ne[0].message}')
     try:
         current = doc.path.read_bytes()
     except OSError as e:

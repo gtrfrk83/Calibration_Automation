@@ -2291,6 +2291,35 @@ def checks_spec_editor():
         check('spec editor: the history shows the entry', len(h.tree.get_children()) == 1, h.tree.get_children())
         grab(h.win, '4_history')
         h.win.destroy()
+        ed.win.destroy()
+        # ---- a sheet that already has an error: red, 'existing', does not block an unrelated edit; a NEW error still blocks
+        import json
+        sp = sd / 'a2la_5500a_coil_standard.json'
+        data = json.loads(sp.read_text(encoding='utf-8'))
+        data['functions'][0]['ranges'][2]['params'][0]['notes'] = [2, 99]
+        sp.write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
+        ed = SEU.EditorWindow(root, 'A2LA-5500A-COIL', spec_dir=sd, db_path=db, backup_dir=tmp / 'bk')
+        ed.win.geometry('1100x700+0+0')
+        pump(root, 30)
+        tree = ed.grid_rows.tree
+        third = ed.doc.lines()[2].iid
+        check('spec editor: a pre-existing error is red when the sheet opens', 'err' in tree.item(third, 'tags'), tree.item(third, 'tags'))
+        tip = ed.grid_rows.tip_for(third, '#1') or ''
+        check('spec editor: its tooltip says it is existing', 'note 99 does not exist' in tip and 'existing' in tip, tip)
+        ed.grid_rows.commit_text(ed.doc.lines()[0].iid, 'page', '12')
+        pump(root, 20)
+        check('spec editor: an unrelated edit is not blocked by it', ed.report.can_save and len(ed.report.existing_errors) == 1 and 'existing, does not block' in ed.pending_text(), ed.pending_text()[-400:])
+        grab(ed.win, '5_existing_error')
+        dlg = ed.document_and_save()
+        pump(root, 20)
+        check('spec editor: the save dialog opens and warns about the existing error', dlg is not None and dlg.win.winfo_exists()
+              and any('already in this sheet' in w.cget('text') for w in walk(dlg.win) if isinstance(w, (tk.Label, ttk.Label)) and 'text' in w.keys()),
+              [w.cget('text')[:60] for w in walk(dlg.win) if isinstance(w, (tk.Label, ttk.Label))])
+        dlg.win.destroy()
+        ed.grid_rows.commit_text(ed.doc.lines()[0].iid, 'notes', '2, 98')
+        pump(root, 20)
+        check('spec editor: a NEW error still blocks the save', not ed.report.can_save and ed.document_and_save() is None)
+        ed.win.destroy()
     check('spec editor: no Tk callback errors', not errs, errs)
     try:
         root.destroy()
