@@ -63,12 +63,12 @@ class VirtualMixin:
     def init_virtual(self, demo, fast_demo=False):
         self._fast_demo = bool(fast_demo)
         try:
-            import ui_theme
-            ui_theme.DEMO_SUFFIX = ' [DEMO]' if (demo and not fast_demo) else ''
+            import ui_theme_core
+            ui_theme_core.DEMO_SUFFIX = ' [DEMO]' if (demo and not fast_demo) else ''
         except Exception:
             pass
         self._vb = None                 # (bench, calibrator transport, DMM transport) of the virtual bench once connected
-        self.demo_failures = None       # a tk.BooleanVar once the window exists: 'include some failures' for the simulated fill
+        self.demo_failures = None       # a Tk BooleanVar (port.var) once the window exists: 'include some failures' for the simulated fill
         self.demo_failures_on = False
 
     def virtual_failures(self) -> bool:

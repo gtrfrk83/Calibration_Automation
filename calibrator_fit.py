@@ -53,7 +53,7 @@ class Req:
     key: object = None              # the procedure's own id of the point (so an engine can find the point again)
 
     def text(self):
-        from ui_theme import si_one
+        from ui_theme_core import si_one
         num, sym = si_one(abs(self.value) if self.kind != 'TEMP' else self.value, UNIT[self.kind] if self.kind != 'TEMP' else 'degC')
         s = f'{NAME[self.kind]} {num} {sym}'.replace('  ', ' ')
         if self.frequency not in (None, 0):
@@ -326,16 +326,10 @@ def make_offer(model, requests, per_point_manual=False, unverified='', name=None
 
 def attach_note(parent, offer, ui, widgets=(), row=None, columnspan=2, wrap=340):
     """A muted label saying whether the model is offered and why not, packed under the picker inside `parent` (or gridded at `row` of a grid); the full
-    explanation is the tooltip of the label and of `widgets` (the picker itself).  Returns the label."""
-    from tkinter import ttk
-    lab = ttk.Label(parent, text=offer.text, style='Muted.TLabel', wraplength=ui.px(wrap), justify='left')
-    if row is None:
-        lab.pack(fill='x', pady=(4, 0))
-    else:
-        lab.grid(row=row, column=0, columnspan=columnspan, sticky='w', pady=(0, 6))
-    for w in (lab, *widgets):
-        ui.Tooltip(w, offer.tooltip)
-    return lab
+    explanation is the tooltip of the label and of `widgets` (the picker itself).  Returns the label.
+    The widget is the toolkit's (calibrator_fit_view_tk.attach_note, via ui_port.view); `ui` is the theme module the caller's view already uses."""
+    from ui_port import ui as port
+    return port.view('calibrator_fit_view').attach_note(parent, offer, ui, widgets, row, columnspan, wrap)
 
 
 def picker_values(names, offers):

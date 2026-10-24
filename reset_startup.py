@@ -20,6 +20,8 @@ Demo mode never calls this (there are no instruments) and writes nothing that co
 """
 from __future__ import annotations
 
+from ui_port import ui as port                 # thread hand-offs (post) and the reset dialogs go through the UI port (ui_port.py)
+
 LOG_LINE = 'Instruments reset to default settings at start'
 
 
@@ -188,10 +190,10 @@ class AppResetMixin:
                 self.reset_run()
                 if self.RESET_ONCE_PER_SESSION:
                     self._reset_done_for = io                # only a SUCCESSFUL reset counts: a failed one leaves the next Run to reset again
-                self.root.after(0, proceed)
+                port.post(self.root, proceed)
             except Exception as exc:
                 msg = str(exc)
-                self.root.after(0, lambda: self._reset_failed(msg))
+                port.post(self.root, lambda: self._reset_failed(msg))
         threading.Thread(target=work, daemon=True).start()
 
     SKIP_LINE = 'reset skipped: already reset this session'
@@ -206,11 +208,11 @@ class AppResetMixin:
         def work():
             try:
                 self.reset_skip_run()
-                self.root.after(0, proceed)
+                port.post(self.root, proceed)
             except Exception as exc:
                 msg = str(exc)
                 self.reset_forget()                          # state unknown: the next Run resets again
-                self.root.after(0, lambda: self._reset_failed(msg, skipped=True))
+                port.post(self.root, lambda: self._reset_failed(msg, skipped=True))
         threading.Thread(target=work, daemon=True).start()
 
     def _reset_failed(self, msg, skipped=False):
@@ -250,7 +252,7 @@ class SessionNotice:
                     box.append(bool(self.ask(text)))
                 finally:
                     done.set()
-            self.root.after(0, on_ui)
+            port.post(self.root, on_ui)
             ok = done.wait(self.timeout) and bool(box and box[0])
         if ok:
             self._ok_until = self.clock() + self.ttl
