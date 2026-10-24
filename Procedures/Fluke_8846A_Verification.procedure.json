@@ -19,6 +19,8 @@
   "code": [
    "Procedures/Fluke_8846A_Verification.py",
    "f8846a_view_tk.py",
+   "f8846a_view_qt.py",
+   "qtui/bench_view.py",
    "ui_port.py",
    "ui_port_tk.py",
    "drivers/base.py",
