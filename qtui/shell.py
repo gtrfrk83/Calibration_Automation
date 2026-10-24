@@ -167,6 +167,7 @@ class _SectionRow(QFrame):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setFixedHeight(34)
         self.setAccessibleName(f'{name}, {ok + bad} of {tot} tested')
+        self.setToolTip(name)                              # the full name when it is elided in the sidebar
         self._hover = False
 
     def mousePressEvent(self, ev):
