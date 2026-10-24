@@ -63,7 +63,7 @@ Included
   fluke_170_series_pv.json  Fluke 175 / 177 / 179 Calibration Information, Table 2 (175, pp. 10-11) and Table 3 (177 / 179, pp. 12-13) (schema 2, written by build_170_spec.py from the page images): per-step 'models' as in the 110-series spec;
                             175 = 52 points, 177 = 51, 179 = 54 (adds 3 temperature points, TEMP kind, degC). Steps are numbered in table order (the tables print no numbers): ids 2-1..2-52 (175), 3-1..3-54 (177 / 179).
                             THREE printed values are corrected (step.printed_limits keeps the printed text; the report row Description says 'limits corrected'); format-only changes keep step.printed_text.
-                            Frequency rows (AC / DC volts frequency) are sourced as AC volts and read in Hz / kHz: no_uncertainty true. build_170_spec.py checks every limit against the published accuracy and fails on a disagreement.
+                            Frequency rows (AC / DC volts frequency) are sourced as AC volts and read in Hz / kHz: unc_kind FREQ (the Frequency - Measure CMC alone). build_170_spec.py checks every limit against the published accuracy and fails on a disagreement.
   fluke_365_pv.json         Fluke 365 Detachable Jaw True-rms Clamp Meter Calibration Manual, Table 2 (printed pp. 7-8), 32 points (schema 3, written by build_fluke_365_spec.py from the page images, read twice):
                             AC volts 6, DC volts 7, ohms 7, AC amps 6, DC amps 6; ids 2-1 .. 2-32. The current rows list the CALIBRATOR current (applied.value 0.5 / 5 / 9.5 A) and the METER limits
                             (nominal 10 / 100 / 190 A: a 20-turn coil, 20 x); they carry the calibrator's current uncertainty at applied.value, unscaled (owner-chosen). groups{COIL_AUX, COIL_20A} are the spec's own cable-change prompts (calibrator low- / high-current
@@ -101,7 +101,8 @@ Options common to the handheld-meter specs (handheld_dmm.py; fluke_110_series, f
   step.printed_limits       optional record of limits as printed when the spec uses corrected ones (not read by the engine).
   step.printed_text         optional (Fluke 170 series): the printed limit text when the spec writes the same numbers at the display resolution (50.1 -> 50.10); not read by the engine.
   step.no_freq_suffix       optional true (Fluke 170 series Hz-unit frequency rows): the report Nominal has no 'at f Hz' suffix.
-  step.no_uncertainty       optional true (Fluke 170 series frequency rows): the report row gets no Uncertainty (and TAR / TUR stay blank); the 77 IV / 110 / 87V frequency steps do not set it (existing behaviour, unchanged).
+  step.no_uncertainty       optional true: the report row gets no Uncertainty (and TAR / TUR stay blank). No spec uses it for a frequency reading any more (see unc_kind).
+  step.unc_kind             optional 'FREQ' (Fluke 170 series hzread rows, 77 IV 2-17, 110-series 3-17, 87V 1-11 .. 1-14, 287 / 289 4-24): the step sources AC volts and reads a frequency; the Uncertainty is the lab's 'Frequency - Measure' CMC at the applied frequency, on its own (no calibrator budget), TUR against it, TAR blank.
 
 Square-wave sources in handheld specs (additive; handheld_dmm.py, procspec.validate_manual_reading)
   step.kind                 DUTY    square-wave source, the meter reads the duty cycle (%) (87V 1-16)

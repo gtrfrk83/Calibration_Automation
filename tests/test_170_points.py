@@ -187,7 +187,7 @@ class Spec(unittest.TestCase):
         for m in MODELS:
             for n in (16, 17, 18, 19):
                 p = PTS[m][n]
-                self.assertEqual((p['kind'], p['base_unit'], p['nominal'], p.get('no_uncertainty')), ('ACV', 'Hz', p['applied']['frequency'], True))
+                self.assertEqual((p['kind'], p['base_unit'], p['nominal'], p.get('unc_kind'), p.get('no_uncertainty')), ('ACV', 'Hz', p['applied']['frequency'], 'FREQ', None))
                 self.assertIs(p.get('no_freq_suffix'), True)
         t = PTS['179'][52]
         self.assertEqual((t['kind'], t['base_unit'], t['display_unit'], t['group']), ('TEMP', 'degC', '°C', 'TEMP'))

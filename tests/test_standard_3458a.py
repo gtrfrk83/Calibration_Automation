@@ -1,6 +1,7 @@
 """Keysight 3458A standards accuracy sheet (specs/standards/keysight_3458a_standard.json, written by specs/build_3458a_standard.py) from the
 Keysight data sheet 5965-4971E (pp. 8-35).  The table below is a SECOND, hand-typed transcription of key cells (read again from the rendered page
 images), independent of the builder's tables.  Run:  python -m unittest tests.test_standard_3458a"""
+import math
 import json
 import os
 import sys
@@ -194,7 +195,8 @@ class Sheet(unittest.TestCase):
         bud = ub.build('DCV', 10.0, 'V', standard=self.s, scope=None, direction='input') if 'direction' in ub.build.__code__.co_varnames else None
         if bud is not None:
             self.assertAlmostEqual(bud.hit.limit, 40.5e-6, 12)
-            self.assertAlmostEqual(bud.emu, 40.5e-6, 12)                         # k = 2 assumed gives back the expanded limit
+            # divisor 2 (no level printed) gives back the expanded limit; the sheet's 8.5-digit resolution (0.1 uV on the 10 V range) adds in quadrature
+            self.assertAlmostEqual(bud.emu, 2 * math.hypot(40.5e-6 / 2, 1e-7 / math.sqrt(12)), 12)
         else:
             self.assertIsNone(ub.build('DCV', 10.0, 'V', standard=self.s, scope=None).hit)   # default direction is 'output': documented in NOTES.md
 

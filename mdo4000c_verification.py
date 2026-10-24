@@ -36,6 +36,8 @@ SECTION_TITLE = {s['id']: s['title'] for s in SPEC['sections']}
 SECTION_PAGE = {s['id']: s['page'] for s in SPEC['sections']}
 MODELS = SPEC['models']
 PLAIN_UNITS = {'%', 'dB', 'dBm', 'dBc', 'dBm/Hz', 'dBc/Hz', 'ratio', ''}
+CAL_MODEL = '5560A'
+FREQ_CMC_KINDS = ('DVMFREQ', 'AFGFREQ')       # frequency points: the lab's Frequency - Measure CMC (GPS-referenced) is their uncertainty         # the standards sheet (specs/standards) whose DC voltage specification is the budget for the DC gain / offset / DVM points
 ENBW_FACTOR = 1.0            # noise-equivalent bandwidth = ENBW_FACTOR x RBW when converting dBm to dBm/Hz (see README)
 SLEEP_SCALE = 1.0            # tests set this to 0
 VIRTUAL_PACE = 1.0           # a virtual-bench demo shortens the waits (virtualbench.WAIT_SCALE); 1.0 = real
@@ -194,9 +196,9 @@ def uncertainty_parts(p, raw):
     """The number behind uncertainty_text: (value, unit, style) or None when the text is 'N/A'.  value is the unrounded uncertainty
     in `unit` ('ohm', '%', 'V', 'ratio' for the bandwidth gain, or the unit of the reference-file entry); style says how
     uncertainty_text prints it ('si' = uncertainty.format_value, 'bw' = plain 2 significant figures, 'ref' = number and unit)."""
-    if p['stim'] == 'none' or p.get('passfail'):
+    if (p['stim'] == 'none' and p['kind'] not in FREQ_CMC_KINDS) or p.get('passfail'):
         return None
-    import report_pdf, uncertainty
+    import report_pdf, uncertainty, uncertainty_budget
     sc = report_pdf.scope()
     k = p['kind']
     try:
@@ -205,32 +207,43 @@ def uncertainty_parts(p, raw):
                 v, u, _ = sc.oscilloscope('impedance', ohms=p['nominal'])
                 return (v, 'ohm', 'si') if v is not None else None
             if k == 'GAIN':
-                ua = [abs(sc.oscilloscope('dcv', volts=abs(p[n]), impedance=p['term'])[0] or 0) / 100 * abs(p[n]) for n in ('vneg', 'vpos')]
-                if all(ua):
-                    return 100 * math.hypot(*ua) / abs(p['vdiff']), '%', 'si'
+                # each applied level: the larger of the 5560A DC budget and the scope's oscilloscope DC CMC (absolute volts); the two are combined
+                # in quadrature and shown as a percentage of the expected difference (CMC-only before: the budget is far below the CMC at every level)
+                bs = [uncertainty_budget.osc_dc(p[n], p['term'], CAL_MODEL, sc) for n in ('vneg', 'vpos')]
+                if all(b is not None and b.value for b in bs):
+                    return 100 * math.hypot(*[b.value for b in bs]) / abs(p['vdiff']), '%', 'si'
             if k == 'OFFSET':
-                v, u, _ = sc.oscilloscope('offset', volts=abs(p['offset']), impedance=p['term'])
-                return (v, 'V', 'si') if v is not None else None
+                b = uncertainty_budget.osc_dc(p['offset'], p['term'], CAL_MODEL, sc)
+                return (b.value, 'V', 'si') if b is not None else None
             if k == 'BW':
                 v, u, _ = sc.oscilloscope('bandwidth', volts_pp=p['vin_pp'], frequency=p['freq'])
                 if v is not None:
                     ratio = 10 ** (v / 20) - 1
                     return ratio * max(raw.get("gain", raw.get("reading", 1)), 0.707), 'ratio', 'bw'
             if k == 'DVMDC':
-                v, u, _ = sc.oscilloscope('dcv', volts=abs(p['nominal']), impedance='1M')
-                if v is not None:
-                    return (v / 100 * abs(p['nominal']) if u == '%' else v), 'V', 'si'
+                b = uncertainty_budget.osc_dc(p['nominal'], '1M', CAL_MODEL, sc)
+                if b is not None:
+                    return b.value, 'V', 'si'
     except Exception:
         return None
     ref = reference_cmc().get(k)
     if ref and (ref.get('rel') is not None or ref.get('abs') is not None):
         reading = abs(raw.get('reading', p['nominal']))
         value = (ref.get('rel') or 0) * reading + (ref.get('abs') or 0)
-        if k == 'DVMFREQ' and sc is not None and ref.get('unit', p['unit']) == 'Hz':
+        if k in FREQ_CMC_KINDS and sc is not None and ref.get('unit', p['unit']) == 'Hz':
             floor = sc.dmm('FREQ', p['nominal'], None, None, basis='measure')     # never below the A2LA frequency CMC
             if floor is not None and value < floor:
                 value = floor
         return value, ref.get('unit', p['unit']), 'ref'
+    if k in FREQ_CMC_KINDS and sc is not None and p['unit'] == 'Hz':
+        # a frequency read by the GPS-referenced lab standard (the 5560A frequency into the DVM counter; the AFG output on the lab counter): the lab's
+        # 'Frequency - Measure' CMC (7.1e-12 of the frequency), on its own: the CMC is already the expanded figure, there is no divisor and no amplitude term
+        try:
+            v = sc.dmm('FREQ', p['nominal'], None, None, basis='measure')
+        except Exception:
+            v = None
+        if v is not None:
+            return v, 'Hz', 'si'
     return None
 
 
@@ -267,7 +280,7 @@ def tar_tur_fields(p, r):
     (gain is a %, the others are measurements or non-DC / leveled-sine / square stimulus with no matching specification row)."""
     import tartur
     try:
-        if p.get('passfail') or p.get('stim') == 'none':
+        if p.get('passfail') or (p.get('stim') == 'none' and p['kind'] not in FREQ_CMC_KINDS):
             return dict(TAR='', TUR='')
         raw = r.get('raw', {})
         text = r.get('uncertainty') or uncertainty_text(p, raw)
@@ -1474,7 +1487,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         c = self.cfg
         opts = ', '.join([x for x in (c.sa if c.sa != 'None' else '', 'AFG' if c.afg else '', 'DVM' if c.dvm else '', 'TPA-N-PRE attached' if c.tpa else '') if x]) or 'none'
         skipped = sum(1 for v in self.found.values() if v.get('result') == 'SKIP')
-        note = ('Uncertainty: points without an input signal show N/A. Analog points use the laboratory A2LA scope (Fluke 5560A CMC); RF, function-generator and meter points '
+        note = ('Uncertainty: points without an input signal show N/A. DC gain, DC offset and DVM DC points report the larger of the laboratory A2LA oscilloscope CMC and the budget '
+                'built from the published DC voltage specification of the Fluke 5560A (divided by its coverage divisor, k = 2), rounded up; input impedance and bandwidth use the laboratory '
+                'A2LA scope (CMC only); RF, function-generator and meter points '
                 'use the entries in specs/mdo4000c_reference_cmc.json and show N/A where none is set.' + (f' {skipped} point(s) were skipped (instrument not available).' if skipped else ''))
         try:
             if report_pdf.details_tar_tur(details):

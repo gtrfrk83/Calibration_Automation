@@ -1583,7 +1583,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             clean = lambda d: float(f'{float(d * factor):.9g}')
             unit = SYMBOL[p['base_unit']]
             unc = ''
-            if self.has_uncertainty(p):
+            if self.has_uncertainty(p) and p.get('unc_kind') == 'FREQ':       # a frequency reading: the Frequency - Measure CMC ALONE (GPS-referenced), never the calibrator's voltage uncertainty
+                unc = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=p['applied']['frequency'], frequency=None, unit='Hz', range=None))
+            elif self.has_uncertainty(p):
                 unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
                                                         frequency=p['applied'].get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None),
                                                         standard=self.calibrator_model())      # unc_unit (opt-in, Fluke 376 iFlex simulation): the source is volts, the reading is amps
@@ -1650,7 +1652,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             clean = lambda d: float(f'{float(d * factor):.9g}')
             q = dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
                      frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)
-            return tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=self.calibrator_model())
+            if p.get('unc_kind') == 'FREQ':            # frequency reading: Frequency - Measure CMC alone, no calibrator budget mixed in (so TAR is blank, TUR is against the CMC)
+                q = dict(kind='FREQ', nominal=p['applied']['frequency'], frequency=None, unit='Hz', range=None)
+            fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=self.calibrator_model())
+            if p.get('unc_kind') == 'FREQ':
+                fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=None)
+            return fields
         except Exception:
             return blank
 

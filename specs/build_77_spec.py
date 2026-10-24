@@ -75,7 +75,7 @@ ROWS = [
     (16, 'AC volts', 'acv', '1000 V', 'ACV', 1000, 1000, 'V', '978', '1022', ('2.0', 2, '1'), {}),
     (17, 'AC volts frequency', 'hz', '99.99 kHz', 'ACV', 5, 50000, 'kHz', '49.94', '50.06', ('0.1', 1, '0.01'),
      dict(nominal=50000.0, note='The meter displays FREQUENCY on this step (the calibrator applies 5 V at 50 kHz). ' + NOTE_YELLOW,
-          report_desc='99.99 kHz range (5 V applied)')),
+          report_desc='99.99 kHz range (5 V applied)', unc_kind='FREQ')),
     (18, 'DC volts', 'dcv', '6.000 V', 'DCV', 5, None, 'V', '4.984', '5.016', ('0.3', 1, '0.001'), {}),
     (19, 'DC volts', 'dcv', '600.0 V', 'DCV', 300, None, 'V', '299.0', '301.0', ('0.3', 1, '0.1'), {}),
     (20, 'DC volts', 'dcv', '1000 V', 'DCV', 1000, None, 'V', '996', '1004', ('0.3', 1, '1'), {}),
@@ -157,6 +157,8 @@ def build_steps():
             step['note'] = extra['note']
         if 'report_desc' in extra:
             step['report_desc'] = extra['report_desc']
+        if extra.get('unc_kind'):                     # the reading is a frequency: its uncertainty is the Frequency - Measure CMC alone (see NOTES.md)
+            step['unc_kind'] = extra['unc_kind']
         step['ref'] = f'T{TABLE} #{n}'
         step['id'] = f'{TABLE}-{n}'
         steps.append(step)

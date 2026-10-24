@@ -40,6 +40,7 @@ KINDS = ('SELFTEST', 'TIMEBASE', 'ACAMP', 'LFFLAT', 'FLAT')
 REF_CMC_PATH = HERE / 'specs' / 'fgen_332xx_reference_cmc.json'
 STD_INPUTS = {'INPUT 1 (type N)': 'INPUT1', 'INPUT 2 (binding posts)': 'INPUT2'}
 FLAT_REF_HZ = 100e3
+STD_MODEL = '5790B'        # the standards sheet (specs/standards) of the measuring standard: its AC voltage specification is the budget for AC amplitude / low-frequency flatness
 WBND_REF_HZ = 1e3          # wideband flatness is measured relative to 1 kHz (5790B manual pp. 4-31, 4-32)
 COUNTER_REFS = {'External 10 MHz (GPS)': 'EXT', 'Internal timebase': 'INT'}
 FLAT_METHODS = {'WBND': '5790B wideband input (relative to 1 kHz)', 'POWER': 'Power meter (manual method)'}
@@ -415,9 +416,30 @@ def _ref_cmc():
         return {}
 
 
+def measure_budget(p, sc=None):
+    """uncertainty_budget.Budget of a sine-wave AC amplitude / low-frequency flatness point read on the Fluke 5790B (the measuring standard of this
+    procedure): the 5790B's published 'Voltage, AC [Sinewave, Absolute]' accuracy at the voltage and frequency / its coverage divisor (99 %: 2.576), + its
+    resolution when the sheet has one, k = 2, checked against the laboratory's AC Voltage - Measure CMC.  None when the point is not a sine wave
+    (the 5790B sinewave rows do not describe a square wave), the scope or the 5790B sheet is missing, or no 5790B row covers the point: those
+    stay CMC-only."""
+    if p['kind'] not in ('ACAMP', 'LFFLAT') or p.get('function') != 'SIN':
+        return None
+    try:
+        import report_pdf, uncertainty_budget
+        sc = sc or report_pdf.scope()
+        if sc is None:
+            return None
+        b = uncertainty_budget.build('ACV', p['nominal'], 'V', standard=STD_MODEL, frequency=p['frequency'], scope=sc, direction='input', basis='measure')
+    except Exception:
+        return None
+    return b if b.hit is not None and b.cmc is not None else None
+
+
 def uncertainty_value(p):
-    """(value, unit, source) behind point_uncertainty: the unrounded uncertainty in `unit`, or (None, None, '') when there is none."""
-    scope_value, scope_unit = None, None
+    """(value, unit, source) behind point_uncertainty: the unrounded uncertainty in `unit`, or (None, None, '') when there is none.
+    Sine-wave AC amplitude / low-frequency flatness: the larger of the 5790B budget and the scope's AC Voltage - Measure CMC (source 'budget');
+    the time base, square-wave points and any point without a 5790B row: the scope CMC alone (source 'scope')."""
+    scope_value, scope_unit, scope_src = None, None, 'scope'
     if p['kind'] in ('ACAMP', 'LFFLAT', 'TIMEBASE'):
         import report_pdf
         sc = report_pdf.scope()
@@ -425,15 +447,18 @@ def uncertainty_value(p):
             kind = 'FREQ' if p['kind'] == 'TIMEBASE' else 'ACV'
             scope_value = sc.dmm(kind, p['nominal'], None, None if kind == 'FREQ' else p['frequency'], basis='measure')
             scope_unit = 'Hz' if kind == 'FREQ' else 'V'
+            b = measure_budget(p, sc) if scope_value is not None else None
+            if b is not None:
+                scope_value, scope_src = max(scope_value, b.value), 'budget'
     entry = _ref_cmc().get(p['kind']) or {}
     if entry.get('rel') is not None or entry.get('abs') is not None:
         value = (entry.get('rel') or 0) * abs(p['nominal'] if p['kind'] != 'FLAT' else 1.0) + (entry.get('abs') or 0)
         unit = entry.get('unit', p['unit'])
         if scope_value is not None and unit == scope_unit and value < scope_value:
-            value = scope_value          # an editable reference value may never be reported below the A2LA scope
+            value = scope_value          # an editable reference value may never be reported below the A2LA scope (or the budget)
         return value, unit, 'reference file'
     if scope_value is not None:
-        return scope_value, scope_unit, 'scope'
+        return scope_value, scope_unit, scope_src
     return None, None, ''
 
 
@@ -1014,8 +1039,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         how = {'WBND': 'Flatness measured on the Fluke 5790B WIDEBAND input relative to 1 kHz (5790B Operators Manual pp. 4-31, 4-32) '
                        'instead of the manual\'s power meter method.',
                'POWER': 'Flatness measured with a power meter: 100 kHz reference plus the worksheet offset (manual method).'}
-        note = ('Uncertainty: AC amplitude and low-frequency flatness use the laboratory A2LA scope, AC Voltage - Measure; the timebase uses '
-                'Frequency - Measure; RF flatness uses specs/fgen_332xx_reference_cmc.json and is blank where no value is set. '
+        note = ('Uncertainty: sine-wave AC amplitude and low-frequency flatness report the larger of the laboratory A2LA scope, AC Voltage - Measure, and the budget '
+                'built from the published AC voltage specification of the Fluke 5790B (divided by its coverage divisor, k = 2), rounded up; square-wave amplitude uses the scope '
+                'alone; the timebase uses Frequency - Measure; RF flatness uses specs/fgen_332xx_reference_cmc.json and is blank where no value is set. '
                 'AC amplitude reference standard: Fluke 5790B (the manual lists a 3458A DMM). ' + ' '.join(how[m] for m in used))
         try:
             if report_pdf.details_tar_tur(details):

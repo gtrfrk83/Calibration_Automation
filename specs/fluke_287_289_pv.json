@@ -873,7 +873,8 @@
     ],
     "rel": false
    },
-   "note": "Press Hz: the frequency reading is recorded."
+   "note": "Press Hz: the frequency reading is recorded.",
+   "unc_kind": "FREQ"
   },
   {
    "table": "4",

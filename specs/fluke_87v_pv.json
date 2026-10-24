@@ -274,6 +274,7 @@
    },
    "nominal": 99950.0,
    "note": "The meter displays FREQUENCY on this step (the calibrator applies the voltage shown at that frequency).",
+   "unc_kind": "FREQ",
    "id": "1-11"
   },
   {
@@ -298,6 +299,7 @@
    },
    "nominal": 199500.0,
    "note": "The meter displays FREQUENCY on this step (the calibrator applies the voltage shown at that frequency).",
+   "unc_kind": "FREQ",
    "id": "1-12"
   },
   {
@@ -322,6 +324,7 @@
    },
    "nominal": 99950.0,
    "note": "The meter displays FREQUENCY on this step.",
+   "unc_kind": "FREQ",
    "id": "1-13"
   },
   {
@@ -346,6 +349,7 @@
    },
    "nominal": 99950.0,
    "note": "The meter displays FREQUENCY on this step.",
+   "unc_kind": "FREQ",
    "id": "1-14"
   },
   {
