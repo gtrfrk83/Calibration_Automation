@@ -53,7 +53,7 @@ class ManagerSource(unittest.TestCase):
             self.assertNotIn(gone, self.src)
         tabs = re.findall(r"self\.notebook\.add\(self\.\w+, text='\s*([^']+?)\s*'\)", self.src)
         self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder'])
-        self.assertIn("text='Library folder...'", self.src)
+        self.assertIn("label='Library folder...'", self.src)          # an item of the Library menu now
         self.assertIn('def restore_previous', self.src)
         self.assertIn('procedure_menu.RESTORE: self.restore_previous', self.src)
 

@@ -108,8 +108,8 @@ class ImportFlow(unittest.TestCase):
 
     def test_the_manager_has_the_button_and_the_folder_setting(self):
         src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertIn("text='Import procedure package...'", src)
-        self.assertIn("text='Library folder...'", src)          # moved from the removed Procedure Development tab
+        self.assertIn("label='Import procedure package...'", src)          # now an item of the Library menu (was a button on the Procedures tab)
+        self.assertIn("label='Library folder...'", src)
         self.assertNotIn('Procedure Development', src)
 
     def test_library_folder_buttons_use_the_setting(self):

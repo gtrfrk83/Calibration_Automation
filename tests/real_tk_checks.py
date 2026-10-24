@@ -359,7 +359,8 @@ def checks_manager_tabs():
     check('manual view: empty until something is imported, note shown', m.view_kind == 'manual' and names() == [] and m.view_notes['manual'].winfo_ismapped()
           and 'type each reading into the test point grid' in str(m.view_notes['manual'].label.cget('text')), names())
     check('manual view: Run is disabled with nothing selected', str(m.btn_run.cget('state')) == 'disabled' and str(m.btn_demo.cget('state')) == 'disabled')
-    check('manual view: the import button is on the Procedures tab', any(isinstance(w, ttk.Button) and 'Import Mudcats datasheet' in str(w.cget('text')) for w in walk(m.library_frame)))
+    check('manual view: the import is in the Library menu, not a button on the tab', not any(isinstance(w, ttk.Button) and 'Import Mudcats datasheet' in str(w.cget('text')) for w in walk(m.library_frame))
+          and 'Import Mudcats datasheet (.mdd)...' in [m.library_menu.entrycget(i, 'label') for i in range(0, int(m.library_menu.index('end')) + 1) if m.library_menu.type(i) != 'separator'])
     grab('manual_empty')
     m.view_nb.select(m.view_pages['adjustment'])
     pump(root, 20)
@@ -436,8 +437,8 @@ def checks_manager_run_top():
                   not str(m.btn_run).startswith(str(m.card_scroll)))
             check(f'{tag}: texts', str(m.btn_run.cget('text')).endswith('Run') and str(m.btn_demo.cget('text')) == 'Try in demo mode')
             check(f'{tag}: no big run row above the table', not any(isinstance(x, ttk.Button) and 'virtual instruments' in str(x.cget('text')) for x in walk(m.library_frame)))
-            check(f'{tag}: import buttons still in the bar', all(any(isinstance(x, ttk.Button) and t in str(x.cget('text')) for x in walk(m.library_frame))
-                                                              for t in ('Import Mudcats', 'Import procedure package', 'Register procedure', 'Remove from library', 'Library folder')))
+            check(f'{tag}: the import / register / remove buttons are gone from the tab', not any(isinstance(x, ttk.Button) and any(t in str(x.cget('text')) for t in
+                  ('Import Mudcats', 'Import procedure package', 'Register procedure', 'Remove from library', 'Library folder')) for x in walk(m.library_frame)))
             check(f'{tag}: the demo hint is on the card', any(isinstance(x, ttk.Label) and 'nothing from a demo is calibration evidence' in str(x.cget('text')) for x in walk(card)))
             check(f'{tag}: the fast demo box is on the card', any(isinstance(x, ttk.Checkbutton) and 'Fast demo' in str(x.cget('text')) for x in walk(card)))
             grab(root, f'run_in_card_{kind}_{w}x{h}')
@@ -601,6 +602,53 @@ def checks_manager_verified_info():
     t.selection_remove(*t.selection())
     m.refresh_details()
     check('verified info: disabled with nothing selected', str(m.btn_ver_info.cget('state')) == 'disabled')
+    check('no Tk callback errors', not errs, errs)
+    root.destroy()
+
+
+def checks_manager_library_menu():
+    """The Library menu (menu bar, immediately left of Help): labels and order, enabled states when it opens, the items run the old handlers; the Procedures tab
+    has no button row any more (Find bar only); layout at 900x600."""
+    shot = os.environ.get('SHOT_DIR')
+    CPM, root, m, errs = _manager_for_small_window(900, 600)
+    settle(root, 0.6)
+    bar = root.nametowidget(root['menu'])
+    tops = [bar.entrycget(i, 'label') for i in range(int(bar.index('end')) + 1)]
+    check('menu bar: Library immediately left of Help', 'Library' in tops and 'Help' in tops and tops.index('Library') + 1 == tops.index('Help'), tops)
+    menu = m.library_menu
+    labels = [menu.entrycget(i, 'label') if menu.type(i) != 'separator' else '-' for i in range(int(menu.index('end')) + 1)]
+    check('Library menu: labels and order', labels[:4] == ['Import Mudcats datasheet (.mdd)...', 'Import procedure package...', 'Register procedure...', '-'] and
+          labels[4].startswith('Library folder: ') and labels[5:] == ['Library folder...', '-', 'Remove from library'], labels)
+    check('Library menu: info line shows the folder or not set', 'not set' in labels[4] or CPM.packages.get_library_dir() in labels[4], labels[4])
+    check('Library menu: Alt+L underline on Library', int(bar.entrycget(tops.index('Library'), 'underline')) == 0)
+    m.table.selection_remove(*m.table.selection())
+    m.refresh_library_menu()
+    check('Library menu: Remove from library disabled with nothing selected', str(menu.entrycget(7, 'state')) == 'disabled')
+    # the postcommand runs when the menu opens
+    m.table.selection_set(m.table.get_children()[0])
+    pump(root, 5)
+    cmd = str(menu.cget('postcommand'))
+    root.tk.call(cmd) if cmd else None
+    check('Library menu: opening it enables Remove with a selection (postcommand)', str(menu.entrycget(7, 'state')) == 'normal')
+    check('Library menu: the old button row is gone, Find bar kept', not any(isinstance(w, ttk.Button) and str(w.cget('text')) in ('Register procedure...', 'Remove from library') for w in walk(m.library_frame))
+          and any(isinstance(w, ttk.Combobox) for w in walk(m.library_frame)))
+    with mock.patch.object(CPM.messagebox, 'askyesno', return_value=False) as ask, mock.patch.object(CPM.messagebox, 'showinfo') as info:
+        n = len(m.table.get_children())
+        menu.invoke(7)
+        check('Library menu: Remove from library asks for confirmation (or explains)', ask.called or info.called)
+        check('Library menu: declining removes nothing', len(m.table.get_children()) == n)
+    if shot:
+        from PIL import ImageGrab
+        pump(root, 6)
+        ImageGrab.grab(bbox=(root.winfo_rootx(), root.winfo_rooty() - 30, root.winfo_rootx() + root.winfo_width(), root.winfo_rooty() + root.winfo_height()),
+                       xdisplay=os.environ['DISPLAY']).save(os.path.join(shot, f'manager_library_menu_900x600_{THEME}.png'))
+    for idx, handler in ((0, 'import_mdd_procedure'), (1, 'import_package'), (2, 'add'), (5, 'choose_library_folder')):
+        with mock.patch.object(CPM.Manager, handler) as h:
+            # items call the handlers bound at build time: rebuild the menu with the patched handler
+            bar.delete([bar.entrycget(k, 'label') for k in range(int(bar.index('end')) + 1)].index('Library'))
+            m.build_library_menu()
+            m.library_menu.invoke(idx)
+            check(f'Library menu: item {idx} runs {handler}', h.called)
     check('no Tk callback errors', not errs, errs)
     root.destroy()
 
@@ -1580,7 +1628,7 @@ def checks_import_package():
     m = CPM.Manager(root)
     pump(root, 20)
     m.verified = verified.Registry(work / 'reg.sqlite3', base=tree)
-    check('import button exists', any(isinstance(w, ttk.Button) and w.cget('text') == 'Import procedure package...' for w in walk(m.library_frame)))
+    check('import item exists in the Library menu', m.library_menu.entrycget(1, 'label') == 'Import procedure package...')
     check('library folder row exists', 'not set' in m.lib_folder.get(), m.lib_folder.get())
 
     def drive(fn):
@@ -2389,6 +2437,7 @@ if __name__ == '__main__':
         checks_manager_run_top()
         checks_manager_row_menu()
         checks_manager_verified_info()
+        checks_manager_library_menu()
         checks_mdd_manual()
         checks_fluke_365()
         checks_fluke_376()
