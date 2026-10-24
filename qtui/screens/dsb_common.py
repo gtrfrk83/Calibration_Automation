@@ -392,8 +392,17 @@ class ToneLabel(QLabel):
         super().__init__(text, parent)
         self.setWordWrap(True)
         self._tone = tone
-        theme.manager().changed.connect(lambda _n: self._apply())
+        theme.manager().changed.connect(self._on_theme)
         self._apply()
+
+    def _on_theme(self, _n=None) -> None:
+        try:
+            self._apply()
+        except RuntimeError:                       # the label is gone with its window
+            try:
+                theme.manager().changed.disconnect(self._on_theme)
+            except (RuntimeError, TypeError):
+                pass
 
     def set_tone(self, tone: str) -> None:
         self._tone = tone

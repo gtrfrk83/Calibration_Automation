@@ -80,7 +80,7 @@ def contrast(a, b):
 PAIRS = (('text', 'bg', 4.5), ('text', 'table', 4.5), ('muted', 'bg', 4.5), ('muted', 'table', 4.5), ('muted', 'head', 4.5),
          ('good', 'good_bg', 4.5), ('bad', 'bad_bg', 4.5), ('warn', 'warn_bg', 4.5), ('info', 'info_bg', 4.5), ('neutral', 'neutral_bg', 4.5),
          ('row_pass_fg', 'row_pass', 4.5), ('row_fail_fg', 'row_fail', 4.5), ('row_warn_fg', 'row_warn', 4.5), ('text', 'select', 4.5), ('bad', 'select', 4.0),
-         ('good', 'select', 4.0), ('on_primary', 'primary', 2.8), ('on_primary', 'danger', 3.0), ('tooltip_fg', 'tip', 4.5), ('primary_off_fg', 'primary_off', 4.5),
+         ('good', 'select', 4.0), ('on_primary', 'primary', 2.8), ('tooltip_fg', 'tip', 4.5), ('primary_off_fg', 'primary_off', 4.5),
          ('danger_off_fg', 'danger_off', 4.5), ('focus', 'bg', 3.0))
 
 
@@ -97,6 +97,8 @@ class Contrast(unittest.TestCase):
             for fg, bg, least in PAIRS:
                 with self.subTest(f'{name}: {fg} on {bg}'):
                     self.assertGreaterEqual(contrast(t[fg], t[bg]), least, f'{t[fg]} on {t[bg]}')
+            with self.subTest(f'{name}: white on danger'):                  # the danger button's text is white
+                self.assertGreaterEqual(contrast('#FFFFFF', t['danger']), 4.5)
 
     def test_light_is_enabled_and_the_window_comes_up_light(self):
         self.assertIn('light', theme.ENABLED_THEMES)
