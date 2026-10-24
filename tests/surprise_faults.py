@@ -53,17 +53,20 @@ class FaultTransport:
 
     def query(self, text):
         self.queries.append(text)
-        for r in self.rules:
+        fire = None
+        for r in self.rules:                                        # every matching rule counts the query, the first one due fires
             if not text.upper().startswith(r.query):
                 continue
             if r.after and not self.last_write.upper().startswith(r.after):
                 continue
             r.seen += 1
-            if r.seen >= r.nth and r.fired < r.times:
+            if fire is None and r.seen >= r.nth and r.fired < r.times:
                 r.fired += 1
-                if r.timeout:
-                    raise TransportError('simulated timeout')
-                return r.reply                                      # the real instrument is not asked: the reply is replaced
+                fire = r
+        if fire is not None:
+            if fire.timeout:
+                raise TransportError('simulated timeout')
+            return fire.reply                                       # the real instrument is not asked: the reply is replaced
         return self.inner.query(text)
 
 

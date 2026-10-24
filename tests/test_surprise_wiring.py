@@ -366,10 +366,261 @@ class TruevoltApp(AppCase):
         self.assertTrue(any('operator chose Continue' in t for t in surprise_lines(app.io)))
 
 
+# =============================================================================================================================== 34970A / 34972A
+class DacqIO(unittest.TestCase):
+    """dacq_verification.IO on the simulated bench.  The DMM's SYST:ERR? is asked at connect (1), after CONF (2) and after the reading (3) of the first point."""
+    MODEL = '34970A'
+    CAL = 'Fluke 5560A'
+
+    def build(self, dmm_rules=(), cal_rules=(), dialog=None):
+        import dacq_verification as D
+        from drivers.simulated import make_dacq_bench
+        D.configure(self.MODEL)
+        self.D = D
+        _b, ft, dt = make_dacq_bench(self.MODEL, D.CALIBRATORS[self.CAL][0], {2: '34901A'})
+        self.dt, self.ft = FaultTransport(dt, *dmm_rules), FaultTransport(ft, *cal_rules)
+        io = D.IO('sim', 'sim', self.CAL, 9600, '34901A', 2, transports=(self.dt, self.ft), mods=None, virtual=True)
+        io.log.virtual = False
+        if dialog is not None:
+            io.enable_surprise(dialog)
+        self.io = io
+        return io
+
+    def points(self, n=3):
+        return [p for p in self.D.POINTS if p['source'] == 'calibrator'][:n]
+
+    def test_clean_run_asks_nothing_and_sends_the_same_commands(self):
+        plain = self.build()
+        r0 = [plain.measure(p) for p in self.points()]
+        log0 = stable_log(plain)
+        d = Dialog()
+        io = self.build(dialog=d)
+        self.assertEqual(len(io.guards), 2)
+        r1 = [io.measure(p) for p in self.points()]
+        self.assertEqual(r0, r1)
+        self.assertEqual(stable_log(io), log0)
+        self.assertEqual((d.count, surprise_lines(io)), (0, []))
+
+    def test_demo_log_is_never_guarded(self):
+        io = self.build()
+        io.log.virtual = True
+        self.assertEqual(io.enable_surprise(Dialog()), [])
+
+    def test_bad_read_reply_is_a_stop_only_surprise(self):
+        for bad in ('', '=>', '?>', 'abc'):
+            d = Dialog(True)
+            io = self.build(dmm_rules=[Rule('READ?', bad, nth=2)], dialog=d)
+            ps = self.points()
+            io.measure(ps[0])
+            with self.assertRaises(surprise.SurpriseStop):
+                io.measure(ps[1])
+            self.assertEqual(d.count, 1, bad)
+            self.assertEqual((d.seen[0].kind, d.seen[0].stop_only, d.seen[0].command), ('reply', True, 'READ?'), bad)
+            self.assertEqual(self.dt.queries.count('READ?'), 2)
+            self.assertEqual(self.ft.writes.count('OPER'), 2, 'OPER once per point')
+            io.standby()
+            self.assertEqual(self.ft.writes[-1], 'STBY')
+
+    def test_one_timeout_is_retried_once_two_are_a_surprise(self):
+        d = Dialog()
+        io = self.build(dmm_rules=[Rule('READ?', timeout=True, nth=1, times=1)], dialog=d)
+        self.assertAlmostEqual(io.measure(self.points(1)[0]), -10.0, places=3)
+        self.assertEqual((d.count, self.dt.queries.count('READ?'), self.ft.writes.count('OPER')), (0, 2, 1))
+        d2 = Dialog()
+        io = self.build(dmm_rules=[Rule('READ?', timeout=True, nth=1, times=2)], dialog=d2)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.points(1)[0])
+        self.assertEqual((d2.count, d2.seen[0].reply, d2.seen[0].stop_only), (1, '', True))
+
+    def test_dmm_error_queue_after_configure_stop_and_continue(self):
+        rule = lambda: [Rule('SYST:ERR?', '-113,"Undefined header"', nth=2)]          # the 2nd ask is the check after CONF of point 1
+        d = Dialog(False)
+        io = self.build(dmm_rules=rule(), dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.points(1)[0])
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only, s.command), (1, 'errqueue', False, 'SYST:ERR?'))
+        self.assertIn('-113', s.reply)
+        self.assertEqual([w for w in self.ft.writes if w.startswith('OUT')], [])
+        self.assertNotIn('OPER', self.ft.writes)
+        io.standby()
+        self.assertEqual(self.ft.writes[-1], 'STBY')
+        d = Dialog(True)
+        io = self.build(dmm_rules=rule(), dialog=d)
+        p = self.points(1)[0]
+        v = io.measure(p)
+        self.assertEqual(v, self.build().measure(p), 'Continue: the point is measured exactly as in a clean run')
+        self.assertEqual(sum(1 for w in self.ft.writes if w.startswith('OUT')), 1, 'the OUT is sent once')
+        self.assertTrue(any('operator chose Continue' in t for t in surprise_lines(io)))
+
+    def test_dmm_error_queue_after_the_reading_continue_keeps_the_reading(self):
+        d = Dialog(True)
+        io = self.build(dmm_rules=[Rule('SYST:ERR?', '-221,"Settings conflict"', nth=3)], dialog=d)       # the check after READ? of point 1
+        p = self.points(1)[0]
+        v = io.measure(p)
+        self.assertAlmostEqual(v, -10.0, places=3)
+        self.assertEqual((d.count, d.seen[0].kind, d.seen[0].stop_only), (1, 'errqueue', False))
+        self.assertEqual(self.ft.writes[-1], 'STBY', 'the output was already in standby')
+
+    def test_error_queue_with_several_entries_shows_the_entries_not_the_final_no_error(self):
+        d = Dialog(False)
+        io = self.build(dmm_rules=[Rule('SYST:ERR?', '-113,"Undefined header"', nth=2), Rule('SYST:ERR?', '-221,"Settings conflict"', nth=3)], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.points(1)[0])
+        self.assertIn('-113', d.seen[0].reply)
+        self.assertIn('-221', d.seen[0].reply)
+        self.assertNotIn('No error', d.seen[0].reply)
+
+    def test_calibrator_error_queue_after_output_is_stop_only_and_never_operates(self):
+        d = Dialog(True)
+        io = self.build(cal_rules=[Rule('ERR?', '-222,"Data out of range"', after='OUT')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.points(1)[0])
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only), (1, 'errqueue', True))
+        self.assertNotIn('OPER', self.ft.writes)
+        self.assertEqual(sum(1 for w in self.ft.writes if w.startswith('OUT')), 1)
+        io.standby()
+        self.assertEqual(self.ft.writes[-1], 'STBY')
+
+    def test_standby_not_confirmed_is_still_a_hard_stop_with_no_dialog(self):
+        import reset_startup
+        d = Dialog(True)
+        io = self.build(cal_rules=[Rule('OPER?', '1', after='STBY')], dialog=d)
+        with self.assertRaises(reset_startup.ResetFailed):
+            io.reset_at_start()
+        self.assertEqual(d.count, 0)
+
+
+class DacqIO34972A(DacqIO):
+    MODEL = '34972A'
+
+
+class DacqIO5522A(DacqIO):
+    CAL = 'Fluke 5522A'
+
+
+class DacqApp(AppCase):
+    MODEL = '34970A'
+    HEADER = [('Instrument', 'Keysight 34970A'), ('Instrument ID', 'A1'), ('Serial', 'S1')]
+
+    def make(self, dmm_rules=(), cal_rules=(), guard=True):
+        import dacq_verification as D
+        import virtualbench
+        D.configure(self.MODEL)
+        D.messagebox = h.messagebox
+        dialog = self.dialog
+        real_pair = virtualbench.dacq_pair
+
+        def pair(model, cal='5560A', modules=None):
+            bench, ft, dt = real_pair(model, cal, modules)
+            return bench, FaultTransport(ft, *cal_rules), FaultTransport(dt, *dmm_rules)
+        self.patch(virtualbench, 'dacq_pair', pair)
+        if guard:
+            orig = D.IO
+
+            class Guarded(orig):
+                def __init__(self, *a, **k):
+                    super().__init__(*a, **k)
+                    self.enable_surprise(dialog, force=True)
+            self.patch(D, 'IO', Guarded)
+        app = D.App(self.hn.root, self.MODEL, demo=True, fast_demo=False)
+        app.asset.set('A1')
+        app.serial.set('S1')
+        self.hn.app = app
+        return app
+
+    restart = TruevoltApp.restart
+
+    def test_clean_run_is_identical_with_and_without_the_guard(self):
+        app0 = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        ref = (stable_log(app0.io), results_view(app0), report_bytes(app0, self.HEADER), VH.wire(app0.io))
+        self.restart()
+        app1 = self.make(guard=True)
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 0)
+        self.assertTrue(app1.io.guards)
+        got = (stable_log(app1.io), results_view(app1), report_bytes(app1, self.HEADER), VH.wire(app1.io))
+        self.assertEqual(got[0], ref[0])
+        self.assertEqual(got[1], ref[1])
+        self.assertEqual(got[2][1], ref[2][1], 'same report rows')
+        self.assertEqual(got[2][0], ref[2][0], 'same PDF bytes')
+        self.assertEqual(got[3], ref[3])
+
+    def test_a_real_connection_wires_the_guard_with_the_apps_handler(self):
+        import dacq_verification as D
+        from drivers.simulated import make_dacq_bench
+        D.configure(self.MODEL)
+        D.messagebox = h.messagebox
+        _b, ft, dt = make_dacq_bench(self.MODEL, '5560A', {2: '34901A'})
+        self.patch(D.drivers, 'open_visa', lambda addr, **k: dt if addr.upper().startswith('ASRL') and '9' not in addr else ft)
+        app = D.App(self.hn.root, self.MODEL, demo=False, fast_demo=False)
+        self.hn.app = app
+        self.patch(app, '_surprise_handler', lambda: self.dialog)
+        app.dmm_addr.set('COM1')
+        app.cal_addr.set('COM9')
+        app.test_connections()
+        self.assertIsNotNone(app.io)
+        self.assertEqual([g.handler for g in app.io.guards], [self.dialog, self.dialog])
+        self.assertFalse(app.io.log.virtual)
+
+    def test_demo_without_the_forced_guard_never_prompts(self):
+        with mock.patch.object(surprise, 'tk_handler', side_effect=AssertionError('demo must not build a dialog')):
+            app = self.make(guard=False)
+            self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 0)
+        self.assertEqual(app.io.guards, [])
+
+    def test_demo_and_fast_demo_never_make_a_handler(self):
+        import dacq_verification as D
+        for demo, fast in ((True, False), (True, True)):
+            app = D.App.__new__(D.App)
+            app.demo, app._fast_demo = demo, fast
+            with mock.patch.object(surprise, 'tk_handler', side_effect=AssertionError):
+                self.assertIsNone(app._surprise_handler())
+        app = D.App.__new__(D.App)
+        app.demo, app._fast_demo, app.root = False, False, object()
+        with mock.patch.object(surprise, 'tk_handler', return_value=lambda s: False) as tk:
+            self.assertIs(app._surprise_handler(), app._surprise_handler())
+        tk.assert_called_once_with(app.root)
+
+    def test_stop_on_a_bad_read_goes_through_the_engines_standby_and_error_dialog(self):
+        app = self.make(dmm_rules=[Rule('READ?', '=>', nth=3)])
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 1)
+        self.assertLess(len(app.results), 3 + 1)
+        self.assertFalse(app.busy)
+        self.assertTrue(self.hn.boxes('showerror'))
+        self.assertEqual(VH.wire(app.io)[-1], ('5560A', 'STBY'))
+
+    def test_writes_are_never_repeated_after_a_surprise(self):
+        clean = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        clean_wire = VH.wire(clean.io)
+        self.restart()
+        app = self.make(dmm_rules=[Rule('READ?', '', nth=3)])
+        self.assertTrue(self.hn.run_all())
+        wire = VH.wire(app.io)
+        k = len(wire) - 1
+        self.assertEqual(wire[:k], clean_wire[:k])
+
+    def test_continue_on_a_dmm_error_queue_entry_records_every_point_like_a_clean_run(self):
+        clean = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        ref = results_view(clean)
+        self.restart(Dialog(True))
+        app = self.make(dmm_rules=[Rule('SYST:ERR?', '-113,"Undefined header"', nth=5)])
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 1)
+        self.assertEqual(results_view(app), ref)
+        self.assertFalse(self.hn.boxes('showerror'))
+
+
 # =============================================================================================================================== real Tk
 class RealTkEngines(unittest.TestCase):
     """The real engine window on a real Tk 9 under Xvfb, a worker thread and mainloop (tests/real_tk_surprise_engine.py)."""
-    ENGINES = ('truevolt',)
+    ENGINES = ('truevolt', 'dacq')
 
     def run_one(self, engine, scenario):
         import os

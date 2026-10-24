@@ -70,6 +70,26 @@ class Setup:
         self.open_visa = lambda addr, **k: self.dmm if addr.upper().startswith('USB') else self.cal
         self.expect_stop = dict(recorded=1, text='READ?')
         self.expect_continue = dict(recorded=3, text='-113')
+        self.prepare = lambda app: None
+
+    def dacq(self):
+        import dacq_verification as D
+        from drivers.simulated import make_dacq_bench
+        self.mod = D
+        D.configure('34970A')
+        _b, ft, dt = make_dacq_bench('34970A', '5560A', {2: '34901A'})
+        d_rules = []
+        if self.scenario == 'stop':
+            d_rules = [Rule('READ?', '=>', nth=2)]
+        elif self.scenario == 'continue':
+            d_rules = [Rule('SYST:ERR?', '-113,"Undefined header"', nth=3)]              # connect (1), after CONF of point 1 (2), after its reading (3)
+        self.dmm, self.cal = FaultTransport(dt, *d_rules), FaultTransport(ft)
+        self.points = [p for p in D.POINTS if p['source'] == 'calibrator'][:3]
+        self.app_args = ('34970A',)
+        self.open_visa = lambda addr, **k: self.cal if '9' in addr else self.dmm            # COM9 = the calibrator, COM1 = the 34970A
+        self.expect_stop = dict(recorded=1, text='READ?')
+        self.expect_continue = dict(recorded=3, text='-113')
+        self.prepare = lambda app: (app.dmm_addr.set('COM1'), app.cal_addr.set('COM9'))
 
 
 def main(engine, scenario):
@@ -89,7 +109,8 @@ def main(engine, scenario):
     app = mod.App(root, *S.app_args, demo=False, fast_demo=False)
     app.asset.set('A1')
     app.serial.set('S1')
-    app.test_connections()                                         # on the Tk thread: the handler is made here, as in the real window
+    S.prepare(app)
+    app.test_connections()                                       # on the Tk thread: the handler is made here, as in the real window
     check('real connection: both instruments guarded', len(app.io.guards) == 2, app.io.guards)
     state = {'dialog': None, 'started': False, 'pressed': False, 'texts': ''}
     answer = 'stop' if scenario == 'stop' else 'continue'

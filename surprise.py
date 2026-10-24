@@ -262,11 +262,31 @@ def attach_guard(instrument, handler=None, force=False, expect=None, stop_only=F
     return g
 
 
-def _logged(inst, direction):
-    for _t, label, d, txt in reversed(inst.log.entries):
-        if label == inst.label and d == direction:
-            return txt
-    return ''
+def _last_exchange(inst, since=0):
+    """(command, reply) of the instrument's last query as logged.  A driver that drains the error queue in a loop (ERR? until empty) repeats the same
+    query: the command is that query and the reply is every non-empty-queue answer of the run of repeats (the final 'No error' is left out)."""
+    exchanges = []                                   # [command, reply or None]
+    for _t, label, d, txt in inst.log.entries[since:][-60:]:
+        if label != inst.label:
+            continue
+        if d == '>>':
+            exchanges.append([txt, None])
+        elif d == '<<' and exchanges and exchanges[-1][1] is None:
+            exchanges[-1][1] = txt
+    if not exchanges:
+        return '', ''
+    cmd, last = exchanges[-1]
+    bad = []
+    for i, (c, r) in enumerate(reversed(exchanges)):
+        if c != cmd:
+            break
+        if r is None or error_queue_clean(r):
+            if i == 0:
+                continue                         # the closing 'No error' of a drain loop
+            break                                # an earlier, separate check
+        bad.append(r)
+    bad.reverse()
+    return cmd, ' | '.join(bad) if bad else (last or '')
 
 
 def checked(instrument, call, *args, kind='errqueue', expected='empty error queue', stop_only=False, **kw):
@@ -282,12 +302,14 @@ def checked(instrument, call, *args, kind='errqueue', expected='empty error queu
     g = getattr(instrument, '_guard', None)
     if g is None or not g.enabled:
         return call(*args, **kw)
+    start = len(instrument.log.entries)
     try:
         return call(*args, **kw)
     except (SurpriseStop, SafetyError):
         raise
     except InstrumentError as exc:
-        g.surprise(kind, _logged(instrument, '>>'), _logged(instrument, '<<'), expected, str(exc), stop_only=stop_only)
+        cmd, reply = _last_exchange(instrument, start)           # only what the check itself sent
+        g.surprise(kind, cmd, reply, expected, str(exc), stop_only=stop_only)
         return None
 
 

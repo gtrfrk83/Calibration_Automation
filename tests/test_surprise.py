@@ -331,6 +331,18 @@ class Surprises(unittest.TestCase):
         self.assertTrue(calls[-1].stop_only)
         self.assertEqual(bus.sent.count('SYST:ERR?'), 1 + 1 + 1 + 1, 'one query per check, never repeated')
 
+    def test_last_exchange_shows_the_entries_of_a_drained_queue(self):
+        dev, bus, seen, handler = make()
+        for r in ('-113,"Undefined header"', '-221,"Settings conflict"', '+0,"No error"'):
+            dev.log.add('>>', 'SYST:ERR?', dev.label)
+            dev.log.add('<<', r, dev.label)
+        self.assertEqual(surprise._last_exchange(dev), ('SYST:ERR?', '-113,"Undefined header" | -221,"Settings conflict"'))
+        dev.log.add('>>', 'READ?', dev.label)
+        dev.log.add('<<', '1.5', dev.label)
+        self.assertEqual(surprise._last_exchange(dev), ('READ?', '1.5'))
+        dev.log.add('>>', 'OUT 1V', dev.label)                 # a write with no reply: the command is the write, no reply
+        self.assertEqual(surprise._last_exchange(dev), ('OUT 1V', ''))
+
     def test_checked_lets_safety_errors_through(self):
         from drivers.base import SafetyError
         dev, bus, seen, handler = make(answers=[True])
@@ -401,7 +413,7 @@ class TemplateIsWired(unittest.TestCase):
         self.assertTrue(issubclass(tpl.ModelName, surprise.SurpriseMixin))
 
     def test_shared_files_do_not_import_surprise(self):
-        for rel in ('drivers/base.py', 'drivers/transport.py', 'handheld_dmm.py', 'dacq_verification.py'):     # the engines wired so far import it (tests/test_surprise_wiring.py)
+        for rel in ('drivers/base.py', 'drivers/transport.py', 'handheld_dmm.py'):     # the engines wired so far import it (tests/test_surprise_wiring.py)
             self.assertNotIn('import surprise', (ROOT / rel).read_text(encoding='utf-8'), rel)
 
 

@@ -1293,7 +1293,7 @@ Tests: `tests/test_surprise.py` (fault injection with a scripted instrument: bad
 
 #### 2b. Existing engines wired for stop-on-surprise (branch `surprise-wiring`; simulated bench and a real Tk 9 under Xvfb only, never on hardware)
 
-Owner decision: wire the unverified engines one at a time, from the ENGINE file only (no driver, `drivers/base.py`, `drivers/transport.py` or `handheld_dmm.py` edit). Done so far: `truevolt_verification.py` (4 procedures). Still open: `dacq_verification.py`, `agilent34410a_verification.py` (this branch, later commits) and `fgen_verification.py` (another branch edits it; later).
+Owner decision: wire the unverified engines one at a time, from the ENGINE file only (no driver, `drivers/base.py`, `drivers/transport.py` or `handheld_dmm.py` edit). Done so far: `truevolt_verification.py` (4 procedures), `dacq_verification.py` (2). Still open: `agilent34410a_verification.py` (this branch, next commit) and `fgen_verification.py` (another branch edits it; later).
 
 What the engine-level wiring is (the same in every wired engine):
 - `IO.__init__(..., surprise_handler=None)` and `IO.enable_surprise(handler, force=False)`: `surprise.attach_guard` on each instrument OBJECT (class untouched) with `expect={'read': 'float'}` and `stop_only=True`, so an empty reply / a prompt character (`=>` `?>` `!>`) / a non-number where a reading is expected / a query that timed out twice is a surprise; a query that times out ONCE is retried once (read-only, the standing rule). `enable_surprise` returns `[]` on a demo (virtual) command log, so the simulated bench never prompts; `force=True` is for tests only.
@@ -1310,6 +1310,15 @@ Truevolt (34460A / 34461A / 34465A / 34470A):
 | DMM error queue not empty after `CONF` / `NPLC` / `BAND` (`dmm.check_errors`) | `IO.measure` | Stop / Continue |
 | 5560A error queue not empty after `OUT` (`cal.check_error`) | `IO.measure` | Stop only: the calibrator refused the setting and the next step is `OPER` |
 | read-back mismatch | none in this engine's point path (writes are verified through the error queue). The only confirmations are the calibrator's `STBY` / `OPER?` states, which stay a `SafetyError` / `InstrumentError` hard stop (reset fails, outputs to standby), never a Continue question | n/a |
+
+34970A / 34972A (`dacq_verification.py`, 5560A / 5522A / 5520A as the source): same wiring (`IO.enable_surprise`, `App._surprise_handler`).
+| surprise | where | dialog |
+|---|---|---|
+| empty / prompt character / non-number reply to `READ?`; any reply problem on the DMM or the calibrator; a timeout twice | every `ask` of both instruments | Stop only |
+| DMM error queue not empty after `CONF` / `NPLC` / `BAND` / `ROUT:SCAN` (`dmm.check_errors`, up to 5 entries; the dialog lists the entries, not the closing 'No error') | `IO.measure`, before the output | Stop / Continue |
+| DMM error queue not empty after the reading (the output is already in standby) | `IO.measure`, after `READ?` and `STBY` (also the zero-offset points) | Stop / Continue: the reading is kept and recorded as usual |
+| calibrator error queue not empty after `OUT` (`cal.check_error`) | `IO.measure` | Stop only (never `OPER` after a refusal) |
+| read-back mismatch | none in the point path (`configure_point` only sends); the calibrator `STBY` / `OPER?` confirmation stays a hard stop | n/a |
 
 Tests: `tests/test_surprise_wiring.py` (per engine: every fault type injected into a simulated transport with `tests/surprise_faults.py`; exactly one dialog; Stop-only where stated; no write repeated; Stop ends in `STBY`; Continue records the same results as a clean run; a clean run asks nothing and gives the same command log, results, report rows and PDF bytes with and without the guard; demo never builds a dialog; a real connection wires the guard with the window's handler) and `tests/real_tk_surprise_engine.py` (the real engine window on a real Tk 9 under Xvfb: a worker thread meets the fault, the dialog appears on the Tk thread with the right buttons, Stop / Continue do what is promised). Found: on the sandbox's uv Python 3.12 / Tk 9.0.3 a worker thread's `root.after(...)` never runs (the engines' own `work()` threads do this), so the real-Tk engine test uses the newest Python with tkinter (3.13); not specific to the wiring.
 
