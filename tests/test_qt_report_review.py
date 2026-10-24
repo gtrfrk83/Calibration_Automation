@@ -196,7 +196,7 @@ class Window(Base):
         self.assertEqual(w.pills['Standard changed'].text(), '1 changed')
         self.assertTrue(w.btn_reset.isEnabled())
         self.assertEqual(cell_texts(w, s.idx), tk_row_values(row), 'the grid shows the recalculated row')
-        self.assertEqual(cell_texts(w, s.idx)[8], M.CHANGED)
+        self.assertEqual(cell_texts(w, s.idx)[8], row.cur.status)        # the badge keeps the uncertainty's own status; the row text is blue
         self.assertNotEqual(self.model.table(), before)
         # the same change made directly on a model gives the identical record
         twin = M.ReviewModel(self.specs, self.default, asset='A-100', procedure='Keysight 34470A performance verification')
