@@ -1,0 +1,869 @@
+{
+ "dialogs_misc": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter an instrument ID.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select a test point first.",
+   "title": "Selection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded results to export yet.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,TDS 2024C,SIM0001,CF:91.1CT FV:v24.00\nCalibrator: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "boom",
+   "title": "Measurement stopped"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "A point may be active. Stop and close?",
+   "title": "Active run"
+  }
+ ],
+ "export_and_load_cancelled": [
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "Tektronix TDS2000C performance verification"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "Tektronix TDS2000C performance verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "A-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": "",
+   "kind": "choose_file",
+   "options": {
+    "filetypes": [
+     [
+      "Checkpoint",
+      "*.json"
+     ]
+    ]
+   },
+   "text": "",
+   "title": ""
+  }
+ ],
+ "fast_demo_dialogs": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Demo mode uses no hardware.",
+   "title": "Demo mode"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Demo mode uses no hardware.",
+   "title": "Demo mode"
+  }
+ ],
+ "first_prompt_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,TDS 2024C,SIM0001,CF:91.1CT FV:v24.00\nCalibrator: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: TDS2000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm up",
+     "The oscilloscope must have been operating continuously for twenty minutes within its operating temperature range (p. 4-3)."
+    ],
+    [
+     "Disconnect",
+     "No test equipment or hook-up is needed. Check the screen shows no error message."
+    ]
+   ],
+   "text": "Self test",
+   "title": "Self test"
+  }
+ ],
+ "read_model": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,TDS 2024C,SIM0001,CF:91.1CT FV:v24.00\nCalibrator: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "The oscilloscope reports TDS2024C (4 channels).",
+   "title": "Model read"
+  }
+ ],
+ "virtual_run_2012C": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,TDS 2012C,SIM0001,CF:91.1CT FV:v24.00\nCalibrator: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: TDS2000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm up",
+     "The oscilloscope must have been operating continuously for twenty minutes within its operating temperature range (p. 4-3)."
+    ],
+    [
+     "Disconnect",
+     "No test equipment or hook-up is needed. Check the screen shows no error message."
+    ]
+   ],
+   "text": "Self test",
+   "title": "Self test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect all probes and cables from every channel input (p. 4-3)."
+    ],
+    [
+     "Wait",
+     "The routine takes about a minute; the oscilloscope does not answer commands meanwhile."
+    ]
+   ],
+   "text": "Self calibration",
+   "title": "Self calibration"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_DCV.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output to CH1 with the BNC cable (SCOPE volts, 1 MOhm output impedance). No terminator."
+    ]
+   ],
+   "text": "DC gain - CH1",
+   "title": "DC gain - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_DCV.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output to CH2 with the BNC cable (SCOPE volts, 1 MOhm output impedance). No terminator."
+    ]
+   ],
+   "text": "DC gain - CH2",
+   "title": "DC gain - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH1 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Bandwidth - CH1",
+   "title": "Bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH2 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Bandwidth - CH2",
+   "title": "Bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_MARKER.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (time marker) to CH1 through the BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Sample rate and delay time accuracy",
+   "title": "Sample rate and delay time accuracy"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH1 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Edge trigger - CH1",
+   "title": "Edge trigger - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH2 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Edge trigger - CH2",
+   "title": "Edge trigger - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_EXTTRIG.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "As the figure on p. 4-9: calibrator SCOPE output to the power splitter; one splitter output to CH1 and the other to EXT TRIG, each through a 50 Ohm feedthrough terminator (use equal-length cables)."
+    ]
+   ],
+   "text": "External edge trigger",
+   "title": "External edge trigger"
+  }
+ ],
+ "virtual_run_2024C": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,TDS 2024C,SIM0001,CF:91.1CT FV:v24.00\nCalibrator: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: TDS2000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm up",
+     "The oscilloscope must have been operating continuously for twenty minutes within its operating temperature range (p. 4-3)."
+    ],
+    [
+     "Disconnect",
+     "No test equipment or hook-up is needed. Check the screen shows no error message."
+    ]
+   ],
+   "text": "Self test",
+   "title": "Self test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect all probes and cables from every channel input (p. 4-3)."
+    ],
+    [
+     "Wait",
+     "The routine takes about a minute; the oscilloscope does not answer commands meanwhile."
+    ]
+   ],
+   "text": "Self calibration",
+   "title": "Self calibration"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_DCV.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output to CH1 with the BNC cable (SCOPE volts, 1 MOhm output impedance). No terminator."
+    ]
+   ],
+   "text": "DC gain - CH1",
+   "title": "DC gain - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_DCV.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output to CH2 with the BNC cable (SCOPE volts, 1 MOhm output impedance). No terminator."
+    ]
+   ],
+   "text": "DC gain - CH2",
+   "title": "DC gain - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_DCV.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output to CH3 with the BNC cable (SCOPE volts, 1 MOhm output impedance). No terminator."
+    ]
+   ],
+   "text": "DC gain - CH3",
+   "title": "DC gain - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_DCV.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output to CH4 with the BNC cable (SCOPE volts, 1 MOhm output impedance). No terminator."
+    ]
+   ],
+   "text": "DC gain - CH4",
+   "title": "DC gain - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH1 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Bandwidth - CH1",
+   "title": "Bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH2 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Bandwidth - CH2",
+   "title": "Bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH3 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Bandwidth - CH3",
+   "title": "Bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH4 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Bandwidth - CH4",
+   "title": "Bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_MARKER.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (time marker) to CH1 through the BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Sample rate and delay time accuracy",
+   "title": "Sample rate and delay time accuracy"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH1 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Edge trigger - CH1",
+   "title": "Edge trigger - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH2 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Edge trigger - CH2",
+   "title": "Edge trigger - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH3 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Edge trigger - CH3",
+   "title": "Edge trigger - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_LEVSINE.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Calibrator SCOPE output (leveled sine, 50 Ohm) to CH4 through the 50 Ohm BNC cable and the 50 Ohm feedthrough terminator at the scope input."
+    ]
+   ],
+   "text": "Edge trigger - CH4",
+   "title": "Edge trigger - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Diagram",
+     "not found (hook_tds2000c_5560A_EXTTRIG.png); follow the text steps"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "As the figure on p. 4-9: calibrator SCOPE output to the power splitter; one splitter output to CH1 and the other to EXT TRIG, each through a 50 Ohm feedthrough terminator (use equal-length cables)."
+    ]
+   ],
+   "text": "External edge trigger",
+   "title": "External edge trigger"
+  }
+ ]
+}

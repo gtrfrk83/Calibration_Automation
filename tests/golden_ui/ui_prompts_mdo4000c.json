@@ -1,0 +1,4329 @@
+{
+ "afg_reading_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been running continuously for at least 20 minutes."
+    ]
+   ],
+   "text": "Self test",
+   "title": "Self test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Power",
+     "The manual requires the power to be cycled after the diagnostics. Switch the oscilloscope OFF, wait 10 seconds, switch it ON and wait for it to boot."
+    ],
+    [
+     "Continue",
+     "Press Continue when the front panel is ready. The program will reconnect over USB."
+    ]
+   ],
+   "text": "Cycle the oscilloscope power",
+   "title": "Cycle power"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs (including the RF input)."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been operating for 20 minutes. SPC takes 5 to 15 minutes; repeat it if the temperature changes by more than 10 degrees C."
+    ]
+   ],
+   "text": "Signal path compensation",
+   "title": "Signal path compensation"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH1 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH1",
+   "title": "Input impedance - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH1",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH2 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH2",
+   "title": "Input impedance - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH2",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH3 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH3",
+   "title": "Input impedance - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH3",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH4 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH4",
+   "title": "Input impedance - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH4",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the AUX IN input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - AUX IN",
+   "title": "Input impedance - AUX IN"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Select the 250 kΩ termination verification as above so the AUX IN input is at 250 kΩ."
+    ]
+   ],
+   "text": "AUX IN impedance",
+   "title": "AUX IN"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH1 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH1",
+   "title": "DC balance - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH2 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH2",
+   "title": "DC balance - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH3 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH3",
+   "title": "DC balance - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH4 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH4",
+   "title": "DC balance - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH1 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH1",
+   "title": "DC gain - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH2 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH2",
+   "title": "DC gain - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH3 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH3",
+   "title": "DC gain - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH4 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH4",
+   "title": "DC gain - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH1."
+    ]
+   ],
+   "text": "DC offset - CH1",
+   "title": "DC offset - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH2."
+    ]
+   ],
+   "text": "DC offset - CH2",
+   "title": "DC offset - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH3."
+    ]
+   ],
+   "text": "DC offset - CH3",
+   "title": "DC offset - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH4."
+    ]
+   ],
+   "text": "DC offset - CH4",
+   "title": "DC offset - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH1",
+   "title": "Analog bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH2",
+   "title": "Analog bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH3",
+   "title": "Analog bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH4",
+   "title": "Analog bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH1",
+   "title": "Analog bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH2",
+   "title": "Analog bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH3",
+   "title": "Analog bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH4",
+   "title": "Analog bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH1",
+   "title": "Random noise - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH2",
+   "title": "Random noise - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH3",
+   "title": "Random noise - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH4",
+   "title": "Random noise - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Function generator output to CH1 with a 50 Ω cable (the program sets a 2.5 Hz square wave = 400 ms mark period, 2 V p-p)."
+    ],
+    [
+     "Accuracy",
+     "The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already."
+    ]
+   ],
+   "text": "Reference frequency error",
+   "title": "Reference frequency error"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1."
+    ]
+   ],
+   "text": "Delta time - CH1",
+   "title": "Delta time - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH1 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH1",
+   "title": "Delta time - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2."
+    ]
+   ],
+   "text": "Delta time - CH2",
+   "title": "Delta time - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH2 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH2",
+   "title": "Delta time - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3."
+    ]
+   ],
+   "text": "Delta time - CH3",
+   "title": "Delta time - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH3 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH3",
+   "title": "Delta time - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4."
+    ]
+   ],
+   "text": "Delta time - CH4",
+   "title": "Delta time - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH4 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH4",
+   "title": "Delta time - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables."
+    ],
+    [
+     "Connect",
+     "Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable."
+    ]
+   ],
+   "text": "Trigger output",
+   "title": "Trigger output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "AFG output to the frequency counter input (50 Ω)."
+    ]
+   ],
+   "text": "AFG frequency",
+   "title": "AFG frequency"
+  },
+  {
+   "answer": null,
+   "initial": "10000.1",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Sine wave 10 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  }
+ ],
+ "afg_reading_not_a_number": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been running continuously for at least 20 minutes."
+    ]
+   ],
+   "text": "Self test",
+   "title": "Self test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Power",
+     "The manual requires the power to be cycled after the diagnostics. Switch the oscilloscope OFF, wait 10 seconds, switch it ON and wait for it to boot."
+    ],
+    [
+     "Continue",
+     "Press Continue when the front panel is ready. The program will reconnect over USB."
+    ]
+   ],
+   "text": "Cycle the oscilloscope power",
+   "title": "Cycle power"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs (including the RF input)."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been operating for 20 minutes. SPC takes 5 to 15 minutes; repeat it if the temperature changes by more than 10 degrees C."
+    ]
+   ],
+   "text": "Signal path compensation",
+   "title": "Signal path compensation"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH1 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH1",
+   "title": "Input impedance - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH1",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH2 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH2",
+   "title": "Input impedance - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH2",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH3 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH3",
+   "title": "Input impedance - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH3",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH4 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH4",
+   "title": "Input impedance - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH4",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the AUX IN input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - AUX IN",
+   "title": "Input impedance - AUX IN"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Select the 250 kΩ termination verification as above so the AUX IN input is at 250 kΩ."
+    ]
+   ],
+   "text": "AUX IN impedance",
+   "title": "AUX IN"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH1 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH1",
+   "title": "DC balance - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH2 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH2",
+   "title": "DC balance - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH3 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH3",
+   "title": "DC balance - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH4 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH4",
+   "title": "DC balance - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH1 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH1",
+   "title": "DC gain - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH2 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH2",
+   "title": "DC gain - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH3 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH3",
+   "title": "DC gain - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH4 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH4",
+   "title": "DC gain - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH1."
+    ]
+   ],
+   "text": "DC offset - CH1",
+   "title": "DC offset - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH2."
+    ]
+   ],
+   "text": "DC offset - CH2",
+   "title": "DC offset - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH3."
+    ]
+   ],
+   "text": "DC offset - CH3",
+   "title": "DC offset - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH4."
+    ]
+   ],
+   "text": "DC offset - CH4",
+   "title": "DC offset - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH1",
+   "title": "Analog bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH2",
+   "title": "Analog bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH3",
+   "title": "Analog bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH4",
+   "title": "Analog bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH1",
+   "title": "Analog bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH2",
+   "title": "Analog bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH3",
+   "title": "Analog bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH4",
+   "title": "Analog bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH1",
+   "title": "Random noise - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH2",
+   "title": "Random noise - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH3",
+   "title": "Random noise - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH4",
+   "title": "Random noise - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Function generator output to CH1 with a 50 Ω cable (the program sets a 2.5 Hz square wave = 400 ms mark period, 2 V p-p)."
+    ],
+    [
+     "Accuracy",
+     "The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already."
+    ]
+   ],
+   "text": "Reference frequency error",
+   "title": "Reference frequency error"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1."
+    ]
+   ],
+   "text": "Delta time - CH1",
+   "title": "Delta time - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH1 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH1",
+   "title": "Delta time - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2."
+    ]
+   ],
+   "text": "Delta time - CH2",
+   "title": "Delta time - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH2 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH2",
+   "title": "Delta time - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3."
+    ]
+   ],
+   "text": "Delta time - CH3",
+   "title": "Delta time - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH3 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH3",
+   "title": "Delta time - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4."
+    ]
+   ],
+   "text": "Delta time - CH4",
+   "title": "Delta time - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH4 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH4",
+   "title": "Delta time - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables."
+    ],
+    [
+     "Connect",
+     "Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable."
+    ]
+   ],
+   "text": "Trigger output",
+   "title": "Trigger output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "AFG output to the frequency counter input (50 Ω)."
+    ]
+   ],
+   "text": "AFG frequency",
+   "title": "AFG frequency"
+  },
+  {
+   "answer": "abc",
+   "initial": "10000.1",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Sine wave 10 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter a number.",
+   "title": "Reading"
+  },
+  {
+   "answer": "10000.1",
+   "initial": "10000.1",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Sine wave 10 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "50000901.2",
+   "initial": "50000901.2",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Sine wave 50 MHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "24999.79",
+   "initial": "24999.79",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Square wave 25 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "24999608.0",
+   "initial": "24999608.0",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Square wave 25 MHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "AFG output to the DMM through a 50 Ω feed-through termination. Set the DMM to AC volts (rms)."
+    ]
+   ],
+   "text": "AFG amplitude",
+   "title": "AFG amplitude"
+  },
+  {
+   "answer": "0.01017",
+   "initial": "0.01017",
+   "kind": "ask_text",
+   "text": "Enter the DMM AC reading for Square 20 mV p-p at 1 kHz, 0 V offset, 50 Ω (rms)\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "0.5023",
+   "initial": "0.5023",
+   "kind": "ask_text",
+   "text": "Enter the DMM AC reading for Square 1 V p-p at 1 kHz, 0.2 V offset, 50 Ω (rms)\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "AFG output to the DMM through a 50 Ω feed-through termination. Set the DMM to DC volts."
+    ]
+   ],
+   "text": "AFG DC offset",
+   "title": "AFG DC offset"
+  },
+  {
+   "answer": "0.0196",
+   "initial": "0.0196",
+   "kind": "ask_text",
+   "text": "Enter the DMM DC reading for DC 20 mV into 50 Ω\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "0.998",
+   "initial": "0.998",
+   "kind": "ask_text",
+   "text": "Enter the DMM DC reading for DC 1 V into 50 Ω\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  }
+ ],
+ "afg_typed_readings": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been running continuously for at least 20 minutes."
+    ]
+   ],
+   "text": "Self test",
+   "title": "Self test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Power",
+     "The manual requires the power to be cycled after the diagnostics. Switch the oscilloscope OFF, wait 10 seconds, switch it ON and wait for it to boot."
+    ],
+    [
+     "Continue",
+     "Press Continue when the front panel is ready. The program will reconnect over USB."
+    ]
+   ],
+   "text": "Cycle the oscilloscope power",
+   "title": "Cycle power"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs (including the RF input)."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been operating for 20 minutes. SPC takes 5 to 15 minutes; repeat it if the temperature changes by more than 10 degrees C."
+    ]
+   ],
+   "text": "Signal path compensation",
+   "title": "Signal path compensation"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH1 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH1",
+   "title": "Input impedance - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH1",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH2 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH2",
+   "title": "Input impedance - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH2",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH3 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH3",
+   "title": "Input impedance - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH3",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH4 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH4",
+   "title": "Input impedance - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH4",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the AUX IN input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - AUX IN",
+   "title": "Input impedance - AUX IN"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Select the 250 kΩ termination verification as above so the AUX IN input is at 250 kΩ."
+    ]
+   ],
+   "text": "AUX IN impedance",
+   "title": "AUX IN"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH1 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH1",
+   "title": "DC balance - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH2 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH2",
+   "title": "DC balance - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH3 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH3",
+   "title": "DC balance - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH4 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH4",
+   "title": "DC balance - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH1 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH1",
+   "title": "DC gain - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH2 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH2",
+   "title": "DC gain - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH3 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH3",
+   "title": "DC gain - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH4 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH4",
+   "title": "DC gain - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH1."
+    ]
+   ],
+   "text": "DC offset - CH1",
+   "title": "DC offset - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH2."
+    ]
+   ],
+   "text": "DC offset - CH2",
+   "title": "DC offset - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH3."
+    ]
+   ],
+   "text": "DC offset - CH3",
+   "title": "DC offset - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH4."
+    ]
+   ],
+   "text": "DC offset - CH4",
+   "title": "DC offset - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH1",
+   "title": "Analog bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH2",
+   "title": "Analog bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH3",
+   "title": "Analog bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH4",
+   "title": "Analog bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH1",
+   "title": "Analog bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH2",
+   "title": "Analog bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH3",
+   "title": "Analog bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH4",
+   "title": "Analog bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH1",
+   "title": "Random noise - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH2",
+   "title": "Random noise - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH3",
+   "title": "Random noise - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH4",
+   "title": "Random noise - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Function generator output to CH1 with a 50 Ω cable (the program sets a 2.5 Hz square wave = 400 ms mark period, 2 V p-p)."
+    ],
+    [
+     "Accuracy",
+     "The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already."
+    ]
+   ],
+   "text": "Reference frequency error",
+   "title": "Reference frequency error"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1."
+    ]
+   ],
+   "text": "Delta time - CH1",
+   "title": "Delta time - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH1 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH1",
+   "title": "Delta time - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2."
+    ]
+   ],
+   "text": "Delta time - CH2",
+   "title": "Delta time - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH2 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH2",
+   "title": "Delta time - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3."
+    ]
+   ],
+   "text": "Delta time - CH3",
+   "title": "Delta time - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH3 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH3",
+   "title": "Delta time - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4."
+    ]
+   ],
+   "text": "Delta time - CH4",
+   "title": "Delta time - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH4 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH4",
+   "title": "Delta time - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables."
+    ],
+    [
+     "Connect",
+     "Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable."
+    ]
+   ],
+   "text": "Trigger output",
+   "title": "Trigger output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "AFG output to the frequency counter input (50 Ω)."
+    ]
+   ],
+   "text": "AFG frequency",
+   "title": "AFG frequency"
+  },
+  {
+   "answer": "10000.1",
+   "initial": "10000.1",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Sine wave 10 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "50000901.2",
+   "initial": "50000901.2",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Sine wave 50 MHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "24999.79",
+   "initial": "24999.79",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Square wave 25 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "24999608.0",
+   "initial": "24999608.0",
+   "kind": "ask_text",
+   "text": "Enter the counter reading for Square wave 25 MHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "AFG output to the DMM through a 50 Ω feed-through termination. Set the DMM to AC volts (rms)."
+    ]
+   ],
+   "text": "AFG amplitude",
+   "title": "AFG amplitude"
+  },
+  {
+   "answer": "0.01017",
+   "initial": "0.01017",
+   "kind": "ask_text",
+   "text": "Enter the DMM AC reading for Square 20 mV p-p at 1 kHz, 0 V offset, 50 Ω (rms)\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "0.5023",
+   "initial": "0.5023",
+   "kind": "ask_text",
+   "text": "Enter the DMM AC reading for Square 1 V p-p at 1 kHz, 0.2 V offset, 50 Ω (rms)\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "AFG output to the DMM through a 50 Ω feed-through termination. Set the DMM to DC volts."
+    ]
+   ],
+   "text": "AFG DC offset",
+   "title": "AFG DC offset"
+  },
+  {
+   "answer": "0.0196",
+   "initial": "0.0196",
+   "kind": "ask_text",
+   "text": "Enter the DMM DC reading for DC 20 mV into 50 Ω\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  },
+  {
+   "answer": "0.998",
+   "initial": "0.998",
+   "kind": "ask_text",
+   "text": "Enter the DMM DC reading for DC 1 V into 50 Ω\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
+   "title": "Enter reading [DEMO]"
+  }
+ ],
+ "dialogs_misc": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter an instrument ID.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select a test point first.",
+   "title": "Selection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded results to export yet.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "boom",
+   "title": "Measurement stopped"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "A point may be active. Stop and close?",
+   "title": "Active run"
+  }
+ ],
+ "export_and_load_cancelled": [
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "Tektronix MDO4000C performance verification"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "Tektronix MDO4000C performance verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "A-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": "",
+   "kind": "choose_file",
+   "options": {
+    "filetypes": [
+     [
+      "Checkpoint",
+      "*.json"
+     ]
+    ]
+   },
+   "text": "",
+   "title": ""
+  }
+ ],
+ "first_prompt_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been running continuously for at least 20 minutes."
+    ]
+   ],
+   "text": "Self test",
+   "title": "Self test"
+  }
+ ],
+ "virtual_run": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been running continuously for at least 20 minutes."
+    ]
+   ],
+   "text": "Self test",
+   "title": "Self test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Power",
+     "The manual requires the power to be cycled after the diagnostics. Switch the oscilloscope OFF, wait 10 seconds, switch it ON and wait for it to boot."
+    ],
+    [
+     "Continue",
+     "Press Continue when the front panel is ready. The program will reconnect over USB."
+    ]
+   ],
+   "text": "Cycle the oscilloscope power",
+   "title": "Cycle power"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs (including the RF input)."
+    ],
+    [
+     "Warm up",
+     "The oscilloscope must have been operating for 20 minutes. SPC takes 5 to 15 minutes; repeat it if the temperature changes by more than 10 degrees C."
+    ]
+   ],
+   "text": "Signal path compensation",
+   "title": "Signal path compensation"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH1 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH1",
+   "title": "Input impedance - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH1",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH2 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH2",
+   "title": "Input impedance - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH2",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH3 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH3",
+   "title": "Input impedance - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH3",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the CH4 input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - CH4",
+   "title": "Input impedance - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "250 kΩ selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Push Utility, then Utility Page, then Self Test."
+    ],
+    [
+     "250 kΩ",
+     "Push the \"250 kΩ Termination Verification\" lower-bezel button, then the CH side-bezel button to enable the channel."
+    ],
+    [
+     "Scale",
+     "Set the vertical scale to 100 mV/div."
+    ]
+   ],
+   "text": "Select 250 kΩ on CH4",
+   "title": "250 kΩ termination"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove all other cables and terminators from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE connector directly to the AUX IN input (the 5560A is switched to its resistance-measurement function)."
+    ]
+   ],
+   "text": "Input impedance - AUX IN",
+   "title": "Input impedance - AUX IN"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Selected - measure",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Select the 250 kΩ termination verification as above so the AUX IN input is at 250 kΩ."
+    ]
+   ],
+   "text": "AUX IN impedance",
+   "title": "AUX IN"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH1 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH1",
+   "title": "DC balance - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH2 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH2",
+   "title": "DC balance - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH3 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH3",
+   "title": "DC balance - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Terminate",
+     "Remove all signal cables. Fit a 50 Ω terminator on the CH4 input and nothing else."
+    ]
+   ],
+   "text": "DC balance - CH4",
+   "title": "DC balance - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH1 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH1",
+   "title": "DC gain - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH2 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH2",
+   "title": "DC gain - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH3 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH3",
+   "title": "DC gain - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH4 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
+    ]
+   ],
+   "text": "DC gain - CH4",
+   "title": "DC gain - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH1."
+    ]
+   ],
+   "text": "DC offset - CH1",
+   "title": "DC offset - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH2."
+    ]
+   ],
+   "text": "DC offset - CH2",
+   "title": "DC offset - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH3."
+    ]
+   ],
+   "text": "DC offset - CH3",
+   "title": "DC offset - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output to CH4."
+    ]
+   ],
+   "text": "DC offset - CH4",
+   "title": "DC offset - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Enable output",
+    "Cancel"
+   ],
+   "caution": "Output stays in STANDBY until you continue.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Safety",
+     "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
+    ]
+   ],
+   "text": "99.5 V DC output",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH1",
+   "title": "Analog bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH2",
+   "title": "Analog bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH3",
+   "title": "Analog bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH4",
+   "title": "Analog bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH1",
+   "title": "Analog bandwidth - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH2",
+   "title": "Analog bandwidth - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH3",
+   "title": "Analog bandwidth - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
+    ]
+   ],
+   "text": "Analog bandwidth - CH4",
+   "title": "Analog bandwidth - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH1",
+   "title": "Random noise - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH2",
+   "title": "Random noise - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH3",
+   "title": "Random noise - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "text": "Random noise - CH4",
+   "title": "Random noise - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables from the oscilloscope inputs."
+    ],
+    [
+     "Connect",
+     "Function generator output to CH1 with a 50 Ω cable (the program sets a 2.5 Hz square wave = 400 ms mark period, 2 V p-p)."
+    ],
+    [
+     "Accuracy",
+     "The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already."
+    ]
+   ],
+   "text": "Reference frequency error",
+   "title": "Reference frequency error"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH1."
+    ]
+   ],
+   "text": "Delta time - CH1",
+   "title": "Delta time - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH1 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH1",
+   "title": "Delta time - CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH2."
+    ]
+   ],
+   "text": "Delta time - CH2",
+   "title": "Delta time - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH2 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH2",
+   "title": "Delta time - CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH3."
+    ]
+   ],
+   "text": "Delta time - CH3",
+   "title": "Delta time - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH3 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH3",
+   "title": "Delta time - CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke 5560A SCOPE output (leveled sine) to CH4."
+    ]
+   ],
+   "text": "Delta time - CH4",
+   "title": "Delta time - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Function generator (33250) output to CH4 with a 50 Ω cable."
+    ]
+   ],
+   "text": "Delta time - CH4",
+   "title": "Delta time - CH4"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Disconnect",
+     "Remove other cables."
+    ],
+    [
+     "Connect",
+     "Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable."
+    ]
+   ],
+   "text": "Trigger output",
+   "title": "Trigger output"
+  }
+ ]
+}

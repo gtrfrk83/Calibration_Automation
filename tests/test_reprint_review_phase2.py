@@ -250,7 +250,7 @@ class Discovery(unittest.TestCase):
                 mock.patch.object(app, 'write_certificate_pdf', lambda *a, **k: 1, create=True), \
                 mock.patch.object(type(app), 'sync_asset', lambda self: True, create=True):
             import WaveSurfer_WS4104HD as W
-                    with mock.patch.object(tk_filedialog, 'asksaveasfilename', lambda **k: ''):
+            with mock.patch.object(__import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: ''):
                 app.export_calibration_section('dcv')
         self.assertEqual(len(seen), 1)
         sections = {r.spec.section for r in seen[0].rows}

@@ -508,6 +508,10 @@ def _run_adj8846a(make_harness):
 
 SCENARIOS = {'a34410a': _run_a34410a, 'f8808a': _run_f8808a, 'handheld': _run_handheld, 'adjustments': _run_adjustments, 'adj8846a': _run_adj8846a}
 
+# ---- WP-G (function generators and scopes): scenarios live in tests/ui_prompt_capture_wpg.py (APPEND-ONLY block)
+import ui_prompt_capture_wpg as _wpg  # noqa: E402
+SCENARIOS.update(_wpg.SCENARIOS)
+
 
 # ---- WP-W (WaveSurfer 4104HD): the scenario lives in tests/ui_prompt_capture_ws.py (append-only block; other packages add their own lines below / above) --------------
 from ui_prompt_capture_ws import _run_wavesurfer  # noqa: E402
