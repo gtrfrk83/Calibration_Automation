@@ -14,104 +14,28 @@ window also opens in a demo run (marked); nothing here changes a limit, a pass /
 """
 from __future__ import annotations
 
-import gc
-import sys
 import tkinter as tk
 from tkinter import ttk
 
 import report_review_model as M
 import ui_theme as ui
 
-UNAVAILABLE = object()
-COVERED = ('certificate_rows_and_points', 'certificate_pairs', 'certificate_source_records')       # multimeters / fgen, MDO4000C, TDS2000C / WaveSurfer
-SHORT = {'As budgeted': 'budgeted', 'Raised to scope': 'raised', 'Not in scope': 'not in scope', 'Standard changed': 'changed', M.MANUAL: 'manual'}
-
-
-def find_app(parent):
-    """The engine App whose window is `parent`: an object with `.root is parent` and `certificate_rows_and_points`.  None when there is not exactly one."""
-    found = []
-    for o in gc.get_objects():
-        try:
-            t = type(o)
-            if t.__module__ in ('builtins', 'tkinter', 'tkinter.ttk') or not any(hasattr(t, a) for a in COVERED):
-                continue
-            if o.__dict__.get('root') is parent:
-                found.append(o)
-        except Exception:
-            continue
-    return found[0] if len(found) == 1 else None
-
-
-def hint_kinds(app):
-    """WaveSurfer only: which result kinds the export that opened the dialog will print.  Its per-tab export asks the details BEFORE it builds the report,
-    so the kind is only in the caller (`export_calibration_section(kind)`); read it from the stack, read-only, and fall back to every kind with data
-    (None) when it cannot be seen.  No other engine needs this."""
-    try:
-        f = sys._getframe(3)
-        for _ in range(6):
-            if f is None:
-                break
-            if f.f_code.co_name == 'export_calibration_section' and f.f_locals.get('self') is app and isinstance(f.f_locals.get('kind'), str):
-                return [f.f_locals['kind']]
-            f = f.f_back
-    except Exception:
-        pass
-    return None
-
-
-def asset_of(app) -> str:
-    """The asset number the technician entered (WaveSurfer calls the field instrument_id)."""
-    for name in ('asset', 'instrument_id'):
-        var = getattr(app, name, None)
-        if var is not None and hasattr(var, 'get'):
-            try:
-                return str(var.get()).strip()
-            except Exception:
-                pass
-    return ''
-
-
-def is_demo(app) -> bool:
-    try:
-        return bool(app.any_synthetic())
-    except Exception:
-        return bool(getattr(app, 'demo', False))
+from report_review_flow import (COVERED, SHORT, UNAVAILABLE, asset_of, build_models, find_app, finish, hint_kinds, is_demo)       # noqa: F401  (moved to the toolkit-free module; names kept here)
 
 
 def ask(parent, procedure='', app=None):
     """The review window for the engine behind `parent`.  Returns the details dict, None when cancelled, or UNAVAILABLE (use the old popup)."""
-    try:
-        app = app or find_app(parent)
-        if app is None:
-            return UNAVAILABLE
-        meters = [None]
-        if app.__dict__.get('_review_all_meters') and hasattr(app, 'queue_wants_run') and app.queue_wants_run():
-            meters = list(app.queue.meters)
-        keep = app.__dict__.get('_queue_ctx')
-        models = []
-        try:
-            for m in meters:
-                if m is not None:
-                    app._queue_activate(m)
-                specs, default = M.specs_for(app, kinds=hint_kinds(app) if hasattr(app, 'certificate_source_records') else None)
-                if not specs:
-                    return UNAVAILABLE
-                models.append(M.ReviewModel(specs, default, asset=asset_of(app), procedure=procedure))
-        finally:
-            if meters != [None] and keep is not None:
-                app._queue_activate(keep)
-        demo = is_demo(app)
-    except Exception as exc:                                      # an engine this phase does not cover, or anything unexpected: the old popup
-        print(f'report_review: using the plain report dialog ({type(exc).__name__}: {exc})', file=sys.stderr)
+    built = build_models(parent, procedure, app)
+    if built is UNAVAILABLE:
         return UNAVAILABLE
+    models, demo = built
     details = None
     for n, model in enumerate(models, 1):
         win = ReviewWindow(parent, model, procedure, demo=demo, details=details, position=(n, len(models)))
         details = win.run()
         if details is None:
             return None
-    details['uncertainty_review'] = M.review_block(models, by=details.get('technician', ''))
-    return details
+    return finish(models, details)
 
 
 class ReviewWindow:

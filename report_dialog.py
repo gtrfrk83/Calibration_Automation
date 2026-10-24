@@ -10,10 +10,23 @@ import ui_theme as ui
 USE_REVIEW = True          # False = always the plain popup below
 
 
+def _is_qt(parent) -> bool:
+    """True when `parent` is a Qt window object (a PySide6 class anywhere in its MRO).  Looks at the class only: PySide6 is never imported here, so the Tk
+    build is untouched (a Tk root, None, a test double: always False)."""
+    try:
+        return any(c.__module__.split('.')[0] == 'PySide6' for c in type(parent).__mro__)
+    except Exception:
+        return False
+
+
 def ask_details(parent, procedure=''):
     """Returns a dict for report_pdf.write_calibration_pdf(details=...), or None if cancelled.
+    Toolkit switch (append-only): a Qt parent is answered by the Qt twin qtui.screens.report_details.ask_details (same contract); Tk stays the default.
     The review window (report_review.py: every point with its assigned uncertainty, standard changeable per row) is shown for the engines it covers;
     for any other engine, or if it cannot be built, the plain popup (ask_details_plain) appears as before."""
+    if _is_qt(parent):
+        from qtui.screens import report_details
+        return report_details.ask_details(parent, procedure)
     if USE_REVIEW:
         try:
             import report_review
