@@ -1013,7 +1013,8 @@ class RulesTests(unittest.TestCase):
                     self.assertFalse(n.split('.')[0].endswith('_view_tk'), f'{f.name} imports {n}')
 
     def test_screen_files_stay_small(self):
-        for f in (ROOT / 'qtui' / 'screens').glob('*.py'):
+        mine = [*(ROOT / 'qtui' / 'screens').glob('dsb_*.py'), ROOT / 'qtui' / 'screens' / 'datasheet_builder.py']       # this package's files only (other screens set their own sizes)
+        for f in mine:
             self.assertLess(len(f.read_text(encoding='utf-8').splitlines()), 1500, f.name)
 
     def test_the_qt_panel_keeps_the_tk_constructor_and_public_methods(self):
