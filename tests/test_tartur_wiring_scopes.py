@@ -8,6 +8,7 @@ import ast
 import importlib.util
 import math
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -183,7 +184,7 @@ class Mdo(unittest.TestCase):
         self.assertEqual(self.M.tar_tur_fields(p, self.rec(p, 0.0))['TUR'], tartur.format_ratio(tol / uncertainty.round_up(parts[0])))
 
     def test_blank_kinds(self):
-        for kind in ('BW', 'NOISE', 'BAL', 'DELTA', 'PHASE', 'DANL', 'XTALK', 'DVMAC', 'SELFTEST', 'SPC', 'TRIGOUT', 'DIGITAL'):
+        for kind in ('BW', 'NOISE', 'BAL', 'DELTA', 'PHASE', 'DANL', 'XTALK', 'DVMAC', 'SELFTEST', 'SPC', 'TRIGOUT'):   # DIGITAL (logic probe) points removed from the MDO4000C spec
             p = self.point(kind)
             f = self.M.tar_tur_fields(p, self.rec(p, p['nominal'] or 1.0))
             self.assertEqual(f, dict(TAR='', TUR=''), kind)       # no printed uncertainty (N/A), one-sided limits, or no matching specification
@@ -368,6 +369,9 @@ class PdfExports(unittest.TestCase):
         base_dir.mkdir()
         r = subprocess.run(f'git archive {BASE_REF} | tar -x -C "{base_dir}"', shell=True, cwd=ROOT, capture_output=True)
         if r.returncode == 0 and (base_dir / 'tartur.py').exists():
+            # The logic-probe (digital threshold D0-D15) points were removed from the MDO4000C spec after BASE_REF: give the baseline the same
+            # spec file, so both runs make the same points (the simulated readings share one random sequence) and only the frequency work differs.
+            shutil.copyfile(ROOT / 'specs' / 'tektronix_mdo4000c_pv.json', base_dir / 'specs' / 'tektronix_mdo4000c_pv.json')
             cls.base = base_dir
         cls.out = {}
 
