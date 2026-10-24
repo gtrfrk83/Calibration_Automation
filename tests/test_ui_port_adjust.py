@@ -36,6 +36,12 @@ class Launchers(unittest.TestCase):
 
 class NewPortMethods(unittest.TestCase):
     def test_same_signatures_on_both_ports(self):
+        import _tk_stub
+        if 'tkinter' not in sys.modules and not getattr(sys.modules.get('tkinter'), '_cal_stub', False):
+            try:
+                import tkinter  # noqa: F401
+            except ImportError:
+                _tk_stub.install()                       # no tkinter here: the signature check only needs the class
         import ui_port_tk
         for name in ('ask_value', 'update', 'enable_hidpi'):
             a, b = getattr(ui_port_tk.TkUiPort, name), getattr(ui_port.ScriptedUiPort, name)
