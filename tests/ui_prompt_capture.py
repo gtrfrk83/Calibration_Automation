@@ -361,6 +361,11 @@ def _run_adjustments(make_harness):
 SCENARIOS = {'a34410a': _run_a34410a, 'f8808a': _run_f8808a, 'handheld': _run_handheld, 'adjustments': _run_adjustments}
 
 
+# ---- WP-W (WaveSurfer 4104HD): the scenario lives in tests/ui_prompt_capture_ws.py (append-only block; other packages add their own lines below / above) --------------
+from ui_prompt_capture_ws import _run_wavesurfer  # noqa: E402
+SCENARIOS['wavesurfer'] = _run_wavesurfer
+
+
 def capture(name, harness_class=TkLevelHarness):
     return SCENARIOS[name](lambda answers=None: harness_class(answers))
 

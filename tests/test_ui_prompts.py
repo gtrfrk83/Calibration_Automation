@@ -48,6 +48,10 @@ class TkLevel(unittest.TestCase):
     def test_adjustment_launchers(self):
         self.check('adjustments')
 
+    # ---- WP-W (WaveSurfer 4104HD; recorded on the unported engine) -- append-only block
+    def test_wavesurfer(self):
+        self.check('wavesurfer')
+
 
 class Port(unittest.TestCase):
     def test_every_ported_engine_prompts_only_through_the_port(self):

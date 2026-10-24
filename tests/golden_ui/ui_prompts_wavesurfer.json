@@ -1,0 +1,3685 @@
+{
+ "bad_checkpoints": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Could not load offset results: Checkpoint point 1 mismatch",
+   "title": "Offset checkpoint"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Could not load saved bandwidth points: Checkpoint point 1 mismatch",
+   "title": "Bandwidth checkpoint"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Could not load the saved time base result: Checkpoint point mismatch",
+   "title": "Time base checkpoint"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Could not load saved trigger level results: Checkpoint point 1 mismatch",
+   "title": "Trigger level checkpoint"
+  }
+ ],
+ "close_window": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Finish the current point (answer any trigger question) and wait for Fluke STBY confirmation before closing.",
+   "title": "Measurement running"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Finish the current point (answer any trigger question) and wait for Fluke STBY confirmation before closing.",
+   "title": "Measurement running"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for Fluke STBY confirmation before closing.",
+   "title": "Bandwidth running"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for Fluke STBY confirmation before closing.",
+   "title": "Offset running"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for the Fluke SCOPE OFF confirmation before closing.",
+   "title": "Impedance in progress"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait until the automatic DCV point completes and Fluke STBY is confirmed before closing.",
+   "title": "DCV in progress"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Stop the test and close the window?",
+   "title": "Test running"
+  }
+ ],
+ "dcv": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enable both automatic Fluke output and scope P1 acquisition.",
+   "title": "Automatic DCV"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enable both automatic Fluke output and scope P1 acquisition.",
+   "title": "Automatic DCV"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enable automatic scope P1 MEAN acquisition to use automatic Fluke output control.",
+   "title": "Automatic mode"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settle time must be 0.5 to 30 seconds.",
+   "title": "Settle time"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Another measurement is in progress.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for the current test point to finish.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for the current measurement to finish.",
+   "title": "Busy"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected and safe — start",
+    "Cancel"
+   ],
+   "caution": "The program applies each voltage automatically and verifies Fluke STBY after every point. Press OK only after the cable is connected and safe.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Test",
+     "Every positive and negative DCV voltage for this channel"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke SCOPE output cable to CH1."
+    ],
+    [
+     "Remove",
+     "External terminators, probes and any other sources."
+    ],
+    [
+     "Verify",
+     "Scope input is DC coupling, 1 MΩ, 20 MHz BW."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Connect DCV cable — CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — start",
+    "Cancel"
+   ],
+   "caution": "The program applies each voltage automatically and verifies Fluke STBY after every point. Press OK only after the cable is connected and safe.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Test",
+     "Every positive and negative DCV voltage for this channel"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke SCOPE output cable to CH1."
+    ],
+    [
+     "Remove",
+     "External terminators, probes and any other sources."
+    ],
+    [
+     "Verify",
+     "Scope input is DC coupling, 1 MΩ, 20 MHz BW."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Connect DCV cable — CH1"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — start",
+    "Cancel"
+   ],
+   "caution": "The program applies each voltage automatically and verifies Fluke STBY after every point. Press OK only after the cable is connected and safe.",
+   "facts": [
+    [
+     "Channel",
+     "CH2"
+    ],
+    [
+     "Test",
+     "Every positive and negative DCV voltage for this channel"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke SCOPE output cable to CH2."
+    ],
+    [
+     "Remove",
+     "External terminators, probes and any other sources."
+    ],
+    [
+     "Verify",
+     "Scope input is DC coupling, 1 MΩ, 20 MHz BW."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH2",
+   "title": "Connect DCV cable — CH2"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — start",
+    "Cancel"
+   ],
+   "caution": "The program applies each voltage automatically and verifies Fluke STBY after every point. Press OK only after the cable is connected and safe.",
+   "facts": [
+    [
+     "Channel",
+     "CH3"
+    ],
+    [
+     "Test",
+     "Every positive and negative DCV voltage for this channel"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke SCOPE output cable to CH3."
+    ],
+    [
+     "Remove",
+     "External terminators, probes and any other sources."
+    ],
+    [
+     "Verify",
+     "Scope input is DC coupling, 1 MΩ, 20 MHz BW."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH3",
+   "title": "Connect DCV cable — CH3"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — start",
+    "Cancel"
+   ],
+   "caution": "The program applies each voltage automatically and verifies Fluke STBY after every point. Press OK only after the cable is connected and safe.",
+   "facts": [
+    [
+     "Channel",
+     "CH4"
+    ],
+    [
+     "Test",
+     "Every positive and negative DCV voltage for this channel"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect",
+     "Fluke SCOPE output cable to CH4."
+    ],
+    [
+     "Remove",
+     "External terminators, probes and any other sources."
+    ],
+    [
+     "Verify",
+     "Scope input is DC coupling, 1 MΩ, 20 MHz BW."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH4",
+   "title": "Connect DCV cable — CH4"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 80 DCV points completed. Export the report (PDF).",
+   "title": "DCV complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 80 DCV points completed. Export the report (PDF).",
+   "title": "DCV complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 80 DCV points are recorded.",
+   "title": "DCV complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All DCV points are complete.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select exactly one completed DCV result in the table.",
+   "title": "Select a row"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select exactly one completed DCV result in the table.",
+   "title": "Select a row"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enable automatic Fluke SCOPE DCV and scope P1 MEAN to retest.",
+   "title": "Automatic retest"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settling time must be 0.5–30 seconds",
+   "title": "Settings"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected — retest",
+    "Cancel"
+   ],
+   "caution": "The previous reading is kept in the retest history. A good new reading replaces the displayed result; an error leaves it unchanged.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Test voltage",
+     "-0.015 V"
+    ],
+    [
+     "Range",
+     "5 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect the cable",
+     "Fluke SCOPE output cable to CH1."
+    ],
+    [
+     "Remove other sources",
+     "No external terminators, probes or other sources on the input."
+    ],
+    [
+     "Automatic",
+     "The scope is set to DC 1 MΩ and 20 MHz BW for you."
+    ]
+   ],
+   "text": "Retest DCV point 4 of 80",
+   "title": "Confirm DCV retest connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected — retest",
+    "Cancel"
+   ],
+   "caution": "The previous reading is kept in the retest history. A good new reading replaces the displayed result; an error leaves it unchanged.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Test voltage",
+     "-0.015 V"
+    ],
+    [
+     "Range",
+     "5 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect the cable",
+     "Fluke SCOPE output cable to CH1."
+    ],
+    [
+     "Remove other sources",
+     "No external terminators, probes or other sources on the input."
+    ],
+    [
+     "Automatic",
+     "The scope is set to DC 1 MΩ and 20 MHz BW for you."
+    ]
+   ],
+   "text": "Retest DCV point 4 of 80",
+   "title": "Confirm DCV retest connection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Finish the current measurement first.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "That point has not been measured yet. Use Run DCV Automatically / Resume DCV, or pick a recorded row to retest.",
+   "title": "Not tested yet"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "That point has not been measured yet. Use Run DCV Automatically / Resume DCV, or pick a recorded row to retest.",
+   "title": "Not tested yet"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Output stable — continue",
+    "Cancel"
+   ],
+   "caution": "Manual mode does not control or disable the Fluke output. Click OK only when the output is stable.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Output",
+     "+0.015 V DC"
+    ],
+    [
+     "Range",
+     "5 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect the cable",
+     "Fluke SCOPE output cable to CH1."
+    ],
+    [
+     "Set the Fluke",
+     "Manually set the DC output to +0.015 V and enable it."
+    ],
+    [
+     "Scope",
+     "DC 1 MΩ, 20 MHz BW. If scope acquisition is selected, scale and P1 MEAN are set automatically."
+    ]
+   ],
+   "text": "DCV point 3 of 80 (manual output)",
+   "title": "Confirm DCV test setup"
+  },
+  {
+   "answer": 0.99,
+   "kind": "ask_number",
+   "text": "CH1 | +0.015000 V applied\nEnter measured oscilloscope MEAN in VOLTS:",
+   "title": "Measured DC voltage"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Output stable — continue",
+    "Cancel"
+   ],
+   "caution": "Manual mode does not control or disable the Fluke output. Click OK only when the output is stable.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Output",
+     "-0.015 V DC"
+    ],
+    [
+     "Range",
+     "5 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect the cable",
+     "Fluke SCOPE output cable to CH1."
+    ],
+    [
+     "Set the Fluke",
+     "Manually set the DC output to -0.015 V and enable it."
+    ],
+    [
+     "Scope",
+     "DC 1 MΩ, 20 MHz BW. If scope acquisition is selected, scale and P1 MEAN are set automatically."
+    ]
+   ],
+   "text": "DCV point 4 of 80 (manual output)",
+   "title": "Confirm DCV test setup"
+  },
+  {
+   "answer": NaN,
+   "kind": "ask_number",
+   "text": "CH1 | -0.015000 V applied\nEnter measured oscilloscope MEAN in VOLTS:",
+   "title": "Measured DC voltage"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Measurement must be finite.",
+   "title": "Invalid value"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Output stable — continue",
+    "Cancel"
+   ],
+   "caution": "Manual mode does not control or disable the Fluke output. Click OK only when the output is stable.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Output",
+     "-0.015 V DC"
+    ],
+    [
+     "Range",
+     "5 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect the cable",
+     "Fluke SCOPE output cable to CH1."
+    ],
+    [
+     "Set the Fluke",
+     "Manually set the DC output to -0.015 V and enable it."
+    ],
+    [
+     "Scope",
+     "DC 1 MΩ, 20 MHz BW. If scope acquisition is selected, scale and P1 MEAN are set automatically."
+    ]
+   ],
+   "text": "DCV point 4 of 80 (manual output)",
+   "title": "Confirm DCV test setup"
+  },
+  {
+   "answer": null,
+   "kind": "ask_number",
+   "text": "CH1 | -0.015000 V applied\nEnter measured oscilloscope MEAN in VOLTS:",
+   "title": "Measured DC voltage"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Output stable — continue",
+    "Cancel"
+   ],
+   "caution": "Manual mode does not control or disable the Fluke output. Click OK only when the output is stable.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Output",
+     "-0.015 V DC"
+    ],
+    [
+     "Range",
+     "5 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect the cable",
+     "Fluke SCOPE output cable to CH1."
+    ],
+    [
+     "Set the Fluke",
+     "Manually set the DC output to -0.015 V and enable it."
+    ],
+    [
+     "Scope",
+     "DC 1 MΩ, 20 MHz BW. If scope acquisition is selected, scale and P1 MEAN are set automatically."
+    ]
+   ],
+   "text": "DCV point 4 of 80 (manual output)",
+   "title": "Confirm DCV test setup"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Scope P1 returned +0.000000 V.\n\nIs P1 set to MEAN of CH1 and is this reading valid?",
+   "title": "Confirm P1 reading"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Confirm the physical connection and that the output is safe before continuing.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Output",
+     "+0.03 V DC"
+    ],
+    [
+     "Range",
+     "10 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect the cable",
+     "Fluke SCOPE output cable to CH1. Remove any external 50 Ω terminator."
+    ],
+    [
+     "Scope input",
+     "DC 1 MΩ, bandwidth 20 MHz."
+    ],
+    [
+     "Automatic",
+     "The program sets 10 mV/div, configures and verifies P1 MEAN, then runs STBY → SCOPE DCV → OUT → OPER, reads the scope and returns to STBY."
+    ]
+   ],
+   "text": "DCV point 5 of 80",
+   "title": "Confirm DCV test setup"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Fluke returned to STBY. Scope P1 returned +0.030115 V.\n\nWas P1 configured to MEAN of CH1, and is this result valid?",
+   "title": "Confirm automatic DCV reading"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Confirm the physical connection and that the output is safe before continuing.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Output",
+     "-0.03 V DC"
+    ],
+    [
+     "Range",
+     "10 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connect the cable",
+     "Fluke SCOPE output cable to CH1. Remove any external 50 Ω terminator."
+    ],
+    [
+     "Scope input",
+     "DC 1 MΩ, bandwidth 20 MHz."
+    ],
+    [
+     "Automatic",
+     "The program sets 10 mV/div, configures and verifies P1 MEAN, then runs STBY → SCOPE DCV → OUT → OPER, reads the scope and returns to STBY."
+    ]
+   ],
+   "text": "DCV point 6 of 80",
+   "title": "Confirm DCV test setup"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "DCV communication failed",
+   "title": "DCV read error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Fluke standby was NOT confirmed",
+   "title": "OUTPUT SAFETY WARNING"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Measurement must be finite.",
+   "title": "Invalid value"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Delete all DCV results and checkpoint?",
+   "title": "Clear DCV results"
+  }
+ ],
+ "demo_data_and_pm": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Loaded 209 SYNTHETIC results in memory across seven functions. Use Export Report (PDF). No checkpoint files were written. Do not use as calibration evidence.",
+   "title": "Demo export ready"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Existing calibration results are loaded. Demo data will not be mixed with them. Use a separate empty folder to launch --demo.",
+   "title": "Demo data"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Every point in the selected function is already recorded.",
+   "title": "Nothing pending"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "cannot apply",
+   "title": "Edits not applied"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Results saved by an earlier version (not tied to an instrument) were found.\n\nAssign them to LEGACY-1?\n\nChoose No to leave them untouched (they are not deleted).",
+   "title": "Earlier results found"
+  }
+ ],
+ "exports": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded calibration data to export.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No calibration results to export.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No dcv measurements to export.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded calibration data to export.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Loaded 209 SYNTHETIC results in memory across seven functions. Use Export Report (PDF). No checkpoint files were written. Do not use as calibration evidence.",
+   "title": "Demo export ready"
+  },
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "WaveSurfer 4104HD verification"
+  },
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "WaveSurfer 4104HD verification"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "WaveSurfer 4104HD verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "WS-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "WaveSurfer 4104HD verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "WS-1-noise-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".xlsx",
+    "filetypes": [
+     [
+      "Excel workbook",
+      "*.xlsx"
+     ]
+    ],
+    "initialfile": "WS-1-<date>.xlsx"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "WaveSurfer 4104HD verification"
+  },
+  {
+   "answer": "Calibration Data WS-1.pdf",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "WS-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Created calibration data report with 209 rows:\nCalibration Data WS-1.pdf",
+   "title": "Report exported"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "WaveSurfer 4104HD verification"
+  },
+  {
+   "answer": "Calibration Data WS-1.pdf",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "WS-1-trigger-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Created calibration data report with 24 rows:\nCalibration Data WS-1.pdf",
+   "title": "Report exported"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "WaveSurfer 4104HD verification"
+  },
+  {
+   "answer": "Calibration Data WS-1.pdf",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "WS-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "disk full",
+   "title": "PDF export error"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "WaveSurfer 4104HD verification"
+  },
+  {
+   "answer": "Calibration Data WS-1.pdf",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "WS-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Install the PDF package with:  py -m pip install reportlab",
+   "title": "PDF export dependency"
+  },
+  {
+   "answer": "Calibration Data WS-1.xlsx",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".xlsx",
+    "filetypes": [
+     [
+      "Excel workbook",
+      "*.xlsx"
+     ]
+    ],
+    "initialfile": "WS-1-<date>.xlsx"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Created formatted Excel report with 7 test points:\nCalibration Data WS-1.xlsx",
+   "title": "Report exported"
+  },
+  {
+   "answer": "Calibration Data WS-1.xlsx",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".xlsx",
+    "filetypes": [
+     [
+      "Excel workbook",
+      "*.xlsx"
+     ]
+    ],
+    "initialfile": "WS-1-<date>.xlsx"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "locked",
+   "title": "Excel export error"
+  },
+  {
+   "answer": "Calibration Data WS-1.xlsx",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".xlsx",
+    "filetypes": [
+     [
+      "Excel workbook",
+      "*.xlsx"
+     ]
+    ],
+    "initialfile": "WS-1-<date>.xlsx"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Install the Excel formatting package with: py -m pip install openpyxl",
+   "title": "Excel export dependency"
+  }
+ ],
+ "noise": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settle time must be 0.2 to 120 seconds.",
+   "title": "Invalid configuration"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Clear and start",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Channels",
+     "CH1, CH2, CH3, CH4"
+    ],
+    [
+     "Ranges",
+     "36 measurements"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Saved results",
+     "Existing saved noise results will be cleared."
+    ],
+    [
+     "Method",
+     "Confirm the 2.75-division method and the limits are applicable."
+    ]
+   ],
+   "text": "Start a new RMS noise test",
+   "title": "New test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Clear and start",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Channels",
+     "CH1"
+    ],
+    [
+     "Ranges",
+     "36 measurements"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Saved results",
+     "Existing saved noise results will be cleared."
+    ],
+    [
+     "Method",
+     "Confirm the 2.75-division method and the limits are applicable."
+    ]
+   ],
+   "text": "Start a new RMS noise test",
+   "title": "New test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Ready — start measuring",
+    "Cancel"
+   ],
+   "caution": "Cancel keeps all completed results saved so you can Resume.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Range",
+     "2 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Move the 50 Ω termination",
+     "Put the external 50 Ω BNC termination on CH1."
+    ],
+    [
+     "Check the scope",
+     "All four channels ON, DC 1 MΩ, full bandwidth, 1 ms/div, averaging / ERES off."
+    ],
+    [
+     "Automatic",
+     "The program sets P1 to StdDev of CH1 for you."
+    ]
+   ],
+   "text": "Prepare CH1 for the next measurement",
+   "title": "Prepare channel"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All selected channels are complete. Export the report (PDF) to save it.",
+   "title": "Test complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select one completed RMS noise result.",
+   "title": "Select a result"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Ready — start measuring",
+    "Cancel"
+   ],
+   "caution": "Cancel keeps all completed results saved so you can Resume.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Range",
+     "2 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Move the 50 Ω termination",
+     "Put the external 50 Ω BNC termination on CH1."
+    ],
+    [
+     "Check the scope",
+     "All four channels ON, DC 1 MΩ, full bandwidth, 1 ms/div, averaging / ERES off."
+    ],
+    [
+     "Automatic",
+     "The program sets P1 to StdDev of CH1 for you."
+    ]
+   ],
+   "text": "Prepare CH1 for the next measurement",
+   "title": "Prepare channel"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Start a test first.",
+   "title": "No saved run"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Enter exactly nine finite minimum dB limits.",
+   "title": "Invalid configuration"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settings differ from the saved run. Restore the original settings before resuming.",
+   "title": "Settings changed"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All selected channels are complete. Export the report (PDF) to save it.",
+   "title": "Test complete"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Ready — start measuring",
+    "Cancel"
+   ],
+   "caution": "Cancel keeps all completed results saved so you can Resume.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Range",
+     "2 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Move the 50 Ω termination",
+     "Put the external 50 Ω BNC termination on CH1."
+    ],
+    [
+     "Check the scope",
+     "All four channels ON, DC 1 MΩ, full bandwidth, 1 ms/div, averaging / ERES off."
+    ],
+    [
+     "Automatic",
+     "The program sets P1 to StdDev of CH1 for you."
+    ]
+   ],
+   "text": "Prepare CH1 for the next measurement",
+   "title": "Prepare channel"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "scope lost",
+   "title": "Measurement error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "scope lost",
+   "title": "Measurement error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "5560A",
+   "title": "Fluke connection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "no reply",
+   "title": "Fluke connection"
+  }
+ ],
+ "sections": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for the current measurement to finish.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for the current test to finish.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for the current test to finish.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settle: 0.5–30 seconds; readings: 1–20; baud: integer.",
+   "title": "Settings"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "C1"
+    ],
+    [
+     "Test",
+     "50 Ohm @ 20 mV/Div"
+    ],
+    [
+     "Input setting",
+     "DC 50 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to C1. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "The application will set and verify coupling and vertical scale automatically."
+    ]
+   ],
+   "text": "Impedance point 1 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "C1"
+    ],
+    [
+     "Test",
+     "50 Ohm @ 20 mV/Div"
+    ],
+    [
+     "Input setting",
+     "DC 50 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to C1. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "The application will set and verify coupling and vertical scale automatically."
+    ]
+   ],
+   "text": "Impedance point 1 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "C2"
+    ],
+    [
+     "Test",
+     "50 Ohm @ 20 mV/Div"
+    ],
+    [
+     "Input setting",
+     "DC 50 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to C2. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "The application will set and verify coupling and vertical scale automatically."
+    ]
+   ],
+   "text": "Impedance point 7 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "C3"
+    ],
+    [
+     "Test",
+     "50 Ohm @ 20 mV/Div"
+    ],
+    [
+     "Input setting",
+     "DC 50 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to C3. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "The application will set and verify coupling and vertical scale automatically."
+    ]
+   ],
+   "text": "Impedance point 13 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "C4"
+    ],
+    [
+     "Test",
+     "50 Ohm @ 20 mV/Div"
+    ],
+    [
+     "Input setting",
+     "DC 50 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to C4. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "The application will set and verify coupling and vertical scale automatically."
+    ]
+   ],
+   "text": "Impedance point 19 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "EXT"
+    ],
+    [
+     "Test",
+     "1e+06 Ohm @ EXT"
+    ],
+    [
+     "Input setting",
+     "DC 1 MΩ"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to EXT. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "EXT/EXT5 input selection and impedance are not remotely configured. Manually select the correct trigger mode and impedance for this point."
+    ]
+   ],
+   "text": "Impedance point 25 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "EXT5"
+    ],
+    [
+     "Test",
+     "1e+06 Ohm @ EXT5"
+    ],
+    [
+     "Input setting",
+     "DC 1 MΩ"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to EXT5. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "EXT/EXT5 input selection and impedance are not remotely configured. Manually select the correct trigger mode and impedance for this point."
+    ]
+   ],
+   "text": "Impedance point 26 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "EXT"
+    ],
+    [
+     "Test",
+     "50 Ohm @ EXT"
+    ],
+    [
+     "Input setting",
+     "DC 50 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to EXT. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "EXT/EXT5 input selection and impedance are not remotely configured. Manually select the correct trigger mode and impedance for this point."
+    ]
+   ],
+   "text": "Impedance point 27 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "EXT5"
+    ],
+    [
+     "Test",
+     "50 Ohm @ EXT5"
+    ],
+    [
+     "Input setting",
+     "DC 50 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to EXT5. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "EXT/EXT5 input selection and impedance are not remotely configured. Manually select the correct trigger mode and impedance for this point."
+    ]
+   ],
+   "text": "Impedance point 28 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 28 impedance measurements are complete.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 28 impedance measurements are complete.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 28 impedance measurements are recorded.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 28 impedance points are recorded.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select one completed impedance result.",
+   "title": "Select a result"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Finish the current measurement first.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "That point has not been measured yet. Pick a recorded row to retest, or use Run / Resume.",
+   "title": "Not tested yet"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Ready — retest",
+    "Cancel"
+   ],
+   "caution": "The prior reading is replaced only after a successful retest.",
+   "facts": [
+    [
+     "Input",
+     "C1"
+    ],
+    [
+     "Test",
+     "1 MOhm @ 20 mV/Div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Confirm the Fluke SCOPE measurement output is OFF before moving cables."
+    ],
+    [
+     "Connection",
+     "Verify the correct connection and, for EXT inputs, the input impedance."
+    ]
+   ],
+   "text": "Retest impedance point 3 of 28",
+   "title": "Confirm impedance retest"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Ready — retest",
+    "Cancel"
+   ],
+   "caution": "The prior reading is replaced only after a successful retest.",
+   "facts": [
+    [
+     "Input",
+     "C1"
+    ],
+    [
+     "Test",
+     "1 MOhm @ 20 mV/Div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Confirm the Fluke SCOPE measurement output is OFF before moving cables."
+    ],
+    [
+     "Connection",
+     "Verify the correct connection and, for EXT inputs, the input impedance."
+    ]
+   ],
+   "text": "Retest impedance point 3 of 28",
+   "title": "Confirm impedance retest"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Check settle time, samples, and baud.",
+   "title": "Settings"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Ready — retest",
+    "Cancel"
+   ],
+   "caution": "The prior reading is replaced only after a successful retest.",
+   "facts": [
+    [
+     "Input",
+     "C1"
+    ],
+    [
+     "Test",
+     "1 MOhm @ 20 mV/Div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Confirm the Fluke SCOPE measurement output is OFF before moving cables."
+    ],
+    [
+     "Connection",
+     "Verify the correct connection and, for EXT inputs, the input impedance."
+    ]
+   ],
+   "text": "Retest impedance point 3 of 28",
+   "title": "Confirm impedance retest"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Fluke SCOPE MEASR failed",
+   "title": "Impedance measurement error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Fluke is not in SCOPE mode",
+   "title": "FLUKE SCOPE MODE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Delete all impedance results and checkpoint?",
+   "title": "Clear impedance"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Click OK only after the cable and input mode are safe.",
+   "facts": [
+    [
+     "Input",
+     "EXT5"
+    ],
+    [
+     "Test",
+     "1e+06 Ohm @ EXT5"
+    ],
+    [
+     "Input setting",
+     "DC 1 MΩ"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Output off",
+     "Verify the Fluke SCOPE MEASR output is OFF before moving the cable."
+    ],
+    [
+     "Connect",
+     "Fluke 5560A SCOPE measurement cable directly to EXT5. Remove other signal sources and external terminators."
+    ],
+    [
+     "Input mode",
+     "EXT/EXT5 input selection and impedance are not remotely configured. Manually select the correct trigger mode and impedance for this point."
+    ]
+   ],
+   "text": "Impedance point 26 of 28",
+   "title": "Confirm impedance connection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Another instrument operation is running.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Another instrument operation is running.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Another instrument operation is running.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Another instrument operation is running.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Another instrument operation is running.",
+   "title": "Busy"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Confirmed — start",
+    "Cancel"
+   ],
+   "caution": "The program will enable and disable the DC voltage output.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "What this tests",
+     "P1 MEAN at specified scope vertical offsets. It does not independently verify waveform centering accuracy."
+    ],
+    [
+     "Confirm",
+     "The intended test method, the limits, and the correct Fluke SCOPE BNC connection."
+    ]
+   ],
+   "text": "Offset-position DCV test",
+   "title": "Confirm offset test method"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "1 of 16"
+    ],
+    [
+     "Channel",
+     "CH1"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH1. Disconnect other sources and terminators."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Offset cable connection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Finish the current measurement first.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Finish the current measurement first.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Finish the current measurement first.",
+   "title": "Busy"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "5 of 16"
+    ],
+    [
+     "Channel",
+     "CH2"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH2. Disconnect other sources and terminators."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH2",
+   "title": "Offset cable connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "9 of 16"
+    ],
+    [
+     "Channel",
+     "CH3"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH3. Disconnect other sources and terminators."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH3",
+   "title": "Offset cable connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "13 of 16"
+    ],
+    [
+     "Channel",
+     "CH4"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH4. Disconnect other sources and terminators."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH4",
+   "title": "Offset cable connection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 16 offset points recorded.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "scope P1 failed",
+   "title": "Offset measurement error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Fluke standby not confirmed",
+   "title": "Fluke safety"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "An instrument operation is running.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settle must be 0.5–60 s; baud must be positive.",
+   "title": "Invalid settings"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Confirmed — start",
+    "Cancel"
+   ],
+   "caution": "The Fluke will generate a 1 GHz sine signal into the oscilloscope. The first point is a hardware pilot.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Signal path",
+     "Use a rated 50 Ω signal path, the correct Fluke SCOPE output and the scope 50 Ω input."
+    ],
+    [
+     "No extra termination",
+     "Do not use a 1 MΩ input, or a 50 Ω feedthrough in addition to the scope internal termination."
+    ],
+    [
+     "Confirm method",
+     "The Fluke LEVSINE command and the scope P1 PkPk measurement are suitable."
+    ]
+   ],
+   "text": "Bandwidth test — 1 GHz sine",
+   "title": "Confirm high-frequency test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Confirmed — start",
+    "Cancel"
+   ],
+   "caution": "The Fluke will generate a 1 GHz sine signal into the oscilloscope. The first point is a hardware pilot.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Signal path",
+     "Use a rated 50 Ω signal path, the correct Fluke SCOPE output and the scope 50 Ω input."
+    ],
+    [
+     "No extra termination",
+     "Do not use a 1 MΩ input, or a 50 Ω feedthrough in addition to the scope internal termination."
+    ],
+    [
+     "Confirm method",
+     "The Fluke LEVSINE command and the scope P1 PkPk measurement are suitable."
+    ]
+   ],
+   "text": "Bandwidth test — 1 GHz sine",
+   "title": "Confirm high-frequency test"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected — continue",
+    "Cancel"
+   ],
+   "caution": "Confirm the connection before the output is enabled.",
+   "facts": [
+    [
+     "Point",
+     "1 of 24"
+    ],
+    [
+     "Channel",
+     "CH1"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Verify the Fluke output is STBY."
+    ],
+    [
+     "Connect",
+     "A rated 50 Ω cable from the Fluke SCOPE output to CH1."
+    ],
+    [
+     "Automatic",
+     "The scope input is set to DC50 for you."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Move 50 Ω signal cable"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Confirmed — start",
+    "Cancel"
+   ],
+   "caution": "The Fluke will generate a 1 GHz sine signal into the oscilloscope. The first point is a hardware pilot.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Signal path",
+     "Use a rated 50 Ω signal path, the correct Fluke SCOPE output and the scope 50 Ω input."
+    ],
+    [
+     "No extra termination",
+     "Do not use a 1 MΩ input, or a 50 Ω feedthrough in addition to the scope internal termination."
+    ],
+    [
+     "Confirm method",
+     "The Fluke LEVSINE command and the scope P1 PkPk measurement are suitable."
+    ]
+   ],
+   "text": "Bandwidth test — 1 GHz sine",
+   "title": "Confirm high-frequency test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected — continue",
+    "Cancel"
+   ],
+   "caution": "Confirm the connection before the output is enabled.",
+   "facts": [
+    [
+     "Point",
+     "1 of 24"
+    ],
+    [
+     "Channel",
+     "CH1"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Verify the Fluke output is STBY."
+    ],
+    [
+     "Connect",
+     "A rated 50 Ω cable from the Fluke SCOPE output to CH1."
+    ],
+    [
+     "Automatic",
+     "The scope input is set to DC50 for you."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Move 50 Ω signal cable"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "CH1 at 10 mV/div:\n50 kHz: 0.06 Vpp\n1 GHz: 0.054 Vpp\nResponse: -0.915 dB\n\nReview the Fluke and scope setup before continuing the remaining 23 points.",
+   "title": "First-point validation"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Confirmed — start",
+    "Cancel"
+   ],
+   "caution": "The Fluke will generate a 1 GHz sine signal into the oscilloscope. The first point is a hardware pilot.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Signal path",
+     "Use a rated 50 Ω signal path, the correct Fluke SCOPE output and the scope 50 Ω input."
+    ],
+    [
+     "No extra termination",
+     "Do not use a 1 MΩ input, or a 50 Ω feedthrough in addition to the scope internal termination."
+    ],
+    [
+     "Confirm method",
+     "The Fluke LEVSINE command and the scope P1 PkPk measurement are suitable."
+    ]
+   ],
+   "text": "Bandwidth test — 1 GHz sine",
+   "title": "Confirm high-frequency test"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected — continue",
+    "Cancel"
+   ],
+   "caution": "Confirm the connection before the output is enabled.",
+   "facts": [
+    [
+     "Point",
+     "2 of 24"
+    ],
+    [
+     "Channel",
+     "CH1"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Verify the Fluke output is STBY."
+    ],
+    [
+     "Connect",
+     "A rated 50 Ω cable from the Fluke SCOPE output to CH1."
+    ],
+    [
+     "Automatic",
+     "The scope input is set to DC50 for you."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Move 50 Ω signal cable"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected — continue",
+    "Cancel"
+   ],
+   "caution": "Confirm the connection before the output is enabled.",
+   "facts": [
+    [
+     "Point",
+     "7 of 24"
+    ],
+    [
+     "Channel",
+     "CH2"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Verify the Fluke output is STBY."
+    ],
+    [
+     "Connect",
+     "A rated 50 Ω cable from the Fluke SCOPE output to CH2."
+    ],
+    [
+     "Automatic",
+     "The scope input is set to DC50 for you."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH2",
+   "title": "Move 50 Ω signal cable"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected — continue",
+    "Cancel"
+   ],
+   "caution": "Confirm the connection before the output is enabled.",
+   "facts": [
+    [
+     "Point",
+     "13 of 24"
+    ],
+    [
+     "Channel",
+     "CH3"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Verify the Fluke output is STBY."
+    ],
+    [
+     "Connect",
+     "A rated 50 Ω cable from the Fluke SCOPE output to CH3."
+    ],
+    [
+     "Automatic",
+     "The scope input is set to DC50 for you."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH3",
+   "title": "Move 50 Ω signal cable"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected — continue",
+    "Cancel"
+   ],
+   "caution": "Confirm the connection before the output is enabled.",
+   "facts": [
+    [
+     "Point",
+     "19 of 24"
+    ],
+    [
+     "Channel",
+     "CH4"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Verify the Fluke output is STBY."
+    ],
+    [
+     "Connect",
+     "A rated 50 Ω cable from the Fluke SCOPE output to CH4."
+    ],
+    [
+     "Automatic",
+     "The scope input is set to DC50 for you."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH4",
+   "title": "Move 50 Ω signal cable"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 24 points recorded.",
+   "title": "Bandwidth complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 24 bandwidth points are complete.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 24 points recorded.",
+   "title": "Bandwidth complete"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Ready — retest",
+    "Cancel"
+   ],
+   "caution": "The prior result is replaced only on success.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Range",
+     "50 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Signal path",
+     "Verify a rated 50 Ω signal path and the scope DC50 input."
+    ],
+    [
+     "Signal",
+     "The Fluke will generate a 1 GHz sine wave."
+    ]
+   ],
+   "text": "Retest bandwidth point 3 of 24",
+   "title": "Confirm bandwidth retest"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Ready — retest",
+    "Cancel"
+   ],
+   "caution": "The prior result is replaced only on success.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Range",
+     "50 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Signal path",
+     "Verify a rated 50 Ω signal path and the scope DC50 input."
+    ],
+    [
+     "Signal",
+     "The Fluke will generate a 1 GHz sine wave."
+    ]
+   ],
+   "text": "Retest bandwidth point 3 of 24",
+   "title": "Confirm bandwidth retest"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Check settle time and baud.",
+   "title": "Settings"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Ready — retest",
+    "Cancel"
+   ],
+   "caution": "The prior result is replaced only on success.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Range",
+     "50 mV/div"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Signal path",
+     "Verify a rated 50 Ω signal path and the scope DC50 input."
+    ],
+    [
+     "Signal",
+     "The Fluke will generate a 1 GHz sine wave."
+    ]
+   ],
+   "text": "Retest bandwidth point 3 of 24",
+   "title": "Confirm bandwidth retest"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "P1 PkPk failed",
+   "title": "Bandwidth error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Fluke standby not confirmed",
+   "title": "Fluke output safety"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Another instrument operation is running.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settle must be 0.5-60 s, samples 1-50, the marker period a positive number of microseconds and the baud numeric (Test settings).",
+   "title": "Time base settings"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected and safe — run",
+    "Cancel"
+   ],
+   "caution": "First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the output if the calibrator rejects them. Check the marker period against your procedure (Test settings).",
+   "facts": [
+    [
+     "Marker period",
+     "10 µs"
+    ],
+    [
+     "Frequency",
+     "100 kHz"
+    ],
+    [
+     "Limit",
+     "±0.350 Hz"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH1 with a 50 Ω cable. Remove other cables and any feedthrough terminator."
+    ],
+    [
+     "Automatic",
+     "The program sets CH1 to DC 50 Ω, full bandwidth and P1 Freq, then outputs the time marker."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Time base accuracy"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — run",
+    "Cancel"
+   ],
+   "caution": "First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the output if the calibrator rejects them. Check the marker period against your procedure (Test settings).",
+   "facts": [
+    [
+     "Marker period",
+     "10 µs"
+    ],
+    [
+     "Frequency",
+     "100 kHz"
+    ],
+    [
+     "Limit",
+     "±0.350 Hz"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH1 with a 50 Ω cable. Remove other cables and any feedthrough terminator."
+    ],
+    [
+     "Automatic",
+     "The program sets CH1 to DC 50 Ω, full bandwidth and P1 Freq, then outputs the time marker."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Time base accuracy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "The time base point is recorded. Use Rerun Selected to measure it again.",
+   "title": "Complete"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected and safe — run",
+    "Cancel"
+   ],
+   "caution": "First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the output if the calibrator rejects them. Check the marker period against your procedure (Test settings).",
+   "facts": [
+    [
+     "Marker period",
+     "10 µs"
+    ],
+    [
+     "Frequency",
+     "100 kHz"
+    ],
+    [
+     "Limit",
+     "±0.350 Hz"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH1 with a 50 Ω cable. Remove other cables and any feedthrough terminator."
+    ],
+    [
+     "Automatic",
+     "The program sets CH1 to DC 50 Ω, full bandwidth and P1 Freq, then outputs the time marker."
+    ]
+   ],
+   "text": "Retest the time base point",
+   "title": "Confirm time base retest"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — run",
+    "Cancel"
+   ],
+   "caution": "First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the output if the calibrator rejects them. Check the marker period against your procedure (Test settings).",
+   "facts": [
+    [
+     "Marker period",
+     "10 µs"
+    ],
+    [
+     "Frequency",
+     "100 kHz"
+    ],
+    [
+     "Limit",
+     "±0.350 Hz"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH1 with a 50 Ω cable. Remove other cables and any feedthrough terminator."
+    ],
+    [
+     "Automatic",
+     "The program sets CH1 to DC 50 Ω, full bandwidth and P1 Freq, then outputs the time marker."
+    ]
+   ],
+   "text": "Retest the time base point",
+   "title": "Confirm time base retest"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "marker rejected",
+   "title": "Time base error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Fluke standby not confirmed",
+   "title": "Fluke output safety"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Another instrument operation is running.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settle must be 0.2-30 s and the baud numeric (Test settings).",
+   "title": "Trigger level settings"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Understood — start",
+    "Cancel"
+   ],
+   "caution": "The Fluke SCOPE DC output is enabled (at most 0.4 V) while you answer, and returns to STBY after every point. The scope trigger commands are not yet verified on a 4104HD: check the first point on screen.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Setup",
+     "The program sets the channel to 100 mV/div, DC 1 MΩ, 20 MHz BW, edge trigger on that channel at the test level, and arms a Single acquisition."
+    ],
+    [
+     "Step 1",
+     "The Fluke steps to 20 mV SHORT of the level. You answer whether the scope triggered (it should not)."
+    ],
+    [
+     "Step 2",
+     "The Fluke steps to 20 mV PAST the level. You answer whether the scope triggered (it should)."
+    ],
+    [
+     "Triggered means",
+     "the trigger status changes from armed/Single to Stopped and a trace is captured."
+    ]
+   ],
+   "text": "Trigger level accuracy — you confirm each trigger",
+   "title": "Trigger level test method"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Understood — start",
+    "Cancel"
+   ],
+   "caution": "The Fluke SCOPE DC output is enabled (at most 0.4 V) while you answer, and returns to STBY after every point. The scope trigger commands are not yet verified on a 4104HD: check the first point on screen.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Setup",
+     "The program sets the channel to 100 mV/div, DC 1 MΩ, 20 MHz BW, edge trigger on that channel at the test level, and arms a Single acquisition."
+    ],
+    [
+     "Step 1",
+     "The Fluke steps to 20 mV SHORT of the level. You answer whether the scope triggered (it should not)."
+    ],
+    [
+     "Step 2",
+     "The Fluke steps to 20 mV PAST the level. You answer whether the scope triggered (it should)."
+    ],
+    [
+     "Triggered means",
+     "the trigger status changes from armed/Single to Stopped and a trace is captured."
+    ]
+   ],
+   "text": "Trigger level accuracy — you confirm each trigger",
+   "title": "Trigger level test method"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "1 of 24"
+    ],
+    [
+     "Channel",
+     "CH1"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH1 (1 MΩ input, no terminator). Disconnect other sources."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Trigger level cable connection"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Understood — start",
+    "Cancel"
+   ],
+   "caution": "The Fluke SCOPE DC output is enabled (at most 0.4 V) while you answer, and returns to STBY after every point. The scope trigger commands are not yet verified on a 4104HD: check the first point on screen.",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Setup",
+     "The program sets the channel to 100 mV/div, DC 1 MΩ, 20 MHz BW, edge trigger on that channel at the test level, and arms a Single acquisition."
+    ],
+    [
+     "Step 1",
+     "The Fluke steps to 20 mV SHORT of the level. You answer whether the scope triggered (it should not)."
+    ],
+    [
+     "Step 2",
+     "The Fluke steps to 20 mV PAST the level. You answer whether the scope triggered (it should)."
+    ],
+    [
+     "Triggered means",
+     "the trigger status changes from armed/Single to Stopped and a trace is captured."
+    ]
+   ],
+   "text": "Trigger level accuracy — you confirm each trigger",
+   "title": "Trigger level test method"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "1 of 24"
+    ],
+    [
+     "Channel",
+     "CH1"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH1 (1 MΩ input, no terminator). Disconnect other sources."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH1",
+   "title": "Trigger level cable connection"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.0?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.0?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at -0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at -0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "7 of 24"
+    ],
+    [
+     "Channel",
+     "CH2"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH2 (1 MΩ input, no terminator). Disconnect other sources."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH2",
+   "title": "Trigger level cable connection"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.0?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.0?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at -0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at -0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "13 of 24"
+    ],
+    [
+     "Channel",
+     "CH3"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH3 (1 MΩ input, no terminator). Disconnect other sources."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH3",
+   "title": "Trigger level cable connection"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.0?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.0?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at -0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at -0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connected and safe — continue",
+    "Cancel"
+   ],
+   "caution": "Press OK only after the connection is safe.",
+   "facts": [
+    [
+     "Point",
+     "19 of 24"
+    ],
+    [
+     "Channel",
+     "CH4"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "Confirm the Fluke is in STBY."
+    ],
+    [
+     "Connect",
+     "Fluke SCOPE output to CH4 (1 MΩ input, no terminator). Disconnect other sources."
+    ]
+   ],
+   "text": "Connect the Fluke SCOPE output to CH4",
+   "title": "Trigger level cable connection"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.0?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.0?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at -0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at -0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 24 trigger level points recorded.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 24 trigger level points are recorded.",
+   "title": "Complete"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "All 24 trigger level points recorded.",
+   "title": "Complete"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Ready — retest",
+    "Cancel"
+   ],
+   "caution": "The prior result is replaced only when the retest completes.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Level",
+     "+300 mV"
+    ],
+    [
+     "Slope",
+     "Positive"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connection",
+     "Confirm the Fluke SCOPE output is connected to CH1."
+    ],
+    [
+     "You confirm",
+     "You will be asked twice whether the scope triggered."
+    ]
+   ],
+   "text": "Retest trigger level point 3 of 24",
+   "title": "Confirm trigger level retest"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Settle must be 0.2-30 s and the baud numeric (Test settings).",
+   "title": "Trigger level settings"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Ready — retest",
+    "Cancel"
+   ],
+   "caution": "The prior result is replaced only when the retest completes.",
+   "facts": [
+    [
+     "Channel",
+     "CH1"
+    ],
+    [
+     "Level",
+     "+300 mV"
+    ],
+    [
+     "Slope",
+     "Positive"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Connection",
+     "Confirm the Fluke SCOPE output is connected to CH1."
+    ],
+    [
+     "You confirm",
+     "You will be asked twice whether the scope triggered."
+    ]
+   ],
+   "text": "Retest trigger level point 3 of 24",
+   "title": "Confirm trigger level retest"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No",
+    "Cancel"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "text": "Did the scope trigger at 0.3?",
+   "title": "Trigger before the level?"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "trigger did not arm",
+   "title": "Trigger level error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Fluke standby not confirmed",
+   "title": "Fluke output safety"
+  }
+ ],
+ "table_buttons": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Choose a function in the Show box first.",
+   "title": "Section"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Wait for the current measurement to finish.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "The Instrument ID cannot change while a measurement is running.",
+   "title": "Busy"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Enter the Instrument ID first. Results are saved separately for each instrument.",
+   "title": "Instrument ID needed"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select one completed test point in the table.",
+   "title": "Select a result"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "That point has not been measured yet. Use Run Pending, or pick a recorded point to rerun.",
+   "title": "Not tested yet"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "default": "no",
+   "kind": "ask_yes_no",
+   "text": "This function already has As Left readings, so the instrument has been adjusted since the As Found run.\n\nMeasuring As Found again now replaces the original As Found reading with a reading from the adjusted instrument.\n\nTo measure after an adjustment, switch to As Left instead.\n\nReplace the As Found reading anyway?",
+   "title": "Replace the As Found reading?"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Choose one function in the Show list first. Results are cleared one function at a time.",
+   "title": "Choose a function"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Clear all saved As Found DC voltage results? This cannot be undone.\n\nAs Left readings for this function are kept.",
+   "title": "Clear results"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Clear all saved As Found DC voltage results? This cannot be undone.\n\nAs Left readings for this function are kept.",
+   "title": "Clear results"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Delete all DCV results and checkpoint?",
+   "title": "Clear DCV results"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Clear all saved As Found Offset (P1 mean) results? This cannot be undone.",
+   "title": "Clear results"
+  }
+ ]
+}
