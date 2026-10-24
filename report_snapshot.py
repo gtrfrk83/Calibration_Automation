@@ -376,7 +376,7 @@ def reprint_note(kind, now=None):
 
 def reprint_filename(asset, issued_at, ext='.pdf') -> str:
     """asset#-date, the same pattern as ui_theme.report_filename, with the ORIGINAL issue date."""
-    import ui_theme as ui
+    import ui_theme_core as ui
     when = None
     for fmt in ('%Y-%m-%d %H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d'):
         try:

@@ -521,6 +521,150 @@ import ui_prompt_capture_wpb as _wpb  # noqa: E402
 SCENARIOS.update(_wpb.SCENARIOS)
 
 
+# ---- WP-S (shared helpers: run_queue_engine, manual_override, datamode, procmods_engine, reset_startup, surprise): APPEND-ONLY block ---------------------------------
+class _Log(list):
+    def __init__(self):
+        super().__init__()
+        self.origins = []
+
+
+class _Tagged(list):
+    """A prompt list that also appends to a shared, ordered log (see _run_shared.begin)."""
+
+    def __init__(self, log, origin):
+        super().__init__()
+        self.log, self.origin = log, origin
+
+    def append(self, rec):
+        super().append(rec)
+        self.log.append(rec)
+        self.log.origins.append(self.origin)
+
+
+ORIGINS = {}                      # scenario name -> ['tk' | 'port' per record] of the last PortHarness run of _run_shared (None at the Tk level)
+
+
+def _run_shared(make_harness):
+    """The prompts the SHARED helpers show, on the engines that inherit them: the run queue (handheld_dmm.App on the simulated 5522A: a point-by-point run, a
+    one-meter-at-a-time run with the swap prompt, the resume question, the report / set-up dialogs), the manual-override small dialogs, the As Found / As Left
+    question and the Show-box notices (datamode), a technician note (procmods_engine) and a failed reset (reset_startup), the last four on the 8808A.
+    The reading windows (ask_readings) are scripted by the harness and not part of the record."""
+    import handheld_dmm as hh
+    import run_queue as RQ
+    import fluke8808a_verification as E
+    from drivers.simulated import make_bench
+    from test_handheld_options import Spy
+    import dsb_run_harness as DH
+    out = {}
+
+    def queue_app(hn, mode, demo=False, assets=('4412', '4413'), model='117', spec='fluke_110_series_pv.json'):
+        if demo:
+            app = hh.App(hn.root, model, demo=True, spec=hh.load_spec(spec), fast_demo=False)
+            app.demo_failures = None
+            app.demo_failures_on = False
+            hn.fill = True
+        else:
+            bench, _a, _b = make_bench()
+            io = hh.IO('Fluke 5522A', 'sim', transport=Spy(bench, '5522A'))
+            io.auto_ramp = False
+            io._wait = lambda *a, **k: None
+            app = hh.App(hn.root, model, demo=False, spec=hh.load_spec(spec), io_factory=lambda: io)
+            app.cal_mode.set(hh.CAL_CHOICES[1])
+            app.io = io
+            hn.fill = False
+            hn.default_reading = lambda p: DH.typed_nominal(p) if p['test'] == 'numeric' and p.get('nominal') is not None else None
+        hn.app = app
+        if assets:
+            app.apply_queue([(a, 'S-' + a, 'Tech ' + a) for a in assets], mode)
+        return app
+
+    def begin(hn):
+        """Start the harness and, behind a PortHarness, keep ONE ordered log of both channels: a prompt a still-unported engine (handheld_dmm: its own function
+        cards, reading windows) shows through a Tk call lands in `hn.prompts`, one a shared helper shows through the port in `hn.port.prompts`.  The record
+        sequence is the same either way (the fixture was recorded with everything at the Tk level); ORIGINS says which channel each record arrived by."""
+        hn.start()
+        hn.log = _Log()
+        if hasattr(hn, 'port'):
+            hn.prompts = _Tagged(hn.log, 'tk')
+            hn.port.prompts = _Tagged(hn.log, 'port')
+        return hn
+
+    def finish(name, hn):
+        out[name] = list(hn.log) if hasattr(hn, 'port') else hn.prompts
+        ORIGINS[name] = list(hn.log.origins) if hasattr(hn, 'port') else None
+        hn.stop()
+
+    hn = begin(make_harness(None))
+    app = queue_app(hn, RQ.POINT_BY_POINT)
+    assert hn.run_all()
+    finish('queue_real_point_by_point', hn)
+
+    hn = begin(make_harness(None))
+    app = queue_app(hn, RQ.ONE_AT_A_TIME)
+    assert hn.run_all()
+    finish('queue_real_one_at_a_time', hn)
+
+    # swap prompt declined: the run pauses and the progress is kept; a NEW window (same asset list) asks 'Resume saved progress' (Yes = continue), then finishes
+    hn = begin(make_harness(Answers([lambda r: False if r['kind'] == 'operator_prompt' and r['title'] == 'Next meter' else None])))
+    app = queue_app(hn, RQ.ONE_AT_A_TIME)
+    assert hn.run_all()
+    hn.answers.rules.clear()
+    app = queue_app(hn, RQ.ONE_AT_A_TIME)
+    assert hn.run_all()
+    finish('queue_swap_declined_then_resume', hn)
+
+    # the set-up / report dialogs of a queue (demo, virtual bench)
+    hn = begin(make_harness(None))
+    app = queue_app(hn, RQ.POINT_BY_POINT, demo=True)
+    app.queue_export_pdfs()                                              # nothing recorded yet -> 'No results'
+    app.busy = True
+    app.open_queue_setup()                                               # 'Stop the run before changing the queue'
+    app.busy = False
+    assert hn.run_all()
+    hn.answers.rules.append(lambda r: False if r['kind'] == 'ask_yes_no_cancel' and r['title'] == 'Reports' else None)
+    app.queue_offer_all_reports()                                        # No = only the meter shown
+    hn.answers.rules[:] = [lambda r: None if r['kind'] != 'ask_yes_no_cancel' else None]
+    app.queue_offer_all_reports()                                        # Yes = one report each: report details cancelled
+    finish('queue_dialogs', hn)
+
+    # the manual-override / data-mode / note / reset dialogs on the 8808A (demo, no instruments)
+    hn = begin(make_harness(None))
+    patch = mock.patch('time.sleep', side_effect=lambda s: None)
+    patch.start(); hn.patches.append(patch)
+    E.configure()
+    a = E.App(hn.root, '8808A', demo=True)
+    hn.app = a
+    hn.env = LH.Env()
+    a.serial.set('SN')
+    a.asset.set('')
+    p1 = E.POINTS[0]
+    a.busy = True
+    a.mo_button_clicked()                                                # busy, no point being measured
+    a._mo_current = dict(p1)
+    a.mo_enter_for(dict(p1, id=p1['id'] + 1000))                         # busy: only the point being measured
+    a.busy = False
+    a._mo_current = None
+    a.tree.selection.return_value = ()
+    a.mo_button_clicked()                                                # nothing selected
+    a.mo_replace(p1)                                                     # no instrument ID
+    a.asset.set('A-8808')
+    a.found[str(p1['id'])] = dict(reading=1.0, entered='1.0', result='PASS')
+    a.left[str(p1['id'])] = dict(reading=1.0, entered='1.0', result='PASS')
+    a.confirm_found_overwrite([p1])                                      # datamode: replace the As Found reading? (Yes by default)
+    a.run_shown_section()                                                # datamode: choose a section first
+    a.show_section.set('x')
+    a.shown_pending = lambda points: []
+    a.run_shown_section()                                                # datamode: nothing left to run
+    a.pm_show_note(dict(p1, tech_note='Check the guard lead first.'))    # procmods_engine: the technician's note
+    a._reset_failed('boom\nsecond line')                                 # reset_startup: error box
+    a._reset_failed('boom', skipped=True)
+    finish('overrides_datamode_note_reset_8808a', hn)
+    return out
+
+
+SCENARIOS['shared'] = _run_shared
+
+
 def capture(name, harness_class=TkLevelHarness):
     return SCENARIOS[name](lambda answers=None: harness_class(answers))
 

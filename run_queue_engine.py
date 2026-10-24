@@ -16,12 +16,11 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
-from tkinter import filedialog, messagebox
 
 import run_queue as RQ
-import run_queue_ui
-import ui_theme as ui
+import ui_theme_core as ui                     # toolkit-free helpers only (Settings, report_filename); the windows are run_queue_view_tk.py / run_queue_ui.py
 import virtualbench
+from ui_port import ui as port
 
 
 class QueueRun:
@@ -38,7 +37,7 @@ class QueueRun:
 
 class QueueMixin:
     QUEUE_SUPPORTED = True
-    queue_progress_factory = staticmethod(run_queue_ui.QueueProgress)
+    queue_progress_factory = staticmethod(lambda *a, **k: port.view('run_queue_view').queue_progress(*a, **k))        # the progress window (run_queue_ui.QueueProgress on Tk)
 
     # ------------------------------------------------------------------ state
     @property
@@ -256,10 +255,10 @@ class QueueMixin:
 
     def open_queue_setup(self):
         if self.busy:
-            messagebox.showinfo('Run queue', 'Stop the run before changing the queue.')
+            port.message('info', 'Run queue', 'Stop the run before changing the queue.')
             return
         if not self.queue_supported():
-            messagebox.showinfo('Run queue', 'The run queue is not available for this procedure.')
+            port.message('info', 'Run queue', 'The run queue is not available for this procedure.')
             return
         start = [(m.asset, m.serial, m.tech) for m in self.queue.meters]
         mode = self.queue.mode
@@ -271,13 +270,13 @@ class QueueMixin:
             elif self.asset.get().strip():
                 start = [(self.asset.get().strip(), self.serial.get().strip(), self._default_tech())]
         ir_only = bool(self.use_ir and self.ir)
-        got = run_queue_ui.ask_queue_setup(self.root, f'Run queue - {self.info["name"]}', start, mode, self.queue_summary, status_of=self.queue_status_text,
+        got = port.view('run_queue_view').ask_queue_setup(self.root, f'Run queue - {self.info["name"]}', start, mode, self.queue_summary, status_of=self.queue_status_text,
                                            candidates=self.queue_candidates(), default_tech=self._default_tech(), ir_only=ir_only)
         if not got:
             return
         self.apply_queue(got['meters'], got['mode'])
         if got['action'] == 'start':
-            self.root.after(30, self._queue_start_pressed)
+            port.after(self.root, 30, self._queue_start_pressed)
         else:
             self.status.set(self.queue_chip_text() or 'Run queue cleared: the procedure runs one meter as usual.')
 
@@ -338,15 +337,7 @@ class QueueMixin:
 
     def build_queue_drawer(self, d, row):
         """The 'Run queue' area of the Connections drawer (rows row .. row+2).  Returns the next free row."""
-        from tkinter import ttk
-        import tkinter as tk
-        ttk.Separator(d).grid(row=row, column=0, columnspan=2, sticky='ew', pady=(12, 10))
-        ttk.Label(d, text='Several meters', style='Bold.TLabel').grid(row=row + 1, column=0, sticky='w')
-        self.btn_queue = ttk.Button(d, text='Run queue...', command=self.open_queue_setup)
-        self.btn_queue.grid(row=row + 1, column=1, sticky='w', padx=(10, 0))
-        self.queue_label = tk.StringVar(value='No queue: one meter, as usual.')
-        ttk.Label(d, textvariable=self.queue_label, style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=row + 2, column=0, columnspan=2, sticky='w', pady=(4, 0))
-        return row + 3
+        return port.view('run_queue_view').build_queue_drawer(self, d, row)
 
     # ------------------------------------------------------------------ pending points / selections
     def queue_lacking(self, p):
@@ -370,11 +361,11 @@ class QueueMixin:
         q = self.queue
         problems = q.problems()
         if problems:
-            messagebox.showwarning('Run queue', '\n'.join(problems))
+            port.message('warning', 'Run queue', '\n'.join(problems))
             return
         same, why = self._queue_mods_same(q.meters)
         if not same:
-            messagebox.showwarning('Run queue', why)
+            port.message('warning', 'Run queue', why)
             return
         if not self._queue_resume():
             return
@@ -436,7 +427,7 @@ class QueueMixin:
         if not found:
             return True
         lines = '\n'.join(f'   asset {m.asset}: {len(d.get("results") or {})} As Found, {len(d.get("left_results") or {})} As Left point(s)' for m, d in found)
-        answer = messagebox.askyesnocancel('Resume saved progress',
+        answer = port.ask_yes_no_cancel('Resume saved progress',
                                            f'Saved progress was found for:\n{lines}\n\nYes = continue from it (points already recorded are not measured again).\n'
                                            'No = start these meters over (their saved progress is replaced as new readings are recorded).\nCancel = do not run.')
         if answer is None:
@@ -534,8 +525,8 @@ class QueueMixin:
         facts = [('Meter', f'{n} of {len(meters)}: asset {m.asset}'), ('Serial', m.serial or '-'), ('Points', str(len(unit.points)))]
         if self.io and not self.manual_cal:
             self._safe_standby()
-        return ui.confirm_steps(self.root, 'Next meter' if not unit.reason or q.mode == RQ.ONE_AT_A_TIME else 'One meter at a time', f'Asset {m.asset}', steps,
-                                facts=facts, caution='Continue only after the right meter is connected.', ok='Meter connected - continue')
+        return port.operator_prompt('Next meter' if not unit.reason or q.mode == RQ.ONE_AT_A_TIME else 'One meter at a time', f'Asset {m.asset}', steps,
+                                    facts=facts, caution='Continue only after the right meter is connected.', ok='Meter connected - continue', parent=self.root)
 
     def _queue_unit_done(self):
         """`_next` ran out of points (or the run was stopped) for the current unit."""
@@ -546,7 +537,7 @@ class QueueMixin:
         if self.stop:
             self._queue_finish(stopped=True)
             return
-        self.root.after(20, self._queue_advance)
+        port.after(self.root, 20, self._queue_advance)
 
     def _queue_save_all(self):
         keep = self.queue_ctx
@@ -644,7 +635,7 @@ class QueueMixin:
                     entered = H.pad_reading(p, text)
                     ann = True
                     if p.get('annunciator'):
-                        ann = bool(messagebox.askyesno('AC annunciator', f'{H.describe(p)}\n\nMeter: asset {m.asset}\n\nIs the AC annunciator ON in the meter display?\n\n'
+                        ann = bool(port.ask_yes_no('AC annunciator', f'{H.describe(p)}\n\nMeter: asset {m.asset}\n\nIs the AC annunciator ON in the meter display?\n\n'
                                                        'Yes = it is on.  No = it is not (the point then fails).'))
                     result, base = H.judge_numeric(p, entered, ann)
                     self._store(p, entered=entered, reading=base, result=result, annunciator=ann if p.get('annunciator') else None, source='typed')
@@ -667,7 +658,7 @@ class QueueMixin:
         if ms:
             self._queue_activate(ms[0])
             self._update_row(p)
-        self.root.after(30, lambda: self._next(points, i + 1, key))
+        port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _reading_labels_shared(self, p):
         labels = self.reading_labels(p)
@@ -714,7 +705,7 @@ class QueueMixin:
         False = go on with the ordinary single report of the meter shown."""
         if not self.queue_wants_run() or not any(m.found or m.left for m in self.queue.meters):
             return False
-        answer = messagebox.askyesnocancel('Reports', f'This run queue has {len(self.queue.meters)} meters.\n\nYes = one report for each meter (asset#-date).\n'
+        answer = port.ask_yes_no_cancel('Reports', f'This run queue has {len(self.queue.meters)} meters.\n\nYes = one report for each meter (asset#-date).\n'
                                                       f'No = only the report of the meter shown (asset {self.asset.get()}).\nCancel = do nothing.')
         if answer is None:
             return True
@@ -725,7 +716,6 @@ class QueueMixin:
 
     def queue_export_pdfs(self):
         """One 'Calibration Data' PDF per meter: asset#-date, its own rows, header, As Left, Asset History record and report snapshot."""
-        import report_dialog
         import report_pdf
         meters = [m for m in self.queue.meters]
         if not meters:
@@ -740,16 +730,16 @@ class QueueMixin:
         if keep is not None:
             self._queue_activate(keep)
         if not todo:
-            messagebox.showinfo('No results', 'No recorded results to export yet.')
+            port.message('info', 'No results', 'No recorded results to export yet.')
             return
         self.__dict__['_review_all_meters'] = True                 # the review window (report_review.py) then shows each meter in turn
         try:
-            details = report_dialog.ask_details(self.root, f'{self.info["name"]} performance verification')
+            details = port.report_details(f'{self.info["name"]} performance verification', parent=self.root)
         finally:
             self.__dict__.pop('_review_all_meters', None)
         if details is None:
             return
-        folder = filedialog.askdirectory(title='Folder for the reports (one PDF per meter)')
+        folder = port.choose_dir(title='Folder for the reports (one PDF per meter)')
         if not folder:
             return
         written, errors = [], []
@@ -783,5 +773,5 @@ class QueueMixin:
         if errors:
             msg += '\n\nNot written:\n' + '\n'.join(errors)
         self.status.set(f'Exported {len(written)} report(s) to {folder}')
-        (messagebox.showwarning if errors else messagebox.showinfo)('Queue reports', msg)
+        port.message('warning' if errors else 'info', 'Queue reports', msg)
         return written

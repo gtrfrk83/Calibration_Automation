@@ -27,6 +27,7 @@
    "ui_port.py",
    "ui_port_tk.py",
    "surprise.py",
+   "surprise_view_tk.py",
    "procspec.py",
    "drivers/base.py",
    "drivers/transport.py",

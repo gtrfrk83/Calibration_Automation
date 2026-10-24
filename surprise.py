@@ -19,7 +19,7 @@ read-back exception becomes the dialog).  A surprise can be `stop_only`: the dia
 handler answers (used where going on would use a reply that is not there, or would enable an output after a refusal).
 
 Demo mode: the guard is OFF on a virtual (demo) command log unless force=True (tests), so the simulated bench never pops a dialog.
-This module has no Tk import at load; the dialog (tk_handler) imports tkinter when it is first used."""
+This module imports no toolkit: the dialog window is surprise_view_tk.py (reached through ui_port.view), the scheduling is the window's own `after`."""
 from __future__ import annotations
 
 import math
@@ -333,17 +333,21 @@ def checked(instrument, call, *args, kind='errqueue', expected='empty error queu
 # ------------------------------------------------------------------------------------------------------------ the dialog
 class _TkAsker:
     """Shows the dialog on the Tk thread for a worker thread.  The worker never calls Tk: it queues a request and waits; a poller that runs ON the Tk
-    thread (root.after, started where the handler is made) shows the dialog and answers.  If nothing picks the request up within START_WAIT seconds
-    (no poller running: no mainloop, or the handler was made on a thread that cannot schedule) the answer is Stop, so a run can never hang here."""
+    thread (win.after, started where the handler is made) shows the dialog and answers.  If nothing picks the request up within START_WAIT seconds
+    (no poller running: no mainloop, or the handler was made on a thread that cannot schedule) the answer is Stop, so a run can never hang here.
+
+    No toolkit is imported here.  `win` is the host's main window object; `schedule(ms, fn)` runs fn on the UI thread after ms (default: win.after, what
+    ui_port_tk.TkUiPort.after does; a Qt port passes its own) and the dialog itself is the toolkit's view (surprise_view_tk.dialog, via ui_port.view)."""
     START_WAIT = 5.0
     POLL_MS = 50
 
-    def __init__(self, root, title):
-        self.root, self.title = root, title
+    def __init__(self, win, title, schedule=None):
+        self.win, self.title = win, title
+        self._schedule = schedule if schedule is not None else (lambda ms, fn: win.after(ms, fn))
         self.q = queue.Queue()
         self.alive = True
         try:
-            root.after(self.POLL_MS, self._tick)
+            self._schedule(self.POLL_MS, self._tick)
         except Exception:
             self.alive = False
 
@@ -355,14 +359,14 @@ class _TkAsker:
                     continue
                 req['started'].set()
                 try:
-                    req['go'] = bool(_dialog(self.root, self.title, req['s']))
+                    req['go'] = bool(_dialog(self.win, self.title, req['s']))
                 except Exception:
                     req['go'] = False
                 req['done'].set()
         except queue.Empty:
             pass
         try:
-            self.root.after(self.POLL_MS, self._tick)
+            self._schedule(self.POLL_MS, self._tick)
         except Exception:
             self.alive = False
 
@@ -370,7 +374,7 @@ class _TkAsker:
         req = dict(s=s, started=threading.Event(), done=threading.Event(), go=False, cancelled=False)
         if threading.current_thread() is threading.main_thread():       # already on the Tk thread: just show it (modal)
             try:
-                return bool(_dialog(self.root, self.title, s))
+                return bool(_dialog(self.win, self.title, s))
             except Exception:
                 return False
         self.q.put(req)
@@ -381,48 +385,13 @@ class _TkAsker:
         return req['go']
 
 
-def tk_handler(root, title='Stop on surprise'):
+def tk_handler(root, title='Stop on surprise', schedule=None):
     """A handler for Guard: ONE Tk dialog, True (Continue) / False (Stop).  Make it on the Tk thread (where the Run button's handler runs) before the
-    worker thread starts; the worker's surprise then waits for the operator without touching Tk itself."""
-    return _TkAsker(root, title).ask
+    worker thread starts; the worker's surprise then waits for the operator without touching Tk itself.  `schedule`: see _TkAsker (ui_port_tk passes none)."""
+    return _TkAsker(root, title, schedule).ask
 
 
 def _dialog(root, title, s):
-    import tkinter as tk
-    from tkinter import ttk
-    win = tk.Toplevel(root)
-    win.title(title)
-    win.transient(root)
-    result = {'go': False}
-    body = ttk.Frame(win, padding=12)
-    body.pack(fill='both', expand=True)
-    ttk.Label(body, text=KINDS.get(s.kind, s.kind), font=('TkDefaultFont', 11, 'bold')).pack(anchor='w')
-    ttk.Label(body, text='\n'.join(s.lines()), justify='left').pack(anchor='w', pady=(6, 6))
-    if getattr(s, 'stop_only', False):
-        ttk.Label(body, text='Continue is not offered here: the run cannot safely go on from this point.').pack(anchor='w', pady=(0, 6))
-    ttk.Label(body, text=f'Last {len(s.log_tail)} log lines:').pack(anchor='w')
-    box = tk.Text(body, width=100, height=12, wrap='none')
-    box.insert('1.0', '\n'.join(s.log_tail))
-    box.configure(state='disabled')
-    box.pack(fill='both', expand=True)
-    row = ttk.Frame(body)
-    row.pack(anchor='e', pady=(8, 0))
-
-    def pick(go):
-        result['go'] = go
-        win.destroy()
-
-    stop = ttk.Button(row, text='Stop', command=lambda: pick(False))
-    cont = None if getattr(s, 'stop_only', False) else ttk.Button(row, text='Continue', command=lambda: pick(True))
-    stop.pack(side='left', padx=4)
-    if cont is not None:
-        cont.pack(side='left', padx=4)
-    win.protocol('WM_DELETE_WINDOW', lambda: pick(False))      # closing the window is Stop
-    win._surprise = dict(stop=stop, cont=cont, text=box)
-    stop.focus_set()
-    try:
-        win.grab_set()
-    except tk.TclError:
-        pass
-    root.wait_window(win)
-    return result['go']
+    """The Stop / Continue window of the installed toolkit (surprise_view_tk.dialog for Tk): True = Continue.  Blocks until the operator answered."""
+    import ui_port
+    return ui_port.get_ui().view('surprise_view').dialog(root, title, s)
