@@ -226,12 +226,14 @@ class SurpriseMixin:
         return reply
 
 
-def attach_guard(instrument, handler=None, force=False, expect=None, stop_only=False):
+def attach_guard(instrument, handler=None, force=False, expect=None, stop_only=False, skip=()):
     """Opt-in for an EXISTING driver instance (class untouched): replaces ask() on this one object by a checked ask.  A reply that is empty, is a
     prompt character, or does not fit `expect` (a dict {registry key: 'float' | 'int' | regex}; other keys are only checked for empty / prompt) is a
     surprise.  A query that times out is retried ONCE (read-only, the standing rule), then it is a surprise with an empty reply.  Write / read-back /
     error-queue checks stay in the driver (route them with `checked`).  stop_only: True (every reply surprise offers Stop only) or a collection of
-    registry keys.  Returns the Guard (None on a demo log: the simulated bench never prompts)."""
+    registry keys.  skip: registry keys whose replies are left exactly as they are (not checked, no retry): used for the replies a driver itself turns
+    into a SafetyError (an output state it could not confirm), so the guard never replaces that hard stop.  Returns the Guard (None on a demo log: the
+    simulated bench never prompts)."""
     if getattr(instrument.log, 'virtual', False) and not force:
         return None
     g = Guard(instrument, handler)
@@ -241,7 +243,11 @@ def attach_guard(instrument, handler=None, force=False, expect=None, stop_only=F
     def only(key):
         return stop_only is True or (not isinstance(stop_only, bool) and key in (stop_only or ()))
 
+    skipped = frozenset(skip or ())
+
     def ask(key, **vals):
+        if key in skipped:
+            return plain(key, **vals)
         want = expect.get(key, 'any')
         try:
             reply = plain(key, **vals)
@@ -290,7 +296,7 @@ def _last_exchange(inst, since=0):
     return cmd, ' | '.join(bad) if bad else (last or '')
 
 
-def checked(instrument, call, *args, kind='errqueue', expected='empty error queue', stop_only=False, **kw):
+def checked(instrument, call, *args, kind='errqueue', expected='empty error queue', stop_only=False, classify=None, **kw):
     """Engine-level route for a driver check that raises InstrumentError itself (the error-queue check after a write, or a read-back compare inside a
     driver method).  `call` is the driver's own bound method, e.g. checked(dmm, dmm.check_errors, 'configuring ...').
 
@@ -299,6 +305,9 @@ def checked(instrument, call, *args, kind='errqueue', expected='empty error queu
         InstrumentError the check raises is shown as the surprise `kind` with the instrument's last reply, the command and the driver's own message.
         Stop raises SurpriseStop.  Continue (only when stop_only is False) returns None: the check had already read the queue; nothing is sent or
         retried.  Use stop_only=True where the driver call fails part-way (a read-back compare) or where going on would enable an output.
+    classify(exc, command, reply) -> None | dict(kind=, expected=, stop_only=): for a driver call that does several things (a setting with its read-back
+    compare AND the error-queue check in one method).  The engine says what the failure was from the exchange the call itself made; None re-raises the
+    driver's exception untouched (it was not an exchange with the instrument: a range check before anything was sent).
     The driver's pass/fail test is not copied: the driver decides, this only routes its exception."""
     g = getattr(instrument, '_guard', None)
     if g is None or not g.enabled:
@@ -310,6 +319,11 @@ def checked(instrument, call, *args, kind='errqueue', expected='empty error queu
         raise
     except InstrumentError as exc:
         cmd, reply = _last_exchange(instrument, start)           # only what the check itself sent
+        if classify is not None:
+            how = classify(exc, cmd, reply)
+            if how is None:
+                raise
+            kind, expected, stop_only = how.get('kind', kind), how.get('expected', expected), how.get('stop_only', stop_only)
         if check_reply(reply, 'any'):                            # no usable answer at all (empty, or a prompt character): a bad reply, never Continue
             g.surprise('reply', cmd, reply, f'a reply ({check_reply(reply, "any")})', str(exc), stop_only=True)
         g.surprise(kind, cmd, reply, expected, str(exc), stop_only=stop_only)

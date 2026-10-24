@@ -413,7 +413,7 @@ class TemplateIsWired(unittest.TestCase):
         self.assertTrue(issubclass(tpl.ModelName, surprise.SurpriseMixin))
 
     def test_shared_files_do_not_import_surprise(self):
-        for rel in ('drivers/base.py', 'drivers/transport.py', 'handheld_dmm.py', 'fgen_verification.py', 'tds2000c_verification.py'):     # not wired yet (the wired engines import it: tests/test_surprise_wiring.py)
+        for rel in ('drivers/base.py', 'drivers/transport.py', 'handheld_dmm.py', 'mdo4000c_verification.py', 'tds2000c_verification.py'):     # not wired (and the MDO4000C stays unwired though it shares drivers/reference_instruments.py with the generators) (the wired engines import it: tests/test_surprise_wiring.py)
             self.assertNotIn('import surprise', (ROOT / rel).read_text(encoding='utf-8'), rel)
 
 

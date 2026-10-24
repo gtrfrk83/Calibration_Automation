@@ -914,10 +914,434 @@ class A34411App(A34410App):
     HEADER = [('Instrument', 'Keysight 34411A'), ('Instrument ID', 'A1'), ('Serial', 'S1')]
 
 
+# =============================================================================================================================== function generators
+class FgenIO(unittest.TestCase):
+    """fgen_verification.IO (33210A / 33220A / 33250A under test, 5790B, counter and power meter) on the simulated bench, a fault in one transport.
+    The generator's SYST:ERR? is asked at connect and after each setup; the 5790B's ERR? after INPUT, EXTRIG and RANGE; the counter's :SYST:ERR? after its setup."""
+    MODEL = '33220A'
+
+    def build(self, uut=(), std=(), counter=(), power=(), dialog=None, connected='std'):
+        import fgen_verification as F
+        from drivers.simulated_fgen import make_fgen_bench
+        F.configure(self.MODEL)
+        self.F = F
+        self.bench, t = make_fgen_bench(self.MODEL)
+        self.bench.connected = connected
+        self.tr = dict(uut=FaultTransport(t['uut'], *uut), std=FaultTransport(t['std'], *std), counter=FaultTransport(t['counter'], *counter),
+                       power=FaultTransport(t['power'], *power))
+        io = F.IO({}, transports=self.tr, ask_number=None, virtual=True)             # virtual only for the short waits
+        io.log.virtual = False                                                       # a real-run log: the guard is on without force
+        if dialog is not None:
+            io.enable_surprise(dialog)
+        self.io = io
+        return io
+
+    def pt(self, kind, n=0):
+        return [p for p in self.F.POINTS if p['kind'] == kind][n]
+
+    def run_point(self, io, p, **bench):
+        for k, v in bench.items():
+            setattr(self.bench, k, v)
+        results = {str(q['id']): dict(reading=0.5) for q in self.F.POINTS if q.get('ref') in ('100k_0dB', '1k_0dB')}      # the two reference points a FLAT point needs
+        return io.measure(p, results, {})
+
+    AMP = dict(connected='std')
+
+    def amp(self, io, n=0):
+        self.bench.connected = 'std'
+        return io.measure(self.pt('ACAMP', n), {}, {})
+
+    def writes(self, key):
+        return self.tr[key].writes
+
+    def uut_off(self):
+        return self.tr['uut'].writes[-1] == 'OUTP OFF'
+
+    # ---- clean ----
+    def test_clean_run_asks_nothing_and_sends_the_same_commands(self):
+        def run(io):
+            out = [io.measure(self.pt('SELFTEST'), {}, {})]
+            out.append(self.run_point(io, self.pt('TIMEBASE'), connected='counter'))
+            out.append(self.run_point(io, self.pt('ACAMP'), connected='std'))
+            out.append(self.run_point(io, self.pt('LFFLAT'), connected='std'))
+            out.append(self.run_point(io, self.pt('FLAT'), connected='power'))
+            return out
+        plain = self.build()
+        r0 = run(plain)
+        log0 = stable_log(plain)
+        d = Dialog()
+        io = self.build(dialog=d)
+        self.assertEqual(len(io.guards), 4, 'generator, 5790B, counter, power meter')
+        r1 = run(io)
+        self.assertEqual(r0, r1)
+        self.assertEqual(stable_log(io), log0, 'guarded and unguarded runs must send exactly the same commands')
+        self.assertEqual((d.count, surprise_lines(io)), (0, []))
+
+    def test_demo_log_is_never_guarded(self):
+        io = self.build()
+        io.log.virtual = True
+        self.assertEqual(io.enable_surprise(Dialog()), [])
+
+    # ---- (a) a bad reply ----
+    def test_bad_reply_from_the_5790B_is_a_stop_only_surprise(self):
+        for bad in ('', '=>', '?>', 'abc'):
+            d = Dialog(True)                                        # the handler says Continue; the engine did not offer it
+            io = self.build(std=[Rule('MEAS?', bad, nth=1)], dialog=d)
+            with self.assertRaises(surprise.SurpriseStop):
+                self.amp(io)
+            s = d.seen[0]
+            self.assertEqual((d.count, s.kind, s.stop_only, s.command), (1, 'reply', True, 'MEAS?'), bad)
+            self.assertEqual(self.tr['std'].queries.count('MEAS?'), 1, 'the read is not repeated')
+            self.assertEqual(self.writes('uut').count('OUTP ON'), 1)
+            self.assertTrue(self.uut_off(), 'the generator output is OFF again (the engine\'s own all_off)')
+            self.assertTrue(any('Continue is not offered' in t for t in surprise_lines(io)))
+
+    def test_bad_reply_from_the_generator_during_setup_never_enables_the_output(self):
+        for bad in ('', '=>', 'abc'):
+            d = Dialog(True)
+            io = self.build(uut=[Rule('FREQ?', bad)], dialog=d)
+            with self.assertRaises(surprise.SurpriseStop):
+                self.amp(io)
+            self.assertEqual((d.count, d.seen[0].kind, d.seen[0].stop_only, d.seen[0].command), (1, 'reply', True, 'FREQ?'), bad)
+            self.assertNotIn('OUTP ON', self.writes('uut'))
+            self.assertEqual(self.writes('uut').count('FREQ 1000'), 1, 'the write is not repeated')
+            self.assertTrue(self.uut_off())
+
+    def test_bad_reply_from_the_counter_and_the_power_meter(self):
+        d = Dialog(True)
+        io = self.build(counter=[Rule('READ?', '=>')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            self.run_point(io, self.pt('TIMEBASE'), connected='counter')
+        self.assertEqual((d.count, d.seen[0].kind, d.seen[0].stop_only, d.seen[0].instrument), (1, 'reply', True, 'Counter'))
+        self.assertTrue(self.uut_off())
+        d = Dialog(True)
+        io = self.build(power=[Rule('MEAS:POW?', 'abc'), Rule('MEASURE:POWER?', 'abc')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            self.run_point(io, self.pt('FLAT'), connected='power')
+        self.assertEqual((d.count, d.seen[0].kind, d.seen[0].stop_only, d.seen[0].instrument), (1, 'reply', True, 'PowerMeter'))
+        self.assertEqual(self.writes('uut').count('OUTP ON'), 1)
+        self.assertTrue(self.uut_off())
+
+    def test_one_timeout_is_retried_once_two_are_a_surprise(self):
+        clean = self.amp(self.build())
+        d = Dialog()
+        io = self.build(std=[Rule('MEAS?', timeout=True, nth=1, times=1)], dialog=d)
+        self.assertEqual(self.amp(io), clean)
+        self.assertEqual(d.count, 0)
+        self.assertEqual(self.writes('uut').count('OUTP ON'), 1, 'the generator write is not repeated')
+        d2 = Dialog()
+        io = self.build(std=[Rule('MEAS?', timeout=True, nth=1, times=2)], dialog=d2)
+        with self.assertRaises(surprise.SurpriseStop):
+            self.amp(io)
+        self.assertEqual((d2.count, d2.seen[0].reply, d2.seen[0].stop_only), (1, '', True))
+        self.assertTrue(self.uut_off())
+
+    # ---- (b) read-back that does not match ----
+    def test_generator_readback_mismatch_is_a_stop_only_surprise(self):
+        d = Dialog(True)
+        io = self.build(uut=[Rule('FREQ?', '+5.000000000000E+03')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            self.amp(io)
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only, s.command, s.reply), (1, 'readback', True, 'FREQ?', '+5.000000000000E+03'))
+        self.assertEqual(self.writes('uut').count('FREQ 1000'), 1, 'sent once, never repeated')
+        self.assertFalse([w for w in self.writes('uut') if w.startswith('VOLT 0')], 'the driver stopped part-way: the amplitude was never sent')
+        self.assertNotIn('OUTP ON', self.writes('uut'))
+        self.assertTrue(self.uut_off())
+        self.assertTrue(any('SURPRISE readback' in t for t in surprise_lines(io)))
+
+    def test_without_the_guard_a_readback_mismatch_still_raises_as_before(self):
+        io = self.build(uut=[Rule('FREQ?', '+5.000000000000E+03')])
+        with self.assertRaises(self.F.drivers.InstrumentError) as cm:
+            self.amp(io)
+        self.assertNotIsInstance(cm.exception, surprise.SurpriseStop)
+        self.assertIn('frequency', str(cm.exception))
+
+    def test_5790B_readback_mismatch_is_a_stop_only_surprise(self):
+        for rule, cmd in ((Rule('INPUT?', 'INPUT2'), 'INPUT?'), (Rule('EXTRIG?', '0'), 'EXTRIG?'), (Rule('RANGE?', '2.2E+00,1E-01,2E-06,1'), 'RANGE?')):
+            d = Dialog(True)
+            io = self.build(std=[rule], dialog=d)
+            with self.assertRaises(surprise.SurpriseStop):
+                self.amp(io)
+            s = d.seen[0]
+            self.assertEqual((d.count, s.kind, s.stop_only, s.command), (1, 'readback', True, cmd))
+            self.assertNotIn('OUTP ON', self.writes('uut'), 'nothing is switched on after a setting that did not take')
+            self.assertTrue(self.uut_off())
+
+    def test_output_on_not_confirmed_is_a_stop_only_surprise(self):
+        for bad, kind in (('0', 'readback'), ('', 'reply')):
+            d = Dialog(True)
+            io = self.build(uut=[Rule('OUTP?', bad, after='OUTP ON')], dialog=d)
+            with self.assertRaises(surprise.SurpriseStop):
+                self.amp(io)
+            s = d.seen[0]
+            self.assertEqual((d.count, s.kind, s.stop_only), (1, kind, True), bad)
+            self.assertEqual(self.writes('uut').count('OUTP ON'), 1)
+            self.assertTrue(self.uut_off())
+
+    def test_counter_readback_mismatch_is_a_stop_only_surprise(self):
+        d = Dialog(True)
+        io = self.build(counter=[Rule(':FREQ:ARM:STOP:TIM?', '+5.00000E+00')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            self.run_point(io, self.pt('TIMEBASE'), connected='counter')
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only, s.instrument), (1, 'readback', True, 'Counter'))
+        self.assertEqual(self.writes('counter').count(':FREQ:ARM:STOP:TIM 1'), 1)
+        self.assertTrue(self.uut_off(), 'the generator was already on for the counter; the engine puts it OFF')
+
+    # ---- (c) error queue after a write ----
+    def test_generator_error_queue_after_setup_is_stop_only_and_never_enables_the_output(self):
+        d = Dialog(True)
+        io = self.build(uut=[Rule('SYST:ERR?', '-221,"Settings conflict"', after='VOLT 0')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            self.amp(io)
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only, s.command), (1, 'errqueue', True, 'SYST:ERR?'))
+        self.assertIn('-221', s.reply)
+        self.assertNotIn('OUTP ON', self.writes('uut'))
+        self.assertTrue(self.uut_off())
+
+    def test_5790B_error_queue_after_the_trigger_setting_offers_stop_and_continue(self):
+        rule = lambda: [Rule('ERR?', '-113,"Undefined header"', after='EXTRIG')]
+        d = Dialog(False)
+        io = self.build(std=rule(), dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            self.amp(io)
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only), (1, 'errqueue', False))
+        self.assertIn('-113', s.reply)
+        self.assertNotIn('OUTP ON', self.writes('uut'))
+        self.assertTrue(self.uut_off())
+        d = Dialog(True)
+        io = self.build(std=rule(), dialog=d)
+        self.assertEqual(self.amp(io), self.amp(self.build()), 'Continue: measured exactly as in a clean run')
+        self.assertEqual((d.count, self.writes('uut').count('OUTP ON')), (1, 1))
+        self.assertTrue(any('operator chose Continue' in t for t in surprise_lines(io)))
+
+    def test_5790B_error_queue_after_input_and_range_is_stop_only(self):
+        for after in ('INPUT', 'RANGE'):
+            d = Dialog(True)
+            io = self.build(std=[Rule('ERR?', '-113,"Undefined header"', after=after)], dialog=d)
+            with self.assertRaises(surprise.SurpriseStop):
+                self.amp(io)
+            self.assertEqual((d.count, d.seen[0].kind, d.seen[0].stop_only), (1, 'errqueue', True), after)
+            self.assertNotIn('OUTP ON', self.writes('uut'))
+
+    def test_counter_error_queue_after_its_setup_is_stop_only(self):
+        d = Dialog(True)
+        io = self.build(counter=[Rule(':SYST:ERR?', '-221,"Settings conflict"', after=':FREQ:EXP1')], dialog=d)
+        with self.assertRaises(surprise.SurpriseStop):
+            self.run_point(io, self.pt('TIMEBASE'), connected='counter')
+        s = d.seen[0]
+        self.assertEqual((d.count, s.kind, s.stop_only, s.instrument), (1, 'errqueue', True, 'Counter'))
+        self.assertTrue(self.uut_off())
+
+    def test_self_test_error_queue_entry_is_a_stop_only_surprise(self):
+        d = Dialog(True)
+        io = self.build(uut=[Rule('SYST:ERR?', '-330,"Self-test failed"', nth=2)], dialog=d)       # connect asks once, the self-test's check once
+        with self.assertRaises(surprise.SurpriseStop):
+            io.measure(self.pt('SELFTEST'), {}, {})
+        self.assertEqual((d.count, d.seen[0].kind, d.seen[0].stop_only), (1, 'errqueue', True))
+        self.assertTrue(self.uut_off())
+
+    # ---- what is NOT a surprise ----
+    def test_a_missing_external_timebase_keeps_its_own_message(self):
+        d = Dialog()
+        io = self.build(dialog=d)
+        self.bench.counter['ext_ref'] = False
+        with self.assertRaises(self.F.drivers.InstrumentError) as cm:
+            self.run_point(io, self.pt('TIMEBASE'), connected='counter')
+        self.assertNotIsInstance(cm.exception, surprise.SurpriseStop)
+        self.assertIn('no valid external timebase', str(cm.exception))
+        self.assertEqual(d.count, 0)
+        self.assertTrue(self.uut_off())
+
+    def test_a_setting_refused_before_anything_is_sent_keeps_its_own_message(self):
+        d = Dialog()
+        io = self.build(dialog=d)
+        p = dict(self.pt('ACAMP'), frequency=1e9)
+        with self.assertRaises(self.F.drivers.InstrumentError) as cm:
+            self.bench.connected = 'std'
+            io.measure(p, {}, {})
+        self.assertNotIsInstance(cm.exception, surprise.SurpriseStop)
+        self.assertIn('above the', str(cm.exception))
+        self.assertEqual(d.count, 0)
+
+    def test_output_off_not_confirmed_is_still_a_safety_error_with_no_dialog(self):
+        d = Dialog(True)
+        io = self.build(dialog=d)
+        self.bench.gen['stuck_on'] = True
+        with self.assertRaises(self.F.drivers.SafetyError):
+            self.amp(io)
+        self.assertEqual(d.count, 0)
+        d = Dialog(True)
+        io = self.build(dialog=d)
+        self.tr['uut'].add(Rule('OUTP?', '', after='OUTP OFF', times=50))
+        with self.assertRaises(self.F.drivers.SafetyError):
+            io.all_off()
+        io.close()                                                      # cleanup() swallows what it must; no dialog is shown there either
+        self.assertEqual(d.count, 0)
+
+
+class FgenIO33210A(FgenIO):
+    MODEL = '33210A'
+
+
+class FgenIO33250A(FgenIO):
+    MODEL = '33250A'
+
+
+class FgenApp(AppCase):
+    """The whole App on the virtual bench (stubbed Tk), the guard forced on."""
+    MODEL = '33220A'
+
+    def make(self, uut=(), std=(), guard=True):
+        import fgen_verification as F
+        import drivers.simulated_fgen as sim
+        from tkinter import simpledialog
+        F.configure(self.MODEL)
+        F.messagebox = h.messagebox
+        self.patch(simpledialog, 'askfloat', lambda *a, **k: k.get('initialvalue'))
+        dialog = self.dialog
+        real = sim.make_fgen_bench
+
+        def bench(model='33220A'):
+            b, t = real(model)
+            t = dict(t, uut=FaultTransport(t['uut'], *uut), std=FaultTransport(t['std'], *std))
+            return b, t
+        self.patch(sim, 'make_fgen_bench', bench)
+        if guard:
+            orig = F.IO
+
+            class Guarded(orig):
+                def __init__(self, *a, **k):
+                    super().__init__(*a, **k)
+                    self.enable_surprise(dialog, force=True)          # force: a virtual (demo) log is otherwise never guarded
+            self.patch(F, 'IO', Guarded)
+        app = F.App(self.hn.root, self.MODEL, demo=True, fast_demo=False)
+        app.asset.set('A1')
+        app.serial.set('S1')
+        self.hn.app = app
+        return app
+
+    restart = TruevoltApp.restart
+
+    def digest(self, app):
+        """Command log, results, report rows and PDF bytes of a finished run (what the run leaves as evidence)."""
+        import report_pdf
+        import report_dialog
+        from tkinter import filedialog
+        from reportlab import rl_config
+        rl_config.invariant = 1
+        path = Path(tempfile.mkdtemp()) / 'r.pdf'
+        real = report_pdf.write_calibration_pdf
+
+        def write(p, rows, **kw):
+            return real(p, rows, **dict(kw, issued_at='2026-01-01 00:00', record_history=False))
+        with mock.patch.object(filedialog, 'asksaveasfilename', lambda **k: str(path)), mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: {}), \
+                mock.patch.object(report_pdf, 'write_calibration_pdf', write):
+            app.export_pdf()
+        return (stable_log(app.io), results_view(app), json.dumps(app.certificate_rows(), sort_keys=True, default=str), path.read_bytes(), VH.wire(app.io))
+
+    def test_clean_run_is_identical_with_and_without_the_guard(self):
+        app0 = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        ref = self.digest(app0)
+        self.restart()
+        app1 = self.make(guard=True)
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 0)
+        self.assertTrue(app1.io.guards)
+        got = self.digest(app1)
+        self.assertEqual(got[0], ref[0], 'command log')
+        self.assertEqual(got[1], ref[1], 'results')
+        self.assertEqual(got[2], ref[2], 'report rows')
+        self.assertEqual(got[3], ref[3], 'PDF bytes')
+        self.assertEqual(got[4], ref[4], 'wire')
+
+    def test_a_real_connection_wires_the_guard_with_the_apps_handler(self):
+        import fgen_verification as F
+        from drivers.simulated_fgen import make_fgen_bench
+        F.configure(self.MODEL)
+        F.messagebox = h.messagebox
+        _b, t = make_fgen_bench(self.MODEL)
+        self.patch(F.drivers, 'open_visa', lambda addr, **k: t['uut'] if addr.upper().startswith('USB') else t['std'])
+        app = F.App(self.hn.root, self.MODEL, demo=False, fast_demo=False)
+        self.hn.app = app
+        self.patch(app, '_surprise_handler', lambda: self.dialog)
+        app.test_connections()
+        self.assertIsNotNone(app.io)
+        self.assertEqual([g.handler for g in app.io.guards], [self.dialog, self.dialog])
+        self.assertFalse(app.io.log.virtual)
+
+    def test_demo_without_the_forced_guard_never_prompts(self):
+        with mock.patch.object(surprise, 'tk_handler', side_effect=AssertionError('demo must not build a dialog')):
+            app = self.make(guard=False)
+            self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 0)
+        self.assertEqual(app.io.guards, [])
+
+    def test_demo_and_fast_demo_never_make_a_handler(self):
+        import fgen_verification as F
+        for demo, fast in ((True, False), (True, True)):
+            app = F.App.__new__(F.App)
+            app.demo, app._fast_demo = demo, fast
+            with mock.patch.object(surprise, 'tk_handler', side_effect=AssertionError):
+                self.assertIsNone(app._surprise_handler())
+        app = F.App.__new__(F.App)
+        app.demo, app._fast_demo, app.root = False, False, object()
+        with mock.patch.object(surprise, 'tk_handler', return_value=lambda s: False) as tk:
+            self.assertIs(app._surprise_handler(), app._surprise_handler())
+        tk.assert_called_once_with(app.root)
+
+    def test_stop_on_a_bad_reply_goes_through_the_engines_standby_and_error_dialog(self):
+        app = self.make(std=[Rule('MEAS?', '=>', nth=3)])
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 1)
+        self.assertFalse(app.busy)
+        self.assertTrue(self.hn.boxes('showerror'))
+        self.assertEqual(VH.wire(app.io)[-2:], [(app.io.uut.label, 'OUTP OFF'), (app.io.uut.label, 'OUTP?')])
+        self.assertEqual(self.dialog.seen[0].kind, 'reply')
+
+    def test_writes_are_never_repeated_after_a_surprise(self):
+        clean = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        clean_wire = VH.wire(clean.io)
+        self.restart()
+        app = self.make(uut=[Rule('FREQ?', '+9.0E+03', nth=4)])
+        self.assertTrue(self.hn.run_all())
+        wire = VH.wire(app.io)
+        tail = [(app.io.uut.label, 'OUTP OFF'), (app.io.uut.label, 'OUTP?')]          # the engine's own all_off after the stop
+        self.assertEqual(wire[-2:], tail)
+        wire = wire[:-2]
+        self.assertGreater(len(wire), 20)
+        self.assertEqual(wire, clean_wire[:len(wire)], 'up to the surprise the run sent exactly what the clean run sent; nothing was repeated')
+        self.assertEqual(self.dialog.seen[0].kind, 'readback')
+
+    def test_continue_on_a_5790B_error_queue_entry_records_every_point_like_a_clean_run(self):
+        clean = self.make(guard=False)
+        self.assertTrue(self.hn.run_all())
+        ref = results_view(clean)
+        self.restart(Dialog(True))
+        app = self.make(std=[Rule('ERR?', '-113,"Undefined header"', after='EXTRIG', nth=2)])
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.dialog.count, 1)
+        self.assertEqual(results_view(app), ref)
+        self.assertFalse(self.hn.boxes('showerror'))
+
+
+class FgenApp33210A(FgenApp):
+    MODEL = '33210A'
+
+
+class FgenApp33250A(FgenApp):
+    MODEL = '33250A'
+
+
 # =============================================================================================================================== real Tk
 class RealTkEngines(unittest.TestCase):
     """The real engine window on a real Tk 9 under Xvfb, a worker thread and mainloop (tests/real_tk_surprise_engine.py)."""
-    ENGINES = ('truevolt', 'dacq', 'a34410')
+    ENGINES = ('truevolt', 'dacq', 'a34410', 'fgen')
 
     def run_one(self, engine, scenario):
         import os
