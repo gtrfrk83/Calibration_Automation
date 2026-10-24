@@ -21,7 +21,6 @@ sys.path.append(str(BASE.parent))  # shared ui_theme.py sits next to the Manager
 import ui_theme as ui
 import drivers
 import reset_startup
-DB = BASE / 'calibration_procedures.sqlite3'
 STEPS = [
     ('PRE', 'As Found verification', 'Run and save the complete independent 8846A performance verification before any adjustment.', '', '', False),
     ('PRE', 'Equipment and safety', 'Verify technician authorization, warm-up, 5560A traceability, required fixtures, firmware and correct 8846A identity.', '', '', False),
@@ -40,23 +39,70 @@ STEPS = [
 ]
 
 
-def connect_db():
-    con = sqlite3.connect(DB)
+RUNS = 'adjustment_runs_8846a'      # same columns as the old adjustment_runs / adjustment_events of calibration_procedures.sqlite3;
+EVENTS = 'adjustment_events_8846a'  # suffixed because adjustment_audit.py (Keithley 2000 / 8808A) already owns the plain names in lab_registry.sqlite3
+MIGRATION = 'adjustment_8846a_migration'
+
+
+def _registry_path():
+    import appdata
+    return appdata.db_path('lab_registry.sqlite3')
+
+
+def _legacy_path():
+    import appdata
+    return appdata.db_path('calibration_procedures.sqlite3')
+
+
+def _migrate_legacy(con, legacy):
+    """Copy the old 8846A adjustment history from calibration_procedures.sqlite3 into the registry, once.
+    The old file is opened READ-ONLY (never altered, never dropped); rows keep their ids, so a repeat can never duplicate."""
+    if con.execute(f'SELECT 1 FROM {MIGRATION} WHERE source=?', ('calibration_procedures.sqlite3',)).fetchone():
+        return 0
+    old_file = Path(legacy)
+    if not old_file.exists():
+        return 0
+    old = sqlite3.connect(f'file:{old_file.as_posix()}?mode=ro', uri=True, timeout=5)
+    try:
+        have = {r[0] for r in old.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        if not {'adjustment_runs', 'adjustment_events'} <= have:
+            return 0
+        runs = old.execute('SELECT id,asset_id,serial_number,technician,meter_idn,status,created_at,updated_at FROM adjustment_runs ORDER BY id').fetchall()
+        events = old.execute('SELECT id,run_id,event_time,step_index,action,detail,outcome FROM adjustment_events ORDER BY id').fetchall()
+    finally:
+        old.close()
+    with con:
+        con.executemany(f'INSERT OR IGNORE INTO {RUNS}(id,asset_id,serial_number,technician,meter_idn,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)', runs)
+        con.executemany(f'INSERT OR IGNORE INTO {EVENTS}(id,run_id,event_time,step_index,action,detail,outcome) VALUES(?,?,?,?,?,?,?)', events)
+        con.execute(f'INSERT OR IGNORE INTO {MIGRATION}(source,runs,events) VALUES(?,?,?)', ('calibration_procedures.sqlite3', len(runs), len(events)))
+    return len(runs)
+
+
+def connect_db(path=None, legacy=None):
+    """The adjustment audit tables live in lab_registry.sqlite3 (new tables only). calibration_procedures.sqlite3 is never written."""
+    con = sqlite3.connect(str(path or _registry_path()))
     con.execute('PRAGMA foreign_keys=ON')
-    con.execute('''CREATE TABLE IF NOT EXISTS adjustment_runs (
+    con.execute(f'''CREATE TABLE IF NOT EXISTS {RUNS} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         asset_id TEXT NOT NULL, serial_number TEXT NOT NULL,
         technician TEXT NOT NULL, meter_idn TEXT NOT NULL DEFAULT '',
         status TEXT NOT NULL DEFAULT 'IN_PROGRESS',
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)''')
-    con.execute('''CREATE TABLE IF NOT EXISTS adjustment_events (
+    con.execute(f'''CREATE TABLE IF NOT EXISTS {EVENTS} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        run_id INTEGER NOT NULL REFERENCES adjustment_runs(id),
+        run_id INTEGER NOT NULL REFERENCES {RUNS}(id),
         event_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         step_index INTEGER, action TEXT NOT NULL, detail TEXT NOT NULL DEFAULT '',
         outcome TEXT NOT NULL DEFAULT '')''')
+    con.execute(f'''CREATE TABLE IF NOT EXISTS {MIGRATION} (
+        source TEXT PRIMARY KEY, runs INTEGER NOT NULL, events INTEGER NOT NULL,
+        migrated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)''')
     con.commit()
+    try:
+        _migrate_legacy(con, legacy or _legacy_path())
+    except sqlite3.Error:
+        pass    # old file unreadable: history stays where it is, the new tables start empty; nothing is written to the old file
     return con
 
 
@@ -252,10 +298,10 @@ class App:
 
     def log(self, action, detail='', outcome='', index=None):
         if self.run_id is None: return
-        self.conn.execute('INSERT INTO adjustment_events(run_id,step_index,action,detail,outcome) VALUES(?,?,?,?,?)',
+        self.conn.execute('INSERT INTO adjustment_events_8846a(run_id,step_index,action,detail,outcome) VALUES(?,?,?,?,?)',
                           (self.run_id,index,action,detail,outcome))
         self._audit_row(action, detail, outcome)
-        self.conn.execute('UPDATE adjustment_runs SET updated_at=CURRENT_TIMESTAMP WHERE id=?',(self.run_id,))
+        self.conn.execute('UPDATE adjustment_runs_8846a SET updated_at=CURRENT_TIMESTAMP WHERE id=?',(self.run_id,))
         self.conn.commit()
 
     def connect(self):
@@ -300,7 +346,7 @@ class App:
         if not messagebox.askyesno('Start new record','Start a new adjustment audit record? This does not unlock the meter.'):
             return
         if not self.reset_meter():return
-        cur=self.conn.execute('INSERT INTO adjustment_runs(asset_id,serial_number,technician,meter_idn) VALUES(?,?,?,?)',
+        cur=self.conn.execute('INSERT INTO adjustment_runs_8846a(asset_id,serial_number,technician,meter_idn) VALUES(?,?,?,?)',
                 (self.asset.get().strip(),self.serial.get().strip(),self.tech.get().strip(),
                  self.meter.idn if self.meter else 'DEMO'))
         self.run_id=cur.lastrowid;self.conn.commit();self.committed=False;self.log_table.delete(*self.log_table.get_children())
@@ -310,7 +356,7 @@ class App:
     def resume(self):
         if not self.asset.get().strip():
             messagebox.showwarning('Instrument ID','Enter instrument ID to find previous records.');return
-        row=self.conn.execute('SELECT id,serial_number,technician,status FROM adjustment_runs WHERE asset_id=? ORDER BY id DESC LIMIT 1',
+        row=self.conn.execute('SELECT id,serial_number,technician,status FROM adjustment_runs_8846a WHERE asset_id=? ORDER BY id DESC LIMIT 1',
                               (self.asset.get().strip(),)).fetchone()
         if not row:
             messagebox.showinfo('No record','No previous adjustment record found.');return
@@ -392,7 +438,7 @@ class App:
         try:
             if not self.demo:self.meter.record_calibration()
             self.log('CAL_RECORD','CAL:REC issued; independent As Left verification required','DEMO' if self.demo else 'ISSUED')
-            self.conn.execute("UPDATE adjustment_runs SET status='ADJUSTED_NOT_VERIFIED' WHERE id=?",(self.run_id,));self.conn.commit()
+            self.conn.execute("UPDATE adjustment_runs_8846a SET status='ADJUSTED_NOT_VERIFIED' WHERE id=?",(self.run_id,));self.conn.commit()
             self.committed=True;self._sync()
             self.status.set('Coefficients recorded; run independent As Left verification before closing calibration')
             messagebox.showwarning('As Left verification required','Coefficient record command issued. Perform independent As Left verification and save its report.')
