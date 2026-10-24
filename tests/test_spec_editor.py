@@ -287,6 +287,78 @@ class Editing(Sandbox):
         self.assertEqual({c.key for c in d.diff()}, {'variant', 'qualifiers', 'notes'})
 
 
+class PreExisting(Sandbox):
+    """Owner decision: only errors the pending edit INTRODUCES block saving; errors the file already had stay red and show as 'existing'."""
+
+    def setUp(self):
+        super().setUp()
+        path = self.sd / COIL
+        data = json.loads(path.read_text(encoding='utf-8'))
+        data['functions'][0]['ranges'][2]['params'][0]['notes'] = [2, 99]          # a note that does not exist, in the file before any edit
+        path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
+        sm.seed(self.sd, self.db)
+
+    def test_existing_error_is_red_but_marked_existing(self):
+        d = self.doc()
+        rep = se.validate(d)
+        ru = d.uid(d.lines()[2].rng)
+        self.assertEqual(rep.worst('rows', ru), 'error')
+        self.assertTrue(all(i.existing for i in rep.errors))
+        self.assertEqual(rep.new_errors, [])
+        self.assertIn('existing', rep.text_for('rows', ru))
+        self.assertTrue(rep.can_save)
+
+    def test_unrelated_edit_saves_and_the_error_stays(self):
+        d = self.edited_doc()                                                        # resolution of row 1: unrelated
+        rep = se.validate(d)
+        self.assertTrue(rep.can_save)
+        self.assertEqual(len(rep.existing_errors), 1)
+        self.assertTrue([c for c in rep.checks if 'already in the file' in c[1]])
+        self.save(d)
+        d2 = self.doc()
+        self.assertEqual(len(se.validate(d2).existing_errors), 0 + 1)               # still there after the save, still red
+        self.assertEqual(elog.count(COIL, self.db), 1)
+
+    def test_edit_of_the_row_that_has_the_error_but_not_its_cause_saves(self):
+        d = self.doc()
+        d.edit_cell(d.lines()[2].iid, 'page', '12')
+        self.assertTrue(se.validate(d).can_save)
+
+    def test_a_new_error_blocks_even_with_an_existing_one(self):
+        d = self.doc()
+        d.edit_cell(d.lines()[0].iid, 'notes', '2, 98')
+        rep = se.validate(d)
+        self.assertFalse(rep.can_save)
+        self.assertEqual([i.message for i in rep.new_errors], ['Row 1: note 98 does not exist.'])
+        self.assertEqual(len(rep.existing_errors), 1)
+        with self.assertRaises(eio.SaveError) as cm:
+            self.save(d)
+        self.assertIn('note 98', str(cm.exception))
+        self.assertEqual(elog.entries(COIL, self.db), [])
+
+    def test_a_second_missing_note_on_the_same_row_is_new(self):
+        d = self.doc()
+        d.edit_cell(d.lines()[2].iid, 'notes', '2, 99, 97')
+        rep = se.validate(d)
+        self.assertFalse(rep.can_save)
+        self.assertTrue([i for i in rep.new_errors if 'note 97' in i.message])
+
+    def test_an_edit_that_fixes_the_error_is_allowed(self):
+        d = self.doc()
+        d.edit_cell(d.lines()[2].iid, 'notes', '2, 4')
+        rep = se.validate(d)
+        self.assertEqual((rep.errors, rep.can_save), ([], True))
+        self.save(d)
+        self.assertEqual(se.validate(self.doc()).errors, [])
+
+    def test_row_numbers_shifting_do_not_make_an_old_error_new(self):
+        d = self.doc()
+        d.add_range_after(d.ranges()[0][1])                                           # the bad row becomes row 4
+        d.edit_cell(d.lines()[0].iid, 'page', '3')
+        rep = se.validate(d)
+        self.assertEqual(rep.new_errors, [])
+
+
 class Validation(Sandbox):
     def test_missing_note_is_a_red_row_with_its_issue_text(self):
         """The owner's rule: a row with an error is red (an issue list per row), live as the edit changes."""

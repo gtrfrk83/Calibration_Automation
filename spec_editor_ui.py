@@ -947,7 +947,7 @@ class EditorWindow:
             img = 'error' if i.level == 'error' else 'warn'
             p.image_create('end', image=self.icons[img], padx=2)
             tag = f'go{shown}'
-            p.insert('end', ' ' + (i.message.rstrip('.') + ' (blocks saving)' if i.level == 'error' else i.message) + '\n', ('errline' if i.level == 'error' else 'warnline', tag))
+            p.insert('end', ' ' + (i.message.rstrip('.') + (' (existing, does not block)' if i.existing else ' (blocks saving)') if i.level == 'error' else i.message) + '\n', ('errline' if i.level == 'error' else 'warnline', tag))
             if i.area == 'rows' and i.target is not None:
                 p.tag_bind(tag, '<Button-1>', lambda _e, u=i.target: self.goto_row(u))
                 p.tag_bind(tag, '<Enter>', lambda _e: p.configure(cursor='hand2'))
@@ -1070,7 +1070,7 @@ class EditorWindow:
         if not self.doc or not self.doc.change_count():
             return None
         if not self.report.can_save:
-            self.say(f'{len(self.report.errors)} error(s) must be fixed first (red rows).', 'error')
+            self.say(f'{len(self.report.new_errors)} error(s) introduced by this edit must be fixed first (red rows).', 'error')
             return None
         dlg = SaveDialog(self)
         return dlg
@@ -1280,6 +1280,9 @@ class SaveDialog:
             notes.append('Procedures that list this file in their fingerprint will show "Changed since verification": ' + ', '.join(listed) + '. Only you mark them verified again.')
         else:
             notes.append('Procedures that use this standard: no procedure fingerprint lists this file, so none flips to "Changed since verification" from this save. Only you mark a procedure verified.')
+        old = editor.report.existing_errors
+        if old:
+            notes.append(f'{len(old)} error{"s" if len(old) != 1 else ""} already in this sheet (not from this edit) stay red and are saved as they are: ' + '; '.join(i.message.rstrip('.') for i in old[:3]) + ('; ...' if len(old) > 3 else '') + '.')
         builders = se.builders_for(self.doc.name)
         if builders:
             notes.append('Running ' + ', '.join(n for n, _ in builders) + ' again will overwrite this edit (the builder rewrites the whole file). The history marks the sheet as edited by hand.')

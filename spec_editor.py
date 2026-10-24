@@ -1149,6 +1149,7 @@ class Issue:
     message: str
     where: str = ''
     row: int = 0                # 1-based row number for rows
+    existing: bool = False      # an error that the file already had before this edit (shown red, does not block saving)
 
 
 class Report:
@@ -1165,8 +1166,18 @@ class Report:
         return [i for i in self.issues if i.level == 'warn']
 
     @property
+    def new_errors(self):
+        """The errors this edit INTRODUCES; only these block saving."""
+        return [i for i in self.issues if i.level == 'error' and not i.existing]
+
+    @property
+    def existing_errors(self):
+        """Errors the file already has without the pending edit: still red, listed as 'existing', never block a save."""
+        return [i for i in self.issues if i.level == 'error' and i.existing]
+
+    @property
     def can_save(self) -> bool:
-        return not self.errors
+        return not self.new_errors
 
     def for_target(self, area, target):
         return [i for i in self.issues if i.area == area and i.target == target]
@@ -1183,7 +1194,8 @@ class Report:
         return ''
 
     def text_for(self, area, target) -> str:
-        return '\n'.join(('✕ ' if i.level == 'error' else '⚠ ') + i.message for i in self.for_target(area, target) if i.level in ('error', 'warn'))
+        return '\n'.join(('✕ ' if i.level == 'error' else '⚠ ') + i.message + (' (existing, not from this edit)' if i.existing else '')
+                         for i in self.for_target(area, target) if i.level in ('error', 'warn'))
 
 
 def _is_number(v) -> bool:
@@ -1200,7 +1212,39 @@ def _unit_known(unit) -> bool:
 KNOWN_FREE_UNITS = {'dB', 'dBm', 'dBc', 'dBc/Hz', 'ratio', 'PF', 'lux', 'FC', 'La', 'rpm', 'uW/cm2', '%DC', 'deg', 'rad', 'degC', 'degF', 'ohm'}
 
 
+_ROW_PREFIX = re.compile(r'^Row \d+: ')
+
+
+def _issue_key(i):
+    return (i.area, i.target, i.code, _ROW_PREFIX.sub('', i.message))
+
+
 def validate(doc: SpecDoc, builder_dir=None) -> Report:
+    """The checks of `_validate_core`, with every error that the file ALREADY had (same row / field, same kind, same text) marked `existing`: those stay red
+    but only the errors the pending edit introduces block saving.  An edit that fixes an error, or leaves it alone, is not blocked by it."""
+    rep = _validate_core(doc, builder_dir)
+    if not rep.errors:
+        return rep
+    try:
+        key = doc.raw
+        if getattr(doc, '_baseline_for', None) is not key:
+            base = _validate_core(SpecDoc.from_bytes(doc.path, doc.raw), builder_dir)
+            doc._baseline_keys, doc._baseline_for = {_issue_key(i) for i in base.issues if i.level == 'error'}, key
+        known = doc._baseline_keys
+    except Exception:
+        return rep                                   # no baseline: every error counts as new (the safe side)
+    for i in rep.issues:
+        if i.level == 'error' and _issue_key(i) in known:
+            i.existing = True
+    n_old, n_new = len(rep.existing_errors), len(rep.new_errors)
+    if n_old:
+        rep.checks.append(('warn', f'{n_old} error{"s" if n_old != 1 else ""} already in the file (not from this edit; shown red, they do not block this save)'))
+    if n_new:
+        rep.checks.append(('error', f'{n_new} error{"s" if n_new != 1 else ""} introduced by this edit (block saving)'))
+    return rep
+
+
+def _validate_core(doc: SpecDoc, builder_dir=None) -> Report:
     """Schema, numbers, units, confidence, note references; sheet checks of the edited rows; what the edit touches.  Errors block saving, warnings do not."""
     rep = Report()
     cur = doc.current
