@@ -26,6 +26,7 @@ from .. import theme
 from ..table import Column, DataTable
 from ..theme import M
 from ..widgets import MessageDialog, ModalDialog, PrimaryButton, SearchField, SecondaryButton, label
+from ._share import ShareWidth
 from .report_details import demo_title
 
 RESULT_BADGE = {'PASS': 'good', 'OUT OF TOLERANCE': 'bad'}
@@ -104,6 +105,7 @@ class AssetHistoryPanel(QWidget):
             Column('result', 'Last result', width=170, kind='badge', badge_map=RESULT_BADGE),
             Column('due', 'Next due', width=170, mono=True),
         ], row_key=lambda r: r['asset_id'], multi=False, row_tone=tone, empty_text='No instruments')
+        self._share_assets = ShareWidth(self.assets, (150, 250, 140, 80, 120, 170, 170), (0.8, 1.6, 1.0, 0.4, 0.7, 1.0, 0.8))
         self.assets.setAccessibleName('Instruments with reports')
         self.assets.selectionChangedRows.connect(lambda _rows: self.show_runs())
 
@@ -115,6 +117,7 @@ class AssetHistoryPanel(QWidget):
             Column('failed', 'Out of tol.', width=100, align='right'),
             Column('file', 'Report file', width=330),
         ], row_key=lambda r: r['id'], multi=False, row_tone=lambda r: 'fail' if r['fail'] else None, empty_text='No reports')
+        self._share_runs = ShareWidth(self.runs, (150, 330, 150, 80, 100, 330), (0.9, 1.6, 0.9, 0.4, 0.5, 1.4))
         self.runs.setAccessibleName('Reports of the selected instrument')
         self.runs.selectionChangedRows.connect(lambda _rows: self.show_points())
         self.runs.rowActivated.connect(self._runs_double)                                      # double-click (or Enter): regenerate the PDF
@@ -132,6 +135,7 @@ class AssetHistoryPanel(QWidget):
             Column('result', 'Result', width=80),
             Column('pct', '% of tol.', width=90, align='right', mono=True),
         ], row_key=lambda r: r['n'], multi=False, row_tone=lambda r: 'fail' if r['result'] == 'FAIL' else None, empty_text='No points')
+        self._share_points = ShareWidth(self.points, (130, 300, 120, 100, 100, 110, 70, 80, 90), (0.8, 1.6, 0.9, 0.8, 0.8, 0.8, 0.4, 0.5, 0.6))
         self.points.setAccessibleName('Points in the selected report')
         self.points.rowActivated.connect(lambda _r: self.show_drift())
 
