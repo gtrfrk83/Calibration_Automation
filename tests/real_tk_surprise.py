@@ -120,6 +120,37 @@ def main():
     r, text, dev, left = run_case(root, 'close', lambda b: setattr(b, 'get_reply', ''))
     check('closing the window counts as Stop', r in ('stopped',), r)
 
+    # a stop-only surprise (an engine uses it where Continue would be unsafe): the dialog has Stop and no Continue button
+    dev, bus, _s, _h = make()
+    g = dev.enable_surprise(surprise.tk_handler(root))
+    out, seen = {}, {}
+
+    def work_so():
+        try:
+            g.surprise('errqueue', 'OUT 1V', '-222,"Data out of range"', 'empty error queue', stop_only=True)
+            out['r'] = 'continued'
+        except surprise.SurpriseStop:
+            out['r'] = 'stopped'
+
+    def poll_so():
+        tops = toplevels(root)
+        if tops and 'text' not in seen:
+            w = tops[0]
+            seen['text'] = '\n'.join(str(c.cget('text')) for c in _walk(w) if isinstance(c, tk.Widget) and 'text' in c.keys())
+            seen['cont'] = w._surprise['cont']
+            w._surprise['stop'].invoke()
+        if not th_so.is_alive() and not toplevels(root):
+            root.quit()
+        else:
+            root.after(20, poll_so)
+    th_so = threading.Thread(target=work_so)
+    th_so.start()
+    root.after(20, poll_so)
+    root.mainloop()
+    th_so.join(5)
+    check('stop-only: Stop answered', out.get('r') == 'stopped', out)
+    check('stop-only: no Continue button, and the dialog says so', seen.get('cont') is None and 'Continue is not offered' in seen.get('text', '') and 'Continue\n' not in seen.get('text', '') + '\n', seen)
+
     # a clean run never shows a dialog
     dev, bus, _s, _h = make()
     dev.enable_surprise(surprise.tk_handler(root))

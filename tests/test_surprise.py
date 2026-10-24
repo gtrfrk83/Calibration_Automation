@@ -266,6 +266,82 @@ class Surprises(unittest.TestCase):
         p2 = type('Plain2', (Instrument,), {'MODEL': 'P', 'COMMANDS': Dev.COMMANDS})(FakeBus(), virt, 'P')
         self.assertIsNone(surprise.attach_guard(p2, lambda s: True))
 
+    def test_stop_only_never_continues_even_if_the_handler_says_yes(self):
+        dev, bus, seen, handler = make(answers=[True])
+        g = surprise.Guard(dev, handler)
+        with self.assertRaises(surprise.SurpriseStop):
+            g.surprise('errqueue', 'OUT 1', '-222', 'empty', stop_only=True)
+        self.assertTrue(seen[0].stop_only)
+        self.assertTrue(any('Continue is not offered' in l for l in dev.log.lines()))
+        self.assertFalse(any('operator chose Continue' in l for l in dev.log.lines()))
+
+    def test_attach_guard_expect_stop_only_and_timeout_retry(self):
+        bus = FakeBus()
+        plain = type('Plain', (Instrument,), {'MODEL': 'P', 'COMMANDS': Dev.COMMANDS})(bus, CommandLog(), 'P')
+        seen = []
+        surprise.attach_guard(plain, lambda s: seen.append(s) or True, expect={'get': 'float'}, stop_only=True)
+        self.assertEqual(plain.ask('get'), '0')
+        bus.get_reply = 'abc'
+        with self.assertRaises(surprise.SurpriseStop):                      # the handler said Continue; stop_only wins
+            plain.ask('get')
+        self.assertTrue(seen[-1].stop_only)
+        self.assertIn('not a number', seen[-1].expected)
+        bus.get_reply = None
+        bus.timeouts = 1                                                    # one timeout: retried once, no surprise
+        n = len(seen)
+        self.assertEqual(plain.ask('get'), '0')
+        self.assertEqual(len(seen), n)
+        self.assertEqual(bus.sent.count('GET?'), 2 + 2)                     # 1 ok + 1 bad + (timed out + retry)
+        bus.timeouts = 2                                                    # timeout twice: a surprise with an empty reply, stop only
+        with self.assertRaises(surprise.SurpriseStop):
+            plain.ask('get')
+        self.assertEqual(seen[-1].reply, '')
+
+    def test_attach_guard_stop_only_for_chosen_keys(self):
+        bus = FakeBus()
+        plain = type('Plain', (Instrument,), {'MODEL': 'P', 'COMMANDS': Dev.COMMANDS})(bus, CommandLog(), 'P')
+        seen = []
+        surprise.attach_guard(plain, lambda s: seen.append(s) or True, stop_only={'get'})
+        bus.errors = ['']
+        self.assertEqual(plain.ask('err.query'), '')                         # Continue offered for this key, handler said yes
+        self.assertFalse(seen[-1].stop_only)
+
+    def test_checked_routes_the_drivers_own_exception(self):
+        bus = FakeBus()
+        dev = type('Plain', (Instrument,), {'MODEL': 'P', 'COMMANDS': Dev.COMMANDS})(bus, CommandLog(), 'P')
+
+        def drv_check(ctx=''):
+            r = dev.ask('err.query').strip()
+            if r.split(',')[0] not in ('0', '+0'):
+                raise InstrumentError(f'rejected {ctx}: {r}')
+
+        calls = []
+        self.assertIsNone(surprise.checked(dev, drv_check, 'x'))              # no guard: plain call, plain exception
+        bus.errors = ['-113,"Undefined header"']
+        with self.assertRaises(InstrumentError) as cm:
+            surprise.checked(dev, drv_check, 'x')
+        self.assertNotIsInstance(cm.exception, surprise.SurpriseStop)
+        surprise.attach_guard(dev, lambda s: calls.append(s) or True)
+        bus.errors = ['-113,"Undefined header"']
+        self.assertIsNone(surprise.checked(dev, drv_check, 'y'))              # Continue
+        self.assertEqual((calls[0].kind, calls[0].reply, calls[0].command), ('errqueue', '-113,"Undefined header"', 'SYST:ERR?'))
+        bus.errors = ['-113,"Undefined header"']
+        with self.assertRaises(surprise.SurpriseStop):
+            surprise.checked(dev, drv_check, 'z', stop_only=True)
+        self.assertTrue(calls[-1].stop_only)
+        self.assertEqual(bus.sent.count('SYST:ERR?'), 1 + 1 + 1 + 1, 'one query per check, never repeated')
+
+    def test_checked_lets_safety_errors_through(self):
+        from drivers.base import SafetyError
+        dev, bus, seen, handler = make(answers=[True])
+        surprise.attach_guard(dev, handler)
+
+        def unsafe():
+            raise SafetyError('standby not confirmed')
+        with self.assertRaises(SafetyError):
+            surprise.checked(dev, unsafe)
+        self.assertEqual(seen, [])
+
     def test_check_reply(self):
         c = surprise.check_reply
         self.assertIsNone(c('1.5E-3', 'float'))
