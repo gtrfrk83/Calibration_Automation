@@ -434,7 +434,7 @@ class Manager:
         entries = self.row_menu_items()
         if entries is None:
             return None
-        actions = {procedure_menu.RUN: self.run_selected, procedure_menu.DEMO: lambda: self.run_selected(demo=True),
+        actions = {procedure_menu.RUN: self.run_selected, procedure_menu.DEMO: lambda: self.run_selected(demo=True), procedure_menu.READINESS: self.readiness_check,
                    procedure_menu.VERIFY: self.mark_verified, procedure_menu.LOCK: self.toggle_lock, procedure_menu.REMOVE: self.remove, procedure_menu.RESTORE: self.restore_previous,
                    procedure_menu.COPY_NAME: self.copy_procedure_name, procedure_menu.COPY_PATH: self.copy_procedure_path,
                    procedure_menu.SHOW: self.show_procedure_location}
@@ -487,6 +487,40 @@ class Manager:
                 subprocess.Popen(['xdg-open', str(path.parent)])
         except OSError as exc:
             messagebox.showerror('Could not open the folder', str(exc))
+
+    def readiness_check(self):
+        """Readiness check of the selected procedure on the simulated bench (tools/readiness_check.py in a subprocess; no instrument I/O)."""
+        rec = self._selected_row()
+        tool = BASE / 'tools' / 'readiness_check.py'
+        if not rec or not tool.is_file():
+            messagebox.showinfo('Readiness check', 'tools/readiness_check.py was not found next to the Manager.')
+            return
+        self.status.set(f'Readiness check of {rec[1]} ...')
+        out = []
+
+        def work():
+            try:
+                r = subprocess.run([sys.executable, str(tool), str(rec[0])], capture_output=True, text=True, timeout=300, cwd=str(BASE))
+                out.append((r.stdout or '') + (r.stderr or ''))
+            except (OSError, subprocess.SubprocessError) as exc:
+                out.append(f'The readiness check could not run: {exc}')
+
+        def show():
+            win = tk.Toplevel(self.root)
+            win.title(f'Readiness check - {rec[1]}')
+            box = tk.Text(win, width=110, height=36, wrap='none', font=('Courier New', 9) if sys.platform == 'win32' else 'TkFixedFont')
+            box.insert('1.0', out[0])
+            box.configure(state='disabled')
+            box.pack(fill='both', expand=True)
+            self.status.set('Readiness check finished.')
+
+        import threading
+        th = threading.Thread(target=work, daemon=True)
+        th.start()
+
+        def poll():
+            show() if not th.is_alive() else self.root.after(200, poll)
+        self.root.after(200, poll)
 
     def _view_changed(self, _event=None):
         kind = next((k for k, page in self.view_pages.items() if str(page) == self.view_nb.select()), procscan.KIND_VERIFICATION)
