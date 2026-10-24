@@ -38,7 +38,7 @@ PILLS = (('As budgeted', 'good'), ('Raised to scope', 'warn'), ('Not in scope', 
 NOTE = ('Reported = larger of Budget and Scope minimum, rounded up to 2 significant figures (k = 2), never below the lab’s A2LA scope minimum. '
         'Limits and pass / fail are never touched.')
 DEMO_TEXT = 'DEMO DATA - NOT CALIBRATION EVIDENCE. This is a demo run: the PDF is stamped DEMO and nothing is recorded in Asset History.'
-MAX_W, MAX_H, MIN_W, MIN_H = 1360, 860, 860, 520
+MAX_W, MAX_H, MIN_W, MIN_H = 1560, 860, 860, 520
 
 
 def _qparent(parent):
@@ -239,16 +239,23 @@ class ReviewWindow(QDialog):
             Column('pick', '', width=44, kind='checkbox', editable=True, getter=lambda r: r.spec.idx in self._sel, setter=self._set_picked),
             Column('step', self.HEADS[0], width=64, getter=lambda r: r.spec.step, natural=True, mono=True),
             Column('point', self.HEADS[1], width=240, stretch=True, getter=lambda r: f'{r.spec.nominal_text}  ·  {r.spec.description}'),
-            Column('tol', self.HEADS[2], width=140, getter=lambda r: M.tolerance_text(r.spec) or '—', mono=True),
-            Column('std', self.HEADS[3], width=176, kind='combo', getter=self._std_text, setter=self._set_std, editable=lambda r: not r.spec.locked,
+            Column('tol', self.HEADS[2], width=160, getter=lambda r: M.tolerance_text(r.spec) or '—', mono=True),
+            Column('std', self.HEADS[3], width=186, kind='combo', getter=self._std_text, setter=self._set_std, editable=lambda r: not r.spec.locked,
                    choices=lambda r: [M.label(k) for k in self.model.options(r.spec.idx)], tone=lambda r: 'muted' if r.spec.locked else None),
-            Column('budget', self.HEADS[4], width=104, align='right', mono=True, getter=lambda r: M.fmt(r.cur.budget, r.cur.unit) or '—'),
-            Column('scope', self.HEADS[5], width=124, align='right', mono=True,
+            Column('budget', self.HEADS[4], width=128, align='right', mono=True, getter=lambda r: M.fmt(r.cur.budget, r.cur.unit) or '—'),
+            Column('scope', self.HEADS[5], width=148, align='right', mono=True,
                    getter=lambda r: M.fmt(r.cur.cmc, r.cur.unit) or ('not in scope' if r.cur.status != M.NO_UNC else '—')),
-            Column('reported', self.HEADS[6], width=150, align='right', mono=True, bold=True, getter=self._reported_text, editable=lambda r: r.can_type()),
-            Column('tur', self.HEADS[7], width=90, align='right', mono=True, getter=lambda r: r.tur_text or '—'),
-            Column('status', self.HEADS[8], width=170, kind='badge', getter=lambda r: r.status, badge=lambda v, r: BADGE.get(r.status, 'neutral')),
+            Column('reported', self.HEADS[6], width=160, align='right', mono=True, bold=True, getter=self._reported_text, editable=lambda r: r.can_type()),
+            Column('tur', self.HEADS[7], width=110, align='right', mono=True, getter=lambda r: r.tur_text or '—'),
+            Column('status', self.HEADS[8], width=186, kind='badge', getter=self._status_text, badge=lambda v, r: BADGE.get(self._status_text(r), 'neutral')),
         ]
+        blue = lambda r: 'info' if r.status == M.CHANGED else None            # a changed standard turns the row's text blue (the status badge still says what the uncertainty did)
+        for col in cols:
+            if col.key in ('step', 'point', 'tol', 'budget', 'scope', 'reported', 'tur'):
+                col.tone = blue
+            elif col.key == 'std':
+                _locked = col.tone
+                col.tone = lambda r, _l=_locked: _l(r) or blue(r)
         self.table = DataTable(cols, m.rows, row_tone=self._tone, row_key=lambda r: r.spec.idx, multi=True, empty_text='No points to review')
         self.table.setItemDelegate(_ReviewDelegate(self.table, self))
         self.table.setAccessibleName('Test points and their uncertainties')
@@ -332,10 +339,14 @@ class ReviewWindow(QDialog):
             rep += '  [type]'                                            # a point the scope does not cover: click to type an uncertainty
         return rep
 
+    def _status_text(self, r):
+        """A row whose standard the person changed keeps showing what the uncertainty did (As budgeted / Raised to scope); the row text turns blue instead."""
+        return r.cur.status if r.status == M.CHANGED else r.status
+
     def _tone(self, r):
         if r.spec.locked and r.cur.status in (M.NO_UNC, M.AS_BUDGETED):
             return None
-        return {M.MANUAL: 'warn', M.NOT_IN_SCOPE: 'fail', M.CHANGED: 'info'}.get(r.status)
+        return {M.MANUAL: 'warn', M.NOT_IN_SCOPE: 'fail'}.get(r.status)
 
     def row_values(self, r) -> tuple:
         """The text of every cell of row `r` (the Tk row_values, without the drop-down arrow)."""

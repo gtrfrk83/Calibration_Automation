@@ -105,7 +105,7 @@ def tk_row_values(r):
     if r.can_type() and r.typed is None:
         rep += '  [type]'
     tur = r.tur_text or '—'
-    return (s.step, f'{s.nominal_text}  ·  {s.description}', M.tolerance_text(s) or '—', std, budget, scope, rep, tur, r.status)
+    return (s.step, f'{s.nominal_text}  ·  {s.description}', M.tolerance_text(s) or '—', std, budget, scope, rep, tur, r.cur.status if r.status == M.CHANGED else r.status)    # Qt: a changed standard turns the row text blue and the badge keeps saying what the uncertainty did
 
 
 def cell_texts(w, idx):
