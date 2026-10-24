@@ -217,7 +217,7 @@ class PointWindow(QWidget):
                 Column('cmd', 'Command for this point', width=290, stretch=True, mono=True, tone=self._tone,
                        getter=lambda r: r.shown_wire + ('   (not saved)' if r.staged or r.pending else '')),
                 Column('rb', 'Read-back', width=120, mono=True, getter=lambda r: r.readback_wire, tone=self._tone),
-                Column('risk', 'Risk', width=90, getter=lambda r: r.risk_text, tone=self._tone),
+                Column('risk', 'Risk', width=130, getter=lambda r: r.risk_text, tone=self._tone),
                 Column('status', 'Status', width=120, getter=lambda r: r.status_text, tone=self._tone),
                 Column('chg', 'Changed', width=80, getter=lambda r: 'changed' if r.changed else '', tone=self._tone)]
         self.tree = DataTable(cols, [], row_tone=lambda r: 'warn' if r.changed else None, row_key=lambda r: str(r.seq), multi=False, tone_style='text',
@@ -313,9 +313,9 @@ class PointWindow(QWidget):
         dl.addStretch(1)
         scroll.setWidget(det)
         split.addWidget(scroll)
-        split.setStretchFactor(0, 2)
-        split.setStretchFactor(1, 3)
-        split.setSizes([260, 380])
+        split.setStretchFactor(0, 1)
+        split.setStretchFactor(1, 1)
+        split.setSizes([290, 350])
         root.addWidget(split, 1)
         self._build_fields()
 

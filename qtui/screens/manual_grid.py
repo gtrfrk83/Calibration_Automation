@@ -287,6 +287,12 @@ class GridEntry(QObject):
         return None
 
     def eventFilter(self, obj, ev):
+        try:
+            return self._filter(obj, ev)
+        except RuntimeError:                                          # the table was deleted under us (shutdown)
+            return False
+
+    def _filter(self, obj, ev):
         t = ev.type()
         if obj is self.view:
             if t == QEvent.Type.KeyPress and self.entry is None:

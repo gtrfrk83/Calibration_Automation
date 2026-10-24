@@ -167,15 +167,15 @@ class _Tab(QWidget):
         scroll.setWidget(self.editor)
         self.split.addWidget(scroll)
         self.split.setStretchFactor(0, 1)
-        self.split.setStretchFactor(1, 2)
-        self.split.setSizes([360, 640])
+        self.split.setStretchFactor(1, 1)
+        self.split.setSizes([560, 560])
         lay.addWidget(self.split)
         self.build_editor()
         self.edit_layout.addStretch(1)
 
     # -- to override
     def columns(self):
-        return [Column('flags', '', width=70, getter=self.flag_text), Column('name', 'Item', width=300, stretch=True, getter=self.name_text, tone=self.name_tone)]
+        return [Column('flags', '', width=48, getter=self.flag_text), Column('name', 'Item', width=300, stretch=True, getter=self.name_text, tone=self.name_tone)]
 
     def rows(self, flt, search):
         return []
@@ -462,7 +462,7 @@ class PointsTab(_Tab):
     kind = 'point'
 
     def columns(self):
-        return [Column('flags', '', width=70, getter=self.flag_text), Column('name', 'Test point', width=300, stretch=True, getter=self.name_text, tone=self.name_tone),
+        return [Column('flags', '', width=48, getter=self.flag_text), Column('name', 'Test point', width=300, stretch=True, getter=self.name_text, tone=self.name_tone),
                 Column('state', 'State', width=90, getter=lambda r: 'skipped' if r['skip'] else r['state'])]
 
     def rows(self, flt, search):
@@ -555,7 +555,7 @@ class TolerancesTab(_Tab):
     kind = 'limit'
 
     def columns(self):
-        return [Column('flags', '', width=60, getter=self.flag_text), Column('name', 'Test point', width=240, stretch=True, getter=self.name_text, tone=self.name_tone),
+        return [Column('flags', '', width=48, getter=self.flag_text), Column('name', 'Test point', width=240, stretch=True, getter=self.name_text, tone=self.name_tone),
                 Column('factory', 'Manufacturer', width=120, getter=lambda r: r['factory']),
                 Column('cur', 'Used', width=120, getter=lambda r: r['current'] + (' TAMPERED' if r.get('tampered') else ''))]
 

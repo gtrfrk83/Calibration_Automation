@@ -451,7 +451,7 @@ class QueueSetupDialog(ModalDialog):
         self.body.addWidget(self.table)
         btns = QHBoxLayout()
         self.buttons = {}
-        for text, cmd in (('+ Add meter', self.add), ('Edit', self.edit), ('Remove', self.remove), ('Move up', lambda: self.move(-1)), ('Move down', lambda: self.move(1))):
+        for text, cmd in (('+ Add meter', self.add), ('Edit', self.edit), ('Remove', self.remove), ('Move up', lambda: self.move_row(-1)), ('Move down', lambda: self.move_row(1))):
             b = QPushButton(text)
             b.setAutoDefault(False)
             b.clicked.connect(lambda _c=False, c=cmd: c())
@@ -575,7 +575,14 @@ class QueueSetupDialog(ModalDialog):
             self.note.setText('')
             self.refresh_all()
 
-    def move(self, delta):
+    def showEvent(self, ev):
+        super().showEvent(ev)
+        lay = self.layout()                                           # wrapped text needs more height than the first size hint: never squeeze the rows together
+        need = lay.totalHeightForWidth(self.width()) if lay is not None and lay.hasHeightForWidth() else 0
+        if need > self.height():
+            self.resize(self.width(), need)
+
+    def move_row(self, delta):
         i = self.selected()
         if i is None:
             return
@@ -651,9 +658,10 @@ class QueueProgress:
         self.bar.setValue(int(round(max(0.0, min(1.0, fraction)) * 100)))
         while self.cards.count():
             it = self.cards.takeAt(0)
-            if it.widget() is not None:
-                it.widget().setParent(None)
-                it.widget().deleteLater()
+            w = it.widget()
+            if w is not None:
+                w.setParent(None)
+                w.deleteLater()
         self.rows = list(rows)
         self.show_buttons = {}
         for row in rows:
