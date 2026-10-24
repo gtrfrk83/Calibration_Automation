@@ -1003,7 +1003,8 @@ class SheetCanvas(tk.Canvas):
                     fill = c['primary'] if selected_cell else (c['bad_bg'] if col['key'] in row['bad'] and row['level'] == 'error' else
                                                                   c['warn_bg'] if col['key'] in row['bad'] else c['select'] if is_sel else c['table'])
                     self.create_rectangle(cx0, cy0, cx1, cy1, fill=fill, outline=c['border_strong'])
-                    text = self._fit(row.get(col['key'], ''), cx1 - cx0)
+                    mark = col['key'] in ('low', 'high') and row.get('limits_from') == 'typed'           # an old sheet's stored (typed) limit gets a small marker
+                    text = self._fit(row.get(col['key'], ''), cx1 - cx0 - (ui.px(44) if mark else 0))
                     if not text:
                         continue
                     color = c['on_primary'] if selected_cell else c['muted'] if (not row['enabled'] and row['kind'] == 'point') else c['text']
@@ -1011,6 +1012,8 @@ class SheetCanvas(tk.Canvas):
                         self.create_text((cx0 + cx1) / 2, (cy0 + cy1) / 2, text=text, fill=color, font=self._font)
                     else:
                         self.create_text(cx0 + ui.px(8), (cy0 + cy1) / 2, text=text, anchor='w', fill=color, font=self._font)
+                    if mark:
+                        self.create_text(cx1 - ui.px(6), (cy0 + cy1) / 2, text='typed', anchor='e', fill=color if selected_cell else c['muted'], font=self._font)
             # the heading is drawn last so scrolled rows slide under it
             self.create_rectangle(0, 0, geo.width, geo.head_h, fill=c['head'], outline=c['border_strong'])
             self.create_text(geo.num_w / 2, geo.head_h / 2, text='#', fill=c['muted'], font=self._bold)
@@ -1337,7 +1340,7 @@ class Inspector(ttk.Frame):
         self.operand_now = 'plus'
         self.v = {k: tk.StringVar() for k in ('nominal', 'units', 'freq', 'level', 'expect', 'iv', 'fs', 'fs_scale', 'floor', 'db', 'calc', 'multi_high', 'multi_n',
                                               'decs', 'res', 'operand', 'multi_mode', 'func', 'definition', 'low', 'high')}
-        self.b = {k: tk.BooleanVar(value=False) for k in ('iv_ppm', 'multi', 'asym', 'auto_res', 'typed')}
+        self.b = {k: tk.BooleanVar(value=False) for k in ('iv_ppm', 'multi', 'asym', 'auto_res')}
         self.types = {k: tk.BooleanVar(value=False) for k in M.SPEC_ORDER}
         self.cells = {}
         self.entries = []
@@ -1498,19 +1501,19 @@ class Inspector(ttk.Frame):
 
     def _build_tolerance(self, body):
         self.tol_body = body
-        # The limits come first: LOW and HIGH (absolute).  Calculated from the tolerance below they are read-only; "Type the limits myself" makes them
-        # the row's limits and hides the tolerance boxes (the two are never shown as editable at once).
-        self.typed_cb = ttk.Checkbutton(body, text='Type the limits myself', variable=self.b['typed'], command=self.typed_changed)
-        self.typed_cb.pack(anchor='w')
-        tip(self.typed_cb, 'Off: the Low limit and High limit are worked out from the tolerance below and cannot be typed here. On: you type the two limits '
-                           '(absolute values, in the Units) and the row is checked against them; the tolerance boxes are hidden.')
+        # The limits come first: LOW and HIGH (absolute).  They are READ-ONLY displays of what the tolerance below works out; the tolerance chips / boxes,
+        # Asymmetrical tolerance and Calc are the only way to change them.
         self.limit_cells = ttk.Frame(body)
         self.limit_cells.pack(fill='x')
         self.limit_names = ('low', 'high')
-        self.low_e = self._cell(self.limit_cells, 'low', 'Low limit', self.v['low'], 'The lowest reading that passes (absolute value, for example 4.9965 V). A bare number is in the Units.')
-        self.high_e = self._cell(self.limit_cells, 'high', 'High limit', self.v['high'], 'The highest reading that passes (absolute value, for example 5.0035 V). A bare number is in the Units.')
-        self.limit_note = ttk.Label(body, text='', style='Small.TLabel', wraplength=ui.px(250), justify='left')
+        self.low_e = self._cell(self.limit_cells, 'low', 'Low limit', self.v['low'], 'The lowest reading that passes (absolute value, for example 4.9965 V). Worked out from the tolerance below; it cannot be typed.')
+        self.high_e = self._cell(self.limit_cells, 'high', 'High limit', self.v['high'], 'The highest reading that passes (absolute value, for example 5.0035 V). Worked out from the tolerance below; it cannot be typed.')
+        for e in (self.low_e, self.high_e):
+            e.configure(state='readonly')
+        self.limit_note = ttk.Label(body, text='Calculated from the tolerance below; they are read-only here.', style='Small.TLabel', wraplength=ui.px(250), justify='left')
         self.limit_note.pack(anchor='w', pady=(0, 4))
+        self.clear_typed_b = ttk.Button(body, text='Clear typed limits', command=self.win.clear_typed_limits)       # only for an old sheet's stored Low / High pair
+        tip(self.clear_typed_b, 'This row still has limits that were typed earlier. Clear them so the limits come from the tolerance (or press Calc to replace them).')
         self.chip_frame = ttk.Frame(body)
         self.chip_frame.pack(fill='x', pady=(0, 2))
         self.chips = []
@@ -1615,9 +1618,6 @@ class Inspector(ttk.Frame):
     def multi_changed(self):
         self.show_fields()
 
-    def typed_changed(self):
-        self.show_fields()
-
     def auto_changed(self):
         self.res_e.configure(state='disabled' if self.b['auto_res'].get() else 'normal')
 
@@ -1655,24 +1655,21 @@ class Inspector(ttk.Frame):
                 'iv': self.types['iv'].get(), 'fs': self.types['fs'].get(), 'fs_scale': self.types['fs'].get(), 'floor': self.types['floor'].get(),
                 'db': self.types['db'].get(), 'calc': self.types['calc'].get(), 'low': True, 'high': True}
         passfail = bool(st.get('passfail'))
-        typed = bool(self.b['typed'].get()) and not passfail
-        if passfail or typed:
+        if passfail:
             for k in self.tol_names:
                 want[k] = False
-        if passfail:
             want['low'] = want['high'] = False
-            self.typed_cb.pack_forget()
             self.limit_note.pack_forget()
+        elif self.limit_note.winfo_manager() != 'pack':
+            nxt = next((w for w in (self.chip_frame, self.tol_cells) if w.winfo_manager() == 'pack'), self.btns)
+            self.limit_note.pack(anchor='w', pady=(0, 4), before=nxt)
+        typed_limits = bool(st.get('typed_limits')) and not passfail
+        self.limit_note.configure(text=M.TYPED_LIMITS_NOTE if typed_limits else 'Calculated from the tolerance below; they are read-only here.')
+        if typed_limits:
+            if self.clear_typed_b.winfo_manager() != 'pack':
+                self.clear_typed_b.pack(anchor='w', pady=(0, 4), after=self.limit_note)
         else:
-            if self.typed_cb.winfo_manager() != 'pack':
-                self.typed_cb.pack(anchor='w', before=self.limit_cells)
-            if self.limit_note.winfo_manager() != 'pack':
-                nxt = next((w for w in (self.chip_frame, self.tol_cells) if w.winfo_manager() == 'pack'), self.btns)
-                self.limit_note.pack(anchor='w', pady=(0, 4), before=nxt)
-            for e in (self.low_e, self.high_e):
-                e.configure(state='normal' if typed else 'readonly')
-            self.limit_note.configure(text='These are the limits the row is checked against.' if typed
-                                      else 'Calculated from the tolerance below; they are read-only here.')
+            self.clear_typed_b.pack_forget()
         self._visible = want
         self._arrange_all()
         if passfail and self.tol_cells.winfo_manager() != 'pack':
@@ -1683,11 +1680,6 @@ class Inspector(ttk.Frame):
             self.chip_frame.pack_forget()
             self.hint_l.pack_forget()
             self.passfail_l.pack(anchor='w', before=self.tol_cells)
-        elif typed:                                  # the tolerance boxes are gone (a Tk frame whose boxes were all removed keeps its old height, so it is unpacked too)
-            self.passfail_l.pack_forget()
-            self.chip_frame.pack_forget()
-            self.hint_l.pack_forget()
-            self.tol_cells.pack_forget()
         else:
             self.passfail_l.pack_forget()
             if self.tol_cells.winfo_manager() != 'pack':
@@ -1759,7 +1751,6 @@ class Inspector(ttk.Frame):
         self.operand_now = 'plus'
         for k in ('nominal', 'units', 'freq', 'level', 'expect', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode', 'low', 'high'):
             self.v[k].set(form[k])
-        self.b['typed'].set(bool(form['typed']))
         for k in M.SPEC_ORDER:
             self.types[k].set(k in form['types'])
         self.b['multi'].set(bool(form['multi'])), self.b['asym'].set(bool(form['asym'])), self.b['auto_res'].set(bool(form['auto_res']))
@@ -1799,7 +1790,7 @@ class Inspector(ttk.Frame):
                     operand='-' if self.v['operand'].get() == '-' else '+', fs_scale=self.v['fs_scale'].get(), nominal=self.v['nominal'].get(), units=self.v['units'].get(),
                     freq=self.v['freq'].get(), level=self.v['level'].get(), expect=self.v['expect'].get() or 'on', multi=bool(self.b['multi'].get()),
                     multi_mode=self.v['multi_mode'].get() or 'span', multi_high=self.v['multi_high'].get(), multi_n=self.v['multi_n'].get(), decs=self.v['decs'].get(),
-                    res=self.v['res'].get(), auto_res=bool(self.b['auto_res'].get()), typed=bool(self.b['typed'].get()), low=self.v['low'].get(), high=self.v['high'].get())
+                    res=self.v['res'].get(), auto_res=bool(self.b['auto_res'].get()))
 
     def definition_id(self, label):
         return next((d['id'] for d in self._defs if d['label'] == label), None)
@@ -1920,9 +1911,8 @@ class GridEditorWindow(CK.CheckWindowMixin, tk.Toplevel):
         self.period_v = tk.StringVar()
         self.period_cell = self._field(left, 'Tolerances for')
         self.period_label = self.period_cell.label
-        self.period_box = ttk.Combobox(self.period_cell, textvariable=self.period_v, state='readonly', width=11)
+        self.period_box = ttk.Label(self.period_cell, textvariable=self.period_v)             # a plain label, not a picker: the limits shown are the default period's (1 year)
         self.period_box.pack(anchor='w')
-        self.period_box.bind('<<ComboboxSelected>>', lambda _e: self.period_chosen())
         # right group, packed right to left: Save, Preview / Print, More, Standards, Undo / Redo, Lock Status
         order = []
         save = ttk.Button(right, text='Save', style='Accent.TButton', command=self.save)
@@ -2104,9 +2094,9 @@ class GridEditorWindow(CK.CheckWindowMixin, tk.Toplevel):
         self.count_v.set(f'{sum(1 for r in m.rows() if r["kind"] != "blank")} rows')
         self.undo_b.configure(state='normal' if m.can_undo else 'disabled')
         self.redo_b.configure(state='normal' if m.can_redo else 'disabled')
+        # The period picker is gone: the limits shown are always those of the default period (1 year); only a sheet with several periods names the one on show.
         if len(ds.periods) > 1:
             self.period_cell.pack(side='left', padx=(0, 10))
-            self.period_box.configure(values=[p.label or p.id for p in ds.periods])
             self.period_v.set(next((p.label or p.id for p in ds.periods if p.id == m.period), ''))
         else:
             self.period_cell.pack_forget()
@@ -2211,12 +2201,6 @@ class GridEditorWindow(CK.CheckWindowMixin, tk.Toplevel):
             return None
         return self.changed(self.model.set_header(**new))
 
-    def period_chosen(self):
-        label = self.period_v.get()
-        pid = next((p.id for p in self.model.ds.periods if (p.label or p.id) == label), '')
-        if pid and self.model.set_period(pid):
-            self.refresh()
-
     # ---- the buttons
     def calc(self):
         self.commit_header()
@@ -2226,6 +2210,9 @@ class GridEditorWindow(CK.CheckWindowMixin, tk.Toplevel):
 
     def recalc(self):
         return self.changed(self.model.recalc_all())
+
+    def clear_typed_limits(self):
+        return self.changed(self.model.clear_typed_limits())
 
     def copy_down(self):
         n = self.model.would_overwrite()

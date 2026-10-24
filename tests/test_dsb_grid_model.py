@@ -168,10 +168,12 @@ class KeyboardTests(Base):
         g.select(key, 'function')
         self.assertEqual(g.nav('Right'), 'moved')
         self.assertEqual(g.sel_col, 'nominal')
+        row = g.sel_key
         self.assertEqual(g.nav('Tab'), 'moved')
-        self.assertEqual(g.sel_col, 'low')                         # Tab skips the read-only columns
+        self.assertEqual(g.sel_col, 'function')                    # Tab skips the read-only columns (the limits too): first cell of the next row
+        self.assertNotEqual(g.sel_key, row)
         self.assertEqual(g.nav('ISO_Left_Tab'), 'moved')
-        self.assertEqual(g.sel_col, 'nominal')
+        self.assertEqual((g.sel_key, g.sel_col), (row, 'nominal'))
         self.assertEqual(g.nav('Return'), 'edit')
         self.assertEqual(g.nav('F9'), '')
         n = len(g.rows())
@@ -341,7 +343,7 @@ class ViewColumnsTests(Base):
 
     def test_screen_columns_are_step_function_nominal_low_high(self):
         self.assertEqual(M.COL_KEYS, ('step', 'function', 'nominal', 'low', 'high'))
-        self.assertEqual(M.EDIT_COLS, ('function', 'nominal', 'low', 'high'))
+        self.assertEqual(M.EDIT_COLS, ('function', 'nominal'))                # the two limit columns are read-only displays
         self.assertEqual(len(M.GridGeometry().widths), 5)
         self.assertNotIn('tol', M.COL_KEYS)                           # no +/- tolerance column next to the limits
 
@@ -375,8 +377,9 @@ class ViewColumnsTests(Base):
         g.nav('Home')
         self.assertEqual(g.sel_col, 'step')
         g.select(key, 'low')
-        g.tab()                                                      # Low limit -> High limit
-        self.assertEqual(g.sel_col, 'high')
+        g.tab()                                                      # from a read-only limit cell: the next cell you can type in is the first one of the next row
+        self.assertEqual(g.sel_col, 'function')
+        g.select(key, 'nominal')
         g.tab()                                                      # Tab from the last editable cell goes to the first one of the next row
         self.assertEqual(g.sel_col, 'function')
         geo = M.GridGeometry(widths=[90, 270, 240, 160, 160], row_h=28, head_h=38, num_w=44)
