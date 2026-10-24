@@ -626,7 +626,10 @@ def _run_adj8846a(make_harness):
     for key in ('demo', 'fake_meter'):
         hn = make_harness(None)
         hn.start()
-        p = mock.patch.object(mod, 'DB', tmp / f'adj8846a_{key}.sqlite3')
+        # main moved the audit tables to lab_registry.sqlite3 (connect_db reads _registry_path/_legacy_path): point both into the temp dir, no legacy file
+        p = mock.patch.object(mod, '_registry_path', lambda _k=key: tmp / f'adj8846a_{_k}.sqlite3')
+        p.start(); hn.patches.append(p)
+        p = mock.patch.object(mod, '_legacy_path', lambda _k=key: tmp / f'adj8846a_{_k}_legacy.sqlite3')
         p.start(); hn.patches.append(p)
         import tkinter.ttk
         p = mock.patch.object(tkinter.ttk.Combobox, '__setitem__', lambda self, k, v: None, create=True)          # `self.port_combo['values'] = ports` on the stub
