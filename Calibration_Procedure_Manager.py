@@ -27,6 +27,7 @@ import specmanager_ui
 import procmods
 import procmods_ui_model
 import datasheet_builder_ui
+import manager_model     # the database registration, shared with the Qt Manager (manager_model.py)
 import mdd_import_ui    # import preview: a Mudcats .MDD becomes a manual calibration procedure
 import dsb_manager      # user-built datasheets are listed (not stored) in the Procedures table
 import packages          # procedure packages: export / inspect / install a procedure as a zip (packages.py)
@@ -87,61 +88,8 @@ def find_wavesurfer():
 
 
 def init_db():
-    with sqlite3.connect(DB) as conn:
-        conn.execute('''CREATE TABLE IF NOT EXISTS procedures (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            manufacturer TEXT NOT NULL DEFAULT '',
-            model TEXT NOT NULL DEFAULT '',
-            category TEXT NOT NULL DEFAULT '',
-            script_path TEXT NOT NULL UNIQUE,
-            description TEXT NOT NULL DEFAULT '',
-            enabled INTEGER NOT NULL DEFAULT 1,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''')
-        conn.execute('''CREATE TABLE IF NOT EXISTS instruments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            asset_id TEXT NOT NULL UNIQUE COLLATE NOCASE,
-            manufacturer TEXT NOT NULL DEFAULT '',
-            model TEXT NOT NULL DEFAULT '',
-            serial_number TEXT NOT NULL DEFAULT '',
-            interval_months INTEGER,
-            procedure_id INTEGER REFERENCES procedures(id) ON DELETE SET NULL,
-            notes TEXT NOT NULL DEFAULT '',
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )''')
-        init_datasheet_db(conn)
-        # Stable paths are relative to this manager, and remain unchanged after updates.
-        records = [p.registration for p in scan_procedures()]      # (name, manufacturer, model, category, launcher file) in list order
-        for name,mfr,model,category,filename in records:
-            stable = str(Path('Procedures') / filename)
-            if not (BASE / stable).is_file():
-                continue
-            # Keep existing procedure IDs and instrument assignments on upgrade.
-            matches = conn.execute('SELECT id,script_path FROM procedures WHERE name=? ORDER BY id',(name,)).fetchall()
-            if matches:
-                chosen = matches[0][0]
-                # If another record already uses the stable path, preserve it.
-                occupied = conn.execute('SELECT id FROM procedures WHERE script_path=?',(stable,)).fetchone()
-                if occupied and occupied[0] != chosen:
-                    chosen = occupied[0]
-                else:
-                    conn.execute('UPDATE procedures SET script_path=?,enabled=1 WHERE id=?',(stable,chosen))
-                # Remove duplicates only if no instruments point to them; otherwise retain with disabled status.
-                for duplicate_id,_ in matches:
-                    if duplicate_id != chosen:
-                        conn.execute('UPDATE instruments SET procedure_id=? WHERE procedure_id=?',(chosen,duplicate_id))
-                        conn.execute('DELETE FROM procedures WHERE id=?',(duplicate_id,))
-            else:
-                # Also migrate renamed V54 starter registrations by model/category.
-                legacy = None
-                if filename == 'Fluke_8846A_Verification.py':
-                    legacy = conn.execute("SELECT id FROM procedures WHERE model='8846A' AND category='Digital Multimeter' ORDER BY id LIMIT 1").fetchone()
-                if legacy:
-                    conn.execute('UPDATE OR IGNORE procedures SET name=?,script_path=?,enabled=1 WHERE id=?',(name,stable,legacy[0]))
-                else:
-                    conn.execute("INSERT OR IGNORE INTO procedures(name,manufacturer,model,category,script_path,description) VALUES(?,?,?,?,?,?)",(name,mfr,model,category,stable,'Standalone calibration procedure'))
+    """Create the tables and register the scanned procedures (the body is in manager_model.py, shared with the Qt Manager)."""
+    manager_model.init_db(DB, BASE, [p.registration for p in scan_procedures()])      # (name, manufacturer, model, category, launcher file) in list order
 
 
 def display_path(path):
