@@ -646,8 +646,8 @@ class StandardsSpecsPanel(QWidget):
         want = ['range', 'span', 'freq', 'res'] + list(PERIOD_IDS[:n])
         for c, k in enumerate(COLUMN_KEYS):
             tree.setColumnHidden(c, k not in want)
-        weight = {'range': 0.9, 'span': 1.25, 'freq': 1.15, 'res': 0.7, 'p1': 1.3, 'p2': 1.3, 'p3': 1.3}
-        least = {'range': 100, 'span': 150, 'freq': 140, 'res': 110, 'p1': 150, 'p2': 150, 'p3': 150}
+        weight = {'range': 1.35, 'span': 1.15, 'freq': 0.75, 'res': 0.7, 'p1': 1.3, 'p2': 1.3, 'p3': 1.3}
+        least = {'range': 120, 'span': 150, 'freq': 112, 'res': 118, 'p1': 150, 'p2': 150, 'p3': 150}
         total = sum(weight[k] for k in want)
         width = {k: max(least[k], avail * weight[k] / total) for k in want}
         over = sum(width.values()) - avail

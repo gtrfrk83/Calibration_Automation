@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import html
 import json
+import weakref
 from pathlib import Path
 
 from PySide6.QtCore import QPointF, QSize, Qt, QUrl
@@ -27,6 +28,7 @@ import spec_edit_log as elog
 import spec_editor as se
 import ui_theme_core as core
 from qtui import theme
+from qtui.screens._share import ShareWidth
 from qtui.table import CellDelegate, Column, DataTable, TableModel
 from qtui.theme import M
 from qtui.widgets import Badge, Banner, MessageDialog, ModalDialog, PrimaryButton, SecondaryButton, label, make_tab_bar, rule
@@ -87,12 +89,17 @@ def ask_string(parent, title: str, prompt: str, initialvalue: str = '') -> str |
     return edit.text() if dlg.run() == 'ok' else None
 
 
+_TONED: 'weakref.WeakKeyDictionary' = weakref.WeakKeyDictionary()
+_BROWSERS: 'weakref.WeakSet' = weakref.WeakSet()
+
+
 def _tone(widget: QWidget, kind: str) -> None:
     """Text colour of a label from the theme tokens: 'bad' | 'warn' | 'good' | 'info' | 'muted' | 'text'."""
     t = theme.tokens()
     pal = widget.palette()
     pal.setColor(widget.foregroundRole(), QColor(t.get(kind, t['text'])))
     widget.setPalette(pal)
+    _TONED[widget] = kind                                  # re-applied when the theme is switched live (see _retheme_all)
 
 
 def _title(text: str) -> str:
@@ -134,7 +141,17 @@ def mark_pixmap(kind: str, size: int = 14) -> QPixmap:
 def amber() -> tuple[str, str]:
     """(background, text) of a changed cell: stronger than the palette's warn_bg so it shows."""
     t = theme.tokens()
-    return theme.blend(t['table'], t['warn_dot'], 0.30), t['warn']
+    bg = theme.blend(t['table'], t['warn_dot'], 0.30)
+    return bg, (t['warn'] if _contrast(t['warn'], bg) >= 4.5 else t['text'])          # light: the amber text on the amber tint is under 4.5:1, the normal text colour is not
+
+
+def _contrast(a: str, b: str) -> float:
+    def lum(h):
+        c = QColor(h)
+        f = lambda v: v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4          # noqa: E731
+        return 0.2126 * f(c.redF()) + 0.7152 * f(c.greenF()) + 0.0722 * f(c.blueF())
+    hi, lo = sorted((lum(a), lum(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
 
 
 # ------------------------------------------------------------------------------------------------------------------------ the table with inline editing
@@ -168,7 +185,7 @@ class _GridModel(TableModel):
         if role == Qt.ItemDataRole.ForegroundRole:
             t = theme.tokens()
             if (row.iid, key) in g.changed or 'new' in row.tags:
-                return QColor(t['bad'] if 'err' in row.tags else t['warn'])
+                return QColor(t['bad'] if 'err' in row.tags else amber()[1])
             if 'err' in row.tags:
                 return QColor(t['bad'])
             if 'warn' in row.tags:
@@ -275,6 +292,7 @@ class Grid(QWidget):
         self.table = SpecTable(self, cols)
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded if hscroll else Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         lay.addWidget(self.table)
+        self._share = ShareWidth(self.table, [28] + [c[2] for c in columns], [0] + [c[2] * (2 if c[0] in ('function', 'label', 'text', 'value', 'what', 'limit', 'where') else 1) for c in columns])
         self.table.selectionChangedRows.connect(lambda _rows: self.ed._selection_changed(self))
 
     # ---- rows
@@ -445,16 +463,50 @@ def _banner(text: str, kind: str) -> Banner:
     return b
 
 
+class _Browser(QTextBrowser):
+    """A text box whose HTML uses the theme colours: it remembers its HTML and re-applies style sheet, marks and text when the theme is switched live."""
+    def __init__(self):
+        super().__init__()
+        self._src = None
+        self.apply_theme(False)
+        _BROWSERS.add(self)
+
+    def setHtml(self, text):
+        self._src = text
+        super().setHtml(text)
+
+    def apply_theme(self, redo=True):
+        t = theme.tokens()
+        self.document().setDefaultStyleSheet(
+            f"body {{ color: {t['text']}; }} a {{ color: {t['primary']}; text-decoration: none; font-weight: 600; }} "
+            f".mono {{ font-family: '{theme.mono_family()}'; }} .muted {{ color: {t['muted']}; }} .del {{ color: {t['bad']}; }} .add {{ color: {t['good']}; }} "
+            f".err {{ color: {t['bad']}; }} .warnl {{ color: {t['warn']}; }} .ok {{ color: {t['good']}; }} .warn {{ color: {t['warn']}; }} h3 {{ margin-top: 12px; margin-bottom: 2px; }}")
+        if redo:
+            _add_marks(self)
+            if self._src is not None:
+                y = self.verticalScrollBar().value()
+                super().setHtml(self._src)
+                self.verticalScrollBar().setValue(y)
+
+
+def _retheme_all(_name=None) -> None:
+    for w, kind in list(_TONED.items()):
+        try:
+            _tone(w, kind)
+        except RuntimeError:
+            pass
+    for b in list(_BROWSERS):
+        try:
+            b.apply_theme()
+        except RuntimeError:
+            pass
+
+
 def _browser() -> QTextBrowser:
-    b = QTextBrowser()
+    b = _Browser()
     b.setOpenLinks(False)
     b.setOpenExternalLinks(False)
     b.setFrameShape(QFrame.Shape.NoFrame)
-    t = theme.tokens()
-    b.document().setDefaultStyleSheet(
-        f"body {{ color: {t['text']}; }} a {{ color: {t['primary']}; text-decoration: none; font-weight: 600; }} "
-        f".mono {{ font-family: '{theme.mono_family()}'; }} .muted {{ color: {t['muted']}; }} .del {{ color: {t['bad']}; }} .add {{ color: {t['good']}; }} "
-        f".err {{ color: {t['bad']}; }} .warnl {{ color: {t['warn']}; }} .ok {{ color: {t['good']}; }} .warn {{ color: {t['warn']}; }} h3 {{ margin-top: 12px; margin-bottom: 2px; }}")
     return b
 
 
@@ -501,6 +553,9 @@ def _diff_box(changes, limit=200) -> QTextBrowser:
     return b
 
 
+theme.manager().changed.connect(_retheme_all)
+
+
 # ------------------------------------------------------------------------------------------------------------------------ the editor window
 class EditorWindow(QWidget):
     def __init__(self, parent=None, model=None, on_saved=None, spec_dir=None, db_path=None, backup_dir=None, width=1240, height=780):
@@ -516,6 +571,7 @@ class EditorWindow(QWidget):
         self.detail_text = ''
         self._links = {}
         self._build()
+        theme.manager().changed.connect(self._on_theme)
         self.resize(width, height)
         self.setMinimumSize(QSize(1000, 620))
         target = None
@@ -528,6 +584,10 @@ class EditorWindow(QWidget):
             self.select_sheet(target)
         if model and not se.sheet_for_model(model, spec_dir):
             self.say(f'{model} has no sheet file in specs/standards/ (it was imported from elsewhere); pick a sheet on the left.', 'warn')
+
+    def _on_theme(self, _name=None):
+        if self.doc is not None:
+            self.refresh()
 
     # ---- layout
     def _build(self):
@@ -547,9 +607,9 @@ class EditorWindow(QWidget):
         hl.addWidget(self.pill)
         root.addWidget(head)
         bar = QFrame()
-        bl = QHBoxLayout(bar)
+        from qtui.screens.standards_specs import FlowLayout          # wraps the buttons onto a second line in a narrow window instead of cutting their text
+        bl = FlowLayout(bar, M.sm, M.sm)
         bl.setContentsMargins(M.lg, M.sm, M.lg, M.sm)
-        bl.setSpacing(M.sm)
         self.btn = {}
         for key, text, cmd, primary in (
                 ('save', SAVE_TEXT, self.document_and_save, True), ('discard', 'Discard all', self.discard_all, False),
@@ -559,7 +619,6 @@ class EditorWindow(QWidget):
             b.clicked.connect(lambda _c=False, f=cmd: f())
             bl.addWidget(b)
             self.btn[key] = b
-        bl.addStretch(1)
         self.btn['history'] = SecondaryButton('Edit history')
         self.btn['history'].clicked.connect(lambda _c=False: self.open_history())
         bl.addWidget(self.btn['history'])
@@ -567,8 +626,8 @@ class EditorWindow(QWidget):
         root.addWidget(rule())
         body = QWidget()
         bd = QHBoxLayout(body)
-        bd.setContentsMargins(0, 0, 0, 0)
-        bd.setSpacing(0)
+        bd.setContentsMargins(M.lg, M.md, M.lg, M.sm)
+        bd.setSpacing(M.md)
         # left: sheets
         left = QFrame()
         left.setProperty('surface', 'card')
@@ -597,7 +656,7 @@ class EditorWindow(QWidget):
         # centre: tabs
         mid = QWidget()
         ml = QVBoxLayout(mid)
-        ml.setContentsMargins(M.md, M.xs, M.md, M.sm)
+        ml.setContentsMargins(0, 0, 0, 0)
         ml.setSpacing(M.xs)
         self.tabbar = make_tab_bar(['Rows', 'Notes', 'Standard info', 'Limits', 'Sheet issues'])
         ml.addWidget(self.tabbar)
@@ -1586,10 +1645,10 @@ class HistoryWindow(QWidget):
         body = QHBoxLayout()
         body.setContentsMargins(0, 0, 0, 0)
         body.setSpacing(0)
-        cols = [Column('edit', 'EDIT', width=84), Column('when', 'WHEN', width=130), Column('who', 'BY', width=90),
+        cols = [Column('edit', 'EDIT', width=84), Column('when', 'WHEN', width=160), Column('who', 'BY', width=100),
                 Column('reason', 'REASON', width=200, stretch=True)]
         self.table = DataTable(cols, [], multi=False, row_key=lambda r: r['iid'], alternating=False, empty_text='No documented edits yet')
-        self.table.setFixedWidth(560)
+        self.table.setFixedWidth(580)
         self.table.horizontalHeader().setSectionsClickable(False)
         self.table.horizontalHeader().setSortIndicatorShown(False)
         self.table.selectionChangedRows.connect(lambda _r: self.show_entry())
