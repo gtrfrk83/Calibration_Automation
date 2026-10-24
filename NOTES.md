@@ -1715,8 +1715,6 @@ QT-F1 addendum (after merging origin/qt-migration with WP-H and QT-F2): `ask_rea
 - **DIFFERS.** Notes wrap at full column width; at the 1000x640 minimum with demo notice + iFlex bar + queue + the long 376 note the content needs about 780 px and the info block (opaque) overlays the foot of the table; no 'Help' menubar in the Qt shell; dialogs without a parent attach to the active window; `report_details` with scripted details is not driven; file choosers are cancel-only in the proof.
 - **Unverified.** No Windows, no hardware or real instruments, dark only, native file dialogs; no SCPI or limits were touched. Possible latent `setFont` vs `* {font-size}` QSS issue in QT-E's `qtui/screens/run_queue.py` (not changed).
 
-`handheld_dmm_view_qt` / `run_queue_ui_qt`, which do not exist on qt-migration yet; until they do they raise NotImplementedError naming WP-H. `tests/test_ui_port_qt.py` skips those
-prompt kinds (SKIP_KINDS) and must replay them once the twins are merged.
 
 ## Qt WaveSurfer WS4104HD window, QT-G2b (branch `qt-p4-wavesurfer-view`; PySide6 offscreen only, never seen on Windows, a real screen or a real scope; DARK ONLY)
 Qt twin of `wavesurfer_view_tk.py`: `ui_port.view('wavesurfer_view')` resolves `wavesurfer_view_qt.py`; the engine (`engine_wavesurfer_dcv` and the section engines) is unchanged and calls the same function names with the App as `self`.
