@@ -15,7 +15,8 @@ What it does
   2. Checks that run and the procedure's files, and prints a PASS / WARN / FAIL checklist (INFO = for your information):
 
        run        the virtual run finished; no error dialog; demo records synthetic; the command log stayed virtual
-       commands   every command sent, with its COMMANDS-registry verified flag and manual page; UNVERIFIED ones listed; raw (unregistered) wire text
+       commands   every command sent, with its COMMANDS-registry verified flag and manual page; unverified ones listed as an INFO note (not a
+                  WARN); raw (unregistered) wire text
        readback   a registered write whose declared read-back query was never sent
        outputs    calibrator / generator output left ON between points or at the end of the run
        prompts    operator prompts per point (flag many in a procedure that reads its own meter)
@@ -74,6 +75,7 @@ class Finding:
     check: str
     text: str
     details: list = field(default_factory=list)
+    show: bool = False              # an INFO whose detail lines are still printed in the one-screen report (the unverified-commands note)
 
     def as_dict(self):
         return dict(level=self.level, check=self.check, text=self.text, details=list(self.details))
@@ -86,8 +88,8 @@ class Report:
     run: dict = field(default_factory=dict)
     seconds: float = 0.0
 
-    def add(self, level, check, text, details=()):
-        self.findings.append(Finding(level, check, text, list(details)))
+    def add(self, level, check, text, details=(), show=False):
+        self.findings.append(Finding(level, check, text, list(details), show))
 
     @property
     def counts(self):
@@ -286,7 +288,8 @@ def check_commands(rep, tr, regs, run):
     n_cmds = sum(v[0] for v in used.values()) + sum(v[0] for v in raw.values())
     head = f'{len(used)} registered commands used ({n_cmds} sent), {len(used) - len(unverified)} verified'
     if unverified:
-        rep.add(WARN, 'commands', head + f'; {len(unverified)} UNVERIFIED', unverified)
+        # a note, not a warning (owner decision): the lab's procedures are built from the manuals that exist and the list goes into the final summary
+        rep.add(INFO, 'commands', head + f'; note: {len(unverified)} unverified command(s) in use (list them in the final summary)', unverified, show=True)
     else:
         rep.add(PASS, 'commands', head)
     if noref:
@@ -356,7 +359,7 @@ def check_static_commands(rep, proc, regs):
     if not regs:
         rep.add(INFO, 'commands', 'no driver registry found for the sidecar\'s drivers')
         return
-    rep.add(WARN if rows else PASS, 'commands', f'static: {n} registered commands in the sidecar\'s drivers, {len(rows)} UNVERIFIED (not run: see "run")', rows)
+    rep.add(INFO if rows else PASS, 'commands', f'static: {n} registered commands in the sidecar\'s drivers; note: {len(rows)} unverified (not run: see "run")', rows, show=bool(rows))
 
 
 _ON = re.compile(r'^(?:OPER|OUTP\w*(?::STAT\w*)?\s+(?:ON|1)|AFG:OUTP\w*:STAT\w*\s+ON|APPL\w*[ :].*)$', re.I)
@@ -1027,7 +1030,7 @@ def render(rep, verbose=False):
              f'result: {rep.worst}   ({rep.counts.get(FAIL, 0)} FAIL, {rep.counts.get(WARN, 0)} WARN)   {rep.seconds} s']
     for f in rep.findings:
         lines.append(f'  {MARK[f.level]:<4} {f.check:<12} {f.text}')
-        shown = f.details if verbose else (f.details[:DETAIL_LINES] if f.level != INFO else [])
+        shown = f.details if verbose else (f.details[:DETAIL_LINES] if (f.level != INFO or f.show) else [])
         for d in shown:
             lines.append(f'         - {d}')
         if len(f.details) > len(shown):

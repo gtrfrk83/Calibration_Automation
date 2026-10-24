@@ -24,6 +24,7 @@ import appdata
 import datamode
 import procmods_engine
 import reset_startup
+import surprise
 import virtualbench
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
@@ -56,7 +57,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the DMM under test and the Fluke 5560A, both through the instrument drivers."""
     SETTLE_AC = {3: 9.0, 20: 5.0, 200: 4.0}
 
-    def __init__(self, dmm_address, cal_address, cal_baud=9600, transports=None, mods=None, virtual=False):
+    def __init__(self, dmm_address, cal_address, cal_baud=9600, transports=None, mods=None, virtual=False, surprise_handler=None):
         self.log = drivers.CommandLog()
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
@@ -75,6 +76,19 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         except Exception:
             self.close(); raise
         self.ident = self.dmm.idn
+        self.guards = []
+        if surprise_handler is not None:
+            self.enable_surprise(surprise_handler)
+
+    def enable_surprise(self, handler, force=False):
+        """Stop on surprise (surprise.py, opt-in; wired here at the engine level, no driver edited).  handler(Surprise) -> True = Continue; it must have
+        been made on the Tk thread (surprise.tk_handler).  A reply that is empty / a prompt character / not a number for READ?, or a query that times
+        out twice, is a Stop-only surprise; the DMM's error queue after CONF / NPLC / BAND is a Stop / Continue surprise; the calibrator's error
+        queue after an output is a Stop-only surprise (the output is never operated after a refusal).  No write is ever repeated.  A virtual (demo)
+        command log is left alone unless force=True (tests), so the simulated bench never prompts."""
+        self.guards = [g for g in (surprise.attach_guard(self.dmm, handler, force, expect={'read': 'float'}, stop_only=True),
+                                   surprise.attach_guard(self.cal, handler, force, stop_only=True)) if g]
+        return self.guards
 
     def reset_roles(self):
         return [self.cal], [self.dmm]
@@ -125,7 +139,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.standby()
         self.check_terminals(p)
         self.dmm.configure_point(p)
-        self.dmm.check_errors('configuring ' + p['description'])
+        surprise.checked(self.dmm, self.dmm.check_errors, 'configuring ' + p['description'])       # no guard: exactly dmm.check_errors(...)
         if p['source'] == 'none':          # copper short / open input: the calibrator stays in STANDBY
             time.sleep(virtualbench.scaled(p['settle_s'] if p.get('settle_s') is not None else self.pm_param('truevolt.settle.zero', 1.5), self.virtual))
             return self.dmm.read()
@@ -137,7 +151,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         elif k in ('DCI', 'ACI'): self.cal.set_output_amps(v, f, dc=k == 'DCI')
         elif k in ('OHM2', 'OHM4'): self.cal.set_output_ohms(v)
         elif k == 'FREQ': self.cal.set_output_volts(p['amplitude'], v)
-        self.cal.check_error(p['description'])   # the calibrator refuses outputs it cannot make; never operate then
+        surprise.checked(self.cal, self.cal.check_error, p['description'], stop_only=True)   # the calibrator refuses outputs it cannot make; never operate then (so no Continue)
         self.cal.operate_unverified()
         time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
         reading = self.dmm.read()
@@ -370,7 +384,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             if self.virtual:          # demo: the real IO / driver code over a simulated DMM and calibrator
                 self._vb = virtualbench.dmm_pair(MODEL)
                 self.io = IO('virtual', 'virtual', 9600, transports=(self._vb[2], self._vb[1]), mods=self.pm_state, virtual=True)
-            else: self.io = IO(self.dmm_addr.get(), self.cal_addr.get(), int(self.cal_baud.get()), mods=self.pm_state)
+            else: self.io = IO(self.dmm_addr.get(), self.cal_addr.get(), int(self.cal_baud.get()), mods=self.pm_state, surprise_handler=self._surprise_handler())
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
@@ -379,6 +393,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
         self.status.set('Connected: ' + self.io.ident + tag + '. Calibrator output is NOT enabled.')
         messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'{MODEL}: {self.io.ident}\nFluke 5560A: {self.io.cal.idn}{tag}\nCalibrator output is not enabled.')
+
+    def _surprise_handler(self):
+        """The Stop / Continue dialog for stop-on-surprise, made ON the Tk thread (here: the Test connections / Run handler), once per window.
+        None in demo (virtual or fast): the simulated bench never prompts."""
+        if self.demo or self.fast_demo: return None
+        if getattr(self, '_sp_handler', None) is None: self._sp_handler = surprise.tk_handler(self.root)
+        return self._sp_handler
 
     def disconnect(self):
         if self.io: self.io.close(); self.io = None
