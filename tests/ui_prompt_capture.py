@@ -360,6 +360,10 @@ def _run_adjustments(make_harness):
 
 SCENARIOS = {'a34410a': _run_a34410a, 'f8808a': _run_f8808a, 'handheld': _run_handheld, 'adjustments': _run_adjustments}
 
+# ---- WP-G (function generators and scopes): scenarios live in tests/ui_prompt_capture_wpg.py (APPEND-ONLY block)
+import ui_prompt_capture_wpg as _wpg  # noqa: E402
+SCENARIOS.update(_wpg.SCENARIOS)
+
 
 def capture(name, harness_class=TkLevelHarness):
     return SCENARIOS[name](lambda answers=None: harness_class(answers))

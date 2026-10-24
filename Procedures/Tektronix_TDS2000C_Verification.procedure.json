@@ -24,6 +24,9 @@
   "code": [
    "Procedures/Tektronix_TDS2000C_Verification.py",
    "tds2000c_verification.py",
+   "tds2000c_view_tk.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "drivers/base.py",
    "drivers/transport.py",
    "drivers/tektronix_tds2000c.py",

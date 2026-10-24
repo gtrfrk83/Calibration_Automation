@@ -56,10 +56,12 @@ def engine_rows(name, app):
 
 def export(name, app, mod, out, details):
     """The engine's own export path (dialog and file chooser replaced)."""
+    import tkinter                       # a ported engine (tests/ui_ported.txt) has no filedialog / messagebox name: the port calls tkinter's
+    fd, mb = getattr(mod, 'filedialog', None) or tkinter.filedialog, getattr(mod, 'messagebox', None) or tkinter.messagebox
     with mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: dict(details)), \
-            mock.patch.object(mod.filedialog, 'asksaveasfilename', lambda **k: str(out)), \
-            mock.patch.object(mod.messagebox, 'showinfo', lambda *a, **k: None, create=True), \
-            mock.patch.object(mod.messagebox, 'showerror', lambda *a, **k: (_ for _ in ()).throw(AssertionError(a)), create=True):
+            mock.patch.object(fd, 'asksaveasfilename', lambda **k: str(out)), \
+            mock.patch.object(mb, 'showinfo', lambda *a, **k: None, create=True), \
+            mock.patch.object(mb, 'showerror', lambda *a, **k: (_ for _ in ()).throw(AssertionError(a)), create=True):
         if name == 'ws':
             app.write_certificate_pdf(str(out), ['noise', 'dcv', 'impedance', 'offset', 'bandwidth', 'timebase', 'trigger'], dict(details))
         else:
