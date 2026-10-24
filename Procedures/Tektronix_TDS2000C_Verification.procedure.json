@@ -25,6 +25,8 @@
    "Procedures/Tektronix_TDS2000C_Verification.py",
    "tds2000c_verification.py",
    "tds2000c_view_tk.py",
+   "tds2000c_view_qt.py",
+   "genscope_support_view_qt.py",
    "ui_port.py",
    "ui_port_tk.py",
    "drivers/base.py",
