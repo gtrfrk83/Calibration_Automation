@@ -183,10 +183,16 @@ class Mdo(unittest.TestCase):
         self.assertEqual(self.M.tar_tur_fields(p, self.rec(p, 0.0))['TUR'], tartur.format_ratio(tol / uncertainty.round_up(parts[0])))
 
     def test_blank_kinds(self):
-        for kind in ('BW', 'NOISE', 'BAL', 'DELTA', 'PHASE', 'DANL', 'XTALK', 'DVMAC', 'DVMFREQ', 'SELFTEST', 'SPC', 'TRIGOUT', 'DIGITAL'):
+        for kind in ('BW', 'NOISE', 'BAL', 'DELTA', 'PHASE', 'DANL', 'XTALK', 'DVMAC', 'SELFTEST', 'SPC', 'TRIGOUT', 'DIGITAL'):
             p = self.point(kind)
             f = self.M.tar_tur_fields(p, self.rec(p, p['nominal'] or 1.0))
             self.assertEqual(f, dict(TAR='', TUR=''), kind)       # no printed uncertainty (N/A), one-sided limits, or no matching specification
+
+    def test_frequency_kinds_have_a_tur_against_the_frequency_cmc_and_no_tar(self):
+        for kind in ('DVMFREQ', 'AFGFREQ'):
+            p = self.point(kind)
+            f = self.M.tar_tur_fields(p, self.rec(p, p['nominal']))
+            self.assertEqual(f, dict(TAR='', TUR='>1000:1'), kind)
 
     def test_reference_file_entry_gives_tur_only_in_same_unit(self):
         M = self.M
@@ -334,7 +340,7 @@ class WaveSurfer(unittest.TestCase):
     def test_blank_kinds_and_bad_rows(self):
         a = self.app
         self.assertEqual(a.tar_tur_fields('noise', dict(minimum_db=30)), dict(TAR='', TUR=''))
-        self.assertEqual(a.tar_tur_fields('timebase', dict(lower_hz=-1, upper_hz=1, nominal_hz=1e5)), dict(TAR='', TUR=''))
+        self.assertEqual(a.tar_tur_fields('timebase', dict(lower_hz=-1, upper_hz=1, nominal_hz=1e5)), dict(TAR='', TUR='>1000:1'))   # the Frequency - Measure CMC (frequency work)
         self.assertEqual(a.tar_tur_fields('dcv', {}), dict(TAR='', TUR=''))
         self.assertEqual(a.tar_tur_fields('nonsense', {}), dict(TAR='', TUR=''))
 
@@ -387,7 +393,19 @@ class PdfExports(unittest.TestCase):
         b = self.run_harness(ROOT, 'new_off', 'off')
         for name in self.PDFS:
             self.assertGreater((a / name).stat().st_size, 1000, name)
+            if (a / name).read_bytes() != (b / name).read_bytes():
+                self.only_frequency_cells_changed(a / name, b / name, name)      # the frequency work: DVM / AFG frequency and the WaveSurfer time base now print the Frequency - Measure CMC
+                continue
             self.assertEqual((a / name).read_bytes(), (b / name).read_bytes(), name)
+
+    def only_frequency_cells_changed(self, old, new, name):
+        import difflib
+        self.assertIn(name, ('mdo.pdf', 'ws_all.pdf'))
+        norm = lambda path: [' '.join(l.split()) for l in pdftext(path).splitlines()]
+        changed = [l for l in difflib.ndiff(norm(old), norm(new)) if l[:2] in ('- ', '+ ')]
+        self.assertTrue(changed)
+        for l in changed:
+            self.assertRegex(l[2:], r'Hz .*N/A$' if l[0] == '-' else r'Hz .* [\d.]+ (p|n|\u00b5|m)?Hz$', l)
 
     def test_on_adds_columns_and_values(self):
         out = self.run_harness(ROOT, 'new_on', 'on')

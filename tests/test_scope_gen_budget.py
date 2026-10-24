@@ -301,7 +301,7 @@ class WaveSurfer(unittest.TestCase):
         self.assertEqual(f['TAR'], f2['TAR'])                               # TAR is the unscaled specification: untouched
         self.assertNotEqual(f['TUR'], f2['TUR'])
 
-    def test_impedance_bandwidth_noise_timebase_unchanged(self):
+    def test_impedance_bandwidth_noise_unchanged(self):
         a = self.app
         value, unit = a.scope_uncertainty_value('impedance', dict(nominal_ohm=1e6))
         self.assertEqual((value, unit), (SC.dmm('OHM', 1e6, basis='measure'), 'ohm'))
@@ -309,7 +309,6 @@ class WaveSurfer(unittest.TestCase):
             self.assertEqual(a.scope_uncertainty_value('impedance', dict(nominal_ohm=1e6))[0], value)
             self.assertEqual(a.scope_uncertainty_value('bandwidth', dict(amplitude_vpp=0.8, high_hz=1e9))[1], 'dB')
         self.assertIsNone(a.scope_uncertainty_value('noise', {}))
-        self.assertIsNone(a.scope_uncertainty_value('timebase', dict(nominal_hz=1e5)))
         self.assertEqual(a.scope_uncertainty('noise', {}), '')
 
     def test_bad_rows_still_give_nothing(self):

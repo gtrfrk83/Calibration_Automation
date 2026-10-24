@@ -3736,6 +3736,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 value,unit,_=sc.oscilloscope('impedance',ohms=r['nominal_ohm'])
             elif kind=='offset':
                 return self._dc_budget_value(r['nominal_v'],sc)
+            elif kind=='timebase':
+                # the 5560A scope marker is locked to the GPS-referenced lab standard: the lab's Frequency - Measure CMC at the marker frequency, on its own
+                value,unit=sc.dmm('FREQ',r['nominal_hz'],None,None,basis='measure'),'Hz'
             elif kind=='bandwidth':
                 value,unit,_=sc.oscilloscope('bandwidth',volts_pp=r['amplitude_vpp'],frequency=r['high_hz'])
             elif kind=='trigger':
@@ -3760,7 +3763,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     # Tolerance (half the width of the limits, in the unit of the row's base values) per kind: (low key, high key, unit)
     _TOL_KEYS={'dcv':('lower_v','upper_v','V'),'impedance':('lower_ohm','upper_ohm','ohm'),'offset':('lower_v','upper_v','V'),
-               'bandwidth':('lower_db','upper_db','dB'),'trigger':('lower_v','upper_v','V')}
+               'bandwidth':('lower_db','upper_db','dB'),'trigger':('lower_v','upper_v','V'),'timebase':('lower_hz','upper_hz','Hz')}
 
     def tar_tur_fields(self, kind, r):
         """dict(TAR, TUR) strings for one result record, used only when the report asks for them.

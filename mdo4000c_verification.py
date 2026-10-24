@@ -36,7 +36,8 @@ SECTION_TITLE = {s['id']: s['title'] for s in SPEC['sections']}
 SECTION_PAGE = {s['id']: s['page'] for s in SPEC['sections']}
 MODELS = SPEC['models']
 PLAIN_UNITS = {'%', 'dB', 'dBm', 'dBc', 'dBm/Hz', 'dBc/Hz', 'ratio', ''}
-CAL_MODEL = '5560A'         # the standards sheet (specs/standards) whose DC voltage specification is the budget for the DC gain / offset / DVM points
+CAL_MODEL = '5560A'
+FREQ_CMC_KINDS = ('DVMFREQ', 'AFGFREQ')       # frequency points: the lab's Frequency - Measure CMC (GPS-referenced) is their uncertainty         # the standards sheet (specs/standards) whose DC voltage specification is the budget for the DC gain / offset / DVM points
 ENBW_FACTOR = 1.0            # noise-equivalent bandwidth = ENBW_FACTOR x RBW when converting dBm to dBm/Hz (see README)
 SLEEP_SCALE = 1.0            # tests set this to 0
 VIRTUAL_PACE = 1.0           # a virtual-bench demo shortens the waits (virtualbench.WAIT_SCALE); 1.0 = real
@@ -195,7 +196,7 @@ def uncertainty_parts(p, raw):
     """The number behind uncertainty_text: (value, unit, style) or None when the text is 'N/A'.  value is the unrounded uncertainty
     in `unit` ('ohm', '%', 'V', 'ratio' for the bandwidth gain, or the unit of the reference-file entry); style says how
     uncertainty_text prints it ('si' = uncertainty.format_value, 'bw' = plain 2 significant figures, 'ref' = number and unit)."""
-    if p['stim'] == 'none' or p.get('passfail'):
+    if (p['stim'] == 'none' and p['kind'] not in FREQ_CMC_KINDS) or p.get('passfail'):
         return None
     import report_pdf, uncertainty, uncertainty_budget
     sc = report_pdf.scope()
@@ -229,11 +230,20 @@ def uncertainty_parts(p, raw):
     if ref and (ref.get('rel') is not None or ref.get('abs') is not None):
         reading = abs(raw.get('reading', p['nominal']))
         value = (ref.get('rel') or 0) * reading + (ref.get('abs') or 0)
-        if k == 'DVMFREQ' and sc is not None and ref.get('unit', p['unit']) == 'Hz':
+        if k in FREQ_CMC_KINDS and sc is not None and ref.get('unit', p['unit']) == 'Hz':
             floor = sc.dmm('FREQ', p['nominal'], None, None, basis='measure')     # never below the A2LA frequency CMC
             if floor is not None and value < floor:
                 value = floor
         return value, ref.get('unit', p['unit']), 'ref'
+    if k in FREQ_CMC_KINDS and sc is not None and p['unit'] == 'Hz':
+        # a frequency read by the GPS-referenced lab standard (the 5560A frequency into the DVM counter; the AFG output on the lab counter): the lab's
+        # 'Frequency - Measure' CMC (7.1e-12 of the frequency), on its own: the CMC is already the expanded figure, there is no divisor and no amplitude term
+        try:
+            v = sc.dmm('FREQ', p['nominal'], None, None, basis='measure')
+        except Exception:
+            v = None
+        if v is not None:
+            return v, 'Hz', 'si'
     return None
 
 
@@ -270,7 +280,7 @@ def tar_tur_fields(p, r):
     (gain is a %, the others are measurements or non-DC / leveled-sine / square stimulus with no matching specification row)."""
     import tartur
     try:
-        if p.get('passfail') or p.get('stim') == 'none':
+        if p.get('passfail') or (p.get('stim') == 'none' and p['kind'] not in FREQ_CMC_KINDS):
             return dict(TAR='', TUR='')
         raw = r.get('raw', {})
         text = r.get('uncertainty') or uncertainty_text(p, raw)
