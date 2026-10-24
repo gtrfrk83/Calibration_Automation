@@ -108,9 +108,14 @@ def _entry_dialog(parent, title: str, prompt: str, initial, secret: bool, ok_tex
     dlg.add_button(ok_text, role='primary', result='ok', default=True, callback=accept_cb)
     entry.selectAll()
     fit_dialog(dlg)
-    if dlg.run() == 'ok':
-        return entry.text()
-    return None
+    try:
+        if dlg.run() == 'ok':
+            return entry.text()
+        return None
+    finally:
+        if secret:                                   # a typed password must not stay in a hidden widget of the parent window (QT-G1b)
+            entry.clear()
+            dlg.deleteLater()
 
 
 def ask_text(parent, title: str, prompt: str, initial=None, show=None) -> str | None:
