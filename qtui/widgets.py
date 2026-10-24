@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Callable, Iterable, Sequence
 
-from PySide6.QtCore import QEvent, QPoint, QRect, QSize, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QKeyEvent
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QDialog, QFrame, QHBoxLayout, QLabel, QLineEdit, QProgressBar, QPushButton, QSizePolicy,
                                QTabBar, QVBoxLayout, QWidget)
@@ -56,6 +56,55 @@ def make_tab_bar(items: Sequence[str], *, sub: bool = False, parent: QWidget | N
     bar.setProperty('sub', sub)
     bar.setFocusPolicy(Qt.FocusPolicy.TabFocus)
     return bar
+
+
+class _StyleFollower(QObject):
+    """Re-applies a widget's own style sheet (built from the tokens) after every theme switch; it lives and dies with the widget."""
+
+    def __init__(self, widget: QWidget, build: Callable[[], str]):
+        super().__init__(widget)
+        self._w, self._build = widget, build
+        theme.manager().changed.connect(self.apply)
+        self.apply()
+
+    def apply(self, *_):
+        try:
+            self._w.setStyleSheet(self._build())
+        except RuntimeError:
+            pass
+
+
+def follow_tokens(widget: QWidget, build: Callable[[], str]) -> None:
+    """`widget.setStyleSheet(build())` now and again after every theme switch (for a style sheet that names token colours).  Calling it again on the same
+    widget replaces the earlier `build`."""
+    for old in widget.findChildren(_StyleFollower, options=Qt.FindChildOption.FindDirectChildrenOnly):
+        old.deleteLater()
+        try:
+            theme.manager().changed.disconnect(old.apply)
+        except (RuntimeError, TypeError):
+            pass
+    _StyleFollower(widget, build)
+
+
+def follow_theme(widget: QWidget, apply: Callable[[], None]) -> None:
+    """Run `apply()` now and after every theme switch (for a widget that sets a pixmap / icon from the tokens); it lives and dies with the widget."""
+    def run(*_):
+        try:
+            apply()
+        except RuntimeError:
+            pass
+    holder = QObject(widget)
+    holder.run = run                                           # keep the callable alive as long as the widget
+    theme.manager().changed.connect(run)
+    run()
+    holder.destroyed.connect(lambda *_: _disconnect(run))
+
+
+def _disconnect(fn) -> None:
+    try:
+        theme.manager().changed.disconnect(fn)
+    except (RuntimeError, TypeError):
+        pass
 
 
 class _Themed:
@@ -469,7 +518,7 @@ class Toast(QFrame):
         row.setContentsMargins(M.lg, M.sm + 2, M.lg, M.sm + 2)
         row.setSpacing(M.sm)
         dot = QLabel('●')
-        dot.setStyleSheet(f"color: {theme.tokens().get(kind + '_dot', theme.tokens()['info_dot'])};")
+        follow_tokens(dot, lambda: f"color: {theme.tokens().get(kind + '_dot', theme.tokens()['info_dot'])};")
         row.addWidget(dot)
         self.text_label = QLabel(text)
         row.addWidget(self.text_label)
@@ -760,7 +809,7 @@ class MessageDialog(ModalDialog):
         icon = QLabel()
         icon.setFixedSize(28, 28)
         col = {'info': 'info', 'warn': 'warn', 'error': 'bad'}[banner_kind]
-        icon.setPixmap(theme.pixmap({'info': 'info', 'warn': 'warn', 'error': 'error'}[banner_kind], theme.tokens()[col], 28))
+        follow_theme(icon, lambda: icon.setPixmap(theme.pixmap({'info': 'info', 'warn': 'warn', 'error': 'error'}[banner_kind], theme.tokens()[col], 28)))
         head.addWidget(icon, 0, Qt.AlignmentFlag.AlignTop)
         col_l = QVBoxLayout()
         col_l.setSpacing(M.xs)

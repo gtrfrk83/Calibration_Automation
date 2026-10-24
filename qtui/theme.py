@@ -81,11 +81,31 @@ def build_tokens(name: str) -> dict:
     dark = name == 'dark'
     t['name'] = name if name in core.PALETTES else 'light'
     t['is_dark'] = dark
+    if dark:                                                   # the light blue of the dark theme reads with dark text (white on it is 2.9:1)
+        t['on_primary'] = t['bg']
+    else:
+        t['info'] = '#0958C8' if contrast(t['info'], t['select']) < 4.6 else t['info']
+    t['faint'] = t.get('faint', t['muted'])
+    while contrast(t['faint'], t['bg']) < 3.0 or contrast(t['faint'], t['card']) < 3.0:        # 'faint' is decoration / disabled text: at least 3:1
+        t['faint'] = blend(t['faint'], t['muted'], 0.1)
+    if not dark:                                               # light only: the blue is darkened until button text and links on it / on the page read (>= 4.5:1)
+        k = 0.0
+        while k < 0.5 and min(contrast(t['on_primary'], t['primary']), contrast(t['primary'], t['bg']), contrast(t['primary'], t['card'])) < 4.5:
+            k += 0.02
+            t['primary'] = blend(pal['primary'], '#000000', k)
+        if k:
+            t['primary_hi'], t['primary_lo'] = blend(t['primary'], '#000000', 0.10), blend(t['primary'], '#000000', 0.22)
+        k = 0.0
+        while k < 0.5 and contrast('#FFFFFF', t['danger']) < 4.5:      # the danger button's text is white
+            k += 0.02
+            t['danger'] = blend(pal['danger'], '#000000', k)
+        if k:
+            t['danger_hi'], t['danger_lo'] = blend(t['danger'], '#000000', 0.10), blend(t['danger'], '#000000', 0.22)
     t['focus'] = t['primary']
     t['focus_ring'] = blend(t['primary'], t['bg'], 0.35)       # the soft halo drawn around a focused field
-    t['disabled_fg'] = blend(t['muted'], t['btn_off'], 0.30)
+    t['disabled_fg'] = blend(t['muted'], t['btn_off'], 0.30 if dark else 0.12)
     t['disabled_bg'] = t['btn_off']
-    t['placeholder'] = blend(t['muted'], t['field'], 0.25)
+    t['placeholder'] = blend(t['muted'], t['field'], 0.08 if dark else 0.0)
     # disabled primary button: pick whichever of white / body text reads better on the pale primary_off, then soften it
     best = max((t['on_primary'], t['text']), key=lambda c: contrast(c, t['primary_off']))
     t['primary_off_fg'] = blend(best, t['primary_off'], 0.25)
