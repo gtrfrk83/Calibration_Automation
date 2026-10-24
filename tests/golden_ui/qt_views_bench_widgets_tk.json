@@ -1,0 +1,6062 @@
+{
+ "a34401a|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Refresh ports",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Refresh ports",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [],
+   "idle": []
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "7",
+      "8"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "DCV",
+      "OHM2",
+      "OHM4",
+      "DCI",
+      "ACV",
+      "ACI",
+      "FREQ",
+      "ZERO FRONT",
+      "ZERO REAR"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Even",
+      "Odd",
+      "None"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "disabled"
+    ],
+    [
+     [],
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "7",
+      "8"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "DCV",
+      "OHM2",
+      "OHM4",
+      "DCI",
+      "ACV",
+      "ACI",
+      "FREQ",
+      "ZERO FRONT",
+      "ZERO REAR"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Even",
+      "Odd",
+      "None"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Agilent 34401A | Performance Verification v54 [DEMO]"
+ },
+ "a34401a|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Refresh ports",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Refresh ports",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [],
+   "idle": []
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "7",
+      "8"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "DCV",
+      "OHM2",
+      "OHM4",
+      "DCI",
+      "ACV",
+      "ACI",
+      "FREQ",
+      "ZERO FRONT",
+      "ZERO REAR"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Even",
+      "Odd",
+      "None"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "disabled"
+    ],
+    [
+     [],
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "7",
+      "8"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "DCV",
+      "OHM2",
+      "OHM4",
+      "DCI",
+      "ACV",
+      "ACI",
+      "FREQ",
+      "ZERO FRONT",
+      "ZERO REAR"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Even",
+      "Odd",
+      "None"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Agilent 34401A | Performance Verification  |  v70 Beta 2"
+ },
+ "a34410a_34410A|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include the optional tests (extra AC volts, AC current, capacitance)",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include the optional tests (extra AC volts, AC current, capacitance)",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset - front terminals",
+      "Zero offset - rear terminals",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency gain",
+      "AC volts",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "GPIB",
+      "USB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset - front terminals",
+      "Zero offset - rear terminals",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency gain",
+      "AC volts",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "GPIB",
+      "USB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34410A | Performance Verification [DEMO]  |  v70 Beta 2"
+ },
+ "a34410a_34410A|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include the optional tests (extra AC volts, AC current, capacitance)",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include the optional tests (extra AC volts, AC current, capacitance)",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset - front terminals",
+      "Zero offset - rear terminals",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency gain",
+      "AC volts",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "GPIB",
+      "USB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset - front terminals",
+      "Zero offset - rear terminals",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency gain",
+      "AC volts",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "GPIB",
+      "USB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34410A | Performance Verification  |  v70 Beta 2"
+ },
+ "a34410a_34411A|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include the optional tests (extra AC volts, AC current, capacitance)",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include the optional tests (extra AC volts, AC current, capacitance)",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset - front terminals",
+      "Zero offset - rear terminals",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency gain",
+      "AC volts",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "GPIB",
+      "USB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset - front terminals",
+      "Zero offset - rear terminals",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency gain",
+      "AC volts",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "GPIB",
+      "USB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34411A | Performance Verification [DEMO]  |  v70 Beta 2"
+ },
+ "a34410a_34411A|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include the optional tests (extra AC volts, AC current, capacitance)",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include the optional tests (extra AC volts, AC current, capacitance)",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset - front terminals",
+      "Zero offset - rear terminals",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency gain",
+      "AC volts",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "GPIB",
+      "USB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset - front terminals",
+      "Zero offset - rear terminals",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency gain",
+      "AC volts",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "GPIB",
+      "USB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34411A | Performance Verification  |  v70 Beta 2"
+ },
+ "dacq_34970A|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Refresh ports",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Refresh ports",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include 2-wire ohms (optional)",
+     "disabled"
+    ],
+    [
+     "Include optional AC tests",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include 2-wire ohms (optional)",
+     "normal"
+    ],
+    [
+     "Include optional AC tests",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "1",
+      "2",
+      "3"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "34901A",
+      "34902A"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "57600",
+      "115200",
+      "38400",
+      "19200",
+      "9600",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "8 data bits, no parity",
+      "7 data bits, even parity",
+      "7 data bits, odd parity"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset: shorted input",
+      "Zero offset: current open",
+      "DC volts gain",
+      "4-wire ohms gain",
+      "DC current gain",
+      "AC volts gain",
+      "AC current gain",
+      "Frequency gain"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "XON/XOFF (instrument default)",
+      "None",
+      "RTS/CTS"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "1",
+      "2",
+      "3"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "34901A",
+      "34902A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "57600",
+      "115200",
+      "38400",
+      "19200",
+      "9600",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "8 data bits, no parity",
+      "7 data bits, even parity",
+      "7 data bits, odd parity"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset: shorted input",
+      "Zero offset: current open",
+      "DC volts gain",
+      "4-wire ohms gain",
+      "DC current gain",
+      "AC volts gain",
+      "AC current gain",
+      "Frequency gain"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "XON/XOFF (instrument default)",
+      "None",
+      "RTS/CTS"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34970A | Performance Verification [DEMO]  |  v70 Beta 2"
+ },
+ "dacq_34970A|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Refresh ports",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Refresh ports",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include 2-wire ohms (optional)",
+     "disabled"
+    ],
+    [
+     "Include optional AC tests",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include 2-wire ohms (optional)",
+     "normal"
+    ],
+    [
+     "Include optional AC tests",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "1",
+      "2",
+      "3"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "34901A",
+      "34902A"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "57600",
+      "115200",
+      "38400",
+      "19200",
+      "9600",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "8 data bits, no parity",
+      "7 data bits, even parity",
+      "7 data bits, odd parity"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset: shorted input",
+      "Zero offset: current open",
+      "DC volts gain",
+      "4-wire ohms gain",
+      "DC current gain",
+      "AC volts gain",
+      "AC current gain",
+      "Frequency gain"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "XON/XOFF (instrument default)",
+      "None",
+      "RTS/CTS"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "1",
+      "2",
+      "3"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "34901A",
+      "34902A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "57600",
+      "115200",
+      "38400",
+      "19200",
+      "9600",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "8 data bits, no parity",
+      "7 data bits, even parity",
+      "7 data bits, odd parity"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset: shorted input",
+      "Zero offset: current open",
+      "DC volts gain",
+      "4-wire ohms gain",
+      "DC current gain",
+      "AC volts gain",
+      "AC current gain",
+      "Frequency gain"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "XON/XOFF (instrument default)",
+      "None",
+      "RTS/CTS"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34970A | Performance Verification  |  v70 Beta 2"
+ },
+ "dacq_34972A|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include 2-wire ohms (optional)",
+     "disabled"
+    ],
+    [
+     "Include optional AC tests",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include 2-wire ohms (optional)",
+     "normal"
+    ],
+    [
+     "Include optional AC tests",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "1",
+      "2",
+      "3"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "34901A",
+      "34902A"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset: shorted input",
+      "Zero offset: current open",
+      "DC volts gain",
+      "4-wire ohms gain",
+      "DC current gain",
+      "AC volts gain",
+      "AC current gain",
+      "Frequency gain"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "1",
+      "2",
+      "3"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "34901A",
+      "34902A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset: shorted input",
+      "Zero offset: current open",
+      "DC volts gain",
+      "4-wire ohms gain",
+      "DC current gain",
+      "AC volts gain",
+      "AC current gain",
+      "Frequency gain"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34972A | Performance Verification [DEMO]  |  v70 Beta 2"
+ },
+ "dacq_34972A|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include 2-wire ohms (optional)",
+     "disabled"
+    ],
+    [
+     "Include optional AC tests",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include 2-wire ohms (optional)",
+     "normal"
+    ],
+    [
+     "Include optional AC tests",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "1",
+      "2",
+      "3"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "34901A",
+      "34902A"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset: shorted input",
+      "Zero offset: current open",
+      "DC volts gain",
+      "4-wire ohms gain",
+      "DC current gain",
+      "AC volts gain",
+      "AC current gain",
+      "Frequency gain"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "1",
+      "2",
+      "3"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "34901A",
+      "34902A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset: shorted input",
+      "Zero offset: current open",
+      "DC volts gain",
+      "4-wire ohms gain",
+      "DC current gain",
+      "AC volts gain",
+      "AC current gain",
+      "Frequency gain"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34972A | Performance Verification  |  v70 Beta 2"
+ },
+ "f8808a|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Enter reading manually",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Refresh ports",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Enter reading manually",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Refresh ports",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [],
+   "idle": []
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "8 data bits, no parity",
+      "7 data bits, even parity",
+      "7 data bits, odd parity"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset, shorted input",
+      "Zero offset, open current input",
+      "DC volts",
+      "AC volts",
+      "Frequency",
+      "4-wire ohms",
+      "2-wire ohms",
+      "DC current",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5522A",
+      "Fluke 5560A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "8 data bits, no parity",
+      "7 data bits, even parity",
+      "7 data bits, odd parity"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset, shorted input",
+      "Zero offset, open current input",
+      "DC volts",
+      "AC volts",
+      "Frequency",
+      "4-wire ohms",
+      "2-wire ohms",
+      "DC current",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5522A",
+      "Fluke 5560A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Fluke 8808A | Performance Verification [DEMO]  |  v70 Beta 2"
+ },
+ "f8808a|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Enter reading manually",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Refresh ports",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Enter reading manually",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Refresh ports",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [],
+   "idle": []
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "8 data bits, no parity",
+      "7 data bits, even parity",
+      "7 data bits, odd parity"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "90 days",
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset, shorted input",
+      "Zero offset, open current input",
+      "DC volts",
+      "AC volts",
+      "Frequency",
+      "4-wire ohms",
+      "2-wire ohms",
+      "DC current",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5522A",
+      "Fluke 5560A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "8 data bits, no parity",
+      "7 data bits, even parity",
+      "7 data bits, odd parity"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "90 days",
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset, shorted input",
+      "Zero offset, open current input",
+      "DC volts",
+      "AC volts",
+      "Frequency",
+      "4-wire ohms",
+      "2-wire ohms",
+      "DC current",
+      "AC current"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5522A",
+      "Fluke 5560A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Fluke 8808A | Performance Verification  |  v70 Beta 2"
+ },
+ "f8846a|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Excel (.xlsx)",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Refresh ports",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Excel (.xlsx)",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Refresh ports",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [],
+   "idle": []
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "7",
+      "8"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "ZERO FRONT",
+      "DCV",
+      "ACV",
+      "FREQ",
+      "OHM4",
+      "OHM2",
+      "CAP",
+      "DCI",
+      "ACI"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Even",
+      "Odd",
+      "None"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "disabled"
+    ],
+    [
+     [],
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "7",
+      "8"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "ZERO FRONT",
+      "DCV",
+      "ACV",
+      "FREQ",
+      "OHM4",
+      "OHM2",
+      "CAP",
+      "DCI",
+      "ACI"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Even",
+      "Odd",
+      "None"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Fluke 8846A | Performance Verification v58 [DEMO]  |  v70 Beta 2"
+ },
+ "f8846a|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Excel (.xlsx)",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Refresh ports",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Excel (.xlsx)",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Refresh ports",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [],
+   "idle": []
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "7",
+      "8"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "ZERO FRONT",
+      "DCV",
+      "ACV",
+      "FREQ",
+      "OHM4",
+      "OHM2",
+      "CAP",
+      "DCI",
+      "ACI"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Even",
+      "Odd",
+      "None"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "disabled"
+    ],
+    [
+     [],
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "7",
+      "8"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "ZERO FRONT",
+      "DCV",
+      "ACV",
+      "FREQ",
+      "OHM4",
+      "OHM2",
+      "CAP",
+      "DCI",
+      "ACI"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Even",
+      "Odd",
+      "None"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Fluke 8846A | Performance Verification  |  v70 Beta 2"
+ },
+ "k2000|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [],
+   "idle": []
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "19200",
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "DC voltage",
+      "AC voltage",
+      "DC current",
+      "AC current",
+      "Resistance 100 ohm to 10 Mohm (4-wire)",
+      "Resistance 100 Mohm (2-wire)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "GPIB",
+      "RS-232"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "LF",
+      "CR",
+      "LFCR"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "None",
+      "XON/XOFF"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "RS-232",
+      "GPIB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "19200",
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "DC voltage",
+      "AC voltage",
+      "DC current",
+      "AC current",
+      "Resistance 100 ohm to 10 Mohm (4-wire)",
+      "Resistance 100 Mohm (2-wire)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "GPIB",
+      "RS-232"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "LF",
+      "CR",
+      "LFCR"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "None",
+      "XON/XOFF"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "RS-232",
+      "GPIB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keithley 2000 | Performance Verification [DEMO]  |  v70 Beta 2"
+ },
+ "k2000|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [],
+   "idle": []
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "1 year"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "19200",
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "DC voltage",
+      "AC voltage",
+      "DC current",
+      "AC current",
+      "Resistance 100 ohm to 10 Mohm (4-wire)",
+      "Resistance 100 Mohm (2-wire)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "GPIB",
+      "RS-232"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "LF",
+      "CR",
+      "LFCR"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "None",
+      "XON/XOFF"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "RS-232",
+      "GPIB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "1 year"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "19200",
+      "9600",
+      "4800",
+      "2400",
+      "1200",
+      "600",
+      "300"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "DC voltage",
+      "AC voltage",
+      "DC current",
+      "AC current",
+      "Resistance 100 ohm to 10 Mohm (4-wire)",
+      "Resistance 100 Mohm (2-wire)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Fluke 5560A",
+      "Fluke 5522A",
+      "Fluke 5520A"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "GPIB",
+      "RS-232"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "LF",
+      "CR",
+      "LFCR"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "None",
+      "XON/XOFF"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "RS-232",
+      "GPIB"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keithley 2000 | Performance Verification  |  v70 Beta 2"
+ },
+ "truevolt_34461A|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include optional capacitance test",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include optional capacitance test",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year",
+      "2 years"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency accuracy",
+      "AC volts",
+      "AC current",
+      "High current (10 A)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "disabled"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year",
+      "2 years"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency accuracy",
+      "AC volts",
+      "AC current",
+      "High current (10 A)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34461A | Performance Verification [DEMO]  |  v70 Beta 2"
+ },
+ "truevolt_34461A|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include optional capacitance test",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include optional capacitance test",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year",
+      "2 years"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency accuracy",
+      "AC volts",
+      "AC current",
+      "High current (10 A)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "disabled"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year",
+      "2 years"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency accuracy",
+      "AC volts",
+      "AC current",
+      "High current (10 A)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34461A | Performance Verification  |  v70 Beta 2"
+ },
+ "truevolt_34470A|demo": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include optional capacitance test",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include optional capacitance test",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year",
+      "2 years"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency accuracy",
+      "AC volts",
+      "AC current",
+      "High current (10 A)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "disabled"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year",
+      "2 years"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency accuracy",
+      "AC volts",
+      "AC current",
+      "High current (10 A)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Calibration Suite  |  Keysight 34470A | Performance Verification [DEMO]  |  v70 Beta 2"
+ },
+ "truevolt_34470A|hardware": {
+  "buttons": {
+   "busy": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "disabled"
+    ],
+    [
+     "Load progress",
+     "disabled"
+    ],
+    [
+     "Rerun Selected",
+     "disabled"
+    ],
+    [
+     "Run Shown Section",
+     "disabled"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "disabled"
+    ],
+    [
+     "■  Stop",
+     "normal"
+    ],
+    [
+     "▶  Run All Pending",
+     "disabled"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     "Close",
+     "normal"
+    ],
+    [
+     "Edit point",
+     "normal"
+    ],
+    [
+     "Export Report (PDF)",
+     "normal"
+    ],
+    [
+     "Find instruments",
+     "normal"
+    ],
+    [
+     "Load progress",
+     "normal"
+    ],
+    [
+     "Rerun Selected",
+     "normal"
+    ],
+    [
+     "Run Shown Section",
+     "normal"
+    ],
+    [
+     "Save progress",
+     "normal"
+    ],
+    [
+     "Test connections",
+     "normal"
+    ],
+    [
+     "■  Stop",
+     "disabled"
+    ],
+    [
+     "▶  Run All Pending",
+     "normal"
+    ],
+    [
+     "⚙  Connections",
+     "normal"
+    ]
+   ]
+  },
+  "checks": {
+   "busy": [
+    [
+     "Include optional capacitance test",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "Include optional capacitance test",
+     "normal"
+    ]
+   ]
+  },
+  "combos": {
+   "busy": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year",
+      "2 years"
+     ],
+     "disabled"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency accuracy",
+      "AC volts",
+      "AC current",
+      "High current (10 A)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "disabled"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ],
+   "idle": [
+    [
+     [
+      "24 hours",
+      "90 days",
+      "1 year",
+      "2 years"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "9600",
+      "19200",
+      "4800",
+      "2400",
+      "1200"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All points",
+      "Not tested",
+      "Passed",
+      "Failed (OOT)",
+      "As Found failed"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "All sections",
+      "Zero offset",
+      "DC volts gain",
+      "DC current gain",
+      "Resistance gain",
+      "Frequency accuracy",
+      "AC volts",
+      "AC current",
+      "High current (10 A)"
+     ],
+     "readonly"
+    ],
+    [
+     [
+      "Full verification",
+      "Quick check (Q points only)"
+     ],
+     "readonly"
+    ],
+    [
+     [],
+     "normal"
+    ],
+    [
+     [],
+     "normal"
+    ]
+   ]
+  },
+  "headings": [
+   "#",
+   "Description",
+   "Nominal",
+   "Low limit",
+   "High limit",
+   "Limits",
+   "● As Found",
+   "Error",
+   "As Left",
+   "Result"
+  ],
+  "modes": {
+   "busy": [
+    [
+     "As Found",
+     "disabled"
+    ],
+    [
+     "As Left",
+     "disabled"
+    ]
+   ],
+   "idle": [
+    [
+     "As Found",
+     "normal"
+    ],
+    [
+     "As Left",
+     "normal"
+    ]
+   ]
+  },
+  "title": "Keysight 34470A | Performance Verification"
+ }
+}

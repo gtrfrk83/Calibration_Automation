@@ -1694,3 +1694,15 @@ The Calibration Procedure Manager in Qt: `qtui/screens/manager.py` (`ManagerWind
 QT-F1 addendum (after merging origin/qt-migration with WP-H and QT-F2): `ask_reading`, `ask_readings`, `ask_range`, `ask_ir_problem` and `progress_window` of `QtUiPort` route to
 `handheld_dmm_view_qt` / `run_queue_ui_qt`, which do not exist on qt-migration yet; until they do they raise NotImplementedError naming WP-H. `tests/test_ui_port_qt.py` skips those
 prompt kinds (SKIP_KINDS) and must replay them once the twins are merged.
+
+## QT-G1a: Qt twins of the bench verification windows (branch qt-p4-bench-views)
+
+Built `truevolt_view_qt.py` (34460A/61A/65A/70A), `dacq_view_qt.py`, `k2000_view_qt.py`, `f8808a_view_qt.py`, `a34401a_view_qt.py`, `f8846a_view_qt.py`, `agilent34410a_view_qt.py`, each next to its Tk twin and resolved by `get_ui().view(name)` under QtUiPort. No engine .py edits (no additive hooks were needed). Shared new module: `qtui/bench_view.py` (Form, drawer footer, action bar, results/detail builder, notice banner, table helpers, `fit_wrapped`, `_AfterRoot` shim for labregistry). One small change to `qtui/shell.py`: the progress-ring text shrinks to fit the ring.
+
+Proof: `tests/test_qt_views_bench.py` (widget-state dump vs a dump of the real Tk windows under Xvfb, `tests/golden_ui/qt_views_bench_widgets_tk.json`; result rows and detail text vs Tk; interaction; render; sidecars) and `tests/test_qt_views_bench_prompts.py` (real engines on the simulated bench through the Qt view reproduce every Tk golden prompt sequence). Run each module separately: `QT_QPA_PLATFORM=offscreen <venv python> -m unittest tests.<module>`. Screenshots: `python tests/qt_bench_shots.py OUT_DIR [keys]` (or `QT_BENCH_SHOTS=dir`).
+
+DIFFERS from Tk: Qt Help menu and shell Log button; window title built via `help_menu.dress` (same pattern); tree selection signal is deferred one event-loop turn; wrapped notes use `_FitHeight` so text is never clipped.
+
+Unverified: no Windows, no hardware, offscreen rendering only; openpyxl is absent here so the 8846A Excel export is faked in tests; the prompt tests use a hybrid port (Qt window plus the harness prompt methods), not the real modal dialogs, except the surprise dialog which is exercised for real.
+
+Sidecars: the 12 verification procedures list each `*_qt.py` right after its Tk view plus `qtui/bench_view.py` (flips shown with `tools/ui_flips.py`, exactly these 12).

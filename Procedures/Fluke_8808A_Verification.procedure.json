@@ -24,6 +24,8 @@
    "Procedures/Fluke_8808A_Verification.py",
    "fluke8808a_verification.py",
    "f8808a_view_tk.py",
+   "f8808a_view_qt.py",
+   "qtui/bench_view.py",
    "ui_port.py",
    "ui_port_tk.py",
    "procspec.py",

@@ -24,6 +24,8 @@
    "Procedures/Keithley_2000_Verification.py",
    "keithley2000_verification.py",
    "k2000_view_tk.py",
+   "k2000_view_qt.py",
+   "qtui/bench_view.py",
    "ui_port.py",
    "ui_port_tk.py",
    "procspec.py",
