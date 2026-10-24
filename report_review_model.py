@@ -26,7 +26,7 @@ SOURCE_STANDARDS = ('5560A', '5522A', '5520A')                     # calibrators
 LABELS = {'5560A': 'Fluke 5560A', '5522A': 'Fluke 5522A', '5520A': 'Fluke 5520A'}
 LOCKED_FREQUENCY = 'Lab frequency'
 
-AS_BUDGETED, RAISED, NOT_IN_SCOPE, CHANGED, NO_UNC = 'As budgeted', 'Raised to scope', 'Not in scope', 'Standard changed', 'No uncertainty'
+AS_BUDGETED, RAISED, NOT_IN_SCOPE, CHANGED, NO_UNC = 'As budgeted', 'Raised to scope', 'Not in scope', 'Standard changed', 'No uncertainty required'
 MANUAL = 'Manual (not in scope)'
 STATUSES = (AS_BUDGETED, RAISED, NOT_IN_SCOPE, CHANGED, MANUAL)
 FILTERS = ('All', 'Needs attention', 'Changed by me')

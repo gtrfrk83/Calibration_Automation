@@ -233,6 +233,7 @@ def fgen_specs(app, mod):
 # ---------------------------------------------------------------------------------------------------------------------------------- WaveSurfer
 TITLES = {'noise': 'RMS Noise', 'dcv': 'DC Gain (1 MOhm)', 'impedance': 'Input Impedance', 'offset': 'DC Offset', 'bandwidth': 'Bandwidth',
           'timebase': 'Time Base Accuracy', 'trigger': 'Trigger Level Accuracy'}
+NO_INPUT_KINDS = ('noise',)          # WaveSurfer RMS noise: the scope measures its own noise with the input terminated (owner: no uncertainty)
 ORDER = ('noise', 'dcv', 'impedance', 'offset', 'bandwidth', 'timebase', 'trigger')
 DC_KINDS = ('dcv', 'offset', 'trigger')
 
@@ -260,7 +261,11 @@ def wavesurfer_specs(app, mod, kinds=None):
             spec = M.PointSpec(i, f'{kind[:3]}-{row.get("Seq.", i + 1)}', TITLES[kind], row.get('Description', ''), row.get('Nominal', ''),
                                _q(kind, nominal, unit), _q(kind, nominal, unit), low, high, unit, None, 'Scope CMC: read-only',
                                dict(Uncertainty=printed, TAR=default_ratio[0], TUR=default_ratio[1]), expects=True, std_label='Scope CMC')
-            if kind in DC_KINDS and printed:
+            if kind in NO_INPUT_KINDS:                    # self-measured: nothing is applied by a calibrator, so no uncertainty is assigned or expected
+                spec.expects, spec.std_label, spec.locked = False, '', 'No input from a calibrator: no uncertainty required'
+                spec.calc = (lambda standard, _u=unit, _p=printed, _r=default_ratio:
+                             _fixed(_u, None, _p, _r[0], _r[1], expects=False))
+            elif kind in DC_KINDS and printed:
                 if kind == 'trigger':
                     level = max(abs(r['short_v']), abs(r['past_v'])) if ('short_v' in r and 'past_v' in r) else abs(r['level_v']) + mod.TRIG_LIMIT_V
                 else:

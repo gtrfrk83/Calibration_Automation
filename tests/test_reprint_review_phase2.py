@@ -94,6 +94,32 @@ class Adapters(unittest.TestCase):
             app, _m = built(name)
             self.assertEqual(report_review.asset_of(app), ASSET[name], name)
 
+    def test_not_in_scope_and_no_uncertainty_counts_per_engine(self):
+        """Owner audit: a point with no stimulus from a calibrator or measuring standard (WaveSurfer RMS noise) is 'No uncertainty required' (grey, locked, not
+        in Needs attention); 'Not in scope' stays only for points that use a standard but have no scope entry."""
+        want = {'ws': (0, 36), 'mdo': (22, 21), 'fgen': (42, 1), 'tds': (1, 3)}
+        for name, (nis, nou) in want.items():
+            app, _m = built(name)
+            specs, d = M.specs_for(app)
+            c = M.ReviewModel(specs, d).counts()
+            self.assertEqual((c[M.NOT_IN_SCOPE], c[M.NO_UNC], c['attention']), (nis, nou, nis), name)
+        app, _m = built('ws')
+        specs, d = M.specs_for(app)
+        model = M.ReviewModel(specs, d)
+        noise = [i for i, r in enumerate(model.rows) if r.spec.section == 'RMS Noise']
+        self.assertEqual(len(noise), 36)
+        for i in noise:
+            r = model.rows[i]
+            self.assertEqual(r.status, M.NO_UNC)
+            self.assertEqual(M.NO_UNC, 'No uncertainty required')
+            self.assertTrue(r.spec.locked)
+            self.assertFalse(r.can_type())
+            self.assertFalse(r.needs_attention)
+            self.assertFalse(model.set_typed(i, '1 dB')[0])
+            self.assertFalse(model.set_standard(i, '5522A'))
+            self.assertEqual(r.reported_text, '')
+        self.assertEqual(model.visible('Needs attention'), [])
+
     def test_untouched_model_has_no_changes(self):
         for name in BUILDERS:
             app, _m = built(name)
