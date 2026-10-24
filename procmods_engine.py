@@ -966,8 +966,8 @@ class ProcModsMixin:
     def pm_show_note(self, p):
         """The technician note of a point, shown once per run when the point is reached (informational; no safety prompt is touched)."""
         try:
-            from tkinter import messagebox
-            messagebox.showinfo(f'Note for point {procmods_live.point_id(p)}', str(p.get('tech_note')), parent=getattr(self, 'root', None))
+            from ui_port import ui as port
+            port.message('info', f'Note for point {procmods_live.point_id(p)}', str(p.get('tech_note')), parent=getattr(self, 'root', None))
         except Exception:
             pass
 

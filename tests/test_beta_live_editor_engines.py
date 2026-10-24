@@ -429,6 +429,8 @@ class Coverage(unittest.TestCase):
                 continue
             mods = re.findall(r'^import (\w+_verification|handheld_dmm|dsb_runtime)\s*$', src, re.M)
             texts = [src] + [(ROOT / f'{m}.py').read_text(encoding='utf-8') for m in mods]
+            for t in list(texts):                                        # a ported engine keeps its window code in <VIEW>_tk.py (ui_port.py)
+                texts += [(ROOT / f'{v}_tk.py').read_text(encoding='utf-8') for v in re.findall(r"^\s+VIEW = '(\w+)'", t, re.M)]
             if path.name == 'User_Datasheet.py':
                 texts.append((ROOT / 'handheld_dmm.py').read_text(encoding='utf-8'))
             self.assertTrue(any('pm_live_attach(' in t for t in texts), f'{path.name}: no in-run editor and not listed in NOT_WIRED')

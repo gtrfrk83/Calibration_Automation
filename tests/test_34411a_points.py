@@ -481,13 +481,11 @@ class HookupAndLaunch(unittest.TestCase):
 
     def test_main_selects_the_model_before_the_window_is_built(self):
         seen = []
-        real_app, real_tk, real_flags = A.App, A.tk.Tk, A.virtualbench.flags
-
-        class Root:
-            def mainloop(self): pass
+        import ui_port
+        real_app, real_flags = A.App, A.virtualbench.flags
+        old_ui = ui_port.set_ui(ui_port.ScriptedUiPort())          # run_app builds no window: it calls the factory at once (the engine no longer touches tk.Tk)
 
         A.App = lambda root, demo=False, fast_demo=False: seen.append((A.MODEL, demo))
-        A.tk.Tk = Root
         A.virtualbench.flags = lambda argv: (True, False)
         try:
             A.main(['x', '--demo'], model='34411A')
@@ -496,7 +494,8 @@ class HookupAndLaunch(unittest.TestCase):
             A.main(['x', '--demo'])
             self.assertEqual(seen[-1], ('34410A', True))
         finally:
-            A.App, A.tk.Tk, A.virtualbench.flags = real_app, real_tk, real_flags
+            A.App, A.virtualbench.flags = real_app, real_flags
+            ui_port.set_ui(old_ui)
             A.configure('34410A')
 
     def test_sidecar_and_registration(self):

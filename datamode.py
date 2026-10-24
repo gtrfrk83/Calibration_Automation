@@ -26,9 +26,10 @@ Needs nothing from the procedure except an optional `busy` flag, `refresh()` and
 from __future__ import annotations
 
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import ttk
 
 import ui_theme as ui
+from ui_port import ui as port                 # dialogs go through the UI port (ui_port.py)
 
 FOUND, LEFT = 'found', 'left'
 LABEL = {FOUND: 'As Found', LEFT: 'As Left'}
@@ -271,7 +272,7 @@ class DataModeMixin:
         clash = [p for p in points if str(p['id']) in self.left]
         if not clash:
             return True
-        return messagebox.askyesno(
+        return port.ask_yes_no(
             'Replace the As Found reading?',
             f'{len(clash)} of these point(s) already have As Left readings, so the instrument has been adjusted since the As Found run.\n\n'
             'Measuring As Found again now replaces the original As Found reading with a reading from the adjusted instrument.\n\n'
@@ -289,10 +290,10 @@ class DataModeMixin:
         (and, if a status is chosen too, only those)."""
         pts = self.shown_pending(points if points is not None else self.active_points())
         if pts is None:
-            messagebox.showinfo('Section', 'Choose a section in the Show box first.')
+            port.message('info', 'Section', 'Choose a section in the Show box first.')
             return
         if not pts:
-            messagebox.showinfo('Section', f'Nothing left to run there: every shown point already has an {self.mode_label} reading.')
+            port.message('info', 'Section', f'Nothing left to run there: every shown point already has an {self.mode_label} reading.')
             return
         self.execute(pts)
 

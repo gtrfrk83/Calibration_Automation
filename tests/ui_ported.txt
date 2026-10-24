@@ -1,0 +1,4 @@
+# Engines ported from Tk to ui_port (NOTES.md 'How to port an engine to UiPort').  One line per engine:   <scenario key>: <every file the port edited or added>
+# Read by tests/ui_ported.py: tests/test_ui_prompts.py (which engines must prompt only through the port), tests/test_ui_port_clean.py (no tkinter left in the engine),
+# and the older 'no engine file is edited' branch guards (test_reprint_review_*), which must not trip on a port.  Add your line when you port; keep one engine per line.
+a34410a: agilent34410a_verification.py agilent34410a_view_tk.py Procedures/Agilent_34410A_Verification.procedure.json Procedures/Agilent_34411A_Verification.procedure.json

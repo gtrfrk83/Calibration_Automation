@@ -94,7 +94,7 @@ class EngineHarness:
             p.start()
             self.patches.append(p)
         for mod in modules:
-            mb = mod.messagebox
+            mb = getattr(mod, 'messagebox', None) or sys.modules['tkinter.messagebox']        # a ported engine has no messagebox: its dialogs are TkUiPort's (same stub module)
             for name in ('askyesno', 'askyesnocancel', 'askokcancel'):
                 p = mock.patch.object(mb, name, lambda *a, _n=name, **k: self._box(_n, a), create=True)
                 p.start()

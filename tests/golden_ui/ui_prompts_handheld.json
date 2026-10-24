@@ -1,0 +1,5994 @@
+{
+ "virtual_run_117": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "1 of 40"
+    ],
+    [
+     "Test",
+     "Display test"
+    ],
+    [
+     "Meter",
+     "Display test"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up",
+     "110/114/115/116/117: push the yellow button and turn the rotary switch to the display-test (all segments) position. 113: push the yellow button and turn the switch to the CHEK position. Compare the display with Figure 3 of the manual."
+    ]
+   ],
+   "text": "Set up for Functional checks",
+   "title": "Check the setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "",
+   "question": "All display segments are clear and have good contrast.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "No calibrator output (STANDBY)",
+   "title": "point F-1",
+   "unit": ""
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "2 of 40"
+    ],
+    [
+     "Test",
+     "Backlight test"
+    ],
+    [
+     "Meter",
+     "Backlight"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up",
+     "Press the backlight button."
+    ]
+   ],
+   "text": "Set up for Functional checks",
+   "title": "Check the setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "",
+   "question": "The backlight turns on.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "No calibrator output (STANDBY)",
+   "title": "point F-2",
+   "unit": ""
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "3 of 40"
+    ],
+    [
+     "Test",
+     "Keypad test"
+    ],
+    [
+     "Meter",
+     "Keypad"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up",
+     "110/114/115/116/117: turn the rotary switch to the yellow-button position, then push each button separately. 113: turn the meter to Ω, then push each button separately. To reset, turn the meter off and back on."
+    ]
+   ],
+   "text": "Set up for Functional checks",
+   "title": "Check the setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "",
+   "question": "Every button push beeps and activates a display annunciator.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "No calibrator output (STANDBY)",
+   "title": "point F-3",
+   "unit": ""
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "4 of 40"
+    ],
+    [
+     "Test",
+     "Ohms, 600.0 range"
+    ],
+    [
+     "Meter",
+     "Ω  (Ohms), range 600.0"
+    ]
+   ],
+   "image": "hook_fluke110_5560A_VOHM.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to OUTPUT V/Ω HI, BLACK lead to OUTPUT V/Ω LO. The terminals light up green on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the VΩ jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: voltage, resistance and capacitance  -  Fluke 5560A to Fluke 110 series",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "4 of 40"
+    ],
+    [
+     "Test",
+     "Ohms, 600.0 range"
+    ],
+    [
+     "Meter",
+     "Ω  (Ohms), range 600.0"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Ω  range 600.0",
+     "n": 4,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Ω",
+       "Ohms",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Ω",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Ohms, 600.0 range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Ω  (Ohms)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Ohms",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "0.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "0 Ω",
+   "title": "point 3-1",
+   "unit": "Ω"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "501.4",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 Ω",
+   "title": "point 3-2",
+   "unit": "Ω"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.987",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 kΩ",
+   "title": "point 3-3",
+   "unit": "kΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "49.90",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 kΩ",
+   "title": "point 3-4",
+   "unit": "kΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "501.6",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 kΩ",
+   "title": "point 3-5",
+   "unit": "kΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "5.005",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 MΩ",
+   "title": "point 3-6",
+   "unit": "MΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "9.81",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "10 MΩ",
+   "title": "point 3-7",
+   "unit": "MΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "29.98",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "30 MΩ",
+   "title": "point 3-8",
+   "unit": "MΩ"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "12 of 40"
+    ],
+    [
+     "Test",
+     "Continuity, 20 Ω: beeper ON"
+    ],
+    [
+     "Meter",
+     "Continuity, range 600 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Continuity  range 600 Ω",
+     "n": 12,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Continuity",
+       "",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Continuity",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Continuity, 20 Ω: beeper ON",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Continuity"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Continuity",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "question": "The beeper is ON (sounding).",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "20 Ω",
+   "title": "point 3-9",
+   "unit": ""
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "question": "The beeper is OFF (silent).",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "250 Ω",
+   "title": "point 3-10",
+   "unit": ""
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "14 of 40"
+    ],
+    [
+     "Test",
+     "AC volts, 6.000 V range"
+    ],
+    [
+     "Meter",
+     "V~  (AC volts), range 6.000 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V~  range 6.000 V",
+     "n": 14,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V~",
+       "AC volts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC volts, 6.000 V range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V~  (AC volts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC volts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.981",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 V AC @ 45 Hz",
+   "title": "point 3-11",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "5.019",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 V AC @ 1 kHz",
+   "title": "point 3-12",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "50.16",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 V AC @ 45 Hz",
+   "title": "point 3-13",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "49.72",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 V AC @ 1 kHz",
+   "title": "point 3-14",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 600 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "598.6",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "600 V AC @ 45 Hz",
+   "title": "point 3-15",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 600 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "604.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "600 V AC @ 1 kHz",
+   "title": "point 3-16",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "20 of 40"
+    ],
+    [
+     "Test",
+     "AC volts + Hz, 6.000 V range"
+    ],
+    [
+     "Meter",
+     "V~ Hz  (AC volts + frequency), range 6.000 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V~ Hz  range 6.000 V",
+     "n": 20,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V~ Hz",
+       "AC volts + frequency",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V~ Hz",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC volts + Hz, 6.000 V range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V~ Hz  (AC volts + frequency)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC volts + Hz",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "50.01",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "2 V AC @ 50 kHz",
+   "title": "point 3-17",
+   "unit": "kHz"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "21 of 40"
+    ],
+    [
+     "Test",
+     "DC volts, 6.000 V range"
+    ],
+    [
+     "Meter",
+     "V⎓  (DC volts), range 6.000 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V⎓  range 6.000 V",
+     "n": 21,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V⎓",
+       "DC volts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC volts, 6.000 V range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V⎓  (DC volts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC volts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-0.001",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "0 V DC",
+   "title": "point 3-18",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.999",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 V DC",
+   "title": "point 3-19",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "50.10",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 V DC",
+   "title": "point 3-20",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 600 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "599.8",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "600 V DC",
+   "title": "point 3-21",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 600 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-601.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "-600 V DC",
+   "title": "point 3-22",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "26 of 40"
+    ],
+    [
+     "Test",
+     "AC millivolts, 600.0 mV range"
+    ],
+    [
+     "Meter",
+     "mV~  (AC millivolts), range 600.0 mV"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: mV~  range 600.0 mV",
+     "n": 26,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to mV~",
+       "AC millivolts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows mV~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC millivolts, 600.0 mV range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: mV~  (AC millivolts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC millivolts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "6.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "6 mV AC @ 45 Hz",
+   "title": "point 3-23",
+   "unit": "mV"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "603.8",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "600 mV AC @ 1 kHz",
+   "title": "point 3-24",
+   "unit": "mV"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "28 of 40"
+    ],
+    [
+     "Test",
+     "DC millivolts, 600.0 mV range"
+    ],
+    [
+     "Meter",
+     "mV⎓  (DC millivolts), range 600.0 mV"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: mV⎓  range 600.0 mV",
+     "n": 28,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to mV⎓",
+       "DC millivolts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows mV⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC millivolts, 600.0 mV range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: mV⎓  (DC millivolts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC millivolts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "9.9",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "10 mV DC",
+   "title": "point 3-25",
+   "unit": "mV"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "599.2",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "600 mV DC",
+   "title": "point 3-26",
+   "unit": "mV"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "30 of 40"
+    ],
+    [
+     "Test",
+     "Diode, 2.000 V range"
+    ],
+    [
+     "Meter",
+     "Diode, range 2.000 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Diode  range 2.000 V",
+     "n": 30,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Diode",
+       "",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Diode",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Diode, 2.000 V range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Diode"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Diode",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "1.906",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "1.9 V DC",
+   "title": "point 3-27",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "31 of 40"
+    ],
+    [
+     "Test",
+     "Capacitance, 1000 nF range"
+    ],
+    [
+     "Meter",
+     "Capacitance, range 1000 nF"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up",
+     "Remove the test leads / calibrator connections from the meter and leave the capacitance input OPEN. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for Capacitance",
+   "title": "Check the setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "No calibrator output (STANDBY)",
+   "title": "point 3-28",
+   "unit": "nF"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "32 of 40"
+    ],
+    [
+     "Test",
+     "Capacitance, 9999 µF range"
+    ],
+    [
+     "Meter",
+     "Capacitance, range 9999 µF"
+    ]
+   ],
+   "image": "hook_fluke110_5560A_VOHM.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to OUTPUT V/Ω HI, BLACK lead to OUTPUT V/Ω LO. The terminals light up green on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the VΩ jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: voltage, resistance and capacitance  -  Fluke 5560A to Fluke 110 series",
+   "title": "Change the cables"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "893",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "900 µF",
+   "title": "point 3-29",
+   "unit": "µF"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "33 of 40"
+    ],
+    [
+     "Test",
+     "LoZ capacitance, 10.00 µF range"
+    ],
+    [
+     "Meter",
+     "LoZ capacitance, range 10.00 µF"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: LoZ capacitance  range 10.00 µF",
+     "n": 33,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to LoZ capacitance",
+       "",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows LoZ capacitance",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "LoZ capacitance, 10.00 µF range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: LoZ capacitance"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "LoZ capacitance",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "8.92",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "9 µF",
+   "title": "point 3-30",
+   "unit": "µF"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "caution": "Leads, plugs and terminals carry high current: use leads rated for 10 A or more, check the meter fuse, and make sure every connection is tight.",
+   "facts": [
+    [
+     "Next point",
+     "34 of 40"
+    ],
+    [
+     "Test",
+     "DC amps, 10.00 A range"
+    ],
+    [
+     "Meter",
+     "A⎓  (DC amps), range 10.00 A"
+    ]
+   ],
+   "image": "hook_fluke110_5560A_AMP10.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to 30A, BLACK lead to OUTPUT V/Ω LO. The terminals light up blue on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the A jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: 10 A current  -  Fluke 5560A to Fluke 110 series",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "34 of 40"
+    ],
+    [
+     "Test",
+     "DC amps, 10.00 A range"
+    ],
+    [
+     "Meter",
+     "A⎓  (DC amps), range 10.00 A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: A⎓  range 10.00 A",
+     "n": 34,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to A⎓",
+       "DC amps",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows A⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC amps, 10.00 A range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: A⎓  (DC amps)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC amps",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "10.05",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "10 A DC",
+   "title": "point 3-31",
+   "unit": "A"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "35 of 40"
+    ],
+    [
+     "Test",
+     "AC amps, 6.000 A range"
+    ],
+    [
+     "Meter",
+     "A~  (AC amps), range 6.000 A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: A~  range 6.000 A",
+     "n": 35,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to A~",
+       "AC amps",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows A~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC amps, 6.000 A range",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: A~  (AC amps)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC amps",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.995",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 A AC @ 45 Hz",
+   "title": "point 3-32",
+   "unit": "A"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "36 of 40"
+    ],
+    [
+     "Test",
+     "AUTO-V LoZ"
+    ],
+    [
+     "Meter",
+     "AUTO-V LoZ"
+    ]
+   ],
+   "image": "hook_fluke110_5560A_VOHM.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to OUTPUT V/Ω HI, BLACK lead to OUTPUT V/Ω LO. The terminals light up green on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the VΩ jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: voltage, resistance and capacitance  -  Fluke 5560A to Fluke 110 series",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "36 of 40"
+    ],
+    [
+     "Test",
+     "AUTO-V LoZ"
+    ],
+    [
+     "Meter",
+     "AUTO-V LoZ"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: AUTO-V LoZ",
+     "n": 36,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to AUTO-V LoZ",
+       "",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows AUTO-V LoZ",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AUTO-V LoZ",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: AUTO-V LoZ"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AUTO-V LoZ",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "0.4",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 mV AC @ 45 Hz",
+   "title": "point 3-38",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "AUTO-V LoZ\n\nIs the AC annunciator ON in the meter display?\n\nYes = it is on.  No = it is not (the point then fails).",
+   "title": "AC annunciator"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "0.5",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 mV DC",
+   "title": "point 3-39",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 500 V (the voltage is ramped up in 50 V steps, 5 s apart). Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "503.3",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 V AC @ 500 Hz",
+   "title": "point 3-40",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "caution": "Mains-level voltage is present at the plug. Keep your hands clear while the output is on.",
+   "facts": [
+    [
+     "Next point",
+     "39 of 40"
+    ],
+    [
+     "Test",
+     "VoltAlert Hi"
+    ],
+    [
+     "Meter",
+     "VoltAlert  (Hi)"
+    ]
+   ],
+   "image": "hook_fluke110_5560A_VOLTALERT.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "Double-banana plug into the Fluke 5560A OUTPUT V/Ω HI and OUTPUT V/Ω LO terminals."
+    ],
+    [
+     "Meter",
+     "No meter leads: hold the meter VoltAlert tip against the plug when the point asks for it."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: VoltAlert  -  Fluke 5560A to Fluke 110 series",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "39 of 40"
+    ],
+    [
+     "Test",
+     "VoltAlert Hi"
+    ],
+    [
+     "Meter",
+     "VoltAlert  (Hi)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: VoltAlert",
+     "n": 39,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to VoltAlert",
+       "Hi",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows VoltAlert",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "VoltAlert Hi",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: VoltAlert  (Hi)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "VoltAlert",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "phase": "check 1 of 2",
+   "question": "With 10 V 60 Hz on: hold the top of the meter, centred, on the banana plug HI terminal - the beeper sounds continuously and the red LED lights. (Adjust position slightly if needed.)",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "10 V AC @ 60 Hz",
+   "title": "point 3-41",
+   "unit": ""
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "Output is in STANDBY.",
+   "phase": "check 2 of 2",
+   "question": "Calibrator in STANDBY: the beeper is silent and the red LED is off.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "10 V AC @ 60 Hz",
+   "title": "point 3-41",
+   "unit": ""
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "40 of 40"
+    ],
+    [
+     "Test",
+     "VoltAlert Lo"
+    ],
+    [
+     "Meter",
+     "VoltAlert  (Lo)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: VoltAlert",
+     "n": 40,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to VoltAlert",
+       "Lo",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows VoltAlert",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "VoltAlert Lo",
+     "total": 40
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: VoltAlert  (Lo)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "VoltAlert",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "phase": "check 1 of 2",
+   "question": "With 30 V 60 Hz on: hold the top of the meter, centred, on the banana plug HI terminal - the beeper sounds continuously and the red LED lights.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "30 V AC @ 60 Hz",
+   "title": "point 3-42",
+   "unit": ""
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "Output is in STANDBY.",
+   "phase": "check 2 of 2",
+   "question": "Calibrator in STANDBY: the beeper is silent and the red LED is off.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "30 V AC @ 60 Hz",
+   "title": "point 3-42",
+   "unit": ""
+  }
+ ],
+ "virtual_run_77iv": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "1 of 35"
+    ],
+    [
+     "Test",
+     "Ohms, 600.0 Ω range"
+    ],
+    [
+     "Meter",
+     "Ω  (dial: Ω / capacitance position), range 600.0 Ω"
+    ]
+   ],
+   "image": "hook_fluke77_5560A_VOHM.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to OUTPUT V/Ω HI, BLACK lead to OUTPUT V/Ω LO. The terminals light up green on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the V Ω jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: voltage, resistance and capacitance  -  Fluke 5560A to Fluke 77 Series IV",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "1 of 35"
+    ],
+    [
+     "Test",
+     "Ohms, 600.0 Ω range"
+    ],
+    [
+     "Meter",
+     "Ω  (dial: Ω / capacitance position), range 600.0 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Ω  range 600.0 Ω",
+     "n": 1,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Ω",
+       "dial: Ω / capacitance position",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Ω",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Ohms, 600.0 Ω range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Ω  (dial: Ω / capacitance position)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Ohms",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "501.0",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 Ω",
+   "title": "point 2-1",
+   "unit": "Ω"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "49.97",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 kΩ",
+   "title": "point 2-2",
+   "unit": "kΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.991",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 MΩ",
+   "title": "point 2-3",
+   "unit": "MΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "10.04",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "10 MΩ",
+   "title": "point 2-4",
+   "unit": "MΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "40.24",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "40 MΩ",
+   "title": "point 2-5",
+   "unit": "MΩ"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "6 of 35"
+    ],
+    [
+     "Test",
+     "Continuity, 25 Ω: beeper ON"
+    ],
+    [
+     "Meter",
+     "Continuity  •)))  (dial: continuity / diode position), range 600 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Continuity  •)))  range 600 Ω",
+     "n": 6,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Continuity  •)))",
+       "dial: continuity / diode position",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Continuity  •)))",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Continuity, 25 Ω: beeper ON",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Continuity  •)))  (dial: continuity / diode position)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Continuity",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "question": "The beeper is ON (sounding).",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "25 Ω",
+   "title": "point 2-6",
+   "unit": ""
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "",
+    "yes": true
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "yesno",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "question": "The beeper is OFF (silent).",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "250 Ω",
+   "title": "point 2-7",
+   "unit": ""
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "8 of 35"
+    ],
+    [
+     "Test",
+     "AC volts, 6.000 V range"
+    ],
+    [
+     "Meter",
+     "V~  (dial: Hz V~ position), range 6.000 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V~  range 6.000 V",
+     "n": 8,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V~",
+       "dial: Hz V~ position",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC volts, 6.000 V range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V~  (dial: Hz V~ position)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC volts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "0.051",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 mV AC @ 45 Hz",
+   "title": "point 2-8",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "5.012",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 V AC @ 45 Hz",
+   "title": "point 2-9",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.962",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 V AC @ 1 kHz",
+   "title": "point 2-10",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 50 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "49.98",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 V AC @ 45 Hz",
+   "title": "point 2-11",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 50 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "50.39",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 V AC @ 1 kHz",
+   "title": "point 2-12",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 500 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "499.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 V AC @ 45 Hz",
+   "title": "point 2-13",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 500 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "496.4",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 V AC @ 1 kHz",
+   "title": "point 2-14",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "1004",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "1 kV AC @ 45 Hz",
+   "title": "point 2-15",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "1007",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "1 kV AC @ 1 kHz",
+   "title": "point 2-16",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "17 of 35"
+    ],
+    [
+     "Test",
+     "AC volts frequency, 99.99 kHz range"
+    ],
+    [
+     "Meter",
+     "Hz  (dial: Hz V~ position; press the YELLOW button), range 99.99 kHz"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Hz  range 99.99 kHz",
+     "n": 17,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Hz",
+       "dial: Hz V~ position; press the YELLOW button",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Hz",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC volts frequency, 99.99 kHz range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Hz  (dial: Hz V~ position; press the YELLOW button)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC volts frequency",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "49.98",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 V AC @ 50 kHz",
+   "title": "point 2-17",
+   "unit": "kHz"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "18 of 35"
+    ],
+    [
+     "Test",
+     "DC volts, 6.000 V range"
+    ],
+    [
+     "Meter",
+     "V⎓  (dial: V⎓ position), range 6.000 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V⎓  range 6.000 V",
+     "n": 18,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V⎓",
+       "dial: V⎓ position",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC volts, 6.000 V range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V⎓  (dial: V⎓ position)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC volts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.996",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 V DC",
+   "title": "point 2-18",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 300 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "300.3",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "300 V DC",
+   "title": "point 2-19",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "1001",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "1 kV DC",
+   "title": "point 2-20",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-1001",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "-1 kV DC",
+   "title": "point 2-21",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "22 of 35"
+    ],
+    [
+     "Test",
+     "DC millivolts, 600.0 mV range"
+    ],
+    [
+     "Meter",
+     "mV⎓  (dial: mV⎓ position), range 600.0 mV"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: mV⎓  range 600.0 mV",
+     "n": 22,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to mV⎓",
+       "dial: mV⎓ position",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows mV⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC millivolts, 600.0 mV range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: mV⎓  (dial: mV⎓ position)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC millivolts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "30.0",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "30 mV DC",
+   "title": "point 2-22",
+   "unit": "mV"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-299.6",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "-300 mV DC",
+   "title": "point 2-23",
+   "unit": "mV"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "599.9",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "600 mV DC",
+   "title": "point 2-24",
+   "unit": "mV"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "25 of 35"
+    ],
+    [
+     "Test",
+     "Capacitance, 1000 nF range"
+    ],
+    [
+     "Meter",
+     "Capacitance  ⊣⊢  (dial: Ω / capacitance position; press the YELLOW button), range 1000 nF"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Capacitance  ⊣⊢  range 1000 nF",
+     "n": 25,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Capacitance  ⊣⊢",
+       "dial: Ω / capacitance position; press the YELLOW button",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Capacitance  ⊣⊢",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Capacitance, 1000 nF range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Capacitance  ⊣⊢  (dial: Ω / capacitance position; press the YELLOW button)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Capacitance",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "895",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "900 nF",
+   "title": "point 2-25",
+   "unit": "nF"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "caution": "The 400 mA input is fused at 440 mA: never apply more than the point being tested (manual p. 4). The meter shows LEAd when the rotary switch moves to or from the mA position: check the leads are in the right jacks (p. 3).",
+   "facts": [
+    [
+     "Next point",
+     "26 of 35"
+    ],
+    [
+     "Test",
+     "AC milliamps, 60.00 mA range"
+    ],
+    [
+     "Meter",
+     "mA~  (dial: mA position, AC), range 60.00 mA"
+    ]
+   ],
+   "image": "hook_fluke77_5560A_UAMP.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to VI AUX, BLACK lead to OUTPUT V/Ω LO. The terminals light up blue on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the 400 mA jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: µA / mA current  -  Fluke 5560A to Fluke 77 Series IV",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "26 of 35"
+    ],
+    [
+     "Test",
+     "AC milliamps, 60.00 mA range"
+    ],
+    [
+     "Meter",
+     "mA~  (dial: mA position, AC), range 60.00 mA"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: mA~  range 60.00 mA",
+     "n": 26,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to mA~",
+       "dial: mA position, AC",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows mA~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC milliamps, 60.00 mA range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: mA~  (dial: mA position, AC)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC milliamps",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "0.51",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 µA AC @ 45 Hz",
+   "title": "point 2-26",
+   "unit": "mA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "50.39",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 mA AC @ 1 kHz",
+   "title": "point 2-27",
+   "unit": "mA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "397.3",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "400 mA AC @ 1 kHz",
+   "title": "point 2-28",
+   "unit": "mA"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "caution": "The 10A input is fused at 11 A: never apply more than 10 A (20 A for 30 s at most, then 10 minutes rest; manual pp. 4, 6). Use leads rated for 10 A. The meter shows LEAd when the rotary switch moves to or from the A position (p. 3).",
+   "facts": [
+    [
+     "Next point",
+     "29 of 35"
+    ],
+    [
+     "Test",
+     "AC amps, 6.000 A range"
+    ],
+    [
+     "Meter",
+     "A~  (dial: A position, AC), range 6.000 A"
+    ]
+   ],
+   "image": "hook_fluke77_5560A_AMP10.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to 30A, BLACK lead to OUTPUT V/Ω LO. The terminals light up blue on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the 10A jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: 10 A current  -  Fluke 5560A to Fluke 77 Series IV",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "29 of 35"
+    ],
+    [
+     "Test",
+     "AC amps, 6.000 A range"
+    ],
+    [
+     "Meter",
+     "A~  (dial: A position, AC), range 6.000 A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: A~  range 6.000 A",
+     "n": 29,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to A~",
+       "dial: A position, AC",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows A~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC amps, 6.000 A range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: A~  (dial: A position, AC)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC amps",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.976",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "4 A AC @ 45 Hz",
+   "title": "point 2-29",
+   "unit": "A"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "9.08",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "9 A AC @ 1 kHz",
+   "title": "point 2-30",
+   "unit": "A"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "caution": "The 400 mA input is fused at 440 mA: never apply more than the point being tested (manual p. 4). The meter shows LEAd when the rotary switch moves to or from the mA position: check the leads are in the right jacks (p. 3).",
+   "facts": [
+    [
+     "Next point",
+     "31 of 35"
+    ],
+    [
+     "Test",
+     "DC milliamps, 60.00 mA range"
+    ],
+    [
+     "Meter",
+     "mA⎓  (dial: mA position; press the YELLOW button), range 60.00 mA"
+    ]
+   ],
+   "image": "hook_fluke77_5560A_UAMP.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to VI AUX, BLACK lead to OUTPUT V/Ω LO. The terminals light up blue on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the 400 mA jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: µA / mA current  -  Fluke 5560A to Fluke 77 Series IV",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "31 of 35"
+    ],
+    [
+     "Test",
+     "DC milliamps, 60.00 mA range"
+    ],
+    [
+     "Meter",
+     "mA⎓  (dial: mA position; press the YELLOW button), range 60.00 mA"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: mA⎓  range 60.00 mA",
+     "n": 31,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to mA⎓",
+       "dial: mA position; press the YELLOW button",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows mA⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC milliamps, 60.00 mA range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: mA⎓  (dial: mA position; press the YELLOW button)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC milliamps",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.01",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3 mA DC",
+   "title": "point 2-31",
+   "unit": "mA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "49.72",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "50 mA DC",
+   "title": "point 2-32",
+   "unit": "mA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-400.3",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "-400 mA DC",
+   "title": "point 2-33",
+   "unit": "mA"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "caution": "The 10A input is fused at 11 A: never apply more than 10 A (20 A for 30 s at most, then 10 minutes rest; manual pp. 4, 6). Use leads rated for 10 A. The meter shows LEAd when the rotary switch moves to or from the A position (p. 3).",
+   "facts": [
+    [
+     "Next point",
+     "34 of 35"
+    ],
+    [
+     "Test",
+     "DC amps, 6.000 A range"
+    ],
+    [
+     "Meter",
+     "A⎓  (dial: A position; press the YELLOW button), range 6.000 A"
+    ]
+   ],
+   "image": "hook_fluke77_5560A_AMP10.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to 30A, BLACK lead to OUTPUT V/Ω LO. The terminals light up blue on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the 10A jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: 10 A current  -  Fluke 5560A to Fluke 77 Series IV",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "34 of 35"
+    ],
+    [
+     "Test",
+     "DC amps, 6.000 A range"
+    ],
+    [
+     "Meter",
+     "A⎓  (dial: A position; press the YELLOW button), range 6.000 A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: A⎓  range 6.000 A",
+     "n": 34,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to A⎓",
+       "dial: A position; press the YELLOW button",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows A⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC amps, 6.000 A range",
+     "total": 35
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: A⎓  (dial: A position; press the YELLOW button)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC amps",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.024",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "4 A DC",
+   "title": "point 2-34",
+   "unit": "A"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-9.01",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "-9 A DC",
+   "title": "point 2-35",
+   "unit": "A"
+  }
+ ],
+ "virtual_run_87v": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "1 of 51"
+    ],
+    [
+     "Test",
+     "AC volts, 600 mV range"
+    ],
+    [
+     "Meter",
+     "mV  (AC millivolts), range 600 mV"
+    ]
+   ],
+   "image": "hook_fluke87v_5560A_VOHM.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to OUTPUT V/Ω HI, BLACK lead to OUTPUT V/Ω LO. The terminals light up green on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the VΩ jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: voltage, resistance and capacitance  -  Fluke 5560A to Fluke 87V",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "1 of 51"
+    ],
+    [
+     "Test",
+     "AC volts, 600 mV range"
+    ],
+    [
+     "Meter",
+     "mV  (AC millivolts), range 600 mV"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: mV  range 600 mV",
+     "n": 1,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to mV",
+       "AC millivolts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows mV",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC volts, 600 mV range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: mV  (AC millivolts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC volts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "331.0",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 mV AC @ 60 Hz",
+   "title": "point 1-1",
+   "unit": "mV"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "599",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "600 mV AC @ 13 kHz",
+   "title": "point 1-2",
+   "unit": "mV"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "3 of 51"
+    ],
+    [
+     "Test",
+     "AC volts, 6 V range"
+    ],
+    [
+     "Meter",
+     "V~  (AC volts), range 6 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V~  range 6 V",
+     "n": 3,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V~",
+       "AC volts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC volts, 6 V range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V~  (AC volts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC volts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.291",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3.3 V AC @ 60 Hz",
+   "title": "point 1-3",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.317",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3.3 V AC @ 20 kHz",
+   "title": "point 1-4",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "33.07",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "33 V AC @ 60 Hz",
+   "title": "point 1-5",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "32.76",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "33 V AC @ 20 kHz",
+   "title": "point 1-6",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 330 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "329.5",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 V AC @ 60 Hz",
+   "title": "point 1-7",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 330 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "332",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 V AC @ 2.5 kHz",
+   "title": "point 1-8",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 500 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "501",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "500 V AC @ 60 Hz",
+   "title": "point 1-9",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "995",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "1 kV AC @ 1 kHz",
+   "title": "point 1-10",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "11 of 51"
+    ],
+    [
+     "Test",
+     "AC volts frequency, 600 mV range"
+    ],
+    [
+     "Meter",
+     "Hz  (frequency, AC volts input), range 600 mV"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Hz  range 600 mV",
+     "n": 11,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Hz",
+       "frequency, AC volts input",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Hz",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC volts frequency, 600 mV range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Hz  (frequency, AC volts input)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC volts frequency",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "99.95",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "150 mV AC @ 99.95 kHz",
+   "title": "point 1-11",
+   "unit": "kHz"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "199.50",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "150 mV AC @ 199.5 kHz",
+   "title": "point 1-12",
+   "unit": "kHz"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "99.95",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "700 mV AC @ 99.95 kHz",
+   "title": "point 1-13",
+   "unit": "kHz"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "99.95",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "7 V AC @ 99.95 kHz",
+   "title": "point 1-14",
+   "unit": "kHz"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "15 of 51"
+    ],
+    [
+     "Test",
+     "DC volts frequency trigger level"
+    ],
+    [
+     "Meter",
+     "Hz  (frequency, DC volts input)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up",
+     "Set the calibrator or a function generator to 3.4 Vpp at 1000 Hz and connect it to the meter VΩ and COM inputs (this step has no automatic calibrator output). Select the DC volts frequency (Hz) function."
+    ]
+   ],
+   "text": "Set up for DC volts frequency trigger level",
+   "title": "Check the setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "1000.0",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "No calibrator output (STANDBY)",
+   "title": "point 1-15",
+   "unit": "Hz"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "16 of 51"
+    ],
+    [
+     "Test",
+     "DC volts duty cycle, 6 V range"
+    ],
+    [
+     "Meter",
+     "Hz  (duty cycle, DC volts input), range 6 V"
+    ]
+   ],
+   "image": "hook_fluke87v_5560A_VOHM.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to OUTPUT V/Ω HI, BLACK lead to OUTPUT V/Ω LO. The terminals light up green on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the VΩ jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: voltage, resistance and capacitance  -  Fluke 5560A to Fluke 87V",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "16 of 51"
+    ],
+    [
+     "Test",
+     "DC volts duty cycle, 6 V range"
+    ],
+    [
+     "Meter",
+     "Hz  (duty cycle, DC volts input), range 6 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Hz  range 6 V",
+     "n": 16,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Hz",
+       "duty cycle, DC volts input",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Hz",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC volts duty cycle, 6 V range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Hz  (duty cycle, DC volts input)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC volts duty cycle",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "50.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 V p-p square wave, 1 kHz, 50 % duty, 2.5 V DC offset",
+   "title": "point 1-16",
+   "unit": "%"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "17 of 51"
+    ],
+    [
+     "Test",
+     "DC volts, 6 V range"
+    ],
+    [
+     "Meter",
+     "V⎓  (DC volts), range 6 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V⎓  range 6 V",
+     "n": 17,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V⎓",
+       "DC volts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC volts, 6 V range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V⎓  (DC volts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC volts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.299",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3.3 V DC",
+   "title": "point 1-17",
+   "unit": "V"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "33.00",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "33 V DC",
+   "title": "point 1-18",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 330 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "330.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 V DC",
+   "title": "point 1-19",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "1000",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "1 kV DC",
+   "title": "point 1-20",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "21 of 51"
+    ],
+    [
+     "Test",
+     "DC volts, 600 mV range"
+    ],
+    [
+     "Meter",
+     "mV  (DC millivolts), range 600 mV"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: mV  range 600 mV",
+     "n": 21,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to mV",
+       "DC millivolts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows mV",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC volts, 600 mV range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: mV  (DC millivolts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC volts",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "33.0",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "33 mV DC",
+   "title": "point 1-21",
+   "unit": "mV"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "330.0",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 mV DC",
+   "title": "point 1-22",
+   "unit": "mV"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "23 of 51"
+    ],
+    [
+     "Test",
+     "Resistance, 600 Ω range"
+    ],
+    [
+     "Meter",
+     "Ω  (resistance), range 600 Ω"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Ω  range 600 Ω",
+     "n": 23,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Ω",
+       "resistance",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Ω",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Resistance, 600 Ω range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Ω  (resistance)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Resistance",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "330.3",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 Ω",
+   "title": "point 1-23",
+   "unit": "Ω"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.299",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3.3 kΩ",
+   "title": "point 1-24",
+   "unit": "kΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "32.97",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "33 kΩ",
+   "title": "point 1-25",
+   "unit": "kΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "330",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 kΩ",
+   "title": "point 1-26",
+   "unit": "kΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.31",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3.3 MΩ",
+   "title": "point 1-27",
+   "unit": "MΩ"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "29.91",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "30 MΩ",
+   "title": "point 1-28",
+   "unit": "MΩ"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "29 of 51"
+    ],
+    [
+     "Test",
+     "Conductance, 60 nS range"
+    ],
+    [
+     "Meter",
+     "nS  (conductance), range 60 nS"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up",
+     "Leave the meter inputs OPEN (no leads connected to the calibrator) and select conductance (nS). The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for Conductance",
+   "title": "Check the setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-0.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "No calibrator output (STANDBY)",
+   "title": "point 1-29",
+   "unit": "nS"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "30 of 51"
+    ],
+    [
+     "Test",
+     "Conductance, 60 nS range"
+    ],
+    [
+     "Meter",
+     "nS  (conductance), range 60 nS"
+    ]
+   ],
+   "image": "hook_fluke87v_5560A_VOHM.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to OUTPUT V/Ω HI, BLACK lead to OUTPUT V/Ω LO. The terminals light up green on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the VΩ jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: voltage, resistance and capacitance  -  Fluke 5560A to Fluke 87V",
+   "title": "Change the cables"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "10.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "100 MΩ",
+   "title": "point 1-30",
+   "unit": "nS"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "31 of 51"
+    ],
+    [
+     "Test",
+     "Diode test"
+    ],
+    [
+     "Meter",
+     "Diode test"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Diode test",
+     "n": 31,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Diode test",
+       "",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Diode test",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Diode test",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Diode test"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Diode test",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.009",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3 V DC",
+   "title": "point 1-31",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "caution": "Leads, plugs and terminals carry high current: use leads rated for 10 A or more, check the meter fuse, and make sure every connection is tight.",
+   "facts": [
+    [
+     "Next point",
+     "32 of 51"
+    ],
+    [
+     "Test",
+     "AC current, 6 A range"
+    ],
+    [
+     "Meter",
+     "A~  (AC amps), range 6 A"
+    ]
+   ],
+   "image": "hook_fluke87v_5560A_AMP10.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to 30A, BLACK lead to OUTPUT V/Ω LO. The terminals light up blue on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the 10A jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: 10 A current  -  Fluke 5560A to Fluke 87V",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "32 of 51"
+    ],
+    [
+     "Test",
+     "AC current, 6 A range"
+    ],
+    [
+     "Meter",
+     "A~  (AC amps), range 6 A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: A~  range 6 A",
+     "n": 32,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to A~",
+       "AC amps",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows A~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC current, 6 A range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: A~  (AC amps)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC current",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "2.988",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3 A AC @ 60 Hz",
+   "title": "point 1-32",
+   "unit": "A"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "33 of 51"
+    ],
+    [
+     "Test",
+     "DC current, 6 A range"
+    ],
+    [
+     "Meter",
+     "A⎓  (DC amps), range 6 A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: A⎓  range 6 A",
+     "n": 33,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to A⎓",
+       "DC amps",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows A⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "DC current, 6 A range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: A⎓  (DC amps)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "DC current",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3.00",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3 A DC",
+   "title": "point 1-33",
+   "unit": "A"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "10.02",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "10 A DC",
+   "title": "point 1-34",
+   "unit": "A"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "caution": "The mA µA input is fused: do not exceed the range of the point being tested.",
+   "facts": [
+    [
+     "Next point",
+     "35 of 51"
+    ],
+    [
+     "Test",
+     "AC current, 60 mA range"
+    ],
+    [
+     "Meter",
+     "mA / µA, range 60 mA"
+    ]
+   ],
+   "image": "hook_fluke87v_5560A_UAMP.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to VI AUX, BLACK lead to OUTPUT V/Ω LO. The terminals light up blue on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the mA µA jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: µA / mA current  -  Fluke 5560A to Fluke 87V",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "35 of 51"
+    ],
+    [
+     "Test",
+     "AC current, 60 mA range"
+    ],
+    [
+     "Meter",
+     "mA / µA, range 60 mA"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: mA / µA  range 60 mA",
+     "n": 35,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to mA / µA",
+       "",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows mA / µA",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "AC current, 60 mA range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: mA / µA"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "AC current",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "32.98",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "33 mA AC @ 60 Hz",
+   "title": "point 1-35",
+   "unit": "mA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "328.7",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 mA AC @ 60 Hz",
+   "title": "point 1-36",
+   "unit": "mA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "33.0",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "33 mA DC",
+   "title": "point 1-37",
+   "unit": "mA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "330.3",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 mA DC",
+   "title": "point 1-38",
+   "unit": "mA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "329.1",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 µA AC @ 60 Hz",
+   "title": "point 1-39",
+   "unit": "µA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3291",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3.3 mA AC @ 60 Hz",
+   "title": "point 1-40",
+   "unit": "µA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "330",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "330 µA DC",
+   "title": "point 1-41",
+   "unit": "µA"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "3301",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "3.3 mA DC",
+   "title": "point 1-42",
+   "unit": "µA"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "43 of 51"
+    ],
+    [
+     "Test",
+     "Capacitance, 10 nF range"
+    ],
+    [
+     "Meter",
+     "Capacitance, range 10 nF"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up",
+     "Remove the test leads / calibrator connections from the meter and leave the capacitance input OPEN. Select capacitance and the 10 nF range. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for Capacitance",
+   "title": "Check the setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "10.01",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "No calibrator output (STANDBY)",
+   "title": "point 1-43",
+   "unit": "nF"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "44 of 51"
+    ],
+    [
+     "Test",
+     "Capacitance, 100 nF range"
+    ],
+    [
+     "Meter",
+     "Capacitance, range 100 nF"
+    ]
+   ],
+   "image": "hook_fluke87v_5560A_VOHM.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "RED lead to OUTPUT V/Ω HI, BLACK lead to OUTPUT V/Ω LO. The terminals light up green on the 5560A: check that these are the lit ones."
+    ],
+    [
+     "Meter",
+     "RED lead in the VΩ jack, BLACK lead in the COM jack. Push both plugs in fully."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: voltage, resistance and capacitance  -  Fluke 5560A to Fluke 87V",
+   "title": "Change the cables"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.99",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "5 nF",
+   "title": "point 1-44",
+   "unit": "nF"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "9.61",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "9.5 µF",
+   "title": "point 1-45",
+   "unit": "µF"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "46 of 51"
+    ],
+    [
+     "Test",
+     "Low pass filter, 400 V @ 400 Hz range"
+    ],
+    [
+     "Meter",
+     "V~  (AC volts), range 400 V @ 400 Hz"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V~  range 400 V @ 400 Hz",
+     "n": 46,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V~",
+       "AC volts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V~",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Low pass filter, 400 V @ 400 Hz range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V~  (AC volts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Low pass filter",
+   "title": "Change the function"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 400 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "389",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "400 V AC @ 400 Hz",
+   "title": "point 1-46",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 400 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "262",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "400 V AC @ 800 Hz",
+   "title": "point 1-47",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "48 of 51"
+    ],
+    [
+     "Test",
+     "Peak Min / Max, 6 V range"
+    ],
+    [
+     "Meter",
+     "V⎓  (DC volts), range 6 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: V⎓  range 6 V",
+     "n": 48,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to V⎓",
+       "DC volts",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows V⎓",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Peak Min / Max, 6 V range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: V⎓  (DC volts)"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Peak Min / Max",
+   "title": "Change the function"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Point",
+     "48 of 51"
+    ],
+    [
+     "Meter",
+     "V⎓  (DC volts), range 6 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter",
+     "With the meter on V DC (6 V range), select Peak Min Max (the p indicator shows the 250 µs Peak Min Max mode), then read MAX."
+    ]
+   ],
+   "text": "Peak Min / Max",
+   "title": "Meter setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "4.015",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "6 V p-p square wave, 2 kHz, 50 % duty, 1 V DC offset",
+   "title": "point 1-48",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Point",
+     "49 of 51"
+    ],
+    [
+     "Meter",
+     "V⎓  (DC volts), range 6 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter",
+     "Peak Min Max is on: step the meter to MIN (the display shows MIN) and read it."
+    ]
+   ],
+   "text": "Peak Min / Max",
+   "title": "Meter setup"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-1.967",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "6 V p-p square wave, 2 kHz, 50 % duty, 1 V DC offset",
+   "title": "point 1-49",
+   "unit": "V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections checked - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "50 of 51"
+    ],
+    [
+     "Test",
+     "Temperature, Type K range"
+    ],
+    [
+     "Meter",
+     "Temperature, range Type K"
+    ]
+   ],
+   "image": "hook_fluke87v_5560A_TEMP.png",
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Meter dial",
+     "Turn the meter dial to OFF before you move any lead."
+    ],
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Calibrator",
+     "K-type thermocouple cable (mini-plug on both ends) into the Fluke 5560A TC connector, observing polarity."
+    ],
+    [
+     "Meter",
+     "Other end into the Fluke 80AK adapter, and the adapter into the meter VΩ (+) and COM (−) jacks."
+    ],
+    [
+     "Settle",
+     "Allow the junctions to stabilise before reading."
+    ],
+    [
+     "Check",
+     "Compare your connections with the diagram, then continue."
+    ]
+   ],
+   "text": "Change the cables: temperature (thermocouple)  -  Fluke 5560A to Fluke 87V",
+   "title": "Change the cables"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Done - continue",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Next point",
+     "50 of 51"
+    ],
+    [
+     "Test",
+     "Temperature, Type K range"
+    ],
+    [
+     "Meter",
+     "Temperature, range Type K"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "layout": {
+    "card": {
+     "meter_line": "Meter: Temperature  range Type K",
+     "n": 50,
+     "steps": [
+      [
+       "Standby",
+       "The calibrator output is OFF (standby) while you turn the rotary switch.",
+       "todo"
+      ],
+      [
+       "Turn the rotary switch to Temperature",
+       "",
+       "todo"
+      ],
+      [
+       "Press Done when the meter shows Temperature",
+       "The program then goes on with this point.",
+       "todo"
+      ]
+     ],
+     "test": "Temperature, Type K range",
+     "total": 51
+    },
+    "layout": "function_change"
+   },
+   "steps": [
+    [
+     "Rotary switch",
+     "Turn the meter to: Temperature"
+    ],
+    [
+     "Standby",
+     "The calibrator output is OFF (standby) while you turn the rotary switch."
+    ]
+   ],
+   "text": "Temperature",
+   "title": "Change the function"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "-0.2",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "0 °C",
+   "title": "point 1-50",
+   "unit": "°C"
+  },
+  {
+   "annunciator": false,
+   "answer": {
+    "action": "record",
+    "ann": false,
+    "text": "99.5",
+    "yes": null
+   },
+   "device": "METER",
+   "fill_offered": true,
+   "kind": "ask_reading",
+   "mode": "numeric",
+   "note": "Output is ON - allow the reading to settle, then read the meter.",
+   "source": "CALIBRATOR OUTPUT",
+   "text": "100 °C",
+   "title": "point 1-51",
+   "unit": "°C"
+  }
+ ]
+}
