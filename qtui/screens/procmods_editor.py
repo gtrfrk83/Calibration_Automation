@@ -21,7 +21,9 @@ import procmods as pm
 import procmods_ui_model as M
 from qtui import theme
 from qtui.screens import common
+from qtui.screens._share import ShareWidth
 from qtui.table import Column, DataTable
+from qtui.theme import M as SP
 from qtui.widgets import Badge, SearchField, SegmentedFilter, label
 
 POLL_MS = 1000
@@ -150,7 +152,7 @@ class _Tab(QWidget):
         self._rows = {}
         self._loading = False
         lay = QVBoxLayout(self)
-        lay.setContentsMargins(0, 10, 0, 0)
+        lay.setContentsMargins(0, SP.md, 0, 0)
         self.table = self.make_table()
         self.table.selectionChangedRows.connect(self._on_rows)
         self.split = QSplitter(Qt.Orientation.Horizontal)
@@ -638,9 +640,10 @@ class ChangesTab(_Tab):
         self.selected = None
         self._rows = {}
         lay = QVBoxLayout(self)
-        lay.setContentsMargins(0, 10, 0, 0)
+        lay.setContentsMargins(0, SP.md, 0, 0)
         self.table = DataTable(self.columns(), [], row_tone=lambda r: 'warn' if r['status'] == 'active' else None, row_key=lambda r: r['uid'], multi=False,
                                tone_style='text', empty_text='No changes')
+        self._share = ShareWidth(self.table, (60, 170, 150, 150, 110, 80), (0, 1.6, 1.3, 1.3, 0.8, 0.8))     # the wide window is shared, not one far-right empty area
         self.table.selectionChangedRows.connect(self._on_rows)
         lay.addWidget(self.table, 1)
         self.detail = label('', wrap=True)
@@ -724,8 +727,8 @@ class ModifyWindow(QWidget):
         self._tips = {}
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(16, 12, 16, 12)
-        root.setSpacing(8)
+        root.setContentsMargins(SP.lg, SP.md, SP.lg, SP.md)
+        root.setSpacing(SP.sm)
 
         head = QHBoxLayout()
         self.banner = label('', wrap=True)

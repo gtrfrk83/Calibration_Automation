@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QFrame, QHBoxLayou
 
 import instrument_scan as S
 from qtui import theme
-from qtui.table import Column, DataTable
+from qtui.table import Column, DataTable, ShareWidth
 from qtui.theme import M
 from qtui.widgets import Banner, PrimaryButton, SecondaryButton, label
 
@@ -92,6 +92,7 @@ class FindInstrumentsWindow(QDialog):
                                                          ('serial', 'Serial', 110), ('state', 'Status', 270)))]
         self.table = DataTable(cols, [], row_tone=lambda r: TAG_TONE.get(r.tag), row_key=lambda r: id(r.hit), tone_style='text', empty_text='Press "Scan instruments".')
         self.table.selectionChangedRows.connect(lambda _rows: self.selection_changed())
+        self._share = ShareWidth(self.table, {0: 0.35, 2: 0.1, 3: 0.15, 4: 0.4}, reserve=300)       # a wide window shares its extra width, the instrument reply keeps the rest
         body.addWidget(self.table, 1)
 
         self.detail = label('', 'hint', wrap=True)

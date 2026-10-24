@@ -310,6 +310,7 @@ def operator_prompt(parent, title: str, heading: str, steps, facts=None, caution
         pic.setPixmap(_on_white(pix.scaledToWidth(min(pix.width(), 460), Qt.TransformationMode.SmoothTransformation)))      # a diagram is drawn on white
         pic.setFixedSize(pic.pixmap().size() / pic.pixmap().devicePixelRatio())
         row.addWidget(pic, 0, Qt.AlignmentFlag.AlignTop)
+        text_col.addStretch(1)                                  # the text keeps its natural height beside a tall picture instead of being spread over it
         row.addLayout(text_col, 1)
         dlg.body.addLayout(row)
         dlg.setMinimumWidth(1040)

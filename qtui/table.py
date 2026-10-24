@@ -20,7 +20,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterable, Sequence
 
-from PySide6.QtCore import (QAbstractTableModel, QEvent, QModelIndex, QPoint, QPointF, QRect, QRectF, QSize, QSortFilterProxyModel, Qt, QTimer, Signal)
+from PySide6.QtCore import (QAbstractTableModel, QEvent, QModelIndex, QObject, QPoint, QPointF, QRect, QRectF, QSize, QSortFilterProxyModel, Qt, QTimer, Signal)
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QKeySequence, QPainter, QPen
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox, QHeaderView, QMenu, QStyle, QStyledItemDelegate, QStyleOptionViewItem, QTableView)
 
@@ -936,3 +936,29 @@ class DataTable(QTableView):
     def scrollTo(self, index, hint=QAbstractItemView.ScrollHint.EnsureVisible):
         if index.column() > 0 or self._frozen_view is None:
             super().scrollTo(index, hint)
+
+
+class ShareWidth(QObject):
+    """For a table with one Stretch column: in a wide window the width beyond what the columns ask for is shared between the fixed columns by `weights`
+    (column index -> share of the extra), the Stretch column keeps the rest, so one giant column does not push the others to the far edge."""
+
+    def __init__(self, table: 'DataTable', weights: dict, reserve: int = 240):
+        super().__init__(table)
+        self.table, self.weights, self.reserve = table, dict(weights), reserve
+        self.base = {i: table.columnWidth(i) for i in weights}
+        table.viewport().installEventFilter(self)
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Resize:
+            QTimer.singleShot(0, self.apply)
+        return False
+
+    def apply(self) -> None:
+        try:
+            cols = self.table.source_model.columns
+            total = sum(self.table.columnWidth(i) for i in range(len(cols)) if i not in self.weights and not cols[i].stretch)
+            extra = max(0, self.table.viewport().width() - total - sum(self.base.values()) - self.reserve)
+            for i, k in self.weights.items():
+                self.table.setColumnWidth(i, int(self.base[i] + extra * k))
+        except RuntimeError:
+            pass                                                   # the table went away

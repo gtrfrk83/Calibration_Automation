@@ -92,6 +92,8 @@ class VerificationPopup(QFrame):
 class _ShareWidth(QObject):
     """Keeps the procedure list readable in a wide window: the width beyond `base` is shared between the columns by `weights` (the last column, which
     stretches, keeps the rest), so the list does not become one huge Procedure column with the others pushed to the far right."""
+    MIN = (215, 108, 74, 118, 64)                              # what each column shrinks to in a narrow window, so the last column stays on screen
+
     def __init__(self, table, base_widths, weights):
         super().__init__(table)
         self.table, self.base, self.weights = table, base_widths, weights
@@ -105,9 +107,13 @@ class _ShareWidth(QObject):
     def apply(self):
         try:
             hh = self.table.horizontalHeader()
-            extra = max(0, self.table.viewport().width() - sum(self.base) - 220)
+            vw = self.table.viewport().width()
+            extra = max(0, vw - sum(self.base) - 220)
+            squeeze = 0.0
+            if vw - 96 < sum(self.base):                           # narrow: shrink toward MIN so the 'Verified on hardware' column keeps ~96 px
+                squeeze = min(1.0, (sum(self.base) - (vw - 96)) / max(1, sum(self.base) - sum(self.MIN)))
             for i, (w, k) in enumerate(zip(self.base, self.weights)):
-                hh.resizeSection(i, int(w + extra * k))
+                hh.resizeSection(i, int(w + extra * k - (w - self.MIN[i]) * squeeze))
         except RuntimeError:
             pass                                                   # the table went away
 
