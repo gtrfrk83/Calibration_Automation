@@ -26,6 +26,8 @@
    "Procedures/Keysight_33210A_Verification.py",
    "fgen_verification.py",
    "fgen_view_tk.py",
+   "fgen_view_qt.py",
+   "genscope_support_view_qt.py",
    "ui_port.py",
    "ui_port_tk.py",
    "surprise.py",
