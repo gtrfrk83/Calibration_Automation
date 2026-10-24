@@ -243,6 +243,8 @@ def point_uncertainty(p, standard=None) -> str:
         return ''
     import uncertainty
     unit = 'ohm' if p['kind'].startswith('OHM') else p['unit']
+    if p['kind'] == 'FREQ':
+        standard = None             # a frequency is measured against the GPS-referenced lab standard: the 'Frequency - Measure' CMC ALONE, never combined with the calibrator's own frequency accuracy
     if standard:
         try:
             import uncertainty_budget

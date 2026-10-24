@@ -104,6 +104,9 @@ def run_dump(root, out, mode):
     return r.stdout
 
 
+FREQUENCY_ROWS_PDFS = ('handheld_Fluke_115.pdf', 'agilent34401a.pdf', 'dacq_34970A.pdf', 'fluke8846a.pdf', 'truevolt_34461A.pdf', 'truevolt_34470A.pdf')
+
+
 @unittest.skipUnless(HAVE_RL and HAVE_PDFTOTEXT, 'reportlab / pdftotext not available')
 class Exports(unittest.TestCase):
     @classmethod
@@ -150,8 +153,8 @@ class Exports(unittest.TestCase):
             if n == 'handheld_Fluke_287.pdf':
                 self.check_temperature_rows_only(n)  # the 287 temperature rows (3-1 .. 3-3) now print a thermocouple-simulation Uncertainty (temperature uncertainty branch)
                 continue
-            if n == 'handheld_Fluke_115.pdf':
-                self.check_frequency_rows_only(n)    # the 115 AC volts + Hz step (3-17) no longer prints the calibrator's VOLTAGE uncertainty as 'mHz' (branch uncertainty-engines, part B)
+            if n in FREQUENCY_ROWS_PDFS:
+                self.check_frequency_rows_only(n)    # also the bench DMM frequency points (34401A, DACQ, 8846A: the calibrator's frequency accuracy is no longer combined); the 115 AC volts + Hz step (3-17) no longer prints the calibrator's VOLTAGE uncertainty as 'mHz' (branch uncertainty-engines, part B)
                 continue
             if self.is_demo(self.off / n):
                 self.check_demo_footer_only(n)       # the demo footer's long left text is now cut with '...' so it cannot overprint the red DEMO DATA line
@@ -187,7 +190,7 @@ class Exports(unittest.TestCase):
             self.check_87v_rows_only(n)
         elif n == 'handheld_Fluke_287.pdf':
             self.check_temperature_rows_only(n)
-        elif n == 'handheld_Fluke_115.pdf':
+        elif n in FREQUENCY_ROWS_PDFS:
             self.check_frequency_rows_only(n)
         else:
             self.assertEqual(self.body_words(self.base / n), self.body_words(self.off / n), n)
@@ -204,13 +207,13 @@ class Exports(unittest.TestCase):
         self.assertLessEqual(len(changed), 24)
 
     def check_frequency_rows_only(self, n):
-        """Only the frequency step rows differ: the voltage uncertainty with a Hz unit ('1.3 mHz') is now the Frequency - Measure CMC ('360 nHz')."""
+        """Only frequency-reading rows differ: the voltage / calibrator-accuracy uncertainty with a Hz unit ('1.3 mHz', '250 mHz') is now the Frequency - Measure CMC ('360 nHz')."""
         import difflib
         txt = lambda d: self.layout_lines(d / n)
         changed = [l for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
-        self.assertEqual(len(changed), 2, changed)
+        self.assertTrue(changed and len(changed) % 2 == 0, changed)
         for l in changed:
-            self.assertRegex(l[2:], r'kHz [\d.]+ Same [\d.]+ (\u00b5|m|n|p)Hz$', l)
+            self.assertRegex(l[2:], r'Hz .*Same [\d.]+ (\u00b5|m|n|p)?Hz$', l)
 
     def check_temperature_rows_only(self, n):
         """Only the Temperature rows differ from the baseline, and only in the Uncertainty cell (N/A before, 'x.xx degC' now)."""
