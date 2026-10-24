@@ -27,6 +27,9 @@
    "Procedures/Fluke_8808A_Adjustment.py",
    "fluke8808a_adjustment.py",
    "adjustment_audit.py",
+   "fluke8808a_adjust_view_tk.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "drivers/base.py",
    "drivers/transport.py",
    "drivers/fluke_8808a.py",
@@ -44,6 +47,7 @@
  "seed_verified": false,
  "own_files": [
   "Procedures/Fluke_8808A_Adjustment.py",
+  "fluke8808a_adjust_view_tk.py",
   "Procedures/Fluke_8808A_Adjustment.procedure.json",
   "specs/fluke_8808a_adjustment.json",
   "specs/build_8808a_adjustment.py",

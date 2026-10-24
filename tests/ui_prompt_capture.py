@@ -336,10 +336,14 @@ def _run_adjustments(make_harness):
         from drivers.simulated_k2000_cal import SIM_CODE
         hn.answers.rules.append(lambda r: SIM_CODE if r['kind'] == 'ask_text' and r['title'] == 'Calibration code' else None)
 
-        def ask_value(self, title, prompt, default, _hn=hn):
+        def ask_value(self, title, prompt, default, *a, _hn=hn, **k):
             _hn.prompts.append(record('ask_value', title, prompt, default))
             return default
-        p = mock.patch.object(mod.App, 'ask_value', ask_value, create=True)
+        import ui_port_tk
+        if hasattr(ui_port_tk.TkUiPort, 'ask_value'):       # ported launcher: the Tk-level recorder sits under the port's ask_value (ScriptedUiPort records its own)
+            p = mock.patch.object(ui_port_tk.TkUiPort, 'ask_value', ask_value)
+        else:                                               # unported launcher: its own App.ask_value window
+            p = mock.patch.object(mod.App, 'ask_value', ask_value, create=True)
         p.start(); hn.patches.append(p)
         app = mod.App(hn.root, demo=True)
         hn.app = app
@@ -358,7 +362,151 @@ def _run_adjustments(make_harness):
     return out
 
 
-SCENARIOS = {'a34410a': _run_a34410a, 'f8808a': _run_f8808a, 'handheld': _run_handheld, 'adjustments': _run_adjustments}
+class _FakeTree:
+    """The step table of the 8846A adjustment window: only what the engine's handlers call (selection, set, item, bind, ...)."""
+
+    def __init__(self):
+        self.sel = ()
+        self.rows = {}
+
+    def selection(self):
+        return self.sel
+
+    def set(self, iid, col, value):
+        self.rows[(iid, col)] = value
+
+    def item(self, iid, **kw):
+        return None
+
+    def get_children(self, *a):
+        return ()
+
+    def __getattr__(self, name):
+        return lambda *a, **k: None
+
+
+class _FakeLog:
+    def __init__(self):
+        self.lines = []
+
+    def append_default(self, text):
+        self.lines.append(text)
+
+    def add(self, *a, **k):
+        pass
+
+
+class _FakeMeter8846A:
+    """A stand-in for the serial 8846A (the real launcher needs a serial meter): only the calls the adjustment window makes.  It never records a password."""
+    label = '8846A'
+    idn = 'FLUKE,8846A,SIM0001,1.0'
+    RESET_EXEMPT = ''
+
+    def __init__(self):
+        self.log = _FakeLog()
+        self.calls = []
+
+    def reset_to_defaults(self):
+        import types
+        self.calls.append('reset')
+        return types.SimpleNamespace(ok=True, instrument='8846A', exempt=False, text=lambda: 'reset')
+
+    def unlock_calibration(self, password):
+        self.calls.append('unlock')
+
+    def lock_calibration(self, password):
+        self.calls.append('lock')
+
+    def adjust_step(self, mode, value):
+        self.calls.append(('adjust', mode, value))
+        return '+0'
+
+    def record_calibration(self):
+        self.calls.append('record')
+
+    def close(self):
+        self.calls.append('close')
+
+
+def _run_adj8846a(make_harness):
+    """Fluke 8846A ADJUSTMENT launcher (Procedures/Fluke_8846A_Adjustment.py; no engine golden transcript, the real launcher needs a serial meter): a DEMO record
+    (start without / with the required fields, review a step, unlock, execute an eligible and a review-only step, commit with a wrong then the right phrase, resume)
+    and a run on a FAKE serial meter (connect failing / succeeding, reset declined then accepted, a malformed then a good calibration password, execute, commit,
+    relock, close while unlocked).  The calibration password is masked in the record; the database is a temporary file."""
+    mod = __import__('Fluke_8846A_Adjustment')
+    out = {}
+    tmp = Path(tempfile.mkdtemp())
+    for key in ('demo', 'fake_meter'):
+        hn = make_harness(None)
+        hn.start()
+        p = mock.patch.object(mod, 'DB', tmp / f'adj8846a_{key}.sqlite3')
+        p.start(); hn.patches.append(p)
+        import tkinter.ttk
+        p = mock.patch.object(tkinter.ttk.Combobox, '__setitem__', lambda self, k, v: None, create=True)          # `self.port_combo['values'] = ports` on the stub
+        p.start(); hn.patches.append(p)
+        pws = iter(['bad pw!', 'Pw12', 'Pw12'])
+        resets = iter([False, True, True])
+        hn.answers.rules.append(lambda r, _pws=pws: next(_pws) if r['kind'] == 'ask_text' and r['title'] in ('Calibration password', 'Relock calibration') else None)
+        hn.answers.rules.append(lambda r: 'COMMIT 8846A' if r['kind'] == 'ask_text' and r['title'] == 'Final confirmation' else None)
+        if key == 'fake_meter':
+            hn.answers.rules.append(lambda r, _r=resets: next(_r) if r['kind'] == 'ask_ok_cancel' and r['title'] == 'Reset instruments' else None)
+        p = mock.patch.object(mod.ui, 'make_table', lambda *a, **k: _FakeTree())          # the step table and the audit table (the stub widgets have no selection)
+        p.start(); hn.patches.append(p)
+        app = mod.App(hn.root, demo=(key == 'demo'))
+        hn.app = app
+        if key == 'demo':
+            import types
+            lp = types.ModuleType('serial.tools.list_ports')
+            lp.comports = lambda: (_ for _ in ()).throw(RuntimeError('no serial support here'))
+            with mock.patch.dict(sys.modules, {'serial.tools.list_ports': lp, 'serial.tools': types.ModuleType('serial.tools'), 'serial': types.ModuleType('serial')}):
+                sys.modules['serial.tools'].list_ports = lp
+                app.refresh_ports()                                        # error box
+            app.connect()
+            app.resume()                                                   # no instrument ID
+            app.start()                                                    # nothing entered -> warning
+            app.asset.set('A-8846'); app.serial.set('S-1'); app.tech.set('T')
+            app.resume()                                                   # no record yet -> info
+            app.start()
+            app.mark_reviewed()                                            # nothing selected -> warning
+            app.tree.sel = ('0',)
+            app.mark_reviewed()
+            app.tree.sel = ('2',)
+            app.execute()                                                  # prerequisites -> warning
+            app.unlock()
+            app.execute()
+            app.tree.sel = ('5',)
+            app.execute()                                                  # review-only -> info
+            app.commit()
+            app.resume()
+            app.disconnect()
+            app.close()
+        else:
+            meter = _FakeMeter8846A()
+            with mock.patch.object(mod, 'open_meter', side_effect=[RuntimeError('port not available'), meter, meter]):
+                app.connect()                                              # error box
+                app.start()                                                # required info -> warning
+                app.asset.set('A-8846'); app.serial.set('S-1'); app.tech.set('T')
+                app.start()                                                # not connected -> warning
+                app.connect()
+                app.start()                                                # reset notice declined
+                app.start()                                                # reset accepted, record started
+                app.tree.sel = ('2',)
+                app.unlock()                                               # malformed password -> error
+                app.unlock()                                               # good password
+                app.execute()
+                app.commit()
+                app.close()                                                # unlocked -> 'Relock first'
+                app.disconnect()                                           # relock with the password
+                app.connect()                                              # resume after reconnect path (record active -> reset again)
+                app.disconnect()
+                app.close()
+            assert 'record' in meter.calls and 'unlock' in meter.calls and 'lock' in meter.calls, meter.calls
+        out[f'adj8846a_{key}'] = hn.port.prompts if hasattr(hn, 'port') else hn.prompts
+        hn.stop()
+    return out
+
+
+SCENARIOS = {'a34410a': _run_a34410a, 'f8808a': _run_f8808a, 'handheld': _run_handheld, 'adjustments': _run_adjustments, 'adj8846a': _run_adj8846a}
 
 
 # ---- WP-W (WaveSurfer 4104HD): the scenario lives in tests/ui_prompt_capture_ws.py (append-only block; other packages add their own lines below / above) --------------

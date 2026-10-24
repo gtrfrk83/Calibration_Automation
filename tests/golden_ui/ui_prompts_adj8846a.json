@@ -1,0 +1,324 @@
+{
+ "adj8846a_demo": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "no serial support here",
+   "title": "COM ports"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter instrument ID to find previous records.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter instrument ID, serial number and technician.",
+   "title": "Required information"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No previous adjustment record found.",
+   "title": "No record"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Start a new adjustment audit record? This does not unlock the meter.",
+   "title": "Start new record"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Select a row first.",
+   "title": "Select a step"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Confirm you reviewed the setup and manual requirements for:\nAs Found verification",
+   "title": "Review confirmation"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Start a record and explicitly unlock adjustment first.",
+   "title": "Prerequisites"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "I am authorized to adjust this instrument, have reviewed the calibration manual, and understand coefficients may change. Continue?",
+   "title": "Authorized adjustment"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "100 MΩ open\n\nDisconnect all leads from meter inputs. Verify open terminals and correct front/rear selection.\n\nConfirm all inputs are OPEN and no source is connected. Execute one calibration step?",
+   "title": "Confirm physical setup"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Command: CAL:VAL ORES,100000000\nThen: CAL? ON\n\nThis changes volatile calibration coefficients. Proceed?",
+   "title": "Final command confirmation"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "This stage is review-only in v56. Exact revision-specific setpoints and 5560A controls require bench validation.",
+   "title": "Not yet validated"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "CAL:REC writes adjusted coefficients to NONVOLATILE MEMORY.\n\nHave you completed the FULL manual adjustment sequence, validated all steps and checked for errors?",
+   "title": "Commit calibration coefficients"
+  },
+  {
+   "answer": "COMMIT 8846A",
+   "kind": "ask_text",
+   "text": "Type COMMIT 8846A to authorize CAL:REC:",
+   "title": "Final confirmation"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Coefficient record command issued. Perform independent As Left verification and save its report.",
+   "title": "As Left verification required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Resume run #1 for serial S-1?",
+   "title": "Resume"
+  }
+ ],
+ "adj8846a_fake_meter": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "port not available",
+   "title": "Connection error"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter instrument ID, serial number and technician.",
+   "title": "Required information"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Connect and identify the 8846A first.",
+   "title": "Connection required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Start a new adjustment audit record? This does not unlock the meter.",
+   "title": "Start new record"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Start a new adjustment audit record? This does not unlock the meter.",
+   "title": "Start new record"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "I am authorized to adjust this instrument, have reviewed the calibration manual, and understand coefficients may change. Continue?",
+   "title": "Authorized adjustment"
+  },
+  {
+   "answer": "<masked>",
+   "kind": "ask_text",
+   "masked": true,
+   "text": "Enter the instrument calibration password:",
+   "title": "Calibration password"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "Expected 1–12 alphanumeric characters.",
+   "title": "Password"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "I am authorized to adjust this instrument, have reviewed the calibration manual, and understand coefficients may change. Continue?",
+   "title": "Authorized adjustment"
+  },
+  {
+   "answer": "<masked>",
+   "kind": "ask_text",
+   "masked": true,
+   "text": "Enter the instrument calibration password:",
+   "title": "Calibration password"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "100 MΩ open\n\nDisconnect all leads from meter inputs. Verify open terminals and correct front/rear selection.\n\nConfirm all inputs are OPEN and no source is connected. Execute one calibration step?",
+   "title": "Confirm physical setup"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Command: CAL:VAL ORES,100000000\nThen: CAL? ON\n\nThis changes volatile calibration coefficients. Proceed?",
+   "title": "Final command confirmation"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "CAL:REC writes adjusted coefficients to NONVOLATILE MEMORY.\n\nHave you completed the FULL manual adjustment sequence, validated all steps and checked for errors?",
+   "title": "Commit calibration coefficients"
+  },
+  {
+   "answer": "COMMIT 8846A",
+   "kind": "ask_text",
+   "text": "Type COMMIT 8846A to authorize CAL:REC:",
+   "title": "Final confirmation"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Coefficient record command issued. Perform independent As Left verification and save its report.",
+   "title": "As Left verification required"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Calibration is unlocked. Use Relock and Disconnect before exiting.",
+   "title": "Relock first"
+  },
+  {
+   "answer": "<masked>",
+   "kind": "ask_text",
+   "masked": true,
+   "text": "Enter calibration password to relock:",
+   "title": "Relock calibration"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  }
+ ]
+}
