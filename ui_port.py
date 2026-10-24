@@ -377,7 +377,7 @@ ui = _Proxy()
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
-# APPENDED BY QT-A (the toolkit switch; append-only block): CALSUITE_UI = qt | tk, default tk until the cut-over
+# APPENDED BY QT-A + QT-F1 (append-only block, merged): the toolkit switch.  CALSUITE_UI = qt | tk, default tk until the cut-over
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
 TOOLKITS = ('tk', 'qt')
 DEFAULT_TOOLKIT = 'tk'                          # the one line to change at the cut-over
@@ -391,13 +391,13 @@ def toolkit_name(name=None):
 
 
 def _make_port(name):
-    """A new port of toolkit `name`.  The Qt port (ui_port_qt.py) may not exist yet: the Tk build is the fallback and a note goes to stderr."""
+    """A new port of toolkit `name`.  A standalone engine's default port (get_ui) falls back to Tk with a note on stderr when the Qt port cannot be imported
+    (for instance PySide6 is not installed); select_toolkit() below does NOT fall back."""
     if name == 'qt':
         try:
             import ui_port_qt
-            factory = getattr(ui_port_qt, 'make_port', None) or getattr(ui_port_qt, 'QtUiPort')
-            return factory()
-        except (ImportError, AttributeError) as exc:
+            return ui_port_qt.QtUiPort()
+        except ImportError as exc:
             import sys
             sys.stderr.write(f'CALSUITE_UI=qt: the Qt UiPort is not available ({exc}); using the Tk build.\n')
     import ui_port_tk
@@ -409,9 +409,18 @@ def _default_port():
 
 
 def select_toolkit(name=None):
-    """Install the UiPort of the chosen toolkit (CALSUITE_UI, default tk) before any window exists; returns the toolkit name that is now in use.
-    A host calls it once at start-up; an engine started on its own gets the same choice through get_ui()'s default."""
-    wanted = toolkit_name(name)
-    port = _make_port(wanted)
+    """Install the UiPort of one toolkit and return it.  `name` 'tk' | 'qt'; None -> the environment variable CALSUITE_UI ('qt' | 'tk'), default 'tk'.
+    Call it once, before any window or engine exists (the launchers do).  An unknown value is an error (a typo in CALSUITE_UI must not silently run the
+    other toolkit); 'qt' imports ui_port_qt (PySide6) and raises ImportError if that is not installed."""
+    import os
+    choice = (name if name is not None else os.environ.get('CALSUITE_UI', '') or DEFAULT_TOOLKIT).strip().lower()
+    if choice not in TOOLKITS:
+        raise ValueError(f'unknown toolkit {choice!r}: use one of {TOOLKITS} (CALSUITE_UI)')
+    if choice == 'qt':
+        import ui_port_qt
+        port = ui_port_qt.QtUiPort()
+    else:
+        import ui_port_tk
+        port = ui_port_tk.TkUiPort()
     set_ui(port)
-    return 'qt' if type(port).__module__ == 'ui_port_qt' else 'tk'
+    return port

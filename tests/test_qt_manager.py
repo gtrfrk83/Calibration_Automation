@@ -849,8 +849,11 @@ class ToolkitSwitch(unittest.TestCase):
         old = ui_port.set_ui(None)
         try:
             with mock.patch.dict(sys.modules, {'ui_port_tk': fake_tk, 'ui_port_qt': None}):
-                self.assertEqual(ui_port.select_toolkit('qt'), 'tk')
-                self.assertEqual(ui_port.get_ui().name, 'tk-port')
+                with self.assertRaises(ImportError):                                  # select_toolkit is strict: the launcher must know
+                    ui_port.select_toolkit('qt')
+                ui_port.set_ui(None)
+                with mock.patch.dict(os.environ, {'CALSUITE_UI': 'qt'}):              # an engine started on its own falls back to Tk with a note
+                    self.assertEqual(ui_port.get_ui().name, 'tk-port')
         finally:
             ui_port.set_ui(old)
 
@@ -863,7 +866,7 @@ class ToolkitSwitch(unittest.TestCase):
         old = ui_port.set_ui(None)
         try:
             with mock.patch.dict(sys.modules, {'ui_port_qt': fake_qt}):
-                self.assertEqual(ui_port.select_toolkit('qt'), 'qt')
+                self.assertIsInstance(ui_port.select_toolkit('qt'), QtUiPort)          # returns the installed port
                 self.assertIsInstance(ui_port.get_ui(), QtUiPort)
                 ui_port.set_ui(None)
                 with mock.patch.dict(os.environ, {'CALSUITE_UI': 'qt'}):

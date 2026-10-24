@@ -521,7 +521,7 @@ class StatusLine(QLabel):
         self._text = ''
         self.setTextFormat(Qt.TextFormat.RichText)
         self.set(text)
-        theme.manager().changed.connect(lambda _n: self._render())
+        theme.manager().changed.connect(self._on_theme)          # a bound slot: Qt drops the connection when the label is destroyed (a lambda would fire on a dead object)
 
     def set(self, text: str, kind: str | None = None) -> None:
         self._text = text
@@ -530,6 +530,9 @@ class StatusLine(QLabel):
 
     def kind(self) -> str:
         return self._kind
+
+    def _on_theme(self, *_) -> None:
+        self._render()
 
     def _render(self) -> None:
         import html
