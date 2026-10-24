@@ -266,8 +266,7 @@ def get_ui():
     if _ui is None:
         with _lock:
             if _ui is None:
-                import ui_port_tk
-                _ui = ui_port_tk.TkUiPort()
+                _ui = _default_port()
     return _ui
 
 
@@ -289,3 +288,44 @@ class _Proxy:
 
 
 ui = _Proxy()
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------
+# APPENDED BY QT-A (the toolkit switch; append-only block): CALSUITE_UI = qt | tk, default tk until the cut-over
+# ----------------------------------------------------------------------------------------------------------------------------------------------------
+TOOLKITS = ('tk', 'qt')
+DEFAULT_TOOLKIT = 'tk'                          # the one line to change at the cut-over
+
+
+def toolkit_name(name=None):
+    """'tk' or 'qt': `name`, else the CALSUITE_UI environment variable, else DEFAULT_TOOLKIT.  An unknown value means the default."""
+    import os
+    value = (name if name is not None else os.environ.get('CALSUITE_UI', '')).strip().lower()
+    return value if value in TOOLKITS else DEFAULT_TOOLKIT
+
+
+def _make_port(name):
+    """A new port of toolkit `name`.  The Qt port (ui_port_qt.py) may not exist yet: the Tk build is the fallback and a note goes to stderr."""
+    if name == 'qt':
+        try:
+            import ui_port_qt
+            factory = getattr(ui_port_qt, 'make_port', None) or getattr(ui_port_qt, 'QtUiPort')
+            return factory()
+        except (ImportError, AttributeError) as exc:
+            import sys
+            sys.stderr.write(f'CALSUITE_UI=qt: the Qt UiPort is not available ({exc}); using the Tk build.\n')
+    import ui_port_tk
+    return ui_port_tk.TkUiPort()
+
+
+def _default_port():
+    return _make_port(toolkit_name())
+
+
+def select_toolkit(name=None):
+    """Install the UiPort of the chosen toolkit (CALSUITE_UI, default tk) before any window exists; returns the toolkit name that is now in use.
+    A host calls it once at start-up; an engine started on its own gets the same choice through get_ui()'s default."""
+    wanted = toolkit_name(name)
+    port = _make_port(wanted)
+    set_ui(port)
+    return 'qt' if type(port).__module__ == 'ui_port_qt' else 'tk'
