@@ -53,10 +53,10 @@ class ScannedEqualsOldRegistry(unittest.TestCase):
     def test_old_fingerprint_files_are_a_superset_of_the_new_ones(self):
         """The new declared lists only DROP what a procedure does not use (hookups.py of the meter-less 287/289); the one addition is surprise.py
         (stop-on-surprise, owner-approved: it is listed by the engines that import it), and the UI-port files of an engine ported to ui_port (ui_port.py,
-        ui_port_tk.py, <engine>_view_tk.py: the code that shows its prompts and window; Qt migration, owner-approved)."""
+        ui_port_tk.py, <engine>_view_tk.py and its Qt twin <engine>_view_qt.py: the code that shows its prompts and window; Qt migration, owner-approved)."""
         for key, old in LEGACY['FILES'].items():
             new = verified.FILES[key]
-            added = {'surprise.py'} | {f for f in new['code'] if f in ('ui_port.py', 'ui_port_tk.py') or f.endswith('_view_tk.py')}
+            added = {'surprise.py'} | {f for f in new['code'] if f in ('ui_port.py', 'ui_port_tk.py') or f.endswith(('_view_tk.py', '_view_qt.py'))}
             self.assertLessEqual(set(new['code']) - added, set(old['code']), key)
             self.assertEqual(new['spec'], old['spec'], key)
             self.assertEqual(set(old['code']) - set(new['code']), {'hookups.py'} if key in ('Fluke_287_Verification.py', 'Fluke_289_Verification.py') else set(), key)
