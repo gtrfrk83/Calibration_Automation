@@ -25,6 +25,7 @@ import labregistry
 import virtualbench
 from handheld_dmm import HERE, OUTPUT_ON_NOTE, READING_WIDTH, describe, limit_line
 from qtui import prompts, theme
+from qtui.bench_view import DetailBox, fit_wrapped, share_columns
 from qtui import shell_helpers as H
 from qtui.screens import common
 from qtui.shell import Shell, results_table, small_window
@@ -231,16 +232,18 @@ def build_ui(self):
     self.tree.column('nominal', width=150)
     small_window(self, self.tree, filt, picker=picker)
     self.tree.setMinimumHeight(theme.M.header_h + 3 * theme.M.row_h)          # the table gives way first when the window is small
+    share_columns(self.tree, sh, nominal=150)
     info = H.frame(None, 'v', spacing=4)
-    info.setObjectName('hhInfo')                                  # opaque: in a window too small for everything the text stays readable over the foot of the table
-    info.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-    info.setStyleSheet(common.tone_css('QWidget#hhInfo', background='{bg}'))
     detail = H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=1000)
     detail.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-    info.layout().addWidget(detail)
-    info.layout().addWidget(_scrolling_note(H.label_(None, src['note'], 'Small.TLabel', wraplength=1000)))
+    note = H.label_(None, src['note'], 'Small.TLabel', wraplength=1000)
+    note.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+    info.layout().addWidget(fit_wrapped(detail, self.detail))
+    info.layout().addWidget(fit_wrapped(note))
+    box = DetailBox(info)                                         # the long 376 note scrolls inside its own box: at the 1000 x 640 minimum it can no longer paint over the table
+    box.setAccessibleName('Procedure note')
     body.layout().addSpacing(8)
-    body.layout().addWidget(info)
+    body.layout().addWidget(box)
     self.tree.bind('<<TreeviewSelect>>', self.on_select)
     self.refresh()
     H.polish(root)

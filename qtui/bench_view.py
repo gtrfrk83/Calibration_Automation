@@ -16,7 +16,9 @@ from __future__ import annotations
 
 import re
 
-from PySide6.QtCore import QEvent, QObject, QTimer, Qt
+from PySide6.QtCore import QEvent, QObject, QSize, QTimer, Qt
+from PySide6.QtGui import QPalette
+from PySide6.QtWidgets import QFrame, QScrollArea, QSizePolicy
 
 import datamode
 import ui_port
@@ -127,11 +129,14 @@ class _FitHeight(QObject):
 
     def refit(self):
         lab = self.label
-        w = lab.width()
-        if w > 20:
-            h = lab.heightForWidth(w)
-            if h > 0 and h != lab.minimumHeight():
-                lab.setMinimumHeight(h)
+        try:
+            w = lab.width()
+            if w > 20:
+                h = lab.heightForWidth(w)
+                if h > 0 and h != lab.minimumHeight():
+                    lab.setMinimumHeight(h)
+        except RuntimeError:
+            pass                                                   # the label went away (the window closed before the queued call ran)
 
     def eventFilter(self, obj, ev):
         if ev.type() in (QEvent.Type.Resize, QEvent.Type.Show):
@@ -143,6 +148,107 @@ def fit_wrapped(label, var=None):
     """Make a word-wrapped label show all its lines (see _FitHeight); `var` = the variable that feeds its text.  Returns the label."""
     _FitHeight(label, var)
     return label
+
+
+class DetailBox(QScrollArea):
+    """The detail text and the source note under a results table.  A wrapped note of five or six lines used to push the window's minimum height past the size the
+    window was given (the fixed 1000 x 640 minimum), and the text then painted over the last table rows.  Here the box asks for the height of its text but can give
+    up to what is above three lines (a scroll bar appears), so the table keeps its rows and nothing overlaps."""
+    MIN_LINES = 3
+
+    def __init__(self, content):
+        super().__init__()
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setWidgetResizable(True)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setWidget(content)
+        content.installEventFilter(self)
+        self.viewport().setAutoFillBackground(False)
+        content.setAutoFillBackground(False)
+        self.setBackgroundRole(QPalette.ColorRole.NoRole)
+        self.viewport().setBackgroundRole(QPalette.ColorRole.NoRole)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+
+    def _line(self):
+        return self.fontMetrics().lineSpacing()
+
+    def _need(self):
+        """The height the text needs at the width it has (a wrapped label's own size hint is that of the un-wrapped text)."""
+        c = self.widget()
+        lay = c.layout()
+        w = max(self.viewport().width(), 300)
+        if lay is not None and lay.hasHeightForWidth():
+            return lay.totalHeightForWidth(w)
+        return c.sizeHint().height()
+
+    def sizeHint(self):
+        return QSize(self.widget().sizeHint().width(), self._need() + 2)
+
+    def minimumSizeHint(self):
+        return QSize(100, min(self._need(), self.MIN_LINES * self._line() + 8) + 2)
+
+    def eventFilter(self, obj, ev):
+        if ev.type() in (QEvent.Type.LayoutRequest, QEvent.Type.Resize):
+            QTimer.singleShot(0, self._geometry)
+        return super().eventFilter(obj, ev)
+
+    def _geometry(self):
+        try:
+            self.updateGeometry()
+        except RuntimeError:
+            pass                                                   # the box went away
+
+
+class ShareColumns(QObject):
+    """Keeps a results table readable at every width: in the small window the merged Limits column gets the width its text needs (the Description takes what is
+    left), in a wide window the width beyond `base` is shared between the numeric columns instead of one huge Description column (same idea as the Manager list)."""
+    NARROW = 900
+    WEIGHTS = {'nominal': .16, 'low': .16, 'high': .16, 'limits': .0, 'found': .16, 'error': .14, 'left': .16, 'result': .06}
+
+    def __init__(self, tree, shell, base=None, compact=None):
+        super().__init__(tree)
+        self.tree, self.shell = tree, shell
+        self.base_over = dict(base or {})
+        self.compact_widths = {'limits': 220, 'found': 104, 'left': 104}
+        self.compact_widths.update(compact or {})
+        tree.viewport().installEventFilter(self)
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Resize:
+            QTimer.singleShot(0, self.apply)
+        return False
+
+    def apply(self):
+        try:
+            t = self.tree
+            width = t.viewport().width()
+            compact = bool(self.shell._compact) or width < self.NARROW           # a narrow table (a window the small-window rule has not folded yet) also gets the merged Limits column
+            full, small = getattr(t, '_cols_full', None), getattr(t, '_cols_small', None)
+            if full and small:
+                t.configure(displaycolumns=small if compact else full)
+            keys = [k for k in t._keys if not t.isColumnHidden(t._keys.index(k))]
+            if compact:
+                for k, w in self.compact_widths.items():
+                    t.column(k, width=w)
+                return
+            base = {'n': 44, 'nominal': 96, 'low': 92, 'high': 92, 'found': 100, 'error': 90, 'left': 100, 'result': 90}
+            base.update(self.base_over)
+            fixed = sum(base.get(k, 0) for k in keys)
+            if width - fixed < 340:                               # a narrow table: the number columns give up width (down to a floor) so the Description keeps ~340 px
+                floor = {k: min(base[k], max(40, int(base[k] * .9))) for k in base}
+                room = sum(base[k] - floor[k] for k in keys if k in base)
+                deficit = min(340 - (width - fixed), room)
+                for k in keys:
+                    if k in base:
+                        t.column(k, width=int(base[k] - deficit * (base[k] - floor[k]) / max(room, 1)))
+                return
+            extra = max(0, width - fixed - 420)                   # the Description keeps at least 420 px
+            share = sum(self.WEIGHTS.get(k, 0) for k in keys if k in base) or 1
+            for k in keys:
+                if k in base:
+                    t.column(k, width=int(base[k] + extra * 0.55 * self.WEIGHTS.get(k, 0) / share))
+        except (RuntimeError, ValueError, AttributeError):
+            pass                                                   # the table went away
 
 
 class Form:
@@ -264,8 +370,29 @@ def build_results(self, sh, source_note, detail_wrap=1000):
     il.addWidget(fit_wrapped(H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=detail_wrap), self.detail))
     il.addWidget(fit_wrapped(H.label_(None, source_note, 'Small.TLabel', wraplength=detail_wrap)))
     lay.addSpacing(8)
-    lay.addWidget(info)
+    lay.addWidget(DetailBox(info))
+    prev = sh.layout_hook
+
+    def hook(compact):
+        if prev:
+            prev(compact)
+        QTimer.singleShot(0, share.apply)
+    share = ShareColumns(self.tree, sh)
+    sh.layout_hook = hook
     return self.tree, filt
+
+
+def share_columns(tree, sh, compact=None, **base):
+    """Install ShareColumns on a results table and re-apply it whenever the shell switches between the full and the small-window column sets."""
+    share = ShareColumns(tree, sh, base, compact)
+    prev = sh.layout_hook
+
+    def hook(compact):
+        if prev:
+            prev(compact)
+        QTimer.singleShot(0, share.apply)
+    sh.layout_hook = hook
+    return share
 
 
 def notice(sh, self, hardware_text, demo_text=None, demo_title=None):

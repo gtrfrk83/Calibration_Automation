@@ -6,7 +6,7 @@ The model (datasheet_builder_ui_model.GridModel) owns the selection and every ke
 (`on_click(row_index, col_index)`, `on_key(keysym, char, shift, ctrl)`, `on_edit()`), exactly like the Tk canvas.  No Tk import."""
 from __future__ import annotations
 
-from PySide6.QtCore import QItemSelectionModel, QRect, Qt
+from PySide6.QtCore import QEvent, QItemSelectionModel, QObject, QRect, QTimer, Qt
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QKeySequence, QPen
 from PySide6.QtWidgets import QAbstractItemView, QWidget
 
@@ -90,6 +90,36 @@ class SheetDelegate(CellDelegate):
         painter.restore()
 
 
+class _ShareSheet(QObject):
+    """A wide sheet no longer becomes one huge FUNCTION TESTED column with the numbers squeezed at the right: the width beyond the columns' own widths is shared
+    (the same idea as the Manager list), the function column keeping the largest part.  Narrower than that, the function column takes what is left, as before."""
+    WEIGHTS = (0.0, 0.0, 0.34, 0.30, 0.18, 0.18)             # '#', step, function, nominal, low, high
+
+    def __init__(self, grid):
+        super().__init__(grid)
+        self.grid = grid
+        grid.viewport().installEventFilter(self)
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Resize:
+            QTimer.singleShot(0, self.apply)
+        return False
+
+    def apply(self):
+        try:
+            g = self.grid
+            base = [44] + [c['width'] for c in M.VIEW_COLUMNS]
+            hh = g.horizontalHeader()
+            vp = g.viewport().width() - 2
+            extra = max(0, vp - sum(base))
+            for i, (w, k) in enumerate(zip(base, self.WEIGHTS)):
+                hh.resizeSection(i, int(w + extra * k))
+            if vp < sum(base):                                # narrow: the function column gives way first (as the stretching column did)
+                hh.resizeSection(2, max(120, vp - (sum(base) - base[2])))
+        except RuntimeError:
+            pass                                              # the grid went away
+
+
 class SheetGrid(DataTable):
     def __init__(self, model, on_click, on_key, on_edit, parent=None):
         cols = [Column('n', '#', 44, align='center')]
@@ -112,6 +142,8 @@ class SheetGrid(DataTable):
         hh.setMinimumSectionSize(40)
         self.verticalHeader().setDefaultSectionSize(SHEET_ROW_H)
         self.setAccessibleName('Datasheet test point sheet')
+        hh.setSectionResizeMode(2, hh.ResizeMode.Interactive)          # the function column is sized by _ShareSheet (it used to take every spare pixel)
+        self._share = _ShareSheet(self)
 
     # ---- showing the model
     def reload(self) -> None:

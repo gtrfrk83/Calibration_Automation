@@ -50,18 +50,11 @@ def build_ui(self):
     for text, var, values in (('Baud', self.baud, ['9600', '19200', '38400', '115200', '4800', '2400']), ('Parity', self.parity, ['None', 'Even', 'Odd']),
                               ('Bits', self.bits, ['7', '8'])):
         f.field(text, aw.combo(var, values, 7), muted=True)
-    row2 = QWidget()
-    r2 = QHBoxLayout(row2)
-    r2.setContentsMargins(0, M.sm, 0, 0)
-    r2.setSpacing(M.sm)
     self.btn_refresh = ui.button(None, 'Refresh ports', self.refresh_ports)
     self.btn_connect = ui.button(None, 'Connect / verify 8846A', self.connect, 'Accent.TButton')
     self.btn_start = ui.button(None, 'Start new adjustment record', self.start)
     self.btn_resume = ui.button(None, 'Resume existing record', self.resume)
-    for b in (self.btn_refresh, self.btn_connect, self.btn_start, self.btn_resume):
-        r2.addWidget(b)
-    r2.addStretch(1)
-    f.full(row2)
+    f.full(aw.FlowRow((self.btn_refresh, self.btn_connect, self.btn_start, self.btn_resume)))
     top.addWidget(link, 1)
     body.addLayout(top)
 

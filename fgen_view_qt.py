@@ -11,7 +11,7 @@ import datamode
 import virtualbench
 from qtui import shell_helpers as H
 from genscope_support_view_qt import (action_bar, address_box, attach_history, detail_panel, drawer_buttons, drawer_note, drawer_row, drawer_separator, filter_bar,
-                                   set_choices_for, table_has, table_select, table_selection, table_set_rows, table_update_row, widen_columns)  # noqa: F401  (the table_* names are the view's API)
+                                   set_choices_for, table_has, table_select, table_selection, table_set_rows, table_update_row, widen_columns, share_table)  # noqa: F401  (the table_* names are the view's API)
 from qtui.shell import Shell, results_table, small_window
 
 
@@ -74,6 +74,7 @@ def build_ui(self):
     self.tree = results_table(self, body)
     widen_columns(self.tree)
     small_window(self, self.tree, filt)
+    share_table(self)
     self.tree.bind('<<TreeviewSelect>>', self.on_select)
     detail_panel(self, body, src['note'])
     self.update_shell_sections(POINTS, lambda p: p['section_title'])

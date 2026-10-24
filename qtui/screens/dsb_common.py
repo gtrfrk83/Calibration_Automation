@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Callable, Sequence
 
-from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtCore import QEvent, QObject, QTimer, Qt
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QRadioButton, QWidget)
 
 from qtui import theme, widgets
@@ -216,6 +216,45 @@ def group(title: str) -> tuple[QFrame, 'QVBoxLayout']:
 
 
 # ------------------------------------------------------------------------------------------------------------------------------ tables
+class ShareWidth(QObject):
+    """Keeps a list readable in a wide window: the width beyond the columns' own widths is shared, half to the stretching column and half between the others in
+    proportion to their width, instead of one huge text column with the other columns pushed to the far right (the idea of the Manager list).  Narrower than the
+    columns' own widths the stretching column gives way first, as a stretching column does."""
+
+    def __init__(self, table, columns):
+        super().__init__(table)
+        self.table = table
+        self.base = [c.width for c in columns]
+        self.grow = next((i for i, c in enumerate(columns) if c.stretch), None)
+        hh = table.horizontalHeader()
+        if self.grow is not None:
+            hh.setSectionResizeMode(self.grow, hh.ResizeMode.Interactive)
+        table.viewport().installEventFilter(self)
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Resize:
+            QTimer.singleShot(0, self.apply)
+        return False
+
+    def apply(self):
+        try:
+            hh = self.table.horizontalHeader()
+            vp = self.table.viewport().width() - 2
+            base, g = self.base, self.grow
+            total = sum(base)
+            extra = max(0, vp - total)
+            others = total - base[g]
+            for i, w in enumerate(base):
+                if i == g:
+                    hh.resizeSection(i, int(w + extra * 0.5))
+                else:
+                    hh.resizeSection(i, int(w + extra * 0.5 * w / max(others, 1)))
+            if vp < total:
+                hh.resizeSection(g, max(120, vp - others))
+        except RuntimeError:
+            pass                                              # the table went away
+
+
 def table(columns: Sequence[Column], *, row_tone=None, multi: bool = False, key='id', empty: str = '', sortable: bool = False) -> DataTable:
     """A read-only list table (the Tk make_table): single selection, rows are dicts with an `id`.  Header sorting only when `sortable` (a table whose row
     order means something, like the function list, keeps the model's order)."""
@@ -223,6 +262,8 @@ def table(columns: Sequence[Column], *, row_tone=None, multi: bool = False, key=
     if not sortable:
         t.horizontalHeader().setSectionsClickable(False)
         t.horizontalHeader().setSortIndicatorShown(False)
+    if any(c.stretch for c in columns):
+        t._share_width = ShareWidth(t, list(columns))
     return t
 
 
@@ -351,8 +392,17 @@ class ToneLabel(QLabel):
         super().__init__(text, parent)
         self.setWordWrap(True)
         self._tone = tone
-        theme.manager().changed.connect(lambda _n: self._apply())
+        theme.manager().changed.connect(self._on_theme)
         self._apply()
+
+    def _on_theme(self, _n=None) -> None:
+        try:
+            self._apply()
+        except RuntimeError:                       # the label is gone with its window
+            try:
+                theme.manager().changed.disconnect(self._on_theme)
+            except (RuntimeError, TypeError):
+                pass
 
     def set_tone(self, tone: str) -> None:
         self._tone = tone

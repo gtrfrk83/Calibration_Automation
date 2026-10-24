@@ -18,6 +18,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QGridLayout, QWidget
 
 from qtui import shell_helpers as H
+from qtui.bench_view import DetailBox, fit_wrapped, share_columns
 
 
 class AfterRoot:
@@ -119,10 +120,10 @@ def detail_panel(self, body: QWidget, note: str | None = None):
     body.layout().addSpacing(8)
     info = H.frame(None, 'v', spacing=4)
     lay = info.layout()
-    lay.addWidget(H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=1100))
+    lay.addWidget(fit_wrapped(H.label_(None, '', 'Muted.TLabel', textvariable=self.detail, wraplength=1100), self.detail))
     if note is not None:
-        lay.addWidget(H.label_(None, note, 'Small.TLabel', wraplength=1100))
-    body.layout().addWidget(info)
+        lay.addWidget(fit_wrapped(H.label_(None, note, 'Small.TLabel', wraplength=1100)))
+    body.layout().addWidget(DetailBox(info))                   # a long note scrolls in its box instead of painting over the table in a small window
     return info
 
 
@@ -145,6 +146,11 @@ def widen_columns(tree) -> None:
     not cut with an ellipsis (the Tk columns were wider in characters as well)."""
     for col, width in (('nominal', 92), ('low', 100), ('high', 100), ('found', 104), ('error', 108), ('left', 104)):
         tree.column(col, width=width)
+
+
+def share_table(self) -> None:
+    """After small_window: the columns share the width in the full window and the small window's Limits column gets the width its text needs."""
+    share_columns(self.tree, self.shell, compact={'found': 120, 'left': 120}, nominal=92, low=100, high=100, found=104, error=108, left=104)
 
 
 def enable(widget, on: bool) -> None:
