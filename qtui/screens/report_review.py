@@ -188,26 +188,21 @@ class ReviewWindow(QDialog):
         g.setHorizontalSpacing(SP.sm)
         g.setVerticalSpacing(SP.sm)
         self.fields = {}
-        for c, (key, text, width) in enumerate((('technician', 'Technician', 170), ('temperature', 'Temperature', 100), ('humidity', 'Humidity', 100))):
-            g.addWidget(label(text, 'kvkey'), 0, 2 * c)
-            e = QLineEdit(str(prior.get(key, self.store.get(key, '')) or ''))
-            e.setFixedWidth(width)
-            e.setAccessibleName(text)
-            self.fields[key] = e
-            g.addWidget(e, 0, 2 * c + 1)
-        g.addWidget(label('Default standard', 'kvkey'), 1, 0)
+        for key in ('technician', 'temperature', 'humidity'):         # no longer asked here (the cover certificate carries them): the keys stay in the details, empty, so the report code is unchanged
+            self.fields[key] = QLineEdit('')
+        g.addWidget(label('Default standard', 'kvkey'), 0, 0)
         self.default_box = QComboBox()
         self.default_box.setFixedWidth(170)
         self.default_box.setAccessibleName('Default standard')
         self.default_box.activated.connect(lambda _i: self.on_default())
-        g.addWidget(self.default_box, 1, 1)
+        g.addWidget(self.default_box, 0, 1)
         remembered = report_pdf.remembered_show_tar_tur()
         self.tar = QCheckBox('TAR on the PDF')
         self.tar.setChecked(bool(prior.get('show_tar', remembered.tar)))
         self.tur = QCheckBox('TUR on the PDF')
         self.tur.setChecked(bool(prior.get('show_tur', remembered.tur)))
-        g.addWidget(self.tar, 1, 2, 1, 2)
-        g.addWidget(self.tur, 1, 4, 1, 2)
+        g.addWidget(self.tar, 0, 2, 1, 2)
+        g.addWidget(self.tur, 0, 4, 1, 2)
         self.btn_standards = SecondaryButton('Standards used…')
         self.btn_standards.clicked.connect(self.edit_standards)
         g.addWidget(self.btn_standards, 0, 7, 1, 1, Qt.AlignmentFlag.AlignRight)
@@ -542,8 +537,6 @@ class ReviewWindow(QDialog):
     def generate(self):
         d = self.details()
         report_pdf.remember_show_tar_tur(d['show_tar_tur'])
-        for k in ('technician', 'temperature', 'humidity'):
-            self.store.set(k, d[k])
         self.store.set('standards', d['standards'])
         self.store.save()
         self.result = d

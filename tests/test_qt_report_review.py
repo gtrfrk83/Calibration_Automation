@@ -490,9 +490,7 @@ class Ask(Base):
             w = RR.ReviewWindow.last
             w.resize(1360, 860)
             pump()
-            w.fields['technician'].setText('  Mike ')
-            w.fields['temperature'].setText('22.4 C')
-            w.fields['humidity'].setText('41 %RH')
+            self.assertFalse(w.findChildren(QLineEdit))          # no technician / temperature / humidity boxes any more (the cover certificate carries them)
             w.tar.setChecked(True)
             for i in free:
                 ix = click(w, i, 'std')
@@ -504,7 +502,7 @@ class Ask(Base):
         details = RR.ask(self.root, 'Keysight 34470A performance verification', app=self.app)
         self.assertEqual(errors, [])
         self.assertIsInstance(details, dict)
-        self.assertEqual((details['technician'], details['temperature'], details['humidity']), ('Mike', '22.4 C', '41 %RH'))
+        self.assertEqual((details['technician'], details['temperature'], details['humidity']), ('', '', ''))
         self.assertEqual(details['procedure'], 'Keysight 34470A performance verification')
         self.assertEqual((details['show_tar'], details['show_tur']), (True, False))
         self.assertEqual(details['show_tar_tur'], report_pdf.TarTur(True, False))
@@ -515,13 +513,11 @@ class Ask(Base):
         twin = M.ReviewModel(self.specs, self.default, asset='A-100', procedure='Keysight 34470A performance verification')
         for i, std in chosen.items():
             twin.set_standard(i, std)
-        want = twin.record(by='Mike', when='X')
+        want = twin.record(by='', when='X')
         got = rev['reviews'][0]
         self.assertEqual(got, want)
         self.assertEqual(got['changed'], 2)
         self.assertEqual({c['idx'] for c in got['changes']}, set(free))
-        s = core.Settings('report_details')
-        self.assertEqual((s.get('technician'), s.get('temperature')), ('Mike', '22.4 C'), 'remembered for next time')
         self.assertEqual(report_pdf.remembered_show_tar_tur().tar, True)
 
     def test_cancel_and_escape_return_none(self):
@@ -551,10 +547,10 @@ class Ask(Base):
         self.assertTrue(report_dialog._is_qt(QWidget()))
         for other in (None, object(), mock.MagicMock(), 'root'):
             self.assertFalse(report_dialog._is_qt(other))
-        errors = run_in_modal(lambda: (RR.ReviewWindow.last.fields['technician'].setText('Via switch'), RR.ReviewWindow.last.btn_ok.click()))
+        errors = run_in_modal(lambda: RR.ReviewWindow.last.btn_ok.click())
         details = report_dialog.ask_details(self.root, 'Keysight 34470A performance verification')
         self.assertEqual(errors, [])
-        self.assertEqual(details['technician'], 'Via switch')
+        self.assertEqual(details['technician'], '')
         self.assertIn('uncertainty_review', details)
         with mock.patch.object(RD, 'ask_details') as qt:
             with mock.patch.object(report_dialog, 'USE_REVIEW', False), mock.patch.object(report_dialog, 'ask_details_plain', return_value={'tk': 1}) as tk_plain:
@@ -596,9 +592,6 @@ class ReportPath(Base):
                     continue
                 pick_in_combo(w, click(w, r.spec.idx, 'std'), 'Fluke 5522A')
                 done += 1
-            w.fields['technician'].setText(R.DETAILS['technician'])
-            w.fields['temperature'].setText(R.DETAILS['temperature'])
-            w.fields['humidity'].setText(R.DETAILS['humidity'])
             w.btn_ok.click()
         errors = run_in_modal(drive)
         details = RR.ask(self.root, 'bench test', app=app)
