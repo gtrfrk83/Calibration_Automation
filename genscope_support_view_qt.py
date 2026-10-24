@@ -143,7 +143,7 @@ def follow_prefixed(combo, var, prefix: str) -> None:
 def widen_columns(tree) -> None:
     """The generators' and scopes' limits and readings carry a unit and up to ten characters ('9.99998 MHz', '+246.373 mdB'): a little wider than the shell's defaults, so they are
     not cut with an ellipsis (the Tk columns were wider in characters as well)."""
-    for col, width in (('nominal', 104), ('low', 112), ('high', 112), ('found', 112), ('error', 120), ('left', 112)):
+    for col, width in (('nominal', 92), ('low', 100), ('high', 100), ('found', 104), ('error', 108), ('left', 104)):
         tree.column(col, width=width)
 
 
