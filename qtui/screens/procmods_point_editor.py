@@ -23,7 +23,9 @@ import procmods_point_model as PM
 import procmods_ui_model as M
 from qtui.screens import common
 from qtui.screens import procmods_editor as UI
+from qtui.screens._share import ShareWidth
 from qtui.table import Column, DataTable
+from qtui.theme import M as SP
 from qtui.widgets import Badge, label
 
 POLL_MS = 1000
@@ -183,8 +185,8 @@ class PointWindow(QWidget):
         self.fvars, self.fmsg, self.fentries, self.frestore = {}, {}, {}, {}
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(16, 10, 16, 8)
-        root.setSpacing(6)
+        root.setContentsMargins(SP.lg, SP.md, SP.lg, SP.sm)
+        root.setSpacing(SP.sm)
 
         # ---- header
         head = QHBoxLayout()
@@ -223,6 +225,7 @@ class PointWindow(QWidget):
         self.tree = DataTable(cols, [], row_tone=lambda r: 'warn' if r.changed else None, row_key=lambda r: str(r.seq), multi=False, tone_style='text',
                               empty_text='No commands')
         self.tree.setMinimumHeight(150)
+        self._share = ShareWidth(self.tree, (44, 100, 290, 120, 130, 120, 80), (0.2, 0.6, 1.8, 0.9, 0.8, 0.7, 0.4))     # a wide window is shared, not left to the Command column
         self.tree.selectionChangedRows.connect(lambda _rows: self.on_select())
         tl.addWidget(self.tree, 1)
         split.addWidget(top)
@@ -234,7 +237,7 @@ class PointWindow(QWidget):
         self.details = det
         dl = QVBoxLayout(det)
         dl.setContentsMargins(0, 4, 6, 4)
-        dl.setSpacing(8)
+        dl.setSpacing(SP.sm)
 
         ed = QGroupBox('Selected command')
         el = QVBoxLayout(ed)
