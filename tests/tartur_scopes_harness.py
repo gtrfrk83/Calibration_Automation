@@ -108,8 +108,8 @@ app.any_synthetic=lambda: False
 current['path']=out+'/fgen.pdf'; app.export_pdf()
 # ---- WaveSurfer
 import WaveSurfer_WS4104HD as W
-W.filedialog.asksaveasfilename=save; W.messagebox.showerror=lambda *a,**k: errors.append(a)
-W.messagebox.showinfo=lambda *a,**k: None; W.messagebox.showwarning=lambda *a,**k: None
+tkinter.filedialog.asksaveasfilename=save; tkinter.messagebox.showerror=lambda *a,**k: errors.append(a)       # the WaveSurfer prompts through ui_port -> tkinter's modules
+tkinter.messagebox.showinfo=lambda *a,**k: None; tkinter.messagebox.showwarning=lambda *a,**k: None
 app=W.RMSNoiseApp.__new__(W.RMSNoiseApp)
 for a in ('rows','dc_rows','imp_rows','offset_rows','bw_rows','tb_rows','trig_rows'): setattr(app,a,[])
 app.root=st._Dummy(); app.demo_mode=False
@@ -123,7 +123,7 @@ for n in ('status','dc_status','imp_status','offset_status','bw_status','tb_stat
 app.sync_asset=lambda: True
 app._mode=W.datamode.FOUND
 app.any_synthetic=lambda: False
-saved=W.messagebox.showinfo
+saved=tkinter.messagebox.showinfo
 W.RMSNoiseApp.__getattr__=lambda self,n: (_ for _ in ()).throw(AttributeError(n)) if n.startswith('__') else V('10')
 app.load_demo_data()
 del W.RMSNoiseApp.__getattr__

@@ -306,8 +306,9 @@ class WaveSurferAsLeft(unittest.TestCase):
         sys.argv.append('--demo')
         self.addCleanup(lambda: sys.argv.__setitem__(slice(None), self._argv))
         self.mod = importlib.import_module('Procedures.WaveSurfer_WS4104HD')
-        with mock.patch.object(self.mod.messagebox, 'showinfo', lambda *a, **k: None), \
-                mock.patch.object(self.mod.messagebox, 'showwarning', lambda *a, **k: None):
+        from tkinter import messagebox as tk_messagebox                  # the WaveSurfer prompts through ui_port (TkUiPort -> tkinter.messagebox)
+        with mock.patch.object(tk_messagebox, 'showinfo', lambda *a, **k: None), \
+                mock.patch.object(tk_messagebox, 'showwarning', lambda *a, **k: None):
             self.root = tk.Tk()
             self.app = self.mod.RMSNoiseApp(self.root)
         self.root.update()
@@ -355,7 +356,7 @@ class WaveSurferAsLeft(unittest.TestCase):
 
     def test_run_section_needs_a_function(self):
         shown = []
-        with mock.patch.object(self.mod.messagebox, 'showinfo', lambda *a, **k: shown.append(a)):
+        with mock.patch.object(__import__('tkinter.messagebox', fromlist=['x']), 'showinfo', lambda *a, **k: shown.append(a)):
             self.app.run_section()
         self.assertEqual(len(shown), 1)
 

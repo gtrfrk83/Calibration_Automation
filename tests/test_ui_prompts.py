@@ -51,6 +51,10 @@ class TkLevel(unittest.TestCase):
     def test_shared_helpers(self):                      # WP-S: run queue, manual override, data mode, note, reset (recorded on the unported helpers)
         self.check('shared')
 
+    # ---- WP-W (WaveSurfer 4104HD; recorded on the unported engine) -- append-only block
+    def test_wavesurfer(self):
+        self.check('wavesurfer')
+
     def test_adjustment_launcher_8846a(self):
         self.check('adj8846a')
 
