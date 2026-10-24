@@ -68,6 +68,7 @@ class PointSpec:
     calc: object = None            # oscilloscope / generator engines (report_review_adapters): callable(standard) -> Evaluation, instead of the multimeter path
     options: list | None = None    # the standards this row can use (None: worked out from the sheets)
     expects: bool = False          # the point should carry an uncertainty: with no scope entry it is 'Not in scope' (and may take a typed value)
+    engine_printed: dict | None = None   # set when the adapter's default is NOT what the engine prints (MDO4000C RF level rows, 96270A): the engine's own Uncertainty / TAR / TUR
     std_label: str = ''            # what the Standard column says for a row with no drop-down ('Scope CMC', 'Fluke 5790B', 'Reference file')
 
 
@@ -311,6 +312,12 @@ class Row:
         return self.typed is not None or self.std_changed
 
     @property
+    def applied(self) -> bool:
+        """The default of this row replaces what the engine prints (not a choice of the person): the review must carry it into the report."""
+        e = self.spec.engine_printed
+        return e is not None and any((e.get(k) or '') != (self.spec.printed.get(k) or '') for k in ('Uncertainty', 'TAR', 'TUR'))
+
+    @property
     def std_changed(self) -> bool:
         return (not self.spec.locked) and self.standard != self.spec.default_std
 
@@ -453,11 +460,11 @@ class ReviewModel:
     def changes(self, by='', when='') -> list:
         out = []
         for r in self.rows:
-            if not r.changed:
+            if not (r.changed or r.applied):
                 continue
             s, e = r.spec, r.cur
             ch = dict(idx=s.idx, step=s.step, section=s.section, description=s.description, nominal=s.nominal_text,
-                      original_standard=s.default_std, standard=r.standard, uncertainty=r.reported_text, tar=r.tar_text, tur=r.tur_text,
+                      original_standard=(None if (r.applied and not r.changed) else s.default_std), standard=r.standard, uncertainty=r.reported_text, tar=r.tar_text, tur=r.tur_text,
                       budget=e.budget, scope_minimum=e.cmc, reported=e.reported, unit=e.unit, status=r.status, manual=r.typed is not None)
             if r.typed is not None:                                  # a typed uncertainty: the value as entered, who entered it and when
                 ch.update(manual_value=r.typed['value'], manual_text=r.typed['text'], entered_by=by, entered_at=when)
