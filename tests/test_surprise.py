@@ -279,20 +279,44 @@ class Surprises(unittest.TestCase):
         self.assertTrue(surprise.error_queue_clean('0, No error'))
         self.assertFalse(surprise.error_queue_clean('-113,"Undefined header"'))
 
-    def test_tk_handler_without_a_main_thread_uses_after(self):
-        """The worker thread schedules the dialog on the Tk thread and waits (fake root: runs the callback)."""
+    def test_tk_handler_never_hangs_when_nothing_services_the_queue(self):
+        """A worker thread asks; no poller runs on the Tk thread (fake root whose after() does nothing): the answer is Stop within START_WAIT."""
         import threading
+        from unittest import mock
 
         class Root:
             def after(self, ms, fn):
-                threading.Thread(target=fn).start()
-        # no tkinter needed: a dialog that cannot be built answers Stop
-        handler = surprise.tk_handler(Root())
-        out = []
-        t = threading.Thread(target=lambda: out.append(handler(surprise.Surprise('reply', 'X', 'GET?', '', 'a value'))))
-        t.start()
-        t.join(5)
+                return 'x'
+        with mock.patch.object(surprise._TkAsker, 'START_WAIT', 0.2):
+            handler = surprise.tk_handler(Root())
+            out = []
+            t = threading.Thread(target=lambda: out.append(handler(surprise.Surprise('reply', 'X', 'GET?', '', 'a value'))))
+            t.start()
+            t.join(5)
         self.assertEqual(out, [False])
+
+    def test_tk_handler_worker_is_served_by_the_poller(self):
+        """The poller (what root.after drives on the Tk thread) picks the worker's request up and the answer comes back; Tk is never called by the worker."""
+        import threading
+        from unittest import mock
+
+        class Root:
+            def after(self, ms, fn):
+                return 'x'
+        shown = []
+        with mock.patch.object(surprise, '_dialog', lambda root, title, s: shown.append(s) or True):
+            asker = surprise._TkAsker(Root(), 't')
+            out = []
+            t = threading.Thread(target=lambda: out.append(asker.ask(surprise.Surprise('reply', 'X', 'GET?', '', 'a value'))))
+            t.start()
+            for _ in range(100):
+                asker._tick()                                  # what the Tk thread does every POLL_MS
+                if not t.is_alive():
+                    break
+                t.join(0.02)
+            t.join(5)
+        self.assertEqual(out, [True])
+        self.assertEqual(len(shown), 1)
 
 
 class TemplateIsWired(unittest.TestCase):

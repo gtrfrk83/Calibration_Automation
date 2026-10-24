@@ -19,6 +19,7 @@ This module has no Tk import at load; the dialog (tk_handler) imports tkinter wh
 from __future__ import annotations
 
 import math
+import queue
 import re
 import threading
 from dataclasses import dataclass, field
@@ -235,28 +236,60 @@ def attach_guard(instrument, handler=None, force=False):
 
 
 # ------------------------------------------------------------------------------------------------------------ the dialog
-def tk_handler(root, title='Stop on surprise'):
-    """A handler for Guard: shows ONE Tk dialog and returns True (Continue) / False (Stop).  Safe from the worker thread: the dialog is built on
-    the Tk thread through root.after and the worker waits for the answer.  Called on the Tk thread itself it just builds the dialog (modal)."""
-    def handler(s):
-        box = {}
-        done = threading.Event()
+class _TkAsker:
+    """Shows the dialog on the Tk thread for a worker thread.  The worker never calls Tk: it queues a request and waits; a poller that runs ON the Tk
+    thread (root.after, started where the handler is made) shows the dialog and answers.  If nothing picks the request up within START_WAIT seconds
+    (no poller running: no mainloop, or the handler was made on a thread that cannot schedule) the answer is Stop, so a run can never hang here."""
+    START_WAIT = 5.0
+    POLL_MS = 50
 
-        def show():
+    def __init__(self, root, title):
+        self.root, self.title = root, title
+        self.q = queue.Queue()
+        self.alive = True
+        try:
+            root.after(self.POLL_MS, self._tick)
+        except Exception:
+            self.alive = False
+
+    def _tick(self):
+        try:
+            while True:
+                req = self.q.get_nowait()
+                if req['cancelled']:
+                    continue
+                req['started'].set()
+                try:
+                    req['go'] = bool(_dialog(self.root, self.title, req['s']))
+                except Exception:
+                    req['go'] = False
+                req['done'].set()
+        except queue.Empty:
+            pass
+        try:
+            self.root.after(self.POLL_MS, self._tick)
+        except Exception:
+            self.alive = False
+
+    def ask(self, s):
+        req = dict(s=s, started=threading.Event(), done=threading.Event(), go=False, cancelled=False)
+        if threading.current_thread() is threading.main_thread():       # already on the Tk thread: just show it (modal)
             try:
-                box['go'] = _dialog(root, title, s)
+                return bool(_dialog(self.root, self.title, s))
             except Exception:
-                box['go'] = False
-            finally:
-                done.set()
+                return False
+        self.q.put(req)
+        if not req['started'].wait(self.START_WAIT):
+            req['cancelled'] = True
+            return False
+        req['done'].wait()
+        return req['go']
 
-        if threading.current_thread() is threading.main_thread():
-            show()
-        else:
-            root.after(0, show)
-            done.wait()
-        return box.get('go', False)
-    return handler
+
+def tk_handler(root, title='Stop on surprise'):
+    """A handler for Guard: ONE Tk dialog, True (Continue) / False (Stop).  Make it on the Tk thread (where the Run button's handler runs) before the
+    worker thread starts; the worker's surprise then waits for the operator without touching Tk itself."""
+    return _TkAsker(root, title).ask
 
 
 def _dialog(root, title, s):
