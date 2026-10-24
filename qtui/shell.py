@@ -35,7 +35,7 @@ from __future__ import annotations
 from typing import Callable
 
 from PySide6.QtCore import QEvent, QPointF, QRectF, QSize, Qt, QTimer
-from PySide6.QtGui import QColor, QKeySequence, QPainter, QPen, QShortcut
+from PySide6.QtGui import QColor, QFontMetrics, QKeySequence, QPainter, QPen, QShortcut
 from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QMainWindow, QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy, QVBoxLayout,
                                QWidget)
 
@@ -145,6 +145,9 @@ class _Ring(QWidget):
         f = p.font()
         f.setBold(True)
         f.setPixelSize(M.font_base + 1)
+        inner = self.width() - 4 * w                             # the text must fit inside the ring ('105/105' is wider than '9/9'): shrink it until it does
+        while f.pixelSize() > 8 and QFontMetrics(f).horizontalAdvance(big) > inner:
+            f.setPixelSize(f.pixelSize() - 1)
         p.setFont(f)
         while f.pixelSize() > 8 and p.fontMetrics().horizontalAdvance(big) > self.width() - 2 * w - 6:          # '496/496' must stay inside the ring
             f.setPixelSize(f.pixelSize() - 1)
