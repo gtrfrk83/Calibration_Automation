@@ -742,7 +742,11 @@ class QueueMixin:
         if not todo:
             messagebox.showinfo('No results', 'No recorded results to export yet.')
             return
-        details = report_dialog.ask_details(self.root, f'{self.info["name"]} performance verification')
+        self.__dict__['_review_all_meters'] = True                 # the review window (report_review.py) then shows each meter in turn
+        try:
+            details = report_dialog.ask_details(self.root, f'{self.info["name"]} performance verification')
+        finally:
+            self.__dict__.pop('_review_all_meters', None)
         if details is None:
             return
         folder = filedialog.askdirectory(title='Folder for the reports (one PDF per meter)')

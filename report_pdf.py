@@ -147,6 +147,41 @@ _FONT_CANDIDATES = (
 )
 
 
+def apply_uncertainty_review(rows, details, header=None):
+    """Rows with the person's standard changes from the review window (report_review.py) applied; the SAME rows (not copies) when there are none.
+
+    details['uncertainty_review'] = {'reviews': [{'asset', 'changes': [{'idx', 'description', 'nominal', 'uncertainty', 'tar', 'tur', ...}]}]}.
+    Only the Uncertainty cell (and the TAR / TUR cells, when the report has them) of a listed row is replaced.  A change whose index does not point at a row
+    with the same Description and Nominal is ignored: an index is never trusted on its own.  The review is picked by Instrument ID.  Never raises; applying it
+    twice gives the same rows (a reprint from the snapshot uses the rows as stored and the same review)."""
+    try:
+        block = (details or {}).get('uncertainty_review')
+        reviews = block.get('reviews') if isinstance(block, dict) else None
+        if not reviews:
+            return rows
+        asset = str(dict(header or []).get('Instrument ID') or '').strip().lower()
+        picked = [r for r in reviews if isinstance(r, dict) and str(r.get('asset') or '').strip().lower() == asset]
+        if not picked:
+            return rows
+        out = list(rows)
+        for ch in picked[0].get('changes') or []:
+            i = ch.get('idx')
+            if not isinstance(i, int) or isinstance(i, bool) or not 0 <= i < len(out):
+                continue
+            row = out[i]
+            if row.get('Description') != ch.get('description') or row.get('Nominal') != ch.get('nominal'):
+                continue
+            new = dict(row)
+            new['Uncertainty'] = ch.get('uncertainty') or ''
+            for col in TAR_TUR_COLUMNS:
+                if col in new:
+                    new[col] = ch.get(col.lower()) or ''
+            out[i] = new
+        return out
+    except Exception:
+        return rows
+
+
 def _fonts():
     """(regular, bold, embedded). Embeds Arial/Liberation/DejaVu when found so the micro sign always prints;
     otherwise falls back to the built-in Helvetica (the viewer substitutes a font for the micro sign)."""
@@ -360,6 +395,7 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
              otherwise identical); record_history=False writes no Asset History event and no snapshot.  All default to the old behaviour.
     snapshot_context  version stamps from context_for(app), stored with the report snapshot (see report_snapshot.py); no effect on the PDF."""
     mods = _mod_lines(modifications)
+    rows = apply_uncertainty_review(rows, details, header)        # standard changes made in the review window (no-op without them)
     show_tar_tur_arg = show_tar_tur                    # as passed (the name is reused below for the effective choice); kept for the report snapshot
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import letter

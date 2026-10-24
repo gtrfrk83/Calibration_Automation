@@ -7,8 +7,27 @@ import report_pdf
 import ui_theme as ui
 
 
+USE_REVIEW = True          # False = always the plain popup below
+
+
 def ask_details(parent, procedure=''):
-    """Returns a dict for report_pdf.write_calibration_pdf(details=...), or None if cancelled."""
+    """Returns a dict for report_pdf.write_calibration_pdf(details=...), or None if cancelled.
+    The review window (report_review.py: every point with its assigned uncertainty, standard changeable per row) is shown for the engines it covers;
+    for any other engine, or if it cannot be built, the plain popup (ask_details_plain) appears as before."""
+    if USE_REVIEW:
+        try:
+            import report_review
+        except Exception:
+            report_review = None
+        if report_review is not None:
+            out = report_review.ask(parent, procedure)           # never raises; UNAVAILABLE = not covered / cannot be built
+            if out is not report_review.UNAVAILABLE:
+                return out
+    return ask_details_plain(parent, procedure)
+
+
+def ask_details_plain(parent, procedure=''):
+    """The original details popup (technician, conditions, standards used, TAR / TUR)."""
     store = ui.Settings('report_details')
     win = ui.dialog(parent, 'Report details')
     win.resizable(False, False)
