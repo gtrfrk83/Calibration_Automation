@@ -42,7 +42,7 @@ TK_ONLY = ('navy', 'navy_hi', 'combo_btn', 'combo_btn_hi')
 # Mike's scope decision: the Qt UI ships DARK ONLY for now.  The light palette, the QSS and the switching are all still token-driven, but light is not offered,
 # not chosen at start-up (CALSUITE_THEME=light and a saved 'light' are ignored here) and not polished or tested.  To enable it later: add 'light' to
 # ENABLED_THEMES, review every screen / the gallery in light, and add light cases to the tests (see NOTES.md 'Qt design system').
-ENABLED_THEMES = ('dark',)
+ENABLED_THEMES = ('dark', 'light')              # light enabled 2026-10-24 (Mike); dark stays the default; Help > Appearance switches live
 DEFAULT_THEME = 'dark'
 KINDS = core.KINDS                                   # 'good', 'bad', 'warn', 'info', 'neutral'
 

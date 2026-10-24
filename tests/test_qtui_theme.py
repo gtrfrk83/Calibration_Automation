@@ -73,12 +73,12 @@ class ThemeTests(unittest.TestCase):
         self.assertGreaterEqual(theme.contrast(t['primary_off_fg'], t['primary_off']), 3.0)
         self.assertGreaterEqual(theme.contrast(t['focus'], t['bg']), 3.0)                    # the focus ring against the window
 
-    def test_dark_only_choice(self):
-        self.assertEqual(theme.ENABLED_THEMES, ('dark',))
-        for env in ('light', 'dark', 'nonsense', ''):
+    def test_start_up_choice(self):
+        self.assertEqual(theme.ENABLED_THEMES, ('dark', 'light'))
+        for env, want in (('light', 'light'), ('dark', 'dark'), ('nonsense', 'dark'), ('', 'dark')):
             with mock.patch.dict(os.environ, {'CALSUITE_THEME': env}):
-                self.assertEqual(theme.manager().apply_initial(), 'dark')
-        self.assertIsNone(theme.build_appearance_menu(mock.Mock()))                         # nothing to choose: no menu
+                self.assertEqual(theme.manager().apply_initial(), want)
+        theme.manager().set_theme('dark')
 
     def test_saved_choice_uses_the_same_store_as_tk(self):
         with tempfile.TemporaryDirectory() as home, mock.patch.dict(os.environ, {'HOME': home, 'USERPROFILE': home}):
