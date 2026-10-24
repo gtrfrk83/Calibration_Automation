@@ -205,6 +205,8 @@ class QtUiPort:
     def close(self, win):
         win.setProperty('_calsuite_closing', True)
         win.close()
+        if win.isVisible():                          # called from inside the window's own close event (the on_close handler): Qt ignores a nested close(), so close once that event is over
+            QTimer.singleShot(0, win.close)
 
     def flush(self, win):
         QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)          # repaint what changed; no clicks / keys are handled here (Tk update_idletasks)

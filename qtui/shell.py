@@ -149,6 +149,9 @@ class _Ring(QWidget):
         while f.pixelSize() > 8 and QFontMetrics(f).horizontalAdvance(big) > inner:
             f.setPixelSize(f.pixelSize() - 1)
         p.setFont(f)
+        while f.pixelSize() > 8 and p.fontMetrics().horizontalAdvance(big) > self.width() - 2 * w - 6:          # '496/496' must stay inside the ring
+            f.setPixelSize(f.pixelSize() - 1)
+            p.setFont(f)
         p.drawText(QRectF(0, 0, self.width(), self.height() / 2 + 6), Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignBottom, big)
         p.setPen(QColor(t['muted']))
         f.setBold(False)
@@ -167,6 +170,7 @@ class _SectionRow(QFrame):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setFixedHeight(34)
         self.setAccessibleName(f'{name}, {ok + bad} of {tot} tested')
+        self.setToolTip(name)                              # the full name when it is elided in the sidebar
         self._hover = False
 
     def mousePressEvent(self, ev):
