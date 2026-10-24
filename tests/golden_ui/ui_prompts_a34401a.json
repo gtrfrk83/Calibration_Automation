@@ -1,0 +1,892 @@
+{
+ "dialogs_misc": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter an instrument ID.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select a test point first.",
+   "title": "Selection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded results to export yet.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34401A: HEWLETT-PACKARD,34401A,SIM0001,11-5-2 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "boom",
+   "title": "Measurement stopped"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "A point may be active. Stop and close?",
+   "title": "Active run"
+  }
+ ],
+ "export_and_load_cancelled": [
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "Agilent 34401A one-year verification"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "Agilent 34401A one-year verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "A-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": "",
+   "kind": "choose_file",
+   "options": {
+    "filetypes": [
+     [
+      "Checkpoint",
+      "*.json"
+     ]
+    ]
+   },
+   "text": "",
+   "title": ""
+  }
+ ],
+ "first_prompt_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34401A: HEWLETT-PACKARD,34401A,SIM0001,11-5-2 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34401A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 86"
+    ],
+    [
+     "Test",
+     "DCV 0.1 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Connect 5560A voltage output to 34401A HI/LO voltage terminals. Verify safe leads and ranges."
+    ]
+   ],
+   "text": "Connect for DCV tests",
+   "title": "Rewire / verify before enabling output"
+  }
+ ],
+ "high_voltage_refused": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34401A: HEWLETT-PACKARD,34401A,SIM0001,11-5-2 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34401A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 86"
+    ],
+    [
+     "Test",
+     "DCV 0.1 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Connect 5560A voltage output to 34401A HI/LO voltage terminals. Verify safe leads and ranges."
+    ]
+   ],
+   "text": "Connect for DCV tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point requires 1000 V DC. Verify CAT-rated leads, connections, clearance, and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE — 1000 V"
+  }
+ ],
+ "virtual_run": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34401A: HEWLETT-PACKARD,34401A,SIM0001,11-5-2 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34401A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 86"
+    ],
+    [
+     "Test",
+     "DCV 0.1 V"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Connect 5560A voltage output to 34401A HI/LO voltage terminals. Verify safe leads and ranges."
+    ]
+   ],
+   "text": "Connect for DCV tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point requires 1000 V DC. Verify CAT-rated leads, connections, clearance, and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE — 1000 V"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "7 of 86"
+    ],
+    [
+     "Test",
+     "OHM2 100 ohm (2-wire +0.2 ohm allowance)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling."
+    ]
+   ],
+   "text": "Connect for OHM2 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "8 of 86"
+    ],
+    [
+     "Test",
+     "OHM4 100 ohm"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals."
+    ]
+   ],
+   "text": "Connect for OHM4 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "9 of 86"
+    ],
+    [
+     "Test",
+     "OHM2 1000 ohm (2-wire +0.2 ohm allowance)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling."
+    ]
+   ],
+   "text": "Connect for OHM2 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "10 of 86"
+    ],
+    [
+     "Test",
+     "OHM4 1000 ohm"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals."
+    ]
+   ],
+   "text": "Connect for OHM4 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "11 of 86"
+    ],
+    [
+     "Test",
+     "OHM2 10000 ohm (2-wire +0.2 ohm allowance)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling."
+    ]
+   ],
+   "text": "Connect for OHM2 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "12 of 86"
+    ],
+    [
+     "Test",
+     "OHM4 10000 ohm"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals."
+    ]
+   ],
+   "text": "Connect for OHM4 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "13 of 86"
+    ],
+    [
+     "Test",
+     "OHM2 100000 ohm (2-wire +0.2 ohm allowance)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling."
+    ]
+   ],
+   "text": "Connect for OHM2 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "14 of 86"
+    ],
+    [
+     "Test",
+     "OHM4 100000 ohm"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals."
+    ]
+   ],
+   "text": "Connect for OHM4 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "15 of 86"
+    ],
+    [
+     "Test",
+     "OHM2 1e+06 ohm (2-wire +0.2 ohm allowance)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling."
+    ]
+   ],
+   "text": "Connect for OHM2 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "16 of 86"
+    ],
+    [
+     "Test",
+     "OHM4 1e+06 ohm"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals."
+    ]
+   ],
+   "text": "Connect for OHM4 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "17 of 86"
+    ],
+    [
+     "Test",
+     "OHM2 1e+07 ohm (2-wire +0.2 ohm allowance)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling."
+    ]
+   ],
+   "text": "Connect for OHM2 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "18 of 86"
+    ],
+    [
+     "Test",
+     "OHM4 1e+07 ohm"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals."
+    ]
+   ],
+   "text": "Connect for OHM4 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "19 of 86"
+    ],
+    [
+     "Test",
+     "OHM2 1e+08 ohm (2-wire +0.2 ohm allowance)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling."
+    ]
+   ],
+   "text": "Connect for OHM2 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "20 of 86"
+    ],
+    [
+     "Test",
+     "OHM4 1e+08 ohm"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals."
+    ]
+   ],
+   "text": "Connect for OHM4 tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "21 of 86"
+    ],
+    [
+     "Test",
+     "DCI 0.01 A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Move leads to 34401A CURRENT input and LO. Check fuses and current ratings."
+    ]
+   ],
+   "text": "Connect for DCI tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "25 of 86"
+    ],
+    [
+     "Test",
+     "ACV 0.01 V @ 1000 Hz"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Connect 5560A voltage output to 34401A HI/LO voltage terminals. Verify safe leads and ranges."
+    ]
+   ],
+   "text": "Connect for ACV tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.",
+   "title": "HIGH VOLTAGE — 750 V AC"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.",
+   "title": "HIGH VOLTAGE — 750 V AC"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "37 of 86"
+    ],
+    [
+     "Test",
+     "ACI 1 A @ 1000 Hz"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Put calibrator in STANDBY. Move leads to 34401A CURRENT input and LO. Check fuses and current ratings."
+    ]
+   ],
+   "text": "Connect for ACI tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "39 of 86"
+    ],
+    [
+     "Test",
+     "Frequency 100 Hz, 0.01 V rms"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Wiring",
+     "Connect 5560A voltage output to 34401A HI/LO voltage terminals. Verify safe leads and ranges."
+    ]
+   ],
+   "text": "Connect for FREQ tests",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "facts": [
+    [
+     "Point",
+     "41 of 86"
+    ],
+    [
+     "Terminals",
+     "FRONT"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Use the front-panel FRONT/REAR switch to select the FRONT terminals."
+    ],
+    [
+     "Set up the input",
+     "Leave CURRENT input OPEN (no calibrator connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "facts": [
+    [
+     "Point",
+     "45 of 86"
+    ],
+    [
+     "Terminals",
+     "FRONT"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Use the front-panel FRONT/REAR switch to select the FRONT terminals."
+    ],
+    [
+     "Set up the input",
+     "Install a low-thermal-EMF copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO. Do NOT use the 5560A as a zero source."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "facts": [
+    [
+     "Point",
+     "64 of 86"
+    ],
+    [
+     "Terminals",
+     "REAR"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Use the front-panel FRONT/REAR switch to select the REAR terminals."
+    ],
+    [
+     "Set up the input",
+     "Leave CURRENT input OPEN (no calibrator connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: REAR terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "facts": [
+    [
+     "Point",
+     "68 of 86"
+    ],
+    [
+     "Terminals",
+     "REAR"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Use the front-panel FRONT/REAR switch to select the REAR terminals."
+    ],
+    [
+     "Set up the input",
+     "Install a low-thermal-EMF copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO. Do NOT use the 5560A as a zero source."
+    ]
+   ],
+   "text": "Zero-offset setup: REAR terminals",
+   "title": "Zero offset — physical setup required"
+  }
+ ]
+}

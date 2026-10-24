@@ -1,0 +1,1168 @@
+{
+ "dialogs_misc": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter an instrument ID.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select a test point first.",
+   "title": "Selection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded results to export yet.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34970A: Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00\nModule in slot 2: 34901A\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "boom",
+   "title": "Measurement stopped"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "A point may be active. Stop and close?",
+   "title": "Active run"
+  }
+ ],
+ "export_and_load_cancelled": [
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "Keysight 34970A performance verification"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "Keysight 34970A performance verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "A-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": "",
+   "kind": "choose_file",
+   "options": {
+    "filetypes": [
+     [
+      "Checkpoint",
+      "*.json"
+     ]
+    ]
+   },
+   "text": "",
+   "title": ""
+  }
+ ],
+ "first_prompt_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34970A: Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00\nModule in slot 2: 34901A\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34970A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source (manual p. 81).",
+   "facts": [
+    [
+     "Next point",
+     "1 of 72"
+    ],
+    [
+     "Test",
+     "Zero offset, DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Channel",
+     "channel 209"
+    ],
+    [
+     "Manual page",
+     "80-81"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Disconnect the calibrator from the module. Fit low-thermal copper shorts across HI/LO of channel 209 and, for the 4-wire ohms points, of its partner channel 219. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Shorted input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  }
+ ],
+ "high_voltage_refused": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34970A: Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00\nModule in slot 2: 34901A\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34970A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source (manual p. 81).",
+   "facts": [
+    [
+     "Next point",
+     "1 of 72"
+    ],
+    [
+     "Test",
+     "Zero offset, DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Channel",
+     "channel 209"
+    ],
+    [
+     "Manual page",
+     "80-81"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Disconnect the calibrator from the module. Fit low-thermal copper shorts across HI/LO of channel 209 and, for the 4-wire ohms points, of its partner channel 219. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Shorted input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source (manual p. 81).",
+   "facts": [
+    [
+     "Next point",
+     "13 of 72"
+    ],
+    [
+     "Test",
+     "Zero offset, DC current, 10.00 mA range (input open)"
+    ],
+    [
+     "Channel",
+     "channel 221"
+    ],
+    [
+     "Manual page",
+     "80"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Leave the current channel 221 OPEN (nothing connected). The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Open current input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "16 of 72"
+    ],
+    [
+     "Test",
+     "DC volts -10.00 V, 10.00 V range"
+    ],
+    [
+     "Channel",
+     "channel 210"
+    ],
+    [
+     "Manual page",
+     "82"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO; calibrator LO to earth ground. Calibrator OUTPUT V/ohm HI / LO to channel 210 HI / LO."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  }
+ ],
+ "virtual_run_34970A": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34970A: Agilent Technologies,34970A,SIM0001,1.20-1.20-1.00\nModule in slot 2: 34901A\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34970A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source (manual p. 81).",
+   "facts": [
+    [
+     "Next point",
+     "1 of 72"
+    ],
+    [
+     "Test",
+     "Zero offset, DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Channel",
+     "channel 209"
+    ],
+    [
+     "Manual page",
+     "80-81"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Disconnect the calibrator from the module. Fit low-thermal copper shorts across HI/LO of channel 209 and, for the 4-wire ohms points, of its partner channel 219. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Shorted input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source (manual p. 81).",
+   "facts": [
+    [
+     "Next point",
+     "13 of 72"
+    ],
+    [
+     "Test",
+     "Zero offset, DC current, 10.00 mA range (input open)"
+    ],
+    [
+     "Channel",
+     "channel 221"
+    ],
+    [
+     "Manual page",
+     "80"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Leave the current channel 221 OPEN (nothing connected). The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Open current input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "16 of 72"
+    ],
+    [
+     "Test",
+     "DC volts -10.00 V, 10.00 V range"
+    ],
+    [
+     "Channel",
+     "channel 210"
+    ],
+    [
+     "Manual page",
+     "82"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO; calibrator LO to earth ground. Calibrator OUTPUT V/ohm HI / LO to channel 210 HI / LO."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 300 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "22 of 72"
+    ],
+    [
+     "Test",
+     "4-wire ohms 100.0 Ω, 100.0 Ω range"
+    ],
+    [
+     "Channel",
+     "channel 210 (4-wire partner channel 220)"
+    ],
+    [
+     "Manual page",
+     "82"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_OHM4.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire: calibrator OUTPUT V/ohm HI / LO (force) to channel 210 HI / LO and calibrator SENSE HI / LO to the partner channel 220 HI / LO. Turn the calibrator's external sense (EX SNS / EXT SENSE) ON at its front panel."
+    ]
+   ],
+   "text": "Connect for 4-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "29 of 72"
+    ],
+    [
+     "Test",
+     "DC current 10.00 mA, 10.00 mA range"
+    ],
+    [
+     "Channel",
+     "channel 221"
+    ],
+    [
+     "Manual page",
+     "83"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_DCI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator VI AUX output and OUTPUT LO to the current channel 221 (HI / LO). Check the calibrator range and the fuse first."
+    ]
+   ],
+   "text": "Connect for DC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "32 of 72"
+    ],
+    [
+     "Test",
+     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter"
+    ],
+    [
+     "Channel",
+     "channel 210"
+    ],
+    [
+     "Manual page",
+     "84"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_ACV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO; calibrator LO to earth ground. Calibrator OUTPUT V/ohm HI / LO to channel 210 HI / LO."
+    ],
+    [
+     "Filter",
+     "The program selects the 3 Hz AC filter; each AC reading takes about 7 s."
+    ]
+   ],
+   "text": "Connect for AC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 300 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 300 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "44 of 72"
+    ],
+    [
+     "Test",
+     "AC current 10.00 mA @ 1.000 kHz, 10.00 mA range, 3 Hz filter"
+    ],
+    [
+     "Channel",
+     "channel 221"
+    ],
+    [
+     "Manual page",
+     "85"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_ACI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator VI AUX output and OUTPUT LO to the current channel 221 (HI / LO). Check the calibrator range and the fuse first."
+    ],
+    [
+     "Filter",
+     "The program selects the 3 Hz AC filter; each AC reading takes about 7 s."
+    ]
+   ],
+   "text": "Connect for AC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "48 of 72"
+    ],
+    [
+     "Test",
+     "Frequency 100.0 Hz at 10.00 mV rms, 100.0 mV range"
+    ],
+    [
+     "Channel",
+     "channel 210"
+    ],
+    [
+     "Manual page",
+     "86"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34970A_5560A_FREQ.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO; calibrator LO to earth ground. Calibrator OUTPUT V/ohm HI / LO to channel 210 HI / LO."
+    ],
+    [
+     "Filter",
+     "The program selects the 3 Hz AC filter; each AC reading takes about 7 s."
+    ]
+   ],
+   "text": "Connect for Frequency",
+   "title": "Rewire / verify before enabling output"
+  }
+ ],
+ "virtual_run_34972A": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34972A: Agilent Technologies,34972A,SIM0001,1.20-1.20-1.00\nModule in slot 2: 34901A\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34972A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source (manual p. 81).",
+   "facts": [
+    [
+     "Next point",
+     "1 of 72"
+    ],
+    [
+     "Test",
+     "Zero offset, DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Channel",
+     "channel 209"
+    ],
+    [
+     "Manual page",
+     "80-81"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34972A_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Disconnect the calibrator from the module. Fit low-thermal copper shorts across HI/LO of channel 209 and, for the 4-wire ohms points, of its partner channel 219. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Shorted input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "Never use the calibrator as a zero source (manual p. 81).",
+   "facts": [
+    [
+     "Next point",
+     "13 of 72"
+    ],
+    [
+     "Test",
+     "Zero offset, DC current, 10.00 mA range (input open)"
+    ],
+    [
+     "Channel",
+     "channel 221"
+    ],
+    [
+     "Manual page",
+     "80"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34972A_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Set up the input",
+     "Leave the current channel 221 OPEN (nothing connected). The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Setup: Open current input (zero offset)",
+   "title": "Zero offset: physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "16 of 72"
+    ],
+    [
+     "Test",
+     "DC volts -10.00 V, 10.00 V range"
+    ],
+    [
+     "Channel",
+     "channel 210"
+    ],
+    [
+     "Manual page",
+     "82"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34972A_5560A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO; calibrator LO to earth ground. Calibrator OUTPUT V/ohm HI / LO to channel 210 HI / LO."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 300 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "22 of 72"
+    ],
+    [
+     "Test",
+     "4-wire ohms 100.0 Ω, 100.0 Ω range"
+    ],
+    [
+     "Channel",
+     "channel 210 (4-wire partner channel 220)"
+    ],
+    [
+     "Manual page",
+     "82"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34972A_5560A_OHM4.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire: calibrator OUTPUT V/ohm HI / LO (force) to channel 210 HI / LO and calibrator SENSE HI / LO to the partner channel 220 HI / LO. Turn the calibrator's external sense (EX SNS / EXT SENSE) ON at its front panel."
+    ]
+   ],
+   "text": "Connect for 4-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "29 of 72"
+    ],
+    [
+     "Test",
+     "DC current 10.00 mA, 10.00 mA range"
+    ],
+    [
+     "Channel",
+     "channel 221"
+    ],
+    [
+     "Manual page",
+     "83"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34972A_5560A_DCI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator VI AUX output and OUTPUT LO to the current channel 221 (HI / LO). Check the calibrator range and the fuse first."
+    ]
+   ],
+   "text": "Connect for DC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "32 of 72"
+    ],
+    [
+     "Test",
+     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter"
+    ],
+    [
+     "Channel",
+     "channel 210"
+    ],
+    [
+     "Manual page",
+     "84"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34972A_5560A_ACV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO; calibrator LO to earth ground. Calibrator OUTPUT V/ohm HI / LO to channel 210 HI / LO."
+    ],
+    [
+     "Filter",
+     "The program selects the 3 Hz AC filter; each AC reading takes about 7 s."
+    ]
+   ],
+   "text": "Connect for AC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 300 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 300 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "44 of 72"
+    ],
+    [
+     "Test",
+     "AC current 10.00 mA @ 1.000 kHz, 10.00 mA range, 3 Hz filter"
+    ],
+    [
+     "Channel",
+     "channel 221"
+    ],
+    [
+     "Manual page",
+     "85"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34972A_5560A_ACI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator VI AUX output and OUTPUT LO to the current channel 221 (HI / LO). Check the calibrator range and the fuse first."
+    ],
+    [
+     "Filter",
+     "The program selects the 3 Hz AC filter; each AC reading takes about 7 s."
+    ]
+   ],
+   "text": "Connect for AC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "48 of 72"
+    ],
+    [
+     "Test",
+     "Frequency 100.0 Hz at 10.00 mV rms, 100.0 mV range"
+    ],
+    [
+     "Channel",
+     "channel 210"
+    ],
+    [
+     "Manual page",
+     "86"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34972A_5560A_FREQ.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted pair, shield to the calibrator LO; calibrator LO to earth ground. Calibrator OUTPUT V/ohm HI / LO to channel 210 HI / LO."
+    ],
+    [
+     "Filter",
+     "The program selects the 3 Hz AC filter; each AC reading takes about 7 s."
+    ]
+   ],
+   "text": "Connect for Frequency",
+   "title": "Rewire / verify before enabling output"
+  }
+ ]
+}

@@ -590,7 +590,7 @@ class EngineRunTests(unittest.TestCase):
         self.h.pump(60)
         out = Path(self.h.home) / 'demo.pdf'
         with mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: {'technician': 'T', 'temperature': '23', 'humidity': '40', 'standards': [], 'show_tar_tur': True}), \
-                mock.patch.object(E.filedialog, 'asksaveasfilename', lambda **k: str(out)):
+                mock.patch.object(__import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: str(out)):
             app.export_pdf()
         self.assertTrue(out.exists())
         rows = app.certificate_rows()

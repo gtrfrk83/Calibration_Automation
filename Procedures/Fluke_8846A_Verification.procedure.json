@@ -18,6 +18,9 @@
  "fingerprint": {
   "code": [
    "Procedures/Fluke_8846A_Verification.py",
+   "f8846a_view_tk.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "drivers/base.py",
    "drivers/transport.py",
    "drivers/scpi_dmm.py",

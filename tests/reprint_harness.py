@@ -77,7 +77,7 @@ def last_run_id(asset='A-100'):
 def _export_patches(mod, details, out):
     import report_dialog
     with mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: dict(details)), \
-            mock.patch.object(mod.filedialog, 'asksaveasfilename', lambda **k: str(out)):
+            mock.patch.object(getattr(mod, 'filedialog', None) or __import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: str(out)):
         yield
 
 
