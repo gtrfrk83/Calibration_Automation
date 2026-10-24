@@ -202,6 +202,10 @@ def uncertainty_parts(p, raw):
     sc = report_pdf.scope()
     k = p['kind']
     try:
+        if k == 'ABSAMP':                  # RF level / flatness: the Fluke 96270A level accuracy over the sweep (standards sheet; the scope has no RF level CMC)
+            b = uncertainty_budget.rf_level_sweep(p)
+            if b is not None:
+                return b.reported, 'dB', 'si'
         if sc is not None:
             if k == 'IMP':
                 v, u, _ = sc.oscilloscope('impedance', ohms=p['nominal'])
@@ -290,6 +294,10 @@ def tar_tur_fields(p, r):
             import uncertainty
             u, uu = uncertainty.round_up(parts[0]), parts[1]
         acc = au = None
+        if p['kind'] == 'ABSAMP':
+            import uncertainty_budget
+            b = uncertainty_budget.rf_level_sweep(p)
+            acc, au = (b.hit.limit, 'dB') if b is not None else (None, None)
         if p['kind'] in ('OFFSET', 'DVMDC') and p['stim'] == 'cal':
             acc, au = tartur.standard_accuracy('5560A', 'DCV', abs(p['offset'] if p['kind'] == 'OFFSET' else p['nominal']))
         return tartur.ratio_fields(tartur.from_values(tartur.half_width(p['low'], p['high']), p['unit'], acc, au, u, uu))

@@ -86,9 +86,6 @@ class Adapters(unittest.TestCase):
             for s, row in zip(specs, rows):
                 e = M.evaluate(s, s.default_std)
                 want = row.get('Uncertainty', '')
-                if s.engine_printed is not None:               # MDO4000C RF level rows: the 96270A value replaces the engine's N/A
-                    self.assertEqual(s.engine_printed.get('Uncertainty'), want)
-                    want = s.printed['Uncertainty']
                 self.assertEqual(e.unc_text, '' if want == 'N/A' else want, (name, s.step, s.description))
 
     def test_asset_number_is_found_for_every_engine(self):
@@ -128,8 +125,7 @@ class Adapters(unittest.TestCase):
             app, _m = built(name)
             specs, d = M.specs_for(app)
             model = M.ReviewModel(specs, d, asset=ASSET[name])
-            # only the MDO4000C RF level rows carry a default of their own (96270A, replaces the engine's N/A): nothing the person did
-            self.assertEqual([c for c in model.changes() if not (c['original_standard'] is None and c['standard'] == '96270A')], [], name)
+            self.assertEqual(model.changes(), [], name)     # the MDO4000C RF level rows print the 96270A value in the engine itself: not a change
             self.assertEqual(model.counts()['changed'], 0)
 
     def test_read_only_rows_are_locked_and_only_not_in_scope_accepts_typing(self):
@@ -281,11 +277,7 @@ class Report(unittest.TestCase):
             export(name, app, mod, a, R.DETAILS)
             specs, d = M.specs_for(app)
             model = M.ReviewModel(specs, d, asset=ASSET[name])
-            block = M.review_block([model])
-            if name == 'mdo':                                   # the 96270A default of the RF level rows is the one intended difference
-                for rv in block['reviews']:
-                    rv['changes'] = [c for c in rv['changes'] if c['original_standard'] is not None]
-            export(name, app, mod, b, dict(R.DETAILS, uncertainty_review=block))
+            export(name, app, mod, b, dict(R.DETAILS, uncertainty_review=M.review_block([model])))
             self.assertEqual(R.differences(a, b, None), [], name)
             self.assertEqual(R.pdf_text(a), R.pdf_text(b), name)
             # ...and a changed review reprints only the Uncertainty / TAR / TUR cells: same page count, same header cells

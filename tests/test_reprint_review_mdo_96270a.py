@@ -70,8 +70,8 @@ class Review(unittest.TestCase):
             self.assertAlmostEqual(r.cur.budget, 0.05, 12)
             self.assertIsNone(r.cur.cmc)
             self.assertFalse(r.can_type())
-            self.assertEqual(r.spec.engine_printed['Uncertainty'], 'N/A')          # what the engine itself still prints
-            self.assertTrue(r.applied and not r.changed)
+            self.assertEqual(r.spec.engine_printed['Uncertainty'], '0.050 dB')     # the engine itself prints the same figure now
+            self.assertFalse(r.applied or r.changed)
 
     def test_uncovered_flatness_and_phase_noise_stay_not_in_scope(self):
         import mdo4000c_verification as mod
@@ -102,7 +102,9 @@ class Review(unittest.TestCase):
             T2.export('mdo', app, mod, a, R.DETAILS)
             T2.export('mdo', app, mod, b, dict(R.DETAILS, uncertainty_review=M.review_block([model], 'Tech', '2026-01-01T00:00:00')))
             ta, tb = R.pdf_text(a), R.pdf_text(b)
-            self.assertEqual(tb.count('0.050 dB'), ta.count('0.050 dB') + 3)
+            self.assertEqual(R.differences(a, b, None), [])                          # engine alone == unchanged review
+            self.assertEqual(ta, tb)
+            self.assertGreaterEqual(ta.count('0.050 dB'), 3)
             import pypdf
             self.assertEqual(len(pypdf.PdfReader(str(a)).pages), len(pypdf.PdfReader(str(b)).pages))
             for token in ('Manual', 'Not in scope', 'review', '*'):
@@ -110,8 +112,8 @@ class Review(unittest.TestCase):
             rid = R.last_run_id('A-200')
             snap = rs.load(rid)
             self.assertEqual(snap.status, rs.OK)
-            ch = snap.data['details']['uncertainty_review']['reviews'][0]['changes']
-            self.assertEqual(sorted(c['uncertainty'] for c in ch), ['0.050 dB'] * 3)
+            rows = snap.data.get('rows') or []
+            self.assertEqual(snap.data['details']['uncertainty_review']['reviews'][0]['changes'], [])
             res = rs.regenerate(rid, choose_path=lambda n, o, p=again: str(p), confirm_overwrite=lambda p, o: False)
             self.assertTrue(res.ok, res.message)
             self.assertEqual(R.differences(b, again, None), [])
@@ -120,6 +122,21 @@ class Review(unittest.TestCase):
                 reg.__exit__(None, None, None)
             except Exception:
                 pass
+
+
+class Engine(unittest.TestCase):
+    def test_engine_prints_the_budget_for_covered_rows_only(self):
+        import mdo4000c_verification as mod
+        for p in mod.POINTS:
+            if p['kind'] != 'ABSAMP':
+                continue
+            ok = ub.rf_level_sweep(p) is not None
+            self.assertEqual(mod.uncertainty_text(p, {}), '0.050 dB' if ok else 'N/A', p['desc'])
+            f = mod.tar_tur_fields(p, dict(raw={}, result='PASS', uncertainty=mod.uncertainty_text(p, {})))
+            self.assertEqual((f['TAR'], f['TUR']), ('20.0:1', '20.0:1') if ok else ('', ''), p['desc'])
+        for p in mod.POINTS:                                   # nothing else changed
+            if p['kind'] in ('PHASE', 'XTALK', 'REFFREQ', 'TPAFUNC', 'IMD'):
+                self.assertEqual(mod.uncertainty_text(p, {}), 'N/A', p['desc'])
 
 
 class Wiring(unittest.TestCase):
