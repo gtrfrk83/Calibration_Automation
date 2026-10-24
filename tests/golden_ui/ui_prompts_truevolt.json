@@ -1,0 +1,1370 @@
+{
+ "dialogs_misc": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter an instrument ID.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select a test point first.",
+   "title": "Selection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded results to export yet.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34470A: Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "boom",
+   "title": "Measurement stopped"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "A point may be active. Stop and close?",
+   "title": "Active run"
+  }
+ ],
+ "export_and_load_cancelled": [
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "Keysight 34470A performance verification"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "Keysight 34470A performance verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "A-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": "",
+   "kind": "choose_file",
+   "options": {
+    "filetypes": [
+     [
+      "Checkpoint",
+      "*.json"
+     ]
+    ]
+   },
+   "text": "",
+   "title": ""
+  }
+ ],
+ "first_prompt_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34470A: Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34470A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 107"
+    ],
+    [
+     "Test",
+     "Front DC current, 1.000 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  }
+ ],
+ "high_voltage_refused": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34470A: Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34470A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 107"
+    ],
+    [
+     "Test",
+     "Front DC current, 1.000 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "10 of 107"
+    ],
+    [
+     "Test",
+     "Front DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "22 of 107"
+    ],
+    [
+     "Test",
+     "Rear DC current, 1.000 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to REAR. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: REAR terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "30 of 107"
+    ],
+    [
+     "Test",
+     "Rear DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to REAR. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
+    ]
+   ],
+   "text": "Zero-offset setup: REAR terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "42 of 107"
+    ],
+    [
+     "Test",
+     "DC volts 100.0 mV, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "512"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator voltage output to the DMM front HI / LO input terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for DC volts gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  }
+ ],
+ "virtual_run_34461A": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34461A: Keysight Technologies,34461A,SIM0001,A.03.01-02.40-03.01-00.52-02-01\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34461A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 101"
+    ],
+    [
+     "Test",
+     "Front DC current, 100.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "505"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "8 of 101"
+    ],
+    [
+     "Test",
+     "Front DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "505"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "19 of 101"
+    ],
+    [
+     "Test",
+     "Rear DC current, 100.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "505"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to REAR. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: REAR terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "25 of 101"
+    ],
+    [
+     "Test",
+     "Rear DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "505"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to REAR. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
+    ]
+   ],
+   "text": "Zero-offset setup: REAR terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "36 of 101"
+    ],
+    [
+     "Test",
+     "DC volts 100.0 mV, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "509"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator voltage output to the DMM front HI / LO input terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for DC volts gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs -500 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "47 of 101"
+    ],
+    [
+     "Test",
+     "DC current 2.000 A, 3.000 A range"
+    ],
+    [
+     "Manual page",
+     "510"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for DC current gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "53 of 101"
+    ],
+    [
+     "Test",
+     "4-wire ohms 100.0 Ω, 100.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "510"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire: calibrator force and sense leads to the DMM HI/LO and HI/LO SENSE terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for Resistance gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "59 of 101"
+    ],
+    [
+     "Test",
+     "2-wire ohms 100.0 MΩ, 100.0 MΩ range"
+    ],
+    [
+     "Manual page",
+     "510"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "2-wire: calibrator resistance leads to the DMM HI / LO input terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for Resistance gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "60 of 101"
+    ],
+    [
+     "Test",
+     "Frequency 10.00 Hz at 100.0 mV rms, 1.000 V range"
+    ],
+    [
+     "Manual page",
+     "513"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator AC voltage output at the stated level and frequency to the DMM HI / LO terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for Frequency accuracy",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "62 of 101"
+    ],
+    [
+     "Test",
+     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 200 Hz filter"
+    ],
+    [
+     "Manual page",
+     "515"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator voltage output to the DMM front HI / LO input terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for AC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 750 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "82 of 101"
+    ],
+    [
+     "Test",
+     "AC current 2.000 A @ 1.000 kHz, 3.000 A range, 200 Hz filter"
+    ],
+    [
+     "Manual page",
+     "516"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for AC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "97 of 101"
+    ],
+    [
+     "Test",
+     "DC current 5.000 A, 10.00 A range"
+    ],
+    [
+     "Manual page",
+     "519"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator high-current output to the DMM front 10 A terminal and LO."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for High current (10 A)",
+   "title": "Rewire / verify before enabling output"
+  }
+ ],
+ "virtual_run_34470A": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "34470A: Keysight Technologies,34470A,SIM0001,A.03.01-02.40-03.01-00.52-02-01\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34470A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 107"
+    ],
+    [
+     "Test",
+     "Front DC current, 1.000 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "10 of 107"
+    ],
+    [
+     "Test",
+     "Front DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
+    ]
+   ],
+   "text": "Zero-offset setup: FRONT terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "22 of 107"
+    ],
+    [
+     "Test",
+     "Rear DC current, 1.000 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to REAR. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
+   "text": "Zero-offset setup: REAR terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "30 of 107"
+    ],
+    [
+     "Test",
+     "Rear DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "507"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to REAR. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
+    ]
+   ],
+   "text": "Zero-offset setup: REAR terminals",
+   "title": "Zero offset — physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "42 of 107"
+    ],
+    [
+     "Test",
+     "DC volts 100.0 mV, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "512"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator voltage output to the DMM front HI / LO input terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for DC volts gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs -500 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "53 of 107"
+    ],
+    [
+     "Test",
+     "DC current 2.000 A, 3.000 A range"
+    ],
+    [
+     "Manual page",
+     "512"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for DC current gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "58 of 107"
+    ],
+    [
+     "Test",
+     "4-wire ohms 100.0 Ω, 100.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "512"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire: calibrator force and sense leads to the DMM HI/LO and HI/LO SENSE terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for Resistance gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "64 of 107"
+    ],
+    [
+     "Test",
+     "2-wire ohms 10.00 MΩ, 10.00 MΩ range"
+    ],
+    [
+     "Manual page",
+     "512"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "2-wire: calibrator resistance leads to the DMM HI / LO input terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for Resistance gain",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "66 of 107"
+    ],
+    [
+     "Test",
+     "Frequency 10.00 Hz at 100.0 mV rms, 1.000 V range"
+    ],
+    [
+     "Manual page",
+     "513"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator AC voltage output at the stated level and frequency to the DMM HI / LO terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for Frequency accuracy",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "68 of 107"
+    ],
+    [
+     "Test",
+     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 200 Hz filter"
+    ],
+    [
+     "Manual page",
+     "517"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator voltage output to the DMM front HI / LO input terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for AC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 750 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "88 of 107"
+    ],
+    [
+     "Test",
+     "AC current 2.000 A @ 1.000 kHz, 3.000 A range, 200 Hz filter"
+    ],
+    [
+     "Manual page",
+     "518"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for AC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "103 of 107"
+    ],
+    [
+     "Test",
+     "DC current 5.000 A, 10.00 A range"
+    ],
+    [
+     "Manual page",
+     "519"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator high-current output to the DMM front 10 A terminal and LO."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
+   "text": "Connect for High current (10 A)",
+   "title": "Rewire / verify before enabling output"
+  }
+ ]
+}

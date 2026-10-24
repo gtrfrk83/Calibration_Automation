@@ -9,16 +9,16 @@ wiring confirmations are required.
     import keithley2000_verification
     keithley2000_verification.main()           # what Procedures/Keithley_2000_Verification.py does
 """
-import json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from tkinter import ttk, messagebox, filedialog
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
-import ui_theme as ui
-import ui_shell
+import ui_port
+import ui_theme as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in k2000_view_tk.py
+from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import procspec
 import calibrator_fit
 import drivers
@@ -242,37 +242,34 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}
         self.pm_init('k2000', MODEL, demo=demo, lists=[POINTS])     # procedure modifications: saved overrides for this model
-        ui.apply_theme(root)
-        root.title('Keithley 2000 | Performance Verification' + (' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1320, 820, min_w=900, min_h=640)
+        self.ui_view.setup_window(self)
         self.settings = ui.Settings('Keithley2000')
         s = self.settings
-        self.asset = tk.StringVar(); self.serial = tk.StringVar()
-        self.interface = tk.StringVar(value=s.get('interface', 'GPIB'))
-        self.dmm_addr = tk.StringVar(value=s.get('dmm_addr', 'GPIB0::16::INSTR'))
-        self.dmm_baud = tk.StringVar(value=s.get('dmm_baud', '4800'))
-        self.dmm_term = tk.StringVar(value=s.get('dmm_term', 'LF'))
-        self.dmm_flow = tk.StringVar(value=s.get('dmm_flow', 'None'))
+        self.asset = port.var(); self.serial = port.var()
+        self.interface = port.var(s.get('interface', 'GPIB'))
+        self.dmm_addr = port.var(s.get('dmm_addr', 'GPIB0::16::INSTR'))
+        self.dmm_baud = port.var(s.get('dmm_baud', '4800'))
+        self.dmm_term = port.var(s.get('dmm_term', 'LF'))
+        self.dmm_flow = port.var(s.get('dmm_flow', 'None'))
         self.cal_offer = calibrator_fit.make_offer('5520A', calibrator_fit.dmm_requests(POINTS), unverified=drivers.Fluke5520A.unverified_summary())
-        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in self.cal_choices() else 'Fluke 5560A')
-        self.cal_interface = tk.StringVar(value=s.get('cal_interface', CAL_INTERFACES[0]))       # RS-232 preselected
+        self.cal_model = port.var(s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in self.cal_choices() else 'Fluke 5560A')
+        self.cal_interface = port.var(s.get('cal_interface', CAL_INTERFACES[0]))       # RS-232 preselected
         if self.cal_interface.get() not in CAL_INTERFACES: self.cal_interface.set(CAL_INTERFACES[0])
-        self.cal_addr = tk.StringVar(value=s.get('cal_addr', CAL_PORT_DEFAULT[self.cal_interface.get()]))
+        self.cal_addr = port.var(s.get('cal_addr', CAL_PORT_DEFAULT[self.cal_interface.get()]))
         self._cal_shown, self._cal_ports = self.cal_interface.get(), {}
-        self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
-        self.period = tk.StringVar(value=s.get('period', PERIOD_LABEL[SPEC['default_period']]))
-        self.status = tk.StringVar()
-        self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
-        self.show_section = tk.StringVar(value='All sections')
-        self.show_status = tk.StringVar(value='All points')
+        self.cal_baud = port.var(s.get('cal_baud', '9600'))
+        self.period = port.var(s.get('period', PERIOD_LABEL[SPEC['default_period']]))
+        self.status = port.var()
+        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.show_section = port.var('All sections')
+        self.show_status = port.var('All points')
         self._build_ui()
         self.on_period(save=False)
         self.status.set(virtualbench.status_text(self) if demo
                         else 'Step 1: enter the Instrument ID. Step 2: choose the interface and addresses and press Test Connections. Step 3: Run All.')
-        root.protocol('WM_DELETE_WINDOW', self.on_close)
-        root.bind('<Control-s>', lambda _e: self.save())
-        import labregistry
-        labregistry.attach(root, self.asset, self.serial, self.status.set)
+        port.on_close(root, self.on_close)
+        port.bind_key(root, '<Control-s>', self.save)
+        self.ui_view.finish_window(self)
 
     # ------------------------------------------------------------------ selection
     @property
@@ -295,89 +292,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self._busy = value
         if hasattr(self, 'btn_run'): self._sync_buttons()
 
-    def _sync_buttons(self):
-        idle = 'disabled' if self._busy else 'normal'
-        for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
-            b.configure(state=idle)
-        self.btn_stop.configure(state='normal' if self._busy else 'disabled')
-        self.period_combo.configure(state='disabled' if self._busy else 'readonly')
+    VIEW = 'k2000_view'                               # the toolkit's window code: k2000_view_tk (Tk), later _qt
+    @property
+    def ui_view(self): return port.view(self.VIEW)
+
+    def _sync_buttons(self): self.ui_view.sync_buttons(self)
 
     # ------------------------------------------------------------------ layout
-    def _build_ui(self):
-        root = self.root
-        sh = self.shell = ui_shell.Shell(root, 'Keithley 2000  -  Performance Verification',
-                                         f'Test points from the Model 2000 Calibration Manual, Tables 1-2 to 1-6 (pp. 1-7 to 1-13)  |  {len(POINTS)} points in the spec  |  '
-                                         'GPIB or RS-232', demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
-        self.status = sh.status_var
-        self.conn_pill = sh.add_chip(self.chip_text() if self.demo else 'Not connected', 'neutral')
-        sh.build_identity(self.asset, self.serial)
-        self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
-        self.summary = sh.build_progress()
-        if self.demo: sh.notice(self.banner_text(), 'warn', title=virtualbench.BANNER_TITLE)
-        else: sh.notice('The program asks you to confirm the warm-up and environment, the wiring before every new setup and before any high-voltage point. Stay at the bench while a run is in progress.', 'info')
-
-        # settings and connections live in the slide-in drawer
-        d = sh.drawer_body; d.columnconfigure(1, weight=1)
-        ttk.Label(d, text='Limits to apply').grid(row=0, column=0, sticky='w', pady=4)
-        self.period_combo = ttk.Combobox(d, textvariable=self.period, values=list(PERIODS), width=20, state='readonly')
-        self.period_combo.grid(row=0, column=1, sticky='w', padx=(10, 0), pady=4)
-        self.period_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_period())
-        ttk.Separator(d).grid(row=1, column=0, columnspan=2, sticky='ew', pady=(2, 10))
-        r = 2
-        ttk.Label(d, text='2000 interface').grid(row=r, column=0, sticky='w', pady=4)
-        iface = ttk.Combobox(d, textvariable=self.interface, values=list(INTERFACES), width=10, state='readonly')
-        iface.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        ttk.Label(d, text='2000 address / port').grid(row=r, column=0, sticky='w', pady=4)
-        self.dmm_entry = ttk.Combobox(d, textvariable=self.dmm_addr, state='normal', width=34)
-        self.dmm_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1
-        for text, var, values, width in (('RS-232 baud', self.dmm_baud, ['19200', '9600', '4800', '2400', '1200', '600', '300'], 9),
-                                         ('RS-232 TX TERM', self.dmm_term, list(drivers.keithley_2000.TX_TERM), 9),
-                                         ('RS-232 flow control', self.dmm_flow, list(FLOW), 12)):
-            ttk.Label(d, text=text).grid(row=r, column=0, sticky='w', pady=4)
-            ttk.Combobox(d, textvariable=var, values=values, width=width, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        ttk.Label(d, text='GPIB: the 2000 factory address is 16 (CONFIG > GPIB). RS-232: set the same baud and TX TERM on the meter (CONFIG > RS-232) and the SCPI '
-                          'language (the RS-232 interface supports SCPI only). 8 data bits, no parity, 1 stop bit.',
-                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=r, column=0, columnspan=2, sticky='w', pady=(2, 8)); r += 1
-        ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
-        calbox = ttk.Combobox(d, textvariable=self.cal_model, values=self.cal_choices(), width=14, state='readonly')
-        calbox.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        calibrator_fit.attach_note(d, self.cal_offer, ui, widgets=(calbox,), row=r); r += 1
-        ttk.Label(d, text='Calibrator interface').grid(row=r, column=0, sticky='w', pady=4)
-        ci = ttk.Combobox(d, textvariable=self.cal_interface, values=list(CAL_INTERFACES), width=10, state='readonly')
-        ci.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        ci.bind('<<ComboboxSelected>>', lambda _e: self.on_cal_interface())
-        ttk.Label(d, text='Calibrator port / address').grid(row=r, column=0, sticky='w', pady=4)
-        self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
-        self.cal_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1
-        ttk.Label(d, text='Calibrator baud (RS-232 only)').grid(row=r, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.cal_baud, values=['9600', '19200', '4800', '2400', '1200'], width=9, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        btns = sh.drawer_footer
-        self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
-        self.btn_test = ttk.Button(btns, text='Test connections', command=self.test_connections, style='Accent.TButton'); self.btn_test.pack(side='left')
-
-        self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
-        self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
-        self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
-        self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
-        sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
-        self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
-        sh.add_action('Save progress', self.save, side='right', short='Save')
-        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
-
-        body = sh.content
-        info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
-        ttk.Label(info, textvariable=self.detail, wraplength=1000, justify='left', style='Muted.TLabel').pack(anchor='w', fill='x')
-        ttk.Label(info, text=SPEC['source']['note'], style='Small.TLabel', wraplength=1000, justify='left').pack(anchor='w', pady=(4, 0))
-        filt = ttk.Frame(body); filt.pack(side='top', fill='x', pady=(0, 6))
-        ttk.Label(filt, text='Test points', style='Bold.TLabel').pack(side='left')
-        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly'); c2.pack(side='right')
-        ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='right', padx=(0, 6))
-        c2.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
-        self.tree = ui_shell.results_table(self, body)
-        ui_shell.small_window(self, self.tree, filt)
-        self.tree.bind('<<TreeviewSelect>>', self.on_select)
-        self.update_shell_sections(POINTS, lambda p: p['section_title'])
-        ui.polish(root)
+    def _build_ui(self): self.ui_view.build_ui(self)
 
     def on_cal_interface(self):
         """Calibrator interface changed: remember the port / address typed for the one just left, show the one for the new interface (RS-232 COM port or GPIB address)."""
@@ -417,18 +339,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return (p['id'], p['description'], *cells), tags
 
     def refresh(self):
-        keep = self.tree.selection()
-        self.tree.delete(*self.tree.get_children())
-        for p in POINTS:
-            if self._visible(p):
-                values, tags = self._row(p); self.tree.insert('', 'end', iid=str(p['id']), values=values, tags=tags)
-        if keep and self.tree.exists(keep[0]): self.tree.selection_set(keep[0])
+        keep = self.ui_view.table_selection(self)
+        self.ui_view.table_set_rows(self, ((str(p['id']), *self._row(p)) for p in POINTS if self._visible(p)), keep)
         self.update_summary()
 
     def _update_row(self, p):
         iid = str(p['id'])
-        if self.tree.exists(iid):
-            values, tags = self._row(p); self.tree.item(iid, values=values, tags=tags)
+        if self.ui_view.table_has(self, iid):
+            values, tags = self._row(p); self.ui_view.table_update_row(self, iid, values, tags)
         self.update_summary()
 
     def update_summary(self):
@@ -446,7 +364,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.refresh()
 
     def on_select(self, _event=None):
-        sel = self.tree.selection()
+        sel = self.ui_view.table_selection(self)
         if not sel: return
         p = POINTS[int(sel[0]) - 1]
         v, _r, u = ui.si_row([p['nominal'] - p['error'], p['nominal'] + p['error']], p['unit'])
@@ -492,7 +410,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             self.status.set(f'Instrument search needs pyvisa and a VISA backend ({exc}). You can still type an address.'); return
         gpib = [r for r in found if r.upper().startswith('GPIB')]
         asrl = [r for r in found if r.upper().startswith('ASRL')]
-        self.dmm_entry['values'] = (gpib if self.interface.get() == 'GPIB' else asrl) or found; self.cal_entry['values'] = (gpib if self.cal_interface.get() == 'GPIB' else asrl) or found
+        self.ui_view.set_choices(self, 'dmm', (gpib if self.interface.get() == 'GPIB' else asrl) or found); self.ui_view.set_choices(self, 'cal', (gpib if self.cal_interface.get() == 'GPIB' else asrl) or found)
         self.status.set(f'{len(found)} VISA resource(s) found: ' + (', '.join(found) if found else 'none') + '. Pick the address for each instrument.')
 
     def _serial(self):
@@ -506,18 +424,18 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), self.interface.get(), serial=self._serial(), mods=self.pm_state, cal_interface=self.cal_interface.get())
 
     def test_connections(self):
-        if self.fast_demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
-        self.status.set('Connecting ...'); self.root.update_idletasks()
+        if self.fast_demo: port.message('info', 'Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
+        self.status.set('Connecting ...'); port.flush(self.root)
         try:
             self.disconnect(); self.io = self._new_io()
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
-            self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
+            self.status.set('Connection error: ' + str(exc)); port.message('error', 'Connection error', str(exc)); return
         self._set_conn(True)
         if not self.demo: self._save_settings()
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
         self.status.set('Connected: ' + self.io.ident + tag + '. Calibrator output is NOT enabled.')
-        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'Keithley {MODEL}: {self.io.ident}\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\nCalibrator output is not enabled.')
+        port.message('info', 'Connected' + (' (DEMO)' if self.virtual else ''), f'Keithley {MODEL}: {self.io.ident}\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\nCalibrator output is not enabled.')
 
     def disconnect(self):
         if self.io: self.io.close(); self.io = None
@@ -540,24 +458,24 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def run_section(self): self.run_shown_section()
 
     def rerun(self):
-        selected = self.tree.selection()
+        selected = self.ui_view.table_selection(self)
         if selected: self.execute([POINTS[int(selected[0]) - 1]])
-        else: messagebox.showinfo('Selection', 'Select a test point first.')
+        else: port.message('info', 'Selection', 'Select a test point first.')
 
     def _prompt_start(self):
         """Warm-up and environment (CM p. 1-3 and 1-6), asked once at the start of a run. Returns False if the technician cancels."""
-        return ui.confirm_steps(self.root, 'Before the verification', 'Warm-up and conditions',
+        return port.operator_prompt('Before the verification', 'Warm-up and conditions',
             [('Warm-up', 'The 2000 must have been on for at least one hour (Cal Manual p. 1-3). Allow the calibrator its own warm-up time as well.'),
              ('Environment', 'Ambient 18 to 28 C and relative humidity below 80 % (p. 1-3).'),
              ('Inputs', 'Set the INPUTS switch to FRONT. The program reads the switch and stops if it is on REAR.'),
              ('Direct connections', 'Connect the calibrator straight to the 2000: no scanner or other switching equipment (p. 1-6).')],
             facts=[('Limits', f'{self.period.get()}, 18 to 28 C'), ('Calibrator', self.cal_model.get())],
             caution='The program restores the 2000 factory defaults (*RST) before the first point, then sets function, range, speed and filter for every point.',
-            ok='Conditions met - start')
+            ok='Conditions met - start', parent=self.root)
 
     def execute(self, points):
         if self.busy or not points: return
-        if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        if not self.asset.get().strip(): port.message('warning', 'Instrument ID', 'Enter an instrument ID.'); return
         points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
         if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
@@ -581,8 +499,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if p['kind'] in ('ACV', 'ACI'):
             steps.append(('Speed', 'AC uses detector bandwidth 3 (slow) with the digital filter off: one reading takes about 2 s and the program waits '
                                    f'{AC_SETTLE_DEFAULT_S:g} s (default, tunable) after the output is on for the detector to settle.'))
-        return ui.confirm_steps(self.root, 'Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
-            steps, facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image)
+        return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
+            steps, facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image, parent=self.root)
 
     def _next(self, points, i, previous):
         if i >= len(points) or self.stop:
@@ -591,35 +509,35 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         p = points[i]
         try: p, previous = self.pm_step(points, i, previous)          # live edits: applied here, between two points (procmods_live)
         except procmods_engine.LiveApplyError as exc: self._error(exc); return
-        if p is None: self.root.after(30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
+        if p is None: port.after(self.root, 30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
         key = (p['source'], p['terminal'], p['group'])
         if not self.fast_demo and key != previous and not self._prompt_setup(p):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
         if not self.fast_demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= HV_CONFIRM:
-            if not messagebox.askyesno('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
+            if not port.ask_yes_no('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False; return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
-        if self.tree.exists(str(p['id'])): self.tree.selection_set(str(p['id'])); self.tree.see(str(p['id']))
+        if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)
         if self.fast_demo:
             reading = p['nominal'] + p['error'] * math.sin(p['id'] * 1.71) * 0.38   # deterministic, labelled synthetic
-            self._record(p, reading, True); self.root.after(30, lambda: self._next(points, i + 1, key))
+            self._record(p, reading, True); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
         else:
             def work():
                 try:
                     reading = self.io.measure(p)
-                    self.root.after(0, lambda: self._done(points, i, p, reading, key))
+                    port.post(self.root, lambda: self._done(points, i, p, reading, key))
                 except Exception as exc:
                     try: self.io.standby()
                     except Exception: pass
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
-                    self.root.after(0, lambda err=err: self._error(err))
+                    port.post(self.root, lambda err=err: self._error(err))
             threading.Thread(target=work, daemon=True).start()
 
     def _done(self, points, i, p, reading, key):
-        self._record(p, reading, bool(self.demo)); self.root.after(30, lambda: self._next(points, i + 1, key))
+        self._record(p, reading, bool(self.demo)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
-        self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); messagebox.showerror('Measurement stopped', str(exc))
+        self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); port.message('error', 'Measurement stopped', str(exc))
 
     def _record(self, p, reading, synthetic):
         result = 'PASS' if judge(p, reading) else 'FAIL'
@@ -639,11 +557,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
-        path = filedialog.askopenfilename(filetypes=[('Checkpoint', '*.json')])
+        path = port.choose_file(filetypes=[('Checkpoint', '*.json')])
         if not path: return
         data = json.loads(Path(path).read_text())
         if self.file_has_synthetic(data) and not self.demo:
-            if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
+            if not port.ask_yes_no('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.period.set(data.get('period', self.period.get())); self.load_results(data)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
@@ -672,13 +590,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def export_pdf(self):
         rows, pts = self.certificate_rows_and_points()
-        if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
-        try: import report_pdf, report_dialog
-        except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
-        details = report_dialog.ask_details(self.root, 'Keithley 2000 performance verification')
+        if not rows: port.message('info', 'No results', 'No recorded results to export yet.'); return
+        try: import report_pdf
+        except ImportError as exc: port.message('error', 'Report export', str(exc)); return
+        details = port.report_details('Keithley 2000 performance verification', parent=self.root)
         if details is None: return
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        path = filedialog.asksaveasfilename(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
+        path = port.save_file(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
         if not path: return
         demo = self.any_synthetic()
         try:
@@ -689,21 +607,21 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                                                                  ('Limits applied', self.period.get()), ('Source', 'Keithley Model 2000 Calibration Manual 2000-905-01 Rev. F, pp. 1-3 to 1-13')],
                                              demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, self.cal_key), snapshot_context=report_pdf.context_for(self))
         except ImportError:
-            messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
+            port.message('error', 'PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
         except Exception as exc:
-            messagebox.showerror('PDF export error', str(exc)); return
+            port.message('error', 'PDF export error', str(exc)); return
         self.status.set(f'Exported {len(rows)} rows: {path}')
 
     def on_close(self):
-        if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return
+        if self.busy and not port.ask_yes_no('Active run', 'A point may be active. Stop and close?'): return
         self.stop = True
         if not self.demo: self._save_settings()
-        self.disconnect(); self.root.destroy()
+        self.disconnect(); port.close(self.root)
 
 
 def main(argv=None):
     argv = sys.argv if argv is None else argv
-    root = tk.Tk()
-    demo, fast = virtualbench.flags(argv)
-    App(root, demo=demo, fast_demo=fast)
-    root.mainloop()
+    def build(root):
+        demo, fast = virtualbench.flags(argv)
+        App(root, demo=demo, fast_demo=fast)
+    port.run_app(build)
