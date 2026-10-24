@@ -152,7 +152,7 @@ def apply_uncertainty_review(rows, details, header=None):
 
     details['uncertainty_review'] = {'reviews': [{'asset', 'changes': [{'idx', 'description', 'nominal', 'uncertainty', 'tar', 'tur', ...}]}]}.
     Only the Uncertainty cell (and the TAR / TUR cells, when the report has them) of a listed row is replaced.  A change whose index does not point at a row
-    with the same Description and Nominal is ignored: an index is never trusted on its own.  The review is picked by Instrument ID.  Never raises; applying it
+    with the same Description and Nominal is ignored (unless exactly one row has that Description and Nominal): an index is never trusted on its own.  The review is picked by Instrument ID.  Never raises; applying it
     twice gives the same rows (a reprint from the snapshot uses the rows as stored and the same review)."""
     try:
         block = (details or {}).get('uncertainty_review')
@@ -166,11 +166,13 @@ def apply_uncertainty_review(rows, details, header=None):
         out = list(rows)
         for ch in picked[0].get('changes') or []:
             i = ch.get('idx')
-            if not isinstance(i, int) or isinstance(i, bool) or not 0 <= i < len(out):
-                continue
+            same = lambda r: r.get('Description') == ch.get('description') and r.get('Nominal') == ch.get('nominal')        # noqa: E731
+            if not (isinstance(i, int) and not isinstance(i, bool) and 0 <= i < len(out) and same(out[i])):
+                hits = [n for n, r in enumerate(out) if same(r)]                  # the index is never trusted on its own: else exactly one identical row (a
+                if len(hits) != 1:                                                # per-tab export prints fewer rows than the review listed)
+                    continue
+                i = hits[0]
             row = out[i]
-            if row.get('Description') != ch.get('description') or row.get('Nominal') != ch.get('nominal'):
-                continue
             new = dict(row)
             new['Uncertainty'] = ch.get('uncertainty') or ''
             for col in TAR_TUR_COLUMNS:
