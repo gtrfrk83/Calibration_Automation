@@ -195,6 +195,7 @@ class Manager:
         self.notebook.add(self.specs_frame, text='  Standards Specs  ')
         self.notebook.add(self.dsb_frame, text='  Datasheet Builder  ')
         self.build_library_tab()
+        self.build_library_menu()
         self.build_datasheet_builder_tab()
         self.history_panel = labregistry_ui.HistoryPanel(self.history_frame.content)
         self.history_panel.pack(fill='both', expand=True)
@@ -292,13 +293,6 @@ class Manager:
         self.category_box.pack(side='left')
         self.category_box.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
         ttk.Button(bar, text='Clear', style='Quiet.TButton', command=lambda: (self.search.set(''), self.category.set(ALL_CATEGORIES))).pack(side='left', padx=6)
-        ttk.Button(bar, text='Remove from library', style='Compact.TButton', command=self.remove).pack(side='right')
-        ttk.Button(bar, text='Register procedure...', style='Compact.TButton', command=self.add).pack(side='right', padx=4)
-        self.btn_library = ttk.Button(bar, text='Library folder...', style='Compact.TButton', command=self.choose_library_folder)    # where the lab keeps its procedure packages (the Import picker opens there)
-        self.btn_library.pack(side='right')
-        ui.Tooltip(self.btn_library, lambda: 'Library folder for procedure packages (the Import procedure package... picker opens here):\n' + self.library_folder_text())
-        ttk.Button(bar, text='Import procedure package...', style='Compact.TButton', command=self.import_package).pack(side='right', padx=(0, 4))
-        ttk.Button(bar, text='Import Mudcats datasheet (.mdd)...', style='Compact.TButton', command=self.import_mdd_procedure).pack(side='right', padx=(0, 4))
 
         split = ttk.Frame(outer)
         split.pack(fill='both', expand=True)
@@ -371,6 +365,38 @@ class Manager:
             b.full_text = ''
             ui.Tooltip(b, lambda b=b: b.full_text)
         self._build_row_menu_bindings()
+
+    # ------------------------------------------------------------------ Library menu (menu bar, immediately left of Help)
+    LIBRARY_MENU_LABELS = ('Import Mudcats datasheet (.mdd)...', 'Import procedure package...', 'Register procedure...', None,
+                           'Library folder: ', 'Library folder...', None, 'Remove from library')
+
+    def build_library_menu(self):
+        """The import / register / library folder / remove actions (they were a button row on the Procedures tab).  The menu is added to the window's menu bar
+        before branding adds Help (on idle), so it sits immediately left of Help.  Handlers are the old buttons' own."""
+        try:
+            existing = self.root['menu']
+            bar = self.root.nametowidget(existing) if existing else tk.Menu(self.root)
+        except tk.TclError:
+            bar = tk.Menu(self.root)
+        menu = tk.Menu(bar, tearoff=False, postcommand=self.refresh_library_menu)
+        menu.add_command(label='Import Mudcats datasheet (.mdd)...', command=self.import_mdd_procedure)
+        menu.add_command(label='Import procedure package...', command=self.import_package)
+        menu.add_command(label='Register procedure...', command=self.add)
+        menu.add_separator()
+        menu.add_command(label='Library folder: ', state='disabled')               # info line (text refreshed when the menu opens)
+        menu.add_command(label='Library folder...', command=self.choose_library_folder)
+        menu.add_separator()
+        menu.add_command(label='Remove from library', command=self.remove)
+        bar.add_cascade(label='Library', menu=menu, underline=0)                  # Alt+L
+        self.root.configure(menu=bar)
+        self.library_menu = menu
+        self.refresh_library_menu()
+
+    def refresh_library_menu(self):
+        """Enabled states when the menu opens: Remove from library needs a selected procedure; the info line shows the current library folder."""
+        menu = self.library_menu
+        menu.entryconfigure(4, label='Library folder: ' + self.library_folder_text())
+        menu.entryconfigure(7, state='normal' if self.table.selection() else 'disabled')
 
     # ------------------------------------------------------------------ right-click menu of a procedure row
     def _build_row_menu_bindings(self):
