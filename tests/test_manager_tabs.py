@@ -111,8 +111,9 @@ class SidecarKind(unittest.TestCase):
         for gone in ('instruments_frame', 'build_instruments_tab', 'refresh_instruments', 'instrument_editor', 'launch_instrument_procedure', 'selected_instrument',
                      'Instruments tab'):
             self.assertNotIn(gone, src)
-        self.assertIn('CREATE TABLE IF NOT EXISTS instruments', src)             # schema creation / migration unchanged
-        self.assertNotIn('DROP TABLE', src)
+        model = (ROOT / 'manager_model.py').read_text(encoding='utf-8')            # the schema creation moved there (shared with the Qt Manager), text unchanged
+        self.assertIn('CREATE TABLE IF NOT EXISTS instruments', model)             # schema creation / migration unchanged
+        self.assertNotIn('DROP TABLE', src + model)
         import re
         tabs = re.findall(r"self\.notebook\.add\(self\.\w+, text='\s*([^']+?)\s*'\)", src)
         self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder'])
