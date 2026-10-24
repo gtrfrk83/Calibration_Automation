@@ -21,13 +21,18 @@ _stub.install()
 import handheld_dmm as H  # noqa: E402
 import uncertainty  # noqa: E402
 
-FIXED = {'fluke_77iv_pv.json': ['2-17'], 'fluke_110_series_pv.json': ['3-17'], 'fluke_87v_pv.json': ['1-11', '1-12', '1-13', '1-14'], 'fluke_287_289_pv.json': ['4-24']}
-LEFT_BLANK = {'fluke_170_series_pv.json'}          # their Hz rows have carried no_uncertainty since the 170 series was written; not in the request, listed in NOTES.md
+FIXED = {'fluke_77iv_pv.json': ['2-17'], 'fluke_110_series_pv.json': ['3-17'], 'fluke_87v_pv.json': ['1-11', '1-12', '1-13', '1-14'], 'fluke_287_289_pv.json': ['4-24'],
+         'fluke_170_series_pv.json': ['2-16', '2-17', '2-18', '2-19', '2-25', '2-26', '3-16', '3-17', '3-18', '3-19', '3-25']}
+LEFT_BLANK = set()                                 # no Hz-reading step with a source is left without the marker
 CMC_REL = 7.1e-12                                  # Frequency - Measure, 10 Hz to 26.5 GHz (specs/a2la_1888_03_cmc.json)
 EXPECTED = {('fluke_77iv_pv.json', '2-17'): ('360 nHz', 50000.0), ('fluke_110_series_pv.json', '3-17'): ('360 nHz', 50000.0),
             ('fluke_87v_pv.json', '1-11'): ('710 nHz', 99950.0), ('fluke_87v_pv.json', '1-12'): ('1.5 µHz', 199500.0),
             ('fluke_87v_pv.json', '1-13'): ('710 nHz', 99950.0), ('fluke_87v_pv.json', '1-14'): ('710 nHz', 99950.0),
-            ('fluke_287_289_pv.json', '4-24'): ('320 pHz', 45.0)}      # 7.1e-12 x f, rounded UP to 2 s.f.: 3.55e-7 -> 3.6e-7, 7.096e-7 -> 7.1e-7, 1.416e-6 -> 1.5e-6, 3.195e-10 -> 3.2e-10
+            ('fluke_287_289_pv.json', '4-24'): ('320 pHz', 45.0)}
+for _sid, _text, _f in (('2-16', '320 pHz', 45.0), ('2-17', '6.4 nHz', 900.0), ('2-18', '64 nHz', 9000.0), ('2-19', '360 nHz', 50000.0), ('2-25', '320 pHz', 45.0),
+                        ('2-26', '360 nHz', 50000.0), ('3-16', '320 pHz', 45.0), ('3-17', '6.4 nHz', 900.0), ('3-18', '64 nHz', 9000.0), ('3-19', '360 nHz', 50000.0),
+                        ('3-25', '320 pHz', 45.0)):
+    EXPECTED[('fluke_170_series_pv.json', _sid)] = (_text, _f)       # 45 Hz 3.195e-10, 900 Hz 6.39e-9, 9 kHz 6.39e-8, 50 kHz 3.55e-7: rounded up to 2 s.f.      # 7.1e-12 x f, rounded UP to 2 s.f.: 3.55e-7 -> 3.6e-7, 7.096e-7 -> 7.1e-7, 1.416e-6 -> 1.5e-6, 3.195e-10 -> 3.2e-10
 
 
 def steps(name):
@@ -79,7 +84,7 @@ class FrequencyRows(unittest.TestCase):
             self.assertEqual(f['TUR'], '>1000:1', (name, sid))                    # tolerance of several mHz to Hz over a sub-microhertz CMC
 
     def test_nothing_else_changed(self):
-        """Steps with a Hz reading and no marker: only the 170 series (no_uncertainty since it was written) and the sourceless 4-25 / 1-15 rows."""
+        """Every Hz-reading step with a source carries the marker (the sourceless 4-25 / 1-15 rows have no source and no uncertainty)."""
         left = set()
         import glob
         for path in sorted(glob.glob(str(ROOT / 'specs' / '*_pv.json'))):
