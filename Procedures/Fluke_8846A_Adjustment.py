@@ -12,15 +12,15 @@ import json
 import re
 import sqlite3
 import sys
-import tkinter as tk
 from pathlib import Path
-from tkinter import ttk, messagebox
 
 BASE = Path(__file__).resolve().parent
 sys.path.append(str(BASE.parent))  # shared ui_theme.py sits next to the Manager
-import ui_theme as ui
+import ui_port
+import ui_theme as ui                   # only its toolkit-free helpers here (Settings); the window code is in fluke8846a_adjust_view_tk.py
 import drivers
 import reset_startup
+from ui_port import ui as port          # every dialog, variable and window operation goes through the UI port (ui_port.py)
 DB = BASE / 'calibration_procedures.sqlite3'
 STEPS = [
     ('PRE', 'As Found verification', 'Run and save the complete independent 8846A performance verification before any adjustment.', '', '', False),
@@ -76,127 +76,41 @@ class App:
         self.committed = False
         self.unlocked = False
         self.conn = connect_db()
-        ui.apply_theme(root)
-        root.title('Fluke 8846A | Guided Adjustment v57' + (' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1280, 860, min_w=1060, min_h=680)
+        self.ui_view.setup_window(self)
         self.settings = ui.Settings('8846A_adjustment')
-        self.asset = tk.StringVar()
-        self.serial = tk.StringVar()
-        self.tech = tk.StringVar()
-        self.port = tk.StringVar(value=self.settings.get('port', 'COM3'))
-        self.baud = tk.StringVar(value=self.settings.get('baud', '9600'))
-        self.parity = tk.StringVar(value=self.settings.get('parity', 'None'))
-        self.bits = tk.StringVar(value=self.settings.get('bits', '8'))
-        self.password = tk.StringVar()
-        self.status = tk.StringVar(value='DEMO — commands simulated' if demo else 'DISCONNECTED — no adjustment commands enabled')
-        self.next_hint = tk.StringVar()
-        self.detail = tk.StringVar(value='Select a step to see its setup instructions.')
+        self.asset = port.var()
+        self.serial = port.var()
+        self.tech = port.var()
+        self.port = port.var(self.settings.get('port', 'COM3'))
+        self.baud = port.var(self.settings.get('baud', '9600'))
+        self.parity = port.var(self.settings.get('parity', 'None'))
+        self.bits = port.var(self.settings.get('bits', '8'))
+        self.password = port.var()
+        self.status = port.var('DEMO — commands simulated' if demo else 'DISCONNECTED — no adjustment commands enabled')
+        self.next_hint = port.var()
+        self.detail = port.var('Select a step to see its setup instructions.')
         self._build_ui()
         self.refresh_ports(quiet=True)
         self._sync()
-        root.protocol('WM_DELETE_WINDOW', self.close)
+        port.on_close(root, self.close)
 
     # ------------------------------------------------------------------ layout
-    def _build_ui(self):
-        root = self.root
-        banner = ui.Banner(root, 'Fluke 8846A  -  Guided Adjustment',
-                           'Changes calibration coefficients. Authorised technicians only. Every action is written to the audit log.')
-        banner.pack(fill='x')
-        if self.demo:
-            banner.add_pill('DEMO MODE  -  commands simulated', 'warn')
-        self.pill_meter = banner.add_pill('Meter: not connected', 'neutral')
-        self.pill_run = banner.add_pill('No adjustment record', 'neutral')
-        self.pill_lock = banner.add_pill('Calibration LOCKED', 'good')
-        ui.StatusBar(root, self.status, right='v57').pack(side='bottom', fill='x')
-        body = ttk.Frame(root, padding=(18, 14, 18, 10))
-        body.pack(fill='both', expand=True)
+    VIEW = 'fluke8846a_adjust_view'                      # the toolkit's window code: fluke8846a_adjust_view_tk (Tk), later _qt
 
-        ui.Notice(body, 'Live adjustment can change calibration coefficients and CAL:REC writes them to non-volatile memory. '
-                        'Only the validated open steps can be executed in this version; all other stages are guided review.',
-                  'bad').pack(fill='x')
+    @property
+    def ui_view(self): return port.view(self.VIEW)
 
-        top = ttk.Frame(body)
-        top.pack(fill='x', pady=(12, 0))
-        top.columnconfigure(1, weight=1)
-        who = ttk.LabelFrame(top, text='1  Who and what', padding=12)
-        who.grid(row=0, column=0, sticky='nsew', padx=(0, 12))
-        for r_, (label, var) in enumerate((('Instrument ID *', self.asset), ('Serial number *', self.serial), ('Technician *', self.tech))):
-            ttk.Label(who, text=label).grid(row=r_, column=0, sticky='w', pady=3)
-            ttk.Entry(who, textvariable=var, width=22).grid(row=r_, column=1, padx=(10, 0), pady=3)
-        link = ttk.LabelFrame(top, text='2  Connect to the meter', padding=12)
-        link.grid(row=0, column=1, sticky='nsew')
-        ttk.Label(link, text='8846A port').grid(row=0, column=0, sticky='w')
-        self.port_combo = ttk.Combobox(link, textvariable=self.port, width=10)
-        self.port_combo.grid(row=0, column=1, padx=(8, 14))
-        for c_, (text, var, values) in enumerate((('Baud', self.baud, ['9600', '19200', '38400', '115200', '4800', '2400']),
-                                                  ('Parity', self.parity, ['None', 'Even', 'Odd']), ('Bits', self.bits, ['7', '8']))):
-            ttk.Label(link, text=text, style='Muted.TLabel').grid(row=0, column=2 + c_ * 2, sticky='w')
-            ttk.Combobox(link, textvariable=var, values=values, width=7, state='readonly').grid(row=0, column=3 + c_ * 2, padx=(5, 12))
-        row2 = ttk.Frame(link)
-        row2.grid(row=1, column=0, columnspan=8, sticky='w', pady=(12, 0))
-        ttk.Button(row2, text='Refresh ports', command=self.refresh_ports).pack(side='left')
-        self.btn_connect = ttk.Button(row2, text='Connect / verify 8846A', style='Accent.TButton', command=self.connect)
-        self.btn_connect.pack(side='left', padx=8)
-        self.btn_start = ttk.Button(row2, text='Start new adjustment record', command=self.start)
-        self.btn_start.pack(side='left')
-        self.btn_resume = ttk.Button(row2, text='Resume existing record', command=self.resume)
-        self.btn_resume.pack(side='left', padx=8)
-
-        hintrow = ttk.Frame(body)
-        hintrow.pack(fill='x', pady=(12, 6))
-        ttk.Label(hintrow, text='NEXT STEP', style='MetricCap.TLabel').pack(side='left')
-        ttk.Label(hintrow, textvariable=self.next_hint, style='Bold.TLabel', wraplength=900, justify='left').pack(side='left', padx=(12, 0), fill='x', expand=True)
-
-        # audit log and step detail are packed first so they always stay visible
-        log_box = ttk.LabelFrame(body, text='Audit log (this record)', padding=6)
-        self.log_box = log_box
-        self.log_table = ui.make_table(log_box, ('time', 'action', 'outcome', 'detail'), ('Time', 'Action', 'Outcome', 'Detail'),
-                                       (150, 150, 100, 600), anchors={'detail': 'w', 'action': 'w', 'time': 'w'}, height=5,
-                                       stretch={'time': False, 'action': False, 'outcome': False})
-        self.log_table.tag_configure('ok', foreground=ui.C['good'])
-        self.log_table.tag_configure('bad', foreground=ui.C['bad'])
-        bar = ttk.Frame(body)
-        bar.pack(side='bottom', fill='x', pady=(10, 0))
-        self.btn_review = ttk.Button(bar, text='Mark setup reviewed', command=self.mark_reviewed)
-        self.btn_unlock = ttk.Button(bar, text='Unlock adjustment (authorised)', command=self.unlock)
-        self.btn_exec = ttk.Button(bar, text='Execute selected verified open step', style='Accent.TButton', command=self.execute)
-        self.btn_commit = ttk.Button(bar, text='Commit coefficients (CAL:REC)', command=self.commit)
-        self.btn_relock = ttk.Button(bar, text='Relock and disconnect', style='Danger.TButton', command=self.disconnect)
-        for b_ in (self.btn_review, self.btn_unlock, self.btn_exec, self.btn_commit):
-            b_.pack(side='left', padx=(0, 8))
-        self.btn_relock.pack(side='right')
-        self.show_log = tk.BooleanVar(value=False)
-        ttk.Checkbutton(bar, text='Show audit log', variable=self.show_log, command=self._toggle_log).pack(side='right', padx=(0, 16))
-        self._bar = bar
-        info = ttk.LabelFrame(body, text='Selected step', padding=(12, 6))
-        info.pack(side='bottom', fill='x', pady=(10, 0))
-        ttk.Label(info, textvariable=self.detail, wraplength=900, justify='left').pack(anchor='w', fill='x')
-
-        self.tree = ui.make_table(body, ('n', 'phase', 'step', 'setup', 'state'), ('#', 'Phase', 'Step', 'Setup', 'Status'),
-                                  (40, 80, 260, 560, 150), anchors={'step': 'w', 'setup': 'w', 'phase': 'w'}, height=14,
-                                  stretch={'n': False, 'phase': False, 'step': False, 'state': False})
-        self.tree.tag_configure('eligible', background=ui.C['info_bg'])
-        self.tree.tag_configure('done', background=ui.C['good_bg'], foreground=ui.C['good'])
-        for i, (phase, name, setup, _, _, enabled) in enumerate(STEPS):
-            self.tree.insert('', 'end', iid=str(i), values=(i + 1, phase, name, setup, 'Open-step eligible' if enabled else 'Guided review'),
-                             tags=('eligible',) if enabled else ())
-        self.tree.bind('<<TreeviewSelect>>', lambda _e: self._on_select())
-        ui.polish(root)
+    def _build_ui(self): self.ui_view.build_ui(self)
 
     # ------------------------------------------------------------------ state display
-    def _toggle_log(self):
-        if self.show_log.get():
-            self.log_box.pack(side='bottom', fill='x', pady=(10, 0), before=self._bar)
-        else:
-            self.log_box.pack_forget()
+    def _toggle_log(self): self.ui_view.toggle_log(self)
 
     def _set_state(self, idx, text):
-        self.tree.set(str(idx), 'state', text)
-        self.tree.item(str(idx), tags=('done',) if text in ('Reviewed', 'Adjusted', 'Simulated') else
-                       ('eligible',) if STEPS[idx][5] else ())
+        self.ui_view.table_set_state(self, idx, text, ('done',) if text in ('Reviewed', 'Adjusted', 'Simulated') else
+                                     ('eligible',) if STEPS[idx][5] else ())
 
     def _on_select(self):
-        sel = self.tree.selection()
+        sel = self.ui_view.table_selection(self)
         if sel:
             phase, name, setup, _, _, ok = STEPS[int(sel[0])]
             self.detail.set(f'{name}  ({phase})\n{setup}\n' + ('This step can be executed after you unlock adjustment.' if ok else
@@ -206,22 +120,13 @@ class App:
     def _sync(self):
         live = self.meter is not None
         ready = live or self.demo
-        self.pill_meter.set('Meter: DEMO (simulated)' if self.demo else ('Meter: connected' if live else 'Meter: not connected'),
-                            'warn' if self.demo else 'good' if live else 'neutral')
-        self.pill_run.set(f'Record #{self.run_id}' if self.run_id else 'No adjustment record', 'info' if self.run_id else 'neutral')
-        self.pill_lock.set('Calibration UNLOCKED' if self.unlocked else 'Calibration LOCKED', 'bad' if self.unlocked else 'good')
-        sel = self.tree.selection()
+        unlocked = self.unlocked
+        self.ui_view.sync_pills(self, live, unlocked)
+        sel = self.ui_view.table_selection(self)
         eligible = bool(sel) and STEPS[int(sel[0])][5]
-        def en(btn, cond):
-            btn.configure(state='normal' if cond else 'disabled')
-        en(self.btn_connect, not self.unlocked and not self.demo)
-        en(self.btn_start, ready)
-        en(self.btn_resume, True)
-        en(self.btn_review, self.run_id is not None)
-        en(self.btn_unlock, self.run_id is not None and ready and not self.unlocked)
-        en(self.btn_exec, self.unlocked and self.run_id is not None and eligible)
-        en(self.btn_commit, self.unlocked and self.run_id is not None)
-        en(self.btn_relock, live or self.unlocked)
+        self.ui_view.sync_buttons(self, not self.unlocked and not self.demo, ready, True, self.run_id is not None,
+                                  self.run_id is not None and ready and not self.unlocked,
+                                  self.unlocked and self.run_id is not None and eligible, self.unlocked and self.run_id is not None, live or self.unlocked)
         if not ready:
             hint = 'Choose the COM port and press "Connect / verify 8846A".'
         elif self.run_id is None:
@@ -236,7 +141,7 @@ class App:
 
     def _audit_row(self, action, detail, outcome):
         tag = 'bad' if outcome in ('ERROR', 'FAILED') else 'ok' if outcome in ('OK', 'CONFIRMED', 'ISSUED', 'DEMO') else ''
-        self.log_table.insert('', 0, values=(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), action, outcome, detail), tags=(tag,))
+        self.ui_view.log_add(self, (dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), action, outcome, detail), (tag,))
 
     def refresh_ports(self, quiet=False):
         try:
@@ -245,8 +150,8 @@ class App:
         except Exception as e:
             ports = []
             if not quiet:
-                messagebox.showerror('COM ports', str(e))
-        self.port_combo['values'] = ports
+                port.message('error', 'COM ports', str(e))
+        self.ui_view.set_ports(self, ports)
         if not quiet:
             self.status.set('Serial ports found: ' + ', '.join(ports) if ports else 'No serial ports detected - you can still type a port name.')
 
@@ -273,7 +178,7 @@ class App:
         except Exception as e:
             self.meter=None;self._sync()
             self.status.set('Connection error: '+str(e))
-            messagebox.showerror('Connection error',str(e))
+            port.message('error', 'Connection error',str(e))
 
     def reset_meter(self):
         """Reset the 8846A to its default settings before an adjustment record starts (or resumes after reconnecting). The notice about the
@@ -282,91 +187,90 @@ class App:
         if self.demo or not self.meter:
             return True
         try:
-            reset_startup.reset_all([], [self.meter], confirm=lambda t: messagebox.askokcancel('Reset instruments', t, icon='warning'),
+            reset_startup.reset_all([], [self.meter], confirm=lambda t: port.ask_ok_cancel('Reset instruments', t, icon='warning'),
                                     log=self.meter.log)
         except reset_startup.ResetDeclined as e:
             self.status.set('Not started: the 8846A was not reset (nothing was touched).');self.log('RESET','declined by operator','CANCELLED');return False
         except Exception as e:
             self.status.set('Reset failed - not started: '+str(e).splitlines()[0]);self.log('RESET',str(e).splitlines()[0],'FAILED')
-            messagebox.showerror('Reset failed - not started',str(e));return False
+            port.message('error', 'Reset failed - not started',str(e));return False
         self.log('RESET','Instruments reset to default settings at start: '+self.meter.label,'OK')
         return True
 
     def start(self):
         if not all([self.asset.get().strip(),self.serial.get().strip(),self.tech.get().strip()]):
-            messagebox.showwarning('Required information','Enter instrument ID, serial number and technician.');return
+            port.message('warning', 'Required information','Enter instrument ID, serial number and technician.');return
         if not self.demo and not self.meter:
-            messagebox.showwarning('Connection required','Connect and identify the 8846A first.');return
-        if not messagebox.askyesno('Start new record','Start a new adjustment audit record? This does not unlock the meter.'):
+            port.message('warning', 'Connection required','Connect and identify the 8846A first.');return
+        if not port.ask_yes_no('Start new record','Start a new adjustment audit record? This does not unlock the meter.'):
             return
         if not self.reset_meter():return
         cur=self.conn.execute('INSERT INTO adjustment_runs(asset_id,serial_number,technician,meter_idn) VALUES(?,?,?,?)',
                 (self.asset.get().strip(),self.serial.get().strip(),self.tech.get().strip(),
                  self.meter.idn if self.meter else 'DEMO'))
-        self.run_id=cur.lastrowid;self.conn.commit();self.committed=False;self.log_table.delete(*self.log_table.get_children())
+        self.run_id=cur.lastrowid;self.conn.commit();self.committed=False;self.ui_view.log_clear(self)
         self.log('RUN_STARTED','Guided adjustment v57','OK')
         self.status.set(f'Adjustment record #{self.run_id} active; no coefficients committed');self._sync()
 
     def resume(self):
         if not self.asset.get().strip():
-            messagebox.showwarning('Instrument ID','Enter instrument ID to find previous records.');return
+            port.message('warning', 'Instrument ID','Enter instrument ID to find previous records.');return
         row=self.conn.execute('SELECT id,serial_number,technician,status FROM adjustment_runs WHERE asset_id=? ORDER BY id DESC LIMIT 1',
                               (self.asset.get().strip(),)).fetchone()
         if not row:
-            messagebox.showinfo('No record','No previous adjustment record found.');return
+            port.message('info', 'No record','No previous adjustment record found.');return
         if row[3] not in ('IN_PROGRESS','ADJUSTED_NOT_VERIFIED'):
-            messagebox.showwarning('Record closed','Most recent record is closed. Start a new record.');return
-        if not messagebox.askyesno('Resume',f'Resume run #{row[0]} for serial {row[1]}?'):
+            port.message('warning', 'Record closed','Most recent record is closed. Start a new record.');return
+        if not port.ask_yes_no('Resume',f'Resume run #{row[0]} for serial {row[1]}?'):
             return
         self.run_id=row[0];self.serial.set(row[1]);self.tech.set(row[2]);self.log('RUN_RESUMED','Resumed by operator','OK')
         self.status.set(f'Resumed adjustment record #{self.run_id}; reconnect and unlock explicitly');self._sync()
 
     def selected(self):
-        s=self.tree.selection()
+        s=self.ui_view.table_selection(self)
         if not s:
-            messagebox.showwarning('Select a step','Select a row first.');return None
+            port.message('warning', 'Select a step','Select a row first.');return None
         return int(s[0])
 
     def mark_reviewed(self):
         idx=self.selected()
         if idx is None:return
         if self.run_id is None:
-            messagebox.showwarning('Record required','Start or resume an adjustment record first.');return
-        if messagebox.askyesno('Review confirmation',f'Confirm you reviewed the setup and manual requirements for:\n{STEPS[idx][1]}'):
+            port.message('warning', 'Record required','Start or resume an adjustment record first.');return
+        if port.ask_yes_no('Review confirmation',f'Confirm you reviewed the setup and manual requirements for:\n{STEPS[idx][1]}'):
             self.log('SETUP_REVIEWED',STEPS[idx][1],'CONFIRMED',idx)
             self._set_state(idx,'Reviewed')
 
     def unlock(self):
         if self.run_id is None or (not self.demo and not self.meter):
-            messagebox.showwarning('Prerequisites','Start a record and connect the identified 8846A first.');return
-        if not messagebox.askyesno('Authorized adjustment','I am authorized to adjust this instrument, have reviewed the calibration manual, and understand coefficients may change. Continue?'):
+            port.message('warning', 'Prerequisites','Start a record and connect the identified 8846A first.');return
+        if not port.ask_yes_no('Authorized adjustment','I am authorized to adjust this instrument, have reviewed the calibration manual, and understand coefficients may change. Continue?'):
             return
         if self.demo:
             self.unlocked=True;self.log('UNLOCK','Simulated','DEMO');self.status.set('DEMO: unlocked (simulated)');self._sync();return
-        from tkinter import simpledialog
-        pw=simpledialog.askstring('Calibration password','Enter the instrument calibration password:',show='*',parent=self.root)
+        pw=port.ask_text('Calibration password','Enter the instrument calibration password:',show='*',parent=self.root)
         if not pw:return
         if not re.fullmatch(r'[A-Za-z0-9]{1,12}',pw):
-            messagebox.showerror('Password','Expected 1–12 alphanumeric characters.');return
+            port.message('error', 'Password','Expected 1–12 alphanumeric characters.');return
         try:
             self.meter.unlock_calibration(pw)
             self.unlocked=True;self.log('UNLOCK','Calibration security verified OFF','OK')
             self.status.set('UNLOCKED — live adjustment enabled for verified open steps only');self._sync()
         except Exception as e:
             self.log('UNLOCK','Unlock failed','ERROR')
-            messagebox.showerror('Unlock failed',str(e))
+            port.message('error', 'Unlock failed',str(e))
 
     def execute(self):
         idx=self.selected()
         if idx is None:return
         phase,name,setup,mode,value,eligible=STEPS[idx]
         if not eligible:
-            messagebox.showinfo('Not yet validated','This stage is review-only in v56. Exact revision-specific setpoints and 5560A controls require bench validation.');return
+            port.message('info', 'Not yet validated','This stage is review-only in v56. Exact revision-specific setpoints and 5560A controls require bench validation.');return
         if not self.run_id or not self.unlocked:
-            messagebox.showwarning('Prerequisites','Start a record and explicitly unlock adjustment first.');return
-        if not messagebox.askyesno('Confirm physical setup',f'{name}\n\n{setup}\n\nConfirm all inputs are OPEN and no source is connected. Execute one calibration step?'):
+            port.message('warning', 'Prerequisites','Start a record and explicitly unlock adjustment first.');return
+        if not port.ask_yes_no('Confirm physical setup',f'{name}\n\n{setup}\n\nConfirm all inputs are OPEN and no source is connected. Execute one calibration step?'):
             return
-        if not messagebox.askyesno('Final command confirmation',f'Command: CAL:VAL {mode},{value}\nThen: CAL? ON\n\nThis changes volatile calibration coefficients. Proceed?'):
+        if not port.ask_yes_no('Final command confirmation',f'Command: CAL:VAL {mode},{value}\nThen: CAL? ON\n\nThis changes volatile calibration coefficients. Proceed?'):
             return
         try:
             if self.demo:reply='+0'
@@ -378,16 +282,15 @@ class App:
             self.status.set(f'Step {idx} accepted; coefficients NOT committed')
         except Exception as e:
             self.log('ADJUST_STEP',f'{mode},{value}: {e}','FAILED',idx)
-            messagebox.showerror('Adjustment step failed',str(e))
+            port.message('error', 'Adjustment step failed',str(e))
 
     def commit(self):
         if not self.run_id or not self.unlocked:
-            messagebox.showwarning('Prerequisites','Active run and unlocked calibration required.');return
-        if not messagebox.askyesno('Commit calibration coefficients',
+            port.message('warning', 'Prerequisites','Active run and unlocked calibration required.');return
+        if not port.ask_yes_no('Commit calibration coefficients',
              'CAL:REC writes adjusted coefficients to NONVOLATILE MEMORY.\n\nHave you completed the FULL manual adjustment sequence, validated all steps and checked for errors?'):
             return
-        from tkinter import simpledialog
-        phrase=simpledialog.askstring('Final confirmation','Type COMMIT 8846A to authorize CAL:REC:',parent=self.root)
+        phrase=port.ask_text('Final confirmation','Type COMMIT 8846A to authorize CAL:REC:',parent=self.root)
         if phrase!='COMMIT 8846A':return
         try:
             if not self.demo:self.meter.record_calibration()
@@ -395,39 +298,38 @@ class App:
             self.conn.execute("UPDATE adjustment_runs SET status='ADJUSTED_NOT_VERIFIED' WHERE id=?",(self.run_id,));self.conn.commit()
             self.committed=True;self._sync()
             self.status.set('Coefficients recorded; run independent As Left verification before closing calibration')
-            messagebox.showwarning('As Left verification required','Coefficient record command issued. Perform independent As Left verification and save its report.')
+            port.message('warning', 'As Left verification required','Coefficient record command issued. Perform independent As Left verification and save its report.')
         except Exception as e:
-            self.log('CAL_RECORD',str(e),'ERROR');messagebox.showerror('Commit failed',str(e))
+            self.log('CAL_RECORD',str(e),'ERROR');port.message('error', 'Commit failed',str(e))
 
     def disconnect(self):
         if self.meter:
             try:
                 if self.unlocked:
-                    from tkinter import simpledialog
-                    pw=simpledialog.askstring('Relock calibration','Enter calibration password to relock:',show='*',parent=self.root)
+                    pw=port.ask_text('Relock calibration','Enter calibration password to relock:',show='*',parent=self.root)
                     if not pw or not re.fullmatch(r'[A-Za-z0-9]{1,12}',pw):
-                        messagebox.showwarning('Relock not confirmed','Calibration may remain unlocked. Do not leave the instrument unattended.');return
+                        port.message('warning', 'Relock not confirmed','Calibration may remain unlocked. Do not leave the instrument unattended.');return
                     self.meter.lock_calibration(pw)
                     self.log('RELOCK','Security state ON','OK')
                 self.meter.log.append_default(f'8846A adjustment {self.asset.get().strip()} run {self.run_id}')
                 self.meter.close()
             except Exception as e:
-                messagebox.showerror('Relock/close error',f'{e}\nMeter may remain unlocked.');return
+                port.message('error', 'Relock/close error',f'{e}\nMeter may remain unlocked.');return
         self.meter=None;self.unlocked=False;self.committed=False
         self.status.set('Disconnected / demo lock reset');self._sync()
 
     def close(self):
         if self.meter and self.unlocked:
-            messagebox.showwarning('Relock first','Calibration is unlocked. Use Relock and Disconnect before exiting.');return
+            port.message('warning', 'Relock first','Calibration is unlocked. Use Relock and Disconnect before exiting.');return
         try:self.disconnect()
         except Exception:pass
-        self.conn.close();self.root.destroy()
+        self.conn.close();port.close(self.root)
 
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--demo',action='store_true')
     args=parser.parse_args()
-    ui.enable_hidpi()
-    root=tk.Tk();App(root,demo=args.demo);root.mainloop()
+    port.enable_hidpi()
+    port.run_app(lambda root: App(root,demo=args.demo))
 
 if __name__=='__main__':main()

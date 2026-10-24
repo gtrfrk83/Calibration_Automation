@@ -2,15 +2,15 @@
 Hardware I/O is OFF in demo mode. Never run unattended: wiring confirmations required.
 Source: Keysight 34401A Service Guide, Ch 4 pp 69-71.
 """
-import json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time
 from datetime import datetime
 from pathlib import Path
-from tkinter import ttk, messagebox, filedialog
 
 HERE=Path(__file__).resolve().parent
 sys.path.append(str(HERE.parent))  # shared ui_theme.py sits next to the Manager
-import ui_theme as ui
-import ui_shell
+import ui_port
+import ui_theme as ui                   # only its toolkit-free helpers here (si, si_row, report_filename, Settings); the window code is in a34401a_view_tk.py
+from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import appdata
 import datamode
 import procmods_engine
@@ -144,29 +144,26 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         self.root=root;self.demo=demo;self.io=None;self._busy=False;self.stop=False
         self.results={}
         self.pm_init('a34401','34401A',demo=demo,lists=[POINTS])   # procedure modifications: saved overrides for this model
-        ui.apply_theme(root)
-        root.title('Agilent 34401A | Performance Verification v54'+(' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1280, 800, min_w=900, min_h=620)
+        self.ui_view.setup_window(self)
         self.settings=ui.Settings('34401A')
-        self.asset=tk.StringVar();self.serial=tk.StringVar()
-        self.dmm_port=tk.StringVar(value=self.settings.get('dmm_port','COM3'))
-        self.fluke_port=tk.StringVar(value=self.settings.get('fluke_port','COM9'))
-        self.baud=tk.StringVar(value=self.settings.get('baud','9600'))
-        self.parity=tk.StringVar(value=self.settings.get('parity','Even'))
-        self.bits=tk.StringVar(value=self.settings.get('bits','7'))
-        self.status=tk.StringVar()
-        self.detail=tk.StringVar(value='Select a test point to see its limits and wiring.')
-        self.show_section=tk.StringVar(value='All sections')
-        self.show_status=tk.StringVar(value='All points')
+        self.asset=port.var();self.serial=port.var()
+        self.dmm_port=port.var(self.settings.get('dmm_port','COM3'))
+        self.fluke_port=port.var(self.settings.get('fluke_port','COM9'))
+        self.baud=port.var(self.settings.get('baud','9600'))
+        self.parity=port.var(self.settings.get('parity','Even'))
+        self.bits=port.var(self.settings.get('bits','7'))
+        self.status=port.var()
+        self.detail=port.var('Select a test point to see its limits and wiring.')
+        self.show_section=port.var('All sections')
+        self.show_status=port.var('All points')
         self._build_ui()
         self.refresh_ports()
         self.refresh()
         self.status.set(virtualbench.status_text(self) if demo
                         else 'Step 1: enter the Instrument ID. Step 2: choose COM ports and press Test Connections. Step 3: Run All.')
-        root.protocol('WM_DELETE_WINDOW',self.on_close)
-        root.bind('<Control-s>',lambda _e:self.save())
-        import labregistry
-        labregistry.attach(root,self.asset,self.serial, self.status.set)
+        port.on_close(root,self.on_close)
+        port.bind_key(root,'<Control-s>',self.save)
+        self.ui_view.finish_window(self)
 
     # ------------------------------------------------------------------ layout
     @property
@@ -176,64 +173,13 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         self._busy=value
         if hasattr(self,'btn_run'):self._sync_buttons()
 
-    def _sync_buttons(self):
-        idle='disabled' if self._busy else 'normal'
-        for b in (self.btn_run,self.btn_section,self.btn_rerun,self.btn_test,self.btn_load,self.btn_refresh_ports,*self.mode_buttons):b.configure(state=idle)
-        self.btn_stop.configure(state='normal' if self._busy else 'disabled')
-        for c in (self.dmm_combo,self.fluke_combo):c.configure(state='disabled' if self._busy else 'normal')
+    VIEW = 'a34401a_view'                               # the toolkit's window code: a34401a_view_tk (Tk), later _qt
+    @property
+    def ui_view(self): return port.view(self.VIEW)
 
-    def _build_ui(self):
-        root=self.root
-        sh=self.shell=ui_shell.Shell(root,'Agilent 34401A  -  Performance Verification','One-year gain and zero-offset verification  |  Keysight 34401A Service Guide, Ch. 4, pp. 67-71',
-                                     demo=self.demo,on_section=self.pick_section,version='v54',virtual=self.virtual)
-        self.status=sh.status_var
-        self.conn_pill=sh.add_chip(self.chip_text() if self.demo else 'Not connected','neutral')
-        sh.build_identity(self.asset,self.serial)
-        self.build_mode_segment(sh.strip,notice_holder=sh.notice_holder)
-        self.summary=sh.build_progress()
-        if self.demo:sh.notice(self.banner_text(),'warn',title=virtualbench.BANNER_TITLE)
-        else:sh.notice('The program pauses and asks you to confirm the wiring before every new setup and before any high-voltage point. Stay at the bench while a run is in progress.','info')
+    def _sync_buttons(self): self.ui_view.sync_buttons(self)
 
-        conn=sh.drawer_body
-        ttk.Label(conn,text='34401A port').grid(row=0,column=0,sticky='w',pady=4)
-        self.dmm_combo=ttk.Combobox(conn,textvariable=self.dmm_port,width=10,state='normal')
-        self.dmm_combo.grid(row=0,column=1,sticky='w',padx=(10,0),pady=4)
-        ttk.Label(conn,text='Fluke 5560A port').grid(row=1,column=0,sticky='w',pady=4)
-        self.fluke_combo=ttk.Combobox(conn,textvariable=self.fluke_port,width=10,state='normal')
-        self.fluke_combo.grid(row=1,column=1,sticky='w',padx=(10,0),pady=4)
-        for r,(text,var,values) in enumerate((('Baud',self.baud,['9600','4800','2400','1200','600','300']),('Parity',self.parity,['Even','Odd','None']),('Data bits',self.bits,['7','8'])),start=2):
-            ttk.Label(conn,text=text).grid(row=r,column=0,sticky='w',pady=4)
-            ttk.Combobox(conn,textvariable=var,values=values,width=10,state='readonly').grid(row=r,column=1,sticky='w',padx=(10,0),pady=4)
-        ttk.Label(conn,text='Match the DMM front-panel RS-232 settings (2 stop bits).',style='Muted.TLabel',wraplength=ui.px(340),justify='left').grid(row=5,column=0,columnspan=2,sticky='w',pady=(12,0))
-        btns=sh.drawer_footer
-        self.btn_refresh_ports=ttk.Button(btns,text='Refresh ports',command=self.refresh_ports)
-        self.btn_refresh_ports.pack(side='left',padx=(0,8))
-        self.btn_test=ttk.Button(btns,text='Test connections',command=self.test_connections,style='Accent.TButton')
-        self.btn_test.pack(side='left')
-
-        self.btn_run=sh.add_action('▶  Run All Pending',self.run_all,accent=True,short='▶  Run')
-        self.btn_section=sh.add_action('Run Shown Section',self.run_section,short='Section')
-        self.btn_rerun=sh.add_action('Rerun Selected',self.rerun,short='Rerun')
-        self.btn_stop=sh.add_action('■  Stop',self.request_stop,danger=True,short='■ Stop',state='disabled')
-        sh.add_action('Export Report (PDF)',self.export_pdf,side='right',short='PDF')
-        self.btn_load=sh.add_action('Load progress',self.load,side='right',short='Load')
-        sh.add_action('Save progress',self.save,side='right',short='Save')
-        self.pm_live_attach(sh)   # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
-
-        body=sh.content
-        info=ttk.Frame(body);info.pack(side='bottom',fill='x',pady=(8,0))
-        ttk.Label(info,textvariable=self.detail,wraplength=900,justify='left',style='Muted.TLabel').pack(anchor='w',fill='x')
-        ttk.Label(info,text='Zero offsets are verified on BOTH the FRONT and REAR terminals. Optional AC tests are not included.',style='Small.TLabel').pack(anchor='w',pady=(4,0))
-        filt=ttk.Frame(body);filt.pack(side='top',fill='x',pady=(0,6))
-        ttk.Label(filt,text='Test points',style='Bold.TLabel').pack(side='left')
-        c2=ttk.Combobox(filt,textvariable=self.show_status,values=datamode.STATUS_FILTERS,width=14,state='readonly');c2.pack(side='right')
-        ttk.Label(filt,text='Show',style='Muted.TLabel').pack(side='right',padx=(0,6))
-        c2.bind('<<ComboboxSelected>>',lambda _e:self.refresh())
-        self.tree=ui_shell.results_table(self,body)
-        ui_shell.small_window(self,self.tree,filt)
-        self.tree.bind('<<TreeviewSelect>>',self.on_select)
-        self.update_shell_sections(POINTS,self._section)
-        ui.polish(root)
+    def _build_ui(self): self.ui_view.build_ui(self)
 
     @staticmethod
     def _section(p):
@@ -265,10 +211,10 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
             self.status.set('Port detection needs pyserial (py -m pip install pyserial). You can still type a COM number.')
         except Exception as exc:
             self.status.set(f'COM port detection unavailable: {exc}. You can still type a COM number.')
-        for widget,current in ((self.dmm_combo,self.dmm_port),(self.fluke_combo,self.fluke_port)):
+        for widget,current in (('dmm',self.dmm_port),('fluke',self.fluke_port)):
             value=current.get().strip().upper()
             if value and not value.startswith('COM') and value.isdigit():value='COM'+value
-            widget['values']=ports
+            self.ui_view.set_choices(self,widget,ports)
             if value:current.set(value)
         if ports:self.status.set('Serial ports found: '+', '.join(ports)+'. Pick the port for each instrument.')
 
@@ -293,18 +239,14 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
                 return IO('1','2',9600,'None',8,mods=mods)
         return procmods_plan.run_plan(self.pm_state,build,lambda io:io.measure(p))
     def refresh(self):
-        keep=self.tree.selection()
-        self.tree.delete(*self.tree.get_children())
-        for p in POINTS:
-            if self._visible(p):
-                values,tags=self._row(p);self.tree.insert('','end',iid=str(p['id']),values=values,tags=tags)
-        if keep and self.tree.exists(keep[0]):self.tree.selection_set(keep[0])
+        keep=self.ui_view.table_selection(self)
+        self.ui_view.table_set_rows(self,((str(p['id']),*self._row(p)) for p in POINTS if self._visible(p)),keep)
         self.update_summary()
 
     def _update_row(self,p):
         iid=str(p['id'])
-        if self.tree.exists(iid):
-            values,tags=self._row(p);self.tree.item(iid,values=values,tags=tags)
+        if self.ui_view.table_has(self,iid):
+            values,tags=self._row(p);self.ui_view.table_update_row(self,iid,values,tags)
         self.update_summary()
 
     def update_summary(self):
@@ -312,7 +254,7 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         if hasattr(self,'tree'):self.update_shell_sections(POINTS,self._section)
 
     def on_select(self,_event=None):
-        sel=self.tree.selection()
+        sel=self.ui_view.table_selection(self)
         if not sel:return
         p=POINTS[int(sel[0])-1]
         setup=('Zero offset: select the '+p['terminal']+' terminals and fit the short (open for current) - the 5560A stays in STANDBY.'
@@ -321,8 +263,8 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         self.detail.set(f'{p["description"]}\nAcceptable reading: {_v[0]} to {_v[1]} {_u}     |     Setup: {setup}')
 
     def test_connections(self):
-        if self.fast_demo:messagebox.showinfo('Demo mode','Demo mode uses no hardware, so there is nothing to connect.');return
-        self.status.set('Connecting ...');self.root.update_idletasks()
+        if self.fast_demo:port.message('info', 'Demo mode','Demo mode uses no hardware, so there is nothing to connect.');return
+        self.status.set('Connecting ...');port.flush(self.root)
         try:
             self.disconnect()
             if self.virtual:          # demo: the real IO / driver code over a simulated DMM and calibrator
@@ -333,12 +275,12 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         except Exception as exc:
             self.disconnect();self._set_conn(False)
             self.status.set('Connection error: '+str(exc))
-            messagebox.showerror('Connection error',str(exc));return
+            port.message('error', 'Connection error',str(exc));return
         self._set_conn(True)
         if not self.demo:self._save_settings()
         tag=' '+virtualbench.VIRTUAL_TAG if self.virtual else ''
         self.status.set('Connected: '+self.io.ident+tag+'. Fluke output is NOT enabled.')
-        messagebox.showinfo('Connected'+(' (DEMO)' if self.virtual else ''),f'34401A: {self.io.ident}{tag}\nFluke port opened (output not enabled).')
+        port.message('info', 'Connected'+(' (DEMO)' if self.virtual else ''),f'34401A: {self.io.ident}{tag}\nFluke port opened (output not enabled).')
     def disconnect(self):
         if self.io:self.io.close();self.io=None
         self._set_conn(None)
@@ -354,13 +296,13 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
     def run_all(self):self.execute([p for p in POINTS if str(p['id']) not in self.results])
     def run_section(self):self.run_shown_section(POINTS)
     def rerun(self):
-        selected=self.tree.selection()
+        selected=self.ui_view.table_selection(self)
         if selected:self.execute([POINTS[int(selected[0])-1]])
-        else:messagebox.showinfo('Selection','Select a test point first.')
+        else:port.message('info', 'Selection','Select a test point first.')
     def execute(self,points):
         if not self.confirm_found_overwrite(points):return
         if self.busy or not points:return
-        if not self.asset.get().strip():messagebox.showwarning('Instrument ID','Enter an instrument ID.');return
+        if not self.asset.get().strip():port.message('warning', 'Instrument ID','Enter an instrument ID.');return
         points=self.pm_begin_run(points,self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
         if not points:self.status.set('Every selected point is skipped by a procedure modification.');return
         if not self.fast_demo and self.io is None:self.test_connections()
@@ -373,7 +315,7 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         p=points[i]
         try:p,previous=self.pm_step(points,i,previous)          # live edits: applied here, between two points (procmods_live)
         except procmods_engine.LiveApplyError as exc:self._error(exc);return
-        if p is None:self.root.after(30,lambda:self._next(points,i+1,previous));return     # skipped by an edit made during the run
+        if p is None:port.after(self.root,30,lambda:self._next(points,i+1,previous));return     # skipped by an edit made during the run
         if p['wiring']!=previous:
             if not self.fast_demo and p.get('zero_offset'):
                 self.io.standby()
@@ -381,53 +323,53 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
                 instruction=('Leave CURRENT input OPEN (no calibrator connected).'
                              if p['kind']=='DCI' else
                              'Install a low-thermal-EMF copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO. Do NOT use the 5560A as a zero source.')
-                if not ui.confirm_steps(self.root,'Zero offset \u2014 physical setup required',f'Zero-offset setup: {location} terminals',
+                if not port.operator_prompt('Zero offset \u2014 physical setup required',f'Zero-offset setup: {location} terminals',
                     [('Select terminals',f'Use the front-panel FRONT/REAR switch to select the {location} terminals.'),
                      ('Set up the input',instruction)],
                     facts=[('Point',f'{p["id"]} of {len(POINTS)}'),('Terminals',location)],
                     caution='The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.',
-                    ok='Set up \u2014 measure'):
+                    ok='Set up \u2014 measure', parent=self.root):
                     self.busy=False;self.status.set('Paused for zero-offset setup');return
             elif not self.fast_demo:
                 msg={'VOLTAGE':'Connect 5560A voltage output to 34401A HI/LO voltage terminals. Verify safe leads and ranges.',
                      'CURRENT':'Put calibrator in STANDBY. Move leads to 34401A CURRENT input and LO. Check fuses and current ratings.',
                      'RESISTANCE_2W':'Put calibrator in STANDBY. Connect 2-wire resistance leads. 2-wire limits include the manual 0.2 ohm allowance; verify zero/null handling.',
                      'RESISTANCE_4W':'Put calibrator in STANDBY. Connect 4-wire force and sense leads to the correct DMM and calibrator terminals.'}[p['wiring']]
-                if not ui.confirm_steps(self.root,'Rewire / verify before enabling output',f'Connect for {p["kind"]} tests',
+                if not port.operator_prompt('Rewire / verify before enabling output',f'Connect for {p["kind"]} tests',
                     [('Wiring',msg)],
                     facts=[('Next point',f'{p["id"]} of {len(POINTS)}'),('Test',p['description'])],
                     caution='Continue only after physically verifying the connections.',
-                    ok='Connections verified \u2014 continue'):
+                    ok='Connections verified \u2014 continue', parent=self.root):
                     self.busy=False;self.status.set('Paused for wiring');return
         if not self.fast_demo and p['nominal']==1000 and p['kind']=='DCV':
-            if not messagebox.askyesno('HIGH VOLTAGE — 1000 V','This point requires 1000 V DC. Verify CAT-rated leads, connections, clearance, and personnel safety. Enable output?'):
+            if not port.ask_yes_no('HIGH VOLTAGE — 1000 V','This point requires 1000 V DC. Verify CAT-rated leads, connections, clearance, and personnel safety. Enable output?'):
                 self.busy=False;return
         if not self.fast_demo and p['kind']=='ACV' and p['nominal']>=750:
-            if not messagebox.askyesno('HIGH VOLTAGE — 750 V AC','Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.'):
+            if not port.ask_yes_no('HIGH VOLTAGE — 750 V AC','Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.'):
                 self.busy=False;return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
         
-        if self.tree.exists(str(p['id'])):self.tree.selection_set(str(p['id']));self.tree.see(str(p['id']))
+        if self.ui_view.table_has(self,str(p['id'])):self.ui_view.table_select(self,str(p['id']),see=True)
         if self.virtual:virtualbench.operator_sets_up(self._vb,p,terminal=p.get('terminal') if p.get('zero_offset') else None)     # the virtual operator does what the prompt asked
         if self.fast_demo:
             # Synthetic reading explicitly labeled; deterministic for reproducibility.
             reading=p['nominal']+p['error']*math.sin(p['id']*1.71)*0.38
-            self._record(p,reading,True);self.root.after(50,lambda:self._next(points,i+1,p['wiring']))
+            self._record(p,reading,True);port.after(self.root,50,lambda:self._next(points,i+1,p['wiring']))
         else:
             def work():
                 try:
                     reading=self.io.measure(p)
-                    self.root.after(0,lambda:self._done(points,i,p,reading))
+                    port.post(self.root,lambda:self._done(points,i,p,reading))
                 except Exception as exc:
                     try:self.io.standby()
                     except Exception:pass
                     err=exc   # 'exc' is deleted when the except block ends; capture by default arg
-                    self.root.after(0,lambda err=err:self._error(err))
+                    port.post(self.root,lambda err=err:self._error(err))
             threading.Thread(target=work,daemon=True).start()
     def _done(self,points,i,p,reading):
         self._record(p,reading,bool(self.demo))
-        self.root.after(50,lambda:self._next(points,i+1,p['wiring']))
-    def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));messagebox.showerror('Measurement stopped',str(exc))
+        port.after(self.root,50,lambda:self._next(points,i+1,p['wiring']))
+    def _error(self,exc):self.busy=False;self.status.set('Error - run stopped: '+str(exc));port.message('error', 'Measurement stopped',str(exc))
     def _record(self,p,reading,synthetic):
         result='PASS' if abs(reading-p['nominal'])<=p['error'] else 'FAIL'
         self.results[str(p['id'])]=dict(reading=reading,result=result,synthetic=synthetic,timestamp=datetime.now().isoformat(timespec='seconds'),data=self.mode_label,**self.pm_result_fields())
@@ -437,11 +379,11 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         path.write_text(json.dumps(dict(asset=self.asset.get(),serial=self.serial.get(),demo=self.demo,**self.save_fields(),**self.pm_checkpoint_fields()),indent=2))
         if not silent:self.status.set(f'Saved {path.name}')
     def load(self):
-        path=filedialog.askopenfilename(filetypes=[('Checkpoint','*.json')]);
+        path=port.choose_file(filetypes=[('Checkpoint','*.json')]);
         if not path:return
         data=json.loads(Path(path).read_text())
         if self.file_has_synthetic(data) and not self.demo:
-            if not messagebox.askyesno('Synthetic data','Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):return
+            if not port.ask_yes_no('Synthetic data','Checkpoint contains DEMO results. Load only for review (not a real calibration)?'):return
         self.asset.set(data.get('asset',''));self.serial.set(data.get('serial',''));self.load_results(data);self.pm_on_checkpoint(data);self.refresh();self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
     @staticmethod
     def report_section(p):
@@ -464,13 +406,13 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         return rows,pts
     def export_pdf(self):
         rows,pts=self.certificate_rows_and_points()
-        if not rows:messagebox.showinfo('No results','No recorded results to export yet.');return
-        try:import report_pdf,report_dialog
-        except ImportError as exc:messagebox.showerror('Report export',str(exc));return
-        details=report_dialog.ask_details(self.root,'Agilent 34401A one-year verification')
+        if not rows:port.message('info', 'No results','No recorded results to export yet.');return
+        try:import report_pdf
+        except ImportError as exc:port.message('error', 'Report export',str(exc));return
+        details=port.report_details('Agilent 34401A one-year verification', parent=self.root)
         if details is None:return
         asset=''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        path=filedialog.asksaveasfilename(defaultextension='.pdf',filetypes=[('PDF report','*.pdf')],initialfile=ui.report_filename(asset))
+        path=port.save_file(defaultextension='.pdf',filetypes=[('PDF report','*.pdf')],initialfile=ui.report_filename(asset))
         if not path:return
         demo=self.any_synthetic()
         try:
@@ -479,13 +421,14 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
                 rows=report_pdf.apply_tar_tur(rows,details.get('show_tar_tur'),[tartur_wiring.point_fields(p,'5560A') for p in pts])
             report_pdf.write_calibration_pdf(path,rows,header=[('Instrument','Agilent 34401A'),('Instrument ID',self.asset.get()),('Serial',self.serial.get()),('Source','Keysight 34401A Service Guide, Ch. 4 - one-year gain and zero-offset verification')],demo=demo,details=details,footer_note=report_pdf.uncertainty_note(rows,'5560A'),snapshot_context=report_pdf.context_for(self))
         except ImportError:
-            messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab');return
+            port.message('error', 'PDF export dependency','Install the PDF package with:  py -m pip install reportlab');return
         except Exception as exc:
-            messagebox.showerror('PDF export error',str(exc));return
+            port.message('error', 'PDF export error',str(exc));return
         self.status.set(f'Exported {len(rows)} rows: {path}')
     def on_close(self):
-        if self.busy and not messagebox.askyesno('Active run','A point may be active. Stop and close?'):return
-        self.stop=True;self._save_settings();self.disconnect();self.root.destroy()
+        if self.busy and not port.ask_yes_no('Active run','A point may be active. Stop and close?'):return
+        self.stop=True;self._save_settings();self.disconnect();port.close(self.root)
 if __name__=='__main__':
     import sys
-    root=tk.Tk();_demo,_fast=virtualbench.flags(sys.argv);App(root,demo=_demo,fast_demo=_fast);root.mainloop()
+    def build(root):_demo,_fast=virtualbench.flags(sys.argv);App(root,demo=_demo,fast_demo=_fast)
+    port.run_app(build)

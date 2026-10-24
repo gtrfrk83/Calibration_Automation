@@ -62,7 +62,7 @@ def truevolt_app(demo=False, n=14):
 
 def export(app, mod, out, details):
     with mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: dict(details)), \
-            mock.patch.object(mod.filedialog, 'asksaveasfilename', lambda **k: str(out)):
+            mock.patch.object(getattr(mod, 'filedialog', None) or __import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: str(out)):
         app.export_pdf()
 
 

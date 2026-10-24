@@ -51,6 +51,9 @@ class TkLevel(unittest.TestCase):
     def test_shared_helpers(self):                      # WP-S: run queue, manual override, data mode, note, reset (recorded on the unported helpers)
         self.check('shared')
 
+    def test_adjustment_launcher_8846a(self):
+        self.check('adj8846a')
+
 
 class Port(unittest.TestCase):
     def test_every_ported_engine_prompts_only_through_the_port(self):

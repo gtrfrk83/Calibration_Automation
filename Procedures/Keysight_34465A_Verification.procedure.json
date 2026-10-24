@@ -23,10 +23,11 @@
   "code": [
    "Procedures/Keysight_34465A_Verification.py",
    "truevolt_verification.py",
-   "surprise.py",
-   "surprise_view_tk.py",
+   "truevolt_view_tk.py",
    "ui_port.py",
    "ui_port_tk.py",
+   "surprise.py",
+   "surprise_view_tk.py",
    "procspec.py",
    "drivers/base.py",
    "drivers/transport.py",

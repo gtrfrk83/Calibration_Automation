@@ -44,6 +44,14 @@ NOT in the interface yet (each has real call sites; the work package that ports 
     progress window                           run_queue_ui.QueueProgress, used by handheld_dmm / run_queue_engine
     result / table windows                    ui_shell.results_table, ui_theme.make_table: today part of the engine's own window (see 'view')
     custom dialogs                            ui_theme.dialog + Toplevel in Fluke_8808A_Adjustment / Keithley_2000_Adjustment / WaveSurfer; surprise.py's own Toplevel
+
+APPENDED BY WP-A (adjustment launchers; append-only block):
+    ask_value(title, prompt, default, *, parent=None) -> str | None     the adjustment launchers' value-entry window (a custom dialog: prompt text, one entry pre-filled
+                                        with `default`, 'Use this value' / 'Cancel'; Enter accepts).  Returns the text typed (not validated here), None = cancelled.
+                                        Not a secret entry: a calibration code / password is asked with ask_text(..., show='*') and is never recorded.
+    update(win)                         UI thread only.  Process pending events NOW and return (Tk `win.update()`): the adjustment launchers' busy-wait pump, and the
+                                        'tick' they give a driver to stay responsive during a long instrument wait.  (flush(win) only does the idle tasks.)
+    enable_hidpi()                      Call BEFORE run_app: crisp text on scaled Windows displays (ui_theme.enable_hidpi; a no-op elsewhere).  Qt ports may ignore it.
 """
 from __future__ import annotations
 
@@ -233,6 +241,16 @@ class ScriptedUiPort:
     def view(self, name):
         import importlib
         return importlib.import_module(f'{name}_tk')   # the scripted port builds nothing itself: tests that need a window use the Tk view over the stub
+
+    # ---- APPENDED BY WP-A (adjustment launchers; append-only block)
+    def ask_value(self, title, prompt, default, *, parent=None):
+        return self._ask(record('ask_value', title, prompt), default)         # headless: the scripted operator accepts the pre-filled value unless a rule answers
+
+    def update(self, win):
+        self.events.append(('update', ()))
+
+    def enable_hidpi(self):
+        self.events.append(('enable_hidpi', ()))
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
