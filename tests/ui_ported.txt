@@ -2,6 +2,8 @@
 # Read by tests/ui_ported.py: tests/test_ui_prompts.py (which engines must prompt only through the port), tests/test_ui_port_clean.py (no tkinter left in the engine),
 # and the older 'no engine file is edited' branch guards (test_reprint_review_*), which must not trip on a port.  Add your line when you port; keep one engine per line.
 a34410a: agilent34410a_verification.py agilent34410a_view_tk.py Procedures/Agilent_34410A_Verification.procedure.json Procedures/Agilent_34411A_Verification.procedure.json
+adjustments: Procedures/Keithley_2000_Adjustment.py keithley2000_adjust_view_tk.py Procedures/Keithley_2000_Adjustment.procedure.json Procedures/Fluke_8808A_Adjustment.py fluke8808a_adjust_view_tk.py Procedures/Fluke_8808A_Adjustment.procedure.json
+adj8846a: Procedures/Fluke_8846A_Adjustment.py fluke8846a_adjust_view_tk.py Procedures/Fluke_8846A_Adjustment.procedure.json
 truevolt: truevolt_verification.py truevolt_view_tk.py Procedures/Keysight_34460A_Verification.procedure.json Procedures/Keysight_34461A_Verification.procedure.json Procedures/Keysight_34465A_Verification.procedure.json Procedures/Keysight_34470A_Verification.procedure.json
 dacq: dacq_verification.py dacq_view_tk.py Procedures/Keysight_34970A_Verification.procedure.json Procedures/Keysight_34972A_Verification.procedure.json
 k2000: keithley2000_verification.py k2000_view_tk.py Procedures/Keithley_2000_Verification.procedure.json
