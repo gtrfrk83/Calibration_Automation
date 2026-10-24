@@ -22,6 +22,9 @@
   "code": [
    "Procedures/Klein_MM325_Verification.py",
    "handheld_dmm.py",
+   "handheld_dmm_view_tk.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "hookups.py#mm325",
    "drivers/base.py",
    "drivers/transport.py",

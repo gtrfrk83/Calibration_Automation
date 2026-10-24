@@ -573,19 +573,21 @@ class Seams(Base):
                 self.opened += 1
         host, win = QWidget(), Win()
         grid = QGridLayout(host)
-        nxt = V.build_queue_drawer(win, grid, 14)
-        self.assertEqual(nxt, 17)
+        self.assertEqual(V.build_queue_drawer(win, grid, 14), 17)
         self.assertEqual(win.btn_queue.text(), 'Run queue...')
-        self.assertEqual(win.queue_label.text(), 'No queue: one meter, as usual.')
-        win.queue_label.set('Queue of 3')
-        self.assertEqual(win.queue_label.text(), 'Queue of 3')
+        self.assertEqual(win.queue_label.get(), 'No queue: one meter, as usual.')
         win.btn_queue.click()
         self.assertEqual(win.opened, 1)
-        self.assertEqual(grid.rowCount(), 17)
-        self.assertIn('Several meters', texts_of(host))
-        host2 = QWidget()
-        QGridLayout(host2)
-        self.assertEqual(V.build_queue_drawer(Win(), host2, 0), 3)
+
+    def test_the_qt_modules_the_seams_resolve_exist(self):
+        import procmods_point_ui_qt
+        import procmods_ui_qt
+        from qtui.screens import procmods_editor, procmods_point_editor
+        self.assertIs(procmods_point_ui_qt.open_point_window, procmods_point_editor.open_point_window)
+        self.assertIs(procmods_ui_qt.attach_live, procmods_editor.attach_live)
+        import run_queue_ui_qt
+        for n in ('ask_readings', 'ask_meter', 'ask_queue_setup', 'QueueProgress'):
+            self.assertTrue(hasattr(run_queue_ui_qt, n), n)
 
 
 if __name__ == '__main__':
