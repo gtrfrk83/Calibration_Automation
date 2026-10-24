@@ -328,10 +328,12 @@ class Report(unittest.TestCase):
 
 class ZeroFlips(unittest.TestCase):
     EDITED = ('report_review_adapters.py',)
+    EDITED_LATER = ('mdo4000c_verification.py',)      # edited by later work (logic probe removal), not by phase 2
 
     def test_no_engine_or_launcher_file_is_changed(self):
         base = subprocess.run(['git', 'diff', '--name-only', 'origin/main'], cwd=ROOT, capture_output=True, text=True).stdout.split()
-        engines = [f for f in base if f.endswith('_verification.py') or f.startswith('Procedures/') or f.endswith('.procedure.json')]
+        engines = [f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.endswith('.procedure.json'))
+                   and f not in self.EDITED_LATER]
         self.assertEqual(engines, [], 'phase 2 edits no engine, procedure or sidecar file')
 
     def test_adapters_are_in_no_fingerprint_list(self):

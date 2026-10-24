@@ -176,7 +176,7 @@ def run_mdo():
     wrapped = {k: rec(v) for k, v in t.items()}
     r = Runner(c)
     io = r.build('mdo4000c_verification.IO.__init__', lambda: M.IO(dict(cal_baud=9600), transports=wrapped))
-    cfg = M.Config('4104C', 'SA6', True, True, True, True)
+    cfg = M.Config('4104C', 'SA6', True, True, True)
 
     class FakeApp:
         stop = False

@@ -152,8 +152,8 @@ COVERAGE = {
         'TektronixMDO4000C': dict(
             covered=['connect', 'installed_options', 'opc', 'check_errors', 'cleanup', 'set_verified', 'set_enum_verified', 'default_setup',
                      'select_only', 'channel', 'acquire_mode', 'timebase', 'delay', 'trigger_line', 'trigger_edge', 'measure_setup',
-                     'stats_reset', 'stat_mean', 'stat_stddev', 'meas_value', 'mean_of', 'delay_stddev', 'fetch', 'edge_time', 'digital_on',
-                     'digital_threshold', 'digital_state', 'rf_cmd', 'rf_setup', 'rf_rbw', 'rf_trace', 'afg_set', 'afg_off', 'dvm',
+                     'stats_reset', 'stat_mean', 'stat_stddev', 'meas_value', 'mean_of', 'delay_stddev', 'fetch', 'edge_time',
+                     'rf_cmd', 'rf_setup', 'rf_rbw', 'rf_trace', 'afg_set', 'afg_off', 'dvm',
                      'dvm_value', 'dvm_frequency', 'run_diagnostics', 'run_spc'],
             no_command=['rf_settle']),                                      # time.sleep only; the sleep is recorded by the engines' runs
     },
@@ -1185,9 +1185,6 @@ def cases_mdo(c):
     c.run('TektronixMDO4000C.delay_stddev', m.delay_stddev, 1, 50, 2.0)
     c.run('TektronixMDO4000C.fetch', m.fetch, 'CH1')
     c.run('TektronixMDO4000C.edge_time', m.edge_time, 1)
-    c.run('TektronixMDO4000C.digital_on', m.digital_on)
-    c.run('TektronixMDO4000C.digital_threshold', m.digital_threshold, 3, 1.4)
-    c.run('TektronixMDO4000C.digital_state', m.digital_state, 3, settle=1.0)
     c.run('TektronixMDO4000C.rf_cmd[on]', m.rf_cmd, 'on')
     c.run('TektronixMDO4000C.rf_cmd[center]', m.rf_cmd, 'center', v=1e9)
     c.run('TektronixMDO4000C.rf_cmd[avg_count]', m.rf_cmd, 'avg_count', n=8)
