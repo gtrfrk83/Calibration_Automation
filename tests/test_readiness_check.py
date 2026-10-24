@@ -308,6 +308,37 @@ class ReportAndExit(unittest.TestCase):
         self.assertIn('No procedure', r.stdout + r.stderr)
 
 
+class SurpriseInFingerprint(unittest.TestCase):
+    """A wired engine depends on surprise.py: the sidecar file list must name it (static, no run)."""
+
+    def _exp(self, pid):
+        proc = RC.procscan.find(pid + '.py', ROOT) or next(p for p in RC.procscan.procs(ROOT) if p.id == pid)
+        return proc, RC.expected_fingerprint(proc, {})
+
+    def test_wired_engines_expect_and_list_surprise(self):
+        for pid in ('Keysight_34460A_Verification', 'Keysight_34970A_Verification', 'Agilent_34410A_Verification'):
+            proc, exp = self._exp(pid)
+            self.assertIn('surprise.py', exp, pid)
+            self.assertIn('surprise.py', proc.fingerprint_code, pid)
+
+    def test_an_unwired_engine_does_not_expect_it(self):
+        _proc, exp = self._exp('Fluke_117_Verification')
+        self.assertNotIn('surprise.py', exp)
+
+    def test_listed_surprise_is_reported_as_listed(self):
+        proc, _exp = self._exp('Keysight_34460A_Verification')
+        rep = RC.Report(proc=proc)
+        RC.check_fingerprint(rep, proc, {})
+        self.assertFalse([f for f in rep.findings if f.level == RC.WARN], [f.text for f in rep.findings])   # no 'incomplete' warning
+        self.assertFalse([d for f in rep.findings for d in f.details if 'missing from the fingerprint list' in d and 'surprise.py' in d])
+        # and the same file without it in the list is reported as missing
+        import dataclasses
+        bare = dataclasses.replace(proc, fingerprint_code=tuple(c for c in proc.fingerprint_code if c != 'surprise.py'))
+        rep2 = RC.Report(proc=bare)
+        RC.check_fingerprint(rep2, bare, {})
+        self.assertTrue([d for f in rep2.findings for d in f.details if 'missing from the fingerprint list' in d and 'surprise.py' in d])
+
+
 class SimulatedRun(unittest.TestCase):
     """One procedure through the simulated bench, end to end (about 2 s)."""
 

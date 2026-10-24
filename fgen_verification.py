@@ -30,6 +30,7 @@ import appdata
 import datamode
 import procmods_engine
 import reset_startup
+import surprise
 import virtualbench
 import drivers
 
@@ -181,7 +182,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """The generator under test, the 5790B, and (optionally) a counter and a power meter. A reference left without an
     address is read by the technician: ask_number(prompt, unit) is called and must return a float (or None to stop)."""
 
-    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT', mods=None, virtual=False):
+    def __init__(self, addrs, transports=None, ask_number=None, std_input='INPUT1', flat_method='POWER', counter_ref='EXT', mods=None, virtual=False,
+                 surprise_handler=None):
         self.log = drivers.CommandLog()
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
@@ -211,6 +213,40 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         except Exception:
             self.close(); raise
         self.ident = self.uut.idn
+        self.guards = []
+        if surprise_handler is not None:
+            self.enable_surprise(surprise_handler)
+
+    # replies that must be numbers (the first field of a comma list counts), per registry key; every other reply is only checked for empty / a prompt character
+    _EXPECT = {'selftest': 'float', 'load.query': 'float', 'offs.query': 'float', 'freq.query': 'float', 'volt.query': 'float',       # generator under test
+               'meas.query': 'float', 'range.query': 'float', 'extrig.query': 'float',                                               # 5790B
+               'read': 'float', 'imp.query': 'float', 'gate.query': 'float', 'exp.query': 'float', 'rosc.freq.query': 'float',        # counter
+               'freq.meas': 'float', 'power.meas': 'float'}                                                                          # generic counter / power meter
+
+    def enable_surprise(self, handler, force=False):
+        """Stop on surprise (surprise.py, opt-in; wired here at the engine level, no driver edited).  handler(Surprise) -> True = Continue; it must have
+        been made on the Tk thread (surprise.tk_handler).  On every instrument (generator, 5790B, counter, power meter) a reply that is empty / a prompt
+        character / not a number where a number is expected, or a query that times out twice, is a Stop-only surprise.  The generator's OUTP? is left to
+        the driver (an output state it cannot confirm stays a SafetyError / InstrumentError, never a dialog).  A setting whose read-back does not match, and
+        an error-queue entry after a setting, are routed through surprise.checked (see _checked): Stop only, except one case.  No write is ever repeated.
+        A virtual (demo) command log is left alone unless force=True (tests), so the simulated bench never prompts."""
+        self.guards = [g for g in (surprise.attach_guard(o, handler, force, expect=self._EXPECT, stop_only=True, skip=('outp.query',) if o is self.uut else ())
+                                   for o in (self.uut, self.std, self.counter, self.power) if o is not None) if g]
+        return self.guards
+
+    def _checked(self, inst, call, *args, errq_continue=False, readback='the value that was set', **kw):
+        """A driver call that sets something, reads it back and compares, then reads the error queue (all inside the one driver method).  With no guard it
+        is exactly `call(*args)`.  With one, a failure after an exchange with the instrument is the surprise it was: the read-back that did not match
+        (Stop only: the driver call stopped part-way, the rest of the settings were never sent) or the error-queue entry (Stop only, or Stop / Continue
+        when errq_continue: the queue check is the last thing the driver method does, so Continue leaves it exactly as if the queue had been empty).  A failure
+        before anything was sent (a range check) and a +2009 'no external timebase' (the counter's own, expected, diagnosis) keep the driver's message."""
+        def how(_exc, command, reply):
+            if not command or reply.lstrip().lstrip('+').startswith('2009'):
+                return None
+            if 'ERR?' in command.upper():
+                return dict(kind='errqueue', expected='empty error queue', stop_only=not errq_continue)
+            return dict(kind='readback', expected=readback, stop_only=True)
+        return surprise.checked(inst, call, *args, classify=how, **kw)
 
     def reset_roles(self):
         return [d for d in (self.std, self.counter, self.power) if d is not None], [self.uut]
@@ -286,9 +322,9 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                     dict(counter='typed', reference=('EXT (operator)' if ext else 'INT (operator)')))
         raw = dict(reference='not checked (generic counter)')
         if isinstance(self.counter, drivers.Keysight5313x):
-            ref_hz = self.counter.set_reference(self.counter_ref)          # EXT: selected, checked now, and re-checked every reading
+            ref_hz = self._checked(self.counter, self.counter.set_reference, self.counter_ref)          # EXT: selected, checked now, and re-checked every reading
             gate_s = self.pm_param('fgen.counter_gate', 1.0)
-            self.counter.configure_frequency(channel=1, gate_s=gate_s, impedance=50, coupling='AC', expected_hz=expected_hz)
+            self._checked(self.counter, self.counter.configure_frequency, channel=1, gate_s=gate_s, impedance=50, coupling='AC', expected_hz=expected_hz)
             src, auto = self.counter.reference()
             if src != self.counter_ref:
                 raise drivers.InstrumentError(f'Counter timebase is {src}, expected {self.counter_ref}.')
@@ -303,13 +339,15 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if self.power:
             try:
                 return self.power.power()
+            except surprise.SurpriseStop:
+                raise
             except drivers.InstrumentError as exc:
                 raise drivers.InstrumentError(f'{exc} - check the sensor, attenuator and cable, and that the power meter is zeroed.') from exc
         return self._manual(f'Read the power meter in dBm ({what}). Relative mode and offset OFF: type the absolute reading.', 'dBm')
 
     def _out(self, p, frequency=None):
-        self.uut.setup(p['function'], frequency or p['frequency'], p['amplitude'], p['amp_unit'], p['load'])
-        self.uut.output(True)
+        self._checked(self.uut, self.uut.setup, p['function'], frequency or p['frequency'], p['amplitude'], p['amp_unit'], p['load'])    # the output is enabled next: Stop only
+        self._checked(self.uut, self.uut.output, True, readback='OUTP? = 1')         # OUTP? is not guarded; an unconfirmed ON is a Stop-only surprise, an unconfirmed OFF stays a SafetyError
         time.sleep(virtualbench.scaled(self._settle(p), self.virtual))
 
     def _settle(self, p):
@@ -329,15 +367,15 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def _measure(self, p, results, pref_cache):
         k = p['kind']
         if k == 'SELFTEST':
-            passed, detail = self.uut.self_test()
+            passed, detail = self._checked(self.uut, self.uut.self_test)
             return (0 if passed else 1), dict(detail=detail)
         if k == 'TIMEBASE':
             self._out(p)
             return self._frequency(p['frequency'])
         if k in ('ACAMP', 'LFFLAT'):
-            self.std.select_input(self.std_input)
-            self.std.set_external_trigger(True)
-            self.std.set_range_for(p['nominal'])
+            self._checked(self.std, self.std.select_input, self.std_input)
+            self._checked(self.std, self.std.set_external_trigger, True, errq_continue=True)       # the queue check is its last step
+            self._checked(self.std, self.std.set_range_for, p['nominal'])
             self._out(p)
             return self._std_volts(p['frequency']), {}
         if k == 'FLAT' and self.flat_method == 'WBND':
@@ -367,6 +405,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         where = where or ('the WIDEBAND input' if self.std.last_input == 'WBND' else self.std.last_input)
         try:
             volts, freq = self.std.measure()
+        except surprise.SurpriseStop:
+            raise                                       # the operator's Stop (the dialog already said what and where), not a message to extend
         except drivers.InstrumentError as exc:
             raise drivers.InstrumentError(f'{exc} - check the cable to the 5790B {where}.') from exc
         if not math.isclose(freq, expected_hz, rel_tol=0.01):
@@ -381,9 +421,9 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         expected = math.sqrt(10 ** (p['amplitude'] / 10) * 1e-3 * 50.0)      # dBm into 50 ohm -> V rms
         if expected > 7.0:
             raise drivers.SafetyError(f'{p["amplitude"]:+.2f} dBm is {expected:.2f} V rms, above the 5790B wideband 7 V range.')
-        self.std.select_input('WBND')
-        self.std.set_external_trigger(True)
-        rng = self.std.set_range_for(expected)
+        self._checked(self.std, self.std.select_input, 'WBND')
+        self._checked(self.std, self.std.set_external_trigger, True, errq_continue=True)
+        rng = self._checked(self.std, self.std.set_range_for, expected)
         key = p['section']
         if key not in ref_cache:
             self._out(p, WBND_REF_HZ)
@@ -834,7 +874,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                              flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=self.pm_state, virtual=True)
             else:
                 self.io = IO(self._addrs(), ask_number=self.ask_number_threadsafe, std_input=STD_INPUTS[self.std_input.get()],
-                             flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=self.pm_state)
+                             flat_method=self.method(), counter_ref=COUNTER_REFS[self.counter_ref.get()], mods=self.pm_state,
+                             surprise_handler=self._surprise_handler())
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
@@ -846,6 +887,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.status.set('Connected: ' + self.io.ident + tag + '. Generator output is OFF.')
         messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'{MODEL}: {self.io.ident}\nFluke 5790B: {self.io.std.idn}\n{extra}\n'
                             + (f'You will type the readings for: {", ".join(manual)}.\n' if manual else '') + 'Generator output is OFF.' + tag)
+
+    def _surprise_handler(self):
+        """The Stop / Continue dialog for stop-on-surprise, made ON the Tk thread (here: the Test connections handler), once per window.
+        None in demo (virtual or fast): the simulated bench never prompts."""
+        if self.demo or self.fast_demo: return None
+        if getattr(self, '_sp_handler', None) is None: self._sp_handler = surprise.tk_handler(self.root)
+        return self._sp_handler
 
     def disconnect(self):
         if self.io: self.io.close(); self.io = None

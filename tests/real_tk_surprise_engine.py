@@ -1,6 +1,6 @@
 """Real-Tk check of an engine wired for stop-on-surprise (run by tests/test_surprise_wiring.py in a subprocess; not a test module).
 
-    python tests/real_tk_surprise_engine.py <engine> <scenario>        engine: truevolt | dacq | a34410      scenario: clean | stop | continue
+    python tests/real_tk_surprise_engine.py <engine> <scenario>        engine: truevolt | dacq | a34410 | fgen      scenario: clean | stop | continue
 
 The real engine window (real Tk, a worker thread, mainloop) is connected to simulated instruments with a fault injected (tests/surprise_faults.py).
 The Stop / Continue dialog must appear ON the Tk thread, with the right buttons, and the answer must do what the engine promises:
@@ -71,6 +71,8 @@ class Setup:
         self.expect_stop = dict(recorded=1, text='READ?')
         self.expect_continue = dict(recorded=3, text='-113')
         self.prepare = lambda app: None
+        self.n_guards = 2
+        self.standby_tail = ['STBY']
 
     def a34410(self):
         import agilent34410a_verification as A
@@ -90,6 +92,8 @@ class Setup:
         self.expect_stop = dict(recorded=1, text='READ?')
         self.expect_continue = dict(recorded=3, text='-113')
         self.prepare = lambda app: None
+        self.n_guards = 2
+        self.standby_tail = ['STBY']
 
     def dacq(self):
         import dacq_verification as D
@@ -109,6 +113,30 @@ class Setup:
         self.expect_stop = dict(recorded=1, text='READ?')
         self.expect_continue = dict(recorded=3, text='-113')
         self.prepare = lambda app: (app.dmm_addr.set('COM1'), app.cal_addr.set('COM9'))
+        self.n_guards = 2
+        self.standby_tail = ['STBY']
+
+    def fgen(self):
+        import fgen_verification as F
+        from drivers.simulated_fgen import make_fgen_bench
+        self.mod = F
+        F.configure('33220A')
+        bench, t = make_fgen_bench('33220A')
+        bench.connected = 'std'                                                       # the generator output is cabled to the 5790B (the ACAMP points)
+        s_rules = []
+        if self.scenario == 'stop':
+            s_rules = [Rule('MEAS?', '=>', nth=4)]                                    # a prompt character where a reading was expected (the first MEAS? of point 2: point 1 took three, two unsettled)
+        elif self.scenario == 'continue':
+            s_rules = [Rule('ERR?', '-113,"Undefined header"', after='EXTRIG', nth=2)]      # the 5790B's queue after EXTRIG: connect (no EXTRIG), point 1 (1), point 2 (2)
+        self.dmm, self.cal = FaultTransport(t['uut']), FaultTransport(t['std'], *s_rules)         # (named dmm / cal only for the shared code: generator, 5790B)
+        self.points = [p for p in F.POINTS if p['kind'] == 'ACAMP'][:3]
+        self.app_args = ('33220A',)
+        self.open_visa = lambda addr, **k: self.dmm if addr.upper().startswith('USB') else self.cal
+        self.expect_stop = dict(recorded=1, text='MEAS?')
+        self.expect_continue = dict(recorded=3, text='-113')
+        self.prepare = lambda app: None
+        self.n_guards = 2
+        self.standby_tail = ['OUTP OFF', 'OUTP?']                                     # the engine's own all_off
 
 
 def main(engine, scenario):
@@ -130,7 +158,7 @@ def main(engine, scenario):
     app.serial.set('S1')
     S.prepare(app)
     app.test_connections()                                       # on the Tk thread: the handler is made here, as in the real window
-    check('real connection: both instruments guarded', len(app.io.guards) == 2, app.io.guards)
+    check('real connection: every connected instrument guarded', len(app.io.guards) == S.n_guards, app.io.guards)
     state = {'dialog': None, 'started': False, 'pressed': False, 'texts': ''}
     answer = 'stop' if scenario == 'stop' else 'continue'
 
@@ -169,7 +197,7 @@ def main(engine, scenario):
         check('stop: dialog names the command and says why', exp['text'] in state['texts'] and 'Continue is not offered' in state['texts'], state['texts'][:600])
         check('stop: the points before it are recorded', recorded == exp['recorded'], recorded)
         check('stop: the engine shows its own error dialog', [b for b in log['boxes'] if b[0] == 'showerror'], log['boxes'])
-        check('stop: outputs end in standby', wire[-1] == 'STBY', wire[-5:])
+        check('stop: outputs end in standby / off', wire[-len(S.standby_tail):] == S.standby_tail, wire[-5:])
         check('stop: the surprise is in the command log', any(e[2] == '!!' and 'SURPRISE reply' in e[3] for e in app.io.log.entries))
     else:
         exp = S.expect_continue

@@ -51,10 +51,11 @@ class ScannedEqualsOldRegistry(unittest.TestCase):
                 self.assertIn(f'hook_{p.hookup_meter}', p.diagram_prefixes)
 
     def test_old_fingerprint_files_are_a_superset_of_the_new_ones(self):
-        """The new declared lists only DROP what a procedure does not use (hookups.py of the meter-less 287/289); they never add a dependency."""
+        """The new declared lists only DROP what a procedure does not use (hookups.py of the meter-less 287/289); the one addition is surprise.py
+        (stop-on-surprise, owner-approved: it is listed by the engines that import it)."""
         for key, old in LEGACY['FILES'].items():
             new = verified.FILES[key]
-            self.assertLessEqual(set(new['code']), set(old['code']), key)
+            self.assertLessEqual(set(new['code']) - {'surprise.py'}, set(old['code']), key)
             self.assertEqual(new['spec'], old['spec'], key)
             self.assertEqual(set(old['code']) - set(new['code']), {'hookups.py'} if key in ('Fluke_287_Verification.py', 'Fluke_289_Verification.py') else set(), key)
 
