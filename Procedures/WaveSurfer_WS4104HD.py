@@ -16,6 +16,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))  # shared ui_theme.py sits next to the Manager
+import ui_port
 import ui_theme as ui
 import ui_shell
 import appdata
@@ -24,6 +25,7 @@ import drivers
 import procmods
 import procmods_engine
 import reset_startup
+from ui_port import ui as port          # every dialog, scheduler call and window operation goes through the UI port (ui_port.py)
 
 DEFAULT_ADDRESS = 'USB0::0x05FF::0x1023::LCRY4903C19426::0::INSTR'
 SCALES = [0.002, 0.005, 0.010, 0.020, 0.050, 0.100, 0.200, 0.500, 1.000]
@@ -164,68 +166,68 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.rows = []
         self.run_config = None
         self.checkpoint_path = appdata.progress_path('rms_noise_checkpoint_v5.json')
-        self.instrument_id = tk.StringVar(value='')
-        self.serial = tk.StringVar(value='')
-        self.visa_address = tk.StringVar(value=DEFAULT_ADDRESS)
-        self.channel = tk.StringVar(value='1')
-        self.all_channels = tk.BooleanVar(value=True)
+        self.instrument_id = port.var('')
+        self.serial = port.var('')
+        self.visa_address = port.var(DEFAULT_ADDRESS)
+        self.channel = port.var('1')
+        self.all_channels = port.var(True, 'bool')
         self.awaiting_channel = False
-        self.ref_factor = tk.StringVar(value='2.75')
-        self.delay = tk.StringVar(value=self.pm_text('ws.rms_delay', 3, '3'))
-        self.samples = tk.StringVar(value=self.pm_text('ws.rms_samples', 5, '5'))
-        self.status = tk.StringVar(value='Disconnected')
-        self.reading = tk.StringVar(value='—')
-        self.db_reading = tk.StringVar(value='—')
-        self.limit_text = tk.StringVar(value=','.join(map(str, LIMITS)))
+        self.ref_factor = port.var('2.75')
+        self.delay = port.var(self.pm_text('ws.rms_delay', 3, '3'))
+        self.samples = port.var(self.pm_text('ws.rms_samples', 5, '5'))
+        self.status = port.var('Disconnected')
+        self.reading = port.var('—')
+        self.db_reading = port.var('—')
+        self.limit_text = port.var(','.join(map(str, LIMITS)))
         self.dc_rows = []
         self.dc_retest_index = None
         self.dc_config = None
         self.noise_retest_index = None
         self.noise_retest_result = None
         self.dc_checkpoint = appdata.progress_path('dcv_checkpoint_v6.json')
-        self.fluke_address = tk.StringVar(value='ASRL9::INSTR')
-        self.fluke_baud = tk.StringVar(value='9600')
-        self.dc_status = tk.StringVar(value='DC voltage verification ready')
-        self.dc_reading = tk.StringVar(value='—')
+        self.fluke_address = port.var('ASRL9::INSTR')
+        self.fluke_baud = port.var('9600')
+        self.dc_status = port.var('DC voltage verification ready')
+        self.dc_reading = port.var('—')
         self.dc_running = False
         self.dc_pending = None
         self.dc_batch = False
         self.dc_batch_channel = None
         self.dc_batch_point_ok = False
-        self.dc_p1_mode = tk.BooleanVar(value=True)
-        self.dc_auto_fluke = tk.BooleanVar(value=True)
-        self.dc_settle = tk.StringVar(value=self.pm_text('ws.dcv_settle', 3.0, '3.0'))
+        self.dc_p1_mode = port.var(True, 'bool')
+        self.dc_auto_fluke = port.var(True, 'bool')
+        self.dc_settle = port.var(self.pm_text('ws.dcv_settle', 3.0, '3.0'))
         self.offset_rows = []
         self.offset_running = False
         self.offset_batch = False
         self.offset_ok = False
         self.offset_connected_channel = None
         self.offset_checkpoint = appdata.progress_path('offset_mean_checkpoint_v28.json')
-        self.offset_status = tk.StringVar(value='Ready — 0 of 16 offset points')
-        self.offset_settle = tk.StringVar(value=self.pm_text('ws.offset_settle', 3.0, '3.0'))
+        self.offset_status = port.var('Ready — 0 of 16 offset points')
+        self.offset_settle = port.var(self.pm_text('ws.offset_settle', 3.0, '3.0'))
         self.bw_rows = []
         self.bw_running = False
         self.bw_batch = False
         self.bw_ok = False
         self.bw_connected_channel = None
         self.bw_checkpoint = appdata.progress_path('bandwidth_checkpoint_v29.json')
-        self.bw_status = tk.StringVar(value='Ready — 0 of 24 bandwidth points')
-        self.bw_settle = tk.StringVar(value=self.pm_text('ws.bw_settle', 3.0, '3.0'))
+        self.bw_status = port.var('Ready — 0 of 24 bandwidth points')
+        self.bw_settle = port.var(self.pm_text('ws.bw_settle', 3.0, '3.0'))
         self.tb_rows = []
         self.tb_running = False
         self.tb_retest_index = None
-        self.tb_status = tk.StringVar(value='Ready \u2014 0 of 1 time base point')
-        self.tb_settle = tk.StringVar(value=self.pm_text('ws.tb_settle', 3.0, '3.0'))
-        self.tb_samples = tk.StringVar(value=self.pm_text('ws.tb_samples', 5, '5'))
-        self.tb_period_us = tk.StringVar(value='10')
+        self.tb_status = port.var('Ready \u2014 0 of 1 time base point')
+        self.tb_settle = port.var(self.pm_text('ws.tb_settle', 3.0, '3.0'))
+        self.tb_samples = port.var(self.pm_text('ws.tb_samples', 5, '5'))
+        self.tb_period_us = port.var('10')
         self.trig_rows = []
         self.trig_running = False
         self.trig_batch = False
         self.trig_ok = False
         self.trig_retest_index = None
         self.trig_connected_channel = None
-        self.trig_status = tk.StringVar(value='Ready \u2014 0 of 24 trigger level points')
-        self.trig_settle = tk.StringVar(value=self.pm_text('ws.trig_settle', 1.0, '1.0'))
+        self.trig_status = port.var('Ready \u2014 0 of 24 trigger level points')
+        self.trig_settle = port.var(self.pm_text('ws.trig_settle', 1.0, '1.0'))
         self.imp_rows = []
         self.imp_running = False
         self.imp_batch = False
@@ -233,9 +235,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.imp_connection_confirmed = False
         self.imp_connected_input = None
         self.imp_checkpoint = appdata.progress_path('impedance_checkpoint_v11.json')
-        self.imp_status = tk.StringVar(value='Ready — 0 of 28 impedance points')
-        self.imp_settle = tk.StringVar(value=self.pm_text('ws.imp_settle', 2.0, '2.0'))
-        self.imp_samples = tk.StringVar(value=self.pm_text('ws.imp_samples', 3, '3'))
+        self.imp_status = port.var('Ready — 0 of 28 impedance points')
+        self.imp_settle = port.var(self.pm_text('ws.imp_settle', 2.0, '2.0'))
+        self.imp_samples = port.var(self.pm_text('ws.imp_samples', 3, '3'))
         self._ckpt_key = None
         self._ckpt_id = ''
         self._pm_ws_last = {v: getattr(self, v).get() for v, _n, _d, _t in PM_VARS}   # what each box held when the modifications were applied
@@ -264,7 +266,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.load_timebase_checkpoint()
         self.show_trigger()
         self.load_trigger_checkpoint()
-        self.root.after(100, self.process_events)
+        port.after(self.root, 100, self.process_events)
         self.load_checkpoint()
         self.load_dc_checkpoint()
         self.load_impedance_checkpoint()
@@ -279,10 +281,10 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.refresh_trigger()
         self.dc_status.set(f'{len(self.dc_rows)} of 80 DCV points recorded. Automatic Fluke control is OFF until enabled.')
         self.imp_status.set(f'{len(self.imp_rows)} of 28 impedance points recorded.')
-        self.root.protocol('WM_DELETE_WINDOW', self.on_close)
+        port.on_close(self.root, self.on_close)
         self.build_unified()
         ui.polish(self.root)
-        self.root.after(500, self.update_tab_titles)
+        port.after(self.root, 500, self.update_tab_titles)
         if '--demo' in sys.argv:
             self.load_demo_data()
 
@@ -519,7 +521,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         ui_shell.small_window(self, self.utree, filt)
         self.utree.bind('<<TreeviewSelect>>', self.on_unified_select)
         self.refresh_unified(force=True)
-        self.root.after(500, self._unified_tick)
+        port.after(self.root, 500, self._unified_tick)
         import labregistry
         labregistry.attach(self.root, self.instrument_id, self.serial, self.msg.set)
         self.sync_asset()                       # --asset <ID> from the Manager
@@ -620,14 +622,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def run_section(self):
         if self.show_function.get() == 'All functions':
-            messagebox.showinfo('Section', 'Choose a function in the Show box first.', parent=self.root)
+            port.message('info', 'Section', 'Choose a function in the Show box first.', parent=self.root)
             return
         self.run_pending()
 
     def _confirm_found_overwrite(self, kind, what):
         if self._mode != datamode.FOUND or not self._stored_rows(datamode.LEFT, kind):
             return True
-        return messagebox.askyesno(
+        return port.ask_yes_no(
             'Replace the As Found reading?',
             f'{what} already has As Left readings, so the instrument has been adjusted since the As Found run.\n\n'
             'Measuring As Found again now replaces the original As Found reading with a reading from the adjusted instrument.\n\n'
@@ -749,17 +751,17 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def run_pending(self):
         if self._batch_busy():
-            messagebox.showwarning('Busy', 'Wait for the current measurement to finish.', parent=self.root)
+            port.message('warning', 'Busy', 'Wait for the current measurement to finish.', parent=self.root)
             return
         if '--demo' not in sys.argv and not self.instrument_id.get().strip():
-            messagebox.showinfo('Instrument ID needed', 'Enter the Instrument ID first. Results are saved separately for each instrument.', parent=self.root)
+            port.message('info', 'Instrument ID needed', 'Enter the Instrument ID first. Results are saved separately for each instrument.', parent=self.root)
             return
         if not self.sync_asset():
             return
         only = self._selected_kind()
         kinds = [k for k, _n in self.FUNCS if (only is None or k == only) and self._pending(k)]
         if not kinds:
-            messagebox.showinfo('Nothing pending', 'Every point in the selected function is already recorded.', parent=self.root)
+            port.message('info', 'Nothing pending', 'Every point in the selected function is already recorded.', parent=self.root)
             return
         self.chain, self._idle = kinds, 0
         self.msg.set('Running: ' + ', '.join(self.FUNC_NAME[k] for k in kinds))
@@ -786,14 +788,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         sel = self.utree.selection()
         if len(sel) != 1:
-            messagebox.showinfo('Select a result', 'Select one completed test point in the table.', parent=self.root)
+            port.message('info', 'Select a result', 'Select one completed test point in the table.', parent=self.root)
             return
         e = self._entries_cache[sel[0]]
         tree = {'noise': self.tree, 'dcv': self.dc_tree, 'impedance': self.imp_tree, 'offset': self.offset_tree, 'bandwidth': self.bw_tree,
                 'timebase': self.tb_tree, 'trigger': self.trig_tree}[e['kind']]
         kids = tree.get_children()
         if not e['done'] or e['idx'] >= len(kids):
-            messagebox.showinfo('Not tested yet', 'That point has not been measured yet. Use Run Pending, or pick a recorded point to rerun.', parent=self.root)
+            port.message('info', 'Not tested yet', 'That point has not been measured yet. Use Run Pending, or pick a recorded point to rerun.', parent=self.root)
             return
         if not self._confirm_found_overwrite(e['kind'], 'This function'):
             return
@@ -804,12 +806,12 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def clear_function(self):
         kind = self._selected_kind()
         if kind is None:
-            messagebox.showinfo('Choose a function', 'Choose one function in the Show list first. Results are cleared one function at a time.', parent=self.root)
+            port.message('info', 'Choose a function', 'Choose one function in the Show list first. Results are cleared one function at a time.', parent=self.root)
             return
         if self._batch_busy() or not self.sync_asset():
             return
         extra = '\n\nAs Left readings for this function are kept.' if self._mode == datamode.FOUND and self._stored_rows(datamode.LEFT, kind) else ''
-        if not messagebox.askyesno('Clear results', f'Clear all saved {self.mode_label} {self.FUNC_NAME[kind]} results? This cannot be undone.' + extra, parent=self.root):
+        if not port.ask_yes_no('Clear results', f'Clear all saved {self.mode_label} {self.FUNC_NAME[kind]} results? This cannot be undone.' + extra, parent=self.root):
             return
         if kind == 'noise':
             self.clear_results()
@@ -869,7 +871,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                             self.chain = []          # stopped, cancelled at a prompt, or an error: leave the rest to the technician
         except tk.TclError:
             return
-        self.root.after(500, self._unified_tick)
+        port.after(self.root, 500, self._unified_tick)
 
     def show_settings_dialog(self):
         win = ui.dialog(self.root, 'Test settings')
@@ -938,7 +940,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return True
         if self._batch_busy():
             self.instrument_id.set(self._ckpt_id)
-            messagebox.showwarning('Busy', 'The Instrument ID cannot change while a measurement is running.', parent=self.root)
+            port.message('warning', 'Busy', 'The Instrument ID cannot change while a measurement is running.', parent=self.root)
             return False
         self._mode_sets = {}
         self._mode = datamode.FOUND                 # another instrument starts on As Found
@@ -990,7 +992,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self._pm_write_sidecar()
             return True
         except procmods_engine.LiveApplyError as exc:
-            messagebox.showerror('Edits not applied', str(exc), parent=self.root)
+            port.message('error', 'Edits not applied', str(exc), parent=self.root)
             return False
 
     def pm_driver_classes(self):
@@ -1219,7 +1221,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         legacy = [(a, p) for a, p in old.items() if p.exists() and not getattr(self, a).exists()]
         if not legacy:
             return
-        if not messagebox.askyesno('Earlier results found',
+        if not port.ask_yes_no('Earlier results found',
                                    f'Results saved by an earlier version (not tied to an instrument) were found.\n\nAssign them to {self._ckpt_id or key}?\n\n'
                                    'Choose No to leave them untouched (they are not deleted).', parent=self.root):
             return
@@ -1249,7 +1251,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 self.conn_pill.set('Scope: connection failed', 'bad')
         except tk.TclError:
             return
-        self.root.after(1000, self.update_tab_titles)
+        port.after(self.root, 1000, self.update_tab_titles)
 
     def make_dcv_ui(self):
         # DC Voltage has its own tab; no duplicate toolbar buttons needed.
@@ -1431,13 +1433,13 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.progress_text.set(f'Completed {len(self.rows)} of {self.total_ranges()} ranges')
 
     def confirm_channel(self, channel, scale):
-        return ui.confirm_steps(self.root, 'Prepare channel', f'Prepare CH{channel} for the next measurement',
+        return port.operator_prompt('Prepare channel', f'Prepare CH{channel} for the next measurement',
             [('Move the 50 \u03a9 termination', f'Put the external 50 \u03a9 BNC termination on CH{channel}.'),
              ('Check the scope', 'All four channels ON, DC 1 M\u03a9, full bandwidth, 1 ms/div, averaging / ERES off.'),
              ('Automatic', f'The program sets P1 to StdDev of CH{channel} for you.')],
             facts=[('Channel', f'CH{channel}'), ('Range', self.range_text(scale))],
             caution='Cancel keeps all completed results saved so you can Resume.',
-            ok='Ready \u2014 start measuring')
+            ok='Ready \u2014 start measuring', parent=self.root)
 
     def launch_remaining(self, resume=False):
         if self.running or self.run_config is None or len(self.rows) >= self.total_ranges():
@@ -1467,7 +1469,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if idx is None:
             return
         if self.run_config is None:
-            messagebox.showinfo('No saved run', 'Start a test first.')
+            port.message('info', 'No saved run', 'Start a test first.')
             return
         config = self.run_config
         row = self.rows[idx]
@@ -1488,11 +1490,11 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         try:
             if self.get_config() != self.run_config:
-                messagebox.showerror('Settings changed',
+                port.message('error', 'Settings changed',
                     'Settings differ from the saved run. Restore the original settings before resuming.')
                 return
         except (ValueError, TypeError) as exc:
-            messagebox.showerror('Invalid configuration', str(exc))
+            port.message('error', 'Invalid configuration', str(exc))
             return
         self.launch_remaining(resume=True)
 
@@ -1502,14 +1504,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         try:
             config = self.get_config()
         except (ValueError, TypeError) as exc:
-            messagebox.showerror('Invalid configuration', str(exc))
+            port.message('error', 'Invalid configuration', str(exc))
             return
         chans = ', '.join(f'CH{c}' for c in config['channels'])
-        if not ui.confirm_steps(self.root, 'New test', 'Start a new RMS noise test',
+        if not port.operator_prompt('New test', 'Start a new RMS noise test',
             [('Saved results', 'Existing saved noise results will be cleared.'),
              ('Method', 'Confirm the 2.75-division method and the limits are applicable.')],
             facts=[('Channels', chans), ('Ranges', f'{self.total_ranges()} measurements')],
-            ok='Clear and start'):
+            ok='Clear and start', parent=self.root):
             return
         self.clear_results()
         self.run_config = config
@@ -1577,14 +1579,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 kind = event[0]
                 if kind == 'ask':
                     _k, title, question, reply = event
-                    reply.put(messagebox.askyesnocancel(title, question, parent=self.root))
+                    reply.put(port.ask_yes_no_cancel(title, question, parent=self.root))
                 elif kind == 'tb_result':
                     self.record_timebase(event[1], event[2], event[3] if len(event) > 3 else ())
                 elif kind in ('tb_error', 'tb_safety'):
                     self.tb_retest_index = None
                     if kind == 'tb_error':
                         self.tb_status.set('ERROR: ' + event[1])
-                    messagebox.showerror('Time base error' if kind == 'tb_error' else 'Fluke output safety', event[1], parent=self.root)
+                    port.message('error', 'Time base error' if kind == 'tb_error' else 'Fluke output safety', event[1], parent=self.root)
                 elif kind == 'tb_idle':
                     self.tb_running = False
                 elif kind == 'trig_result':
@@ -1599,12 +1601,12 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                     else:
                         if kind == 'trig_error':
                             self.trig_status.set('ERROR: ' + event[1])
-                        messagebox.showerror('Trigger level error' if kind == 'trig_error' else 'Fluke output safety', event[1], parent=self.root)
+                        port.message('error', 'Trigger level error' if kind == 'trig_error' else 'Fluke output safety', event[1], parent=self.root)
                 elif kind == 'trig_idle':
                     self.trig_running = False
                     if self.trig_batch and self.trig_ok:
                         self.trig_ok = False
-                        self.root.after(250, self.next_trigger)
+                        port.after(self.root, 250, self.next_trigger)
                 if kind == 'bw_result':
                     self.record_bandwidth(event[1],event[2],event[3])
                     self.bw_ok = True
@@ -1613,17 +1615,17 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                     self.bw_batch = False
                     self.bw_ok = False
                     self.bw_status.set('ERROR: '+event[1])
-                    messagebox.showerror('Bandwidth error',event[1],parent=self.root)
+                    port.message('error', 'Bandwidth error',event[1],parent=self.root)
                 elif kind == 'bw_safety':
                     self.bw_retest_index = None
                     self.bw_batch = False
                     self.bw_ok = False
-                    messagebox.showerror('Fluke output safety',event[1],parent=self.root)
+                    port.message('error', 'Fluke output safety',event[1],parent=self.root)
                 elif kind == 'bw_idle':
                     self.bw_running = False
                     if self.bw_batch and self.bw_ok:
                         self.bw_ok = False
-                        self.root.after(250,self.next_bandwidth)
+                        port.after(self.root, 250,self.next_bandwidth)
                 if kind == 'offset_result':
                     self.record_offset(event[1], event[2], event[3])
                     self.offset_ok = True
@@ -1632,24 +1634,24 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                     self.offset_batch = False
                     self.offset_ok = False
                     self.offset_status.set('ERROR: ' + event[1])
-                    messagebox.showerror('Offset measurement error', event[1], parent=self.root)
+                    port.message('error', 'Offset measurement error', event[1], parent=self.root)
                 elif kind == 'offset_safety':
                     self.offset_retest_index = None
                     self.offset_batch = False
                     self.offset_ok = False
-                    messagebox.showerror('Fluke safety', event[1], parent=self.root)
+                    port.message('error', 'Fluke safety', event[1], parent=self.root)
                 elif kind == 'offset_idle':
                     self.offset_running = False
                     if self.offset_batch and self.offset_ok:
                         self.offset_ok = False
-                        self.root.after(250, self.next_offset)
+                        port.after(self.root, 250, self.next_offset)
                 if kind == 'connection':
                     self.connected = event[1]
                     self.status.set(('Connected: ' if event[1] else 'Connection failed: ') + event[2])
                 elif kind == 'dc_value':
                     if getattr(self, 'dc_window', None) and self.dc_window.winfo_exists():
                         self.dc_next_button.configure(state='normal')
-                        if messagebox.askyesno('Confirm P1 reading', f'Scope P1 returned {event[2]:+.6f} V.\n\nIs P1 set to MEAN of CH{event[1]["channel"]} and is this reading valid?', parent=self.root):
+                        if port.ask_yes_no('Confirm P1 reading', f'Scope P1 returned {event[2]:+.6f} V.\n\nIs P1 set to MEAN of CH{event[1]["channel"]} and is this reading valid?', parent=self.root):
                             self.record_dcv(event[1],event[2],'scope P1 MEAN (operator confirmed)')
                 elif kind == 'dc_auto_value':
                     if getattr(self, 'dc_window', None) and self.dc_window.winfo_exists():
@@ -1661,7 +1663,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                         elif self.dc_batch:
                             self.record_dcv(event[1], event[2], 'automatic Fluke SCOPE DCV / single P1 MEAN reading')
                             self.dc_batch_point_ok = True
-                        elif messagebox.askyesno('Confirm automatic DCV reading',
+                        elif port.ask_yes_no('Confirm automatic DCV reading',
                             f'Fluke returned to STBY. Scope P1 returned {event[2]:+.6f} V.\n\n'
                             f'Was P1 configured to MEAN of CH{event[1]["channel"]}, and is this result valid?',
                             parent=self.root):
@@ -1672,17 +1674,17 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                         self.dc_next_button.configure(state='normal')
                         if self.dc_batch and self.dc_batch_point_ok:
                             self.dc_batch_point_ok = False
-                            self.root.after(200, self.next_dcv)
+                            port.after(self.root, 200, self.next_dcv)
                 elif kind == 'dc_safety':
                     self.dc_retest_index = None
                     self.dc_batch = False
-                    messagebox.showerror('OUTPUT SAFETY WARNING', event[1])
+                    port.message('error', 'OUTPUT SAFETY WARNING', event[1])
                 elif kind == 'dc_error':
                     self.dc_retest_index = None
                     self.dc_batch = False
                     if getattr(self, 'dc_window', None) and self.dc_window.winfo_exists():
                         self.dc_next_button.configure(state='normal')
-                    messagebox.showerror('DCV read error', event[1])
+                    port.message('error', 'DCV read error', event[1])
                 elif kind == 'imp_result':
                     self.record_impedance(event[1], event[2], event[3])
                     self.imp_batch_success = True
@@ -1691,22 +1693,22 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                     self.imp_batch = False
                     self.imp_batch_success = False
                     self.imp_status.set('Impedance measurement error — point not recorded')
-                    messagebox.showerror('Impedance measurement error', event[1], parent=getattr(self,'imp_window',self.root))
+                    port.message('error', 'Impedance measurement error', event[1], parent=getattr(self,'imp_window',self.root))
                 elif kind == 'imp_safety':
                     self.imp_retest_index = None
                     self.imp_batch = False
                     self.imp_batch_success = False
-                    messagebox.showerror('FLUKE SCOPE MODE', event[1], parent=getattr(self,'imp_window',self.root))
+                    port.message('error', 'FLUKE SCOPE MODE', event[1], parent=getattr(self,'imp_window',self.root))
                 elif kind == 'imp_idle':
                     self.imp_running = False
                     if getattr(self, 'imp_window', None) and self.imp_window.winfo_exists():
                         self.imp_next_button.configure(state='normal')
                         if self.imp_batch and self.imp_batch_success:
                             self.imp_batch_success = False
-                            self.root.after(300, self.next_impedance)
+                            port.after(self.root, 300, self.next_impedance)
                 elif kind == 'fluke':
                     self.status.set(('Fluke connected: ' if event[1] else 'Fluke error: ') + event[2])
-                    messagebox.showinfo('Fluke connection', event[2]) if event[1] else messagebox.showerror('Fluke connection', event[2])
+                    port.message('info', 'Fluke connection', event[2]) if event[1] else port.message('error', 'Fluke connection', event[2])
                 elif kind == 'status':
                     self.status.set(event[1])
                 elif kind == 'row' and self.noise_retest_index is not None:
@@ -1728,24 +1730,24 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                         self.progress_text.set(f'Stopped — {len(self.rows)} of {self.total_ranges()} ranges saved')
                     elif len(self.rows) == self.total_ranges():
                         self.progress_text.set(f'Completed — {len(self.rows)} of {self.total_ranges()} ranges')
-                        messagebox.showinfo('Test complete', 'All selected channels are complete. Export the report (PDF) to save it.')
+                        port.message('info', 'Test complete', 'All selected channels are complete. Export the report (PDF) to save it.')
                     else:
                         # Schedule on the Tk event loop so the next channel is
                         # prepared only after the previous VISA session closes.
-                        self.root.after(300, self.launch_remaining)
+                        port.after(self.root, 300, self.launch_remaining)
                 elif kind == 'error' and self.noise_retest_index is not None:
                     self.noise_retest_index = None
                     self.set_running(False)
                     self.progress_text.set('Retest failed — previous result kept')
-                    messagebox.showerror('Measurement error', event[1])
+                    port.message('error', 'Measurement error', event[1])
                 elif kind == 'error':
                     self.set_running(False)
                     self.status.set('Test error — completed ranges preserved; use Resume Test')
                     self.progress_text.set(f'Interrupted — {len(self.rows)} of {self.total_ranges()} ranges saved')
-                    messagebox.showerror('Measurement error', event[1])
+                    port.message('error', 'Measurement error', event[1])
         except queue.Empty:
             pass
-        self.root.after(100, self.process_events)
+        port.after(self.root, 100, self.process_events)
 
     def stop_test(self):
         self.stop_event.set()
@@ -1768,26 +1770,26 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def on_close(self):
         if self.tb_running or self.trig_running:
-            messagebox.showwarning('Measurement running', 'Finish the current point (answer any trigger question) and wait for Fluke STBY confirmation before closing.')
+            port.message('warning', 'Measurement running', 'Finish the current point (answer any trigger question) and wait for Fluke STBY confirmation before closing.')
             return
         if self.bw_running:
-            messagebox.showwarning('Bandwidth running',
+            port.message('warning', 'Bandwidth running',
                 'Wait for Fluke STBY confirmation before closing.')
             return
         if self.offset_running:
-            messagebox.showwarning('Offset running', 'Wait for Fluke STBY confirmation before closing.')
+            port.message('warning', 'Offset running', 'Wait for Fluke STBY confirmation before closing.')
             return
         if self.imp_running:
-            messagebox.showwarning('Impedance in progress', 'Wait for the Fluke SCOPE OFF confirmation before closing.')
+            port.message('warning', 'Impedance in progress', 'Wait for the Fluke SCOPE OFF confirmation before closing.')
             return
         if self.dc_running:
-            messagebox.showwarning('DCV in progress', 'Wait until the automatic DCV point completes and Fluke STBY is confirmed before closing.')
+            port.message('warning', 'DCV in progress', 'Wait until the automatic DCV point completes and Fluke STBY is confirmed before closing.')
             return
         if self.running:
-            if not messagebox.askyesno('Test running', 'Stop the test and close the window?'):
+            if not port.ask_yes_no('Test running', 'Stop the test and close the window?'):
                 return
             self.stop_event.set()
-        self.root.destroy()
+        port.close(self.root)
 
 
     def test_fluke(self):
@@ -1877,18 +1879,18 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def retest_selected_dcv(self):
         """Retest an existing result without changing sequential checkpoint progress."""
         if self.running or self.dc_running or self.imp_running or self.dc_retest_index is not None:
-            messagebox.showwarning('Busy', 'Finish the current measurement first.', parent=self.root)
+            port.message('warning', 'Busy', 'Finish the current measurement first.', parent=self.root)
             return
         selected = self.dc_tree.selection()
         if len(selected) != 1:
-            messagebox.showinfo('Select a row', 'Select exactly one completed DCV result in the table.', parent=self.root)
+            port.message('info', 'Select a row', 'Select exactly one completed DCV result in the table.', parent=self.root)
             return
         idx = self.dc_tree.index(selected[0])
         if idx >= len(self.dc_rows):
-            messagebox.showinfo('Not tested yet', 'That point has not been measured yet. Use Run DCV Automatically / Resume DCV, or pick a recorded row to retest.', parent=self.root)
+            port.message('info', 'Not tested yet', 'That point has not been measured yet. Use Run DCV Automatically / Resume DCV, or pick a recorded row to retest.', parent=self.root)
             return
         if not (self.dc_auto_fluke.get() and self.dc_p1_mode.get()):
-            messagebox.showwarning('Automatic retest',
+            port.message('warning', 'Automatic retest',
                 'Enable automatic Fluke SCOPE DCV and scope P1 MEAN to retest.', parent=self.root)
             return
         try:
@@ -1897,18 +1899,18 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             if not math.isfinite(settle) or not 0.5 <= settle <= 30:
                 raise ValueError('Settling time must be 0.5–30 seconds')
         except ValueError as exc:
-            messagebox.showerror('Settings', str(exc), parent=self.root)
+            port.message('error', 'Settings', str(exc), parent=self.root)
             return
         point = self.dcv_points()[idx]
         ch = point['channel']
-        if not ui.confirm_steps(self.root, 'Confirm DCV retest connection', f'Retest DCV point {idx+1} of 80',
+        if not port.operator_prompt('Confirm DCV retest connection', f'Retest DCV point {idx+1} of 80',
             [('Connect the cable', f'Fluke SCOPE output cable to CH{ch}.'),
              ('Remove other sources', 'No external terminators, probes or other sources on the input.'),
              ('Automatic', 'The scope is set to DC 1 M\u03a9 and 20 MHz BW for you.')],
             facts=[('Channel', f'CH{ch}'), ('Test voltage', f'{point["nominal_v"]:+g} V'),
                    ('Range', self.range_text(point["scale_v_div"]))],
             caution='The previous reading is kept in the retest history. A good new reading replaces the displayed result; an error leaves it unchanged.',
-            ok='Connected \u2014 retest'):
+            ok='Connected \u2014 retest', parent=self.root):
             return
         self.dc_batch = False
         self.dc_batch_point_ok = False
@@ -1923,10 +1925,10 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def resume_dcv(self):
         """Resume at the first unrecorded DCV point using the saved checkpoint."""
         if self.dc_running or self.running or self.imp_running:
-            messagebox.showwarning('Busy', 'Wait for the current measurement to finish.', parent=self.root)
+            port.message('warning', 'Busy', 'Wait for the current measurement to finish.', parent=self.root)
             return
         if len(self.dc_rows) >= len(self.dcv_points()):
-            messagebox.showinfo('DCV complete', 'All 80 DCV points are recorded.', parent=self.root)
+            port.message('info', 'DCV complete', 'All 80 DCV points are recorded.', parent=self.root)
             return
         self.dc_status.set(f'Resuming DCV at point {len(self.dc_rows)+1} of 80.')
         if self.dc_auto_fluke.get() and self.dc_p1_mode.get():
@@ -1936,13 +1938,13 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def start_dcv_batch(self):
         if self.dc_running or self.running or self.imp_running:
-            messagebox.showwarning('Busy', 'Wait for the current test point to finish.', parent=self.root)
+            port.message('warning', 'Busy', 'Wait for the current test point to finish.', parent=self.root)
             return
         if len(self.dc_rows) >= len(self.dcv_points()):
-            messagebox.showinfo('Complete', 'All DCV points are complete.', parent=self.root)
+            port.message('info', 'Complete', 'All DCV points are complete.', parent=self.root)
             return
         if not (self.dc_auto_fluke.get() and self.dc_p1_mode.get()):
-            messagebox.showwarning('Automatic DCV', 'Enable both automatic Fluke output and scope P1 acquisition.', parent=self.root)
+            port.message('warning', 'Automatic DCV', 'Enable both automatic Fluke output and scope P1 acquisition.', parent=self.root)
             return
         self.dc_batch = True
         self.dc_batch_channel = None
@@ -1955,7 +1957,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def next_dcv(self):
         if self.running or self.dc_running or self.imp_running:
-            messagebox.showwarning('Busy', 'Another measurement is in progress.')
+            port.message('warning', 'Busy', 'Another measurement is in progress.')
             return
         if not self._pm_boundary('DC voltage'):
             self.dc_batch = False
@@ -1964,13 +1966,13 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         i = len(self.dc_rows)
         if i >= len(points):
             self.dc_batch = False
-            messagebox.showinfo('DCV complete', 'All 80 DCV points completed. Export the report (PDF).')
+            port.message('info', 'DCV complete', 'All 80 DCV points completed. Export the report (PDF).')
             return
         point = points[i]
         ch, scale, nominal = point['channel'], point['scale_v_div'], point['nominal_v']
         automatic = self.dc_auto_fluke.get()
         if automatic and not self.dc_p1_mode.get():
-            messagebox.showwarning('Automatic mode', 'Enable automatic scope P1 MEAN acquisition to use automatic Fluke output control.')
+            port.message('warning', 'Automatic mode', 'Enable automatic scope P1 MEAN acquisition to use automatic Fluke output control.')
             return
         if automatic:
             try:
@@ -1978,7 +1980,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 if not math.isfinite(settle) or not 0.5 <= settle <= 30:
                     raise ValueError()
             except ValueError:
-                messagebox.showerror('Settle time', 'Settle time must be 0.5 to 30 seconds.')
+                port.message('error', 'Settle time', 'Settle time must be 0.5 to 30 seconds.')
                 return
             msg = dict(heading=f'DCV point {i+1} of 80',
                 steps=[('Connect the cable', f'Fluke SCOPE output cable to CH{ch}. Remove any external 50 \u03a9 terminator.'),
@@ -1998,23 +2000,23 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if self.dc_batch:
             if not automatic:
                 self.dc_batch = False
-                messagebox.showerror('Automatic DCV', 'Fluke automatic output control is required.', parent=self.root)
+                port.message('error', 'Automatic DCV', 'Fluke automatic output control is required.', parent=self.root)
                 return
             if self.dc_batch_channel != ch:
                 # A physical cable change is mandatory at every new channel.
-                if not ui.confirm_steps(self.root, f'Connect DCV cable \u2014 CH{ch}',
+                if not port.operator_prompt(f'Connect DCV cable \u2014 CH{ch}',
                     f'Connect the Fluke SCOPE output to CH{ch}',
                     [('Connect', f'Fluke SCOPE output cable to CH{ch}.'),
                      ('Remove', 'External terminators, probes and any other sources.'),
                      ('Verify', 'Scope input is DC coupling, 1 M\u03a9, 20 MHz BW.')],
                     facts=[('Channel', f'CH{ch}'), ('Test', 'Every positive and negative DCV voltage for this channel')],
                     caution='The program applies each voltage automatically and verifies Fluke STBY after every point. Press OK only after the cable is connected and safe.',
-                    ok='Connected and safe \u2014 start'):
+                    ok='Connected and safe \u2014 start', parent=self.root):
                     self.dc_batch = False
                     self.dc_status.set('Automatic DCV paused at channel connection.')
                     return
                 self.dc_batch_channel = ch
-        elif not ui.confirm_steps(self.root, 'Confirm DCV test setup', **msg):
+        elif not port.operator_prompt('Confirm DCV test setup', **msg, parent=self.root):
             return
         if automatic:
             self.dc_running = True
@@ -2045,7 +2047,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         notice = getattr(self, '_reset_notice', None)
         if notice is None:
             notice = self._reset_notice = reset_startup.SessionNotice(
-                self.root, lambda text: messagebox.askokcancel('Reset instruments', text, icon='warning', parent=self.root))
+                self.root, lambda text: port.ask_ok_cancel('Reset instruments', text, icon='warning', parent=self.root))
         reset_startup.reset_all([fluke] if fluke is not None else [], [scope] if scope is not None else [], confirm=notice, log=log)
 
     def _pm_bench(self, log, *insts):
@@ -2118,8 +2120,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.events.put(('dc_idle',))
 
     def enter_dcv_manual(self, point):
-        from tkinter import simpledialog
-        value=simpledialog.askfloat('Measured DC voltage',
+        value=port.ask_number('Measured DC voltage',
             f'CH{point["channel"]} | {point["nominal_v"]:+.6f} V applied\n'
             'Enter measured oscilloscope MEAN in VOLTS:', parent=self.root)
         if value is None: return
@@ -2150,7 +2151,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def record_dcv(self,point,value,method,stats=None):
         if not math.isfinite(value):
-            messagebox.showerror('Invalid value','Measurement must be finite.')
+            port.message('error', 'Invalid value','Measurement must be finite.')
             return
         row=dict(point, measured_v=value, error_v=value-point['nominal_v'],
                  result='PASS' if point['lower_v'] <= value <= point['upper_v'] else 'FAIL',
@@ -2228,7 +2229,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.dc_status.set(f'Could not load DCV checkpoint: {exc}')
 
     def clear_dcv(self):
-        if not messagebox.askyesno('Clear DCV results','Delete all DCV results and checkpoint?',parent=self.root):return
+        if not port.ask_yes_no('Clear DCV results','Delete all DCV results and checkpoint?',parent=self.root):return
         self.dc_rows=[]
         self.dc_retest_index = None
         self.dc_checkpoint.unlink(missing_ok=True)
@@ -2336,20 +2337,20 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def resume_impedance(self):
         """Resume at the first unrecorded impedance point."""
         if self.running or self.dc_running or self.imp_running:
-            messagebox.showwarning('Busy', 'Wait for the current measurement to finish.', parent=self.root)
+            port.message('warning', 'Busy', 'Wait for the current measurement to finish.', parent=self.root)
             return
         if len(self.imp_rows) >= len(self.impedance_points()):
-            messagebox.showinfo('Complete', 'All 28 impedance points are recorded.', parent=self.root)
+            port.message('info', 'Complete', 'All 28 impedance points are recorded.', parent=self.root)
             return
         self.imp_status.set(f'Resuming impedance at point {len(self.imp_rows)+1} of 28.')
         self.start_impedance_batch()
 
     def start_impedance_batch(self):
         if self.running or self.dc_running or self.imp_running:
-            messagebox.showwarning('Busy', 'Wait for the current test to finish.', parent=self.root)
+            port.message('warning', 'Busy', 'Wait for the current test to finish.', parent=self.root)
             return
         if len(self.imp_rows) >= len(self.impedance_points()):
-            messagebox.showinfo('Complete', 'All 28 impedance measurements are recorded.', parent=self.root)
+            port.message('info', 'Complete', 'All 28 impedance measurements are recorded.', parent=self.root)
             return
         self.imp_batch = True
         self.imp_batch_success = False
@@ -2364,7 +2365,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def next_impedance(self):
         if self.running or self.dc_running or self.imp_running:
-            messagebox.showwarning('Busy', 'Wait for the current test to finish.', parent=self.root)
+            port.message('warning', 'Busy', 'Wait for the current test to finish.', parent=self.root)
             return
         if not self._pm_boundary('input impedance'):
             self.imp_batch = False
@@ -2374,7 +2375,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if index >= len(points):
             self.imp_batch = False
             self.imp_batch_success = False
-            messagebox.showinfo('Complete', 'All 28 impedance measurements are complete.', parent=self.root)
+            port.message('info', 'Complete', 'All 28 impedance measurements are complete.', parent=self.root)
             return
         point = points[index]
         try:
@@ -2384,7 +2385,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             if not math.isfinite(settle) or not .5 <= settle <= 30 or not 1 <= samples <= 20:
                 raise ValueError()
         except ValueError:
-            messagebox.showerror('Settings', 'Settle: 0.5–30 seconds; readings: 1–20; baud: integer.', parent=self.root)
+            port.message('error', 'Settings', 'Settle: 0.5–30 seconds; readings: 1–20; baud: integer.', parent=self.root)
             return
         # Coupling and vertical scale are configured and verified automatically
         # on channels C1-C4. Only actual cable/input changes need confirmation.
@@ -2409,7 +2410,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 facts=[('Input', target), ('Test', point['description']), ('Input setting', mode)],
                 caution='Click OK only after the cable and input mode are safe.',
                 ok='Connected and safe \u2014 continue')
-            if not ui.confirm_steps(self.root, 'Confirm impedance connection', **prompt):
+            if not port.operator_prompt('Confirm impedance connection', **prompt, parent=self.root):
                 self.imp_batch = False
                 self.imp_status.set('Automatic impedance paused for connection.')
                 return
@@ -2420,11 +2421,11 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             previous = self.imp_rows[-1] if self.imp_rows else None
             if previous is None or previous['coupling'] != point['coupling']:
                 mode = {'D50':'50 Ω', 'D1M':'1 MΩ'}[point['coupling']]
-                if not ui.confirm_steps(self.root, 'Confirm external trigger impedance',
+                if not port.operator_prompt('Confirm external trigger impedance',
                     f'Set {target} trigger input impedance',
                     [('Set the input', f'Trigger input impedance to {mode}.'),
                      ('Confirm', 'Check the setting before the resistance measurement.')],
-                    facts=[('Input', target), ('Impedance', mode)], ok='Set \u2014 continue'):
+                    facts=[('Input', target), ('Impedance', mode)], ok='Set \u2014 continue', parent=self.root):
                     self.imp_batch = False
                     return
         self.imp_running = True
@@ -2480,15 +2481,15 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def _retest_index(self, tree, rows, label, parent):
         if any((self.running, self.dc_running, self.imp_running, self.offset_running, self.bw_running, self.tb_running, self.trig_running)):
-            messagebox.showwarning('Busy', 'Finish the current measurement first.', parent=parent)
+            port.message('warning', 'Busy', 'Finish the current measurement first.', parent=parent)
             return None
         selected = tree.selection()
         if len(selected) != 1:
-            messagebox.showinfo('Select a result', f'Select one completed {label} result.', parent=parent)
+            port.message('info', 'Select a result', f'Select one completed {label} result.', parent=parent)
             return None
         idx = tree.index(selected[0])
         if idx >= len(rows):
-            messagebox.showinfo('Not tested yet', 'That point has not been measured yet. Pick a recorded row to retest, or use Run / Resume.', parent=parent)
+            port.message('info', 'Not tested yet', 'That point has not been measured yet. Pick a recorded row to retest, or use Run / Resume.', parent=parent)
             return None
         return idx
 
@@ -2496,16 +2497,16 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         idx = self._retest_index(self.imp_tree, self.imp_rows, 'impedance', self.imp_window)
         if idx is None: return
         point = self.impedance_points()[idx]
-        if not ui.confirm_steps(self.root, 'Confirm impedance retest', f'Retest impedance point {idx+1} of 28',
+        if not port.operator_prompt('Confirm impedance retest', f'Retest impedance point {idx+1} of 28',
             [('Output off', 'Confirm the Fluke SCOPE measurement output is OFF before moving cables.'),
              ('Connection', 'Verify the correct connection and, for EXT inputs, the input impedance.')],
             facts=[('Input', point['channel']), ('Test', point['description'])],
-            caution='The prior reading is replaced only after a successful retest.', ok='Ready \u2014 retest'): return
+            caution='The prior reading is replaced only after a successful retest.', ok='Ready \u2014 retest', parent=self.root): return
         try:
             settle=float(self.imp_settle.get()); samples=int(self.imp_samples.get()); baud=int(self.fluke_baud.get())
             if not (.5<=settle<=30 and 1<=samples<=20 and baud>0): raise ValueError()
         except ValueError:
-            messagebox.showerror('Settings', 'Check settle time, samples, and baud.', parent=self.root); return
+            port.message('error', 'Settings', 'Check settle time, samples, and baud.', parent=self.root); return
         self.imp_batch=False
         self.imp_retest_index=idx
         self.imp_running=True
@@ -2519,15 +2520,15 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         idx=self._retest_index(self.offset_tree,self.offset_rows,'offset',self.offset_tab)
         if idx is None:return
         point=self.offset_points()[idx]
-        if not ui.confirm_steps(self.root, 'Confirm offset retest', f'Retest offset point {idx+1} of 16',
+        if not port.operator_prompt('Confirm offset retest', f'Retest offset point {idx+1} of 16',
             [('Connection', 'Confirm the Fluke SCOPE cable is connected to the correct channel.')],
             facts=[('Channel', f'CH{point["channel"]}'), ('Scope offset', f'{point["scope_offset_v"]:+g} V')],
-            caution='The prior reading is replaced only on success.', ok='Ready \u2014 retest'):return
+            caution='The prior reading is replaced only on success.', ok='Ready \u2014 retest', parent=self.root):return
         try:
             settle=float(self.offset_settle.get());baud=int(self.fluke_baud.get())
             if not (.5<=settle<=60 and baud>0):raise ValueError()
         except ValueError:
-            messagebox.showerror('Settings','Check settle time and baud.',parent=self.root);return
+            port.message('error', 'Settings','Check settle time and baud.',parent=self.root);return
         self.offset_batch=False
         self.offset_retest_index=idx
         self.offset_running=True
@@ -2539,16 +2540,16 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         idx=self._retest_index(self.bw_tree,self.bw_rows,'bandwidth',self.bw_tab)
         if idx is None:return
         point=self.bandwidth_points()[idx]
-        if not ui.confirm_steps(self.root, 'Confirm bandwidth retest', f'Retest bandwidth point {idx+1} of 24',
+        if not port.operator_prompt('Confirm bandwidth retest', f'Retest bandwidth point {idx+1} of 24',
             [('Signal path', 'Verify a rated 50 \u03a9 signal path and the scope DC50 input.'),
              ('Signal', 'The Fluke will generate a 1 GHz sine wave.')],
             facts=[('Channel', f'CH{point["channel"]}'), ('Range', self.range_text(point["scale_v_div"]))],
-            caution='The prior result is replaced only on success.', ok='Ready \u2014 retest'):return
+            caution='The prior result is replaced only on success.', ok='Ready \u2014 retest', parent=self.root):return
         try:
             settle=float(self.bw_settle.get());baud=int(self.fluke_baud.get())
             if not (.5<=settle<=60 and baud>0):raise ValueError()
         except ValueError:
-            messagebox.showerror('Settings','Check settle time and baud.',parent=self.root);return
+            port.message('error', 'Settings','Check settle time and baud.',parent=self.root);return
         self.bw_batch=False
         self.bw_retest_index=idx
         self.bw_running=True
@@ -2620,7 +2621,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def clear_impedance(self):
         if self.imp_running:
             return
-        if not messagebox.askyesno('Clear impedance', 'Delete all impedance results and checkpoint?', parent=self.root):
+        if not port.ask_yes_no('Clear impedance', 'Delete all impedance results and checkpoint?', parent=self.root):
             return
         self.imp_rows = []
         self.imp_connection_confirmed = False
@@ -2693,11 +2694,11 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def start_offset(self):
         if self.offset_running or self.dc_running or self.imp_running or self.running:
-            messagebox.showwarning('Busy', 'Another instrument operation is running.',
+            port.message('warning', 'Busy', 'Another instrument operation is running.',
                                    parent=self.root)
             return
         if len(self.offset_rows) >= 16:
-            messagebox.showinfo('Complete', 'All 16 offset points are complete.',
+            port.message('info', 'Complete', 'All 16 offset points are complete.',
                                 parent=self.root)
             return
         try:
@@ -2706,13 +2707,13 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 raise ValueError()
             int(self.fluke_baud.get())
         except ValueError:
-            messagebox.showerror('Invalid setup', 'Settle must be 0.5–60 seconds and baud numeric.',
+            port.message('error', 'Invalid setup', 'Settle must be 0.5–60 seconds and baud numeric.',
                                  parent=self.root)
             return
-        if not ui.confirm_steps(self.root, 'Confirm offset test method', 'Offset-position DCV test',
+        if not port.operator_prompt('Confirm offset test method', 'Offset-position DCV test',
             [('What this tests', 'P1 MEAN at specified scope vertical offsets. It does not independently verify waveform centering accuracy.'),
              ('Confirm', 'The intended test method, the limits, and the correct Fluke SCOPE BNC connection.')],
-            caution='The program will enable and disable the DC voltage output.', ok='Confirmed \u2014 start'):
+            caution='The program will enable and disable the DC voltage output.', ok='Confirmed \u2014 start', parent=self.root):
             return
         self.offset_batch = True
         self.offset_ok = False
@@ -2735,17 +2736,17 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if idx >= len(points):
             self.offset_batch = False
             self.offset_status.set('Complete — 16 of 16 offset points')
-            messagebox.showinfo('Complete','All 16 offset points recorded.',parent=self.root)
+            port.message('info', 'Complete','All 16 offset points recorded.',parent=self.root)
             return
         point = points[idx]
         ch = point['channel']
         if self.offset_connected_channel != ch:
-            if not ui.confirm_steps(self.root, 'Offset cable connection',
+            if not port.operator_prompt('Offset cable connection',
                 f'Connect the Fluke SCOPE output to CH{ch}',
                 [('Standby', 'Confirm the Fluke is in STBY.'),
                  ('Connect', f'Fluke SCOPE output to CH{ch}. Disconnect other sources and terminators.')],
                 facts=[('Point', f'{idx+1} of 16'), ('Channel', f'CH{ch}')],
-                caution='Press OK only after the connection is safe.', ok='Connected and safe \u2014 continue'):
+                caution='Press OK only after the connection is safe.', ok='Connected and safe \u2014 continue', parent=self.root):
                 self.offset_batch = False
                 self.offset_status.set('Paused — awaiting safe cable connection')
                 return
@@ -2863,7 +2864,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.offset_rows=rows
             self.refresh_offset()
         except Exception as exc:
-            messagebox.showwarning('Offset checkpoint',f'Could not load offset results: {exc}',
+            port.message('warning', 'Offset checkpoint',f'Could not load offset results: {exc}',
                                    parent=self.root)
 
     def export_offset(self):
@@ -2919,10 +2920,10 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def start_bandwidth(self):
         if any((self.bw_running,self.dc_running,self.imp_running,self.offset_running,self.running)):
-            messagebox.showwarning('Busy','An instrument operation is running.',parent=self.root)
+            port.message('warning', 'Busy','An instrument operation is running.',parent=self.root)
             return
         if len(self.bw_rows)==24:
-            messagebox.showinfo('Complete','All 24 bandwidth points are complete.',parent=self.root)
+            port.message('info', 'Complete','All 24 bandwidth points are complete.',parent=self.root)
             return
         try:
             settle=float(self.bw_settle.get())
@@ -2930,15 +2931,15 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             if not math.isfinite(settle) or not .5<=settle<=60 or baud<=0:
                 raise ValueError()
         except ValueError:
-            messagebox.showerror('Invalid settings','Settle must be 0.5–60 s; baud must be positive.',
+            port.message('error', 'Invalid settings','Settle must be 0.5–60 s; baud must be positive.',
                                  parent=self.root)
             return
-        if not ui.confirm_steps(self.root, 'Confirm high-frequency test', 'Bandwidth test \u2014 1 GHz sine',
+        if not port.operator_prompt('Confirm high-frequency test', 'Bandwidth test \u2014 1 GHz sine',
             [('Signal path', 'Use a rated 50 \u03a9 signal path, the correct Fluke SCOPE output and the scope 50 \u03a9 input.'),
              ('No extra termination', 'Do not use a 1 M\u03a9 input, or a 50 \u03a9 feedthrough in addition to the scope internal termination.'),
              ('Confirm method', 'The Fluke LEVSINE command and the scope P1 PkPk measurement are suitable.')],
             caution='The Fluke will generate a 1 GHz sine signal into the oscilloscope. The first point is a hardware pilot.',
-            ok='Confirmed \u2014 start'):
+            ok='Confirmed \u2014 start', parent=self.root):
             return
         self.bw_batch=True
         self.bw_ok=False
@@ -2960,17 +2961,17 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if idx>=24:
             self.bw_batch=False
             self.bw_status.set('Complete — 24/24 bandwidth points')
-            messagebox.showinfo('Bandwidth complete','All 24 points recorded.',parent=self.root)
+            port.message('info', 'Bandwidth complete','All 24 points recorded.',parent=self.root)
             return
         point=self.bandwidth_points()[idx]
         ch=point['channel']
         if self.bw_connected_channel!=ch:
-            if not ui.confirm_steps(self.root, 'Move 50 \u03a9 signal cable', f'Connect the Fluke SCOPE output to CH{ch}',
+            if not port.operator_prompt('Move 50 \u03a9 signal cable', f'Connect the Fluke SCOPE output to CH{ch}',
                 [('Standby', 'Verify the Fluke output is STBY.'),
                  ('Connect', f'A rated 50 \u03a9 cable from the Fluke SCOPE output to CH{ch}.'),
                  ('Automatic', 'The scope input is set to DC50 for you.')],
                 facts=[('Point', f'{idx+1} of 24'), ('Channel', f'CH{ch}')],
-                caution='Confirm the connection before the output is enabled.', ok='Connected \u2014 continue'):
+                caution='Confirm the connection before the output is enabled.', ok='Connected \u2014 continue', parent=self.root):
                 self.bw_batch=False
                 self.bw_status.set('Paused — waiting for safe cable connection')
                 return
@@ -3084,7 +3085,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if len(self.bw_rows)==1 and self.bw_batch:
             self.bw_batch=False
             self.bw_status.set('Pilot point complete — review measured amplitudes and response; click Run / Resume to continue.')
-            messagebox.showinfo('First-point validation',
+            port.message('info', 'First-point validation',
                 f'CH1 at 10 mV/div:\n50 kHz: {reference:.6g} Vpp\n'
                 f'1 GHz: {high:.6g} Vpp\nResponse: {response:+.3f} dB\n\n'
                 'Review the Fluke and scope setup before continuing the remaining 23 points.',
@@ -3130,7 +3131,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.bw_rows=rows
             self.refresh_bandwidth()
         except Exception as exc:
-            messagebox.showwarning('Bandwidth checkpoint',
+            port.message('warning', 'Bandwidth checkpoint',
                 f'Could not load saved bandwidth points: {exc}',parent=self.root)
 
     def export_bandwidth(self):
@@ -3175,14 +3176,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             if not (.5 <= settle <= 60 and 1 <= samples <= 50 and baud > 0) or self._tb_period() is None:
                 raise ValueError()
         except ValueError:
-            messagebox.showerror('Time base settings', 'Settle must be 0.5-60 s, samples 1-50, the marker period a positive number of '
+            port.message('error', 'Time base settings', 'Settle must be 0.5-60 s, samples 1-50, the marker period a positive number of '
                                  'microseconds and the baud numeric (Test settings).', parent=self.root)
             return None
         return settle, samples, baud
 
     def _tb_confirm(self, title, heading, point):
         period, nominal = point['marker_period_s'], point['nominal_hz']
-        return ui.confirm_steps(self.root, title, heading,
+        return port.operator_prompt(title, heading,
             [('Standby', 'Confirm the Fluke is in STBY.'),
              ('Connect', 'Fluke SCOPE output to CH1 with a 50 Ω cable. Remove other cables and any feedthrough terminator.'),
              ('Automatic', 'The program sets CH1 to DC 50 Ω, full bandwidth and P1 Freq, then outputs the time marker.')],
@@ -3190,14 +3191,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                    ('Limit', f'±{TIMEBASE_LIMIT_HZ:.3f} Hz')],
             caution='First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the '
                     'output if the calibrator rejects them. Check the marker period against your procedure (Test settings).',
-            ok='Connected and safe — run')
+            ok='Connected and safe — run', parent=self.root)
 
     def start_timebase(self):
         if self._batch_busy():
-            messagebox.showwarning('Busy', 'Another instrument operation is running.', parent=self.root)
+            port.message('warning', 'Busy', 'Another instrument operation is running.', parent=self.root)
             return
         if self.tb_rows:
-            messagebox.showinfo('Complete', 'The time base point is recorded. Use Rerun Selected to measure it again.', parent=self.root)
+            port.message('info', 'Complete', 'The time base point is recorded. Use Rerun Selected to measure it again.', parent=self.root)
             return
         cfg = self._tb_settings()
         if cfg is None:
@@ -3343,7 +3344,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.tb_rows = rows
             self.refresh_timebase()
         except Exception as exc:
-            messagebox.showwarning('Time base checkpoint', f'Could not load the saved time base result: {exc}', parent=self.root)
+            port.message('warning', 'Time base checkpoint', f'Could not load the saved time base result: {exc}', parent=self.root)
 
     # ======================================================================== trigger level accuracy (24 points, bracket test)
     # Limits from the HAZ-OSC-02 data sheet, pages 10-11 (rendered page images): CH1-CH4 x 0 / +300 / -300 mV x positive and
@@ -3385,20 +3386,20 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             if not (.2 <= settle <= 30 and baud > 0):
                 raise ValueError()
         except ValueError:
-            messagebox.showerror('Trigger level settings', 'Settle must be 0.2-30 s and the baud numeric (Test settings).', parent=self.root)
+            port.message('error', 'Trigger level settings', 'Settle must be 0.2-30 s and the baud numeric (Test settings).', parent=self.root)
             return None
         return settle, baud
 
     def start_trigger(self):
         if self._batch_busy():
-            messagebox.showwarning('Busy', 'Another instrument operation is running.', parent=self.root)
+            port.message('warning', 'Busy', 'Another instrument operation is running.', parent=self.root)
             return
         if len(self.trig_rows) >= len(self.trigger_points()):
-            messagebox.showinfo('Complete', 'All 24 trigger level points are recorded.', parent=self.root)
+            port.message('info', 'Complete', 'All 24 trigger level points are recorded.', parent=self.root)
             return
         if self._trig_settings() is None:
             return
-        if not ui.confirm_steps(self.root, 'Trigger level test method', 'Trigger level accuracy — you confirm each trigger',
+        if not port.operator_prompt('Trigger level test method', 'Trigger level accuracy — you confirm each trigger',
             [('Setup', 'The program sets the channel to 100 mV/div, DC 1 MΩ, 20 MHz BW, edge trigger on that channel at the test level, '
                        'and arms a Single acquisition.'),
              ('Step 1', 'The Fluke steps to 20 mV SHORT of the level. You answer whether the scope triggered (it should not).'),
@@ -3406,7 +3407,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
              ('Triggered means', 'the trigger status changes from armed/Single to Stopped and a trace is captured.')],
             caution='The Fluke SCOPE DC output is enabled (at most 0.4 V) while you answer, and returns to STBY after every point. '
                     'The scope trigger commands are not yet verified on a 4104HD: check the first point on screen.',
-            ok='Understood — start'):
+            ok='Understood — start', parent=self.root):
             return
         self.trig_batch = True
         self.trig_ok = False
@@ -3429,16 +3430,16 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if idx >= len(points):
             self.trig_batch = False
             self.trig_status.set('Complete — 24 of 24 trigger level points')
-            messagebox.showinfo('Complete', 'All 24 trigger level points recorded.', parent=self.root)
+            port.message('info', 'Complete', 'All 24 trigger level points recorded.', parent=self.root)
             return
         point = points[idx]
         ch = point['channel']
         if self.trig_connected_channel != ch:
-            if not ui.confirm_steps(self.root, 'Trigger level cable connection', f'Connect the Fluke SCOPE output to CH{ch}',
+            if not port.operator_prompt('Trigger level cable connection', f'Connect the Fluke SCOPE output to CH{ch}',
                 [('Standby', 'Confirm the Fluke is in STBY.'),
                  ('Connect', f'Fluke SCOPE output to CH{ch} (1 MΩ input, no terminator). Disconnect other sources.')],
                 facts=[('Point', f'{idx+1} of 24'), ('Channel', f'CH{ch}')],
-                caution='Press OK only after the connection is safe.', ok='Connected and safe — continue'):
+                caution='Press OK only after the connection is safe.', ok='Connected and safe — continue', parent=self.root):
                 self.trig_batch = False
                 self.trig_status.set('Paused — awaiting safe cable connection')
                 return
@@ -3452,11 +3453,11 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if self._trig_settings() is None:
             return
         point = self.trigger_points()[idx]
-        if not ui.confirm_steps(self.root, 'Confirm trigger level retest', f'Retest trigger level point {idx+1} of 24',
+        if not port.operator_prompt('Confirm trigger level retest', f'Retest trigger level point {idx+1} of 24',
             [('Connection', f'Confirm the Fluke SCOPE output is connected to CH{point["channel"]}.'),
              ('You confirm', 'You will be asked twice whether the scope triggered.')],
             facts=[('Channel', f'CH{point["channel"]}'), ('Level', f'{point["level_v"]*1000:+.0f} mV'), ('Slope', point['slope'])],
-            caution='The prior result is replaced only when the retest completes.', ok='Ready — retest'):
+            caution='The prior result is replaced only when the retest completes.', ok='Ready — retest', parent=self.root):
             return
         self.trig_batch = False
         self.trig_retest_index = idx
@@ -3602,18 +3603,18 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.trig_rows = rows
             self.refresh_trigger()
         except Exception as exc:
-            messagebox.showwarning('Trigger level checkpoint', f'Could not load saved trigger level results: {exc}', parent=self.root)
+            port.message('warning', 'Trigger level checkpoint', f'Could not load saved trigger level results: {exc}', parent=self.root)
 
 
     def load_demo_data(self):
         """Synthetic, memory-only export test data; no VISA, no checkpoint writes."""
         if any((self.rows,self.dc_rows,self.imp_rows,self.offset_rows,self.bw_rows,self.tb_rows,self.trig_rows)):
-            messagebox.showwarning('Demo data',
+            port.message('warning', 'Demo data',
                 'Existing calibration results are loaded. Demo data will not be mixed with them. '
                 'Use a separate empty folder to launch --demo.')
             return
         self.demo_mode=True
-        self.root.title('DEMO DATA ONLY — WaveSurfer Calibration Export Tester')
+        port.set_title(self.root, 'DEMO DATA ONLY — WaveSurfer Calibration Export Tester')
         stamp=datetime.now().isoformat(timespec='seconds')
         channels=list(range(1,5))
         scales=SCALES
@@ -3691,7 +3692,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.bw_status.set('DEMO DATA — 24 synthetic bandwidth points')
         self.tb_status.set('DEMO DATA — 1 synthetic time base point')
         self.trig_status.set('DEMO DATA — 24 synthetic trigger level points')
-        messagebox.showinfo('Demo export ready',
+        port.message('info', 'Demo export ready',
             f'Loaded {sum(len(r) for r in (self.rows,self.dc_rows,self.imp_rows,self.offset_rows,self.bw_rows,self.tb_rows,self.trig_rows))} '
             'SYNTHETIC results in memory across seven functions. '
             'Use Export Report (PDF). '
@@ -3903,13 +3904,12 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         rows=self.certificate_rows(kind)
         if not rows:
-            messagebox.showinfo('No results',f'No {kind} measurements to export.')
+            port.message('info', 'No results',f'No {kind} measurements to export.')
             return
-        import report_dialog
-        details=report_dialog.ask_details(self.root,'WaveSurfer 4104HD verification')
+        details=port.report_details('WaveSurfer 4104HD verification', parent=self.root)
         if details is None:
             return
-        filename=filedialog.asksaveasfilename(
+        filename=port.save_file(
             defaultextension='.pdf',
             initialfile=ui.report_filename(self.instrument_id.get(),'.pdf',kind),
             filetypes=[('PDF report','*.pdf')])
@@ -3932,12 +3932,12 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 rows.append(row)
             sources.extend((kind,r) for r in self.certificate_source_records(kind))
         if not rows:
-            messagebox.showinfo('No results','No recorded calibration data to export.')
+            port.message('info', 'No results','No recorded calibration data to export.')
             return 0
         try:
-            import report_pdf, report_dialog
+            import report_pdf
             if details is None:
-                details=report_dialog.ask_details(self.root,'WaveSurfer 4104HD verification')
+                details=port.report_details('WaveSurfer 4104HD verification', parent=self.root)
                 if details is None:
                     return 0
             if report_pdf.details_tar_tur(details):
@@ -3950,12 +3950,12 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 footer_note=report_pdf.uncertainty_note(rows,'5560A'),title='Calibration Data',
                 snapshot_context=report_pdf.context_for(self))
         except ImportError:
-            messagebox.showerror('PDF export dependency','Install the PDF package with:  py -m pip install reportlab')
+            port.message('error', 'PDF export dependency','Install the PDF package with:  py -m pip install reportlab')
             return 0
         except Exception as exc:
-            messagebox.showerror('PDF export error',str(exc))
+            port.message('error', 'PDF export error',str(exc))
             return 0
-        messagebox.showinfo('Report exported',f'Created calibration data report with {count} rows:\n{filename}')
+        port.message('info', 'Report exported',f'Created calibration data report with {count} rows:\n{filename}')
         return count
 
     def export_pdf_report(self):
@@ -3963,17 +3963,17 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         sections=[k for k in ('noise','dcv','impedance','offset','bandwidth','timebase','trigger') if self.certificate_rows(k)]
         if not sections:
-            messagebox.showinfo('No results','No recorded calibration data to export.')
+            port.message('info', 'No results','No recorded calibration data to export.')
             return
         try:
-            import report_dialog
+            import report_pdf
         except ImportError as exc:
-            messagebox.showerror('Report export',str(exc))
+            port.message('error', 'Report export',str(exc))
             return
-        details=report_dialog.ask_details(self.root,'WaveSurfer 4104HD verification')
+        details=port.report_details('WaveSurfer 4104HD verification', parent=self.root)
         if details is None:
             return
-        filename=filedialog.asksaveasfilename(
+        filename=port.save_file(
             defaultextension='.pdf',
             initialfile=ui.report_filename(self.instrument_id.get()),
             filetypes=[('PDF report','*.pdf')])
@@ -3986,9 +3986,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         sections=('noise','dcv','impedance','offset','bandwidth','timebase','trigger')
         groups={k:self.certificate_rows(k) for k in sections}
         if not any(groups.values()):
-            messagebox.showinfo('No results','No calibration results to export.')
+            port.message('info', 'No results','No calibration results to export.')
             return
-        filename=filedialog.asksaveasfilename(
+        filename=port.save_file(
             defaultextension='.xlsx',
             initialfile=ui.report_filename(self.instrument_id.get(),'.xlsx'),
             filetypes=[('Excel workbook','*.xlsx')])
@@ -3998,13 +3998,13 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             count=make_report(groups,filename,synthetic=getattr(self,'demo_mode',False),
                               instrument_id=self.instrument_id.get())
         except ImportError:
-            messagebox.showerror('Excel export dependency',
+            port.message('error', 'Excel export dependency',
                 'Install the Excel formatting package with: py -m pip install openpyxl')
             return
         except Exception as exc:
-            messagebox.showerror('Excel export error',str(exc))
+            port.message('error', 'Excel export error',str(exc))
             return
-        messagebox.showinfo('Report exported',
+        port.message('info', 'Report exported',
             f'Created formatted Excel report with {count} test points:\n{filename}')
 
 
