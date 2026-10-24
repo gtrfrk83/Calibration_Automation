@@ -27,6 +27,10 @@ if not isinstance(getattr(_tk, 'TclError', None), type) or not issubclass(_tk.Tc
 
 import drivers  # noqa: E402
 import handheld_dmm as hh  # noqa: E402
+
+for _n in ('messagebox', 'filedialog'):           # handheld_dmm no longer imports these (it prompts through ui_port): the tests patch the stub modules TkUiPort calls, spelled hh.messagebox / hh.filedialog
+    if not hasattr(hh, _n):
+        setattr(hh, _n, sys.modules['tkinter.' + _n])
 import run_queue_engine  # noqa: E402
 import tds2000c_verification as tds  # noqa: E402
 import ui_shell  # noqa: E402

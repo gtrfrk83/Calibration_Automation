@@ -35,6 +35,8 @@ if HAVE_QT:
 
 import ui_port  # noqa: E402  (toolkit-free)
 
+# prompts of windows that are not dialogs of this package: report_details (covered elsewhere) and the WP-H handheld windows (their Qt twins are not merged yet)
+SKIP_KINDS = ('ask_reading', 'ask_readings', 'ask_range', 'ask_ir_problem', 'report_details')
 LAST = {}                                  # record -> what its dialog showed (filled by the per-prompt test, reused by the sequence test)
 FIXTURES = sorted(glob.glob(str(ROOT / 'tests' / 'golden_ui' / 'ui_prompts_*.json')))
 DATE = '1-2-2026'
@@ -309,7 +311,7 @@ class GoldenPrompts(QtCase):
             if key in seen:
                 continue
             seen.add(key)
-            if rec['kind'] in ('ask_reading', 'report_details'):
+            if rec['kind'] in SKIP_KINDS:
                 skipped[rec['kind']] = skipped.get(rec['kind'], 0) + 1          # WP-H windows / the review screen: other tests
                 continue
             with self.subTest(fixture=name, scenario=scen, kind=rec['kind'], title=rec.get('title')):
@@ -330,7 +332,7 @@ class GoldenPrompts(QtCase):
             for scen, recs in data.items():
                 shown, want, seen = [], [], set()
                 for rec in recs:
-                    if rec['kind'] in ('ask_reading', 'report_details') or (rec.get('layout') or {}).get('layout') == 'function_change':
+                    if rec['kind'] in SKIP_KINDS or (rec.get('layout') or {}).get('layout') == 'function_change':
                         continue
                     key = json.dumps(rec, sort_keys=True, default=str)
                     if len(recs) > 60 and key in seen:                 # the long virtual handheld runs repeat the same prompts for every point
