@@ -345,7 +345,7 @@ class Report(Base):
              'show_tar_tur': True}
         import report_dialog
         with mock.patch.object(report_dialog, 'ask_details', lambda parent, proc='': dict(d)), \
-                mock.patch.object(E.filedialog, 'asksaveasfilename', lambda **k: out), mock.patch('report_pdf.record_history', create=True):
+                mock.patch.object(__import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: out), mock.patch('report_pdf.record_history', create=True):
             app.export_pdf()
         text = subprocess.run(['pdftotext', '-layout', out, '-'], capture_output=True, text=True).stdout
         return app.certificate_rows(), re.sub(r'\d{4}-\d\d-\d\d[ T]\d\d:\d\d(:\d\d)?|\b\d{1,2}[:.]\d\d\b', '<time>', text)
@@ -453,7 +453,7 @@ class Wiring(Base):
     def test_the_button_is_added_between_rerun_and_stop(self):
         E.configure()
         shell = mock.MagicMock()
-        with mock.patch.object(E.ui_shell, 'Shell', return_value=shell):
+        with mock.patch.object(__import__('ui_shell'), 'Shell', return_value=shell):
             app = E.App(self.h.root, '8808A', demo=True)
         texts = [c.args[0] for c in shell.add_action.call_args_list]
         self.assertLess(texts.index('Rerun Selected'), texts.index('Enter reading manually'))

@@ -173,12 +173,11 @@ def dump(root, outdir, show, specs=ENGINES, home=None, cal_mode=None):
             details = {'technician': 'T', 'temperature': '23', 'humidity': '40', 'standards': []}
             if show is not None:
                 details['show_tar_tur'] = bool(show)
-            from tkinter import filedialog as _tk_filedialog
             names = [n for n in ('filedialog', 'messagebox') if hasattr(mod, n)]
             with contextlib.ExitStack() as st:
                 st.enter_context(mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: dict(details)))
                 st.enter_context(mock.patch.object(report_pdf, 'datetime', _Clock))
-                st.enter_context(mock.patch.object(getattr(mod, 'filedialog', None) or _tk_filedialog, 'asksaveasfilename', lambda **k: str(pdf)))     # a ported engine has no filedialog: its dialogs are TkUiPort's (`from tkinter import filedialog`)
+                st.enter_context(mock.patch.object(getattr(mod, 'filedialog', None) or __import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: str(pdf)))
                 for n in names:
                     pass
                 mod.ui.report_filename  # attribute exists

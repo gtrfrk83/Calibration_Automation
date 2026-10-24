@@ -397,7 +397,8 @@ class WaveSurferLive(unittest.TestCase):
         self.assertEqual(m.stage_param('ws.dcv_settle', 6.0), [])
         self.h_edit(m)
         self.app.io = type('IO', (), {'standby': lambda s: (_ for _ in ()).throw(RuntimeError('x'))})()
-        with mock.patch.object(W.messagebox, 'showerror') as err:
+        import tkinter.messagebox as tk_messagebox                     # the WaveSurfer prompts through ui_port (TkUiPort -> tkinter.messagebox)
+        with mock.patch.object(tk_messagebox, 'showerror') as err:
             self.assertFalse(self.app._pm_boundary('DC voltage'))
         self.assertTrue(err.called)
         self.assertEqual(self.app.dc_settle.get(), '3.0')

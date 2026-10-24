@@ -17,6 +17,9 @@
  "fingerprint": {
   "code": [
    "Procedures/Fluke_8846A_Adjustment.py",
+   "fluke8846a_adjust_view_tk.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "drivers/base.py",
    "drivers/transport.py",
    "drivers/scpi_dmm.py"
@@ -30,6 +33,7 @@
  "seed_verified": false,
  "own_files": [
   "Procedures/Fluke_8846A_Adjustment.py",
+  "fluke8846a_adjust_view_tk.py",
   "Procedures/Fluke_8846A_Adjustment.procedure.json"
  ]
 }

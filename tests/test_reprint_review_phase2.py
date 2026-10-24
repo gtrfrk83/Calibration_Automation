@@ -57,9 +57,9 @@ def engine_rows(name, app):
 def export(name, app, mod, out, details):
     """The engine's own export path (dialog and file chooser replaced)."""
     with mock.patch.object(report_dialog, 'ask_details', lambda *a, **k: dict(details)), \
-            mock.patch.object(mod.filedialog, 'asksaveasfilename', lambda **k: str(out)), \
-            mock.patch.object(mod.messagebox, 'showinfo', lambda *a, **k: None, create=True), \
-            mock.patch.object(mod.messagebox, 'showerror', lambda *a, **k: (_ for _ in ()).throw(AssertionError(a)), create=True):
+            mock.patch.object(getattr(mod, 'filedialog', None) or __import__('ui_port_tk').filedialog, 'asksaveasfilename', lambda **k: str(out)), \
+            mock.patch.object(getattr(mod, 'messagebox', None) or __import__('ui_port_tk').messagebox, 'showinfo', lambda *a, **k: None, create=True), \
+            mock.patch.object(getattr(mod, 'messagebox', None) or __import__('ui_port_tk').messagebox, 'showerror', lambda *a, **k: (_ for _ in ()).throw(AssertionError(a)), create=True):
         if name == 'ws':
             app.write_certificate_pdf(str(out), ['noise', 'dcv', 'impedance', 'offset', 'bandwidth', 'timebase', 'trigger'], dict(details))
         else:
@@ -250,7 +250,7 @@ class Discovery(unittest.TestCase):
                 mock.patch.object(app, 'write_certificate_pdf', lambda *a, **k: 1, create=True), \
                 mock.patch.object(type(app), 'sync_asset', lambda self: True, create=True):
             import WaveSurfer_WS4104HD as W
-            with mock.patch.object(W.filedialog, 'asksaveasfilename', lambda **k: ''):
+                    with mock.patch.object(tk_filedialog, 'asksaveasfilename', lambda **k: ''):
                 app.export_calibration_section('dcv')
         self.assertEqual(len(seen), 1)
         sections = {r.spec.section for r in seen[0].rows}

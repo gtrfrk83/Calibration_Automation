@@ -9,7 +9,7 @@ from __future__ import annotations
 import importlib
 import threading
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog
+from tkinter import filedialog, messagebox, simpledialog, ttk
 
 
 def _kw(**kw):
@@ -113,7 +113,7 @@ class TkUiPort:
     def view(self, name):
         return importlib.import_module(f'{name}_tk')
 
-    # ==== APPEND-ONLY BLOCK, WP-H (handheld): the reading windows and the progress window ======================================================
+    # ==== APPEND-ONLY BLOCK, WP-H (handheld): the reading windows and the progress window ===============================================
     # The windows are the code the engine carried, moved: handheld_dmm_view_tk (reading, IR problem, dial) and run_queue_ui (run-queue reading window, progress).
     def ask_reading(self, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
                     limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None):
@@ -135,3 +135,36 @@ class TkUiPort:
     def progress_window(self, win, title='Queue progress', on_show=None, on_export=None):
         import run_queue_ui
         return run_queue_ui.QueueProgress(win, **_kw(title=title if title != 'Queue progress' else None, on_show=on_show, on_export=on_export))
+
+    # ---- APPENDED BY WP-A (adjustment launchers; append-only block) -----------------------------------------------------------------------
+    def ask_value(self, title, prompt, default, *, parent=None):
+        """The value-entry window of Keithley_2000_Adjustment / Fluke_8808A_Adjustment (their former App.ask_value), moved unchanged; `parent` was self.root."""
+        import ui_theme as ui
+        win = ui.dialog(parent, title)
+        var, result = tk.StringVar(value=default), {'v': None}
+        frame = ttk.Frame(win, padding=16)
+        frame.pack()
+        ttk.Label(frame, text=prompt, wraplength=ui.px(460), justify='left').pack(anchor='w')
+        ent = ttk.Entry(frame, textvariable=var, width=24)
+        ent.pack(anchor='w', pady=(10, 0))
+        row = ttk.Frame(frame)
+        row.pack(fill='x', pady=(14, 0))
+
+        def done(ok):
+            result['v'] = var.get() if ok else None
+            win.destroy()
+        ttk.Button(row, text='Use this value', style='Accent.TButton', command=lambda: done(True)).pack(side='right')
+        ttk.Button(row, text='Cancel', command=lambda: done(False)).pack(side='right', padx=(0, 8))
+        win.bind('<Return>', lambda _e: done(True))
+        ui.center_on(win, parent)
+        ent.focus_set()
+        ent.select_range(0, 'end')
+        win.wait_window()
+        return result['v']
+
+    def update(self, win):
+        win.update()
+
+    def enable_hidpi(self):
+        import ui_theme
+        ui_theme.enable_hidpi()

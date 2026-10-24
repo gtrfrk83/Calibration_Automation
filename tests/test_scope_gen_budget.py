@@ -321,6 +321,7 @@ class ReportRows(unittest.TestCase):
 
     def test_wavesurfer_rows_footer_and_demo_marking(self):
         import report_pdf
+        import tkinter.messagebox as tk_messagebox                       # the WaveSurfer prompts through ui_port (TkUiPort -> tkinter.messagebox)
         import WaveSurfer_WS4104HD as W
         app = W.RMSNoiseApp.__new__(W.RMSNoiseApp)
         rec = dict(channel=1, scale_v_div=0.5, nominal_v=1.0, lower_v=0.99, upper_v=1.01, measured_v=1.0001, result='PASS')
@@ -340,7 +341,7 @@ class ReportRows(unittest.TestCase):
             return len(rows)
 
         with mock.patch.object(report_pdf, 'write_calibration_pdf', fake), mock.patch.object(report_pdf, 'context_for', lambda a: {}), \
-                mock.patch.object(W.messagebox, 'showinfo', lambda *a, **k: None), mock.patch.object(W.messagebox, 'showerror', lambda *a, **k: None):
+                mock.patch.object(tk_messagebox, 'showinfo', lambda *a, **k: None), mock.patch.object(tk_messagebox, 'showerror', lambda *a, **k: None):
             n = app.write_certificate_pdf('x.pdf', ['dcv'], details={'technician': 'T'})
         self.assertEqual(n, 1)
         self.assertEqual(seen['rows'][0]['Uncertainty'], '640 µV')

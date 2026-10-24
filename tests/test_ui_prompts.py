@@ -50,6 +50,12 @@ class TkLevel(unittest.TestCase):
 
     def test_handheld_other_families(self):
         self.check('handheld_families')
+    # ---- WP-W (WaveSurfer 4104HD; recorded on the unported engine) -- append-only block
+    def test_wavesurfer(self):
+        self.check('wavesurfer')
+
+    def test_adjustment_launcher_8846a(self):
+        self.check('adj8846a')
 
 
 class Port(unittest.TestCase):
