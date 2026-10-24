@@ -620,7 +620,10 @@ class DataTable(QTableView):
         self._apply_columns()
         if frozen:
             self.enable_frozen_first_column()
-        theme.manager().changed.connect(lambda _n: self.viewport().update())
+        theme.manager().changed.connect(self._on_theme)          # a bound slot: dropped by Qt when the table is destroyed
+
+    def _on_theme(self, *_) -> None:
+        self.viewport().update()
 
     # ---- columns
     def _apply_columns(self) -> None:
@@ -831,8 +834,22 @@ class DataTable(QTableView):
                 return
         super().keyPressEvent(ev)
 
+    context_provider: Callable[[Any], Sequence] | None = None      # row under the cursor -> [(label, callback | None, enabled)] shown above Copy ('-' = separator)
+
     def _context_menu(self, pos: QPoint) -> None:
         menu = QMenu(self)
+        if self.context_provider is not None:
+            entries = list(self.context_provider(self.row_of(self.indexAt(pos))) or ())
+            for label, cb, ok in entries:
+                if label == '-' and cb is None:
+                    menu.addSeparator()
+                    continue
+                act = menu.addAction(label)
+                act.setEnabled(bool(ok))
+                if cb is not None:
+                    act.triggered.connect(lambda _c=False, f=cb: f())
+            if entries:
+                menu.addSeparator()
         n = self.selected_count()
         a1 = menu.addAction('Copy' if n <= 1 else f'Copy {n} rows')
         a2 = menu.addAction('Copy with headers')

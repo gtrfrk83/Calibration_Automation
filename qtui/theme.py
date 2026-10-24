@@ -492,6 +492,13 @@ QGroupBox::title {{ subcontrol-origin: margin; left: 12px; padding: 0 4px; color
 QSlider::groove:horizontal {{ background: {t['trough']}; height: 6px; border-radius: 3px; }}
 QSlider::sub-page:horizontal {{ background: {t['primary']}; border-radius: 3px; }}
 QSlider::handle:horizontal {{ background: {t['card']}; border: 2px solid {t['primary']}; width: 14px; height: 14px; margin: -6px 0; border-radius: 9px; }}
+
+/* pill toggles: a checkable QPushButton with role=chip is a tick box drawn as a pill (Datasheet Builder tolerance types) */
+QPushButton[role="chip"] {{ background: {t['bar']}; border: 1px solid {t['border_strong']}; border-radius: 13px; padding: 3px 12px; color: {t['muted']}; min-height: 20px; }}
+QPushButton[role="chip"]:hover {{ border-color: {t['primary']}; color: {t['text']}; }}
+QPushButton[role="chip"]:checked {{ background: {t['info_bg']}; border: 1px solid {t['primary']}; color: {t['info']}; font-weight: 600; }}
+QPushButton[role="chip"]:focus {{ border: 2px solid {t['focus']}; padding: 2px 11px; }}
+QPushButton[role="chip"]:disabled {{ color: {t['disabled_fg']}; }}
 """
 
 

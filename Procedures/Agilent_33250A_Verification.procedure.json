@@ -30,6 +30,7 @@
    "ui_port_tk.py",
    "surprise.py",
    "surprise_view_tk.py",
+   "surprise_view_qt.py",
    "ui_port.py",
    "ui_port_tk.py",
    "drivers/base.py",
