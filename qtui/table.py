@@ -620,7 +620,10 @@ class DataTable(QTableView):
         self._apply_columns()
         if frozen:
             self.enable_frozen_first_column()
-        theme.manager().changed.connect(lambda _n: self.viewport().update())
+        theme.manager().changed.connect(self._on_theme)          # a bound slot: dropped by Qt when the table is destroyed
+
+    def _on_theme(self, *_) -> None:
+        self.viewport().update()
 
     # ---- columns
     def _apply_columns(self) -> None:
