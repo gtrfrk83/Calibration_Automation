@@ -648,5 +648,11 @@ def build_appearance_menu(parent_menu: QMenu, on_change=None) -> QMenu | None:
             if on_change:
                 on_change(k)
         a.triggered.connect(pick)
-    manager().changed.connect(lambda n: acts[n].setChecked(True) if n in acts else None)
+    def _sync(n, acts=acts):
+        try:
+            if n in acts:
+                acts[n].setChecked(True)
+        except RuntimeError:
+            pass                                                  # the menu went away with its window
+    manager().changed.connect(_sync)
     return sub
