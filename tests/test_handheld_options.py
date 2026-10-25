@@ -121,7 +121,7 @@ class Flow:
         self.app = app
 
     def run(self):
-        orig_confirm, orig_range, orig_ask = h.ui.confirm_steps, h.ask_range, sys.modules['tkinter.messagebox'].askyesno
+        orig_confirm, orig_range, orig_ask = __import__('ui_theme').confirm_steps, h.ask_range, sys.modules['tkinter.messagebox'].askyesno
         flow = self
 
         def confirm(root, title, sub, steps, **k):
@@ -131,14 +131,14 @@ class Flow:
                 return flow.cancel_at != flow.n_prompts
             flow.events.append(('other-prompt', title))
             return True
-        h.ui.confirm_steps = confirm
+        __import__('ui_theme').confirm_steps = confirm
         h.ask_range = lambda root, p, total, dial, text: self.events.append(('range', p['n'])) or 'ok'
         sys.modules['tkinter.messagebox'].askyesno = lambda *a, **k: self.events.append(('hv', a[1])) or True
         try:
             self.app._last_switch = None
             self.app._next(self.app.points, 0, None)
         finally:
-            h.ui.confirm_steps, h.ask_range, sys.modules['tkinter.messagebox'].askyesno = orig_confirm, orig_range, orig_ask
+            __import__('ui_theme').confirm_steps, h.ask_range, sys.modules['tkinter.messagebox'].askyesno = orig_confirm, orig_range, orig_ask
         return self.events
 
     def functions(self):

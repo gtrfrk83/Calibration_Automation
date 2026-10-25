@@ -54,19 +54,19 @@ class Card(unittest.TestCase):
 
     def test_prompt_passes_layout_and_card_and_keeps_old_arguments(self):
         seen = []
-        real = h.ui.confirm_steps
+        real = __import__('ui_theme').confirm_steps
 
         def confirm(root, title, sub, steps, **k):
             if title == 'Change the function':
                 seen.append((steps, k))
             return True
-        h.ui.confirm_steps = confirm
+        __import__('ui_theme').confirm_steps = confirm
         try:
             f = Flow('117')
             f.app._last_switch = None
             f.app._next(f.app.points, 0, None)
         finally:
-            h.ui.confirm_steps = real
+            __import__('ui_theme').confirm_steps = real
         self.assertTrue(seen)
         steps, k = seen[0]
         self.assertEqual(k['layout'], 'function_change')

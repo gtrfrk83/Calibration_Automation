@@ -147,7 +147,7 @@ def main(engine, scenario):
         setattr(messagebox, name, lambda *a, _n=name, **k: log['boxes'].append((_n, a[:2])))
     for name in ('askyesno', 'askokcancel', 'askyesnocancel'):
         setattr(messagebox, name, lambda *a, **k: True)
-    mod.ui.confirm_steps = lambda *a, **k: True                    # the hook-up / safety prompts are not what is tested here
+    __import__('ui_theme').confirm_steps = lambda *a, **k: True                    # the hook-up / safety prompts are not what is tested here
     time.sleep = lambda s: None                                    # settle waits
     mod.drivers.open_visa = S.open_visa
 

@@ -66,7 +66,7 @@ class TkLevelHarness(VH.VHarness):
                 pats.append((mb, name, self._mk_ask(kind)))
         pats += [(fd, 'askopenfilename', self._file('choose_file')), (fd, 'asksaveasfilename', self._file('save_file')),
                  (sd, 'askfloat', self._simple('ask_number')), (sd, 'askinteger', self._simple('ask_number')), (sd, 'askstring', self._simple('ask_text')),
-                 (report_dialog, 'ask_details', self._details), (VH.hh.ui, 'confirm_steps', self._confirm),
+                 (report_dialog, 'ask_details', self._details), (__import__('ui_theme'), 'confirm_steps', self._confirm),
                  (VH.hh, 'ask_range', self._ask_range_v), (VH.hh, 'ask_ir_problem', self._ask_ir_problem_v)]
         for obj, name, val in pats:
             p = mock.patch.object(obj, name, val, create=True)
@@ -640,7 +640,7 @@ def _run_adj8846a(make_harness):
         hn.answers.rules.append(lambda r: 'COMMIT 8846A' if r['kind'] == 'ask_text' and r['title'] == 'Final confirmation' else None)
         if key == 'fake_meter':
             hn.answers.rules.append(lambda r, _r=resets: next(_r) if r['kind'] == 'ask_ok_cancel' and r['title'] == 'Reset instruments' else None)
-        p = mock.patch.object(mod.ui, 'make_table', lambda *a, **k: _FakeTree())          # the step table and the audit table (the stub widgets have no selection)
+        p = mock.patch.object(__import__('ui_theme'), 'make_table', lambda *a, **k: _FakeTree())          # the step table and the audit table (the stub widgets have no selection)
         p.start(); hn.patches.append(p)
         app = mod.App(hn.root, demo=(key == 'demo'))
         hn.app = app
