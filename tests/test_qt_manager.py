@@ -659,6 +659,27 @@ class LibraryActions(QtCase):
         self.assertIs(self.win.table.selected_rows()[0].user, True)
         self.assertFalse(pv.dialog.isVisible())
 
+    def test_dropping_mdd_files_on_the_window_opens_one_preview_each_and_ignores_other_files(self):
+        from PySide6.QtCore import QMimeData, QUrl
+        from mdd_synth import write_mdd
+        a, b = write_mdd(self.t / 'a.mdd'), write_mdd(self.t / 'b.MDD')
+        txt = self.t / 'notes.txt'
+        txt.write_text('x')
+        mime = QMimeData()
+        mime.setUrls([QUrl.fromLocalFile(str(p)) for p in (a, txt, b)])
+        self.assertEqual(sorted(Path(p).name for p in self.win.dropped_mdd_paths(mime)), ['a.mdd', 'b.MDD'])
+        only_txt = QMimeData()
+        only_txt.setUrls([QUrl.fromLocalFile(str(txt))])
+        self.assertEqual(self.win.dropped_mdd_paths(only_txt), [])
+        self.assertTrue(self.win.acceptDrops())
+        seen = []
+        with mock.patch.object(self.win, 'import_mdd_procedure', side_effect=seen.append):
+            from PySide6.QtCore import QPoint, QPointF, Qt
+            from PySide6.QtGui import QDropEvent
+            ev = QDropEvent(QPointF(10, 10), Qt.CopyAction, mime, Qt.LeftButton, Qt.NoModifier)
+            self.win.dropEvent(ev)
+        self.assertEqual(sorted(Path(p).name for p in seen), ['a.mdd', 'b.MDD'])
+
     def test_mdd_import_of_a_bad_file_shows_the_reason(self):
         bad = self.t / 'bad.mdd'
         bad.write_text('not a datasheet')

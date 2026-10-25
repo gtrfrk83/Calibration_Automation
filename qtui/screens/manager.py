@@ -128,6 +128,7 @@ class ManagerWindow(QMainWindow):
         self.panel_registry = dict(PANELS if panels is None else panels)
         self.demo = False
         self.setWindowTitle(TITLE)
+        self.setAcceptDrops(True)
         self.resize(1260, 800)
         self.setMinimumSize(900, 580)
         self._ver_pop = None
@@ -846,6 +847,30 @@ class ManagerWindow(QMainWindow):
         if not path:
             return None
         return dialogs.open_mdd_preview(self, path, on_created=self._mdd_procedure_created, status=self.status.set)
+
+    @staticmethod
+    def dropped_mdd_paths(mime):
+        """The .mdd files in a drag (local files only; anything else is ignored)."""
+        if mime is None or not mime.hasUrls():
+            return []
+        paths = [u.toLocalFile() for u in mime.urls() if u.isLocalFile()]
+        return [p for p in paths if p.lower().endswith('.mdd') and Path(p).is_file()]
+
+    def dragEnterEvent(self, event):
+        if self.dropped_mdd_paths(event.mimeData()):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        paths = self.dropped_mdd_paths(event.mimeData())
+        if not paths:
+            event.ignore()
+            return
+        event.acceptProposedAction()
+        # one review window per file, same preview-first flow as the button; nothing is created until each is approved
+        for path in paths:
+            self.import_mdd_procedure(path)
 
     def _mdd_procedure_created(self, res):
         """The new manual procedure is in the registry: show it (Manual Calibrations tab, selected)."""
