@@ -240,6 +240,15 @@ class DataModeMixin:
             return
         self.execute(pts)
 
+    def points_from(self, points, iid):
+        """The points 'Rerun From Selected' measures: the point with id `iid` and every point after it in the table as shown (the
+        current section and status filters applied, the table's own order).  [] when `iid` is not in the shown list."""
+        shown = [p for p in points if self._visible(p)]
+        for i, p in enumerate(shown):
+            if str(p['id']) == str(iid):
+                return shown[i:]
+        return []
+
     def status_visible(self, key, status) -> bool:
         """The 'As Found failed' choice of the status filter (judged on the As Found result whichever mode is on screen)."""
         if status == 'As Found failed':

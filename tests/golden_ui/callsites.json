@@ -38,6 +38,15 @@
   },
   {
    "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
     "'Instrument ID'",
     "'Enter an instrument ID.'"
    ],
@@ -919,6 +928,15 @@
   },
   {
    "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
     "'Instrument ID'",
     "'Enter an instrument ID.'"
    ],
@@ -1465,6 +1483,15 @@
    "kind": "info",
    "kw": {},
    "where": "RMSNoiseApp.rerun_selected"
+  },
+  {
+   "args": [
+    "'Select a result'",
+    "'Select one completed test point in the table.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.rerun_from_selected"
   },
   {
    "args": [
@@ -2688,6 +2715,15 @@
   },
   {
    "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
     "'Before the verification'",
     "'Warm-up and conditions'",
     "[('Warm-up', f'The {MODEL} must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well.'), ('Environment', 'Ambient 18 to 28 C (ideally 23 C +/- 2 C) and relative humidity below 80 % (p. 67).'), ('Cables', 'Shielded twisted-pair PTFE cables, as short as possible, shields to earth ground at ONE place (p. 67).'), ('Front / Rear', 'The program reads the Front/Rear switch (ROUT:TERM?) before every point and stops if it is wrong; it cannot move the switch. Never move it with signals present.')]"
@@ -2889,6 +2925,15 @@
    "kind": "info",
    "kw": {},
    "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
   },
   {
    "args": [
@@ -3118,6 +3163,15 @@
   },
   {
    "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
     "'Instrument ID'",
     "'Enter an instrument ID.'"
    ],
@@ -3297,6 +3351,15 @@
    "kind": "info",
    "kw": {},
    "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
   },
   {
    "args": [
@@ -3532,6 +3595,15 @@
    "kind": "info",
    "kw": {},
    "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
   },
   {
    "args": [
@@ -3796,6 +3868,15 @@
    "kind": "info",
    "kw": {},
    "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
   },
   {
    "args": [
@@ -4152,6 +4233,15 @@
    "kind": "info",
    "kw": {},
    "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
   },
   {
    "args": [
@@ -4574,6 +4664,15 @@
   },
   {
    "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
     "'Instrument ID'",
     "'Enter an instrument ID.'"
    ],
@@ -4707,6 +4806,15 @@
    "kind": "info",
    "kw": {},
    "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
   },
   {
    "args": [

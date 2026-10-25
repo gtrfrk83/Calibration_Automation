@@ -364,6 +364,9 @@ class Shell:
         self._ar = QHBoxLayout(self.actions_right)
         self._ar.setContentsMargins(0, 0, 0, 0)
         self._ar.setSpacing(M.sm)
+        self.actions_left.setMinimumWidth(1)               # the bar never holds the window wide: the small-window layout (short texts) is chosen by _apply_layout
+        self.actions_right.setMinimumWidth(1)
+        self._bar_need = 0                                  # the width the bar needs with the full texts (measured while they are shown)
         arow.addWidget(self.actions_left)
         arow.addStretch(1)
         arow.addWidget(self.actions_right)
@@ -507,7 +510,7 @@ class Shell:
         return n
 
     # ------------------------------------------------------------------ action bar
-    ACTION_ICONS = {'Save progress': 'save', 'Load progress': 'load', 'Export Report (PDF)': 'export', 'Rerun Selected': 'rerun', 'Edit point': 'edit',
+    ACTION_ICONS = {'Save progress': 'save', 'Load progress': 'load', 'Export Report (PDF)': 'export', 'Rerun Selected': 'rerun', 'Rerun From Selected': 'rerun_from', 'Edit point': 'edit',
                     'Run Shown Section': 'play'}                    # the buttons whose text carries no glyph of its own get a drawn icon (text unchanged)
 
     def add_action(self, text, command, accent=False, danger=False, side='left', short=None, state=None, **kw):
@@ -637,7 +640,9 @@ class Shell:
         width = self.widget.width()
         if width <= 1:
             return
-        compact = width < COMPACT_BELOW
+        if not self._compact:
+            self._bar_need = self.actions.sizeHint().width()           # full texts: what the action bar needs (more buttons, wider bar)
+        compact = width < max(COMPACT_BELOW, self._bar_need)
         if compact == self._compact:
             return
         self._compact = compact

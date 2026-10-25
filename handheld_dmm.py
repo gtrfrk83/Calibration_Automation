@@ -753,6 +753,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         else:
             port.message('info', 'Selection', 'Select a test point first.')
 
+    def rerun_from(self):
+        sel = self.ui_view.table_selection(self)
+        if sel:
+            self._queue_force = True                       # as Rerun Selected: a run queue measures these points again on every meter
+            self.execute(self.points_from(self.points, sel[0]))
+        else:
+            port.message('info', 'Selection', 'Select a test point first.')
+
     def execute(self, points):
         if self.busy or not points:
             return

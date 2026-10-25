@@ -100,7 +100,7 @@ class QtHarness(VH.VHarness):
         self.port = QtScriptedPort(self.answers)
         self._old_ui = ui_port.set_ui(self.port)
         self.root = QMainWindow()
-        self.root.resize(1320, 840)
+        self.root.resize(1480, 840)
         return self
 
     def stop(self):

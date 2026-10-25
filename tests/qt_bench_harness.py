@@ -167,7 +167,7 @@ def record_failures(app, count=6, every=9):
     return done
 
 
-def show(win, width=1320, height=840):
+def show(win, width=1700, height=840):
     """Resize (after the app fitted the window to the 800 x 600 offscreen screen), show, let the layout settle."""
     win.resize(width, height)
     win.show()

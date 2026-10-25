@@ -291,6 +291,16 @@ def _draw(name: str, p: QPainter, s: float, col: QColor):
         p.drawArc(QRectF(s * 0.18, s * 0.18, s * 0.64, s * 0.64), 60 * 16, 270 * 16)
         p.drawLine(QPointF(s * 0.68, s * 0.14), QPointF(s * 0.66, s * 0.32))
         p.drawLine(QPointF(s * 0.68, s * 0.14), QPointF(s * 0.84, s * 0.26))
+    elif name == 'rerun_from':                             # a circular arrow with a small play triangle inside ('from here')
+        p.drawArc(QRectF(s * 0.14, s * 0.14, s * 0.72, s * 0.72), 60 * 16, 270 * 16)
+        p.drawLine(QPointF(s * 0.70, s * 0.08), QPointF(s * 0.68, s * 0.28))
+        p.drawLine(QPointF(s * 0.70, s * 0.08), QPointF(s * 0.88, s * 0.22))
+        tri = QPainterPath(QPointF(s * 0.42, s * 0.36))
+        tri.lineTo(QPointF(s * 0.64, s * 0.50))
+        tri.lineTo(QPointF(s * 0.42, s * 0.64))
+        tri.closeSubpath()
+        p.setBrush(col)
+        p.drawPath(tri)
     elif name == 'edit':                                   # a pencil
         path = QPainterPath(QPointF(s * 0.18, s * 0.82))
         for x, y in ((0.24, 0.62), (0.66, 0.20), (0.80, 0.34), (0.38, 0.76)):
@@ -312,7 +322,7 @@ def _draw(name: str, p: QPainter, s: float, col: QColor):
         p.drawLine(QPointF(s * 0.42, s * 0.66), QPointF(s * 0.58, s * 0.66))
 
 
-ICON_NAMES = ('search', 'clear', 'close', 'check', 'dash', 'dot', 'chevron_down', 'chevron_up', 'info', 'warn', 'error', 'good', 'inbox', 'save', 'load', 'export', 'rerun', 'edit', 'play')
+ICON_NAMES = ('search', 'clear', 'close', 'check', 'dash', 'dot', 'chevron_down', 'chevron_up', 'info', 'warn', 'error', 'good', 'inbox', 'save', 'load', 'export', 'rerun', 'edit', 'play', 'rerun_from')
 
 
 def pixmap(name: str, color: str, size: int = 16, dpr: float = 2.0) -> QPixmap:
