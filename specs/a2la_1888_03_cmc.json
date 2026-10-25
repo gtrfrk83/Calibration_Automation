@@ -3192,6 +3192,489 @@
     }
    ],
    "basis": "generate"
+  },
+  {
+   "parameter": "Electrical Calibration of Thermocouple Indicators",
+   "kind": "TEMP",
+   "standard": "Multifunction calibrator",
+   "notes": "Thermocouple simulation, degC (printed p. 13 of 47, verified against the page image). bands = Type K; types = B C D E J K L N R S T U.",
+   "bands": [
+    {
+     "lo": -200,
+     "hi": -100,
+     "rel": 0.0,
+     "abs": 0.22,
+     "rng": 0.0,
+     "gt": false
+    },
+    {
+     "lo": -100,
+     "hi": -25,
+     "rel": 0.0,
+     "abs": 0.11,
+     "rng": 0.0,
+     "gt": true
+    },
+    {
+     "lo": -25,
+     "hi": 120,
+     "rel": 0.0,
+     "abs": 0.1,
+     "rng": 0.0,
+     "gt": true
+    },
+    {
+     "lo": 120,
+     "hi": 1000,
+     "rel": 0.0,
+     "abs": 0.16,
+     "rng": 0.0,
+     "gt": true
+    },
+    {
+     "lo": 1000,
+     "hi": 1372,
+     "rel": 0.0,
+     "abs": 0.27,
+     "rng": 0.0,
+     "gt": true
+    }
+   ],
+   "types": {
+    "B": [
+     {
+      "lo": 600,
+      "hi": 800,
+      "rel": 0.0,
+      "abs": 0.34,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 800,
+      "hi": 1000,
+      "rel": 0.0,
+      "abs": 0.26,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1000,
+      "hi": 1550,
+      "rel": 0.0,
+      "abs": 0.23,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1550,
+      "hi": 1820,
+      "rel": 0.0,
+      "abs": 0.26,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "C": [
+     {
+      "lo": 0,
+      "hi": 150,
+      "rel": 0.0,
+      "abs": 0.19,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 150,
+      "hi": 650,
+      "rel": 0.0,
+      "abs": 0.16,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 650,
+      "hi": 1000,
+      "rel": 0.0,
+      "abs": 0.2,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1000,
+      "hi": 1800,
+      "rel": 0.0,
+      "abs": 0.35,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1800,
+      "hi": 2316,
+      "rel": 0.0,
+      "abs": 0.61,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "D": [
+     {
+      "lo": 0,
+      "hi": 150,
+      "rel": 0.0,
+      "abs": 0.19,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 150,
+      "hi": 650,
+      "rel": 0.0,
+      "abs": 0.16,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 650,
+      "hi": 1000,
+      "rel": 0.0,
+      "abs": 0.2,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1000,
+      "hi": 1800,
+      "rel": 0.0,
+      "abs": 0.34,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1800,
+      "hi": 2316,
+      "rel": 0.0,
+      "abs": 0.61,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "E": [
+     {
+      "lo": -250,
+      "hi": -150,
+      "rel": 0.0,
+      "abs": 0.31,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": -150,
+      "hi": -25,
+      "rel": 0.0,
+      "abs": 0.12,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": -25,
+      "hi": 350,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 350,
+      "hi": 650,
+      "rel": 0.0,
+      "abs": 0.13,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 650,
+      "hi": 1000,
+      "rel": 0.0,
+      "abs": 0.16,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "J": [
+     {
+      "lo": -210,
+      "hi": -100,
+      "rel": 0.0,
+      "abs": 0.19,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": -100,
+      "hi": -30,
+      "rel": 0.0,
+      "abs": 0.11,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": -30,
+      "hi": 150,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 150,
+      "hi": 760,
+      "rel": 0.0,
+      "abs": 0.12,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 760,
+      "hi": 1200,
+      "rel": 0.0,
+      "abs": 0.16,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "K": [
+     {
+      "lo": -200,
+      "hi": -100,
+      "rel": 0.0,
+      "abs": 0.22,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": -100,
+      "hi": -25,
+      "rel": 0.0,
+      "abs": 0.11,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": -25,
+      "hi": 120,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 120,
+      "hi": 1000,
+      "rel": 0.0,
+      "abs": 0.16,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1000,
+      "hi": 1372,
+      "rel": 0.0,
+      "abs": 0.27,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "L": [
+     {
+      "lo": -200,
+      "hi": -100,
+      "rel": 0.0,
+      "abs": 0.24,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": -100,
+      "hi": 800,
+      "rel": 0.0,
+      "abs": 0.16,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 800,
+      "hi": 900,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "N": [
+     {
+      "lo": -200,
+      "hi": -100,
+      "rel": 0.0,
+      "abs": 0.26,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": -100,
+      "hi": -25,
+      "rel": 0.0,
+      "abs": 0.13,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": -25,
+      "hi": 120,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 120,
+      "hi": 410,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 410,
+      "hi": 1300,
+      "rel": 0.0,
+      "abs": 0.16,
+      "rng": 0.0,
+      "gt": false
+     }
+    ],
+    "R": [
+     {
+      "lo": 0,
+      "hi": 250,
+      "rel": 0.0,
+      "abs": 0.4,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 250,
+      "hi": 400,
+      "rel": 0.0,
+      "abs": 0.23,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 400,
+      "hi": 1000,
+      "rel": 0.0,
+      "abs": 0.21,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1000,
+      "hi": 1767,
+      "rel": 0.0,
+      "abs": 0.26,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "S": [
+     {
+      "lo": 0,
+      "hi": 250,
+      "rel": 0.0,
+      "abs": 0.33,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 250,
+      "hi": 1000,
+      "rel": 0.0,
+      "abs": 0.24,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1000,
+      "hi": 1400,
+      "rel": 0.0,
+      "abs": 0.25,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 1400,
+      "hi": 1767,
+      "rel": 0.0,
+      "abs": 0.32,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "T": [
+     {
+      "lo": -250,
+      "hi": -150,
+      "rel": 0.0,
+      "abs": 0.47,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": -150,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.16,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 0,
+      "hi": 120,
+      "rel": 0.0,
+      "abs": 0.11,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 120,
+      "hi": 400,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "U": [
+     {
+      "lo": -200,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.31,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 0,
+      "hi": 600,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     }
+    ]
+   },
+   "basis": "generate"
   }
  ],
  "oscilloscope": {

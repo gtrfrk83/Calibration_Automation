@@ -62,9 +62,11 @@ class Table(unittest.TestCase):
             elif k == ('generate', 'ACI'):
                 self.assertEqual(h(e['ranges'][:OLD_ACI_RANGES[1]]), OLD_ACI_RANGES[0])
                 self.assertEqual(len(e['ranges']), OLD_ACI_RANGES[1] + 2)
+            elif k == ('generate', 'TEMP'):
+                pass                                               # the Type K line, added later (specs/build_a2la_cmc_temperature.py)
             else:
                 self.assertEqual(h(body), OLD[k], k)
-        self.assertEqual(len(self.data['entries']), 13)
+        self.assertEqual(len(self.data['entries']), 14)
         self.assertEqual(h(self.data['oscilloscope']), OLD_OSC)
         self.assertEqual(h({k: v for k, v in self.data.items() if k not in ('entries', 'oscilloscope', 'source')}), OLD_TOP)
 

@@ -27,6 +27,16 @@ def _inside(value, lo, hi):
     return lo <= value <= hi
 
 
+def _temp_in(t, band, first_lo=None):
+    """Thermocouple bands: printed '(> lo to hi)' (gt) = lower edge belongs to the band below; a band printed without '>' is a closed interval."""
+    return band['lo'] < t <= band['hi'] if band.get('gt') else band['lo'] <= t <= band['hi']
+
+
+def _tc_bands(entry, tc):
+    """The bands of one thermocouple type of the TEMP entry (Type K when none is named)."""
+    return (entry.get('types') or {}).get(tc or 'K') or ([] if entry.get('types') else entry['bands'])
+
+
 def _in_row(frequency, row, first_lo, half_open=True):
     """A frequency row of an AC table is printed '(> lo to hi) Hz': the lower edge belongs to the row below, the upper edge to this row (only the
     lowest row of the block, 'lo to hi', includes its lower edge)."""
@@ -56,7 +66,7 @@ class Scope:
                 "Based on the laboratory's source (Generate) CMC for the applied stimulus; it does not include contributions from the unit under test.")
 
     # ---- measuring instruments (DMMs): value in the measurand's base unit ------------------------
-    def dmm(self, kind, nominal, range_value=None, frequency=None, basis='generate'):
+    def dmm(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K'):
         """basis 'generate' (default): the CMC of the SOURCE that applies the stimulus (calibrator), which is how a DMM
         verification is performed. 'measure': the lab's measuring-instrument CMC. Kinds with no Generate entry
         (frequency) fall back to Measure."""
@@ -67,7 +77,7 @@ class Scope:
         if entry.get('basis') == 'generate':
             range_value = None            # Generate bands are by the generated value, never by the DMM range
         if kind == 'TEMP':      # signed bands in degC; the shipped scope file has no temperature entry, so this returns None (nothing is assumed) until the lab adds one
-            hits = [_u(b, nominal) for b in entry['bands'] if _inside(nominal, b['lo'], b['hi'])]
+            hits = [_u(b, 0.0) for b in _tc_bands(entry, tc) if _temp_in(nominal, b)]       # '(> lo to hi)' bands: an edge belongs to the lower band
             return max(hits) if hits else None
         value = abs(nominal)
         if kind == 'ACV':
@@ -77,14 +87,17 @@ class Scope:
         hits = [_u(b, value) for b in entry['bands'] if _inside(value, b['lo'], b['hi'])]
         return max(hits) if hits else None
 
-    def dmm_text(self, kind, nominal, range_value=None, frequency=None, basis='generate'):
+    def dmm_text(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K'):
         """The scope's own expression for the band that `dmm` uses, e.g. '8.9 µV/V + 0.8 µV' ('' when the scope does not cover the point).
         Rebuilt from the stored relative / absolute / range terms (the scope file keeps numbers, not the printed text): the relative term is shown per
         unit of the measurand (µV/V), the absolute term in the measurand's unit.  Display only: it never feeds a limit or an uncertainty."""
         kind = 'OHM' if kind in ('OHM2', 'OHM4') else kind
         entry = self.entries.get((basis, kind)) or self.entries.get(('measure', kind))
-        if entry is None or kind == 'TEMP':
+        if entry is None:
             return ''
+        if kind == 'TEMP':
+            hits = [b for b in _tc_bands(entry, tc) if _temp_in(nominal, b)]
+            return f"{max(b['abs'] for b in hits):.2f} °C" if hits else ''
         if entry.get('basis') == 'generate':
             range_value = None
         unit = _SCOPE_UNIT.get(kind, '')
