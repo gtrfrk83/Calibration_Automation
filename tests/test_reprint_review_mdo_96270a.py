@@ -144,6 +144,9 @@ class Wiring(unittest.TestCase):
     def test_no_engine_file_edited_and_shared_modules_in_no_fingerprint(self):
         base = subprocess.run(['git', 'diff', '--name-only', 'origin/main'], cwd=ROOT, capture_output=True, text=True).stdout.split()
         later = ('mdo4000c_verification.py', 'specs/build_mdo_spec.py', 'specs/tektronix_mdo4000c_pv.json')       # edited by the logic probe removal, not by this work
+        later += ('specs/a2la_1888_03_cmc.json', 'specs/build_a2la_cmc_temperature.py',     # scope CMC thermocouple / capacitance lines (3b30fe7, dccc414)
+                  'specs/build_28x_spec.py', 'specs/fluke_287_289_pv.json',                  # 287/289 panel picture, FREQ CMC on 4-24/4-25 (20edb7d, dccc414, 8b150e7)
+                  'specs/build_hookups.py', 'specs/build_hookups_ext.py')                    # drawn hook-up diagrams (8b150e7); none of these is this work
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
         for f in ('report_review_adapters.py', 'report_review_model.py', 'uncertainty_budget.py'):

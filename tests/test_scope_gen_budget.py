@@ -365,7 +365,9 @@ class ReportRows(unittest.TestCase):
             fg = text('fgen.pdf')
             self.assertRegex(fg, r'Sine 20\.00 mVrms @ 1\.000 kHz, High Z.*2\.9 µV')
             self.assertRegex(fg, r'Square 900\.0 mVrms @ 1\.000 kHz, High Z.*20 µV')
-            self.assertRegex(fg, r'Sine 7\.000 Vrms @ 100\.0 kHz, High Z.*1\.2 mV')
+            # 100 kHz is on the scope's '(> 50 to 100) kHz' row since the ACV band edges went half-open (1d13125): CMC 0.0065 % x 7 V = 0.455 mV,
+            # so the 5790B budget governs: 1.33 mV / 2.576 x 2 = 1.033 mV, rounded up 1.1 mV (was the 100-300 kHz row, 0.017 % x 7 V = 1.19 mV -> 1.2 mV)
+            self.assertRegex(fg, r'Sine 7\.000 Vrms @ 100\.0 kHz, High Z.*1\.1 mV')
             self.assertRegex(fg, r'Sine 1\.00 Vpp @ 10\.00 MHz, 50 ohm.*71 µHz')
             mdo = text('mdo.pdf')
             self.assertIn('Uncertainty', mdo)
