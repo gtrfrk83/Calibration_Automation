@@ -1062,8 +1062,8 @@ class SheetQualityTests(QtDsbCase):
         self.assertEqual([lv.unit.itemText(i) for i in range(lv.unit.count())], ['V', 'mV', '\u00b5V', 'Vpp', 'mVpp', '\u00b5Vpp'])
         lv.edit.setText('500'), lv.unit.setCurrentText('mV')
         self.assertEqual(box.v['level'].get(), '0.5 V')
-        lv.edit.setText('1'), lv.unit.setCurrentText('Vpp')                  # rms basis: 1 Vpp = 0.35355339 V rms (sine)
-        self.assertEqual(box.v['level'].get(), '0.35355339 V')
+        lv.edit.setText('1'), lv.unit.setCurrentText('Vpp')                  # Vpp is a square wave as the calibrator takes it: no sine conversion
+        self.assertEqual(box.v['level'].get(), '1 V')
         lv.set_basis('pp')
         lv.edit.setText('1'), lv.unit.setCurrentText('Vpp')                  # the scope functions store peak-to-peak: as typed
         self.assertEqual(box.v['level'].get(), '1 V')

@@ -76,8 +76,8 @@ class FreqBox(QWidget):
 
 class LevelBox(QWidget):
     """The signal level of a frequency / period / bandwidth test: a number and a unit picker (V, mV, µV, Vpp, mVpp, µVpp).  The value is stored in the basis of the
-    function (volts rms; the scope functions store volts peak-to-peak), so a level typed in the other basis is converted for a sine wave (Vpp = 2 sqrt(2) x Vrms)
-    and the text handed on is always a plain volts figure in the stored basis.  UNVERIFIED: the sine-wave factor is the lab's usual assumption, not a manual's."""
+    function (volts rms; the scope functions store volts peak-to-peak).  V / mV / µV is a sine wave in rms and Vpp / mVpp / µVpp a square wave in peak-to-peak, the way the
+    calibrator takes them, so NO conversion is made between the two: the number is only scaled to volts.  The waveform itself is not stored in the datasheet."""
     UNITS = ('V', 'mV', '\u00b5V', 'Vpp', 'mVpp', '\u00b5Vpp')
     SCALE = {'V': 1, 'mV': 1e-3, '\u00b5V': 1e-6, 'Vpp': 1, 'mVpp': 1e-3, '\u00b5Vpp': 1e-6}
 
@@ -112,11 +112,6 @@ class LevelBox(QWidget):
             value = Decimal(t.replace(',', '.')) * Decimal(str(self.SCALE[unit]))
         except Exception:
             return t
-        typed_pp = unit.endswith('pp')
-        if typed_pp != (self.basis == 'pp'):
-            factor = Decimal(2) * Decimal(2).sqrt()
-            value = value / factor if typed_pp else value * factor
-            value = Decimal(format(value, '.8g'))
         return f'{value.normalize():f} V'.replace('+', '')
 
     def set_value(self, v):
