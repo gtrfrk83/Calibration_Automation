@@ -163,6 +163,7 @@ class QtDsbCase(unittest.TestCase):
         self.app.processEvents()
         self.assertTrue(box.cells['floor_plus'].isVisibleTo(box))
         self.assertTrue(box.cells['floor_minus'].isVisibleTo(box))            # both at the same time
+        self.assertLess(box.cells['floor_minus'].mapTo(box, box.cells['floor_minus'].rect().topLeft()).x(), box.cells['floor_plus'].mapTo(box, box.cells['floor_plus'].rect().topLeft()).x())      # low side on the left
         self.assertFalse(box.chip_frame.isVisibleTo(box))                     # no % of reading / % of range ... in this mode
         self.assertFalse(box.cells['iv'].isVisibleTo(box))
         self.assertFalse(box.side_box.isVisibleTo(box))

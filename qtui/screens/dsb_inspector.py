@@ -347,8 +347,9 @@ class Inspector(QFrame):
         lay.addWidget(self.side_box)
         # Asymmetrical tolerance is floor values only: one box for the side above the nominal and one for the side below, both in view
         self._group(lay, 'asym_floor')
-        self.v['floor_plus'] = C.Bind(self._cell('asym_floor', 'floor_plus', 'Floor above nominal (+)', None, 'A fixed amount (in the Units) added to the nominal for the high limit, for example 2.'))
+        # low side on the left, high side on the right (the order the cells are created in is the order they are laid out)
         self.v['floor_minus'] = C.Bind(self._cell('asym_floor', 'floor_minus', 'Floor below nominal (\u2212)', None, 'A fixed amount (in the Units) taken from the nominal for the low limit, for example 1.'))
+        self.v['floor_plus'] = C.Bind(self._cell('asym_floor', 'floor_plus', 'Floor above nominal (+)', None, 'A fixed amount (in the Units) added to the nominal for the high limit, for example 2.'))
         self._legacy_asym = False
         # Several rows at once: how the rows are spaced (shown while 'Make several rows at once' is ticked)
         self.mode_box = QWidget()
