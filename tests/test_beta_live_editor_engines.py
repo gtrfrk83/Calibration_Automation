@@ -397,7 +397,8 @@ class WaveSurferLive(unittest.TestCase):
         self.assertEqual(m.stage_param('ws.dcv_settle', 6.0), [])
         self.h_edit(m)
         self.app.io = type('IO', (), {'standby': lambda s: (_ for _ in ()).throw(RuntimeError('x'))})()
-        with mock.patch.object(W.messagebox, 'showerror') as err:
+        import tkinter.messagebox as tk_messagebox                     # the WaveSurfer prompts through ui_port (TkUiPort -> tkinter.messagebox)
+        with mock.patch.object(tk_messagebox, 'showerror') as err:
             self.assertFalse(self.app._pm_boundary('DC voltage'))
         self.assertTrue(err.called)
         self.assertEqual(self.app.dc_settle.get(), '3.0')
@@ -429,8 +430,11 @@ class Coverage(unittest.TestCase):
                 continue
             mods = re.findall(r'^import (\w+_verification|handheld_dmm|dsb_runtime)\s*$', src, re.M)
             texts = [src] + [(ROOT / f'{m}.py').read_text(encoding='utf-8') for m in mods]
+            for t in list(texts):                                        # a ported engine keeps its window code in <VIEW>_tk.py (ui_port.py)
+                texts += [(ROOT / f'{v}_tk.py').read_text(encoding='utf-8') for v in re.findall(r"^\s+VIEW = '(\w+)'", t, re.M)]
             if path.name == 'User_Datasheet.py':
                 texts.append((ROOT / 'handheld_dmm.py').read_text(encoding='utf-8'))
+                texts.append((ROOT / 'handheld_dmm_view_tk.py').read_text(encoding='utf-8'))        # its window code (ui_port.py)
             self.assertTrue(any('pm_live_attach(' in t for t in texts), f'{path.name}: no in-run editor and not listed in NOT_WIRED')
 
 

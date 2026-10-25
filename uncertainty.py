@@ -27,6 +27,24 @@ def _inside(value, lo, hi):
     return lo <= value <= hi
 
 
+def _temp_in(t, band, first_lo=None):
+    """Thermocouple bands: printed '(> lo to hi)' (gt) = lower edge belongs to the band below; a band printed without '>' is a closed interval."""
+    return band['lo'] < t <= band['hi'] if band.get('gt') else band['lo'] <= t <= band['hi']
+
+
+def _tc_bands(entry, tc):
+    """The bands of one thermocouple type of the TEMP entry (Type K when none is named)."""
+    return (entry.get('types') or {}).get(tc or 'K') or ([] if entry.get('types') else entry['bands'])
+
+
+def _in_row(frequency, row, first_lo, half_open=True):
+    """A frequency row of an AC table is printed '(> lo to hi) Hz': the lower edge belongs to the row below, the upper edge to this row (only the
+    lowest row of the block, 'lo to hi', includes its lower edge)."""
+    if not half_open or row['f_lo'] == first_lo:        # AC volts keep the closed interval (larger CMC on a shared edge) until its table is checked the same way
+        return row['f_lo'] <= frequency <= row['f_hi']
+    return row['f_lo'] < frequency <= row['f_hi']
+
+
 def _u(band, reading, rng=0.0):
     return band['rel'] * abs(reading) + band['abs'] + band.get('rng', 0.0) * rng
 
@@ -48,7 +66,7 @@ class Scope:
                 "Based on the laboratory's source (Generate) CMC for the applied stimulus; it does not include contributions from the unit under test.")
 
     # ---- measuring instruments (DMMs): value in the measurand's base unit ------------------------
-    def dmm(self, kind, nominal, range_value=None, frequency=None, basis='generate'):
+    def dmm(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K'):
         """basis 'generate' (default): the CMC of the SOURCE that applies the stimulus (calibrator), which is how a DMM
         verification is performed. 'measure': the lab's measuring-instrument CMC. Kinds with no Generate entry
         (frequency) fall back to Measure."""
@@ -59,7 +77,7 @@ class Scope:
         if entry.get('basis') == 'generate':
             range_value = None            # Generate bands are by the generated value, never by the DMM range
         if kind == 'TEMP':      # signed bands in degC; the shipped scope file has no temperature entry, so this returns None (nothing is assumed) until the lab adds one
-            hits = [_u(b, nominal) for b in entry['bands'] if _inside(nominal, b['lo'], b['hi'])]
+            hits = [_u(b, 0.0) for b in _tc_bands(entry, tc) if _temp_in(nominal, b)]       # '(> lo to hi)' bands: an edge belongs to the lower band
             return max(hits) if hits else None
         value = abs(nominal)
         if kind == 'ACV':
@@ -68,6 +86,54 @@ class Scope:
             return self._ac(entry, value, value if range_value is None else range_value, frequency, by_range=range_value is not None)
         hits = [_u(b, value) for b in entry['bands'] if _inside(value, b['lo'], b['hi'])]
         return max(hits) if hits else None
+
+    def dmm_text(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K'):
+        """The scope's own expression for the band that `dmm` uses, e.g. '8.9 µV/V + 0.8 µV' ('' when the scope does not cover the point).
+        Rebuilt from the stored relative / absolute / range terms (the scope file keeps numbers, not the printed text): the relative term is shown per
+        unit of the measurand (µV/V), the absolute term in the measurand's unit.  Display only: it never feeds a limit or an uncertainty."""
+        kind = 'OHM' if kind in ('OHM2', 'OHM4') else kind
+        entry = self.entries.get((basis, kind)) or self.entries.get(('measure', kind))
+        if entry is None:
+            return ''
+        if kind == 'TEMP':
+            hits = [b for b in _tc_bands(entry, tc) if _temp_in(nominal, b)]
+            return f"{max(b['abs'] for b in hits):.2f} °C" if hits else ''
+        if entry.get('basis') == 'generate':
+            range_value = None
+        unit = _SCOPE_UNIT.get(kind, '')
+        value = abs(nominal)
+        best = None
+        if kind in ('ACV', 'ACI'):
+            if frequency is None:
+                return ''
+            selector = value if (kind == 'ACV' or range_value is None) else range_value
+            by_range = kind == 'ACI' and range_value is not None
+            for block in entry['ranges']:
+                if (block['lo'] <= selector <= block['hi']):
+                    first = min(r['f_lo'] for r in block['rows'])
+                    for row in block['rows']:
+                        if _in_row(frequency, row, first, kind == 'ACI'):
+                            u = _u(row, value, selector if by_range else 0.0)
+                            if best is None or u > best[0]:
+                                best = (u, row)
+        else:
+            for b in entry['bands']:
+                if _inside(value, b['lo'], b['hi']):
+                    u = _u(b, value)
+                    if best is None or u > best[0]:
+                        best = (u, b)
+        if best is None:
+            return ''
+        band = best[1]
+        parts = []
+        as_percent = kind in ('ACV', 'ACI')           # the AC tables are printed in % of reading (0.39 % + 80 nA); the DC ones per unit (8.9 µV/V + 0.8 µV)
+        if band.get('rel'):
+            parts.append(f"{float(band['rel']) * 100:.6g} %" if as_percent else _si_text(band['rel'], f'{unit}/{unit}' if unit else ''))
+        if band.get('abs'):
+            parts.append(_si_text(band['abs'], unit))
+        if band.get('rng'):
+            parts.append((f"{float(band['rng']) * 100:.6g} %" if as_percent else _si_text(band['rng'], f'{unit}/{unit}')) + ' of range')
+        return ' + '.join(parts)
 
     def _ac(self, entry, value, selector, frequency, by_range):
         if frequency is None:
@@ -80,8 +146,9 @@ class Scope:
                 match = selector >= block['lo'] and selector <= block['hi']
             if not match:
                 continue
+            first = min(r['f_lo'] for r in block['rows'])
             for row in block['rows']:
-                if _inside(frequency, row['f_lo'], row['f_hi']):
+                if _in_row(frequency, row, first, entry.get('kind') == 'ACI'):
                     out.append(_u(row, value, selector if by_range else 0.0))
         return max(out) if out else None
 
@@ -115,6 +182,19 @@ class Scope:
                 return 20 * math.log10(1 + max(hits)), 'dB', 'oscilloscope level-sine flatness CMC converted to dB'
             return None, '', 'frequency outside the flatness scope'
         return None, '', 'no scope entry for this test (e.g. RMS noise)'
+
+
+_SCOPE_UNIT = {'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A', 'OHM': 'Ohm', 'CAP': 'F', 'FREQ': 'Hz'}
+
+
+def _si_text(value, unit):
+    """3 significant figures with the first SI prefix that gives 0.1 to 1000 (micro first, as the scope prints): 8.9 µV/V, 0.8 µV, 1.1 mOhm."""
+    for prefix, scale in (('µ', 1e6), ('n', 1e9), ('m', 1e3), ('', 1.0), ('p', 1e12)):
+        m = value * scale
+        if 0.1 <= m < 1000:
+            first, _, rest = unit.partition('/')
+            return f'{m:.3g} {prefix}{first}' + (f'/{rest}' if rest else '')
+    return f'{value:.3g} {unit}'
 
 
 def round_up(value, sig=2):

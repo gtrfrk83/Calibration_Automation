@@ -40,7 +40,7 @@ SOURCE_MODELS = ('5560A', '5522A', '5520A')
 # ---- which readings should carry an uncertainty (rule 5): derived from the laboratory's CMC table, not typed in twice.
 # CMC_KIND_MAP says which Datasheet Builder kinds each entry of specs/a2la_1888_03_cmc.json covers (the table's 'entries[].kind' values and the 'oscilloscope'
 # sections).  A kind (or section) that is in the table but not in this map is a hole: tests.test_datasheet_builder_rules fails until it is mapped.
-CMC_KIND_MAP = {'DCV': ('DCV',), 'DCI': ('DCI',), 'OHM': ('OHM2', 'OHM4'), 'CAP': ('CAP',), 'ACV': ('ACV',), 'ACI': ('ACI',),
+CMC_KIND_MAP = {'DCV': ('DCV',), 'DCI': ('DCI',), 'OHM': ('OHM2', 'OHM4'), 'CAP': ('CAP',), 'ACV': ('ACV',), 'ACI': ('ACI',), 'TEMP': ('TEMP',),
                 'FREQ': ('FREQ', 'PERIOD', 'GEN_FREQ', 'SCOPE_TIMEBASE'),                      # Time & Frequency
                 'oscilloscope.dc': ('SCOPE_GAIN', 'SCOPE_OFFSET', 'GEN_OFFSET'),
                 'oscilloscope.flatness': ('SCOPE_BW', 'GEN_FLAT'),

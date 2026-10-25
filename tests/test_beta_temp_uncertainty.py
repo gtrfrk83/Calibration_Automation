@@ -135,21 +135,21 @@ class Data(unittest.TestCase):
             self.assertAlmostEqual(b.components[0].u, spec / 2.576, 12)
             self.assertAlmostEqual(b.components[1].u, 0.01 / 12 ** 0.5, 12)
             self.assertAlmostEqual(b.emu, 2 * ((spec / 2.576) ** 2 + (0.01 ** 2) / 12) ** 0.5, 12)
-            self.assertIsNone(b.cmc)                           # the scope file has no temperature entry: nothing is invented
+            self.assertEqual(b.cmc, {0: 0.10, 100: 0.10, 400: 0.16, -40: 0.11}[v])      # the scope's Type K line (p. 13): a floor, never below it
             self.assertEqual(b.reported, rep, v)
             self.assertGreaterEqual(b.reported, b.emu)
             self.assertEqual(uncertainty.format_value(b.reported, 'C'), f'{rep:.2f} °C')
 
     def test_5560a_budget_hand_worked(self):
-        for v, spec, rep, text in ((0, 0.09, 0.091, '0.091 °C'), (100, 0.09, 0.091, '0.091 °C'), (400, 0.16, 0.17, '0.17 °C'), (-40, 0.10, 0.11, '0.11 °C'),
+        for v, spec, rep, text in ((0, 0.09, 0.10, '0.10 °C'), (100, 0.09, 0.10, '0.10 °C'), (400, 0.16, 0.17, '0.17 °C'), (-40, 0.10, 0.11, '0.11 °C'),
                                    (1000, 0.27, 0.28, '0.28 °C'), (-200, 0.22, 0.23, '0.23 °C')):
             b = ub.build('TEMP', v, 'degC', standard=self.s56, scope=self.sc)
             self.assertEqual(len(b.components), 2, v)                          # spec / 2 and the 0.01 degC resolution (5560A Product Specifications p. 15)
             self.assertAlmostEqual(b.components[0].u, spec / 2, 12)
             self.assertAlmostEqual(b.components[1].u, 0.01 / 12 ** 0.5, 12)
             self.assertAlmostEqual(b.emu, 2 * ((spec / 2) ** 2 + (0.01 ** 2) / 12) ** 0.5, 12)
-            self.assertIsNone(b.cmc)
-            self.assertEqual(b.reported, rep, v)
+            self.assertEqual(b.cmc, {0: 0.10, 100: 0.10, 400: 0.16, -40: 0.11, 1000: 0.16, -200: 0.22}[v])
+            self.assertEqual(b.reported, rep, v)                 # 0 and 100 degC: the CMC (0.10) is above the budget (0.091)
             self.assertEqual(uncertainty.format_value(b.reported, 'degC'), text)
 
     def test_5560a_resolution_is_the_printed_0_01_degC(self):
@@ -203,9 +203,11 @@ class Data(unittest.TestCase):
         self.assertEqual(sc.dmm('TEMP', -150), 0.7)
         self.assertIsNone(sc.dmm('TEMP', 150))                                  # +150 is not in the -200..-100 band (no magnitude mirroring)
 
-    def test_shipped_scope_has_no_temperature_entry(self):
-        self.assertIsNone(self.sc.dmm('TEMP', 100))
-        self.assertIsNone(self.sc.dmm('TEMP', 0))
+    def test_shipped_scope_has_the_type_k_entry(self):
+        for t, v in ((-200, 0.22), (-150, 0.22), (-100, 0.22), (-50, 0.11), (-25, 0.11), (0, 0.10), (120, 0.10), (400, 0.16), (1000, 0.16), (1372, 0.27)):
+            self.assertEqual(self.sc.dmm('TEMP', t), v, t)       # '(> lo to hi)': an edge belongs to the lower band
+        self.assertIsNone(self.sc.dmm('TEMP', 1400))
+        self.assertIsNone(self.sc.dmm('TEMP', -250))
 
     # ---- TAR / TUR (tolerance = half the width of the limits)
     def ratios(self, std, v, low, high, unit='degC'):
@@ -220,8 +222,8 @@ class Data(unittest.TestCase):
         self.assertEqual(self.ratios(self.s22, 1000, 989.0, 1011.0)[:2], ('27.5:1', '34.3:1'))  # border: 0.40 -> 11/0.40, 11/0.32
 
     def test_tar_tur_5560a(self):
-        self.assertEqual(self.ratios(self.s56, 0, -1.0, 1.0)[:2], ('11.1:1', '10.9:1'))
-        self.assertEqual(self.ratios(self.s56, 100, 98.0, 102.0)[:2], ('22.2:1', '21.9:1'))
+        self.assertEqual(self.ratios(self.s56, 0, -1.0, 1.0)[:2], ('11.1:1', '10.0:1'))       # TUR: 1 / 0.10 (the scope CMC is above the 0.091 budget)
+        self.assertEqual(self.ratios(self.s56, 100, 98.0, 102.0)[:2], ('22.2:1', '20.0:1'))
         self.assertEqual(self.ratios(self.s56, 400, 395.0, 405.0)[:2], ('31.2:1', '29.4:1'))
         self.assertEqual(self.ratios(self.s56, -40, -41.4, -38.6)[:2], ('14.0:1', '12.7:1'))
         self.assertEqual(self.ratios(self.s56, 1000, 989.0, 1011.0)[:2], ('40.7:1', '39.2:1'))
@@ -242,7 +244,7 @@ class Data(unittest.TestCase):
         self.assertEqual((tar, tur), ('', ''))
         self.assertIn('not converted', r['reason'])
         r = tartur.compute(pt(100), 98, 102, None, self.sc)
-        self.assertEqual((tartur.format_ratio(r['tar']), tartur.format_ratio(r['tur'])), ('', ''))
+        self.assertEqual((tartur.format_ratio(r['tar']), tartur.format_ratio(r['tur'])), ('', '20.0:1'))      # no calibrator: TAR blank, TUR from the scope CMC alone (0.10)
         self.assertIsNone(tartur.compute(pt(100), 98, None, self.s22, self.sc)['tar'])           # one-sided limits
 
     def test_other_kinds_still_blank_when_the_scope_does_not_cover_them(self):
@@ -333,10 +335,10 @@ class Reports(unittest.TestCase):
                   'Fluke_179': [('0.0', '0.13 °C', '6.2:1', '7.6:1'), ('-40.0', '0.14 °C', '7.7:1', '10.0:1'), ('400.0', '0.21 °C', '19.2:1', '23.8:1')],
                   'Fluke_87V': [('0.0', '0.13 °C', '6.2:1', '7.6:1'), ('100.0', '0.13 °C', '12.5:1', '15.3:1')],
                   'Fluke_287': [('0.0', '0.13 °C', '6.2:1', '7.6:1'), ('100.0', '0.13 °C', '12.5:1', '15.3:1'), ('1000.0', '0.32 °C', '27.5:1', '34.3:1')]},
-        '5560A': {'Fluke_116': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('400.0', '0.17 °C', '31.2:1', '29.4:1')],
-                  'Fluke_179': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('-40.0', '0.11 °C', '14.0:1', '12.7:1'), ('400.0', '0.17 °C', '31.2:1', '29.4:1')],
-                  'Fluke_87V': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('100.0', '0.091 °C', '22.2:1', '21.9:1')],
-                  'Fluke_287': [('0.0', '0.091 °C', '11.1:1', '10.9:1'), ('100.0', '0.091 °C', '22.2:1', '21.9:1'), ('1000.0', '0.28 °C', '40.7:1', '39.2:1')]},
+        '5560A': {'Fluke_116': [('0.0', '0.10 °C', '11.1:1', '10.0:1'), ('400.0', '0.17 °C', '31.2:1', '29.4:1')],
+                  'Fluke_179': [('0.0', '0.10 °C', '11.1:1', '10.0:1'), ('-40.0', '0.11 °C', '14.0:1', '12.7:1'), ('400.0', '0.17 °C', '31.2:1', '29.4:1')],
+                  'Fluke_87V': [('0.0', '0.10 °C', '11.1:1', '10.0:1'), ('100.0', '0.10 °C', '22.2:1', '20.0:1')],
+                  'Fluke_287': [('0.0', '0.10 °C', '11.1:1', '10.0:1'), ('100.0', '0.10 °C', '22.2:1', '20.0:1'), ('1000.0', '0.28 °C', '40.7:1', '39.2:1')]},
     }
 
     @classmethod
@@ -377,7 +379,7 @@ class Reports(unittest.TestCase):
                 rows = self.out[cal]['handheld:Fluke ' + tag]['rows']
                 got = [r['Unc'] for r in rows if r['UOM'] == '°C']
                 if cal == '5560A':
-                    want = {'116': ['0.091 °C', '0.17 °C'], '179': ['0.091 °C', '0.11 °C', '0.17 °C']}[tag]
+                    want = {'116': ['0.10 °C', '0.17 °C'], '179': ['0.10 °C', '0.11 °C', '0.17 °C']}[tag]
                 self.assertEqual(got, want, (cal, tag))
 
     def test_open_input_functional_check_stays_na(self):

@@ -109,7 +109,8 @@ class Registry8846A(unittest.TestCase):
         app.reset_meter = lambda: True
         app._sync = lambda: None
         app.conn = mod.connect_db(self.reg, self.old)
-        with mock.patch.object(mod.messagebox, 'askyesno', return_value=True), mock.patch.object(mod.messagebox, 'showwarning'):
+        import ui_port_tk       # the launcher's dialogs go through the UI port now (Tk implementation shows them with tkinter.messagebox)
+        with mock.patch.object(ui_port_tk.messagebox, 'askyesno', return_value=True), mock.patch.object(ui_port_tk.messagebox, 'showwarning'):
             app.start()
             app.log('STEP', 'simulated', 'DEMO', 3)
         app.conn.close()

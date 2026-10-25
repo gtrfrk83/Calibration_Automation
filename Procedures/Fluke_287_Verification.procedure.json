@@ -23,6 +23,10 @@
   "code": [
    "Procedures/Fluke_287_Verification.py",
    "handheld_dmm.py",
+   "handheld_dmm_view_tk.py",
+   "handheld_dmm_view_qt.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "drivers/base.py",
    "drivers/transport.py",
    "drivers/fluke_5560a.py",

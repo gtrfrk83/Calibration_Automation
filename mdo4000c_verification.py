@@ -12,15 +12,15 @@ front-panel-only step. Writes are never retried; all settings are read back; out
 """
 from __future__ import annotations
 
-import json, math, queue, sys, threading, time, tkinter as tk
+import json, math, queue, sys, threading, time
 from datetime import datetime
 from pathlib import Path
-from tkinter import ttk, messagebox, filedialog
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
-import ui_theme as ui
-import ui_shell
+import ui_port
+import ui_theme as ui                   # only its toolkit-free helpers here (si_row, si, report_filename, Settings); the window code is in mdo4000c_view_tk.py
+from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import appdata
 import datamode
 import drivers
@@ -927,32 +927,29 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.q = queue.Queue()
         self.cfg = Config()
         self.pm_init('mdo', 'MDO4000C', demo=demo, lists=[POINTS], shape='band')    # procedure modifications: saved overrides for this model
-        ui.apply_theme(root)
-        root.title('Tektronix MDO4000C | Performance Verification' + (' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1380, 880, min_w=900, min_h=680)
+        self.ui_view.setup_window(self)
         self.settings = ui.Settings('MDO4000C')
         g = self.settings.get
-        self.asset, self.serial = tk.StringVar(), tk.StringVar()
-        self.v_model = tk.StringVar(value=g('model', '4104C'))
-        self.v_sa = tk.StringVar(value=g('sa', 'None'))
-        self.v_afg = tk.BooleanVar(value=g('afg', 'False') == 'True')
-        self.v_dvm = tk.BooleanVar(value=g('dvm', 'False') == 'True')
-        self.v_tpa = tk.BooleanVar(value=g('tpa', 'False') == 'True')
-        self.addr = {k: tk.StringVar(value=g(k, d)) for k, d in (
+        self.asset, self.serial = port.var(), port.var()
+        self.v_model = port.var(g('model', '4104C'))
+        self.v_sa = port.var(g('sa', 'None'))
+        self.v_afg = port.var(g('afg', 'False') == 'True', 'bool')
+        self.v_dvm = port.var(g('dvm', 'False') == 'True', 'bool')
+        self.v_tpa = port.var(g('tpa', 'False') == 'True', 'bool')
+        self.addr = {k: port.var(g(k, d)) for k, d in (
             ('scope', 'USB0::0x0699::0x0415::C000000::INSTR'), ('cal', 'COM9'), ('cal_baud', '9600'), ('rf1', ''), ('rf2', ''), ('gen', ''), ('dmm', ''), ('counter', ''), ('power', ''))}
-        self.status = tk.StringVar()
-        self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
-        self.show_section = tk.StringVar(value='All sections')
-        self.show_status = tk.StringVar(value='All points')
+        self.status = port.var()
+        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.show_section = port.var('All sections')
+        self.show_status = port.var('All points')
         self._build_ui()
         self.on_config(save=False)
         self.status.set(virtualbench.status_text(self) if demo else
                         'Step 1: instrument ID and model/options. Step 2: addresses, then Test Connections. Step 3: Run All Pending.')
-        root.protocol('WM_DELETE_WINDOW', self.on_close)
-        root.bind('<Control-s>', lambda _e: self.save())
-        import labregistry
-        labregistry.attach(root, self.asset, self.serial, self.status.set)
-        self.root.after(50, self._pump)
+        port.on_close(root, self.on_close)
+        port.bind_key(root, '<Control-s>', self.save)
+        self.ui_view.finish_window(self)
+        port.after(self.root, 50, self._pump)
 
     # ---- selection ---------------------------------------------------------------------------------------------------
     def read_cfg(self):
@@ -971,79 +968,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self._busy = v
         if hasattr(self, 'btn_run'): self._sync_buttons()
 
-    def _sync_buttons(self):
-        idle = 'disabled' if self._busy else 'normal'
-        for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
-            b.configure(state=idle)
-        self.btn_stop.configure(state='normal' if self._busy else 'disabled')
-        for c in self.cfg_widgets:
-            c.configure(state='disabled' if self._busy else ('readonly' if isinstance(c, ttk.Combobox) else 'normal'))
+    def _sync_buttons(self): self.ui_view.sync_buttons(self)
 
     # ---- layout -------------------------------------------------------------------------------------------------------------
-    def _build_ui(self):
-        root = self.root
-        sh = self.shell = ui_shell.Shell(root, 'Tektronix MDO4000C  -  Performance Verification',
-                                         f'MDO4024C / 4034C / 4054C / 4104C  |  {SPEC["source"]["document"]}  |  {len(POINTS)} points in the spec',
-                                         demo=self.demo, on_section=self.pick_section, version='spec v2', virtual=self.virtual)
-        self.status = sh.status_var
-        self.conn_pill = sh.add_chip(self.chip_text() if self.demo else 'Not connected', 'neutral')
-        sh.build_identity(self.asset, self.serial)
-        self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
-        self.summary = sh.build_progress()
-        if self.demo: sh.notice(self.banner_text(), 'warn', title=virtualbench.BANNER_TITLE)
-        else: sh.notice('The program stops and asks you to confirm every cable, terminator, instrument or front-panel change before the next point. '
-                        'Stay at the bench: high-voltage DC points (to 99.5 V) and RF outputs are enabled only after you confirm.', 'info')
+    VIEW = 'mdo4000c_view'                          # the toolkit's window code: mdo4000c_view_tk (Tk), later _qt
 
-        d = sh.drawer_body; d.columnconfigure(1, weight=1)
-        ttk.Label(d, text='Model').grid(row=0, column=0, sticky='w', pady=4)
-        m = ttk.Combobox(d, textvariable=self.v_model, values=['MDO' + x for x in MODELS], width=10, state='readonly'); m.grid(row=0, column=1, padx=(10, 0), pady=4, sticky='w')
-        m.set('MDO' + self.v_model.get().replace('MDO', ''))
-        ttk.Label(d, text='Spectrum analyzer').grid(row=1, column=0, sticky='w', pady=4)
-        sa = ttk.Combobox(d, textvariable=self.v_sa, values=['None', 'SA3', 'SA6'], width=10, state='readonly'); sa.grid(row=1, column=1, padx=(10, 0), pady=4, sticky='w')
-        checks = [ttk.Checkbutton(d, text='AFG (MDO4AFG)', variable=self.v_afg, command=self.on_config),
-                  ttk.Checkbutton(d, text='DVM', variable=self.v_dvm, command=self.on_config),
-                  ttk.Checkbutton(d, text='TPA-N-PRE attached', variable=self.v_tpa, command=self.on_config)]
-        for i, c in enumerate(checks): c.grid(row=2 + i, column=0, columnspan=2, sticky='w', pady=1)
-        self.btn_read_opts = ttk.Button(d, text='Read options from scope', command=self.read_options); self.btn_read_opts.grid(row=5, column=0, columnspan=2, sticky='w', pady=(8, 0))
-        self.cfg_widgets = [m, sa] + checks
-        for w in (m, sa): w.bind('<<ComboboxSelected>>', lambda _e: self.on_config())
-        ttk.Separator(d).grid(row=7, column=0, columnspan=2, sticky='ew', pady=(12, 10))
-        rows = [('scope', 'MDO4000C (USB)'), ('cal', 'Fluke 5560A'), ('rf1', 'Fluke 96270A (RF)'), ('rf2', 'RF source 2 (IMD only)'),
-                ('gen', 'Agilent 33220A / 33250A'), ('dmm', 'Reference DMM (AFG)'), ('counter', 'Counter (AFG freq)'), ('power', 'Power meter (optional)')]
-        self.addr_boxes = {}
-        for i, (key, label) in enumerate(rows):
-            ttk.Label(d, text=label).grid(row=8 + i, column=0, sticky='w', pady=4)
-            cb = ttk.Combobox(d, textvariable=self.addr[key], state='normal', width=34); cb.grid(row=8 + i, column=1, sticky='ew', padx=(10, 0), pady=4)
-            self.addr_boxes[key] = cb
-        ttk.Label(d, text='5560A baud').grid(row=16, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.addr['cal_baud'], values=['9600', '19200', '4800', '2400', '1200'], width=9, state='readonly').grid(row=16, column=1, sticky='w', padx=(10, 0), pady=4)
-        ttk.Label(d, text='Leave an address blank if that instrument is not used. Without a reference DMM / counter the AFG readings are typed in.',
-                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=17, column=0, columnspan=2, sticky='w', pady=(8, 0))
-        btns = sh.drawer_footer
-        self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
-        self.btn_test = ttk.Button(btns, text='Test connections', command=self.test_connections, style='Accent.TButton'); self.btn_test.pack(side='left')
+    @property
+    def ui_view(self): return port.view(self.VIEW)
 
-        self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
-        self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
-        self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
-        self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
-        sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
-        self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
-        sh.add_action('Save progress', self.save, side='right', short='Save')
-        self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well, usable during a run
-
-        body = sh.content
-        info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
-        ttk.Label(info, textvariable=self.detail, wraplength=1100, justify='left', style='Muted.TLabel').pack(anchor='w', fill='x')
-        filt = ttk.Frame(body); filt.pack(side='top', fill='x', pady=(0, 6))
-        ttk.Label(filt, text='Test points', style='Bold.TLabel').pack(side='left')
-        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS + ['Skipped'], width=14, state='readonly'); c2.pack(side='right')
-        ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='right', padx=(0, 6))
-        c2.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
-        self.tree = ui_shell.results_table(self, body)
-        ui_shell.small_window(self, self.tree, filt)
-        self.tree.bind('<<TreeviewSelect>>', self.on_select)
-        ui.polish(root)
+    def _build_ui(self): self.ui_view.build_ui(self)
 
     # ---- configuration changed -------------------------------------------------------------------------------------------------
     def on_config(self, save=True):
@@ -1058,7 +991,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def read_options(self):
         if self.fast_demo:
-            messagebox.showinfo('Demo mode', 'Demo mode uses no hardware.'); return
+            port.message('info', 'Demo mode', 'Demo mode uses no hardware.'); return
         if self.io is None: self.test_connections()
         if self.io is None: return
         opts = self.io.scope.installed_options()
@@ -1067,7 +1000,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.v_sa.set('SA6' if 'SA6' in opts else 'SA3' if 'SA3' in opts else 'None')
         self.v_afg.set('AFG' in opts); self.v_dvm.set('DVM' in opts)
         self.on_config()
-        messagebox.showinfo('Options read', f'Model MDO{model}; options reported: {", ".join(sorted(opts)) or "none"}.\nCheck the boxes against the instrument label and correct anything the scope does not report.')
+        port.message('info', 'Options read', f'Model MDO{model}; options reported: {", ".join(sorted(opts)) or "none"}.\nCheck the boxes against the instrument label and correct anything the scope does not report.')
 
     # ---- table --------------------------------------------------------------------------------------------------------------------
     def _visible(self, p):
@@ -1156,18 +1089,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             pass
 
     def refresh(self):
-        keep = self.tree.selection()
-        self.tree.delete(*self.tree.get_children())
-        for p in POINTS:
-            if self._visible(p):
-                v, tags = self._row(p); self.tree.insert('', 'end', iid=str(p['id']), values=v, tags=tags)
-        if keep and self.tree.exists(keep[0]): self.tree.selection_set(keep[0])
+        keep = self.ui_view.table_selection(self)
+        self.ui_view.table_set_rows(self, ((str(p['id']), *self._row(p)) for p in POINTS if self._visible(p)), keep)
         self.update_summary()
 
     def _update_row(self, p):
         iid = str(p['id'])
-        if self.tree.exists(iid):
-            v, tags = self._row(p); self.tree.item(iid, values=v, tags=tags)
+        if self.ui_view.table_has(self, iid):
+            v, tags = self._row(p); self.ui_view.table_update_row(self, iid, v, tags)
         self.update_summary()
 
     def update_summary(self):
@@ -1175,7 +1104,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.update_shell_sections(self.active_points(), lambda p: SECTION_TITLE[p['section']])
 
     def on_select(self, _e=None):
-        sel = self.tree.selection()
+        sel = self.ui_view.table_selection(self)
         if not sel: return
         p = POINTS[int(sel[0]) - 1]
         nom, lo, hi, _r, unit = display_row(p)
@@ -1194,15 +1123,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             found = list(pyvisa.ResourceManager().list_resources())
         except Exception as exc:
             self.status.set(f'Instrument search needs pyvisa and a VISA backend ({exc}). You can still type an address.'); return
-        for cb in self.addr_boxes.values(): cb['values'] = found
+        self.ui_view.set_choices(self, found)
         self.status.set(f'{len(found)} VISA resource(s): ' + (', '.join(found) if found else 'none'))
 
     def addrs(self):
         return {k: v.get() for k, v in self.addr.items()}
 
     def test_connections(self):
-        if self.fast_demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware.'); return
-        self.status.set('Connecting ...'); self.root.update_idletasks()
+        if self.fast_demo: port.message('info', 'Demo mode', 'Demo mode uses no hardware.'); return
+        self.status.set('Connecting ...'); port.flush(self.root)
         try:
             self.disconnect()
             if self.virtual:          # demo: the real IO / driver code over the simulated MDO4000C bench (scope, 5560A, 96270A x2, generator, DMM, counter)
@@ -1213,13 +1142,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             else: self.io = IO(self.addrs(), mods=self.pm_state)
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
-            self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
+            self.status.set('Connection error: ' + str(exc)); port.message('error', 'Connection error', str(exc)); return
         self._set_conn(True)
         if not self.demo: self._save_addrs()
         used = [n for n, o in (('96270A', self.io.rf1), ('RF source 2', self.io.rf2), ('function generator', self.io.gen), ('reference DMM', self.io.dmm), ('counter', self.io.counter), ('power meter', self.io.power)) if o]
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
         self.status.set('Connected: ' + self.io.ident + tag + '. Outputs are OFF.')
-        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'Oscilloscope: {self.io.ident}\nFluke 5560A: {self.io.cal.idn}\nAlso connected: {", ".join(used) or "no other instruments"}\nAll outputs are off.{tag}')
+        port.message('info', 'Connected' + (' (DEMO)' if self.virtual else ''), f'Oscilloscope: {self.io.ident}\nFluke 5560A: {self.io.cal.idn}\nAlso connected: {", ".join(used) or "no other instruments"}\nAll outputs are off.{tag}')
 
     def disconnect(self):
         if self.io: self.io.close(); self.io = None
@@ -1258,7 +1187,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 elif kind == 'refresh': self.refresh()
                 elif kind == 'done': self._finished(payload)
                 elif kind == 'ask':
-                    ok = ui.confirm_steps(self.root, payload['title'], payload['heading'], payload['steps'], facts=payload['facts'], caution=payload['caution'], ok=payload['ok'])
+                    ok = port.operator_prompt(payload['title'], payload['heading'], payload['steps'], facts=payload['facts'], caution=payload['caution'], ok=payload['ok'], parent=self.root)
                     if ok and self.virtual: virtualbench.mdo_operator_confirmed(self._vb, payload['title'])      # the virtual operator pushes the front-panel button
                     box['value'] = ok; box['ev'].set()
                 elif kind == 'manual':
@@ -1267,10 +1196,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                     box['value'] = self._reconnect(); box['ev'].set()
         except queue.Empty:
             pass
-        self.root.after(50, self._pump)
+        port.after(self.root, 50, self._pump)
 
     def _manual_dialog(self, req):
-        from tkinter import simpledialog
         while True:
             hint, start = '', None
             if self.virtual:       # demo: the same window; the box holds a plausible simulated reading, which may be replaced
@@ -1280,10 +1208,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 elif q.get('nominal') is not None:
                     start = f"{q['nominal']:g}"
                 hint = '\nDEMO: the box holds a simulated reading; type your own if you like.'
-            text = simpledialog.askstring('Enter reading' + (' [DEMO]' if self.virtual else ''), req['prompt'] + f'\n(value in {req["unit"]}, plain number)' + hint, parent=self.root, initialvalue=start)
+            text = port.ask_text('Enter reading' + (' [DEMO]' if self.virtual else ''), req['prompt'] + f'\n(value in {req["unit"]}, plain number)' + hint, parent=self.root, initial=start)
             if text is None: return None
             try: return float(text.replace(',', ''))
-            except ValueError: messagebox.showwarning('Reading', 'Enter a number.')
+            except ValueError: port.message('warning', 'Reading', 'Enter a number.')
 
     def _reconnect(self):
         try:
@@ -1298,14 +1226,19 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def run_section(self): self.run_shown_section()
 
     def rerun(self):
-        sel = self.tree.selection()
+        sel = self.ui_view.table_selection(self)
         if sel: self.execute([POINTS[int(sel[0]) - 1]])
-        else: messagebox.showinfo('Selection', 'Select a test point first.')
+        else: port.message('info', 'Selection', 'Select a test point first.')
+
+    def rerun_from(self):
+        sel = self.ui_view.table_selection(self)
+        if sel: self.execute(self.points_from(POINTS, sel[0]))
+        else: port.message('info', 'Selection', 'Select a test point first.')
 
     def execute(self, points):
         if not self.confirm_found_overwrite(points): return
         if self.busy or not points: return
-        if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        if not self.asset.get().strip(): port.message('warning', 'Instrument ID', 'Enter an instrument ID.'); return
         points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
         if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         self.read_cfg()
@@ -1351,7 +1284,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.busy = False; self.save(silent=True)
         if error == 'stopped': self.status.set('Run stopped. Progress is saved.')
         elif error is not None:
-            self.status.set('Error - run stopped: ' + str(error)); messagebox.showerror('Measurement stopped', str(error))
+            self.status.set('Error - run stopped: ' + str(error)); port.message('error', 'Measurement stopped', str(error))
         else: self.status.set('Run complete. Save progress or export a report.')
 
     def _record_threadsafe(self, p, reading, raw, synthetic):
@@ -1377,11 +1310,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
-        path = filedialog.askopenfilename(filetypes=[('Checkpoint', '*.json')])
+        path = port.choose_file(filetypes=[('Checkpoint', '*.json')])
         if not path: return
         data = json.loads(Path(path).read_text())
         if self.file_has_synthetic(data) and not self.demo:
-            if not messagebox.askyesno('Synthetic data', 'The checkpoint contains DEMO results. Load for review only?'): return
+            if not port.ask_yes_no('Synthetic data', 'The checkpoint contains DEMO results. Load for review only?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         c = data.get('config', {})
         self.v_model.set(c.get('model', self.v_model.get())); self.v_sa.set(c.get('sa', 'None'))
@@ -1437,13 +1370,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def export_pdf(self):
         pairs = self.certificate_pairs()
         rows = [row for _p, row in pairs]
-        if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
-        try: import report_pdf, report_dialog
-        except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
-        details = report_dialog.ask_details(self.root, 'Tektronix MDO4000C performance verification')
+        if not rows: port.message('info', 'No results', 'No recorded results to export yet.'); return
+        try: import report_pdf
+        except ImportError as exc: port.message('error', 'Report export', str(exc)); return
+        details = port.report_details('Tektronix MDO4000C performance verification', parent=self.root)
         if details is None: return
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        path = filedialog.asksaveasfilename(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
+        path = port.save_file(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
         if not path: return
         demo = self.any_synthetic()
         c = self.cfg
@@ -1461,19 +1394,19 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                                              demo=demo, details=details, footer_note=note, title='Calibration Data',
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:
-            messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
+            port.message('error', 'PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
         except Exception as exc:
-            messagebox.showerror('PDF export error', str(exc)); return
+            port.message('error', 'PDF export error', str(exc)); return
         self.status.set(f'Exported {len(rows)} rows: {path}')
 
     def on_close(self):
-        if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return
-        self.stop = True; self._save_addrs(); self.disconnect(); self.root.destroy()
+        if self.busy and not port.ask_yes_no('Active run', 'A point may be active. Stop and close?'): return
+        self.stop = True; self._save_addrs(); self.disconnect(); port.close(self.root)
 
 
 def main(argv=None):
     argv = sys.argv if argv is None else argv
-    root = tk.Tk()
-    demo, fast = virtualbench.flags(argv)
-    App(root, demo=demo, fast_demo=fast)
-    root.mainloop()
+    def build(root):
+        demo, fast = virtualbench.flags(argv)
+        App(root, demo=demo, fast_demo=fast)
+    port.run_app(build)

@@ -22,6 +22,10 @@
   "code": [
    "Procedures/Fluke_110_Verification.py",
    "handheld_dmm.py",
+   "handheld_dmm_view_tk.py",
+   "handheld_dmm_view_qt.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "hookups.py#fluke110",
    "drivers/base.py",
    "drivers/transport.py",

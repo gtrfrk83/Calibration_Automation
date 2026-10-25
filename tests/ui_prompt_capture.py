@@ -1,0 +1,895 @@
+"""Operator-prompt characterization: the exact sequence of prompts an engine shows (kind, title, text, buttons, answer consumed).  Not a test module.
+
+The golden transcripts in tests/golden/engine_*.json lock the INSTRUMENT I/O only; none of them sees a dialog.  This module records the dialogs, in one
+canonical form, from two vantage points so a port of an engine from Tk to ui_port (see NOTES.md 'UiPort') can be proven prompt-for-prompt identical:
+
+  * `TkLevelHarness`: patches the Tk calls themselves (tkinter.messagebox / filedialog / simpledialog, ui_theme.confirm_steps, report_dialog.ask_details).
+    Works on the engine as it is TODAY (before a port) and after it (TkUiPort calls the same functions).
+  * `PortHarness`: installs a ui_port.ScriptedUiPort; the engine must reach every prompt through the port (a prompt that still goes through a Tk call is
+    not recorded there, so the two sequences differ and the test fails).
+
+Canonical record (a dict, JSON-able; None fields are left out):
+    {'kind': 'info' | 'warning' | 'error' | 'ask_yes_no' | 'ask_ok_cancel' | 'ask_retry_cancel' | 'ask_yes_no_cancel' |
+             'ask_number' | 'ask_text' | 'choose_file' | 'save_file' | 'operator_prompt' | 'report_details',
+     'title': str, 'text': str, 'buttons': [...], 'answer': <what the scripted operator returned>, ...kind-specific fields}
+`buttons` is the button set the dialog offers (info: ['OK'], ask_yes_no: ['Yes', 'No'], operator_prompt: [ok, cancel] as given).  The parent window is never
+recorded.  Fixtures live in tests/golden_ui/ (NOT tests/golden/: `python -m tests.golden_capture --update` deletes every file in tests/golden/ it does not
+know).  Rewrite one with:   python -m tests.ui_prompt_capture --update <scenario set>
+"""
+from __future__ import annotations
+
+import json
+import sys
+import tempfile
+from pathlib import Path
+from unittest import mock
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / 'Procedures'))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import virtual_harness as VH  # noqa: E402  (installs the tkinter stub)
+import live_editor_harness as LH  # noqa: E402
+import ui_port  # noqa: E402
+from ui_port import Answers, operator_record, plain, record  # noqa: E402  (the canonical form is defined once, next to ScriptedUiPort)
+
+GOLDEN_UI = ROOT / 'tests' / 'golden_ui'
+
+# the handheld module's own window entry points as imported (the harnesses replace them with scripted ones; PortHarness puts them back so the engine's call goes
+# through ui_port.ui to the ScriptedUiPort)
+_HH_WINDOWS = {n: getattr(VH.hh, n) for n in ('ask_reading', 'ask_readings', 'ask_range', 'ask_ir_problem')}
+
+TK_KIND = {'showinfo': 'info', 'showwarning': 'warning', 'showerror': 'error', 'askyesno': 'ask_yes_no', 'askokcancel': 'ask_ok_cancel',
+           'askretrycancel': 'ask_retry_cancel', 'askyesnocancel': 'ask_yes_no_cancel'}
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------
+class TkLevelHarness(VH.VHarness):
+    """VHarness (stubbed Tk, simulated benches) whose Tk dialog functions are replaced by recorders in the canonical form."""
+
+    def __init__(self, answers=None, home=None):
+        super().__init__(home)
+        self.prompts = []
+        self.answers = answers or Answers()
+
+    def start(self):
+        super().start()
+        import tkinter
+        import report_dialog
+        mb, fd, sd = tkinter.messagebox, tkinter.filedialog, tkinter.simpledialog
+        pats = []
+        for name, kind in TK_KIND.items():
+            if kind in ('info', 'warning', 'error'):
+                pats.append((mb, name, self._mk_show(kind)))
+            else:
+                pats.append((mb, name, self._mk_ask(kind)))
+        pats += [(fd, 'askopenfilename', self._file('choose_file')), (fd, 'asksaveasfilename', self._file('save_file')),
+                 (sd, 'askfloat', self._simple('ask_number')), (sd, 'askinteger', self._simple('ask_number')), (sd, 'askstring', self._simple('ask_text')),
+                 (report_dialog, 'ask_details', self._details), (VH.hh.ui, 'confirm_steps', self._confirm),
+                 (VH.hh, 'ask_range', self._ask_range_v), (VH.hh, 'ask_ir_problem', self._ask_ir_problem_v)]
+        for obj, name, val in pats:
+            p = mock.patch.object(obj, name, val, create=True)
+            p.start()
+            self.patches.append(p)
+        return self
+
+    # the recorders -------------------------------------------------------------------------------------------------------------------
+    def _mk_show(self, kind):
+        def show(title='', message='', *a, **k):
+            self.prompts.append(record(kind, title, message, None))
+        return show
+
+    def _mk_ask(self, kind):
+        def ask(title='', message='', *a, **k):
+            rec = record(kind, title, message, None, icon=k.get('icon'), default=k.get('default'))
+            ans = self.answers.for_(rec, self.box_answer.get({v: n for n, v in TK_KIND.items()}[kind], True))
+            self.prompts.append(dict(rec, answer=plain(ans)))
+            return ans
+        return ask
+
+    def _file(self, kind):
+        def choose(*a, **k):
+            opts = {n: k.get(n) for n in ('defaultextension', 'filetypes', 'initialfile', 'title') if k.get(n) is not None}
+            rec = record(kind, '', '', None, options=opts)
+            ans = self.answers.for_(rec, self.answers.save_path if kind == 'save_file' else self.answers.open_path)
+            self.prompts.append(dict(rec, answer=plain(ans)))
+            return ans
+        return choose
+
+    def _simple(self, kind):
+        def ask(title='', prompt='', *a, **k):
+            rec = record(kind, title, prompt, None, initial=k.get('initialvalue'), masked=True if k.get('show') else None)
+            ans = self.answers.for_(rec, None)
+            self.prompts.append(dict(rec, answer=('<masked>' if k.get('show') and ans else plain(ans))))          # a typed secret is never recorded
+            return ans
+        return ask
+
+    def _details(self, parent, procedure=''):
+        rec = record('report_details', procedure, '', None)
+        ans = self.answers.for_(rec, None)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def _confirm(self, parent, title, heading, steps, facts=None, caution=None, ok='OK', cancel='Cancel', image=None, **_layout):
+        rec = operator_record(title, heading, steps, facts, caution, ok, cancel, image, None, **_layout)
+        r = super()._confirm(parent, title, heading, steps, facts, caution, ok, cancel, image, **_layout)     # VHarness bookkeeping (dialogs, on_confirm)
+        ans = self.answers.for_(rec, r)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def _ask_reading_v(self, parent, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
+                       limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None):
+        """handheld_dmm.ask_reading (not in UiPort yet: the handheld work package adds it): recorded as kind 'ask_reading'."""
+        ans = super()._ask_reading_v(parent, p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate, phase, limit_s, on_expire,
+                                     device, source, demo_fill)
+        self.prompts.append(record('ask_reading', f'point {p["id"]}', out_text, ans, mode=mode, device=device, source=source, unit=unit, phase=phase or None,
+                                   question=question, annunciator=bool(annunciator), fill_offered=demo_fill is not None, note=out_note))
+        return ans
+
+    def _ask_readings(self, parent, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                      source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading=''):
+        """run_queue_ui.ask_readings (UiPort.ask_readings): recorded as kind 'ask_readings'."""
+        ans = super()._ask_readings(parent, p, total, out_text, out_note, accept, meters, unit=unit, judge=judge, limit_s=limit_s, on_expire=on_expire,
+                                    device=device, source=source, demo_fill=demo_fill, tol_text=tol_text, phase=phase, heading=heading)
+        self.prompts.append(record('ask_readings', f'point {p["id"]}', out_text, ans, device=device, source=source, unit=unit, phase=phase or None, heading=heading or None,
+                                   meters=[list(m) for m in meters], fill_offered=demo_fill is not None, note=out_note, tol_text=tol_text or None))
+        return ans
+
+    def _ask_range_v(self, parent, p, total, dial, standby_text):
+        rec = record('ask_range', f'point {p["id"]}', p.get('dial_text') or p['switch'], None, range=p['range'], standby=standby_text)
+        ans = self.answers.for_(rec, self.range_answer)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def _ask_ir_problem_v(self, parent, p, total, problems, shown):
+        rec = record('ask_ir_problem', f'point {p["id"]}', '; '.join(problems), None, shown=shown or None)
+        ans = self.answers.for_(rec, 'stop')
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def _box(self, kind, args):                     # unused here (the Tk functions are replaced above) but keeps VHarness helpers consistent
+        return self.box_answer.get(kind, True)
+
+
+class _HarnessPort(ui_port.ScriptedUiPort):
+    """ScriptedUiPort whose reading windows are answered like the Tk-level harness answers them (VHarness: hn.readings / hn.default_reading / hn.fill, and for the
+    queue window hn.queue_*), so a scenario scripted with those hooks (the shared run-queue scenarios) gets the same readings behind the port.  An explicit rule of
+    `answers` still wins, and the record is the port's own."""
+
+    def __init__(self, answers, hn):
+        super().__init__(answers)
+        self.hn = hn
+
+    def ask_reading(self, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
+                    limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None):
+        rec = record('ask_reading', f'point {p["id"]}', out_text, None, mode=mode, device=device, source=source, unit=unit, phase=phase or None,
+                     question=question, annunciator=bool(annunciator), fill_offered=demo_fill is not None, note=out_note)
+        ans = self.answers.for_(rec, None)
+        if ans is None:
+            ans = VH.VHarness._ask_reading_v(self.hn, None, p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate, phase, limit_s,
+                                             on_expire, device, source, demo_fill)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+    def ask_readings(self, p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER',
+                     source='CALIBRATOR OUTPUT', demo_fill=None, tol_text='', phase='', heading='', *, parent=None):
+        rec = record('ask_readings', f'point {p["id"]}', out_text, None, device=device, source=source, unit=unit, phase=phase or None, heading=heading or None,
+                     meters=[list(m) for m in meters], fill_offered=demo_fill is not None, note=out_note, tol_text=tol_text or None)
+        ans = self.answers.for_(rec, None)
+        if ans is None:
+            ans = VH.VHarness._ask_readings(self.hn, None, p, total, out_text, out_note, accept, meters, unit=unit, judge=judge, limit_s=limit_s,
+                                            on_expire=on_expire, device=device, source=source, demo_fill=demo_fill, tol_text=tol_text, phase=phase, heading=heading)
+        self.prompts.append(dict(rec, answer=plain(ans)))
+        return ans
+
+
+class PortHarness(TkLevelHarness):
+    """The same scripted operator behind ui_port.ScriptedUiPort: every prompt must arrive through the port.  The Tk-level recorders stay installed underneath: a
+    prompt that bypasses the port lands in `.prompts` (the scenarios assert it stays empty), a prompt through the port lands in `.port.prompts`."""
+
+    def start(self):
+        super().start()
+        self.port = _HarnessPort(self.answers, self)
+        self._old_ui = ui_port.set_ui(self.port)
+        for name, real in _HH_WINDOWS.items():          # the handheld engine's reading windows reach the ScriptedUiPort through the module's own entry points
+            p = mock.patch.object(VH.hh, name, real)
+            p.start()
+            self.patches.append(p)
+        return self
+
+    def stop(self):
+        ui_port.set_ui(self._old_ui)
+        super().stop()
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------
+# scenarios.  Each takes a harness class and returns {scenario name: [canonical prompt records]}.
+# ---------------------------------------------------------------------------------------------------------------------------------------
+def _run_a34410a(make_harness):
+    import agilent34410a_verification as A
+    out = {}
+
+    def new(answers=None, **settings):
+        hn = make_harness(answers)
+        hn.start()
+        a = A.App(hn.root, demo=True, fast_demo=settings.pop('fast', False))
+        a.asset.set('A-1'); a.serial.set('S-1')
+        for k, v in settings.items():
+            getattr(a, k).set(v)
+        hn.app = a
+        return hn, a
+
+    def prompts(hn):
+        return hn.port.prompts if hasattr(hn, 'port') else hn.prompts
+
+    def done(name, hn):
+        out[name] = prompts(hn)
+        bypassed = hn.prompts if hasattr(hn, 'port') else []
+        hn.stop()
+        assert not bypassed, f'{name}: prompts bypassed the port: {bypassed[:2]}'
+
+    # 1. a whole virtual run (warm-up prompt, every wiring prompt with its steps / facts / caution / image, the high-voltage questions)
+    hn, a = new()
+    assert hn.run_all()
+    done('virtual_run_5560A_gpib', hn)
+
+    # 2. the optional tests too (capacitance standard prompt), calibrator 5522A on USB
+    hn, a = new(cal_model='Fluke 5522A', interface='USB', include_optional=True)
+    a.cal_model.set('Fluke 5522A')
+    assert hn.run_all()
+    done('virtual_run_5522A_usb_optional', hn)
+
+    # 3. the operator refuses the first high-voltage question: the run stops
+    hn, a = new(Answers([lambda r: False if r.get('title') == 'HIGH VOLTAGE' else None]))
+    hn.run_all()
+    done('high_voltage_refused', hn)
+
+    # 4. the operator cancels the warm-up prompt: the run does not start
+    hn, a = new(Answers([lambda r: False if r.get('title') == 'Before the verification' else None]))
+    hn.run_all()
+    done('warmup_cancelled', hn)
+
+    # 5. the small dialogs, one by one
+    hn, a = new()
+    a.asset.set('')
+    a.execute(a.active_points()[:1])                       # no instrument ID -> warning
+    a.asset.set('A-1')
+    a.tree.selection.return_value = ()                     # Rerun Selected with nothing selected -> info
+    a.rerun()
+    a.export_pdf()                                         # nothing recorded yet -> info
+    a.test_connections()                                   # virtual: connects the simulated bench -> info 'Connected (DEMO)'
+    a._error(RuntimeError('boom'))                         # a measurement failure -> error
+    a.busy = True
+    hn.answers.rules.append(lambda r: False if r.get('title') == 'Active run' else None)
+    a.on_close()                                           # busy: 'Stop and close?' -> No (stays open)
+    hn.answers.rules.clear()
+    a.busy = False
+    done('dialogs_misc', hn)
+
+    # 6. export with results: details window cancelled, then details + a file name left empty; load: file dialog cancelled
+    hn, a = new()
+    assert hn.run_all() is True
+    hn.prompts.clear() if not hasattr(hn, 'port') else hn.port.prompts.clear()
+    a.export_pdf()                                         # report details -> None (cancelled)
+    hn.answers.rules.append(lambda r: {} if r['kind'] == 'report_details' else None)
+    a.export_pdf()                                         # report details given, save-as cancelled ('')
+    a.load()                                               # open-file cancelled ('')
+    done('export_and_load_cancelled', hn)
+    return out
+
+
+def _run_f8808a(make_harness):
+    """Fluke 8808A verification: no engine golden transcript exists for it (only the driver ones), so this is its prompt characterization."""
+    import re
+    import fluke8808a_verification as E
+    from drivers.simulated_8808a import make_8808a_bench
+    out = {}
+
+    def new(answers=None, cal='Fluke 5522A', io=True, demo=False):
+        hn = make_harness(answers)
+        env = LH.Env()
+        hn.start()
+        patch = mock.patch('time.sleep', side_effect=lambda s: None)
+        patch.start()
+        hn.patches.append(patch)
+        E.configure()
+        a = E.App(hn.root, '8808A', demo=demo)
+        hn.app = a
+        a.asset.set('A-8808'); a.serial.set('SN')
+        a.cal_model.set(cal)
+        st = a.pm_state
+        st.store, st.devmode = env.store, env.dm
+        hn.env = env
+        if io:
+            bench, ct, dt = make_8808a_bench(E.CALIBRATORS[cal][0], True)
+            a.io = E.IO('sim', 'sim', cal, 9600, transports=(dt, ct), mods=a.pm_state)
+            a.io.is_manual = a.is_manual
+
+            def operator(rec):                              # the technician connects the stated standard for a 'Your own standard' prompt
+                if rec['kind'] == 'operator_prompt' and rec['title'].startswith('Your own standard'):
+                    p = E.POINTS[int(re.search(r'Point (\d+)', rec['text']).group(1)) - 1]
+                    if p['kind'] == 'FREQ':
+                        bench.external = ('V', p['amplitude'], p['nominal'])
+                    else:
+                        bench.external = ({'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A'}[p['kind']], p['nominal'], p.get('frequency') or 0.0)
+                elif rec['kind'] == 'operator_prompt':
+                    bench.external = None
+                return None
+            hn.answers.rules.insert(0, operator)
+        return hn, a
+
+    def prompts(hn):
+        return hn.port.prompts if hasattr(hn, 'port') else hn.prompts
+
+    def done(name, hn):
+        out[name] = prompts(hn)
+        bypassed = hn.prompts if hasattr(hn, 'port') else []
+        hn.stop(); hn.env.close()
+        assert not bypassed, f'{name}: prompts bypassed the port: {bypassed[:2]}'
+
+    hn, a = new()
+    a.execute(a.active_points())
+    assert hn.pump(180)
+    done('run_5522A_all_points', hn)
+
+    hn, a = new(cal='Fluke 5560A')
+    a.execute(a.active_points())
+    assert hn.pump(180)
+    done('run_5560A_all_points', hn)
+
+    hn, a = new(Answers([lambda r: False if r.get('title') == 'HIGH VOLTAGE' else None]))
+    a.warm_confirmed = True
+    a.execute([p for p in E.POINTS if p['ref'] == 'T3-2 #16'])
+    hn.pump(30)
+    done('high_voltage_refused', hn)
+
+    hn, a = new(Answers([lambda r: False if r.get('title') == 'Warm-up' else None]))
+    a.execute(a.active_points()[:3])
+    hn.pump(30)
+    done('warmup_refused', hn)
+
+    hn, a = new(io=False, demo=True)
+    a.asset.set('')
+    a.execute(a.active_points()[:1])                       # no instrument ID -> warning
+    a.asset.set('A-8808')
+    a.tree.selection.return_value = ()
+    a.rerun()
+    a.export_pdf()
+    a.test_connections()                                   # demo -> 'Demo mode' info
+    a._error(RuntimeError('boom'))
+    a.busy = True
+    hn.answers.rules.append(lambda r: False if r.get('title') == 'Active run' else None)
+    a.on_close()
+    hn.answers.rules.clear()
+    a.busy = False
+    done('dialogs_misc', hn)
+    return out
+
+
+def _run_handheld(make_harness):
+    """handheld_dmm.App on the virtual bench (not the fast demo): the Fluke 77 Series IV, a 110-series meter (117) and the 87V.  The Fill button answers the
+    reading windows (the virtual operator).  ask_reading is recorded at the Tk level only (it has no UiPort method yet)."""
+    import handheld_dmm as hh
+    out = {}
+    for key, model, spec in (('77iv', '77IV', 'fluke_77iv_pv.json'), ('117', '117', 'fluke_110_series_pv.json'), ('87v', '87V', 'fluke_87v_pv.json')):
+        hn = make_harness(None)
+        hn.start()
+        app = hh.App(hn.root, model, demo=True, spec=hh.load_spec(spec), fast_demo=False)
+        app.asset.set('A-1'); app.serial.set('S-1')
+        app.demo_failures = None
+        app.demo_failures_on = False
+        hn.app = app
+        assert hn.run_all(), key
+        out[f'virtual_run_{key}'] = hn.port.prompts if hasattr(hn, 'port') else hn.prompts
+        hn.stop()
+    return out
+
+
+def _run_adjustments(make_harness):
+    """Fluke 8808A and Keithley 2000 ADJUSTMENT launchers (no engine golden transcript): the first dialogs of a demo (virtual bench) adjustment record, driven
+    like the operator would: connect, start the record, unlock / enter the calibration mode, the first steps, then Abort.  ask_value (their own value-entry window,
+    not in UiPort yet) is recorded as kind 'ask_value' and answers with the pre-filled default.  The calibration code is masked in the record."""
+    out = {}
+    for key, modname in (('f8808a_adj', 'Fluke_8808A_Adjustment'), ('k2000_adj', 'Keithley_2000_Adjustment')):
+        mod = __import__(modname)
+        hn = make_harness(None)
+        hn.start()
+        from drivers.simulated_k2000_cal import SIM_CODE
+        hn.answers.rules.append(lambda r: SIM_CODE if r['kind'] == 'ask_text' and r['title'] == 'Calibration code' else None)
+
+        def ask_value(self, title, prompt, default, *a, _hn=hn, **k):
+            _hn.prompts.append(record('ask_value', title, prompt, default))
+            return default
+        import ui_port_tk
+        if hasattr(ui_port_tk.TkUiPort, 'ask_value'):       # ported launcher: the Tk-level recorder sits under the port's ask_value (ScriptedUiPort records its own)
+            p = mock.patch.object(ui_port_tk.TkUiPort, 'ask_value', ask_value)
+        else:                                               # unported launcher: its own App.ask_value window
+            p = mock.patch.object(mod.App, 'ask_value', ask_value, create=True)
+        p.start(); hn.patches.append(p)
+        app = mod.App(hn.root, demo=True)
+        hn.app = app
+        app.connect()                                      # no instrument ID -> warning
+        app.asset.set('A-1'); app.serial.set('S-1'); app.tech.set('T')
+        app.connect()
+        app.start_record()
+        (app.unlock if modname.startswith('Keithley') else app.enter_calibration)()
+        for _ in range(8):
+            if app.session and app.session.next_step():
+                app.run_next(); hn.pump(20)
+        app.abort(ask=True)
+        app.on_close()
+        out[f'{key}_first_steps_then_abort'] = hn.port.prompts if hasattr(hn, 'port') else hn.prompts
+        hn.stop()
+    return out
+
+
+def _run_handheld_families(make_harness):
+    """The handheld families the first handheld fixture does not cover (it has the 77 IV, 117 and 87 V): the 170 series (179), the 287 / 289 (REL offset, IR option), the 365,
+    the 376 (iFlex option through iflex_option.App), the Klein MM325 (dial picture: ask_range), a manual calibrator, the run queue (ask_readings), the IR problem
+    window, the HIGH VOLTAGE refusal and the small dialogs.  Virtual bench, the Fill button answers the reading windows."""
+    import handheld_dmm as hh
+    import iflex_option
+    out = {}
+
+    def new(answers=None, model='117', spec=None, engine=None, cal=None):
+        hn = make_harness(answers)
+        hn.start()
+        mod = engine or hh
+        app = mod.App(hn.root, model, demo=True, spec=hh.load_spec(spec) if spec else None, fast_demo=False)
+        app.asset.set('A-1'); app.serial.set('S-1')
+        app.demo_failures = None
+        app.demo_failures_on = False
+        if cal:
+            app.cal_mode.set(cal)
+        hn.app = app
+        return hn, app
+
+    def prompts(hn):
+        return hn.port.prompts if hasattr(hn, 'port') else hn.prompts
+
+    def done(name, hn):
+        out[name] = prompts(hn)
+        hn.stop()
+
+    for key, model, spec in (('170_179', '179', 'fluke_170_series_pv.json'), ('289', '289', 'fluke_287_289_pv.json'), ('365', '365', 'fluke_365_pv.json'),
+                             ('mm325', 'MM325', 'klein_mm325_pv.json')):
+        hn, app = new(model=model, spec=spec)
+        assert hn.run_all(), key
+        done(f'virtual_run_{key}', hn)
+
+    hn, app = new(model='376', spec='fluke_376_pv.json', engine=iflex_option)          # the iFlex option: refused, then accepted, then the run without the iFlex points
+    hn.answers.rules.append(lambda r: False if r.get('title') == 'Skip the iFlex tests' else None)
+    app.set_include('iflex', False)                       # operator says No: nothing changes
+    hn.answers.rules.clear()
+    app.set_include('iflex', False)                       # operator says Yes: the iFlex points leave the run
+    assert hn.run_all()
+    done('virtual_run_376_iflex_off', hn)
+
+    hn, app = new(model='376', spec='fluke_376_pv.json', engine=iflex_option)
+    assert hn.run_all()
+    done('virtual_run_376_iflex_on', hn)
+
+    hn, app = new(Answers([lambda r: 'stop' if r['kind'] == 'ask_range' and r['title'] == 'point 3' else ('skip' if r['kind'] == 'ask_range' and r['title'] == 'point 2' else None)]),
+                  model='MM325', spec='klein_mm325_pv.json')
+    hn.run_all()                                          # the dial window: skip one point, stop at the third
+    done('mm325_range_skip_then_stop', hn)
+
+    hn, app = new(cal=hh.CAL_CHOICES[2])                  # calibrator set by hand: 'Set this on the calibrator and press OPERATE'
+    assert app.manual_cal
+    assert hn.run_all()
+    done('virtual_run_117_manual_calibrator', hn)
+
+    hn, app = new(Answers([lambda r: False if r.get('title') == 'HIGH VOLTAGE' else None]), model='365', spec='fluke_365_pv.json')
+    hn.run_all()
+    done('high_voltage_refused_365', hn)
+
+    hn, app = new(Answers([lambda r: False if r.get('title') == 'Change the function' else None]), model='179', spec='fluke_170_series_pv.json')
+    hn.run_all()
+    done('function_change_cancelled_179', hn)
+
+    hn, app = new(Answers([lambda r: False if r.get('title') == 'Set the REL offset' else None]), model='289', spec='fluke_287_289_pv.json')
+    hn.run_all()
+    done('rel_offset_cancelled_289', hn)
+
+    hn, app = new()                                       # a run queue of two meters on the virtual bench: one reading window for both
+    app.apply_queue([('4412', 'S-4412', 'T 1'), ('4413', 'S-4413', 'T 2')], 'point_by_point')
+    hn.fill = True
+    assert hn.run_all()
+    done('virtual_queue_117_two_meters', hn)
+
+    hn, app = new(Answers([lambda r: 'type' if r['kind'] == 'ask_ir_problem' else None]), model='289', spec='fluke_287_289_pv.json')
+    from unittest import mock as _m
+    app.cal_mode.set(hh.CAL_CHOICES[2])                   # calibrator by hand: nothing to connect
+    ir_point = next(p for p in app.points if p['test'] == 'numeric' and p.get('ir') and not p.get('rel_zero'))
+    problem = _m.patch.object(hh, 'ir_read', side_effect=hh.SetupProblem(['The meter is in the wrong function'], 'V DC, auto range'))
+    problem.start(); hn.patches.append(problem)
+    app.meter, app.ir = object(), app.spec['options']['ir']
+    app.read_mode.set(hh.READ_IR)
+    app.busy = True
+    app._next([ir_point], 0, None)                        # IR read fails with a set-up problem; the operator chooses 'Type the reading instead'
+    hn.pump(30)
+    done('ir_set_up_problem_289', hn)
+
+    hn, app = new()                                       # the small dialogs of the handheld window
+    app.asset.set('')
+    app.execute(app.points[:1])                           # no instrument ID -> warning
+    app.asset.set('A-1')
+    app.tree.selection.return_value = ()                  # Rerun Selected with nothing selected -> info
+    app.rerun()
+    app.export_pdf()                                      # nothing recorded yet -> info
+    app.test_connection()                                 # virtual: connects the simulated calibrator -> info 'Connected (DEMO)'
+    app._fast_demo = True
+    app.test_connection()                                 # fast demo -> info
+    app._fast_demo = False
+    app.cal_mode.set(hh.CAL_CHOICES[2])
+    app.test_connection()                                 # manual calibrator -> info
+    app.test_ir()                                         # virtual: the IR cable is not simulated -> info
+    app._error(RuntimeError('boom'))                      # a failure -> error
+    app.busy = True
+    hn.answers.rules.append(lambda r: False if r.get('title') == 'Active run' else None)
+    app.on_close()                                        # busy: 'Stop and close?' -> No (stays open)
+    hn.answers.rules.clear()
+    app.busy = False
+    done('dialogs_misc', hn)
+
+    hn, app = new()                                       # export with results: details window cancelled; load: file dialog cancelled
+    assert hn.run_all() is True
+    prompts(hn).clear()
+    app.export_pdf()                                      # report details -> None (cancelled)
+    hn.answers.rules.append(lambda r: {} if r['kind'] == 'report_details' else None)
+    app.export_pdf()                                      # report details given, save-as cancelled ('')
+    app.load()                                            # open-file cancelled ('')
+    done('export_and_load_cancelled', hn)
+    return out
+
+
+# Scenarios compared at the Tk level only, until the shared helper they reach is ported: {scenario key: {scenario name}}.  Empty since the run queue
+# (run_queue_engine) prompts through the port: handheld_families/virtual_queue_117_two_meters gives the same sequence behind ScriptedUiPort.
+TK_LEVEL_ONLY = {}
+
+
+class _FakeTree:
+    """The step table of the 8846A adjustment window: only what the engine's handlers call (selection, set, item, bind, ...)."""
+
+    def __init__(self):
+        self.sel = ()
+        self.rows = {}
+
+    def selection(self):
+        return self.sel
+
+    def set(self, iid, col, value):
+        self.rows[(iid, col)] = value
+
+    def item(self, iid, **kw):
+        return None
+
+    def get_children(self, *a):
+        return ()
+
+    def __getattr__(self, name):
+        return lambda *a, **k: None
+
+
+class _FakeLog:
+    def __init__(self):
+        self.lines = []
+
+    def append_default(self, text):
+        self.lines.append(text)
+
+    def add(self, *a, **k):
+        pass
+
+
+class _FakeMeter8846A:
+    """A stand-in for the serial 8846A (the real launcher needs a serial meter): only the calls the adjustment window makes.  It never records a password."""
+    label = '8846A'
+    idn = 'FLUKE,8846A,SIM0001,1.0'
+    RESET_EXEMPT = ''
+
+    def __init__(self):
+        self.log = _FakeLog()
+        self.calls = []
+
+    def reset_to_defaults(self):
+        import types
+        self.calls.append('reset')
+        return types.SimpleNamespace(ok=True, instrument='8846A', exempt=False, text=lambda: 'reset')
+
+    def unlock_calibration(self, password):
+        self.calls.append('unlock')
+
+    def lock_calibration(self, password):
+        self.calls.append('lock')
+
+    def adjust_step(self, mode, value):
+        self.calls.append(('adjust', mode, value))
+        return '+0'
+
+    def record_calibration(self):
+        self.calls.append('record')
+
+    def close(self):
+        self.calls.append('close')
+
+
+def _run_adj8846a(make_harness):
+    """Fluke 8846A ADJUSTMENT launcher (Procedures/Fluke_8846A_Adjustment.py; no engine golden transcript, the real launcher needs a serial meter): a DEMO record
+    (start without / with the required fields, review a step, unlock, execute an eligible and a review-only step, commit with a wrong then the right phrase, resume)
+    and a run on a FAKE serial meter (connect failing / succeeding, reset declined then accepted, a malformed then a good calibration password, execute, commit,
+    relock, close while unlocked).  The calibration password is masked in the record; the database is a temporary file."""
+    mod = __import__('Fluke_8846A_Adjustment')
+    out = {}
+    tmp = Path(tempfile.mkdtemp())
+    for key in ('demo', 'fake_meter'):
+        hn = make_harness(None)
+        hn.start()
+        # main moved the audit tables to lab_registry.sqlite3 (connect_db reads _registry_path/_legacy_path): point both into the temp dir, no legacy file
+        p = mock.patch.object(mod, '_registry_path', lambda _k=key: tmp / f'adj8846a_{_k}.sqlite3')
+        p.start(); hn.patches.append(p)
+        p = mock.patch.object(mod, '_legacy_path', lambda _k=key: tmp / f'adj8846a_{_k}_legacy.sqlite3')
+        p.start(); hn.patches.append(p)
+        import tkinter.ttk
+        p = mock.patch.object(tkinter.ttk.Combobox, '__setitem__', lambda self, k, v: None, create=True)          # `self.port_combo['values'] = ports` on the stub
+        p.start(); hn.patches.append(p)
+        pws = iter(['bad pw!', 'Pw12', 'Pw12'])
+        resets = iter([False, True, True])
+        hn.answers.rules.append(lambda r, _pws=pws: next(_pws) if r['kind'] == 'ask_text' and r['title'] in ('Calibration password', 'Relock calibration') else None)
+        hn.answers.rules.append(lambda r: 'COMMIT 8846A' if r['kind'] == 'ask_text' and r['title'] == 'Final confirmation' else None)
+        if key == 'fake_meter':
+            hn.answers.rules.append(lambda r, _r=resets: next(_r) if r['kind'] == 'ask_ok_cancel' and r['title'] == 'Reset instruments' else None)
+        p = mock.patch.object(mod.ui, 'make_table', lambda *a, **k: _FakeTree())          # the step table and the audit table (the stub widgets have no selection)
+        p.start(); hn.patches.append(p)
+        app = mod.App(hn.root, demo=(key == 'demo'))
+        hn.app = app
+        if key == 'demo':
+            import types
+            lp = types.ModuleType('serial.tools.list_ports')
+            lp.comports = lambda: (_ for _ in ()).throw(RuntimeError('no serial support here'))
+            with mock.patch.dict(sys.modules, {'serial.tools.list_ports': lp, 'serial.tools': types.ModuleType('serial.tools'), 'serial': types.ModuleType('serial')}):
+                sys.modules['serial.tools'].list_ports = lp
+                app.refresh_ports()                                        # error box
+            app.connect()
+            app.resume()                                                   # no instrument ID
+            app.start()                                                    # nothing entered -> warning
+            app.asset.set('A-8846'); app.serial.set('S-1'); app.tech.set('T')
+            app.resume()                                                   # no record yet -> info
+            app.start()
+            app.mark_reviewed()                                            # nothing selected -> warning
+            app.tree.sel = ('0',)
+            app.mark_reviewed()
+            app.tree.sel = ('2',)
+            app.execute()                                                  # prerequisites -> warning
+            app.unlock()
+            app.execute()
+            app.tree.sel = ('5',)
+            app.execute()                                                  # review-only -> info
+            app.commit()
+            app.resume()
+            app.disconnect()
+            app.close()
+        else:
+            meter = _FakeMeter8846A()
+            with mock.patch.object(mod, 'open_meter', side_effect=[RuntimeError('port not available'), meter, meter]):
+                app.connect()                                              # error box
+                app.start()                                                # required info -> warning
+                app.asset.set('A-8846'); app.serial.set('S-1'); app.tech.set('T')
+                app.start()                                                # not connected -> warning
+                app.connect()
+                app.start()                                                # reset notice declined
+                app.start()                                                # reset accepted, record started
+                app.tree.sel = ('2',)
+                app.unlock()                                               # malformed password -> error
+                app.unlock()                                               # good password
+                app.execute()
+                app.commit()
+                app.close()                                                # unlocked -> 'Relock first'
+                app.disconnect()                                           # relock with the password
+                app.connect()                                              # resume after reconnect path (record active -> reset again)
+                app.disconnect()
+                app.close()
+            assert 'record' in meter.calls and 'unlock' in meter.calls and 'lock' in meter.calls, meter.calls
+        out[f'adj8846a_{key}'] = hn.port.prompts if hasattr(hn, 'port') else hn.prompts
+        hn.stop()
+    return out
+
+
+SCENARIOS = {'a34410a': _run_a34410a, 'f8808a': _run_f8808a, 'handheld': _run_handheld, 'adjustments': _run_adjustments, 'adj8846a': _run_adj8846a}
+
+# ---- WP-G (function generators and scopes): scenarios live in tests/ui_prompt_capture_wpg.py (APPEND-ONLY block)
+import ui_prompt_capture_wpg as _wpg  # noqa: E402
+SCENARIOS.update(_wpg.SCENARIOS)
+
+
+# ---- WP-W (WaveSurfer 4104HD): the scenario lives in tests/ui_prompt_capture_ws.py (append-only block; other packages add their own lines below / above) --------------
+from ui_prompt_capture_ws import _run_wavesurfer  # noqa: E402
+SCENARIOS['wavesurfer'] = _run_wavesurfer
+# ---- WP-B (bench DMM engines): Truevolt, DACQ, Keithley 2000, 34401A, 8846A.  APPEND-ONLY block; the scenarios live in tests/ui_prompt_capture_wpb.py.
+import ui_prompt_capture_wpb as _wpb  # noqa: E402
+SCENARIOS.update(_wpb.SCENARIOS)
+# ---- WP-H (handheld): the other handheld families (the first handheld fixture is the 'handheld' scenario above).  APPEND-ONLY block.
+SCENARIOS['handheld_families'] = _run_handheld_families
+
+
+# ---- WP-S (shared helpers: run_queue_engine, manual_override, datamode, procmods_engine, reset_startup, surprise): APPEND-ONLY block ---------------------------------
+class _Log(list):
+    def __init__(self):
+        super().__init__()
+        self.origins = []
+
+
+class _Tagged(list):
+    """A prompt list that also appends to a shared, ordered log (see _run_shared.begin)."""
+
+    def __init__(self, log, origin):
+        super().__init__()
+        self.log, self.origin = log, origin
+
+    def append(self, rec):
+        super().append(rec)
+        self.log.append(rec)
+        self.log.origins.append(self.origin)
+
+
+ORIGINS = {}                      # scenario name -> ['tk' | 'port' per record] of the last PortHarness run of _run_shared (None at the Tk level)
+
+
+def _run_shared(make_harness):
+    """The prompts the SHARED helpers show, on the engines that inherit them: the run queue (handheld_dmm.App on the simulated 5522A: a point-by-point run, a
+    one-meter-at-a-time run with the swap prompt, the resume question, the report / set-up dialogs), the manual-override small dialogs, the As Found / As Left
+    question and the Show-box notices (datamode), a technician note (procmods_engine) and a failed reset (reset_startup), the last four on the 8808A.
+    The multi-meter reading windows (kind 'ask_readings') are scripted by the harness and left out of the record (finish() drops them)."""
+    import handheld_dmm as hh
+    import run_queue as RQ
+    import fluke8808a_verification as E
+    from drivers.simulated import make_bench
+    from test_handheld_options import Spy
+    import dsb_run_harness as DH
+    out = {}
+
+    def queue_app(hn, mode, demo=False, assets=('4412', '4413'), model='117', spec='fluke_110_series_pv.json'):
+        if demo:
+            app = hh.App(hn.root, model, demo=True, spec=hh.load_spec(spec), fast_demo=False)
+            app.demo_failures = None
+            app.demo_failures_on = False
+            hn.fill = True
+        else:
+            bench, _a, _b = make_bench()
+            io = hh.IO('Fluke 5522A', 'sim', transport=Spy(bench, '5522A'))
+            io.auto_ramp = False
+            io._wait = lambda *a, **k: None
+            app = hh.App(hn.root, model, demo=False, spec=hh.load_spec(spec), io_factory=lambda: io)
+            app.cal_mode.set(hh.CAL_CHOICES[1])
+            app.io = io
+            hn.fill = False
+            hn.default_reading = lambda p: DH.typed_nominal(p) if p['test'] == 'numeric' and p.get('nominal') is not None else None
+        hn.app = app
+        if assets:
+            app.apply_queue([(a, 'S-' + a, 'Tech ' + a) for a in assets], mode)
+        return app
+
+    def begin(hn):
+        """Start the harness and, behind a PortHarness, keep ONE ordered log of both channels: a prompt a still-unported engine (handheld_dmm: its own function
+        cards, reading windows) shows through a Tk call lands in `hn.prompts`, one a shared helper shows through the port in `hn.port.prompts`.  The record
+        sequence is the same either way (the fixture was recorded with everything at the Tk level); ORIGINS says which channel each record arrived by."""
+        hn.start()
+        hn.log = _Log()
+        if hasattr(hn, 'port'):
+            hn.prompts = _Tagged(hn.log, 'tk')
+            hn.port.prompts = _Tagged(hn.log, 'port')
+        return hn
+
+    def finish(name, hn):
+        # The fixture predates the recording of the multi-meter reading window (kind 'ask_readings', recorded by the harness since WP-H): left out here, it is
+        # covered by handheld_families.  Everything else is the sequence recorded on the unported helpers.
+        seq = hn.log if hasattr(hn, 'port') else hn.prompts
+        keep = [i for i, r in enumerate(seq) if r['kind'] != 'ask_readings']
+        out[name] = [seq[i] for i in keep]
+        ORIGINS[name] = [hn.log.origins[i] for i in keep] if hasattr(hn, 'port') else None
+        hn.stop()
+
+    hn = begin(make_harness(None))
+    app = queue_app(hn, RQ.POINT_BY_POINT)
+    assert hn.run_all()
+    finish('queue_real_point_by_point', hn)
+
+    hn = begin(make_harness(None))
+    app = queue_app(hn, RQ.ONE_AT_A_TIME)
+    assert hn.run_all()
+    finish('queue_real_one_at_a_time', hn)
+
+    # swap prompt declined: the run pauses and the progress is kept; a NEW window (same asset list) asks 'Resume saved progress' (Yes = continue), then finishes
+    hn = begin(make_harness(Answers([lambda r: False if r['kind'] == 'operator_prompt' and r['title'] == 'Next meter' else None])))
+    app = queue_app(hn, RQ.ONE_AT_A_TIME)
+    assert hn.run_all()
+    hn.answers.rules.clear()
+    app = queue_app(hn, RQ.ONE_AT_A_TIME)
+    assert hn.run_all()
+    finish('queue_swap_declined_then_resume', hn)
+
+    # the set-up / report dialogs of a queue (demo, virtual bench)
+    hn = begin(make_harness(None))
+    app = queue_app(hn, RQ.POINT_BY_POINT, demo=True)
+    app.queue_export_pdfs()                                              # nothing recorded yet -> 'No results'
+    app.busy = True
+    app.open_queue_setup()                                               # 'Stop the run before changing the queue'
+    app.busy = False
+    assert hn.run_all()
+    hn.answers.rules.append(lambda r: False if r['kind'] == 'ask_yes_no_cancel' and r['title'] == 'Reports' else None)
+    app.queue_offer_all_reports()                                        # No = only the meter shown
+    hn.answers.rules[:] = [lambda r: None if r['kind'] != 'ask_yes_no_cancel' else None]
+    app.queue_offer_all_reports()                                        # Yes = one report each: report details cancelled
+    finish('queue_dialogs', hn)
+
+    # the manual-override / data-mode / note / reset dialogs on the 8808A (demo, no instruments)
+    hn = begin(make_harness(None))
+    patch = mock.patch('time.sleep', side_effect=lambda s: None)
+    patch.start(); hn.patches.append(patch)
+    E.configure()
+    a = E.App(hn.root, '8808A', demo=True)
+    hn.app = a
+    hn.env = LH.Env()
+    a.serial.set('SN')
+    a.asset.set('')
+    p1 = E.POINTS[0]
+    a.busy = True
+    a.mo_button_clicked()                                                # busy, no point being measured
+    a._mo_current = dict(p1)
+    a.mo_enter_for(dict(p1, id=p1['id'] + 1000))                         # busy: only the point being measured
+    a.busy = False
+    a._mo_current = None
+    a.tree.selection.return_value = ()
+    a.mo_button_clicked()                                                # nothing selected
+    a.mo_replace(p1)                                                     # no instrument ID
+    a.asset.set('A-8808')
+    a.found[str(p1['id'])] = dict(reading=1.0, entered='1.0', result='PASS')
+    a.left[str(p1['id'])] = dict(reading=1.0, entered='1.0', result='PASS')
+    a.confirm_found_overwrite([p1])                                      # datamode: replace the As Found reading? (Yes by default)
+    a.run_shown_section()                                                # datamode: choose a section first
+    a.show_section.set('x')
+    a.shown_pending = lambda points: []
+    a.run_shown_section()                                                # datamode: nothing left to run
+    a.pm_show_note(dict(p1, tech_note='Check the guard lead first.'))    # procmods_engine: the technician's note
+    a._reset_failed('boom\nsecond line')                                 # reset_startup: error box
+    a._reset_failed('boom', skipped=True)
+    finish('overrides_datamode_note_reset_8808a', hn)
+    return out
+
+
+SCENARIOS['shared'] = _run_shared
+
+
+# ---- QT-H (user-built datasheet runtime: dsb_runtime / dsb_override / dsb_prerun): the scenarios live in tests/ui_prompt_capture_dsb.py.  APPEND-ONLY block.
+import ui_prompt_capture_dsb as _dsb  # noqa: E402
+SCENARIOS.update(_dsb.SCENARIOS)
+
+
+def capture(name, harness_class=TkLevelHarness):
+    return SCENARIOS[name](lambda answers=None: harness_class(answers))
+
+
+def fixture_path(name):
+    return GOLDEN_UI / f'ui_prompts_{name}.json'
+
+
+def dumps(obj):
+    return json.dumps(obj, indent=1, sort_keys=True, ensure_ascii=False) + '\n'
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if not argv or argv[0] != '--update':
+        print(__doc__)
+        print('Nothing written. Re-run with --update <name> ... (' + ', '.join(SCENARIOS) + ') to rewrite tests/golden_ui/ui_prompts_<name>.json (review the git diff).')
+        return 0
+    GOLDEN_UI.mkdir(exist_ok=True)
+    for name in argv[1:] or list(SCENARIOS):
+        fixture_path(name).write_text(dumps(capture(name)), encoding='utf-8')
+        print('wrote', fixture_path(name))
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

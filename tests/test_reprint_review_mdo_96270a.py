@@ -16,6 +16,7 @@ ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(HERE))
 import reprint_harness as R  # noqa: E402
+import ui_ported  # noqa: E402
 import phase2_apps as P  # noqa: E402
 import report_review_adapters as A  # noqa: E402
 import report_review_model as M  # noqa: E402
@@ -143,7 +144,7 @@ class Wiring(unittest.TestCase):
     def test_no_engine_file_edited_and_shared_modules_in_no_fingerprint(self):
         base = subprocess.run(['git', 'diff', '--name-only', 'origin/main'], cwd=ROOT, capture_output=True, text=True).stdout.split()
         later = ('mdo4000c_verification.py', 'specs/build_mdo_spec.py', 'specs/tektronix_mdo4000c_pv.json')       # edited by the logic probe removal, not by this work
-        self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later], [])
+        self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
         for f in ('report_review_adapters.py', 'report_review_model.py', 'uncertainty_budget.py'):
             self.assertNotIn(f, text, f)

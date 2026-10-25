@@ -83,8 +83,7 @@ def _compute(p, low, high, standard, scope):
         return _blank('scope of accreditation not available', tolerance=tol)
     freq = p.get('frequency')
     cmc = sc.dmm(kind, p['nominal'], p.get('range'), freq)
-    # TEMP (thermocouple simulation): the scope file has no temperature CMC, so with a calibrator the ratios come from its own degC specification
-    # alone (no CMC floor is invented; a CMC entry, if the lab adds one, is used as everywhere else).  Without a calibrator: blank, as before.
+    # TEMP (thermocouple simulation, Type K): the scope's Type K line (printed p. 13) is the CMC floor, like every other kind; with a calibrator the ratios also use its own degC specification.  Without a calibrator: blank, as before.
     # Light (LUX / FC / LAMBERT / UVIRR): the scope CMC IS the A2LA-LIGHT sheet (no separate scope entry), so with that standard the ratios come from it alone.
     if cmc is None and not (kind in ('TEMP', 'LUX', 'FC', 'LAMBERT', 'UVIRR') and standard):
         return _blank('point is not covered by the scope of accreditation', tolerance=tol)

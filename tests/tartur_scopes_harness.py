@@ -91,7 +91,7 @@ tkinter.messagebox.showwarning=lambda *a,**k: None
 
 # ---- MDO
 import mdo4000c_verification as M
-M.filedialog.asksaveasfilename=save; M.messagebox.showerror=lambda *a,**k: errors.append(a)
+# (a ported engine has no filedialog / messagebox name: the port calls tkinter's, patched above)
 found=mdo_found()
 app=M.App.__new__(M.App)
 app.cfg=M.Config(model='4104C',sa='SA6',afg=True,dvm=True,tpa=True); app._found=found; app._left={k:dict(v,reading=v['reading']*1.0001 if isinstance(v['reading'],(int,float)) else v['reading']) for k,v in list(found.items())[10:40]}
@@ -100,7 +100,7 @@ app.any_synthetic=lambda: False
 current['path']=out+'/mdo.pdf'; app.export_pdf()
 # ---- FGEN
 import fgen_verification as F
-F.configure('33220A'); F.filedialog.asksaveasfilename=save; F.messagebox.showerror=lambda *a,**k: errors.append(a)
+F.configure('33220A')
 app=F.App.__new__(F.App)
 app._found=fgen_found(); app._left={k:dict(v,reading=v['reading']*1.0001) for k,v in list(app._found.items())[2:9]}
 app.asset=V('A1'); app.serial=V('S1'); app.status=V(); app.root=None; app.period=V('1 year')
@@ -108,8 +108,8 @@ app.any_synthetic=lambda: False
 current['path']=out+'/fgen.pdf'; app.export_pdf()
 # ---- WaveSurfer
 import WaveSurfer_WS4104HD as W
-W.filedialog.asksaveasfilename=save; W.messagebox.showerror=lambda *a,**k: errors.append(a)
-W.messagebox.showinfo=lambda *a,**k: None; W.messagebox.showwarning=lambda *a,**k: None
+tkinter.filedialog.asksaveasfilename=save; tkinter.messagebox.showerror=lambda *a,**k: errors.append(a)       # the WaveSurfer prompts through ui_port -> tkinter's modules
+tkinter.messagebox.showinfo=lambda *a,**k: None; tkinter.messagebox.showwarning=lambda *a,**k: None
 app=W.RMSNoiseApp.__new__(W.RMSNoiseApp)
 for a in ('rows','dc_rows','imp_rows','offset_rows','bw_rows','tb_rows','trig_rows'): setattr(app,a,[])
 app.root=st._Dummy(); app.demo_mode=False
@@ -123,7 +123,7 @@ for n in ('status','dc_status','imp_status','offset_status','bw_status','tb_stat
 app.sync_asset=lambda: True
 app._mode=W.datamode.FOUND
 app.any_synthetic=lambda: False
-saved=W.messagebox.showinfo
+saved=tkinter.messagebox.showinfo
 W.RMSNoiseApp.__getattr__=lambda self,n: (_ for _ in ()).throw(AttributeError(n)) if n.startswith('__') else V('10')
 app.load_demo_data()
 del W.RMSNoiseApp.__getattr__

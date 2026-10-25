@@ -23,10 +23,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
-from tkinter import messagebox, ttk
-import tkinter as tk
 
-import ui_theme as ui
+import ui_theme_core as ui                     # toolkit-free helpers only (si, si_row, si_scale); the entry window is manual_override_view_tk.py
+from ui_port import ui as port
 
 NOT_A_NUMBER = 'Enter the number exactly as the meter shows it, without the unit.'
 OVERLOAD_LIMIT = 1.0e9          # the same overload threshold as the 8808A driver (Format 1, +/-1.0E+9): the automatic reading refuses it, so does a typed one
@@ -96,63 +95,22 @@ def log_text(p, entered: Entered, auto=None, why='', mode='') -> str:
 # ============================================================================ the dialog
 def ask_manual_reading(parent, p, total, auto=None, reason='', cancel_text='Cancel', demo=False, stored=None):
     """Modal entry window.  Returns Entered, or None when cancelled / stopped.  The short confirmation is asked here, after the typed value is valid,
-    so a wrong click costs one answer; an invalid entry shows its message in the window and stays open."""
-    result = {'v': None}
-    win = ui.dialog(parent, f'Point {p["id"]} of {total} - enter the reading')
-    win.resizable(False, False)
-    outer = ttk.Frame(win, padding=(ui.px(22), ui.px(16), ui.px(22), ui.px(14)))
-    outer.pack(fill='both', expand=True)
-    wrap = ui.px(520)
+    so a wrong click costs one answer; an invalid entry shows its message in the window and stays open.
+    The window itself is the toolkit's (manual_override_view_tk.ask_reading_window); what the Use button does with the typed text is `done` below."""
     vals, unit, _scale = entry_scale(p)
-    ttk.Label(outer, text=f'Point {p["id"]} of {total}  -  {p.get("section_title", "")}', style='Small.TLabel').pack(anchor='w')
-    ttk.Label(outer, text=p['description'], style='Section.TLabel', wraplength=wrap, justify='left').pack(anchor='w', pady=(2, 8))
-    if reason:
-        ttk.Label(outer, text='The automatic reading failed: ' + reason, style='Bold.TLabel', wraplength=wrap, justify='left',
-                  foreground=ui.C.get('bad', '#B3261E')).pack(anchor='w', pady=(0, 8))
-        ttk.Label(outer, text='The calibrator is in STANDBY. Read the meter display and type it here to carry on, or stop the run.',
-                  style='Small.TLabel', wraplength=wrap, justify='left').pack(anchor='w', pady=(0, 8))
-    elif stored:
-        ttk.Label(outer, text=f'Stored reading: {stored}. Typing a value replaces it.', style='Small.TLabel', wraplength=wrap, justify='left').pack(anchor='w', pady=(0, 8))
-    if demo:
-        ttk.Label(outer, text='DEMO: the value you type is recorded as demo data. Nothing here is calibration evidence.', style='Small.TLabel',
-                  wraplength=wrap, justify='left', foreground=ui.C.get('warn', '#B26A00')).pack(anchor='w', pady=(0, 8))
-    ttk.Label(outer, text='WHAT DOES THE METER SHOW?', style='MetricCap.TLabel').pack(anchor='w')
-    row = ttk.Frame(outer)
-    row.pack(fill='x', pady=(4, 0))
-    text = tk.StringVar()
-    entry = ttk.Entry(row, textvariable=text, width=16)
-    entry.pack(side='left')
-    ttk.Label(row, text=unit, style='Bold.TLabel').pack(side='left', padx=(10, 0))
-    ttk.Label(outer, text=f'Acceptable reading: {vals[0]} to {vals[1]} {unit}', style='Small.TLabel').pack(anchor='w', pady=(6, 0))
-    error = tk.StringVar()
-    ttk.Label(outer, textvariable=error, wraplength=wrap, justify='left', foreground=ui.C.get('bad', '#B3261E')).pack(anchor='w', pady=(6, 0))
 
-    def done(use):
-        if not use:
-            win.destroy()
-            return
+    def done(win, typed, clear_error):
+        """The Use button: ('error', message) for a text that is not a reading (the window stays open, message shown), ('again', None) when the operator
+        declined the confirmation (the window stays open), ('use', Entered) when confirmed."""
         try:
-            entered = parse_reading(p, text.get())
+            entered = parse_reading(p, typed)
         except ValueError as exc:
-            error.set(str(exc))
-            return
-        error.set('')
-        if not messagebox.askyesno('Use this reading?', f'Use {entered.shown} as the reading for point {p["id"]}?', parent=win):
-            entry.focus_set()
-            return
-        result['v'] = entered
-        win.destroy()
-    bar = ttk.Frame(outer)
-    bar.pack(fill='x', pady=(14, 0))
-    ok = ttk.Button(bar, text='Use this reading  (Enter)', style='Accent.TButton', command=lambda: done(True))
-    ok.pack(side='right')
-    ttk.Button(bar, text=cancel_text, style='Danger.TButton' if reason else 'TButton', command=lambda: done(False)).pack(side='left')
-    win.bind('<Return>', lambda _e: done(True))
-    win.protocol('WM_DELETE_WINDOW', lambda: done(False))
-    ui.center_on(win, parent.winfo_toplevel())
-    entry.focus_set()
-    win.wait_window()
-    return result['v']
+            return 'error', str(exc)
+        clear_error()
+        if not port.ask_yes_no('Use this reading?', f'Use {entered.shown} as the reading for point {p["id"]}?', parent=win):
+            return 'again', None
+        return 'use', entered
+    return port.view('manual_override_view').ask_reading_window(parent, p, total, vals, unit, reason, cancel_text, demo, stored, done)
 
 
 # ============================================================================ the App side
@@ -204,12 +162,12 @@ class ManualOverrideMixin:
         if self.busy:
             p = self._mo_current
             if p is None:
-                messagebox.showinfo('Enter reading manually', 'No point is being measured at this moment.', parent=self.root)
+                port.message('info', 'Enter reading manually', 'No point is being measured at this moment.', parent=self.root)
                 return
         else:
             sel = self.tree.selection()
             if not sel:
-                messagebox.showinfo('Enter reading manually', 'Select a test point first.', parent=self.root)
+                port.message('info', 'Enter reading manually', 'Select a test point first.', parent=self.root)
                 return
             p = self.mo_point(sel[0])
         self.mo_enter_for(p)
@@ -217,7 +175,7 @@ class ManualOverrideMixin:
     def mo_enter_for(self, p):
         ok, why = self.mo_state(p)
         if not ok:
-            messagebox.showinfo('Enter reading manually', why, parent=self.root)
+            port.message('info', 'Enter reading manually', why, parent=self.root)
             return
         if self.busy:
             self.mo_arm(p)
@@ -231,7 +189,7 @@ class ManualOverrideMixin:
         if entered is None:
             return
         if self._mo_current is None or self._mo_current['id'] != p['id']:       # the point finished while the window was open
-            messagebox.showinfo('Enter reading manually', f'Point {p["id"]} has just been recorded. Select it and use Enter reading manually to replace its result.', parent=self.root)
+            port.message('info', 'Enter reading manually', f'Point {p["id"]} has just been recorded. Select it and use Enter reading manually to replace its result.', parent=self.root)
             return
         self._mo_pending = (p['id'], entered)
         self.status.set(f'Point {p["id"]}: {entered.shown} will be used as the reading instead of the automatic one.')
@@ -253,7 +211,7 @@ class ManualOverrideMixin:
     # ---- a point that is already stored (or not yet measured), run idle ----------------------------------------------------------
     def mo_replace(self, p):
         if not self.asset.get().strip():
-            messagebox.showwarning('Instrument ID', 'Enter an instrument ID.', parent=self.root)
+            port.message('warning', 'Instrument ID', 'Enter an instrument ID.', parent=self.root)
             return
         if not self.confirm_found_overwrite([p]):
             return

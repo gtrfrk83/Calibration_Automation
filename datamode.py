@@ -25,10 +25,8 @@ Needs nothing from the procedure except an optional `busy` flag, `refresh()` and
 """
 from __future__ import annotations
 
-import tkinter as tk
-from tkinter import messagebox, ttk
-
-import ui_theme as ui
+import ui_theme_core as ui                   # toolkit-free helpers only (si); the toggle's widgets are datamode_view_tk.py
+from ui_port import ui as port                 # dialogs go through the UI port (ui_port.py)
 
 FOUND, LEFT = 'found', 'left'
 LABEL = {FOUND: 'As Found', LEFT: 'As Left'}
@@ -101,52 +99,18 @@ class DataModeMixin:
     # ---- the toggle -------------------------------------------------------------------------------------
     def build_mode_bar(self, parent, **pack):
         """The 'Collecting data' toggle (As Found | As Left).  Returns the frame; it is packed with **pack (default: fill x)."""
-        self.mode_var = tk.StringVar(value=self._mode)
-        bar = ttk.Frame(parent)
-        options = {'fill': 'x', 'pady': (8, 0)}
-        options.update(pack)
-        bar.pack(**options)
-        row = ttk.Frame(bar)
-        row.pack(fill='x')
-        ttk.Label(row, text='Collecting data:', style='Bold.TLabel').pack(side='left', padx=(0, 10))
-        self.mode_buttons = []
-        for mode in (FOUND, LEFT):
-            b = ttk.Radiobutton(row, text=LABEL[mode], value=mode, variable=self.mode_var, command=self._mode_clicked)
-            b.pack(side='left', padx=(0, 14))
-            self.mode_buttons.append(b)
-        self.mode_hint = tk.StringVar(value=HINT_FOUND)
-        hint = ttk.Label(row, textvariable=self.mode_hint, style='Small.TLabel', wraplength=ui.px(560), justify='left')
-        hint.pack(side='left', fill='x', expand=True)
-        def fit_hint(_e=None):                              # wrap to the room left of the toggle (its x position does not depend on its own width)
-            room = row.winfo_width() - (hint.winfo_rootx() - row.winfo_rootx()) - ui.px(12)
-            room = max(ui.px(160), room)
-            if int(float(str(hint.cget('wraplength')))) != room:
-                hint.configure(wraplength=room)
-        row.bind('<Configure>', lambda e: row.after_idle(fit_hint), add='+')
-        self.mode_notice_holder = ttk.Frame(bar)
-        self.mode_notice_holder.pack(fill='x')
-        self.mode_notice = None
-        return bar
+        return self.dm_view().build_mode_bar(self, parent, **pack)
 
     def build_mode_segment(self, parent, notice_holder=None):
         """The redesigned toggle: a compact  Collecting [ As Found | As Left ]  switch for the shell's top strip.  It keeps the same
         attributes as build_mode_bar (mode_var, mode_buttons, mode_hint, mode_notice_holder), so everything else works unchanged;
         the hint becomes a tooltip and the As Left warning becomes a one-line amber notice under the strip."""
-        self.mode_var = tk.StringVar(value=self._mode)
-        box = ttk.Frame(parent)
-        box.pack(side='left', padx=(0, 14))
-        ttk.Label(box, text='Collecting').pack(side='left', padx=(0, 8))
-        self.mode_buttons = []
-        for mode, style in ((FOUND, 'Seg.Toolbutton'), (LEFT, 'SegLeft.Toolbutton')):
-            b = ttk.Radiobutton(box, text=LABEL[mode], value=mode, variable=self.mode_var, command=self._mode_clicked, style=style)
-            b.pack(side='left')
-            self.mode_buttons.append(b)
-        self.mode_hint = tk.StringVar(value=HINT_FOUND)
-        ui.Tooltip(box, lambda: self.mode_hint.get())
-        self.mode_notice_holder = notice_holder if notice_holder is not None else ttk.Frame(parent)
-        self.mode_notice = None
-        self.mode_notice_short = True
-        return box
+        return self.dm_view().build_mode_segment(self, parent, notice_holder)
+
+    @staticmethod
+    def dm_view():
+        """The toolkit's window code for the toggle (datamode_view_tk for Tk)."""
+        return port.view('datamode_view')
 
     def _mode_clicked(self):
         self.set_data_mode(self.mode_var.get(), from_ui=True)
@@ -179,30 +143,10 @@ class DataModeMixin:
         self._relabel_reading_column()
 
     def _show_mode_notice(self):
-        holder = getattr(self, 'mode_notice_holder', None)
-        if holder is None:
-            return
-        if self.mode_notice is not None:
-            self.mode_notice.destroy()
-            self.mode_notice = None
-        if self._mode == LEFT:
-            short = getattr(self, 'mode_notice_short', False)
-            self.mode_notice = ui.Notice(holder, ('Collecting AS LEFT: readings are saved beside the As Found values, which stay locked. Use after an adjustment only.' if short else
-                                                  'Readings taken now are saved as AS LEFT. Use this only after the instrument was adjusted. '
-                                                  'Switch back to As Found to review the original readings.'), 'warn', title=None if short else 'Collecting As Left data')
-            self.mode_notice.pack(fill='x', pady=(6, 0))
+        self.dm_view().show_mode_notice(self)
 
     def _relabel_reading_column(self):
-        tree = getattr(self, 'tree', None)
-        if tree is None:
-            return
-        try:
-            for col in ('reading', 'found', 'entered'):
-                if col in tree['columns']:
-                    tree.heading(col, text=('As Left reading' if self._mode == LEFT else 'Reading'))
-                    break
-        except tk.TclError:
-            pass
+        self.dm_view().relabel_reading_column(self)
 
 
     # ---- the redesigned window (ui_shell) --------------------------------------------------------------------
@@ -271,7 +215,7 @@ class DataModeMixin:
         clash = [p for p in points if str(p['id']) in self.left]
         if not clash:
             return True
-        return messagebox.askyesno(
+        return port.ask_yes_no(
             'Replace the As Found reading?',
             f'{len(clash)} of these point(s) already have As Left readings, so the instrument has been adjusted since the As Found run.\n\n'
             'Measuring As Found again now replaces the original As Found reading with a reading from the adjusted instrument.\n\n'
@@ -289,12 +233,21 @@ class DataModeMixin:
         (and, if a status is chosen too, only those)."""
         pts = self.shown_pending(points if points is not None else self.active_points())
         if pts is None:
-            messagebox.showinfo('Section', 'Choose a section in the Show box first.')
+            port.message('info', 'Section', 'Choose a section in the Show box first.')
             return
         if not pts:
-            messagebox.showinfo('Section', f'Nothing left to run there: every shown point already has an {self.mode_label} reading.')
+            port.message('info', 'Section', f'Nothing left to run there: every shown point already has an {self.mode_label} reading.')
             return
         self.execute(pts)
+
+    def points_from(self, points, iid):
+        """The points 'Rerun From Selected' measures: the point with id `iid` and every point after it in the table as shown (the
+        current section and status filters applied, the table's own order).  [] when `iid` is not in the shown list."""
+        shown = [p for p in points if self._visible(p)]
+        for i, p in enumerate(shown):
+            if str(p['id']) == str(iid):
+                return shown[i:]
+        return []
 
     def status_visible(self, key, status) -> bool:
         """The 'As Found failed' choice of the status filter (judged on the As Found result whichever mode is on screen)."""

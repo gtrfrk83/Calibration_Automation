@@ -11,10 +11,7 @@ never come here (no real instrument is opened).  Nothing in the engine, the driv
 """
 from __future__ import annotations
 
-import tkinter as tk
-from tkinter import ttk
-
-import ui_theme as ui
+from ui_port import ui as port          # the list window's toolkit code is dsb_prerun_view_tk / _qt (reached through the UI port)
 
 MAX_SHOWN = 60
 
@@ -43,39 +40,15 @@ def intro(info):
             f'({pts} point{"s" * (pts != 1)} use them). Real instruments run only after you accept the list.')
 
 
+def list_text(info):
+    """The lines of the list as shown (at most MAX_SHOWN, then '... and n more')."""
+    shown = info['lines'][:MAX_SHOWN]
+    return '\n'.join(f'  {l}' for l in shown) + (f'\n  ... and {len(info["lines"]) - MAX_SHOWN} more' if len(info['lines']) > MAX_SHOWN else '')
+
+
 def show_list(root, info):
     """The modal list: scrolling text, 'Accept and run' (not the default) and 'Cancel'.  Returns True when accepted."""
-    result = {'ok': False}
-    win = ui.dialog(root, 'Unverified commands: accept before a real run')
-    body = ttk.Frame(win, padding=16)
-    body.pack(fill='both', expand=True)
-    ttk.Label(body, text='Commands to accept', style='Header.TLabel').pack(anchor='w')
-    ttk.Label(body, text=intro(info), style='Muted.TLabel', wraplength=ui.px(560), justify='left').pack(anchor='w', pady=(4, 8))
-    box = ttk.Frame(body)
-    box.pack(fill='both', expand=True)
-    text = tk.Text(box, width=78, height=14, wrap='word', background=ui.C['card'], foreground=ui.C['text'],
-                   relief='flat', highlightthickness=1, highlightbackground=ui.C['border_strong'], padx=8, pady=6)
-    sb = ttk.Scrollbar(box, orient='vertical', command=text.yview)
-    text.configure(yscrollcommand=sb.set)
-    sb.pack(side='right', fill='y')
-    text.pack(side='left', fill='both', expand=True)
-    shown = info['lines'][:MAX_SHOWN]
-    text.insert('1.0', '\n'.join(f'  {l}' for l in shown) + (f'\n  ... and {len(info["lines"]) - MAX_SHOWN} more' if len(info['lines']) > MAX_SHOWN else ''))
-    text.configure(state='disabled')
-    bar = ttk.Frame(body)
-    bar.pack(fill='x', pady=(10, 0))
-
-    def done(ok):
-        result['ok'] = ok
-        win.destroy()
-    cancel = ttk.Button(bar, text='Cancel (nothing is opened)', command=lambda: done(False))
-    cancel.pack(side='right')
-    ttk.Button(bar, text='Accept and run', command=lambda: done(True)).pack(side='right', padx=(0, 8))
-    win.protocol('WM_DELETE_WINDOW', lambda: done(False))
-    cancel.focus_set()
-    ui.center_on(win, root)
-    root.wait_window(win)
-    return result['ok']
+    return port.view('dsb_prerun_view').show_list(root, intro(info), list_text(info))
 
 
 def accepted(root, spec, accepted_fingerprint='', ask=None):

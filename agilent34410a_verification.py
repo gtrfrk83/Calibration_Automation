@@ -14,16 +14,15 @@ Model family: the 34410A and the 34411A share ONE spec (specs/keysight_34410a_pv
 same pages "34410A/11A") and one engine.  The spec's models{} block carries the per-model flags; configure(model) selects the model.  The 34410A is the default and
 behaves exactly as before.  The 34411A-only features (digitizing, pre-trigger, 1 million reading memory) are not part of the verification and are not used.
 """
-import json, math, sys, threading, time, tkinter as tk
+import json, math, sys, threading, time
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from tkinter import ttk, messagebox, filedialog
 
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
-import ui_theme as ui
-import ui_shell
+import ui_port
+import ui_theme as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in agilent34410a_view_tk.py
 import calibrator_fit
 import procspec
 import drivers
@@ -33,6 +32,7 @@ import procmods_engine
 import reset_startup
 import surprise
 import virtualbench
+from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 
 MODEL = '34410A'
 SPEC_PATH = HERE / 'specs' / 'keysight_34410a_pv.json'
@@ -267,38 +267,40 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.root = root; self.demo = demo; self.io = None; self._busy = False; self.stop = False
         self.results = {}
         self.pm_init('a34410a', MODEL, demo=demo, lists=[POINTS])     # procedure modifications: saved overrides for this model
-        ui.apply_theme(root)
-        root.title(f'Keysight {MODEL} | Performance Verification' + (' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1320, 820, min_w=900, min_h=640)
+        self.ui_view.setup_window(self)
         self.settings = ui.Settings(f'Keysight{MODEL}')
         s = self.settings
-        self.asset = tk.StringVar(); self.serial = tk.StringVar()
-        self.interface = tk.StringVar(value=s.get('interface', 'GPIB') if s.get('interface', 'GPIB') in INTERFACES else 'GPIB')
+        self.asset = port.var(); self.serial = port.var()
+        self.interface = port.var(s.get('interface', 'GPIB') if s.get('interface', 'GPIB') in INTERFACES else 'GPIB')
         # one address per interface, remembered separately: choosing GPIB or USB brings back the address last used with it
         self.addrs = {i: s.get(f'dmm_addr_{i}', DEFAULT_ADDR[i]) for i in INTERFACES}
         self._iface_shown = self.interface.get()
-        self.dmm_addr = tk.StringVar(value=self.addrs[self._iface_shown])
+        self.dmm_addr = port.var(self.addrs[self._iface_shown])
         self.cal_offer = calibrator_fit.make_offer('5520A', calibrator_fit.dmm_requests(POINTS), unverified=drivers.Fluke5520A.unverified_summary())
-        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in self.cal_choices() else 'Fluke 5560A')
-        self.cal_addr = tk.StringVar(value=s.get('cal_addr', 'COM9'))        # calibrators are typically on RS-232
-        self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
-        self.period = tk.StringVar(value=s.get('period', PERIOD_LABEL[SPEC['default_period']]))
-        self.test_set = tk.StringVar(value='Full verification')
-        self.include_optional = tk.BooleanVar(value=False)
-        self.status = tk.StringVar()
-        self.detail = tk.StringVar(value='Select a test point to see its limits and setup.')
-        self.show_section = tk.StringVar(value='All sections')
-        self.show_status = tk.StringVar(value='All points')
+        self.cal_model = port.var(s.get('cal_model', 'Fluke 5560A') if s.get('cal_model', 'Fluke 5560A') in self.cal_choices() else 'Fluke 5560A')
+        self.cal_addr = port.var(s.get('cal_addr', 'COM9'))        # calibrators are typically on RS-232
+        self.cal_baud = port.var(s.get('cal_baud', '9600'))
+        self.period = port.var(s.get('period', PERIOD_LABEL[SPEC['default_period']]))
+        self.test_set = port.var('Full verification')
+        self.include_optional = port.var(False, 'bool')
+        self.status = port.var()
+        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.show_section = port.var('All sections')
+        self.show_status = port.var('All points')
         self._build_ui()
         self.on_period(save=False)
         self.status.set(virtualbench.status_text(self) if demo
                         else 'Step 1: enter the Instrument ID. Step 2: choose the interface and addresses and press Test Connections. Step 3: Run All.')
-        root.protocol('WM_DELETE_WINDOW', self.on_close)
-        root.bind('<Control-s>', lambda _e: self.save())
-        import labregistry
-        labregistry.attach(root, self.asset, self.serial, self.status.set)
+        port.on_close(root, self.on_close)
+        port.bind_key(root, '<Control-s>', self.save)
+        self.ui_view.finish_window(self)
 
     # ------------------------------------------------------------------ selection
+    VIEW = 'agilent34410a_view'                          # the toolkit's window code: agilent34410a_view_tk (Tk), later _qt
+
+    @property
+    def ui_view(self): return port.view(self.VIEW)
+
     @property
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
 
@@ -322,88 +324,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self._busy = value
         if hasattr(self, 'btn_run'): self._sync_buttons()
 
-    def _sync_buttons(self):
-        idle = 'disabled' if self._busy else 'normal'
-        for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
-            b.configure(state=idle)
-        self.btn_stop.configure(state='normal' if self._busy else 'disabled')
-        for c in (self.period_combo, self.set_combo, self.opt_check):
-            c.configure(state='disabled' if self._busy else ('readonly' if isinstance(c, ttk.Combobox) else 'normal'))
+    def _sync_buttons(self): self.ui_view.sync_buttons(self)
 
     # ------------------------------------------------------------------ layout
-    def _build_ui(self):
-        root = self.root
-        sh = self.shell = ui_shell.Shell(root, f'Keysight {MODEL}  -  Performance Verification',
-                                         f'Test points from the 34410A/11A/L4411A Service Guide, pp. 68-87  |  {len(POINTS)} points in the spec  |  GPIB or USB',
-                                         demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
-        self.status = sh.status_var
-        self.conn_pill = sh.add_chip(self.chip_text() if self.demo else 'Not connected', 'neutral')
-        sh.build_identity(self.asset, self.serial)
-        self.build_mode_segment(sh.strip, notice_holder=sh.notice_holder)
-        self.summary = sh.build_progress()
-        if self.demo: sh.notice(self.banner_text(), 'warn', title=virtualbench.BANNER_TITLE)
-        else: sh.notice('The program asks you to confirm the warm-up and environment, the wiring before every new setup and before any high-voltage point. Stay at the bench while a run is in progress.', 'info')
-
-        # settings and connections live in the slide-in drawer
-        d = sh.drawer_body; d.columnconfigure(1, weight=1)
-        ttk.Label(d, text='Limits to apply').grid(row=0, column=0, sticky='w', pady=4)
-        self.period_combo = ttk.Combobox(d, textvariable=self.period, values=list(PERIODS), width=20, state='readonly')
-        self.period_combo.grid(row=0, column=1, sticky='w', padx=(10, 0), pady=4)
-        self.period_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_period())
-        ttk.Label(d, text='Test set').grid(row=1, column=0, sticky='w', pady=4)
-        self.set_combo = ttk.Combobox(d, textvariable=self.test_set, values=['Full verification', 'Quick check (Q points only)'], width=26, state='readonly')
-        self.set_combo.grid(row=1, column=1, sticky='w', padx=(10, 0), pady=4); self.set_combo.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
-        self.opt_check = ttk.Checkbutton(d, text='Include the optional tests (extra AC volts, AC current, capacitance)', variable=self.include_optional, command=self.refresh)
-        self.opt_check.grid(row=2, column=0, columnspan=2, sticky='w', pady=(2, 10))
-        ttk.Separator(d).grid(row=3, column=0, columnspan=2, sticky='ew', pady=(0, 10))
-        r = 4
-        ttk.Label(d, text=f'{MODEL} interface').grid(row=r, column=0, sticky='w', pady=4)
-        self.iface_combo = ttk.Combobox(d, textvariable=self.interface, values=list(INTERFACES), width=10, state='readonly')
-        self.iface_combo.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4)
-        self.iface_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_interface()); r += 1
-        ttk.Label(d, text=f'{MODEL} address / resource').grid(row=r, column=0, sticky='w', pady=4)
-        self.dmm_entry = ttk.Combobox(d, textvariable=self.dmm_addr, state='normal', width=34)
-        self.dmm_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1
-        ttk.Label(d, text=f'GPIB: the {MODEL} factory address is 22 (UTILITY MENU > REMOTE I/O > GPIB). USB: nothing to set on the meter; the resource is '
-                          'USB0::<mfgID>::<modID>::<serial>::INSTR (UTILITY MENU > REMOTE I/O > USB > USB ID, or Find instruments). ' + f'The {MODEL} has no RS-232. ' +
-                          'The IDs in the example are not verified for your bench.',
-                  style='Muted.TLabel', wraplength=ui.px(340), justify='left').grid(row=r, column=0, columnspan=2, sticky='w', pady=(2, 8)); r += 1
-        ttk.Label(d, text='Calibrator').grid(row=r, column=0, sticky='w', pady=4)
-        calbox = ttk.Combobox(d, textvariable=self.cal_model, values=self.cal_choices(), width=14, state='readonly')
-        calbox.grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        calibrator_fit.attach_note(d, self.cal_offer, ui, widgets=(calbox,), row=r); r += 1
-        ttk.Label(d, text='Calibrator port').grid(row=r, column=0, sticky='w', pady=4)
-        self.cal_entry = ttk.Combobox(d, textvariable=self.cal_addr, state='normal', width=34)
-        self.cal_entry.grid(row=r, column=1, sticky='ew', padx=(10, 0), pady=4); r += 1
-        ttk.Label(d, text='Calibrator baud').grid(row=r, column=0, sticky='w', pady=4)
-        ttk.Combobox(d, textvariable=self.cal_baud, values=['9600', '19200', '4800', '2400', '1200'], width=9, state='readonly').grid(row=r, column=1, sticky='w', padx=(10, 0), pady=4); r += 1
-        btns = sh.drawer_footer
-        self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
-        self.btn_test = ttk.Button(btns, text='Test connections', command=self.test_connections, style='Accent.TButton'); self.btn_test.pack(side='left')
-
-        self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
-        self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
-        self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
-        self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
-        sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
-        self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
-        sh.add_action('Save progress', self.save, side='right', short='Save')
-        self.pm_live_attach(sh)                                    # 'Edit procedure': the editor inside this window, usable during a run
-
-        body = sh.content
-        info = ttk.Frame(body); info.pack(side='bottom', fill='x', pady=(8, 0))
-        ttk.Label(info, textvariable=self.detail, wraplength=1000, justify='left', style='Muted.TLabel').pack(anchor='w', fill='x')
-        ttk.Label(info, text=SPEC['source']['note'], style='Small.TLabel', wraplength=1000, justify='left').pack(anchor='w', pady=(4, 0))
-        filt = ttk.Frame(body); filt.pack(side='top', fill='x', pady=(0, 6))
-        ttk.Label(filt, text='Test points', style='Bold.TLabel').pack(side='left')
-        c2 = ttk.Combobox(filt, textvariable=self.show_status, values=datamode.STATUS_FILTERS, width=14, state='readonly'); c2.pack(side='right')
-        ttk.Label(filt, text='Show', style='Muted.TLabel').pack(side='right', padx=(0, 6))
-        c2.bind('<<ComboboxSelected>>', lambda _e: self.refresh())
-        self.tree = ui_shell.results_table(self, body)
-        ui_shell.small_window(self, self.tree, filt)
-        self.tree.bind('<<TreeviewSelect>>', self.on_select)
-        self.update_shell_sections(POINTS, lambda p: p['section_title'])
-        ui.polish(root)
+    def _build_ui(self): self.ui_view.build_ui(self)
 
     def on_interface(self):
         """GPIB <-> USB: keep the address typed for the interface just left and show the one remembered for the new one."""
@@ -411,7 +335,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if new == old: return
         self.addrs[old] = self.dmm_addr.get()
         self.dmm_addr.set(self.addrs[new]); self._iface_shown = new
-        self.dmm_entry.configure(values=())
+        self.ui_view.set_choices(self, 'dmm', ())
         if not self.demo: self._save_settings()
 
     def pm_driver_classes(self): return (dmm_class(), *[cls for _n, cls in CALIBRATORS.values()])
@@ -445,18 +369,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return (p['id'], p['description'] + (' ★' if p['quick'] else ''), *cells), tags
 
     def refresh(self):
-        keep = self.tree.selection()
-        self.tree.delete(*self.tree.get_children())
-        for p in POINTS:
-            if self._visible(p):
-                values, tags = self._row(p); self.tree.insert('', 'end', iid=str(p['id']), values=values, tags=tags)
-        if keep and self.tree.exists(keep[0]): self.tree.selection_set(keep[0])
+        keep = self.ui_view.table_selection(self)
+        self.ui_view.table_set_rows(self, ((str(p['id']), *self._row(p)) for p in POINTS if self._visible(p)), keep)
         self.update_summary()
 
     def _update_row(self, p):
         iid = str(p['id'])
-        if self.tree.exists(iid):
-            values, tags = self._row(p); self.tree.item(iid, values=values, tags=tags)
+        if self.ui_view.table_has(self, iid):
+            values, tags = self._row(p); self.ui_view.table_update_row(self, iid, values, tags)
         self.update_summary()
 
     def update_summary(self):
@@ -474,7 +394,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.refresh()
 
     def on_select(self, _event=None):
-        sel = self.tree.selection()
+        sel = self.ui_view.table_selection(self)
         if not sel: return
         p = POINTS[int(sel[0]) - 1]
         v, _r, u = ui.si_row([p['nominal'] - p['error'], p['nominal'] + p['error']], p['unit'])
@@ -523,7 +443,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         want = self.interface.get()
         mine = [r for r in found if r.upper().startswith(want)]
         asrl = [r for r in found if r.upper().startswith('ASRL')]
-        self.dmm_entry.configure(values=mine or found); self.cal_entry.configure(values=asrl or found)
+        self.ui_view.set_choices(self, 'dmm', mine or found); self.ui_view.set_choices(self, 'cal', asrl or found)
         self.status.set(f'{len(found)} VISA resource(s) found: ' + (', '.join(found) if found else 'none') + '. Pick the address for each instrument.')
 
     def _new_io(self):
@@ -538,23 +458,23 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         """The Stop / Continue dialog for stop-on-surprise, made ON the Tk thread (here: the Test connections / Run handler), once per window.
         None in demo (virtual or fast): the simulated bench never prompts."""
         if self.demo or self.fast_demo: return None
-        if getattr(self, '_sp_handler', None) is None: self._sp_handler = surprise.tk_handler(self.root)
+        if getattr(self, '_sp_handler', None) is None: self._sp_handler = port.surprise_handler(self.root)
         return self._sp_handler
 
     def test_connections(self):
-        if self.fast_demo: messagebox.showinfo('Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
-        self.status.set('Connecting ...'); self.root.update_idletasks()
+        if self.fast_demo: port.message('info', 'Demo mode', 'Demo mode uses no hardware, so there is nothing to connect.'); return
+        self.status.set('Connecting ...'); port.flush(self.root)
         try:
             self.disconnect(); self.io = self._new_io()
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
-            self.status.set('Connection error: ' + str(exc)); messagebox.showerror('Connection error', str(exc)); return
+            self.status.set('Connection error: ' + str(exc)); port.message('error', 'Connection error', str(exc)); return
         self._set_conn(True)
         if not self.demo: self._save_settings()
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
         warn = self.io.dmm.firmware_warning()
         self.status.set('Connected: ' + self.io.ident + tag + '. Calibrator output is NOT enabled.' + (f' WARNING: {warn}.' if warn else ''))
-        messagebox.showinfo('Connected' + (' (DEMO)' if self.virtual else ''), f'Keysight {MODEL}: {self.io.ident}\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\n'
+        port.message('info', 'Connected' + (' (DEMO)' if self.virtual else ''), f'Keysight {MODEL}: {self.io.ident}\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\n'
                             f'Calibrator output is not enabled.' + (f'\n\nWARNING: {warn}.' if warn else ''))
 
     def disconnect(self):
@@ -580,24 +500,29 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def run_section(self): self.run_shown_section()
 
     def rerun(self):
-        selected = self.tree.selection()
+        selected = self.ui_view.table_selection(self)
         if selected: self.execute([POINTS[int(selected[0]) - 1]])
-        else: messagebox.showinfo('Selection', 'Select a test point first.')
+        else: port.message('info', 'Selection', 'Select a test point first.')
+
+    def rerun_from(self):
+        selected = self.ui_view.table_selection(self)
+        if selected: self.execute(self.points_from(POINTS, selected[0]))
+        else: port.message('info', 'Selection', 'Select a test point first.')
 
     def _prompt_start(self):
         """Warm-up and environment (Service Guide p. 67), asked once at the start of a run. Returns False if the technician cancels."""
-        return ui.confirm_steps(self.root, 'Before the verification', 'Warm-up and conditions',
+        return port.operator_prompt('Before the verification', 'Warm-up and conditions',
             [('Warm-up', f'The {MODEL} must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well.'),
              ('Environment', 'Ambient 18 to 28 C (ideally 23 C +/- 2 C) and relative humidity below 80 % (p. 67).'),
              ('Cables', 'Shielded twisted-pair PTFE cables, as short as possible, shields to earth ground at ONE place (p. 67).'),
              ('Front / Rear', 'The program reads the Front/Rear switch (ROUT:TERM?) before every point and stops if it is wrong; it cannot move the switch. Never move it with signals present.')],
             facts=[('Limits', f'{self.period.get()}, 18 to 28 C'), ('Calibrator', self.cal_model.get()), ('Meter interface', self.interface.get())],
             caution=f'The program restores the {MODEL} factory defaults (*RST) before the first point, then sets function, range, 100 NPLC or the 3 Hz AC filter for every point.',
-            ok='Conditions met - start')
+            ok='Conditions met - start', parent=self.root)
 
     def execute(self, points):
         if self.busy or not points: return
-        if not self.asset.get().strip(): messagebox.showwarning('Instrument ID', 'Enter an instrument ID.'); return
+        if not self.asset.get().strip(): port.message('warning', 'Instrument ID', 'Enter an instrument ID.'); return
         points = self.pm_begin_run(points, self.asset.get().strip())   # load the saved modifications for this asset (patches POINTS)
         if not points: self.status.set('Every selected point is skipped by a procedure modification.'); return
         if not self.confirm_found_overwrite(points): return
@@ -617,19 +542,19 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.io.standby()
         switch = ('Front/Rear switch', f'Set the Front/Rear switch to {p["terminal"]} (with nothing connected to the terminals). The program checks the switch position before measuring.')
         if p['source'] == 'none':
-            return ui.confirm_steps(self.root, 'Zero offset - physical setup required', f'Set up for {GROUP_TITLE[group]}, {p["terminal"]} terminals',
+            return port.operator_prompt('Zero offset - physical setup required', f'Set up for {GROUP_TITLE[group]}, {p["terminal"]} terminals',
                 [switch, ('Set up the input', self.setup_text(p))], facts=facts, caution='The calibrator stays in STANDBY. Never use it as a zero source.',
-                ok='Set up - measure', image=image)
+                ok='Set up - measure', image=image, parent=self.root)
         if p['source'] == 'manual':
-            return ui.confirm_steps(self.root, 'Connect the standard', f'Connect for {GROUP_TITLE[group]}',
+            return port.operator_prompt('Connect the standard', f'Connect for {GROUP_TITLE[group]}',
                 [('Null', f'With the test leads open, press Null on the {MODEL} in the capacitance function (User\'s Guide p. 60: the specification is with Math Null); the program sends no null command.'),
                  ('Connect', p['setup']), ('Stabilise', f'Allow the standard to settle, then continue; the program reads the {MODEL} itself.')],
-                facts=facts, caution='The specification is for film capacitors; additional errors may occur for other types (User\'s Guide p. 136).', ok='Standard connected - measure', image=image)
+                facts=facts, caution='The specification is for film capacitors; additional errors may occur for other types (User\'s Guide p. 136).', ok='Standard connected - measure', image=image, parent=self.root)
         steps = [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p)), switch]
         if p['kind'] in ('ACV', 'ACI'):
             steps.append(('Speed', 'Each AC reading takes about 2.5 seconds with the 3 Hz filter plus the settling wait.'))
-        return ui.confirm_steps(self.root, 'Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
-            steps, facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image)
+        return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
+            steps, facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image, parent=self.root)
 
     def _next(self, points, i, previous):
         if i >= len(points) or self.stop:
@@ -639,29 +564,29 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         p = points[i]
         try: p, previous = self.pm_step(points, i, previous)          # live edits: applied here, between two points (procmods_live)
         except procmods_engine.LiveApplyError as exc: self._error(exc); return
-        if p is None: self.root.after(30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
+        if p is None: port.after(self.root, 30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
         key = (p['source'], p['terminal'], p['group'])
         if not self.fast_demo and key != previous and not self._prompt_setup(p):
             self.busy = False; self.status.set('Paused for wiring or setup'); return
         if not self.fast_demo and p['source'] == 'calibrator' and p['kind'] in ('DCV', 'ACV') and abs(p['nominal']) >= HV_CONFIRM:
-            if not messagebox.askyesno('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
+            if not port.ask_yes_no('HIGH VOLTAGE', f'This point outputs {p["nominal"]:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?'):
                 self.busy = False; return
         self.status.set(f'Running {p["id"]}/{len(POINTS)}: {p["description"]}')
-        if self.tree.exists(str(p['id'])): self.tree.selection_set(str(p['id'])); self.tree.see(str(p['id']))
+        if self.ui_view.table_has(self, str(p['id'])): self.ui_view.table_select(self, str(p['id']), see=True)
         if self.virtual: self._virtual_operator(p)                       # the virtual operator does what the prompt asked
         if self.fast_demo:
             reading = p['nominal'] + p['error'] * math.sin(p['id'] * 1.71) * 0.38   # deterministic, labelled synthetic
-            self._record(p, reading, True); self.root.after(30, lambda: self._next(points, i + 1, key))
+            self._record(p, reading, True); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
         else:
             def work():
                 try:
                     reading = self.io.measure(p)
-                    self.root.after(0, lambda: self._done(points, i, p, reading, key))
+                    port.post(self.root, lambda: self._done(points, i, p, reading, key))
                 except Exception as exc:
                     try: self.io.standby()
                     except Exception: pass
                     err = exc   # 'exc' is deleted when the except block ends; capture by default arg
-                    self.root.after(0, lambda err=err: self._error(err))
+                    port.post(self.root, lambda err=err: self._error(err))
             threading.Thread(target=work, daemon=True).start()
 
     def _virtual_operator(self, p):
@@ -669,10 +594,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         virtualbench.operator_sets_up(self._vb, p, terminal=p.get('terminal'), manual=p['source'] == 'manual', nominal=p['nominal'])
 
     def _done(self, points, i, p, reading, key):
-        self._record(p, reading, bool(self.demo)); self.root.after(30, lambda: self._next(points, i + 1, key))
+        self._record(p, reading, bool(self.demo)); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
-        self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); messagebox.showerror('Measurement stopped', str(exc))
+        self.busy = False; self.status.set('Error - run stopped: ' + str(exc)); port.message('error', 'Measurement stopped', str(exc))
 
     def _record(self, p, reading, synthetic):
         result = 'PASS' if judge(p, reading) else 'FAIL'
@@ -692,11 +617,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not silent: self.status.set(f'Saved {path.name}')
 
     def load(self):
-        path = filedialog.askopenfilename(filetypes=[('Checkpoint', '*.json')])
+        path = port.choose_file(filetypes=[('Checkpoint', '*.json')])
         if not path: return
         data = json.loads(Path(path).read_text())
         if self.file_has_synthetic(data) and not self.demo:
-            if not messagebox.askyesno('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
+            if not port.ask_yes_no('Synthetic data', 'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'): return
         self.asset.set(data.get('asset', '')); self.serial.set(data.get('serial', ''))
         self.period.set(data.get('period', self.period.get())); self.load_results(data)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
@@ -726,13 +651,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def export_pdf(self):
         rows, pts = self.certificate_rows_and_points()
-        if not rows: messagebox.showinfo('No results', 'No recorded results to export yet.'); return
-        try: import report_pdf, report_dialog
-        except ImportError as exc: messagebox.showerror('Report export', str(exc)); return
-        details = report_dialog.ask_details(self.root, f'Keysight {MODEL} performance verification')
+        if not rows: port.message('info', 'No results', 'No recorded results to export yet.'); return
+        try: import report_pdf
+        except ImportError as exc: port.message('error', 'Report export', str(exc)); return
+        details = port.report_details(f'Keysight {MODEL} performance verification', parent=self.root)
         if details is None: return
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        path = filedialog.asksaveasfilename(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
+        path = port.save_file(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
         if not path: return
         demo = self.any_synthetic()
         try:
@@ -744,16 +669,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                                                                  ('Limits applied', self.period.get()), ('Source', 'Keysight 34410A/11A/L4411A Service Guide, pp. 68-87 (Verification Tests)')],
                                              demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, std), snapshot_context=report_pdf.context_for(self))
         except ImportError:
-            messagebox.showerror('PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
+            port.message('error', 'PDF export dependency', 'Install the PDF package with:  py -m pip install reportlab'); return
         except Exception as exc:
-            messagebox.showerror('PDF export error', str(exc)); return
+            port.message('error', 'PDF export error', str(exc)); return
         self.status.set(f'Exported {len(rows)} rows: {path}')
 
     def on_close(self):
-        if self.busy and not messagebox.askyesno('Active run', 'A point may be active. Stop and close?'): return
+        if self.busy and not port.ask_yes_no('Active run', 'A point may be active. Stop and close?'): return
         self.stop = True
         if not self.demo: self._save_settings()
-        self.disconnect(); self.root.destroy()
+        self.disconnect(); port.close(self.root)
 
 
 def main(argv=None, model=None):
@@ -761,7 +686,7 @@ def main(argv=None, model=None):
     argv = sys.argv if argv is None else argv
     if model:
         configure(model)
-    root = tk.Tk()
-    demo, fast = virtualbench.flags(argv)
-    App(root, demo=demo, fast_demo=fast)
-    root.mainloop()
+    def build(root):
+        demo, fast = virtualbench.flags(argv)
+        App(root, demo=demo, fast_demo=fast)
+    port.run_app(build)

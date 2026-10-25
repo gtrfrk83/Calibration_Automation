@@ -1,0 +1,750 @@
+{
+ "f8808a_adj_first_steps_then_abort": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter the instrument ID first.",
+   "title": "Instrument ID"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Start record",
+    "Cancel"
+   ],
+   "caution": "This procedure adjusts the calibration of the 8808A.",
+   "facts": [
+    [
+     "Method",
+     "The RS-232 calibration dialog in the order of Table 3-9. Both instruments are reset to their defaults first; the calibration mode stays closed."
+    ],
+    [
+     "Scope",
+     "Complete: all six functions, 124 steps (recommended)"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5522A: Fluke 5522A is offered, but cannot source 1 of 119 points: for those you connect another standard (the meter is still read automatically). Its remote commands are not fully verified (hover)."
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Nothing is changed yet",
+     "Starting resets the instruments; no calibration command is sent."
+    ],
+    [
+     "Verification",
+     "This program does not run the performance verification: do the As Found one first, the As Left one afterwards."
+    ]
+   ],
+   "text": "Start a new adjustment record?",
+   "title": "Start adjustment record"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: Fluke 8808A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "All confirmed",
+    "Cancel"
+   ],
+   "caution": "Next you confirm your authority.",
+   "facts": [
+    [
+     "Instrument",
+     "A-1  (serial S-1)"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5522A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 8808A must have warmed up for at least one half hour (Calibration Manual p. 1-9); allow the calibrator its own warm-up."
+    ],
+    [
+     "Environment",
+     "Ambient conditions as the manual requires (p. 3-2)."
+    ],
+    [
+     "As Found",
+     "The performance verification (As Found) has been run and its report kept."
+    ],
+    [
+     "Calibration mode",
+     "NEXT you enter the calibration mode yourself, at the front panel of the 8808A, with the calibration button. This program does not enter it for you."
+    ]
+   ],
+   "text": "Warm-up, conditions and As Found",
+   "title": "Before the adjustment"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "I am authorised to adjust this instrument and understand that every point I start changes the calibration of the 8808A. There is no SAVE and no way to undo a point; a function that is started must be completed.\n\nContinue?",
+   "title": "THIS CHANGES THE INSTRUMENT CALIBRATION"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Calibration mode entered - continue",
+    "Cancel"
+   ],
+   "caution": "Confirm only when the meter is in the calibration mode.",
+   "facts": [
+    [
+     "Instrument",
+     "A-1  (serial S-1)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front panel",
+     "Enter calibration mode on the front panel of the 8808A using the calibration button, then confirm here."
+    ],
+    [
+     "What the program can check",
+     "The manual prints no query that shows the calibration mode, so the program cannot verify it before the first function. It will send the first function name only after you confirm; if the meter does not answer it with a recommended value, nothing has been changed and you stop."
+    ]
+   ],
+   "text": "Enter the calibration mode at the front panel",
+   "title": "Operator step: enter calibration mode"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "Start VDC (Volts DC)?\n\nOnce a function is selected ALL its 21 points must be calibrated (p. 3-16); leaving earlier shows CAL ERROR and the manual does not say what happens to the points already done.\n\nThe function name is sent once. Continue?",
+   "title": "Start a function"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Step",
+     "S001  VDC  DC volts 0 mV/0V (zero)"
+    ],
+    [
+     "Calibrator output",
+     "no calibrator output (STANDBY)"
+    ],
+    [
+     "Manual page",
+     "p. 3-12 (Table 3-9, step 1)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Disconnect the calibrator leads. Fit the low thermal 4-wire short (Fluke PN 2653346) across the meter INPUT HI / LO and SENSE HI / LO (Table 3-1; \"Volts DC: zero points using the 4-wire short\", p. 3-12). The calibrator stays in STANDBY and no calibrator output is used. Keep drafts away from the low-thermal connections."
+    ]
+   ],
+   "text": "Connect for the 4-wire short (DC volts and ohms zero)",
+   "title": "Rewire / verify before the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "S001  VDC  DC volts 0 mV/0V (zero)\n\nMeter recommended value: 0 V, 0 HZ\nCalibrator: no calibrator output (STANDBY) (OPERATE, settled)\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\n\nIs the input stable? Start the point?",
+   "title": "Start the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Step",
+     "S002  VDC  DC volts -199.9 mV"
+    ],
+    [
+     "Calibrator output",
+     "-199.9 mV DC"
+    ],
+    [
+     "Manual page",
+     "p. 3-12 (Table 3-9, step 2)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator NORMAL HI / LO to the meter INPUT HI / LO (Figure 3-1). AC volts at 1 kHz; DC volts with the calibrator external sense OFF."
+    ]
+   ],
+   "text": "Connect for voltage / frequency inputs",
+   "title": "Rewire / verify before the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "S002  VDC  DC volts -199.9 mV\n\nMeter recommended value: -0.1999 V, 0 HZ\nCalibrator: -199.9 mV DC (OPERATE, settled)\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\n\nIs the input stable? Start the point?",
+   "title": "Start the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "S003  VDC  DC volts -100 mV\n\nMeter recommended value: -0.1 V, 0 HZ\nCalibrator: -100 mV DC (OPERATE, settled)\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\n\nIs the input stable? Start the point?",
+   "title": "Start the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "S004  VDC  DC volts 100 mV\n\nMeter recommended value: 0.1 V, 0 HZ\nCalibrator: 100 mV DC (OPERATE, settled)\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\n\nIs the input stable? Start the point?",
+   "title": "Start the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "S005  VDC  DC volts 199.9 mV\n\nMeter recommended value: 0.1999 V, 0 HZ\nCalibrator: 199.9 mV DC (OPERATE, settled)\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\n\nIs the input stable? Start the point?",
+   "title": "Start the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "S006  VDC  DC volts -1.999 V\n\nMeter recommended value: -1.999 V, 0 HZ\nCalibrator: -1.999 V DC (OPERATE, settled)\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\n\nIs the input stable? Start the point?",
+   "title": "Start the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "S007  VDC  DC volts -1 V\n\nMeter recommended value: -1 V, 0 HZ\nCalibrator: -1 V DC (OPERATE, settled)\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\n\nIs the input stable? Start the point?",
+   "title": "Start the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "S008  VDC  DC volts 1 V\n\nMeter recommended value: 1 V, 0 HZ\nCalibrator: 1 V DC (OPERATE, settled)\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\n\nIs the input stable? Start the point?",
+   "title": "Start the point"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "Stop the adjustment? The calibrator goes to STANDBY and EXIT is sent. A function that is not complete shows CAL ERROR.",
+   "title": "Abort"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Adjustment stopped (operator). VDC was NOT completed (8 of 21 points were calibrated before the stop). The manual: a function that is not completely calibrated shows CAL ERROR (p. 3-16). The manual does not say whether the points already calibrated were stored or discarded: repeat the whole function and run the performance verification before using the meter. EXIT was sent over RS-232 (the manual's way to leave the calibration mode, p. 3-16). Look at the meter: if it still shows the calibration mode, press the SHIFT key at the front panel to leave it (owner-stated, not from the manual pages read).",
+   "title": "Adjustment stopped"
+  }
+ ],
+ "k2000_adj_first_steps_then_abort": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter the instrument ID first.",
+   "title": "Instrument ID"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Start record",
+    "Cancel"
+   ],
+   "caution": "This procedure adjusts the calibration of the Model 2000.",
+   "facts": [
+    [
+     "Method",
+     "The remote :CAL:PROT commands in the order of the manual (Tables 2-8 to 2-12). Both instruments are reset to their defaults first; the 2000 stays LOCKED."
+    ],
+    [
+     "Scope",
+     "Complete: DC, then AC (recommended)"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A: Meets the manual's Table 2-1 (Fluke 5700A 90-day ppm) at 4 of the 24 sourced steps; the sheet holds the 1-year column, which is conservative."
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Nothing is changed yet",
+     "Starting resets the instruments and sets DC volts / SLOW; the calibration stays locked until you unlock it."
+    ],
+    [
+     "INPUTS switch",
+     "Set it to FRONT (button not pressed in). The program reads it and stops if it is on REAR."
+    ]
+   ],
+   "text": "Start a new adjustment record?",
+   "title": "Start adjustment record"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: Keithley 2000.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "All confirmed",
+    "Cancel"
+   ],
+   "caution": "Next you confirm your authority and type the calibration code.",
+   "facts": [
+    [
+     "Instrument",
+     "A-1  (serial S-1)"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 2000 must have been on for at least ONE hour (one more if it was outside 23 C +/- 5 C); allow the calibrator its own warm-up (Cal Manual p. 2-3)."
+    ],
+    [
+     "Environment",
+     "23 C +/- 5 C, relative humidity below 80 % (p. 2-3)."
+    ],
+    [
+     "As Found",
+     "The performance verification (As Found) has been run and its report kept."
+    ],
+    [
+     "Direct connection",
+     "No scanner or switching equipment between the calibrator and the 2000; common-mode voltage under 500 V peak (p. 2-4)."
+    ]
+   ],
+   "text": "Warm-up, conditions and As Found",
+   "title": "Before the adjustment"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "I am authorised to adjust this instrument and understand that the calibration constants of the Model 2000 will change when I save them.\n\nNothing is stored until I type the SAVE confirmation at the end. Continue to the calibration code?",
+   "title": "THIS CHANGES THE INSTRUMENT CALIBRATION"
+  },
+  {
+   "answer": "<masked>",
+   "kind": "ask_text",
+   "masked": true,
+   "text": "Enter the calibration code of the Model 2000 (1 to 8 letters / digits).\nIt is sent once and is NOT stored or logged.\n\nDEMO: the simulated meter accepts SIMCODE1 (not a real code).",
+   "title": "Calibration code"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Step",
+     "D01  Front terminal short circuit"
+    ],
+    [
+     "Calibrator output",
+     "no calibrator output (STANDBY)"
+    ],
+    [
+     "Manual page",
+     "2-15, 3-11"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Disconnect the calibrator leads. Connect the Keithley 8610 low-thermal shorting plug to the 2000 front INPUT HI / LO and SENSE (S+ / S-) jacks (Figure 2-1). INPUTS button NOT pressed in (front inputs). Keep drafts away from the low-thermal connections. Wait at least three minutes before the step (p. 2-15)."
+    ],
+    [
+     "Manual note",
+     "Keithley 8610 low-thermal short on the front INPUT HI / LO and SENSE jacks (Figure 2-1); wait at least three minutes for thermal equilibrium before the command (p. 2-15)."
+    ]
+   ],
+   "text": "Connect for the low-thermal short",
+   "title": "Rewire / verify before the step"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "D01  Front terminal short circuit\n\nCalibrator: no calibrator output (STANDBY) (in OPERATE, settled).\nCommand: :CAL:PROT:DC:STEP1\n\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\n\nIs the calibrator output stable? Send the step?",
+   "title": "Send the calibration step"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Step",
+     "D02  Front terminal open circuit"
+    ],
+    [
+     "Calibrator output",
+     "no calibrator output (STANDBY)"
+    ],
+    [
+     "Manual page",
+     "2-15, 3-11"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Remove the shorting plug. Disconnect ALL cables and accessories from the front input jacks, the calibrator leads included (p. 3-11)."
+    ],
+    [
+     "Manual note",
+     "Remove the short; disconnect all cables and accessories from the front input jacks (p. 3-11)."
+    ]
+   ],
+   "text": "Connect for open inputs",
+   "title": "Rewire / verify before the step"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "D02  Front terminal open circuit\n\nCalibrator: no calibrator output (STANDBY) (in OPERATE, settled).\nCommand: :CAL:PROT:DC:STEP2\n\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\n\nIs the calibrator output stable? Send the step?",
+   "title": "Send the calibration step"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Step",
+     "D03  +10 V DC"
+    ],
+    [
+     "Calibrator output",
+     "10 V DC"
+    ],
+    [
+     "Manual page",
+     "2-16, 3-11"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_ADJ_5560A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded low-thermal cables: calibrator OUTPUT V/ohm HI / LO to the 2000 INPUT HI / LO (Figure 2-2). Calibrator set to DC volts with EXTERNAL SENSE OFF (disconnect the sense leads if the calibrator cannot switch it) (p. 2-9). Wait three minutes for thermal equilibrium after connecting (p. 2-15)."
+    ],
+    [
+     "Manual note",
+     "Connect the calibrator (Figure 2-2) and wait three minutes for thermal equilibrium (p. 2-15); calibrator external sense OFF (p. 2-9)."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before the step"
+  },
+  {
+   "answer": "10",
+   "kind": "ask_value",
+   "text": "D03  +10 V DC\n\nEnter the EXACT value the calibrator is outputting (this is the parameter of the command; the manual allows 9 V to 11 V). It is pre-filled with the calibrator's own read-back (OUT?); change it only to a value from the calibrator's certificate.",
+   "title": "Calibrator value"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "D03  +10 V DC\n\nCalibrator: 10 V DC (in OPERATE, settled).\nCommand: :CAL:PROT:DC:STEP3 10\n\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\n\nIs the calibrator output stable? Send the step?",
+   "title": "Send the calibration step"
+  },
+  {
+   "answer": "-10",
+   "kind": "ask_value",
+   "text": "D04  -10 V DC\n\nEnter the EXACT value the calibrator is outputting (this is the parameter of the command; the manual allows -11 V to -9 V). It is pre-filled with the calibrator's own read-back (OUT?); change it only to a value from the calibrator's certificate.",
+   "title": "Calibrator value"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "D04  -10 V DC\n\nCalibrator: -10 V DC (in OPERATE, settled).\nCommand: :CAL:PROT:DC:STEP4 -10\n\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\n\nIs the calibrator output stable? Send the step?",
+   "title": "Send the calibration step"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "This step outputs 100 V DC. Verify CAT-rated leads, connections, clearance and personnel safety. Enable the output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": "100",
+   "kind": "ask_value",
+   "text": "D05  +100 V DC\n\nEnter the EXACT value the calibrator is outputting (this is the parameter of the command; the manual allows 90 V to 110 V). It is pre-filled with the calibrator's own read-back (OUT?); change it only to a value from the calibrator's certificate.",
+   "title": "Calibrator value"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "D05  +100 V DC\n\nCalibrator: 100 V DC (in OPERATE, settled).\nCommand: :CAL:PROT:DC:STEP5 100\n\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\n\nIs the calibrator output stable? Send the step?",
+   "title": "Send the calibration step"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Step",
+     "D06  1 kohm 4-wire"
+    ],
+    [
+     "Calibrator output",
+     "1 kΩ"
+    ],
+    [
+     "Manual page",
+     "2-16, 3-12"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_k2000_ADJ_5560A_OHM4.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire: calibrator OUTPUT V/ohm HI / LO (force) to the 2000 INPUT HI / LO and the calibrator SENSE HI / LO to the 2000 SENSE Ohms 4 WIRE HI / LO (Figure 2-2). Calibrator external sense ON for ALL resistance steps (p. 2-10). Set the 5560A's own 4-wire (external sense) mode yourself: the program sends no compensation command to a 5560A."
+    ]
+   ],
+   "text": "Connect for 4-wire ohms",
+   "title": "Rewire / verify before the step"
+  },
+  {
+   "answer": "1000",
+   "kind": "ask_value",
+   "text": "D06  1 kohm 4-wire\n\nEnter the EXACT value the calibrator is outputting (this is the parameter of the command; the manual allows 900 Ω to 1.1 kΩ). It is pre-filled with the calibrator's own read-back (OUT?); change it only to a value from the calibrator's certificate.",
+   "title": "Calibrator value"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "D06  1 kohm 4-wire\n\nCalibrator: 1 kΩ (in OPERATE, settled).\nCommand: :CAL:PROT:DC:STEP6 1000\n\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\n\nIs the calibrator output stable? Send the step?",
+   "title": "Send the calibration step"
+  },
+  {
+   "answer": "10000",
+   "kind": "ask_value",
+   "text": "D07  10 kohm 4-wire\n\nEnter the EXACT value the calibrator is outputting (this is the parameter of the command; the manual allows 9 kΩ to 11 kΩ). It is pre-filled with the calibrator's own read-back (OUT?); change it only to a value from the calibrator's certificate.",
+   "title": "Calibrator value"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "D07  10 kohm 4-wire\n\nCalibrator: 10 kΩ (in OPERATE, settled).\nCommand: :CAL:PROT:DC:STEP7 10000\n\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\n\nIs the calibrator output stable? Send the step?",
+   "title": "Send the calibration step"
+  },
+  {
+   "answer": "100000",
+   "kind": "ask_value",
+   "text": "D08  100 kohm 4-wire\n\nEnter the EXACT value the calibrator is outputting (this is the parameter of the command; the manual allows 90 kΩ to 110 kΩ). It is pre-filled with the calibrator's own read-back (OUT?); change it only to a value from the calibrator's certificate.",
+   "title": "Calibrator value"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "D08  100 kohm 4-wire\n\nCalibrator: 100 kΩ (in OPERATE, settled).\nCommand: :CAL:PROT:DC:STEP8 100000\n\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\n\nIs the calibrator output stable? Send the step?",
+   "title": "Send the calibration step"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "icon": "warning",
+   "kind": "ask_yes_no",
+   "text": "Stop the adjustment? The calibrator goes to STANDBY and the calibration is locked again.",
+   "title": "Abort"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Adjustment stopped (operator). The constants were NOT saved: the manual says calculated constants are only temporary until :CAL:PROT:SAVE is sent (pp. 2-19, 3-8), so the stored calibration is unchanged. The manual does not say whether :LOCK discards the temporary constants at once: switch the 2000 off and on again before using it, then run the performance verification.",
+   "title": "Adjustment stopped"
+  }
+ ]
+}

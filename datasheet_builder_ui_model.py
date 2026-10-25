@@ -2430,7 +2430,10 @@ class GridModel(CheckMixin, EditorModel):
             fn = self._function_for(self.resolve_function(text))
             self.fid = fn.id
             return f'New rows go under {fn.name}. Type a value in the NOMINAL VALUE cell.'
-        return self._do('choose function', act)
+        res = self._do('choose function', act)
+        if res.ok and not self.fn().points:
+            self.select(f'e:{self.fid}', 'nominal')              # a section made from the empty row's function box: the cursor goes on the empty row right under its heading
+        return res
 
     # ---- the cell edit gate
     def commit_cell(self, text, key=None, col=None, move='down'):
@@ -2657,7 +2660,10 @@ class GridModel(CheckMixin, EditorModel):
                 fs.insert(fs.index(after) + 1, fn)
             self.fid = fn.id
             return Outcome(True, f'Section "{fn.name}" added. Click the empty row under it and type a value.', f'h:{fn.id}')
-        return self._do('add section', act)
+        res = self._do('add section', act)
+        if res.ok and isinstance(res.detail, str) and res.detail.startswith('h:'):
+            self.select('e:' + res.detail[2:], 'nominal')           # the cursor goes to the empty row directly under the new heading
+        return res
 
     # ---- handheld multimeter template (a starting set of sections; the sheet itself still starts blank)
     HANDHELD_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'CONT', 'CAP', 'FREQ', 'TEMP', 'DIODE')
@@ -2684,6 +2690,7 @@ class GridModel(CheckMixin, EditorModel):
         res = self._do('add handheld functions', act)
         if res.ok and box.get('first'):
             self.fid = box['first']
+            self.select('e:' + box['first'], 'nominal')
         return res
 
     # ---- what the suite can automate (for the Run buttons)
@@ -3116,6 +3123,22 @@ class GridModel(CheckMixin, EditorModel):
             return Outcome(True, f'The tolerance was copied to {n} row{"s" * (n != 1)} below.', key)
         return self._do('copy tolerance', act)
 
+    def tolerance_form_above(self, key=None):
+        """For an empty row: the tolerance boxes (panel form) of the nearest test row above it in the same section, or None.  Nothing on the sheet changes:
+        the panel puts them in its boxes and Calc then makes the new row with them."""
+        rows = self.rows()
+        key = key or self.sel_key
+        idx = next((i for i, r in enumerate(rows) if r['key'] == key), None)
+        if idx is None:
+            return None
+        fid = rows[idx].get('fid') or self.fid
+        for r in reversed(rows[:idx]):
+            if r['kind'] == 'point' and (r.get('fid') == fid or not fid):
+                fn, p = self.point_of(r['key'])
+                if p is not None and p.spec is not None:
+                    return self.panel_state(r['key'])['form']
+        return None
+
     def would_overwrite(self, key=None):
         """How many rows below the selected one already have a tolerance of their own (the window asks before copying over them)."""
         fn, p = self.point_of(key or self.sel_key)
@@ -3164,6 +3187,7 @@ class GridModel(CheckMixin, EditorModel):
         res = super().add_function(kind, name, direction)
         if res.ok:
             res.message = f'Added the section "{self.fn().name}". Click the empty row under it and type a value.'
+            self.select(f'e:{res.detail}', 'nominal')      # the cursor goes to the empty row directly under the new heading (it used to stay on a spare row two lines down)
         return res
 
     def add_rule(self, fid, form, rule_id=None):

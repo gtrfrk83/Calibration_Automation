@@ -187,6 +187,10 @@ class Padding(unittest.TestCase):
                                (3, '5', '5.000'), (20, '1000', '1000'), (30, '9', '9.00'), (35, '-9', '-9.00'), (23, '-300', '-300.0')):
             self.assertEqual(h.pad_reading(PTS[n], typed), want, n)
 
+    def test_a_missing_leading_zero_is_added(self):
+        for n, typed, want in ((9, '.5', '0.500'), (9, '-.5', '-0.500'), (9, '.5000', '0.5000'), (9, '+.5', '+0.500'), (8, '.05', '0.050')):
+            self.assertEqual(h.pad_reading(PTS[n], typed), want, (n, typed))
+
     def test_a_perfect_meter_passes_every_point(self):
         for n, p in PTS.items():
             if p['test'] == 'numeric':

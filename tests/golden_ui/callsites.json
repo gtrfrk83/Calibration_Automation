@@ -1,0 +1,4970 @@
+{
+ "Procedures/Agilent_34401A.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'34401A: {self.io.ident}{tag}\\nFluke port opened (output not enabled).'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Zero offset — physical setup required'",
+    "f'Zero-offset setup: {location} terminals'",
+    "[('Select terminals', f'Use the front-panel FRONT/REAR switch to select the {location} terminals.'), ('Set up the input', instruction)]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.'",
+    "facts": "[('Point', f\"{p['id']} of {len(POINTS)}\"), ('Terminals', location)]",
+    "ok": "'Set up — measure'"
+   },
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Rewire / verify before enabling output'",
+    "f\"Connect for {p['kind']} tests\"",
+    "[('Wiring', msg)]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "[('Next point', f\"{p['id']} of {len(POINTS)}\"), ('Test', p['description'])]",
+    "ok": "'Connections verified — continue'"
+   },
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE — 1000 V'",
+    "'This point requires 1000 V DC. Verify CAT-rated leads, connections, clearance, and personnel safety. Enable output?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE — 750 V AC'",
+    "'Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Agilent 34401A one-year verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "Procedures/Fluke_8808A_Adjustment.py": [
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter the instrument ID first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.connect"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.connect"
+  },
+  {
+   "args": [
+    "'Required information'",
+    "'Enter instrument ID, serial number and technician.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Start adjustment record'",
+    "'Start a new adjustment record?'",
+    "[('Nothing is changed yet', 'Starting resets the instruments; no calibration command is sent.'), ('Verification', 'This program does not run the performance verification: do the As Found one first, the As Left one afterwards.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'This procedure adjusts the calibration of the 8808A.'",
+    "facts": "notes",
+    "ok": "'Start record'"
+   },
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Reset instruments'",
+    "t"
+   ],
+   "kind": "ask_ok_cancel",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Reset failed - not started'",
+    "exc.report.failure_text() if hasattr(exc.report, 'failure_text') else str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Not started'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Before the adjustment'",
+    "'Warm-up, conditions and As Found'",
+    "[('Warm-up', 'The 8808A must have warmed up for at least one half hour (Calibration Manual p. 1-9); allow the calibrator its own warm-up.'), ('Environment', 'Ambient conditions as the manual requires (p. 3-2).'), ('As Found', 'The performance verification (As Found) has been run and its report kept.'), ('Calibration mode', 'NEXT you enter the calibration mode yourself, at the front panel of the 8808A, with the calibration button. This program does not enter it for you.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Next you confirm your authority.'",
+    "facts": "[('Instrument', f'{self.asset.get().strip()}  (serial {self.serial.get().strip()})'), ('Calibrator', self.cal_model.get())]",
+    "ok": "'All confirmed'"
+   },
+   "where": "App.enter_calibration"
+  },
+  {
+   "args": [
+    "'THIS CHANGES THE INSTRUMENT CALIBRATION'",
+    "'I am authorised to adjust this instrument and understand that every point I start changes the calibration of the 8808A. There is no SAVE and no way to undo a point; a function that is started must be completed.\\n\\nContinue?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.enter_calibration"
+  },
+  {
+   "args": [
+    "'Operator step: enter calibration mode'",
+    "'Enter the calibration mode at the front panel'",
+    "[('Front panel', 'Enter calibration mode on the front panel of the 8808A using the calibration button, then confirm here.'), ('What the program can check', 'The manual prints no query that shows the calibration mode, so the program cannot verify it before the first function. ' + 'It will send the first function name only after you confirm; if the meter does not answer it with a recommended value, nothing has been changed and you stop.')] + ([('*TER (optional)', '*TER will ALSO be sent once after you confirm (UNVERIFIED: the manual shows it as the RS-232 entry, p. 3-16, but does not say whether it works without the front-panel entry).')] if use_ter else [])"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Confirm only when the meter is in the calibration mode.'",
+    "facts": "[('Instrument', f'{self.asset.get().strip()}  (serial {self.serial.get().strip()})')]",
+    "ok": "'Calibration mode entered - continue'"
+   },
+   "where": "App.enter_calibration"
+  },
+  {
+   "args": [
+    "'Calibration mode not entered'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.enter_calibration"
+  },
+  {
+   "args": [
+    "'Rewire / verify before the point'",
+    "f'Connect for {adj.GROUP_TITLE.get(group, group)}'",
+    "steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "facts",
+    "ok": "'Connections verified - continue'"
+   },
+   "where": "App._hookup"
+  },
+  {
+   "args": [
+    "'CALREF not confirmed'",
+    "f'{exc}\\n\\nDoes the meter display show the value that was sent?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.run_next"
+  },
+  {
+   "args": [
+    "'Point stopped'",
+    "str(exc2)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.run_next"
+  },
+  {
+   "args": [
+    "f\"Point {st['id']} stopped\"",
+    "f'{exc}\\n\\nNothing was repeated automatically. You can repeat the point after fixing the cause, or abort.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.run_next"
+  },
+  {
+   "args": [
+    "f\"Point {st['id']} stopped\"",
+    "f'{exc}\\n\\nNothing was repeated automatically. You can repeat the point after fixing the cause, or abort.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.run_next"
+  },
+  {
+   "args": [
+    "'Calibrator'",
+    "'The calibrator could not be confirmed in STANDBY. Check its front panel before touching any lead.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.run_next"
+  },
+  {
+   "args": [
+    "'Calibration mode not entered'",
+    "f'{exc}\\n\\nThe single *TER attempt was already used. Stopping: nothing more is sent. Check the meter and the front-panel entry, then start again.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._offer_ter"
+  },
+  {
+   "args": [
+    "'Meter did not enter calibration mode - try *TER once? (UNVERIFIED)'",
+    "f\"{exc}\\n\\nThe 8808A did not answer the function name with a recommended value, so it is probably not in the calibration mode.\\n\\nYou may try ONE entry over RS-232 with the manual's command *TER (p. 3-16). This is UNVERIFIED: the manual does not say whether *TER works after, or instead of, the front-panel entry. It is sent ONCE; if it does not work the adjustment stops, and nothing else is sent by the program. The function name is only sent again when you confirm the next function start.\\n\\nSend *TER once?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._offer_ter"
+  },
+  {
+   "args": [
+    "'*TER did not work'",
+    "f'{exc2}\\n\\nStopping. Nothing else is sent.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._offer_ter"
+  },
+  {
+   "args": [
+    "'No completion answer'",
+    "f\"{st['id']} {st['title']}: the 8808A did not say the point was finished.\\n\\nRead what the meter has sent since (read-only, nothing is sent)?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Repeat a failed point'",
+    "f\"{st['id']} {st['title']} failed before ({' | '.join(rec.errors) or 'error'}).\\n\\nRepeat it with a fresh confirmation? The program never repeats a command by itself.\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Start a function'",
+    "f\"Start {st['function']} ({adj.FUNCTION_BY_ID[st['function']]['title']})?\\n\\nOnce a function is selected ALL its {n} points must be calibrated (p. 3-16); leaving earlier shows CAL ERROR and the manual does not say what happens to the points already done.\\n\\nThe function name is sent once. Continue?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Terminal'",
+    "warn"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Own standard'",
+    "f\"{st['id']}: {adj.source_text(st)}\\n\\nThe {self.cal_model.get()} cannot make this output ({adj.own_standard_reasons(s.cal_key).get(st['id'], '')}).\\nConnect your own standard, set it, and confirm it is stable. The meter is not read, so you vouch for the value.\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE / CURRENT'",
+    "f'This hook-up group outputs up to {adj.source_text(st)}. Verify CAT-rated leads, connections, clearance and personnel safety, and the fuse of the terminal in use. Enable the output?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Start the point'",
+    "f\"{st['id']}  {st['function']}  {st['title']}\\n\\nMeter recommended value: {(s.rec.raw if s.rec else '')}\\nCalibrator: {adj.source_text(st)} (OPERATE, settled){(chr(10) + 'CALREF ' + rec.calref if rec.calref else '')}\\n\\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key is sent ONCE.\\n\\nIs the input stable? Start the point?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'No completion answer'",
+    "f'{exc}\\n\\nThe Enter key was NOT sent again. Press \"Run next point\" to decide.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Calibration point failed'",
+    "f'{exc}\\n\\nNothing was repeated.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Meter and Table 3-9 differ'",
+    "f\"{info['text']}\\n\\nYes = follow the METER (calibrate at its recommended value).\\nNo = use the Table 3-9 value (CALREF is sent).\\nCancel = stop here.\""
+   ],
+   "kind": "ask_yes_no_cancel",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._decide_value"
+  },
+  {
+   "args": [
+    "'Unexpected recommended value'",
+    "f\"{info['text']}\\n\\nAcknowledge and calibrate at the meter's value? (No = stop; use Abort if this is wrong.)\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._decide_value"
+  },
+  {
+   "args": [
+    "'Waive characterization'",
+    "\"Use the calibrator's nominal value without the characterization?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._decide_value"
+  },
+  {
+   "args": [
+    "'EXIT'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.finish"
+  },
+  {
+   "args": [
+    "'Adjustment complete' + (' (DEMO)' if self.demo else '')",
+    "msg + '\\n\\nRun the As Left performance verification now and keep its report.' + ('\\n\\nDEMO: this was a simulated meter; nothing was recorded as evidence.' if self.demo else '')"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.finish"
+  },
+  {
+   "args": [
+    "'Abort'",
+    "'Stop the adjustment? The calibrator goes to STANDBY and EXIT is sent. A function that is not complete shows CAL ERROR.'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.abort"
+  },
+  {
+   "args": [
+    "'Adjustment stopped'",
+    "text"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.abort"
+  },
+  {
+   "args": [
+    "'Calibration mode is OPEN'",
+    "'Abort the adjustment (EXIT is sent) and disconnect?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.disconnect"
+  },
+  {
+   "args": [
+    "'Calibration mode is open'",
+    "'Use \"Abort\" (or finish with EXIT) before closing.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "Procedures/Fluke_8846A_Adjustment.py": [
+  {
+   "args": [
+    "'COM ports'",
+    "str(e)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.refresh_ports"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(e)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.connect"
+  },
+  {
+   "args": [
+    "'Reset instruments'",
+    "t"
+   ],
+   "kind": "ask_ok_cancel",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.reset_meter"
+  },
+  {
+   "args": [
+    "'Reset failed - not started'",
+    "str(e)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.reset_meter"
+  },
+  {
+   "args": [
+    "'Required information'",
+    "'Enter instrument ID, serial number and technician.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.start"
+  },
+  {
+   "args": [
+    "'Connection required'",
+    "'Connect and identify the 8846A first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.start"
+  },
+  {
+   "args": [
+    "'Start new record'",
+    "'Start a new adjustment audit record? This does not unlock the meter.'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.start"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter instrument ID to find previous records.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.resume"
+  },
+  {
+   "args": [
+    "'No record'",
+    "'No previous adjustment record found.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.resume"
+  },
+  {
+   "args": [
+    "'Record closed'",
+    "'Most recent record is closed. Start a new record.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.resume"
+  },
+  {
+   "args": [
+    "'Resume'",
+    "f'Resume run #{row[0]} for serial {row[1]}?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.resume"
+  },
+  {
+   "args": [
+    "'Select a step'",
+    "'Select a row first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.selected"
+  },
+  {
+   "args": [
+    "'Record required'",
+    "'Start or resume an adjustment record first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.mark_reviewed"
+  },
+  {
+   "args": [
+    "'Review confirmation'",
+    "f'Confirm you reviewed the setup and manual requirements for:\\n{STEPS[idx][1]}'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.mark_reviewed"
+  },
+  {
+   "args": [
+    "'Prerequisites'",
+    "'Start a record and connect the identified 8846A first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'Authorized adjustment'",
+    "'I am authorized to adjust this instrument, have reviewed the calibration manual, and understand coefficients may change. Continue?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'Calibration password'",
+    "'Enter the instrument calibration password:'"
+   ],
+   "kind": "ask_text",
+   "kw": {
+    "show": "'*'"
+   },
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'Password'",
+    "'Expected 1–12 alphanumeric characters.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'Unlock failed'",
+    "str(e)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'Not yet validated'",
+    "'This stage is review-only in v56. Exact revision-specific setpoints and 5560A controls require bench validation.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Prerequisites'",
+    "'Start a record and explicitly unlock adjustment first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Confirm physical setup'",
+    "f'{name}\\n\\n{setup}\\n\\nConfirm all inputs are OPEN and no source is connected. Execute one calibration step?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Final command confirmation'",
+    "f'Command: CAL:VAL {mode},{value}\\nThen: CAL? ON\\n\\nThis changes volatile calibration coefficients. Proceed?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Adjustment step failed'",
+    "str(e)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Prerequisites'",
+    "'Active run and unlocked calibration required.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.commit"
+  },
+  {
+   "args": [
+    "'Commit calibration coefficients'",
+    "'CAL:REC writes adjusted coefficients to NONVOLATILE MEMORY.\\n\\nHave you completed the FULL manual adjustment sequence, validated all steps and checked for errors?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.commit"
+  },
+  {
+   "args": [
+    "'Final confirmation'",
+    "'Type COMMIT 8846A to authorize CAL:REC:'"
+   ],
+   "kind": "ask_text",
+   "kw": {},
+   "where": "App.commit"
+  },
+  {
+   "args": [
+    "'As Left verification required'",
+    "'Coefficient record command issued. Perform independent As Left verification and save its report.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.commit"
+  },
+  {
+   "args": [
+    "'Commit failed'",
+    "str(e)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.commit"
+  },
+  {
+   "args": [
+    "'Relock calibration'",
+    "'Enter calibration password to relock:'"
+   ],
+   "kind": "ask_text",
+   "kw": {
+    "show": "'*'"
+   },
+   "where": "App.disconnect"
+  },
+  {
+   "args": [
+    "'Relock not confirmed'",
+    "'Calibration may remain unlocked. Do not leave the instrument unattended.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.disconnect"
+  },
+  {
+   "args": [
+    "'Relock/close error'",
+    "f'{e}\\nMeter may remain unlocked.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.disconnect"
+  },
+  {
+   "args": [
+    "'Relock first'",
+    "'Calibration is unlocked. Use Relock and Disconnect before exiting.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.close"
+  }
+ ],
+ "Procedures/Fluke_8846A_Verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'8846A: {self.io.ident}{tag}\\nFluke port opened (output not enabled).'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Zero offset — physical setup required'",
+    "f'Zero-offset setup: {location} terminals'",
+    "[('Select terminals', f'Use the front-panel FRONT/REAR switch to select the {location} terminals.'), ('Set up the input', instruction)]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.'",
+    "facts": "[('Point', f\"{p['id']} of {len(POINTS)}\"), ('Terminals', location)]",
+    "ok": "'Set up — measure'"
+   },
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Rewire / verify before enabling output'",
+    "f\"Connect for {p['kind']} tests\"",
+    "[('Wiring', msg)]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "[('Next point', f\"{p['id']} of {len(POINTS)}\"), ('Test', p['description'])]",
+    "ok": "'Connections verified — continue'"
+   },
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE — 1000 V'",
+    "'This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE — 750 V AC'",
+    "'Verify the calibrator can deliver this voltage/frequency into the load. Confirm safety before proceeding.'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Fluke 8846A one-year verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Excel dependency'",
+    "'Install openpyxl using: py -m pip install openpyxl'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_excel"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.xlsx'",
+    "filetypes": "[('Excel workbook', '*.xlsx')]",
+    "initialfile": "'8846A_Professional_Verification.xlsx'"
+   },
+   "where": "App.export_excel"
+  },
+  {
+   "args": [
+    "'Excel export failed'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_excel"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "Procedures/Keithley_2000_Adjustment.py": [
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter the instrument ID first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.connect"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.connect"
+  },
+  {
+   "args": [
+    "'Firmware revision'",
+    "f'The 2000 identified itself as:\\n{self.io.ident}\\n\\nThe program could not read the firmware revision from this text. The calibration step numbers differ between firmware A19 and earlier and A20 and later (Calibration Manual Table 3-1 note, p. 3-4).\\n\\nIs the firmware revision A20 or LATER?  (No = A19 or earlier. Check CONFIG > SNUMBER / the rear-panel label if you are not sure; a wrong answer would send the wrong step.)'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.connect"
+  },
+  {
+   "args": [
+    "'Required information'",
+    "'Enter instrument ID, serial number and technician.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Start adjustment record'",
+    "'Start a new adjustment record?'",
+    "[('Nothing is changed yet', 'Starting resets the instruments and sets DC volts / SLOW; the calibration stays locked until you unlock it.'), ('INPUTS switch', 'Set it to FRONT (button not pressed in). The program reads it and stops if it is on REAR.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'This procedure adjusts the calibration of the Model 2000.'",
+    "facts": "notes",
+    "ok": "'Start record'"
+   },
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Reset instruments'",
+    "t"
+   ],
+   "kind": "ask_ok_cancel",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Reset failed - not started'",
+    "exc.report.failure_text() if hasattr(exc.report, 'failure_text') else str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Not started'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.start_record"
+  },
+  {
+   "args": [
+    "'Before the adjustment'",
+    "'Warm-up, conditions and As Found'",
+    "[('Warm-up', 'The 2000 must have been on for at least ONE hour (one more if it was outside 23 C +/- 5 C); allow the calibrator its own warm-up (Cal Manual p. 2-3).'), ('Environment', '23 C +/- 5 C, relative humidity below 80 % (p. 2-3).'), ('As Found', 'The performance verification (As Found) has been run and its report kept.'), ('Direct connection', 'No scanner or switching equipment between the calibrator and the 2000; common-mode voltage under 500 V peak (p. 2-4).')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Next you confirm your authority and type the calibration code.'",
+    "facts": "[('Instrument', f'{self.asset.get().strip()}  (serial {self.serial.get().strip()})'), ('Calibrator', self.cal_model.get())]",
+    "ok": "'All confirmed'"
+   },
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'THIS CHANGES THE INSTRUMENT CALIBRATION'",
+    "'I am authorised to adjust this instrument and understand that the calibration constants of the Model 2000 will change when I save them.\\n\\nNothing is stored until I type the SAVE confirmation at the end. Continue to the calibration code?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'Calibration code'",
+    "'Enter the calibration code of the Model 2000 (1 to 8 letters / digits).\\nIt is sent once and is NOT stored or logged.' + hint"
+   ],
+   "kind": "ask_text",
+   "kw": {
+    "show": "'*'"
+   },
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'Unlock failed'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.unlock"
+  },
+  {
+   "args": [
+    "'Rewire / verify before the step'",
+    "f'Connect for {GROUP_TITLE.get(group, group)}'",
+    "steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Connections verified - continue'"
+   },
+   "where": "App._hookup"
+  },
+  {
+   "args": [
+    "f\"Step {st['id']} stopped\"",
+    "f'{exc}\\n\\nThe command was NOT repeated automatically. Nothing is saved. You can repeat the step after fixing the cause, or abort.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.run_next"
+  },
+  {
+   "args": [
+    "'Calibrator'",
+    "'The calibrator could not be confirmed in STANDBY. Check its front panel before touching any lead.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.run_next"
+  },
+  {
+   "args": [
+    "'No completion answer'",
+    "f\"{st['id']} {st['title']}: the 2000 did not confirm completion of the step.\\n\\nLook at the 2000 front panel. Is it idle (no CAL / busy annunciator, normal display)?\\n\\nYes = the program reads the error queue and records the outcome.  No = nothing is decided, wait and ask again.\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Repeat a failed step'",
+    "f\"{st['id']} {st['title']} failed before ({' | '.join(rec.errors) or 'error'}).\\n\\nRepeat it? The program never repeats a calibration command by itself.\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE'",
+    "f'This step outputs {adj.source_text(st)}. Verify CAT-rated leads, connections, clearance and personnel safety. Enable the output?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Value differs from the calibrator'",
+    "f\"You entered {value}, the calibrator read back {got:.10g}.\\nIs {value} the value from the calibrator's certificate for this output?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Send the calibration step'",
+    "f\"{st['id']}  {st['title']}\\n\\nCalibrator: {adj.source_text(st)} (in OPERATE, settled).\\nCommand: {cmd}\\n\\nThis changes the VOLATILE calibration constants (nothing is stored until SAVE). The command is sent ONCE.\\n\\nIs the calibrator output stable? Send the step?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'No completion answer'",
+    "f'{exc}\\n\\nThe command was NOT sent again. Press \"Run next step\" to decide from the 2000 front panel.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Calibration step failed'",
+    "f'{exc}\\n\\nThe command was NOT repeated. Nothing is saved.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._run_step"
+  },
+  {
+   "args": [
+    "'Dates'",
+    "'Enter the dates as YYYY-MM-DD.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.dates_and_save"
+  },
+  {
+   "args": [
+    "'SAVE the calibration constants'",
+    "f'SAVE stores ALL the new calibration constants permanently in the 2000 (EEPROM). The manual has no command to undo it.\\n\\nEvery step of \"{self.scope.get()}\" is done. Calibration date {cal_d}, next due {due_d}.\\n\\nType  {adj.CONFIRM_SAVE}  to store the constants:'"
+   ],
+   "kind": "ask_text",
+   "kw": {},
+   "where": "App.dates_and_save"
+  },
+  {
+   "args": [
+    "'Dates / SAVE'",
+    "f'{exc}\\n\\nIf :SAVE was sent, do not trust the stored constants: use \"Abort and lock\", then run the performance verification.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.dates_and_save"
+  },
+  {
+   "args": [
+    "'Saved' + (' (DEMO)' if self.demo else '')",
+    "msg + '\\n\\nRun the As Left performance verification now and keep its report.' + ('\\n\\nDEMO: this was a simulated meter; nothing was recorded as evidence.' if self.demo else '')"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.dates_and_save"
+  },
+  {
+   "args": [
+    "'Abort'",
+    "'Stop the adjustment? The calibrator goes to STANDBY and the calibration is locked again.'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.abort"
+  },
+  {
+   "args": [
+    "'Adjustment stopped'",
+    "text"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.abort"
+  },
+  {
+   "args": [
+    "'Calibration is UNLOCKED'",
+    "'Abort the adjustment, lock the calibration and disconnect?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "App.disconnect"
+  },
+  {
+   "args": [
+    "'Lock first'",
+    "'Calibration is UNLOCKED. Use \"Abort and lock\" (or finish and SAVE) before closing.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "Procedures/WaveSurfer_WS4104HD.py": [
+  {
+   "args": [
+    "'Section'",
+    "'Choose a function in the Show box first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.run_section"
+  },
+  {
+   "args": [
+    "'Replace the As Found reading?'",
+    "f'{what} already has As Left readings, so the instrument has been adjusted since the As Found run.\\n\\nMeasuring As Found again now replaces the original As Found reading with a reading from the adjusted instrument.\\n\\nTo measure after an adjustment, switch to As Left instead.\\n\\nReplace the As Found reading anyway?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "default": "'no'"
+   },
+   "where": "RMSNoiseApp._confirm_found_overwrite"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Wait for the current measurement to finish.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.run_pending"
+  },
+  {
+   "args": [
+    "'Instrument ID needed'",
+    "'Enter the Instrument ID first. Results are saved separately for each instrument.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.run_pending"
+  },
+  {
+   "args": [
+    "'Nothing pending'",
+    "'Every point in the selected function is already recorded.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.run_pending"
+  },
+  {
+   "args": [
+    "'Select a result'",
+    "'Select one completed test point in the table.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.rerun_selected"
+  },
+  {
+   "args": [
+    "'Not tested yet'",
+    "'That point has not been measured yet. Use Run Pending, or pick a recorded point to rerun.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.rerun_selected"
+  },
+  {
+   "args": [
+    "'Select a result'",
+    "'Select one completed test point in the table.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.rerun_from_selected"
+  },
+  {
+   "args": [
+    "'Choose a function'",
+    "'Choose one function in the Show list first. Results are cleared one function at a time.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.clear_function"
+  },
+  {
+   "args": [
+    "'Clear results'",
+    "f'Clear all saved {self.mode_label} {self.FUNC_NAME[kind]} results? This cannot be undone.' + extra"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "RMSNoiseApp.clear_function"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'The Instrument ID cannot change while a measurement is running.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.sync_asset"
+  },
+  {
+   "args": [
+    "'Edits not applied'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp._pm_boundary"
+  },
+  {
+   "args": [
+    "'Earlier results found'",
+    "f'Results saved by an earlier version (not tied to an instrument) were found.\\n\\nAssign them to {self._ckpt_id or key}?\\n\\nChoose No to leave them untouched (they are not deleted).'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "RMSNoiseApp._adopt_legacy_results"
+  },
+  {
+   "args": [
+    "'Prepare channel'",
+    "f'Prepare CH{channel} for the next measurement'",
+    "[('Move the 50 Ω termination', f'Put the external 50 Ω BNC termination on CH{channel}.'), ('Check the scope', 'All four channels ON, DC 1 MΩ, full bandwidth, 1 ms/div, averaging / ERES off.'), ('Automatic', f'The program sets P1 to StdDev of CH{channel} for you.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Cancel keeps all completed results saved so you can Resume.'",
+    "facts": "[('Channel', f'CH{channel}'), ('Range', self.range_text(scale))]",
+    "ok": "'Ready — start measuring'"
+   },
+   "where": "RMSNoiseApp.confirm_channel"
+  },
+  {
+   "args": [
+    "'No saved run'",
+    "'Start a test first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_noise"
+  },
+  {
+   "args": [
+    "'Settings changed'",
+    "'Settings differ from the saved run. Restore the original settings before resuming.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.resume_test"
+  },
+  {
+   "args": [
+    "'Invalid configuration'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.resume_test"
+  },
+  {
+   "args": [
+    "'Invalid configuration'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.start_test"
+  },
+  {
+   "args": [
+    "'New test'",
+    "'Start a new RMS noise test'",
+    "[('Saved results', 'Existing saved noise results will be cleared.'), ('Method', 'Confirm the 2.75-division method and the limits are applicable.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "facts": "[('Channels', chans), ('Ranges', f'{self.total_ranges()} measurements')]",
+    "ok": "'Clear and start'"
+   },
+   "where": "RMSNoiseApp.start_test"
+  },
+  {
+   "args": [
+    "title",
+    "question"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Time base error' if kind == 'tb_error' else 'Fluke output safety'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Trigger level error' if kind == 'trig_error' else 'Fluke output safety'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Bandwidth error'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Fluke output safety'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Offset measurement error'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Fluke safety'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Confirm P1 reading'",
+    "f\"Scope P1 returned {event[2]:+.6f} V.\\n\\nIs P1 set to MEAN of CH{event[1]['channel']} and is this reading valid?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Confirm automatic DCV reading'",
+    "f\"Fluke returned to STBY. Scope P1 returned {event[2]:+.6f} V.\\n\\nWas P1 configured to MEAN of CH{event[1]['channel']}, and is this result valid?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'OUTPUT SAFETY WARNING'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'DCV read error'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Impedance measurement error'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'FLUKE SCOPE MODE'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Fluke connection'",
+    "event[2]"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Fluke connection'",
+    "event[2]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Test complete'",
+    "'All selected channels are complete. Export the report (PDF) to save it.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Measurement error'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Measurement error'",
+    "event[1]"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.process_events"
+  },
+  {
+   "args": [
+    "'Measurement running'",
+    "'Finish the current point (answer any trigger question) and wait for Fluke STBY confirmation before closing.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.on_close"
+  },
+  {
+   "args": [
+    "'Bandwidth running'",
+    "'Wait for Fluke STBY confirmation before closing.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.on_close"
+  },
+  {
+   "args": [
+    "'Offset running'",
+    "'Wait for Fluke STBY confirmation before closing.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.on_close"
+  },
+  {
+   "args": [
+    "'Impedance in progress'",
+    "'Wait for the Fluke SCOPE OFF confirmation before closing.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.on_close"
+  },
+  {
+   "args": [
+    "'DCV in progress'",
+    "'Wait until the automatic DCV point completes and Fluke STBY is confirmed before closing.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.on_close"
+  },
+  {
+   "args": [
+    "'Test running'",
+    "'Stop the test and close the window?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "RMSNoiseApp.on_close"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Finish the current measurement first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_selected_dcv"
+  },
+  {
+   "args": [
+    "'Select a row'",
+    "'Select exactly one completed DCV result in the table.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_selected_dcv"
+  },
+  {
+   "args": [
+    "'Not tested yet'",
+    "'That point has not been measured yet. Use Run DCV Automatically / Resume DCV, or pick a recorded row to retest.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_selected_dcv"
+  },
+  {
+   "args": [
+    "'Automatic retest'",
+    "'Enable automatic Fluke SCOPE DCV and scope P1 MEAN to retest.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_selected_dcv"
+  },
+  {
+   "args": [
+    "'Settings'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_selected_dcv"
+  },
+  {
+   "args": [
+    "'Confirm DCV retest connection'",
+    "f'Retest DCV point {idx + 1} of 80'",
+    "[('Connect the cable', f'Fluke SCOPE output cable to CH{ch}.'), ('Remove other sources', 'No external terminators, probes or other sources on the input.'), ('Automatic', 'The scope is set to DC 1 MΩ and 20 MHz BW for you.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The previous reading is kept in the retest history. A good new reading replaces the displayed result; an error leaves it unchanged.'",
+    "facts": "[('Channel', f'CH{ch}'), ('Test voltage', f\"{point['nominal_v']:+g} V\"), ('Range', self.range_text(point['scale_v_div']))]",
+    "ok": "'Connected — retest'"
+   },
+   "where": "RMSNoiseApp.retest_selected_dcv"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Wait for the current measurement to finish.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.resume_dcv"
+  },
+  {
+   "args": [
+    "'DCV complete'",
+    "'All 80 DCV points are recorded.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.resume_dcv"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Wait for the current test point to finish.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.start_dcv_batch"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All DCV points are complete.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.start_dcv_batch"
+  },
+  {
+   "args": [
+    "'Automatic DCV'",
+    "'Enable both automatic Fluke output and scope P1 acquisition.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.start_dcv_batch"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Another measurement is in progress.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.next_dcv"
+  },
+  {
+   "args": [
+    "'DCV complete'",
+    "'All 80 DCV points completed. Export the report (PDF).'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.next_dcv"
+  },
+  {
+   "args": [
+    "'Automatic mode'",
+    "'Enable automatic scope P1 MEAN acquisition to use automatic Fluke output control.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.next_dcv"
+  },
+  {
+   "args": [
+    "'Settle time'",
+    "'Settle time must be 0.5 to 30 seconds.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.next_dcv"
+  },
+  {
+   "args": [
+    "'Automatic DCV'",
+    "'Fluke automatic output control is required.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.next_dcv"
+  },
+  {
+   "args": [
+    "f'Connect DCV cable — CH{ch}'",
+    "f'Connect the Fluke SCOPE output to CH{ch}'",
+    "[('Connect', f'Fluke SCOPE output cable to CH{ch}.'), ('Remove', 'External terminators, probes and any other sources.'), ('Verify', 'Scope input is DC coupling, 1 MΩ, 20 MHz BW.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The program applies each voltage automatically and verifies Fluke STBY after every point. Press OK only after the cable is connected and safe.'",
+    "facts": "[('Channel', f'CH{ch}'), ('Test', 'Every positive and negative DCV voltage for this channel')]",
+    "ok": "'Connected and safe — start'"
+   },
+   "where": "RMSNoiseApp.next_dcv"
+  },
+  {
+   "args": [
+    "'Confirm DCV test setup'"
+   ],
+   "kind": "operator_prompt",
+   "kw": {},
+   "where": "RMSNoiseApp.next_dcv"
+  },
+  {
+   "args": [
+    "'Reset instruments'",
+    "text"
+   ],
+   "kind": "ask_ok_cancel",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "RMSNoiseApp.reset_bench"
+  },
+  {
+   "args": [
+    "'Measured DC voltage'",
+    "f\"CH{point['channel']} | {point['nominal_v']:+.6f} V applied\\nEnter measured oscilloscope MEAN in VOLTS:\""
+   ],
+   "kind": "ask_number",
+   "kw": {},
+   "where": "RMSNoiseApp.enter_dcv_manual"
+  },
+  {
+   "args": [
+    "'Invalid value'",
+    "'Measurement must be finite.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.record_dcv"
+  },
+  {
+   "args": [
+    "'Clear DCV results'",
+    "'Delete all DCV results and checkpoint?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "RMSNoiseApp.clear_dcv"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Wait for the current measurement to finish.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.resume_impedance"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All 28 impedance points are recorded.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.resume_impedance"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Wait for the current test to finish.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.start_impedance_batch"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All 28 impedance measurements are recorded.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.start_impedance_batch"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Wait for the current test to finish.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.next_impedance"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All 28 impedance measurements are complete.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.next_impedance"
+  },
+  {
+   "args": [
+    "'Settings'",
+    "'Settle: 0.5–30 seconds; readings: 1–20; baud: integer.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.next_impedance"
+  },
+  {
+   "args": [
+    "'Confirm impedance connection'"
+   ],
+   "kind": "operator_prompt",
+   "kw": {},
+   "where": "RMSNoiseApp.next_impedance"
+  },
+  {
+   "args": [
+    "'Confirm external trigger impedance'",
+    "f'Set {target} trigger input impedance'",
+    "[('Set the input', f'Trigger input impedance to {mode}.'), ('Confirm', 'Check the setting before the resistance measurement.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "facts": "[('Input', target), ('Impedance', mode)]",
+    "ok": "'Set — continue'"
+   },
+   "where": "RMSNoiseApp.next_impedance"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Finish the current measurement first.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp._retest_index"
+  },
+  {
+   "args": [
+    "'Select a result'",
+    "f'Select one completed {label} result.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp._retest_index"
+  },
+  {
+   "args": [
+    "'Not tested yet'",
+    "'That point has not been measured yet. Pick a recorded row to retest, or use Run / Resume.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp._retest_index"
+  },
+  {
+   "args": [
+    "'Confirm impedance retest'",
+    "f'Retest impedance point {idx + 1} of 28'",
+    "[('Output off', 'Confirm the Fluke SCOPE measurement output is OFF before moving cables.'), ('Connection', 'Verify the correct connection and, for EXT inputs, the input impedance.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The prior reading is replaced only after a successful retest.'",
+    "facts": "[('Input', point['channel']), ('Test', point['description'])]",
+    "ok": "'Ready — retest'"
+   },
+   "where": "RMSNoiseApp.retest_impedance"
+  },
+  {
+   "args": [
+    "'Settings'",
+    "'Check settle time, samples, and baud.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_impedance"
+  },
+  {
+   "args": [
+    "'Confirm offset retest'",
+    "f'Retest offset point {idx + 1} of 16'",
+    "[('Connection', 'Confirm the Fluke SCOPE cable is connected to the correct channel.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The prior reading is replaced only on success.'",
+    "facts": "[('Channel', f\"CH{point['channel']}\"), ('Scope offset', f\"{point['scope_offset_v']:+g} V\")]",
+    "ok": "'Ready — retest'"
+   },
+   "where": "RMSNoiseApp.retest_offset"
+  },
+  {
+   "args": [
+    "'Settings'",
+    "'Check settle time and baud.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_offset"
+  },
+  {
+   "args": [
+    "'Confirm bandwidth retest'",
+    "f'Retest bandwidth point {idx + 1} of 24'",
+    "[('Signal path', 'Verify a rated 50 Ω signal path and the scope DC50 input.'), ('Signal', 'The Fluke will generate a 1 GHz sine wave.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The prior result is replaced only on success.'",
+    "facts": "[('Channel', f\"CH{point['channel']}\"), ('Range', self.range_text(point['scale_v_div']))]",
+    "ok": "'Ready — retest'"
+   },
+   "where": "RMSNoiseApp.retest_bandwidth"
+  },
+  {
+   "args": [
+    "'Settings'",
+    "'Check settle time and baud.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.retest_bandwidth"
+  },
+  {
+   "args": [
+    "'Clear impedance'",
+    "'Delete all impedance results and checkpoint?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "RMSNoiseApp.clear_impedance"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Another instrument operation is running.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.start_offset"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All 16 offset points are complete.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.start_offset"
+  },
+  {
+   "args": [
+    "'Invalid setup'",
+    "'Settle must be 0.5–60 seconds and baud numeric.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.start_offset"
+  },
+  {
+   "args": [
+    "'Confirm offset test method'",
+    "'Offset-position DCV test'",
+    "[('What this tests', 'P1 MEAN at specified scope vertical offsets. It does not independently verify waveform centering accuracy.'), ('Confirm', 'The intended test method, the limits, and the correct Fluke SCOPE BNC connection.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The program will enable and disable the DC voltage output.'",
+    "ok": "'Confirmed — start'"
+   },
+   "where": "RMSNoiseApp.start_offset"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All 16 offset points recorded.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.next_offset"
+  },
+  {
+   "args": [
+    "'Offset cable connection'",
+    "f'Connect the Fluke SCOPE output to CH{ch}'",
+    "[('Standby', 'Confirm the Fluke is in STBY.'), ('Connect', f'Fluke SCOPE output to CH{ch}. Disconnect other sources and terminators.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Press OK only after the connection is safe.'",
+    "facts": "[('Point', f'{idx + 1} of 16'), ('Channel', f'CH{ch}')]",
+    "ok": "'Connected and safe — continue'"
+   },
+   "where": "RMSNoiseApp.next_offset"
+  },
+  {
+   "args": [
+    "'Offset checkpoint'",
+    "f'Could not load offset results: {exc}'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.load_offset_checkpoint"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'An instrument operation is running.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.start_bandwidth"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All 24 bandwidth points are complete.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.start_bandwidth"
+  },
+  {
+   "args": [
+    "'Invalid settings'",
+    "'Settle must be 0.5–60 s; baud must be positive.'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.start_bandwidth"
+  },
+  {
+   "args": [
+    "'Confirm high-frequency test'",
+    "'Bandwidth test — 1 GHz sine'",
+    "[('Signal path', 'Use a rated 50 Ω signal path, the correct Fluke SCOPE output and the scope 50 Ω input.'), ('No extra termination', 'Do not use a 1 MΩ input, or a 50 Ω feedthrough in addition to the scope internal termination.'), ('Confirm method', 'The Fluke LEVSINE command and the scope P1 PkPk measurement are suitable.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The Fluke will generate a 1 GHz sine signal into the oscilloscope. The first point is a hardware pilot.'",
+    "ok": "'Confirmed — start'"
+   },
+   "where": "RMSNoiseApp.start_bandwidth"
+  },
+  {
+   "args": [
+    "'Bandwidth complete'",
+    "'All 24 points recorded.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.next_bandwidth"
+  },
+  {
+   "args": [
+    "'Move 50 Ω signal cable'",
+    "f'Connect the Fluke SCOPE output to CH{ch}'",
+    "[('Standby', 'Verify the Fluke output is STBY.'), ('Connect', f'A rated 50 Ω cable from the Fluke SCOPE output to CH{ch}.'), ('Automatic', 'The scope input is set to DC50 for you.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Confirm the connection before the output is enabled.'",
+    "facts": "[('Point', f'{idx + 1} of 24'), ('Channel', f'CH{ch}')]",
+    "ok": "'Connected — continue'"
+   },
+   "where": "RMSNoiseApp.next_bandwidth"
+  },
+  {
+   "args": [
+    "'First-point validation'",
+    "f'CH1 at 10 mV/div:\\n50 kHz: {reference:.6g} Vpp\\n1 GHz: {high:.6g} Vpp\\nResponse: {response:+.3f} dB\\n\\nReview the Fluke and scope setup before continuing the remaining 23 points.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.record_bandwidth"
+  },
+  {
+   "args": [
+    "'Bandwidth checkpoint'",
+    "f'Could not load saved bandwidth points: {exc}'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.load_bandwidth_checkpoint"
+  },
+  {
+   "args": [
+    "'Time base settings'",
+    "'Settle must be 0.5-60 s, samples 1-50, the marker period a positive number of microseconds and the baud numeric (Test settings).'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp._tb_settings"
+  },
+  {
+   "args": [
+    "title",
+    "heading",
+    "[('Standby', 'Confirm the Fluke is in STBY.'), ('Connect', 'Fluke SCOPE output to CH1 with a 50 Ω cable. Remove other cables and any feedthrough terminator.'), ('Automatic', 'The program sets CH1 to DC 50 Ω, full bandwidth and P1 Freq, then outputs the time marker.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the output if the calibrator rejects them. Check the marker period against your procedure (Test settings).'",
+    "facts": "[('Marker period', f'{period * 1000000.0:g} µs'), ('Frequency', f'{nominal / 1000.0:g} kHz'), ('Limit', f'±{TIMEBASE_LIMIT_HZ:.3f} Hz')]",
+    "ok": "'Connected and safe — run'"
+   },
+   "where": "RMSNoiseApp._tb_confirm"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Another instrument operation is running.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.start_timebase"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'The time base point is recorded. Use Rerun Selected to measure it again.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.start_timebase"
+  },
+  {
+   "args": [
+    "'Time base checkpoint'",
+    "f'Could not load the saved time base result: {exc}'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.load_timebase_checkpoint"
+  },
+  {
+   "args": [
+    "'Trigger level settings'",
+    "'Settle must be 0.2-30 s and the baud numeric (Test settings).'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp._trig_settings"
+  },
+  {
+   "args": [
+    "'Busy'",
+    "'Another instrument operation is running.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.start_trigger"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All 24 trigger level points are recorded.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.start_trigger"
+  },
+  {
+   "args": [
+    "'Trigger level test method'",
+    "'Trigger level accuracy — you confirm each trigger'",
+    "[('Setup', 'The program sets the channel to 100 mV/div, DC 1 MΩ, 20 MHz BW, edge trigger on that channel at the test level, and arms a Single acquisition.'), ('Step 1', 'The Fluke steps to 20 mV SHORT of the level. You answer whether the scope triggered (it should not).'), ('Step 2', 'The Fluke steps to 20 mV PAST the level. You answer whether the scope triggered (it should).'), ('Triggered means', 'the trigger status changes from armed/Single to Stopped and a trace is captured.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The Fluke SCOPE DC output is enabled (at most 0.4 V) while you answer, and returns to STBY after every point. The scope trigger commands are not yet verified on a 4104HD: check the first point on screen.'",
+    "ok": "'Understood — start'"
+   },
+   "where": "RMSNoiseApp.start_trigger"
+  },
+  {
+   "args": [
+    "'Complete'",
+    "'All 24 trigger level points recorded.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.next_trigger"
+  },
+  {
+   "args": [
+    "'Trigger level cable connection'",
+    "f'Connect the Fluke SCOPE output to CH{ch}'",
+    "[('Standby', 'Confirm the Fluke is in STBY.'), ('Connect', f'Fluke SCOPE output to CH{ch} (1 MΩ input, no terminator). Disconnect other sources.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Press OK only after the connection is safe.'",
+    "facts": "[('Point', f'{idx + 1} of 24'), ('Channel', f'CH{ch}')]",
+    "ok": "'Connected and safe — continue'"
+   },
+   "where": "RMSNoiseApp.next_trigger"
+  },
+  {
+   "args": [
+    "'Confirm trigger level retest'",
+    "f'Retest trigger level point {idx + 1} of 24'",
+    "[('Connection', f\"Confirm the Fluke SCOPE output is connected to CH{point['channel']}.\"), ('You confirm', 'You will be asked twice whether the scope triggered.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The prior result is replaced only when the retest completes.'",
+    "facts": "[('Channel', f\"CH{point['channel']}\"), ('Level', f\"{point['level_v'] * 1000:+.0f} mV\"), ('Slope', point['slope'])]",
+    "ok": "'Ready — retest'"
+   },
+   "where": "RMSNoiseApp.retest_trigger"
+  },
+  {
+   "args": [
+    "'Trigger level checkpoint'",
+    "f'Could not load saved trigger level results: {exc}'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.load_trigger_checkpoint"
+  },
+  {
+   "args": [
+    "'Demo data'",
+    "'Existing calibration results are loaded. Demo data will not be mixed with them. Use a separate empty folder to launch --demo.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "RMSNoiseApp.load_demo_data"
+  },
+  {
+   "args": [
+    "'Demo export ready'",
+    "f'Loaded {sum((len(r) for r in (self.rows, self.dc_rows, self.imp_rows, self.offset_rows, self.bw_rows, self.tb_rows, self.trig_rows)))} SYNTHETIC results in memory across seven functions. Use Export Report (PDF). No checkpoint files were written. Do not use as calibration evidence.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.load_demo_data"
+  },
+  {
+   "args": [
+    "'No results'",
+    "f'No {kind} measurements to export.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.export_calibration_section"
+  },
+  {
+   "args": [
+    "'WaveSurfer 4104HD verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "RMSNoiseApp.export_calibration_section"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(self.instrument_id.get(), '.pdf', kind)"
+   },
+   "where": "RMSNoiseApp.export_calibration_section"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded calibration data to export.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.write_certificate_pdf"
+  },
+  {
+   "args": [
+    "'WaveSurfer 4104HD verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "RMSNoiseApp.write_certificate_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.write_certificate_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.write_certificate_pdf"
+  },
+  {
+   "args": [
+    "'Report exported'",
+    "f'Created calibration data report with {count} rows:\\n{filename}'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.write_certificate_pdf"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded calibration data to export.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.export_pdf_report"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.export_pdf_report"
+  },
+  {
+   "args": [
+    "'WaveSurfer 4104HD verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "RMSNoiseApp.export_pdf_report"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(self.instrument_id.get())"
+   },
+   "where": "RMSNoiseApp.export_pdf_report"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No calibration results to export.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.export_professional_excel"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.xlsx'",
+    "filetypes": "[('Excel workbook', '*.xlsx')]",
+    "initialfile": "ui.report_filename(self.instrument_id.get(), '.xlsx')"
+   },
+   "where": "RMSNoiseApp.export_professional_excel"
+  },
+  {
+   "args": [
+    "'Excel export dependency'",
+    "'Install the Excel formatting package with: py -m pip install openpyxl'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.export_professional_excel"
+  },
+  {
+   "args": [
+    "'Excel export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "RMSNoiseApp.export_professional_excel"
+  },
+  {
+   "args": [
+    "'Report exported'",
+    "f'Created formatted Excel report with {count} test points:\\n{filename}'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "RMSNoiseApp.export_professional_excel"
+  }
+ ],
+ "agilent34410a_verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'Keysight {MODEL}: {self.io.ident}\\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\\nCalibrator output is not enabled.' + (f'\\n\\nWARNING: {warn}.' if warn else '')"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Before the verification'",
+    "'Warm-up and conditions'",
+    "[('Warm-up', f'The {MODEL} must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well.'), ('Environment', 'Ambient 18 to 28 C (ideally 23 C +/- 2 C) and relative humidity below 80 % (p. 67).'), ('Cables', 'Shielded twisted-pair PTFE cables, as short as possible, shields to earth ground at ONE place (p. 67).'), ('Front / Rear', 'The program reads the Front/Rear switch (ROUT:TERM?) before every point and stops if it is wrong; it cannot move the switch. Never move it with signals present.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "f'The program restores the {MODEL} factory defaults (*RST) before the first point, then sets function, range, 100 NPLC or the 3 Hz AC filter for every point.'",
+    "facts": "[('Limits', f'{self.period.get()}, 18 to 28 C'), ('Calibrator', self.cal_model.get()), ('Meter interface', self.interface.get())]",
+    "ok": "'Conditions met - start'"
+   },
+   "where": "App._prompt_start"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Zero offset - physical setup required'",
+    "f\"Set up for {GROUP_TITLE[group]}, {p['terminal']} terminals\"",
+    "[switch, ('Set up the input', self.setup_text(p))]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The calibrator stays in STANDBY. Never use it as a zero source.'",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Set up - measure'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Connect the standard'",
+    "f'Connect for {GROUP_TITLE[group]}'",
+    "[('Null', f\"With the test leads open, press Null on the {MODEL} in the capacitance function (User's Guide p. 60: the specification is with Math Null); the program sends no null command.\"), ('Connect', p['setup']), ('Stabilise', f'Allow the standard to settle, then continue; the program reads the {MODEL} itself.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "\"The specification is for film capacitors; additional errors may occur for other types (User's Guide p. 136).\"",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Standard connected - measure'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Rewire / verify before enabling output'",
+    "f'Connect for {GROUP_TITLE[group]}'",
+    "steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Connections verified - continue'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE'",
+    "f\"This point outputs {p['nominal']:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "f'Keysight {MODEL} performance verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "dacq_verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'{MODEL}: {self.io.ident}\\nModule in slot {self.slot.get()}: {self.module.get()}\\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\\nCalibrator output is not enabled.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Zero offset: physical setup required'",
+    "f'Setup: {GROUP_TITLE[group]}'",
+    "[('Set up the input', self.setup_text(p))]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Never use the calibrator as a zero source (manual p. 81).'",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Set up - measure'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Rewire / verify before enabling output'",
+    "f'Connect for {GROUP_TITLE[group]}'",
+    "steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Connections verified - continue'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE'",
+    "f\"This point outputs {p['nominal']:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "f'Keysight {MODEL} performance verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "datamode.py": [
+  {
+   "args": [
+    "'Replace the As Found reading?'",
+    "f'{len(clash)} of these point(s) already have As Left readings, so the instrument has been adjusted since the As Found run.\\n\\nMeasuring As Found again now replaces the original As Found reading with a reading from the adjusted instrument.\\n\\nTo measure after an adjustment, switch to As Left instead.\\n\\nReplace the As Found reading anyway?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "default": "'no'"
+   },
+   "where": "DataModeMixin.confirm_found_overwrite"
+  },
+  {
+   "args": [
+    "'Section'",
+    "'Choose a section in the Show box first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "DataModeMixin.run_shown_section"
+  },
+  {
+   "args": [
+    "'Section'",
+    "f'Nothing left to run there: every shown point already has an {self.mode_label} reading.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "DataModeMixin.run_shown_section"
+  }
+ ],
+ "fgen_verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'{MODEL}: {self.io.ident}\\nFluke 5790B: {self.io.std.idn}\\n{extra}\\n' + (f\"You will type the readings for: {', '.join(manual)}.\\n\" if manual else '') + 'Generator output is OFF.' + tag"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Type the reading' + ' [DEMO]'",
+    "f'{prompt}\\n\\nReading in {unit}:\\n\\nDEMO: the box holds a simulated reading from the virtual bench; type your own if you like.'"
+   ],
+   "kind": "ask_number",
+   "kw": {
+    "initialvalue": "virtualbench.fgen_typed_value(self._vb, unit)"
+   },
+   "where": "App.ask_number_threadsafe.ask"
+  },
+  {
+   "args": [
+    "'Type the reading'",
+    "f'{prompt}\\n\\nReading in {unit}:'"
+   ],
+   "kind": "ask_number",
+   "kw": {},
+   "where": "App.ask_number_threadsafe.ask"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Test conditions'",
+    "'Before you start'",
+    "[('Warm-up', 'The generator has been powered on for at least 1 hour (manual, Test Considerations).'), ('Environment', SPEC['source']['conditions'] + '.'), ('Cables', 'Short RG-58 or equivalent 50 ohm cables only.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "facts": "[('Points to run', len(points)), ('Limits', self.period.get())]",
+    "ok": "'Conditions met - start'"
+   },
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Rewire / verify - generator output is OFF'",
+    "title",
+    "[('Output OFF', f'The {MODEL} output has been switched OFF (confirmed).')] + steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically checking the connections.'",
+    "facts": "facts",
+    "image": "str(image) if image.is_file() else None",
+    "ok": "'Connections verified - continue'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "title",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [
+    "'Flatness reference changed'",
+    "f\"This reading is a flatness reference. {len(stale)} {p['ref'].split('_')[1]} range flatness result(s) were recorded with the earlier reference: rerun them.\""
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App._record"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Checkpoint'",
+    "f\"This checkpoint is for a {data.get('model')}, not a {MODEL}.\""
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "f'{MODEL} performance verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "fluke8808a_verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected'",
+    "f'{MODEL}: {self.io.ident}\\n{self.cal_model.get()}: {self.io.cal.idn}\\nCalibrator output is not enabled.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Warm-up'",
+    "WARM_UP + '\\n\\nHas the meter been on for at least half an hour?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Zero offset: physical setup required'",
+    "f'Setup: {GROUP_TITLE[group]}'",
+    "[('Set up the input', self.setup_text(p))]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Never use the calibrator as a zero source. The program does not turn its output on for these points.'",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Set up - measure'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Rewire / verify before enabling output'",
+    "f'Connect for {GROUP_TITLE[group]}'",
+    "steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Connections verified - continue'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Your own standard is needed'",
+    "f\"Point {p['id']}: {p['description']}\"",
+    "steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The meter is read automatically once you press Continue. Apply the value first and let it settle.'",
+    "facts": "[('Next point', f\"{p['id']} of {len(POINTS)}\"), ('Manual page', p['page'])]",
+    "image": "find_diagram(self.cal_key, p['group'])",
+    "ok": "'Standard applied - measure'"
+   },
+   "where": "App._prompt_manual"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE'",
+    "f\"This point puts {p['nominal']:g} V on the meter input. Verify CAT-rated leads, connections, clearance and personnel safety. Continue?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "f'Fluke {MODEL} performance verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "handheld_dmm.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connection"
+  },
+  {
+   "args": [
+    "'Manual calibrator'",
+    "'Manual mode: no connection is needed. The program will tell you what to set on the calibrator.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connection"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connection"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'{self.io.ident}{tag}\\nCalibrator output is not enabled.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connection"
+  },
+  {
+   "args": [
+    "'Demo mode'",
+    "'The IR cable is not simulated: in demo mode the readings are typed (or filled with the simulated reading).'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_ir"
+  },
+  {
+   "args": [
+    "'IR connection'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_ir"
+  },
+  {
+   "args": [
+    "'IR connection'",
+    "f'{self.meter.idn}\\nReadings will be collected over IR.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_ir"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Change the cables'",
+    "group['title']",
+    "steps + self._qsteps()"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "group.get('caution')",
+    "facts": "self._qfacts(facts)",
+    "image": "image if image and image.is_file() else None",
+    "ok": "'Connections checked - continue'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Check the setup'",
+    "f\"Set up for {p['section']}\"",
+    "steps + self._qsteps()"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "caution",
+    "facts": "self._qfacts(facts)",
+    "ok": "'Done - continue'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Change the function'",
+    "p['section']",
+    "[('Rotary switch', f\"Turn the meter to: {p['switch']}\"), ('Standby', standby)] + self._qsteps()"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "card": "function_change_card(p, len(self.points), standby + self._qnote())",
+    "facts": "self._qfacts(facts)",
+    "layout": "'function_change'",
+    "ok": "'Done - continue'"
+   },
+   "where": "App._prompt_function"
+  },
+  {
+   "args": [
+    "'Meter rest period'",
+    "f'The meter manual requires 10 minutes of rest after measuring more than 6 A. Wait about {int(wait // 60)} min {int(wait % 60)} s, then press Run again.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Meter setup'",
+    "p['section']",
+    "[('Meter', p['prompt'])] + self._qsteps()"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "facts": "self._qfacts([('Point', f\"{p['n']} of {len(self.points)}\"), ('Meter', p['switch'] + (f\", range {p['range']}\" if p['range'] else ''))])",
+    "ok": "'Done - continue'"
+   },
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE'",
+    "self._q_hv_text(f\"This point outputs {abs(p['applied']['value']):g} V\" + (' (the voltage is ramped up in 50 V steps, 5 s apart)' if not self.manual_cal and (not p.get('ramp')) and self._auto_ramp() and (abs(p['applied']['value']) > IO.RAMP_ABOVE) else '') + '. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?')"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Set the REL offset'",
+    "f\"{p['section']}: REL offset\"",
+    "steps + self._qsteps()"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The program checks over IR that REL is on.' if self.use_ir else None",
+    "facts": "self._qfacts([('Point', f\"{p['n']} of {len(self.points)}\"), ('Calibrator output', output_text(zero_point) if zero_point else 'none (STANDBY)')])",
+    "ok": "'REL set - continue'"
+   },
+   "where": "App._rel_zero.ask"
+  },
+  {
+   "args": [
+    "'Calibrator stopped'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [
+    "'AC annunciator'",
+    "f'{describe(p)}\\n\\nIs the AC annunciator ON in the meter display?\\n\\nYes = it is on.  No = it is not (the point then fails).'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._ask"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Wrong model'",
+    "f\"This checkpoint is for the Fluke {data.get('model')}.\""
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Wrong datasheet'",
+    "problem"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "f\"{self.info['name']} performance verification\""
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "hookups.py": [],
+ "iflex_option.py": [
+  {
+   "args": [
+    "'Skip the iFlex tests'",
+    "text"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.set_include"
+  }
+ ],
+ "keithley2000_verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'Keithley {MODEL}: {self.io.ident}\\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\\nCalibrator output is not enabled.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Before the verification'",
+    "'Warm-up and conditions'",
+    "[('Warm-up', 'The 2000 must have been on for at least one hour (Cal Manual p. 1-3). Allow the calibrator its own warm-up time as well.'), ('Environment', 'Ambient 18 to 28 C and relative humidity below 80 % (p. 1-3).'), ('Inputs', 'Set the INPUTS switch to FRONT. The program reads the switch and stops if it is on REAR.'), ('Direct connections', 'Connect the calibrator straight to the 2000: no scanner or other switching equipment (p. 1-6).')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The program restores the 2000 factory defaults (*RST) before the first point, then sets function, range, speed and filter for every point.'",
+    "facts": "[('Limits', f'{self.period.get()}, 18 to 28 C'), ('Calibrator', self.cal_model.get())]",
+    "ok": "'Conditions met - start'"
+   },
+   "where": "App._prompt_start"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Rewire / verify before enabling output'",
+    "f'Connect for {GROUP_TITLE[group]}'",
+    "steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "facts",
+    "image": "image",
+    "ok": "'Connections verified - continue'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE'",
+    "f\"This point outputs {p['nominal']:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Keithley 2000 performance verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "labregistry_ui.py": [
+  {
+   "args": [
+    "'Regenerate PDF'",
+    "'Select a report in the middle table first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "HistoryPanel.regenerate_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {},
+   "where": "HistoryPanel.regenerate_pdf.choose"
+  },
+  {
+   "args": [
+    "'Replace file?'",
+    "f'{what}{os.path.basename(path)} already exists. Replace it?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {
+    "default": "'no'",
+    "icon": "'warning'"
+   },
+   "where": "HistoryPanel.regenerate_pdf.overwrite"
+  },
+  {
+   "args": [
+    "'Rebuild from history rows'",
+    "text + '\\n\\nContinue?'"
+   ],
+   "kind": "ask_ok_cancel",
+   "kw": {},
+   "where": "HistoryPanel.regenerate_pdf"
+  },
+  {
+   "args": [
+    "'Regenerate PDF'",
+    "result.message"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "HistoryPanel.regenerate_pdf"
+  },
+  {
+   "args": [
+    "'Report'",
+    "'The PDF is not at the place it was saved (it may have been moved or deleted).'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "HistoryPanel.open_report"
+  },
+  {
+   "args": [
+    "'Report'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "HistoryPanel.open_report"
+  },
+  {
+   "args": [
+    "'Drift'",
+    "'Select a test point in the lower table first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "HistoryPanel.show_drift"
+  }
+ ],
+ "manual_override.py": [
+  {
+   "args": [
+    "'Use this reading?'",
+    "f\"Use {entered.shown} as the reading for point {p['id']}?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "ask_manual_reading.done"
+  },
+  {
+   "args": [
+    "'Enter reading manually'",
+    "'No point is being measured at this moment.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "ManualOverrideMixin.mo_button_clicked"
+  },
+  {
+   "args": [
+    "'Enter reading manually'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "ManualOverrideMixin.mo_button_clicked"
+  },
+  {
+   "args": [
+    "'Enter reading manually'",
+    "why"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "ManualOverrideMixin.mo_enter_for"
+  },
+  {
+   "args": [
+    "'Enter reading manually'",
+    "f\"Point {p['id']} has just been recorded. Select it and use Enter reading manually to replace its result.\""
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "ManualOverrideMixin.mo_arm"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "ManualOverrideMixin.mo_replace"
+  }
+ ],
+ "mdo4000c_verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.read_options"
+  },
+  {
+   "args": [
+    "'Options read'",
+    "f\"Model MDO{model}; options reported: {', '.join(sorted(opts)) or 'none'}.\\nCheck the boxes against the instrument label and correct anything the scope does not report.\""
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.read_options"
+  },
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f\"Oscilloscope: {self.io.ident}\\nFluke 5560A: {self.io.cal.idn}\\nAlso connected: {', '.join(used) or 'no other instruments'}\\nAll outputs are off.{tag}\""
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "payload['title']",
+    "payload['heading']",
+    "payload['steps']"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "payload['caution']",
+    "facts": "payload['facts']",
+    "ok": "payload['ok']"
+   },
+   "where": "App._pump"
+  },
+  {
+   "args": [
+    "'Enter reading' + (' [DEMO]' if self.virtual else '')",
+    "req['prompt'] + f\"\\n(value in {req['unit']}, plain number)\" + hint"
+   ],
+   "kind": "ask_text",
+   "kw": {
+    "initialvalue": "start"
+   },
+   "where": "App._manual_dialog"
+  },
+  {
+   "args": [
+    "'Reading'",
+    "'Enter a number.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App._manual_dialog"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(error)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._finished"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'The checkpoint contains DEMO results. Load for review only?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Tektronix MDO4000C performance verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "procmods_engine.py": [
+  {
+   "args": [
+    "f'Note for point {procmods_live.point_id(p)}'",
+    "str(p.get('tech_note'))"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "ProcModsMixin.pm_show_note"
+  }
+ ],
+ "procmods_ui.py": [
+  {
+   "args": [
+    "'Confirm wider change'",
+    "f'{len(need)} change(s) will apply to {where} and stay in effect for later runs:\\n{lines}\\n\\nContinue?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "ModifyWindow.apply"
+  },
+  {
+   "args": [
+    "'Tolerance change needs a redo'",
+    "f'The tolerance of {names} concerns a point that already has a reading or is in progress. A tolerance can only be changed for a point that is measured again against it, and the reading taken now will be replaced by the new one.\\n\\nSave the change and redo the point?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "ModifyWindow.apply"
+  },
+  {
+   "args": [
+    "'Measure this point again?'",
+    "f\"Saved. Point {offer['id']} ({offer['desc']}) is in progress and keeps the settings it started with; the change starts at the next point.\\n\\nMeasure point {offer['id']} again with the new settings after it finishes? The reading from the old settings will be replaced by the new one. Nothing is retried automatically.\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "ModifyWindow.apply"
+  },
+  {
+   "args": [
+    "'Reset all to factory'",
+    "'Stage the removal of every modification in effect? You still give a reason and press Apply. Saved rows are kept in the audit trail.'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "ModifyWindow.reset_all"
+  },
+  {
+   "args": [
+    "'Reason'",
+    "'Reason for resetting to factory (required):'"
+   ],
+   "kind": "ask_text",
+   "kw": {},
+   "where": "ModifyWindow.reset_all"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.calov.json'",
+    "filetypes": "[('Override set', '*.calov.json *.json')]"
+   },
+   "where": "ModifyWindow.do_export"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Override set', '*.calov.json *.json')]"
+   },
+   "where": "ModifyWindow.do_import"
+  },
+  {
+   "args": [
+    "'Import override set'",
+    "f'These entries will be imported (+) or skipped (-). Imported commands are UNVERIFIED here.\\n{text}\\n\\nImport the {len(accept)} marked +?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "ModifyWindow.do_import"
+  },
+  {
+   "args": [
+    "'Unsaved changes'",
+    "'Discard the staged changes?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "ModifyWindow.close"
+  },
+  {
+   "args": [
+    "'Procedure is locked'",
+    "why"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "LiveHook.open"
+  },
+  {
+   "args": [
+    "'Edit point'",
+    "'Select a test point in the list first (or right-click a point and choose Edit).'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "LiveHook.open"
+  }
+ ],
+ "procspec.py": [],
+ "report_dialog.py": [],
+ "reset_startup.py": [
+  {
+   "args": [
+    "'Reset instruments'",
+    "text"
+   ],
+   "kind": "ask_ok_cancel",
+   "kw": {
+    "icon": "'warning'"
+   },
+   "where": "AppResetMixin.reset_ask"
+  },
+  {
+   "args": [
+    "'Reset failed - run not started'",
+    "text"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "AppResetMixin.reset_error"
+  }
+ ],
+ "run_queue_engine.py": [
+  {
+   "args": [
+    "'Run queue'",
+    "'Stop the run before changing the queue.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "QueueMixin.open_queue_setup"
+  },
+  {
+   "args": [
+    "'Run queue'",
+    "'The run queue is not available for this procedure.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "QueueMixin.open_queue_setup"
+  },
+  {
+   "args": [
+    "'Run queue'",
+    "'\\n'.join(problems)"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "QueueMixin.queue_execute"
+  },
+  {
+   "args": [
+    "'Run queue'",
+    "why"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "QueueMixin.queue_execute"
+  },
+  {
+   "args": [
+    "'Resume saved progress'",
+    "f'Saved progress was found for:\\n{lines}\\n\\nYes = continue from it (points already recorded are not measured again).\\nNo = start these meters over (their saved progress is replaced as new readings are recorded).\\nCancel = do not run.'"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "kw": {},
+   "where": "QueueMixin._queue_resume"
+  },
+  {
+   "args": [
+    "'Next meter' if not unit.reason or q.mode == RQ.ONE_AT_A_TIME else 'One meter at a time'",
+    "f'Asset {m.asset}'",
+    "steps"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after the right meter is connected.'",
+    "facts": "facts",
+    "ok": "'Meter connected - continue'"
+   },
+   "where": "QueueMixin._queue_swap_prompt"
+  },
+  {
+   "args": [
+    "'AC annunciator'",
+    "f'{H.describe(p)}\\n\\nMeter: asset {m.asset}\\n\\nIs the AC annunciator ON in the meter display?\\n\\nYes = it is on.  No = it is not (the point then fails).'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "QueueMixin._ask_shared"
+  },
+  {
+   "args": [
+    "'Reports'",
+    "f'This run queue has {len(self.queue.meters)} meters.\\n\\nYes = one report for each meter (asset#-date).\\nNo = only the report of the meter shown (asset {self.asset.get()}).\\nCancel = do nothing.'"
+   ],
+   "kind": "ask_yes_no_cancel",
+   "kw": {},
+   "where": "QueueMixin.queue_offer_all_reports"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "QueueMixin.queue_export_pdfs"
+  },
+  {
+   "args": [
+    "f\"{self.info['name']} performance verification\""
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "QueueMixin.queue_export_pdfs"
+  },
+  {
+   "args": [],
+   "kind": "choose_dir",
+   "kw": {
+    "title": "'Folder for the reports (one PDF per meter)'"
+   },
+   "where": "QueueMixin.queue_export_pdfs"
+  }
+ ],
+ "run_queue_ui.py": [],
+ "surprise.py": [],
+ "tds2000c_verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.read_model"
+  },
+  {
+   "args": [
+    "'Model read'",
+    "f'The oscilloscope reports TDS{model} ({self.io.scope.channels} channels).'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.read_model"
+  },
+  {
+   "args": [
+    "'Model'",
+    "f'Could not recognise a model in: {self.io.scope.idn}\\nChoose it in the Model box.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.read_model"
+  },
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'Oscilloscope: {self.io.ident}\\nCalibrator: {self.io.cal.idn}{tag}'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "payload['title']",
+    "payload['heading']",
+    "payload['steps']"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "payload['caution']",
+    "facts": "payload['facts']",
+    "image": "payload.get('image')",
+    "ok": "payload['ok']"
+   },
+   "where": "App._pump"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(error)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._finished"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'The checkpoint contains DEMO results. Load for review only?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Tektronix TDS2000C performance verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "truevolt_verification.py": [
+  {
+   "args": [
+    "'Demo mode'",
+    "'Demo mode uses no hardware, so there is nothing to connect.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connection error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Connected' + (' (DEMO)' if self.virtual else '')",
+    "f'{MODEL}: {self.io.ident}\\nFluke 5560A: {self.io.cal.idn}{tag}\\nCalibrator output is not enabled.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.test_connections"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun"
+  },
+  {
+   "args": [
+    "'Selection'",
+    "'Select a test point first.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.rerun_from"
+  },
+  {
+   "args": [
+    "'Instrument ID'",
+    "'Enter an instrument ID.'"
+   ],
+   "kind": "warning",
+   "kw": {},
+   "where": "App.execute"
+  },
+  {
+   "args": [
+    "'Zero offset — physical setup required'",
+    "f\"Zero-offset setup: {p['terminal']} terminals\"",
+    "([('Select terminals', f\"Set the front-panel FRONT/REAR switch to {p['terminal']}. The program checks the switch position before measuring.\")] if SPEC.get('front_rear_switch', True) else []) + [('Set up the input', instruction)]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'The calibrator stays in STANDBY. Never use it as a zero source.'",
+    "facts": "facts",
+    "ok": "'Set up — measure'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Connect the standard'",
+    "f\"Connect for {p['section_title']}\"",
+    "[('Connect', p['setup']), ('Stabilise', 'Allow the standard to settle before continuing.')]"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "facts": "facts",
+    "ok": "'Connected — measure'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'Rewire / verify before enabling output'",
+    "f\"Connect for {p['section_title']}\"",
+    "[('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p))] + ([('Switch', 'Front/Rear switch on FRONT.' if p['terminal'] != 'REAR' else 'Front/Rear switch on REAR.')] if SPEC.get('front_rear_switch', True) else [])"
+   ],
+   "kind": "operator_prompt",
+   "kw": {
+    "caution": "'Continue only after physically verifying the connections.'",
+    "facts": "facts",
+    "ok": "'Connections verified — continue'"
+   },
+   "where": "App._prompt_setup"
+  },
+  {
+   "args": [
+    "'HIGH VOLTAGE'",
+    "f\"This point outputs {p['nominal']:g} V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?\""
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App._next"
+  },
+  {
+   "args": [
+    "'Measurement stopped'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App._error"
+  },
+  {
+   "args": [],
+   "kind": "choose_file",
+   "kw": {
+    "filetypes": "[('Checkpoint', '*.json')]"
+   },
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'Synthetic data'",
+    "'Checkpoint contains DEMO results. Load only for review (not a real calibration)?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.load"
+  },
+  {
+   "args": [
+    "'No results'",
+    "'No recorded results to export yet.'"
+   ],
+   "kind": "info",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Report export'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "f'Keysight {MODEL} performance verification'"
+   ],
+   "kind": "report_details",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [],
+   "kind": "save_file",
+   "kw": {
+    "defaultextension": "'.pdf'",
+    "filetypes": "[('PDF report', '*.pdf')]",
+    "initialfile": "ui.report_filename(asset)"
+   },
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export dependency'",
+    "'Install the PDF package with:  py -m pip install reportlab'"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'PDF export error'",
+    "str(exc)"
+   ],
+   "kind": "error",
+   "kw": {},
+   "where": "App.export_pdf"
+  },
+  {
+   "args": [
+    "'Active run'",
+    "'A point may be active. Stop and close?'"
+   ],
+   "kind": "ask_yes_no",
+   "kw": {},
+   "where": "App.on_close"
+  }
+ ],
+ "ui_shell.py": [],
+ "ui_theme.py": []
+}

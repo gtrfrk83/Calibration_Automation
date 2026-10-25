@@ -797,8 +797,8 @@ class ProcModsMixin:
         """Called by ui_shell.results_table (and by an engine whose lists are built another way): give the point list its right-click 'Edit'
         menu.  `resolver(iid)` names the point of a row (default: the row id is the point id).  Never breaks the window."""
         try:
-            import procmods_point_ui
-            procmods_point_ui.attach_tree_menu(self, tree, resolver)
+            from ui_port import ui as port
+            port.view('procmods_view').attach_tree_menu(self, tree, resolver)
         except Exception as exc:
             if self.pm_state is not None:
                 self.pm_state.warnings.append(f'the point list menu could not be attached ({type(exc).__name__})')
@@ -824,8 +824,8 @@ class ProcModsMixin:
         """Who is making the edit: the operating-system user, plus the technician name the report dialog remembers (if any)."""
         who = procmods.default_author()
         try:
-            import ui_theme
-            tech = str(ui_theme.Settings('report_details').get('technician', '') or '').strip()
+            import ui_theme_core
+            tech = str(ui_theme_core.Settings('report_details').get('technician', '') or '').strip()
         except Exception:
             tech = ''
         return f'{who} (technician {tech})' if tech and tech.casefold() != who.casefold() else who
@@ -966,8 +966,8 @@ class ProcModsMixin:
     def pm_show_note(self, p):
         """The technician note of a point, shown once per run when the point is reached (informational; no safety prompt is touched)."""
         try:
-            from tkinter import messagebox
-            messagebox.showinfo(f'Note for point {procmods_live.point_id(p)}', str(p.get('tech_note')), parent=getattr(self, 'root', None))
+            from ui_port import ui as port
+            port.message('info', f'Note for point {procmods_live.point_id(p)}', str(p.get('tech_note')), parent=getattr(self, 'root', None))
         except Exception:
             pass
 
@@ -1072,8 +1072,8 @@ class ProcModsMixin:
     def pm_live_attach(self, shell=None):
         """Give this procedure window the 'Edit procedure' action (it stays usable during a run).  Never breaks the window."""
         try:
-            import procmods_ui
-            hook = procmods_ui.attach_live(self, shell if shell is not None else getattr(self, 'shell', None))
+            from ui_port import ui as port
+            hook = port.view('procmods_view').attach_live(self, shell if shell is not None else getattr(self, 'shell', None))
             self.__dict__['_pm_live_hook'] = hook
             return hook
         except Exception as exc:

@@ -25,6 +25,11 @@
   "code": [
    "Procedures/Tektronix_MDO4000C_Verification.py",
    "mdo4000c_verification.py",
+   "mdo4000c_view_tk.py",
+   "mdo4000c_view_qt.py",
+   "genscope_support_view_qt.py",
+   "ui_port.py",
+   "ui_port_tk.py",
    "drivers/base.py",
    "drivers/transport.py",
    "drivers/tektronix_mdo4000c.py",

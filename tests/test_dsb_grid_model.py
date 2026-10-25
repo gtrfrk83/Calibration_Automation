@@ -73,6 +73,10 @@ class GeometryTests(unittest.TestCase):
         self.assertEqual(g.widths, [60, 120])
 
 
+def rows_kind(g, i):
+    return g.rows()[i]['kind']
+
+
 class BlankSheetTests(Base):
     def test_blank_sheet_looks_like_a_template(self):
         rows = self.g.rows()
@@ -82,6 +86,29 @@ class BlankSheetTests(Base):
         self.assertEqual([c['title'] for c in M.GRID_COLUMNS],
                          ['STEP NUM', 'FUNCTION TESTED', 'NOMINAL VALUE', 'AS FOUND', 'AS LEFT', 'Out of Tol', 'LOW LIMIT', 'HIGH LIMIT'])
         self.assertTrue(all(not r['problem'] for r in rows))             # no row is flagged on an empty sheet
+
+    def test_adding_a_function_puts_the_cursor_on_the_empty_row_under_its_heading(self):
+        self.assertEqual(self.g.sel_key, 'b:0')                          # a blank sheet starts on its first spare row
+        self.assertTrue(self.g.add_function('ACV'))
+        rows = self.g.rows()
+        self.assertEqual([r['kind'] for r in rows[:3]], ['header', 'blank', 'blank'])
+        self.assertEqual(self.g.row_index(), 1)                          # row 2 (the empty row under the heading), not row 3
+        self.assertEqual(self.g.sel_key, f'e:{self.g.fid}')
+        self.assertEqual(self.g.sel_col, 'nominal')
+        self.assertTrue(self.g.add_function('DCV'))                      # a second section: again the row under ITS heading
+        self.assertEqual(rows_kind(self.g, self.g.row_index() - 1), 'header')
+        self.assertEqual(self.g.sel_key, f'e:{self.g.fid}')
+
+    def test_a_new_section_or_the_handheld_template_puts_the_cursor_under_the_heading(self):
+        self.assertTrue(self.g.add_section('DC volts'))
+        self.assertEqual(self.g.sel_key, f'e:{self.g.fid}')
+        self.assertEqual(rows_kind(self.g, self.g.row_index() - 1), 'header')
+        self.assertTrue(self.g.add_section('AC volts'))
+        self.assertEqual(rows_kind(self.g, self.g.row_index() - 1), 'header')
+        self.assertEqual(self.g.sel_col, 'nominal')
+        g2 = M.GridModel(self.store)
+        self.assertTrue(g2.add_handheld_functions())
+        self.assertEqual((g2.row_index(), g2.sel_key), (1, f'e:{g2.fid}'))
 
     def test_typing_a_value_without_a_function_says_what_to_do(self):
         self.g.select('b:0', 'nominal')
@@ -579,6 +606,33 @@ class AutomationLineTests(Base):
         self.g.set_target_function('DC volts')
         self.assertIsNone(self.g.automation_counts(compute=False))
         self.assertIn('not worked out yet', self.g.automation_line(compute=False))
+
+
+class CursorAfterChoosingFunctionTests(Base):
+    def test_cursor_on_empty_row_under_new_heading(self):
+        g = self.g
+        self.assertTrue(g.set_target_function('DC volts').ok)
+        row = g.selected_row()
+        self.assertEqual(row['key'], f'e:{g.fid}')
+        self.assertEqual(g.sel_col, 'nominal')
+        rows = g.rows()
+        self.assertEqual([r['kind'] for r in rows[:2]], ['header', row['kind']])
+
+
+class ToleranceFromAboveTests(Base):
+    def test_blank_row_takes_tolerance_without_touching_sheet(self):
+        g = self.g
+        key = self.dcv_row('5 V')
+        self.assertIsNone(g.tolerance_form_above('b:0'))                   # the row above has no tolerance yet
+        f = dict(self.form(key))
+        f['types'] = ['iv']
+        f['plus'] = dict(f['plus'], iv='0.05')
+        self.assertTrue(g.calc_row(key, f).ok)
+        before = g._snapshot()
+        got = g.tolerance_form_above(next(r['key'] for r in g.rows() if r['kind'] == 'blank'))
+        self.assertIsNotNone(got)
+        self.assertEqual(got['plus']['iv'], '0.05')
+        self.assertEqual(g._snapshot(), before)
 
 
 class _FakeMatch:

@@ -268,7 +268,7 @@ class WaveSurferBinding(unittest.TestCase):
     def test_every_section_list_is_bound_and_its_rows_resolve_to_section_points(self):
         import re
         import Procedures.WaveSurfer_WS4104HD as W
-        src = Path(W.__file__).read_text(encoding='utf-8')
+        src = Path(W.__file__).read_text(encoding='utf-8') + (Path(W.__file__).parent.parent / 'wavesurfer_view_tk.py').read_text(encoding='utf-8')   # the window code is in the view
         binds = re.findall(r"self\.pm_bind_tree\(self\.(\w+_tree), lambda iid, t=self\.\w+_tree: '(\w+):%d' % t\.index\(iid\)\)", src)
         self.assertEqual(sorted(k for _t, k in binds), ['bandwidth', 'dcv', 'impedance', 'offset', 'timebase', 'trigger'])
         b = PH.wavesurfer()

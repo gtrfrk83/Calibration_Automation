@@ -1,0 +1,1739 @@
+{
+ "dialogs_misc": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "warning",
+   "text": "Enter an instrument ID.",
+   "title": "Instrument ID"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Select a test point first.",
+   "title": "Selection"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "No recorded results to export yet.",
+   "title": "No results"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keysight 34410A: Agilent Technologies,34410A,MY00000001,2.35-2.35-0.09-46-09\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "error",
+   "text": "boom",
+   "title": "Measurement stopped"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "A point may be active. Stop and close?",
+   "title": "Active run"
+  }
+ ],
+ "export_and_load_cancelled": [
+  {
+   "answer": null,
+   "kind": "report_details",
+   "text": "",
+   "title": "Keysight 34410A performance verification"
+  },
+  {
+   "answer": {},
+   "kind": "report_details",
+   "text": "",
+   "title": "Keysight 34410A performance verification"
+  },
+  {
+   "answer": "",
+   "kind": "save_file",
+   "options": {
+    "defaultextension": ".pdf",
+    "filetypes": [
+     [
+      "PDF report",
+      "*.pdf"
+     ]
+    ],
+    "initialfile": "A-1-<date>.pdf"
+   },
+   "text": "",
+   "title": ""
+  },
+  {
+   "answer": "",
+   "kind": "choose_file",
+   "options": {
+    "filetypes": [
+     [
+      "Checkpoint",
+      "*.json"
+     ]
+    ]
+   },
+   "text": "",
+   "title": ""
+  }
+ ],
+ "high_voltage_refused": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keysight 34410A: Agilent Technologies,34410A,MY00000001,2.35-2.35-0.09-46-09\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Conditions met - start",
+    "Cancel"
+   ],
+   "caution": "The program restores the 34410A factory defaults (*RST) before the first point, then sets function, range, 100 NPLC or the 3 Hz AC filter for every point.",
+   "facts": [
+    [
+     "Limits",
+     "1 year, 18 to 28 C"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A"
+    ],
+    [
+     "Meter interface",
+     "GPIB"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 34410A must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well."
+    ],
+    [
+     "Environment",
+     "Ambient 18 to 28 C (ideally 23 C +/- 2 C) and relative humidity below 80 % (p. 67)."
+    ],
+    [
+     "Cables",
+     "Shielded twisted-pair PTFE cables, as short as possible, shields to earth ground at ONE place (p. 67)."
+    ],
+    [
+     "Front / Rear",
+     "The program reads the Front/Rear switch (ROUT:TERM?) before every point and stops if it is wrong; it cannot move the switch. Never move it with signals present."
+    ]
+   ],
+   "text": "Warm-up and conditions",
+   "title": "Before the verification"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34410A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 103"
+    ],
+    [
+     "Test",
+     "Front DC current, 100.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 1-3)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the FRONT terminals; leave the current (I) input OPEN, nothing connected. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (current input open), FRONT terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "7 of 103"
+    ],
+    [
+     "Test",
+     "Front DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 1-3)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the FRONT terminals; install the 34172B low-thermal 4-terminal short across INPUT HI / LO and SENSE HI / LO. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (4-terminal short), FRONT terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "19 of 103"
+    ],
+    [
+     "Test",
+     "Rear DC current, 100.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 4-5)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to REAR (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the REAR terminals; leave the current (I) input OPEN, nothing connected. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (current input open), REAR terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "25 of 103"
+    ],
+    [
+     "Test",
+     "Rear DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 4-5)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to REAR (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the REAR terminals; install the 34172B low-thermal 4-terminal short across INPUT HI / LO and SENSE HI / LO. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (4-terminal short), REAR terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "37 of 103"
+    ],
+    [
+     "Test",
+     "DC volts 100.0 mV, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "71"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted-pair PTFE cable, shields to earth ground at one place only. Calibrator OUTPUT V/ohm HI / LO to the 34410A front INPUT HI / LO; low-thermal connections for DC volts on the 100 mV and 1 V ranges. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  }
+ ],
+ "virtual_run_5522A_usb_optional": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keysight 34410A: Agilent Technologies,34410A,MY00000001,2.35-2.35-0.09-46-09\nFluke 5522A: FLUKE,5522A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Conditions met - start",
+    "Cancel"
+   ],
+   "caution": "The program restores the 34410A factory defaults (*RST) before the first point, then sets function, range, 100 NPLC or the 3 Hz AC filter for every point.",
+   "facts": [
+    [
+     "Limits",
+     "1 year, 18 to 28 C"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5522A"
+    ],
+    [
+     "Meter interface",
+     "USB"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 34410A must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well."
+    ],
+    [
+     "Environment",
+     "Ambient 18 to 28 C (ideally 23 C +/- 2 C) and relative humidity below 80 % (p. 67)."
+    ],
+    [
+     "Cables",
+     "Shielded twisted-pair PTFE cables, as short as possible, shields to earth ground at ONE place (p. 67)."
+    ],
+    [
+     "Front / Rear",
+     "The program reads the Front/Rear switch (ROUT:TERM?) before every point and stops if it is wrong; it cannot move the switch. Never move it with signals present."
+    ]
+   ],
+   "text": "Warm-up and conditions",
+   "title": "Before the verification"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34410A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 103"
+    ],
+    [
+     "Test",
+     "Front DC current, 100.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 1-3)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the FRONT terminals; leave the current (I) input OPEN, nothing connected. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (current input open), FRONT terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "7 of 103"
+    ],
+    [
+     "Test",
+     "Front DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 1-3)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the FRONT terminals; install the 34172B low-thermal 4-terminal short across INPUT HI / LO and SENSE HI / LO. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (4-terminal short), FRONT terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "19 of 103"
+    ],
+    [
+     "Test",
+     "Rear DC current, 100.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 4-5)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to REAR (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the REAR terminals; leave the current (I) input OPEN, nothing connected. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (current input open), REAR terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "25 of 103"
+    ],
+    [
+     "Test",
+     "Rear DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 4-5)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to REAR (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the REAR terminals; install the 34172B low-thermal 4-terminal short across INPUT HI / LO and SENSE HI / LO. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (4-terminal short), REAR terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "37 of 103"
+    ],
+    [
+     "Test",
+     "DC volts 100.0 mV, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "71"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted-pair PTFE cable, shields to earth ground at one place only. Calibrator NORMAL HI / LO to the 34410A front INPUT HI / LO; low-thermal connections for DC volts on the 100 mV and 1 V ranges. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "44 of 103"
+    ],
+    [
+     "Test",
+     "DC current 100.0 µA, 100.0 µA range"
+    ],
+    [
+     "Manual page",
+     "73"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_DCI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator AUX HI and AUX LO to the 34410A front 3 A (I) terminal and INPUT LO. Check the calibrator range, its fuse and the 34410A 3 A, 250 V fuse first. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for DC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "50 of 103"
+    ],
+    [
+     "Test",
+     "4-wire ohms 100.0 Ω, 100.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "75"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_OHM4.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire: calibrator NORMAL HI / LO (force) to the 34410A INPUT HI / LO and the calibrator SENSE HI / LO to the 34410A SENSE (Sense Ohm 4W) HI / LO; calibrator external sense ON. The program sets the calibrator impedance compensation (ZCOMP) to WIRE4 below 110 kohm and NONE from 110 kohm up. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for 4-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "56 of 103"
+    ],
+    [
+     "Test",
+     "2-wire ohms 100.0 MΩ, 100.0 MΩ range"
+    ],
+    [
+     "Manual page",
+     "75"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_OHM2.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator NORMAL HI / LO to the 34410A INPUT HI / LO; calibrator external sense OFF (2-wire output); shielded cable. 2-wire ohms function. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for 2-wire ohms (100 Mohm)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "57 of 103"
+    ],
+    [
+     "Test",
+     "Frequency 40.00 Hz at 10.00 mV rms, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "77"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_FREQ.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator AC voltage output at the stated level and frequency to the 34410A front INPUT HI / LO (the manual's standard is a 33220A generator). Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for frequency",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "59 of 103"
+    ],
+    [
+     "Test",
+     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter"
+    ],
+    [
+     "Manual page",
+     "79"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_ACV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted-pair PTFE cable, shields to earth ground at one place only. Calibrator NORMAL HI / LO to the 34410A front INPUT HI / LO; low-thermal connections for DC volts on the 100 mV and 1 V ranges. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Speed",
+     "Each AC reading takes about 2.5 seconds with the 3 Hz filter plus the settling wait."
+    ]
+   ],
+   "text": "Connect for AC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 750 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 210 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "75 of 103"
+    ],
+    [
+     "Test",
+     "AC current 100.0 µA @ 1.000 kHz, 100.0 µA range, 3 Hz filter"
+    ],
+    [
+     "Manual page",
+     "81"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_ACI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator AUX HI and AUX LO to the 34410A front 3 A (I) terminal and INPUT LO. Check the calibrator range, its fuse and the 34410A 3 A, 250 V fuse first. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Speed",
+     "Each AC reading takes about 2.5 seconds with the 3 Hz filter plus the settling wait."
+    ]
+   ],
+   "text": "Connect for AC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "87 of 103"
+    ],
+    [
+     "Test",
+     "AC volts 1.000 V @ 10.00 Hz, 1.000 V range, 3 Hz filter"
+    ],
+    [
+     "Manual page",
+     "83"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_ACV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted-pair PTFE cable, shields to earth ground at one place only. Calibrator NORMAL HI / LO to the 34410A front INPUT HI / LO; low-thermal connections for DC volts on the 100 mV and 1 V ranges. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Speed",
+     "Each AC reading takes about 2.5 seconds with the 3 Hz filter plus the settling wait."
+    ]
+   ],
+   "text": "Connect for AC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "96 of 103"
+    ],
+    [
+     "Test",
+     "AC current 1.000 mA @ 10.00 Hz, 1.000 mA range, 3 Hz filter"
+    ],
+    [
+     "Manual page",
+     "85"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_ACI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator AUX HI and AUX LO to the 34410A front 3 A (I) terminal and INPUT LO. Check the calibrator range, its fuse and the 34410A 3 A, 250 V fuse first. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Speed",
+     "Each AC reading takes about 2.5 seconds with the 3 Hz filter plus the settling wait."
+    ]
+   ],
+   "text": "Connect for AC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Standard connected - measure",
+    "Cancel"
+   ],
+   "caution": "The specification is for film capacitors; additional errors may occur for other types (User's Guide p. 136).",
+   "facts": [
+    [
+     "Next point",
+     "102 of 103"
+    ],
+    [
+     "Test",
+     "Capacitance 1.000 µF, 1.000 µF range"
+    ],
+    [
+     "Manual page",
+     "87"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5522A_CAP.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Null",
+     "With the test leads open, press Null on the 34410A in the capacitance function (User's Guide p. 60: the specification is with Math Null); the program sends no null command."
+    ],
+    [
+     "Connect",
+     "Optional capacitance tests (Service Guide p. 86): a 1 uF capacitance standard (IET SCA-1uF) connected by the technician, 2-wire."
+    ],
+    [
+     "Stabilise",
+     "Allow the standard to settle, then continue; the program reads the 34410A itself."
+    ]
+   ],
+   "text": "Connect for capacitance",
+   "title": "Connect the standard"
+  }
+ ],
+ "virtual_run_5560A_gpib": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keysight 34410A: Agilent Technologies,34410A,MY00000001,2.35-2.35-0.09-46-09\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Conditions met - start",
+    "Cancel"
+   ],
+   "caution": "The program restores the 34410A factory defaults (*RST) before the first point, then sets function, range, 100 NPLC or the 3 Hz AC filter for every point.",
+   "facts": [
+    [
+     "Limits",
+     "1 year, 18 to 28 C"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A"
+    ],
+    [
+     "Meter interface",
+     "GPIB"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 34410A must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well."
+    ],
+    [
+     "Environment",
+     "Ambient 18 to 28 C (ideally 23 C +/- 2 C) and relative humidity below 80 % (p. 67)."
+    ],
+    [
+     "Cables",
+     "Shielded twisted-pair PTFE cables, as short as possible, shields to earth ground at ONE place (p. 67)."
+    ],
+    [
+     "Front / Rear",
+     "The program reads the Front/Rear switch (ROUT:TERM?) before every point and stops if it is wrong; it cannot move the switch. Never move it with signals present."
+    ]
+   ],
+   "text": "Warm-up and conditions",
+   "title": "Before the verification"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "OK",
+    "Cancel"
+   ],
+   "icon": "warning",
+   "kind": "ask_ok_cancel",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34410A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
+   "title": "Reset instruments"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "1 of 103"
+    ],
+    [
+     "Test",
+     "Front DC current, 100.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 1-3)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the FRONT terminals; leave the current (I) input OPEN, nothing connected. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (current input open), FRONT terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "7 of 103"
+    ],
+    [
+     "Test",
+     "Front DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 1-3)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the FRONT terminals; install the 34172B low-thermal 4-terminal short across INPUT HI / LO and SENSE HI / LO. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (4-terminal short), FRONT terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "19 of 103"
+    ],
+    [
+     "Test",
+     "Rear DC current, 100.0 µA range (input open)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 4-5)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ZERO_OPEN.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to REAR (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the REAR terminals; leave the current (I) input OPEN, nothing connected. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (current input open), REAR terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Set up - measure",
+    "Cancel"
+   ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "facts": [
+    [
+     "Next point",
+     "25 of 103"
+    ],
+    [
+     "Test",
+     "Rear DC volts, 100.0 mV range (input shorted)"
+    ],
+    [
+     "Manual page",
+     "69 (and 68, steps 4-5)"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ZERO_SHORT.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to REAR (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Select the REAR terminals; install the 34172B low-thermal 4-terminal short across INPUT HI / LO and SENSE HI / LO. The calibrator stays in STANDBY."
+    ]
+   ],
+   "text": "Set up for zero offset (4-terminal short), REAR terminals",
+   "title": "Zero offset - physical setup required"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "37 of 103"
+    ],
+    [
+     "Test",
+     "DC volts 100.0 mV, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "71"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_DCV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted-pair PTFE cable, shields to earth ground at one place only. Calibrator OUTPUT V/ohm HI / LO to the 34410A front INPUT HI / LO; low-thermal connections for DC volts on the 100 mV and 1 V ranges. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for DC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "44 of 103"
+    ],
+    [
+     "Test",
+     "DC current 100.0 µA, 100.0 µA range"
+    ],
+    [
+     "Manual page",
+     "73"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_DCI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator VI AUX output and OUTPUT LO to the 34410A front 3 A (I) terminal and INPUT LO. Check the calibrator range, its fuse and the 34410A 3 A, 250 V fuse first. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for DC current",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "50 of 103"
+    ],
+    [
+     "Test",
+     "4-wire ohms 100.0 Ω, 100.0 Ω range"
+    ],
+    [
+     "Manual page",
+     "75"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_OHM4.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "4-wire: calibrator OUTPUT V/ohm HI / LO (force) to the 34410A INPUT HI / LO and the calibrator SENSE HI / LO to the 34410A SENSE (Sense Ohm 4W) HI / LO; calibrator external sense ON. Set the 5560A's own 4-wire (external sense) mode for the points below 110 kohm; the program sends no compensation command to a 5560A. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for 4-wire ohms",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "56 of 103"
+    ],
+    [
+     "Test",
+     "2-wire ohms 100.0 MΩ, 100.0 MΩ range"
+    ],
+    [
+     "Manual page",
+     "75"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_OHM2.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator OUTPUT V/ohm HI / LO to the 34410A INPUT HI / LO; calibrator external sense OFF (2-wire output); shielded cable. 2-wire ohms function. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for 2-wire ohms (100 Mohm)",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "57 of 103"
+    ],
+    [
+     "Test",
+     "Frequency 40.00 Hz at 10.00 mV rms, 100.0 mV range"
+    ],
+    [
+     "Manual page",
+     "77"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_FREQ.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator AC voltage output at the stated level and frequency to the 34410A front INPUT HI / LO (the manual's standard is a 33220A generator). Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ]
+   ],
+   "text": "Connect for frequency",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "59 of 103"
+    ],
+    [
+     "Test",
+     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 3 Hz filter"
+    ],
+    [
+     "Manual page",
+     "79"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ACV.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Shielded twisted-pair PTFE cable, shields to earth ground at one place only. Calibrator OUTPUT V/ohm HI / LO to the 34410A front INPUT HI / LO; low-thermal connections for DC volts on the 100 mV and 1 V ranges. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Speed",
+     "Each AC reading takes about 2.5 seconds with the 3 Hz filter plus the settling wait."
+    ]
+   ],
+   "text": "Connect for AC volts",
+   "title": "Rewire / verify before enabling output"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 100 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 750 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "kind": "ask_yes_no",
+   "text": "This point outputs 210 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "title": "HIGH VOLTAGE"
+  },
+  {
+   "answer": true,
+   "buttons": [
+    "Connections verified - continue",
+    "Cancel"
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "facts": [
+    [
+     "Next point",
+     "75 of 103"
+    ],
+    [
+     "Test",
+     "AC current 100.0 µA @ 1.000 kHz, 100.0 µA range, 3 Hz filter"
+    ],
+    [
+     "Manual page",
+     "81"
+    ],
+    [
+     "Diagram",
+     "not installed (expected diagrams/hook_34410a_5560A_ACI.png)"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator VI AUX output and OUTPUT LO to the 34410A front 3 A (I) terminal and INPUT LO. Check the calibrator range, its fuse and the 34410A 3 A, 250 V fuse first. Front/Rear switch on FRONT."
+    ],
+    [
+     "Front/Rear switch",
+     "Set the Front/Rear switch to FRONT (with nothing connected to the terminals). The program checks the switch position before measuring."
+    ],
+    [
+     "Speed",
+     "Each AC reading takes about 2.5 seconds with the 3 Hz filter plus the settling wait."
+    ]
+   ],
+   "text": "Connect for AC current",
+   "title": "Rewire / verify before enabling output"
+  }
+ ],
+ "warmup_cancelled": [
+  {
+   "buttons": [
+    "OK"
+   ],
+   "kind": "info",
+   "text": "Keysight 34410A: Agilent Technologies,34410A,MY00000001,2.35-2.35-0.09-46-09\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
+   "title": "Connected (DEMO)"
+  },
+  {
+   "answer": false,
+   "buttons": [
+    "Conditions met - start",
+    "Cancel"
+   ],
+   "caution": "The program restores the 34410A factory defaults (*RST) before the first point, then sets function, range, 100 NPLC or the 3 Hz AC filter for every point.",
+   "facts": [
+    [
+     "Limits",
+     "1 year, 18 to 28 C"
+    ],
+    [
+     "Calibrator",
+     "Fluke 5560A"
+    ],
+    [
+     "Meter interface",
+     "GPIB"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "Warm-up",
+     "The 34410A must have warmed up for 90 minutes with a copper short connected (Service Guide p. 67). Allow the calibrator its own warm-up time as well."
+    ],
+    [
+     "Environment",
+     "Ambient 18 to 28 C (ideally 23 C +/- 2 C) and relative humidity below 80 % (p. 67)."
+    ],
+    [
+     "Cables",
+     "Shielded twisted-pair PTFE cables, as short as possible, shields to earth ground at ONE place (p. 67)."
+    ],
+    [
+     "Front / Rear",
+     "The program reads the Front/Rear switch (ROUT:TERM?) before every point and stops if it is wrong; it cannot move the switch. Never move it with signals present."
+    ]
+   ],
+   "text": "Warm-up and conditions",
+   "title": "Before the verification"
+  }
+ ]
+}

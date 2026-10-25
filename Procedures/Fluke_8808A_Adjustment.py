@@ -6,9 +6,7 @@ Demo (virtual instruments, nothing persisted):  python Procedures/Fluke_8808A_Ad
 """
 import sys
 import time
-import tkinter as tk
 from pathlib import Path
-from tkinter import messagebox, ttk
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))   # shared modules sit next to the Manager
 import adjustment_audit
@@ -16,8 +14,10 @@ import calibrator_fit
 import drivers
 import fluke8808a_adjustment as adj
 import reset_startup
-import ui_theme as ui
+import ui_port
+import ui_theme as ui                   # only its toolkit-free helpers here (Settings); the window code is in fluke8808a_adjust_view_tk.py
 import virtualbench
+from ui_port import ui as port          # every dialog, variable and window operation goes through the UI port (ui_port.py)
 
 TITLE = 'Fluke 8808A  -  Guided Adjustment'
 NOTICE = ('The 8808A has no SAVE step: each point changes the calibration when it is started, and a function that is started must be completed (an incomplete function shows CAL ERROR, '
@@ -34,137 +34,50 @@ class App(virtualbench.VirtualMixin):
         self.busy = False
         self._abort_req = False
         self._last_group = None
-        ui.apply_theme(root)
-        root.title(TITLE.replace('  -  ', ' | ') + (' [DEMO]' if demo else ''))
-        ui.fit_window(root, 1320, 900, min_w=1000, min_h=680)
+        self.ui_view.setup_window(self)
         self.settings = ui.Settings('Fluke8808AAdjustment')
         s = self.settings
-        self.asset, self.serial, self.tech = tk.StringVar(), tk.StringVar(), tk.StringVar()
-        self.scope = tk.StringVar(value=s.get('scope', next(iter(adj.SCOPES))))
+        self.asset, self.serial, self.tech = port.var(), port.var(), port.var()
+        self.scope = port.var(s.get('scope', next(iter(adj.SCOPES))))
         if self.scope.get() not in adj.SCOPES:
             self.scope.set(next(iter(adj.SCOPES)))
-        self.dmm_addr = tk.StringVar(value=s.get('dmm_addr', 'COM3'))
-        self.dmm_baud = tk.StringVar(value=s.get('dmm_baud', '9600'))
-        self.dmm_fmt = tk.StringVar(value=s.get('dmm_fmt', next(iter(adj.PARITY_FORMATS))))
+        self.dmm_addr = port.var(s.get('dmm_addr', 'COM3'))
+        self.dmm_baud = port.var(s.get('dmm_baud', '9600'))
+        self.dmm_fmt = port.var(s.get('dmm_fmt', next(iter(adj.PARITY_FORMATS))))
         self.offers = {n: calibrator_fit.make_offer(k, adj.requests(), per_point_manual=True, unverified=(cls.unverified_summary() if hasattr(cls, 'unverified_summary') else ''), name=n) for n, (k, cls) in adj.CALIBRATORS.items()}
-        self.cal_model = tk.StringVar(value=s.get('cal_model', 'Fluke 5522A'))
+        self.cal_model = port.var(s.get('cal_model', 'Fluke 5522A'))
         if self.cal_model.get() not in adj.CALIBRATORS:
             self.cal_model.set('Fluke 5522A')
-        self.cal_interface = tk.StringVar(value=s.get('cal_interface', adj.CAL_INTERFACES[0]))
+        self.cal_interface = port.var(s.get('cal_interface', adj.CAL_INTERFACES[0]))
         if self.cal_interface.get() not in adj.CAL_INTERFACES:
             self.cal_interface.set(adj.CAL_INTERFACES[0])
-        self.cal_addr = tk.StringVar(value=s.get('cal_addr', adj.CAL_PORT_DEFAULT[self.cal_interface.get()]))
-        self.cal_baud = tk.StringVar(value=s.get('cal_baud', '9600'))
-        self.use_ter = tk.BooleanVar(value=False)         # optional, UNVERIFIED: also send *TER once (off by default)
-        self.status = tk.StringVar()
-        self.next_hint = tk.StringVar()
-        self.cal_note = tk.StringVar()
+        self.cal_addr = port.var(s.get('cal_addr', adj.CAL_PORT_DEFAULT[self.cal_interface.get()]))
+        self.cal_baud = port.var(s.get('cal_baud', '9600'))
+        self.use_ter = port.var(False, 'bool')         # optional, UNVERIFIED: also send *TER once (off by default)
+        self.status = port.var()
+        self.next_hint = port.var()
+        self.cal_note = port.var()
         self._build_ui()
         self._fill_table()
         self.on_cal_model()
         self.status.set('DEMO MODE (virtual instruments): commands go to a simulated 8808A and calibrator; nothing is recorded as evidence.' if demo
                         else 'Enter the instrument ID, choose the ports and press Connect.')
         self._sync()
-        root.protocol('WM_DELETE_WINDOW', self.on_close)
+        port.on_close(root, self.on_close)
 
     # ------------------------------------------------------------------ layout
-    def _build_ui(self):
-        root = self.root
-        banner = ui.Banner(root, TITLE, 'RS-232 calibration dialog, Calibration Manual (Oct 2008) pp. 3-16 / 3-17, Table 3-9  |  RS-232 only')
-        banner.pack(fill='x')
-        if self.demo:
-            banner.add_pill('DEMO MODE  -  virtual instruments, nothing saved', 'warn')
-        self.pill_meter = banner.add_pill('8808A: not connected', 'neutral')
-        self.pill_run = banner.add_pill('No adjustment record', 'neutral')
-        self.pill_cal = banner.add_pill('Calibration mode: closed', 'good')
-        ui.StatusBar(root, self.status, right='spec v1').pack(side='bottom', fill='x')
-        body = ttk.Frame(root, padding=(18, 12, 18, 8))
-        body.pack(fill='both', expand=True)
-        ui.Notice(body, NOTICE, 'bad', title='This changes the instrument calibration').pack(fill='x')
+    VIEW = 'fluke8808a_adjust_view'                      # the toolkit's window code: fluke8808a_adjust_view_tk (Tk), later _qt
 
-        top = ttk.Frame(body)
-        top.pack(fill='x', pady=(10, 0))
-        top.columnconfigure(1, weight=1)
-        who = ttk.LabelFrame(top, text='1  Who and what', padding=10)
-        who.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
-        for r_, (label, var) in enumerate((('Instrument ID *', self.asset), ('Serial number *', self.serial), ('Technician *', self.tech))):
-            ttk.Label(who, text=label).grid(row=r_, column=0, sticky='w', pady=2)
-            ttk.Entry(who, textvariable=var, width=20).grid(row=r_, column=1, padx=(8, 0), pady=2)
-        ttk.Label(who, text='Scope').grid(row=3, column=0, sticky='w', pady=2)
-        self.scope_combo = ttk.Combobox(who, textvariable=self.scope, values=list(adj.SCOPES), state='readonly', width=34)
-        self.scope_combo.grid(row=3, column=1, padx=(8, 0), pady=2)
-        self.scope_combo.bind('<<ComboboxSelected>>', lambda _e: (self._fill_table(), self._sync()))
+    @property
+    def ui_view(self): return port.view(self.VIEW)
 
-        link = ttk.LabelFrame(top, text='2  Connect: the 8808A and the calibrator', padding=10)
-        link.grid(row=0, column=1, sticky='nsew')
-        ttk.Label(link, text='8808A COM port').grid(row=0, column=0, sticky='w')
-        ttk.Entry(link, textvariable=self.dmm_addr, width=14).grid(row=0, column=1, padx=(6, 12), sticky='w')
-        ttk.Label(link, text='Baud', style='Muted.TLabel').grid(row=0, column=2, sticky='w')
-        ttk.Combobox(link, textvariable=self.dmm_baud, values=adj.BAUDS, width=7, state='readonly').grid(row=0, column=3, padx=(6, 12), sticky='w')
-        ttk.Label(link, text='Format', style='Muted.TLabel').grid(row=0, column=4, sticky='w')
-        ttk.Combobox(link, textvariable=self.dmm_fmt, values=list(adj.PARITY_FORMATS), width=24, state='readonly').grid(row=0, column=5, padx=(6, 0), sticky='w')
-        ttk.Label(link, text='Calibrator').grid(row=1, column=0, sticky='w', pady=(6, 0))
-        cm = ttk.Combobox(link, textvariable=self.cal_model, values=list(adj.CALIBRATORS), width=14, state='readonly')
-        cm.grid(row=1, column=1, padx=(6, 12), pady=(6, 0), sticky='w')
-        cm.bind('<<ComboboxSelected>>', lambda _e: self.on_cal_model())
-        self.cal_combo = cm
-        ttk.Label(link, text='Interface').grid(row=1, column=2, sticky='w', pady=(6, 0))
-        ci = ttk.Combobox(link, textvariable=self.cal_interface, values=list(adj.CAL_INTERFACES), width=8, state='readonly')
-        ci.grid(row=1, column=3, padx=(6, 12), pady=(6, 0), sticky='w')
-        ci.bind('<<ComboboxSelected>>', lambda _e: self.cal_addr.set(adj.CAL_PORT_DEFAULT[self.cal_interface.get()]))
-        ttk.Label(link, text='Address / port', style='Muted.TLabel').grid(row=1, column=4, sticky='w', pady=(6, 0))
-        ttk.Entry(link, textvariable=self.cal_addr, width=18).grid(row=1, column=5, padx=(6, 12), pady=(6, 0), sticky='w')
-        ttk.Label(link, text='Baud', style='Muted.TLabel').grid(row=1, column=6, sticky='w', pady=(6, 0))
-        ttk.Combobox(link, textvariable=self.cal_baud, values=['9600', '19200', '38400', '4800', '2400'], width=7, state='readonly').grid(row=1, column=7, padx=(6, 0), pady=(6, 0), sticky='w')
-        ttk.Label(link, textvariable=self.cal_note, style='Muted.TLabel', wraplength=ui.px(900), justify='left').grid(row=2, column=0, columnspan=8, sticky='w', pady=(6, 0))
+    def _build_ui(self): self.ui_view.build_ui(self)
 
-        ttk.Checkbutton(link, text='Also send *TER once (UNVERIFIED, off by default: calibration mode is entered at the front panel)', variable=self.use_ter).grid(row=3, column=0, columnspan=8, sticky='w', pady=(4, 0))
-
-        hintrow = ttk.Frame(body)
-        hintrow.pack(fill='x', pady=(10, 4))
-        ttk.Label(hintrow, text='NEXT', style='MetricCap.TLabel').pack(side='left')
-        ttk.Label(hintrow, textvariable=self.next_hint, style='Bold.TLabel', wraplength=ui.px(1100), justify='left').pack(side='left', padx=(12, 0), fill='x', expand=True)
-
-        bar = ttk.Frame(body)
-        bar.pack(side='bottom', fill='x', pady=(8, 0))
-        self.btn_connect = ttk.Button(bar, text='Connect', command=self.connect)
-        self.btn_start = ttk.Button(bar, text='Start adjustment record', command=self.start_record)
-        self.btn_enter = ttk.Button(bar, text='Calibration mode entered', command=self.enter_calibration)
-        self.btn_run = ttk.Button(bar, text='Run next point', style='Accent.TButton', command=self.run_next)
-        self.btn_finish = ttk.Button(bar, text='Finish (EXIT)', command=self.finish)
-        self.btn_abort = ttk.Button(bar, text='Abort', style='Danger.TButton', command=self.abort)
-        self.btn_close = ttk.Button(bar, text='Disconnect', command=self.disconnect)
-        for b_ in (self.btn_connect, self.btn_start, self.btn_enter, self.btn_run, self.btn_finish):
-            b_.pack(side='left', padx=(0, 8))
-        self.btn_close.pack(side='right')
-        self.btn_abort.pack(side='right', padx=(0, 8))
-        self.show_log = tk.BooleanVar(value=True)
-        ttk.Checkbutton(bar, text='Show audit log', variable=self.show_log, command=self._toggle_log).pack(side='right', padx=(0, 16))
-        self._bar = bar
-
-        self.log_box = ttk.LabelFrame(body, text='Audit log (this record; no password exists or is written)', padding=6)
-        self.log_table = ui.make_table(self.log_box, ('time', 'step', 'action', 'outcome', 'detail'), ('Time', 'Step', 'Action', 'Outcome', 'Detail'),
-                                       (140, 50, 110, 110, 720), anchors={'detail': 'w', 'action': 'w', 'time': 'w', 'step': 'w'}, height=6,
-                                       stretch={'time': False, 'step': False, 'action': False, 'outcome': False})
-        self.log_table.tag_configure('ok', foreground=ui.C['good'])
-        self.log_table.tag_configure('bad', foreground=ui.C['bad'])
-        self.log_box.pack(side='bottom', fill='x', pady=(8, 0), before=self._bar)
-        self.tree = ui.make_table(body, ('id', 'fn', 'step', 'output', 'state'), ('ID', 'Function', 'Point (Table 3-9)', 'Calibrator output', 'Status'),
-                                  (60, 80, 260, 360, 160), anchors={'step': 'w', 'output': 'w', 'id': 'w', 'fn': 'w'}, height=12, stretch={'id': False, 'fn': False, 'state': False})
-        self.tree.tag_configure('done', background=ui.C['good_bg'], foreground=ui.C['good'])
-        self.tree.tag_configure('next', background=ui.C['info_bg'])
-        self.tree.tag_configure('failed', background=ui.C['bad_bg'], foreground=ui.C['bad'])
-        ui.polish(root)
-
-    def _toggle_log(self):
-        if self.show_log.get():
-            self.log_box.pack(side='bottom', fill='x', pady=(8, 0), before=self._bar)
-        else:
-            self.log_box.pack_forget()
+    def _toggle_log(self): self.ui_view.toggle_log(self)
 
     def on_cal_model(self):
         offer = self.offers[self.cal_model.get()]
-        ui.Tooltip(self.cal_combo, offer.tooltip)
+        self.ui_view.cal_tooltip(self, offer.tooltip)
         self.cal_note.set(offer.text + ('  Own standard needed at: ' + ', '.join(sorted(adj.own_standard_ids(adj.CALIBRATORS[self.cal_model.get()][0]))) + '.'
                                         if adj.own_standard_ids(adj.CALIBRATORS[self.cal_model.get()][0]) else ''))
 
@@ -174,7 +87,7 @@ class App(virtualbench.VirtualMixin):
         return adj.SCOPES[self.scope.get()]
 
     def _fill_table(self):
-        self.tree.delete(*self.tree.get_children())
+        self.ui_view.table_clear(self)
         nxt = self.session.next_step() if self.session else None
         own = adj.own_standard_ids(adj.CALIBRATORS[self.cal_model.get()][0])
         for st in adj.steps_in_scope(self.scope_t):
@@ -190,28 +103,18 @@ class App(virtualbench.VirtualMixin):
                 elif nxt is not None and nxt['id'] == st['id']:
                     state, tags = 'next', ('next',)
             out = adj.source_text(st) + ('  (OWN STANDARD)' if st['id'] in own else '') + ('  (characterize)' if st['characterize'] else '') + ('  [list differs]' if st['conflict'] else '')
-            self.tree.insert('', 'end', iid=st['id'], values=(st['id'], st['function'], st['title'], out, state), tags=tags)
+            self.ui_view.table_add(self, st['id'], (st['id'], st['function'], st['title'], out, state), tags)
 
     def _sync(self):
         s = self.session
         live = self.io is not None
-        self.pill_meter.set(('8808A: DEMO (simulated)' if self.demo else '8808A: connected') if live else '8808A: not connected', 'warn' if (live and self.demo) else 'good' if live else 'neutral')
-        rid = self.audit.run_id
-        self.pill_run.set(('DEMO record (not saved)' if self.demo else f'Record #{rid}') if rid else 'No adjustment record', 'info' if rid else 'neutral')
         open_ = bool(s and s.cal_mode)
-        self.pill_cal.set('Calibration mode: OPEN' if open_ else 'Calibration mode: closed', 'bad' if open_ else 'good')
-
-        def en(btn, cond):
-            btn.configure(state='normal' if (cond and not self.busy) else 'disabled')
+        self.ui_view.sync_pills(self, live, open_)
         finished = bool(s and (s.aborted or s.finished))
-        en(self.btn_connect, not live)
-        en(self.btn_start, live and not (s and not finished))
-        en(self.btn_enter, bool(s) and not open_ and not finished)
-        en(self.btn_run, open_ and not s.all_done())
-        en(self.btn_finish, open_ and s.all_done() and s.active_function is None)
-        self.btn_abort.configure(state='normal' if (open_ or (s and not finished and any(r.attempts for r in s.records.values()))) else 'disabled')
-        en(self.btn_close, live)
-        self.scope_combo.configure(state='disabled' if s and not finished else 'readonly')
+        idle = not self.busy
+        self.ui_view.sync_buttons(self, not live and idle, live and not (s and not finished) and idle, bool(s) and not open_ and not finished and idle,
+                                  open_ and not s.all_done() and idle, open_ and s.all_done() and s.active_function is None and idle,
+                                  bool(open_ or (s and not finished and any(r.attempts for r in s.records.values()))), live and idle, bool(s and not finished))
         if not live:
             hint = 'Enter the instrument ID, choose the ports and press Connect.'
         elif s is None or finished:
@@ -230,7 +133,7 @@ class App(virtualbench.VirtualMixin):
     def _audit_row(self, row, step_id=''):
         t, action, outcome, detail = row
         tag = 'bad' if outcome in ('FAILED', 'ERROR', 'INDETERMINATE', 'NOT CONFIRMED', 'COULD NOT CONFIRM', 'UNCONFIRMED') else 'ok' if outcome in ('OK', 'CONFIRMED', 'SENT', 'DONE', 'COMPLETE') else ''
-        self.log_table.insert('', 0, values=(t, step_id, action, outcome, detail), tags=(tag,) if tag else ())
+        self.ui_view.log_add(self, (t, step_id, action, outcome, detail), (tag,) if tag else ())
 
     # ------------------------------------------------------------------ waiting without freezing
     def pump(self, seconds, what):
@@ -240,13 +143,13 @@ class App(virtualbench.VirtualMixin):
             if left <= 0:
                 break
             self.status.set(f'{what}: {left:.0f} s')
-            self.root.update()
+            port.update(self.root)
             time.sleep(0.05)
 
     def _begin(self):
         self.busy, self._abort_req = True, False
         self._sync()
-        self.root.update_idletasks()
+        port.flush(self.root)
 
     def _end(self):
         self.busy = False
@@ -256,19 +159,19 @@ class App(virtualbench.VirtualMixin):
     # ------------------------------------------------------------------ connect
     def connect(self):
         if not self.asset.get().strip():
-            messagebox.showwarning('Instrument ID', 'Enter the instrument ID first.')
+            port.message('warning', 'Instrument ID', 'Enter the instrument ID first.')
             return
         self.status.set('Connecting ...')
-        self.root.update_idletasks()
+        port.flush(self.root)
         try:
             self.io = self._new_io()
         except Exception as exc:
             self.io = None
             self.status.set('Connection error: ' + str(exc).splitlines()[0])
-            messagebox.showerror('Connection error', str(exc))
+            port.message('error', 'Connection error', str(exc))
             self._sync()
             return
-        self.io.dmm.tick = self.root.update
+        self.io.dmm.tick = lambda: port.update(self.root)
         if not self.demo:
             self._save_settings()
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
@@ -295,15 +198,15 @@ class App(virtualbench.VirtualMixin):
     # ------------------------------------------------------------------ record
     def start_record(self):
         if not all([self.asset.get().strip(), self.serial.get().strip(), self.tech.get().strip()]):
-            messagebox.showwarning('Required information', 'Enter instrument ID, serial number and technician.')
+            port.message('warning', 'Required information', 'Enter instrument ID, serial number and technician.')
             return
         if self.io is None:
             return
         notes = [('Method', 'The RS-232 calibration dialog in the order of Table 3-9. Both instruments are reset to their defaults first; the calibration mode stays closed.'),
                  ('Scope', self.scope.get()), ('Calibrator', f'{self.cal_model.get()}: ' + self.offers[self.cal_model.get()].text)]
-        if not ui.confirm_steps(self.root, 'Start adjustment record', 'Start a new adjustment record?', [('Nothing is changed yet', 'Starting resets the instruments; no calibration command is sent.'),
+        if not port.operator_prompt('Start adjustment record', 'Start a new adjustment record?', [('Nothing is changed yet', 'Starting resets the instruments; no calibration command is sent.'),
                                 ('Verification', 'This program does not run the performance verification: do the As Found one first, the As Left one afterwards.')],
-                                facts=notes, caution='This procedure adjusts the calibration of the 8808A.', ok='Start record'):
+                                facts=notes, caution='This procedure adjusts the calibration of the 8808A.', ok='Start record', parent=self.root):
             return
         self._begin()
         try:
@@ -312,10 +215,10 @@ class App(virtualbench.VirtualMixin):
             wait = (lambda sec: self.pump(sec, 'Settling'))
             self.session = adj.Session(self.io, self.audit, scope=self.scope_t, wait=wait, scale=virtualbench.WAIT_SCALE if self.virtual else 1.0)
             self.session.on_log = self._audit_row
-            self.log_table.delete(*self.log_table.get_children())
+            self.ui_view.log_clear(self)
             self.session.log('RUN_STARTED', 'OK', f'{adj.INSTRUMENT} {self.io.ident}; calibrator {self.cal_model.get()}' + (' [DEMO: nothing saved]' if self.demo else ''))
             try:
-                self.session.reset(confirm=lambda t: messagebox.askokcancel('Reset instruments', t, icon='warning'))
+                self.session.reset(confirm=lambda t: port.ask_ok_cancel('Reset instruments', t, icon='warning'))
             except reset_startup.ResetDeclined:
                 self.session.log('RESET', 'CANCELLED', 'declined by the operator; nothing was touched')
                 self.session = None
@@ -325,7 +228,7 @@ class App(virtualbench.VirtualMixin):
                 self.session.log('RESET', 'FAILED', 'run not started')
                 self.session = None
                 self.status.set('Reset failed - not started.')
-                messagebox.showerror('Reset failed - not started', exc.report.failure_text() if hasattr(exc.report, 'failure_text') else str(exc))
+                port.message('error', 'Reset failed - not started', exc.report.failure_text() if hasattr(exc.report, 'failure_text') else str(exc))
                 return
             self.session.prepare()
         except Exception as exc:
@@ -333,7 +236,7 @@ class App(virtualbench.VirtualMixin):
                 self.session.log('START', 'FAILED', str(exc).splitlines()[0])
             self.session = None
             self.status.set('Not started: ' + str(exc).splitlines()[0])
-            messagebox.showerror('Not started', str(exc))
+            port.message('error', 'Not started', str(exc))
             return
         finally:
             self._end()
@@ -344,19 +247,19 @@ class App(virtualbench.VirtualMixin):
         s = self.session
         if s is None or s.cal_mode:
             return
-        ok = ui.confirm_steps(self.root, 'Before the adjustment', 'Warm-up, conditions and As Found',
+        ok = port.operator_prompt('Before the adjustment', 'Warm-up, conditions and As Found',
             [('Warm-up', 'The 8808A must have warmed up for at least one half hour (Calibration Manual p. 1-9); allow the calibrator its own warm-up.'),
              ('Environment', 'Ambient conditions as the manual requires (p. 3-2).'),
              ('As Found', 'The performance verification (As Found) has been run and its report kept.'),
              ('Calibration mode', 'NEXT you enter the calibration mode yourself, at the front panel of the 8808A, with the calibration button. This program does not enter it for you.')],
             facts=[('Instrument', f'{self.asset.get().strip()}  (serial {self.serial.get().strip()})'), ('Calibrator', self.cal_model.get())],
-            caution='Next you confirm your authority.', ok='All confirmed')
+            caution='Next you confirm your authority.', ok='All confirmed', parent=self.root)
         if not ok:
             self.status.set('Not entered: conditions were not confirmed.')
             return
         s.acknowledge('conditions', 'warm-up and environment confirmed')
         s.acknowledge('as_found', 'As Found performance verification done')
-        if not messagebox.askyesno('THIS CHANGES THE INSTRUMENT CALIBRATION',
+        if not port.ask_yes_no('THIS CHANGES THE INSTRUMENT CALIBRATION',
                                    'I am authorised to adjust this instrument and understand that every point I start changes the calibration of the 8808A. There is no SAVE and no way '
                                    'to undo a point; a function that is started must be completed.\n\nContinue?', icon='warning'):
             self.status.set('Not entered.')
@@ -364,13 +267,13 @@ class App(virtualbench.VirtualMixin):
         s.acknowledge('authorised', 'operator authorised to adjust')
         s.acknowledge('notice', 'calibration-change notice acknowledged')
         use_ter = bool(self.use_ter.get())
-        if not ui.confirm_steps(self.root, 'Operator step: enter calibration mode', 'Enter the calibration mode at the front panel',
+        if not port.operator_prompt('Operator step: enter calibration mode', 'Enter the calibration mode at the front panel',
                                 [('Front panel', 'Enter calibration mode on the front panel of the 8808A using the calibration button, then confirm here.'),
                                  ('What the program can check', 'The manual prints no query that shows the calibration mode, so the program cannot verify it before the first function. ' +
                                   'It will send the first function name only after you confirm; if the meter does not answer it with a recommended value, nothing has been changed and you stop.')]
                                 + ([('*TER (optional)', '*TER will ALSO be sent once after you confirm (UNVERIFIED: the manual shows it as the RS-232 entry, p. 3-16, but does not say whether it works without the front-panel entry).')] if use_ter else []),
                                 facts=[('Instrument', f'{self.asset.get().strip()}  (serial {self.serial.get().strip()})')],
-                                caution='Confirm only when the meter is in the calibration mode.', ok='Calibration mode entered - continue'):
+                                caution='Confirm only when the meter is in the calibration mode.', ok='Calibration mode entered - continue', parent=self.root):
             self.status.set('Not entered: the front-panel entry was not confirmed.')
             return
         s.acknowledge('panel', 'operator entered the calibration mode at the front panel (calibration button)')
@@ -381,7 +284,7 @@ class App(virtualbench.VirtualMixin):
             s.enter_calibration(use_ter=use_ter)
         except Exception as exc:
             self.status.set('Not entered: ' + str(exc).splitlines()[0])
-            messagebox.showerror('Calibration mode not entered', str(exc))
+            port.message('error', 'Calibration mode not entered', str(exc))
             return
         finally:
             self._end()
@@ -389,35 +292,16 @@ class App(virtualbench.VirtualMixin):
 
     # ------------------------------------------------------------------ one point
     def ask_value(self, title, prompt, default):
-        win = ui.dialog(self.root, title)
-        var, result = tk.StringVar(value=default), {'v': None}
-        frame = ttk.Frame(win, padding=16)
-        frame.pack()
-        ttk.Label(frame, text=prompt, wraplength=ui.px(460), justify='left').pack(anchor='w')
-        ent = ttk.Entry(frame, textvariable=var, width=24)
-        ent.pack(anchor='w', pady=(10, 0))
-        row = ttk.Frame(frame)
-        row.pack(fill='x', pady=(14, 0))
-
-        def done(ok):
-            result['v'] = var.get() if ok else None
-            win.destroy()
-        ttk.Button(row, text='Use this value', style='Accent.TButton', command=lambda: done(True)).pack(side='right')
-        ttk.Button(row, text='Cancel', command=lambda: done(False)).pack(side='right', padx=(0, 8))
-        win.bind('<Return>', lambda _e: done(True))
-        ui.center_on(win, self.root)
-        ent.focus_set()
-        ent.select_range(0, 'end')
-        win.wait_window()
-        return result['v']
+        """The value-entry window (a custom dialog of the UI port)."""
+        return port.ask_value(title, prompt, default, parent=self.root)
 
     def _hookup(self, st):
         s = self.session
         group = st['group']
         facts = [('Step', f'{st["id"]}  {st["function"]}  {st["title"]}'), ('Calibrator output', adj.source_text(st)), ('Manual page', st['page'])]
         steps = [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', adj.hookup_text(st, s.cal_key))]
-        return ui.confirm_steps(self.root, 'Rewire / verify before the point', f'Connect for {adj.GROUP_TITLE.get(group, group)}', steps, facts=facts,
-                                caution='Continue only after physically verifying the connections.', ok='Connections verified - continue')
+        return port.operator_prompt('Rewire / verify before the point', f'Connect for {adj.GROUP_TITLE.get(group, group)}', steps, facts=facts,
+                                caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', parent=self.root)
 
     def run_next(self):
         s = self.session
@@ -429,22 +313,22 @@ class App(virtualbench.VirtualMixin):
         try:
             self._run_step(s, st, rec)
         except adj.NeedsDisplayConfirmation as exc:
-            shows = messagebox.askyesno('CALREF not confirmed', f'{exc}\n\nDoes the meter display show the value that was sent?', icon='warning')
+            shows = port.ask_yes_no('CALREF not confirmed', f'{exc}\n\nDoes the meter display show the value that was sent?', icon='warning')
             try:
                 if not s.confirm_calref_display(st, shows):
                     self._abort_req = True
             except Exception as exc2:
-                messagebox.showerror('Point stopped', str(exc2))
+                port.message('error', 'Point stopped', str(exc2))
         except adj.cal_driver.CalibrationError as exc:
             if s.entry_failed and not s.entry_verified:
                 self._offer_ter(s, exc)
             else:
                 self.status.set(f'{st["id"]}: ' + str(exc).splitlines()[0])
-                messagebox.showerror(f'Point {st["id"]} stopped', f'{exc}\n\nNothing was repeated automatically. You can repeat the point after fixing the cause, or abort.')
+                port.message('error', f'Point {st["id"]} stopped', f'{exc}\n\nNothing was repeated automatically. You can repeat the point after fixing the cause, or abort.')
                 self._last_group = None
         except Exception as exc:
             self.status.set(f'{st["id"]}: ' + str(exc).splitlines()[0])
-            messagebox.showerror(f'Point {st["id"]} stopped', f'{exc}\n\nNothing was repeated automatically. You can repeat the point after fixing the cause, or abort.')
+            port.message('error', f'Point {st["id"]} stopped', f'{exc}\n\nNothing was repeated automatically. You can repeat the point after fixing the cause, or abort.')
             self._last_group = None
         finally:
             try:
@@ -452,7 +336,7 @@ class App(virtualbench.VirtualMixin):
                     self.io.standby()
                     s.source_on = None
             except Exception:
-                messagebox.showerror('Calibrator', 'The calibrator could not be confirmed in STANDBY. Check its front panel before touching any lead.')
+                port.message('error', 'Calibrator', 'The calibrator could not be confirmed in STANDBY. Check its front panel before touching any lead.')
             self._end()
         if self._abort_req:
             self._abort_req = False
@@ -461,10 +345,10 @@ class App(virtualbench.VirtualMixin):
     def _offer_ter(self, s, exc):
         """The meter did not answer the first function name with a recommended value. ONE retry is allowed, only on the operator's explicit confirmation: the manual's RS-232 entry command *TER (UNVERIFIED)."""
         if s.ter_attempted or s.must_stop:
-            messagebox.showerror('Calibration mode not entered', f'{exc}\n\nThe single *TER attempt was already used. Stopping: nothing more is sent. Check the meter and the front-panel entry, then start again.')
+            port.message('error', 'Calibration mode not entered', f'{exc}\n\nThe single *TER attempt was already used. Stopping: nothing more is sent. Check the meter and the front-panel entry, then start again.')
             self._abort_req = True
             return
-        if not messagebox.askyesno('Meter did not enter calibration mode - try *TER once? (UNVERIFIED)',
+        if not port.ask_yes_no('Meter did not enter calibration mode - try *TER once? (UNVERIFIED)',
                                    f'{exc}\n\nThe 8808A did not answer the function name with a recommended value, so it is probably not in the calibration mode.\n\n'
                                    'You may try ONE entry over RS-232 with the manual\'s command *TER (p. 3-16). This is UNVERIFIED: the manual does not say whether *TER works after, or instead of, the front-panel '
                                    'entry. It is sent ONCE; if it does not work the adjustment stops, and nothing else is sent by the program. The function name is only sent again when you confirm the next '
@@ -476,7 +360,7 @@ class App(virtualbench.VirtualMixin):
             s.retry_entry_with_ter(confirmed=True)
         except Exception as exc2:
             self.status.set('*TER did not enter the calibration mode: stopping.')
-            messagebox.showerror('*TER did not work', f'{exc2}\n\nStopping. Nothing else is sent.')
+            port.message('error', '*TER did not work', f'{exc2}\n\nStopping. Nothing else is sent.')
             self._abort_req = True
             return
         self.status.set('*TER sent once (UNVERIFIED) and the banner came back. Press "Run next point" to start the function again.')
@@ -484,19 +368,19 @@ class App(virtualbench.VirtualMixin):
     def _run_step(self, s, st, rec):
         rerun = False
         if rec.indeterminate:
-            if messagebox.askyesno('No completion answer', f'{st["id"]} {st["title"]}: the 8808A did not say the point was finished.\n\nRead what the meter has sent since (read-only, nothing is sent)?',
+            if port.ask_yes_no('No completion answer', f'{st["id"]} {st["title"]}: the 8808A did not say the point was finished.\n\nRead what the meter has sent since (read-only, nothing is sent)?',
                                    icon='warning'):
                 got = s.recheck_indeterminate(st)
                 self.status.set(f'{st["id"]}: ' + ('completion arrived late.' if got else 'still no answer: look at the display (flashing star = calibrating) or abort.'))
             return
         if rec.failed:
-            if not messagebox.askyesno('Repeat a failed point', f'{st["id"]} {st["title"]} failed before ({" | ".join(rec.errors) or "error"}).\n\nRepeat it with a fresh confirmation? '
+            if not port.ask_yes_no('Repeat a failed point', f'{st["id"]} {st["title"]} failed before ({" | ".join(rec.errors) or "error"}).\n\nRepeat it with a fresh confirmation? '
                                        'The program never repeats a command by itself.', icon='warning'):
                 return
             rerun = True
         if not s.active_function:
             n = len(adj.function_steps(st['function']))
-            if not messagebox.askyesno('Start a function', f'Start {st["function"]} ({adj.FUNCTION_BY_ID[st["function"]]["title"]})?\n\nOnce a function is selected ALL its {n} points must be '
+            if not port.ask_yes_no('Start a function', f'Start {st["function"]} ({adj.FUNCTION_BY_ID[st["function"]]["title"]})?\n\nOnce a function is selected ALL its {n} points must be '
                                        'calibrated (p. 3-16); leaving earlier shows CAL ERROR and the manual does not say what happens to the points already done.\n\n'
                                        f'The function name is sent once. Continue?', icon='warning'):
                 self.status.set('Function not started.')
@@ -510,7 +394,7 @@ class App(virtualbench.VirtualMixin):
             return
         warn = s.message_warning(st)
         if warn:
-            messagebox.showwarning('Terminal', warn)
+            port.message('warning', 'Terminal', warn)
         if self._last_group != st['group'] or rerun or st['zero']:
             self.io.standby()
             if not self._hookup(st):
@@ -520,13 +404,13 @@ class App(virtualbench.VirtualMixin):
             self._last_group = st['group']
         if st['id'] in adj.own_standard_ids(s.cal_key):
             if st['id'] not in s.own_ack:
-                if not messagebox.askyesno('Own standard', f'{st["id"]}: {adj.source_text(st)}\n\nThe {self.cal_model.get()} cannot make this output ({adj.own_standard_reasons(s.cal_key).get(st["id"], "")}).\n'
+                if not port.ask_yes_no('Own standard', f'{st["id"]}: {adj.source_text(st)}\n\nThe {self.cal_model.get()} cannot make this output ({adj.own_standard_reasons(s.cal_key).get(st["id"], "")}).\n'
                                            'Connect your own standard, set it, and confirm it is stable. The meter is not read, so you vouch for the value.', icon='warning'):
                     return
                 s.acknowledge_own_standard(st)
         elif adj.is_hv(st, s.records[st['id']].output_value) or adj.is_high_current(st, s.records[st['id']].output_value):
             if s.hv_group != st['group']:
-                if not messagebox.askyesno('HIGH VOLTAGE / CURRENT', f'This hook-up group outputs up to {adj.source_text(st)}. Verify CAT-rated leads, connections, clearance and '
+                if not port.ask_yes_no('HIGH VOLTAGE / CURRENT', f'This hook-up group outputs up to {adj.source_text(st)}. Verify CAT-rated leads, connections, clearance and '
                                            'personnel safety, and the fuse of the terminal in use. Enable the output?', icon='warning'):
                     return
                 s.acknowledge_hv(st)
@@ -534,7 +418,7 @@ class App(virtualbench.VirtualMixin):
         if self._abort_req:
             return
         value_text = adj.si_text(rec.output_value, st['point']['unit']) if rec.output_value is not None else adj.point_text(st)
-        if not messagebox.askyesno('Start the point', f'{st["id"]}  {st["function"]}  {st["title"]}\n\nMeter recommended value: {s.rec.raw if s.rec else ""}\nCalibrator: {adj.source_text(st)} (OPERATE, settled)'
+        if not port.ask_yes_no('Start the point', f'{st["id"]}  {st["function"]}  {st["title"]}\n\nMeter recommended value: {s.rec.raw if s.rec else ""}\nCalibrator: {adj.source_text(st)} (OPERATE, settled)'
                                    f'{chr(10) + "CALREF " + rec.calref if rec.calref else ""}\n\nStarting the point CHANGES the calibration of the 8808A (no undo, no save step). The Enter key '
                                    'is sent ONCE.\n\nIs the input stable? Start the point?', icon='warning'):
             self.io.standby()
@@ -542,17 +426,17 @@ class App(virtualbench.VirtualMixin):
             self.status.set(f'{st["id"]}: not started (the value stays confirmed; press Run next point).')
             return
         self.status.set(f'{st["id"]}: calibrating ... (waiting for the 8808A)')
-        self.root.update()
+        port.update(self.root)
         try:
             s.send_point(st, confirmed=True, rerun_ack=rerun)
         except adj.cal_driver.StepIndeterminate as exc:
-            messagebox.showwarning('No completion answer', f'{exc}\n\nThe Enter key was NOT sent again. Press "Run next point" to decide.')
+            port.message('warning', 'No completion answer', f'{exc}\n\nThe Enter key was NOT sent again. Press "Run next point" to decide.')
             self.status.set(f'{st["id"]}: completion not confirmed.')
             return
         except adj.cal_driver.CalibrationError as exc:
             self._last_group = None
             self.status.set(f'{st["id"]}: the 8808A reported an error.')
-            messagebox.showerror('Calibration point failed', f'{exc}\n\nNothing was repeated.')
+            port.message('error', 'Calibration point failed', f'{exc}\n\nNothing was repeated.')
             return
         self.status.set(f'{st["id"]} {st["function"]} {value_text}: done.')
 
@@ -561,14 +445,14 @@ class App(virtualbench.VirtualMixin):
         info = s.review(st)
         choose, unexpected, characterized, waive = 'meter', False, None, False
         if info['verdict'] == 'list':
-            ans = messagebox.askyesnocancel('Meter and Table 3-9 differ', f'{info["text"]}\n\nYes = follow the METER (calibrate at its recommended value).\nNo = use the Table 3-9 value (CALREF is sent).\n'
+            ans = port.ask_yes_no_cancel('Meter and Table 3-9 differ', f'{info["text"]}\n\nYes = follow the METER (calibrate at its recommended value).\nNo = use the Table 3-9 value (CALREF is sent).\n'
                                             'Cancel = stop here.', icon='warning')
             if ans is None:
                 self._abort_req = False
                 return
             choose = 'meter' if ans else 'table'
         elif info['verdict'] == 'other':
-            if not messagebox.askyesno('Unexpected recommended value', f'{info["text"]}\n\nAcknowledge and calibrate at the meter\'s value? (No = stop; use Abort if this is wrong.)', icon='warning'):
+            if not port.ask_yes_no('Unexpected recommended value', f'{info["text"]}\n\nAcknowledge and calibrate at the meter\'s value? (No = stop; use Abort if this is wrong.)', icon='warning'):
                 return
             unexpected = True
         if st['characterize']:
@@ -578,7 +462,7 @@ class App(virtualbench.VirtualMixin):
                 return
             if text.strip():
                 characterized = text.strip()
-            elif messagebox.askyesno('Waive characterization', 'Use the calibrator\'s nominal value without the characterization?', icon='warning'):
+            elif port.ask_yes_no('Waive characterization', 'Use the calibrator\'s nominal value without the characterization?', icon='warning'):
                 waive = True
             else:
                 return
@@ -594,13 +478,13 @@ class App(virtualbench.VirtualMixin):
             flags = s.finish()
         except Exception as exc:
             self.status.set('EXIT problem: ' + str(exc).splitlines()[0])
-            messagebox.showerror('EXIT', str(exc))
+            port.message('error', 'EXIT', str(exc))
             return
         finally:
             self._end()
         msg = 'The calibration mode was left (EXIT). If the meter still shows it, press the SHIFT key at the front panel (owner-stated, not from the manual pages read).' + (f' The meter reported: {", ".join(flags)}.' if flags else '')
         self.status.set(msg + ' Run the As Left performance verification.')
-        messagebox.showinfo('Adjustment complete' + (' (DEMO)' if self.demo else ''), msg + '\n\nRun the As Left performance verification now and keep its report.' +
+        port.message('info', 'Adjustment complete' + (' (DEMO)' if self.demo else ''), msg + '\n\nRun the As Left performance verification now and keep its report.' +
                             ('\n\nDEMO: this was a simulated meter; nothing was recorded as evidence.' if self.demo else ''))
 
     def abort(self, ask=True):
@@ -611,18 +495,18 @@ class App(virtualbench.VirtualMixin):
             self._abort_req = True
             self.status.set('Abort requested: stopping after the current wait.')
             return
-        if ask and not messagebox.askyesno('Abort', 'Stop the adjustment? The calibrator goes to STANDBY and EXIT is sent. A function that is not complete shows CAL ERROR.', icon='warning'):
+        if ask and not port.ask_yes_no('Abort', 'Stop the adjustment? The calibrator goes to STANDBY and EXIT is sent. A function that is not complete shows CAL ERROR.', icon='warning'):
             return
         text = s.abort('operator')
         self._last_group = None
         self._end()
         self.status.set('Adjustment stopped.')
-        messagebox.showinfo('Adjustment stopped', text)
+        port.message('info', 'Adjustment stopped', text)
 
     def disconnect(self):
         s = self.session
         if s and s.cal_mode:
-            if not messagebox.askyesno('Calibration mode is OPEN', 'Abort the adjustment (EXIT is sent) and disconnect?', icon='warning'):
+            if not port.ask_yes_no('Calibration mode is OPEN', 'Abort the adjustment (EXIT is sent) and disconnect?', icon='warning'):
                 return
             self.abort(ask=False)
         if self.io:
@@ -637,7 +521,7 @@ class App(virtualbench.VirtualMixin):
     def on_close(self):
         s = self.session
         if s and s.cal_mode:
-            messagebox.showwarning('Calibration mode is open', 'Use "Abort" (or finish with EXIT) before closing.')
+            port.message('warning', 'Calibration mode is open', 'Use "Abort" (or finish with EXIT) before closing.')
             return
         if self.busy:
             return
@@ -648,16 +532,14 @@ class App(virtualbench.VirtualMixin):
                 self.io.close()
         finally:
             self.audit.close()
-            self.root.destroy()
+            port.close(self.root)
 
 
 def main(argv=None):
     argv = sys.argv if argv is None else argv
     demo, _fast = virtualbench.flags(argv)
-    ui.enable_hidpi()
-    root = tk.Tk()
-    App(root, demo=demo)
-    root.mainloop()
+    port.enable_hidpi()
+    port.run_app(lambda root: App(root, demo=demo))
 
 
 if __name__ == '__main__':

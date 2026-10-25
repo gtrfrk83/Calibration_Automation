@@ -213,13 +213,17 @@ class Exports(unittest.TestCase):
         changed = [l for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
         self.assertTrue(changed and len(changed) % 2 == 0, changed)
         for l in changed:
-            self.assertRegex(l[2:], r'Hz .*Same [\d.]+ (\u00b5|m|n|p)?Hz$', l)
+            # also the AC current rows on a band edge (1 kHz, 5 kHz, 10 kHz): the scope's '(> lo to hi)' rows now give the lower row's CMC, not the larger of two
+            self.assertRegex(l[2:], r'Hz .*Same [\d.]+ (\u00b5|m|n|p)?Hz$|[\d.]+ (\u00b5|m|n|p)?A$', l)
 
     def check_temperature_rows_only(self, n):
         """Only the Temperature rows differ from the baseline, and only in the Uncertainty cell (N/A before, 'x.xx degC' now)."""
         import difflib
         txt = lambda d: self.layout_lines(d / n)
         changed = [l for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
+        ac_i = r'@ [\d.]+ [kM]?Hz .*[\d.]+ (\u00b5|m|n|p)?A\s*$|^[\d.]+ (\u00b5|m|n|p)?A$|[\d.]+ (\u00b5|m|n|p)?A\s*$'     # AC current rows on a scope band edge now take the lower row's CMC
+        ac_rows = [l for l in changed if re.search(ac_i, l[2:]) and not re.search(r'Hz\s*$|degC|\u00b0C|N/A', l[2:])]
+        changed = [l for l in changed if l not in ac_rows]
         self.assertEqual(len(changed), 8, changed)
         for l in changed:
             if not re.match(r'^\s*Temperature\s', l[2:]):          # the 4-24 frequency row: the voltage uncertainty with a Hz unit became the Frequency - Measure CMC

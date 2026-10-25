@@ -53,7 +53,7 @@ class Req:
     key: object = None              # the procedure's own id of the point (so an engine can find the point again)
 
     def text(self):
-        from ui_theme import si_one
+        from ui_theme_core import si_one
         num, sym = si_one(abs(self.value) if self.kind != 'TEMP' else self.value, UNIT[self.kind] if self.kind != 'TEMP' else 'degC')
         s = f'{NAME[self.kind]} {num} {sym}'.replace('  ', ' ')
         if self.frequency not in (None, 0):
@@ -312,30 +312,24 @@ def make_offer(model, requests, per_point_manual=False, unverified='', name=None
     low = (f' TAR is below 1:1 at {len(fit.low_tar)} point(s): the calibrator is less accurate than the limit.' if fit.low_tar else '')
     if fit.complete:
         extra = f' ({len(fit.optional_excluded)} optional point(s) it cannot source)' if fit.optional_excluded else ''
-        text = f'{name} is offered: all {n} sourced points are inside its published specification{extra}.{low} Its remote commands are not fully verified (hover).'
+        text = f'{name} is offered: all {n} sourced points are inside its published specification{extra}.{low} Its remote commands are not fully verified.'
         return Offer(model, fit, True, [], text, fit.tooltip(unverified))
     x = len(fit.excluded)
     if per_point_manual:
         text = (f'{name} is offered, but cannot source {x} of {n} points: for those you connect another standard (the meter is still read automatically).{low} '
-                f'Its remote commands are not fully verified (hover).')
+                f'Its remote commands are not fully verified.')
         return Offer(model, fit, True, [(r, v.reason) for r, v in fit.excluded], text, fit.tooltip(unverified))
     first = fit.reasons(1)[0]
-    text = (f'{name} is NOT offered: it cannot source {x} of {n} points of this procedure ({first[1][0]}{" ..." if x > 1 else ""}). Hover for the list.')
+    text = (f'{name} is NOT offered: it cannot source {x} of {n} points of this procedure ({first[1][0]}{" ..." if x > 1 else ""}).')
     return Offer(model, fit, False, [], text, fit.tooltip(''))
 
 
 def attach_note(parent, offer, ui, widgets=(), row=None, columnspan=2, wrap=340):
     """A muted label saying whether the model is offered and why not, packed under the picker inside `parent` (or gridded at `row` of a grid); the full
-    explanation is the tooltip of the label and of `widgets` (the picker itself).  Returns the label."""
-    from tkinter import ttk
-    lab = ttk.Label(parent, text=offer.text, style='Muted.TLabel', wraplength=ui.px(wrap), justify='left')
-    if row is None:
-        lab.pack(fill='x', pady=(4, 0))
-    else:
-        lab.grid(row=row, column=0, columnspan=columnspan, sticky='w', pady=(0, 6))
-    for w in (lab, *widgets):
-        ui.Tooltip(w, offer.tooltip)
-    return lab
+    explanation is the tooltip of the label and of `widgets` (the picker itself).  Returns the label.
+    The widget is the toolkit's (calibrator_fit_view_tk.attach_note, via ui_port.view); `ui` is the theme module the caller's view already uses."""
+    from ui_port import ui as port
+    return port.view('calibrator_fit_view').attach_note(parent, offer, ui, widgets, row, columnspan, wrap)
 
 
 def picker_values(names, offers):

@@ -135,6 +135,7 @@ class RecordsFromBeforeSlices(unittest.TestCase):
         self.tree = make_tree(self.t / 'suite', ['Fluke_117_Verification', 'Fluke_113_Verification'])
         self.reg = V.Registry(self.t / 'r.sqlite3', base=self.tree, now=lambda: datetime(2026, 10, 22, 9, 0))
         legacy = json.loads((ROOT / 'tests' / 'fixtures' / 'legacy_registry.json').read_text(encoding='utf-8'))['FILES']['Fluke_117_Verification.py']
+        legacy['code'] = list(legacy['code']) + [f for f in ('handheld_dmm_view_tk.py', 'handheld_dmm_view_qt.py', 'ui_port.py', 'ui_port_tk.py') if f not in legacy['code']]    # the UiPort port added these to the sidecar: a record taken before it is meant to say 'Changed' (NOTES 'UiPort, WP-H')
         comps = {'code': {r: V._file_digest(self.tree / r) for r in legacy['code']}, 'spec': {r: V._file_digest(self.tree / r) for r in legacy['spec']},
                  'overrides': {}}
         p = procscan.find('Fluke_117_Verification', self.tree)
