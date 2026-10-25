@@ -140,7 +140,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_VOLT.png",
    "answer": false
   }
  ],
@@ -189,7 +189,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_VOLT.png",
    "answer": true
   },
   {
@@ -248,7 +248,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_VOLT.png",
    "answer": true
   },
   {
@@ -286,7 +286,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES2.png",
    "answer": true
   },
   {
@@ -314,7 +314,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES4.png",
    "answer": true
   },
   {
@@ -342,7 +342,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES2.png",
    "answer": true
   },
   {
@@ -370,7 +370,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES4.png",
    "answer": true
   },
   {
@@ -398,7 +398,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES2.png",
    "answer": true
   },
   {
@@ -426,7 +426,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES4.png",
    "answer": true
   },
   {
@@ -454,7 +454,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES2.png",
    "answer": true
   },
   {
@@ -482,7 +482,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES4.png",
    "answer": true
   },
   {
@@ -510,7 +510,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES2.png",
    "answer": true
   },
   {
@@ -538,7 +538,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES4.png",
    "answer": true
   },
   {
@@ -566,7 +566,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES2.png",
    "answer": true
   },
   {
@@ -594,7 +594,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES4.png",
    "answer": true
   },
   {
@@ -622,7 +622,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES2.png",
    "answer": true
   },
   {
@@ -650,7 +650,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_RES4.png",
    "answer": true
   },
   {
@@ -678,7 +678,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_I_I.png",
    "answer": true
   },
   {
@@ -706,7 +706,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_VOLT.png",
    "answer": true
   },
   {
@@ -754,7 +754,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_I_I.png",
    "answer": true
   },
   {
@@ -782,7 +782,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_VOLT.png",
    "answer": true
   },
   {
@@ -814,7 +814,7 @@
     ]
    ],
    "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_OPEN.png",
    "answer": true
   },
   {
@@ -846,7 +846,7 @@
     ]
    ],
    "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "image": "keysight34401a_panel.png",
+   "image": "hook_34401A_5560A_SHORT.png",
    "answer": true
   },
   {

@@ -400,7 +400,7 @@
      "mV ⎓ / temperature position, temperature (°C)"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_TEMP.png",
    "answer": true
   },
   {
@@ -1543,7 +1543,7 @@
      "mV ⎓ / temperature position, temperature (°C)"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_TEMP.png",
    "answer": true
   },
   {
@@ -1696,7 +1696,7 @@
      "mV ⎓ / temperature position (DC millivolts), range 50.000 mV"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_VOHM.png",
    "answer": true
   },
   {
@@ -10250,7 +10250,7 @@
      "mV ⎓ / temperature position, temperature (°C)"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_TEMP.png",
    "answer": true
   },
   {
@@ -10403,7 +10403,7 @@
      "mV ⎓ / temperature position (DC millivolts), range 50.000 mV"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_VOHM.png",
    "answer": true
   },
   {
@@ -10699,7 +10699,7 @@
     ]
    ],
    "caution": "Ohms compensation is set by you, not by the program: check it before continuing.",
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_OHM4.png",
    "answer": true
   },
   {
@@ -10940,7 +10940,7 @@
      "Ω position (ohms), range 500.00 kΩ"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_VOHM.png",
    "answer": true
   },
   {
@@ -11267,7 +11267,7 @@
      "V ~ position (AC volts), range 5.0000 V"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_VOHM.png",
    "answer": true
   },
   {
@@ -11468,7 +11468,7 @@
      "V ~ position (AC volts), range 50.000 V"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_VOHM.png",
    "answer": true
   },
   {
@@ -11905,7 +11905,7 @@
      "Ω position, capacitance (press the yellow button), range 10.00 nF"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_VOHM.png",
    "answer": true
   },
   {
@@ -12172,7 +12172,7 @@
     ]
    ],
    "caution": "Ohms compensation is set by you, not by the program: check it before continuing.",
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_OHM4.png",
    "answer": true
   },
   {
@@ -12330,7 +12330,7 @@
     ]
    ],
    "caution": "The mA/µA input is fused at 0.44 A: do not exceed the point being tested.",
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_UAMP.png",
    "answer": true
   },
   {
@@ -12702,7 +12702,7 @@
     ]
    ],
    "caution": "The A input is fused at 11 A.",
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_AMP10.png",
    "answer": true
   },
   {
@@ -12873,7 +12873,7 @@
      "LoZ position (289), range 1000 V"
     ]
    ],
-   "image": "fluke28x_panel.png",
+   "image": "hook_fluke28x_5560A_VOHM.png",
    "answer": true
   },
   {

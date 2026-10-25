@@ -160,7 +160,7 @@
     ]
    ],
    "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "image": "fluke8846a_panel.png",
+   "image": "hook_8846A_5560A_SHORT.png",
    "answer": false
   }
  ],
@@ -213,7 +213,7 @@
     ]
    ],
    "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "image": "fluke8846a_panel.png",
+   "image": "hook_8846A_5560A_SHORT.png",
    "answer": true
   },
   {
@@ -276,7 +276,7 @@
     ]
    ],
    "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "image": "fluke8846a_panel.png",
+   "image": "hook_8846A_5560A_SHORT.png",
    "answer": true
   },
   {

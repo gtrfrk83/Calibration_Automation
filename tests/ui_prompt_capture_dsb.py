@@ -108,6 +108,8 @@ def _run_dsb(make_harness):
         def operator(rec):
             if rec['kind'] != 'operator_prompt':
                 return None
+            if box['app']._cur is None:                 # the 'Before the run' standards screen comes before the first point: nothing to wire yet
+                return True
             run = box['app']._cur['run']
             txt = ' '.join(s if isinstance(s, str) else ' '.join(s) for s in rec['steps']).upper()
             f = run['reference_hz'] if 'REFERENCE' in txt else run['frequency']
@@ -137,7 +139,7 @@ def _run_dsb(make_harness):
 
         def wrong_input(rec, _inner=inner, _app=app, _bench=bench):
             r = _inner(rec)
-            if rec['kind'] == 'operator_prompt' and _app._cur['run']['op'] == 'std_freq':
+            if rec['kind'] == 'operator_prompt' and _app._cur is not None and _app._cur['run']['op'] == 'std_freq':
                 _bench.connected = 'std'
             return r
         hn.answers.rules[-1] = wrong_input

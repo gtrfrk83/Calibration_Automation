@@ -1871,6 +1871,36 @@
   {
    "answer": true,
    "buttons": [
+    "Continue with the run",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Instrument ID",
+     "A-100"
+    ],
+    [
+     "Points to run",
+     "71"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "5560A - connected at ASRL9::INSTR",
+     "Serves 69 point(s)."
+    ],
+    [
+     "5522A - connected",
+     "Serves 1 point(s)."
+    ]
+   ],
+   "text": "Standards for this run",
+   "title": "Before the run"
+  },
+  {
+   "answer": true,
+   "buttons": [
     "Done - continue",
     "Cancel"
    ],
@@ -2377,6 +2407,37 @@
   }
  ],
  "manual_run_dmm": [
+  {
+   "answer": true,
+   "buttons": [
+    "Continue with the run",
+    "Cancel"
+   ],
+   "caution": "2 standard(s) not connected. Cancel to fix the address or the cable and press Connect, or continue to do those points by hand.",
+   "facts": [
+    [
+     "Instrument ID",
+     "A-100"
+    ],
+    [
+     "Points to run",
+     "71"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "5560A - NOT connected",
+     "69 point(s) that use it are done by hand: the program tells you what to set and asks for the reading."
+    ],
+    [
+     "5522A - NOT connected",
+     "1 point(s) that use it are done by hand: the program tells you what to set and asks for the reading."
+    ]
+   ],
+   "text": "Standards for this run",
+   "title": "Before the run"
+  },
   {
    "answer": true,
    "buttons": [
@@ -4170,6 +4231,36 @@
   {
    "answer": true,
    "buttons": [
+    "Continue with the run",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Instrument ID",
+     "A-100"
+    ],
+    [
+     "Points to run",
+     "15"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "5790B - connected",
+     "Serves 12 point(s)."
+    ],
+    [
+     "53132A - connected",
+     "Serves 3 point(s)."
+    ]
+   ],
+   "text": "Standards for this run",
+   "title": "Before the run"
+  },
+  {
+   "answer": true,
+   "buttons": [
     "Done - continue",
     "Cancel"
    ],
@@ -4982,6 +5073,36 @@
   }
  ],
  "measuring_standard_typed": [
+  {
+   "answer": true,
+   "buttons": [
+    "Continue with the run",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Instrument ID",
+     "A-100"
+    ],
+    [
+     "Points to run",
+     "15"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "5790B - connected",
+     "Serves 12 point(s)."
+    ],
+    [
+     "53132A - connected",
+     "Serves 3 point(s)."
+    ]
+   ],
+   "text": "Standards for this run",
+   "title": "Before the run"
+  },
   {
    "answer": true,
    "buttons": [
@@ -5921,6 +6042,36 @@
   }
  ],
  "real_run_dmm": [
+  {
+   "answer": true,
+   "buttons": [
+    "Continue with the run",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Instrument ID",
+     "A-100"
+    ],
+    [
+     "Points to run",
+     "71"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "5560A - connected at ASRL9::INSTR",
+     "Serves 69 point(s)."
+    ],
+    [
+     "5522A - connected",
+     "Serves 1 point(s)."
+    ]
+   ],
+   "text": "Standards for this run",
+   "title": "Before the run"
+  },
   {
    "answer": true,
    "buttons": [
@@ -7714,6 +7865,36 @@
   {
    "answer": true,
    "buttons": [
+    "Continue with the run",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Instrument ID",
+     "A-100"
+    ],
+    [
+     "Points to run",
+     "15"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "5790B - connected",
+     "Serves 12 point(s)."
+    ],
+    [
+     "53132A - connected",
+     "Serves 3 point(s)."
+    ]
+   ],
+   "text": "Standards for this run",
+   "title": "Before the run"
+  },
+  {
+   "answer": true,
+   "buttons": [
     "Done - continue",
     "Cancel"
    ],
@@ -8529,6 +8710,36 @@
   }
  ],
  "real_run_scope": [
+  {
+   "answer": true,
+   "buttons": [
+    "Continue with the run",
+    "Cancel"
+   ],
+   "facts": [
+    [
+     "Instrument ID",
+     "A-100"
+    ],
+    [
+     "Points to run",
+     "15"
+    ]
+   ],
+   "kind": "operator_prompt",
+   "steps": [
+    [
+     "5560A - connected at ASRL9::INSTR",
+     "Serves 8 point(s)."
+    ],
+    [
+     "5522A - connected",
+     "Serves 7 point(s)."
+    ]
+   ],
+   "text": "Standards for this run",
+   "title": "Before the run"
+  },
   {
    "answer": true,
    "buttons": [

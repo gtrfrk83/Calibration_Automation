@@ -414,7 +414,7 @@
     ]
    ],
    "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_OPEN.png",
    "answer": true
   },
   {
@@ -450,7 +450,7 @@
     ]
    ],
    "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_SHORT.png",
    "answer": true
   },
   {
@@ -562,7 +562,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_VOLT.png",
    "answer": true
   },
   {
@@ -622,7 +622,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_I_3A.png",
    "answer": true
   },
   {
@@ -662,7 +662,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_RES4.png",
    "answer": true
   },
   {
@@ -702,7 +702,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_RES2.png",
    "answer": true
   },
   {
@@ -742,7 +742,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_VOLT.png",
    "answer": true
   },
   {
@@ -782,7 +782,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_VOLT.png",
    "answer": true
   },
   {
@@ -832,7 +832,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_I_3A.png",
    "answer": true
   },
   {
@@ -872,7 +872,7 @@
     ]
    ],
    "caution": "Continue only after physically verifying the connections.",
-   "image": "keysight34461a_34465a_panel.png",
+   "image": "hook_34461A_5560A_I_10A.png",
    "answer": true
   }
  ],

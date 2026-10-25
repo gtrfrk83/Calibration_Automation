@@ -1342,7 +1342,10 @@ class SameAsTkTests(unittest.TestCase):
                 with mock.patch.object(C, 'ask_yes_no', return_value=yes):
                     yield
             env = sc.Env(panel, new, answer)
-            with mock.patch.object(C, 'ask_yes_no', return_value=True):
+
+            def blocked(win, items):                   # the Qt list of what blocks Save answers as the Tk 'Save as a draft?' question does
+                return 'draft' if C.ask_yes_no(win, 'Save as a draft?', '') else 'edit'
+            with mock.patch.object(C, 'ask_yes_no', return_value=True), mock.patch.object(dsb_editor.GridEditorWindow, 'ask_save_blocked', blocked):
                 log = sc.run_all(env)
             dump = sc.dump_storage(tmp / 'user_specs', tmp / 'lab_registry.sqlite3')
         for w in windows:

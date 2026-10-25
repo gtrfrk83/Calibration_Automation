@@ -26,7 +26,7 @@
     ],
     [
      "Calibrator",
-     "Fluke 5522A: Fluke 5522A is offered, but cannot source 1 of 119 points: for those you connect another standard (the meter is still read automatically). Its remote commands are not fully verified (hover)."
+     "Fluke 5522A: Fluke 5522A is offered, but cannot source 1 of 119 points: for those you connect another standard (the meter is still read automatically). Its remote commands are not fully verified."
     ]
    ],
    "kind": "operator_prompt",
