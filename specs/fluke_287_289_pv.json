@@ -48,7 +48,8 @@
      "Calibrator",
      "Ohms compensation OFF (COMP off) and the auxiliary cable removed (manual, before step 15)."
     ]
-   ]
+   ],
+   "diagram": "diagrams/fluke28x_panel.png"
   },
   "OHM4": {
    "title": "Ohms: 2-wire COMP, 4-wire connection",
@@ -67,7 +68,8 @@
      "Connect in the 4-wire configuration: NORMAL HI and AUX HI to the meter V input, NORMAL LO and AUX LO to COM (the calibrator senses at the meter terminals)."
     ]
    ],
-   "caution": "Ohms compensation is set by you, not by the program: check it before continuing."
+   "caution": "Ohms compensation is set by you, not by the program: check it before continuing.",
+   "diagram": "diagrams/fluke28x_panel.png"
   },
   "UAMP": {
    "title": "Connect for µA / mA",
@@ -82,7 +84,8 @@
      "Calibrator AUX HI / LO (5560A: VI AUX and OUTPUT LO) to the meter mA/µA (red) and COM inputs."
     ]
    ],
-   "caution": "The mA/µA input is fused at 0.44 A: do not exceed the point being tested."
+   "caution": "The mA/µA input is fused at 0.44 A: do not exceed the point being tested.",
+   "diagram": "diagrams/fluke28x_panel.png"
   },
   "AMP10": {
    "title": "Connect for A",
@@ -97,7 +100,8 @@
      "Calibrator 20 A output and AUX LO (5560A: 30A and OUTPUT LO) to the meter A (red) and COM inputs, with leads rated for 10 A."
     ]
    ],
-   "caution": "The A input is fused at 11 A."
+   "caution": "The A input is fused at 11 A.",
+   "diagram": "diagrams/fluke28x_panel.png"
   },
   "TEMP": {
    "title": "Connect the thermocouple",
@@ -115,7 +119,8 @@
      "Connect",
      "K-type thermocouple (mini-plug both ends) from the calibrator TC output to the Fluke 80AK in the meter V and COM inputs. The meter must be within ±1 °C of ambient (can take hours); allow the connections 2 minutes to stabilize."
     ]
-   ]
+   ],
+   "diagram": "diagrams/fluke28x_panel.png"
   }
  },
  "steps": [

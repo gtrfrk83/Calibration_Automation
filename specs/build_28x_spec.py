@@ -213,6 +213,7 @@ for n, (title, setup, q) in enumerate(F, 1):
         s['note'] = 'With "Read over IR" selected this check is done automatically (the meter must answer ID with its model).'
     steps.append(s)
 
+PANEL_PICTURE = 'diagrams/fluke28x_panel.png'       # the owner's photo of the 287 / 289 front panel (jack layout: A, mA uA, COM, V Ohm); every cable-change prompt shows it
 GROUPS = {
     'VOHM': dict(title='Connect for voltage, resistance (2-wire) and capacitance',
                  summary='Calibrator NORMAL HI / LO (5560A: OUTPUT V/Ω) to the meter V and COM inputs.',
@@ -256,7 +257,7 @@ spec = {
                         'IR cable; with IR the program also checks the meter\'s function, range and REL / Low Pass state before recording.')},
     'models': {'287': dict(name='Fluke 287', brand='Fluke', model_note='Fluke 287 True-rms logging multimeter'),
                '289': dict(name='Fluke 289', brand='Fluke', model_note='Fluke 289 True-rms industrial logging multimeter')},
-    'groups': GROUPS,
+    'groups': {k: dict(v, diagram=v.get('diagram', PANEL_PICTURE)) for k, v in GROUPS.items()},
     'steps': steps,
 }
 
