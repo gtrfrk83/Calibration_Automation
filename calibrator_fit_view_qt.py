@@ -23,6 +23,4 @@ def attach_note(parent, offer, ui=None, widgets=(), row=None, columnspan=2, wrap
         if not isinstance(lay, QGridLayout):
             raise TypeError('attach_note(row=...) needs a grid layout')
         lay.addWidget(lab, row, 0, 1, columnspan)
-    for w in (lab, *widgets):
-        w.setToolTip(offer.tooltip)
-    return lab
+    return lab                                  # no hover box: the line says what matters

@@ -158,6 +158,9 @@ def pad_reading(p, text):
         except (KeyError, InvalidOperation, TypeError):
             pass
     whole, _, frac = t.partition('.')
+    if whole in ('', '+', '-'):                       # '.5' is written 0.5 (and '-.5' as -0.5), whatever the resolution
+        whole += '0'
+        t = whole + '.' + frac if '.' in t else whole
     if len(frac) >= want:
         return t
     return f'{whole}.{frac.ljust(want, "0")}' if want else whole

@@ -678,8 +678,8 @@ class CalibratorNote(QtCase):
         col.addWidget(picker)
         lab = calibrator_fit_view_qt.attach_note(host, offer, None, widgets=(picker,))
         self.assertEqual(lab.text(), 'Model offered.')
-        self.assertEqual(lab.toolTip(), offer.tooltip)
-        self.assertEqual(picker.toolTip(), offer.tooltip)
+        self.assertEqual(lab.toolTip(), '')                    # no hover box
+        self.assertEqual(picker.toolTip(), '')
         self.assertEqual(col.count(), 2)
         grid_host = QWidget()
         grid = QGridLayout(grid_host)

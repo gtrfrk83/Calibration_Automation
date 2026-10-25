@@ -19,9 +19,9 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QPointF, QRectF, Qt, Signal
+from PySide6.QtCore import QEvent, QObject, QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QIcon, QPainter, QPainterPath, QPalette, QPen, QPixmap
-from PySide6.QtWidgets import QApplication, QMenu
+from PySide6.QtWidgets import QApplication, QComboBox, QMenu, QStyledItemDelegate
 
 import ui_theme_core as core
 
@@ -499,7 +499,13 @@ QPushButton[role="icon"]:hover {{ background: {t['btn_hi']}; }}
 QPushButton[role="icon"]:focus {{ border: 2px solid {t['focus']}; padding: 0; }}
 
 /* check / radio */
-QCheckBox, QRadioButton {{ spacing: 8px; background: transparent; }}
+QCheckBox, QRadioButton {{ spacing: 8px; background: transparent; min-height: 22px; padding: 1px 0; }}
+QRadioButton[role="choice"] {{ border: 1px solid {t['border_strong']}; border-radius: {rs}px; padding: 14px 24px 14px 16px; font-weight: 700; font-size: {m.font_base + 3}px; min-height: 32px; background: {t['field']}; }}
+QRadioButton[role="choice"]::indicator {{ width: 20px; height: 20px; }}
+QRadioButton[role="choice"]:hover {{ border-color: {t['primary']}; }}
+QRadioButton[role="choice"]:focus {{ border: 2px solid {t['focus']}; padding: 13px 23px 13px 15px; }}
+QRadioButton[role="choice"][tone="good"]:checked {{ background: {t['good_bg']}; border: 2px solid {t['good']}; color: {t['good']}; padding: 13px 23px 13px 15px; }}
+QRadioButton[role="choice"][tone="bad"]:checked {{ background: {t['bad_bg']}; border: 2px solid {t['bad']}; color: {t['bad']}; padding: 13px 23px 13px 15px; }}
 QCheckBox:disabled, QRadioButton:disabled {{ color: {t['disabled_fg']}; }}
 QCheckBox::indicator, QRadioButton::indicator {{ width: 16px; height: 16px; border: 1px solid {t['border_strong']}; background: {t['field']}; }}
 QCheckBox::indicator {{ border-radius: {rs}px; }}
@@ -615,6 +621,7 @@ class ThemeManager(QObject):
         self._tokens = build_tokens(name)
         app = app or QApplication.instance()
         if app is not None:
+            _install_combo_rows(app)
             self._applied_qss = build_qss(self._tokens)
             app.setPalette(build_palette(self._tokens))
             app.setStyleSheet(self._applied_qss)
@@ -652,6 +659,27 @@ def name() -> str:
 
 def is_dark() -> bool:
     return manager().name == 'dark'
+
+
+class _ComboRows(QObject):
+    """Every combo box gets the styled item delegate: with the style sheet's item padding the default delegate under-reports the row height, so the pop-up
+    list was cut off after the first row and the rest had to be scrolled to."""
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Polish and isinstance(obj, QComboBox) and not getattr(obj, '_rows_fixed', False):
+            obj._rows_fixed = True
+            obj.setItemDelegate(QStyledItemDelegate(obj))
+        return False
+
+
+_combo_rows = None
+
+
+def _install_combo_rows(app) -> None:
+    global _combo_rows
+    if _combo_rows is None and app is not None:
+        _combo_rows = _ComboRows(app)
+        app.installEventFilter(_combo_rows)
 
 
 def set_theme(theme_name: str, *, save: bool = False) -> str:

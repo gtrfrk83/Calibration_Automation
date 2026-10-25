@@ -421,11 +421,12 @@ class ReadingDialog(ModalDialog):
             row.setSpacing(16)
             for value, text in (('y', 'Yes - as stated'), ('n', 'No - it does not')):
                 r = QRadioButton(text)
+                r.setProperty('role', 'choice')                 # a bordered button; Yes turns green and No red when picked
+                r.setProperty('tone', 'good' if value == 'y' else 'bad')
                 bind(r, self.yes, value=value)
                 r.toggled.connect(lambda _on: self.error.setText(''))
                 self.radios[value] = r
-                row.addWidget(r)
-            row.addStretch(1)
+                row.addWidget(r, 1)
             cl.addLayout(row)
         self.error = common.ToneLabel('bad')
         self.error.setTextFormat(Qt.TextFormat.PlainText)

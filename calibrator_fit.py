@@ -312,15 +312,15 @@ def make_offer(model, requests, per_point_manual=False, unverified='', name=None
     low = (f' TAR is below 1:1 at {len(fit.low_tar)} point(s): the calibrator is less accurate than the limit.' if fit.low_tar else '')
     if fit.complete:
         extra = f' ({len(fit.optional_excluded)} optional point(s) it cannot source)' if fit.optional_excluded else ''
-        text = f'{name} is offered: all {n} sourced points are inside its published specification{extra}.{low} Its remote commands are not fully verified (hover).'
+        text = f'{name} is offered: all {n} sourced points are inside its published specification{extra}.{low} Its remote commands are not fully verified.'
         return Offer(model, fit, True, [], text, fit.tooltip(unverified))
     x = len(fit.excluded)
     if per_point_manual:
         text = (f'{name} is offered, but cannot source {x} of {n} points: for those you connect another standard (the meter is still read automatically).{low} '
-                f'Its remote commands are not fully verified (hover).')
+                f'Its remote commands are not fully verified.')
         return Offer(model, fit, True, [(r, v.reason) for r, v in fit.excluded], text, fit.tooltip(unverified))
     first = fit.reasons(1)[0]
-    text = (f'{name} is NOT offered: it cannot source {x} of {n} points of this procedure ({first[1][0]}{" ..." if x > 1 else ""}). Hover for the list.')
+    text = (f'{name} is NOT offered: it cannot source {x} of {n} points of this procedure ({first[1][0]}{" ..." if x > 1 else ""}).')
     return Offer(model, fit, False, [], text, fit.tooltip(''))
 
 
