@@ -44,7 +44,8 @@ CMC_KIND_MAP = {'DCV': ('DCV',), 'DCI': ('DCI',), 'OHM': ('OHM2', 'OHM4'), 'CAP'
                 'FREQ': ('FREQ', 'PERIOD', 'GEN_FREQ', 'SCOPE_TIMEBASE'),                      # Time & Frequency
                 'oscilloscope.dc': ('SCOPE_GAIN', 'SCOPE_OFFSET', 'GEN_OFFSET'),
                 'oscilloscope.flatness': ('SCOPE_BW', 'GEN_FLAT'),
-                'oscilloscope.amplitude': ('GEN_AMPL',)}
+                'oscilloscope.amplitude': ('GEN_AMPL',),
+                'ACFLAT': ('GEN_FLAT',)}                                                         # AC Voltage - Measure, AC Flatness relative to 1 kHz (generator flatness)
 # Kinds the suite resolves an uncertainty for TODAY: the standards matcher / handheld_dmm.has_uncertainty give a value (TEMP in degC is not in the CMC table but the
 # handheld procedures print one, so it stays).  Every other should-have kind is an ERROR until the author waives it ('not_implemented').
 RESOLVABLE_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'TEMP')
