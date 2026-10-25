@@ -4,7 +4,7 @@ GridModel.calc_row() uses what form() returns.  The Low / High limit boxes are R
 pair is flagged and offered 'Clear typed limits'.  Port of datasheet_builder_ui.Inspector; no Tk import."""
 from __future__ import annotations
 
-from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtCore import QEvent, QObject, QTimer, Qt
 from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QRadioButton, QScrollArea,
                                QVBoxLayout, QWidget)
 
@@ -455,6 +455,17 @@ class Inspector(QFrame):
         self.tol_names = ('iv', 'fs', 'fs_scale', 'floor', 'db', 'calc')
         self.hint_l = C.small('Tick a tolerance type to show its box.')
         lay.addWidget(self.hint_l)
+        self.aside_l = C.ToneLabel('', 'warn')                     # which tolerance types Asymmetrical set aside (they come back when it is unticked)
+        self.aside_l.hide()
+        lay.addWidget(self.aside_l)
+        self.preview_l = C.ToneLabel('', 'info')                  # what Calc would give for the boxes as they are now (nothing is changed until Calc)
+        self.preview_l.hide()
+        lay.addWidget(self.preview_l)
+        self._pv_sig = None
+        self._pv_timer = QTimer(self)
+        self._pv_timer.setInterval(450)
+        self._pv_timer.timeout.connect(self.refresh_preview)
+        self._pv_timer.start()
         self.btns = QWidget()                                   # the footer of the panel: always in view at the bottom right, outside the scrolling sections
         bl = QHBoxLayout(self.btns)
         bl.setContentsMargins(0, 4, 8, 0)
@@ -542,6 +553,46 @@ class Inspector(QFrame):
         self.remark_v, self.run_v = C.Bind(self.remark_e), C.Bind(self.run_cb)
 
     # ---- visibility
+    def _mark_aside(self):
+        """Asymmetrical uses the floor boxes only: the other tolerance chips are greyed and a line names the ones that were set aside."""
+        on = bool(self.b['asym'].get()) and not self._legacy_asym
+        keys = [k for k, _l, _h in M.SPEC_TYPES]
+        for k, chip in zip(keys, self.chips):
+            chip.setEnabled(not (on and k != 'floor'))
+        before = getattr(self, '_types_before_asym', None) or {}
+        names = [CHIP_LABELS[k] for k in keys if k != 'floor' and before.get(k)]
+        if on and names:
+            self.aside_l.setText('Set aside while Asymmetrical is ticked (they come back when you untick it): ' + ', '.join(names) + '.')
+            self.aside_l.show()
+        else:
+            self.aside_l.hide()
+
+    def _form_signature(self):
+        try:
+            return repr(sorted(self.form().items(), key=lambda kv: kv[0]))
+        except Exception:
+            return None
+
+    def refresh_preview(self):
+        """Every so often: when the boxes differ from what the row has, show the limits Calc would give (grey), or what is wrong (amber).  Changes nothing."""
+        if not self.isVisible() or not hasattr(self, 'preview_l'):
+            return
+        sig = self._form_signature()
+        if sig is None or sig == self._pv_sig or not self.win.model.selected_row():
+            return
+        self._pv_sig = sig
+        try:
+            kind, text = self.win.model.preview_limits(self.form(), self.win.model.sel_key)
+        except Exception:
+            self.preview_l.hide()
+            return
+        if not text:
+            self.preview_l.hide()
+            return
+        self.preview_l.setText(('Calc would give: ' if kind == 'limits' else 'Not ready: ') + text)
+        self.preview_l.set_tone('info' if kind == 'limits' else 'warn')
+        self.preview_l.show()
+
     def types_changed(self):
         self.show_fields()
 
@@ -574,6 +625,7 @@ class Inspector(QFrame):
         self.load_side()
         self._sync_side()
         self.show_fields()
+        self._mark_aside()
 
     def operand_changed(self):
         self.save_side()
@@ -662,6 +714,9 @@ class Inspector(QFrame):
         self.sides = {'plus': dict(form['plus']), 'minus': dict(form['minus'])}
         self.operand_now = 'plus'
         self._types_before_asym = None
+        self._pv_sig = None
+        if hasattr(self, 'preview_l'):
+            self.preview_l.hide()
         for k in ('nominal', 'units', 'freq', 'level', 'expect', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode', 'low', 'high'):
             self.v[k].set(form[k])
         for k in M.SPEC_ORDER:
@@ -697,6 +752,8 @@ class Inspector(QFrame):
         self.copy_b.setText('Use tolerance of row above' if blank else 'Copy tolerance to rows below')
         self.calc_b.setEnabled(usable)
         self.copy_b.setEnabled(usable or blank)
+        self._mark_aside()
+        self._pv_sig = self._form_signature()               # the boxes as the row has them: only a change from here is previewed
         try:
             self.set_uncertainty(*self.win.model.uncertainty_line())
         except Exception:                                    # the source line is information only: never stop the panel from loading

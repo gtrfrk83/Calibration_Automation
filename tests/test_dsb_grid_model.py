@@ -878,7 +878,11 @@ class DeepDiveFixTests(Base):
         fn = g.ds.functions[0]
         p = fn.points[0]
         self.assertEqual(p.settings.get('waveform'), 'square')
-        self.assertIn('level 1 V square', g.cell_text(g.sel_key, 'nominal') if g.point_of(g.sel_key)[1] else g.rows()[1]['nominal'])
+        row = next(r for r in g.rows() if r['kind'] == 'point')
+        self.assertEqual(row['badge'], 'square')                                          # drawn as a tag in the sheet
+        self.assertNotIn('square', row['nominal'])
+        self.assertIn('level 1 V square', g.cell_text(row['key'], 'nominal'))             # the Edit Cell bar still has the whole text
+        self.assertIn(row['status'], ('good', 'warn', 'bad', 'off'))
         self.assertEqual(g.panel_state(next(r['key'] for r in g.rows() if r['kind'] == 'point'))['form']['level'], '1 V square')
         key = next(r['key'] for r in g.rows() if r['kind'] == 'point')
         self.assertTrue(g.commit_cell('1 kHz, level 1 V', key, 'nominal', move='stay').ok)       # sine again: nothing stored

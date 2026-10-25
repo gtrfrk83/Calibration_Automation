@@ -2035,7 +2035,7 @@ class GridModel(CheckMixin, EditorModel):
 
         def add(**kw):
             for k, v in (('found', ''), ('left', ''), ('oot', ''), ('problem', ''), ('level', ''), ('bad', ()), ('enabled', True), ('remark', False),
-                         ('step', ''), ('function', ''), ('nominal', ''), ('low', ''), ('high', ''), ('formula', ''), ('limits_from', ''), ('pid', ''), ('fid', '')):
+                         ('step', ''), ('function', ''), ('nominal', ''), ('low', ''), ('high', ''), ('formula', ''), ('limits_from', ''), ('pid', ''), ('fid', ''), ('badge', ''), ('status', '')):
                 kw.setdefault(k, v)
             kw['n'] = len(out) + 1
             out.append(kw)
@@ -2047,10 +2047,17 @@ class GridModel(CheckMixin, EditorModel):
                 if p.enabled:
                     k += 1
                 rng = fn.range(p.range_id)
+                issue = self._issue(by_point.get(p.id, []), fn, p)
+                limits = self.limit_fields(fn, p)
+                badge = p.settings.get('waveform', '') if p.amplitude is not None else ''
+                nominal = self.nominal_text(fn, p)
+                if badge and nominal.endswith(' ' + badge):
+                    nominal = nominal[:-len(badge) - 1]                  # the waveform is drawn as a small tag, not as text in the cell (the Edit Cell bar still shows it)
+                status = ('off' if not p.enabled else 'bad' if issue.get('level') == 'error' else 'warn' if issue.get('level') == 'warn'
+                          or (not fn.info.get('passfail') and not limits['low'] and not limits['high']) else 'good')
                 add(key=f'p:{fn.id}:{p.id}', kind='point', fid=fn.id, pid=p.id, step=(f'{fi}-{k}' if p.enabled else '') + (' *' if p.note else ''),
                     function=f'{fn.name}, {self.range_text(fn, rng)} range' if rng is not None and len(fn.ranges) > 1 else fn.name,
-                    nominal=self.nominal_text(fn, p), **self.limit_fields(fn, p), enabled=p.enabled, remark=bool(p.note),
-                    **self._issue(by_point.get(p.id, []), fn, p))
+                    nominal=nominal, badge=badge, status=status, **limits, enabled=p.enabled, remark=bool(p.note), **issue)
             if not fn.points:
                 add(key=f'e:{fn.id}', kind='blank', fid=fn.id)
         for i in range(max(SPARE_ROWS, MIN_ROWS - len(out)) + self.extra_blank):
@@ -3137,6 +3144,37 @@ class GridModel(CheckMixin, EditorModel):
         if 'fs' not in form.get('types', []) or not str(form.get('fs_scale') or '').strip():
             return None
         return db.parse_quantity(with_units(str(form['fs_scale']), units), fn.unit or None)
+
+    def preview_limits(self, form, key=None):
+        """What Calc WOULD give for the boxes, without changing anything: ('limits', 'Low limit ..., High limit ...') or ('error', why).  Runs the same Calc on a
+        throw-away copy of the sheet and puts everything back (the undo list, the cursor, the sheet) afterwards."""
+        if getattr(self, 'locked', False):
+            return 'error', LOCKED_MESSAGE
+        keep = (self.ds, self._undo, self._redo, self.sel_key, self.sel_col, self.fid, self.borrowed_tol, dict(self.__dict__.get('_sel_memory', {})))
+        was_fresh = self.match_fresh()
+        try:
+            self.ds = db.Datasheet.from_json(self.ds.to_json())
+            self._undo, self._redo = [], []
+            if form.get('multi'):
+                return 'error', 'Several rows at once: the limits are shown after Calc.'
+            res = self._calc_row(key, dict(form))
+            if not res.ok:
+                return 'error', res.message
+            sel = res.detail if isinstance(res.detail, str) else self.sel_key
+            fn, p = self.point_of(sel)
+            if p is None or fn.info.get('passfail'):
+                return 'limits', ''
+            text = self.limits_display(fn, p)
+            return 'limits', text
+        except (db.DsError, ArithmeticError, ValueError, KeyError, TypeError) as exc:
+            return 'error', plain_error(exc)
+        finally:
+            (self.ds, self._undo, self._redo, self.sel_key, self.sel_col, self.fid, self.borrowed_tol, mem) = keep
+            self.__dict__['_sel_memory'] = mem
+            self._rev += 1                                   # every cache made while the copy was in place is out of date now (the revision only ever goes up)
+            self._rows_cache = None
+            if was_fresh:
+                self.match_rev = self._rev                   # the standards check was for this very sheet, and it still is
 
     def calc_row(self, key=None, form=None):
         res = self._calc_row(key, form)

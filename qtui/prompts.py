@@ -281,6 +281,35 @@ def _step_row(n: int, step) -> QWidget:
     return row
 
 
+class _EnlargeablePicture(QLabel):
+    """The hook-up picture of a prompt: a click opens it at full size in its own window (the prompt keeps its place behind it)."""
+
+    def __init__(self, full: QPixmap):
+        super().__init__()
+        self._full = full
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setToolTip('Click to enlarge the picture')
+
+    def mousePressEvent(self, ev):
+        if ev.button() == Qt.MouseButton.LeftButton:
+            self.enlarge()
+        super().mousePressEvent(ev)
+
+    def enlarge(self):
+        from PySide6.QtWidgets import QScrollArea
+        dlg = ModalDialog(self.window(), 'Hook-up picture', width=900)
+        dlg.title_label.hide()
+        big = QLabel()
+        big.setPixmap(_on_white(self._full))
+        area = QScrollArea()
+        area.setWidget(big)
+        area.setMinimumSize(min(self._full.width() + 24, 1100), min(self._full.height() + 24, 760))
+        dlg.body.addWidget(area)
+        dlg.add_button('Close', cancel=True, result='cancel', default=True)
+        fit_dialog(dlg)
+        dlg.run()
+
+
 def operator_prompt(parent, title: str, heading: str, steps, facts=None, caution=None, ok='OK', cancel='Cancel', image=None, layout=None, card=None) -> bool:
     """Confirm-the-hook-up / safety prompt.  True = the OK button (Enter), False = Cancel / Esc / closing the window.  Same content as ui_theme.confirm_steps:
     heading, key facts card, 'Before you continue', numbered steps (bold lead + detail), optional caution banner, optional PNG hook-up picture beside the text."""
@@ -305,7 +334,7 @@ def operator_prompt(parent, title: str, heading: str, steps, facts=None, caution
     if not pix.isNull():
         row = QHBoxLayout()
         row.setSpacing(M.xl)
-        pic = QLabel()
+        pic = _EnlargeablePicture(pix)
         pic.setObjectName('hookup_picture')
         pic.setPixmap(_on_white(pix.scaledToWidth(min(pix.width(), 460), Qt.TransformationMode.SmoothTransformation)))      # a diagram is drawn on white
         pic.setFixedSize(pic.pixmap().size() / pic.pixmap().devicePixelRatio())

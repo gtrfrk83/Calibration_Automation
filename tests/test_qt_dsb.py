@@ -1137,6 +1137,37 @@ class SheetQualityTests(QtDsbCase):
         win.sync()
         self.assertTrue(win.delete_b.isEnabled())
 
+    def test_the_panel_previews_the_limits_without_changing_the_sheet(self):
+        win, keys = self._two_rows()
+        win.model.select(keys[0], 'low')
+        win.sync()
+        box = win.panel_box
+        box.show()
+        before = win.model._snapshot()
+        undo = len(win.model._undo)
+        box.types['iv'].set(True)
+        box.v['iv'].set('0.05')
+        box.refresh_preview()
+        self.assertTrue(box.preview_l.isVisibleTo(box))
+        self.assertIn('Calc would give', box.preview_l.text())
+        self.assertIn('Low limit', box.preview_l.text())
+        box.v['iv'].set('abc')
+        box.refresh_preview()
+        self.assertIn('Not ready', box.preview_l.text())
+        self.assertEqual(win.model._snapshot(), before)
+        self.assertEqual(len(win.model._undo), undo)
+        self.assertEqual(win.model.sel_key, keys[0])
+
+    def test_the_sheet_marks_rows_with_a_status_strip_and_the_waveform_tag(self):
+        win = self.new_window()
+        win.function_chosen('Frequency')
+        self.type_cell(win, '1 kHz, level 1 V square')
+        row = next(r for r in win.model.rows() if r['kind'] == 'point')
+        self.assertEqual(row['badge'], 'square')
+        self.assertIn(row['status'], ('warn', 'bad'))                       # no limits yet
+        pix = win.sheet.viewport().grab()                                    # painting the rows must not raise
+        self.assertFalse(pix.isNull())
+
     def test_resolution_section_sits_under_limits_and_is_open(self):
         win, key = self.build()
         win.model.select(key, 'low')

@@ -451,6 +451,12 @@ class ReadingDialog(ModalDialog):
         else:                                       # one press answers: No is a red button like Stop run, Yes is the Enter button
             self.no_button = self.add_button('No', role='danger', result='no', callback=self._no)
             self.record_button = self.add_button('Yes  (Enter)', role='primary', result='record', default=True, callback=self._yes)
+            for b in (self.no_button, self.record_button):          # the two answers are big and easy to hit; Yes is the one Enter presses
+                f = b.font()
+                f.setPointSizeF(f.pointSizeF() + 3)
+                f.setBold(True)
+                b.setFont(f)
+                b.setMinimumSize(150, 46)
         self.initial_focus = self.entry or self.record_button
         prompts.fit_dialog(self, READING_WIDTH + 2 * theme.M.xl)
 
