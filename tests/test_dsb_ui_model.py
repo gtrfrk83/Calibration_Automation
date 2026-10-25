@@ -504,7 +504,7 @@ class PointTests(Base):
         self.assertEqual(errs[0]['step'], M.S_POINTS)
         self.assertEqual(errs[0]['point_id'], 'dcv.r10.+5')
         self.assertIn('10 V range', errs[0]['location'])
-        self.assertIn('point +5 V', errs[0]['location'])
+        self.assertIn('point 5 V', errs[0]['location'])
         self.assertTrue(next(r for r in ed.point_rows(fid) if r['id'] == 'dcv.r10.+5')['has_error'])
         self.assertEqual([r['id'] for r in ed.point_rows(fid, only_problems=True)], ['dcv.r10.+5'])
 
@@ -679,7 +679,7 @@ class MatchTests(Base):
         self.assertEqual((r['status'], r['standard'], r['automation'], r['level'], r['mode']), ('assigned', '5560A', 'can automate', 'ok', 'auto'))
         self.assertRegex(r['tur'], r'^\d+\.\d:1$')
         self.assertRegex(r['tar'], r'^\d+\.\d:1$')
-        self.assertEqual(r['point'], '+5 V')
+        self.assertEqual(r['point'], '5 V')
         s = ed.match_summary()
         self.assertEqual(s['total']['points'], 18)
         self.assertEqual(s['functions'][0]['name'], 'DC volts')

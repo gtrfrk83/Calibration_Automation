@@ -1374,8 +1374,8 @@ class EditorModel:
 
     @staticmethod
     def _signed(fn):
-        """A '+' goes in front of a positive nominal only where the quantity has a sign (DC volts / current, temperature); AC volts, resistance, frequency ... never show one."""
-        return fn.kind in ('DCV', 'DCI', 'TEMP') or bool(fn.info.get('signed'))
+        """Never a '+' in front of a positive nominal (owner decision): only a negative value shows its '-'."""
+        return False
 
     def point_text(self, fn, p):
         """'+5 V', '+5 V @ 1 kHz' (display only)."""
@@ -1423,8 +1423,11 @@ class EditorModel:
 
     def point_form_fields(self, fid=None):
         fn = self._need(fid)
-        return dict(frequency=bool(fn.info.get('ac') or fn.info['family'] == 'generator' or fn.info.get('value')), amplitude=bool(fn.info.get('amplitude')), expect=fn.kind == 'CONT',
-                    unit=db.unit_symbol(fn.unit))
+        # the nominal of a frequency test IS the frequency: no second frequency box for it
+        own_frequency = fn.unit == 'Hz'
+        return dict(frequency=bool(fn.info.get('ac') or fn.info['family'] == 'generator' or fn.info.get('value')) and not own_frequency,
+                    amplitude=bool(fn.info.get('amplitude')), expect=fn.kind == 'CONT', unit=db.unit_symbol(fn.unit),
+                    level_basis='pp' if fn.info['family'] == 'scope' else 'rms')
 
     def add_point(self, fid, nominal, range_id=None, frequency='', amplitude='', label='', note='', expect=None):
         def act():
@@ -2841,8 +2844,9 @@ class GridModel(CheckMixin, EditorModel):
             fn = self.target_function()
         st = dict(key=r['key'], kind=r['kind'], fid=fn.id if fn else '', function=fn.name if fn else '', unit=fn.unit if fn else '', symbol=db.unit_symbol(fn.unit) if fn else '',
                   unit_choices=unit_choices(fn.unit) if fn else [], passfail=bool(fn and fn.info.get('passfail')), note='',
-                  fields=dict(frequency=bool(fn and (fn.info.get('ac') or fn.info['family'] == 'generator' or fn.info.get('value'))),
-                              amplitude=bool(fn and fn.info.get('amplitude')), expect=bool(fn and fn.kind == 'CONT')),
+                  fields=dict(frequency=bool(fn and (fn.info.get('ac') or fn.info['family'] == 'generator' or fn.info.get('value'))) and not (fn and fn.unit == 'Hz'),
+                              amplitude=bool(fn and fn.info.get('amplitude')), expect=bool(fn and fn.kind == 'CONT'),
+                              level_basis='pp' if fn and fn.info['family'] == 'scope' else 'rms'),
                   new_row=r['kind'] == 'blank', can_edit=not self.locked and r['kind'] != 'header', typed_limits=False)
         form = self.blank_form(fn)
         if r['kind'] == 'header':

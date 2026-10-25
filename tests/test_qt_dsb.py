@@ -272,23 +272,23 @@ class EditorTests(QtDsbCase):
         win.sync()
         win.bar.setText('6 V')
         self.key(win.bar, Qt.Key.Key_Return)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '+6 V')
+        self.assertEqual(win.model.cell_text(key, 'nominal'), '6 V')
         self.assertTrue(win.sheet.hasFocus() or True)
         win.undo()
         self.assertEqual(win.model.cell_text(key, 'nominal'), before)
         win.redo()
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '+6 V')
+        self.assertEqual(win.model.cell_text(key, 'nominal'), '6 V')
         win.model.select(key, 'nominal')
         win.sync()
         win.bar.setText('junk')
         self.key(win.bar, Qt.Key.Key_Escape)
-        self.assertEqual(win.bar.text(), '+6 V')
+        self.assertEqual(win.bar.text(), '6 V')
         win.bar.setText('abc')
         win.model.select(key, 'nominal')
         res = win.commit_bar('down')
         self.assertFalse(res.ok)                                         # an inline message, nothing changed
         self.assertTrue(win.note.get().startswith('Not done'))
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '+6 V')
+        self.assertEqual(win.model.cell_text(key, 'nominal'), '6 V')
         win.model.select(key, 'function')
         win.sync()
         win.bar.setText(win.bar.text())
@@ -305,9 +305,9 @@ class EditorTests(QtDsbCase):
         self.assertTrue(win.model.can_undo)
         win.make_e.setFocus()
         QTest.keyClick(win.make_e, Qt.Key.Key_Z, Qt.KeyboardModifier.ControlModifier)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '+5 V')
+        self.assertEqual(win.model.cell_text(key, 'nominal'), '5 V')
         QTest.keyClick(win.make_e, Qt.Key.Key_Y, Qt.KeyboardModifier.ControlModifier)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '+6 V')
+        self.assertEqual(win.model.cell_text(key, 'nominal'), '6 V')
         QTest.keyClick(win.sheet, Qt.Key.Key_S, Qt.KeyboardModifier.ControlModifier)
         self.assertFalse(win.model.dirty)                                 # Ctrl+S saved
         QTest.keyClick(win.sheet, Qt.Key.Key_I, Qt.KeyboardModifier.ControlModifier)
@@ -344,7 +344,7 @@ class EditorTests(QtDsbCase):
         win.bar.setFocus()
         win.bar.setText('7 V')
         win.sheet_click(win.model.row_index(key), 1)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '+7 V')
+        self.assertEqual(win.model.cell_text(key, 'nominal'), '7 V')
 
     def test_buttons_symbols_header_remark_run_lock(self):
         win, key = self.build()
@@ -632,9 +632,9 @@ class InspectorTests(QtDsbCase):
         win.sync()
         win.bar.setText('5')
         self.key(win.bar, Qt.Key.Key_Return)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '+5 mV')
+        self.assertEqual(win.model.cell_text(key, 'nominal'), '5 mV')
         self.assertEqual(win.model.point_of(key)[1].nominal, db.D('0.005'))
-        self.assertEqual(win.model.row(key)['nominal'], '+5 mV')
+        self.assertEqual(win.model.row(key)['nominal'], '5 mV')
 
 
 # ------------------------------------------------------------------------------------------------------------------------------ run, layout, template
@@ -1041,6 +1041,40 @@ class PanelTests(QtDsbCase):
 
 # ------------------------------------------------------------------------------------------------------------------------------ speed, look, rules
 class SheetQualityTests(QtDsbCase):
+    def test_frequency_rows_ask_for_the_frequency_once_and_the_level_has_units(self):
+        win = self.new_window()
+        win.make_v.set('Acme'), win.model_v.set('DM-1'), win.title_v.set('DM-1 PV')
+        win.commit_header()
+        win.function_chosen('Frequency')
+        win.model.select(next(r['key'] for r in win.model.rows() if r['kind'] == 'blank'), 'nominal')
+        win.sync()
+        win.show()
+        box = win.panel_box
+        self.app.processEvents()
+        self.assertFalse(box.cells['freq'].isVisibleTo(box))                 # the nominal is the frequency
+        self.assertTrue(box.cells['level'].isVisibleTo(box))
+        lv = box.level_box
+        self.assertEqual([lv.unit.itemText(i) for i in range(lv.unit.count())], ['V', 'mV', '\u00b5V', 'Vpp', 'mVpp', '\u00b5Vpp'])
+        lv.edit.setText('500'), lv.unit.setCurrentText('mV')
+        self.assertEqual(box.v['level'].get(), '0.5 V')
+        lv.edit.setText('1'), lv.unit.setCurrentText('Vpp')                  # rms basis: 1 Vpp = 0.35355339 V rms (sine)
+        self.assertEqual(box.v['level'].get(), '0.35355339 V')
+        lv.set_basis('pp')
+        lv.edit.setText('1'), lv.unit.setCurrentText('Vpp')                  # the scope functions store peak-to-peak: as typed
+        self.assertEqual(box.v['level'].get(), '1 V')
+
+    def test_resolution_section_sits_under_limits_and_is_open(self):
+        win, key = self.build()
+        win.model.select(key, 'low')
+        win.sync()
+        box = win.panel_box
+        order = [n for n in box.SECTION_ORDER]
+        self.assertEqual(order.index('res'), order.index('tol') + 1)
+        lay = box.inner_lay
+        idx = {n: lay.indexOf(sec) for n, sec in box.sections.items()}
+        self.assertEqual(idx['res'], idx['tol'] + 1)
+        self.assertTrue(box.sections['res'].isVisibleTo(box.win) or not box.sections['res'].isHidden())
+
     def test_a_long_sheet_stays_fast(self):
         win, key = self.build()
         win.model.select(key, 'low')

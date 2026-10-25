@@ -74,6 +74,65 @@ class FreqBox(QWidget):
                 self.unit.setCurrentText('Hz')
 
 
+class LevelBox(QWidget):
+    """The signal level of a frequency / period / bandwidth test: a number and a unit picker (V, mV, µV, Vpp, mVpp, µVpp).  The value is stored in the basis of the
+    function (volts rms; the scope functions store volts peak-to-peak), so a level typed in the other basis is converted for a sine wave (Vpp = 2 sqrt(2) x Vrms)
+    and the text handed on is always a plain volts figure in the stored basis.  UNVERIFIED: the sine-wave factor is the lab's usual assumption, not a manual's."""
+    UNITS = ('V', 'mV', '\u00b5V', 'Vpp', 'mVpp', '\u00b5Vpp')
+    SCALE = {'V': 1, 'mV': 1e-3, '\u00b5V': 1e-6, 'Vpp': 1, 'mVpp': 1e-3, '\u00b5Vpp': 1e-6}
+
+    def __init__(self):
+        super().__init__()
+        self.basis = 'rms'
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(6)
+        self.edit = QLineEdit()
+        self.unit = QComboBox()
+        self.unit.addItems(self.UNITS)
+        self.unit.setMinimumContentsLength(5)
+        self.unit.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        lay.addWidget(self.edit, 1)
+        lay.addWidget(self.unit)
+
+    def set_basis(self, basis):
+        self.basis = 'pp' if basis == 'pp' else 'rms'
+        if self.unit.currentText() in ('V', 'Vpp'):                       # keep the family of unit the stored basis uses
+            self.unit.setCurrentText('Vpp' if self.basis == 'pp' else 'V')
+
+    def get_value(self):
+        t = self.edit.text().strip()
+        if not t:
+            return ''
+        if any(ch.isalpha() for ch in t.replace('e', '').replace('E', '')) or '\u00b5' in t:      # a unit typed in the box itself: leave it alone
+            return t
+        from decimal import Decimal
+        unit = self.unit.currentText()
+        try:
+            value = Decimal(t.replace(',', '.')) * Decimal(str(self.SCALE[unit]))
+        except Exception:
+            return t
+        typed_pp = unit.endswith('pp')
+        if typed_pp != (self.basis == 'pp'):
+            factor = Decimal(2) * Decimal(2).sqrt()
+            value = value / factor if typed_pp else value * factor
+            value = Decimal(format(value, '.8g'))
+        return f'{value.normalize():f} V'.replace('+', '')
+
+    def set_value(self, v):
+        t = '' if v is None else str(v).strip()
+        parts = t.split()
+        if len(parts) == 2 and parts[1] in ('V', 'mV', '\u00b5V', 'uV'):
+            self.edit.setText(parts[0])
+            self.unit.setCurrentText('\u00b5V' if parts[1] == 'uV' else parts[1])
+            if self.basis == 'pp':
+                self.unit.setCurrentText({'V': 'Vpp', 'mV': 'mVpp', '\u00b5V': '\u00b5Vpp'}[self.unit.currentText()])
+        else:
+            self.edit.setText(t)
+            if not t:
+                self.unit.setCurrentText('Vpp' if self.basis == 'pp' else 'V')
+
+
 class Chip(QPushButton):
     """A tick box drawn as a pill.  Space / Enter / click toggles it."""
 
@@ -149,7 +208,7 @@ class _EntryKeys(QObject):
 
 
 class Inspector(QFrame):
-    SECTION_ORDER = ('point', 'tol', 'uncert', 'multi', 'asym', 'res', 'rules', 'row')
+    SECTION_ORDER = ('point', 'tol', 'res', 'uncert', 'multi', 'asym', 'rules', 'row')
 
     def __init__(self, win, parent=None):
         super().__init__(parent)
@@ -196,11 +255,11 @@ class Inspector(QFrame):
 
         self._build_point(self._section('point', 'Test point', '', True))
         self._build_tolerance(self._section('tol', 'Limits and tolerance', '', True))
+        self._build_res(self._section('res', 'Resolution and decimals', '', True, 'Display Decs., Meas Res and Auto Res: the display resolution of the range.'))
         self._build_uncertainty(self._section('uncert', 'Uncertainty source', '', True,
                                               'Rule 5: which standards sheet the uncertainty of this row comes from. A row with no source keeps the uncertainty blank on the report (never zero).'))
         self._build_multi(self._section('multi', 'Several rows at once', 'Multiple', False, 'Multiple Test Points: make a run of rows between a lowest and a highest value.'))
         self._build_asym(self._section('asym', 'Asymmetrical tolerance', 'Operand', False, 'Asymmetrical Tol and Operand: a different tolerance above and below the nominal.'))
-        self._build_res(self._section('res', 'Resolution and decimals', 'Decs · Res', False, 'Display Decs., Meas Res and Auto Res: the display resolution of the range.'))
         self._build_rules(self._section('rules', 'Rules for this section', 'Definitions', False, 'Test Point Definitions: the rules of the test point calculator for this section.'))
         self._build_row(self._section('row', 'Row options', '', True))
         self.inner_lay.addStretch(1)
@@ -302,7 +361,9 @@ class Inspector(QFrame):
         self.freq_box = FreqBox()
         self.entries.append(self.freq_box.edit)
         self.v['freq'] = C.Bind(self._cell('point', 'freq', 'Frequency', self.freq_box, 'For AC and frequency tests: type the number and pick the unit (Hz, kHz, MHz, GHz).'))
-        self.v['level'] = C.Bind(self._cell('point', 'level', 'Signal level', None, 'The level of the signal applied while a frequency, period or bandwidth is tested, for example 1 V.'))
+        self.level_box = LevelBox()
+        self.entries.append(self.level_box.edit)
+        self.v['level'] = C.Bind(self._cell('point', 'level', 'Signal level', self.level_box, 'The level of the signal applied while a frequency, period or bandwidth is tested: type the number and pick the unit (V, mV, \u00b5V, Vpp ...). A level in the other basis than the one the test stores (rms or peak-to-peak) is converted for a sine wave.'))
         self.v['expect'] = C.Bind(self._cell('point', 'expect', 'Beeper should be', self._combo(['on', 'off'])))
         self.point_names = ('func', 'nominal', 'units', 'freq', 'level', 'expect')
 
@@ -535,6 +596,7 @@ class Inspector(QFrame):
     def show_fields(self):
         st = self._state
         fields = st.get('fields', {})
+        self.level_box.set_basis(fields.get('level_basis', 'rms'))
         want = {'func': True, 'nominal': True, 'units': True, 'freq': fields.get('frequency', False), 'level': fields.get('amplitude', False),
                 'expect': fields.get('expect', False),
                 'iv': self.types['iv'].get(), 'fs': self.types['fs'].get(), 'fs_scale': self.types['fs'].get(), 'floor': self.types['floor'].get(),

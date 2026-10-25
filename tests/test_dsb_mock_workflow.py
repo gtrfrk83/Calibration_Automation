@@ -119,15 +119,15 @@ class MockWorkflow(unittest.TestCase):
 
     def test_rows_land_on_the_predefined_ranges_and_check_against_hand_arithmetic(self):
         rows = {(r['fid'], r['nominal']): r for r in self.sheet.points()}
-        self.assertIn('6 V range', rows[('dcv', '+5.000 V')]['function'])
-        self.assertIn('600 V range', rows[('dcv', '+500.0 V')]['function'])
-        self.assertIn('600 mA range', rows[('dci', '+500.0 mA')]['function'])
+        self.assertIn('6 V range', rows[('dcv', '5.000 V')]['function'])
+        self.assertIn('600 V range', rows[('dcv', '500.0 V')]['function'])
+        self.assertIn('600 mA range', rows[('dci', '500.0 mA')]['function'])
         # 0.5 % of 5 V + 5 mV = 30 mV; 0.5 % of 50 V + 5 mV = 255 mV (the inherited tolerance is worked out again for each row's own value)
         # ... shown as the two absolute limits (nominal -/+ that), padded to the range's resolution
-        self.assertEqual((rows[('dcv', '+5.000 V')]['low'], rows[('dcv', '+5.000 V')]['high']), ('4.970 V', '5.030 V'))
-        self.assertEqual((rows[('dcv', '+50.00 V')]['low'], rows[('dcv', '+50.00 V')]['high']), ('49.745 V', '50.255 V'))
+        self.assertEqual((rows[('dcv', '5.000 V')]['low'], rows[('dcv', '5.000 V')]['high']), ('4.970 V', '5.030 V'))
+        self.assertEqual((rows[('dcv', '50.00 V')]['low'], rows[('dcv', '50.00 V')]['high']), ('49.745 V', '50.255 V'))
         # the Floor box is in the row's units: 0.0001 on a mA row is 0.0001 mA = 100 nA (1 % of 10 mA = 100 uA, plus 0.1 uA)
-        self.assertEqual((rows[('dci', '+10.00 mA')]['low'], rows[('dci', '+10.00 mA')]['high']), ('9.8999 mA', '10.1001 mA'))
+        self.assertEqual((rows[('dci', '10.00 mA')]['low'], rows[('dci', '10.00 mA')]['high']), ('9.8999 mA', '10.1001 mA'))
 
     def test_rows_are_sorted_by_range_then_frequency_not_in_the_order_typed(self):
         """The doc: 'Keep the order the manual uses' cannot be done by typing order: AC rows typed 5 V@1k, 50 V@1k, 5 V@20k are listed 5@1k, 5@20k, 50@1k."""
@@ -141,7 +141,7 @@ class MockWorkflow(unittest.TestCase):
         s.assertOk(s.type_cell(s.blank_key('dcv'), 'nominal', '5 V'))
         self.assertEqual(s.g.sel_key, 'e:acv')
         s.assertOk(s.g.commit_cell('10 V'))                  # silently an AC volts row
-        self.assertEqual([(r['fid'], r['nominal']) for r in s.points()], [('dcv', '+5.000 V'), ('acv', '10 V')])
+        self.assertEqual([(r['fid'], r['nominal']) for r in s.points()], [('dcv', '5.000 V'), ('acv', '10 V')])
 
     def test_forgotten_frequency_on_an_ac_row_is_an_error_that_blocks_saving_as_runnable(self):
         s = Sheet(tempfile.mkdtemp())

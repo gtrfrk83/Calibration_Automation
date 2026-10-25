@@ -659,7 +659,7 @@ class ToleranceFromAboveTests(Base):
         res = self.g.use_tolerance_above()
         self.assertFalse(res.ok)
 
-    def test_sign_only_on_dc_nominals(self):
+    def test_no_plus_sign_on_any_nominal(self):
         g = self.g
         self.assertTrue(g.set_target_function('AC volts').ok)
         g.select('b:0', 'nominal')
@@ -670,7 +670,7 @@ class ToleranceFromAboveTests(Base):
         self.assertTrue(g2.set_target_function('DC volts').ok)
         g2.select('b:0', 'nominal')
         self.assertTrue(g2.commit_cell('4 V').ok)
-        self.assertEqual(next(r for r in g2.rows() if r['kind'] == 'point')['nominal'], '+4 V')
+        self.assertEqual(next(r for r in g2.rows() if r['kind'] == 'point')['nominal'], '4 V')
 
 
 class _FakeMatch:

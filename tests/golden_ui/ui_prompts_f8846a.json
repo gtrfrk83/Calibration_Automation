@@ -113,42 +113,32 @@
  ],
  "first_prompt_cancelled": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": false,
+   "kind": "operator_prompt",
+   "title": "Zero offset — physical setup required",
+   "text": "Zero-offset setup: FRONT terminals",
    "buttons": [
     "Set up — measure",
     "Cancel"
    ],
-   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "facts": [
-    [
-     "Point",
-     "1 of 135"
-    ],
-    [
-     "Terminals",
-     "FRONT"
-    ]
-   ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Select terminals",
@@ -159,48 +149,49 @@
      "Install the manual-prescribed low-thermal short/shorted leads. Do NOT use the 5560A as a zero source."
     ]
    ],
-   "text": "Zero-offset setup: FRONT terminals",
-   "title": "Zero offset — physical setup required"
+   "facts": [
+    [
+     "Point",
+     "1 of 135"
+    ],
+    [
+     "Terminals",
+     "FRONT"
+    ]
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "image": "fluke8846a_panel.png",
+   "answer": false
   }
  ],
  "high_voltage_refused": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Zero offset — physical setup required",
+   "text": "Zero-offset setup: FRONT terminals",
    "buttons": [
     "Set up — measure",
     "Cancel"
    ],
-   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "facts": [
-    [
-     "Point",
-     "1 of 135"
-    ],
-    [
-     "Terminals",
-     "FRONT"
-    ]
-   ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Select terminals",
@@ -211,58 +202,59 @@
      "Install the manual-prescribed low-thermal short/shorted leads. Do NOT use the 5560A as a zero source."
     ]
    ],
-   "text": "Zero-offset setup: FRONT terminals",
-   "title": "Zero offset — physical setup required"
+   "facts": [
+    [
+     "Point",
+     "1 of 135"
+    ],
+    [
+     "Terminals",
+     "FRONT"
+    ]
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "image": "fluke8846a_panel.png",
+   "answer": true
   },
   {
-   "answer": false,
+   "kind": "ask_yes_no",
+   "title": "HIGH VOLTAGE — 1000 V",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
    "buttons": [
     "Yes",
     "No"
    ],
-   "kind": "ask_yes_no",
-   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE — 1000 V"
+   "answer": false
   }
  ],
  "virtual_run": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "8846A: FLUKE,8846A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nFluke port opened (output not enabled).",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 8846A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Zero offset — physical setup required",
+   "text": "Zero-offset setup: FRONT terminals",
    "buttons": [
     "Set up — measure",
     "Cancel"
    ],
-   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
-   "facts": [
-    [
-     "Point",
-     "1 of 135"
-    ],
-    [
-     "Terminals",
-     "FRONT"
-    ]
-   ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Select terminals",
@@ -273,36 +265,47 @@
      "Install the manual-prescribed low-thermal short/shorted leads. Do NOT use the 5560A as a zero source."
     ]
    ],
-   "text": "Zero-offset setup: FRONT terminals",
-   "title": "Zero offset — physical setup required"
+   "facts": [
+    [
+     "Point",
+     "1 of 135"
+    ],
+    [
+     "Terminals",
+     "FRONT"
+    ]
+   ],
+   "caution": "The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.",
+   "image": "fluke8846a_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "ask_yes_no",
+   "title": "HIGH VOLTAGE — 1000 V",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
    "buttons": [
     "Yes",
     "No"
    ],
-   "kind": "ask_yes_no",
-   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE — 1000 V"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "ask_yes_no",
+   "title": "HIGH VOLTAGE — 1000 V",
+   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
    "buttons": [
     "Yes",
     "No"
    ],
-   "kind": "ask_yes_no",
-   "text": "This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE — 1000 V"
+   "answer": true
   },
   {
+   "kind": "error",
+   "title": "Measurement stopped",
+   "text": "AC filter and Fluke source setup must be lab-verified before automatic output is enabled.",
    "buttons": [
     "OK"
-   ],
-   "kind": "error",
-   "text": "AC filter and Fluke source setup must be lab-verified before automatic output is enabled.",
-   "title": "Measurement stopped"
+   ]
   }
  ]
 }

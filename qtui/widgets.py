@@ -6,6 +6,8 @@ properties plus a few painted icons); a widget never hard-codes a colour.  No in
 """
 from __future__ import annotations
 
+import warnings
+
 from typing import Callable, Iterable, Sequence
 
 from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QSize, Qt, QTimer, Signal
@@ -80,7 +82,9 @@ def follow_tokens(widget: QWidget, build: Callable[[], str]) -> None:
     for old in widget.findChildren(_StyleFollower, options=Qt.FindChildOption.FindDirectChildrenOnly):
         old.deleteLater()
         try:
-            theme.manager().changed.disconnect(old.apply)
+            with warnings.catch_warnings():                      # PySide warns (it does not raise) when the connection is already gone
+                warnings.simplefilter('ignore')
+                theme.manager().changed.disconnect(old.apply)
         except (RuntimeError, TypeError):
             pass
     _StyleFollower(widget, build)

@@ -138,7 +138,7 @@ class GridShowsLimits(unittest.TestCase):
 
     def test_display_scaling_follows_the_row_not_the_error(self):
         g = grid(fx.dmm_34461a_like())
-        row = next(r for r in points(g, 'dcv') if r['nominal'].startswith('+10') and 'mV' in r['nominal'])
+        row = next(r for r in points(g, 'dcv') if r['nominal'].startswith('10') and 'mV' in r['nominal'])
         self.assertTrue(row['low'].endswith('mV') and row['high'].endswith('mV'), (row['low'], row['high']))
         zero = next(r for r in points(g, 'dcv') if r['nominal'].startswith('0.'))
         self.assertTrue(zero['low'].startswith('-') and not zero['high'].startswith('-'), (zero['low'], zero['high']))
@@ -185,7 +185,7 @@ class LimitCellsAreReadOnly(unittest.TestCase):
 
     def setUp(self):
         self.g = grid(fx.dmm_34461a_like())
-        self.row = next(r for r in points(self.g, 'dcv') if r['nominal'] == '+5.00000 V')
+        self.row = next(r for r in points(self.g, 'dcv') if r['nominal'] == '5.00000 V')
         self.key = self.row['key']
         self.fn, self.p = self.g.point_of(self.key)
 
@@ -298,7 +298,7 @@ class StoredTypedLimitsStillWork(unittest.TestCase):
 
     def test_a_row_with_one_stored_limit_is_still_an_error(self):
         g = grid(fx.dmm_34461a_like())
-        row = next(r for r in points(g, 'dcv') if r['nominal'] == '+5.00000 V')
+        row = next(r for r in points(g, 'dcv') if r['nominal'] == '5.00000 V')
         p = g.point_of(row['key'])[1]
         p.overrides['1y'] = {'low': '4.9', 'high': ''}
         g._bump()
@@ -309,7 +309,7 @@ class StoredTypedLimitsStillWork(unittest.TestCase):
 class InspectorPath(unittest.TestCase):
     def setUp(self):
         self.g = grid(fx.dmm_34461a_like())
-        self.row = next(r for r in points(self.g, 'dcv') if r['nominal'] == '+5.00000 V')
+        self.row = next(r for r in points(self.g, 'dcv') if r['nominal'] == '5.00000 V')
         self.key = self.row['key']
         self.fn, self.p = self.g.point_of(self.key)
 
@@ -363,24 +363,24 @@ class BareNumberIsInTheUnitShown(unittest.TestCase):
         return self.g.point_of(key)[1].nominal
 
     def test_5_on_a_mV_row_is_5_mV(self):
-        r = self.row('+50.0000 mV')
+        r = self.row('50.0000 mV')
         res = self.g.commit_cell('5', r['key'], 'nominal', move='stay')
         self.assertTrue(res.ok, res.message)
         self.assertEqual(self.nominal_of(res.detail), D('0.005'))
-        self.assertEqual(self.g.row(res.detail)['nominal'], '+5.0000 mV')       # zero padded to the range resolution (100 nV on the 100 mV range)
+        self.assertEqual(self.g.row(res.detail)['nominal'], '5.0000 mV')       # zero padded to the range resolution (100 nV on the 100 mV range)
 
     def test_explicit_units_stay_as_typed(self):
-        r = self.row('+50.0000 mV')
+        r = self.row('50.0000 mV')
         res = self.g.commit_cell('0.02 V', r['key'], 'nominal', move='stay')
         self.assertTrue(res.ok, res.message)
         self.assertEqual(self.nominal_of(res.detail), D('0.02'))
-        r = self.row('+5.00000 V')
+        r = self.row('5.00000 V')
         res = self.g.commit_cell('4950 mV', r['key'], 'nominal', move='stay')
         self.assertTrue(res.ok, res.message)
         self.assertEqual(self.nominal_of(res.detail), D('4.95'))
 
     def test_5_on_a_volt_row_is_5_V(self):
-        r = self.row('+10.0000 V')
+        r = self.row('10.0000 V')
         res = self.g.commit_cell('7', r['key'], 'nominal', move='stay')
         self.assertTrue(res.ok, res.message)
         self.assertEqual(self.nominal_of(res.detail), D('7'))
@@ -402,13 +402,13 @@ class BareNumberIsInTheUnitShown(unittest.TestCase):
         fn = self.g.ds.function('dcv')
         fn.range('r10').display_unit = 'm'
         self.g._bump()
-        r = self.row('+5000.00 mV')
+        r = self.row('5000.00 mV')
         res = self.g.commit_cell('4000', r['key'], 'nominal', move='stay')
         self.assertTrue(res.ok, res.message)
         self.assertEqual(self.nominal_of(res.detail), D('4'))
 
     def test_the_inspector_units_box_agrees(self):
-        r = self.row('+50.0000 mV')
+        r = self.row('50.0000 mV')
         form = self.g.panel_state(r['key'])['form']
         self.assertEqual(form['units'], 'mV')
         form.update(nominal='5', types=['iv'])
