@@ -817,9 +817,9 @@ class PlainDetails(unittest.TestCase):
         def fill(dlg):
             f = self.fields(dlg)
             self.assertEqual(dlg.windowTitle(), 'Report details')
-            f['Technician'].setText(' Mike ')
-            f['Temperature'].setText('23.1 °C')
-            f['Humidity'].setText('45 %RH')
+            self.assertNotIn('Technician', f)                           # technician, temperature and humidity are on the cover cert, not here
+            self.assertNotIn('Temperature', f)
+            self.assertNotIn('Humidity', f)
             f['Standard (model) 1'].setText('Fluke 5560A')
             f['Serial number 1'].setText('S5560')
             f['Calibration due 1'].setText('2027-01-01')
@@ -827,12 +827,12 @@ class PlainDetails(unittest.TestCase):
             boxes = {b.text(): b for b in dlg.findChildren(QCheckBox)}
             self.assertEqual(sorted(boxes), ['Show TAR on the data file', 'Show TUR on the data file'])
             boxes['Show TUR on the data file'].setChecked(True)
-            QTest.keyClick(f['Humidity'], Qt.Key.Key_Return)             # Enter = Create report (the Tk dialog bound <Return>)
+            QTest.keyClick(f['Calibration due 1'], Qt.Key.Key_Return)             # Enter = Create report (the Tk dialog bound <Return>)
         errors = self.drive(fill)
         d = RD.ask_details_plain(self.root, 'Fluke 117 performance verification')
         self.assertEqual(errors, [])
         self.assertEqual(sorted(d), ['humidity', 'procedure', 'show_tar', 'show_tar_tur', 'show_tur', 'standards', 'technician', 'temperature'])
-        self.assertEqual((d['technician'], d['temperature'], d['humidity']), ('Mike', '23.1 °C', '45 %RH'))
+        self.assertEqual((d['technician'], d['temperature'], d['humidity']), ('', '', ''))        # keys kept, empty
         self.assertEqual(d['procedure'], 'Fluke 117 performance verification')
         self.assertEqual(d['standards'], [{'description': 'Fluke 5560A', 'serial': 'S5560', 'due': '2027-01-01'}, {'description': '', 'serial': '', 'due': ''},
                                           {'description': '', 'serial': '', 'due': ''}])
@@ -840,22 +840,22 @@ class PlainDetails(unittest.TestCase):
         self.assertEqual(d['show_tar_tur'], report_pdf.TarTur(False, True))
         self.assertTrue(d['show_tar_tur'])
         s = core.Settings('report_details')
-        self.assertEqual((s.get('technician'), s.get('standards')[0]['serial']), ('Mike', 'S5560'))
+        self.assertEqual((s.get('technician'), s.get('standards')[0]['serial']), (None, 'S5560'))        # not remembered any more
         self.assertEqual(report_pdf.remembered_show_tar_tur(), report_pdf.TarTur(False, True))
         # the next time the entries are there
         seen = {}
 
         def look(dlg):
             f = self.fields(dlg)
-            seen.update(tech=f['Technician'].text(), serial=f['Serial number 1'].text())
+            seen.update(serial=f['Serial number 1'].text())
             dlg.button('cancel').click()
         self.drive(look)
         self.assertIsNone(RD.ask_details_plain(self.root, 'x'))
-        self.assertEqual(seen, {'tech': 'Mike', 'serial': 'S5560'})
+        self.assertEqual(seen, {'serial': 'S5560'})
 
     def test_cancel_and_escape_return_none_and_remember_nothing(self):
         def fill(dlg):
-            self.fields(dlg)['Technician'].setText('Nobody')
+            self.fields(dlg)['Serial number 1'].setText('Nobody')
             dlg.button('cancel').click()
         self.drive(fill)
         self.assertIsNone(RD.ask_details_plain(self.root, 'x'))

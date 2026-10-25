@@ -15,7 +15,7 @@ point, and TAR = half-width of the pass/fail limits / that specification.  Numbe
       (the 99 % / 1 year column prints 0.28 0.13 0.11 0.21 0.35; 90 day 95 %: 0.17 0.08 0.07 0.13 0.22).  Resolution 0.01 degC (printed p. 15).
 
 Budget (uncertainty_budget): u = spec / divisor (5522A 99 % -> 2.576; 5560A 95 % column -> 2), plus the calibrator resolution / sqrt(12) when known (0.01 degC for both calibrators),
-EMU = 2 * sqrt(sum u^2), rounded UP to 2 significant figures; no CMC floor (the scope file has no temperature entry).
+EMU = 2 * sqrt(sum u^2), rounded UP to 2 significant figures; the scope's Type K line (printed p. 13) is the CMC floor.
   5522A  (sheet at 99 %, divisor 2.576, since 2026-10-22; before: divisor 2 -> 0.17 / 0.27 / 0.19)
          0 / 100 degC: 2*sqrt((0.16/2.576)^2 + 0.002887^2) = 0.124358 -> 0.13      400: 0.201946 -> 0.21      -40: 0.139871 -> 0.14      1000: 0.310613 -> 0.32
   5560A  0 / 100 degC: 2*sqrt(0.045^2 + 0.002887^2) = 0.090185 -> 0.091   400: 0.160104 -> 0.17   -40: 0.100167 -> 0.11   1000: 0.270062 -> 0.28
@@ -406,7 +406,7 @@ class Reports(unittest.TestCase):
             note = self.out[cal]['in_range']['note']
             self.assertIn(f'{cal} calibrator', note)
             self.assertIn('Type K', note)
-            self.assertIn('no CMC floor', note)
+            self.assertIn('CMC floor', note)
             self.assertEqual(self.out[cal]['no_temp_note'], '')                      # the 115 has no temperature point: nothing added
 
     def test_non_temperature_rows_are_untouched(self):

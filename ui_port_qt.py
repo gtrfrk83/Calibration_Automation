@@ -248,17 +248,7 @@ def _report_details_plain(parent, procedure: str = ''):
     dlg.title_label.setText('Report details')
     dlg.sub_label.setText('Printed on the report. Everything is optional; entries are remembered for next time.')
     dlg.sub_label.show()
-    grid = QGridLayout()
-    grid.setHorizontalSpacing(M.md)
-    edits = {}
-    for r, (key, lab, hint) in enumerate((('technician', 'Technician', ''), ('temperature', 'Temperature', 'e.g. 23.1 °C'), ('humidity', 'Humidity', 'e.g. 45 %RH'))):
-        grid.addWidget(prompts.plain_label(lab, wrap=False), r, 0)
-        e = QLineEdit(str(store.get(key, '') or ''))
-        edits[key] = e
-        grid.addWidget(e, r, 1)
-        grid.addWidget(prompts.plain_label(hint, 'hint', wrap=False), r, 2)
-    grid.setColumnStretch(1, 1)
-    dlg.body.addLayout(grid)
+    edits = {k: QLineEdit() for k in ('technician', 'temperature', 'humidity')}      # not shown and not remembered: the cover cert carries them; the keys stay empty in the details
     dlg.body.addWidget(prompts.plain_label('Standards used', 'section', wrap=False))
     saved = store.get('standards', []) or []
     sg = QGridLayout()
@@ -293,8 +283,6 @@ def _report_details_plain(parent, procedure: str = ''):
     details['show_tar'], details['show_tur'] = bool(tar.isChecked()), bool(tur.isChecked())
     details['show_tar_tur'] = report_pdf.TarTur(details['show_tar'], details['show_tur'])
     report_pdf.remember_show_tar_tur(details['show_tar_tur'])
-    for k in ('technician', 'temperature', 'humidity'):
-        store.set(k, details[k])
     store.set('standards', details['standards'])
     store.save()
     return details

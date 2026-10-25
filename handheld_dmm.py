@@ -140,6 +140,13 @@ def function_change_card(p, total, standby_text, standby_known=False):
     return dict(n=p['n'], total=total, test=describe(p), meter_line=meter, steps=steps)
 
 
+def unc_frequency(p):
+    """The frequency (Hz) a frequency-reading point (unc_kind FREQ) is judged at: the applied frequency, or `unc_frequency` for a point whose calibrator is set by hand."""
+    a = p.get('applied') or {}
+    f = a.get('frequency')
+    return f if f is not None else p.get('unc_frequency')
+
+
 def pad_reading(p, text):
     """Rule: a typed reading is filled out to the point's display resolution with zeros (5 -> 5.000 on a 5.000 V point), so the
     stored/printed reading matches the test point's resolution. The resolution is the most decimals in the point's limits.
@@ -1281,7 +1288,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             unit = SYMBOL[p['base_unit']]
             unc = ''
             if self.has_uncertainty(p) and p.get('unc_kind') == 'FREQ':       # a frequency reading: the Frequency - Measure CMC ALONE (GPS-referenced), never the calibrator's voltage uncertainty
-                unc = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=p['applied']['frequency'], frequency=None, unit='Hz', range=None))
+                unc = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None))
             elif self.has_uncertainty(p):
                 unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
                                                         frequency=p['applied'].get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None),
@@ -1331,6 +1338,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
     def has_uncertainty(p):
         """True for the points that carry an Uncertainty (and TAR / TUR): numeric DCV / ACV / DCI / ACI / OHM / CAP with a source, and the
         thermocouple-simulation TEMP points (degC only: a degF point has no degC calibrator specification, so it stays blank)."""
+        if p.get('unc_kind') == 'FREQ' and unc_frequency(p) is not None and not p.get('no_uncertainty'):
+            return True                   # a frequency reading is judged against the lab's Frequency - Measure CMC alone: no applied source needed (a hand-set calibrator point)
         if not p.get('applied') or p.get('no_uncertainty'):
             return False
         if p['kind'] == 'TEMP':
@@ -1347,10 +1356,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             import tartur
             factor = Decimal(str(p['factor']))
             clean = lambda d: float(f'{float(d * factor):.9g}')
-            q = dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
-                     frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)
             if p.get('unc_kind') == 'FREQ':            # frequency reading: Frequency - Measure CMC alone, no calibrator budget mixed in (so TAR is blank, TUR is against the CMC)
-                q = dict(kind='FREQ', nominal=p['applied']['frequency'], frequency=None, unit='Hz', range=None)
+                q = dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None)
+            else:
+                q = dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
+                         frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)
             fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=self.calibrator_model())
             if p.get('unc_kind') == 'FREQ':
                 fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=None)
@@ -1420,8 +1430,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         if not cal or not any(self.has_uncertainty(p) and p['kind'] == 'TEMP' for p in self.points):
             return ''
         return (f'Temperature points: the uncertainty is the published 1-year Type K thermocouple-simulation specification of the {cal} calibrator, in degC '
-                '(accuracy divided by the coverage divisor, with the calibrator resolution where known), k = 2. The scope of accreditation has no temperature '
-                'entry, so no CMC floor applies. It does not include the Fluke 80AK adapter, the thermocouple or reference-junction effects at the meter. '
+                '(accuracy divided by the coverage divisor, with the calibrator resolution where known), k = 2. The scope of accreditation '
+                'Type K thermocouple line (A2LA 1888.03 printed p. 13) is the CMC floor. It does not include the Fluke 80AK adapter, the thermocouple or reference-junction effects at the meter. '
                 'A temperature outside the calibrator\'s specified Type K range shows no uncertainty or ratio.')
 
     def source_note(self):

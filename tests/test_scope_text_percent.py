@@ -40,5 +40,22 @@ class ThermocoupleLines(unittest.TestCase):
         self.assertEqual(s.dmm_text('TEMP', 0, tc='K'), '0.10 °C')
 
 
+class CapacitanceLines(unittest.TestCase):
+    """Printed p. 11 of the scope: two groups of 'Capacitance - Generate' lines (5522A: 0.5 % + 0.01 nF ...; 5560A: 0.19 % + 3.6 pF ...)."""
+
+    def test_each_calibrator_has_its_own_line(self):
+        s = U.load()
+        self.assertEqual(s.dmm_text('CAP', 5e-9, source='5522A'), '0.25 % + 0.3 nF')
+        self.assertEqual(s.dmm_text('CAP', 5e-9, source='5560A'), '0.17 % + 11 pF')
+        self.assertAlmostEqual(s.dmm('CAP', 5e-9, source='5560A'), 0.0017 * 5e-9 + 11e-12, places=15)
+        self.assertAlmostEqual(s.dmm('CAP', 5e-9, source='5522A'), 0.0025 * 5e-9 + 0.3e-9, places=15)
+
+    def test_unknown_calibrator_takes_the_larger(self):
+        s = U.load()
+        self.assertEqual(s.dmm('CAP', 5e-9), s.dmm('CAP', 5e-9, source='5522A'))
+        self.assertEqual(s.dmm('CAP', 50e-6, source='5560A'), 0.0025 * 50e-6 + 49e-9)
+        self.assertEqual(s.dmm('CAP', 50e-6, source='5522A'), 0.0045 * 50e-6 + 300e-9)
+
+
 if __name__ == '__main__':
     unittest.main()

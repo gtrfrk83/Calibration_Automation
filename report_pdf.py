@@ -290,7 +290,7 @@ def point_uncertainty(p, standard=None) -> str:
                 return uncertainty.format_value(b.reported, unit)
         except Exception:
             pass                                        # fall back to the CMC rather than lose the report
-    value = sc.dmm(p['kind'], p['nominal'], p.get('range'), p.get('frequency'))
+    value = sc.dmm(p['kind'], p['nominal'], p.get('range'), p.get('frequency'), source=standard)
     return uncertainty.format_value(value, unit) if value is not None else ''
 
 

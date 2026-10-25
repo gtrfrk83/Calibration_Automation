@@ -62,6 +62,9 @@ class Table(unittest.TestCase):
             elif k == ('generate', 'ACI'):
                 self.assertEqual(h(e['ranges'][:OLD_ACI_RANGES[1]]), OLD_ACI_RANGES[0])
                 self.assertEqual(len(e['ranges']), OLD_ACI_RANGES[1] + 2)
+            elif k == ('generate', 'CAP'):                          # calibrator tags ('src') added to the bands; the numbers are checked below
+                self.assertEqual([{x: y for x, y in b.items() if x != 'src'} for b in e['bands']][:1], [dict(lo=1.9e-10, hi=3.3e-09, rel=0.005, abs=1e-11, rng=0.0)])
+                self.assertEqual({b['src'] for b in e['bands']}, {'5522A', '5560A'})
             elif k == ('generate', 'TEMP'):
                 pass                                               # the Type K line, added later (specs/build_a2la_cmc_temperature.py)
             else:

@@ -80,20 +80,7 @@ def ask_details_plain(parent, procedure=''):
     dlg.setWindowTitle(demo_title('Report details'))
     dlg.sub_label.setText('Printed on the report. Everything is optional; entries are remembered for next time.')
     dlg.sub_label.show()
-    grid = QGridLayout()
-    grid.setHorizontalSpacing(M.md)
-    grid.setVerticalSpacing(M.xs + 2)
-    fields = {}
-    for r, (key, text, hint) in enumerate((('technician', 'Technician', ''), ('temperature', 'Temperature', 'e.g. 23.1 °C'), ('humidity', 'Humidity', 'e.g. 45 %RH'))):
-        grid.addWidget(label(text), r, 0)
-        e = QLineEdit(str(store.get(key, '') or ''))
-        e.setMinimumWidth(220)
-        e.setAccessibleName(text)
-        fields[key] = e
-        grid.addWidget(e, r, 1)
-        grid.addWidget(label(hint, 'sub'), r, 2)
-    grid.setColumnStretch(3, 1)
-    dlg.body.addLayout(grid)
+    fields = {k: QLineEdit() for k in ('technician', 'temperature', 'humidity')}      # not shown and not remembered: the cover cert carries them; the keys stay empty in the details
     dlg.body.addSpacing(M.xs)
     dlg.body.addWidget(label('Standards used', 'section'))
     standards = StandardsGrid(store.get('standards', []) or [])
@@ -115,14 +102,12 @@ def ask_details_plain(parent, procedure=''):
         details['show_tar'], details['show_tur'] = bool(tar.isChecked()), bool(tur.isChecked())
         details['show_tar_tur'] = report_pdf.TarTur(details['show_tar'], details['show_tur'])      # truthy if either is on
         report_pdf.remember_show_tar_tur(details['show_tar_tur'])
-        for k in ('technician', 'temperature', 'humidity'):
-            store.set(k, details[k])
         store.set('standards', details['standards'])
         store.save()
         result['ok'] = details
 
     dlg.add_button('Cancel', cancel=True)
     dlg.add_button('Create report', role='primary', default=True, callback=done)
-    dlg.initial_focus = fields['technician']
+    dlg.initial_focus = standards.edits[0][0]
     dlg.run()
     return result['ok']

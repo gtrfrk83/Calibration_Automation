@@ -32,6 +32,12 @@ def _temp_in(t, band, first_lo=None):
     return band['lo'] < t <= band['hi'] if band.get('gt') else band['lo'] <= t <= band['hi']
 
 
+def _src(source):
+    """'5522A' / '5560A' from a calibrator model (text or a standard sheet), or None: which of the scope's calibrator-specific lines applies."""
+    text = str(getattr(source, 'model', source) or '')
+    return '5560A' if '5560' in text else '5522A' if ('5522' in text or '5520' in text) else None
+
+
 def _tc_bands(entry, tc):
     """The bands of one thermocouple type of the TEMP entry (Type K when none is named)."""
     return (entry.get('types') or {}).get(tc or 'K') or ([] if entry.get('types') else entry['bands'])
@@ -66,7 +72,7 @@ class Scope:
                 "Based on the laboratory's source (Generate) CMC for the applied stimulus; it does not include contributions from the unit under test.")
 
     # ---- measuring instruments (DMMs): value in the measurand's base unit ------------------------
-    def dmm(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K'):
+    def dmm(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K', source=None):
         """basis 'generate' (default): the CMC of the SOURCE that applies the stimulus (calibrator), which is how a DMM
         verification is performed. 'measure': the lab's measuring-instrument CMC. Kinds with no Generate entry
         (frequency) fall back to Measure."""
@@ -76,7 +82,7 @@ class Scope:
             return None
         if entry.get('basis') == 'generate':
             range_value = None            # Generate bands are by the generated value, never by the DMM range
-        if kind == 'TEMP':      # signed bands in degC; the shipped scope file has no temperature entry, so this returns None (nothing is assumed) until the lab adds one
+        if kind == 'TEMP':      # signed bands in degC (the scope's thermocouple lines, Type K by default); None outside them (nothing is assumed)
             hits = [_u(b, 0.0) for b in _tc_bands(entry, tc) if _temp_in(nominal, b)]       # '(> lo to hi)' bands: an edge belongs to the lower band
             return max(hits) if hits else None
         value = abs(nominal)
@@ -84,10 +90,11 @@ class Scope:
             return self._ac(entry, value, value, frequency, by_range=False)
         if kind == 'ACI':
             return self._ac(entry, value, value if range_value is None else range_value, frequency, by_range=range_value is not None)
-        hits = [_u(b, value) for b in entry['bands'] if _inside(value, b['lo'], b['hi'])]
+        src = _src(source)
+        hits = [_u(b, value) for b in entry['bands'] if _inside(value, b['lo'], b['hi']) and (not src or b.get('src') in (None, src))]
         return max(hits) if hits else None
 
-    def dmm_text(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K'):
+    def dmm_text(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K', source=None):
         """The scope's own expression for the band that `dmm` uses, e.g. '8.9 µV/V + 0.8 µV' ('' when the scope does not cover the point).
         Rebuilt from the stored relative / absolute / range terms (the scope file keeps numbers, not the printed text): the relative term is shown per
         unit of the measurand (µV/V), the absolute term in the measurand's unit.  Display only: it never feeds a limit or an uncertainty."""
@@ -117,8 +124,9 @@ class Scope:
                             if best is None or u > best[0]:
                                 best = (u, row)
         else:
+            src = _src(source)
             for b in entry['bands']:
-                if _inside(value, b['lo'], b['hi']):
+                if _inside(value, b['lo'], b['hi']) and (not src or b.get('src') in (None, src)):
                     u = _u(b, value)
                     if best is None or u > best[0]:
                         best = (u, b)
@@ -126,7 +134,7 @@ class Scope:
             return ''
         band = best[1]
         parts = []
-        as_percent = kind in ('ACV', 'ACI')           # the AC tables are printed in % of reading (0.39 % + 80 nA); the DC ones per unit (8.9 µV/V + 0.8 µV)
+        as_percent = kind in ('ACV', 'ACI', 'CAP')           # the AC tables are printed in % of reading (0.39 % + 80 nA); the DC ones per unit (8.9 µV/V + 0.8 µV)
         if band.get('rel'):
             parts.append(f"{float(band['rel']) * 100:.6g} %" if as_percent else _si_text(band['rel'], f'{unit}/{unit}' if unit else ''))
         if band.get('abs'):

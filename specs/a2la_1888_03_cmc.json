@@ -1759,126 +1759,143 @@
    "parameter": "Capacitance \u2013 Generate",
    "kind": "CAP",
    "standard": "Multifunction calibrator (both listed sets)",
-   "notes": "Capacitance relative terms are fractions of the value (percent given in the scope).",
+   "notes": "Capacitance relative terms are fractions of the value (percent given in the scope). Two scope groups: the first 8 lines (0.5 % + 0.01 nF ... 33 to 110 mF) are tagged src 5522A (they are the 5522A/5520A 1-year capacitance specification), the last 9 (0.19 % + 3.6 pF ... ) src 5560A; a point takes the line of the calibrator that sourced it (largest of both when the calibrator is unknown). The tag is an inference from the numbers - confirm.",
    "bands": [
     {
      "lo": 1.9e-10,
      "hi": 3.3e-09,
      "rel": 0.005,
      "abs": 1e-11,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5522A"
     },
     {
      "lo": 3.3e-09,
      "hi": 3.3e-07,
      "rel": 0.0025,
      "abs": 3e-10,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5522A"
     },
     {
      "lo": 3.3e-07,
      "hi": 3.3e-06,
      "rel": 0.002,
      "abs": 3e-09,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5522A"
     },
     {
      "lo": 3.3e-06,
      "hi": 3.3e-05,
      "rel": 0.004,
      "abs": 3e-08,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5522A"
     },
     {
      "lo": 3.3e-05,
      "hi": 0.00033,
      "rel": 0.0045,
      "abs": 3e-07,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5522A"
     },
     {
      "lo": 0.00033,
      "hi": 0.0033,
      "rel": 0.0045,
      "abs": 3e-06,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5522A"
     },
     {
      "lo": 0.0033,
      "hi": 0.033,
      "rel": 0.0075,
      "abs": 3e-05,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5522A"
     },
     {
      "lo": 0.033,
      "hi": 0.11,
      "rel": 0.0066,
      "abs": 0.0001,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5522A"
     },
     {
      "lo": 2e-10,
      "hi": 1.2e-09,
      "rel": 0.0019,
      "abs": 3.6e-12,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     },
     {
      "lo": 1.2e-09,
      "hi": 1.2e-08,
      "rel": 0.0017,
      "abs": 1.1e-11,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     },
     {
      "lo": 1.2e-08,
      "hi": 1.2e-07,
      "rel": 0.0017,
      "abs": 4.9e-11,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     },
     {
      "lo": 1.2e-07,
      "hi": 1.2e-06,
      "rel": 0.0017,
      "abs": 5e-10,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     },
     {
      "lo": 1.2e-06,
      "hi": 1.2e-05,
      "rel": 0.002,
      "abs": 4.9e-09,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     },
     {
      "lo": 1.2e-05,
      "hi": 0.00012,
      "rel": 0.0025,
      "abs": 4.9e-08,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     },
     {
      "lo": 0.00012,
      "hi": 0.0012,
      "rel": 0.0032,
      "abs": 4.9e-07,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     },
     {
      "lo": 0.0012,
      "hi": 0.012,
      "rel": 0.0036,
      "abs": 4.9e-06,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     },
     {
      "lo": 0.012,
      "hi": 0.12,
      "rel": 0.0079,
      "abs": 4.9e-05,
-     "rng": 0.0
+     "rng": 0.0,
+     "src": "5560A"
     }
    ],
    "basis": "generate"

@@ -102,11 +102,11 @@ add(21, 'AC mV', 'ACMV', '500.00 mV', 'ACV', 50e-3, 'mV', '47.85', '52.15', freq
 add(22, 'AC mV', 'ACMV', '500.00 mV', 'ACV', 0.25, 'mV', '240.85', '259.15', freq=65e3, ir=dict(unit=ACV))
 add(23, 'AC mV', 'ACMV', '500.00 mV', 'ACV', 0.5, 'mV', '498.25', '501.75', freq=45, ir=dict(unit=ACV))
 add(24, 'AC mV, Hz', 'ACMV', '500.00 mV', 'ACV', 0.5, 'Hz', '44.986', '45.014', freq=45, nominal=45.0, ir=dict(unit='Hz'),
-    note='Press Hz: the frequency reading is recorded.')
+    note='Press Hz: the frequency reading is recorded.', unc_kind='FREQ')
 add(25, 'AC mV, Hz', 'ACMV', '500.00 mV', 'NONE', None, 'kHz', '949.90', '950.10', nominal=950e3, ir=dict(unit='Hz'),
     setup='Set the calibrator by hand: 0.707 V p-p sine at 950 kHz from a 50 Ω output (5520A scope option: LEVSINE mode, manual '
           'footnote 8) to the meter V and COM inputs, and press OPERATE. Meter: AC mV, 500 mV range, Hz. Put the calibrator in '
-          'STANDBY after the reading.', note='Press Hz: the frequency reading is recorded.')
+          'STANDBY after the reading.', note='Press Hz: the frequency reading is recorded.', unc_kind='FREQ', unc_frequency=950e3)
 
 # ---- AC volts (pp. 18-19) --------------------------------------------------------------------------------------------------------------
 add(26, 'AC volts', 'ACV', '5.0000 V', 'ACV', 0.1, 'V', '0.0952', '0.1048', freq=60, ir=dict(unit=ACV, lowpass=False))

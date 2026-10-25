@@ -124,7 +124,7 @@ def evaluate(spec: PointSpec, standard) -> Evaluation:
             b = ub.build(q['kind'], q['nominal'], unit, standard=std, frequency=q.get('frequency'), scope=sc, range_value=q.get('range'))
             emu, cmc, rep = b.emu, b.cmc, b.reported
         elif sc is not None and q.get('source') != 'none':
-            cmc = sc.dmm(q['kind'], q['nominal'], q.get('range'), q.get('frequency'))
+            cmc = sc.dmm(q['kind'], q['nominal'], q.get('range'), q.get('frequency'), source=std)
             rep = uncertainty.round_up(cmc) if cmc else None
     except Exception:
         pass
@@ -314,7 +314,7 @@ class Row:
             return ''
         try:
             sc = scope()
-            return sc.dmm_text(q['kind'], q['nominal'], q.get('range'), q.get('frequency')) if sc is not None else ''
+            return sc.dmm_text(q['kind'], q['nominal'], q.get('range'), q.get('frequency'), source=self.standard) if sc is not None else ''
         except Exception:
             return ''
 
@@ -551,12 +551,13 @@ def _handheld_spec(app, i, p, row) -> PointSpec:
     factor = Decimal(str(p['factor']))
     clean = lambda d: float(f'{float(d * factor):.9g}')                # noqa: E731  (as handheld_dmm.certificate_fields)
     kind = 'OHM2' if p['kind'] == 'OHM' else p['kind']
-    a = p['applied']
-    q = dict(kind=kind, nominal=a['value'], frequency=a.get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None)     # as certificate_row
-    q_tar = dict(kind=kind, nominal=a['value'], frequency=a.get('frequency'), unit=p['base_unit'], range=None)                       # as certificate_fields
+    a = p.get('applied') or {}
+    q = dict(kind=kind, nominal=a.get('value', 0), frequency=a.get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None)     # as certificate_row
+    q_tar = dict(kind=kind, nominal=a.get('value', 0), frequency=a.get('frequency'), unit=p['base_unit'], range=None)                       # as certificate_fields
     locked = ''
     if p.get('unc_kind') == 'FREQ':
-        q = dict(kind='FREQ', nominal=a['frequency'], frequency=None, unit='Hz', range=None)
+        import handheld_dmm
+        q = dict(kind='FREQ', nominal=handheld_dmm.unc_frequency(p), frequency=None, unit='Hz', range=None)
         q_tar = dict(q)
         locked = 'Frequency: measured against the lab standard'
     prev = getattr(app, '_row_std', None)

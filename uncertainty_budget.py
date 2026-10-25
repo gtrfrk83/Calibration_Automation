@@ -84,7 +84,7 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
     if cmc is not None:
         b.cmc = cmc
     elif scope is not None:
-        b.cmc = scope.dmm(kind, nominal, range_value, frequency) if basis is None else scope.dmm(kind, nominal, range_value, frequency, basis=basis)
+        b.cmc = (scope.dmm(kind, nominal, range_value, frequency, source=standard) if basis is None else scope.dmm(kind, nominal, range_value, frequency, basis=basis, source=standard))
     if standard is not None:
         if kind == 'TEMP':        # thermocouple simulation (Type K): the calibrator's degC specification, never the magnitude lookup
             hit = standard.lookup_temperature(nominal)

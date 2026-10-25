@@ -15,8 +15,8 @@ Ratios are shown rounded DOWN to 0.1 (never overstated), e.g. '4.2:1'; above 100
 never 0 or infinity.  Blank (with a reason) for: zero-offset / no-source points, points the scope of accreditation does not cover,
 tolerance and uncertainty in different units (% or dB tolerances are not converted), and any error (this module never raises).
 TAR is blank when no calibrator model is given or no specification row covers the point; TUR may still be shown in that case.
-Temperature (TEMP, thermocouple simulation, degC): the scope file has no temperature CMC, so with a calibrator model the ratios come from its Type K simulation
-specification alone (uncertainty_budget, no CMC floor); without a model, outside its range, or for a degF tolerance they are blank.
+Temperature (TEMP, thermocouple simulation, degC): the scope's Type K line is the CMC; with a calibrator model the ratios also use its Type K simulation
+specification (uncertainty_budget); without a model, outside its range, or for a degF tolerance they are blank.
 """
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ def _compute(p, low, high, standard, scope):
     if sc is None:
         return _blank('scope of accreditation not available', tolerance=tol)
     freq = p.get('frequency')
-    cmc = sc.dmm(kind, p['nominal'], p.get('range'), freq)
+    cmc = sc.dmm(kind, p['nominal'], p.get('range'), freq, source=standard)
     # TEMP (thermocouple simulation, Type K): the scope's Type K line (printed p. 13) is the CMC floor, like every other kind; with a calibrator the ratios also use its own degC specification.  Without a calibrator: blank, as before.
     # Light (LUX / FC / LAMBERT / UVIRR): the scope CMC IS the A2LA-LIGHT sheet (no separate scope entry), so with that standard the ratios come from it alone.
     if cmc is None and not (kind in ('TEMP', 'LUX', 'FC', 'LAMBERT', 'UVIRR') and standard):

@@ -904,7 +904,9 @@
     "rel": false
    },
    "setup": "Set the calibrator by hand: 0.707 V p-p sine at 950 kHz from a 50 Ω output (5520A scope option: LEVSINE mode, manual footnote 8) to the meter V and COM inputs, and press OPERATE. Meter: AC mV, 500 mV range, Hz. Put the calibrator in STANDBY after the reading.",
-   "note": "Press Hz: the frequency reading is recorded."
+   "note": "Press Hz: the frequency reading is recorded.",
+   "unc_kind": "FREQ",
+   "unc_frequency": 950000.0
   },
   {
    "table": "4",
