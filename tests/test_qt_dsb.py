@@ -1315,6 +1315,14 @@ class SameAsTkTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # The save-time sheet check runs rule 4 (the dry run on the simulated bench) through datasheet_builder_rules._runner_modules, whose dsb_runtime
+        # imports tkinter (dsb_runtime -> fgen_verification -> ui_theme).  The Tk reference subprocess has the tkinter stub, so its dry run runs and its saved
+        # specs say engine.check.dry_run = true; without the stub here the Qt run skipped the dry run and saved dry_run = false.  Give this process the
+        # same stub when tkinter is missing (as tests/test_qt_dsb_runtime.py does) so both panels run the same check.  Only the static guard in
+        # RulesTests keeps tkinter out of qtui/screens; nothing in the Qt panel is changed by this.
+        sys.path.insert(0, str(ROOT / 'tests'))
+        import _tk_stub
+        _tk_stub.install()                                 # no-op when the real tkinter is present
         cls.app = app.create_app()
         proc = subprocess.run([sys.executable, str(ROOT / 'tests' / 'dsb_tk_reference.py')], capture_output=True, text=True, cwd=str(ROOT), timeout=600)
         if proc.returncode:
