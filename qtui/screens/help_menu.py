@@ -98,6 +98,12 @@ def add_help_menu(window: QMainWindow):
         dark.setCheckable(True)
         dark.setChecked(True)
         dark.setEnabled(False)
+    from qtui import depth
+    depth_act = menu.addAction('Depth (soft shadows on cards and buttons)')
+    depth_act.setCheckable(True)
+    depth_act.setChecked(depth.enabled())
+    depth_act.toggled.connect(lambda on: depth.set_enabled(on, save=True))
+    window.depth_action = depth_act
     window.help_menu = menu
     return menu
 

@@ -109,6 +109,8 @@ def create_app(argv: list[str] | None = None, *, name: str = APP_NAME) -> QAppli
     theme.manager().apply_initial(_app)
     _apply_icon()
     install_excepthook()
+    from . import depth
+    depth.install(_app)
     return _app
 
 
