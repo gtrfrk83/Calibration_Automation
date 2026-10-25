@@ -372,6 +372,19 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.stop = False; self.busy = True
         self.reset_then(lambda: self._next(points, 0, None))     # every run (first, re-run, resume): reset to defaults before the first point
 
+    def _hookup_image(self, p):
+        """Drawn hook-up picture for this point's wiring (hookups.bench_image), else the supplied front-panel photo. Picture only: no step changes."""
+        try:
+            if p['source'] == 'none':
+                return hookups.bench_image(MODEL, 'ZERO', terminal=p['terminal'], open_input=(p['input'] == 'open'))
+            if p['source'] == 'manual':
+                return hookups.panel_image(MODEL)
+            group = procspec.wiring_key(p)[2]
+            wiring = {'VOLT': 'VOLT', 'CURRENT': 'CURRENT', 'RES2': 'RES2', 'RES4': 'RES4'}[group]
+            return hookups.bench_image(MODEL, wiring, terminal=p['terminal'], nominal=p['nominal'], rng=p.get('range'))
+        except Exception:
+            return hookups.panel_image(MODEL)
+
     def _prompt_setup(self, p):
         """Confirm the physical setup when the wiring group changes. Returns False if the technician cancels."""
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description']), ('Manual page', p['page'])]
@@ -382,15 +395,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return port.operator_prompt('Zero offset — physical setup required', f'Zero-offset setup: {p["terminal"]} terminals',
                 ([('Select terminals', f'Set the front-panel FRONT/REAR switch to {p["terminal"]}. The program checks the switch position before measuring.')]
                  if SPEC.get('front_rear_switch', True) else []) + [('Set up the input', instruction)],
-                facts=facts, caution='The calibrator stays in STANDBY. Never use it as a zero source.', ok='Set up — measure', image=hookups.panel_image(MODEL), parent=self.root)
+                facts=facts, caution='The calibrator stays in STANDBY. Never use it as a zero source.', ok='Set up — measure', image=self._hookup_image(p), parent=self.root)
         if p['source'] == 'manual':
             return port.operator_prompt('Connect the standard', f'Connect for {p["section_title"]}',
                 [('Connect', p['setup']), ('Stabilise', 'Allow the standard to settle before continuing.')],
-                facts=facts, ok='Connected — measure', image=hookups.panel_image(MODEL), parent=self.root)
+                facts=facts, ok='Connected — measure', image=self._hookup_image(p), parent=self.root)
         return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {p["section_title"]}',
             [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p)),
              ] + ([('Switch', 'Front/Rear switch on FRONT.' if p['terminal'] != 'REAR' else 'Front/Rear switch on REAR.')] if SPEC.get('front_rear_switch', True) else []),
-            facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified — continue', image=hookups.panel_image(MODEL), parent=self.root)
+            facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified — continue', image=self._hookup_image(p), parent=self.root)
 
     def _next(self, points, i, previous):
         if i >= len(points) or self.stop:

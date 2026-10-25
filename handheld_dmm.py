@@ -619,6 +619,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             return plan
         return self.spec.get('groups', {}).get(p['group'])
 
+    def _drawn_image(self, p, image):
+        """The drawn hook-up picture for the chosen calibrator (diagrams/hook_<meter>_<cal>_<group>.png) when the spec names one with the option
+        'hookup_images' and it exists; otherwise the picture the group already had (the supplied panel photo). Only the picture changes, never a step."""
+        meter = self.spec.get('options', {}).get('hookup_images')
+        if not meter:
+            return image
+        drawn = hookups.image_path(meter, hookups.calibrator_key(self.cal_mode.get()), p['group'])
+        return drawn or image
+
     def setup_text(self, p):
         if p.get('setup'):
             return p['setup']
@@ -822,6 +831,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
                 steps = [(lead, detail.replace('The program switches the output off after 30 s.', 'Switch the calibrator to STANDBY after 30 s.')) for lead, detail in steps]
             facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', describe(p)), ('Meter', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
             image = group['diagram'] if group.get('diagram') and Path(group['diagram']).is_absolute() else (HERE / group['diagram'] if group.get('diagram') else None)
+            image = self._drawn_image(p, image)
             return port.operator_prompt('Change the cables', group['title'], steps + self._qsteps(), facts=self._qfacts(facts), caution=group.get('caution'),
                                         ok='Connections checked - continue', image=image if image and image.is_file() else None, parent=self.root)
         steps = []

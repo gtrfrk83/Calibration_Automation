@@ -6,6 +6,7 @@
   "auto_ramp": false,
   "function_prompt": true,
   "ir": "fluke28x",
+  "hookup_images": "fluke28x",
   "table_order": {
    "F": 0,
    "3": 1,

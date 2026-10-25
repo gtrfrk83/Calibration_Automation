@@ -327,7 +327,7 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
                      ('Set up the input',instruction)],
                     facts=[('Point',f'{p["id"]} of {len(POINTS)}'),('Terminals',location)],
                     caution='The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.',
-                    ok='Set up \u2014 measure', image=hookups.panel_image('8846A'), parent=self.root):
+                    ok='Set up \u2014 measure', image=hookups.bench_image('8846A','ZERO',terminal=location,open_input=p['kind']=='DCI') if p['kind']!='CAP' else hookups.panel_image('8846A'), parent=self.root):
                     self.busy=False;self.status.set('Paused for zero-offset setup');return
             elif not self.fast_demo:
                 msg={'VOLTAGE':'Connect 5560A voltage output to 8846A HI/LO voltage terminals. Verify safe leads and ranges.',
@@ -339,7 +339,7 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
                     [('Wiring',msg)],
                     facts=[('Next point',f'{p["id"]} of {len(POINTS)}'),('Test',p['description'])],
                     caution='Continue only after physically verifying the connections.',
-                    ok='Connections verified \u2014 continue', image=hookups.panel_image('8846A'), parent=self.root):
+                    ok='Connections verified \u2014 continue', image=hookups.bench_image('8846A',{'VOLTAGE':'VOLT','CURRENT':'CURRENT','RESISTANCE_2W':'RES2','RESISTANCE_4W':'RES4'}.get(p['wiring']),nominal=p['nominal'],rng=p.get('range')), parent=self.root):
                     self.busy=False;self.status.set('Paused for wiring');return
         if not self.fast_demo and abs(p['nominal'])>=1000 and p['kind'] in ('DCV','ACV'):
             if not port.ask_yes_no('HIGH VOLTAGE — 1000 V','This point requires hazardous high voltage. Verify leads, connections, clearance and personnel safety. Enable output?'):

@@ -55,6 +55,8 @@ METERS = {
     'fluke170': dict(name='Fluke 175 / 177 / 179', jacks={'vohm': 'VΩ', 'ma': '400 mA', 'a10': '10A', 'com': 'COM'}),
     # Fluke 365 clamp meter: the Calibration Manual's Figure 1 (p. 5) labels two jacks 'VΩ' and 'COM'; the current points use the detachable jaw on a 20-turn coil
     # (no test leads in the jacks), so only the voltage / ohms hook-up is described here and the coil hook-ups are the spec's own groups (specs/fluke_365_pv.json)
+    # Fluke 287 / 289: jacks as printed on the case (supplied photo): A, mA uA, COM, V Ohm
+    'fluke28x': dict(name='Fluke 287 / 289', jacks={'vohm': 'VΩ', 'ma': 'mA µA', 'a10': 'A', 'com': 'COM'}),
     'fluke365': dict(name='Fluke 365', jacks={'vohm': 'VΩ', 'com': 'COM'}),
     # Fluke 374 / 375 / 376 / 376-II clamp meters: the Calibration Manual's Figure 1 (p. 2) labels two jacks 'VΩ' and 'COM' (the iFlex 2 mm jack is named 'far left' on p. 3);
     # the current points use the detachable jaw or the iFlex loop on a 50-turn coil, and the iFlex simulation uses the iFlex jack, so only the voltage / mV / ohms / capacitance
@@ -70,6 +72,7 @@ AVAILABLE = {
     'fluke87v': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
     'fluke77': ('VOHM', 'UAMP', 'AMP10'),
     'fluke170': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
+    'fluke28x': ('VOHM', 'UAMP', 'AMP10', 'TEMP'),
     'fluke365': ('VOHM',),
     'fluke376': ('VOHM',),
 }
@@ -126,6 +129,34 @@ def panel_image(model):
     name = PANEL_PICTURES.get(str(model or '').upper().replace('-', ''))
     path = DIAGRAMS / name if name else None
     return path if path is not None and path.is_file() else None
+
+
+BENCH_CURRENT_JACK = {'34401A': 'I', '34460A': '3A', '34461A': '3A', '34465A': '3A'}
+
+
+def bench_image(model, wiring, terminal=None, nominal=None, rng=None, open_input=False):
+    """Drawn hook-up picture (Fluke 5560A to the meter's front jacks) for a bench DMM, or the supplied front-panel photo when there is none
+    (rear terminals, capacitance, other models).  wiring: 'VOLT' | 'RES2' | 'RES4' | 'CURRENT' | 'ZERO'.  Shown beside the connection steps; it never changes a step.
+    Jack choice for current (34461A / 34465A: 10 A for terminal FRONT_10A else 3 A; 8846A: 400 mA jack up to the 400 mA range, else 10 A) is from the panel photos: UNVERIFIED."""
+    m = str(model or '').upper().replace('-', '')
+    if str(terminal or '').upper() == 'REAR':
+        return panel_image(model)
+    if wiring == 'ZERO':
+        key = 'OPEN' if open_input else 'SHORT'
+    elif wiring == 'CURRENT':
+        if m == '8846A':
+            size = abs(float(rng if rng is not None else (nominal or 0)))
+            key = 'I_400MA' if size <= 0.4 else 'I_10A'
+        elif str(terminal or '').upper() == 'FRONT_10A' and m in ('34461A', '34465A'):
+            key = 'I_10A'
+        else:
+            key = 'I_' + BENCH_CURRENT_JACK.get(m, '3A')
+    elif wiring in ('VOLT', 'RES2', 'RES4'):
+        key = wiring
+    else:
+        return panel_image(model)
+    path = DIAGRAMS / f'hook_{m}_5560A_{key}.png'
+    return path if path.is_file() else panel_image(model)
 
 
 def has(meter, group) -> bool:
