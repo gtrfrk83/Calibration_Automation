@@ -372,6 +372,7 @@ class Inspector(QFrame):
         iv_e = QLineEdit()
         self.iv_ppm_cb = QCheckBox('ppm')
         C.tip(self.iv_ppm_cb, 'Tick when the number is parts per million of the value instead of percent.')
+        self.iv_ppm_cb.setMinimumWidth(16 + 8 + self.iv_ppm_cb.fontMetrics().horizontalAdvance('ppm') + 14)       # the last letter was clipped
         ivl.addWidget(iv_e, 1)
         ivl.addWidget(self.iv_ppm_cb)
         self._cell('tol', 'iv', '% of reading', iv_box, 'How many percent of the value being tested, for example 0.05 (% of I.V., the input value).')
@@ -605,12 +606,28 @@ class Inspector(QFrame):
             self.sections['rules'].set_open(True)
         self.show_fields()
         usable = bool(state['can_edit'])
-        for b in (self.calc_b, self.copy_b):
-            b.setEnabled(usable)
+        blank = state['kind'] == 'blank'
+        self.copy_b.setText('Use tolerance of row above' if blank else 'Copy tolerance to rows below')
+        self.calc_b.setEnabled(usable)
+        self.copy_b.setEnabled(usable or blank)
         try:
             self.set_uncertainty(*self.win.model.uncertainty_line())
         except Exception:                                    # the source line is information only: never stop the panel from loading
             self.set_uncertainty('')
+
+    def adopt_tolerance(self, form):
+        """Put another row's tolerance (a panel form) in the tolerance boxes, leaving the value being typed alone."""
+        self.sides = {'plus': dict(form['plus']), 'minus': dict(form['minus'])}
+        for k in M.SPEC_ORDER:
+            self.types[k].set(k in form['types'])
+        self.v['fs_scale'].set(form['fs_scale'])
+        self.b['asym'].set(bool(form['asym']))
+        self.v['operand'].set('+' if form['asym'] else '±')
+        self.operand_box.setEnabled(bool(form['asym']))
+        self.operand_now = 'plus'
+        self._sync_side()
+        self.load_side()
+        self.show_fields()
 
     def form(self):
         """The boxes as a form dict for GridModel.calc_row()."""

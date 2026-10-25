@@ -3123,6 +3123,22 @@ class GridModel(CheckMixin, EditorModel):
             return Outcome(True, f'The tolerance was copied to {n} row{"s" * (n != 1)} below.', key)
         return self._do('copy tolerance', act)
 
+    def tolerance_form_above(self, key=None):
+        """For an empty row: the tolerance boxes (panel form) of the nearest test row above it in the same section, or None.  Nothing on the sheet changes:
+        the panel puts them in its boxes and Calc then makes the new row with them."""
+        rows = self.rows()
+        key = key or self.sel_key
+        idx = next((i for i, r in enumerate(rows) if r['key'] == key), None)
+        if idx is None:
+            return None
+        fid = rows[idx].get('fid') or self.fid
+        for r in reversed(rows[:idx]):
+            if r['kind'] == 'point' and (r.get('fid') == fid or not fid):
+                fn, p = self.point_of(r['key'])
+                if p is not None and p.spec is not None:
+                    return self.panel_state(r['key'])['form']
+        return None
+
     def would_overwrite(self, key=None):
         """How many rows below the selected one already have a tolerance of their own (the window asks before copying over them)."""
         fn, p = self.point_of(key or self.sel_key)

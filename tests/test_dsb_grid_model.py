@@ -619,6 +619,22 @@ class CursorAfterChoosingFunctionTests(Base):
         self.assertEqual([r['kind'] for r in rows[:2]], ['header', row['kind']])
 
 
+class ToleranceFromAboveTests(Base):
+    def test_blank_row_takes_tolerance_without_touching_sheet(self):
+        g = self.g
+        key = self.dcv_row('5 V')
+        self.assertIsNone(g.tolerance_form_above('b:0'))                   # the row above has no tolerance yet
+        f = dict(self.form(key))
+        f['types'] = ['iv']
+        f['plus'] = dict(f['plus'], iv='0.05')
+        self.assertTrue(g.calc_row(key, f).ok)
+        before = g._snapshot()
+        got = g.tolerance_form_above(next(r['key'] for r in g.rows() if r['kind'] == 'blank'))
+        self.assertIsNotNone(got)
+        self.assertEqual(got['plus']['iv'], '0.05')
+        self.assertEqual(g._snapshot(), before)
+
+
 class _FakeMatch:
     def __init__(self, fid, total):
         self._fid, self._t = fid, total
