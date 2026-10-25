@@ -209,6 +209,7 @@ def build_ui(self):
     self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
     self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
     self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
+    self.btn_rerun_from = sh.add_action('Rerun From Selected', self.rerun_from, short='From here')
     self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
     sh.add_action('Export Report (PDF)', self.export_pdf, side='right', short='PDF')
     self.btn_load = sh.add_action('Load progress', self.load, side='right', short='Load')
@@ -251,7 +252,7 @@ def build_ui(self):
 
 def sync_buttons(self, value):
     """The run buttons while a run is active (the engine's former `busy` setter body)."""
-    for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
+    for b in (self.btn_run, self.btn_section, self.btn_rerun, self.btn_rerun_from, self.btn_test, self.btn_load, self.btn_find, *self.mode_buttons):
         common.set_button_state(b, not value)
     common.set_button_state(self.btn_stop, bool(value))
 

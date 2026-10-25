@@ -355,6 +355,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if selected: self.execute([POINTS[int(selected[0]) - 1]])
         else: port.message('info', 'Selection', 'Select a test point first.')
 
+    def rerun_from(self):
+        selected = self.ui_view.table_selection(self)
+        if selected: self.execute(self.points_from(POINTS, selected[0]))
+        else: port.message('info', 'Selection', 'Select a test point first.')
+
     def execute(self, points):
         if self.busy or not points: return
         if not self.asset.get().strip(): port.message('warning', 'Instrument ID', 'Enter an instrument ID.'); return

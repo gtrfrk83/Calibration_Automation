@@ -374,7 +374,7 @@ class WindowCase(unittest.TestCase):
         self.hn.app = self.app
         self.win = self.hn.root
         self.win.setMinimumSize(0, 0)               # fit_window shrinks to the (small) offscreen screen
-        self.win.resize(1320, 840)
+        self.win.resize(1480, 840)
         self.win.show()
         Q.settle(10)
         QTest.qWait(30)
@@ -439,7 +439,7 @@ class WindowTests:
         sh = self.app.shell
         left = [b.text() for b in sh.actions_left.findChildren(QPushButton)]
         right = [b.text() for b in sh.actions_right.findChildren(QPushButton)]
-        self.assertEqual(left[:4], ['▶  Run All Pending', 'Run Shown Section', 'Rerun Selected', '■  Stop'])
+        self.assertEqual(left[:5], ['▶  Run All Pending', 'Run Shown Section', 'Rerun Selected', 'Rerun From Selected', '■  Stop'])
         self.assertEqual(right, ['Export Report (PDF)', 'Load progress', 'Save progress'])
         self.assertEqual(self.app.btn_run.property('role'), 'primary')
         self.assertEqual(self.app.btn_stop.property('role'), 'danger')
@@ -451,11 +451,11 @@ class WindowTests:
         Q.settle(10)
         QTest.qWait(50)
         self.assertTrue(sh.compact)
-        self.assertEqual([b.text() for b in sh.actions_left.findChildren(QPushButton)][:4], ['▶  Run', 'Section', 'Rerun', '■ Stop'])
+        self.assertEqual([b.text() for b in sh.actions_left.findChildren(QPushButton)][:5], ['▶  Run', 'Section', 'Rerun', 'From here', '■ Stop'])
         self.assertFalse(sh.sidebar.isVisible())
         self.assertTrue(sh.section_picker.isVisibleTo(self.win))
         self.assertTrue(self.app.tree.isVisible())
-        self.win.resize(1320, 840)
+        self.win.resize(1480, 840)
         Q.settle(10)
         QTest.qWait(50)
         self.assertFalse(sh.compact)

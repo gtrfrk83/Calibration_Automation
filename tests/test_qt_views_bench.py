@@ -87,7 +87,7 @@ class WidgetState(unittest.TestCase):
                     self.assertEqual(want['headings'], got['headings'])
                     for group in ('buttons', 'checks', 'modes', 'combos'):
                         for state in ('idle', 'busy'):
-                            have = [r for r in got[group][state] if r[0] != 'Log']          # the shell's own Log button (hidden until there is a log line) is new in Qt
+                            have = [r for r in got[group][state] if r[0] not in ('Log', 'Rerun From Selected')]          # the shell's own Log button (hidden until there is a log line) and 'Rerun From Selected' are new in Qt
                             self.assertEqual(want[group][state], have, f'{name}: {group} {state}')
                     root.close()
 

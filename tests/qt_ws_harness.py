@@ -281,7 +281,7 @@ class Harness:
         self.shim.start()
         self.win = QMainWindow()
         self.app = a = W.RMSNoiseApp(self.win)
-        self.win.resize(1320, 860)
+        self.win.resize(1480, 860)
         self.win.show()                                  # a dialog with no parent window is parented to the active window: keep this one real and active
         self.win.activateWindow()
         QApplication.processEvents()

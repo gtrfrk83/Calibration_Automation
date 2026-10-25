@@ -201,6 +201,7 @@ def build_unified(self):
     self.btn_run = sh.add_action('▶  Run All Pending', self.run_pending, accent=True, short='▶  Run')
     self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
     self.btn_rerun = sh.add_action('Rerun Selected', self.rerun_selected, short='Rerun')
+    self.btn_rerun_from = sh.add_action('Rerun From Selected', self.rerun_from_selected, short='From here')
     self.btn_stop = sh.add_action('■  Stop', self.stop_all, danger=True, short='■ Stop', state='disabled')
     sh.add_action('Export Report (PDF)', self.export_pdf_report, side='right', short='PDF')
     sh.add_action('Export Excel (.xlsx)', self.export_professional_excel, side='right', short='Excel')

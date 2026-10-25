@@ -648,7 +648,7 @@ class Rendering(QtCase):
         h = self.harness()
         a = h.app
         a.load_demo_data()
-        for size in ((1320, 860), (1000, 680), (900, 640)):
+        for size in ((1480, 860), (1000, 680), (900, 640)):
             h.win.resize(*size)
             for _ in range(5):
                 QApplication.processEvents()
@@ -666,7 +666,7 @@ class Rendering(QtCase):
             QApplication.processEvents()
         self.assertEqual(a.btn_run.text(), '▶  Run')
         self.assertEqual(a.btn_stop.text(), '■ Stop')
-        h.win.resize(1320, 860)
+        h.win.resize(1480, 860)
         for _ in range(8):
             QApplication.processEvents()
         self.assertEqual(a.btn_run.text(), '▶  Run All Pending')

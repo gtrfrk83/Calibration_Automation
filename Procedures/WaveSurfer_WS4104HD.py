@@ -592,6 +592,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     def stop_all(self):
         self.chain = []
+        self._from_queue = ()
         if self.running:
             self.stop_test()
         if self.dc_running or getattr(self, 'dc_batch', False):
@@ -625,6 +626,37 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.ui_view.select(tree, kids[e['idx']])
         {'noise': self.retest_noise, 'dcv': self.retest_selected_dcv, 'impedance': self.retest_impedance,
          'offset': self.retest_offset, 'bandwidth': self.retest_bandwidth, 'timebase': self.retest_timebase, 'trigger': self.retest_trigger}[e['kind']]()
+
+    _from_queue = ()                       # 'Rerun From Selected': the table keys still to be re-measured, one at a time, by rerun_selected
+
+    def rerun_from_selected(self):
+        """The selected measured point and every measured point after it in the table as shown (section / status filters applied):
+        each is re-measured exactly as Rerun Selected does it (its own prompts, overwrite question and worker), one after the other.
+        A point that does not start (cancelled at its prompt, busy, refused) ends the chain; Stop ends it too."""
+        if not self.sync_asset():
+            return
+        sel = self.ui_view.selection(self.utree)
+        if len(sel) != 1:
+            port.message('info', 'Select a result', 'Select one completed test point in the table.', parent=self.root)
+            return
+        keys = [f"{e['kind']}:{e['idx']}" for e in self.entries() if self._visible_entry(e)]
+        if sel[0] not in keys:
+            return
+        done = {f"{e['kind']}:{e['idx']}" for e in self.entries() if e['done']}
+        self._from_queue = [k for k in keys[keys.index(sel[0]) + 1:] if k in done]
+        self.rerun_selected()                                                 # the selected point, through the existing path
+        if not self._batch_busy():
+            self._from_queue = ()
+
+    def _from_step(self):
+        key, self._from_queue = self._from_queue[0], list(self._from_queue[1:])
+        if key not in self._entries_cache:
+            self._from_queue = ()
+            return
+        self.ui_view.select(self.utree, key)
+        self.rerun_selected()
+        if not self._batch_busy():
+            self._from_queue = ()
 
     def clear_function(self):
         kind = self._selected_kind()
@@ -666,6 +698,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.refresh_unified()
             self.ui_view.set_state(self.btn_run, 'disabled' if busy else 'normal')
             self.ui_view.set_state(self.btn_rerun, 'disabled' if busy else 'normal')
+            if getattr(self, 'btn_rerun_from', None) is not None:          # the Qt build's 'Rerun From Selected'
+                self.ui_view.set_state(self.btn_rerun_from, 'disabled' if busy else 'normal')
             self.ui_view.set_state(self.btn_section, 'disabled' if busy else 'normal')
             for b in self.mode_buttons:
                 self.ui_view.set_state(b, 'disabled' if busy else 'normal')
@@ -677,6 +711,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                     if name in self._last_status and var.get():
                         self.msg.set(var.get())
                     self._last_status[name] = var.get()
+            if self._from_queue and not busy and not self._dialog_open():
+                self._from_step()
             if self.chain:
                 if busy or self._dialog_open():
                     self._idle = 0

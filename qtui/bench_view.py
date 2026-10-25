@@ -100,6 +100,8 @@ def sync_buttons(self, idle_buttons, inputs):
     """The Tk sync_buttons: while busy every action button except Stop and every setting is disabled; Stop is enabled only while busy.
     `idle_buttons`: the buttons that are 'normal' when idle; `inputs`: [(widget, idle_state)] (combo boxes 'readonly', editable boxes and check boxes 'normal')."""
     idle = 'disabled' if self._busy else 'normal'
+    if getattr(self, 'btn_rerun_from', None) is not None:      # 'Rerun From Selected' follows 'Rerun Selected'
+        idle_buttons = (*idle_buttons, self.btn_rerun_from)
     for b in (*idle_buttons, *self.mode_buttons):
         set_state(b, idle)
     set_state(self.btn_stop, 'normal' if self._busy else 'disabled')
@@ -334,6 +336,7 @@ def action_bar(self, sh, *, manual=False, excel=False):
     self.btn_run = sh.add_action('▶  Run All Pending', self.run_all, accent=True, short='▶  Run')
     self.btn_section = sh.add_action('Run Shown Section', self.run_section, short='Section')
     self.btn_rerun = sh.add_action('Rerun Selected', self.rerun, short='Rerun')
+    self.btn_rerun_from = sh.add_action('Rerun From Selected', self.rerun_from, short='From here')
     if manual:
         self.mo_add_button(sh)                              # 'Enter reading manually' (also on the point list's right-click menu)
     self.btn_stop = sh.add_action('■  Stop', self.request_stop, danger=True, short='■ Stop', state='disabled')
