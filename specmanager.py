@@ -518,6 +518,35 @@ def set_standard_field(standard_id, field, value, who='', reason='', path=None):
         _log(con, standard_id, None, field, old[0] if old else '', value, who, reason)
 
 
+DETAIL_FIELDS = ('manufacturer', 'model', 'description', 'period', 'confidence_text', 'approved_by', 'approve_date', 'reference', 'revision', 'author')
+
+
+def set_standard_details(standard_id, changes, who='', reason='', path=None):
+    """Edit the name / description / other text details of a standard in one step (each changed field is logged).  `changes` = {field: new text}, fields of
+    DETAIL_FIELDS only.  The model name must not be blank and must not be another standard's.  Returns the list of fields that really changed.
+    The specification rows, limits and the sheet's own numbers are never touched."""
+    bad = [f for f in changes if f not in DETAIL_FIELDS]
+    if bad:
+        raise ValueError('cannot be edited: ' + ', '.join(bad))
+    changes = {f: str(v).strip() for f, v in changes.items()}
+    if 'model' in changes:
+        if not changes['model']:
+            raise ValueError('The model name cannot be blank.')
+    with _db(path) as con:
+        old = con.execute('SELECT ' + ', '.join(DETAIL_FIELDS) + ' FROM standards WHERE id=?', (standard_id,)).fetchone()
+        if old is None:
+            raise ValueError('No such standard.')
+        old = dict(zip(DETAIL_FIELDS, old))
+        if 'model' in changes and changes['model'].lower() != old['model'].lower():
+            if con.execute('SELECT 1 FROM standards WHERE model=? AND id<>?', (changes['model'], standard_id)).fetchone():
+                raise ValueError(f"Another standard is already called {changes['model']}.")
+        done = [f for f, v in changes.items() if v != old[f]]
+        for f in done:
+            con.execute(f'UPDATE standards SET {f}=? WHERE id=?', (changes[f], standard_id))
+            _log(con, standard_id, None, f, old[f], changes[f], who, reason)
+        return done
+
+
 def set_assets(standard_id, assets, path=None):
     """assets: [(asset_id, serial)] - the physical units of this model that the lab uses as standards."""
     with _db(path) as con:

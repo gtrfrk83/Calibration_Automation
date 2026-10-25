@@ -16,6 +16,7 @@ import datamode
 import procmods_engine
 import reset_startup
 import virtualbench
+import hookups
 import drivers
 DATA=HERE/'34401A_results.json'
 POINTS=[]
@@ -332,7 +333,7 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
                      ('Set up the input',instruction)],
                     facts=[('Point',f'{p["id"]} of {len(POINTS)}'),('Terminals',location)],
                     caution='The 5560A stays in STANDBY. Confirm the terminal selection and physical setup before measuring.',
-                    ok='Set up \u2014 measure', parent=self.root):
+                    ok='Set up \u2014 measure', image=hookups.panel_image('34401A'), parent=self.root):
                     self.busy=False;self.status.set('Paused for zero-offset setup');return
             elif not self.fast_demo:
                 msg={'VOLTAGE':'Connect 5560A voltage output to 34401A HI/LO voltage terminals. Verify safe leads and ranges.',
@@ -343,7 +344,7 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
                     [('Wiring',msg)],
                     facts=[('Next point',f'{p["id"]} of {len(POINTS)}'),('Test',p['description'])],
                     caution='Continue only after physically verifying the connections.',
-                    ok='Connections verified \u2014 continue', parent=self.root):
+                    ok='Connections verified \u2014 continue', image=hookups.panel_image('34401A'), parent=self.root):
                     self.busy=False;self.status.set('Paused for wiring');return
         if not self.fast_demo and p['nominal']==1000 and p['kind']=='DCV':
             if not port.ask_yes_no('HIGH VOLTAGE — 1000 V','This point requires 1000 V DC. Verify CAT-rated leads, connections, clearance, and personnel safety. Enable output?'):

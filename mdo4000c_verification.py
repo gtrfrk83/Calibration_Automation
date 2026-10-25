@@ -27,6 +27,7 @@ import drivers
 import procmods_engine
 import reset_startup
 import virtualbench
+import hookups
 
 SPEC_PATH = HERE / 'specs' / 'tektronix_mdo4000c_pv.json'
 REF_CMC_PATH = HERE / 'specs' / 'mdo4000c_reference_cmc.json'
@@ -1187,7 +1188,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 elif kind == 'refresh': self.refresh()
                 elif kind == 'done': self._finished(payload)
                 elif kind == 'ask':
-                    ok = port.operator_prompt(payload['title'], payload['heading'], payload['steps'], facts=payload['facts'], caution=payload['caution'], ok=payload['ok'], parent=self.root)
+                    ok = port.operator_prompt(payload['title'], payload['heading'], payload['steps'], facts=payload['facts'], caution=payload['caution'], ok=payload['ok'], image=hookups.panel_image('MDO4000C'), parent=self.root)
                     if ok and self.virtual: virtualbench.mdo_operator_confirmed(self._vb, payload['title'])      # the virtual operator pushes the front-panel button
                     box['value'] = ok; box['ev'].set()
                 elif kind == 'manual':

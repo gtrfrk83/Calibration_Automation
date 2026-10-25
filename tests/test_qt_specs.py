@@ -883,6 +883,41 @@ class SpecsTab(unittest.TestCase):
         self.assertEqual(len(asked), 1)
         self.assertEqual(next(r for r in sm.rows_of(self.ids['5522A']) if r['id'] == int(rid))['resolution'], 1e-6)
 
+    def test_edit_details_changes_name_and_description_and_logs_it(self):
+        p = self.p
+        sid = self.ids['5522A']
+        p.select(sid)
+        pump(3)
+        rows_before = len(sm.rows_of(sid))
+        seen = []
+
+        def ask(cur):
+            seen.append(dict(cur))
+            return dict(cur, description='Multi-product calibrator (lab unit)', manufacturer='Fluke Corp', reason='renamed for the lab list')
+        with mock.patch.object(p, 'ask_details', side_effect=ask):
+            p.edit_details()
+        pump(3)
+        self.assertEqual(seen[0]['model'], '5522A')
+        row = next(x for x in sm.standards() if x['id'] == sid)
+        self.assertEqual((row['description'], row['manufacturer']), ('Multi-product calibrator (lab unit)', 'Fluke Corp'))
+        self.assertEqual(p.h_title.text(), '5522A')
+        self.assertIn('Multi-product calibrator (lab unit)', p.h_desc.full)
+        self.assertTrue(sm.log_for(sid))
+        self.assertEqual(len(sm.rows_of(sid)), rows_before)      # the limits are untouched
+
+    def test_edit_details_refuses_a_blank_or_duplicate_model(self):
+        p = self.p
+        sid = self.ids['5522A']
+        p.select(sid)
+        other = next(k for k in self.ids if k != '5522A')
+        for bad in ('', other):
+            with mock.patch.object(p, 'ask_details', side_effect=lambda cur, b=bad: dict(cur, model=b)):
+                p.edit_details()
+            self.assertEqual(self.shown[-1][0], 'show_error')
+        self.assertEqual(next(x for x in sm.standards() if x['id'] == sid)['model'], '5522A')
+        with self.assertRaises(ValueError):
+            sm.set_standard_details(sid, {'divisor': '2'})
+
     def test_set_divisor_and_assets(self):
         p = self.p
         p.select(self.ids['5522A'])

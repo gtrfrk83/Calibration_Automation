@@ -26,6 +26,7 @@ import procmods_engine
 import reset_startup
 import surprise
 import virtualbench
+import hookups
 
 MODEL = SPEC_PATH = SPEC = POINTS = None
 PERIODS = {'24 hours': '24h', '90 days': '90d', '1 year': '1y', '2 years': '2y'}
@@ -381,15 +382,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             return port.operator_prompt('Zero offset — physical setup required', f'Zero-offset setup: {p["terminal"]} terminals',
                 ([('Select terminals', f'Set the front-panel FRONT/REAR switch to {p["terminal"]}. The program checks the switch position before measuring.')]
                  if SPEC.get('front_rear_switch', True) else []) + [('Set up the input', instruction)],
-                facts=facts, caution='The calibrator stays in STANDBY. Never use it as a zero source.', ok='Set up — measure', parent=self.root)
+                facts=facts, caution='The calibrator stays in STANDBY. Never use it as a zero source.', ok='Set up — measure', image=hookups.panel_image(MODEL), parent=self.root)
         if p['source'] == 'manual':
             return port.operator_prompt('Connect the standard', f'Connect for {p["section_title"]}',
                 [('Connect', p['setup']), ('Stabilise', 'Allow the standard to settle before continuing.')],
-                facts=facts, ok='Connected — measure', parent=self.root)
+                facts=facts, ok='Connected — measure', image=hookups.panel_image(MODEL), parent=self.root)
         return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {p["section_title"]}',
             [('Standby', 'The calibrator is put in STANDBY before you rewire.'), ('Wiring', self.setup_text(p)),
              ] + ([('Switch', 'Front/Rear switch on FRONT.' if p['terminal'] != 'REAR' else 'Front/Rear switch on REAR.')] if SPEC.get('front_rear_switch', True) else []),
-            facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified — continue', parent=self.root)
+            facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified — continue', image=hookups.panel_image(MODEL), parent=self.root)
 
     def _next(self, points, i, previous):
         if i >= len(points) or self.stop:

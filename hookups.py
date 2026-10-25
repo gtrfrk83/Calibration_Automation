@@ -115,6 +115,19 @@ def image_path(meter: str, cal: str, group: str):
     return path if path.is_file() else None
 
 
+PANEL_PICTURES = {'34401A': 'keysight34401a_panel.png', '34460A': 'keysight34460a_panel.png', '34461A': 'keysight34461a_34465a_panel.png',
+                  '34465A': 'keysight34461a_34465a_panel.png', '8846A': 'fluke8846a_panel.png', 'MDO4000C': 'tektronix_mdo4000_panel.png',
+                  '287': 'fluke28x_panel.png', '289': 'fluke28x_panel.png'}
+
+
+def panel_image(model):
+    """The front-panel picture the owner supplied for an instrument (diagrams/, see README_panels.txt), or None when there is none for that model
+    (the 34470A has none yet) or the file is missing.  Shown beside the connection steps; it never changes a step."""
+    name = PANEL_PICTURES.get(str(model or '').upper().replace('-', ''))
+    path = DIAGRAMS / name if name else None
+    return path if path is not None and path.is_file() else None
+
+
 def has(meter, group) -> bool:
     return group in AVAILABLE.get(meter, ())
 

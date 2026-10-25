@@ -453,13 +453,16 @@ class StandardsSpecsPanel(QWidget):
         top.addWidget(self.h_title)
         top.addSpacing(M.sm)
         top.addWidget(self.h_desc, 1)
+        self.btn_details = SecondaryButton('Edit details...')
+        self.btn_details.setToolTip('Change the name, description, period and other details of this standard (logged in the change log).')
+        self.btn_details.clicked.connect(lambda _c=False: self.edit_details())
         self.btn_edit = SecondaryButton('Edit spec...')
         self.btn_export = SecondaryButton('Export JSON...')
         self.btn_emu = PrimaryButton('Check an EMU...')
         self.btn_edit.clicked.connect(lambda _c=False: self.edit_spec())
         self.btn_export.clicked.connect(lambda _c=False: self.export_json())
         self.btn_emu.clicked.connect(lambda _c=False: self.check_emu())
-        for x in (self.btn_edit, self.btn_export, self.btn_emu):
+        for x in (self.btn_details, self.btn_edit, self.btn_export, self.btn_emu):
             top.addWidget(x)
         b.addLayout(top)
         b.addWidget(rule())
@@ -1031,6 +1034,58 @@ class StandardsSpecsPanel(QWidget):
         reason = sed.ask_string(self, 'Reason', 'Reason for the change (kept in the change log):') or ''
         sm.set_standard_field(self.sel, 'divisor', val, who=self._who(), reason=reason)
         self.refresh()
+
+    DETAIL_CAPTIONS = (('manufacturer', 'Manufacturer'), ('model', 'Model'), ('description', 'Description'), ('period', 'Default period'),
+                       ('confidence_text', 'Confidence statement'), ('approved_by', 'Approved by'), ('approve_date', 'Approval date'),
+                       ('reference', 'Reference'), ('revision', 'Revision'), ('author', 'Author'))
+
+    def ask_details(self, current: dict):
+        """The details form: {field: text} (plus 'reason') or None when cancelled.  A seam for tests, like the sed.ask_* functions."""
+        dlg = ModalDialog(self, 'Edit details of the standard', width=620)
+        dlg.setWindowTitle(sed._title('Edit details of the standard'))
+        dlg.sub_label.setText('The specification rows and limits are not changed here (use Edit spec...). Every change is kept in the change log.')
+        dlg.sub_label.show()
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(M.md)
+        grid.setVerticalSpacing(M.sm)
+        edits = {}
+        for r, (key, cap) in enumerate(self.DETAIL_CAPTIONS):
+            grid.addWidget(label(cap, 'hint'), r, 0)
+            e = QLineEdit(str(current.get(key, '') or ''))
+            e.setAccessibleName(cap)
+            grid.addWidget(e, r, 1)
+            edits[key] = e
+        grid.setColumnStretch(1, 1)
+        reason = QLineEdit()
+        reason.setAccessibleName('Reason')
+        reason.setPlaceholderText('Reason for the change (optional)')
+        grid.addWidget(label('Reason', 'hint'), len(edits), 0)
+        grid.addWidget(reason, len(edits), 1)
+        dlg.body.addLayout(grid)
+        dlg.initial_focus = edits['description']
+        dlg.add_button('Cancel', cancel=True)
+        dlg.add_button('Save', role='primary', default=True)
+        if dlg.run() != 'save':
+            return None
+        out = {k: e.text() for k, e in edits.items()}
+        out['reason'] = reason.text()
+        return out
+
+    def edit_details(self):
+        if self.sel is None:
+            return
+        std = self._info[self.sel]['std']
+        got = self.ask_details({k: std.get(k, '') for k, _c in self.DETAIL_CAPTIONS})
+        if got is None:
+            return
+        reason = got.pop('reason', '')
+        try:
+            done = sm.set_standard_details(self.sel, got, who=self._who(), reason=reason)
+        except ValueError as e:
+            sed.show_error(self, 'Edit details', str(e))
+            return
+        if done:
+            self.refresh()
 
     def set_assets(self):
         if self.sel is None:
