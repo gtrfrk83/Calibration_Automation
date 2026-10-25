@@ -1,0 +1,234 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "TektronixTBS1000.connect",
+   "log": [
+    "TBS1000|>>|*IDN?",
+    "TBS1000|<<|TEKTRONIX,TBS 1154,SIM0001,CF:91.1CT FV:v4.00",
+    "TBS1000|>>|*CLS",
+    "TBS1000|>>|HEADer OFF",
+    "TBS1000|>>|VERBose OFF",
+    "TBS1000|>>|*IDN?",
+    "TBS1000|<<|TEKTRONIX,TBS 1154,SIM0001,CF:91.1CT FV:v4.00"
+   ],
+   "method": "TektronixTBS1000.connect",
+   "result": "returned <TektronixTBS1000>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TBS 1154,SIM0001,CF:91.1CT FV:v4.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TBS 1154,SIM0001,CF:91.1CT FV:v4.00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "TektronixTBS1000.connect[two channels]",
+   "log": [
+    "TBS1000|>>|*IDN?",
+    "TBS1000|<<|TEKTRONIX,TBS 1102,SIM0001,CF:91.1CT FV:v4.00",
+    "TBS1000|>>|*CLS",
+    "TBS1000|>>|HEADer OFF",
+    "TBS1000|>>|VERBose OFF",
+    "TBS1000|>>|*IDN?",
+    "TBS1000|<<|TEKTRONIX,TBS 1102,SIM0001,CF:91.1CT FV:v4.00"
+   ],
+   "method": "TektronixTBS1000.connect",
+   "result": "returned <TektronixTBS1000>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TBS 1102,SIM0001,CF:91.1CT FV:v4.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TBS 1102,SIM0001,CF:91.1CT FV:v4.00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "TektronixTBS1000.connect[wrong model]",
+   "log": [
+    "TBS1000|>>|*IDN?",
+    "TBS1000|<<|TEKTRONIX,TDS 2024C,C0,CF:91.1CT FV:v24"
+   ],
+   "method": "TektronixTBS1000.connect",
+   "result": "raised InstrumentError: Expected Tektronix TBS1000 but the instrument identifies as: 'TEKTRONIX,TDS 2024C,C0,CF:91.1CT FV:v24'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TDS 2024C,C0,CF:91.1CT FV:v24"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "TektronixTBS1000.connect[reset]",
+   "log": [
+    "TBS1000|>>|*IDN?",
+    "TBS1000|<<|TEKTRONIX,TBS 1104,SIM0001,CF:91.1CT FV:v4.00",
+    "TBS1000|>>|*CLS",
+    "TBS1000|>>|HEADer OFF",
+    "TBS1000|>>|VERBose OFF",
+    "TBS1000|>>|*IDN?",
+    "TBS1000|<<|TEKTRONIX,TBS 1104,SIM0001,CF:91.1CT FV:v4.00"
+   ],
+   "method": "TektronixTBS1000.connect",
+   "result": "returned <TektronixTBS1000>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TBS 1104,SIM0001,CF:91.1CT FV:v4.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TBS 1104,SIM0001,CF:91.1CT FV:v4.00"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "TektronixTBS1000.reset_to_defaults",
+   "log": [
+    "TBS1000|>>|FACtory",
+    "TBS1000|>>|*CLS",
+    "TBS1000|>>|*OPC?",
+    "TBS1000|<<|1",
+    "TBS1000|>>|HEADer OFF",
+    "TBS1000|>>|VERBose OFF",
+    "TBS1000|>>|*ESR?",
+    "TBS1000|<<|0"
+   ],
+   "method": "TektronixTBS1000.reset_to_defaults",
+   "result": "returned ResetReport(instrument='TBS1000', ok=True, exempt=False, steps=[ResetStep(name='reset (FACtory)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='no error-queue command'), ResetStep(name='replies without headers (HEADer OFF)', ok=True, detail=''), ResetStep(name='short headers (VERBose OFF)', ok=True, detail=''), ResetStep(name='event status clean (*ESR?)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  }
+ ],
+ "name": "tektronix_tbs1000",
+ "schema": 1
+}

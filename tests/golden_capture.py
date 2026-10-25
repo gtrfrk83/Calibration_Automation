@@ -62,6 +62,9 @@ from drivers.simulated_34410a import make_34410a_bench  # noqa: E402
 from drivers.simulated_3458a import make_3458a_bench  # noqa: E402
 from drivers.simulated_mdo import make_mdo_bench  # noqa: E402
 from drivers.simulated_tds import make_tds_bench  # noqa: E402
+from drivers.simulated_tbs import make_tbs1000_bench, make_tbs1000c_bench  # noqa: E402
+from drivers.tektronix_tbs1000 import TektronixTBS1000  # noqa: E402
+from drivers.tektronix_tbs1000c import TektronixTBS1000C  # noqa: E402
 
 SCHEMA = 1
 SENTINEL_PASSWORD = 'GOLDEN_SENTINEL_PW'       # not a real password; asserted absent from every fixture
@@ -165,6 +168,17 @@ COVERAGE = {
                      'measure', 'waveform', 'waveform_burst'],
             no_command=['model_from_idn']),                                 # static: parses the *IDN? text already read
     },
+    'tektronix_tbs1000': {
+        'TektronixTBS1000': dict(covered=['connect'], no_command=['model_from_idn']),   # the TDS2000C driver; only the identification differs
+    },
+    'tektronix_tbs1000c': {
+        'TektronixTBS1000C': dict(
+            covered=['connect', 'opc', 'check_errors', 'cleanup', 'set_num', 'set_word', 'default_setup', 'run_self_test', 'self_cal',
+                     'select_only', 'channel', 'position', 'acquire_mode', 'run', 'num_acq', 'wait_acquisitions', 'timebase',
+                     'horizontal_position', 'trigger_edge', 'trigger_mode', 'set_level_50', 'trigger_state', 'measure_setup', 'meas_value',
+                     'measure', 'waveform', 'waveform_burst'],
+            no_command=['model_from_idn']),                                 # static: parses the *IDN? text already read
+    },
     'fluke_5522a_scope': {
         'Fluke5522AScope': dict(covered=['select_scope_dcv', 'set_dc_volts'], no_command=[]),
     },
@@ -201,18 +215,19 @@ COVERAGE = {
 # Stage 7: reset_to_defaults is defined once, on Instrument, and exercised on each of these concrete drivers (golden cases "Class.reset_to_defaults").
 for _cls in ('Fluke5560A', 'Fluke5520A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A', 'Agilent34401A', 'Keysight34470A', 'Keysight34970A', 'Keysight34972A', 'Keysight33220A',
              'Fluke8808ACal', 'Keysight53132A', 'Fluke5790B', 'Fluke28x', 'WaveSurfer4104HD', 'TektronixMDO4000C', 'Fluke96270A', 'AgilentAFG', 'ReferenceMeter',
-             'TektronixTDS2000C', 'Fluke5522AScope', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A'):
+             'TektronixTDS2000C', 'TektronixTBS1000', 'TektronixTBS1000C', 'Fluke5522AScope', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A'):
     for _fixture in COVERAGE.values():
         if _cls in _fixture:
             _fixture[_cls]['covered'].append('reset_to_defaults')
 
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
-              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keithley_2000_cal', 'fluke_8808a_cal', 'keysight_34410a', 'agilent_3458a']
+              'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keithley_2000_cal', 'fluke_8808a_cal', 'keysight_34410a', 'agilent_3458a',
+              'tektronix_tbs1000', 'tektronix_tbs1000c']
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
 ENGINES = ('truevolt_34470A', 'dacq_34970A', 'dacq_34972A', 'fgen_33220A', 'mdo4000c', 'tds2000c', 'agilent_34401a', 'fluke_8846a', 'handheld_5522a',
-           'wavesurfer_dcv', 'keithley_2000', 'keysight_34410a', 'keysight_34411a')
+           'wavesurfer_dcv', 'keithley_2000', 'keysight_34410a', 'keysight_34411a', 'tbs1000c', 'tbs1000')
 
 
 # =====================================================================================================================================
@@ -1609,6 +1624,106 @@ def resets_8808a(c):
     c.run('Fluke8808A.reset_to_defaults[error bit set: warning]', bad.reset_to_defaults)
 
 
+
+def cases_tbs1000(c):
+    """The TBS1000 is the TDS2000C driver (same programmer manual 077-0444-03): only connect / identification is its own."""
+    bench, t = make_tbs1000_bench('1154')
+    m = c.inst(TektronixTBS1000, t['scope'], opened=False, label='TBS1000')
+    c.run('TektronixTBS1000.connect', m.connect)
+    two = c.inst(TektronixTBS1000, make_tbs1000_bench('1102')[1]['scope'], opened=False, label='TBS1000')
+    c.run('TektronixTBS1000.connect[two channels]', two.connect)
+    wrong = c.inst(TektronixTBS1000, Scripted([(r'\*IDN\?', 'TEKTRONIX,TDS 2024C,C0,CF:91.1CT FV:v24')]), opened=False, label='TBS1000')
+    c.run('TektronixTBS1000.connect[wrong model]', wrong.connect)
+
+
+def resets_tbs1000(c):
+    bench, t = make_tbs1000_bench('1104')
+    m = c.inst(TektronixTBS1000, t['scope'], opened=False, label='TBS1000')
+    c.run('TektronixTBS1000.connect[reset]', m.connect)
+    c.run('TektronixTBS1000.reset_to_defaults', m.reset_to_defaults)
+
+
+def cases_tbs1000c(c):
+    bench, t = make_tbs1000c_bench('1202C')
+    m = c.inst(TektronixTBS1000C, t['scope'], opened=False, label='TBS1000C')
+    bench.fluke.update(operate=True, scope='LEVSINE', volts=0.5, freq=10e6)
+    c.run('TektronixTBS1000C.connect', m.connect)
+    c.run('TektronixTBS1000C.opc[no timeout]', m.opc)
+    c.run('TektronixTBS1000C.opc[timeout]', m.opc, 60)
+    c.run('TektronixTBS1000C.check_errors[ok]', m.check_errors, 'ctx')
+    c.run('TektronixTBS1000C.default_setup', m.default_setup)
+    c.run('TektronixTBS1000C.select_only', m.select_only, 2)
+    c.run('TektronixTBS1000C.channel[all]', m.channel, 1, vscale=0.5, position=0.0, probe=1, coupling='DC', bw_limit=True)
+    c.run('TektronixTBS1000C.channel[defaults]', m.channel, 2)
+    c.run('TektronixTBS1000C.position', m.position, 1, 0.0)
+    c.run('TektronixTBS1000C.set_num', m.set_num, 'ch.scale.set', 0.2, ch=1)
+    c.run('TektronixTBS1000C.set_word', m.set_word, 'ch.bw.set', 'FULl', ch=1)
+    c.run('TektronixTBS1000C.acquire_mode[average]', m.acquire_mode, 'AVErage', 64)
+    c.run('TektronixTBS1000C.acquire_mode[sample]', m.acquire_mode, 'SAMple')
+    c.run('TektronixTBS1000C.run', m.run)
+    c.run('TektronixTBS1000C.num_acq', m.num_acq)
+    c.run('TektronixTBS1000C.wait_acquisitions', m.wait_acquisitions, 1, timeout=5.0, poll=0.0)
+    c.run('TektronixTBS1000C.timebase', m.timebase, 1e-3)
+    c.run('TektronixTBS1000C.horizontal_position', m.horizontal_position, 1e-3)
+    c.run('TektronixTBS1000C.trigger_edge[aux]', m.trigger_edge, 'EXT', slope='FALL', mode='NORMal', coupling='DC')
+    c.run('TektronixTBS1000C.trigger_edge[defaults]', m.trigger_edge, 'CH2')
+    c.run('TektronixTBS1000C.trigger_mode', m.trigger_mode, 'AUTO')
+    c.run('TektronixTBS1000C.set_level_50', m.set_level_50)
+    c.run('TektronixTBS1000C.trigger_state', m.trigger_state)
+    c.run('TektronixTBS1000C.measure_setup', m.measure_setup, 'PK2Pk', 1)
+    c.run('TektronixTBS1000C.meas_value', m.meas_value)
+    c.run('TektronixTBS1000C.measure', m.measure, 'MEAN', 1, count=2, timeout=5.0)
+    c.run('TektronixTBS1000C.default_setup[again]', m.default_setup)
+    c.run('TektronixTBS1000C.waveform', m.waveform, 1)
+    c.run('TektronixTBS1000C.waveform_burst', m.waveform_burst, 1, 2, 300)
+    c.run('TektronixTBS1000C.run_self_test', m.run_self_test)
+    c.run('TektronixTBS1000C.self_cal', m.self_cal)
+    c.run('TektronixTBS1000C.cleanup', m.cleanup)
+    # branches the simulator cannot reach
+    err = c.inst(TektronixTBS1000C, Scripted([(r'^\*ESR\?', '16'), (r'^EVMsg\?', '113,"Undefined header"')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.check_errors[command error]', err.check_errors, 'setup')
+    flat = c.inst(TektronixTBS1000C, Scripted([(r'^CH1:SCAle\?', '0.9')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.set_num[mismatch]', flat.set_num, 'ch.scale.set', 0.2, ch=1)
+    flat2 = c.inst(TektronixTBS1000C, Scripted([(r'^CH1:BANdwidth\?', 'TWENTY')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.set_word[mismatch]', flat2.set_word, 'ch.bw.set', 'FULl', ch=1)
+    src = c.inst(TektronixTBS1000C, Scripted([(r'^MEASUrement:IMMed:SOUrce1\?', 'CH2')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.measure_setup[source mismatch]', src.measure_setup, 'MEAN', 1)
+    bad = c.inst(TektronixTBS1000C, Scripted([(r'^MEASUrement:IMMed:VALue\?', '9.9E+37')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.meas_value[invalid]', bad.meas_value)
+    few = c.inst(TektronixTBS1000C, Scripted([(r'^ACQuire:NUMACq\?', '350')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.wait_acquisitions[count does not move]', few.wait_acquisitions, 5, timeout=0.0, poll=0.0)
+    short = c.inst(TektronixTBS1000C, Scripted([(r'^WFMOutpre:XINcr\?', '1E-9'), (r'^WFMOutpre:XZEro\?', '0'), (r'^WFMOutpre:YMUlt\?', '0.1'),
+                                                (r'^WFMOutpre:YOFf\?', '0'), (r'^WFMOutpre:YZEro\?', '0'), (r'^CURVe\?', ':CURVE 1,2,3')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.waveform[record too short]', short.waveform, 1)
+    junk = c.inst(TektronixTBS1000C, Scripted([(r'^WFMOutpre:XINcr\?', '1E-9'), (r'^WFMOutpre:XZEro\?', '0'), (r'^WFMOutpre:YMUlt\?', '0.1'),
+                                               (r'^WFMOutpre:YOFf\?', '0'), (r'^WFMOutpre:YZEro\?', '0'), (r'^CURVe\?', '#41000xyz')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.waveform[binary reply]', junk.waveform, 1)
+    badscale = c.inst(TektronixTBS1000C, Scripted([(r'^WFMOutpre:XINcr\?', '0'), (r'^WFMOutpre:YMUlt\?', '0.1'), (r'^WFMOutpre:YOFf\?', '0'),
+                                                   (r'^WFMOutpre:YZEro\?', '0')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.waveform_burst[scale not usable]', badscale.waveform_burst, 1, 2)
+    narrow = c.inst(TektronixTBS1000C, Scripted([(r'^WFMOutpre:XINcr\?', '1E-9'), (r'^WFMOutpre:YMUlt\?', '0.1'), (r'^WFMOutpre:YOFf\?', '0'),
+                                                 (r'^WFMOutpre:YZEro\?', '0'), (r'^CURVe\?', 'CURVE 1,2,3')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.waveform_burst[window too short]', narrow.waveform_burst, 1, 1)
+    failing = c.inst(TektronixTBS1000C, Scripted([(r'^DIAg:RESUlt:FLAg\?', 'FAIL'), (r'^DIAg:RESUlt:LOG\?', '"FAIL--ACQ"')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.run_self_test[fails]', failing.run_self_test)
+    nolog = c.inst(TektronixTBS1000C, Scripted([(r'^DIAg:RESUlt:FLAg\?', 'PASS'), (r'^DIAg:RESUlt:LOG\?', TransportError('timeout'))]), label='TBS1000C')
+    c.run('TektronixTBS1000C.run_self_test[log query fails]', nolog.run_self_test)
+    badcal = c.inst(TektronixTBS1000C, Scripted([(r'^\*CAL\?', '1'), (r'^CALibrate:INTERNal:STATus\?', 'FAIL')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.self_cal[fails]', badcal.self_cal)
+    wrong = c.inst(TektronixTBS1000C, Scripted([(r'\*IDN\?', 'KEYSIGHT,34401A,1,1')]), opened=False, label='TBS1000C')
+    c.run('TektronixTBS1000C.connect[wrong model]', wrong.connect)
+
+
+def resets_tbs1000c(c):
+    bench, t = make_tbs1000c_bench('1202C')
+    m = c.inst(TektronixTBS1000C, t['scope'], opened=False, label='TBS1000C')
+    c.run('TektronixTBS1000C.connect[reset]', m.connect)
+    c.run('TektronixTBS1000C.reset_to_defaults', m.reset_to_defaults)
+    bad = c.inst(TektronixTBS1000C, Scripted([(r'^\*ESR\?', '16'), (r'^EVMsg\?', '113,"Undefined header"'), (r'^HORizontal:RECOrdlength\?', '2000'),
+                                              (r'^HORizontal:MAIn:DELay:MODe\?', 'OFF'), (r'^HORizontal:MAIn:POSition\?', '50')]), label='TBS1000C')
+    c.run('TektronixTBS1000C.reset_to_defaults[event status not clean]', bad.reset_to_defaults)
+
+
 def _with_resets(cases, resets):
     def both(c):
         cases(c)
@@ -1635,6 +1750,8 @@ DRIVER_CASES = {
     'keysight_34410a': _with_resets(cases_34410a, resets_34410a),
     'keysight_34411a': _with_resets(cases_34411a, resets_34411a),
     'agilent_3458a': cases_3458a_all,
+    'tektronix_tbs1000': _with_resets(cases_tbs1000, resets_tbs1000),
+    'tektronix_tbs1000c': _with_resets(cases_tbs1000c, resets_tbs1000c),
 }
 
 

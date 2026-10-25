@@ -165,6 +165,17 @@ tektronix_mdo4000c_pv.json (schema 2)
 mdo4000c_reference_cmc.json
   Editable uncertainties for the 96270A, function generator and reference meters (rel x reading + abs). Blank = N/A on the report.
 
+tektronix_tbs1000c_pv.json / tektronix_tbs1000_pv.json (schema 2, the point layout of tektronix_tds2000c_pv.json; run by the shared Tektronix engine)
+  tbs1000c: TBS1000C Specification and Performance Verification 077-1583-03 Rev A, pp. 23-30, 14 points for each of TBS1052C / 1072C / 1102C /
+            1202C (two channels); written by build_tbs1000c_spec.py from the page images (read twice). DC gain +/-3 % (5 mV/div 33.95 to 36.05 mV),
+            bandwidth >= 2.12 V p-p, time base +/-2.5 div at 10 ns/div with a 1 ms marker (the test record prints +/-2 div: flagged), edge trigger,
+            Aux In trigger. Vertical offset accuracy (pp. 30-31) not built.
+  tbs1000:  TBS1000 Series Service Manual 077-0772-01 Rev D, Chapter 4 pp. 4-1 to 4-10, 24 points (TBS1022 / 1042 / 1062 / 1064 / 1102 / 1104 /
+            1152 / 1154; CH3 / CH4 points list the four-channel models); written by build_tbs1000_spec.py from the page images (read twice).
+            Same tests and limits as the TDS2000C chapter except the model list, bandwidths (25 to 150 MHz) and trigger frequencies.
+  Extra trigger-stage frequency tags (engine): 'BW' = models_info bw_test_hz, '150M' = 150 MHz. Top-level 'flags' and 'not_built' list what
+  differs from the printed procedure or was left out. The builders recompute the DC gain limits in Decimal and abort on a mismatch.
+
 Schema 4 (function generators: keysight_33210a/33220a/33250a_pv.json)
   periods / default_period      ["90d","1y"] / "1y"
   sections[]                    id, title, page (printed), kind, group (wiring prompt: NONE / COUNTER / STD / POWER / POWER_ATT), setup, points[]

@@ -415,6 +415,8 @@ class Coverage(unittest.TestCase):
     """Every launcher either runs an engine with the in-run editor or is listed here as not wired (a new launcher forces a decision)."""
     NOT_WIRED = {
         'Tektronix_TDS2000C_Verification.py': 'tds2000c_verification has no procedure-modification layer at all (no mixin, no command registry)',
+        'Tektronix_TBS1000C_Verification.py': 'the shared tds2000c_verification engine (TBS1000C family) has no procedure-modification layer, as the TDS2000C',
+        'Tektronix_TBS1000_Verification.py': 'the shared tds2000c_verification engine (TBS1000 family) has no procedure-modification layer, as the TDS2000C',
         'Fluke_8846A_Adjustment.py': 'an adjustment procedure (stores calibration constants), not a verification: never editable while running',
         'Keithley_2000_Adjustment.py': 'an adjustment procedure (stores calibration constants), not a verification: never editable while running',
         'Fluke_8808A_Adjustment.py': 'an adjustment procedure (changes the calibration of the meter), not a verification: never editable while running',

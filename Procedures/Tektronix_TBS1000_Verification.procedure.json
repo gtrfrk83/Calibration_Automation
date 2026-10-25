@@ -1,0 +1,64 @@
+{
+ "schema": 1,
+ "id": "Tektronix_TBS1000_Verification",
+ "name": "Tektronix TBS1000 Performance Verification",
+ "manufacturer": "Tektronix",
+ "model": "TBS1022/1042/1062/1064/1102/1104/1152/1154",
+ "category": "Oscilloscope",
+ "version": "1",
+ "order": 40,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Tektronix_TBS1000_Verification.py",
+ "engine": [
+  "tds2000c_verification.py",
+  "tbs1000_verification.py"
+ ],
+ "drivers": [
+  "tektronix_tbs1000",
+  "tektronix_tds2000c",
+  "fluke_5522a_scope",
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/tektronix_tbs1000_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Tektronix_TBS1000_Verification.py",
+   "tds2000c_verification.py",
+   "tbs1000_verification.py",
+   "tds2000c_view_tk.py",
+   "tds2000c_view_qt.py",
+   "genscope_support_view_qt.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/tektronix_tbs1000.py",
+   "drivers/tektronix_tds2000c.py",
+   "drivers/fluke_5522a_scope.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/tektronix_tbs1000_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_tbs1000"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Tektronix_TBS1000_Verification.py",
+  "Procedures/Tektronix_TBS1000_Verification.procedure.json",
+  "specs/tektronix_tbs1000_pv.json",
+  "specs/build_tbs1000_spec.py",
+  "drivers/tektronix_tbs1000.py",
+  "tests/test_tbs1000_points.py"
+ ],
+ "tests": [
+  "tests/test_tbs1000_points.py"
+ ]
+}

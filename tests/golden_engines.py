@@ -233,6 +233,52 @@ def run_tds():
     return c.entries
 
 
+def _run_tbs(name, fam_attr, make, model):
+    """The shared Tektronix engine on a TBS family (tbs1000_verification): the same sample of points as the TDS2000C run."""
+    import tds2000c_verification as T
+    import tbs1000_verification as B
+    fam = getattr(B, fam_attr)
+    c = gc.Case('engine_' + name)
+    bench, t = make(model)
+    wrapped = {k: rec(v) for k, v in t.items() if k != 'dmm'}
+    r = Runner(c)
+    io = r.build('tds2000c_verification.IO.__init__', lambda: T.IO(dict(cal_baud=9600, cal_model='Fluke 5560A'), transports=wrapped, fam=fam))
+    cfg = T.Config(model, fam)
+
+    class FakeApp:
+        stop = False
+
+        def __init__(self):
+            self.io, self.cfg = io, cfg
+
+        def request(self, kind, payload=None):
+            return True
+
+        def post(self, *a, **k):
+            pass
+
+        def cal_text(self):
+            return 'Fluke 5560A'
+
+    runner = T.Runner(FakeApp())
+    c.run('tds2000c_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
+    pts = [p for p in fam.points if cfg.applies(p) and p['kind'] != 'SELFCAL']
+    for p in sample(pts, lambda p: p['kind'], 12):
+        c.run(f'tds2000c_verification.Runner.run_point[{pid(p)}]', runner.run_point, p, _log=io.log)
+    c.run('tds2000c_verification.IO.close', io.close, _log=io.log)
+    return c.entries
+
+
+def run_tbs1000c():
+    from drivers.simulated_tbs import make_tbs1000c_bench
+    return _run_tbs('tbs1000c', 'TBS1000C_FAMILY', make_tbs1000c_bench, '1202C')
+
+
+def run_tbs1000():
+    from drivers.simulated_tbs import make_tbs1000_bench
+    return _run_tbs('tbs1000', 'TBS1000_FAMILY', make_tbs1000_bench, '1154')
+
+
 def _patch_open_visa(transports):
     """drivers.open_visa returns the next simulated transport (the procedure modules call it with an address)."""
     queue_ = list(transports)
@@ -395,4 +441,6 @@ RUNS = {
     'keithley_2000': run_k2000,
     'keysight_34410a': run_34410a,
     'keysight_34411a': run_34411a,
+    'tbs1000c': run_tbs1000c,
+    'tbs1000': run_tbs1000,
 }

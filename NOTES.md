@@ -253,6 +253,27 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
   their wire text is locked by `tests/golden/tektronix_tds2000c.json`, `fluke_5522a_scope.json` and `engine_tds2000c.json`.
 - No procedure modifications (procmods) are wired into this engine yet. TAR/TUR: TUR only on the DC gain points (volts); TAR is blank.
 
+## Tektronix TBS1000C and TBS1000 (branch `tektronix-tbs1000`; simulated bench only, never run on hardware or a real UI)
+- One engine, two families: `tds2000c_verification.py` gained a `Family` (spec, model list, prompt page numbers, driver, simulator, names); the TDS2000C is
+  `TDS_FAMILY` (every text, command and limit unchanged: `tests/golden/engine_tds2000c.json`, `tektronix_tds2000c.json`, `fluke_5522a_scope.json` are
+  byte-identical). `tbs1000_verification.py` declares `TBS1000C_FAMILY` / `TBS1000_FAMILY` and the `App` subclasses; launchers
+  `Procedures/Tektronix_TBS1000C_Verification.py`, `Procedures/Tektronix_TBS1000_Verification.py`. The TDS views read the window title, model prefix and
+  address label from the family. Editing the shared engine / views flips the TDS2000C fingerprint ('Changed since verification'; it already flips on
+  qt-migration against main).
+- TBS1000C: spec from the Specification and Performance Verification manual 077-1583-03 Rev A (pp. 23-30); driver `drivers/tektronix_tbs1000c.py` from the
+  TBS1000C Programmer Manual 077-1691-02 (every command registered with its page). Differences from the TDS command set: TRIGger:A, WFMOutpre, WFMOutpre:ENCdg,
+  MEASUrement:IMMed:SOUrce1, CH<x>:PRObe:GAIN, CH<x>:BANdwidth FULl/TWEnty, CALibrate:INTERNal:STATus?, AUX trigger source, HORizontal:MAIn:POSition in percent
+  (the delay is HORizontal:MAIn:DELay:MODe ON + DELay:TIMe), record 2000 points over 15 divisions (set after every FACtory).
+- TBS1000 (non-C): spec from the TBS1000 Service Manual 077-0772-01 Rev D, Chapter 4; driver `drivers/tektronix_tbs1000.py` = the TDS2000C driver (same
+  programmer manual 077-0444-03 Rev B, which names the TBS1000) with TBS identification; `COMMAND_PAGES` lists the page of every command it sends.
+- UNVERIFIED (no TBS on the bench): reply formats, the TBS1000C time axis (XZEro with the delay on), the 2000-point record at 2-4 ns/div, ACQuire:NUMACq?
+  counting after RUN on the TBS1000C (counted relative to the value after RUN), the stable-trigger criteria (as TDS2000C), the 5560A / 5522A scope-option
+  commands (as TDS2000C).
+- Flags (as printed unless said): TBS1000C time base +/-2.5 div used (test record prints +/-2 div); TBS1202C trigger at 200 MHz with 0.75 V p-p (1.5 div) and
+  Aux In at ~200 mV p-p to 200 MHz are stricter than the published specification (2.0 div / 350 mV); TBS1000 external trigger step 10 sets 5 ns/div again
+  (TDS chapter: 2.5 ns/div); TBS1000 bandwidth reference at 10 us/div (the lab's TDS2000C deviation; the manual prints 10 ms/div); TBS1052 appears only in
+  the TBS1000 trigger-source table. Vertical position / offset accuracy not built (owner to decide).
+
 ## Fluke 87V notes
 - Temperature 1-50 / 1-51 are read and sourced in degC. Limits follow the 87 Series V Calibration Manual (Table 3 steps 49 / 50, printed p. 11): -1.0..1.0 at 0 degC
   and 98.0..102.0 at 100 degC (decided by the lab owner; the MDD-derived 99.0..101.0 is not used).

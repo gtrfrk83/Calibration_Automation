@@ -4601,7 +4601,7 @@
   {
    "args": [
     "'Model read'",
-    "f'The oscilloscope reports TDS{model} ({self.io.scope.channels} channels).'"
+    "f'The oscilloscope reports {self.fam.prefix}{model} ({self.io.scope.channels} channels).'"
    ],
    "kind": "info",
    "kw": {},
@@ -4731,7 +4731,7 @@
   },
   {
    "args": [
-    "'Tektronix TDS2000C performance verification'"
+    "self.fam.report_title"
    ],
    "kind": "report_details",
    "kw": {},
