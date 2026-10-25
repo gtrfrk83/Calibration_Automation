@@ -50,6 +50,14 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
   'Instruments reset to default settings at start'. Because a UUT reset can erase stored settings, a notice is confirmed first (declining touches
   nothing). STANDING-RULE DEVIATION (owner request, Fluke 8808A only): `AppResetMixin.RESET_ONCE_PER_SESSION` (default False = reset on every Run, every other engine unchanged) is True for the 8808A App, so 'reset every instrument to defaults before tests start' is once per session for that procedure; see the 8808A section. Fast demo sends nothing; a virtual-bench demo resets the SIMULATED instruments (see Virtual bench). A new procedure must call the helper before its first point; `tests/test_reset_startup.py` enforces it.
 
+## Frequency band edges (decided 2026-10-25)
+- A2LA scope CMC tables (specs/a2la_1888_03_cmc.json, `uncertainty.Scope`): AC rows are printed '(> lo to hi) Hz', so they are read HALF-OPEN: a frequency on a shared
+  edge belongs to the row below (the lowest row of a block includes its lower edge).  AC volts and AC current alike (1d13125).  The MDO flatness rows print the scope's 0.050 dB.
+- Manufacturer specifications of the standards (5522A, 5560A, 5520A, 3458A, 5790B, coils ...; `specmanager.Standard.lookup`): bands are printed 'lo - hi' with no convention
+  stated (5790B Operators Manual pp. 1-10 to 1-12: '50 kHz - 100 kHz', '100 kHz - 300 kHz'), so a value on a shared edge takes the WORSE row (conservative).  Not changed.
+- Consequence: at exactly 100 kHz the 33220A 7 V point compares the scope CMC (50-100 kHz row) with the 5790B budget (100-300 kHz row) and reports the larger.
+- Follow a manual's own statement where one exists (e.g. '> 45 Hz to 10 kHz'); otherwise keep the worse row for standards.
+
 ## Reset to default settings: what is verified (Stage 7)
 - Backed by a manual page: Fluke 5522A `*RST` (Operators Manual p. 6-35) and `*OPC?` (p. 5-44); Fluke 5790B `*RST` (Operators Manual pp. 6-11,
   6-22) and `*OPC?` (pp. 6-10, 6-22); Agilent 53131A/53132A `*RST` (Programming Guide p. 2-40, Table 2-3; `*OPC?` p. 4-133; the reference
