@@ -396,3 +396,5 @@ RUNS = {
     'keysight_34410a': run_34410a,
     'keysight_34411a': run_34411a,
 }
+from tests import golden_tbs2000b as _tbs2000b  # noqa: E402
+RUNS['tbs2000b'] = _tbs2000b.engine_run

@@ -99,6 +99,7 @@ ENGINES = {          # source file -> (function that starts a run, name of the r
     'dsb_runtime.py': ('execute', 'reset_then', '_next'),                  # user-built datasheets (Datasheet Builder runtime)
     'mdo4000c_verification.py': ('_worker', 'reset_run', 'run_point'),
     'tds2000c_verification.py': ('_worker', 'reset_run', 'run_point'),
+    'tbs2000b_verification.py': ('_worker', 'reset_run', 'run_point'),
     'Procedures/Agilent_34401A.py': ('execute', 'reset_then', '_next'),
     'Procedures/Fluke_8846A_Verification.py': ('execute', 'reset_then', '_next'),
     'fluke8808a_verification.py': ('execute', 'reset_then', '_next'),
