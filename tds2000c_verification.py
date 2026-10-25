@@ -38,7 +38,7 @@ class Family:
 
     def __init__(self, spec_path, *, name, title, prefix, default_model, settings_key, scope_label, addr_label, log_name, diagram_prefix,
                  report_title, report_source, pages, ext_source='EXT', ext_title='External edge trigger', ext_label='EXT TRIG',
-                 axis_hint='check HORizontal:MAIn:POSition and WFMPre:XZEro on this firmware', scope_driver=None, sim_bench=None):
+                 axis_hint='check HORizontal:MAIn:POSition and WFMPre:XZEro on this firmware', scope_driver=None, sim_bench=None, sim_cal_exact=False):
         self.spec_path = Path(spec_path)
         self.spec = json.loads(self.spec_path.read_text(encoding='utf-8'))
         self.points = self.spec['points']
@@ -52,6 +52,7 @@ class Family:
         self.pages = dict(pages)                     # page numbers quoted in the operator prompts: warmup, selfcal, ext_figure
         self.ext_source, self.ext_title, self.ext_label, self.axis_hint = ext_source, ext_title, ext_label, axis_hint
         self._scope_driver, self._sim_bench = scope_driver, sim_bench
+        self.sim_cal_exact = sim_cal_exact           # demo: simulate the chosen calibrator itself (5520A too); False = the TDS2000C's 5560A / 5522A pair
 
     def scope_driver(self):
         return self._scope_driver() if self._scope_driver else drivers.TektronixTDS2000C
@@ -203,6 +204,11 @@ def parse_out_reply(reply):
         return amp * (1e-3 if unit == 'MV' else 1.0), freq
     except (ValueError, KeyError, IndexError):
         raise drivers.InstrumentError(f'Unexpected calibrator OUT? reply {reply!r}')
+
+
+def report_notes(p, model):
+    """The point's report notes that apply to `model` (spec field 'report_notes': [{text, models?}]); the TDS2000C spec has none."""
+    return [n['text'] for n in p.get('report_notes', ()) if not n.get('models') or model in n['models']]
 
 
 def hook_image(group, cal_text, prefix='hook_tds2000c'):
@@ -849,6 +855,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         nom, lo, hi, _r, unit = display_row(p)
         raw = self.results.get(str(p['id']), {}).get('raw')
         extra = ('  |  ' + p['note']) if p.get('note') else ''
+        extra += ''.join('  |  Report note: ' + t for t in report_notes(p, self.cfg.model))
         work = ''
         if raw:
             work = '\nWorksheet: ' + ', '.join(f'{k} = {v:.6g}' if isinstance(v, float) else f'{k} = {v}' for k, v in raw.items() if not isinstance(v, (list, dict)))
@@ -874,7 +881,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         try:
             self.disconnect()
             if self.virtual:          # demo: the real IO / driver code over a simulated scope and calibrator
-                cal = '5560A' if '5560' in self.cal_text() else '5522A'
+                cal = virtualbench.sim_model(self.cal_text()) if self.fam.sim_cal_exact else ('5560A' if '5560' in self.cal_text() else '5522A')
                 self._vb, t = self.fam.sim_bench(self.v_model.get().replace(self.fam.prefix, '') or self.fam.default_model, cal)
                 t.pop('dmm', None)
                 set_virtual_pace(True)
@@ -1034,14 +1041,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         failed = r['result'] == 'FAIL'
         unc = r.get('uncertainty') or uncertainty_text(p, r.get('raw', {}))
         sec = self.fam.section_title[p['section']]
+        desc = p['desc'] + (' (see note)' if report_notes(p, self.cfg.model) else '')     # notes are printed under the table (export_pdf)
         if p.get('passfail'):
-            return dict(Section=sec, Description=p['desc'], Nominal='Pass', **{'Tolerance -': 'N/A', 'Tolerance +': 'N/A'}, UOM='',
+            return dict(Section=sec, Description=desc, Nominal='Pass', **{'Tolerance -': 'N/A', 'Tolerance +': 'N/A'}, UOM='',
                         **{'As Found': 'Pass' if not failed else 'Fail'}, OOT='OOT' if failed else '', **{'As Left': 'Same'}, Uncertainty='N/A')
         if p['unit'] in PLAIN_UNITS:
             nom, lo, hi, rd, unit = display_row(p, r['reading'])
-            return {'Section': sec, 'Description': p['desc'], 'Nominal': nom, 'Tolerance -': lo, 'Tolerance +': hi, 'UOM': unit, 'As Found': rd,
+            return {'Section': sec, 'Description': desc, 'Nominal': nom, 'Tolerance -': lo, 'Tolerance +': hi, 'UOM': unit, 'As Found': rd,
                     'OOT': 'OOT' if failed else '', 'As Left': 'Same', 'Uncertainty': unc}
-        row = report_pdf.cert_row(p['desc'], p['nominal'], p['low'] if p['low'] is not None else float('nan'), p['high'] if p['high'] is not None else float('nan'),
+        row = report_pdf.cert_row(desc, p['nominal'], p['low'] if p['low'] is not None else float('nan'), p['high'] if p['high'] is not None else float('nan'),
                                   p['unit'], r['reading'], failed, section=sec, uncertainty=unc)
         if p['low'] is None: row['Tolerance -'] = 'N/A'
         if p['high'] is None: row['Tolerance +'] = 'N/A'
@@ -1086,6 +1094,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         skipped = sum(1 for v in self.found.values() if v.get('result') == 'SKIP')
         note = ('Uncertainty: DC points use the laboratory A2LA scope (calibrator CMC); points the scope does not cover show N/A.'
                 + (f' {skipped} point(s) were skipped.' if skipped else ''))
+        notes = []
+        for p, _row in pairs:
+            for text in report_notes(p, self.cfg.model):
+                if text not in notes:
+                    notes.append(text)
+        if notes:
+            note += ' Notes: ' + ' '.join(f'({i}) {t}' for i, t in enumerate(notes, 1))
         try:
             if report_pdf.details_tar_tur(details):
                 rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [self.tar_tur_for(p) for p, _row in pairs])

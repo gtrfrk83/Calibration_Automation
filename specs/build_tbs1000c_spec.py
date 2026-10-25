@@ -78,15 +78,19 @@ for ch in (1, 2):
              'Pk-Pk must be >= 2.12 V. 50 ohm feedthrough termination at the scope input.')
 
 # ---- sample rate and delay time accuracy (p. 27) ----------------------------------------------------------------------------------------------------
-# 1 ms time mark, 500 mV/div, 1 ms/div, trigger 50 %, delay 1.0000 ms, then 10 ns/div. Step 13 limit: +/-2.5 divisions (+/-25 ns); the note: one
-# division = 10 ppm.  The test record (p. 24) prints -2 / +2 divs; the procedure step and the +/-25 x 10^-6 specification (p. 15) give 2.5 div.
-TB_DIV = D('2.5')
-if TB_DIV * D('10e-9') / D('1e-3') != D('25e-6'):
-    raise SystemExit('time base: 2.5 div x 10 ns / 1 ms is not 25 ppm')
+# 1 ms time mark, 500 mV/div, 1 ms/div, trigger 50 %, delay 1.0000 ms, then 10 ns/div. Step 13 prints +/-2.5 divisions (+/-25 ns); the note: one
+# division = 10 ppm.  The test record (p. 24) prints -2 / +2 divs.  OWNER DECISION: the test record's +/-2 div is used (20 ppm, tighter than the
+# +/-25 x 10^-6 specification, p. 15); the step's +/-2.5 div is kept in the point as 'printed_step_limits' and the point carries a report note.
+TB_DIV = D('2')
+TB_STEP_DIV = D('2.5')
+if TB_STEP_DIV * D('10e-9') / D('1e-3') != D('25e-6') or TB_DIV * D('10e-9') / D('1e-3') != D('20e-6'):
+    raise SystemExit('time base: division / ppm arithmetic does not hold')
 add('timebase', 'TIMEBASE', 'Time base: rising edge of the 1 ms marker at center screen (divisions)', 0.0, -float(TB_DIV), float(TB_DIV), 'div', ch=1,
-    period=1e-3, vscale=0.5, hscale_set=1e-3, delay=1e-3, hscale_meas=10e-9, printed_record_limits=[-2.0, 2.0],
-    note='p. 27 step 13: within +/-2.5 divisions (+/-25 ns); 1 division = 10 ppm. The test record (p. 24) prints -2 / +2 divs: '
-         'the procedure step and the 25 ppm specification (p. 15) are used (flagged for the owner). Edge position measured from the acquired waveform.')
+    period=1e-3, vscale=0.5, hscale_set=1e-3, delay=1e-3, hscale_meas=10e-9, printed_step_limits=[-float(TB_STEP_DIV), float(TB_STEP_DIV)],
+    note='Limit +/-2 div (+/-20 ns at 10 ns/div; 1 division = 10 ppm) from the manual test record (p. 24); the procedure step 13 (p. 27) prints '
+         '+/-2.5 div (+/-25 ns, the 25 ppm specification). Edge position measured from the acquired waveform.',
+    report_notes=[dict(text='Limit +/-2 div taken from the manual test record (p. 24); the procedure step (p. 27, step 13) prints +/-2.5 div '
+                            '(25 ppm specification). The tighter test-record limit is applied.')])
 
 # ---- edge trigger sensitivity (p. 27-29; test record: "Stable trigger") ------------------------------------------------------------------------------
 TRIG_STAGES = [
@@ -95,9 +99,11 @@ TRIG_STAGES = [
     dict(step='12',    freq='150M', meas_vpp=1.0,  hscale=4e-9,  slope='RISe', check=True, models=HZ200),
     dict(step='13-15', freq='LAST', meas_vpp='LAST', hscale=2e-9, slope='FALL', check=True),
 ]
+TRIG_NOTES = [dict(models=HZ200, text='TBS1202C: step 8 checks 200 MHz at the printed 750 mV p-p (1.5 div at 500 mV/div); the published '
+                                        'sensitivity above 100 MHz is 2.0 div (p. 17, style B). Checked as printed (stricter than the specification).')]
 for ch in (1, 2):
     add('trig', 'TRIG', f'CH{ch} edge trigger sensitivity (stable trigger)', 1, 1, 1, '', ch=ch, passfail=True,
-        vscale=0.5, stages=TRIG_STAGES,
+        vscale=0.5, stages=TRIG_STAGES, report_notes=TRIG_NOTES,
         note='Pass = stable trigger at every stage (engine criteria: trigger state, acquisitions counting, edge position repeatable).')
 
 # ---- Aux In edge trigger sensitivity (p. 29-30) ---------------------------------------------------------------------------------------------------------
@@ -110,10 +116,11 @@ EXT_STAGES = [
 ]
 add('exttrig', 'EXTTRIG', 'Aux In edge trigger sensitivity (stable trigger)', 1, 1, 1, '', ch=1, passfail=True,
     vscale=0.1, stages=EXT_STAGES,
+    report_notes=[dict(models=HZ200, text='TBS1202C: Aux In checked at 200 MHz with the printed level of about 200 mV p-p; the published '
+                                          'sensitivity from 100 MHz to 200 MHz is 350 mV (p. 17, style B). Checked as printed (stricter than the specification).')],
     note='CH1 and AUX IN both fed from a power splitter, 50 ohm feedthrough terminators on both inputs (figure p. 29).')
 
-# Check Vertical Offset Accuracy (pp. 30-31, Table 3) is NOT built: the TDS2000C procedure this one follows leaves its vertical position test out at the
-# lab's request; the owner decides whether to add it (question in the report).
+# Check Vertical Offset Accuracy (pp. 30-31, Table 3) is NOT built (owner decision, as the TDS2000C vertical position test).
 
 for i, p in enumerate(points, 1):
     p['id'] = i
@@ -126,12 +133,13 @@ spec = dict(schema=2, manufacturer='Tektronix', model='TBS1000C', models=list(MO
                              '+/-3 %, time mark 10 ms period +/-10 ppm; the procedure uses a 1 ms mark) is met here by the calibrator scope option. '
                              'Vertical offset accuracy (pp. 30-31) is not built.'),
             not_built=[dict(test='Check Vertical Offset Accuracy', pages='30-31',
-                            why='left out like the TDS2000C vertical position test (lab request on the TDS2000C); owner to decide')],
-            flags=[dict(point='timebase', printed='test record p. 24: -2 / +2 divs', used='+/-2.5 div (p. 27 step 13, 25 ppm spec p. 15)'),
+                            why='left out like the TDS2000C vertical position test (owner decision)')],
+            flags=[dict(point='timebase', printed='test record p. 24: -2 / +2 divs; step 13 p. 27: +/-2.5 div (25 ppm spec p. 15)',
+                        used='+/-2 div (test record; owner decision)'),
                    dict(point='trig 1202C step 8-11', printed='0.75 V p-p (1.5 div) at 200 MHz', spec='2.0 div above 100 MHz to 200 MHz (p. 17, style B)',
-                        used='as printed (stricter than the specification)'),
+                        used='as printed (stricter than the specification; owner decision)'),
                    dict(point='exttrig 1202C step 7-13', printed='about 200 mV p-p at 200 MHz', spec='350 mV from 100 MHz to 200 MHz (p. 17, style B)',
-                        used='as printed (stricter than the specification)')],
+                        used='as printed (stricter than the specification; owner decision)')],
             sections=[dict(id=s, title=t, page=PAGES[s]) for s, t in TITLES.items()], points=points)
 OUT.write_text(json.dumps(spec, indent=1, ensure_ascii=False), encoding='utf-8')
 if __name__ == '__main__':

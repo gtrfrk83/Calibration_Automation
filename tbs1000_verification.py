@@ -47,7 +47,7 @@ TBS1000_FAMILY = T.Family(
     settings_key='TBS1000', scope_label='TBS1000', addr_label='TBS1000 (USB)', log_name='TBS1000', diagram_prefix='hook_tbs1000',
     report_title='Tektronix TBS1000 performance verification', report_source='TBS1000 Series Service Manual 077-0772-01 Rev D, Chapter 4',
     pages=dict(warmup='4-3', selfcal='4-3', ext_figure='4-9'),
-    scope_driver=_tbs1000_driver, sim_bench=_tbs1000_bench)
+    scope_driver=_tbs1000_driver, sim_bench=_tbs1000_bench, sim_cal_exact=True)
 
 TBS1000C_FAMILY = T.Family(
     HERE / 'specs' / 'tektronix_tbs1000c_pv.json', name='TBS1000C', title='Tektronix TBS1000C (TBS1052C to TBS1202C)', prefix='TBS', default_model='1202C',
@@ -57,7 +57,7 @@ TBS1000C_FAMILY = T.Family(
     pages=dict(warmup='24', selfcal='25', ext_figure='29'),
     ext_source='AUX', ext_title='Aux In edge trigger', ext_label='AUX IN',
     axis_hint='check HORizontal:MAIn:DELay:TIMe and WFMOutpre:XZEro on this firmware',
-    scope_driver=_tbs1000c_driver, sim_bench=_tbs1000c_bench)
+    scope_driver=_tbs1000c_driver, sim_bench=_tbs1000c_bench, sim_cal_exact=True)
 
 
 class TBS1000App(T.App):

@@ -100,8 +100,18 @@ class Spec(unittest.TestCase):
         self.assertEqual(trig['stages'][2]['models'], ['1152', '1154'])
         ext = next(p for p in POINTS if p['kind'] == 'EXTTRIG')
         self.assertEqual([(s['freq'], s['src_vpp'], s['hscale'], s['slope'], s['check']) for s in ext['stages']],
-                         [('10M', 0.3, 25e-9, 'RISe', False), ('BW', 'LAST', 5e-9, 'RISe', True), ('LAST', 'LAST', 5e-9, 'RISe', True),
-                          ('LAST', 'LAST', 5e-9, 'FALL', True)])
+                         [('10M', 0.3, 25e-9, 'RISe', False), ('BW', 'LAST', 5e-9, 'RISe', True), ('LAST', 'LAST', 2.5e-9, 'RISe', True),
+                          ('LAST', 'LAST', 2.5e-9, 'FALL', True)])                                 # step 10 misprint (5 ns/div) corrected, owner decision
+        self.assertEqual(ext['stages'][2]['printed_hscale'], 5e-9)
+        notes = T.report_notes(ext, '1104')
+        self.assertEqual(len(notes), 1)
+        self.assertIn('prints 5 ns/div', notes[0])
+        self.assertIn('corrected to 2.5 ns/div', notes[0])
+        self.assertEqual(len(T.report_notes(ext, '1154')), 2)                         # + the stricter-than-spec 150 MHz level
+        self.assertIn('stricter than the specification', T.report_notes(ext, '1154')[1])
+        self.assertIn('10 ms/div', T.report_notes(bw[0], '1102')[0])
+        self.assertNotIn('TBS1052', SPEC['models'])                                      # only in the trigger-source table: nothing to build
+        self.assertIn('TBS1052', json.dumps(SPEC['flags']))
 
     def test_builder_reproduces_the_json(self):
         with tempfile.TemporaryDirectory() as d:
@@ -136,8 +146,12 @@ class Driver(unittest.TestCase):
         reg = cmdreg.merge_commands(TektronixTBS1000)
         self.assertEqual(reg['reset'].template, 'FACtory')
         self.assertTrue(all(c.verified and '077-0444-03' in c.ref for c in reg.values()))
-        tds = cmdreg.merge_commands(drivers.TektronixTDS2000C)          # the TDS2000C's own flags are untouched
-        self.assertFalse(tds['reset'].verified)
+        tds = cmdreg.merge_commands(drivers.TektronixTDS2000C)          # owner-approved: the TDS2000C's reset / *OPC? / *CLS are verified (077-0444-03)
+        self.assertEqual({k: (c.template, c.verified) for k, c in tds.items()},
+                         {'reset': ('FACtory', True), 'opc.query': ('*OPC?', True), 'status.clear': ('*CLS', True)})
+        for key, page in (('reset', 'pp. 2-86 / 2-87'), ('opc.query', 'p. 2-152'), ('status.clear', 'p. 2-58')):
+            self.assertIn('077-0444-03', tds[key].ref)
+            self.assertIn(page, tds[key].ref)
 
     def test_every_command_of_a_full_run_has_a_checked_manual_page(self):
         T.SLEEP_SCALE = 0
@@ -187,7 +201,7 @@ class Engine(unittest.TestCase):
 
     def test_every_model_passes_on_a_good_simulated_scope(self):
         for model in MODELS:
-            for cal in ('5560A', '5522A'):
+            for cal in ('5560A', '5522A', '5520A'):
                 with self.subTest(model=model, cal=cal):
                     out, asked = self.run_model(model, cal)
                     self.assertEqual([i for i, v in out.items() if v[2] != 'PASS'], [])
@@ -269,7 +283,8 @@ class Report(unittest.TestCase):
         self.assertFalse(got['demo'])
         self.assertIn(('Instrument', 'Tektronix TBS1102'), got['header'])
         self.assertIn(('Source', 'TBS1000 Series Service Manual 077-0772-01 Rev D, Chapter 4'), got['header'])
-        self.assertEqual(got['rows'][0]['Nominal'], '35.0 mV')                   # display-only SI scaling; the spec keeps 0.035 V
+        self.assertEqual(got['rows'][0]['Nominal'], '35.0 mV')
+        self.assertNotIn('Notes:', got['footer_note'])                           # only the recorded DC gain point: no note applies                   # display-only SI scaling; the spec keeps 0.035 V
         self.assertEqual(gain['nominal'], 0.035)
 
 

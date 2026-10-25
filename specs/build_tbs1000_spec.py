@@ -82,6 +82,8 @@ for ch in (1, 2, 3, 4):
 for ch in (1, 2, 3, 4):
     add('bw', 'BW', f'CH{ch} bandwidth: 3 V p-p at 50 kHz reference, Vpk-pk at model frequency', 2.12, 2.12, None, 'V', ch=ch, models=models_for(ch),
         vscale=0.5, ref_hz=50e3, ref_target=3.0, ref_low=2.98, ref_high=3.02, hscale_ref=10e-6, hscale=10e-9,
+        report_notes=[dict(text='50 kHz reference level set at 10 us/div; the manual prints 10 ms/div (p. 4-5 step 4). Lab deviation, as on the '
+                                'TDS2000C; the limits are unchanged.')],
         note='Reference level is set at 10 us/div (5 cycles of 50 kHz on screen) instead of the manual 10 ms/div (p. 4-5 step 4), the deviation the lab '
              'asked for on the TDS2000C (same chapter text); the measured Pk-Pk limits are unchanged. Model frequency 25/40/60/100/150 MHz. 50 ohm feedthrough.')
 
@@ -107,18 +109,25 @@ for ch in (1, 2, 3, 4):
         note='Pass = stable trigger at every stage (engine criteria: trigger state, acquisitions counting, edge position repeatable).')
 
 # ---- external edge trigger sensitivity (p. 4-9 / 4-10) ----------------------------------------------------------------------------------------------
-# Step 10 sets 5 ns/div again (the same as step 8); built as printed (the TDS2000C chapter has 2.5 ns/div there; flagged as a possible misprint).
+# Step 10 prints 5 ns/div again (the same as step 8): a misprint, CORRECTED to 2.5 ns/div (owner decision; the TDS2000C chapter has 2.5 ns/div there).
+# Steps 12-13 (falling slope) keep the step-10 scale.  The printed value is kept in the stage ('printed_hscale') and the point carries a report note.
 EXT_STAGES = [
     dict(step='3-6',   freq='10M',  src_vpp=0.3, hscale=25e-9,  slope='RISe', check=False, note='about 200 mV p-p on CH1'),
     dict(step='7-9',   freq='BW',   src_vpp='LAST', hscale=5e-9, slope='RISe', check=True),
-    dict(step='10-11', freq='LAST', src_vpp='LAST', hscale=5e-9, slope='RISe', check=True),
-    dict(step='12-13', freq='LAST', src_vpp='LAST', hscale=5e-9, slope='FALL', check=True),
+    dict(step='10-11', freq='LAST', src_vpp='LAST', hscale=2.5e-9, slope='RISe', check=True, printed_hscale=5e-9,
+         note='step 10 printed 5 ns/div; corrected to 2.5 ns/div'),
+    dict(step='12-13', freq='LAST', src_vpp='LAST', hscale=2.5e-9, slope='FALL', check=True),
 ]
 add('exttrig', 'EXTTRIG', 'External edge trigger sensitivity (stable trigger)', 1, 1, 1, '', ch=1, passfail=True,
     vscale=0.1, stages=EXT_STAGES,
+    report_notes=[dict(text='Step 10 (p. 4-10) prints 5 ns/div, a repeat of step 8 and a misprint; corrected to 2.5 ns/div (as in the TDS2000C '
+                            'service manual). Steps 10 to 13 run at 2.5 ns/div.'),
+                  dict(models=HZ150, text='TBS1152 / TBS1154: external trigger checked at 150 MHz with the printed level of about 200 mV p-p; the '
+                                          'published sensitivity from 100 MHz to 150 MHz is 350 mV (p. 1-9, style B). Checked as printed (stricter '
+                                          'than the specification).')],
     note='CH1 and EXT TRIG both fed from a power splitter, 50 ohm feedthrough terminators on both inputs (figure p. 4-9).')
 
-# Vertical position accuracy (p. 4-10 onwards) is NOT built: left out as on the TDS2000C (lab request); the owner decides.
+# Vertical position accuracy (p. 4-10 onwards) is NOT built (owner decision, as on the TDS2000C).
 
 for i, p in enumerate(points, 1):
     p['id'] = i
@@ -130,12 +139,12 @@ spec = dict(schema=2, manufacturer='Tektronix', model='TBS1000', models=list(MOD
                         note='Limits read from rendered page images. Equipment table p. 4-1 (DC source 17.5 mV to 7 V +/-0.5 %, leveled sine 50 kHz and 200 MHz '
                              '+/-3 %, 10 ms time mark +/-10 ppm) is met here by the calibrator scope option. Vertical position accuracy is not built.'),
             not_built=[dict(test='Check Vertical Position Accuracy', pages='4-10 onwards',
-                            why='left out like the TDS2000C vertical position test (lab request on the TDS2000C); owner to decide')],
-            flags=[dict(point='bw', printed='reference at 10 ms/div (p. 4-5 step 4)', used='10 us/div, as the lab asked for the TDS2000C'),
-                   dict(point='exttrig step 10', printed='5 ns/div (same as step 8)', used='as printed (TDS2000C chapter: 2.5 ns/div; possible misprint)'),
+                            why='left out like the TDS2000C vertical position test (owner decision)')],
+            flags=[dict(point='bw', printed='reference at 10 ms/div (p. 4-5 step 4)', used='10 us/div, as the lab asked for the TDS2000C (owner decision)'),
+                   dict(point='exttrig step 10', printed='5 ns/div (same as step 8)', used='2.5 ns/div: misprint corrected (owner decision; TDS2000C chapter)'),
                    dict(point='exttrig 1152/1154 at 150 MHz', printed='about 200 mV p-p', spec='350 mV from 100 MHz to 150 MHz (p. 1-9, style B)',
-                        used='as printed (stricter than the specification)'),
-                   dict(point='model list', printed='TBS1052 appears in the trigger-source table only (p. 1-8)', used='not built (no channel, bandwidth or procedure rows)')],
+                        used='as printed (stricter than the specification; owner decision)'),
+                   dict(point='model list', printed='TBS1052 appears in the trigger-source table only (p. 1-8)', used='not selectable: the manual gives it no channel count, bandwidth, procedure frequency or test-record row, so no point can be built for it')],
             sections=[dict(id=s, title=t, page=PAGES[s]) for s, t in TITLES.items()], points=points)
 OUT.write_text(json.dumps(spec, indent=1, ensure_ascii=False), encoding='utf-8')
 if __name__ == '__main__':

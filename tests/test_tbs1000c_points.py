@@ -103,10 +103,18 @@ class Spec(unittest.TestCase):
         bw = [p for p in POINTS if p['kind'] == 'BW']
         self.assertEqual({(p['low'], p['high'], p['unit'], p['ref_hz'], p['ref_low'], p['ref_high'], p['hscale_ref'], p['hscale']) for p in bw},
                          {(2.12, None, 'V', 50e3, 2.98, 3.02, 10e-6, 10e-9)})
+        trig = next(p for p in POINTS if p['kind'] == 'TRIG')
+        ext = next(p for p in POINTS if p['kind'] == 'EXTTRIG')
         tb = next(p for p in POINTS if p['kind'] == 'TIMEBASE')
         self.assertEqual((tb['low'], tb['high'], tb['unit'], tb['period'], tb['delay'], tb['hscale_set'], tb['hscale_meas'], tb['vscale']),
-                         (-2.5, 2.5, 'div', 1e-3, 1e-3, 1e-3, 10e-9, 0.5))
-        self.assertEqual(tb['printed_record_limits'], [-2.0, 2.0])                       # the test record's value is kept in the spec (flag)
+                         (-2.0, 2.0, 'div', 1e-3, 1e-3, 1e-3, 10e-9, 0.5))                 # the test record's +/-2 div (owner decision)
+        self.assertEqual(tb['printed_step_limits'], [-2.5, 2.5])                         # step 13's printed value is kept in the spec
+        self.assertIn('test record', T.report_notes(tb, '1102C')[0])
+        self.assertIn('+/-2.5 div', T.report_notes(tb, '1102C')[0])
+        for p in (trig, ext):                                                            # stricter-than-spec checks: a note for the TBS1202C only
+            self.assertTrue(T.report_notes(p, '1202C'), p['desc'])
+            self.assertEqual(T.report_notes(p, '1102C'), [], p['desc'])
+            self.assertIn('stricter than the specification', T.report_notes(p, '1202C')[0])
         trig = next(p for p in POINTS if p['kind'] == 'TRIG')
         self.assertEqual([(s['freq'], s['meas_vpp'], s['hscale'], s['slope']) for s in trig['stages']],
                          [('10M', 0.5, 20e-9, 'RISe'), ('F', 0.75, 4e-9, 'RISe'), ('150M', 1.0, 4e-9, 'RISe'), ('LAST', 'LAST', 2e-9, 'FALL')])
@@ -129,7 +137,7 @@ class Spec(unittest.TestCase):
         gain = next(p for p in POINTS if p['kind'] == 'GAIN' and p['vscale'] == 0.005)
         self.assertEqual([T.judge(gain, v) for v in (0.03395, 0.03605, 0.033949, 0.036051)], ['PASS', 'PASS', 'FAIL', 'FAIL'])
         tb = next(p for p in POINTS if p['kind'] == 'TIMEBASE')
-        self.assertEqual([T.judge(tb, v) for v in (2.5, -2.5, 2.51, -2.51)], ['PASS', 'PASS', 'FAIL', 'FAIL'])
+        self.assertEqual([T.judge(tb, v) for v in (2.0, -2.0, 2.01, -2.01, 2.4)], ['PASS', 'PASS', 'FAIL', 'FAIL', 'FAIL'])
 
 
 class Driver(unittest.TestCase):
@@ -239,7 +247,7 @@ class Engine(unittest.TestCase):
 
     def test_every_model_passes_on_a_good_simulated_scope(self):
         for model in SPEC['models']:
-            for cal in ('5560A', '5522A'):
+            for cal in ('5560A', '5522A', '5520A'):
                 with self.subTest(model=model, cal=cal):
                     out, asked, io = self.run_model(model, cal)
                     self.assertEqual([i for i, v in out.items() if v[2] != 'PASS'], [])
@@ -315,6 +323,26 @@ class VirtualRun(unittest.TestCase):
         self.assertIn(('TBS1000C', 'TRIGger:A:EDGE:SOUrce AUX'), VH.wire(app.io))
         self.assertFalse(list(Path(hn.home).rglob('command_log.txt')))
         self.assertTrue(app._checkpoint_path().name.startswith('TBS1102C_A1'))
+
+    def test_demo_runs_with_each_calibrator_choice(self):
+        import virtual_harness as VH
+        self.assertEqual(T.CAL_CHOICES, ['Fluke 5560A', 'Fluke 5522A', 'Fluke 5520A'])
+        for choice in T.CAL_CHOICES:
+            with self.subTest(cal=choice):
+                hn = VH.VHarness().start()
+                try:
+                    app = B.TBS1000CApp(hn.root, demo=True)
+                    app.asset.set('A1')
+                    app.v_model.set('1052C')
+                    app.addr['cal_model'].set(choice)
+                    hn.app = app
+                    app.run_all()
+                    self.assertTrue(hn.pump_poll(240))
+                    self.assertIn(choice.split()[-1], app.io.cal.idn)        # the simulated calibrator is the one chosen
+                    self.assertEqual(len(app.results), 14)
+                    self.assertEqual([k for k, r in app.results.items() if r.get('result') != 'PASS'], [])
+                finally:
+                    hn.stop()
 
     def test_fast_demo(self):
         import virtual_harness as VH
@@ -398,6 +426,10 @@ class Report(unittest.TestCase):
         self.assertTrue(got['demo'])
         self.assertIn(('Instrument', 'Tektronix TBS1202C'), got['header'])
         self.assertIn(('Source', 'TBS1000C Specification and Performance Verification 077-1583-03 Rev A'), got['header'])
+        noted = [r['Description'] for r in got['rows'] if r['Description'].endswith('(see note)')]
+        self.assertEqual(len(noted), 4)                                     # time base, CH1 / CH2 trigger, Aux In (TBS1202C)
+        self.assertIn('Notes: (1) Limit +/-2 div taken from the manual test record', got['footer_note'])
+        self.assertIn('TBS1202C: Aux In checked at 200 MHz', got['footer_note'])
         self.assertTrue(os.path.basename(got['path']).startswith('A1-'))
 
 
