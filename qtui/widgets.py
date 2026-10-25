@@ -364,7 +364,7 @@ class SegmentedFilter(QFrame):
                 f = QFont(b.font())
                 f.setWeight(QFont.Weight.DemiBold)
                 b.setMinimumHeight(QFontMetrics(f).height() + 16)
-                b.setMinimumWidth(QFontMetrics(f).horizontalAdvance(b.text()) + 2 * 14 + 2 * 2 + 8)       # the chosen segment is semi-bold: it needs its own width (padding 14 + border 2)
+                b.setMinimumWidth(QFontMetrics(f).horizontalAdvance(b.text()) + 2 * 14 + 2)       # the chosen segment is semi-bold: it needs its own width (padding 14 + border 2)
         except RuntimeError:                  # the window closed before the deferred call ran
             pass
 

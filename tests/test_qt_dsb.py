@@ -588,8 +588,8 @@ class InspectorTests(QtDsbCase):
         box.multi_cb.click()
         self.assertTrue(box.multi_box.isHidden())
         box.asym_cb.click()
-        self.assertTrue(box.operand_box.isEnabled())
-        self.assertEqual(box.v['operand'].get(), '+')
+        self.assertTrue(box.cells['floor_plus'].isVisibleTo(box) and box.cells['floor_minus'].isVisibleTo(box))
+        box.asym_cb.click()
         was = box.res_e.isEnabled()
         box.auto_cb.click()
         self.assertEqual(box.res_e.isEnabled(), was is False)                  # Auto Res on: the resolution box is a read-out; off: it can be typed in

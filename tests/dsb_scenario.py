@@ -146,13 +146,8 @@ def s_multi_asym_calc(env):
     box = win.panel_box
     box.b['multi'].set(False), box.multi_changed()
     box.types['iv'].set(True), box.types['fs'].set(False)
-    box.b['asym'].set(True)
-    box.asym_changed()
-    box.v['iv'].set('0.1')
-    box.v['operand'].set('-')
-    box.operand_changed()
-    box.v['iv'].set('0.2')
-    env.rec('asym calc', win.calc())
+    box.v['iv'].set('0.2')                      # (the asymmetrical tolerance is two Floor boxes in the Qt build only: tested in test_qt_dsb, not compared with Tk)
+    env.rec('iv calc', win.calc())
     win.model.select(ks[0], 'low')
     win.sync()
     box = win.panel_box
