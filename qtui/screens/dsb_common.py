@@ -41,6 +41,8 @@ class Bind:
 
     def get(self):
         w = self.w
+        if hasattr(w, 'get_value'):
+            return w.get_value()
         if isinstance(w, QLineEdit):
             return w.text()
         if isinstance(w, QComboBox):
@@ -51,7 +53,9 @@ class Bind:
 
     def set(self, v):
         w = self.w
-        if isinstance(w, QLineEdit):
+        if hasattr(w, 'set_value'):
+            w.set_value(v)
+        elif isinstance(w, QLineEdit):
             w.setText('' if v is None else str(v))
         elif isinstance(w, QComboBox):
             v = '' if v is None else str(v)

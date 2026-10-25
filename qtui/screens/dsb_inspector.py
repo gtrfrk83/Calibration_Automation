@@ -36,6 +36,44 @@ class RadioVar:
             b.setChecked(True)
 
 
+class FreqBox(QWidget):
+    """A number and a unit picker (Hz, kHz, MHz, GHz) in one box: the value reads and writes as text such as '1 MHz', so nothing downstream changes.
+    Typing the unit yourself still works ('1 MHz' in the number box)."""
+    UNITS = ('Hz', 'kHz', 'MHz', 'GHz')
+
+    def __init__(self):
+        super().__init__()
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(6)
+        self.edit = QLineEdit()
+        self.unit = QComboBox()
+        self.unit.addItems(self.UNITS)
+        self.unit.setMinimumContentsLength(3)
+        self.unit.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        lay.addWidget(self.edit, 1)
+        lay.addWidget(self.unit)
+
+    def get_value(self):
+        t = self.edit.text().strip()
+        if not t:
+            return ''
+        if any(ch.isalpha() for ch in t):                      # the unit was typed in the box: leave it alone
+            return t
+        return f'{t} {self.unit.currentText()}'
+
+    def set_value(self, v):
+        t = '' if v is None else str(v).strip()
+        parts = t.split()
+        if len(parts) == 2 and parts[1] in self.UNITS:
+            self.edit.setText(parts[0])
+            self.unit.setCurrentText(parts[1])
+        else:
+            self.edit.setText(t)
+            if not t:
+                self.unit.setCurrentText('Hz')
+
+
 class Chip(QPushButton):
     """A tick box drawn as a pill.  Space / Enter / click toggles it."""
 
@@ -183,6 +221,8 @@ class Inspector(QFrame):
     def _pack_sections(self, names):
         for n, sec in self.sections.items():
             sec.setVisible(n in names)
+        if hasattr(self, 'btns'):
+            self.btns.setVisible('tol' in names)
 
     def _cell(self, group, name, label, widget=None, hint='', entry=True):
         """One labelled box inside a two-per-line group (`group` is a name made by _group)."""
@@ -259,9 +299,10 @@ class Inspector(QFrame):
         self.units_c = self._cell('point', 'units', 'Units', self._combo(editable=True), 'The unit the numbers in these boxes are in (Units of Measure). Display only.')
         self.entries.append(self.units_c)
         self.v['units'] = C.Bind(self.units_c)
-        for key, label, hint in (('freq', 'Frequency', 'For AC and frequency tests, with its unit, for example 1 kHz.'),
-                                 ('level', 'Signal level', 'The level of the signal applied while a frequency, period or bandwidth is tested, for example 1 V.')):
-            self.v[key] = C.Bind(self._cell('point', key, label, None, hint))
+        self.freq_box = FreqBox()
+        self.entries.append(self.freq_box.edit)
+        self.v['freq'] = C.Bind(self._cell('point', 'freq', 'Frequency', self.freq_box, 'For AC and frequency tests: type the number and pick the unit (Hz, kHz, MHz, GHz).'))
+        self.v['level'] = C.Bind(self._cell('point', 'level', 'Signal level', None, 'The level of the signal applied while a frequency, period or bandwidth is tested, for example 1 V.'))
         self.v['expect'] = C.Bind(self._cell('point', 'expect', 'Beeper should be', self._combo(['on', 'off'])))
         self.point_names = ('func', 'nominal', 'units', 'freq', 'level', 'expect')
 
@@ -290,6 +331,37 @@ class Inspector(QFrame):
             self.chips.append(chip)
             self.types[key] = C.Bind(chip)
         lay.addWidget(self.chip_frame)
+        # Asymmetrical tolerance: which side the boxes below are for (the two radios drive the Operand box kept in the Asymmetrical section)
+        self.side_box = QWidget()
+        sl = QHBoxLayout(self.side_box)
+        sl.setContentsMargins(0, 2, 0, 2)
+        sl.setSpacing(10)
+        sl.addWidget(widgets.label('Boxes below are for:', 'hint'))
+        self.side_plus, self.side_minus = QRadioButton('+ above nominal'), QRadioButton('\u2212 below nominal')
+        for rb, tip in ((self.side_plus, 'Type the tolerance for readings ABOVE the nominal.'), (self.side_minus, 'Type the tolerance for readings BELOW the nominal.')):
+            C.tip(rb, tip)
+            rb.clicked.connect(lambda _c=False: self.side_clicked())
+            sl.addWidget(rb)
+        self.side_plus.setChecked(True)
+        sl.addStretch(1)
+        lay.addWidget(self.side_box)
+        # Several rows at once: how the rows are spaced (shown while 'Make several rows at once' is ticked)
+        self.mode_box = QWidget()
+        ml = QVBoxLayout(self.mode_box)
+        ml.setContentsMargins(0, 2, 0, 2)
+        ml.setSpacing(2)
+        ml.addWidget(widgets.label('Several rows: spacing', 'hint'))
+        modes = QGridLayout()
+        self.mode_var = RadioVar()
+        for i, (key, label, hint) in enumerate(M.MULTI_MODES):
+            rb = QRadioButton(label)
+            C.tip(rb, hint)
+            self.mode_var.add(key, rb)
+            modes.addWidget(rb, i // 2, i % 2)
+        self.mode_var.set('span')
+        self.v['multi_mode'] = self.mode_var
+        ml.addLayout(modes)
+        lay.addWidget(self.mode_box)
         self.passfail_l = C.small('This test is pass / fail: there is no tolerance to type.')
         lay.addWidget(self.passfail_l)
         self._group(lay, 'tol', wide=('calc',))
@@ -316,13 +388,16 @@ class Inspector(QFrame):
         self.tol_names = ('iv', 'fs', 'fs_scale', 'floor', 'db', 'calc')
         self.hint_l = C.small('Tick a tolerance type to show its box.')
         lay.addWidget(self.hint_l)
-        self.btns = QWidget()
-        bl = C.FlowLayout(self.btns, 8)
+        self.btns = QWidget()                                   # the footer of the panel: always in view at the bottom right, outside the scrolling sections
+        bl = QHBoxLayout(self.btns)
+        bl.setContentsMargins(0, 4, 8, 0)
+        bl.setSpacing(8)
+        bl.addStretch(1)
         self.calc_b = C.button('Calc', self.win.calc, 'primary', tooltip='Work out the calibration tolerance of this row from the boxes and put it in the sheet (Enter in any box does the same).')
         self.copy_b = C.button('Copy tolerance to rows below', self.win.copy_down, tooltip='Give the rows under this one, in the same section, the same tolerance as this row.')
-        bl.addWidget(self.calc_b)
         bl.addWidget(self.copy_b)
-        lay.addWidget(self.btns)
+        bl.addWidget(self.calc_b)
+        self.layout().addWidget(self.btns)
 
     def _build_uncertainty(self, lay):
         self.uncert_l = C.ToneLabel('')
@@ -342,16 +417,7 @@ class Inspector(QFrame):
         self.multi_box = QWidget()
         mb = QVBoxLayout(self.multi_box)
         mb.setContentsMargins(0, 0, 0, 0)
-        modes = QGridLayout()
-        self.mode_var = RadioVar()
-        for i, (key, label, hint) in enumerate(M.MULTI_MODES):
-            rb = QRadioButton(label)
-            C.tip(rb, hint)
-            self.mode_var.add(key, rb)
-            modes.addWidget(rb, i // 2, i % 2)
-        self.mode_var.set('span')
-        self.v['multi_mode'] = self.mode_var
-        mb.addLayout(modes)
+        mb.addWidget(widgets.label('Pick how the rows are spaced under Limits and tolerance.', 'hint'))
         self._group(mb, 'multi')
         self.v['multi_high'] = C.Bind(self._cell('multi', 'multi_high', 'High (last value)', None, 'The last value the rows should reach.'))
         self.v['multi_n'] = C.Bind(self._cell('multi', 'multi_n', 'n (how many / step)', None, 'How many points (Lo to High) or the size of the step (n %, n Units, n ppm).'))
@@ -366,12 +432,11 @@ class Inspector(QFrame):
         self.asym_box = QWidget()
         al = QVBoxLayout(self.asym_box)
         al.setContentsMargins(0, 4, 0, 0)
-        al.addWidget(widgets.label('Side being typed', 'hint'))
-        self.operand_box = self._combo(['±', '+', '-'])
+        al.addWidget(widgets.label('Under Limits and tolerance, pick "+ above nominal" or "\u2212 below nominal", then fill in the tolerance boxes for that side. '
+                                   'Press Calc when both sides are done.', 'hint', wrap=True))
+        self.operand_box = self._combo(['±', '+', '-'])           # holds the side; the two radios under Limits and tolerance change it
+        self.operand_box.setVisible(False)
         self.operand_box.setEnabled(False)
-        self.operand_box.activated.connect(lambda _i: self.operand_changed())
-        C.tip(self.operand_box, 'Operand: with the box above ticked, which side (+ or -) the tolerance boxes are for.')
-        al.addWidget(self.operand_box, 0, Qt.AlignmentFlag.AlignLeft)
         self.v['operand'] = C.Bind(self.operand_box)
         lay.addWidget(self.asym_box)
 
@@ -430,12 +495,22 @@ class Inspector(QFrame):
             self.load_side()
         else:
             self.v['operand'].set('+')
+        self._sync_side()
         self.show_fields()
 
     def operand_changed(self):
         self.save_side()
         self.operand_now = 'minus' if self.v['operand'].get() == '-' else 'plus'
         self.load_side()
+        self._sync_side()
+
+    def side_clicked(self):
+        self.v['operand'].set('-' if self.side_minus.isChecked() else '+')
+        self.operand_changed()
+
+    def _sync_side(self):
+        self.side_minus.setChecked(self.v['operand'].get() == '-')
+        self.side_plus.setChecked(self.v['operand'].get() != '-')
 
     def save_side(self):
         s = self.sides[self.operand_now]
@@ -469,6 +544,8 @@ class Inspector(QFrame):
         self.hint_l.setVisible(not passfail and not any(self.types[k].get() for k in M.SPEC_ORDER))
         self.multi_box.setVisible(bool(self.b['multi'].get()))
         self.asym_box.setVisible(bool(self.b['asym'].get()))
+        self.side_box.setVisible(bool(self.b['asym'].get()) and not passfail)
+        self.mode_box.setVisible(bool(self.b['multi'].get()) and not passfail)
         self.sections['multi'].set_note('ON' if self.b['multi'].get() else '', self.b['multi'].get())
         self.sections['asym'].set_note('ON' if self.b['asym'].get() else '', self.b['asym'].get())
 
@@ -507,6 +584,7 @@ class Inspector(QFrame):
         self.b['multi'].set(bool(form['multi'])), self.b['asym'].set(bool(form['asym'])), self.b['auto_res'].set(bool(form['auto_res']))
         self.v['operand'].set('+' if form['asym'] else '±')
         self.operand_box.setEnabled(bool(form['asym']))
+        self._sync_side()
         self.load_side()
         C.set_items(self.units_c, state['unit_choices'])
         self.units_c.setEditText(form['units'])

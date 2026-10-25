@@ -2430,7 +2430,10 @@ class GridModel(CheckMixin, EditorModel):
             fn = self._function_for(self.resolve_function(text))
             self.fid = fn.id
             return f'New rows go under {fn.name}. Type a value in the NOMINAL VALUE cell.'
-        return self._do('choose function', act)
+        res = self._do('choose function', act)
+        if res.ok and not self.fn().points:
+            self.select(f'e:{self.fid}', 'nominal')              # a section made from the empty row's function box: the cursor goes on the empty row right under its heading
+        return res
 
     # ---- the cell edit gate
     def commit_cell(self, text, key=None, col=None, move='down'):

@@ -608,6 +608,17 @@ class AutomationLineTests(Base):
         self.assertIn('not worked out yet', self.g.automation_line(compute=False))
 
 
+class CursorAfterChoosingFunctionTests(Base):
+    def test_cursor_on_empty_row_under_new_heading(self):
+        g = self.g
+        self.assertTrue(g.set_target_function('DC volts').ok)
+        row = g.selected_row()
+        self.assertEqual(row['key'], f'e:{g.fid}')
+        self.assertEqual(g.sel_col, 'nominal')
+        rows = g.rows()
+        self.assertEqual([r['kind'] for r in rows[:2]], ['header', row['kind']])
+
+
 class _FakeMatch:
     def __init__(self, fid, total):
         self._fid, self._t = fid, total
