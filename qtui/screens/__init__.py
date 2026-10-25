@@ -12,6 +12,7 @@ PANELS = {
     'asset_history': 'qtui.screens.asset_history:AssetHistoryPanel',
     'standards_specs': 'qtui.screens.standards_specs:StandardsSpecsPanel',
     'datasheet_builder': 'qtui.screens.datasheet_builder:DatasheetBuilderPanel',
+    'uncertainty_calc': 'qtui.screens.uncertainty_calculator:UncertaintyCalculatorPanel',
 }
 
 

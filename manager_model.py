@@ -61,6 +61,7 @@ TAB_STATUS = {
     'asset_history': 'Every exported PDF report is recorded here. Double-click a test point to see its drift across reports.',
     'standards_specs': 'Published specifications of the calibrators used as standards; they set the lowest uncertainty that may be reported.',
     'datasheet_builder': 'Build your own datasheet from a manufacturer specification; each save is a new version and a runnable procedure.',
+    'uncertainty_calc': 'Work out an uncertainty from spot readings (repeatability, reproducibility) and other components; export the working to Excel.',
 }
 # the stored text of the columns, in order (key, title)
 TABLE_HEADINGS = (('name', 'Procedure'), ('manufacturer', 'Manufacturer'), ('model', 'Model'), ('category', 'Category'), ('ready', 'Status'), ('verified', 'Verified on hardware'))

@@ -38,8 +38,8 @@ from qtui.widgets import (Badge, Banner, EmptyState, GhostButton, PrimaryButton,
 
 TITLE = 'Calibration Procedure Manager'
 SUBTITLE = 'Run, document and maintain your calibration procedures'
-MAIN_TABS = (('procedures', 'Procedures'), ('asset_history', 'Asset History'), ('standards_specs', 'Standards Specs'), ('datasheet_builder', 'Datasheet Builder'))
-PANEL_TITLES = {'asset_history': 'Asset History', 'standards_specs': 'Standards Specs', 'datasheet_builder': 'Datasheet Builder'}
+MAIN_TABS = (('procedures', 'Procedures'), ('asset_history', 'Asset History'), ('standards_specs', 'Standards Specs'), ('datasheet_builder', 'Datasheet Builder'), ('uncertainty_calc', 'Uncertainty'))
+PANEL_TITLES = {'asset_history': 'Asset History', 'standards_specs': 'Standards Specs', 'datasheet_builder': 'Datasheet Builder', 'uncertainty_calc': 'Uncertainty Calculator'}
 
 
 class StatusProxy:
@@ -180,14 +180,14 @@ class ManagerWindow(QMainWindow):
         self.library_page = QWidget()
         self.stack.addWidget(self.library_page)
         self.page_of = {'procedures': self.library_page}
-        for key in ('asset_history', 'standards_specs', 'datasheet_builder'):
+        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc'):
             holder = QWidget()
             QVBoxLayout(holder).setContentsMargins(0, M.sm, 0, 0)
             self.stack.addWidget(holder)
             self.page_of[key] = holder
         self.build_menus()
         self.build_library_tab()
-        for key in ('asset_history', 'standards_specs', 'datasheet_builder'):
+        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc'):
             self.build_panel(key)
         help_menu.dress(self)
         self.tabs.currentChanged.connect(self._tab_changed)
