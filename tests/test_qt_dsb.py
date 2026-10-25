@@ -506,10 +506,12 @@ class InspectorTests(QtDsbCase):
         win.model.select(key, 'low')
         win.sync()
         row = win.model.row(key)
-        self.assertEqual((box.v['low'].get(), box.v['high'].get()), (row['low'], row['high']))     # the Low / High limit boxes show the calculated limits
+        self.assertEqual((box.v['low'].get(), box.v['high'].get()), (row['low'], row['high']))     # the (hidden) read-only boxes still carry the calculated limits
         self.assertTrue(box.low_e.isReadOnly() and box.high_e.isReadOnly())
-        QTest.keyClicks(box.low_e, '9')                                  # typing in a read-only box changes nothing
-        self.assertEqual(box.v['low'].get(), row['low'])
+        win.show()
+        self.app.processEvents()
+        self.assertFalse(box.low_e.isVisibleTo(box) or box.high_e.isVisibleTo(box))      # the grid shows the limits: the boxes no longer take room in the panel
+        self.assertFalse(box.limit_note.isVisibleTo(box))
         src = '\n'.join((ROOT / 'qtui' / 'screens' / f).read_text(encoding='utf-8') for f in ('dsb_inspector.py', 'dsb_editor.py'))
         for gone in ('Type the limits myself', 'typed_cb', 'typed_changed'):
             self.assertNotIn(gone, src)

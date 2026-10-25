@@ -121,7 +121,13 @@ class LevelBox(QWidget):
     def set_value(self, v):
         t = '' if v is None else str(v).strip()
         parts = t.split()
-        if len(parts) == 2 and parts[1] in ('V', 'mV', '\u00b5V', 'uV'):
+        square = len(parts) == 3 and parts[2] == 'square'            # the older '1 V square' text: shown as Vpp
+        if square:
+            parts = parts[:2]
+        if len(parts) == 2 and parts[1] in self.UNITS:               # '1 Vpp' (peak to peak, shown as it was typed)
+            self.edit.setText(parts[0])
+            self.unit.setCurrentText(parts[1])
+        elif len(parts) == 2 and parts[1] in ('V', 'mV', '\u00b5V', 'uV'):
             self.edit.setText(parts[0])
             self.unit.setCurrentText('\u00b5V' if parts[1] == 'uV' else parts[1])
             if self.basis == 'pp' or square:
@@ -657,7 +663,7 @@ class Inspector(QFrame):
         want = {'func': True, 'nominal': True, 'units': True, 'freq': fields.get('frequency', False), 'level': fields.get('amplitude', False),
                 'expect': fields.get('expect', False),
                 'iv': self.types['iv'].get(), 'fs': self.types['fs'].get(), 'fs_scale': self.types['fs'].get(), 'floor': self.types['floor'].get(),
-                'db': self.types['db'].get(), 'calc': self.types['calc'].get(), 'low': True, 'high': True}
+                'db': self.types['db'].get(), 'calc': self.types['calc'].get(), 'low': False, 'high': False}      # the grid shows the limits; the read-only boxes only took room
         passfail = bool(st.get('passfail'))
         asym = bool(self.b['asym'].get()) and not passfail
         floor_only = asym and not self._legacy_asym
@@ -670,8 +676,8 @@ class Inspector(QFrame):
                 want[k] = False
             want['low'] = want['high'] = False
         typed_limits = bool(st.get('typed_limits')) and not passfail
-        self.limit_note.setText(M.TYPED_LIMITS_NOTE if typed_limits else 'Calculated from the tolerance below; they are read-only here.')
-        self.limit_note.setVisible(not passfail)
+        self.limit_note.setText(M.TYPED_LIMITS_NOTE if typed_limits else '')
+        self.limit_note.setVisible(typed_limits)                  # only an old sheet's typed limits need a word of explanation
         self.clear_typed_b.setVisible(typed_limits)
         self._visible = want
         self._arrange_all()

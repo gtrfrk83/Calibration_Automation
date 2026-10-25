@@ -1857,6 +1857,27 @@ def split_waveform(text):
     return text[:m.start()].strip(), ('square' if m.group(1).lower() == 'square' else None)
 
 
+def read_level(text, pp_basis=False):
+    """A signal-level text -> (level text in volts, waveform).  '1 Vpp' / '500 mVpp' is a peak-to-peak level: it is stored as that many volts (never converted to
+    rms), shown as typed ('1 Vpp'), and on a function whose level is in rms it is the square wave (waveform 'square'); on a scope function (stored peak to peak) it
+    is just the level.  '1 V square' reads as before."""
+    t = (text or '').strip()
+    m = re.fullmatch(r'(.+?)\s*([mM\u00b5\u03bcuUkK]?)Vpp', t, re.I)
+    if m and m.group(1).strip():
+        pre = m.group(2)
+        pre = '\u00b5' if pre in ('u', 'U', '\u03bc') else pre
+        return f'{m.group(1).strip()} {pre}V', (None if pp_basis else 'square')
+    return split_waveform(t)
+
+
+def level_display(fn, p):
+    """How a point's signal level is shown: '1 Vpp' for a square-wave level or a scope function (peak to peak), else '1 V' (rms)."""
+    text = db.format_si(p.amplitude, 'V')
+    if p.settings.get('waveform') == 'square' or (fn is not None and fn.info.get('family') == 'scope'):
+        return text[:-1] + 'Vpp'
+    return text
+
+
 def with_units(text, units):
     """'5' + 'mV' -> '5 mV'; a text that already carries a unit is left alone."""
     t = (text or '').strip()
@@ -2133,9 +2154,7 @@ class GridModel(CheckMixin, EditorModel):
         if p.frequency is not None:
             s += ' @ ' + db.format_si(p.frequency, 'Hz')
         if p.amplitude is not None:
-            s += ', level ' + db.format_si(p.amplitude, 'V')
-            if p.settings.get('waveform') == 'square':
-                s += ' square'
+            s += ', level ' + level_display(fn, p)
         return s
 
     def typing_prefix(self, fn, p=None):
@@ -2179,7 +2198,7 @@ class GridModel(CheckMixin, EditorModel):
             db.parse_quantity(freq, 'Hz')
         waveform = None
         if level is not None:
-            level, waveform = split_waveform(level)
+            level, waveform = read_level(level, fn.info.get('family') == 'scope')
             db.parse_quantity(level)
         if bare_unit:
             num, unit_part = split_unit_text(t)
@@ -3017,7 +3036,7 @@ class GridModel(CheckMixin, EditorModel):
             rng = fn.range(p.range_id)
             num, units = split_unit_text(self.fmt_value(fn, rng, p.nominal))
             form.update(nominal=num, units=units or form['units'], freq=db.format_si(p.frequency, 'Hz') if p.frequency is not None else '',
-                        level=(db.format_si(p.amplitude, 'V') + (' square' if p.settings.get('waveform') == 'square' else '')) if p.amplitude is not None else '', expect=p.settings.get('expect', 'on'), remark=p.note, run=p.enabled,
+                        level=level_display(fn, p) if p.amplitude is not None else '', expect=p.settings.get('expect', 'on'), remark=p.note, run=p.enabled,
                         fs_scale=self.fmt_value(fn, rng, rng.full_scale) if rng else '')
             if rng is not None and rng.resolution:
                 pre = prefix_of_units(form['units'], fn.unit)
@@ -3290,7 +3309,7 @@ class GridModel(CheckMixin, EditorModel):
             units = form.get('units') or db.unit_symbol(fn.unit)
             values = self.multi_values(fn, form)
             freq = with_units(form.get('freq', ''), 'Hz') if str(form.get('freq', '')).strip() else None
-            level, waveform = split_waveform(str(form.get('level', '')).strip())
+            level, waveform = read_level(str(form.get('level', '')).strip(), fn.info.get('family') == 'scope')
             level = level or None
             plus = minus = ''
             if not fn.info.get('passfail'):

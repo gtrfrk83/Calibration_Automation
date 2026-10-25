@@ -55,9 +55,8 @@ def _point_text(fn, p):
     if p.frequency is not None:
         s += ' @ ' + _si(p.frequency, 'Hz')
     if p.amplitude is not None:
-        s += ', level ' + _si(p.amplitude, 'V')
-        if p.settings.get('waveform') == 'square':
-            s += ' square'
+        import datasheet_builder_ui_model as M
+        s += ', level ' + M.level_display(fn, p)
     return s
 
 

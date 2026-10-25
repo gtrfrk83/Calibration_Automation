@@ -870,6 +870,27 @@ class DeepDiveFixTests(Base):
         g.set_locked(True)
         self.assertFalse(g.load_version(1).ok)
 
+    def pkey(self):
+        return next(r['key'] for r in self.g.rows() if r['kind'] == 'point')
+
+    def test_vpp_typed_in_the_test_point_stays_vpp_and_is_not_converted(self):
+        g = self.g
+        g.set_target_function('Frequency')
+        g.select(self.blank_key(), 'nominal')
+        self.assertTrue(g.commit_cell('1 kHz, level 1 Vpp').ok)
+        p = g.ds.functions[0].points[0]
+        self.assertEqual((float(p.amplitude), p.settings.get('waveform')), (1.0, 'square'))     # 1 volt peak to peak, as typed
+        row = next(r for r in g.rows() if r['kind'] == 'point')
+        self.assertIn('level 1 Vpp', g.cell_text(self.pkey(), 'nominal'))
+        self.assertTrue(g.commit_cell('1 kHz, level 500 mVpp', self.pkey(), 'nominal', move='stay').ok)
+        p = g.ds.functions[0].points[0]
+        self.assertEqual(float(p.amplitude), 0.5)
+        self.assertIn('level 500 mVpp', g.cell_text(self.pkey(), 'nominal'))
+        self.assertTrue(g.commit_cell('1 kHz, level 1 V', self.pkey(), 'nominal', move='stay').ok)    # plain V is the rms sine
+        self.assertNotIn('waveform', g.ds.functions[0].points[0].settings)
+        self.assertIn('level 1 V', g.cell_text(self.pkey(), 'nominal'))
+        self.assertNotIn('Vpp', g.cell_text(self.pkey(), 'nominal'))
+
     def test_a_square_wave_level_is_kept_shown_and_survives_edit_and_reload(self):
         g = self.g
         g.set_target_function('Frequency')
@@ -881,9 +902,9 @@ class DeepDiveFixTests(Base):
         row = next(r for r in g.rows() if r['kind'] == 'point')
         self.assertEqual(row['badge'], 'square')                                          # drawn as a tag in the sheet
         self.assertNotIn('square', row['nominal'])
-        self.assertIn('level 1 V square', g.cell_text(row['key'], 'nominal'))             # the Edit Cell bar still has the whole text
+        self.assertIn('level 1 Vpp', g.cell_text(row['key'], 'nominal'))                  # shown as peak to peak, never converted to rms
         self.assertIn(row['status'], ('good', 'warn', 'bad', 'off'))
-        self.assertEqual(g.panel_state(next(r['key'] for r in g.rows() if r['kind'] == 'point'))['form']['level'], '1 V square')
+        self.assertEqual(g.panel_state(next(r['key'] for r in g.rows() if r['kind'] == 'point'))['form']['level'], '1 Vpp')
         key = next(r['key'] for r in g.rows() if r['kind'] == 'point')
         self.assertTrue(g.commit_cell('1 kHz, level 1 V', key, 'nominal', move='stay').ok)       # sine again: nothing stored
         self.assertNotIn('waveform', g.ds.functions[0].points[0].settings)
