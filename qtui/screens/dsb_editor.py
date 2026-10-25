@@ -15,7 +15,7 @@ import datasheet_builder_ui_model as M
 from qtui import widgets
 from qtui.screens import dsb_common as C
 from qtui.screens.dsb_check import CheckWindowMixin
-from qtui.screens.dsb_dialogs import DriversWindow, PageDialog, PreviewWindow, ProblemsWindow, RuleDialog, VersionsWindow, present
+from qtui.screens.dsb_dialogs import DriversWindow, PageDialog, PreviewWindow, ProblemsWindow, RuleDialog, SaveBlockedDialog, VersionsWindow, present
 from qtui.screens.dsb_grid import SheetGrid
 from qtui.screens.dsb_inspector import Inspector
 from qtui.screens.dsb_pages import AutomationPage, FunctionsPage, HeaderPage, RangesPage, SpecPage
@@ -655,14 +655,30 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.commit_header()
         res = self.model.save_sheet(note)
         if not res.ok and isinstance(res.detail, dict) and res.detail.get('needs_draft'):
-            if C.ask_yes_no(self, 'Save as a draft?', res.message + '\n\nSave it as a draft now? A draft is kept as a version but is not a runnable procedure yet.'):
+            items = self.model.save_blockers()
+            choice = self.ask_save_blocked(items) if items else ('draft' if C.ask_yes_no(self, 'Save as a draft?', res.message + '\n\nSave it as a draft now?') else 'edit')
+            if choice == 'draft':
                 res = self.model.save_sheet(note, as_draft=True)
             else:
+                if choice == 'go':
+                    if self._blocked_key:
+                        self.goto_row(self._blocked_key)
+                    else:                                      # a problem of the header (make, model, title): the boxes at the top
+                        self.make_e.setFocus()
                 return self.changed(res)
         self.changed(res)
         if res.ok:
             self.saved()
         return res
+
+    _blocked_key = ''
+
+    def ask_save_blocked(self, items):
+        """The list of what to fix before Save can make a runnable procedure: 'go' (a row was chosen), 'draft' or 'edit'.  A seam the tests replace."""
+        dlg = SaveBlockedDialog(self, items)
+        choice = dlg.run() or 'edit'
+        self._blocked_key = dlg.chosen_key
+        return choice
 
     def saved(self):
         if self.panel is not None:

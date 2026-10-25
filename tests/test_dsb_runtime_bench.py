@@ -201,6 +201,44 @@ class Resume(Base):
         self.assertEqual([t for _i, t in w].count('*RST'), 2, 'the reset runs again on resume')
         self.assertEqual(len(outs(w)), len(app2.points) - n, 'only the missing points are output')
 
+    def test_the_standards_screen_comes_before_a_real_run_and_names_what_is_connected(self):
+        spec = spec_of(fx.dmm_34461a_like())
+        app = self.h.make_app(spec, io=cal_io())
+        self.h.default_reading = H.typed_nominal
+        self.h.run_all()
+        screens = [d for d in self.h.dialogs if d[0] == 'confirm' and d[1] == 'Before the run']
+        self.assertEqual(len(screens), 1)
+        self.assertTrue(any('connected' in line for line in screens[0][3]))
+        rows = app.pre_run_rows(app.points)
+        self.assertTrue(rows)
+        self.assertTrue(all(r[2] for r in rows))                       # the simulated bench answers
+
+    def test_an_interrupted_run_is_offered_for_continuing(self):
+        spec = spec_of(fx.dmm_34461a_like())
+        app = self.h.make_app(spec, io=cal_io())
+        n = 6
+        ids = [p['id'] for p in app.points]
+        self.h.default_reading = lambda p: H.typed_nominal(p) if p['id'] in ids[:n] else None
+        self.h.run_all()
+        self.assertEqual(len(app.found), n)                          # the progress file was saved after each point
+        asked = [d for d in self.h.dialogs if d[0] == 'box' and d[2] == 'Continue the saved run?']
+        self.assertEqual(asked, [])                                  # nothing saved before the first run: no offer
+        # a new window, the same instrument ID: the offer appears, Yes keeps the six readings and runs only the rest
+        io2 = cal_io()
+        app2 = self.h.make_app(spec, io=io2)
+        self.h.default_reading = H.typed_nominal
+        self.assertTrue(self.h.run_all())
+        asked = [d for d in self.h.dialogs if d[0] == 'box' and d[2] == 'Continue the saved run?']
+        self.assertEqual(len(asked), 1)
+        self.assertEqual(len(app2.found), len(app2.points))
+        self.assertEqual(len(outs(H.wire(io2))), len(app2.points) - n)
+        # No: the saved readings are not loaded
+        self.h.dialogs.clear()
+        self.h.box_answer['askyesno'] = False
+        app3 = self.h.make_app(spec, io=cal_io())
+        self.h.run_all()
+        self.assertTrue(any(d[0] == 'box' and d[2] == 'Continue the saved run?' for d in self.h.dialogs))
+
     def test_checkpoint_of_another_datasheet_version_or_period_is_refused(self):
         spec = spec_of(fx.dmm_34461a_like())
         app = self.h.make_app(spec, io=cal_io())

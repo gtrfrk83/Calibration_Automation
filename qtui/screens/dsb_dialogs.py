@@ -321,13 +321,15 @@ class VersionsWindow(widgets.ModalDialog):
         self.uid, self.editor, self.panel = uid, editor, panel
         self.body.addWidget(widgets.label('Every save is a new version and old versions are never changed. Opening an old version and saving it creates a newer version.', 'sub', wrap=True))
         self.table = C.table([Column('version', 'Version', 70, align='right'), Column('saved', 'Saved', 170), Column('who', 'By', 110), Column('status', 'Status', 150),
-                              Column('points', 'Points', 70, align='right'), Column('note', 'Note', 300, stretch=True)], sortable=True)
+                              Column('points', 'Points', 70, align='right'), Column('note', 'Note', 300, stretch=True)], sortable=True, multi=True)
         self.body.addWidget(self.table, 1)
         self.msg = widgets.label('', 'sub', wrap=True)
         self.body.addWidget(self.msg)
         self.add_button('Open in a new window', role='primary', close=False, callback=self.open_new)
         if editor is not None:
             self.add_button('Load into the open editor', close=False, callback=self.load_here)
+        cb = self.add_button('Compare', close=False, callback=self.compare)
+        cb.setToolTip('Select two versions to see what changed between them, or one version to compare it with the one before it.')
         self.add_button('Export JSON...', close=False, callback=self.export)
         self.add_button('Close', cancel=True)
         self.reload()
@@ -339,6 +341,23 @@ class VersionsWindow(widgets.ModalDialog):
     def _version(self):
         s = C.selected_ids(self.table)
         return int(s[0]) if s else None
+
+    def compare(self):
+        sel = sorted(int(v) for v in C.selected_ids(self.table))
+        if not sel:
+            self.msg.setText('Select a version first (two to compare them, or one to compare it with the version before).')
+            return None
+        if len(sel) == 1:
+            older = [r['version'] for r in self.lst.version_rows(self.uid) if r['version'] < sel[0]]
+            if not older:
+                self.msg.setText('That is the first version: there is nothing before it to compare with.')
+                return None
+            sel = [max(older), sel[0]]
+        res = self.lst.compare_versions(self.uid, sel[0], sel[-1])
+        self.msg.setText(res.message)
+        if res.ok:
+            CompareWindow(self, self.uid, sel[0], sel[-1], res.detail).show()
+        return res
 
     def open_new(self):
         v = self._version()
@@ -375,3 +394,57 @@ class VersionsWindow(widgets.ModalDialog):
         res = self.lst.export_json(self.uid, path, v)
         self.msg.setText(res.message)
         return res
+
+
+class CompareWindow(widgets.ModalDialog):
+    """What changed from one saved version to a newer one: header lines, then a row per added / removed / changed point."""
+
+    def __init__(self, parent, uid, old, new, diff):
+        super().__init__(parent, f'Compare versions {old} and {new}: {uid}', width=760, modal=False)
+        self.title_label.hide()
+        self._size_hint = (980, 520)
+        self.diff = diff
+        self.body.addWidget(widgets.label(f'Version {old} -> version {new}. ' + diff.summary(), 'sub', wrap=True))
+        tone = {'added': 'good', 'removed': 'bad', 'changed': 'warn'}
+        self.table = C.table([Column('kind', 'Change', 80), Column('section', 'Section', 150), Column('point', 'Test point', 190), Column('what', 'What', 110),
+                              Column('before', 'Version %d' % old, 220, stretch=True), Column('after', 'Version %d' % new, 220, stretch=True)],
+                             row_tone=lambda r: tone.get(r.get('kind')), empty='No differences.')
+        C.fill(self.table, [dict(id=i, kind=c.kind, section=c.section, point=c.point, what=c.what or ('whole point' if c.point else 'whole section'),
+                                 before=c.before, after=c.after) for i, c in enumerate(diff.rows)])
+        self.body.addWidget(self.table, 1)
+        self.add_button('Close', cancel=True, default=True)
+
+
+class SaveBlockedDialog(widgets.ModalDialog):
+    """Shown when Save finds problems: every error in one list (the sheet's own and the Sheet check's), a click on a line shows the row, and the three ways on:
+    go to the selected row, save the sheet as a draft anyway, or keep editing.  run() returns 'go', 'draft' or 'edit'; `chosen_key` is the row to go to."""
+
+    def __init__(self, parent, items):
+        super().__init__(parent, 'Before this can be saved as a procedure', width=760)
+        self.title_label.hide()
+        self._size_hint = (900, 460)
+        self.items = items
+        self.chosen_key = ''
+        self.body.addWidget(widgets.label(f'{len(items)} thing{"s" * (len(items) != 1)} to fix before this sheet can run as a procedure. Double-click a line to go to its row. '
+                                          'A draft is kept as a version but is not a runnable procedure yet.', 'sub', wrap=True))
+        self.table = C.table([Column('row', 'Row', 54, align='right'), Column('where', 'Section', 170), Column('text', 'What to fix', 560, stretch=True)], row_tone=lambda r: 'fail')
+        C.fill(self.table, [dict(id=i, row=it.get('row') or '', where=it.get('where', ''), text=it['text']) for i, it in enumerate(items)])
+        self.table.rowActivated.connect(lambda _r: self._go())
+        self.body.addWidget(self.table, 1)
+        self.add_button('Keep editing', cancel=True, result='edit')
+        self.add_button('Save as a draft', result='draft')
+        self.go_b = self.add_button('Go to the row', role='primary', result='go', default=True, callback=self._go_cb)
+
+    def _selected(self):
+        sel = C.selected_ids(self.table)
+        return self.items[int(sel[0])] if sel else (self.items[0] if self.items else None)
+
+    def _go_cb(self):
+        it = self._selected()
+        self.chosen_key = (it or {}).get('key', '')
+        return None
+
+    def _go(self):
+        self._go_cb()
+        self.result_key = 'go'
+        self.accept()

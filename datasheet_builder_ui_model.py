@@ -410,6 +410,18 @@ class DatasheetList:
         self.refresh()
         return Outcome(True, f'Imported as "{res.uid}" (version {res.version}).', res.uid)
 
+    def compare_versions(self, uid, version_a, version_b):
+        """What changed from version_a to version_b (any order is fine: the older one is the 'before').  Outcome(detail=Diff)."""
+        import datasheet_builder_diff as dd
+        lo, hi = sorted((int(version_a), int(version_b)))
+        if lo == hi:
+            return Outcome(False, 'Choose two different versions to compare.')
+        old, new = self.storage.load(uid, lo), self.storage.load(uid, hi)
+        if old is None or new is None:
+            return Outcome(False, f'Version {lo if old is None else hi} cannot be read.')
+        d = dd.compare(old, new)
+        return Outcome(True, f'Version {lo} -> {hi}: ' + d.summary(), d)
+
     def version_rows(self, uid):
         """[{version, saved_at, who, note, status, points, status_text}] newest first, for the history window."""
         out = []
@@ -2344,6 +2356,18 @@ class GridModel(CheckMixin, EditorModel):
                             text=f'{len(names)} sections have no test rows yet and are skipped when the sheet runs'
                                  + (': ' + ', '.join(names) + '.' if len(names) <= 4 else f' (first ones: {", ".join(names[:3])}).')))
         out.sort(key=lambda d: d['level'] != 'error')
+        return out
+
+    def save_blockers(self):
+        """Everything that keeps Save from making a runnable procedure, as a list of dict(text, row, key, where): the sheet's own errors, then the errors of the
+        Sheet check (rules 1-12).  Empty when the sheet can be saved as runnable."""
+        out = [dict(text=p['text'], row=p['row'], key=p['key'], where=p['where']) for p in self.problem_rows() if p['level'] == 'error']
+        try:
+            for r in self.check_rows(compute=True):
+                if r['level'] == 'error':
+                    out.append(dict(text=(r['text'] or r['title']) + (f' What to do: {r["fix"]}' if r['fix'] else ''), row=r['row'], key=r['key'], where=r['where']))
+        except Exception:
+            pass
         return out
 
     def problem_summary(self):

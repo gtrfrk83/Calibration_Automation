@@ -418,14 +418,35 @@ class EditorTests(QtDsbCase):
         win.commit_header()
         win.function_chosen(self.dcv_label(win))
         self.type_cell(win, '5 V')                                       # a row without any tolerance: one thing to fix
-        with mock.patch.object(C, 'ask_yes_no', return_value=False):
+        items = win.model.save_blockers()
+        self.assertTrue(items)
+        self.assertTrue(all(it['text'] for it in items))
+        with mock.patch.object(win, 'ask_save_blocked', return_value='edit') as ask:
             res = win.save()
         self.assertFalse(res.ok)
+        self.assertEqual(ask.call_args[0][0], items)
         self.assertEqual(self.store.entries(), [])
-        with mock.patch.object(C, 'ask_yes_no', return_value=True):
+        row_item = next(it for it in items if it['key'])
+        win._blocked_key = row_item['key']
+        with mock.patch.object(win, 'ask_save_blocked', return_value='go'):
+            win.save()
+        self.assertEqual(win.model.sel_key, row_item['key'])             # 'Go to the row' puts the cursor on that problem
+        with mock.patch.object(win, 'ask_save_blocked', return_value='draft'):
             res = win.save()
         self.assertTrue(res.ok, res.message)
         self.assertTrue(win.close())
+
+    def test_the_save_blocked_dialog_lists_every_problem(self):
+        win = self.new_window()
+        win.function_chosen(self.dcv_label(win))
+        self.type_cell(win, '5 V')
+        dlg = dsb_dialogs.SaveBlockedDialog(win, win.model.save_blockers())
+        self.assertGreaterEqual(len(dlg.table.rows()), 1)
+        want = next(i for i, it in enumerate(dlg.items) if it['key'])
+        self.select_rows(dlg.table, want)
+        dlg._go_cb()
+        self.assertEqual(dlg.chosen_key, dlg.items[want]['key'])
+        dlg.close()
 
     def test_closing_with_unsaved_changes_asks(self):
         win, key = self.build()
@@ -1035,6 +1056,26 @@ class PanelTests(QtDsbCase):
         self.app.processEvents()
         vw.open_new()
         self.assertIn('Select a version', vw.msg.text())
+        vw.close()
+
+    def test_versions_window_compares_two_versions(self):
+        win, key = self.build()
+        win.save()
+        self.type_cell(win, '6 V')
+        win.save()
+        vw = dsb_dialogs.VersionsWindow(win, self.store, win.model.ds.uid, editor=win, panel=self.panel)
+        vw.table.select_rows([])
+        self.app.processEvents()
+        vw.compare()
+        self.assertIn('Select a version', vw.msg.text())
+        self.select_rows(vw.table, '1')
+        vw.compare()
+        self.assertIn('first version', vw.msg.text())
+        self.select_rows(vw.table, '2')
+        res = vw.compare()                                           # one selected: compared with the version before it
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(sorted(c.kind for c in res.detail.rows), ['added', 'removed'])        # the typed 6 V replaced the row that was selected
+        self.assertIn('6 V', next(c for c in res.detail.rows if c.kind == 'added').point)
         vw.close()
 
     def test_help_text_and_buttons(self):

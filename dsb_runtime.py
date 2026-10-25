@@ -1170,12 +1170,76 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         return self.left.get(p['id']) or self.found.get(p['id']) or {}
 
     # ---- running -------------------------------------------------------------------------------------------------------------
+    def _offer_resume(self):
+        """A run that was interrupted leaves its progress file (it is saved after every recorded point).  When the instrument ID is the same and nothing has
+        been recorded or loaded in this window yet, offer to carry on from it, once per instrument ID.  True when the saved readings were loaded."""
+        asset = self.asset.get().strip()
+        if getattr(self, '_resume_asked', None) == asset or self.found or self.left:
+            return False
+        self._resume_asked = asset
+        path = self._checkpoint_path()
+        try:
+            data = json.loads(path.read_text()) if path.is_file() else None
+        except (OSError, ValueError):
+            return False
+        if not isinstance(data, dict) or self.checkpoint_problem(data) is not None:
+            return False                                                # another datasheet, version or period: not offered (Load still says why)
+        if self.file_has_synthetic(data) != bool(self.demo):
+            return False                                                # demo readings are never offered to a real run, nor real ones to a demo
+        done = len(data.get('results') or {}) + len(data.get('left_results') or {})
+        if not done:
+            return False
+        stamps = [v.get('timestamp', '') for key in ('results', 'left_results') for v in (data.get(key) or {}).values()]
+        when = max((t for t in stamps if t), default='')
+        if not port.ask_yes_no('Continue the saved run?', f'A run of instrument {asset} was saved with {done} reading(s) recorded' + (f' (last one {when.replace("T", " ")})' if when else '')
+                               + '.\n\nContinue from it? The recorded readings are kept and only the points without a reading are run.\n\n'
+                                 'No starts without them (the saved file is replaced as this run records points).'):
+            return False
+        self.serial.set(data.get('serial', '') or self.serial.get())
+        self.load_results(data)
+        self.refresh()
+        self.status.set(f'Continuing the saved run: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
+        return True
+
+    def pre_run_rows(self, points):
+        """[(standard, address, connected, points it serves)] for the points about to run that a standard drives or reads: what the before-the-run screen lists."""
+        used = {}
+        for p in points:
+            m = _assigned(p)
+            if m and not self.hand_point(p):
+                used[m] = used.get(m, 0) + 1
+        connected = self.io.models() if self.io is not None else set()
+        addrs = self.addresses()
+        return [(m, (addrs.get(m) or {}).get('address', ''), m in connected, n) for m, n in used.items()]
+
+    def _pre_run_screen(self, points):
+        """One screen before a real run: which standards the run uses and whether each answered when the program connected.  False = the operator cancelled."""
+        if self.demo or self.fast_demo or self.manual_entry:
+            return True
+        rows = self.pre_run_rows(points)
+        if not rows:
+            return True
+        steps = []
+        for m, addr, ok, n in rows:
+            where = f' at {addr}' if addr else ''
+            steps.append((f'{m} - connected{where}' if ok else f'{m} - NOT connected{where}',
+                          f'Serves {n} point(s).' if ok else f'{n} point(s) that use it are done by hand: the program tells you what to set and asks for the reading.'))
+        missing = [r for r in rows if not r[2]]
+        return port.operator_prompt('Before the run', 'Standards for this run', steps, facts=[('Instrument ID', self.asset.get().strip()), ('Points to run', str(len(points)))],
+                                    caution=(f'{len(missing)} standard(s) not connected. Cancel to fix the address or the cable and press Connect, or continue to do those points by hand.' if missing else None),
+                                    ok='Continue with the run', parent=self.root)
+
     def execute(self, points):
         if self.busy or not points:
             return
         if not self.asset.get().strip():
             port.message('warning', 'Instrument ID', 'Enter an instrument ID.')
             return
+        if self._offer_resume():
+            points = [p for p in points if str(p['id']) not in self.results]            # the points that have a reading in the mode being collected are not run again
+            if not points:
+                self.status.set('Every point already has a reading in the saved run. Nothing left to run.')
+                return
         asked = len(points)
         points = [p for p in points if not self.is_skipped(p)]                 # rule 12: a Not-tested section is never run
         if not points:
@@ -1193,6 +1257,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             self.test_connection()
             if self.io is None:
                 return
+        if not self._pre_run_screen(points):
+            self.status.set('Run cancelled before it started.')
+            return
         self.dsb_ref = {}                                           # references (bandwidth, flatness) are taken again at the start of every run
         self._hookup_seen = None                                    # rule 9: the cables are asked once at the start of a Run and again only when the hook-up changes
         self._hv_ok_key = None
