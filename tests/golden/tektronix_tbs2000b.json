@@ -1002,6 +1002,17 @@
    "call": "",
    "case": "TektronixTBS2000B.run_self_test",
    "log": [
+    "TBS2000B|>>|DIAg:LOOP:OPTion ONCE",
+    "TBS2000B|>>|DIAg:SELect ALL",
+    "TBS2000B|>>|DIAg:STATE EXECute",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|0",
     "TBS2000B|>>|DIAg:RESUlt:FLAg?",
     "TBS2000B|<<|PASS",
     "TBS2000B|>>|DIAg:RESUlt:LOG?",
@@ -1010,6 +1021,54 @@
    "method": "TektronixTBS2000B.run_self_test",
    "result": "returned (True, '\"PASS--CPU,PASS--DISPLAY,PASS--FPANEL,PASS--IO,PASS--ACQ,PASS--ROM,PASS--APPKEY\"')",
    "wire": [
+    [
+     "W",
+     "DIAg:LOOP:OPTion ONCE"
+    ],
+    [
+     "W",
+     "DIAg:SELect ALL"
+    ],
+    [
+     "W",
+     "DIAg:STATE EXECute"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "0"
+    ],
     [
      "Q",
      "DIAg:RESUlt:FLAg?",
@@ -1317,6 +1376,11 @@
    "call": "",
    "case": "TektronixTBS2000B.run_self_test[fails]",
    "log": [
+    "TBS2000B|>>|DIAg:LOOP:OPTion ONCE",
+    "TBS2000B|>>|DIAg:SELect ALL",
+    "TBS2000B|>>|DIAg:STATE EXECute",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|0",
     "TBS2000B|>>|DIAg:RESUlt:FLAg?",
     "TBS2000B|<<|FAIL",
     "TBS2000B|>>|DIAg:RESUlt:LOG?",
@@ -1325,6 +1389,27 @@
    "method": "TektronixTBS2000B.run_self_test",
    "result": "returned (False, '\"FAIL--ACQ\"')",
    "wire": [
+    [
+     "W",
+     "DIAg:LOOP:OPTion ONCE"
+    ],
+    [
+     "W",
+     "DIAg:SELect ALL"
+    ],
+    [
+     "W",
+     "DIAg:STATE EXECute"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "0"
+    ],
     [
      "Q",
      "DIAg:RESUlt:FLAg?",
@@ -1341,6 +1426,11 @@
    "call": "",
    "case": "TektronixTBS2000B.run_self_test[log query fails]",
    "log": [
+    "TBS2000B|>>|DIAg:LOOP:OPTion ONCE",
+    "TBS2000B|>>|DIAg:SELect ALL",
+    "TBS2000B|>>|DIAg:STATE EXECute",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|0",
     "TBS2000B|>>|DIAg:RESUlt:FLAg?",
     "TBS2000B|<<|PASS",
     "TBS2000B|>>|DIAg:RESUlt:LOG?"
@@ -1348,6 +1438,27 @@
    "method": "TektronixTBS2000B.run_self_test",
    "result": "returned (True, '')",
    "wire": [
+    [
+     "W",
+     "DIAg:LOOP:OPTion ONCE"
+    ],
+    [
+     "W",
+     "DIAg:SELect ALL"
+    ],
+    [
+     "W",
+     "DIAg:STATE EXECute"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "0"
+    ],
     [
      "Q",
      "DIAg:RESUlt:FLAg?",
@@ -1357,6 +1468,222 @@
      "Q!",
      "DIAg:RESUlt:LOG?",
      "timeout"
+    ]
+   ]
+  },
+  {
+   "call": "poll=1.0",
+   "case": "TektronixTBS2000B.run_self_test[no answer while running]",
+   "log": [
+    "TBS2000B|>>|DIAg:LOOP:OPTion ONCE",
+    "TBS2000B|>>|DIAg:SELect ALL",
+    "TBS2000B|>>|DIAg:STATE EXECute",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|DIAg:RESUlt:FLAg?",
+    "TBS2000B|<<|PASS",
+    "TBS2000B|>>|DIAg:RESUlt:LOG?",
+    "TBS2000B|<<|\"PASS--CPU,PASS--ACQ\""
+   ],
+   "method": "TektronixTBS2000B.run_self_test",
+   "result": "returned (True, '\"PASS--CPU,PASS--ACQ\"')",
+   "wire": [
+    [
+     "W",
+     "DIAg:LOOP:OPTion ONCE"
+    ],
+    [
+     "W",
+     "DIAg:SELect ALL"
+    ],
+    [
+     "W",
+     "DIAg:STATE EXECute"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q!",
+     "BUSY?",
+     "timeout"
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "0"
+    ],
+    [
+     "Q",
+     "DIAg:RESUlt:FLAg?",
+     "PASS"
+    ],
+    [
+     "Q",
+     "DIAg:RESUlt:LOG?",
+     "\"PASS--CPU,PASS--ACQ\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "TektronixTBS2000B.run_self_test[log says not run]",
+   "log": [
+    "TBS2000B|>>|DIAg:LOOP:OPTion ONCE",
+    "TBS2000B|>>|DIAg:SELect ALL",
+    "TBS2000B|>>|DIAg:STATE EXECute",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|DIAg:RESUlt:FLAg?",
+    "TBS2000B|<<|PASS",
+    "TBS2000B|>>|DIAg:RESUlt:LOG?",
+    "TBS2000B|<<|\"NOT RUN--CPU,NOT RUN--ACQ\""
+   ],
+   "method": "TektronixTBS2000B.run_self_test",
+   "result": "returned (False, '\"NOT RUN--CPU,NOT RUN--ACQ\"')",
+   "wire": [
+    [
+     "W",
+     "DIAg:LOOP:OPTion ONCE"
+    ],
+    [
+     "W",
+     "DIAg:SELect ALL"
+    ],
+    [
+     "W",
+     "DIAg:STATE EXECute"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "0"
+    ],
+    [
+     "Q",
+     "DIAg:RESUlt:FLAg?",
+     "PASS"
+    ],
+    [
+     "Q",
+     "DIAg:RESUlt:LOG?",
+     "\"NOT RUN--CPU,NOT RUN--ACQ\""
+    ]
+   ]
+  },
+  {
+   "call": "timeout=10.0, poll=2.0",
+   "case": "TektronixTBS2000B.run_self_test[never finishes]",
+   "log": [
+    "TBS2000B|>>|DIAg:LOOP:OPTion ONCE",
+    "TBS2000B|>>|DIAg:SELect ALL",
+    "TBS2000B|>>|DIAg:STATE EXECute",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1"
+   ],
+   "method": "TektronixTBS2000B.run_self_test",
+   "result": "raised InstrumentError: The self test did not report completion (BUSY? 0) within 10 s",
+   "wire": [
+    [
+     "W",
+     "DIAg:LOOP:OPTion ONCE"
+    ],
+    [
+     "W",
+     "DIAg:SELect ALL"
+    ],
+    [
+     "W",
+     "DIAg:STATE EXECute"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
     ]
    ]
   },

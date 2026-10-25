@@ -46,7 +46,6 @@ SLEEP_SCALE = 1.0            # tests set this (and tds2000c_verification.SLEEP_S
 VIRTUAL_PACE = 1.0
 CAL_CHOICES = list(tds.CAL_CHOICES)          # Fluke 5560A, 5522A, 5520A: the TDS2000C procedure's calibrators
 DEFAULT_MODEL = '2204B'
-HV_CONFIRM_V = 30.0          # a DC source level at or above this gets a HIGH VOLTAGE confirmation (once per channel); the manual's warning p. 22
 EDGE_CAPTURES = 5
 
 
@@ -205,18 +204,17 @@ class IO(reset_startup.IOResetMixin):
 # the runner: the TDS2000C Runner's calibrator helpers (dc_source, apply_dc, select_levsine, set_sine, tune_sine, ask, wire, run_point) with the TBS2000B tests
 # ======================================================================================================================
 class Runner(tds.Runner):
-    _hv_ch = None
 
     # ---- self test / signal path compensation (p. 22) -------------------------------------------------------------------------------------
     def do_selftest(self, p):
-        self.io.scope.default_setup()                                                       # step 2: Default Setup
         self.wire(('SELF',), 'Self test', [
             ('Warm up', 'The oscilloscope must have been operating continuously for twenty minutes within its operating temperature range (p. 22).'),
             ('Disconnect', 'Disconnect all probes and cables from the instrument inputs.'),
-            ('Run', 'On the oscilloscope: Utility > Utility Page > Diagnostics > Self Test; set Loop Times to 1 (Loop 1 Times); select Run Self Test and push '
-                    'the Multipurpose knob (p. 22 steps 3-7).'),
-            ('Wait', 'When the self test has finished and the results dialog is shown, push Menu Off, then continue here. The result is read back from the oscilloscope.')])
-        ok, log = self.io.scope.run_self_test()
+            ('Do not touch', 'The self test is started by the program (one loop) and runs for a few minutes. Do not touch the oscilloscope until the program continues.')])
+        self.io.scope.default_setup()                                                       # step 2: Default Setup
+        self.status('Self test running - do not touch the oscilloscope ...')
+        sc, pace = self.io.scope, (SLEEP_SCALE * VIRTUAL_PACE)
+        ok, log = sc.run_self_test(settle=sc.SELF_TEST_SETTLE * pace, poll=sc.SELF_TEST_POLL * pace)     # steps 3-8, started remotely
         return (1.0 if ok else 0.0), dict(log=log[:300])
 
     def do_spc(self, p):
@@ -262,12 +260,6 @@ class Runner(tds.Runner):
             s.measure_setup('MEAN', ch)
         s.channel(ch, vscale=p['vscale'], position=p['position'], probe=1, offset=p['offset'])
         s.check_errors('offset setup')
-        if abs(p['vsrc']) >= HV_CONFIRM_V and self._hv_ch != ch:
-            self.ask('HIGH VOLTAGE', f'{abs(p["vsrc"]):g} V DC on CH{ch}', [
-                ('Safety', f'The next points apply up to {abs(p["vsrc"]):g} V DC to the oscilloscope input. Check the cable is rated for it, keep clear of '
-                           'the connection, and never touch the BNC while the output is on (manual warning p. 22).')],
-                caution='Output stays in STANDBY until you continue.', ok='Enable output')
-            self._hv_ch = ch
         self.dc_source()
         self.apply_dc(p['vsrc'])
         mean = s.measure('MEAN', ch)

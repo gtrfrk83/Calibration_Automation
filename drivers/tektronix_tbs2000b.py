@@ -13,9 +13,10 @@ unchanged, but the command set is the TBS2000B's, which differs from the TDS2000
 
 UNVERIFIED (manual text only, never run on a TBS2000B): the reply formats with HEADer OFF / VERBose OFF (the manual's examples show headers); CH<x>:BANdwidth?
 answering FULl rather than a frequency (both accepted); whether *CAL? is the same operation as the front-panel 'Compensate Signal Paths' (p. 52 calls it
-self-calibration and points to CALibrate:INTERNal, the SPC); whether a front-panel self test updates DIAg:RESUlt:FLAg? (p. 82 says power-on or Service-menu
-diagnostics); ACQuire:NUMACq? counting (p. 42 says RUN does not reset it, p. 44 says it does: wait_acquisitions() waits for `count` MORE acquisitions either way);
-the *IDN? model text (the example on p. 121 prints 'TBS2104' without the B); CH<x>:PRObe:GAIN 1 being accepted with no probe attached.
+self-calibration and points to CALibrate:INTERNal, the SPC); whether the remotely started self test updates DIAg:RESUlt:FLAg?
+(p. 82 says power-on or Service-menu diagnostics); ACQuire:NUMACq? counting (p. 42 says RUN does not reset it, p. 44 says it does: wait_acquisitions() waits for `count` MORE acquisitions either way);
+the *IDN? model text (the example on p. 121 prints 'TBS2104' without the B); CH<x>:PRObe:GAIN 1 being accepted with no probe attached; how the end of the
+remotely started self test is signalled (BUSY? polling, registered verified=False).
 """
 from __future__ import annotations
 
@@ -26,6 +27,7 @@ import time
 import cmdreg
 from cmdreg import Cmd, Placeholder
 from .base import Instrument, InstrumentError
+from .transport import TransportError
 
 MANUAL = 'TBS2000B Series Programmer Manual 077-1149-04'
 MODEL_RE = re.compile(r'TBS\s*(2(?:07|10|20)[24])\s*(B?)', re.I)
@@ -133,6 +135,11 @@ COMMANDS = {
     'wfm.yzero': _q('WFMOutpre:YZEro?', 'Vertical offset (V)', 198),
     'wfm.curve': _q('CURVe?', 'Waveform data', 74),
     # self test result / signal path compensation (never overridable)
+    'diag.loop': _c('DIAg:LOOP:OPTion ONCE', 'Self test: one loop', 81, 'Runs the self test sequence once (the manual\'s Loop 1 Times, p. 22)', risk='locked'),
+    'diag.select': _c('DIAg:SELect ALL', 'Self test: all diagnostic groups', 83, risk='locked'),
+    'diag.run': _c('DIAg:STATE EXECute', 'Self test: start', 84, 'Starts the diagnostics (an action: never retried)', kind='action', risk='locked'),
+    'diag.busy': Cmd('BUSY?', 'Busy (self test completion)', 'BUSY? exists (p. 51) but Table 30 (p. 209) does not list DIAg:STATE among the operations it '
+                     'tracks: using it to wait for the end of the self test is NOT documented', kind='query', risk='locked', verified=False, ref=''),
     'diag.flag': _q('DIAg:RESUlt:FLAg?', 'Self test result', 82, 'PASS / FAIL of the last diagnostic sequence', risk='locked'),
     'diag.log': _q('DIAg:RESUlt:LOG?', 'Self test log', 83, risk='locked'),
     'spc.run': _q('*CAL?', 'Signal path compensation (runs it; 0 = no errors)', 52, 'An action in query form: never retried', risk='locked'),
@@ -171,6 +178,9 @@ class TektronixTBS2000B(Instrument):
     DEFAULT_TIMEOUT = 15.0
     RESET_OPC_TIMEOUT = 60.0         # FACtory is waited for as default_setup() does
     SELF_CAL_TIMEOUT = 600.0         # "can take several minutes" (p. 52)
+    SELF_TEST_TIMEOUT = 900.0        # generous: the manual gives no duration for the self test
+    SELF_TEST_SETTLE = 5.0           # wait after DIAg:STATE EXECute before the first completion poll
+    SELF_TEST_POLL = 2.0
     SPC_PASS = 'PASS'
     model = ''
     channels = 2
@@ -249,14 +259,40 @@ class TektronixTBS2000B(Instrument):
         self.send('sys.verbose.off')
         self.check_errors('FACtory')
 
-    def run_self_test(self):
-        """Result of the last diagnostic sequence: (passed, log text). DIAg:RESUlt:FLAg? (p. 82), DIAg:RESUlt:LOG? (p. 83)."""
+    def run_self_test(self, timeout=None, poll=None, settle=None):
+        """Run the self test remotely and return (passed, log text).  DIAg:LOOP:OPTion ONCE (p. 81), DIAg:SELect ALL (p. 83), DIAg:STATE EXECute (p. 84),
+        each sent once (never retried); then wait for the end with BUSY? (p. 51) until it answers 0.  The manual does NOT document how the end of the
+        self test is signalled (DIAg:STATE has no query form, and Table 30 p. 209 does not list it for *OPC / BUSY?), so the wait is UNVERIFIED: a poll
+        that gets no answer is taken as 'still running' (read-only, asked again after a device clear) until `timeout`.  Then DIAg:RESUlt:FLAg? (p. 82)
+        and DIAg:RESUlt:LOG? (p. 83): passed = PASS, and the log names no FAIL and no NOT RUN module."""
+        timeout = self.SELF_TEST_TIMEOUT if timeout is None else timeout
+        poll = self.SELF_TEST_POLL if poll is None else poll
+        self.send('diag.loop')
+        self.send('diag.select')
+        self.send('diag.run')
+        time.sleep(self.SELF_TEST_SETTLE if settle is None else settle)
+        deadline = time.monotonic() + timeout
+        while True:
+            try:
+                busy = int(_last_number(self.ask('diag.busy')))
+            except (TransportError, ValueError):
+                busy = 1
+                try:
+                    self.t.clear()
+                except Exception:
+                    pass
+            if busy == 0:
+                break
+            if time.monotonic() >= deadline:
+                raise InstrumentError(f'The self test did not report completion (BUSY? 0) within {timeout:g} s')
+            time.sleep(poll)
         flag = _last_word(self.ask('diag.flag'))
         try:
             log = self.ask('diag.log').strip()
         except Exception:
             log = ''
-        return flag == 'PASS', log
+        bad = 'FAIL' in log.upper() or 'NOT RUN' in log.upper()
+        return flag == 'PASS' and not bad, log
 
     def self_cal(self):
         """Signal path compensation: *CAL? runs it and answers 0 when no errors were found (p. 52); CALibrate:RESults:SPC? must then say PASS (p. 54).

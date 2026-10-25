@@ -1815,13 +1815,18 @@ A new action-bar button 'Rerun From Selected' (short 'From here', icon `rerun_fr
   (its golden transcripts are byte-identical). Calibrators, uncertainty (A2LA oscilloscope CMC) and TAR / TUR wiring as the TDS2000C; TUR on the offset and bandwidth points, TAR blank.
 - Deviations from the manual (stated in the spec's source.deviations and point notes): bandwidth reference at 50 kHz and 10 us/div (manual 1 kHz, 400 us/div; the calibrator leveled sine starts
   at 50 kHz, the equipment table p. 19 says 50 kHz); offset accuracy recorded as the MEAN the scope measures with limits source +/- 0.2 div (the manual's check is by eye, pass / fail); time base
-  edge measured from the waveform record (Average off, 2000-point record, delay mode ON, 1 ms delay); self test run from the front panel by the technician, result read with DIAg:RESUlt:FLAg?;
-  a HIGH VOLTAGE confirmation before the first +/-45 V point of each channel (engine choice, manual warning p. 22).
-- UNVERIFIED: reply formats with HEADer OFF / VERBose OFF; CH<x>:BANdwidth? answering FULl (a frequency is accepted too); *CAL? being the front-panel SPC; a front-panel self test updating
-  DIAg:RESUlt:FLAg?; ACQuire:NUMACq? counting (pp. 42 / 44 disagree; the driver waits for N more); the *IDN? model text (p. 121 example prints 'TBS2104' without B: a TBS2000 cannot be told
+  edge measured from the waveform record (Average off, 2000-point record, delay mode ON, 1 ms delay).
+- Owner answers (2026-10-25): bandwidth reference 50 kHz / 10 us/div approved; the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm (calibrator drives the 5 V/div offset
+  points); offset as a measured voltage approved; NO HIGH VOLTAGE confirmation before the +/-45 V points (removed); self test started REMOTELY: DIAg:LOOP:OPTion ONCE (p. 81),
+  DIAg:SELect ALL (p. 83), DIAg:STATE EXECute (p. 84, sent once), then BUSY? (p. 51) polled until 0 (900 s limit; no answer = still running, device clear, asked again), then
+  DIAg:RESUlt:FLAg? / LOG? (PASS and no FAIL / NOT RUN module). The completion wait is NOT documented (Table 30 p. 209 does not list DIAg:STATE): `diag.busy` is verified=False.
+  The operator is told 'do not touch the oscilloscope' in the prompt and the status line. Find instruments: family TBS2000B added to `instrument_scan.py` (model TBS2072/2074/2102/2104/2202/2204,
+  B optional), driver exported from `drivers/__init__.py`.
+- UNVERIFIED: reply formats with HEADer OFF / VERBose OFF; CH<x>:BANdwidth? answering FULl (a frequency is accepted too); *CAL? being the front-panel SPC; the remotely started self test updating
+  DIAg:RESUlt:FLAg? (p. 82 names power-on / Service-menu diagnostics); BUSY? as the self-test completion signal; ACQuire:NUMACq? counting (pp. 42 / 44 disagree; the driver waits for N more); the *IDN? model text (p. 121 example prints 'TBS2104' without B: a TBS2000 cannot be told
   from a TBS2000B); CH<x>:PRObe:GAIN 1 with no probe; position / offset read-back resolution (0.02 div tolerance); WFMOutpre:XZEro relative to the trigger with delay mode on; TRIGger:A:EDGE:SOUrce
   CH3 / CH4 (the syntax line lists CH1 | CH2 | LINE | AUX, the argument text 1-4); the 5560A / 5522A SCOPE DC output at +/-45 V into 1 MOhm; the front panel staying usable over USB (no LOCk sent).
-- No front-panel photo or hook-up diagrams supplied: prompts are text only. Not added to `instrument_scan.py` (Find instruments) or `drivers/__init__.py` (imported directly).
+- No front-panel photo or hook-up diagrams supplied: prompts are text only.
 - Tests: `tests/test_tbs2000b_points.py` (spec vs manual, builder reproduces the JSON, driver registry / read-back / no retry, every model on the simulated bench with both calibrators,
   failures, reset at start, report rows / uncertainty / TUR, a virtual run through the Tk view (stubbed) and the Qt window (offscreen), Manager registration, golden transcripts);
   golden cases in `tests/golden_tbs2000b.py` (registered by additive lines in `tests/golden_capture.py` / `golden_engines.py`).

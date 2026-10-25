@@ -21,6 +21,7 @@ from .fluke_8808a import Fluke8808A
 from .fluke_8808a_cal import Fluke8808ACal
 from .tektronix_mdo4000c import TektronixMDO4000C
 from .tektronix_tds2000c import TektronixTDS2000C
+from .tektronix_tbs2000b import TektronixTBS2000B
 from .reference_instruments import AgilentAFG, Fluke96270A, ReferenceMeter
 from .fluke_5790b import SERIAL_DEFAULT as FLUKE_5790B_SERIAL
 from .fluke_5790b import Fluke5790B

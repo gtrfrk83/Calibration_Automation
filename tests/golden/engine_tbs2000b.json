@@ -183,9 +183,10 @@
    ]
   },
   {
-   "call": "{'ch': None, 'desc': 'Self test (Utility > Diagnostics > Self Test, 1 loop: passed)', 'high': 1, 'id': 1, 'kind': 'SELFTEST', 'low': 1, 'nominal': 1, 'note': 'p. 22: run from the front panel by the technician (Loop Times 1); the result is read back with DIAg:RESUlt:FLAg?. The scope must have run 20 minutes first.', 'passfail': True, 'section': 'selftest', 'stim': 'none', 'unit': ''}",
+   "call": "{'ch': None, 'desc': 'Self test (Utility > Diagnostics > Self Test, 1 loop: passed)', 'high': 1, 'id': 1, 'kind': 'SELFTEST', 'low': 1, 'nominal': 1, 'note': 'p. 22: started remotely (DIAg:LOOP:OPTion ONCE, DIAg:SELect ALL, DIAg:STATE EXECute = Loop 1 Times), end awaited with BUSY? (not documented for the self test), result DIAg:RESUlt:FLAg? / LOG?. The scope must have run 20 minutes first.', 'passfail': True, 'section': 'selftest', 'stim': 'none', 'unit': ''}",
    "case": "tbs2000b_verification.Runner.run_point[SELFTEST#1]",
    "log": [
+    "5560A|>>|STBY",
     "TBS2000B|>>|FACtory",
     "TBS2000B|>>|*OPC?",
     "TBS2000B|<<|1",
@@ -193,7 +194,17 @@
     "TBS2000B|>>|VERBose OFF",
     "TBS2000B|>>|*ESR?",
     "TBS2000B|<<|0",
-    "5560A|>>|STBY",
+    "TBS2000B|>>|DIAg:LOOP:OPTion ONCE",
+    "TBS2000B|>>|DIAg:SELect ALL",
+    "TBS2000B|>>|DIAg:STATE EXECute",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|0",
     "TBS2000B|>>|DIAg:RESUlt:FLAg?",
     "TBS2000B|<<|PASS",
     "TBS2000B|>>|DIAg:RESUlt:LOG?",
@@ -203,6 +214,10 @@
    "method": "tbs2000b_verification.Runner.run_point",
    "result": "returned (1.0, {'log': '\"PASS--CPU,PASS--DISPLAY,PASS--FPANEL,PASS--IO,PASS--ACQ,PASS--ROM,PASS--APPKEY\"'})",
    "wire": [
+    [
+     "W",
+     "STBY"
+    ],
     [
      "W",
      "FACtory"
@@ -237,7 +252,51 @@
     ],
     [
      "W",
-     "STBY"
+     "DIAg:LOOP:OPTion ONCE"
+    ],
+    [
+     "W",
+     "DIAg:SELect ALL"
+    ],
+    [
+     "W",
+     "DIAg:STATE EXECute"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "0"
     ],
     [
      "Q",
@@ -300,7 +359,7 @@
    ]
   },
   {
-   "call": "{'ch': 1, 'desc': 'CH1 bandwidth: 3 V p-p reference, Vpk-pk at the model frequency', 'high': None, 'hscale': 1e-08, 'hscale_ref': 1e-05, 'id': 3, 'kind': 'BW', 'low': 2.12, 'nominal': 2.12, 'note': 'p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.', 'printed': {'hscale_ref': 0.0004, 'ref_hz': 1000.0}, 'ref_high': 3.02, 'ref_hz': 50000.0, 'ref_low': 2.98, 'ref_target': 3.0, 'section': 'bw', 'stim': 'cal', 'unit': 'V', 'vscale': 0.5}",
+   "call": "{'ch': 1, 'desc': 'CH1 bandwidth: 3 V p-p reference, Vpk-pk at the model frequency', 'high': None, 'hscale': 1e-08, 'hscale_ref': 1e-05, 'id': 3, 'kind': 'BW', 'low': 2.12, 'nominal': 2.12, 'note': 'Owner-approved (2026-10-25): 50 kHz reference at 10 us/div; the manual prints 1 kHz at 400 us/div. p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.', 'printed': {'hscale_ref': 0.0004, 'ref_hz': 1000.0}, 'ref_high': 3.02, 'ref_hz': 50000.0, 'ref_low': 2.98, 'ref_target': 3.0, 'section': 'bw', 'stim': 'cal', 'unit': 'V', 'vscale': 0.5}",
    "case": "tbs2000b_verification.Runner.run_point[BW#3]",
    "log": [
     "5560A|>>|STBY",
@@ -844,7 +903,7 @@
    ]
   },
   {
-   "call": "{'ch': 1, 'desc': 'CH1 offset +0.8 V, 200 mV/div, trace at -5 div: +1.8 V in', 'high': 1.84, 'id': 7, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': 1.76, 'nominal': 1.8, 'note': 'p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.', 'offset': 0.8, 'position': -5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 0.2, 'vsrc': 1.8}",
+   "call": "{'ch': 1, 'desc': 'CH1 offset +0.8 V, 200 mV/div, trace at -5 div: +1.8 V in', 'high': 1.84, 'id': 7, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': 1.76, 'nominal': 1.8, 'note': 'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.', 'offset': 0.8, 'position': -5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 0.2, 'vsrc': 1.8}",
    "case": "tbs2000b_verification.Runner.run_point[OFFSET#7]",
    "log": [
     "5560A|>>|STBY",
@@ -1251,7 +1310,7 @@
    ]
   },
   {
-   "call": "{'ch': 1, 'desc': 'CH1 offset -0.8 V, 200 mV/div, trace at +5 div: -1.8 V in', 'high': -1.76, 'id': 8, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': -1.84, 'nominal': -1.8, 'note': 'p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.', 'offset': -0.8, 'position': 5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 0.2, 'vsrc': -1.8}",
+   "call": "{'ch': 1, 'desc': 'CH1 offset -0.8 V, 200 mV/div, trace at +5 div: -1.8 V in', 'high': -1.76, 'id': 8, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': -1.84, 'nominal': -1.8, 'note': 'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.', 'offset': -0.8, 'position': 5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 0.2, 'vsrc': -1.8}",
    "case": "tbs2000b_verification.Runner.run_point[OFFSET#8]",
    "log": [
     "TBS2000B|>>|CH1:COUPling DC",
@@ -1517,7 +1576,7 @@
    ]
   },
   {
-   "call": "{'ch': 1, 'desc': 'CH1 offset +20 V, 5 V/div, trace at -5 div: +45 V in', 'high': 46.0, 'id': 9, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': 44.0, 'nominal': 45.0, 'note': 'p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.', 'offset': 20.0, 'position': -5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 5.0, 'vsrc': 45.0}",
+   "call": "{'ch': 1, 'desc': 'CH1 offset +20 V, 5 V/div, trace at -5 div: +45 V in', 'high': 46.0, 'id': 9, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': 44.0, 'nominal': 45.0, 'note': 'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.', 'offset': 20.0, 'position': -5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 5.0, 'vsrc': 45.0}",
    "case": "tbs2000b_verification.Runner.run_point[OFFSET#9]",
    "log": [
     "TBS2000B|>>|CH1:COUPling DC",
@@ -1783,7 +1842,7 @@
    ]
   },
   {
-   "call": "{'ch': 1, 'desc': 'CH1 offset -20 V, 5 V/div, trace at +5 div: -45 V in', 'high': -44.0, 'id': 10, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': -46.0, 'nominal': -45.0, 'note': 'p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.', 'offset': -20.0, 'position': 5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 5.0, 'vsrc': -45.0}",
+   "call": "{'ch': 1, 'desc': 'CH1 offset -20 V, 5 V/div, trace at +5 div: -45 V in', 'high': -44.0, 'id': 10, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': -46.0, 'nominal': -45.0, 'note': 'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.', 'offset': -20.0, 'position': 5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 5.0, 'vsrc': -45.0}",
    "case": "tbs2000b_verification.Runner.run_point[OFFSET#10]",
    "log": [
     "TBS2000B|>>|CH1:COUPling DC",

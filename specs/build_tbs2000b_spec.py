@@ -61,7 +61,8 @@ def offset_accuracy(vdiv, offset, position):   # p. 11: vertical offset accuracy
 
 # ---- self test / signal path compensation (p. 22; test record p. 20 'Self test', 'Signal path compensation (SPC)') -----------------------------------
 add('selftest', 'SELFTEST', 'Self test (Utility > Diagnostics > Self Test, 1 loop: passed)', 1, 1, 1, '', stim='none', passfail=True,
-    note='p. 22: run from the front panel by the technician (Loop Times 1); the result is read back with DIAg:RESUlt:FLAg?. The scope must have run 20 minutes first.')
+    note='p. 22: started remotely (DIAg:LOOP:OPTion ONCE, DIAg:SELect ALL, DIAg:STATE EXECute = Loop 1 Times), end awaited with BUSY? (not documented for '
+         'the self test), result DIAg:RESUlt:FLAg? / LOG?. The scope must have run 20 minutes first.')
 add('selftest', 'SPC', 'Signal path compensation (Compensate Signal Paths: passed)', 1, 1, 1, '', stim='none', passfail=True,
     note='p. 22: all probes and cables removed first; repeat if the temperature changes by more than 10 degC. Run remotely with *CAL?, confirmed with CALibrate:RESults:SPC?.')
 
@@ -72,7 +73,7 @@ for ch in (1, 2, 3, 4):
     add('bw', 'BW', f'CH{ch} bandwidth: 3 V p-p reference, Vpk-pk at the model frequency', float(BW_LOW), float(BW_LOW), None, 'V', ch=ch, models=models_for(ch),
         vscale=0.5, ref_hz=50e3, ref_target=3.0, ref_low=2.98, ref_high=3.02, hscale_ref=10e-6, hscale=10e-9,
         printed=dict(ref_hz=1e3, hscale_ref=400e-6),
-        note='p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, '
+        note='Owner-approved (2026-10-25): 50 kHz reference at 10 us/div; the manual prints 1 kHz at 400 us/div. p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, '
              'not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div '
              'instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.')
 
@@ -92,7 +93,7 @@ for ch in (1, 2, 3, 4):
         add('offset', 'OFFSET', f'CH{ch} offset {D(off):+g} V, {txt}, trace at {pos:+d} div: {D(src):+g} V in', float(D(src)), float(D(src) - half),
             float(D(src) + half), 'V', ch=ch, models=models_for(ch), vscale=float(D(vdiv)), position=float(pos), offset=float(D(off)), vsrc=float(D(src)),
             limit_div=float(LIMIT_DIV),
-            note=f'p. 24: the trace must be within {LIMIT_DIV} division of the centre line (pass / fail in the test record); recorded as the MEAN the scope '
+            note=f'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within {LIMIT_DIV} division of the centre line (pass / fail in the test record); recorded as the MEAN the scope '
                  f'measures, limits = source +/- {LIMIT_DIV} div x {txt} = +/- {half:g} V. Specification p. 11: '
                  f'+/-{offset_accuracy(vdiv, off, pos) / D(vdiv):.3f} div here.')
 
@@ -126,7 +127,13 @@ spec = dict(schema=2, manufacturer='Tektronix', model='TBS2000B', models=list(MO
                                     'Vertical offset accuracy (pass/fail by eye, p. 24) is recorded as the MEAN voltage the scope measures with limits of the source '
                                     '+/- 0.2 division.',
                                     'Time base edge position is measured from the waveform record instead of by eye (p. 25 step 15).',
-                                    'Self test is run from the front panel by the technician (p. 22 steps 3-9) and its result read back remotely.']),
+                                    'Self test is started remotely (p. 22 steps 3-8 done by commands); its completion is awaited with BUSY?, which the manual '
+                                    'does not document for the self test.'],
+                        owner=['2026-10-25: 50 kHz / 10 us/div bandwidth reference approved (the manual prints 1 kHz).',
+                               '2026-10-25: the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm: the calibrator drives the 5 V/div offset points.',
+                               '2026-10-25: offset recorded as a measured voltage, limits source +/- 0.2 div: approved.',
+                               '2026-10-25: self test started remotely.',
+                               '2026-10-25: no HIGH VOLTAGE confirmation before the +/-45 V points.']),
             sections=[dict(id=s, title=t, page=PAGES[s]) for s, t in TITLES.items()], points=points)
 OUT.write_text(json.dumps(spec, indent=1, ensure_ascii=False), encoding='utf-8')
 if __name__ == '__main__':

@@ -41,6 +41,7 @@ class TbsState:
         self.esr = 0
         self.events = []
         self.header = True
+        self.diag_busy, self.diag_run = 0, False
 
 
 class SimTbs(_SimBase):
@@ -135,8 +136,19 @@ class SimTbs(_SimBase):
         if u == 'FACTORY': s.reset(); return None
         if u == '*CAL?': return str(self.bench.tbs_spc_result)
         if u == 'CALIBRATE:RESULTS:SPC?': return 'PASS' if self.bench.tbs_spc_result == 0 else 'FAIL'
+        if u in ('DIAG:LOOP:OPTION ONCE', 'DIAG:SELECT ALL'): return None
+        if u == 'DIAG:STATE EXECUTE': s.diag_busy, s.diag_run = 3, True; return None
+        if u == 'BUSY?':
+            if s.diag_busy > 0:
+                s.diag_busy -= 1
+                return '1'
+            return '0'
         if u == 'DIAG:RESULT:FLAG?': return 'PASS' if self.bench.tbs_diag_pass else 'FAIL'
-        if u == 'DIAG:RESULT:LOG?': return '"PASS--CPU,PASS--DISPLAY,PASS--FPANEL,PASS--IO,PASS--ACQ,PASS--ROM,PASS--APPKEY"'
+        if u == 'DIAG:RESULT:LOG?':
+            if not s.diag_run:
+                return '"NOT RUN--CPU,NOT RUN--DISPLAY,NOT RUN--FPANEL,NOT RUN--IO,NOT RUN--ACQ,NOT RUN--ROM,NOT RUN--APPKEY"'
+            word = 'PASS' if self.bench.tbs_diag_pass else 'FAIL'
+            return f'"{word}--CPU,PASS--DISPLAY,PASS--FPANEL,PASS--IO,{word}--ACQ,PASS--ROM,PASS--APPKEY"'
         m = re.match(r'SELECT:CH(\d) (ON|OFF)$', u)
         if m:
             n = int(m.group(1))

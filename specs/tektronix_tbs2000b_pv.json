@@ -51,7 +51,14 @@
    "Bandwidth reference at 50 kHz and 10 us/div instead of 1 kHz and 400 us/div (p. 23 steps 13-14): the calibrator leveled sine starts at 50 kHz (equipment table p. 19 also says 50 kHz).",
    "Vertical offset accuracy (pass/fail by eye, p. 24) is recorded as the MEAN voltage the scope measures with limits of the source +/- 0.2 division.",
    "Time base edge position is measured from the waveform record instead of by eye (p. 25 step 15).",
-   "Self test is run from the front panel by the technician (p. 22 steps 3-9) and its result read back remotely."
+   "Self test is started remotely (p. 22 steps 3-8 done by commands); its completion is awaited with BUSY?, which the manual does not document for the self test."
+  ],
+  "owner": [
+   "2026-10-25: 50 kHz / 10 us/div bandwidth reference approved (the manual prints 1 kHz).",
+   "2026-10-25: the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm: the calibrator drives the 5 V/div offset points.",
+   "2026-10-25: offset recorded as a measured voltage, limits source +/- 0.2 div: approved.",
+   "2026-10-25: self test started remotely.",
+   "2026-10-25: no HIGH VOLTAGE confirmation before the +/-45 V points."
   ]
  },
  "sections": [
@@ -93,7 +100,7 @@
    "unit": "",
    "stim": "none",
    "passfail": true,
-   "note": "p. 22: run from the front panel by the technician (Loop Times 1); the result is read back with DIAg:RESUlt:FLAg?. The scope must have run 20 minutes first.",
+   "note": "p. 22: started remotely (DIAg:LOOP:OPTion ONCE, DIAg:SELect ALL, DIAg:STATE EXECute = Loop 1 Times), end awaited with BUSY? (not documented for the self test), result DIAg:RESUlt:FLAg? / LOG?. The scope must have run 20 minutes first.",
    "id": 1
   },
   {
@@ -131,7 +138,7 @@
     "ref_hz": 1000.0,
     "hscale_ref": 0.0004
    },
-   "note": "p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.",
+   "note": "Owner-approved (2026-10-25): 50 kHz reference at 10 us/div; the manual prints 1 kHz at 400 us/div. p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.",
    "id": 3
   },
   {
@@ -155,7 +162,7 @@
     "ref_hz": 1000.0,
     "hscale_ref": 0.0004
    },
-   "note": "p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.",
+   "note": "Owner-approved (2026-10-25): 50 kHz reference at 10 us/div; the manual prints 1 kHz at 400 us/div. p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.",
    "id": 4
   },
   {
@@ -184,7 +191,7 @@
     "ref_hz": 1000.0,
     "hscale_ref": 0.0004
    },
-   "note": "p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.",
+   "note": "Owner-approved (2026-10-25): 50 kHz reference at 10 us/div; the manual prints 1 kHz at 400 us/div. p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.",
    "id": 5
   },
   {
@@ -213,7 +220,7 @@
     "ref_hz": 1000.0,
     "hscale_ref": 0.0004
    },
-   "note": "p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.",
+   "note": "Owner-approved (2026-10-25): 50 kHz reference at 10 us/div; the manual prints 1 kHz at 400 us/div. p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.",
    "id": 6
   },
   {
@@ -231,7 +238,7 @@
    "offset": 0.8,
    "vsrc": 1.8,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
    "id": 7
   },
   {
@@ -249,7 +256,7 @@
    "offset": -0.8,
    "vsrc": -1.8,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
    "id": 8
   },
   {
@@ -267,7 +274,7 @@
    "offset": 20.0,
    "vsrc": 45.0,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
    "id": 9
   },
   {
@@ -285,7 +292,7 @@
    "offset": -20.0,
    "vsrc": -45.0,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
    "id": 10
   },
   {
@@ -303,7 +310,7 @@
    "offset": 0.8,
    "vsrc": 1.8,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
    "id": 11
   },
   {
@@ -321,7 +328,7 @@
    "offset": -0.8,
    "vsrc": -1.8,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
    "id": 12
   },
   {
@@ -339,7 +346,7 @@
    "offset": 20.0,
    "vsrc": 45.0,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
    "id": 13
   },
   {
@@ -357,7 +364,7 @@
    "offset": -20.0,
    "vsrc": -45.0,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
    "id": 14
   },
   {
@@ -380,7 +387,7 @@
    "offset": 0.8,
    "vsrc": 1.8,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
    "id": 15
   },
   {
@@ -403,7 +410,7 @@
    "offset": -0.8,
    "vsrc": -1.8,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
    "id": 16
   },
   {
@@ -426,7 +433,7 @@
    "offset": 20.0,
    "vsrc": 45.0,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
    "id": 17
   },
   {
@@ -449,7 +456,7 @@
    "offset": -20.0,
    "vsrc": -45.0,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
    "id": 18
   },
   {
@@ -472,7 +479,7 @@
    "offset": 0.8,
    "vsrc": 1.8,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
    "id": 19
   },
   {
@@ -495,7 +502,7 @@
    "offset": -0.8,
    "vsrc": -1.8,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.",
    "id": 20
   },
   {
@@ -518,7 +525,7 @@
    "offset": 20.0,
    "vsrc": 45.0,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
    "id": 21
   },
   {
@@ -541,7 +548,7 @@
    "offset": -20.0,
    "vsrc": -45.0,
    "limit_div": 0.2,
-   "note": "p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
+   "note": "Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.",
    "id": 22
   },
   {

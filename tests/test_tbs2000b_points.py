@@ -178,12 +178,13 @@ class Driver(unittest.TestCase):
         self.assertEqual(f('TEKTRONIX,TBS2104 ,CU10100,CF:91.1CT FV:v2015-12-10_01-00-59rootfs; FPGA:v1.21;'), '2104B')     # the manual's example, p. 121
         self.assertEqual(f('TEKTRONIX,TDS 2024C,C1,FV:v24'), '')
 
-    def test_every_command_is_registered_with_a_page_and_none_is_unverified(self):
+    def test_every_command_is_registered_with_a_page_and_only_the_self_test_wait_is_unverified(self):
         reg = cmdreg.merge_commands(TektronixTBS2000B)
         self.assertEqual(cmdreg.lint_registry(reg), [])
+        self.assertEqual(sorted(k for k, c in reg.items() if not c.verified), ['diag.busy'])     # BUSY? as the self-test completion signal: not documented
         for key, cmd in reg.items():
-            self.assertTrue(cmd.verified, key)
-            self.assertRegex(cmd.ref, r'TBS2000B Series Programmer Manual 077-1149-04 p\. \d+', key)
+            if cmd.verified:
+                self.assertRegex(cmd.ref, r'TBS2000B Series Programmer Manual 077-1149-04 p\. \d+', key)
         self.assertEqual(reg['reset'].template, 'FACtory')
         self.assertEqual(reg['reset'].risk, 'locked')
         self.assertNotIn('*RST', [c.template for c in reg.values()])
@@ -222,6 +223,17 @@ class Driver(unittest.TestCase):
         scope.channel(1, vscale=0.2, position=0.0)
         with self.assertRaises(drivers.InstrumentError):                                   # +20 V is outside the 200 mV/div offset range: not stored, read back 0
             scope.channel(1, vscale=0.2, offset=20.0)
+
+    def test_self_test_is_started_remotely_once_and_waited_for(self):
+        scope, log = self.make()
+        del log.entries[:]
+        ok, text = scope.run_self_test(poll=0.0, settle=0.0)
+        self.assertTrue(ok, text)
+        sent = [t for _ts, _i, d, t in log.entries if d == '>>']
+        self.assertEqual(sent[:3], ['DIAg:LOOP:OPTion ONCE', 'DIAg:SELect ALL', 'DIAg:STATE EXECute'])
+        self.assertEqual(sent.count('DIAg:STATE EXECute'), 1)                               # an action: never retried
+        self.assertIn('BUSY?', sent)
+        self.assertLess(max(i for i, t in enumerate(sent) if t == 'BUSY?'), sent.index('DIAg:RESUlt:FLAg?'))
 
     def test_waveform_record(self):
         scope, _log = self.make()
@@ -275,7 +287,9 @@ class Engine(unittest.TestCase):
     def test_prompts_reuse_the_tds_texts_and_ask_before_every_cable_change(self):
         _out, app, _io = self.run_model('2204B')
         titles = [a['title'] for a in app.asked]
-        self.assertEqual(titles.count('HIGH VOLTAGE'), 4)                                   # once per channel, before the first +/-45 V point
+        self.assertNotIn('HIGH VOLTAGE', titles)                                            # owner: no confirmation before the +/-45 V points
+        st = next(a for a in app.asked if a['title'] == 'Self test')
+        self.assertIn('Do not touch', [lead for lead, _t in st['steps']])
         self.assertEqual(len([t for t in titles if t.startswith('Vertical offset accuracy')]), 4)
         self.assertEqual(len([t for t in titles if t.startswith('Bandwidth')]), 4)
         self.assertEqual(len([t for t in titles if t.startswith('DC balance')]), 4)
@@ -320,17 +334,6 @@ class Engine(unittest.TestCase):
             with self.assertRaises(T.Stopped):
                 T.Runner(app).run_point(next(p for p in T.POINTS if p['kind'] == 'OFFSET'))
             self.assertFalse(bench.fluke['operate'])
-
-    def test_a_declined_high_voltage_prompt_applies_nothing(self):
-        bench, io = self.bench('2072B')
-        app = FakeApp(io, '2072B')
-        runner = T.Runner(app)
-        p45 = next(p for p in T.POINTS if p['kind'] == 'OFFSET' and p['vsrc'] == 45.0)
-        app.request = lambda kind, payload=None: payload['title'] != 'HIGH VOLTAGE'
-        with self.assertRaises(T.Stopped):
-            runner.run_point(p45)
-        self.assertFalse(bench.fluke['operate'])
-        self.assertNotIn('OUT 45.000000000V', [t for _ts, _i, d, t in io.log.entries if d == '>>'])
 
 
 class ResetAtStart(unittest.TestCase):
@@ -547,6 +550,21 @@ class QtWindow(unittest.TestCase):
         self.assertEqual(len(app.results), 15)
         self.assertEqual({r['result'] for r in app.results.values()}, {'PASS'})
         self.assertTrue(all(r.get('synthetic') for r in app.results.values()))
+
+
+class FindInstruments(unittest.TestCase):
+    def test_the_tbs2000b_is_recognised_and_its_driver_accepts_the_reply(self):
+        import instrument_scan as S
+        for reply in ('TEKTRONIX,TBS2104 ,CU10100,CF:91.1CT FV:v2015-12-10_01-00-59rootfs; FPGA:v1.21;', 'TEKTRONIX,TBS2072B,C0,CF:91.1CT FV:v1.3',
+                      'TEKTRONIX,TBS2204B,SIM0001,CF:91.1CT FV:v1.30'):
+            fam = S.match_family(S.parse_identity(reply))
+            self.assertEqual(fam.key, 'TBS2000B', reply)
+            self.assertIs(getattr(drivers, fam.driver), TektronixTBS2000B)
+            self.assertTrue(any(m in reply.upper() for m in TektronixTBS2000B.IDN_MATCH))
+            self.assertFalse(fam.serial_ok)
+        for other in ('TEKTRONIX,TDS 2024C,C1,FV:v24', 'TEKTRONIX,TBS1102C,C1,FV:v1', 'TEKTRONIX,TBS2105,C1,FV'):
+            fam = S.match_family(S.parse_identity(other))
+            self.assertTrue(fam is None or fam.key != 'TBS2000B', other)
 
 
 class ManagerEntry(unittest.TestCase):
