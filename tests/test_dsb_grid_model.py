@@ -619,6 +619,224 @@ class CursorAfterChoosingFunctionTests(Base):
         self.assertEqual([r['kind'] for r in rows[:2]], ['header', row['kind']])
 
 
+class DeepDiveFixTests(Base):
+    """Regression tests for what the datasheet builder deep dive found."""
+
+    def blank_key(self):
+        return next(r['key'] for r in self.g.rows() if r['kind'] == 'blank')
+
+    def test_a_comma_inside_a_number_is_refused_not_misread(self):
+        g = self.g
+        self.dcv_row('5 V')
+        for text in ('1,000 V', '1,5 V', '2,5'):
+            g.select(self.blank_key(), 'nominal')
+            res = g.commit_cell(text)
+            self.assertFalse(res.ok, text)
+            self.assertIn('comma', res.message.lower())
+        self.assertEqual(len([r for r in g.rows() if r['kind'] == 'point']), 1)
+
+    def test_a_signal_level_is_refused_on_a_function_without_one(self):
+        g = self.g
+        self.dcv_row('5 V')
+        g.select(self.blank_key(), 'nominal')
+        res = g.commit_cell('1 V, level 2 V')
+        self.assertFalse(res.ok)
+
+    def test_a_new_row_does_not_change_the_resolution_of_the_range(self):
+        g = self.g
+        key = self.dcv_row('5.0000 V')
+        f = dict(self.form(key))
+        f['types'] = ['calc']
+        f['plus'] = dict(f['plus'], calc='0.05 % of reading + 2 counts')
+        f['decs'] = '4'
+        self.assertTrue(g.calc_row(key, f).ok)
+        first = next(r for r in g.rows() if r['kind'] == 'point')
+        limits = (first['low'], first['high'])
+        blank = self.blank_key()
+        g.select(blank, 'nominal')
+        f2 = dict(g.panel_state()['form'], nominal='1.0', types=['calc'])
+        f2['plus'] = dict(f2['plus'], calc='0.05 % of reading + 2 counts')
+        res = g.calc_row(None, f2)
+        self.assertTrue(res.ok, res.message)
+        self.assertIn('keeps its resolution', res.message)
+        first = next(r for r in g.rows() if r['kind'] == 'point' and r['nominal'].startswith('5'))
+        self.assertEqual((first['low'], first['high']), limits)
+
+    def test_locked_sheet_refuses_every_change_and_undo(self):
+        g = self.g
+        key = self.dcv_row('5 V')
+        g.set_locked(True)
+        before = g._snapshot()
+        for res in (g.set_header(make='X'), g.add_section('DC volts') if hasattr(g, 'add_section') else g.set_header(model='Y'), g.undo(), g.redo(),
+                    g.remove_point(g.ds.functions[0].id, g.ds.functions[0].points[0].id)):
+            self.assertFalse(res.ok)
+            self.assertIn('locked', res.message)
+        self.assertEqual(g._snapshot(), before)
+        g.set_locked(False)
+        self.assertTrue(g.undo().ok)
+
+    # ---- the second round of fixes
+    def points(self):
+        return [r for r in self.g.rows() if r['kind'] == 'point']
+
+    def test_the_point_id_follows_an_edited_value_and_its_waiver_and_standard_go_with_it(self):
+        g = self.g
+        key = self.dcv_row('5 V')
+        fn, p = g.point_of(key)
+        g.ds.assignments[p.id] = 'ABC'
+        import datasheet_builder_rules as rules
+        rules.set_waiver(g.ds, [p.id], 'other', 'test reason')
+        self.assertTrue(g.commit_cell('3 V', key, 'nominal', move='stay').ok)
+        fn, p = g.point_of(g.sel_key)
+        self.assertEqual(p.nominal, Decimal(3))
+        self.assertTrue(p.id.endswith('+3'))
+        self.assertEqual(g.ds.assignments.get(p.id), 'ABC')
+        self.assertIn(p.id, rules.waivers(g.ds))
+        g.select(self.blank_key(), 'nominal')
+        self.assertTrue(g.commit_cell('5 V').ok)                    # the old value can be added again
+        new = [q for q in fn.points if q.nominal == Decimal(5)][0]
+        self.assertNotIn(new.id, rules.waivers(g.ds))
+
+    def test_a_deleted_rows_waiver_does_not_come_back_with_the_same_value(self):
+        import datasheet_builder_rules as rules
+        g = self.g
+        key = self.dcv_row('5 V')
+        fn, p = g.point_of(key)
+        rules.set_waiver(g.ds, [p.id], 'other', 'test reason')
+        self.assertTrue(g.clear_row(key).ok)
+        g.select(self.blank_key(), 'nominal')
+        self.assertTrue(g.commit_cell('5 V').ok)
+        self.assertEqual(rules.waivers(g.ds), {})
+
+    def test_a_row_alone_on_its_range_goes_back_to_the_smaller_range(self):
+        g = self.g
+        self.dcv_row('5 V')
+        g.select(self.blank_key(), 'nominal')
+        self.assertTrue(g.commit_cell('50 V').ok)                   # adds the 100 V range
+        key = next(r['key'] for r in self.points() if r['nominal'] == '50 V')
+        self.assertTrue(g.commit_cell('6 V', key, 'nominal', move='stay').ok)
+        fn, p = g.point_of(g.sel_key)
+        self.assertEqual(fn.range(p.range_id).full_scale, Decimal(10))
+
+    def test_a_borrowed_tolerance_does_not_follow_to_another_section(self):
+        g = self.g
+        key = self.dcv_row('5 V')
+        self.assertTrue(g.calc_row(key, self.form(key, iv='0.05')).ok)
+        g.select(self.blank_key(), 'nominal')
+        self.assertTrue(g.use_tolerance_above().ok)
+        self.assertTrue(g.borrowed_tol)
+        g.set_target_function('Frequency')
+        self.assertFalse(g.borrowed_tol)
+
+    def test_several_rows_are_rounded_carry_remark_and_run_flag_and_count_properly(self):
+        g = self.g
+        self.dcv_row('1 V')
+        g.select(self.blank_key(), 'nominal')
+        f = dict(g.panel_state()['form'], nominal='0', multi=True, multi_high='1', multi_n='7', multi_mode='span', remark='from span', run=False,
+                 types=['floor'])
+        f['plus'] = dict(f['plus'], floor='1 mV')
+        res = g.calc_row(None, f)
+        self.assertTrue(res.ok, res.message)
+        fn = g.ds.functions[0]
+        self.assertTrue(all(len(q.nominal.as_tuple().digits) <= 12 for q in fn.points))
+        made = [q for q in fn.points if q.note == 'from span']
+        self.assertTrue(made)
+        self.assertTrue(all(not q.enabled for q in made))
+        g.select(self.blank_key(), 'nominal')
+        f = dict(g.panel_state()['form'], nominal='2', multi=True, multi_high='3', multi_n='1', multi_mode='units', types=['floor'])
+        f['plus'] = dict(f['plus'], floor='1 mV')
+        g.set_target_function('DC volts')
+        f['multi_n'] = '1 V'
+        res = g.calc_row(None, f)
+        self.assertTrue(res.ok, res.message)
+        self.assertNotIn('1 rows', res.message)
+
+    def test_several_rows_above_the_full_scale_are_refused_before_any_row_is_made(self):
+        g = self.g
+        self.dcv_row('1 V')
+        g.select(self.blank_key(), 'nominal')
+        before = len(self.points())
+        f = dict(g.panel_state()['form'], nominal='1', multi=True, multi_high='50', multi_n='5', multi_mode='span', types=['fs', 'floor'], fs_scale='10')
+        f['plus'] = dict(f['plus'], fs='0.01', floor='1 mV')
+        res = g.calc_row(None, f)
+        self.assertFalse(res.ok)
+        self.assertIn('F.S.', res.message)
+        self.assertEqual(len(self.points()), before)
+
+    def test_absurd_numbers_and_bad_frequencies_are_refused_in_plain_words(self):
+        g = self.g
+        self.dcv_row('5 V')
+        g.set_target_function('AC volts')
+        for text, word in (('1 V @ -5 Hz', 'above 0'), ('1 V @ 0 Hz', 'above 0'), ('1e999 V @ 1 kHz', 'too large'), ('1 V @ 1e999 Hz', 'too large')):
+            g.select(self.blank_key(), 'nominal')
+            res = g.commit_cell(text)
+            self.assertFalse(res.ok, text)
+            self.assertIn(word, res.message, text)
+        key = self.dcv_row('5 V') if False else next(r['key'] for r in self.points() if r['nominal'] == '5 V')
+        for iv, word in (('5 % of reading - 2 mV', 'number only'), ('1e999', 'too large')):
+            res = g.calc_row(key, self.form(key, iv=iv))
+            self.assertFalse(res.ok, iv)
+            self.assertIn(word, res.message)
+
+    def test_a_missing_asymmetrical_floor_names_its_side(self):
+        g = self.g
+        key = self.dcv_row('5 V')
+        f = self.form(key, types=['floor'], floor='')
+        f['asym'] = True
+        f['plus']['floor'], f['minus']['floor'] = '1 mV', ''
+        self.assertIn('Low', g.calc_row(key, f).message)
+        f['plus']['floor'], f['minus']['floor'] = '', '1 mV'
+        self.assertIn('High', g.calc_row(key, f).message)
+
+    def test_a_db_tolerance_shows_short_limits(self):
+        g = self.g
+        key = self.dcv_row('5 V')
+        self.assertTrue(g.calc_row(key, self.form(key, types=['db'], db='0.5')).ok)
+        row = self.points()[0]
+        self.assertLessEqual(len(row['low']), 14)
+        self.assertLessEqual(len(row['high']), 14)
+
+    def test_save_of_an_unchanged_sheet_makes_no_new_version(self):
+        g = self.g
+        g.set_header(make='A', model='B', title='C')
+        key = self.dcv_row('5 V')
+        self.assertTrue(g.calc_row(key, self.form(key, iv='1')).ok)
+        first = g.save()
+        self.assertTrue(first.ok, first.message)
+        again = g.save()
+        self.assertTrue(again.ok)
+        self.assertIn('Nothing has changed', again.message)
+        self.assertEqual(len(g.storage.versions(g.ds.uid)), 1)
+
+    def test_undo_of_a_delete_puts_the_cursor_back_on_the_deleted_line(self):
+        g = self.g
+        self.dcv_row('5 V')
+        g.select(self.blank_key(), 'nominal')
+        g.commit_cell('6 V')
+        key = next(r['key'] for r in self.points() if r['nominal'] == '5 V')
+        g.select(key, 'nominal')
+        self.assertTrue(g.clear_row(key).ok)
+        self.assertTrue(g.undo().ok)
+        self.assertEqual(g.sel_key, key)
+
+    def test_a_unit_on_a_function_without_one_is_refused(self):
+        g = self.g
+        g.set_target_function('Check')
+        g.select(self.blank_key(), 'nominal')
+        res = g.commit_cell('5 V')
+        self.assertFalse(res.ok)
+        self.assertIn('no unit', res.message)
+
+    def test_shift_tab_onto_a_heading_lands_on_its_name(self):
+        g = self.g
+        self.dcv_row('5 V')
+        g.select(next(r['key'] for r in self.points()), 'nominal')
+        g.select(col='function')
+        g.tab(back=True)
+        self.assertEqual(g.row()['kind'], 'header')
+        self.assertEqual(g.sel_col, 'function')
+
+
 class ToleranceFromAboveTests(Base):
     def test_blank_row_takes_tolerance_without_touching_sheet(self):
         g = self.g

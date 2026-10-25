@@ -272,12 +272,14 @@ class EditorTests(QtDsbCase):
         win.sync()
         win.bar.setText('6 V')
         self.key(win.bar, Qt.Key.Key_Return)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '6 V')
+        now = lambda: next(r['key'] for r in win.model.rows() if r['kind'] == 'point')           # the id follows the value
+        self.assertEqual(win.model.cell_text(now(), 'nominal'), '6 V')
         self.assertTrue(win.sheet.hasFocus() or True)
         win.undo()
-        self.assertEqual(win.model.cell_text(key, 'nominal'), before)
+        self.assertEqual(win.model.cell_text(now(), 'nominal'), before)
         win.redo()
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '6 V')
+        self.assertEqual(win.model.cell_text(now(), 'nominal'), '6 V')
+        key = now()
         win.model.select(key, 'nominal')
         win.sync()
         win.bar.setText('junk')
@@ -304,10 +306,11 @@ class EditorTests(QtDsbCase):
         win.commit_bar('down')
         self.assertTrue(win.model.can_undo)
         win.make_e.setFocus()
+        now = lambda: next(r['key'] for r in win.model.rows() if r['kind'] == 'point')           # the id follows the value
         QTest.keyClick(win.make_e, Qt.Key.Key_Z, Qt.KeyboardModifier.ControlModifier)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '5 V')
+        self.assertEqual(win.model.cell_text(now(), 'nominal'), '5 V')
         QTest.keyClick(win.make_e, Qt.Key.Key_Y, Qt.KeyboardModifier.ControlModifier)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '6 V')
+        self.assertEqual(win.model.cell_text(now(), 'nominal'), '6 V')
         QTest.keyClick(win.sheet, Qt.Key.Key_S, Qt.KeyboardModifier.ControlModifier)
         self.assertFalse(win.model.dirty)                                 # Ctrl+S saved
         QTest.keyClick(win.sheet, Qt.Key.Key_I, Qt.KeyboardModifier.ControlModifier)
@@ -344,7 +347,8 @@ class EditorTests(QtDsbCase):
         win.bar.setFocus()
         win.bar.setText('7 V')
         win.sheet_click(win.model.row_index(key), 1)
-        self.assertEqual(win.model.cell_text(key, 'nominal'), '7 V')
+        now = next(r['key'] for r in win.model.rows() if r['kind'] == 'point')                   # the id follows the value
+        self.assertEqual(win.model.cell_text(now, 'nominal'), '7 V')
 
     def test_buttons_symbols_header_remark_run_lock(self):
         win, key = self.build()
@@ -632,6 +636,7 @@ class InspectorTests(QtDsbCase):
         win.sync()
         win.bar.setText('5')
         self.key(win.bar, Qt.Key.Key_Return)
+        key = next(r['key'] for r in win.model.rows() if r['kind'] == 'point')                  # the id follows the value
         self.assertEqual(win.model.cell_text(key, 'nominal'), '5 mV')
         self.assertEqual(win.model.point_of(key)[1].nominal, db.D('0.005'))
         self.assertEqual(win.model.row(key)['nominal'], '5 mV')
@@ -1062,6 +1067,75 @@ class SheetQualityTests(QtDsbCase):
         lv.set_basis('pp')
         lv.edit.setText('1'), lv.unit.setCurrentText('Vpp')                  # the scope functions store peak-to-peak: as typed
         self.assertEqual(box.v['level'].get(), '1 V')
+
+    def _two_rows(self):
+        win = self.new_window()
+        win.function_chosen(self.dcv_label(win))
+        self.type_cell(win, '5 V')
+        self.type_cell(win, '6 V')
+        return win, [r['key'] for r in win.model.rows() if r['kind'] == 'point']
+
+    def test_a_refused_calc_keeps_what_was_typed_in_the_boxes(self):
+        win, keys = self._two_rows()
+        win.model.select(keys[0], 'low')
+        win.sync()
+        box = win.panel_box
+        box.types['iv'].set(True)
+        box.v['iv'].set('abc')
+        res = win.calc()
+        self.assertFalse(res.ok)
+        self.assertEqual(box.v['iv'].get(), 'abc')
+        self.assertTrue(box.types['iv'].get())
+
+    def test_text_typed_in_the_edit_cell_bar_is_kept_when_another_row_is_clicked(self):
+        win, keys = self._two_rows()
+        win.model.select(keys[0], 'nominal')
+        win.sync()
+        win.bar.setFocus()
+        win.bar.selectAll()
+        QTest.keyClicks(win.bar, '7 V')
+        ix = win.sheet.proxy.index(2, 3)
+        QTest.mouseClick(win.sheet.viewport(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, win.sheet.visualRect(ix).center())
+        self.app.processEvents()
+        self.assertEqual(sorted(r['nominal'] for r in win.model.rows() if r['kind'] == 'point'), ['6 V', '7 V'])
+
+    def test_deleting_a_heading_asks_first(self):
+        win, keys = self._two_rows()
+        head = next(r['key'] for r in win.model.rows() if r['kind'] == 'header')
+        win.model.select(head, 'function')
+        win.sync()
+        with mock.patch.object(dsb_editor.C, 'ask_yes_no', return_value=False) as ask:
+            win.delete_line()
+        self.assertTrue(ask.called)
+        self.assertEqual(len([r for r in win.model.rows() if r['kind'] == 'point']), 2)
+        with mock.patch.object(dsb_editor.C, 'ask_yes_no', return_value=True):
+            win.delete_line()
+        self.assertEqual(len([r for r in win.model.rows() if r['kind'] == 'point']), 0)
+        self.assertTrue(win.model.undo().ok)
+
+    def test_unticking_asymmetrical_brings_back_the_tolerance_types(self):
+        win, keys = self._two_rows()
+        win.model.select(keys[0], 'low')
+        win.sync()
+        box = win.panel_box
+        box.types['iv'].set(True)
+        box.types['floor'].set(True)
+        box.b['asym'].set(True)
+        box.asym_changed()
+        self.assertFalse(box.types['iv'].get())
+        box.b['asym'].set(False)
+        box.asym_changed()
+        self.assertTrue(box.types['iv'].get())
+        self.assertTrue(box.types['floor'].get())
+
+    def test_delete_line_is_off_while_the_sheet_is_locked(self):
+        win, keys = self._two_rows()
+        win.model.set_locked(True)
+        win.sync()
+        self.assertFalse(win.delete_b.isEnabled())
+        win.model.set_locked(False)
+        win.sync()
+        self.assertTrue(win.delete_b.isEnabled())
 
     def test_resolution_section_sits_under_limits_and_is_open(self):
         win, key = self.build()

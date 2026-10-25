@@ -415,7 +415,7 @@ class BareNumberIsInTheUnitShown(unittest.TestCase):
         form['plus'].update(iv='0.1')
         res = self.g.calc_row(r['key'], form)
         self.assertTrue(res.ok, res.message)
-        self.assertEqual(self.g.point_of(r['key'])[1].nominal, D('0.005'))
+        self.assertEqual(self.g.point_of(self.g.sel_key)[1].nominal, D('0.005'))      # the row's id follows its value
 
 
 class RunWindowAndReport(unittest.TestCase):

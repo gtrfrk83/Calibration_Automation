@@ -222,6 +222,8 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.bar_v = C.Bind(self.bar)
         C.tip(self.bar, 'Type the new content of the selected cell and press Enter. Esc puts the old text back.')
         self.bar.returnPressed.connect(lambda: self.commit_bar('down'))
+        self._bar_typed = False
+        self.bar.textEdited.connect(lambda _t: setattr(self, '_bar_typed', True))     # text the operator typed (not text the window filled in)
         self.bar.installEventFilter(_BarKeys(self))
         lay.addWidget(self.bar, 1)
         self.symbol_buttons = {}                      # the ± ° µ ¹ ² ³ · Units buttons were removed (not needed); insert_symbol() stays for the code that uses it
@@ -305,10 +307,13 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.sheet.reload()
         ok, why = m.cell_editable()
         self.bar.setText(m.cell_text())
+        self._bar_typed = False
         self.bar.setReadOnly(not ok)
+        self.delete_b.setEnabled(not getattr(m, 'locked', False))
         state = m.panel_state()
         self._state_note = state['note']
-        self.panel_box.load(state)
+        if not getattr(self, '_keep_typed', False):
+            self.panel_box.load(state)
         self.panel_box.set_header(row, sum(1 for r in m.rows() if r['kind'] != 'blank'))
         self.remark_v.set(state['form']['remark']), self.run_v.set(bool(state['form']['run']))
         self.set_issue(row, ok, why)
@@ -388,6 +393,11 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
     def delete_line(self):
         """Delete the selected line (the Delete line button and the right-click menu)."""
         self.commit_bar_if_changed()
+        row = self.model.selected_row()
+        if row and row.get('kind') == 'header':
+            n = sum(1 for r in self.model.rows() if r.get('fid') == row.get('fid') and r.get('kind') == 'point')
+            if n and not C.ask_yes_no(self, 'Delete section', f'Delete the whole section "{row.get("function", "")}" with its {n} row(s)? (Undo brings it back.)'):
+                return None
         return self.changed(self.model.clear_row())
 
     def sheet_context(self, r, c, gpos):
@@ -396,7 +406,7 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         row = self.model.selected_row()
         label = 'Delete section' if row and row.get('kind') == 'header' else 'Delete line'
         act = menu.addAction(label)
-        act.setEnabled(bool(row) and row.get('kind') != 'blank')
+        act.setEnabled(bool(row) and row.get('kind') != 'blank' and not getattr(self.model, 'locked', False))
         act.triggered.connect(self.delete_line)
         menu.exec(gpos)
 
@@ -441,7 +451,7 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
             self.bar.setCursorPosition(len(self.bar.text()))
 
     def commit_bar_if_changed(self):
-        if self.bar.text() != self.model.cell_text() and self.model.cell_editable()[0] and self.bar.hasFocus():
+        if self.bar.text() != self.model.cell_text() and self.model.cell_editable()[0] and (self._bar_typed or self.bar.hasFocus()):
             self.commit_bar('stay')
 
     def commit_bar(self, move='down'):
@@ -472,7 +482,12 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.commit_header()
         form = self.panel_box.form()
         form.update(remark=self.remark_v.get(), run=bool(self.run_v.get()))
-        return self.changed(self.model.calc_row(form=form))
+        out = self.model.calc_row(form=form)
+        self._keep_typed = not out.ok            # a refused Calc leaves what was typed in the boxes, so it can be corrected
+        try:
+            return self.changed(out)
+        finally:
+            self._keep_typed = False
 
     def recalc(self):
         return self.changed(self.model.recalc_all())

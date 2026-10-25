@@ -26,6 +26,7 @@ from decimal import Decimal
 from pathlib import Path
 
 import datasheet_builder as db
+import datasheet_builder_rules as _rules
 from datasheet_builder_check_model import CheckMixin      # the Sheet check (build-time rules 1-5), GridModel only
 
 D = Decimal
@@ -124,6 +125,9 @@ for _c in ('write', 'registry'):
 
 
 # ------------------------------------------------------------------------------------------------------------------------------ small helpers
+LOCKED_MESSAGE = 'The sheet is locked. Switch Lock Status to Edit Mode to change it.'
+
+
 @dataclass
 class Outcome:
     """What every action returns: ok, a plain-language message for the status line, and optional detail (a list of lines / a value)."""
@@ -138,6 +142,10 @@ class Outcome:
 def split_list(text):
     """'10, 50; 100' / lines -> ['10', '50', '100'] (empty pieces dropped)."""
     return [p.strip() for p in re.split(r'[,;\n]+', text or '') if p.strip()]
+
+
+BIGGEST = Decimal('1e15')        # no test value, frequency or level is this large: a typing slip (1e999) is refused
+TOL_BIGGEST = Decimal('1e6')     # the same for the number in a tolerance box
 
 
 def plain_error(exc):
@@ -450,10 +458,18 @@ class EditorModel:
 
     # ---- the one gate for changes
     def _snapshot(self):
-        return self.ds.to_json()
+        text = self.ds.to_json()
+        mem = self.__dict__.setdefault('_sel_memory', {})
+        mem[text] = getattr(self, 'sel_key', '')                        # where the cursor was, so Undo / Redo put it back there
+        while len(mem) > 120:
+            mem.pop(next(iter(mem)))
+        return text
 
     def _restore(self, text):
         self.ds = db.Datasheet.from_json(text)
+        want = self.__dict__.get('_sel_memory', {}).get(text)
+        if want and hasattr(self, 'rows') and any(r['key'] == want for r in self.rows()):
+            self.sel_key = want
         if self.ds.function(self.fid) is None:
             self.fid = self.ds.functions[0].id if self.ds.functions else ''
         if self.period not in self.ds.period_ids():
@@ -462,6 +478,8 @@ class EditorModel:
     def _do(self, label, action, ok_message=''):
         """Run `action()` (which changes self.ds).  On a core error the datasheet is put back and the message is returned; otherwise the change
         is one undo step.  `action` may return a string (the success message) or an Outcome."""
+        if getattr(self, 'locked', False) and label != 'load version':
+            return Outcome(False, LOCKED_MESSAGE)                     # Lock Status: nothing changes the sheet until Edit Mode is switched on
         before = self._snapshot()
         try:
             res = action()
@@ -499,6 +517,8 @@ class EditorModel:
         return self._undo[-1][0] if self._undo else ''
 
     def undo(self):
+        if getattr(self, 'locked', False):
+            return Outcome(False, LOCKED_MESSAGE)
         if not self._undo:
             return Outcome(False, 'Nothing to undo.')
         label, snap = self._undo.pop()
@@ -508,6 +528,8 @@ class EditorModel:
         return Outcome(True, f'Undid: {label}.')
 
     def redo(self):
+        if getattr(self, 'locked', False):
+            return Outcome(False, LOCKED_MESSAGE)
         if not self._redo:
             return Outcome(False, 'Nothing to redo.')
         label, snap = self._redo.pop()
@@ -804,6 +826,7 @@ class EditorModel:
             n = len(fn.points)
             self.ds.functions.remove(fn)
             self.ds.assignments = {k: v for k, v in self.ds.assignments.items() if not any(p.id == k for p in fn.points)}
+            _rules.clear_waiver(self.ds, [p.id for p in fn.points])
             if self.fid == fid:
                 self.fid = self.ds.functions[0].id if self.ds.functions else ''
             return f'Removed {fn.name} with its {len(fn.ranges)} range(s) and {n} point(s). Undo brings it back.'
@@ -1463,6 +1486,7 @@ class EditorModel:
             was_rule = p.origin.startswith('rule:') and not p.edited
             db.remove_point(fn, pid)
             self.ds.assignments.pop(pid, None)
+            _rules.clear_waiver(self.ds, [pid])                  # a waiver belongs to the row it was given for, not to the value
             return 'Point removed.' + (' It comes back if you recalculate; switch it off instead to keep it out.' if was_rule else '')
         return self._do('remove point', act)
 
@@ -1692,6 +1716,8 @@ class EditorModel:
             return Outcome(False, f'Not saved: {counts["errors"]} error(s) must be fixed first (or save it as a draft).')
         if not (self.ds.make.strip() or self.ds.model.strip() or self.ds.title.strip() or self.ds.functions):
             return Outcome(False, 'Not saved: there is nothing in the datasheet yet.')
+        if self.based_on and self._saved_json == self._snapshot() and getattr(self, 'last_save', None) is not None and self.last_save.ok and not as_draft and not note:
+            return Outcome(True, f'Nothing has changed since {self.based_on}: no new version was made.', self.last_save)
         res = self.storage.save(self.ds, note=note)
         self.last_save = res
         if not res.ok:
@@ -2086,9 +2112,14 @@ class GridModel(CheckMixin, EditorModel):
         if not t:
             raise db.DsError('nominal', 'Type the value to test, for example 5 V.')
         level = None
+        if re.search(r'\d,\d', t):
+            raise db.DsError('nominal', "A comma inside a number is not read (1,5 or 1,000). Use a decimal point and no thousands separator, like 1.5 kHz. "
+                                        "To give the signal level, write it after the value: 1 kHz, level 1 V.")
         m = re.search(r',\s*(?:level|lvl)?\s*(.+)$', t, re.I)
         if m:
             level, t = m.group(1).strip(), t[:m.start()].strip()
+            if not fn.info.get('amplitude'):
+                raise db.DsError('nominal', f'{fn.name} has no signal level to give: remove the part after the comma.')
         freq = None
         if '@' in t:
             t, freq = [x.strip() for x in t.split('@', 1)]
@@ -2101,7 +2132,14 @@ class GridModel(CheckMixin, EditorModel):
             num, unit_part = split_unit_text(t)
             if num and not unit_part:
                 t = f'{num} {bare_unit}'
-        db.parse_quantity(t, fn.unit or None)
+        if not fn.unit and split_unit_text(t)[1]:
+            raise db.DsError('unit', f'{fn.name} has no unit: type the number only.')
+        value = db.parse_quantity(t, fn.unit or None)
+        for what, q in (('value', value), ('frequency', db.parse_quantity(freq, 'Hz') if freq else None), ('signal level', db.parse_quantity(level) if level else None)):
+            if q is not None and abs(db.dec(q)) >= BIGGEST:
+                raise db.DsError('nominal', f'That {what} is far too large to be a test point.')
+        if freq and db.parse_quantity(freq, 'Hz') <= 0:
+            raise db.DsError('frequency', 'The frequency must be above 0 Hz.')
         return dict(nominal=t, frequency=freq, amplitude=level)
 
     # ---- the limits: LOW and HIGH, absolute (display only; the exact limit maths is Function.limit_for and has not changed)
@@ -2129,6 +2167,11 @@ class GridModel(CheckMixin, EditorModel):
         if lim is None:
             return '', ''
         rng = fn.range(p.range_id)
+        long_ = lambda v: v is not None and len(v.as_tuple().digits) > 12
+        if rng is not None and rng.resolution is None and (long_(lim.low) or long_(lim.high)):
+            lim = copy.copy(lim)                                 # a tolerance in dB makes an endless decimal: shown to 9 digits (display only)
+            lim.low = db._sig(lim.low, 9) if long_(lim.low) else lim.low
+            lim.high = db._sig(lim.high, 9) if long_(lim.high) else lim.high
         pre = self._prefix_for(fn, rng, [v for v in (lim.low, lim.high, p.nominal) if v is not None])
         lo = self.fmt_value(fn, rng, lim.low, pre) if lim.low is not None else 'open'
         hi = self.fmt_value(fn, rng, lim.high, pre) if lim.high is not None else 'open'
@@ -2322,7 +2365,8 @@ class GridModel(CheckMixin, EditorModel):
                 return self.select(col=EDIT_COLS[j - 1])
             if (self.row_index() or 0) > 0:
                 self.move(-1)
-            return self.select(col=EDIT_COLS[-1])
+            r = self.row()
+            return self.select(col='function' if r and r['kind'] == 'header' else EDIT_COLS[-1])      # a heading can only be edited in its name
         if 0 <= j < len(EDIT_COLS) - 1:
             return self.select(col=EDIT_COLS[j + 1])
         if j == -1:                                # from a read-only cell: the first cell you can type in, to its right if there is one
@@ -2378,7 +2422,7 @@ class GridModel(CheckMixin, EditorModel):
         if col in ('low', 'high'):
             return False, LIMITS_HINT
         if self.locked:
-            return False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.'
+            return False, LOCKED_MESSAGE
         if r['kind'] == 'header' and col != 'function':
             return False, 'This is a section heading. Only its name can be changed; click a test row to edit values.'
         return True, ''
@@ -2439,6 +2483,8 @@ class GridModel(CheckMixin, EditorModel):
         """The function box under the sheet while an empty row is selected: where the next new row goes."""
         def act():
             fn = self._function_for(self.resolve_function(text))
+            if fn.id != self.fid:
+                self.borrowed_tol = None                   # a tolerance borrowed from a row of another section does not follow to this one
             self.fid = fn.id
             return f'New rows go under {fn.name}. Type a value in the NOMINAL VALUE cell.'
         res = self._do('choose function', act)
@@ -2451,12 +2497,13 @@ class GridModel(CheckMixin, EditorModel):
         """Enter in the Edit Cell bar: put `text` in the cell.  After a good edit the selection moves on: down (a row you just made in an empty row
         goes to the next empty row), right, or stays.  Returns an Outcome."""
         key, col = key or self.sel_key, col or self.sel_col
+        at = self.row_index(key)
         res = self.edit_cell(key, col, text)
         if res.ok:
-            self._after_edit(key, col, res, move)
+            self._after_edit(key, col, res, move, at)
         return res
 
-    def _after_edit(self, key, col, res, move):
+    def _after_edit(self, key, col, res, move, at=None):
         newkey = res.detail if isinstance(res.detail, str) and res.detail[:2] in ('p:', 'h:') and self.row(res.detail) else key
         if self.row(newkey) is None:
             newkey = self.rows()[min(self._sel_index, len(self.rows()) - 1)]['key']
@@ -2464,6 +2511,9 @@ class GridModel(CheckMixin, EditorModel):
             if key.startswith(('b:', 'e:')):
                 nxt = next((r for r in self.rows() if r['kind'] == 'blank'), None)
                 self.select(nxt['key'] if nxt else newkey, col)
+            elif at is not None and self.row(newkey) is not None and newkey != key and (self.row_index(newkey) or 0) != at:
+                rows = self.rows()                           # the row moved to its sorted place: Enter goes to the line under where you were
+                self.select(rows[min(at + 1, len(rows) - 1)]['key'], col)
             else:
                 self.select(newkey, col)
                 self.move(1, 0)
@@ -2505,7 +2555,7 @@ class GridModel(CheckMixin, EditorModel):
         if r['kind'] == 'blank':
             return Outcome(True, 'Nothing to clear.')
         if r['kind'] == 'header':
-            return Outcome(False, 'To remove a whole section use Delete row on its heading (its rows go too; Undo brings them back).')
+            return Outcome(False, 'To remove a whole section use Delete line on its heading (its rows go too; Undo brings them back).')
         if col == 'nominal':
             return self.clear_row(key)
         return Outcome(False, 'The function of a row cannot be cleared: choose another function instead.')
@@ -2591,6 +2641,34 @@ class GridModel(CheckMixin, EditorModel):
         res.message = res.message.strip()
         return res
 
+    def _settle_range(self, fn, p, value, rng):
+        """After a value edit: a row alone on its range (the range was made for it) goes back to the smallest existing range that holds the new value."""
+        if rng is None or any(q is not p and q.range_id == rng.id for q in fn.points):
+            return rng
+        small = fn.range_for(value)
+        if small is not None and small.id != rng.id and small.full_scale < rng.full_scale and self._holds(fn, small, value):
+            return small
+        return rng
+
+    def _rekey(self, fn, p):
+        """A point's id is built from its value, range and frequency.  After an edit the id follows them, and what is kept under the id (the
+        chosen standard, a waiver) moves with it, so the old value can be added again later as a new row.  Returns the (new) id."""
+        new = db.point_id(fn.id, p.range_id, p.nominal, None if p.frequency is None else db.dec(p.frequency),
+                          None if p.amplitude is None else db.dec(p.amplitude), db._uses_amp(fn))
+        old = p.id
+        if new == old or any(q is not p and q.id == new for q in fn.points):
+            return old
+        p.id = new
+        if old in self.ds.assignments:
+            self.ds.assignments[new] = self.ds.assignments.pop(old)
+        w = dict(_rules.waivers(self.ds))
+        if old in w:
+            w[new] = w.pop(old)
+            self.ds.options[_rules.WAIVER_KEY] = w
+        if self.sel_key == f'p:{fn.id}:{old}':
+            self.sel_key = f'p:{fn.id}:{new}'
+        return new
+
     def _edit_nominal(self, fn, p, text):
         pid = p.id
 
@@ -2604,9 +2682,12 @@ class GridModel(CheckMixin, EditorModel):
             rng, note = fn.range(cur.range_id), ''
             if rng is None or not self._holds(fn, rng, value):
                 rng, note = self._pick_range(fn, value)
+            else:
+                rng = self._settle_range(fn, cur, value, rng)
             db.edit_point(fn, pid, nominal=parts['nominal'], frequency=parts['frequency'] or '', amplitude=parts['amplitude'] or '', range_id=rng.id)
+            new_id = self._rekey(fn, fn.point(pid))
             return Outcome(True, ('Value changed.' + (' ' + note if note else '') + (' The tolerance follows the new value.' if cur.spec is not None else '')),
-                           f'p:{fn.id}:{pid}')
+                           f'p:{fn.id}:{new_id}')
         return self._do('edit cell', act)
 
     @staticmethod
@@ -2624,7 +2705,7 @@ class GridModel(CheckMixin, EditorModel):
         fn, p = self.point_of(key)
         r = self.row(key)
         if self.locked:
-            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+            return Outcome(False, LOCKED_MESSAGE)
         if r is None or r['kind'] == 'blank':
             return Outcome(False, 'This row is empty already.')
         if r['kind'] == 'header':
@@ -2766,7 +2847,7 @@ class GridModel(CheckMixin, EditorModel):
         key = key or self.sel_key
         fn, p = self.point_of(key)
         if self.locked:
-            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+            return Outcome(False, LOCKED_MESSAGE)
         if p is None or self.typed_limits(p) is None:
             return Outcome(False, 'This row has no typed limits.')
         pid = p.id
@@ -2885,7 +2966,7 @@ class GridModel(CheckMixin, EditorModel):
         return st
 
     # ---- building the tolerance from the boxes
-    def side_text(self, fn, side, types, units):
+    def side_text(self, fn, side, types, units, side_name=''):
         """The accuracy statement the ticked boxes make: '0.05 % of reading + 0.01 % of range + 20 µV'.  DsError says which box is empty."""
         parts = []
         for t in SPEC_ORDER:
@@ -2893,7 +2974,13 @@ class GridModel(CheckMixin, EditorModel):
                 continue
             v = str(side.get(t) or '').strip()
             if not v:
-                raise db.DsError('spec_value', f'Type the {SPEC_LABEL[t]} value, or untick it.')
+                raise db.DsError('spec_value', f'Type the {SPEC_LABEL[t]} value' + (f' for the {side_name} side' if side_name else '') + ', or untick it.')
+            if t in ('iv', 'fs', 'db'):
+                bare = re.sub(r'%|ppm|dB', '', v, flags=re.I).strip()
+                if not re.fullmatch(r'[0-9.]+(?:[eE][+-]?\d+)?', bare):
+                    raise db.DsError('spec_value', f'The {SPEC_LABEL[t]} box takes a number only, like 0.05. Put a fixed part in the Floor box and add the types you need.')
+                if Decimal(bare) >= TOL_BIGGEST:
+                    raise db.DsError('spec_value', f'{bare} is far too large for the {SPEC_LABEL[t]} box.')
             if t == 'iv':
                 parts.append(f'{re.sub(r"%|ppm", "", v, flags=re.I).strip()} {"ppm" if side.get("iv_ppm") else "%"} of reading')
             elif t == 'fs':
@@ -2912,8 +2999,9 @@ class GridModel(CheckMixin, EditorModel):
         """(plus text, minus text or '') from the form."""
         types = [t for t in form.get('types', []) if t in SPEC_ORDER]
         units = form.get('units') or db.unit_symbol(fn.unit)
-        plus = self.side_text(fn, form['plus'], types, units)
-        minus = self.side_text(fn, form['minus'], types, units) if form.get('asym') else ''
+        asym = bool(form.get('asym'))
+        plus = self.side_text(fn, form['plus'], types, units, 'High (above the nominal)' if asym else '')
+        minus = self.side_text(fn, form['minus'], types, units, 'Low (below the nominal)') if asym else ''
         return plus, minus
 
     def _resolution_from_form(self, fn, form, units, nominal_text):
@@ -2932,6 +3020,24 @@ class GridModel(CheckMixin, EditorModel):
         text = with_units(str(form.get('res') or ''), units)
         return db.parse_quantity(text, fn.unit or None) if text else None
 
+    def _explicit_resolution(self, form):
+        """True when the person typed the resolution or the decimals in the boxes (not only decimals read from the nominal they typed)."""
+        return bool(str(form.get('decs') or '').strip()) or not form.get('auto_res', True)
+
+    def _set_range_resolution(self, fn, rng, res, form, keep_ids=()):
+        """Give the range the resolution asked for.  Rows on a range share its resolution (counts and rounding use it), so a resolution that only came from the
+        decimals of a typed nominal never replaces a different one the range already has; one the person typed does, and the message names the other rows it changes."""
+        if res is None or rng is None or rng.resolution == res:
+            return ''
+        if rng.resolution is not None and not self._explicit_resolution(form):
+            return f'The range keeps its resolution of {show(rng.resolution, fn.unit)} (rows on one range share it; change it in Decimals shown).'
+        others = [q for q in fn.points if q.range_id == rng.id and q.id not in keep_ids]
+        had = rng.resolution is not None
+        rng.resolution = res
+        if had and others:
+            return f'The resolution of this range is now {show(res, fn.unit)}: the {len(others)} other row(s) on it were recalculated with it.'
+        return ''
+
     def _apply_row(self, fn, p, form, want_fs):
         """Apply the boxes to an existing point: value, range, resolution, tolerance, remark, run flag.  Call inside _do."""
         units = form.get('units') or db.unit_symbol(fn.unit)
@@ -2948,10 +3054,13 @@ class GridModel(CheckMixin, EditorModel):
             rng, note = self._pick_range(fn, value, want_fs)
         elif rng is None or not self._holds(fn, rng, value):
             rng, note = self._pick_range(fn, value)
+        else:
+            rng = self._settle_range(fn, p, value, rng)
         db.edit_point(fn, p.id, nominal=parts['nominal'], frequency=parts['frequency'] or '', amplitude=parts['amplitude'] or '', range_id=rng.id)
+        self._rekey(fn, p)
         res = self._resolution_from_form(fn, form, units, nominal_text)
-        if res is not None:
-            rng.resolution = res
+        res_note = self._set_range_resolution(fn, rng, res, form, keep_ids=(p.id,))
+        note = (note + ' ' + res_note).strip() if res_note else note
         if fn.kind == 'CONT':
             p.settings['expect'] = form.get('expect') or 'on'
         p.note = str(form.get('remark', '')).strip()
@@ -2967,7 +3076,8 @@ class GridModel(CheckMixin, EditorModel):
             info = db.point_limits(self.ds, fn, p, self.period)
             if info.get('error'):
                 raise db.DsError('tol', info['error'])
-            msg = f'{info["accept"]}. {self.limits_display(fn, p)}. {note}'.strip()
+            accept = info["accept"] if not re.search(r'\d[\d.]{13,}', info["accept"]) else 'Accept if the reading is between the limits'          # no endless decimals in the message
+            msg = f'{accept}. {self.limits_display(fn, p)}. {note}'.strip()
         return msg
 
     @staticmethod
@@ -2988,7 +3098,7 @@ class GridModel(CheckMixin, EditorModel):
         key = key or self.sel_key
         r = self.row(key)
         if self.locked:
-            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+            return Outcome(False, LOCKED_MESSAGE)
         if r is None or r['kind'] == 'header':
             return Outcome(False, 'Click a test row, or an empty row, first.')
         if form is None:
@@ -3041,9 +3151,9 @@ class GridModel(CheckMixin, EditorModel):
                     raise db.DsError('multi', 'For Lo to High, n is the number of points: a whole number of 2 or more.')
                 if int(n_text) > MAX_MULTI:
                     raise db.DsError('multi', f'That would make {n_text} rows; {MAX_MULTI} is the most at once.')
-                values = db._steps_linear(low, high, count=int(n_text))
+                values = [db._sig(v, 12) for v in db._steps_linear(low, high, count=int(n_text))]      # 1/6 of a span is not kept to 50 digits
             else:
-                n = db.dec(re.sub(r'[%a-z\s]', '', n_text, flags=re.I) if mode in ('pct', 'ppm') else n_text, 'n')
+                n = None if mode == 'units' else db.dec(re.sub(r'[%a-z\s]', '', n_text, flags=re.I) if mode in ('pct', 'ppm') else n_text, 'n')
                 if mode == 'units':
                     step = db.parse_quantity(with_units(n_text, units), fn.unit or None)
                 elif mode == 'pct':
@@ -3054,7 +3164,7 @@ class GridModel(CheckMixin, EditorModel):
                     raise db.DsError('multi', 'n must be above zero.')
                 if (high - low) / step > MAX_MULTI:
                     raise db.DsError('multi', f'That step would make more than {MAX_MULTI} rows. Use a bigger step.')
-                values = db._steps_linear(low, high, step=step)
+                values = [db._sig(v, 12) for v in db._steps_linear(low, high, step=step)]
         return values
 
     def _calc_multi(self, key, form):
@@ -3071,6 +3181,10 @@ class GridModel(CheckMixin, EditorModel):
             if not fn.info.get('passfail'):
                 plus, minus = self.form_spec_texts(fn, form)
             want_fs = self._want_fs(fn, form, units)
+            if want_fs is not None and fn.info.get('unit') not in ('dB', ''):
+                over = [v for v in values if abs(v) > want_fs]
+                if over:
+                    raise db.DsError('multi', f'{len(over)} of those values are above the F.S. of {show(want_fs, fn.unit)}. Raise the F.S. or lower High; no rows were added.')
             made, existed = [], 0
             for v in values:
                 try:
@@ -3086,9 +3200,11 @@ class GridModel(CheckMixin, EditorModel):
             res = self._resolution_from_form(fn, form, units, with_units(str(form.get('nominal', '')), units))
             for p in made:
                 if res is not None:
-                    fn.range(p.range_id).resolution = res
+                    self._set_range_resolution(fn, fn.range(p.range_id), res, form, keep_ids=tuple(q.id for q in made))
                 if fn.kind == 'CONT':
                     p.settings['expect'] = form.get('expect') or 'on'
+                p.note = str(form.get('remark', '')).strip()
+                p.enabled = bool(form.get('run', True))
                 if plus:
                     self._set_spec(fn, p, plus, minus)
                     info = db.point_limits(self.ds, fn, p, self.period)
@@ -3096,8 +3212,11 @@ class GridModel(CheckMixin, EditorModel):
                         raise db.DsError('tol', info['error'])
             self.fid = fn.id
             first = made[0]
-            return Outcome(True, f'{len(made)} rows added to {fn.name}' + (f' ({existed} already on the sheet, left alone)' if existed else '') + '. Each has the tolerance from the boxes.' if plus
-                           else f'{len(made)} rows added to {fn.name}.', f'p:{fn.id}:{first.id}')
+            n = len(made)
+            text = f'{n} row{"s" * (n != 1)} added to {fn.name}' + (f' ({existed} already on the sheet, left alone)' if existed else '') + '.'
+            if plus:
+                text += ' Each new row has the tolerance from the boxes.' if not existed else ' The new rows have the tolerance from the boxes; the ones already there keep theirs.'
+            return Outcome(True, text, f'p:{fn.id}:{first.id}')
         res = self._do('add test points', act)
         if res.ok:
             self.select(res.detail)
@@ -3120,7 +3239,7 @@ class GridModel(CheckMixin, EditorModel):
         key = key or self.sel_key
         fn, p = self.point_of(key)
         if self.locked:
-            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+            return Outcome(False, LOCKED_MESSAGE)
         if p is None:
             return Outcome(False, 'Click a test row that has a tolerance first.')
         if p.spec is None:
@@ -3163,7 +3282,7 @@ class GridModel(CheckMixin, EditorModel):
     def use_tolerance_above(self, key=None):
         """The empty row being filled in takes the tolerance of the nearest test row above it (the boxes show it; the sheet changes only when Calc makes the row)."""
         if self.locked:
-            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+            return Outcome(False, LOCKED_MESSAGE)
         form = self.tolerance_form_above(key)
         if form is None:
             return Outcome(False, 'No test row above this one in the section has a tolerance of its own to use yet.')
@@ -3181,7 +3300,7 @@ class GridModel(CheckMixin, EditorModel):
     def set_remark(self, key, text):
         fn, p = self.point_of(key)
         if self.locked:
-            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+            return Outcome(False, LOCKED_MESSAGE)
         if p is None:
             return Outcome(False, 'Click a test row first.')
 
@@ -3195,7 +3314,7 @@ class GridModel(CheckMixin, EditorModel):
     def set_run(self, key, run):
         fn, p = self.point_of(key)
         if self.locked:
-            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+            return Outcome(False, LOCKED_MESSAGE)
         if p is None:
             return Outcome(False, 'Click a test row first.')
         return self.set_point_enabled(fn.id, p.id, run)
@@ -3318,7 +3437,10 @@ class GridModel(CheckMixin, EditorModel):
                 data.append([Paragraph(txt(c), ParagraphStyle('b', parent=cell, fontName=bold) if row['kind'] == 'header' else cell) for c in row['cells']])
                 if row['kind'] == 'header':
                     style += [('SPAN', (0, i), (-1, i)), ('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F5F5F7'))]
-            widths = [0.7 * inch, 2.2 * inch, 1.7 * inch, 1.2 * inch, 1.2 * inch, 0.6 * inch, 2.4 * inch]
+            weights = {'STEP NUM': 0.6, 'FUNCTION TESTED': 2.1, 'NOMINAL VALUE': 1.5, 'AS FOUND': 1.1, 'AS LEFT': 1.1, 'Out of Tol': 0.6, 'LOW LIMIT': 1.5, 'HIGH LIMIT': 1.5}
+            usable = doc.width                                              # one weight per printed column; together they fill the page width exactly
+            raw = [weights.get(c, 1.0) for c in view['columns']]
+            widths = [usable * w / sum(raw) for w in raw]
             table = Table(data, colWidths=widths, repeatRows=1)
             table.setStyle(TableStyle(style))
             doc.build([Paragraph(txt(view['title']), h1), Paragraph(txt(view['subtitle']), small), Paragraph(txt(view['notice']), warn), Spacer(1, 8), table])

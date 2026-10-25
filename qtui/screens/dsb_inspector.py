@@ -493,7 +493,7 @@ class Inspector(QFrame):
 
     def _build_asym(self, lay):
         self.asym_cb = QCheckBox('Different tolerance above and below')
-        C.tip(self.asym_cb, 'Asymmetrical Tol: the tolerance below the nominal differs from the one above it. Use the side box to switch between typing the + side and the - side.')
+        C.tip(self.asym_cb, 'Asymmetrical Tol: the limit below the nominal differs from the one above it. Two floor boxes appear, low on the left and high on the right. The other tolerance types are set aside while this is ticked and come back when you untick it.')
         self.asym_cb.clicked.connect(lambda _c=False: self.asym_changed())
         lay.addWidget(self.asym_cb)
         self.b['asym'] = C.Bind(self.asym_cb)
@@ -556,6 +556,7 @@ class Inspector(QFrame):
         on = bool(self.b['asym'].get())
         if on:
             self.save_side()                                   # keep what was typed for the ordinary tolerance
+            self._types_before_asym = {k: bool(self.types[k].get()) for k in M.SPEC_ORDER}
             self._legacy_asym = False
             for k in M.SPEC_ORDER:
                 self.types[k].set(k == 'floor')                # asymmetrical = floor values only
@@ -563,6 +564,11 @@ class Inspector(QFrame):
             self.v['floor_minus'].set(self.sides['minus'].get('floor', ''))
         else:
             self.sides['plus']['floor'] = self.v['floor_plus'].get() or self.sides['plus'].get('floor', '')
+            before = getattr(self, '_types_before_asym', None)
+            if before:                                          # the types that were ticked before Asymmetrical was ticked come back
+                for k in M.SPEC_ORDER:
+                    self.types[k].set(before.get(k, False))
+                self._types_before_asym = None
         self.operand_box.setEnabled(on and self._legacy_asym)
         self.operand_now = 'plus'
         self.v['operand'].set('+' if on and self._legacy_asym else '±')
@@ -656,6 +662,7 @@ class Inspector(QFrame):
         form = state['form']
         self.sides = {'plus': dict(form['plus']), 'minus': dict(form['minus'])}
         self.operand_now = 'plus'
+        self._types_before_asym = None
         for k in ('nominal', 'units', 'freq', 'level', 'expect', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode', 'low', 'high'):
             self.v[k].set(form[k])
         for k in M.SPEC_ORDER:
