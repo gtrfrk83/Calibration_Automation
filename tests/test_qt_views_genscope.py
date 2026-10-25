@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import threading
 import time
 import unittest
@@ -686,6 +687,14 @@ class WindowMdo(WindowTests, WindowCase):
         self.assertTrue(a.read_cfg().afg)
         QTest.mouseClick(afg, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, QPoint(8, 9))
         self.assertFalse(a.v_afg.get())
+
+    def test_model_and_options_are_on_the_main_window_not_in_the_drawer(self):
+        row = self.app.uut_options_row
+        self.assertTrue(row.isVisibleTo(self.win))
+        for w in self.app.cfg_widgets + [self.app.btn_read_opts]:
+            self.assertTrue(row.isAncestorOf(w), w)
+            self.assertFalse(self.app.shell.drawer_body.isAncestorOf(w), w)
+        self.win.grab().save(str(Path(tempfile.gettempdir()) / 'mdo_options_row.png'))
 
     def test_the_hookup_prompt_pump_is_the_engines_own(self):
         self.assertTrue(hasattr(self.app, 'q') and callable(self.app._pump))
