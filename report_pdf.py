@@ -229,13 +229,13 @@ def _trim(number: str) -> str:
 
 
 def _freq_text(hz) -> str:
-    import ui_theme as ui
+    import ui_theme_core as ui
     number, unit = ui.si_one(hz, 'Hz')
     return f'{_trim(number)} {unit}'
 
 
 def _si(value, unit) -> str:
-    import ui_theme as ui
+    import ui_theme_core as ui
     number, symbol = ui.si_one(value, unit)
     return ascii_unit(f'{_trim(number)} {symbol}')
 
@@ -324,7 +324,7 @@ def cert_row(description, nominal, low, high, unit, reading=None, failed=False, 
              nominal_text=None, section='', frequency=None):
     """One report row from base-unit numbers. Display scaling (6 mV, 1.00 MOhm) matches the on-screen tables;
     reading=None gives an untested row. Limits are the ABSOLUTE low/high values, as on the certificate."""
-    import ui_theme as ui
+    import ui_theme_core as ui
     vals, reads, unit_text = ui.si_row([nominal, low, high], unit, [] if reading is None else [reading])
     unit_text = ascii_unit(unit_text)
     limit_dp = max(_decimals(vals[1]), _decimals(vals[2]))

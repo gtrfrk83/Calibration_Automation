@@ -20,7 +20,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
 import ui_port
-import ui_theme as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in f8808a_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in f8808a_view_tk.py
 from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import appdata
 import calibrator_fit

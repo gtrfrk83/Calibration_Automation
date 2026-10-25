@@ -16,7 +16,7 @@ import drivers
 import keithley2000_adjustment as adj
 import reset_startup
 import ui_port
-import ui_theme as ui                   # only its toolkit-free helpers here (Settings); the window code is in keithley2000_adjust_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (Settings); the window code is in keithley2000_adjust_view_tk.py
 import virtualbench
 from ui_port import ui as port          # every dialog, variable and window operation goes through the UI port (ui_port.py)
 

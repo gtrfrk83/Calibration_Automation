@@ -226,6 +226,6 @@ def format_value(value, unit, sig=2):
         return f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f} dB' if value else '0 dB'
     if unit in ('C', 'degC', '\u00b0C'):       # temperatures are never SI-prefixed (no 'm\u00b0C'): 0.17 \u00b0C
         return f'{value:.{max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)}f} \u00b0C' if value else '0 \u00b0C'
-    import ui_theme as ui
+    import ui_theme_core as ui
     number, symbol = ui.si_one(value, 'Ω' if unit == 'ohm' else unit, sig=sig)
     return f'{number} {symbol}'.replace('Ω', 'Ohm')

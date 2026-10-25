@@ -29,7 +29,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import hookups
 import ui_port
-import ui_theme as ui                  # only its toolkit-free helpers here (Settings, report_filename); the window code is in handheld_dmm_view_tk.py
+import ui_theme_core as ui                  # only its toolkit-free helpers here (Settings, report_filename); the window code is in handheld_dmm_view_tk.py
 import appdata
 import calibrator_fit
 import datamode

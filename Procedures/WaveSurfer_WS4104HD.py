@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))  # shared ui_theme.py sits next to the Manager
 import ui_port
-import ui_theme as ui
+import ui_theme_core as ui
 import appdata
 import datamode
 import drivers

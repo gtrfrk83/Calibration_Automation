@@ -23,7 +23,7 @@ class SpecError(ValueError):
 
 
 def _fmt(value, unit):
-    from ui_theme import si_one
+    from ui_theme_core import si_one
     number, symbol = si_one(value, unit)
     return f'{number} {symbol}'
 

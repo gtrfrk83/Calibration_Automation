@@ -259,7 +259,7 @@ def parse_uncertainty(text, unit, shown_scale=Decimal(1)):
 
 def format_manual(value, unit, sig=2):
     """A typed uncertainty printed as entered (`sig` figures, no rounding up), with the same SI scaling and spelling as uncertainty.format_value."""
-    import ui_theme as ui
+    import ui_theme_core as ui
     if unit in ('C', 'degC', '\u00b0C'):
         dp = max(sig - 1 - int(math.floor(math.log10(abs(value)))), 0)
         return f'{value:.{dp}f} \u00b0C'
@@ -274,7 +274,7 @@ def entry_scale(spec, ev):
     """(Decimal scale, symbol) of the unit the grid shows for the row: what a bare typed number means (display-only SI scaling)."""
     try:
         import tartur
-        import ui_theme as ui
+        import ui_theme_core as ui
         ref = ev.reported or tartur.half_width(spec.low, spec.high) or abs(spec.q.get('nominal') or 0) or 1.0
         unit = _unit_of(spec.q)
         if unit in ('C', 'degC', '\u00b0C'):
