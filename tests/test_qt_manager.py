@@ -709,8 +709,14 @@ class HostedPanels(unittest.TestCase):
         win = ManagerWindow(core, launcher=FakeLauncher(), panels=panels)
         win.resize(1200, 800)
         win.show()
-        self.addCleanup(win.close)
+        self.addCleanup(self._close, win)                  # runs before tmp.cleanup: pending (0 ms) selection timers fire while the database still exists
         return win
+
+    def _close(self, win):
+        win.close()
+        win.deleteLater()
+        for _ in range(3):
+            self.app.processEvents()
 
     def test_registry_names_the_panels(self):
         self.assertEqual(PANELS, {'asset_history': 'qtui.screens.asset_history:AssetHistoryPanel', 'standards_specs': 'qtui.screens.standards_specs:StandardsSpecsPanel',
