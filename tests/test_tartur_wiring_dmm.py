@@ -214,7 +214,7 @@ class Exports(unittest.TestCase):
         self.assertTrue(changed and len(changed) % 2 == 0, changed)
         for l in changed:
             # also the AC current rows on a band edge (1 kHz, 5 kHz, 10 kHz): the scope's '(> lo to hi)' rows now give the lower row's CMC, not the larger of two
-            self.assertRegex(l[2:], r'Hz .*Same [\d.]+ (\u00b5|m|n|p)?Hz$|[\d.]+ (\u00b5|m|n|p)?A$|[\d.]+ (\u00b5|m|n|p)?F$', l)       # capacitance rows too: the scope's 5560A line (0.17 % + 11 pF ...) for a 5560A-sourced point
+            self.assertRegex(l[2:], r'Hz .*Same [\d.]+ (\u00b5|m|n|p)?Hz$|[\d.]+ (\u00b5|m|n|p)?A$|[\d.]+ (\u00b5|m|n|p)?F$|@ .*Same [\d.]+ (\u00b5|m|n|p)?V$', l)       # AC volts rows on a band edge take the lower row's CMC too; capacitance rows too: the scope's 5560A line (0.17 % + 11 pF ...) for a 5560A-sourced point
 
     def check_temperature_rows_only(self, n):
         """Only the Temperature rows differ from the baseline, and only in the Uncertainty cell (N/A before, 'x.xx degC' now)."""
@@ -224,7 +224,8 @@ class Exports(unittest.TestCase):
         ac_i = r'@ [\d.]+ [kM]?Hz .*[\d.]+ (\u00b5|m|n|p)?A\s*$|^[\d.]+ (\u00b5|m|n|p)?A$|[\d.]+ (\u00b5|m|n|p)?A\s*$'     # AC current rows on a scope band edge now take the lower row's CMC
         ac_rows = [l for l in changed if re.search(ac_i, l[2:]) and not re.search(r'Hz\s*$|degC|\u00b0C|N/A', l[2:])]
         cap_rows = [l for l in changed if re.search(r'(\u00b5|m|n|p)F range .*[\d.]+ (\u00b5|m|n|p)?F\s*$', l[2:])]       # capacitance rows: the scope line of the calibrator that sourced the point
-        changed = [l for l in changed if l not in ac_rows and l not in cap_rows]
+        acv_rows = [l for l in changed if re.search(r'@ [\d.]+ [kM]?Hz .*[\d.]+ (\u00b5|m|n|p)?V\s*$', l[2:])]       # AC volts rows on a band edge: the lower row's CMC
+        changed = [l for l in changed if l not in ac_rows and l not in cap_rows and l not in acv_rows]
         self.assertEqual(len(changed), 10, changed)               # 3 temperature rows x 2, 4-24 x 2, 4-25 x 2 (the hand-set 950 kHz point now has the lab frequency CMC)
         for l in changed:
             if re.search(r'950\.\d kHz ', l[2:]):

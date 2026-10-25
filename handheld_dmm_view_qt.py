@@ -417,17 +417,7 @@ class ReadingDialog(ModalDialog):
         else:
             cl.addWidget(_caps('YOUR ANSWER', 'primary'))
             cl.addWidget(_bold(question or '', size=theme.M.font_base + 1))
-            row = QHBoxLayout()
-            row.setSpacing(16)
-            for value, text in (('y', 'Yes - as stated'), ('n', 'No - it does not')):
-                r = QRadioButton(text)
-                r.setProperty('role', 'choice')                 # a bordered button; Yes turns green and No red when picked
-                r.setProperty('tone', 'good' if value == 'y' else 'bad')
-                bind(r, self.yes, value=value)
-                r.toggled.connect(lambda _on: self.error.setText(''))
-                self.radios[value] = r
-                row.addWidget(r, 1)
-            cl.addLayout(row)
+            cl.addWidget(common.hint('Press Yes (Enter) if it is as stated, or No if it is not.'))
         self.error = common.ToneLabel('bad')
         self.error.setTextFormat(Qt.TextFormat.PlainText)
         cl.addWidget(self.error)
@@ -455,7 +445,12 @@ class ReadingDialog(ModalDialog):
         self.stop_button = self.add_button('Stop run', role='danger', result='stop', cancel=True, callback=self._stop)
         self._button_row.addStretch(1)
         self.skip_button = self.add_button('Skip point', result='skip', callback=self._skip)
-        self.record_button = self.add_button('Record  (Enter)', role='primary', result='record', default=True, callback=self._record)
+        if mode == 'numeric':
+            self.record_button = self.add_button('Record  (Enter)', role='primary', result='record', default=True, callback=self._record)
+            self.no_button = None
+        else:                                       # one press answers: No is a red button like Stop run, Yes is the Enter button
+            self.no_button = self.add_button('No', role='danger', result='no', callback=self._no)
+            self.record_button = self.add_button('Yes  (Enter)', role='primary', result='record', default=True, callback=self._yes)
         self.initial_focus = self.entry or self.record_button
         prompts.fit_dialog(self, READING_WIDTH + 2 * theme.M.xl)
 
@@ -504,7 +499,7 @@ class ReadingDialog(ModalDialog):
             self.entry.setText(value)
             self.entry.setFocus()
         else:
-            self.yes.set('y' if value else 'n')
+            (self.record_button if value else self.no_button).click()           # demo helper: answers for the operator
 
     # ---- the answers
     def reject(self):                      # Esc / the window's close button: Stop run (also after a refused Record, which had set the action)
@@ -516,6 +511,14 @@ class ReadingDialog(ModalDialog):
 
     def _skip(self):
         self.answer['action'] = 'skip'
+
+    def _yes(self):
+        self.answer.update(action='record', yes=True)
+        return True
+
+    def _no(self):
+        self.answer.update(action='record', yes=False)
+        return True
 
     def _record(self):
         self.answer['action'] = 'record'
@@ -530,10 +533,7 @@ class ReadingDialog(ModalDialog):
                 return False
             self.answer.update(text=text, ann=bool(self.ann_box.isChecked()) if self.ann_box is not None else False)
         else:
-            if not self.yes.get():
-                self.error.setText('Choose Yes or No.')
-                return False
-            self.answer['yes'] = self.yes.get() == 'y'
+            return self._yes()
         return True
 
 

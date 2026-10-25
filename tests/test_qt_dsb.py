@@ -120,6 +120,79 @@ class QtDsbCase(unittest.TestCase):
         self.assertTrue(res.ok, res.message)
         return win, key
 
+    def test_use_tolerance_of_the_row_above_survives_the_redraw(self):
+        """On an empty row the button puts the tolerance of the row above in the boxes; the redraw that follows must not wipe it, and Calc then makes the new row with it."""
+        win, key = self.build()
+        blank = next(r['key'] for r in win.model.rows() if r['kind'] == 'blank')
+        win.model.select(blank, 'nominal')
+        win.sync()
+        box = win.panel_box
+        self.assertEqual(box.copy_b.text(), 'Use tolerance of row above')
+        self.assertTrue(box.copy_b.isEnabled())
+        self.assertEqual(box.v['iv'].get(), '')
+        res = win.copy_down()
+        self.assertTrue(res.ok, res.message)
+        self.assertTrue(box.types['iv'].get())                      # still there after the redraw
+        self.assertEqual(box.v['iv'].get(), '0.05')
+        self.assertEqual(win.model.selected_row()['kind'], 'blank')    # the sheet was not touched
+        self.assertEqual(sum(1 for r in win.model.rows() if r['kind'] == 'point'), 1)
+        box.v['nominal'].set('10')
+        res = win.calc()
+        self.assertTrue(res.ok, res.message)
+        points = [r for r in win.model.rows() if r['kind'] == 'point']
+        self.assertEqual(len(points), 2)
+        f2 = win.model.panel_state(points[1]['key'])['form']
+        f1 = win.model.panel_state(points[0]['key'])['form']
+        self.assertEqual((f2['types'], f2['plus']['iv']), (f1['types'], f1['plus']['iv']))
+        self.assertEqual(f2['plus']['iv'], '0.05')
+        # the next empty row does not keep a borrowed tolerance after a test row was selected
+        win.model.select(points[0]['key'], 'nominal')
+        win.sync()
+        blank2 = next(r['key'] for r in win.model.rows() if r['kind'] == 'blank')
+        win.model.select(blank2, 'nominal')
+        win.sync()
+        self.assertEqual(box.v['iv'].get(), '')
+
+    def test_asymmetrical_tolerance_is_two_floor_boxes_in_view(self):
+        win, key = self.build()
+        win.model.select(key, 'low')
+        win.sync()
+        box = win.panel_box
+        box.b['asym'].set(True)
+        box.asym_changed()
+        self.app.processEvents()
+        self.assertTrue(box.cells['floor_plus'].isVisibleTo(box))
+        self.assertTrue(box.cells['floor_minus'].isVisibleTo(box))            # both at the same time
+        self.assertFalse(box.chip_frame.isVisibleTo(box))                     # no % of reading / % of range ... in this mode
+        self.assertFalse(box.cells['iv'].isVisibleTo(box))
+        self.assertFalse(box.side_box.isVisibleTo(box))
+        box.v['floor_plus'].set('2')
+        box.v['floor_minus'].set('1')
+        res = win.calc()
+        self.assertTrue(res.ok, res.message)
+        win.model.select(key, 'low')
+        win.sync()
+        self.assertEqual((box.v['floor_plus'].get(), box.v['floor_minus'].get()), ('2 V', '1 V'))
+        self.assertTrue(box.b['asym'].get())
+        low, high = win.model.panel_state(key)['form']['low'], win.model.panel_state(key)['form']['high']
+        self.assertEqual((low.replace(' V', ''), high.replace(' V', '')), ('4', '7'))
+
+    def test_delete_line_button_removes_the_selected_row(self):
+        win, key = self.build()
+        before = len([r for r in win.model.rows() if r['kind'] not in ('header', 'blank')])
+        win.model.select(key, 'nominal')
+        win.sync()
+        self.assertTrue(win.delete_b.isEnabled())
+        win.delete_b.click()
+        self.app.processEvents()
+        after = len([r for r in win.model.rows() if r['kind'] not in ('header', 'blank')])
+        self.assertEqual(after, before - 1)
+
+    def test_right_click_menu_offers_delete_line(self):
+        win, key = self.build()
+        self.assertTrue(callable(win.sheet.on_context))
+        self.assertEqual(win.sheet.on_context.__func__, type(win).sheet_context)
+
     def key(self, widget, k, mods=Qt.KeyboardModifier.NoModifier):
         QTest.keyClick(widget, k, mods)
 

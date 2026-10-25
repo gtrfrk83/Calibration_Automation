@@ -74,6 +74,7 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self._build_header()
         self._build_editbar()
         self.sheet = SheetGrid(model, self.sheet_click, self.sheet_key, self.focus_bar)
+        self.sheet.on_context = self.sheet_context
         self.grid.addWidget(self.sheet, 2, 0)
         self._build_footer()
         self.panel_box = Inspector(self)
@@ -223,13 +224,7 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.bar.returnPressed.connect(lambda: self.commit_bar('down'))
         self.bar.installEventFilter(_BarKeys(self))
         lay.addWidget(self.bar, 1)
-        self.symbol_buttons = {}
-        for name in M.SYMBOLS + ('Units',):
-            b = C.button(name, (lambda n=name: self.insert_symbol(n)), compact=True, tooltip=f'Put {name if name != "Units" else "the row units"} into the box you are typing in (also copied).')
-            b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-            b.setMinimumWidth(34 if name != 'Units' else 56)
-            lay.addWidget(b)
-            self.symbol_buttons[name] = b
+        self.symbol_buttons = {}                      # the ± ° µ ¹ ² ³ · Units buttons were removed (not needed); insert_symbol() stays for the code that uses it
         self.grid.addWidget(bar, 1, 0)
 
     def _build_footer(self):
@@ -244,6 +239,9 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.build_check_button(lay)
         self.recalc_b = C.button('Recalc all', self.recalc, compact=True, tooltip='Re-run the test point rules and check every row of the sheet.')
         lay.addWidget(self.recalc_b)
+        lay.addSpacing(8)
+        self.delete_b = C.button('Delete line', self.delete_line, compact=True, tooltip='Delete the selected line (a heading deletes its whole section). Undo brings it back. Also Delete on the nominal cell, or right-click the line.')
+        lay.addWidget(self.delete_b)
         lay.addStretch(1)
         self.grid.addWidget(foot, 3, 0)
 
@@ -387,6 +385,21 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.model.select_at(r, c)
         self.sync()
 
+    def delete_line(self):
+        """Delete the selected line (the Delete line button and the right-click menu)."""
+        self.commit_bar_if_changed()
+        return self.changed(self.model.clear_row())
+
+    def sheet_context(self, r, c, gpos):
+        self.sheet_click(r, c)
+        menu = QMenu(self.sheet)
+        row = self.model.selected_row()
+        label = 'Delete section' if row and row.get('kind') == 'header' else 'Delete line'
+        act = menu.addAction(label)
+        act.setEnabled(bool(row) and row.get('kind') != 'blank')
+        act.triggered.connect(self.delete_line)
+        menu.exec(gpos)
+
     def goto_row(self, key):
         self.model.select(key, 'nominal')
         self.sync()
@@ -469,11 +482,7 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
 
     def copy_down(self):
         if self.model.selected_row()['kind'] == 'blank':             # a new row: take the tolerance of the row above into the boxes (the sheet is not touched)
-            form = self.model.tolerance_form_above()
-            if form is None:
-                return self.changed(M.Outcome(False, 'No test row above this one in the section has a tolerance to use yet.'))
-            self.panel_box.adopt_tolerance(form)
-            return self.changed(M.Outcome(True, 'The tolerance of the row above is in the boxes. Type the value and press Calc.'))
+            return self.changed(self.model.use_tolerance_above())
         n = self.model.would_overwrite()
         if n and not C.ask_yes_no(self, 'Copy tolerance', f'{n} row(s) below already have a tolerance of their own. Replace them with this row\'s tolerance? (Undo brings them back.)'):
             return None

@@ -337,7 +337,7 @@ class Inspector(QFrame):
         sl.setContentsMargins(0, 2, 0, 2)
         sl.setSpacing(10)
         sl.addWidget(widgets.label('Boxes below are for:', 'hint'))
-        self.side_plus, self.side_minus = QRadioButton('+ above nominal'), QRadioButton('\u2212 below nominal')
+        self.side_plus, self.side_minus = QRadioButton('+ above'), QRadioButton('\u2212 below')
         for rb, tip in ((self.side_plus, 'Type the tolerance for readings ABOVE the nominal.'), (self.side_minus, 'Type the tolerance for readings BELOW the nominal.')):
             C.tip(rb, tip)
             rb.clicked.connect(lambda _c=False: self.side_clicked())
@@ -345,6 +345,11 @@ class Inspector(QFrame):
         self.side_plus.setChecked(True)
         sl.addStretch(1)
         lay.addWidget(self.side_box)
+        # Asymmetrical tolerance is floor values only: one box for the side above the nominal and one for the side below, both in view
+        self._group(lay, 'asym_floor')
+        self.v['floor_plus'] = C.Bind(self._cell('asym_floor', 'floor_plus', 'Floor above nominal (+)', None, 'A fixed amount (in the Units) added to the nominal for the high limit, for example 2.'))
+        self.v['floor_minus'] = C.Bind(self._cell('asym_floor', 'floor_minus', 'Floor below nominal (\u2212)', None, 'A fixed amount (in the Units) taken from the nominal for the low limit, for example 1.'))
+        self._legacy_asym = False
         # Several rows at once: how the rows are spaced (shown while 'Make several rows at once' is ticked)
         self.mode_box = QWidget()
         ml = QVBoxLayout(self.mode_box)
@@ -433,8 +438,7 @@ class Inspector(QFrame):
         self.asym_box = QWidget()
         al = QVBoxLayout(self.asym_box)
         al.setContentsMargins(0, 4, 0, 0)
-        al.addWidget(widgets.label('Under Limits and tolerance, pick "+ above nominal" or "\u2212 below nominal", then fill in the tolerance boxes for that side. '
-                                   'Press Calc when both sides are done.', 'hint', wrap=True))
+        al.addWidget(widgets.label('Type a floor value for the side above and one for the side below the nominal (under Limits and tolerance), then press Calc.', 'hint', wrap=True))
         self.operand_box = self._combo(['±', '+', '-'])           # holds the side; the two radios under Limits and tolerance change it
         self.operand_box.setVisible(False)
         self.operand_box.setEnabled(False)
@@ -487,15 +491,20 @@ class Inspector(QFrame):
         self.res_e.setEnabled(not self.b['auto_res'].get())
 
     def asym_changed(self):
-        self.save_side()
         on = bool(self.b['asym'].get())
-        self.operand_box.setEnabled(on)
-        if not on:
-            self.operand_now = 'plus'
-            self.v['operand'].set('±')
-            self.load_side()
+        if on:
+            self.save_side()                                   # keep what was typed for the ordinary tolerance
+            self._legacy_asym = False
+            for k in M.SPEC_ORDER:
+                self.types[k].set(k == 'floor')                # asymmetrical = floor values only
+            self.v['floor_plus'].set(self.sides['plus'].get('floor', ''))
+            self.v['floor_minus'].set(self.sides['minus'].get('floor', ''))
         else:
-            self.v['operand'].set('+')
+            self.sides['plus']['floor'] = self.v['floor_plus'].get() or self.sides['plus'].get('floor', '')
+        self.operand_box.setEnabled(on and self._legacy_asym)
+        self.operand_now = 'plus'
+        self.v['operand'].set('+' if on and self._legacy_asym else '±')
+        self.load_side()
         self._sync_side()
         self.show_fields()
 
@@ -530,6 +539,12 @@ class Inspector(QFrame):
                 'iv': self.types['iv'].get(), 'fs': self.types['fs'].get(), 'fs_scale': self.types['fs'].get(), 'floor': self.types['floor'].get(),
                 'db': self.types['db'].get(), 'calc': self.types['calc'].get(), 'low': True, 'high': True}
         passfail = bool(st.get('passfail'))
+        asym = bool(self.b['asym'].get()) and not passfail
+        floor_only = asym and not self._legacy_asym
+        if floor_only:                                            # asymmetrical: the two floor boxes only, no tolerance types
+            for k in self.tol_names:
+                want[k] = False
+        want['floor_plus'] = want['floor_minus'] = floor_only
         if passfail:
             for k in self.tol_names:
                 want[k] = False
@@ -540,12 +555,12 @@ class Inspector(QFrame):
         self.clear_typed_b.setVisible(typed_limits)
         self._visible = want
         self._arrange_all()
-        self.chip_frame.setVisible(not passfail)
+        self.chip_frame.setVisible(not passfail and not floor_only)
         self.passfail_l.setVisible(passfail)
-        self.hint_l.setVisible(not passfail and not any(self.types[k].get() for k in M.SPEC_ORDER))
+        self.hint_l.setVisible(not passfail and not floor_only and not any(self.types[k].get() for k in M.SPEC_ORDER))
         self.multi_box.setVisible(bool(self.b['multi'].get()))
         self.asym_box.setVisible(bool(self.b['asym'].get()))
-        self.side_box.setVisible(bool(self.b['asym'].get()) and not passfail)
+        self.side_box.setVisible(asym and self._legacy_asym)
         self.mode_box.setVisible(bool(self.b['multi'].get()) and not passfail)
         self.sections['multi'].set_note('ON' if self.b['multi'].get() else '', self.b['multi'].get())
         self.sections['asym'].set_note('ON' if self.b['asym'].get() else '', self.b['asym'].get())
@@ -584,7 +599,10 @@ class Inspector(QFrame):
             self.types[k].set(k in form['types'])
         self.b['multi'].set(bool(form['multi'])), self.b['asym'].set(bool(form['asym'])), self.b['auto_res'].set(bool(form['auto_res']))
         self.v['operand'].set('+' if form['asym'] else '±')
-        self.operand_box.setEnabled(bool(form['asym']))
+        self._legacy_asym = bool(form['asym']) and bool(set(form['types']) - {'floor'})        # a stored asymmetrical row with other tolerance types keeps the full boxes
+        self.operand_box.setEnabled(bool(form['asym']) and self._legacy_asym)
+        self.v['floor_plus'].set(form['plus'].get('floor', ''))
+        self.v['floor_minus'].set(form['minus'].get('floor', ''))
         self._sync_side()
         self.load_side()
         C.set_items(self.units_c, state['unit_choices'])
@@ -631,9 +649,16 @@ class Inspector(QFrame):
 
     def form(self):
         """The boxes as a form dict for GridModel.calc_row()."""
-        self.save_side()
         asym = bool(self.b['asym'].get())
-        return dict(types=[k for k in M.SPEC_ORDER if self.types[k].get()], plus=dict(self.sides['plus']), minus=dict(self.sides['minus']), asym=asym,
+        types = [k for k in M.SPEC_ORDER if self.types[k].get()]
+        plus, minus = dict(self.sides['plus']), dict(self.sides['minus'])
+        if asym and not self._legacy_asym:
+            types = ['floor']
+            plus, minus = dict(M.GridModel.blank_side(), floor=self.v['floor_plus'].get()), dict(M.GridModel.blank_side(), floor=self.v['floor_minus'].get())
+        else:
+            self.save_side()
+            plus, minus = dict(self.sides['plus']), dict(self.sides['minus'])
+        return dict(types=types, plus=plus, minus=minus, asym=asym,
                     operand='-' if self.v['operand'].get() == '-' else '+', fs_scale=self.v['fs_scale'].get(), nominal=self.v['nominal'].get(), units=self.v['units'].get(),
                     freq=self.v['freq'].get(), level=self.v['level'].get(), expect=self.v['expect'].get() or 'on', multi=bool(self.b['multi'].get()),
                     multi_mode=self.v['multi_mode'].get() or 'span', multi_high=self.v['multi_high'].get(), multi_n=self.v['multi_n'].get(), decs=self.v['decs'].get(),

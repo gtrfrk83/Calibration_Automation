@@ -46,7 +46,7 @@ def _tc_bands(entry, tc):
 def _in_row(frequency, row, first_lo, half_open=True):
     """A frequency row of an AC table is printed '(> lo to hi) Hz': the lower edge belongs to the row below, the upper edge to this row (only the
     lowest row of the block, 'lo to hi', includes its lower edge)."""
-    if not half_open or row['f_lo'] == first_lo:        # AC volts keep the closed interval (larger CMC on a shared edge) until its table is checked the same way
+    if not half_open or row['f_lo'] == first_lo:
         return row['f_lo'] <= frequency <= row['f_hi']
     return row['f_lo'] < frequency <= row['f_hi']
 
@@ -119,7 +119,7 @@ class Scope:
                 if (block['lo'] <= selector <= block['hi']):
                     first = min(r['f_lo'] for r in block['rows'])
                     for row in block['rows']:
-                        if _in_row(frequency, row, first, kind == 'ACI'):
+                        if _in_row(frequency, row, first):
                             u = _u(row, value, selector if by_range else 0.0)
                             if best is None or u > best[0]:
                                 best = (u, row)
@@ -156,7 +156,7 @@ class Scope:
                 continue
             first = min(r['f_lo'] for r in block['rows'])
             for row in block['rows']:
-                if _in_row(frequency, row, first, entry.get('kind') == 'ACI'):
+                if _in_row(frequency, row, first):
                     out.append(_u(row, value, selector if by_range else 0.0))
         return max(out) if out else None
 

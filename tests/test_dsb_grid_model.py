@@ -634,6 +634,44 @@ class ToleranceFromAboveTests(Base):
         self.assertEqual(got['plus']['iv'], '0.05')
         self.assertEqual(g._snapshot(), before)
 
+    def test_borrowed_tolerance_lives_in_the_panel_state_until_calc(self):
+        g = self.g
+        key = self.dcv_row('5 V')
+        f = dict(self.form(key))
+        f['types'] = ['iv']
+        f['plus'] = dict(f['plus'], iv='0.05')
+        self.assertTrue(g.calc_row(key, f).ok)
+        blank = next(r['key'] for r in g.rows() if r['kind'] == 'blank')
+        g.select(blank, 'nominal')
+        self.assertEqual(g.panel_state()['form']['plus']['iv'], '')
+        self.assertTrue(g.use_tolerance_above().ok)
+        self.assertEqual(g.panel_state()['form']['plus']['iv'], '0.05')          # survives any redraw
+        self.assertEqual(g.panel_state()['form']['plus']['iv'], '0.05')
+        form = g.panel_state()['form']
+        form['nominal'] = '10'
+        self.assertTrue(g.calc_row(form=form).ok)
+        self.assertIsNone(g.borrowed_tol)
+        g.select(next(r['key'] for r in g.rows() if r['kind'] == 'blank'), 'nominal')
+        self.assertEqual(g.panel_state()['form']['plus']['iv'], '')
+
+    def test_use_tolerance_says_so_when_nothing_is_above(self):
+        self.assertTrue(self.g.set_target_function('DC volts').ok)
+        res = self.g.use_tolerance_above()
+        self.assertFalse(res.ok)
+
+    def test_sign_only_on_dc_nominals(self):
+        g = self.g
+        self.assertTrue(g.set_target_function('AC volts').ok)
+        g.select('b:0', 'nominal')
+        self.assertTrue(g.commit_cell('4 V @ 4 Hz').ok)
+        row = next(r for r in g.rows() if r['kind'] == 'point')
+        self.assertEqual(row['nominal'], '4 V @ 4 Hz')
+        g2 = M.GridModel(self.store)
+        self.assertTrue(g2.set_target_function('DC volts').ok)
+        g2.select('b:0', 'nominal')
+        self.assertTrue(g2.commit_cell('4 V').ok)
+        self.assertEqual(next(r for r in g2.rows() if r['kind'] == 'point')['nominal'], '+4 V')
+
 
 class _FakeMatch:
     def __init__(self, fid, total):

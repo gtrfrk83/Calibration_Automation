@@ -191,6 +191,17 @@ class SheetGrid(DataTable):
             return
         super().mousePressEvent(ev)
 
+    on_context = None                                          # set by the editor: (row_index, view_col_index, global_pos)
+
+    def contextMenuEvent(self, ev):
+        pos = ev.pos()
+        ix = self.indexAt(pos)
+        if self.on_context is None or not ix.isValid():
+            return
+        self.setFocus()
+        self.on_context(ix.row(), max(0, self.columnAt(pos.x()) - 1), ev.globalPos())
+        ev.accept()
+
     def mouseDoubleClickEvent(self, ev):
         if ev.button() == Qt.MouseButton.LeftButton and self._click(ev):
             self.on_edit()

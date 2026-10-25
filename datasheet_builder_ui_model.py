@@ -1372,10 +1372,15 @@ class EditorModel:
             return text
         return self._do('recalculate points', act)
 
+    @staticmethod
+    def _signed(fn):
+        """A '+' goes in front of a positive nominal only where the quantity has a sign (DC volts / current, temperature); AC volts, resistance, frequency ... never show one."""
+        return fn.kind in ('DCV', 'DCI', 'TEMP') or bool(fn.info.get('signed'))
+
     def point_text(self, fn, p):
         """'+5 V', '+5 V @ 1 kHz' (display only)."""
         s = show(p.nominal, fn.unit, shared_prefix([p.nominal], fn.unit)) if p.nominal else show(0, fn.unit)
-        if p.nominal > 0 and fn.unit not in ('',):
+        if p.nominal > 0 and fn.unit not in ('',) and self._signed(fn):
             s = '+' + s
         if p.frequency is not None:
             s += f' @ {show(p.frequency, "Hz")}'
@@ -1932,6 +1937,7 @@ class GridModel(CheckMixin, EditorModel):
         self._sel_index = 0
         self._rows_cache = None
         self.extra_blank = 0
+        self.borrowed_tol = None                 # a tolerance taken from the row above for the empty row being filled in (not on the sheet)
         self.sel_key = ''
         self.sel_key = self._default_key()
 
@@ -2044,7 +2050,7 @@ class GridModel(CheckMixin, EditorModel):
     def nominal_text(self, fn, p):
         """The nominal cell: '+5 V', '5 V @ 1 kHz', '1 kHz, level 1 V'.  parse_nominal reads the same grammar back."""
         s = self.fmt_value(fn, fn.range(p.range_id), p.nominal)
-        if p.nominal > 0 and fn.unit:
+        if p.nominal > 0 and fn.unit and self._signed(fn):
             s = '+' + s
         if p.frequency is not None:
             s += ' @ ' + db.format_si(p.frequency, 'Hz')
@@ -2278,6 +2284,8 @@ class GridModel(CheckMixin, EditorModel):
             self.sel_key = rows[i]['key']
         self._sel_index = i
         r = rows[i]
+        if r['kind'] != 'blank':
+            self.borrowed_tol = None
         if r['fid'] and self.ds.function(r['fid']):
             self.fid = r['fid']
         return r
@@ -2866,6 +2874,9 @@ class GridModel(CheckMixin, EditorModel):
                     st['note'] = TYPED_LIMITS_NOTE
         elif r['kind'] == 'blank' and fn is not None:
             st['note'] = f'New row in {fn.name}.'
+            if self.borrowed_tol:
+                form.update(copy.deepcopy(self.borrowed_tol))
+                st['note'] += ' The tolerance is the one of the row above: type the value and press Calc.'
         st['form'] = form
         return st
 
@@ -2962,6 +2973,12 @@ class GridModel(CheckMixin, EditorModel):
         return db.parse_quantity(with_units(str(form['fs_scale']), units), fn.unit or None)
 
     def calc_row(self, key=None, form=None):
+        res = self._calc_row(key, form)
+        if res.ok:
+            self.borrowed_tol = None
+        return res
+
+    def _calc_row(self, key=None, form=None):
         """Calc: apply the boxes under the sheet to the selected row (a row that does not exist yet is created from them) and work out its tolerance.
         One undo step; on any problem nothing changes and the message says what to type."""
         key = key or self.sel_key
@@ -3138,6 +3155,16 @@ class GridModel(CheckMixin, EditorModel):
                 if p is not None and p.spec is not None:
                     return self.panel_state(r['key'])['form']
         return None
+
+    def use_tolerance_above(self, key=None):
+        """The empty row being filled in takes the tolerance of the nearest test row above it (the boxes show it; the sheet changes only when Calc makes the row)."""
+        if self.locked:
+            return Outcome(False, 'The sheet is locked. Switch Lock Status to Edit Mode to change it.')
+        form = self.tolerance_form_above(key)
+        if form is None:
+            return Outcome(False, 'No test row above this one in the section has a tolerance of its own to use yet.')
+        self.borrowed_tol = {k: copy.deepcopy(form[k]) for k in ('types', 'plus', 'minus', 'asym', 'operand', 'fs_scale') if k in form}
+        return Outcome(True, 'The tolerance of the row above is in the boxes. Type the value to test and press Calc.')
 
     def would_overwrite(self, key=None):
         """How many rows below the selected one already have a tolerance of their own (the window asks before copying over them)."""

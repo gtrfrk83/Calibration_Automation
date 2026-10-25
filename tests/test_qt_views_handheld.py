@@ -121,17 +121,14 @@ class Windows(unittest.TestCase):
             run_dialog(dlg, lambda d, _n=name: Q.press(d, _n))
             self.assertEqual(dlg.answer['action'], action)
 
-    def test_yes_no_needs_a_choice(self):
+    def test_yes_no_is_one_press(self):
+        for name, want in (('No', False), ('Yes  (Enter)', True)):
+            dlg = self.reading('yesno')
+            run_dialog(dlg, lambda d, _n=name: Q.press(d, _n))
+            self.assertEqual((dlg.answer['action'], dlg.answer['yes']), ('record', want))
         dlg = self.reading('yesno')
-
-        def script(d):
-            Q.press(d, 'Record  (Enter)')
-            self.assertTrue(d.isVisible())
-            self.assertEqual(d.error.text(), 'Choose Yes or No.')
-            next(r for r in d.findChildren(QRadioButton) if r.text().startswith('No')).click()
-            Q.press(d, 'Record  (Enter)')
-        run_dialog(dlg, script)
-        self.assertEqual((dlg.answer['action'], dlg.answer['yes']), ('record', False))
+        self.assertEqual(dlg.no_button.property('role'), 'danger')
+        self.assertTrue(dlg.record_button.isDefault())
 
     def test_the_annunciator_box_only_when_asked_and_its_state_comes_back(self):
         dlg = self.reading(annunciator=True)

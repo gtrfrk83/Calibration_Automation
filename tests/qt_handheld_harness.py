@@ -354,7 +354,7 @@ class ProofPort(ui_port_qt.QtUiPort):
                 self._body_ok(info, question)
             if mode == 'numeric' and unit:
                 self._body_ok(info, unit)
-            want_buttons = ['Stop run', 'Skip point', 'Record  (Enter)'] + ([hh.virtualbench.FILL_TEXT] if demo_fill is not None else [])
+            want_buttons = ['Stop run', 'Skip point'] + (['Record  (Enter)'] if mode == 'numeric' else ['No', 'Yes  (Enter)']) + ([hh.virtualbench.FILL_TEXT] if demo_fill is not None else [])
             self._same(sorted(info['buttons']), sorted(want_buttons), 'buttons')
             ann_box = next((c for c in dlg.findChildren(QCheckBox) if c.text() == 'The AC annunciator is ON' and c.isVisibleTo(dlg)), None)
             if (ann_box is not None) != bool(annunciator and mode == 'numeric'):
@@ -369,15 +369,16 @@ class ProofPort(ui_port_qt.QtUiPort):
                         if ann_box is not None and rule.get('ann'):
                             ann_box.setChecked(True)
                     else:
-                        next(r for r in dlg.findChildren(QRadioButton) if r.text() == ('Yes - as stated' if rule['yes'] else 'No - it does not')).click()
+                        press(dlg, 'Yes  (Enter)' if rule['yes'] else 'No')
+                        return
                 press(dlg, {'record': 'Record  (Enter)', 'skip': 'Skip point', 'stop': 'Stop run'}[act])
                 return
             if use_fill:
                 press(dlg, hh.virtualbench.FILL_TEXT)
                 if mode == 'numeric':
                     info['filled'] = entry.text()
-                press(dlg, 'Record  (Enter)')
-                return
+                    press(dlg, 'Record  (Enter)')
+                return                                                         # yes / no: the demo fill answers by itself
             if typed is None:
                 press(dlg, 'Stop run')
                 return
@@ -385,9 +386,9 @@ class ProofPort(ui_port_qt.QtUiPort):
                 entry.setText(typed)
                 if ann_box is not None and hn.annunciator_on:
                     ann_box.setChecked(True)
+                press(dlg, 'Record  (Enter)')
             else:
-                next(r for r in dlg.findChildren(QRadioButton) if r.text() == ('Yes - as stated' if typed else 'No - it does not')).click()
-            press(dlg, 'Record  (Enter)')
+                press(dlg, 'Yes  (Enter)' if typed else 'No')
         got = self.op.run(lambda: super(ProofPort, self).ask_reading(p, total, out_text, out_note, accept, mode, question, unit, annunciator, validate, phase,
                                                                     limit_s, on_expire, device, source, demo_fill, parent=parent), handler)
         self.prompts.append(dict(rec, answer=plain(got)))

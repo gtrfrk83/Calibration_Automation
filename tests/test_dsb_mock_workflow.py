@@ -131,7 +131,7 @@ class MockWorkflow(unittest.TestCase):
 
     def test_rows_are_sorted_by_range_then_frequency_not_in_the_order_typed(self):
         """The doc: 'Keep the order the manual uses' cannot be done by typing order: AC rows typed 5 V@1k, 50 V@1k, 5 V@20k are listed 5@1k, 5@20k, 50@1k."""
-        self.assertEqual([r['nominal'] for r in self.sheet.points('acv')], ['+5.000 V @ 1 kHz', '+5.000 V @ 20 kHz', '+50.00 V @ 1 kHz'])
+        self.assertEqual([r['nominal'] for r in self.sheet.points('acv')], ['5.000 V @ 1 kHz', '5.000 V @ 20 kHz', '50.00 V @ 1 kHz'])
 
     def test_after_a_first_row_the_cursor_goes_to_the_next_sections_empty_row(self):
         """The doc: typing the next value straight away lands in the NEXT section (here AC volts), so the 2nd row of a section is added from the empty row at the bottom."""
@@ -141,7 +141,7 @@ class MockWorkflow(unittest.TestCase):
         s.assertOk(s.type_cell(s.blank_key('dcv'), 'nominal', '5 V'))
         self.assertEqual(s.g.sel_key, 'e:acv')
         s.assertOk(s.g.commit_cell('10 V'))                  # silently an AC volts row
-        self.assertEqual([(r['fid'], r['nominal']) for r in s.points()], [('dcv', '+5.000 V'), ('acv', '+10 V')])
+        self.assertEqual([(r['fid'], r['nominal']) for r in s.points()], [('dcv', '+5.000 V'), ('acv', '10 V')])
 
     def test_forgotten_frequency_on_an_ac_row_is_an_error_that_blocks_saving_as_runnable(self):
         s = Sheet(tempfile.mkdtemp())

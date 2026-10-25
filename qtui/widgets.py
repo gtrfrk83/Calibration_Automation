@@ -364,6 +364,7 @@ class SegmentedFilter(QFrame):
                 f = QFont(b.font())
                 f.setWeight(QFont.Weight.DemiBold)
                 b.setMinimumHeight(QFontMetrics(f).height() + 16)
+                b.setMinimumWidth(QFontMetrics(f).horizontalAdvance(b.text()) + 2 * 14 + 2 * 2 + 8)       # the chosen segment is semi-bold: it needs its own width (padding 14 + border 2)
         except RuntimeError:                  # the window closed before the deferred call ran
             pass
 
@@ -379,6 +380,8 @@ class SegmentedFilter(QFrame):
     def set_count(self, key: str, count: int | None) -> None:
         b = self._buttons[key]
         b.setText(self._labels[key] if count is None else f'{self._labels[key]}  {count}')
+        if self.isVisible():
+            self._fit_height()
 
     def current(self) -> str:
         return self._current
