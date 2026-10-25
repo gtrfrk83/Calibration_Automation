@@ -836,6 +836,40 @@ class DeepDiveFixTests(Base):
         self.assertEqual(g.row()['kind'], 'header')
         self.assertEqual(g.sel_col, 'function')
 
+    def test_second_review_fixes(self):
+        import datasheet_builder_rules as rules
+        g = self.g
+        k5 = self.dcv_row('5 V')
+        g.select(self.blank_key(), 'nominal')
+        g.commit_cell('7 V')
+        k7 = next(r['key'] for r in self.points() if r['nominal'] == '7 V')
+        # an explicit F.S. is kept when Calc is pressed twice
+        f = self.form(k7, types=['fs'], fs='0.01')
+        f['fs_scale'] = '100'
+        self.assertTrue(g.calc_row(k7, f).ok)
+        k7 = g.sel_key if g.point_of(g.sel_key)[1] is not None else k7
+        rid = lambda: g.point_of(next(r['key'] for r in self.points() if r['nominal'] == '7 V'))[1].range_id
+        first = rid()
+        self.assertTrue(g.calc_row(next(r['key'] for r in self.points() if r['nominal'] == '7 V'), f).ok)
+        self.assertEqual(rid(), first)
+        # F.S. of zero, negative or below the value is refused
+        key = next(r['key'] for r in self.points() if r['nominal'] == '5 V')
+        for bad in ('0', '-10', '4'):
+            f2 = self.form(key, types=['fs'], fs='0.01')
+            f2['fs_scale'] = bad
+            self.assertFalse(g.calc_row(key, f2).ok, bad)
+        # the same value on another range is another row
+        g.select(self.blank_key(), 'nominal')
+        self.assertTrue(g.commit_cell('5 V').ok is False)          # same range: still a duplicate
+        # undo of a re-key puts the cursor back on a row that exists
+        g.select(key, 'nominal')
+        self.assertTrue(g.commit_cell('2.5 V', key, 'nominal', move='stay').ok)
+        self.assertTrue(g.undo().ok)
+        self.assertIsNotNone(g.row(g.sel_key))
+        # a locked sheet refuses Load version
+        g.set_locked(True)
+        self.assertFalse(g.load_version(1).ok)
+
 
 class ToleranceFromAboveTests(Base):
     def test_blank_row_takes_tolerance_without_touching_sheet(self):

@@ -465,10 +465,18 @@ class EditorModel:
             mem.pop(next(iter(mem)))
         return text
 
+    def _key_in_ds(self, key):
+        """True when a row key 'p:<function>:<point>' / 'h:<function>' names something in the datasheet now (the row cache may be stale)."""
+        parts = key.split(':', 2)
+        fn = self.ds.function(parts[1]) if len(parts) > 1 else None
+        if fn is None:
+            return False
+        return parts[0] == 'h' or (parts[0] == 'p' and len(parts) == 3 and fn.point(parts[2]) is not None)
+
     def _restore(self, text):
         self.ds = db.Datasheet.from_json(text)
         want = self.__dict__.get('_sel_memory', {}).get(text)
-        if want and hasattr(self, 'rows') and any(r['key'] == want for r in self.rows()):
+        if want and hasattr(self, 'rows') and self._key_in_ds(want):
             self.sel_key = want
         if self.ds.function(self.fid) is None:
             self.fid = self.ds.functions[0].id if self.ds.functions else ''
@@ -485,6 +493,10 @@ class EditorModel:
             res = action()
         except (db.DsError, ArithmeticError, ValueError, KeyError, TypeError) as exc:
             self._restore(before)
+            if isinstance(exc, ArithmeticError) and not str(exc).strip('[]<> '):
+                return Outcome(False, 'That number is too large or too small to use.')
+            if isinstance(exc, ArithmeticError) and str(exc).startswith('[<class'):
+                return Outcome(False, 'That number is too large or too small to use.')
             return Outcome(False, plain_error(exc))
         if isinstance(res, Outcome):
             if not res.ok:
@@ -1701,6 +1713,14 @@ class EditorModel:
         if ds.assignments:
             auto += f' {len(ds.assignments)} point(s) have your own standard choice.'
         runnable = counts['errors'] == 0 and bool(ds.functions)
+        try:
+            chk = self.sheet_check(compute=True)           # the sheet check (rules 1-12) can make the saved version a draft too
+        except Exception:
+            chk = None
+        check_errors = chk.counts()['errors'] if chk is not None else 0
+        if check_errors:
+            runnable = False
+            counts = dict(counts, errors=counts['errors'] + check_errors)
         next_v = (self.last_save.version + 1) if self.last_save else (ds.version + 1)
         return dict(lines=lines, functions=funcs, points=npts, errors=counts['errors'], warnings=counts['warnings'], problems=self.problems(), automation=auto,
                     can_save=runnable, can_save_draft=bool(ds.make.strip() or ds.model.strip() or ds.title.strip() or ds.functions),
@@ -1745,6 +1765,8 @@ class EditorModel:
 
     def load_version(self, version):
         """Replace the editor's content with an older version (the current content is one undo step; saving makes it a NEW version)."""
+        if getattr(self, 'locked', False):
+            return Outcome(False, LOCKED_MESSAGE)
         def act():
             old = self.storage.load(self.ds.uid, version)
             if old is None:
@@ -2675,15 +2697,15 @@ class GridModel(CheckMixin, EditorModel):
         def act():
             parts = self.parse_nominal(fn, text, self.bare_unit(fn, fn.point(pid)))
             value = db.parse_quantity(parts['nominal'], fn.unit or None)
-            q = self._find_duplicate(fn, value, parts['frequency'], parts['amplitude'])
-            if q is not None and q.id != pid:
-                raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, q)}.')
             cur = fn.point(pid)
             rng, note = fn.range(cur.range_id), ''
             if rng is None or not self._holds(fn, rng, value):
                 rng, note = self._pick_range(fn, value)
             else:
                 rng = self._settle_range(fn, cur, value, rng)
+            q = self._find_duplicate(fn, value, parts['frequency'], parts['amplitude'], rng.id)          # the same value on another range is another row
+            if q is not None and q.id != pid:
+                raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, q)}.')
             db.edit_point(fn, pid, nominal=parts['nominal'], frequency=parts['frequency'] or '', amplitude=parts['amplitude'] or '', range_id=rng.id)
             new_id = self._rekey(fn, fn.point(pid))
             return Outcome(True, ('Value changed.' + (' ' + note if note else '') + (' The tolerance follows the new value.' if cur.spec is not None else '')),
@@ -2733,6 +2755,10 @@ class GridModel(CheckMixin, EditorModel):
             q.edited = True
             if p.id in self.ds.assignments:
                 self.ds.assignments[q.id] = self.ds.assignments.pop(p.id)
+            w = dict(_rules.waivers(self.ds))
+            if p.id in w:
+                w[q.id] = w.pop(p.id)
+                self.ds.options[_rules.WAIVER_KEY] = w
             db.remove_point(fn, p.id)
             self.fid = target.id
             return Outcome(True, f'Moved to {target.name}.' + (f' {fn.name} has no rows left.' if not fn.points else ''), f'p:{target.id}:{q.id}')
@@ -3045,17 +3071,20 @@ class GridModel(CheckMixin, EditorModel):
         parts = self.parse_nominal(fn, ' @ '.join(x for x in (nominal_text, with_units(form.get('freq', ''), 'Hz') if str(form.get('freq', '')).strip() else '') if x)
                                    + (f', level {form["level"]}' if str(form.get('level', '')).strip() else ''))
         value = db.parse_quantity(parts['nominal'], fn.unit or None)
-        q = self._find_duplicate(fn, value, parts['frequency'], parts['amplitude'])
-        if q is not None and q is not p:
-            raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, q)}.')
         rng = fn.range(p.range_id)
         note = ''
-        if want_fs is not None and (rng is None or rng.full_scale != want_fs):
-            rng, note = self._pick_range(fn, value, want_fs)
+        if want_fs is not None:
+            if want_fs <= 0 or (fn.info.get('unit') not in ('dB', '') and abs(value) > want_fs):
+                raise db.DsError('range_value', f'The F.S. must be above zero and not below the value ({show(value, fn.unit)}).')
+            if rng is None or rng.full_scale != want_fs:
+                rng, note = self._pick_range(fn, value, want_fs)
         elif rng is None or not self._holds(fn, rng, value):
             rng, note = self._pick_range(fn, value)
         else:
             rng = self._settle_range(fn, p, value, rng)
+        q = self._find_duplicate(fn, value, parts['frequency'], parts['amplitude'], rng.id)
+        if q is not None and q is not p:
+            raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, q)}.')
         db.edit_point(fn, p.id, nominal=parts['nominal'], frequency=parts['frequency'] or '', amplitude=parts['amplitude'] or '', range_id=rng.id)
         self._rekey(fn, p)
         res = self._resolution_from_form(fn, form, units, nominal_text)

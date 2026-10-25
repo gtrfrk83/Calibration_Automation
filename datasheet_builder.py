@@ -1976,6 +1976,8 @@ def import_json(path, who='', root=None, db=None):
         ds = Datasheet.from_dict(data)
     except DsError as e:
         return ImportResult(False, problems=[DsProblem('import_' + e.code, str(e))])
+    except (ArithmeticError, AttributeError, TypeError, ValueError, KeyError) as e:       # an odd value in a hand-edited file: refused, not a crash
+        return ImportResult(False, problems=[DsProblem('import_damaged', f'The file has a value that cannot be read ({type(e).__name__}); nothing was imported.')])
     ds.uid, ds.version, ds.created = '', 0, ''
     res = save(ds, who=who, note=f'imported from {Path(path).name}', root=root, db=db)
     return ImportResult(res.ok, res.uid, res.version, res.problems)
