@@ -475,11 +475,55 @@ def measure_budget(p, sc=None):
     return b if b.hit is not None and b.cmc is not None else None
 
 
-def uncertainty_value(p):
+def flat_level_v(p):
+    """The RF flatness point's level in V rms: its dBm into 50 ohm (the same conversion the measurement uses)."""
+    return math.sqrt(10 ** (p['amplitude'] / 10) * 1e-3 * 50.0)
+
+
+def flat_budget(p, sc=None):
+    """(value dB, source, cmc dB, emu dB) for an RF flatness point measured on the 5790B WIDEBAND input relative to 1 kHz, or None when the lab scope
+    has no 'AC Voltage - Measure, AC Flatness - Relative to 1 kHz' line for its level and frequency (then it stays 'not in scope').
+    cmc: the scope line (% of reading, k = 2); emu: the 5790B 'Flatness [Wideband, Relative to 1 kHz]' specification (99 %, divisor 2.576) at k = 2.
+    The larger is reported; both are relative to the reading and become dB as 20 log10(1 + u)."""
+    if p['kind'] != 'FLAT':
+        return None
+    try:
+        import report_pdf
+        sc = sc or report_pdf.scope()
+        level = flat_level_v(p)
+        cmc_rel = sc.ac_flatness(level, p['frequency']) if sc is not None and hasattr(sc, 'ac_flatness') else None
+        if cmc_rel is None:
+            return None
+        emu_rel = None
+        try:
+            import specmanager as sm
+            std = sm.standard(STD_MODEL)
+            if std is None:
+                sm.seed()
+                std = sm.standard(STD_MODEL)
+            hit = std.lookup('FLAT', level, frequency=p['frequency'], direction='input') if std is not None else None
+            if hit is not None:
+                emu_rel = hit.limit / std.divisor()[0] * 2.0 / level
+        except Exception:
+            emu_rel = None
+    except Exception:
+        return None
+    db = lambda rel: 20 * math.log10(1 + rel)
+    use_emu = emu_rel is not None and emu_rel > cmc_rel
+    return (db(emu_rel if use_emu else cmc_rel), 'budget' if use_emu else 'scope', db(cmc_rel), db(emu_rel) if emu_rel is not None else None)
+
+
+def uncertainty_value(p, method=None):
     """(value, unit, source) behind point_uncertainty: the unrounded uncertainty in `unit`, or (None, None, '') when there is none.
     Sine-wave AC amplitude / low-frequency flatness: the larger of the 5790B budget and the scope's AC Voltage - Measure CMC (source 'budget');
-    the time base, square-wave points and any point without a 5790B row: the scope CMC alone (source 'scope')."""
+    the time base, square-wave points and any point without a 5790B row: the scope CMC alone (source 'scope').
+    RF flatness (`method` 'WBND', measured on the 5790B WIDEBAND input): the larger of the scope's AC Flatness - Relative to 1 kHz CMC and the 5790B
+    wideband flatness specification, in dB (flat_budget); the power-meter method has no scope line or meter specification here."""
     scope_value, scope_unit, scope_src = None, None, 'scope'
+    if p['kind'] == 'FLAT' and method == 'WBND':
+        fb = flat_budget(p)
+        if fb is not None:
+            scope_value, scope_unit, scope_src = fb[0], 'dB', fb[1]
     if p['kind'] in ('ACAMP', 'LFFLAT', 'TIMEBASE'):
         import report_pdf
         sc = report_pdf.scope()
@@ -502,13 +546,18 @@ def uncertainty_value(p):
     return None, None, ''
 
 
-def point_uncertainty(p):
+def point_uncertainty(p, method=None):
     """(text, source) - the editable reference file first, then the laboratory scope (Measure entries), else ''."""
     import uncertainty
-    value, unit, source = uncertainty_value(p)
+    value, unit, source = uncertainty_value(p, method)
     if value is None:
         return '', ''
     return uncertainty.format_value(value, unit), source
+
+
+def record_method(r):
+    """The flatness method a recorded RF flatness point was measured with ('WBND' or 'POWER'), from its record."""
+    return ((r or {}).get('raw') or {}).get('method', 'POWER')
 
 
 def tar_tur_fields(p, r=None):
@@ -523,7 +572,7 @@ def tar_tur_fields(p, r=None):
         if p['kind'] == 'SELFTEST' or p.get('typical'):
             return dict(TAR='', TUR='')
         import uncertainty
-        value, unit, _src = uncertainty_value(p)
+        value, unit, _src = uncertainty_value(p, record_method(r) if r is not None else None)
         u = uu = None
         if value is not None:
             u, uu = uncertainty.round_up(value), unit
@@ -556,7 +605,7 @@ def certificate_row(p, r):
     if p['kind'] == 'SELFTEST':
         return {'Section': sec, 'Description': p['desc'], 'Nominal': 'Pass', 'Tolerance -': 'N/A', 'Tolerance +': 'N/A', 'UOM': '',
                 'As Found': 'Pass' if r['reading'] == 0 else 'Fail', 'OOT': 'OOT' if failed else '', 'As Left': 'Same', 'Uncertainty': ''}
-    unc, _src = point_uncertainty(p)
+    unc, _src = point_uncertainty(p, record_method(r))
     if p['unit'] == 'dB':
         return _db_row(p, r, failed, sec, unc)
     desc = p['desc'] + (' (typical)' if p.get('typical') else '')
@@ -984,6 +1033,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         """Report rows: As Found for every recorded point; As Left where the point was measured again after an adjustment, else 'Same'."""
         return [row for _p, row in self.certificate_pairs()]
 
+    def record_of(self, p):
+        """The record behind a point's report row (As Found first, else As Left), or None."""
+        key = str(p['id'])
+        return self.found.get(key) or self.left.get(key)
+
     def certificate_pairs(self):
         """(point, report row) in the order certificate_rows() lists them."""
         pairs = []
@@ -1010,11 +1064,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                'POWER': 'Flatness measured with a power meter: 100 kHz reference plus the worksheet offset (manual method).'}
         note = ('Uncertainty: sine-wave AC amplitude and low-frequency flatness report the larger of the laboratory A2LA scope, AC Voltage - Measure, and the budget '
                 'built from the published AC voltage specification of the Fluke 5790B (divided by its coverage divisor, k = 2), rounded up; square-wave amplitude uses the scope '
-                'alone; the timebase uses Frequency - Measure; RF flatness uses specs/fgen_332xx_reference_cmc.json and is blank where no value is set. '
+                'alone; the timebase uses Frequency - Measure; RF flatness measured on the 5790B WIDEBAND input reports the larger of the scope\'s AC Flatness - Relative to 1 kHz '
+                'CMC and the 5790B wideband flatness specification (k = 2), in dB; power-meter flatness uses specs/fgen_332xx_reference_cmc.json and is blank where no value is set. '
                 'AC amplitude reference standard: Fluke 5790B (the manual lists a 3458A DMM). ' + ' '.join(how[m] for m in used))
         try:
             if report_pdf.details_tar_tur(details):
-                rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [tar_tur_fields(p) for p, _row in pairs])
+                rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [tar_tur_fields(p, self.record_of(p)) for p, _row in pairs])
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'{SPEC["manufacturer"]} {MODEL}'), ('Instrument ID', self.asset.get()),
                                                                  ('Serial', self.serial.get()), ('Limits applied', self.period.get()),
                                                                  ('Flatness method', ', '.join(FLAT_METHODS[m] for m in used) or 'not tested'),

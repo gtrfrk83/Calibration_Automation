@@ -94,6 +94,30 @@ class Scope:
         hits = [_u(b, value) for b in entry['bands'] if _inside(value, b['lo'], b['hi']) and (not src or b.get('src') in (None, src))]
         return max(hits) if hits else None
 
+    def ac_flatness(self, level, frequency):
+        """Relative CMC (a fraction of the reading, k = 2) of 'AC Voltage - Measure, AC Flatness - Relative to 1 kHz' for a sine of `level` V rms at
+        `frequency` Hz, or None when the scope has no line for it.  The lines of the smallest range that holds the level apply (the larger of them);
+        a row of spot frequencies is a band from its lowest to its highest frequency, and a frequency between two rows takes the larger neighbour
+        (owner, 2026-10-25; specs/build_a2la_cmc_flatness.py)."""
+        entry = self.entries.get(('measure', 'ACFLAT'))
+        if entry is None or frequency is None or level is None:
+            return None
+        level = abs(level)
+        ranges = sorted({ln['range'] for ln in entry['lines'] if ln['range'] >= level})
+        if not ranges:
+            return None
+        hits = []
+        for ln in entry['lines']:
+            if ln['range'] != ranges[0]:
+                continue
+            spans = sorted((min(g['freqs']), max(g['freqs']), g['pct']) for g in ln['groups'])
+            for i, (lo, hi, pct) in enumerate(spans):
+                if lo <= frequency <= hi:
+                    hits.append(pct)
+                elif i + 1 < len(spans) and hi < frequency < spans[i + 1][0]:
+                    hits.append(max(pct, spans[i + 1][2]))
+        return max(hits) / 100.0 if hits else None
+
     def dmm_text(self, kind, nominal, range_value=None, frequency=None, basis='generate', tc='K', source=None):
         """The scope's own expression for the band that `dmm` uses, e.g. '8.9 µV/V + 0.8 µV' ('' when the scope does not cover the point).
         Rebuilt from the stored relative / absolute / range terms (the scope file keeps numbers, not the printed text): the relative term is shown per

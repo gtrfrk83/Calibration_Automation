@@ -19,7 +19,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from PySide6.QtCore import QEvent, QObject, QPointF, QRectF, Qt, Signal
+from PySide6.QtCore import QTimer, QEvent, QObject, QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QIcon, QPainter, QPainterPath, QPalette, QPen, QPixmap
 from PySide6.QtWidgets import QApplication, QComboBox, QMenu, QStyledItemDelegate
 
@@ -670,7 +670,38 @@ class _ComboRows(QObject):
         if ev.type() == QEvent.Type.Polish and isinstance(obj, QComboBox) and not getattr(obj, '_rows_fixed', False):
             obj._rows_fixed = True
             obj.setItemDelegate(QStyledItemDelegate(obj))
+        elif ev.type() == QEvent.Type.Show and obj.metaObject().className() == 'QComboBoxPrivateContainer':
+            QTimer.singleShot(0, lambda c=obj: fit_combo_popup(c))
         return False
+
+
+def fit_combo_popup(container) -> None:
+    """Grow an open combo pop-up so every visible row fits: Qt sizes the pop-up from the rows alone, but the style sheet's padding and border on the list
+    take room out of it, so the last row was cut off.  Rows beyond the combo's maxVisibleItems still scroll; the pop-up never leaves the screen."""
+    try:
+        from PySide6.QtWidgets import QAbstractItemView
+        view = container.findChild(QAbstractItemView)
+        combo = container.parentWidget()
+        if view is None or view.model() is None:
+            return
+        rows = view.model().rowCount()
+        shown = min(rows, combo.maxVisibleItems()) if isinstance(combo, QComboBox) else rows
+        need = sum(view.sizeHintForRow(i) for i in range(shown))
+        deficit = need - view.viewport().height()
+        if deficit <= 0:
+            return
+        geo = container.geometry()
+        screen = container.screen().availableGeometry() if container.screen() is not None else None
+        height = geo.height() + deficit
+        if screen is not None:
+            if geo.top() + height > screen.bottom():
+                top = max(screen.top(), screen.bottom() - height)
+                geo.moveTop(top)
+            height = min(height, screen.height())
+        geo.setHeight(height)
+        container.setGeometry(geo)
+    except RuntimeError:
+        pass
 
 
 _combo_rows = None

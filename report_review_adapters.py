@@ -243,8 +243,10 @@ def fgen_specs(app, mod):
         unit = p['unit']
         low, high = _floats(p['nominal'] - p['error'], p['nominal'] + p['error'])
         expects = p['kind'] != 'SELFTEST'
+        rec = app.record_of(p) if hasattr(app, 'record_of') else None
+        method = mod.record_method(rec) if (rec is not None and hasattr(mod, 'record_method')) else None
         try:
-            value, vunit, src = mod.uncertainty_value(p)
+            value, vunit, src = mod.uncertainty_value(p, method) if method else mod.uncertainty_value(p)
         except Exception:
             value, vunit, src = None, None, ''
         cmc = emu = None
@@ -259,7 +261,11 @@ def fgen_specs(app, mod):
                 emu = b.emu if b is not None else None
             except Exception:
                 emu = None
-        ratios = mod.tar_tur_fields(p)
+        if p['kind'] == 'FLAT' and method == 'WBND' and hasattr(mod, 'flat_budget'):
+            fb = mod.flat_budget(p, sc)
+            if fb is not None:
+                cmc, emu = fb[2], fb[3]
+        ratios = mod.tar_tur_fields(p, rec) if rec is not None else mod.tar_tur_fields(p)
         label = {'budget': 'Fluke 5790B', 'scope': 'Scope CMC', 'reference file': 'Reference file'}.get(src, '')
         spec = M.PointSpec(i, str(p.get('id', i + 1)), row.get('Section', ''), row.get('Description', ''), row.get('Nominal', ''), _q(p['kind'], p['nominal'], unit),
                            _q(p['kind'], p['nominal'], unit), low, high, unit, None,

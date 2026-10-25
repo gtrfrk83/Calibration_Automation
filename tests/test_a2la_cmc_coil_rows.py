@@ -67,9 +67,11 @@ class Table(unittest.TestCase):
                 self.assertEqual({b['src'] for b in e['bands']}, {'5522A', '5560A'})
             elif k == ('generate', 'TEMP'):
                 pass                                               # the Type K line, added later (specs/build_a2la_cmc_temperature.py)
+            elif k == ('measure', 'ACFLAT'):
+                pass                                               # AC Flatness - Relative to 1 kHz, added later (specs/build_a2la_cmc_flatness.py)
             else:
                 self.assertEqual(h(body), OLD[k], k)
-        self.assertEqual(len(self.data['entries']), 14)
+        self.assertEqual(len(self.data['entries']), 15)
         self.assertEqual(h(self.data['oscilloscope']), OLD_OSC)
         self.assertEqual(h({k: v for k, v in self.data.items() if k not in ('entries', 'oscilloscope', 'source')}), OLD_TOP)
 
