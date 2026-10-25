@@ -141,7 +141,16 @@ class ReviewWindow(QDialog):
                             | Qt.WindowType.WindowMaximizeButtonHint)
         self._build(details or {}, position)
         self._fit()
+        try:                                                        # 'use it for all points like this' rules saved in earlier runs
+            import uncertainty_fixes
+            import uncertainty_why
+            self.rules_applied = uncertainty_why.apply_saved_rules(model, uncertainty_fixes.who_am_i())
+        except Exception:
+            self.rules_applied = 0
         self.refresh()
+        if self.rules_applied:
+            self._show_hint(f'{self.rules_applied} point(s) the lab scope does not cover use a saved rule (Status: {M.MANUAL}); '
+                            'select one and press Why? / Fix to change it.', 'info')
 
     # ------------------------------------------------------------------------------------------------------------------ layout
     def _build(self, prior, position):
@@ -227,6 +236,11 @@ class ReviewWindow(QDialog):
         self.btn_apply = SecondaryButton('Apply')
         self.btn_apply.clicked.connect(self.apply_bulk)
         tools.addWidget(self.btn_apply)
+        self.btn_why = SecondaryButton('Why? / Fix\u2026')
+        self.btn_why.setToolTip('For a point with no uncertainty: what is missing, and one-click ways to fix it')
+        self.btn_why.setEnabled(False)
+        self.btn_why.clicked.connect(lambda: self.why())
+        tools.addWidget(self.btn_why)
         root.addLayout(tools)
 
         # ---- the grid
@@ -418,6 +432,24 @@ class ReviewWindow(QDialog):
         else:
             self.bulk_box.setCurrentIndex(-1)                  # nothing chosen yet (the Tk box is empty until a standard is picked)
         self.btn_apply.setEnabled(bool(common))
+        one = self.model.rows[idx[0]] if len(idx) == 1 else None
+        self.btn_why.setEnabled(bool(one is not None and (one.cur.status == M.NOT_IN_SCOPE or one.typed is not None)))
+
+    def why(self, idx=None):
+        """The 'Why is there no uncertainty?' panel for the selected row (or `idx`).  Returns its outcome ('applied' | 'flagged' | None)."""
+        from .uncertainty_why_dialog import WhyDialog
+        if idx is None:
+            sel = self.selected_indexes()
+            if len(sel) != 1:
+                return None
+            idx = sel[0]
+        out = WhyDialog(self, self.model, idx, asset=self.model.asset).run()
+        if out == 'applied':
+            self.refresh()
+            self._show_hint('')
+        elif out == 'flagged':
+            self._show_hint('Flagged for quality: it is on the uncertainty issues list.', 'info')
+        return out
 
     # ------------------------------------------------------------------------------------------------------------------ editing
     def _set_picked(self, row, on):

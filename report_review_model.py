@@ -70,6 +70,7 @@ class PointSpec:
     expects: bool = False          # the point should carry an uncertainty: with no scope entry it is 'Not in scope' (and may take a typed value)
     engine_printed: dict | None = None   # set when the adapter's default is NOT what the engine prints (MDO4000C RF level rows, 96270A): the engine's own Uncertainty / TAR / TUR
     std_label: str = ''            # what the Standard column says for a row with no drop-down ('Scope CMC', 'Fluke 5790B', 'Reference file')
+    hints: list = field(default_factory=list)        # plain hints for the 'Why?' panel (uncertainty_why), e.g. another method that is in scope
 
 
 @dataclass
@@ -367,8 +368,8 @@ class Row:
     def entry_hint(self) -> str:
         return entry_scale(self.spec, self.cur)[1]
 
-    def set_typed(self, text):
-        """(ok, message).  Empty text clears the entry (back to the engine's value)."""
+    def set_typed(self, text, source='', reason=''):
+        """(ok, message).  Empty text clears the entry (back to the engine's value).  `source` / `reason`: where the value came from (the 'Why?' panel)."""
         if not str(text or '').strip():
             self.typed = None
             return True, ''
@@ -382,7 +383,7 @@ class Row:
         tol = tartur.half_width(self.spec.low, self.spec.high)
         res = tartur.from_values(tol, self.spec.unit, None, None, value, self.cur.unit) if tol else {}
         self.typed = dict(value=value, text=str(text).strip(), display=format_manual(value, _unit_of(self.spec.q), sig), sig=sig,
-                          tur=tartur.format_ratio(res.get('tur')) if res else '')
+                          tur=tartur.format_ratio(res.get('tur')) if res else '', source=source or '', reason=reason or '')
         return True, ''
 
 
@@ -442,9 +443,9 @@ class ReviewModel:
         row.follow(self.default_std)
         return True
 
-    def set_typed(self, idx, text):
+    def set_typed(self, idx, text, source='', reason=''):
         """Type an uncertainty for a not-in-scope row (empty text clears it).  (ok, message)."""
-        return self.rows[idx].set_typed(text)
+        return self.rows[idx].set_typed(text, source=source, reason=reason)
 
     def set_standard_many(self, indexes, standard) -> int:
         return sum(1 for i in indexes if self.set_standard(i, standard))
@@ -480,6 +481,8 @@ class ReviewModel:
                       budget=e.budget, scope_minimum=e.cmc, reported=e.reported, unit=e.unit, status=r.status, manual=r.typed is not None)
             if r.typed is not None:                                  # a typed uncertainty: the value as entered, who entered it and when
                 ch.update(manual_value=r.typed['value'], manual_text=r.typed['text'], entered_by=by, entered_at=when)
+                if r.typed.get('source'):
+                    ch.update(manual_source=r.typed['source'], manual_reason=r.typed.get('reason', ''))
                 ch['standard'] = s.default_std
             out.append(ch)
         return out

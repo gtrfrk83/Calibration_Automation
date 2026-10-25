@@ -271,7 +271,18 @@ class Report(unittest.TestCase):
 
     def test_no_change_review_leaves_the_pdf_identical(self):
         """Owner requirement: a review the technician did not change prints exactly the PDF the engine made before this feature.
-        Compared page by page (R.differences) and by text; no added column, marker or footnote."""
+        Compared page by page (R.differences) and by text; no added column, marker or footnote.
+        The clock is frozen: the header's 'Report date' is printed to the minute, and on a slow machine the two exports of one engine can fall either side
+        of a minute boundary (seen with the WaveSurfer export under load)."""
+        import datetime as _dt
+
+        class _Frozen(_dt.datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return cls(2026, 1, 2, 3, 4, 5)
+        frozen = mock.patch.object(report_pdf, 'datetime', _Frozen)
+        frozen.start()
+        self.addCleanup(frozen.stop)
         for name in BUILDERS:
             app, mod = built(name)
             a, b, c = (self.dir / f'{name}_{x}.pdf' for x in 'abc')

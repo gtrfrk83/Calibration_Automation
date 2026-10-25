@@ -271,6 +271,8 @@ def fgen_specs(app, mod):
                            _q(p['kind'], p['nominal'], unit), low, high, unit, None,
                            'Measured against the lab standard: read-only' if expects else 'Not an uncertainty point',
                            dict(Uncertainty=printed, TAR=ratios.get('TAR', ''), TUR=ratios.get('TUR', '')), expects=expects, std_label=label)
+        if p['kind'] == 'FLAT' and method != 'WBND' and hasattr(mod, 'flat_budget') and mod.flat_budget(p, sc) is not None:
+            spec.hints.append('Measured with the 5790B WIDEBAND method (relative to 1 kHz) this point is in scope (AC Flatness - Relative to 1 kHz).')
         spec.calc = (lambda standard, _u=unit, _p=printed, _r=ratios, _c=cmc, _e=emu, _v=value, _vu=vunit, _x=expects:
                      _fixed(_u, None, _p, _r.get('TAR', ''), _r.get('TUR', ''), cmc=_c, emu=_e, value=_v, expects=_x, vunit=_vu or _u))
         specs.append(spec)
