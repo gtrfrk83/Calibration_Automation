@@ -488,7 +488,11 @@ class RowMenu(QtCase):
         menu = self.win.build_row_menu()
         got = [a.text() if not a.isSeparator() else None for a in menu.actions()]
         want = [e.label if e else None for e in self.win.row_menu_items()]
-        self.assertEqual(got, want)
+        self.assertEqual(got[-2:], [None, 'Open manual...'])               # the Qt-only entry after the shared ones
+        self.assertEqual(got[:-2], want)
+        with mock.patch('qtui.manual_viewer.open_for_model') as opener:
+            next(a for a in menu.actions() if a.data() == 'open_manual').trigger()
+        self.assertEqual(opener.call_args[0][1], self.NAME)
         self.assertIn('Readiness check (no hardware)...', got)
         self.assertIn(procedure_menu.DEMO_LABEL, got)
         enabled = {a.data(): a.isEnabled() for a in menu.actions() if not a.isSeparator()}

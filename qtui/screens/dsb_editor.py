@@ -17,7 +17,8 @@ from qtui.screens import dsb_common as C
 from qtui.screens.dsb_check import CheckWindowMixin
 from qtui.screens.dsb_dialogs import DriversWindow, PageDialog, PreviewWindow, ProblemsWindow, RuleDialog, SaveBlockedDialog, VersionsWindow, present
 from qtui.screens.dsb_grid import SheetGrid
-from qtui.screens.dsb_inspector import Inspector
+from qtui import layouts
+from qtui.screens.dsb_inspector import Inspector, Section
 from qtui.screens.dsb_pages import AutomationPage, FunctionsPage, HeaderPage, RangesPage, SpecPage
 from qtui.theme import M as SZ
 
@@ -103,6 +104,7 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         scr = (self.screen() or QApplication.primaryScreen()).availableGeometry()
         self.resize(min(1340, scr.width() - 40), min(900, scr.height() - 60))
         self.setMinimumSize(min(980, scr.width() - 40), min(620, scr.height() - 60))
+        self._restore_layout()
         self.sync()
         self.refresh()                                       # header pills, title, Undo / Redo state before the first edit
 
@@ -684,6 +686,20 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         if self.panel is not None:
             self.panel.editor_saved(self)
 
+    # ---- remembered layout (window size / position, row panel open or hidden, which panel sections are open)
+    def _layout_state(self):
+        return {'inspector_open': bool(self._insp_open), 'sections': {s.title: bool(s.open) for s in self.panel_box.findChildren(Section)}}
+
+    def _restore_layout(self):
+        extra = layouts.restore('datasheet_builder', self)
+        if 'inspector_open' in extra:
+            self._insp_open, self._insp_manual = bool(extra['inspector_open']), True
+            self._set_inspector_width()
+        opened = extra.get('sections') or {}
+        for sec in self.panel_box.findChildren(Section):
+            if sec.title in opened and sec.open != bool(opened[sec.title]):
+                sec.set_open(opened[sec.title])
+
     def closeEvent(self, ev):
         self.commit_header()
         if self.model.dirty and not C.ask_yes_no(self, 'Unsaved changes', 'This datasheet has changes that are not saved. Close without saving?'):
@@ -694,6 +710,7 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
                 d.close()
             except RuntimeError:
                 pass
+        layouts.save('datasheet_builder', self, extra=self._layout_state())
         if self.panel is not None:
             self.panel.editor_closed(self)
         ev.accept()

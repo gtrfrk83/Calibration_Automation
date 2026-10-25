@@ -29,7 +29,7 @@ import procedure_menu
 import procscan
 import suite_info
 import verified
-from qtui import app, theme
+from qtui import app, layouts, theme
 from qtui.screens import PANELS, find_instruments, help_menu, load_panel
 from qtui.screens import manager_dialogs as dialogs
 from qtui.table import Column, DataTable
@@ -197,6 +197,7 @@ class ManagerWindow(QMainWindow):
         self._first_tab = QTimer(self)
         self._first_tab.setSingleShot(True)
         self._first_tab.timeout.connect(lambda: self._tab_changed(0))
+        layouts.restore('manager', self)
         self._first_tab.start(0)                # the Tk notebook reports its first tab once it is shown: the status line then reads the tab's own text
 
     def resizeEvent(self, ev):
@@ -205,6 +206,7 @@ class ManagerWindow(QMainWindow):
             self.card_column.setFixedWidth(max(340, min(380, int(self.width() * 0.26))))        # the card is a little wider on a wide window; the table keeps the rest
 
     def closeEvent(self, ev):
+        layouts.save('manager', self)
         self._first_tab.stop()
         if self.find_window is not None and hasattr(self.find_window, 'close'):
             self.find_window.close()
@@ -576,7 +578,19 @@ class ManagerWindow(QMainWindow):
                 act.setEnabled(bool(e.enabled))
                 act.setData(e.key)
                 act.triggered.connect(lambda _c=False, fn=actions[e.key]: fn())
+        menu.addSeparator()
+        act = menu.addAction('Open manual...')
+        act.setData('open_manual')
+        act.triggered.connect(lambda _c=False: self.open_manual())
         return menu
+
+    def open_manual(self):
+        """The selected procedure's instrument manual (PDF), in the suite's own viewer.  Manuals are found by model number in manuals.folders()."""
+        rec = self._selected_row()
+        if not rec:
+            return None
+        from qtui import manual_viewer
+        return manual_viewer.open_for_model(self, str(rec[1]))
 
     def post_row_menu(self, global_pos):
         menu = self.build_row_menu()

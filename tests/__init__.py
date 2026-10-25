@@ -3,3 +3,4 @@ import os
 import tempfile
 
 os.environ.setdefault('CALSUITE_DATA', tempfile.mkdtemp(prefix='calsuite_test_data_'))
+os.environ.setdefault('CALSUITE_LAYOUTS', '0')            # window layouts are only remembered in the tests that ask for it
