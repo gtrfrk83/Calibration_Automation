@@ -104,12 +104,13 @@ class Scope:
             return ''
         band = best[1]
         parts = []
+        as_percent = kind in ('ACV', 'ACI')           # the AC tables are printed in % of reading (0.39 % + 80 nA); the DC ones per unit (8.9 µV/V + 0.8 µV)
         if band.get('rel'):
-            parts.append(_si_text(band['rel'], f'{unit}/{unit}' if unit else ''))
+            parts.append(f"{float(band['rel']) * 100:.6g} %" if as_percent else _si_text(band['rel'], f'{unit}/{unit}' if unit else ''))
         if band.get('abs'):
             parts.append(_si_text(band['abs'], unit))
         if band.get('rng'):
-            parts.append(_si_text(band['rng'], f'{unit}/{unit}') + ' of range')
+            parts.append((f"{float(band['rng']) * 100:.6g} %" if as_percent else _si_text(band['rng'], f'{unit}/{unit}')) + ' of range')
         return ' + '.join(parts)
 
     def _ac(self, entry, value, selector, frequency, by_range):

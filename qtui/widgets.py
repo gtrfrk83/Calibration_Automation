@@ -359,10 +359,13 @@ class SegmentedFilter(QFrame):
 
     def _fit_height(self) -> None:
         """Size every segment from the font it is really drawn in (after the style sheet: the chosen one is semi-bold), so no font or Windows scaling can clip the text."""
-        for b in self._buttons.values():
-            f = QFont(b.font())
-            f.setWeight(QFont.Weight.DemiBold)
-            b.setMinimumHeight(QFontMetrics(f).height() + 16)
+        try:
+            for b in self._buttons.values():
+                f = QFont(b.font())
+                f.setWeight(QFont.Weight.DemiBold)
+                b.setMinimumHeight(QFontMetrics(f).height() + 16)
+        except RuntimeError:                  # the window closed before the deferred call ran
+            pass
 
     def showEvent(self, ev):
         self._fit_height()

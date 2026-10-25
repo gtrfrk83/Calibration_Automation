@@ -468,6 +468,12 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         return self.changed(self.model.clear_typed_limits())
 
     def copy_down(self):
+        if self.model.selected_row()['kind'] == 'blank':             # a new row: take the tolerance of the row above into the boxes (the sheet is not touched)
+            form = self.model.tolerance_form_above()
+            if form is None:
+                return self.changed(M.Outcome(False, 'No test row above this one in the section has a tolerance to use yet.'))
+            self.panel_box.adopt_tolerance(form)
+            return self.changed(M.Outcome(True, 'The tolerance of the row above is in the boxes. Type the value and press Calc.'))
         n = self.model.would_overwrite()
         if n and not C.ask_yes_no(self, 'Copy tolerance', f'{n} row(s) below already have a tolerance of their own. Replace them with this row\'s tolerance? (Undo brings them back.)'):
             return None
