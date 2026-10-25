@@ -1638,6 +1638,134 @@ DRIVER_CASES = {
 }
 
 
+# ==== APPEND-ONLY BLOCK, 3 Series MDO (drivers/tektronix_mdo3.py; branch tektronix-mdo3): its own fixtures tektronix_mdo3.json / engine_mdo3.json ======
+from drivers import TektronixMDO3  # noqa: E402
+from drivers.simulated_mdo3 import make_mdo3_bench  # noqa: E402
+
+COVERAGE['tektronix_mdo3'] = {
+    'TektronixMDO3': dict(
+        covered=['connect', 'installed_options', 'opc', 'check_errors', 'cleanup', 'set_verified', 'default_setup', 'select_only', 'bandwidth', 'channel',
+                 'acquire_mode', 'timebase', 'delay', 'trigger_line', 'trigger_edge', 'trigger_counter_on', 'trigger_frequency', 'measure_setup',
+                 'gating_off', 'stats_reset', 'stat_mean', 'stat_stddev', 'meas_value', 'mean_of', 'delay_stddev', 'fetch', 'edge_time', 'rf_cmd',
+                 'rf_setup', 'rf_rbw', 'rf_trace', 'afg_set', 'afg_off', 'dvm', 'dvm_value', 'run_diagnostics', 'run_spc', 'reset_to_defaults'],
+        no_command=[]),
+}
+LINT_FILES.append('tektronix_mdo3')
+ENGINES += ('mdo3',)
+
+
+def cases_mdo3(c):
+    bench, t = make_mdo3_bench('34-1000')
+    m = c.inst(TektronixMDO3, t['scope'], opened=False, label='MDO3')
+    c.run('TektronixMDO3.connect', m.connect)
+    c.run('TektronixMDO3.installed_options', m.installed_options)
+    c.run('TektronixMDO3.opc[no timeout]', m.opc)
+    c.run('TektronixMDO3.opc[timeout]', m.opc, 60)
+    c.run('TektronixMDO3.check_errors[ok]', m.check_errors, 'ctx')
+    c.run('TektronixMDO3.default_setup', m.default_setup)
+    c.run('TektronixMDO3.select_only', m.select_only, 2)
+    c.run('TektronixMDO3.channel[all]', m.channel, 1, term='1M', bw='TWEnty', vscale=0.5, offset=0.1, position=0.0)
+    c.run('TektronixMDO3.channel[50 ohm minimal]', m.channel, 2, term='50', position=None)
+    c.run('TektronixMDO3.channel[defaults]', m.channel, 3)
+    c.run('TektronixMDO3.bandwidth[250 MHz]', m.bandwidth, 1, 'TWOFifty')
+    c.run('TektronixMDO3.bandwidth[full, model bandwidth unknown]', m.bandwidth, 1, 'FULl')
+    m.full_bw_hz = 1e9
+    c.run('TektronixMDO3.bandwidth[full, 1 GHz model]', m.bandwidth, 1, 'FULl')
+    c.run('TektronixMDO3.set_verified', m.set_verified, 'ch.scale.set', 'ch.scale.get', 0.2, ch='1')
+    c.run('TektronixMDO3.acquire_mode[average]', m.acquire_mode, 'AVErage', 32)
+    c.run('TektronixMDO3.acquire_mode[sample]', m.acquire_mode, 'SAMple')
+    c.run('TektronixMDO3.timebase', m.timebase, 1e-3)
+    c.run('TektronixMDO3.delay', m.delay, 0.08)
+    c.run('TektronixMDO3.trigger_line', m.trigger_line)
+    c.run('TektronixMDO3.trigger_edge[level]', m.trigger_edge, 'CH1', level=0.0, slope='RISe', mode='NORMal')
+    c.run('TektronixMDO3.trigger_edge[defaults]', m.trigger_edge, 'CH2')
+    c.run('TektronixMDO3.trigger_edge[level on LINE]', m.trigger_edge, 'LINE', level=0.5)
+    c.run('TektronixMDO3.trigger_counter_on', m.trigger_counter_on)
+    c.run('TektronixMDO3.trigger_frequency[not available]', m.trigger_frequency, 1.0)
+    bench.gen.update(on=True, f=1e3)
+    c.run('TektronixMDO3.trigger_frequency', m.trigger_frequency, 1.0)
+    bench.gen.update(on=False)
+    c.run('TektronixMDO3.measure_setup[single]', m.measure_setup, 'MEAN', 'CH1')
+    c.run('TektronixMDO3.measure_setup[slot 2]', m.measure_setup, 'RMS', 'CH1', slot=2)
+    c.run('TektronixMDO3.measure_setup[source2 refused]', m.measure_setup, 'DELay', 'CH1', source2='CH2')
+    c.run('TektronixMDO3.gating_off', m.gating_off)
+    c.run('TektronixMDO3.stats_reset[weighting]', m.stats_reset, 16)
+    c.run('TektronixMDO3.stats_reset[none]', m.stats_reset)
+    c.run('TektronixMDO3.stat_mean', m.stat_mean)
+    c.run('TektronixMDO3.stat_stddev', m.stat_stddev, 2)
+    c.run('TektronixMDO3.meas_value', m.meas_value)
+    c.run('TektronixMDO3.mean_of', m.mean_of, 1, 8, 1.0)
+    c.run('TektronixMDO3.delay_stddev', m.delay_stddev, 1, 50, 2.0)
+    c.run('TektronixMDO3.fetch', m.fetch, 'CH1')
+    c.run('TektronixMDO3.edge_time', m.edge_time, 1)
+    c.run('TektronixMDO3.rf_cmd[on]', m.rf_cmd, 'on')
+    c.run('TektronixMDO3.rf_cmd[center]', m.rf_cmd, 'center', v=1e9)
+    c.run('TektronixMDO3.rf_setup[full]', m.rf_setup, center=1e9, span=1e6, start=0.9e9, stop=1.1e9, rbw=1e3, ref_level=-15, averages=4, detection='AVErage')
+    c.run('TektronixMDO3.rf_setup[minimal]', m.rf_setup, center=2e9, span=1e6, average_trace=False)
+    c.run('TektronixMDO3.rf_rbw', m.rf_rbw)
+    c.run('TektronixMDO3.rf_trace[average]', m.rf_trace)
+    c.run('TektronixMDO3.rf_trace[normal]', m.rf_trace, average=False)
+    c.run('TektronixMDO3.afg_set[all]', m.afg_set, 'SINE', 1000.0, 1.0, 0.0)
+    c.run('TektronixMDO3.afg_set[dc]', m.afg_set, 'DC', offset=1.0)
+    c.run('TektronixMDO3.afg_off', m.afg_off)
+    c.run('TektronixMDO3.dvm[dc]', m.dvm, 'DC', 1)
+    c.run('TektronixMDO3.dvm[acrms ch2]', m.dvm, 'ACRMS', 2)
+    c.run('TektronixMDO3.dvm_value', m.dvm_value, 1.0)
+    c.run('TektronixMDO3.run_diagnostics', m.run_diagnostics)
+    c.run('TektronixMDO3.run_spc', m.run_spc)
+    c.run('TektronixMDO3.cleanup', m.cleanup)
+    # a 2-channel MDO32: CH3 / CH4 are never addressed
+    b2, t2 = make_mdo3_bench('32-200')
+    m2 = c.inst(TektronixMDO3, t2['scope'], opened=False, label='MDO3')
+    c.run('TektronixMDO3.connect[MDO32]', m2.connect)
+    c.run('TektronixMDO3.select_only[MDO32]', m2.select_only, 1)
+    # branches the simulator cannot reach
+    err = c.inst(TektronixMDO3, Scripted([(r'^\*ESR\?', '16'), (r'^EVMsg\?', '113,"Undefined header"')]), label='MDO3')
+    c.run('TektronixMDO3.check_errors[command error]', err.check_errors, 'setup')
+    noopt = c.inst(TektronixMDO3, Scripted([(r'^\*OPT\?', TransportError('timeout'))]), label='MDO3')
+    c.run('TektronixMDO3.installed_options[query fails]', noopt.installed_options)
+    bare = c.inst(TektronixMDO3, Scripted([(r'^\*OPT\?', 'SA:Spectrum analyzer maximum input frequency,AFG:Arbitrary Function Generator,3-DVM:Digital Voltmeter')]), label='MDO3')
+    c.run('TektronixMDO3.installed_options[bare SA code]', bare.installed_options)
+    flat = c.inst(TektronixMDO3, Scripted([(r'^CH1:SCAle\?', '0.9')]), label='MDO3')
+    c.run('TektronixMDO3.set_verified[mismatch]', flat.set_verified, 'ch.scale.set', 'ch.scale.get', 0.2, ch='1')
+    bw = c.inst(TektronixMDO3, Scripted([(r'^CH1:BANdwidth\?', '2.5000E+08')]), label='MDO3')
+    bw.full_bw_hz = 1e9
+    c.run('TektronixMDO3.bandwidth[full reads back 250 MHz]', bw.bandwidth, 1, 'FULl')
+    bw20 = c.inst(TektronixMDO3, Scripted([(r'^CH1:BANdwidth\?', '2.5000E+08')]), label='MDO3')
+    c.run('TektronixMDO3.bandwidth[20 MHz mismatch]', bw20.bandwidth, 1, 'TWEnty')
+    noedge = c.inst(TektronixMDO3, Scripted([(r'^WFMOutpre:NR_Pt\?', '3'), (r'^WFMOutpre', '0.0'), (r'^CURVe\?', '1,1,1')]), label='MDO3')
+    c.run('TektronixMDO3.edge_time[no edge]', noedge.edge_time, 1)
+    bad = c.inst(TektronixMDO3, Scripted([(r'^MEASUrement:MEAS1:MEAN\?', '9.91E+37')]), label='MDO3')
+    c.run('TektronixMDO3.stat_mean[invalid]', bad.stat_mean)
+    off = c.inst(TektronixMDO3, Scripted([(r'^DISplay:TRIGFrequency\?', '0')]), label='MDO3')
+    c.run('TektronixMDO3.trigger_counter_on[stays off]', off.trigger_counter_on)
+    slow = c.inst(TektronixMDO3, Scripted([(r'^DIAg:RESUlt:FLAg\?', ['IN PROGRESS', 'IN PROGRESS', 'FAIL']), (r'^DIAg:RESUlt:LOG\?', '"FAIL--ACQ"')]), label='MDO3')
+    c.run('TektronixMDO3.run_diagnostics[polls and fails]', slow.run_diagnostics, 900)
+    spc = c.inst(TektronixMDO3, Scripted([(r'^CALibrate:INTERNal:STATus\?', ['RUNNING', 'FAIL']), (r'^CALibrate:RESults:SPC\?', 'FAIL')]), label='MDO3')
+    c.run('TektronixMDO3.run_spc[polls and fails]', spc.run_spc, 1200)
+    afg = c.inst(TektronixMDO3, Scripted([(r'^AFG:OUTPut:LOAd:IMPEDance\?', 'HIGHZ')]), label='MDO3')
+    c.run('TektronixMDO3.afg_set[load not 50 ohm]', afg.afg_set, 'SINE', 1000.0, 1.0, 0.0)
+    noafg = c.inst(TektronixMDO3, Scripted([(r'^\*OPT\?', 'DVM:Digital Voltmeter')]), label='MDO3')
+    c.run('TektronixMDO3.afg_off[no AFG option: nothing sent]', noafg.afg_off)
+    wrong = c.inst(TektronixMDO3, Scripted([(r'\*IDN\?', 'KEYSIGHT,34401A,1,1')]), opened=False, label='MDO3')
+    c.run('TektronixMDO3.connect[wrong model]', wrong.connect)
+    old = c.inst(TektronixMDO3, Scripted([(r'\*IDN\?', 'TEKTRONIX,MDO3104,C012345,CF:91.1CT FV:v1.30')]), opened=False, label='MDO3')
+    c.run('TektronixMDO3.connect[MDO3000 series refused]', old.connect)
+
+
+def resets_mdo3(c):
+    bench, t = make_mdo3_bench('34-1000')
+    m = c.inst(TektronixMDO3, t['scope'], opened=False, label='MDO3')
+    c.quiet(m.connect)
+    c.run('TektronixMDO3.reset_to_defaults', m.reset_to_defaults)
+    bad = c.inst(TektronixMDO3, Scripted([(r'^\*OPC\?', '1'), (r'^\*OPT\?', 'NONE'), (r'^\*ESR\?', '16'), (r'^EVMsg\?', '113,"Undefined header"')]), label='MDO3')
+    c.run('TektronixMDO3.reset_to_defaults[event status not clean]', bad.reset_to_defaults)
+
+
+DRIVER_CASES['tektronix_mdo3'] = _with_resets(cases_mdo3, resets_mdo3)
+# ==== end of the 3 Series MDO block ===========================================================================================================
+
+
 def capture_driver_transcripts():
     """{driver fixture name: [entry, ...]} - entries are JSON-serialisable and identical on every run."""
     out = {}

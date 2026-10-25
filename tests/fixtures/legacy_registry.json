@@ -39,7 +39,8 @@
   "Fluke 376 Clamp Meter Performance Verification": "Fluke_376_Verification.py",
   "Fluke 374 Clamp Meter Performance Verification": "Fluke_374_Verification.py",
   "Fluke 375 Clamp Meter Performance Verification": "Fluke_375_Verification.py",
-  "Fluke 376-II Clamp Meter Performance Verification": "Fluke_376II_Verification.py"
+  "Fluke 376-II Clamp Meter Performance Verification": "Fluke_376II_Verification.py",
+  "Tektronix 3 Series MDO Performance Verification": "Tektronix_MDO3_Verification.py"
  },
  "VERSIONS": {
   "WaveSurfer_WS4104HD.py": "51",
@@ -81,7 +82,8 @@
   "Fluke_376_Verification.py": "1",
   "Fluke_374_Verification.py": "1",
   "Fluke_375_Verification.py": "1",
-  "Fluke_376II_Verification.py": "1"
+  "Fluke_376II_Verification.py": "1",
+  "Tektronix_MDO3_Verification.py": "1"
  },
  "records": [
   [
@@ -363,6 +365,13 @@
    "376-II",
    "Clamp Meter",
    "Fluke_376II_Verification.py"
+  ],
+  [
+   "Tektronix 3 Series MDO Performance Verification",
+   "Tektronix",
+   "MDO32/MDO34",
+   "Oscilloscope",
+   "Tektronix_MDO3_Verification.py"
   ]
  ],
  "FILES": {
@@ -900,6 +909,26 @@
    ],
    "spec": [
     "specs/fluke_376_pv.json"
+   ]
+  },
+  "Tektronix_MDO3_Verification.py": {
+   "code": [
+    "Procedures/Tektronix_MDO3_Verification.py",
+    "mdo4000c_verification.py",
+    "mdo3_view_tk.py",
+    "mdo3_view_qt.py",
+    "genscope_support_view_qt.py",
+    "ui_port.py",
+    "ui_port_tk.py",
+    "drivers/base.py",
+    "drivers/transport.py",
+    "drivers/tektronix_mdo3.py",
+    "drivers/fluke_5560a.py",
+    "drivers/reference_instruments.py"
+   ],
+   "spec": [
+    "specs/tektronix_mdo3_pv.json",
+    "specs/mdo3_reference_cmc.json"
    ]
   }
  },

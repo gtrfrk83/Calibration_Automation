@@ -165,6 +165,15 @@ tektronix_mdo4000c_pv.json (schema 2)
 mdo4000c_reference_cmc.json
   Editable uncertainties for the 96270A, function generator and reference meters (rel x reading + abs). Blank = N/A on the report.
 
+tektronix_mdo3_pv.json (schema 2; the 3 Series MDO family of the MDO4000C engine)
+  The same point fields as tektronix_mdo4000c_pv.json, plus top-level model_info{} (per model key '32-100' ... '34-1000': channels, bandwidth_hz,
+  bw_limits, counter_max_hz, option), options{} and discrepancies[] (every disagreement between the test record, the procedure and the published
+  specification, listed by the builder). Option tokens: SA3, noSA3, AFG, DVM, TPA, noTPA. Optional point parameters the shared engine reads only
+  when present (none on an MDO4000C point): per_div, method, hscale, vpp, coarse_hscale, fine_hscale, ref_level, detection, counter, vscale.
+  Built by specs/build_mdo3_spec.py (committed; run it to rewrite the JSON) from the rendered page images of 077-1499-10, Decimal limits.
+mdo3_reference_cmc.json
+  As mdo4000c_reference_cmc.json, for the 3 Series kinds (REFFREQ in divisions).
+
 Schema 4 (function generators: keysight_33210a/33220a/33250a_pv.json)
   periods / default_period      ["90d","1y"] / "1y"
   sections[]                    id, title, page (printed), kind, group (wiring prompt: NONE / COUNTER / STD / POWER / POWER_ATT), setup, points[]
