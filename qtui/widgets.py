@@ -346,9 +346,6 @@ class SegmentedFilter(QFrame):
             b.setAutoDefault(False)
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             b.installEventFilter(self)
-            f = b.font()
-            f.setWeight(QFont.Weight.DemiBold)                      # the chosen segment is semi-bold: size for it, so no font (or Windows scaling) can clip the text
-            b.setMinimumHeight(QFontMetrics(f).height() + 14)
             self._group.addButton(b)
             row.addWidget(b)
             self._buttons[key] = b
@@ -359,6 +356,22 @@ class SegmentedFilter(QFrame):
         if items:
             self._buttons[self._current].setChecked(True)
         self._rove()
+
+    def _fit_height(self) -> None:
+        """Size every segment from the font it is really drawn in (after the style sheet: the chosen one is semi-bold), so no font or Windows scaling can clip the text."""
+        for b in self._buttons.values():
+            f = QFont(b.font())
+            f.setWeight(QFont.Weight.DemiBold)
+            b.setMinimumHeight(QFontMetrics(f).height() + 16)
+
+    def showEvent(self, ev):
+        self._fit_height()
+        super().showEvent(ev)
+
+    def changeEvent(self, ev):
+        if ev.type() in (QEvent.Type.FontChange, QEvent.Type.StyleChange, QEvent.Type.ApplicationFontChange):
+            QTimer.singleShot(0, self._fit_height)
+        super().changeEvent(ev)
 
     def set_count(self, key: str, count: int | None) -> None:
         b = self._buttons[key]
