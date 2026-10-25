@@ -99,7 +99,7 @@ def output_text(p):
     kind, v, f = p['kind'], a['value'], a.get('frequency')
     unit = {'ACV': 'V', 'DCV': 'V', 'ACI': 'A', 'DCI': 'A', 'OHM': 'ohm', 'CAP': 'F', 'TEMP': 'C', 'DUTY': 'V', 'SQUARE': 'V'}[kind]
     text = _fmt(v, unit)
-    if kind in SQUARE_KINDS:
+    if kind in SQUARE_KINDS or (kind == 'ACV' and a.get('waveform') == 'square'):
         text += f' p-p square wave, {_fmt(f, "Hz")}, {a.get("duty", 50.0):g} % duty'
         if a.get('offset'):
             text += f', {_fmt(a["offset"], "V")} DC offset'
@@ -296,7 +296,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if getattr(self.cal, 'wave_nonsine', False) and kind not in SQUARE_KINDS:
             raise drivers.InstrumentError('The calibrator is still on a square wave (WAVE SINE was not confirmed after the last square-wave point): '
                                           'output not enabled. Run again (the calibrator is reset to its defaults first).')
-        if kind in ('DCV', 'ACV'):
+        square_level = kind == 'ACV' and a.get('waveform') == 'square'       # a datasheet level given in Vpp: a square wave, amplitude peak-to-peak
+        if kind in ('DCV', 'ACV') and not square_level:
             self._volts(v, f, context, cancel, ramp=p.get('ramp'), dc=kind == 'DCV')
         else:
             if kind in ('DCI', 'ACI'):
@@ -307,7 +308,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 self.cal.set_output_capacitance(v)
             elif kind == 'TEMP':
                 self.cal.set_output_temperature(v)
-            elif kind in SQUARE_KINDS:
+            elif kind in SQUARE_KINDS or square_level:
+                if not hasattr(self.cal, 'set_output_square'):
+                    raise drivers.InstrumentError(f'{getattr(self.cal, "label", "The calibrator")} cannot make a square wave: this point asks for a level in Vpp '
+                                                  f'({_fmt(v, "V")} p-p). Output not enabled.')
                 self.cal.set_output_square(v, f, a.get('duty', 50.0), a.get('offset', 0.0))
             else:
                 raise ValueError('No calibrator output for ' + kind)

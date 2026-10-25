@@ -171,6 +171,8 @@ def _engine_step(ds, fn, fi, n, p, rng, lims, period):
         if k in ('FREQ', 'PERIOD'):
             freq = p.nominal if k == 'FREQ' else (D(1) / p.nominal)
             step.update(kind='ACV', applied=dict(value=float(p.amplitude), frequency=float(freq)))
+            if p.settings.get('waveform') == 'square':                       # a Vpp level: the calibrator makes a square wave of that peak-to-peak amplitude (never a sine)
+                step['applied']['waveform'] = 'square'
         elif k in ('DCV', 'DIODE', 'SCOPE_GAIN', 'SCOPE_OFFSET'):
             step.update(kind='DCV', applied=dict(value=nominal, frequency=None))
         elif k in ('OHM2', 'OHM4'):

@@ -82,26 +82,13 @@ class SheetDelegate(CellDelegate):
         painter.setFont(base)
         painter.setPen(QColor(fg))
         fm = painter.fontMetrics()
-        room = r.width() - 16 - (44 if marked else 0) - (60 if key == 'nominal' and row.get('badge') else 0)
+        room = r.width() - 16 - (44 if marked else 0)
         text = fm.elidedText(str(row.get(key, '') or ''), Qt.TextElideMode.ElideRight, max(10, room))
         if text:
             if col['align'] == 'center':
                 painter.drawText(r, int(Qt.AlignmentFlag.AlignCenter), text)
             else:
                 painter.drawText(r.adjusted(8, 0, -8, 0), int(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft), text)
-        if key == 'nominal' and row.get('badge'):         # the waveform tag (a square wave level) at the right of the nominal cell
-            tag = row['badge']
-            fb = QFont(base)
-            fb.setPointSizeF(max(7.0, base.pointSizeF() - 1.5))
-            painter.setFont(fb)
-            w = painter.fontMetrics().horizontalAdvance(tag) + 14
-            box = QRect(r.right() - w - 6, r.top() + 5, w, r.height() - 10)
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QColor(t['on_primary'] if sel_cell else t['info_bg']))
-            painter.drawRoundedRect(box, 8, 8)
-            painter.setPen(QColor(t['primary'] if sel_cell else t['info']))
-            painter.drawText(box, int(Qt.AlignmentFlag.AlignCenter), tag)
-            painter.setFont(base)
         if marked:
             painter.setPen(QColor(t['on_primary'] if sel_cell else t['muted']))
             painter.drawText(r.adjusted(0, 0, -6, 0), int(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight), 'typed')

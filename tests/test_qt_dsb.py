@@ -1201,12 +1201,12 @@ class SheetQualityTests(QtDsbCase):
         self.assertEqual(len(win.model._undo), undo)
         self.assertEqual(win.model.sel_key, keys[0])
 
-    def test_the_sheet_marks_rows_with_a_status_strip_and_the_waveform_tag(self):
+    def test_the_sheet_marks_rows_with_a_status_strip(self):
         win = self.new_window()
         win.function_chosen('Frequency')
         self.type_cell(win, '1 kHz, level 1 V square')
         row = next(r for r in win.model.rows() if r['kind'] == 'point')
-        self.assertEqual(row['badge'], 'square')
+        self.assertEqual(row['badge'], '')                                  # no tag any more: the nominal cell says 'level 1 V square' / Vpp itself
         self.assertIn(row['status'], ('warn', 'bad'))                       # no limits yet
         pix = win.sheet.viewport().grab()                                    # painting the rows must not raise
         self.assertFalse(pix.isNull())

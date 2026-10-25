@@ -900,8 +900,8 @@ class DeepDiveFixTests(Base):
         p = fn.points[0]
         self.assertEqual(p.settings.get('waveform'), 'square')
         row = next(r for r in g.rows() if r['kind'] == 'point')
-        self.assertEqual(row['badge'], 'square')                                          # drawn as a tag in the sheet
-        self.assertNotIn('square', row['nominal'])
+        self.assertEqual(row['badge'], '')                                                # no tag in the sheet any more
+        self.assertIn('level 1 Vpp', row['nominal'])                                      # the cell itself says Vpp
         self.assertIn('level 1 Vpp', g.cell_text(row['key'], 'nominal'))                  # shown as peak to peak, never converted to rms
         self.assertIn(row['status'], ('good', 'warn', 'bad', 'off'))
         self.assertEqual(g.panel_state(next(r['key'] for r in g.rows() if r['kind'] == 'point'))['form']['level'], '1 Vpp')

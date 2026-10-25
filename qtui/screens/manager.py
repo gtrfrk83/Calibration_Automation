@@ -203,7 +203,7 @@ class ManagerWindow(QMainWindow):
     def resizeEvent(self, ev):
         super().resizeEvent(ev)
         if hasattr(self, 'card_column'):
-            self.card_column.setFixedWidth(max(340, min(380, int(self.width() * 0.26))))        # the card is a little wider on a wide window; the table keeps the rest
+            self.card_column.setFixedWidth(max(356, min(396, int(self.width() * 0.26) + 16)))        # the card is a little wider on a wide window; the table keeps the rest
 
     def closeEvent(self, ev):
         layouts.save('manager', self)
@@ -374,9 +374,9 @@ class ManagerWindow(QMainWindow):
 
     def build_card(self):
         column = self.card_column = QWidget()
-        column.setFixedWidth(360)
+        column.setFixedWidth(376)
         cv = QVBoxLayout(column)
-        cv.setContentsMargins(0, 0, 0, 0)
+        cv.setContentsMargins(4, 0, 12, 14)                  # room around the card for its soft shadow (Appearance > Depth)
         cv.setSpacing(M.sm)
         cv.addWidget(label('Selected procedure', 'section'))
         card = self.card = QFrame()

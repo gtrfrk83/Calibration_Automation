@@ -2082,10 +2082,8 @@ class GridModel(CheckMixin, EditorModel):
                 rng = fn.range(p.range_id)
                 issue = self._issue(by_point.get(p.id, []), fn, p)
                 limits = self.limit_fields(fn, p)
-                badge = p.settings.get('waveform', '') if p.amplitude is not None else ''
+                badge = ''                                                # no tag: a Vpp level says it in the cell itself ('level 1 Vpp')
                 nominal = self.nominal_text(fn, p)
-                if badge and nominal.endswith(' ' + badge):
-                    nominal = nominal[:-len(badge) - 1]                  # the waveform is drawn as a small tag, not as text in the cell (the Edit Cell bar still shows it)
                 status = ('off' if not p.enabled else 'bad' if issue.get('level') == 'error' else 'warn' if issue.get('level') == 'warn'
                           or (not fn.info.get('passfail') and not limits['low'] and not limits['high']) else 'good')
                 add(key=f'p:{fn.id}:{p.id}', kind='point', fid=fn.id, pid=p.id, step=(f'{fi}-{k}' if p.enabled else '') + (' *' if p.note else ''),
