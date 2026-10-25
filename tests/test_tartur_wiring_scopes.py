@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import re
 import unittest
 from pathlib import Path
 
@@ -402,14 +403,24 @@ class PdfExports(unittest.TestCase):
                 continue
             self.assertEqual((a / name).read_bytes(), (b / name).read_bytes(), name)
 
+    # Accepted since the integration branch (owner, 2026-10-25): the MDO flatness rows print the scope's 0.050 dB, and the AC bands are half-open, so a
+    # 33220A point at exactly 100 kHz takes the 50-100 kHz row (scope CMC and 5790B alike).
+    DB_ROWS = r'dBm, [\d.]+ [kM]?Hz - [\d.]+ [kM]?Hz .* dB'
+    FGEN_100K = r'Sine [\d.]+ m?Vrms @ 100\.0 kHz, High Z .* [\d.]+ (\u00b5|m)?V$'
+
     def only_frequency_cells_changed(self, old, new, name):
         import difflib
-        self.assertIn(name, ('mdo.pdf', 'ws_all.pdf'))
+        self.assertIn(name, ('mdo.pdf', 'ws_all.pdf', 'fgen.pdf'))
         norm = lambda path: [' '.join(l.split()) for l in pdftext(path).splitlines()]
         changed = [l for l in difflib.ndiff(norm(old), norm(new)) if l[:2] in ('- ', '+ ')]
         self.assertTrue(changed)
         for l in changed:
-            self.assertRegex(l[2:], r'Hz .*N/A$' if l[0] == '-' else r'Hz .* [\d.]+ (p|n|\u00b5|m)?Hz$', l)
+            if name == 'fgen.pdf':
+                self.assertRegex(l[2:], self.FGEN_100K, l)
+            elif re.search(self.DB_ROWS, l[2:]):
+                self.assertRegex(l[2:], r' N/A$' if l[0] == '-' else r' 0\.050 dB$', l)
+            else:
+                self.assertRegex(l[2:], r'Hz .*N/A$' if l[0] == '-' else r'Hz .* [\d.]+ (p|n|\u00b5|m)?Hz$', l)
 
     def test_on_adds_columns_and_values(self):
         out = self.run_harness(ROOT, 'new_on', 'on')

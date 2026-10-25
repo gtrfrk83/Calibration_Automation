@@ -310,6 +310,8 @@ class RealDialogsBase(unittest.TestCase):
     key, fixture, scenario = '', '', ''
 
     def test_the_windows_of_a_whole_run(self):
+        if not self.fixture:
+            self.skipTest('the base class itself: the Tds / Mdo / Fgen subclasses run this test')
         want = json.loads((ROOT / 'tests' / 'golden_ui' / f'ui_prompts_{self.fixture}.json').read_text(encoding='utf-8'))[self.scenario]
         hn = Q.QtHarness().start()
         ui_port.set_ui(ui_port_qt.QtUiPort())

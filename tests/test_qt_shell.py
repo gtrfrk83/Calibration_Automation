@@ -519,7 +519,7 @@ class Demo(ShellCase):
         win.show()
         settle(10)
         self.assertEqual(len(app.tree.get_children()), len(app.points))
-        self.assertEqual(sh.summary.text.get(), f'34 of {len(app.points)} tested')
+        self.assertEqual(sh.summary.text.get(), f'{min(34, len(app.points))} of {len(app.points)} tested')       # 30 sample rows when the engine cannot import (no tkinter)
         out = Path(tempfile.mkdtemp()) / 'shell.png'
         self.assertTrue(win.grab().save(str(out)))
         img = QImage(str(out))
