@@ -65,6 +65,9 @@ class FreqBox(QWidget):
     def set_value(self, v):
         t = '' if v is None else str(v).strip()
         parts = t.split()
+        square = len(parts) == 3 and parts[2] == 'square'
+        if square:
+            parts = parts[:2]
         if len(parts) == 2 and parts[1] in self.UNITS:
             self.edit.setText(parts[0])
             self.unit.setCurrentText(parts[1])
@@ -112,7 +115,8 @@ class LevelBox(QWidget):
             value = Decimal(t.replace(',', '.')) * Decimal(str(self.SCALE[unit]))
         except Exception:
             return t
-        return f'{value.normalize():f} V'.replace('+', '')
+        text = f'{value.normalize():f} V'.replace('+', '')
+        return text + (' square' if unit.endswith('pp') and self.basis == 'rms' else '')       # Vpp on an rms function is a square wave: kept with the point
 
     def set_value(self, v):
         t = '' if v is None else str(v).strip()
@@ -120,7 +124,7 @@ class LevelBox(QWidget):
         if len(parts) == 2 and parts[1] in ('V', 'mV', '\u00b5V', 'uV'):
             self.edit.setText(parts[0])
             self.unit.setCurrentText('\u00b5V' if parts[1] == 'uV' else parts[1])
-            if self.basis == 'pp':
+            if self.basis == 'pp' or square:
                 self.unit.setCurrentText({'V': 'Vpp', 'mV': 'mVpp', '\u00b5V': '\u00b5Vpp'}[self.unit.currentText()])
         else:
             self.edit.setText(t)

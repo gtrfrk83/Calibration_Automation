@@ -1837,6 +1837,14 @@ _CODE_COL = {'no_spec': 'tol', 'expr_eval': 'tol', 'limit_inverted': 'tol', 'lim
              'point_range_unknown': 'nominal', 'dup_point_id': 'nominal', 'limit_open': 'tol'}
 
 
+def split_waveform(text):
+    """'1 V square' -> ('1 V', 'square'); '1 V sine' -> ('1 V', None) (sine is the default and is not stored); '1 V' -> ('1 V', None)."""
+    m = re.search(r'\s+(sine|square)\s*$', text or '', re.I)
+    if not m:
+        return (text or '').strip(), None
+    return text[:m.start()].strip(), ('square' if m.group(1).lower() == 'square' else None)
+
+
 def with_units(text, units):
     """'5' + 'mV' -> '5 mV'; a text that already carries a unit is left alone."""
     t = (text or '').strip()
@@ -2107,6 +2115,8 @@ class GridModel(CheckMixin, EditorModel):
             s += ' @ ' + db.format_si(p.frequency, 'Hz')
         if p.amplitude is not None:
             s += ', level ' + db.format_si(p.amplitude, 'V')
+            if p.settings.get('waveform') == 'square':
+                s += ' square'
         return s
 
     def typing_prefix(self, fn, p=None):
@@ -2148,7 +2158,9 @@ class GridModel(CheckMixin, EditorModel):
             if not freq:
                 raise db.DsError('frequency', 'Type the frequency after the @, for example 5 V @ 1 kHz.')
             db.parse_quantity(freq, 'Hz')
+        waveform = None
         if level is not None:
+            level, waveform = split_waveform(level)
             db.parse_quantity(level)
         if bare_unit:
             num, unit_part = split_unit_text(t)
@@ -2162,7 +2174,7 @@ class GridModel(CheckMixin, EditorModel):
                 raise db.DsError('nominal', f'That {what} is far too large to be a test point.')
         if freq and db.parse_quantity(freq, 'Hz') <= 0:
             raise db.DsError('frequency', 'The frequency must be above 0 Hz.')
-        return dict(nominal=t, frequency=freq, amplitude=level)
+        return dict(nominal=t, frequency=freq, amplitude=level, waveform=waveform)
 
     # ---- the limits: LOW and HIGH, absolute (display only; the exact limit maths is Function.limit_for and has not changed)
     def typed_limits(self, p):
@@ -2634,7 +2646,7 @@ class GridModel(CheckMixin, EditorModel):
         p.spec = copy_spec(src.spec)
         return True
 
-    def _create_point(self, fn, nominal, freq=None, amp=None, want_fs=None, inherit=True):
+    def _create_point(self, fn, nominal, freq=None, amp=None, want_fs=None, inherit=True, waveform=None):
         """Add a test point to a function.  Call inside _do.  Returns (point, notes[])."""
         value = db.parse_quantity(nominal, fn.unit or None) if isinstance(nominal, str) else db.dec(nominal)
         rng, note = self._pick_range(fn, value, want_fs)
@@ -2642,6 +2654,8 @@ class GridModel(CheckMixin, EditorModel):
         if dup is not None:
             raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, dup)}.')
         p = db.add_point(fn, value, rng.id, freq or None, amp or None)
+        if waveform:
+            p.settings['waveform'] = waveform
         notes = [note] if note else []
         if inherit and not fn.info.get('passfail') and self._copy_spec_from_neighbour(fn, p):
             notes.append('It starts with the tolerance of the nearest row in this section (change it in the boxes below).')
@@ -2655,13 +2669,20 @@ class GridModel(CheckMixin, EditorModel):
             if fn is None:
                 raise db.DsError('function', 'Choose what this row tests first: use the function box under the sheet, or type it in FUNCTION TESTED.')
             parts = self.parse_nominal(fn, text, self.bare_unit(fn))
-            p, notes = self._create_point(fn, parts['nominal'], parts['frequency'], parts['amplitude'])
+            p, notes = self._create_point(fn, parts['nominal'], parts['frequency'], parts['amplitude'], waveform=parts['waveform'])
             self.fid = fn.id
             box['key'] = f'p:{fn.id}:{p.id}'
             return Outcome(True, f'Row added to {fn.name}. ' + ' '.join(notes), box['key'])
         res = self._do('add row', act)
         res.message = res.message.strip()
         return res
+
+    @staticmethod
+    def _set_waveform(p, waveform):
+        if waveform:
+            p.settings['waveform'] = waveform
+        else:
+            p.settings.pop('waveform', None)
 
     def _settle_range(self, fn, p, value, rng):
         """After a value edit: a row alone on its range (the range was made for it) goes back to the smallest existing range that holds the new value."""
@@ -2707,6 +2728,7 @@ class GridModel(CheckMixin, EditorModel):
             if q is not None and q.id != pid:
                 raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, q)}.')
             db.edit_point(fn, pid, nominal=parts['nominal'], frequency=parts['frequency'] or '', amplitude=parts['amplitude'] or '', range_id=rng.id)
+            self._set_waveform(fn.point(pid), parts['waveform'])
             new_id = self._rekey(fn, fn.point(pid))
             return Outcome(True, ('Value changed.' + (' ' + note if note else '') + (' The tolerance follows the new value.' if cur.spec is not None else '')),
                            f'p:{fn.id}:{new_id}')
@@ -2964,7 +2986,7 @@ class GridModel(CheckMixin, EditorModel):
             rng = fn.range(p.range_id)
             num, units = split_unit_text(self.fmt_value(fn, rng, p.nominal))
             form.update(nominal=num, units=units or form['units'], freq=db.format_si(p.frequency, 'Hz') if p.frequency is not None else '',
-                        level=db.format_si(p.amplitude, 'V') if p.amplitude is not None else '', expect=p.settings.get('expect', 'on'), remark=p.note, run=p.enabled,
+                        level=(db.format_si(p.amplitude, 'V') + (' square' if p.settings.get('waveform') == 'square' else '')) if p.amplitude is not None else '', expect=p.settings.get('expect', 'on'), remark=p.note, run=p.enabled,
                         fs_scale=self.fmt_value(fn, rng, rng.full_scale) if rng else '')
             if rng is not None and rng.resolution:
                 pre = prefix_of_units(form['units'], fn.unit)
@@ -3086,6 +3108,7 @@ class GridModel(CheckMixin, EditorModel):
         if q is not None and q is not p:
             raise db.DsError('dup_point', f'There is already a row for that: row {self._row_number(fn, q)}.')
         db.edit_point(fn, p.id, nominal=parts['nominal'], frequency=parts['frequency'] or '', amplitude=parts['amplitude'] or '', range_id=rng.id)
+        self._set_waveform(p, parts['waveform'])
         self._rekey(fn, p)
         res = self._resolution_from_form(fn, form, units, nominal_text)
         res_note = self._set_range_resolution(fn, rng, res, form, keep_ids=(p.id,))
@@ -3147,7 +3170,7 @@ class GridModel(CheckMixin, EditorModel):
                 units = form.get('units') or db.unit_symbol(fn.unit)
                 parts = self.parse_nominal(fn, ' @ '.join(x for x in (with_units(form['nominal'], units), with_units(form.get('freq', ''), 'Hz') if str(form.get('freq', '')).strip() else '') if x)
                                            + (f', level {form["level"]}' if str(form.get('level', '')).strip() else ''))
-                p, notes = self._create_point(fn, parts['nominal'], parts['frequency'], parts['amplitude'], self._want_fs(fn, form, units), inherit=False)
+                p, notes = self._create_point(fn, parts['nominal'], parts['frequency'], parts['amplitude'], self._want_fs(fn, form, units), inherit=False, waveform=parts['waveform'])
                 self.fid = fn.id
             units = form.get('units') or db.unit_symbol(fn.unit)
             msg = self._apply_row(fn, p, form, self._want_fs(fn, form, units))
@@ -3205,7 +3228,8 @@ class GridModel(CheckMixin, EditorModel):
             units = form.get('units') or db.unit_symbol(fn.unit)
             values = self.multi_values(fn, form)
             freq = with_units(form.get('freq', ''), 'Hz') if str(form.get('freq', '')).strip() else None
-            level = str(form.get('level', '')).strip() or None
+            level, waveform = split_waveform(str(form.get('level', '')).strip())
+            level = level or None
             plus = minus = ''
             if not fn.info.get('passfail'):
                 plus, minus = self.form_spec_texts(fn, form)
@@ -3217,7 +3241,7 @@ class GridModel(CheckMixin, EditorModel):
             made, existed = [], 0
             for v in values:
                 try:
-                    p, _notes = self._create_point(fn, v, freq, level, want_fs, inherit=False)
+                    p, _notes = self._create_point(fn, v, freq, level, want_fs, inherit=False, waveform=waveform)
                 except db.DsError as exc:
                     if exc.code == 'dup_point':
                         existed += 1

@@ -870,6 +870,25 @@ class DeepDiveFixTests(Base):
         g.set_locked(True)
         self.assertFalse(g.load_version(1).ok)
 
+    def test_a_square_wave_level_is_kept_shown_and_survives_edit_and_reload(self):
+        g = self.g
+        g.set_target_function('Frequency')
+        g.select(self.blank_key(), 'nominal')
+        self.assertTrue(g.commit_cell('1 kHz, level 1 V square').ok)
+        fn = g.ds.functions[0]
+        p = fn.points[0]
+        self.assertEqual(p.settings.get('waveform'), 'square')
+        self.assertIn('level 1 V square', g.cell_text(g.sel_key, 'nominal') if g.point_of(g.sel_key)[1] else g.rows()[1]['nominal'])
+        self.assertEqual(g.panel_state(next(r['key'] for r in g.rows() if r['kind'] == 'point'))['form']['level'], '1 V square')
+        key = next(r['key'] for r in g.rows() if r['kind'] == 'point')
+        self.assertTrue(g.commit_cell('1 kHz, level 1 V', key, 'nominal', move='stay').ok)       # sine again: nothing stored
+        self.assertNotIn('waveform', g.ds.functions[0].points[0].settings)
+        self.assertTrue(g.commit_cell('2 kHz, level 2 V sine', g.sel_key, 'nominal', move='stay').ok)
+        self.assertNotIn('waveform', g.ds.functions[0].points[0].settings)
+        import datasheet_builder as dbm
+        back = dbm.Datasheet.from_json(g.ds.to_json())
+        self.assertEqual(back.functions[0].points[0].settings, g.ds.functions[0].points[0].settings)
+
 
 class ToleranceFromAboveTests(Base):
     def test_blank_row_takes_tolerance_without_touching_sheet(self):
