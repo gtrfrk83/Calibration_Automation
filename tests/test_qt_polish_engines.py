@@ -54,14 +54,17 @@ def setUpModule():
     # (reported in NOTES.md, shared component): this module builds many windows in one process, so its windows get no Appearance menu (the live switch is tested in
     # a subprocess with windows that stay open).
     if HAVE_QT:
-        global _PATCH
+        global _PATCH, _PATCH2
         _PATCH = mock.patch.object(theme, 'build_appearance_menu', lambda *a, **k: None)
+        _PATCH2 = mock.patch.object(theme, 'fill_appearance_menu', lambda *a, **k: None)
         _PATCH.start()
+        _PATCH2.start()
 
 
 def tearDownModule():
     if HAVE_QT:
         _PATCH.stop()
+        _PATCH2.stop()
 
 
 def lum(h):

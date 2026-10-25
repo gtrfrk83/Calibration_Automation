@@ -246,9 +246,9 @@ class Card(QtCase):
 
 @unittest.skipUnless(HAVE_QT, 'PySide6 is not installed')
 class Menus(QtCase):
-    def test_menu_bar_has_file_library_help_in_that_order(self):
+    def test_menu_bar_has_file_appearance_library_help_in_that_order(self):
         titles = [a.text().replace('&', '') for a in self.win.menuBar().actions()]
-        self.assertEqual(titles, ['File', 'Library', 'Help'])
+        self.assertEqual(titles, ['File', 'Appearance', 'Library', 'Help'])
         self.assertIn('&Library', [a.text() for a in self.win.menuBar().actions()])           # Alt+L
 
     def test_library_menu_items_are_the_tk_ones(self):
@@ -271,9 +271,9 @@ class Menus(QtCase):
     def test_help_menu_items_and_f1(self):
         texts = [a.text() for a in self.win.help_menu.actions() if not a.isSeparator()]
         self.assertEqual(texts[:4], ['About Calibration Suite', 'Open my data folder', 'Import data from another copy...', 'Save diagnostic log for support'])
-        self.assertIn('Appearance', texts)
+        self.assertNotIn('Appearance', texts)                                  # Appearance has its own menu, next to File
         self.assertEqual(self.win.help_actions['about'].shortcut().toString(), 'F1')
-        self.assertEqual([a.text() for a in self.win.appearance_menu.actions()], ['Dark', 'Light'])          # both themes are offered (light enabled 2026-10-24)
+        self.assertEqual([a.text() for a in self.win.appearance_menu.actions() if not a.isSeparator()], ['Dark', 'Light', 'Depth (soft shadows on cards and buttons)'])          # both themes, then the shadows switch
         self.win.help_actions['about'].trigger()
         self.assertEqual(self.boxes[-1][1], 'About Calibration Suite')
         self.assertIn('Your data folder:', self.boxes[-1][2])

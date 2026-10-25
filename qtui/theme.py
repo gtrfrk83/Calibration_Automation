@@ -705,6 +705,13 @@ def build_appearance_menu(parent_menu: QMenu, on_change=None) -> QMenu | None:
     if len(ENABLED_THEMES) < 2:
         return None
     sub = parent_menu.addMenu('Appearance')
+    fill_appearance_menu(sub, on_change)
+    return sub
+
+
+def fill_appearance_menu(sub: QMenu, on_change=None) -> None:
+    """The theme choices (one checkable entry per ENABLED_THEMES, the current one checked) added straight into `sub`."""
+    from PySide6.QtGui import QActionGroup
     group = QActionGroup(sub)
     group.setExclusive(True)
     acts = {}
@@ -727,4 +734,3 @@ def build_appearance_menu(parent_menu: QMenu, on_change=None) -> QMenu | None:
         except RuntimeError:
             pass                                                  # the menu went away with its window
     manager().changed.connect(_sync)
-    return sub

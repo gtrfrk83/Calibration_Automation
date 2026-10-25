@@ -91,20 +91,35 @@ def add_help_menu(window: QMainWindow):
     add('import', 'Import data from another copy...', lambda: import_data(window))
     add('log', 'Save diagnostic log for support', lambda: save_log(window))
     menu.addSeparator()
-    window.appearance_menu = theme.build_appearance_menu(menu)
-    if window.appearance_menu is None:                                  # only dark is offered for now: the menu is there, with its one (current) choice
-        window.appearance_menu = menu.addMenu('Appearance')
-        dark = window.appearance_menu.addAction('Dark  (current)')
+    window.help_menu = menu
+    return menu
+
+
+def add_appearance_menu(window: QMainWindow):
+    """A top-level Appearance menu right after File: the theme choices, then the Depth (soft shadows) switch."""
+    from PySide6.QtWidgets import QMenu
+    from qtui import depth
+    bar = window.menuBar()
+    menu = QMenu('&Appearance', window)
+    existing = bar.actions()
+    if len(existing) > 1:
+        bar.insertMenu(existing[1], menu)                      # File, Appearance, Library, ... Help
+    else:
+        bar.addMenu(menu)
+    if len(theme.ENABLED_THEMES) < 2:                         # only dark is offered: the menu is there, with its one (current) choice
+        dark = menu.addAction('Dark  (current)')
         dark.setCheckable(True)
         dark.setChecked(True)
         dark.setEnabled(False)
-    from qtui import depth
+    else:
+        theme.fill_appearance_menu(menu)
+    menu.addSeparator()
     depth_act = menu.addAction('Depth (soft shadows on cards and buttons)')
     depth_act.setCheckable(True)
     depth_act.setChecked(depth.enabled())
     depth_act.toggled.connect(lambda on: depth.set_enabled(on, save=True))
     window.depth_action = depth_act
-    window.help_menu = menu
+    window.appearance_menu = menu
     return menu
 
 
@@ -116,5 +131,6 @@ def install_hooks():
 
 def dress(window: QMainWindow, where: str = ''):
     window.setWindowTitle(window.windowTitle() if window.windowTitle().startswith(suite_info.NAME) else suite_info.window_title(window.windowTitle()))
+    add_appearance_menu(window)
     add_help_menu(window)
     return window
