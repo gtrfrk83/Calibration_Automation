@@ -288,7 +288,7 @@ class Menus(QtCase):
         self.assertEqual(self.win.version_label.text(), mm.VERSION)
 
     def test_main_tabs_and_their_status_texts(self):
-        self.assertEqual([self.win.tabs.tabText(i) for i in range(self.win.tabs.count())], ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder', 'Uncertainty'])
+        self.assertEqual([self.win.tabs.tabText(i) for i in range(self.win.tabs.count())], ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder', 'Uncertainty\nCalculator'])
         self.assertEqual([self.win.view_bar.tabText(i) for i in range(3)], ['Automated Calibrations', 'Manual Calibrations', 'Adjustments'])
         for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc', 'procedures'):
             self.win.select_tab(key)

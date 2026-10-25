@@ -38,7 +38,7 @@ from qtui.widgets import (Badge, Banner, EmptyState, GhostButton, PrimaryButton,
 
 TITLE = 'Calibration Procedure Manager'
 SUBTITLE = 'Run, document and maintain your calibration procedures'
-MAIN_TABS = (('procedures', 'Procedures'), ('asset_history', 'Asset History'), ('standards_specs', 'Standards Specs'), ('datasheet_builder', 'Datasheet Builder'), ('uncertainty_calc', 'Uncertainty'))
+MAIN_TABS = (('procedures', 'Procedures'), ('asset_history', 'Asset History'), ('standards_specs', 'Standards Specs'), ('datasheet_builder', 'Datasheet Builder'), ('uncertainty_calc', 'Uncertainty\nCalculator'))
 PANEL_TITLES = {'asset_history': 'Asset History', 'standards_specs': 'Standards Specs', 'datasheet_builder': 'Datasheet Builder', 'uncertainty_calc': 'Uncertainty Calculator'}
 
 
@@ -174,6 +174,7 @@ class ManagerWindow(QMainWindow):
         # ---- main tabs
         self.tabs = make_tab_bar([t for _k, t in MAIN_TABS])
         self.tabs.setAccessibleName('Main tabs')
+        self.tabs.setProperty('tall', any('\n' in t for _k, t in MAIN_TABS))          # room for the two-line 'Uncertainty / Calculator' label
         self.stack = QStackedWidget()
         page.addWidget(self.tabs)
         page.addWidget(self.stack, 1)

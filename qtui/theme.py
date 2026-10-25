@@ -440,6 +440,7 @@ QTabBar::tab:hover:!selected {{ color: {t['text']}; }}
 QTabBar::tab:focus {{ background: {t['select']}; border-top-left-radius: {rs}px; border-top-right-radius: {rs}px; }}
 QTabBar::tab:disabled {{ color: {t['disabled_fg']}; }}
 QTabBar[sub="true"]::tab {{ padding: 6px 14px; }}
+QTabBar[tall="true"]::tab {{ padding: 4px 16px; min-height: 34px; }}
 QTabWidget::pane {{ border: none; border-top: 1px solid {t['border']}; top: -1px; }}
 
 /* fields */

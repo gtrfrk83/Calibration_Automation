@@ -13,15 +13,16 @@ from datetime import date
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import (QAbstractItemView, QComboBox, QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QLineEdit, QMenu, QPlainTextEdit, QScrollArea,
-                               QSpinBox, QTableWidget, QTableWidgetItem, QToolButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QComboBox, QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QInputDialog, QLineEdit, QListWidget, QListWidgetItem,
+                               QMenu, QPlainTextEdit, QScrollArea, QSpinBox, QTableWidget, QTableWidgetItem, QToolButton, QVBoxLayout, QWidget)
 
 import uncertainty_calc as uc
 import uncertainty_calc_xlsx as xl
+import uncertainty_store as store
 
 from ..table import Column, DataTable
 from ..theme import M
-from ..widgets import Banner, Card, MessageDialog, PrimaryButton, SecondaryButton, label
+from ..widgets import Banner, Card, GhostButton, MessageDialog, PrimaryButton, SearchField, SecondaryButton, label
 
 PRESETS = (                                            # (menu text, component name, distribution)
     ('Resolution of the unit under test (half the last digit)', 'Resolution (UUT)', 'rect'),
@@ -48,6 +49,18 @@ def _save_file(parent, title, directory, filters):
     return QFileDialog.getSaveFileName(parent, title, directory, filters)[0]
 
 
+def _ask_name(parent, title, text, default=''):
+    """Ask for a name; '' when cancelled (a test replaces this)."""
+    value, ok = QInputDialog.getText(parent, title, text, text=default)
+    return value.strip() if ok else ''
+
+
+def _confirm(parent, title, text):
+    """Yes / No question (a test replaces this)."""
+    from PySide6.QtWidgets import QMessageBox
+    return QMessageBox.question(parent, title, text) == QMessageBox.StandardButton.Yes
+
+
 def fmt(x, unit=''):
     if x is None:
         return ''
@@ -71,13 +84,80 @@ class UncertaintyCalculatorPanel(QWidget):
         root = QHBoxLayout(self)
         root.setContentsMargins(M.page_margin, M.sm, M.page_margin, M.page_margin)
         root.setSpacing(M.lg)
+        self.current_id = None                       # the saved calculation on screen (None = not saved yet)
+        self._saved_state = None                     # its state as last saved / opened: differing means unsaved changes
+        self._loading = False
+        root.addWidget(self._build_rail())
         root.addWidget(self._build_inputs(), 5)
-        root.addWidget(self._build_results(), 6)
+        root.addWidget(self._build_results(), 5)
         for _ in range(START_GROUPS):
             self.add_group()
+        self._saved_state = self.state()
         self.recalc()
+        self.refresh()
 
     # ------------------------------------------------------------------------------------------------------------------------------ building
+    def _build_rail(self):
+        self.rail = QWidget()
+        outer = QVBoxLayout(self.rail)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(M.sm)
+        head = QHBoxLayout()
+        self.rail_title = label('Saved calculations', 'section')
+        head.addWidget(self.rail_title, 1)
+        self.rail_toggle = QToolButton()
+        self.rail_toggle.setAutoRaise(True)
+        self.rail_toggle.setToolTip('Hide or show the list of saved calculations (gives the budget more room)')
+        self.rail_toggle.setAccessibleName('Hide the saved list')
+        self.rail_toggle.clicked.connect(lambda: self.set_rail_open(not self.rail_open))
+        head.addWidget(self.rail_toggle)
+        outer.addLayout(head)
+        host = QWidget()                                   # everything below the header: hidden when the rail is folded
+        self.rail_body = host
+        outer.addWidget(host, 1)
+        lay = QVBoxLayout(host)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(M.sm)
+        self.find_e = SearchField('Search saved')
+        self.find_e.queryChanged.connect(lambda *_: self.refresh())
+        lay.addWidget(self.find_e)
+        self.saved_list = QListWidget()
+        self.saved_list.setAccessibleName('Saved uncertainty calculations')
+        self.saved_list.setWordWrap(True)
+        self.saved_list.itemClicked.connect(lambda it: self.open_saved(it.data(Qt.ItemDataRole.UserRole)))
+        lay.addWidget(self.saved_list, 1)
+        self.state_label = label('', 'hint', wrap=True)
+        lay.addWidget(self.state_label)
+        grid = QHBoxLayout()
+        self.save_b = PrimaryButton('Save')
+        self.save_b.clicked.connect(lambda: self.save_current())
+        self.new_b = SecondaryButton('New')
+        self.new_b.clicked.connect(lambda: self.new_calculation())
+        grid.addWidget(self.save_b)
+        grid.addWidget(self.new_b)
+        lay.addLayout(grid)
+        grid2 = QHBoxLayout()
+        self.saveas_b = SecondaryButton('Save as')
+        self.saveas_b.clicked.connect(lambda: self.save_current(as_new=True))
+        self.dup_b = SecondaryButton('Duplicate')
+        self.dup_b.clicked.connect(lambda: self.duplicate_saved())
+        self.del_b = GhostButton('Delete')
+        self.del_b.clicked.connect(lambda: self.delete_saved())
+        for b in (self.saveas_b, self.dup_b):
+            grid2.addWidget(b)
+        lay.addLayout(grid2)
+        lay.addWidget(self.del_b)
+        self.rail_open = True
+        self.set_rail_open(True)
+        return self.rail
+
+    def set_rail_open(self, on):
+        self.rail_open = bool(on)
+        self.rail_body.setVisible(self.rail_open)
+        self.rail_title.setVisible(self.rail_open)
+        self.rail.setFixedWidth(220 if self.rail_open else 30)
+        self.rail_toggle.setText('\u2039' if self.rail_open else '\u203a')
+
     def _build_inputs(self):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -373,6 +453,7 @@ class UncertaintyCalculatorPanel(QWidget):
         except (uc.CalcError, ValueError) as exc:
             self.error = str(exc)
         self.show_result()
+        self._update_state()
 
     def show_result(self):
         res, unit = self.result, self.unit_e.text().strip()
@@ -445,6 +526,165 @@ class UncertaintyCalculatorPanel(QWidget):
             return None
         self._say(f'Exported the uncertainty work to {path}')
         return path
+
+    # ------------------------------------------------------------------------------------------------------------------------------ saving and reopening
+    def state(self):
+        """Everything typed, as a JSON-able dict (the numbers are worked out again when it is opened)."""
+        groups = []
+        for c in range(self.groups.columnCount()):
+            head = self.groups.item(0, c)
+            vals = []
+            for r in range(1, self.groups.rowCount()):
+                it = self.groups.item(r, c)
+                vals.append(it.text() if it else '')
+            while vals and not vals[-1].strip():
+                vals.pop()
+            groups.append([head.text() if head else f'Group {c + 1}', vals])
+        typeb = []
+        for r in range(self.typeb.rowCount()):
+            def cell(c):
+                it = self.typeb.item(r, c)
+                return it.text() if it else ''
+            typeb.append([cell(0), cell(1), self.typeb.cellWidget(r, 2).currentData(), cell(3), cell(4)])
+        return dict(version=1, measurand=self.title_e.text(), nominal=self.nominal_e.text(), unit=self.unit_e.text(), repeat_text=self.rep_text.toPlainText(),
+                    averaged=self.avg_spin.value(), groups=groups, type_b=typeb, k_mode=self.k_mode.currentData(), fixed_k=self.k_fixed.text(),
+                    cmc=self.cmc_e.text(), tolerance=self.tol_e.text())
+
+    def load_state(self, st):
+        """Put a saved state back on screen (missing keys keep their defaults)."""
+        self._loading = True
+        try:
+            self.title_e.setText(st.get('measurand', ''))
+            self.nominal_e.setText(st.get('nominal', ''))
+            self.unit_e.setText(st.get('unit', ''))
+            self.rep_text.setPlainText(st.get('repeat_text', ''))
+            self.avg_spin.setValue(int(st.get('averaged') or 0))
+            self.cmc_e.setText(st.get('cmc', ''))
+            self.tol_e.setText(st.get('tolerance', ''))
+            self.k_fixed.setText(st.get('fixed_k', '2') or '2')
+            self.k_mode.setCurrentIndex(max(0, self.k_mode.findData(st.get('k_mode', 'auto'))))
+            self.groups.setColumnCount(0)
+            self.groups.setRowCount(GROUP_ROWS + 1)
+            for name, vals in st.get('groups', []) or []:
+                self.add_group(name, vals)
+            self.typeb.setRowCount(0)
+            for row in st.get('type_b', []) or []:
+                name, value, dist, sens, dof = (list(row) + ['', '', 'k2', '1', ''])[:5]
+                self.add_type_b(name, value, dist, sens or '1', dof)
+        finally:
+            self._loading = False
+        self.recalc()
+
+    def is_dirty(self):
+        return self.state() != self._saved_state
+
+    def _default_name(self):
+        t = self.title_e.text().strip()
+        n = self.nominal_e.text().strip()
+        return ' - '.join(x for x in (t, n) if x)
+
+    def _summary_line(self):
+        res, unit = self.result, self.unit_e.text().strip()
+        return f'U = ± {fmt(res.reported, unit)} (k = {res.k:.2f})' if res is not None else 'no result yet'
+
+    def save_current(self, as_new=False):
+        """Save what is on screen: update the open saved calculation, or (first save / Save as) ask for a name and store a new one.  Returns the id or None."""
+        self.recalc()
+        name = None
+        existing = store.load(self.current_id) if self.current_id is not None else None
+        if as_new or existing is None:
+            name = _ask_name(self, 'Save the uncertainty', 'Name for this calculation:', existing['name'] if (existing and as_new) else self._default_name())
+            if not name:
+                return None
+        else:
+            name = existing['name']
+        new_id = store.save(name, self.state(), self._summary_line(), None if (as_new or existing is None) else self.current_id)
+        if new_id is None:
+            _error(self, 'Save the uncertainty', 'The calculation could not be saved (the lab registry file could not be written).')
+            return None
+        self.current_id = new_id
+        self._saved_state = self.state()
+        self.refresh()
+        self._say(f'Saved "{name}".')
+        return new_id
+
+    def open_saved(self, calc_id):
+        if calc_id == self.current_id and not self.is_dirty():
+            return True
+        if self.is_dirty() and not _confirm(self, 'Unsaved changes', 'The calculation on screen has changes that are not saved. Open the other one anyway and lose them?'):
+            self.refresh()
+            return False
+        rec = store.load(calc_id)
+        if rec is None:
+            _error(self, 'Open', 'That saved calculation could not be read.')
+            self.refresh()
+            return False
+        self.load_state(rec['state'])
+        self.current_id = rec['id']
+        self._saved_state = self.state()
+        self.refresh()
+        self._say(f'Opened "{rec["name"]}" (saved {rec["updated_at"]}). Change anything and press Save to keep the changes.')
+        return True
+
+    def new_calculation(self):
+        if self.is_dirty() and not _confirm(self, 'Unsaved changes', 'The calculation on screen has changes that are not saved. Start a new one anyway?'):
+            return False
+        self.clear_all()
+        self.current_id = None
+        self._saved_state = self.state()
+        self.refresh()
+        return True
+
+    def duplicate_saved(self):
+        if self.current_id is None:
+            return None
+        rec = store.load(self.current_id)
+        if rec is None:
+            return None
+        name = _ask_name(self, 'Duplicate', 'Name for the copy:', rec['name'] + ' (copy)')
+        if not name:
+            return None
+        new_id = store.duplicate(self.current_id, name)
+        self.refresh()
+        return new_id
+
+    def delete_saved(self):
+        if self.current_id is None:
+            return False
+        rec = store.load(self.current_id)
+        if rec is None or not _confirm(self, 'Delete', f'Delete the saved calculation "{rec["name"]}"? This cannot be undone.'):
+            return False
+        ok = store.delete(self.current_id)
+        self.current_id = None
+        self._saved_state = None                       # what is on screen is now an unsaved calculation
+        self.refresh()
+        return ok
+
+    def refresh(self):
+        """Rebuild the saved list and the buttons / state text (also called when the tab is shown)."""
+        rows = store.listing(self.find_e.text() if hasattr(self.find_e, 'text') else '')
+        self.saved_list.blockSignals(True)
+        self.saved_list.clear()
+        for r in rows:
+            it = QListWidgetItem(f'{r["name"]}\n{r["summary"]}\n{r["updated_at"]}')
+            it.setData(Qt.ItemDataRole.UserRole, r['id'])
+            it.setToolTip(f'{r["name"]}\n{r["summary"]}\nLast saved {r["updated_at"]}')
+            self.saved_list.addItem(it)
+            if r['id'] == self.current_id:
+                self.saved_list.setCurrentItem(it)
+        self.saved_list.blockSignals(False)
+        self._update_state()
+
+    def _update_state(self):
+        if not hasattr(self, 'state_label'):
+            return
+        saved = self.current_id is not None
+        self.dup_b.setEnabled(saved)
+        self.del_b.setEnabled(saved)
+        if saved:
+            self.state_label.setText('Unsaved changes: press Save to keep them' if self.is_dirty() else 'Saved')
+        else:
+            self.state_label.setText('Not saved yet')
 
     def clear_all(self):
         for e in (self.title_e, self.nominal_e, self.unit_e, self.cmc_e, self.tol_e):

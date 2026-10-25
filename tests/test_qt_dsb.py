@@ -1111,6 +1111,21 @@ class SheetQualityTests(QtDsbCase):
         lv.edit.setText('1'), lv.unit.setCurrentText('Vpp')                  # the scope functions store peak-to-peak: as typed
         self.assertEqual(box.v['level'].get(), '1 V')
 
+    def test_a_vpp_level_is_still_vpp_when_the_row_is_selected_again(self):
+        win = self.new_window()
+        win.function_chosen('Frequency')
+        self.type_cell(win, '100 Hz, level 1 Vpp')
+        self.type_cell(win, '200 Hz, level 2 V')
+        keys = [r['key'] for r in win.model.rows() if r['kind'] == 'point']
+        box = win.panel_box
+        for key, text, unit in ((keys[0], '1', 'Vpp'), (keys[1], '2', 'V'), (keys[0], '1', 'Vpp')):
+            win.model.select(key, 'nominal')
+            win.sync()
+            self.app.processEvents()
+            self.assertEqual((box.level_box.edit.text(), box.level_box.unit.currentText()), (text, unit))
+        box.level_box.edit.setText('1.5')                                   # an edit keeps the square wave too
+        self.assertEqual(box.v['level'].get(), '1.5 V square')
+
     def _two_rows(self):
         win = self.new_window()
         win.function_chosen(self.dcv_label(win))

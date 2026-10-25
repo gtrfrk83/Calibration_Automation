@@ -100,8 +100,13 @@ class LevelBox(QWidget):
 
     def set_basis(self, basis):
         self.basis = 'pp' if basis == 'pp' else 'rms'
-        if self.unit.currentText() in ('V', 'Vpp'):                       # keep the family of unit the stored basis uses
-            self.unit.setCurrentText('Vpp' if self.basis == 'pp' else 'V')
+        now = self.unit.currentText()
+        if not self.edit.text().strip():                                  # nothing typed: the default unit of the stored basis
+            if now in ('V', 'Vpp'):
+                self.unit.setCurrentText('Vpp' if self.basis == 'pp' else 'V')
+        elif now == 'V' and self.basis == 'pp':                           # a peak-to-peak function stores Vpp ...
+            self.unit.setCurrentText('Vpp')
+        # ... but a Vpp level on an rms function is a square wave the person chose: never turned back into V when the point is shown again
 
     def get_value(self):
         t = self.edit.text().strip()
