@@ -363,31 +363,42 @@
  ],
  "virtual_run_34461A": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "34461A: Keysight Technologies,34461A,SIM0001,A.03.01-02.40-03.01-00.52-02-01\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "34461A: Keysight Technologies,34461A,SIM0001,A.03.01-02.40-03.01-00.52-02-01\nFluke 5560A: FLUKE,5560A,SIM0001,1.0 [VIRTUAL - simulated instrument]\nCalibrator output is not enabled.",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34461A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: 34461A.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Zero offset — physical setup required",
+   "text": "Zero-offset setup: FRONT terminals",
    "buttons": [
     "Set up — measure",
     "Cancel"
    ],
-   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
    "facts": [
     [
      "Next point",
@@ -402,7 +413,18 @@
      "505"
     ]
    ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
+  },
+  {
    "kind": "operator_prompt",
+   "title": "Zero offset — physical setup required",
+   "text": "Zero-offset setup: FRONT terminals",
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
    "steps": [
     [
      "Select terminals",
@@ -410,19 +432,9 @@
     ],
     [
      "Set up the input",
-     "Leave the CURRENT input OPEN (nothing connected)."
+     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
     ]
    ],
-   "text": "Zero-offset setup: FRONT terminals",
-   "title": "Zero offset — physical setup required"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Set up — measure",
-    "Cancel"
-   ],
-   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
    "facts": [
     [
      "Next point",
@@ -437,27 +449,28 @@
      "505"
     ]
    ],
-   "kind": "operator_prompt",
-   "steps": [
-    [
-     "Select terminals",
-     "Set the front-panel FRONT/REAR switch to FRONT. The program checks the switch position before measuring."
-    ],
-    [
-     "Set up the input",
-     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
-    ]
-   ],
-   "text": "Zero-offset setup: FRONT terminals",
-   "title": "Zero offset — physical setup required"
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Zero offset — physical setup required",
+   "text": "Zero-offset setup: REAR terminals",
    "buttons": [
     "Set up — measure",
     "Cancel"
    ],
-   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "steps": [
+    [
+     "Select terminals",
+     "Set the front-panel FRONT/REAR switch to REAR. The program checks the switch position before measuring."
+    ],
+    [
+     "Set up the input",
+     "Leave the CURRENT input OPEN (nothing connected)."
+    ]
+   ],
    "facts": [
     [
      "Next point",
@@ -472,7 +485,18 @@
      "505"
     ]
    ],
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
+  },
+  {
    "kind": "operator_prompt",
+   "title": "Zero offset — physical setup required",
+   "text": "Zero-offset setup: REAR terminals",
+   "buttons": [
+    "Set up — measure",
+    "Cancel"
+   ],
    "steps": [
     [
      "Select terminals",
@@ -480,19 +504,9 @@
     ],
     [
      "Set up the input",
-     "Leave the CURRENT input OPEN (nothing connected)."
+     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
     ]
    ],
-   "text": "Zero-offset setup: REAR terminals",
-   "title": "Zero offset — physical setup required"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Set up — measure",
-    "Cancel"
-   ],
-   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
    "facts": [
     [
      "Next point",
@@ -507,27 +521,32 @@
      "505"
     ]
    ],
-   "kind": "operator_prompt",
-   "steps": [
-    [
-     "Select terminals",
-     "Set the front-panel FRONT/REAR switch to REAR. The program checks the switch position before measuring."
-    ],
-    [
-     "Set up the input",
-     "Install the low-thermal copper four-terminal SHORT across INPUT HI/LO and SENSE HI/LO (34172B or equivalent)."
-    ]
-   ],
-   "text": "Zero-offset setup: REAR terminals",
-   "title": "Zero offset — physical setup required"
+   "caution": "The calibrator stays in STANDBY. Never use it as a zero source.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Rewire / verify before enabling output",
+   "text": "Connect for DC volts gain",
    "buttons": [
     "Connections verified — continue",
     "Cancel"
    ],
-   "caution": "Continue only after physically verifying the connections.",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is put in STANDBY before you rewire."
+    ],
+    [
+     "Wiring",
+     "Calibrator voltage output to the DMM front HI / LO input terminals."
+    ],
+    [
+     "Switch",
+     "Front/Rear switch on FRONT."
+    ]
+   ],
    "facts": [
     [
      "Next point",
@@ -542,7 +561,38 @@
      "509"
     ]
    ],
+   "caution": "Continue only after physically verifying the connections.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "ask_yes_no",
+   "title": "HIGH VOLTAGE",
+   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "answer": true
+  },
+  {
+   "kind": "ask_yes_no",
+   "title": "HIGH VOLTAGE",
+   "text": "This point outputs -500 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
+   "buttons": [
+    "Yes",
+    "No"
+   ],
+   "answer": true
+  },
+  {
    "kind": "operator_prompt",
+   "title": "Rewire / verify before enabling output",
+   "text": "Connect for DC current gain",
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
    "steps": [
     [
      "Standby",
@@ -550,43 +600,13 @@
     ],
     [
      "Wiring",
-     "Calibrator voltage output to the DMM front HI / LO input terminals."
+     "Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first."
     ],
     [
      "Switch",
      "Front/Rear switch on FRONT."
     ]
    ],
-   "text": "Connect for DC volts gain",
-   "title": "Rewire / verify before enabling output"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 1000 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Yes",
-    "No"
-   ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs -500 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Connections verified — continue",
-    "Cancel"
-   ],
-   "caution": "Continue only after physically verifying the connections.",
    "facts": [
     [
      "Next point",
@@ -601,46 +621,18 @@
      "510"
     ]
    ],
-   "kind": "operator_prompt",
-   "steps": [
-    [
-     "Standby",
-     "The calibrator is put in STANDBY before you rewire."
-    ],
-    [
-     "Wiring",
-     "Calibrator current output to the DMM front current (A) input and LO. Check the fuse and current rating first."
-    ],
-    [
-     "Switch",
-     "Front/Rear switch on FRONT."
-    ]
-   ],
-   "text": "Connect for DC current gain",
-   "title": "Rewire / verify before enabling output"
+   "caution": "Continue only after physically verifying the connections.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Rewire / verify before enabling output",
+   "text": "Connect for Resistance gain",
    "buttons": [
     "Connections verified — continue",
     "Cancel"
    ],
-   "caution": "Continue only after physically verifying the connections.",
-   "facts": [
-    [
-     "Next point",
-     "53 of 101"
-    ],
-    [
-     "Test",
-     "4-wire ohms 100.0 Ω, 100.0 Ω range"
-    ],
-    [
-     "Manual page",
-     "510"
-    ]
-   ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Standby",
@@ -655,31 +647,32 @@
      "Front/Rear switch on FRONT."
     ]
    ],
-   "text": "Connect for Resistance gain",
-   "title": "Rewire / verify before enabling output"
-  },
-  {
-   "answer": true,
-   "buttons": [
-    "Connections verified — continue",
-    "Cancel"
-   ],
-   "caution": "Continue only after physically verifying the connections.",
    "facts": [
     [
      "Next point",
-     "59 of 101"
+     "53 of 101"
     ],
     [
      "Test",
-     "2-wire ohms 100.0 MΩ, 100.0 MΩ range"
+     "4-wire ohms 100.0 Ω, 100.0 Ω range"
     ],
     [
      "Manual page",
      "510"
     ]
    ],
+   "caution": "Continue only after physically verifying the connections.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
+  },
+  {
    "kind": "operator_prompt",
+   "title": "Rewire / verify before enabling output",
+   "text": "Connect for Resistance gain",
+   "buttons": [
+    "Connections verified — continue",
+    "Cancel"
+   ],
    "steps": [
     [
      "Standby",
@@ -694,31 +687,32 @@
      "Front/Rear switch on FRONT."
     ]
    ],
-   "text": "Connect for Resistance gain",
-   "title": "Rewire / verify before enabling output"
+   "facts": [
+    [
+     "Next point",
+     "59 of 101"
+    ],
+    [
+     "Test",
+     "2-wire ohms 100.0 MΩ, 100.0 MΩ range"
+    ],
+    [
+     "Manual page",
+     "510"
+    ]
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Rewire / verify before enabling output",
+   "text": "Connect for Frequency accuracy",
    "buttons": [
     "Connections verified — continue",
     "Cancel"
    ],
-   "caution": "Continue only after physically verifying the connections.",
-   "facts": [
-    [
-     "Next point",
-     "60 of 101"
-    ],
-    [
-     "Test",
-     "Frequency 10.00 Hz at 100.0 mV rms, 1.000 V range"
-    ],
-    [
-     "Manual page",
-     "513"
-    ]
-   ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Standby",
@@ -733,31 +727,32 @@
      "Front/Rear switch on FRONT."
     ]
    ],
-   "text": "Connect for Frequency accuracy",
-   "title": "Rewire / verify before enabling output"
+   "facts": [
+    [
+     "Next point",
+     "60 of 101"
+    ],
+    [
+     "Test",
+     "Frequency 10.00 Hz at 100.0 mV rms, 1.000 V range"
+    ],
+    [
+     "Manual page",
+     "513"
+    ]
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Rewire / verify before enabling output",
+   "text": "Connect for AC volts",
    "buttons": [
     "Connections verified — continue",
     "Cancel"
    ],
-   "caution": "Continue only after physically verifying the connections.",
-   "facts": [
-    [
-     "Next point",
-     "62 of 101"
-    ],
-    [
-     "Test",
-     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 200 Hz filter"
-    ],
-    [
-     "Manual page",
-     "515"
-    ]
-   ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Standby",
@@ -772,41 +767,42 @@
      "Front/Rear switch on FRONT."
     ]
    ],
-   "text": "Connect for AC volts",
-   "title": "Rewire / verify before enabling output"
+   "facts": [
+    [
+     "Next point",
+     "62 of 101"
+    ],
+    [
+     "Test",
+     "AC volts 100.0 mV @ 1.000 kHz, 100.0 mV range, 200 Hz filter"
+    ],
+    [
+     "Manual page",
+     "515"
+    ]
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "ask_yes_no",
+   "title": "HIGH VOLTAGE",
+   "text": "This point outputs 750 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
    "buttons": [
     "Yes",
     "No"
    ],
-   "kind": "ask_yes_no",
-   "text": "This point outputs 750 V. Verify CAT-rated leads, connections, clearance and personnel safety. Enable output?",
-   "title": "HIGH VOLTAGE"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Rewire / verify before enabling output",
+   "text": "Connect for AC current",
    "buttons": [
     "Connections verified — continue",
     "Cancel"
    ],
-   "caution": "Continue only after physically verifying the connections.",
-   "facts": [
-    [
-     "Next point",
-     "82 of 101"
-    ],
-    [
-     "Test",
-     "AC current 2.000 A @ 1.000 kHz, 3.000 A range, 200 Hz filter"
-    ],
-    [
-     "Manual page",
-     "516"
-    ]
-   ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Standby",
@@ -821,31 +817,32 @@
      "Front/Rear switch on FRONT."
     ]
    ],
-   "text": "Connect for AC current",
-   "title": "Rewire / verify before enabling output"
+   "facts": [
+    [
+     "Next point",
+     "82 of 101"
+    ],
+    [
+     "Test",
+     "AC current 2.000 A @ 1.000 kHz, 3.000 A range, 200 Hz filter"
+    ],
+    [
+     "Manual page",
+     "516"
+    ]
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Rewire / verify before enabling output",
+   "text": "Connect for High current (10 A)",
    "buttons": [
     "Connections verified — continue",
     "Cancel"
    ],
-   "caution": "Continue only after physically verifying the connections.",
-   "facts": [
-    [
-     "Next point",
-     "97 of 101"
-    ],
-    [
-     "Test",
-     "DC current 5.000 A, 10.00 A range"
-    ],
-    [
-     "Manual page",
-     "519"
-    ]
-   ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Standby",
@@ -860,8 +857,23 @@
      "Front/Rear switch on FRONT."
     ]
    ],
-   "text": "Connect for High current (10 A)",
-   "title": "Rewire / verify before enabling output"
+   "facts": [
+    [
+     "Next point",
+     "97 of 101"
+    ],
+    [
+     "Test",
+     "DC current 5.000 A, 10.00 A range"
+    ],
+    [
+     "Manual page",
+     "519"
+    ]
+   ],
+   "caution": "Continue only after physically verifying the connections.",
+   "image": "keysight34461a_34465a_panel.png",
+   "answer": true
   }
  ],
  "virtual_run_34470A": [

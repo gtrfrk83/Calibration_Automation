@@ -1,31 +1,32 @@
 {
  "afg_reading_cancelled": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Self test",
+   "text": "Self test",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -36,16 +37,17 @@
      "The oscilloscope must have been running continuously for at least 20 minutes."
     ]
    ],
-   "text": "Self test",
-   "title": "Self test"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Cycle power",
+   "text": "Cycle the oscilloscope power",
    "buttons": [
     "Continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Power",
@@ -56,16 +58,17 @@
      "Press Continue when the front panel is ready. The program will reconnect over USB."
     ]
    ],
-   "text": "Cycle the oscilloscope power",
-   "title": "Cycle power"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Signal path compensation",
+   "text": "Signal path compensation",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -76,17 +79,17 @@
      "The oscilloscope must have been operating for 20 minutes. SPC takes 5 to 15 minutes; repeat it if the temperature changes by more than 10 degrees C."
     ]
    ],
-   "text": "Signal path compensation",
-   "title": "Signal path compensation"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH1",
+   "text": "Input impedance - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -97,16 +100,18 @@
      "Fluke 5560A SCOPE connector directly to the CH1 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH1",
-   "title": "Input impedance - CH1"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH1",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -121,17 +126,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH1",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH2",
+   "text": "Input impedance - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -142,16 +147,18 @@
      "Fluke 5560A SCOPE connector directly to the CH2 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH2",
-   "title": "Input impedance - CH2"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH2",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -166,17 +173,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH2",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH3",
+   "text": "Input impedance - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -187,16 +194,18 @@
      "Fluke 5560A SCOPE connector directly to the CH3 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH3",
-   "title": "Input impedance - CH3"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH3",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -211,17 +220,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH3",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH4",
+   "text": "Input impedance - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -232,16 +241,18 @@
      "Fluke 5560A SCOPE connector directly to the CH4 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH4",
-   "title": "Input impedance - CH4"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH4",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -256,17 +267,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH4",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - AUX IN",
+   "text": "Input impedance - AUX IN",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -277,96 +288,103 @@
      "Fluke 5560A SCOPE connector directly to the AUX IN input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - AUX IN",
-   "title": "Input impedance - AUX IN"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AUX IN",
+   "text": "AUX IN impedance",
    "buttons": [
     "Selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
      "Select the 250 kΩ termination verification as above so the AUX IN input is at 250 kΩ."
     ]
    ],
-   "text": "AUX IN impedance",
-   "title": "AUX IN"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH1",
+   "text": "DC balance - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH1 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH1",
-   "title": "DC balance - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH2",
+   "text": "DC balance - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH2 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH2",
-   "title": "DC balance - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH3",
+   "text": "DC balance - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH3 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH3",
-   "title": "DC balance - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH4",
+   "text": "DC balance - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH4 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH4",
-   "title": "DC balance - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH1",
+   "text": "DC gain - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -377,16 +395,17 @@
      "Fluke 5560A SCOPE output to CH1 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH1",
-   "title": "DC gain - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH2",
+   "text": "DC gain - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -397,16 +416,17 @@
      "Fluke 5560A SCOPE output to CH2 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH2",
-   "title": "DC gain - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH3",
+   "text": "DC gain - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -417,16 +437,17 @@
      "Fluke 5560A SCOPE output to CH3 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH3",
-   "title": "DC gain - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH4",
+   "text": "DC gain - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -437,16 +458,17 @@
      "Fluke 5560A SCOPE output to CH4 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH4",
-   "title": "DC gain - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH1",
+   "text": "DC offset - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -457,33 +479,35 @@
      "Fluke 5560A SCOPE output to CH1."
     ]
    ],
-   "text": "DC offset - CH1",
-   "title": "DC offset - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH2",
+   "text": "DC offset - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -494,33 +518,35 @@
      "Fluke 5560A SCOPE output to CH2."
     ]
    ],
-   "text": "DC offset - CH2",
-   "title": "DC offset - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH3",
+   "text": "DC offset - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -531,33 +557,35 @@
      "Fluke 5560A SCOPE output to CH3."
     ]
    ],
-   "text": "DC offset - CH3",
-   "title": "DC offset - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH4",
+   "text": "DC offset - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -568,33 +596,35 @@
      "Fluke 5560A SCOPE output to CH4."
     ]
    ],
-   "text": "DC offset - CH4",
-   "title": "DC offset - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH1",
+   "text": "Analog bandwidth - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -605,16 +635,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH1",
-   "title": "Analog bandwidth - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH2",
+   "text": "Analog bandwidth - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -625,16 +656,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH2",
-   "title": "Analog bandwidth - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH3",
+   "text": "Analog bandwidth - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -645,16 +677,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH3",
-   "title": "Analog bandwidth - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH4",
+   "text": "Analog bandwidth - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -665,16 +698,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH4",
-   "title": "Analog bandwidth - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH1",
+   "text": "Analog bandwidth - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -685,16 +719,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH1",
-   "title": "Analog bandwidth - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH2",
+   "text": "Analog bandwidth - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -705,16 +740,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH2",
-   "title": "Analog bandwidth - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH3",
+   "text": "Analog bandwidth - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -725,16 +761,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH3",
-   "title": "Analog bandwidth - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH4",
+   "text": "Analog bandwidth - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -745,80 +782,85 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH4",
-   "title": "Analog bandwidth - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
-   "buttons": [
-    "Connected - continue",
-    "Cancel"
-   ],
    "kind": "operator_prompt",
-   "steps": [
-    [
-     "Disconnect",
-     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
-    ]
-   ],
+   "title": "Random noise - CH1",
    "text": "Random noise - CH1",
-   "title": "Random noise - CH1"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "operator_prompt",
+   "title": "Random noise - CH2",
    "text": "Random noise - CH2",
-   "title": "Random noise - CH2"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "operator_prompt",
+   "title": "Random noise - CH3",
    "text": "Random noise - CH3",
-   "title": "Random noise - CH3"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
-   "text": "Random noise - CH4",
-   "title": "Random noise - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Random noise - CH4",
+   "text": "Random noise - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
    "kind": "operator_prompt",
+   "title": "Reference frequency error",
+   "text": "Reference frequency error",
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
    "steps": [
     [
      "Disconnect",
@@ -833,144 +875,153 @@
      "The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already."
     ]
    ],
-   "text": "Reference frequency error",
-   "title": "Reference frequency error"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH1",
+   "text": "Delta time - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH1."
     ]
    ],
-   "text": "Delta time - CH1",
-   "title": "Delta time - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH1",
+   "text": "Delta time - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH1 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH1",
-   "title": "Delta time - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH2",
+   "text": "Delta time - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH2."
     ]
    ],
-   "text": "Delta time - CH2",
-   "title": "Delta time - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH2",
+   "text": "Delta time - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH2 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH2",
-   "title": "Delta time - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH3",
+   "text": "Delta time - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH3."
     ]
    ],
-   "text": "Delta time - CH3",
-   "title": "Delta time - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH3",
+   "text": "Delta time - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH3 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH3",
-   "title": "Delta time - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH4",
+   "text": "Delta time - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH4."
     ]
    ],
-   "text": "Delta time - CH4",
-   "title": "Delta time - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH4",
+   "text": "Delta time - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH4 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH4",
-   "title": "Delta time - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Trigger output",
+   "text": "Trigger output",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -981,60 +1032,62 @@
      "Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable."
     ]
    ],
-   "text": "Trigger output",
-   "title": "Trigger output"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AFG frequency",
+   "text": "AFG frequency",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "AFG output to the frequency counter input (50 Ω)."
     ]
    ],
-   "text": "AFG frequency",
-   "title": "AFG frequency"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": null,
-   "initial": "10000.1",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Sine wave 10 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "10000.1",
+   "answer": null
   }
  ],
  "afg_reading_not_a_number": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Self test",
+   "text": "Self test",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1045,16 +1098,17 @@
      "The oscilloscope must have been running continuously for at least 20 minutes."
     ]
    ],
-   "text": "Self test",
-   "title": "Self test"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Cycle power",
+   "text": "Cycle the oscilloscope power",
    "buttons": [
     "Continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Power",
@@ -1065,16 +1119,17 @@
      "Press Continue when the front panel is ready. The program will reconnect over USB."
     ]
    ],
-   "text": "Cycle the oscilloscope power",
-   "title": "Cycle power"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Signal path compensation",
+   "text": "Signal path compensation",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1085,17 +1140,17 @@
      "The oscilloscope must have been operating for 20 minutes. SPC takes 5 to 15 minutes; repeat it if the temperature changes by more than 10 degrees C."
     ]
    ],
-   "text": "Signal path compensation",
-   "title": "Signal path compensation"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH1",
+   "text": "Input impedance - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1106,16 +1161,18 @@
      "Fluke 5560A SCOPE connector directly to the CH1 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH1",
-   "title": "Input impedance - CH1"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH1",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -1130,17 +1187,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH1",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH2",
+   "text": "Input impedance - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1151,16 +1208,18 @@
      "Fluke 5560A SCOPE connector directly to the CH2 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH2",
-   "title": "Input impedance - CH2"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH2",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -1175,17 +1234,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH2",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH3",
+   "text": "Input impedance - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1196,16 +1255,18 @@
      "Fluke 5560A SCOPE connector directly to the CH3 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH3",
-   "title": "Input impedance - CH3"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH3",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -1220,17 +1281,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH3",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH4",
+   "text": "Input impedance - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1241,16 +1302,18 @@
      "Fluke 5560A SCOPE connector directly to the CH4 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH4",
-   "title": "Input impedance - CH4"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH4",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -1265,17 +1328,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH4",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - AUX IN",
+   "text": "Input impedance - AUX IN",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1286,96 +1349,103 @@
      "Fluke 5560A SCOPE connector directly to the AUX IN input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - AUX IN",
-   "title": "Input impedance - AUX IN"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AUX IN",
+   "text": "AUX IN impedance",
    "buttons": [
     "Selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
      "Select the 250 kΩ termination verification as above so the AUX IN input is at 250 kΩ."
     ]
    ],
-   "text": "AUX IN impedance",
-   "title": "AUX IN"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH1",
+   "text": "DC balance - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH1 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH1",
-   "title": "DC balance - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH2",
+   "text": "DC balance - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH2 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH2",
-   "title": "DC balance - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH3",
+   "text": "DC balance - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH3 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH3",
-   "title": "DC balance - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH4",
+   "text": "DC balance - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH4 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH4",
-   "title": "DC balance - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH1",
+   "text": "DC gain - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1386,16 +1456,17 @@
      "Fluke 5560A SCOPE output to CH1 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH1",
-   "title": "DC gain - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH2",
+   "text": "DC gain - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1406,16 +1477,17 @@
      "Fluke 5560A SCOPE output to CH2 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH2",
-   "title": "DC gain - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH3",
+   "text": "DC gain - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1426,16 +1498,17 @@
      "Fluke 5560A SCOPE output to CH3 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH3",
-   "title": "DC gain - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH4",
+   "text": "DC gain - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1446,16 +1519,17 @@
      "Fluke 5560A SCOPE output to CH4 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH4",
-   "title": "DC gain - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH1",
+   "text": "DC offset - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1466,33 +1540,35 @@
      "Fluke 5560A SCOPE output to CH1."
     ]
    ],
-   "text": "DC offset - CH1",
-   "title": "DC offset - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH2",
+   "text": "DC offset - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1503,33 +1579,35 @@
      "Fluke 5560A SCOPE output to CH2."
     ]
    ],
-   "text": "DC offset - CH2",
-   "title": "DC offset - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH3",
+   "text": "DC offset - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1540,33 +1618,35 @@
      "Fluke 5560A SCOPE output to CH3."
     ]
    ],
-   "text": "DC offset - CH3",
-   "title": "DC offset - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH4",
+   "text": "DC offset - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1577,33 +1657,35 @@
      "Fluke 5560A SCOPE output to CH4."
     ]
    ],
-   "text": "DC offset - CH4",
-   "title": "DC offset - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH1",
+   "text": "Analog bandwidth - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1614,16 +1696,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH1",
-   "title": "Analog bandwidth - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH2",
+   "text": "Analog bandwidth - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1634,16 +1717,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH2",
-   "title": "Analog bandwidth - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH3",
+   "text": "Analog bandwidth - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1654,16 +1738,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH3",
-   "title": "Analog bandwidth - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH4",
+   "text": "Analog bandwidth - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1674,16 +1759,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH4",
-   "title": "Analog bandwidth - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH1",
+   "text": "Analog bandwidth - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1694,16 +1780,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH1",
-   "title": "Analog bandwidth - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH2",
+   "text": "Analog bandwidth - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1714,16 +1801,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH2",
-   "title": "Analog bandwidth - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH3",
+   "text": "Analog bandwidth - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1734,16 +1822,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH3",
-   "title": "Analog bandwidth - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH4",
+   "text": "Analog bandwidth - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1754,80 +1843,85 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH4",
-   "title": "Analog bandwidth - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
-   "buttons": [
-    "Connected - continue",
-    "Cancel"
-   ],
    "kind": "operator_prompt",
-   "steps": [
-    [
-     "Disconnect",
-     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
-    ]
-   ],
+   "title": "Random noise - CH1",
    "text": "Random noise - CH1",
-   "title": "Random noise - CH1"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "operator_prompt",
+   "title": "Random noise - CH2",
    "text": "Random noise - CH2",
-   "title": "Random noise - CH2"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "operator_prompt",
+   "title": "Random noise - CH3",
    "text": "Random noise - CH3",
-   "title": "Random noise - CH3"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
-   "text": "Random noise - CH4",
-   "title": "Random noise - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Random noise - CH4",
+   "text": "Random noise - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
    "kind": "operator_prompt",
+   "title": "Reference frequency error",
+   "text": "Reference frequency error",
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
    "steps": [
     [
      "Disconnect",
@@ -1842,144 +1936,153 @@
      "The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already."
     ]
    ],
-   "text": "Reference frequency error",
-   "title": "Reference frequency error"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH1",
+   "text": "Delta time - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH1."
     ]
    ],
-   "text": "Delta time - CH1",
-   "title": "Delta time - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH1",
+   "text": "Delta time - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH1 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH1",
-   "title": "Delta time - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH2",
+   "text": "Delta time - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH2."
     ]
    ],
-   "text": "Delta time - CH2",
-   "title": "Delta time - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH2",
+   "text": "Delta time - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH2 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH2",
-   "title": "Delta time - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH3",
+   "text": "Delta time - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH3."
     ]
    ],
-   "text": "Delta time - CH3",
-   "title": "Delta time - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH3",
+   "text": "Delta time - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH3 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH3",
-   "title": "Delta time - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH4",
+   "text": "Delta time - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH4."
     ]
    ],
-   "text": "Delta time - CH4",
-   "title": "Delta time - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH4",
+   "text": "Delta time - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH4 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH4",
-   "title": "Delta time - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Trigger output",
+   "text": "Trigger output",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -1990,156 +2093,160 @@
      "Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable."
     ]
    ],
-   "text": "Trigger output",
-   "title": "Trigger output"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AFG frequency",
+   "text": "AFG frequency",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "AFG output to the frequency counter input (50 Ω)."
     ]
    ],
-   "text": "AFG frequency",
-   "title": "AFG frequency"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": "abc",
-   "initial": "10000.1",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Sine wave 10 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "10000.1",
+   "answer": "abc"
   },
   {
+   "kind": "warning",
+   "title": "Reading",
+   "text": "Enter a number.",
    "buttons": [
     "OK"
-   ],
-   "kind": "warning",
-   "text": "Enter a number.",
-   "title": "Reading"
+   ]
   },
   {
-   "answer": "10000.1",
-   "initial": "10000.1",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Sine wave 10 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "10000.1",
+   "answer": "10000.1"
   },
   {
-   "answer": "50000901.2",
-   "initial": "50000901.2",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Sine wave 50 MHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "50000901.2",
+   "answer": "50000901.2"
   },
   {
-   "answer": "24999.79",
-   "initial": "24999.79",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Square wave 25 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "24999.79",
+   "answer": "24999.79"
   },
   {
-   "answer": "24999608.0",
-   "initial": "24999608.0",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Square wave 25 MHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "24999608.0",
+   "answer": "24999608.0"
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AFG amplitude",
+   "text": "AFG amplitude",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "AFG output to the DMM through a 50 Ω feed-through termination. Set the DMM to AC volts (rms)."
     ]
    ],
-   "text": "AFG amplitude",
-   "title": "AFG amplitude"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": "0.01017",
-   "initial": "0.01017",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the DMM AC reading for Square 20 mV p-p at 1 kHz, 0 V offset, 50 Ω (rms)\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "0.01017",
+   "answer": "0.01017"
   },
   {
-   "answer": "0.5023",
-   "initial": "0.5023",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the DMM AC reading for Square 1 V p-p at 1 kHz, 0.2 V offset, 50 Ω (rms)\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "0.5023",
+   "answer": "0.5023"
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AFG DC offset",
+   "text": "AFG DC offset",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "AFG output to the DMM through a 50 Ω feed-through termination. Set the DMM to DC volts."
     ]
    ],
-   "text": "AFG DC offset",
-   "title": "AFG DC offset"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": "0.0196",
-   "initial": "0.0196",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the DMM DC reading for DC 20 mV into 50 Ω\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "0.0196",
+   "answer": "0.0196"
   },
   {
-   "answer": "0.998",
-   "initial": "0.998",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the DMM DC reading for DC 1 V into 50 Ω\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "0.998",
+   "answer": "0.998"
   }
  ],
  "afg_typed_readings": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Self test",
+   "text": "Self test",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2150,16 +2257,17 @@
      "The oscilloscope must have been running continuously for at least 20 minutes."
     ]
    ],
-   "text": "Self test",
-   "title": "Self test"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Cycle power",
+   "text": "Cycle the oscilloscope power",
    "buttons": [
     "Continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Power",
@@ -2170,16 +2278,17 @@
      "Press Continue when the front panel is ready. The program will reconnect over USB."
     ]
    ],
-   "text": "Cycle the oscilloscope power",
-   "title": "Cycle power"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Signal path compensation",
+   "text": "Signal path compensation",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2190,17 +2299,17 @@
      "The oscilloscope must have been operating for 20 minutes. SPC takes 5 to 15 minutes; repeat it if the temperature changes by more than 10 degrees C."
     ]
    ],
-   "text": "Signal path compensation",
-   "title": "Signal path compensation"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH1",
+   "text": "Input impedance - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2211,16 +2320,18 @@
      "Fluke 5560A SCOPE connector directly to the CH1 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH1",
-   "title": "Input impedance - CH1"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH1",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -2235,17 +2346,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH1",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH2",
+   "text": "Input impedance - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2256,16 +2367,18 @@
      "Fluke 5560A SCOPE connector directly to the CH2 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH2",
-   "title": "Input impedance - CH2"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH2",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -2280,17 +2393,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH2",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH3",
+   "text": "Input impedance - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2301,16 +2414,18 @@
      "Fluke 5560A SCOPE connector directly to the CH3 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH3",
-   "title": "Input impedance - CH3"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH3",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -2325,17 +2440,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH3",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH4",
+   "text": "Input impedance - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2346,16 +2461,18 @@
      "Fluke 5560A SCOPE connector directly to the CH4 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH4",
-   "title": "Input impedance - CH4"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH4",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -2370,17 +2487,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH4",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - AUX IN",
+   "text": "Input impedance - AUX IN",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2391,96 +2508,103 @@
      "Fluke 5560A SCOPE connector directly to the AUX IN input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - AUX IN",
-   "title": "Input impedance - AUX IN"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AUX IN",
+   "text": "AUX IN impedance",
    "buttons": [
     "Selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
      "Select the 250 kΩ termination verification as above so the AUX IN input is at 250 kΩ."
     ]
    ],
-   "text": "AUX IN impedance",
-   "title": "AUX IN"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH1",
+   "text": "DC balance - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH1 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH1",
-   "title": "DC balance - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH2",
+   "text": "DC balance - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH2 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH2",
-   "title": "DC balance - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH3",
+   "text": "DC balance - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH3 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH3",
-   "title": "DC balance - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH4",
+   "text": "DC balance - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH4 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH4",
-   "title": "DC balance - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH1",
+   "text": "DC gain - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2491,16 +2615,17 @@
      "Fluke 5560A SCOPE output to CH1 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH1",
-   "title": "DC gain - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH2",
+   "text": "DC gain - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2511,16 +2636,17 @@
      "Fluke 5560A SCOPE output to CH2 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH2",
-   "title": "DC gain - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH3",
+   "text": "DC gain - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2531,16 +2657,17 @@
      "Fluke 5560A SCOPE output to CH3 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH3",
-   "title": "DC gain - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH4",
+   "text": "DC gain - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2551,16 +2678,17 @@
      "Fluke 5560A SCOPE output to CH4 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH4",
-   "title": "DC gain - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH1",
+   "text": "DC offset - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2571,33 +2699,35 @@
      "Fluke 5560A SCOPE output to CH1."
     ]
    ],
-   "text": "DC offset - CH1",
-   "title": "DC offset - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH2",
+   "text": "DC offset - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2608,33 +2738,35 @@
      "Fluke 5560A SCOPE output to CH2."
     ]
    ],
-   "text": "DC offset - CH2",
-   "title": "DC offset - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH3",
+   "text": "DC offset - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2645,33 +2777,35 @@
      "Fluke 5560A SCOPE output to CH3."
     ]
    ],
-   "text": "DC offset - CH3",
-   "title": "DC offset - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH4",
+   "text": "DC offset - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2682,33 +2816,35 @@
      "Fluke 5560A SCOPE output to CH4."
     ]
    ],
-   "text": "DC offset - CH4",
-   "title": "DC offset - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH1",
+   "text": "Analog bandwidth - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2719,16 +2855,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH1",
-   "title": "Analog bandwidth - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH2",
+   "text": "Analog bandwidth - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2739,16 +2876,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH2",
-   "title": "Analog bandwidth - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH3",
+   "text": "Analog bandwidth - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2759,16 +2897,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH3",
-   "title": "Analog bandwidth - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH4",
+   "text": "Analog bandwidth - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2779,16 +2918,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH4",
-   "title": "Analog bandwidth - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH1",
+   "text": "Analog bandwidth - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2799,16 +2939,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH1",
-   "title": "Analog bandwidth - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH2",
+   "text": "Analog bandwidth - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2819,16 +2960,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH2",
-   "title": "Analog bandwidth - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH3",
+   "text": "Analog bandwidth - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2839,16 +2981,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH3",
-   "title": "Analog bandwidth - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH4",
+   "text": "Analog bandwidth - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -2859,80 +3002,85 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH4",
-   "title": "Analog bandwidth - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
-   "buttons": [
-    "Connected - continue",
-    "Cancel"
-   ],
    "kind": "operator_prompt",
-   "steps": [
-    [
-     "Disconnect",
-     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
-    ]
-   ],
+   "title": "Random noise - CH1",
    "text": "Random noise - CH1",
-   "title": "Random noise - CH1"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "operator_prompt",
+   "title": "Random noise - CH2",
    "text": "Random noise - CH2",
-   "title": "Random noise - CH2"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "operator_prompt",
+   "title": "Random noise - CH3",
    "text": "Random noise - CH3",
-   "title": "Random noise - CH3"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
-   "text": "Random noise - CH4",
-   "title": "Random noise - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Random noise - CH4",
+   "text": "Random noise - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
    "kind": "operator_prompt",
+   "title": "Reference frequency error",
+   "text": "Reference frequency error",
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
    "steps": [
     [
      "Disconnect",
@@ -2947,144 +3095,153 @@
      "The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already."
     ]
    ],
-   "text": "Reference frequency error",
-   "title": "Reference frequency error"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH1",
+   "text": "Delta time - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH1."
     ]
    ],
-   "text": "Delta time - CH1",
-   "title": "Delta time - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH1",
+   "text": "Delta time - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH1 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH1",
-   "title": "Delta time - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH2",
+   "text": "Delta time - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH2."
     ]
    ],
-   "text": "Delta time - CH2",
-   "title": "Delta time - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH2",
+   "text": "Delta time - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH2 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH2",
-   "title": "Delta time - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH3",
+   "text": "Delta time - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH3."
     ]
    ],
-   "text": "Delta time - CH3",
-   "title": "Delta time - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH3",
+   "text": "Delta time - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH3 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH3",
-   "title": "Delta time - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH4",
+   "text": "Delta time - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH4."
     ]
    ],
-   "text": "Delta time - CH4",
-   "title": "Delta time - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH4",
+   "text": "Delta time - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH4 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH4",
-   "title": "Delta time - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Trigger output",
+   "text": "Trigger output",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3095,112 +3252,115 @@
      "Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable."
     ]
    ],
-   "text": "Trigger output",
-   "title": "Trigger output"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AFG frequency",
+   "text": "AFG frequency",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "AFG output to the frequency counter input (50 Ω)."
     ]
    ],
-   "text": "AFG frequency",
-   "title": "AFG frequency"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": "10000.1",
-   "initial": "10000.1",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Sine wave 10 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "10000.1",
+   "answer": "10000.1"
   },
   {
-   "answer": "50000901.2",
-   "initial": "50000901.2",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Sine wave 50 MHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "50000901.2",
+   "answer": "50000901.2"
   },
   {
-   "answer": "24999.79",
-   "initial": "24999.79",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Square wave 25 kHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "24999.79",
+   "answer": "24999.79"
   },
   {
-   "answer": "24999608.0",
-   "initial": "24999608.0",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the counter reading for Square wave 25 MHz, 2.5 V p-p, 50 Ω\n(value in Hz, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "24999608.0",
+   "answer": "24999608.0"
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AFG amplitude",
+   "text": "AFG amplitude",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "AFG output to the DMM through a 50 Ω feed-through termination. Set the DMM to AC volts (rms)."
     ]
    ],
-   "text": "AFG amplitude",
-   "title": "AFG amplitude"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": "0.01017",
-   "initial": "0.01017",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the DMM AC reading for Square 20 mV p-p at 1 kHz, 0 V offset, 50 Ω (rms)\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "0.01017",
+   "answer": "0.01017"
   },
   {
-   "answer": "0.5023",
-   "initial": "0.5023",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the DMM AC reading for Square 1 V p-p at 1 kHz, 0.2 V offset, 50 Ω (rms)\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "0.5023",
+   "answer": "0.5023"
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AFG DC offset",
+   "text": "AFG DC offset",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "AFG output to the DMM through a 50 Ω feed-through termination. Set the DMM to DC volts."
     ]
    ],
-   "text": "AFG DC offset",
-   "title": "AFG DC offset"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": "0.0196",
-   "initial": "0.0196",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the DMM DC reading for DC 20 mV into 50 Ω\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "0.0196",
+   "answer": "0.0196"
   },
   {
-   "answer": "0.998",
-   "initial": "0.998",
    "kind": "ask_text",
+   "title": "Enter reading [DEMO]",
    "text": "Enter the DMM DC reading for DC 1 V into 50 Ω\n(value in V, plain number)\nDEMO: the box holds a simulated reading; type your own if you like.",
-   "title": "Enter reading [DEMO]"
+   "initial": "0.998",
+   "answer": "0.998"
   }
  ],
  "dialogs_misc": [
@@ -3301,31 +3461,32 @@
  ],
  "first_prompt_cancelled": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": false,
+   "kind": "operator_prompt",
+   "title": "Self test",
+   "text": "Self test",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3336,37 +3497,38 @@
      "The oscilloscope must have been running continuously for at least 20 minutes."
     ]
    ],
-   "text": "Self test",
-   "title": "Self test"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": false
   }
  ],
  "virtual_run": [
   {
+   "kind": "info",
+   "title": "Connected (DEMO)",
+   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
    "buttons": [
     "OK"
-   ],
-   "kind": "info",
-   "text": "Oscilloscope: TEKTRONIX,MDO4104C,SIM0001,CF:91.1CT FV:v1.0\nFluke 5560A: FLUKE,5560A,SIM0001,1.0\nAlso connected: 96270A, RF source 2, function generator, reference DMM, counter\nAll outputs are off. [VIRTUAL - simulated instrument]",
-   "title": "Connected (DEMO)"
+   ]
   },
   {
-   "answer": true,
+   "kind": "ask_ok_cancel",
+   "title": "Reset instruments",
+   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
    "buttons": [
     "OK",
     "Cancel"
    ],
    "icon": "warning",
-   "kind": "ask_ok_cancel",
-   "text": "Before the first test point every instrument is reset to its default settings.\n\nUnit under test that will be reset: MDO4000C.\n\nResetting a unit under test can ERASE settings stored on it (set-ups, configuration, preferences). Save anything you need from it first.\n\nReset the instruments and start?",
-   "title": "Reset instruments"
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Self test",
+   "text": "Self test",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3377,16 +3539,17 @@
      "The oscilloscope must have been running continuously for at least 20 minutes."
     ]
    ],
-   "text": "Self test",
-   "title": "Self test"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Cycle power",
+   "text": "Cycle the oscilloscope power",
    "buttons": [
     "Continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Power",
@@ -3397,16 +3560,17 @@
      "Press Continue when the front panel is ready. The program will reconnect over USB."
     ]
    ],
-   "text": "Cycle the oscilloscope power",
-   "title": "Cycle power"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Signal path compensation",
+   "text": "Signal path compensation",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3417,17 +3581,17 @@
      "The oscilloscope must have been operating for 20 minutes. SPC takes 5 to 15 minutes; repeat it if the temperature changes by more than 10 degrees C."
     ]
    ],
-   "text": "Signal path compensation",
-   "title": "Signal path compensation"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH1",
+   "text": "Input impedance - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3438,16 +3602,18 @@
      "Fluke 5560A SCOPE connector directly to the CH1 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH1",
-   "title": "Input impedance - CH1"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH1",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -3462,17 +3628,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH1",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH2",
+   "text": "Input impedance - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3483,16 +3649,18 @@
      "Fluke 5560A SCOPE connector directly to the CH2 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH2",
-   "title": "Input impedance - CH2"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH2",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -3507,17 +3675,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH2",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH3",
+   "text": "Input impedance - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3528,16 +3696,18 @@
      "Fluke 5560A SCOPE connector directly to the CH3 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH3",
-   "title": "Input impedance - CH3"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH3",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -3552,17 +3722,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH3",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - CH4",
+   "text": "Input impedance - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3573,16 +3743,18 @@
      "Fluke 5560A SCOPE connector directly to the CH4 input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - CH4",
-   "title": "Input impedance - CH4"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "250 kΩ termination",
+   "text": "Select 250 kΩ on CH4",
    "buttons": [
     "250 kΩ selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
@@ -3597,17 +3769,17 @@
      "Set the vertical scale to 100 mV/div."
     ]
    ],
-   "text": "Select 250 kΩ on CH4",
-   "title": "250 kΩ termination"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Input impedance - AUX IN",
+   "text": "Input impedance - AUX IN",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "caution": "Do not connect anything else to the input while measuring resistance.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3618,96 +3790,103 @@
      "Fluke 5560A SCOPE connector directly to the AUX IN input (the 5560A is switched to its resistance-measurement function)."
     ]
    ],
-   "text": "Input impedance - AUX IN",
-   "title": "Input impedance - AUX IN"
+   "caution": "Do not connect anything else to the input while measuring resistance.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "AUX IN",
+   "text": "AUX IN impedance",
    "buttons": [
     "Selected - measure",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Front panel",
      "Select the 250 kΩ termination verification as above so the AUX IN input is at 250 kΩ."
     ]
    ],
-   "text": "AUX IN impedance",
-   "title": "AUX IN"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH1",
+   "text": "DC balance - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH1 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH1",
-   "title": "DC balance - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH2",
+   "text": "DC balance - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH2 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH2",
-   "title": "DC balance - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH3",
+   "text": "DC balance - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH3 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH3",
-   "title": "DC balance - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC balance - CH4",
+   "text": "DC balance - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Terminate",
      "Remove all signal cables. Fit a 50 Ω terminator on the CH4 input and nothing else."
     ]
    ],
-   "text": "DC balance - CH4",
-   "title": "DC balance - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH1",
+   "text": "DC gain - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3718,16 +3897,17 @@
      "Fluke 5560A SCOPE output to CH1 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH1",
-   "title": "DC gain - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH2",
+   "text": "DC gain - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3738,16 +3918,17 @@
      "Fluke 5560A SCOPE output to CH2 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH2",
-   "title": "DC gain - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH3",
+   "text": "DC gain - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3758,16 +3939,17 @@
      "Fluke 5560A SCOPE output to CH3 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH3",
-   "title": "DC gain - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC gain - CH4",
+   "text": "DC gain - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3778,16 +3960,17 @@
      "Fluke 5560A SCOPE output to CH4 with the BNC cable (SCOPE DCV, source impedance matched to the input termination)."
     ]
    ],
-   "text": "DC gain - CH4",
-   "title": "DC gain - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH1",
+   "text": "DC offset - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3798,33 +3981,35 @@
      "Fluke 5560A SCOPE output to CH1."
     ]
    ],
-   "text": "DC offset - CH1",
-   "title": "DC offset - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH2",
+   "text": "DC offset - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3835,33 +4020,35 @@
      "Fluke 5560A SCOPE output to CH2."
     ]
    ],
-   "text": "DC offset - CH2",
-   "title": "DC offset - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH3",
+   "text": "DC offset - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3872,33 +4059,35 @@
      "Fluke 5560A SCOPE output to CH3."
     ]
    ],
-   "text": "DC offset - CH3",
-   "title": "DC offset - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "DC offset - CH4",
+   "text": "DC offset - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3909,33 +4098,35 @@
      "Fluke 5560A SCOPE output to CH4."
     ]
    ],
-   "text": "DC offset - CH4",
-   "title": "DC offset - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "HIGH VOLTAGE",
+   "text": "99.5 V DC output",
    "buttons": [
     "Enable output",
     "Cancel"
    ],
-   "caution": "Output stays in STANDBY until you continue.",
-   "kind": "operator_prompt",
    "steps": [
     [
      "Safety",
      "The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on."
     ]
    ],
-   "text": "99.5 V DC output",
-   "title": "HIGH VOLTAGE"
+   "caution": "Output stays in STANDBY until you continue.",
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH1",
+   "text": "Analog bandwidth - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3946,16 +4137,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH1",
-   "title": "Analog bandwidth - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH2",
+   "text": "Analog bandwidth - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3966,16 +4158,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH2",
-   "title": "Analog bandwidth - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH3",
+   "text": "Analog bandwidth - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -3986,16 +4179,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH3",
-   "title": "Analog bandwidth - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH4",
+   "text": "Analog bandwidth - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -4006,16 +4200,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH4",
-   "title": "Analog bandwidth - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH1",
+   "text": "Analog bandwidth - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -4026,16 +4221,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH1. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH1",
-   "title": "Analog bandwidth - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH2",
+   "text": "Analog bandwidth - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -4046,16 +4242,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH2. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH2",
-   "title": "Analog bandwidth - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH3",
+   "text": "Analog bandwidth - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -4066,16 +4263,17 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH3. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH3",
-   "title": "Analog bandwidth - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Analog bandwidth - CH4",
+   "text": "Analog bandwidth - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -4086,80 +4284,85 @@
      "Fluke 5560A SCOPE output (leveled sine) to CH4. Use the 50 Ω cable supplied for the 5560A leveled-sine head."
     ]
    ],
-   "text": "Analog bandwidth - CH4",
-   "title": "Analog bandwidth - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
-   "buttons": [
-    "Connected - continue",
-    "Cancel"
-   ],
    "kind": "operator_prompt",
-   "steps": [
-    [
-     "Disconnect",
-     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
-    ]
-   ],
+   "title": "Random noise - CH1",
    "text": "Random noise - CH1",
-   "title": "Random noise - CH1"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "operator_prompt",
+   "title": "Random noise - CH2",
    "text": "Random noise - CH2",
-   "title": "Random noise - CH2"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
+   "kind": "operator_prompt",
+   "title": "Random noise - CH3",
    "text": "Random noise - CH3",
-   "title": "Random noise - CH3"
-  },
-  {
-   "answer": true,
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
      "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
     ]
    ],
-   "text": "Random noise - CH4",
-   "title": "Random noise - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Random noise - CH4",
+   "text": "Random noise - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
+   "steps": [
+    [
+     "Disconnect",
+     "Disconnect everything from the oscilloscope inputs. Leave the inputs open."
+    ]
+   ],
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
+  },
+  {
    "kind": "operator_prompt",
+   "title": "Reference frequency error",
+   "text": "Reference frequency error",
+   "buttons": [
+    "Connected - continue",
+    "Cancel"
+   ],
    "steps": [
     [
      "Disconnect",
@@ -4174,144 +4377,153 @@
      "The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already."
     ]
    ],
-   "text": "Reference frequency error",
-   "title": "Reference frequency error"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH1",
+   "text": "Delta time - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH1."
     ]
    ],
-   "text": "Delta time - CH1",
-   "title": "Delta time - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH1",
+   "text": "Delta time - CH1",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH1 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH1",
-   "title": "Delta time - CH1"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH2",
+   "text": "Delta time - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH2."
     ]
    ],
-   "text": "Delta time - CH2",
-   "title": "Delta time - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH2",
+   "text": "Delta time - CH2",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH2 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH2",
-   "title": "Delta time - CH2"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH3",
+   "text": "Delta time - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH3."
     ]
    ],
-   "text": "Delta time - CH3",
-   "title": "Delta time - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH3",
+   "text": "Delta time - CH3",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH3 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH3",
-   "title": "Delta time - CH3"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH4",
+   "text": "Delta time - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Fluke 5560A SCOPE output (leveled sine) to CH4."
     ]
    ],
-   "text": "Delta time - CH4",
-   "title": "Delta time - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Delta time - CH4",
+   "text": "Delta time - CH4",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Connect",
      "Function generator (33250) output to CH4 with a 50 Ω cable."
     ]
    ],
-   "text": "Delta time - CH4",
-   "title": "Delta time - CH4"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   },
   {
-   "answer": true,
+   "kind": "operator_prompt",
+   "title": "Trigger output",
+   "text": "Trigger output",
    "buttons": [
     "Connected - continue",
     "Cancel"
    ],
-   "kind": "operator_prompt",
    "steps": [
     [
      "Disconnect",
@@ -4322,8 +4534,8 @@
      "Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable."
     ]
    ],
-   "text": "Trigger output",
-   "title": "Trigger output"
+   "image": "tektronix_mdo4000_panel.png",
+   "answer": true
   }
  ]
 }
