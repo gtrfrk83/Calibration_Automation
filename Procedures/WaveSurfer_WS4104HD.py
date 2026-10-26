@@ -1114,10 +1114,25 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.status.set(f'Checkpoint could not be loaded: {exc}')
 
     # ---- grids list every planned test point up front; as-found values fill in as the run goes
-    @staticmethod
-    def _set_grid(tree, items, active=None):
-        """items = [(values, tags), ...]. Updates rows in place, keeps selection, scrolls to `active`."""
-        return port.view(RMSNoiseApp.VIEW).set_grid(tree, items, active)
+    # grid attribute -> (running flag, retest-index attribute): while that section runs its points in turn (not a retest), the highlighted row
+    # follows the point being tested
+    FOLLOW_GRIDS = {'tree': ('running', 'noise_retest_index'), 'dc_tree': ('dc_running', 'dc_retest_index'), 'imp_tree': ('imp_running', 'imp_retest_index'),
+                    'offset_tree': ('offset_running', 'offset_retest_index'), 'bw_tree': ('bw_running', 'bw_retest_index'),
+                    'tb_tree': ('tb_running', 'tb_retest_index'), 'trig_tree': ('trig_running', 'trig_retest_index')}
+
+    def _set_grid(self, tree, items, active=None):
+        """items = [(values, tags), ...]. Updates rows in place, keeps selection, scrolls to `active`.
+        While the section is running its points in turn, `active` (the point being tested) is also the highlighted row."""
+        ids = port.view(RMSNoiseApp.VIEW).set_grid(tree, items, active)
+        try:
+            for attr, (running, retest) in self.FOLLOW_GRIDS.items():
+                if getattr(self, attr, None) is tree:
+                    if (getattr(self, running, False) and getattr(self, retest, None) is None and active is not None and 0 <= active < len(ids)):
+                        self.ui_view.select_and_show(tree, ids[active])
+                    break
+        except Exception:
+            pass                                                  # the highlight never breaks a measurement
+        return ids
 
     @staticmethod
     def range_text(scale):

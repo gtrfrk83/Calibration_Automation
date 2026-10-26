@@ -445,6 +445,7 @@ def run_scenarios(only=None):
         a.all_channels.set(False)
         a.start_test()
         hn.pump()
+        sh.set(a.tree, selection=())                                       # the run leaves its last point highlighted; the Tk scenario had nothing selected
         a.retest_noise()
         sh.set(a.tree, selection=('i0',), index=0)
         a.retest_noise()

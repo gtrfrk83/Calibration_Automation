@@ -1955,3 +1955,6 @@ Right-clicking a test point now offers "Run from here" under Edit (and the engin
 
 ## Owner change: the batch file installs every package
 00_START_Calibration_Suite.bat now also installs pyvisa, pyserial, reportlab and openpyxl (when missing, into the same Python as PySide6) before starting the Manager. A failed optional install only prints pip's message; the Manager still starts. Not tried on Windows (Linux sandbox). A VISA backend (NI-VISA / Keysight IO Libraries, or pip pyvisa-py) is still a separate install.
+
+## Owner change: the highlighted row follows the point being tested
+WaveSurfer (every section grid, while that section runs its points in turn; not during a retest) and the scope engines TDS2000C / MDO3 / MDO4000C / TBS2000B (the worker posts 'select' before each point; the pump selects and scrolls to the row) now move the highlight to the point under test, as the handheld, bench-DMM, generator and DAQ procedures already did. The last tested point stays highlighted after the run (so Rerun Selected works on it without clicking). Not tried on real instruments.

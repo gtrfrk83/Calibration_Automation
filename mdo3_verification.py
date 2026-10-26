@@ -1110,6 +1110,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             while True:
                 kind, payload, box = self.q.get_nowait()
                 if kind == 'status': self.status.set(payload)
+                elif kind == 'select':
+                    if self.ui_view.table_has(self, payload): self.ui_view.table_select(self, payload, see=True)
                 elif kind == 'row': self._update_row(POINTS[payload - 1])
                 elif kind == 'refresh': self.refresh()
                 elif kind == 'done': self._finished(payload)
@@ -1192,6 +1194,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 i += 1
                 if p is None: continue                              # skipped by an edit made during the run
                 self.post('status', f'Running {i}/{len(points)}: {p["desc"]}')
+                self.post('select', str(p['id']))                       # the highlighted row follows the point being tested
                 try:
                     reading, raw = runner.run_point(p)
                     self._record_threadsafe(p, reading, raw, bool(self.demo))
