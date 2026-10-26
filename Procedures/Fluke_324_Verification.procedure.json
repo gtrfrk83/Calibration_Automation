@@ -1,0 +1,54 @@
+{
+ "schema": 1,
+ "id": "Fluke_324_Verification",
+ "name": "Fluke 324 Clamp Meter Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "324",
+ "category": "Clamp Meter",
+ "version": "1",
+ "order": 62,
+ "description": "Fluke 323 / 324 / 325 Clamp Meter Performance Verification (family spec): this launcher runs the 324, 24 points",
+ "launcher": "Procedures/Fluke_324_Verification.py",
+ "engine": [
+  "handheld_dmm.py",
+  "iflex_option.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_323_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_324_Verification.py",
+   "handheld_dmm.py",
+   "handheld_dmm_view_tk.py",
+   "handheld_dmm_view_qt.py",
+   "iflex_option.py",
+   "iflex_option_view_tk.py",
+   "iflex_option_view_qt.py",
+   "coil_rule.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "hookups.py#fluke323",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_323_pv.json#324"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke323",
+  "diagram_prefixes": [
+   "hook_fluke323"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_324_Verification.py",
+  "Procedures/Fluke_324_Verification.procedure.json"
+ ]
+}

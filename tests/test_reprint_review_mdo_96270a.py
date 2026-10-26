@@ -160,7 +160,8 @@ class Wiring(unittest.TestCase):
                   'specs/build_5560a_standard_from_manual.py', 'specs/analyze_5560a_spec_check.py', 'specs/fluke_5560a_spec_check.md',          # the 5560A sheet re-run from the manual (branch fluke-5560a-spec-check)
                   'specs/standards/fluke_5560a_standard.json')
         later += ('specs/build_fluke_376_spec.py', 'specs/fluke_376_pv.json', 'Procedures/Fluke_374_Verification.py', 'Procedures/Fluke_375_Verification.py', 'Procedures/Fluke_376_Verification.py', 'Procedures/Fluke_376II_Verification.py',
-                  'i400_verification.py', 'Procedures/Fluke_i400_Verification.py', 'Procedures/Fluke_i400_Verification.procedure.json', 'specs/build_fluke_i400_spec.py', 'specs/fluke_i400_pv.json')                                                                  # the 50-turn coil uncertainty rule (2026-10-26)
+                  'i400_verification.py', 'Procedures/Fluke_i400_Verification.py', 'Procedures/Fluke_i400_Verification.procedure.json', 'specs/build_fluke_i400_spec.py', 'specs/fluke_i400_pv.json',
+                  'Procedures/Fluke_323_Verification.py', 'Procedures/Fluke_323_Verification.procedure.json', 'Procedures/Fluke_324_Verification.py', 'Procedures/Fluke_324_Verification.procedure.json', 'Procedures/Fluke_325_Verification.py', 'Procedures/Fluke_325_Verification.procedure.json', 'specs/build_fluke_323_spec.py', 'specs/fluke_323_pv.json')                                                                  # the 50-turn coil uncertainty rule (2026-10-26)
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
         for f in ('report_review_adapters.py', 'report_review_model.py', 'uncertainty_budget.py'):

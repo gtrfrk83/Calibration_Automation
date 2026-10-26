@@ -348,7 +348,8 @@ class ZeroFlips(unittest.TestCase):
                     'Procedures/Tektronix_TBS1000_Verification.py', 'Procedures/Tektronix_TBS1000_Verification.procedure.json',
                     'Procedures/Tektronix_TBS2000B_Verification.py', 'Procedures/Tektronix_TBS2000B_Verification.procedure.json',
                     'Procedures/Fluke_374_Verification.py', 'Procedures/Fluke_375_Verification.py', 'Procedures/Fluke_376_Verification.py', 'Procedures/Fluke_376II_Verification.py',
-                    'i400_verification.py', 'Procedures/Fluke_i400_Verification.py', 'Procedures/Fluke_i400_Verification.procedure.json', 'specs/build_fluke_i400_spec.py', 'specs/fluke_i400_pv.json')      # edited by later work (logic probe removal; the 3 Series MDO and TBS procedures), not by phase 2
+                    'i400_verification.py', 'Procedures/Fluke_i400_Verification.py', 'Procedures/Fluke_i400_Verification.procedure.json', 'specs/build_fluke_i400_spec.py', 'specs/fluke_i400_pv.json',
+                  'Procedures/Fluke_323_Verification.py', 'Procedures/Fluke_323_Verification.procedure.json', 'Procedures/Fluke_324_Verification.py', 'Procedures/Fluke_324_Verification.procedure.json', 'Procedures/Fluke_325_Verification.py', 'Procedures/Fluke_325_Verification.procedure.json', 'specs/build_fluke_323_spec.py', 'specs/fluke_323_pv.json')      # edited by later work (logic probe removal; the 3 Series MDO and TBS procedures), not by phase 2
 
     def test_no_engine_or_launcher_file_is_changed(self):
         base = subprocess.run(['git', 'diff', '--name-only', 'origin/main'], cwd=ROOT, capture_output=True, text=True).stdout.split()
