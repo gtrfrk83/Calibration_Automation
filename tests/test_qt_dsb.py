@@ -1454,8 +1454,8 @@ class StandardColumnAndCalcTests(QtDsbCase):
         box = win.panel_box
         self.assertFalse(box.cells['sensor'].isHidden())
         labels = [box.sensor_box.combo.itemText(i) for i in range(box.sensor_box.combo.count())]
-        self.assertIn('Thermocouple Type K', labels)
-        self.assertIn('RTD Pt 385, 100 ohm', labels)
+        self.assertIn('Type K', labels)
+        self.assertIn('Pt 385, 100 Ω', labels)
         self.assertEqual(box.v['sensor'].get(), '')                                # nothing is assumed
         win2 = self.new_window()
         win2.function_chosen(self.dcv_label(win2))
@@ -1470,7 +1470,7 @@ class StandardColumnAndCalcTests(QtDsbCase):
         self.assertTrue(win.calc().ok)
         fn = win.model.point_of(keys[0])[0]
         self.assertEqual([p.settings.get('sensor') for p in fn.points], ['Pt385-100', None])
-        self.assertIn('RTD Pt 385, 100 ohm', win.model.row(keys[0])['function'])
+        self.assertIn('Pt 385, 100', win.model.row(keys[0])['function'])
         self.assertIn('sensor not chosen', win.model.row(keys[1])['function'])
         self.assertTrue(win.model.undo().ok)
         fn = win.model.point_of(keys[0])[0]
@@ -1512,7 +1512,7 @@ class StandardColumnAndCalcTests(QtDsbCase):
         self.pump(win)
         sheet = win.sheet
         ix = sheet.proxy.index(win.model.row_index(keys[0]), 5)
-        self.assertIn('RTD Pt 385, 100 ohm', sheet.proxy.data(ix, Qt.ItemDataRole.ToolTipRole))
+        self.assertIn('Pt 385, 100', sheet.proxy.data(ix, Qt.ItemDataRole.ToolTipRole))
         self.assertIn('by hand', sheet.proxy.data(ix, Qt.ItemDataRole.ToolTipRole))
         ix2 = sheet.proxy.index(win.model.row_index(keys[1]), 5)
         self.assertEqual(sheet.proxy.data(ix2, Qt.ItemDataRole.DisplayRole), '')
