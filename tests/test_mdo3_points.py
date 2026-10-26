@@ -451,7 +451,7 @@ class MethodsFollowTheManual(unittest.TestCase):
             else:
                 self.assertEqual((centre_cmds, span_cmds), ([], []), p['desc'])           # start / stop only, no narrowing to the noisiest frequency
         note = next(p for p in POINTS if p['kind'] == 'DANL' and p['f_start'] == 2e9 and not p.get('tpa'))['note']
-        self.assertIn('1.5 GHz', note); self.assertIn('2.5 GHz', note)
+        self.assertIn('1.5 GHz', note); self.assertIn('2.5 GHz', note); self.assertIn('owner decision 2026-10-25', note)
 
     def test_dvm_frequency_is_a_square_time_mark_except_at_150_mhz_which_is_a_sine(self):
         waves = {p['freq']: p['waveform'] for p in POINTS if p['kind'] == 'DVMFREQ'}

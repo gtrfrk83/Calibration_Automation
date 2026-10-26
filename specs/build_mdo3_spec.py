@@ -228,7 +228,7 @@ for lo_f, hi_f, lim, opt in DANL:
     a, b = q(lo_f), q(hi_f)
     cen = {'center': q(DANL_CENTRE[(lo_f, hi_f)]), 'span': q('10 MHz')} if (lo_f, hi_f) in DANL_CENTRE else {}
     if (lo_f, hi_f) == ('2 GHz', '3 GHz'):
-        cen['note'] = 'The procedure (p. 112 step 8d) sets the centre frequency to 1.5 GHz, which is outside this 2 GHz to 3 GHz range; 2.5 GHz (the middle of the range) is used. Confirm.'
+        cen['note'] = 'The procedure (p. 112 step 8d) sets the centre frequency to 1.5 GHz, which is outside this 2 GHz to 3 GHz range; 2.5 GHz (the middle of the range) is used (owner decision 2026-10-25).'
     add('danl', 'DANL', f'{fname(a)} to {fname(b)}' + (' (3-SA3 installed)' if opt == 'SA3' else ' (3-SA3 not installed)' if opt else ''),
         D(0), None, D(lim), 'dBm/Hz', req=[x for x in (opt, 'noTPA') if x], stim='none', f_start=a, f_stop=b, ref_level=D(-15), detection='AVErage', **cen)
 
@@ -413,7 +413,7 @@ MISPRINTS = [
     'TPA DANL (p. 82): "50 kHz - 1 GHz (3-SA3 not installed)"; procedure p. 120 checks 5 MHz - 1 GHz. 5 MHz used.',
     'Residual spurs (p. 80): the "5 MHz to 2 GHz (not 1.25 GHz)" row has no 3-SA3 qualifier; the procedure (p. 113) checks 5 MHz - 1 GHz without '
     '3-SA3 and 5 MHz - 2 GHz with it. Built as the procedure.',
-    'DANL 2 GHz to 3 GHz (p. 112 step 8d): the centre frequency is printed as 1.5 GHz, outside the 2 GHz to 3 GHz range; 2.5 GHz used (visible note on the point).',
+    'DANL 2 GHz to 3 GHz (p. 112 step 8d): the centre frequency is printed as 1.5 GHz, outside the 2 GHz to 3 GHz range; 2.5 GHz used (owner decision 2026-10-25, visible note on the point).',
     'DANL with the TPA-N-PRE (pp. 120-121): the centre frequency is not printed ("the center frequency"); the DANL procedure\'s centres are used (note on the points).',
     'DVM frequency 150 MHz (p. 88): printed +/-10 kHz; specification p. 46 (+/-(10 uHz/Hz + 1 count)) gives +/-11.5 kHz. Printed (tighter) limit applied. '
     'Specification p. 46: counter maximum 100 MHz for 100 MHz models - the 150 MHz point is not run on them.',

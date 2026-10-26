@@ -148,7 +148,7 @@ class Wiring(unittest.TestCase):
                   'specs/build_28x_spec.py', 'specs/fluke_287_289_pv.json',                  # 287/289 panel picture, FREQ CMC on 4-24/4-25 (20edb7d, dccc414, 8b150e7)
                   'specs/build_hookups.py', 'specs/build_hookups_ext.py',                    # drawn hook-up diagrams (8b150e7); none of these is this work
                   'specs/build_a2la_cmc_flatness.py')                                        # scope AC Flatness lines (owner, 2026-10-25)
-        later += ('Procedures/Tektronix_MDO3_Verification.py', 'Procedures/Tektronix_MDO3_Verification.procedure.json', 'specs/README.txt',     # the 3 Series MDO procedure (branch tektronix-mdo3); not this work
+        later += ('mdo3_verification.py', 'Procedures/Tektronix_MDO3_Verification.py', 'Procedures/Tektronix_MDO3_Verification.procedure.json', 'specs/README.txt',     # the 3 Series MDO procedure (branch tektronix-mdo3); not this work
                   'specs/build_mdo3_spec.py', 'specs/tektronix_mdo3_pv.json', 'specs/mdo3_reference_cmc.json')
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
