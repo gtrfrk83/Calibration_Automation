@@ -109,7 +109,7 @@ class StandardColumnsMixin:
                 out['standard_tip'] = (f'{a.standard} sources {a.sourced:.6g} A through the {dsb_coil.LABEL}; the meter reads {abs(float(p.nominal)):.6g} A. '
                                        + ('Chosen by hand. ' if hand else 'The best fit, picked automatically. ')
                                        + ('The uncertainty is the coil\'s own sheet. ' if a.unc_standard == dsb_coil.MODEL else
-                                          'The coil sheet has no row at this current: the uncertainty is the calibrator\'s at the sourced current. ')
+                                          'The coil sheet has no row at this current: the uncertainty is the calibrator\'s at the sourced current x ' + f'{a.unc_scale:g}' + ' turns (the clamp reads that many times the output). ')
                                        + 'Click to choose another calibrator (the coil is not commanded, so it is never in the list).')
         if src.level == 'ok' and a is not None and a.uncertainty and a.uncertainty > 0:
             out['unc'] = uncertainty.format_value(a.uncertainty, fn.unit)

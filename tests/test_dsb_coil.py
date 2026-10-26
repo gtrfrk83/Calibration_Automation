@@ -91,13 +91,19 @@ class Matching(unittest.TestCase):
         self.assertAlmostEqual(a.uncertainty, 0.56)                                  # (90 uA/A + 0.1 mA) = 1 mA RSS (0.5 % of 10 A + 0.5 A) / 2 = 0.275 A: 0.56 A at k = 2 rounded up
         self.assertAlmostEqual(a.sourced, 0.2)
 
-    def test_ac_10_a_is_below_the_coils_range_so_the_calibrator_at_the_sourced_current_applies(self):
+    def test_ac_10_a_is_below_the_coils_range_so_the_calibrator_at_the_sourced_current_applies_x_50(self):
         a = self.a('ACI', 10)
         self.assertEqual((a.unc_standard, a.sourced), (a.standard, 0.2))              # the calibrator itself, at 0.2 A, no interaction term
         self.assertFalse(coil_rule.covers('ACI', 10.0, 50.0))
+        self.assertEqual(a.unc_scale, 50.0)
         cand = next(c for c in a.candidates if c.standard == a.standard)
         self.assertEqual(a.uncertainty, cand.uncertainty)
-        self.assertLess(a.uncertainty, 0.01)                                         # a 0.2 A calibrator figure, not the coil's several amperes
+        self.assertAlmostEqual(a.uncertainty, 0.0072)                                # 5560A at 0.2 A, 50 Hz, x 50 (was 0.00015 A unscaled): a 7.2 mA-class figure on the clamp's 10 A
+        self.assertGreater(a.tur, 10)                                                # the TAR accuracy and the uncertainty are both x 50; the budget is rounded after scaling
+        self.assertLess(a.tur, 100)
+        self.assertEqual(self.a('ACI', 500).unc_scale, 1.0)                           # the coil-covered and the DC points are not scaled
+        self.assertEqual(self.a('DCI', 10).unc_scale, 1.0)
+        self.assertNotIn('unc_scale', self.a('ACI', 100).to_dict())                  # non-coil points write no coil keys
 
     def test_a_non_coil_current_point_is_unchanged(self):
         a = self.a('ACI', 100)
@@ -128,9 +134,17 @@ class Matching(unittest.TestCase):
                 self.assertEqual(uncertainty.format_value(a.uncertainty, 'A'), printed, (kind, nominal))
                 self.assertEqual(tartur.format_ratio(a.tur), fields['TUR'], (kind, nominal))
                 self.assertEqual(tartur.format_ratio(a.tar), fields['TAR'], (kind, nominal))
-            else:                                                                    # below the coil's range: the calibrator at the sourced current
+            else:                                                                    # below the coil's range: the calibrator at the sourced current x 50
                 self.assertEqual(a.unc_standard, a.standard)
                 self.assertEqual(nom, float(nominal) / 50)
+                self.assertEqual(a.unc_scale, iflex_option.App.unc_scale(step))
+                q['scale'] = a.unc_scale
+                printed = report_pdf.point_uncertainty(q, standard=a.standard)
+                import uncertainty
+                self.assertEqual(uncertainty.format_value(a.uncertainty, 'A'), printed, (kind, nominal))
+                fields = tartur.row_fields(q, float(lim.low), float(lim.high), standard=a.standard)
+                self.assertEqual(tartur.format_ratio(a.tur), fields['TUR'], (kind, nominal))
+                self.assertEqual(tartur.format_ratio(a.tar), fields['TAR'], (kind, nominal))
 
 
 class Export(unittest.TestCase):
@@ -169,7 +183,13 @@ class Export(unittest.TestCase):
         self.assertFalse(covered(by[pts[('ACI', 100)].id]))                          # not a coil point
         self.assertEqual(rt.DsbApp.unc_extra(app, by[pts[('ACI', 500)].id]), iflex_option.App.unc_extra(by[pts[('ACI', 500)].id]))
         self.assertEqual(rt.DsbApp.unc_extra(app, by[pts[('ACI', 10)].id]), ())
+        app.unc_scale = lambda p: rt.DsbApp.unc_scale(app, p)
+        self.assertEqual(app.unc_scale(by[pts[('ACI', 10)].id]), 50.0)                # the fallback is x 50 ...
+        self.assertEqual(app.unc_scale(by[pts[('ACI', 500)].id]), 1.0)                # ... the coil-covered point and
+        self.assertEqual(app.unc_scale(by[pts[('ACI', 100)].id]), 1.0)                # a non-coil point are not
+        self.assertEqual(app.unc_scale(by[pts[('ACI', 10)].id]), iflex_option.App.unc_scale(by[pts[('ACI', 10)].id]))
         app.demo = True
+        self.assertEqual(app.unc_scale(by[pts[('ACI', 10)].id]), 1.0)                 # a demo prints nothing of a standard
         self.assertFalse(covered(by[pts[('ACI', 500)].id]))                          # a demo never prints a standard's figures
         self.assertIn('50-turn coil', by[pts[('ACI', 500)].id]['dsb_desc'])
 

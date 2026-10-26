@@ -660,7 +660,7 @@ def uncertainty_source(ds, fn, p, a, manual_sheet=False, pending=False):
                 if a.unc_standard == dsb_coil.MODEL:
                     return UncertaintySource(p.id, f'{dsb_coil.LABEL} standards sheet ({a.unc_row}) at the effective current, RSS with the clamp / coil interaction; '
                                                    f'{a.standard} sources {a.sourced:.6g} A', True, 'ok', dsb_coil.MODEL, True)
-                return UncertaintySource(p.id, f'{a.standard} standards sheet{row} at the sourced {a.sourced:.6g} A (below the coil\'s range: no coil line, no interaction term)',
+                return UncertaintySource(p.id, f'{a.standard} standards sheet{row} at the sourced {a.sourced:.6g} A, x {a.unc_scale:g} turns (below the coil\'s range: no coil line, no interaction term)',
                                          True, 'ok', a.standard, True)
             return UncertaintySource(p.id, f'{a.standard} standards sheet{row}', True, 'ok', a.standard, True)
     std = a.standard if a is not None and a.status not in ('manual', 'uncovered') else ''
