@@ -369,7 +369,7 @@ class Drivers(M):
             for kind in db.KINDS:
                 if db.KINDS[kind]['family'] == 'generator':
                     continue
-                if kind in ('TEMPF', 'COND', 'PCT', 'CHECK'):           # the kinds of the .MDD import: done by hand, no calibrator command exists for them
+                if kind in ('TEMPF', 'COND', 'PCT', 'CHECK', 'LUX', 'FC', 'LAMBERT', 'UVIRR'):           # the kinds of the .MDD import and the light kinds: done by hand, no calibrator command exists for them
                     self.assertEqual(dm.automation_status(model, kind).status, 'manual', (model, kind))
                     continue
                 self.assertIn(dm.automation_status(model, kind).status, ('ok', 'unverified'), (model, kind))

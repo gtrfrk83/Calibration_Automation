@@ -54,7 +54,7 @@ STEPS = (
 STEP_KEYS = tuple(s['key'] for s in STEPS)
 S_HEADER, S_FUNCTIONS, S_RANGES, S_SPEC, S_POINTS, S_AUTOMATION, S_REVIEW = range(7)
 
-KIND_GROUPS = (('dmm', 'Multimeter / handheld / calibrator'), ('scope', 'Oscilloscope'), ('generator', 'Signal / function generator'))
+KIND_GROUPS = (('dmm', 'Multimeter / handheld / calibrator'), ('scope', 'Oscilloscope'), ('generator', 'Signal / function generator'), ('light', 'Light meter'))
 SETTING_FIELDS = {
     'GEN_AMPL': [('waveform', 'Waveform', ['SIN', 'SQU', 'DC'], 'SIN'), ('load', 'Load', ['INF', '50'], 'INF'), ('amp_unit', 'Amplitude is in', ['Vrms', 'Vpp', 'Vp'], 'Vrms')],
     'GEN_FLAT': [('waveform', 'Waveform', ['SIN', 'SQU'], 'SIN'), ('amp_unit', 'Amplitude is in', ['Vrms', 'Vpp', 'Vp'], 'Vrms')],
