@@ -1,0 +1,133 @@
+{
+ "schema": 1,
+ "manufacturer": "Fluke",
+ "model": "i400",
+ "title": "i400 AC Current Clamp - Current Accuracy Tests",
+ "idn_match": [],
+ "source": {
+  "document": "Fluke i400 AC Current Clamp - Calibration Information (part 2414311)",
+  "tables": "Table 3 (p. 6), Figures 2 and 3 (pp. 6 - 7), Table 2 (p. 5), Electrical Specifications (p. 3)",
+  "note": "Fluke i400 Calibration Information 2414311, Table 3 Accuracy Tests (p. 6)"
+ },
+ "periods": [
+  "printed"
+ ],
+ "default_period": "printed",
+ "front_rear_switch": false,
+ "equipment": {
+  "calibrator": "AC current 0 - 8 A, 0.15 %, 45 - 400 Hz (recommended: Fluke 5520A; the program also offers the 5560A and 5522A)",
+  "multimeter": "AC current 1 mA - 400 mA, 0.5 %, 45 - 400 Hz (recommended: Fluke 189 in mA ac)",
+  "wire_loop": "single-turn copper wire loop, larger than #14 gauge, 6 in diameter",
+  "coil": "toroid coil, 50 turns, Fluke 5500A/Coil"
+ },
+ "general": [
+  "The multimeter is pre-calibrated at each step with the calibrator (LCOMP OFF) and its error is added to the clamp reading (Table 3 footnote, p. 6): the program does this when the pre-calibration option is on."
+ ],
+ "measure": {
+  "ac_bandwidth": 20,
+  "note": "AC current function of the reading multimeter; the manual states no filter or speed (UNVERIFIED engineering choice: 20 Hz AC filter on the 34410A / 34411A)."
+ },
+ "accuracy": {
+  "text": "2 % + 0.06 A, 45 Hz to 400 Hz",
+  "output": "1 mA/A",
+  "range": "1 A to 400 A ac rms",
+  "page": 3,
+  "rel": "0.02",
+  "abs_a": "0.06"
+ },
+ "sections": [
+  {
+   "id": "wire",
+   "title": "Current accuracy - single-turn wire",
+   "page": "6 (Table 3 step 1, Figure 2)",
+   "source": "calibrator",
+   "setup": "Calibrator output (5560A: VI AUX / OUTPUT LO; 5522A / 5520A: AUX HI / AUX LO) through a single-turn copper wire loop (larger than #14 gauge, about 6 in diameter) - the clamp jaws closed round the wire, centred (Figure 2, p. 6).  The clamp output cable goes to the multimeter mA ac input and COM.  Calibrator LCOMP OFF.",
+   "points": [
+    {
+     "step": 1,
+     "kind": "ACI",
+     "nominal": 0.001,
+     "range": 0.01,
+     "frequency": 45.0,
+     "limits": {
+      "printed": 8e-05
+     },
+     "printed_limits": {
+      "printed": "0.920 mA to 1.080 mA"
+     },
+     "quick": true,
+     "plc": null,
+     "clamp_amps": 1.0,
+     "applied": {
+      "value": 1.0,
+      "frequency": 45.0,
+      "unit": "A"
+     },
+     "turns": 1,
+     "lcomp": "OFF",
+     "group": "WIRE_1T",
+     "ref": "Table 3 step 1"
+    }
+   ]
+  },
+  {
+   "id": "coil",
+   "title": "Current accuracy - 50-turn coil",
+   "page": "6 - 7 (Table 3 steps 2 - 3, Figure 3)",
+   "source": "calibrator",
+   "setup": "Calibrator current output (below 3 A: 5560A VI AUX / OUTPUT LO, 5522A / 5520A AUX HI / AUX LO; 3 A and above: 5560A 30A / OUTPUT LO, 5522A / 5520A 20 A / AUX LO) through the 50-turn coil (Fluke 5500A/Coil) - the clamp jaws closed round the coil, centred (Figure 3, p. 7).  The clamp output cable goes to the multimeter mA ac input and COM.  Calibrator LCOMP ON.",
+   "points": [
+    {
+     "step": 2,
+     "kind": "ACI",
+     "nominal": 0.1,
+     "range": 1.0,
+     "frequency": 400.0,
+     "limits": {
+      "printed": 0.00206
+     },
+     "printed_limits": {
+      "printed": "97.94 mA to 102.06 mA"
+     },
+     "quick": true,
+     "plc": null,
+     "clamp_amps": 100.0,
+     "applied": {
+      "value": 2.0,
+      "frequency": 400.0,
+      "unit": "A"
+     },
+     "turns": 50,
+     "lcomp": "ON",
+     "group": "COIL_AUX",
+     "ref": "Table 3 step 2"
+    },
+    {
+     "step": 3,
+     "kind": "ACI",
+     "nominal": 0.4,
+     "range": 1.0,
+     "frequency": 60.0,
+     "limits": {
+      "printed": 0.00806
+     },
+     "printed_limits": {
+      "printed": "391.94 mA to 408.06 mA"
+     },
+     "quick": true,
+     "plc": null,
+     "clamp_amps": 400.0,
+     "applied": {
+      "value": 8.0,
+      "frequency": 60.0,
+      "unit": "A"
+     },
+     "turns": 50,
+     "lcomp": "ON",
+     "group": "COIL_20A",
+     "ref": "Table 3 step 3"
+    }
+   ]
+  }
+ ]
+}

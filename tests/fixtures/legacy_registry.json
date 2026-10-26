@@ -1,1044 +1,1079 @@
 {
- "STABLE": {
-  "WaveSurfer WS4104HD Verification": "WaveSurfer_WS4104HD.py",
-  "Fluke 87V Guided Verification": "Fluke_87V.py",
-  "Agilent 34401A Performance Verification": "Agilent_34401A.py",
-  "Fluke 8846A Performance Verification (1-Year)": "Fluke_8846A_Verification.py",
-  "Fluke 8846A Guided Adjustment": "Fluke_8846A_Adjustment.py",
-  "Fluke 8808A Performance Verification (RS-232)": "Fluke_8808A_Verification.py",
-  "Keysight 34465A Performance Verification": "Keysight_34465A_Verification.py",
-  "Keysight 34460A Performance Verification": "Keysight_34460A_Verification.py",
-  "Keysight 34461A Performance Verification": "Keysight_34461A_Verification.py",
-  "Keysight 34470A Performance Verification": "Keysight_34470A_Verification.py",
-  "Keysight 34970A Performance Verification (RS-232)": "Keysight_34970A_Verification.py",
-  "Keysight 34972A Performance Verification (USB)": "Keysight_34972A_Verification.py",
-  "Tektronix MDO4000C Performance Verification": "Tektronix_MDO4000C_Verification.py",
-  "Tektronix TDS2000C / TDS1000C-EDU Performance Verification": "Tektronix_TDS2000C_Verification.py",
-  "Fluke 110 Performance Verification": "Fluke_110_Verification.py",
-  "Fluke 113 Performance Verification": "Fluke_113_Verification.py",
-  "Fluke 114 Performance Verification": "Fluke_114_Verification.py",
-  "Fluke 115 Performance Verification": "Fluke_115_Verification.py",
-  "Fluke 116 Performance Verification": "Fluke_116_Verification.py",
-  "Fluke 117 Performance Verification": "Fluke_117_Verification.py",
-  "Klein Tools MM325 Performance Verification": "Klein_MM325_Verification.py",
-  "Keysight 33210A Performance Verification": "Keysight_33210A_Verification.py",
-  "Agilent 33220A Performance Verification": "Agilent_33220A_Verification.py",
-  "Agilent 33250A Performance Verification": "Agilent_33250A_Verification.py",
-  "Fluke 287 Performance Verification": "Fluke_287_Verification.py",
-  "Fluke 289 Performance Verification": "Fluke_289_Verification.py",
-  "Fluke 77 Series IV Performance Verification": "Fluke_77IV_Verification.py",
-  "Fluke 175 Performance Verification": "Fluke_175_Verification.py",
-  "Fluke 177 Performance Verification": "Fluke_177_Verification.py",
-  "Fluke 179 Performance Verification": "Fluke_179_Verification.py",
-  "Keithley 2000 Performance Verification": "Keithley_2000_Verification.py",
-  "Agilent 34410A Performance Verification": "Agilent_34410A_Verification.py",
-  "Agilent 34411A Performance Verification": "Agilent_34411A_Verification.py",
-  "Keithley 2000 Guided Adjustment": "Keithley_2000_Adjustment.py",
-  "Fluke 8808A Guided Adjustment": "Fluke_8808A_Adjustment.py",
-  "Fluke 365 Clamp Meter Performance Verification": "Fluke_365_Verification.py",
-  "Fluke 376 Clamp Meter Performance Verification": "Fluke_376_Verification.py",
-  "Fluke 374 Clamp Meter Performance Verification": "Fluke_374_Verification.py",
-  "Fluke 375 Clamp Meter Performance Verification": "Fluke_375_Verification.py",
-  "Fluke 376-II Clamp Meter Performance Verification": "Fluke_376II_Verification.py",
-  "Tektronix TBS1000C Performance Verification": "Tektronix_TBS1000C_Verification.py",
-  "Tektronix TBS1000 Performance Verification": "Tektronix_TBS1000_Verification.py",
-  "Tektronix TBS2000B Performance Verification": "Tektronix_TBS2000B_Verification.py",
-  "Tektronix 3 Series MDO Performance Verification": "Tektronix_MDO3_Verification.py"
- },
- "VERSIONS": {
-  "WaveSurfer_WS4104HD.py": "51",
-  "Fluke_87V.py": "53",
-  "Agilent_34401A.py": "55",
-  "Fluke_8846A_Verification.py": "59",
-  "Fluke_8846A_Adjustment.py": "57",
-  "Fluke_8808A_Verification.py": "1",
-  "Keysight_34465A_Verification.py": "3",
-  "Keysight_34460A_Verification.py": "2",
-  "Keysight_34461A_Verification.py": "2",
-  "Keysight_34470A_Verification.py": "2",
-  "Keysight_34970A_Verification.py": "1",
-  "Keysight_34972A_Verification.py": "1",
-  "Tektronix_MDO4000C_Verification.py": "2",
-  "Tektronix_TDS2000C_Verification.py": "1",
-  "Fluke_110_Verification.py": "2",
-  "Fluke_113_Verification.py": "2",
-  "Fluke_114_Verification.py": "2",
-  "Fluke_115_Verification.py": "2",
-  "Fluke_116_Verification.py": "2",
-  "Fluke_117_Verification.py": "2",
-  "Klein_MM325_Verification.py": "2",
-  "Keysight_33210A_Verification.py": "2",
-  "Agilent_33220A_Verification.py": "2",
-  "Agilent_33250A_Verification.py": "1",
-  "Fluke_287_Verification.py": "1",
-  "Fluke_289_Verification.py": "1",
-  "Fluke_77IV_Verification.py": "1",
-  "Fluke_175_Verification.py": "1",
-  "Fluke_177_Verification.py": "1",
-  "Fluke_179_Verification.py": "1",
-  "Keithley_2000_Verification.py": "1",
-  "Agilent_34410A_Verification.py": "1",
-  "Agilent_34411A_Verification.py": "1",
-  "Keithley_2000_Adjustment.py": "1",
-  "Fluke_8808A_Adjustment.py": "1",
-  "Fluke_365_Verification.py": "1",
-  "Fluke_376_Verification.py": "1",
-  "Fluke_374_Verification.py": "1",
-  "Fluke_375_Verification.py": "1",
-  "Fluke_376II_Verification.py": "1",
-  "Tektronix_TBS1000C_Verification.py": "1",
-  "Tektronix_TBS1000_Verification.py": "1",
-  "Tektronix_TBS2000B_Verification.py": "1",
-  "Tektronix_MDO3_Verification.py": "1"
- },
- "records": [
-  [
-   "WaveSurfer WS4104HD Verification",
-   "Teledyne LeCroy",
-   "WS4104HD",
-   "Oscilloscope",
-   "WaveSurfer_WS4104HD.py"
+  "STABLE": {
+    "WaveSurfer WS4104HD Verification": "WaveSurfer_WS4104HD.py",
+    "Fluke 87V Guided Verification": "Fluke_87V.py",
+    "Agilent 34401A Performance Verification": "Agilent_34401A.py",
+    "Fluke 8846A Performance Verification (1-Year)": "Fluke_8846A_Verification.py",
+    "Fluke 8846A Guided Adjustment": "Fluke_8846A_Adjustment.py",
+    "Fluke 8808A Performance Verification (RS-232)": "Fluke_8808A_Verification.py",
+    "Keysight 34465A Performance Verification": "Keysight_34465A_Verification.py",
+    "Keysight 34460A Performance Verification": "Keysight_34460A_Verification.py",
+    "Keysight 34461A Performance Verification": "Keysight_34461A_Verification.py",
+    "Keysight 34470A Performance Verification": "Keysight_34470A_Verification.py",
+    "Keysight 34970A Performance Verification (RS-232)": "Keysight_34970A_Verification.py",
+    "Keysight 34972A Performance Verification (USB)": "Keysight_34972A_Verification.py",
+    "Tektronix MDO4000C Performance Verification": "Tektronix_MDO4000C_Verification.py",
+    "Tektronix TDS2000C / TDS1000C-EDU Performance Verification": "Tektronix_TDS2000C_Verification.py",
+    "Fluke 110 Performance Verification": "Fluke_110_Verification.py",
+    "Fluke 113 Performance Verification": "Fluke_113_Verification.py",
+    "Fluke 114 Performance Verification": "Fluke_114_Verification.py",
+    "Fluke 115 Performance Verification": "Fluke_115_Verification.py",
+    "Fluke 116 Performance Verification": "Fluke_116_Verification.py",
+    "Fluke 117 Performance Verification": "Fluke_117_Verification.py",
+    "Klein Tools MM325 Performance Verification": "Klein_MM325_Verification.py",
+    "Keysight 33210A Performance Verification": "Keysight_33210A_Verification.py",
+    "Agilent 33220A Performance Verification": "Agilent_33220A_Verification.py",
+    "Agilent 33250A Performance Verification": "Agilent_33250A_Verification.py",
+    "Fluke 287 Performance Verification": "Fluke_287_Verification.py",
+    "Fluke 289 Performance Verification": "Fluke_289_Verification.py",
+    "Fluke 77 Series IV Performance Verification": "Fluke_77IV_Verification.py",
+    "Fluke 175 Performance Verification": "Fluke_175_Verification.py",
+    "Fluke 177 Performance Verification": "Fluke_177_Verification.py",
+    "Fluke 179 Performance Verification": "Fluke_179_Verification.py",
+    "Keithley 2000 Performance Verification": "Keithley_2000_Verification.py",
+    "Agilent 34410A Performance Verification": "Agilent_34410A_Verification.py",
+    "Agilent 34411A Performance Verification": "Agilent_34411A_Verification.py",
+    "Keithley 2000 Guided Adjustment": "Keithley_2000_Adjustment.py",
+    "Fluke 8808A Guided Adjustment": "Fluke_8808A_Adjustment.py",
+    "Fluke 365 Clamp Meter Performance Verification": "Fluke_365_Verification.py",
+    "Fluke 376 Clamp Meter Performance Verification": "Fluke_376_Verification.py",
+    "Fluke 374 Clamp Meter Performance Verification": "Fluke_374_Verification.py",
+    "Fluke 375 Clamp Meter Performance Verification": "Fluke_375_Verification.py",
+    "Fluke 376-II Clamp Meter Performance Verification": "Fluke_376II_Verification.py",
+    "Tektronix TBS1000C Performance Verification": "Tektronix_TBS1000C_Verification.py",
+    "Tektronix TBS1000 Performance Verification": "Tektronix_TBS1000_Verification.py",
+    "Tektronix TBS2000B Performance Verification": "Tektronix_TBS2000B_Verification.py",
+    "Tektronix 3 Series MDO Performance Verification": "Tektronix_MDO3_Verification.py",
+    "Fluke i400 AC Current Clamp Verification": "Fluke_i400_Verification.py"
+  },
+  "VERSIONS": {
+    "WaveSurfer_WS4104HD.py": "51",
+    "Fluke_87V.py": "53",
+    "Agilent_34401A.py": "55",
+    "Fluke_8846A_Verification.py": "59",
+    "Fluke_8846A_Adjustment.py": "57",
+    "Fluke_8808A_Verification.py": "1",
+    "Keysight_34465A_Verification.py": "3",
+    "Keysight_34460A_Verification.py": "2",
+    "Keysight_34461A_Verification.py": "2",
+    "Keysight_34470A_Verification.py": "2",
+    "Keysight_34970A_Verification.py": "1",
+    "Keysight_34972A_Verification.py": "1",
+    "Tektronix_MDO4000C_Verification.py": "2",
+    "Tektronix_TDS2000C_Verification.py": "1",
+    "Fluke_110_Verification.py": "2",
+    "Fluke_113_Verification.py": "2",
+    "Fluke_114_Verification.py": "2",
+    "Fluke_115_Verification.py": "2",
+    "Fluke_116_Verification.py": "2",
+    "Fluke_117_Verification.py": "2",
+    "Klein_MM325_Verification.py": "2",
+    "Keysight_33210A_Verification.py": "2",
+    "Agilent_33220A_Verification.py": "2",
+    "Agilent_33250A_Verification.py": "1",
+    "Fluke_287_Verification.py": "1",
+    "Fluke_289_Verification.py": "1",
+    "Fluke_77IV_Verification.py": "1",
+    "Fluke_175_Verification.py": "1",
+    "Fluke_177_Verification.py": "1",
+    "Fluke_179_Verification.py": "1",
+    "Keithley_2000_Verification.py": "1",
+    "Agilent_34410A_Verification.py": "1",
+    "Agilent_34411A_Verification.py": "1",
+    "Keithley_2000_Adjustment.py": "1",
+    "Fluke_8808A_Adjustment.py": "1",
+    "Fluke_365_Verification.py": "1",
+    "Fluke_376_Verification.py": "1",
+    "Fluke_374_Verification.py": "1",
+    "Fluke_375_Verification.py": "1",
+    "Fluke_376II_Verification.py": "1",
+    "Tektronix_TBS1000C_Verification.py": "1",
+    "Tektronix_TBS1000_Verification.py": "1",
+    "Tektronix_TBS2000B_Verification.py": "1",
+    "Tektronix_MDO3_Verification.py": "1",
+    "Fluke_i400_Verification.py": "1"
+  },
+  "records": [
+    [
+      "WaveSurfer WS4104HD Verification",
+      "Teledyne LeCroy",
+      "WS4104HD",
+      "Oscilloscope",
+      "WaveSurfer_WS4104HD.py"
+    ],
+    [
+      "Fluke 87V Guided Verification",
+      "Fluke",
+      "87 Series V",
+      "Digital Multimeter",
+      "Fluke_87V.py"
+    ],
+    [
+      "Agilent 34401A Performance Verification",
+      "Agilent",
+      "34401A",
+      "Digital Multimeter",
+      "Agilent_34401A.py"
+    ],
+    [
+      "Fluke 8846A Performance Verification (1-Year)",
+      "Fluke",
+      "8846A",
+      "Digital Multimeter",
+      "Fluke_8846A_Verification.py"
+    ],
+    [
+      "Fluke 8846A Guided Adjustment",
+      "Fluke",
+      "8846A",
+      "Digital Multimeter Adjustment",
+      "Fluke_8846A_Adjustment.py"
+    ],
+    [
+      "Fluke 8808A Performance Verification (RS-232)",
+      "Fluke",
+      "8808A",
+      "Digital Multimeter",
+      "Fluke_8808A_Verification.py"
+    ],
+    [
+      "Keysight 34465A Performance Verification",
+      "Keysight",
+      "34465A",
+      "Digital Multimeter",
+      "Keysight_34465A_Verification.py"
+    ],
+    [
+      "Keysight 34460A Performance Verification",
+      "Keysight",
+      "34460A",
+      "Digital Multimeter",
+      "Keysight_34460A_Verification.py"
+    ],
+    [
+      "Keysight 34461A Performance Verification",
+      "Keysight",
+      "34461A",
+      "Digital Multimeter",
+      "Keysight_34461A_Verification.py"
+    ],
+    [
+      "Keysight 34470A Performance Verification",
+      "Keysight",
+      "34470A",
+      "Digital Multimeter",
+      "Keysight_34470A_Verification.py"
+    ],
+    [
+      "Keysight 34970A Performance Verification (RS-232)",
+      "Keysight",
+      "34970A",
+      "Data Acquisition / Switch Unit",
+      "Keysight_34970A_Verification.py"
+    ],
+    [
+      "Keysight 34972A Performance Verification (USB)",
+      "Keysight",
+      "34972A",
+      "Data Acquisition / Switch Unit",
+      "Keysight_34972A_Verification.py"
+    ],
+    [
+      "Tektronix MDO4000C Performance Verification",
+      "Tektronix",
+      "MDO4024C/4034C/4054C/4104C",
+      "Oscilloscope",
+      "Tektronix_MDO4000C_Verification.py"
+    ],
+    [
+      "Tektronix TDS2000C / TDS1000C-EDU Performance Verification",
+      "Tektronix",
+      "TDS2000C/TDS1000C-EDU",
+      "Oscilloscope",
+      "Tektronix_TDS2000C_Verification.py"
+    ],
+    [
+      "Fluke 110 Performance Verification",
+      "Fluke",
+      "110",
+      "Digital Multimeter",
+      "Fluke_110_Verification.py"
+    ],
+    [
+      "Fluke 113 Performance Verification",
+      "Fluke",
+      "113",
+      "Digital Multimeter",
+      "Fluke_113_Verification.py"
+    ],
+    [
+      "Fluke 114 Performance Verification",
+      "Fluke",
+      "114",
+      "Digital Multimeter",
+      "Fluke_114_Verification.py"
+    ],
+    [
+      "Fluke 115 Performance Verification",
+      "Fluke",
+      "115",
+      "Digital Multimeter",
+      "Fluke_115_Verification.py"
+    ],
+    [
+      "Fluke 116 Performance Verification",
+      "Fluke",
+      "116",
+      "Digital Multimeter",
+      "Fluke_116_Verification.py"
+    ],
+    [
+      "Fluke 117 Performance Verification",
+      "Fluke",
+      "117",
+      "Digital Multimeter",
+      "Fluke_117_Verification.py"
+    ],
+    [
+      "Klein Tools MM325 Performance Verification",
+      "Klein Tools",
+      "MM325",
+      "Digital Multimeter",
+      "Klein_MM325_Verification.py"
+    ],
+    [
+      "Keysight 33210A Performance Verification",
+      "Keysight",
+      "33210A",
+      "Function Generator",
+      "Keysight_33210A_Verification.py"
+    ],
+    [
+      "Agilent 33220A Performance Verification",
+      "Agilent",
+      "33220A",
+      "Function Generator",
+      "Agilent_33220A_Verification.py"
+    ],
+    [
+      "Agilent 33250A Performance Verification",
+      "Agilent",
+      "33250A",
+      "Function Generator",
+      "Agilent_33250A_Verification.py"
+    ],
+    [
+      "Fluke 287 Performance Verification",
+      "Fluke",
+      "287",
+      "Digital Multimeter",
+      "Fluke_287_Verification.py"
+    ],
+    [
+      "Fluke 289 Performance Verification",
+      "Fluke",
+      "289",
+      "Digital Multimeter",
+      "Fluke_289_Verification.py"
+    ],
+    [
+      "Fluke 77 Series IV Performance Verification",
+      "Fluke",
+      "77 Series IV",
+      "Digital Multimeter",
+      "Fluke_77IV_Verification.py"
+    ],
+    [
+      "Fluke 175 Performance Verification",
+      "Fluke",
+      "175",
+      "Digital Multimeter",
+      "Fluke_175_Verification.py"
+    ],
+    [
+      "Fluke 177 Performance Verification",
+      "Fluke",
+      "177",
+      "Digital Multimeter",
+      "Fluke_177_Verification.py"
+    ],
+    [
+      "Fluke 179 Performance Verification",
+      "Fluke",
+      "179",
+      "Digital Multimeter",
+      "Fluke_179_Verification.py"
+    ],
+    [
+      "Keithley 2000 Performance Verification",
+      "Keithley",
+      "2000",
+      "Digital Multimeter",
+      "Keithley_2000_Verification.py"
+    ],
+    [
+      "Agilent 34410A Performance Verification",
+      "Agilent",
+      "34410A",
+      "Digital Multimeter",
+      "Agilent_34410A_Verification.py"
+    ],
+    [
+      "Agilent 34411A Performance Verification",
+      "Agilent",
+      "34411A",
+      "Digital Multimeter",
+      "Agilent_34411A_Verification.py"
+    ],
+    [
+      "Keithley 2000 Guided Adjustment",
+      "Keithley",
+      "2000",
+      "Digital Multimeter Adjustment",
+      "Keithley_2000_Adjustment.py"
+    ],
+    [
+      "Fluke 8808A Guided Adjustment",
+      "Fluke",
+      "8808A",
+      "Digital Multimeter Adjustment",
+      "Fluke_8808A_Adjustment.py"
+    ],
+    [
+      "Fluke 365 Clamp Meter Performance Verification",
+      "Fluke",
+      "365",
+      "Clamp Meter",
+      "Fluke_365_Verification.py"
+    ],
+    [
+      "Fluke 376 Clamp Meter Performance Verification",
+      "Fluke",
+      "376",
+      "Clamp Meter",
+      "Fluke_376_Verification.py"
+    ],
+    [
+      "Fluke 374 Clamp Meter Performance Verification",
+      "Fluke",
+      "374",
+      "Clamp Meter",
+      "Fluke_374_Verification.py"
+    ],
+    [
+      "Fluke 375 Clamp Meter Performance Verification",
+      "Fluke",
+      "375",
+      "Clamp Meter",
+      "Fluke_375_Verification.py"
+    ],
+    [
+      "Fluke 376-II Clamp Meter Performance Verification",
+      "Fluke",
+      "376-II",
+      "Clamp Meter",
+      "Fluke_376II_Verification.py"
+    ],
+    [
+      "Tektronix TBS1000C Performance Verification",
+      "Tektronix",
+      "TBS1052C/TBS1072C/TBS1102C/TBS1202C",
+      "Oscilloscope",
+      "Tektronix_TBS1000C_Verification.py"
+    ],
+    [
+      "Tektronix TBS1000 Performance Verification",
+      "Tektronix",
+      "TBS1022/1042/1062/1064/1102/1104/1152/1154",
+      "Oscilloscope",
+      "Tektronix_TBS1000_Verification.py"
+    ],
+    [
+      "Tektronix TBS2000B Performance Verification",
+      "Tektronix",
+      "TBS2000B",
+      "Oscilloscope",
+      "Tektronix_TBS2000B_Verification.py"
+    ],
+    [
+      "Tektronix 3 Series MDO Performance Verification",
+      "Tektronix",
+      "MDO32/MDO34",
+      "Oscilloscope",
+      "Tektronix_MDO3_Verification.py"
+    ],
+    [
+      "Fluke i400 AC Current Clamp Verification",
+      "Fluke",
+      "i400",
+      "Current Clamp",
+      "Fluke_i400_Verification.py"
+    ]
   ],
-  [
-   "Fluke 87V Guided Verification",
-   "Fluke",
-   "87 Series V",
-   "Digital Multimeter",
-   "Fluke_87V.py"
+  "FILES": {
+    "WaveSurfer_WS4104HD.py": {
+      "code": [
+        "Procedures/WaveSurfer_WS4104HD.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/lecroy_ws4104hd.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": []
+    },
+    "Fluke_87V.py": {
+      "code": [
+        "Procedures/Fluke_87V.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_87v_pv.json"
+      ]
+    },
+    "Agilent_34401A.py": {
+      "code": [
+        "Procedures/Agilent_34401A.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/scpi_dmm.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": []
+    },
+    "Fluke_8846A_Verification.py": {
+      "code": [
+        "Procedures/Fluke_8846A_Verification.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/scpi_dmm.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": []
+    },
+    "Fluke_8846A_Adjustment.py": {
+      "code": [
+        "Procedures/Fluke_8846A_Adjustment.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/scpi_dmm.py"
+      ],
+      "spec": []
+    },
+    "Fluke_8808A_Verification.py": {
+      "code": [
+        "Procedures/Fluke_8808A_Verification.py",
+        "fluke8808a_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_8808a.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_8808a_pv.json"
+      ]
+    },
+    "Keysight_34465A_Verification.py": {
+      "code": [
+        "Procedures/Keysight_34465A_Verification.py",
+        "truevolt_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_truevolt.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keysight_34465a_pv.json"
+      ]
+    },
+    "Keysight_34460A_Verification.py": {
+      "code": [
+        "Procedures/Keysight_34460A_Verification.py",
+        "truevolt_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_truevolt.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keysight_34460a_pv.json"
+      ]
+    },
+    "Keysight_34461A_Verification.py": {
+      "code": [
+        "Procedures/Keysight_34461A_Verification.py",
+        "truevolt_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_truevolt.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keysight_34461a_pv.json"
+      ]
+    },
+    "Keysight_34470A_Verification.py": {
+      "code": [
+        "Procedures/Keysight_34470A_Verification.py",
+        "truevolt_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_truevolt.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keysight_34470a_pv.json"
+      ]
+    },
+    "Keysight_34970A_Verification.py": {
+      "code": [
+        "Procedures/Keysight_34970A_Verification.py",
+        "dacq_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_dacq.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keysight_34970a_pv.json"
+      ]
+    },
+    "Keysight_34972A_Verification.py": {
+      "code": [
+        "Procedures/Keysight_34972A_Verification.py",
+        "dacq_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_dacq.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keysight_34972a_pv.json"
+      ]
+    },
+    "Tektronix_MDO4000C_Verification.py": {
+      "code": [
+        "Procedures/Tektronix_MDO4000C_Verification.py",
+        "mdo4000c_verification.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/tektronix_mdo4000c.py",
+        "drivers/fluke_5560a.py",
+        "drivers/reference_instruments.py"
+      ],
+      "spec": [
+        "specs/tektronix_mdo4000c_pv.json",
+        "specs/mdo4000c_reference_cmc.json"
+      ]
+    },
+    "Tektronix_TDS2000C_Verification.py": {
+      "code": [
+        "Procedures/Tektronix_TDS2000C_Verification.py",
+        "tds2000c_verification.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/tektronix_tds2000c.py",
+        "drivers/fluke_5522a_scope.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/tektronix_tds2000c_pv.json"
+      ]
+    },
+    "Fluke_110_Verification.py": {
+      "code": [
+        "Procedures/Fluke_110_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_110_series_pv.json"
+      ]
+    },
+    "Fluke_113_Verification.py": {
+      "code": [
+        "Procedures/Fluke_113_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_110_series_pv.json"
+      ]
+    },
+    "Fluke_114_Verification.py": {
+      "code": [
+        "Procedures/Fluke_114_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_110_series_pv.json"
+      ]
+    },
+    "Fluke_115_Verification.py": {
+      "code": [
+        "Procedures/Fluke_115_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_110_series_pv.json"
+      ]
+    },
+    "Fluke_116_Verification.py": {
+      "code": [
+        "Procedures/Fluke_116_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_110_series_pv.json"
+      ]
+    },
+    "Fluke_117_Verification.py": {
+      "code": [
+        "Procedures/Fluke_117_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_110_series_pv.json"
+      ]
+    },
+    "Klein_MM325_Verification.py": {
+      "code": [
+        "Procedures/Klein_MM325_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/klein_mm325_pv.json"
+      ]
+    },
+    "Keysight_33210A_Verification.py": {
+      "code": [
+        "Procedures/Keysight_33210A_Verification.py",
+        "fgen_verification.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_332xx.py",
+        "drivers/fluke_5790b.py",
+        "drivers/keysight_5313x.py",
+        "drivers/reference_instruments.py"
+      ],
+      "spec": [
+        "specs/keysight_33210a_pv.json"
+      ]
+    },
+    "Agilent_33220A_Verification.py": {
+      "code": [
+        "Procedures/Agilent_33220A_Verification.py",
+        "fgen_verification.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_332xx.py",
+        "drivers/fluke_5790b.py",
+        "drivers/keysight_5313x.py",
+        "drivers/reference_instruments.py"
+      ],
+      "spec": [
+        "specs/keysight_33220a_pv.json"
+      ]
+    },
+    "Agilent_33250A_Verification.py": {
+      "code": [
+        "Procedures/Agilent_33250A_Verification.py",
+        "fgen_verification.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_332xx.py",
+        "drivers/fluke_5790b.py",
+        "drivers/keysight_5313x.py",
+        "drivers/reference_instruments.py"
+      ],
+      "spec": [
+        "specs/keysight_33250a_pv.json"
+      ]
+    },
+    "Fluke_287_Verification.py": {
+      "code": [
+        "Procedures/Fluke_287_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py",
+        "drivers/fluke_28x.py"
+      ],
+      "spec": [
+        "specs/fluke_287_289_pv.json"
+      ]
+    },
+    "Fluke_289_Verification.py": {
+      "code": [
+        "Procedures/Fluke_289_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py",
+        "drivers/fluke_28x.py"
+      ],
+      "spec": [
+        "specs/fluke_287_289_pv.json"
+      ]
+    },
+    "Fluke_77IV_Verification.py": {
+      "code": [
+        "Procedures/Fluke_77IV_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_77iv_pv.json"
+      ]
+    },
+    "Fluke_175_Verification.py": {
+      "code": [
+        "Procedures/Fluke_175_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_170_series_pv.json"
+      ]
+    },
+    "Fluke_177_Verification.py": {
+      "code": [
+        "Procedures/Fluke_177_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_170_series_pv.json"
+      ]
+    },
+    "Fluke_179_Verification.py": {
+      "code": [
+        "Procedures/Fluke_179_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_170_series_pv.json"
+      ]
+    },
+    "Keithley_2000_Verification.py": {
+      "code": [
+        "Procedures/Keithley_2000_Verification.py",
+        "keithley2000_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keithley_2000.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keithley_2000_pv.json"
+      ]
+    },
+    "Agilent_34410A_Verification.py": {
+      "code": [
+        "Procedures/Agilent_34410A_Verification.py",
+        "agilent34410a_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_34410a.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keysight_34410a_pv.json"
+      ]
+    },
+    "Agilent_34411A_Verification.py": {
+      "code": [
+        "Procedures/Agilent_34411A_Verification.py",
+        "agilent34410a_verification.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keysight_34410a.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keysight_34410a_pv.json"
+      ]
+    },
+    "Keithley_2000_Adjustment.py": {
+      "code": [
+        "Procedures/Keithley_2000_Adjustment.py",
+        "keithley2000_adjustment.py",
+        "adjustment_audit.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/keithley_2000.py",
+        "drivers/keithley_2000_cal.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/keithley_2000_adjustment.json"
+      ]
+    },
+    "Fluke_8808A_Adjustment.py": {
+      "code": [
+        "Procedures/Fluke_8808A_Adjustment.py",
+        "fluke8808a_adjustment.py",
+        "adjustment_audit.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_8808a.py",
+        "drivers/fluke_8808a_cal.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_8808a_adjustment.json"
+      ]
+    },
+    "Fluke_365_Verification.py": {
+      "code": [
+        "Procedures/Fluke_365_Verification.py",
+        "handheld_dmm.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_365_pv.json"
+      ]
+    },
+    "Fluke_376_Verification.py": {
+      "code": [
+        "Procedures/Fluke_376_Verification.py",
+        "handheld_dmm.py",
+        "iflex_option.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_376_pv.json"
+      ]
+    },
+    "Fluke_374_Verification.py": {
+      "code": [
+        "Procedures/Fluke_374_Verification.py",
+        "handheld_dmm.py",
+        "iflex_option.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_376_pv.json"
+      ]
+    },
+    "Fluke_375_Verification.py": {
+      "code": [
+        "Procedures/Fluke_375_Verification.py",
+        "handheld_dmm.py",
+        "iflex_option.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_376_pv.json"
+      ]
+    },
+    "Fluke_376II_Verification.py": {
+      "code": [
+        "Procedures/Fluke_376II_Verification.py",
+        "handheld_dmm.py",
+        "iflex_option.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_376_pv.json"
+      ]
+    },
+    "Tektronix_TBS1000C_Verification.py": {
+      "code": [
+        "Procedures/Tektronix_TBS1000C_Verification.py",
+        "tds2000c_verification.py",
+        "tbs1000_verification.py",
+        "tds2000c_view_tk.py",
+        "tds2000c_view_qt.py",
+        "genscope_support_view_qt.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/tektronix_tbs1000c.py",
+        "drivers/fluke_5522a_scope.py",
+        "drivers/fluke_5560a.py",
+        "surprise.py"
+      ],
+      "spec": [
+        "specs/tektronix_tbs1000c_pv.json"
+      ]
+    },
+    "Tektronix_TBS1000_Verification.py": {
+      "code": [
+        "Procedures/Tektronix_TBS1000_Verification.py",
+        "tds2000c_verification.py",
+        "tbs1000_verification.py",
+        "tds2000c_view_tk.py",
+        "tds2000c_view_qt.py",
+        "genscope_support_view_qt.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/tektronix_tbs1000.py",
+        "drivers/tektronix_tds2000c.py",
+        "drivers/fluke_5522a_scope.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/tektronix_tbs1000_pv.json"
+      ]
+    },
+    "Tektronix_TBS2000B_Verification.py": {
+      "code": [
+        "Procedures/Tektronix_TBS2000B_Verification.py",
+        "tbs2000b_verification.py",
+        "tds2000c_verification.py",
+        "tbs2000b_view_tk.py",
+        "tbs2000b_view_qt.py",
+        "tds2000c_view_tk.py",
+        "genscope_support_view_qt.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/tektronix_tbs2000b.py",
+        "drivers/fluke_5522a_scope.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/tektronix_tbs2000b_pv.json"
+      ]
+    },
+    "Tektronix_MDO3_Verification.py": {
+      "code": [
+        "Procedures/Tektronix_MDO3_Verification.py",
+        "mdo3_verification.py",
+        "mdo4000c_verification.py",
+        "mdo3_view_tk.py",
+        "mdo3_view_qt.py",
+        "genscope_support_view_qt.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/tektronix_mdo3.py",
+        "drivers/fluke_5560a.py",
+        "drivers/reference_instruments.py"
+      ],
+      "spec": [
+        "specs/tektronix_mdo3_pv.json",
+        "specs/mdo3_reference_cmc.json"
+      ]
+    },
+    "Fluke_i400_Verification.py": {
+      "code": [
+        "Procedures/Fluke_i400_Verification.py",
+        "i400_verification.py",
+        "i400_view_tk.py",
+        "i400_view_qt.py",
+        "qtui/bench_view.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "surprise.py",
+        "surprise_view_tk.py",
+        "surprise_view_qt.py",
+        "procspec.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py",
+        "drivers/keysight_34410a.py",
+        "drivers/simulated_i400.py",
+        "coil_rule.py",
+        "drivers/scpi_dmm.py",
+        "drivers/keithley_2000.py"
+      ],
+      "spec": [
+        "specs/fluke_i400_pv.json"
+      ]
+    }
+  },
+  "SEED": [
+    {
+      "proc_key": "Tektronix_TDS2000C_Verification.py",
+      "name": "Tektronix TDS2000C / TDS1000C-EDU Performance Verification",
+      "model": "TDS2000C/TDS1000C-EDU"
+    },
+    {
+      "proc_key": "WaveSurfer_WS4104HD.py",
+      "name": "WaveSurfer WS4104HD Verification",
+      "model": "WS4104HD"
+    },
+    {
+      "proc_key": "Fluke_117_Verification.py",
+      "name": "Fluke 117 Performance Verification",
+      "model": "117"
+    }
   ],
-  [
-   "Agilent 34401A Performance Verification",
-   "Agilent",
-   "34401A",
-   "Digital Multimeter",
-   "Agilent_34401A.py"
-  ],
-  [
-   "Fluke 8846A Performance Verification (1-Year)",
-   "Fluke",
-   "8846A",
-   "Digital Multimeter",
-   "Fluke_8846A_Verification.py"
-  ],
-  [
-   "Fluke 8846A Guided Adjustment",
-   "Fluke",
-   "8846A",
-   "Digital Multimeter Adjustment",
-   "Fluke_8846A_Adjustment.py"
-  ],
-  [
-   "Fluke 8808A Performance Verification (RS-232)",
-   "Fluke",
-   "8808A",
-   "Digital Multimeter",
-   "Fluke_8808A_Verification.py"
-  ],
-  [
-   "Keysight 34465A Performance Verification",
-   "Keysight",
-   "34465A",
-   "Digital Multimeter",
-   "Keysight_34465A_Verification.py"
-  ],
-  [
-   "Keysight 34460A Performance Verification",
-   "Keysight",
-   "34460A",
-   "Digital Multimeter",
-   "Keysight_34460A_Verification.py"
-  ],
-  [
-   "Keysight 34461A Performance Verification",
-   "Keysight",
-   "34461A",
-   "Digital Multimeter",
-   "Keysight_34461A_Verification.py"
-  ],
-  [
-   "Keysight 34470A Performance Verification",
-   "Keysight",
-   "34470A",
-   "Digital Multimeter",
-   "Keysight_34470A_Verification.py"
-  ],
-  [
-   "Keysight 34970A Performance Verification (RS-232)",
-   "Keysight",
-   "34970A",
-   "Data Acquisition / Switch Unit",
-   "Keysight_34970A_Verification.py"
-  ],
-  [
-   "Keysight 34972A Performance Verification (USB)",
-   "Keysight",
-   "34972A",
-   "Data Acquisition / Switch Unit",
-   "Keysight_34972A_Verification.py"
-  ],
-  [
-   "Tektronix MDO4000C Performance Verification",
-   "Tektronix",
-   "MDO4024C/4034C/4054C/4104C",
-   "Oscilloscope",
-   "Tektronix_MDO4000C_Verification.py"
-  ],
-  [
-   "Tektronix TDS2000C / TDS1000C-EDU Performance Verification",
-   "Tektronix",
-   "TDS2000C/TDS1000C-EDU",
-   "Oscilloscope",
-   "Tektronix_TDS2000C_Verification.py"
-  ],
-  [
-   "Fluke 110 Performance Verification",
-   "Fluke",
-   "110",
-   "Digital Multimeter",
-   "Fluke_110_Verification.py"
-  ],
-  [
-   "Fluke 113 Performance Verification",
-   "Fluke",
-   "113",
-   "Digital Multimeter",
-   "Fluke_113_Verification.py"
-  ],
-  [
-   "Fluke 114 Performance Verification",
-   "Fluke",
-   "114",
-   "Digital Multimeter",
-   "Fluke_114_Verification.py"
-  ],
-  [
-   "Fluke 115 Performance Verification",
-   "Fluke",
-   "115",
-   "Digital Multimeter",
-   "Fluke_115_Verification.py"
-  ],
-  [
-   "Fluke 116 Performance Verification",
-   "Fluke",
-   "116",
-   "Digital Multimeter",
-   "Fluke_116_Verification.py"
-  ],
-  [
-   "Fluke 117 Performance Verification",
-   "Fluke",
-   "117",
-   "Digital Multimeter",
-   "Fluke_117_Verification.py"
-  ],
-  [
-   "Klein Tools MM325 Performance Verification",
-   "Klein Tools",
-   "MM325",
-   "Digital Multimeter",
-   "Klein_MM325_Verification.py"
-  ],
-  [
-   "Keysight 33210A Performance Verification",
-   "Keysight",
-   "33210A",
-   "Function Generator",
-   "Keysight_33210A_Verification.py"
-  ],
-  [
-   "Agilent 33220A Performance Verification",
-   "Agilent",
-   "33220A",
-   "Function Generator",
-   "Agilent_33220A_Verification.py"
-  ],
-  [
-   "Agilent 33250A Performance Verification",
-   "Agilent",
-   "33250A",
-   "Function Generator",
-   "Agilent_33250A_Verification.py"
-  ],
-  [
-   "Fluke 287 Performance Verification",
-   "Fluke",
-   "287",
-   "Digital Multimeter",
-   "Fluke_287_Verification.py"
-  ],
-  [
-   "Fluke 289 Performance Verification",
-   "Fluke",
-   "289",
-   "Digital Multimeter",
-   "Fluke_289_Verification.py"
-  ],
-  [
-   "Fluke 77 Series IV Performance Verification",
-   "Fluke",
-   "77 Series IV",
-   "Digital Multimeter",
-   "Fluke_77IV_Verification.py"
-  ],
-  [
-   "Fluke 175 Performance Verification",
-   "Fluke",
-   "175",
-   "Digital Multimeter",
-   "Fluke_175_Verification.py"
-  ],
-  [
-   "Fluke 177 Performance Verification",
-   "Fluke",
-   "177",
-   "Digital Multimeter",
-   "Fluke_177_Verification.py"
-  ],
-  [
-   "Fluke 179 Performance Verification",
-   "Fluke",
-   "179",
-   "Digital Multimeter",
-   "Fluke_179_Verification.py"
-  ],
-  [
-   "Keithley 2000 Performance Verification",
-   "Keithley",
-   "2000",
-   "Digital Multimeter",
-   "Keithley_2000_Verification.py"
-  ],
-  [
-   "Agilent 34410A Performance Verification",
-   "Agilent",
-   "34410A",
-   "Digital Multimeter",
-   "Agilent_34410A_Verification.py"
-  ],
-  [
-   "Agilent 34411A Performance Verification",
-   "Agilent",
-   "34411A",
-   "Digital Multimeter",
-   "Agilent_34411A_Verification.py"
-  ],
-  [
-   "Keithley 2000 Guided Adjustment",
-   "Keithley",
-   "2000",
-   "Digital Multimeter Adjustment",
-   "Keithley_2000_Adjustment.py"
-  ],
-  [
-   "Fluke 8808A Guided Adjustment",
-   "Fluke",
-   "8808A",
-   "Digital Multimeter Adjustment",
-   "Fluke_8808A_Adjustment.py"
-  ],
-  [
-   "Fluke 365 Clamp Meter Performance Verification",
-   "Fluke",
-   "365",
-   "Clamp Meter",
-   "Fluke_365_Verification.py"
-  ],
-  [
-   "Fluke 376 Clamp Meter Performance Verification",
-   "Fluke",
-   "376",
-   "Clamp Meter",
-   "Fluke_376_Verification.py"
-  ],
-  [
-   "Fluke 374 Clamp Meter Performance Verification",
-   "Fluke",
-   "374",
-   "Clamp Meter",
-   "Fluke_374_Verification.py"
-  ],
-  [
-   "Fluke 375 Clamp Meter Performance Verification",
-   "Fluke",
-   "375",
-   "Clamp Meter",
-   "Fluke_375_Verification.py"
-  ],
-  [
-   "Fluke 376-II Clamp Meter Performance Verification",
-   "Fluke",
-   "376-II",
-   "Clamp Meter",
-   "Fluke_376II_Verification.py"
-  ],
-  [
-   "Tektronix TBS1000C Performance Verification",
-   "Tektronix",
-   "TBS1052C/TBS1072C/TBS1102C/TBS1202C",
-   "Oscilloscope",
-   "Tektronix_TBS1000C_Verification.py"
-  ],
-  [
-   "Tektronix TBS1000 Performance Verification",
-   "Tektronix",
-   "TBS1022/1042/1062/1064/1102/1104/1152/1154",
-   "Oscilloscope",
-   "Tektronix_TBS1000_Verification.py"
-  ],
-  [
-   "Tektronix TBS2000B Performance Verification",
-   "Tektronix",
-   "TBS2000B",
-   "Oscilloscope",
-   "Tektronix_TBS2000B_Verification.py"
-  ],
-  [
-   "Tektronix 3 Series MDO Performance Verification",
-   "Tektronix",
-   "MDO32/MDO34",
-   "Oscilloscope",
-   "Tektronix_MDO3_Verification.py"
-  ]
- ],
- "FILES": {
-  "WaveSurfer_WS4104HD.py": {
-   "code": [
-    "Procedures/WaveSurfer_WS4104HD.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/lecroy_ws4104hd.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": []
-  },
-  "Fluke_87V.py": {
-   "code": [
-    "Procedures/Fluke_87V.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_87v_pv.json"
-   ]
-  },
-  "Agilent_34401A.py": {
-   "code": [
-    "Procedures/Agilent_34401A.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/scpi_dmm.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": []
-  },
-  "Fluke_8846A_Verification.py": {
-   "code": [
-    "Procedures/Fluke_8846A_Verification.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/scpi_dmm.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": []
-  },
-  "Fluke_8846A_Adjustment.py": {
-   "code": [
-    "Procedures/Fluke_8846A_Adjustment.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/scpi_dmm.py"
-   ],
-   "spec": []
-  },
-  "Fluke_8808A_Verification.py": {
-   "code": [
-    "Procedures/Fluke_8808A_Verification.py",
-    "fluke8808a_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_8808a.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_8808a_pv.json"
-   ]
-  },
-  "Keysight_34465A_Verification.py": {
-   "code": [
-    "Procedures/Keysight_34465A_Verification.py",
-    "truevolt_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_truevolt.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keysight_34465a_pv.json"
-   ]
-  },
-  "Keysight_34460A_Verification.py": {
-   "code": [
-    "Procedures/Keysight_34460A_Verification.py",
-    "truevolt_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_truevolt.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keysight_34460a_pv.json"
-   ]
-  },
-  "Keysight_34461A_Verification.py": {
-   "code": [
-    "Procedures/Keysight_34461A_Verification.py",
-    "truevolt_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_truevolt.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keysight_34461a_pv.json"
-   ]
-  },
-  "Keysight_34470A_Verification.py": {
-   "code": [
-    "Procedures/Keysight_34470A_Verification.py",
-    "truevolt_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_truevolt.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keysight_34470a_pv.json"
-   ]
-  },
-  "Keysight_34970A_Verification.py": {
-   "code": [
-    "Procedures/Keysight_34970A_Verification.py",
-    "dacq_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_dacq.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keysight_34970a_pv.json"
-   ]
-  },
-  "Keysight_34972A_Verification.py": {
-   "code": [
-    "Procedures/Keysight_34972A_Verification.py",
-    "dacq_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_dacq.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keysight_34972a_pv.json"
-   ]
-  },
-  "Tektronix_MDO4000C_Verification.py": {
-   "code": [
-    "Procedures/Tektronix_MDO4000C_Verification.py",
-    "mdo4000c_verification.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/tektronix_mdo4000c.py",
-    "drivers/fluke_5560a.py",
-    "drivers/reference_instruments.py"
-   ],
-   "spec": [
-    "specs/tektronix_mdo4000c_pv.json",
-    "specs/mdo4000c_reference_cmc.json"
-   ]
-  },
-  "Tektronix_TDS2000C_Verification.py": {
-   "code": [
-    "Procedures/Tektronix_TDS2000C_Verification.py",
-    "tds2000c_verification.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/tektronix_tds2000c.py",
-    "drivers/fluke_5522a_scope.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/tektronix_tds2000c_pv.json"
-   ]
-  },
-  "Fluke_110_Verification.py": {
-   "code": [
-    "Procedures/Fluke_110_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_110_series_pv.json"
-   ]
-  },
-  "Fluke_113_Verification.py": {
-   "code": [
-    "Procedures/Fluke_113_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_110_series_pv.json"
-   ]
-  },
-  "Fluke_114_Verification.py": {
-   "code": [
-    "Procedures/Fluke_114_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_110_series_pv.json"
-   ]
-  },
-  "Fluke_115_Verification.py": {
-   "code": [
-    "Procedures/Fluke_115_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_110_series_pv.json"
-   ]
-  },
-  "Fluke_116_Verification.py": {
-   "code": [
-    "Procedures/Fluke_116_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_110_series_pv.json"
-   ]
-  },
-  "Fluke_117_Verification.py": {
-   "code": [
-    "Procedures/Fluke_117_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_110_series_pv.json"
-   ]
-  },
-  "Klein_MM325_Verification.py": {
-   "code": [
-    "Procedures/Klein_MM325_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/klein_mm325_pv.json"
-   ]
-  },
-  "Keysight_33210A_Verification.py": {
-   "code": [
-    "Procedures/Keysight_33210A_Verification.py",
-    "fgen_verification.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_332xx.py",
-    "drivers/fluke_5790b.py",
-    "drivers/keysight_5313x.py",
-    "drivers/reference_instruments.py"
-   ],
-   "spec": [
-    "specs/keysight_33210a_pv.json"
-   ]
-  },
-  "Agilent_33220A_Verification.py": {
-   "code": [
-    "Procedures/Agilent_33220A_Verification.py",
-    "fgen_verification.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_332xx.py",
-    "drivers/fluke_5790b.py",
-    "drivers/keysight_5313x.py",
-    "drivers/reference_instruments.py"
-   ],
-   "spec": [
-    "specs/keysight_33220a_pv.json"
-   ]
-  },
-  "Agilent_33250A_Verification.py": {
-   "code": [
-    "Procedures/Agilent_33250A_Verification.py",
-    "fgen_verification.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_332xx.py",
-    "drivers/fluke_5790b.py",
-    "drivers/keysight_5313x.py",
-    "drivers/reference_instruments.py"
-   ],
-   "spec": [
-    "specs/keysight_33250a_pv.json"
-   ]
-  },
-  "Fluke_287_Verification.py": {
-   "code": [
-    "Procedures/Fluke_287_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py",
-    "drivers/fluke_28x.py"
-   ],
-   "spec": [
-    "specs/fluke_287_289_pv.json"
-   ]
-  },
-  "Fluke_289_Verification.py": {
-   "code": [
-    "Procedures/Fluke_289_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py",
-    "drivers/fluke_28x.py"
-   ],
-   "spec": [
-    "specs/fluke_287_289_pv.json"
-   ]
-  },
-  "Fluke_77IV_Verification.py": {
-   "code": [
-    "Procedures/Fluke_77IV_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_77iv_pv.json"
-   ]
-  },
-  "Fluke_175_Verification.py": {
-   "code": [
-    "Procedures/Fluke_175_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_170_series_pv.json"
-   ]
-  },
-  "Fluke_177_Verification.py": {
-   "code": [
-    "Procedures/Fluke_177_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_170_series_pv.json"
-   ]
-  },
-  "Fluke_179_Verification.py": {
-   "code": [
-    "Procedures/Fluke_179_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_170_series_pv.json"
-   ]
-  },
-  "Keithley_2000_Verification.py": {
-   "code": [
-    "Procedures/Keithley_2000_Verification.py",
-    "keithley2000_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keithley_2000.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keithley_2000_pv.json"
-   ]
-  },
-  "Agilent_34410A_Verification.py": {
-   "code": [
-    "Procedures/Agilent_34410A_Verification.py",
-    "agilent34410a_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_34410a.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keysight_34410a_pv.json"
-   ]
-  },
-  "Agilent_34411A_Verification.py": {
-   "code": [
-    "Procedures/Agilent_34411A_Verification.py",
-    "agilent34410a_verification.py",
-    "procspec.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keysight_34410a.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keysight_34410a_pv.json"
-   ]
-  },
-  "Keithley_2000_Adjustment.py": {
-   "code": [
-    "Procedures/Keithley_2000_Adjustment.py",
-    "keithley2000_adjustment.py",
-    "adjustment_audit.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/keithley_2000.py",
-    "drivers/keithley_2000_cal.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/keithley_2000_adjustment.json"
-   ]
-  },
-  "Fluke_8808A_Adjustment.py": {
-   "code": [
-    "Procedures/Fluke_8808A_Adjustment.py",
-    "fluke8808a_adjustment.py",
-    "adjustment_audit.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_8808a.py",
-    "drivers/fluke_8808a_cal.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_8808a_adjustment.json"
-   ]
-  },
-  "Fluke_365_Verification.py": {
-   "code": [
-    "Procedures/Fluke_365_Verification.py",
-    "handheld_dmm.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_365_pv.json"
-   ]
-  },
-  "Fluke_376_Verification.py": {
-   "code": [
-    "Procedures/Fluke_376_Verification.py",
-    "handheld_dmm.py",
-    "iflex_option.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_376_pv.json"
-   ]
-  },
-  "Fluke_374_Verification.py": {
-   "code": [
-    "Procedures/Fluke_374_Verification.py",
-    "handheld_dmm.py",
-    "iflex_option.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_376_pv.json"
-   ]
-  },
-  "Fluke_375_Verification.py": {
-   "code": [
-    "Procedures/Fluke_375_Verification.py",
-    "handheld_dmm.py",
-    "iflex_option.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_376_pv.json"
-   ]
-  },
-  "Fluke_376II_Verification.py": {
-   "code": [
-    "Procedures/Fluke_376II_Verification.py",
-    "handheld_dmm.py",
-    "iflex_option.py",
-    "hookups.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/fluke_376_pv.json"
-   ]
-  },
-  "Tektronix_TBS1000C_Verification.py": {
-   "code": [
-    "Procedures/Tektronix_TBS1000C_Verification.py",
-    "tds2000c_verification.py",
-    "tbs1000_verification.py",
-    "tds2000c_view_tk.py",
-    "tds2000c_view_qt.py",
-    "genscope_support_view_qt.py",
-    "ui_port.py",
-    "ui_port_tk.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/tektronix_tbs1000c.py",
-    "drivers/fluke_5522a_scope.py",
-    "drivers/fluke_5560a.py",
-    "surprise.py"
-   ],
-   "spec": [
-    "specs/tektronix_tbs1000c_pv.json"
-   ]
-  },
-  "Tektronix_TBS1000_Verification.py": {
-   "code": [
-    "Procedures/Tektronix_TBS1000_Verification.py",
-    "tds2000c_verification.py",
-    "tbs1000_verification.py",
-    "tds2000c_view_tk.py",
-    "tds2000c_view_qt.py",
-    "genscope_support_view_qt.py",
-    "ui_port.py",
-    "ui_port_tk.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/tektronix_tbs1000.py",
-    "drivers/tektronix_tds2000c.py",
-    "drivers/fluke_5522a_scope.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/tektronix_tbs1000_pv.json"
-   ]
-  },
-  "Tektronix_TBS2000B_Verification.py": {
-   "code": [
-    "Procedures/Tektronix_TBS2000B_Verification.py",
-    "tbs2000b_verification.py",
-    "tds2000c_verification.py",
-    "tbs2000b_view_tk.py",
-    "tbs2000b_view_qt.py",
-    "tds2000c_view_tk.py",
-    "genscope_support_view_qt.py",
-    "ui_port.py",
-    "ui_port_tk.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/tektronix_tbs2000b.py",
-    "drivers/fluke_5522a_scope.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/tektronix_tbs2000b_pv.json"
-   ]
-  },
-  "Tektronix_MDO3_Verification.py": {
-   "code": [
-    "Procedures/Tektronix_MDO3_Verification.py",
-    "mdo3_verification.py",
-    "mdo4000c_verification.py",
-    "mdo3_view_tk.py",
-    "mdo3_view_qt.py",
-    "genscope_support_view_qt.py",
-    "ui_port.py",
-    "ui_port_tk.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/tektronix_mdo3.py",
-    "drivers/fluke_5560a.py",
-    "drivers/reference_instruments.py"
-   ],
-   "spec": [
-    "specs/tektronix_mdo3_pv.json",
-    "specs/mdo3_reference_cmc.json"
-   ]
-  }
- },
- "SEED": [
-  {
-   "proc_key": "Tektronix_TDS2000C_Verification.py",
-   "name": "Tektronix TDS2000C / TDS1000C-EDU Performance Verification",
-   "model": "TDS2000C/TDS1000C-EDU"
-  },
-  {
-   "proc_key": "WaveSurfer_WS4104HD.py",
-   "name": "WaveSurfer WS4104HD Verification",
-   "model": "WS4104HD"
-  },
-  {
-   "proc_key": "Fluke_117_Verification.py",
-   "name": "Fluke 117 Performance Verification",
-   "model": "117"
-  }
- ],
- "_note": "Frozen copy of the hand-written registrations on main at 59cfe1c (Manager init_db records, STABLE, VERSIONS, verified.FILES, verified.SEED). tests/test_procscan.py compares the scanned list with it."
+  "_note": "Frozen copy of the hand-written registrations on main at 59cfe1c (Manager init_db records, STABLE, VERSIONS, verified.FILES, verified.SEED). tests/test_procscan.py compares the scanned list with it."
 }

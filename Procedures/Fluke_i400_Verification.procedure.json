@@ -1,0 +1,66 @@
+{
+ "schema": 1,
+ "id": "Fluke_i400_Verification",
+ "name": "Fluke i400 AC Current Clamp Verification",
+ "manufacturer": "Fluke",
+ "model": "i400",
+ "category": "Current Clamp",
+ "version": "1",
+ "order": 60,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Fluke_i400_Verification.py",
+ "engine": [
+  "i400_verification.py"
+ ],
+ "drivers": [
+  "keysight_34410a",
+  "fluke_5560a",
+  "scpi_dmm",
+  "keithley_2000",
+  "simulated_i400"
+ ],
+ "specs": [
+  "specs/fluke_i400_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_i400_Verification.py",
+   "i400_verification.py",
+   "i400_view_tk.py",
+   "i400_view_qt.py",
+   "qtui/bench_view.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "surprise.py",
+   "surprise_view_tk.py",
+   "surprise_view_qt.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py",
+   "drivers/keysight_34410a.py",
+   "drivers/simulated_i400.py",
+   "coil_rule.py",
+   "drivers/scpi_dmm.py",
+   "drivers/keithley_2000.py"
+  ],
+  "spec": [
+   "specs/fluke_i400_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_i400"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_i400_Verification.py",
+  "Procedures/Fluke_i400_Verification.procedure.json",
+  "specs/fluke_i400_pv.json",
+  "tests/test_fluke_i400_points.py",
+  "drivers/simulated_i400.py",
+  "diagrams/README_i400.txt"
+ ]
+}
