@@ -122,7 +122,7 @@ def evaluate(spec: PointSpec, standard) -> Evaluation:
     emu = cmc = rep = None
     try:
         if std and sc is not None and q.get('source') != 'none':
-            b = ub.build(q['kind'], q['nominal'], unit, standard=std, frequency=q.get('frequency'), scope=sc, range_value=q.get('range'), extra=q.get('extra') or ())
+            b = ub.build(q['kind'], q['nominal'], unit, standard=std, frequency=q.get('frequency'), scope=sc, range_value=q.get('range'), extra=q.get('extra') or (), scale=q.get('scale') or 1.0)
             emu, cmc, rep = b.emu, b.cmc, b.reported
         elif sc is not None and q.get('source') != 'none':
             cmc = sc.dmm(q['kind'], q['nominal'], q.get('range'), q.get('frequency'), source=std)
@@ -591,6 +591,9 @@ def _handheld_spec(app, i, p, row) -> PointSpec:
     extra = app.unc_extra(p) if (coil and hasattr(app, 'unc_extra')) else ()                         # + the clamp / coil interaction
     q = dict(kind=kind, nominal=nom, frequency=a.get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None, extra=extra)     # as certificate_row
     q_tar = dict(kind=kind, nominal=nom, frequency=a.get('frequency'), unit=p['base_unit'], range=None, extra=extra)                       # as certificate_fields
+    scale = app.unc_scale(p) if hasattr(app, 'unc_scale') else 1.0                                  # below the coil's range: the calibrator's figure x 50
+    if scale != 1.0:
+        q['scale'] = q_tar['scale'] = scale
     locked = ''
     if p.get('unc_kind') == 'FREQ':
         import handheld_dmm

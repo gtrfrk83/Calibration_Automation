@@ -268,16 +268,26 @@ class App(handheld_dmm.App):
             return coil_rule.extra_components(p.get('unc_nominal', p.get('nominal')), p.get('unc_interaction'))
         return ()
 
+    @classmethod
+    def unc_scale(cls, p):
+        """1 for every point but a 50-turn-coil point BELOW the coil's range: there the calibrator's uncertainty at the sourced current is multiplied by the 50 turns
+        (owner, 2026-10-26), because the clamp reads 50 times what the calibrator outputs."""
+        if p.get('unc_standard'):
+            return coil_rule.uncertainty_scale(p['kind'], p.get('unc_nominal', p.get('nominal')), (p.get('applied') or {}).get('frequency'))
+        return 1.0
+
     def _coil_point(self, p):
-        return bool(p.get('unc_standard')) and p.get('test') == 'numeric' and self.has_uncertainty(p) and self.unc_source(p)[1] is not None
+        return bool(p.get('unc_standard')) and p.get('test') == 'numeric' and self.has_uncertainty(p)
 
     def certificate_row(self, p, r):
         row = super().certificate_row(p, r)
         if self._coil_point(p):
             import report_pdf
             nom, std = self.unc_source(p)
-            row['Uncertainty'] = report_pdf.point_uncertainty(dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None,
-                                                                   extra=self.unc_extra(p)), standard=std)
+            q = dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None, extra=self.unc_extra(p))
+            if self.unc_scale(p) != 1.0:
+                q['scale'] = self.unc_scale(p)
+            row['Uncertainty'] = report_pdf.point_uncertainty(q, standard=std or self.calibrator_model())
         return row
 
     def certificate_fields(self, p):
@@ -290,7 +300,9 @@ class App(handheld_dmm.App):
             clean = lambda d: float(f'{float(d * factor):.9g}')               # noqa: E731  (as handheld_dmm.certificate_fields)
             nom, std = self.unc_source(p)
             q = dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None, extra=self.unc_extra(p))
-            return tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=std)
+            if self.unc_scale(p) != 1.0:
+                q['scale'] = self.unc_scale(p)
+            return tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=std or self.calibrator_model())
         except Exception:
             return dict(TAR='', TUR='')
 

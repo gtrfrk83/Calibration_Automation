@@ -65,12 +65,14 @@ COIL_MODEL = 'A2LA-5500A-COIL'          # specs/standards/a2la_5500a_coil_standa
 
 
 def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None, type_a=(), extra=(), scope=None, range_value=None,
-          direction='output', basis=None, cmc=None):
+          direction='output', basis=None, cmc=None, scale=1.0):
     """Budget for one applied point.  `standard` is a specmanager.StandardSpec (or model text); `resolution` overrides the sheet-derived
     calibrator resolution (SI); `type_a` / `extra` are (name, u_k1, sensitivity) tuples.
     Optional (the defaults are what every multimeter engine has always got):
       direction  row direction of the standard: 'output' (it SOURCES the point, the default) or 'input' (it MEASURES it, e.g. the 5790B reading a generator)
       basis      scope CMC basis ('generate' when None, or 'measure'): a measuring standard is checked against the laboratory's Measure CMC
+      scale      factor every component and the CMC floor are multiplied by (default 1): a 50-turn-coil point below the coil's range, where the calibrator's
+                 uncertainty at the sourced current is referred to the current the clamp reads (coil_rule.uncertainty_scale)
       cmc        a CMC (SI) the caller already worked out (the oscilloscope DC lines of the scope are not in the DMM tables): used instead of the scope lookup"""
     if isinstance(standard, str) or isinstance(standard, int):
         key = standard
@@ -112,6 +114,12 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
         b.add(name, u, s, 'Type A')
     for name, u, s in extra:
         b.add(name, u, s, 'entered')
+    if scale and float(scale) != 1.0:
+        for c in b.components:
+            c.sensitivity *= float(scale)
+        if b.cmc is not None:
+            b.cmc *= float(scale)
+        b.notes.append(f'referred to the current the clamp reads: x {float(scale):g}')
     if b.emu is not None:
         b.reported = ceil_sig(max(b.emu, b.cmc or 0.0))
     elif b.cmc is not None:

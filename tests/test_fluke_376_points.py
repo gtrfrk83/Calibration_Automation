@@ -651,7 +651,7 @@ class EndToEnd(unittest.TestCase):
         for p, r in zip(app.points, rows):
             if p['n'] in COIL_POINTS:
                 if p['n'] in (23, 35):                                       # AC 10 A: below the coil's 20.5 A AC lines -> the calibrator's uncertainty at the sourced current (owner, 2026-10-26)
-                    q = dict(kind=p['kind'], nominal=p['applied']['value'], frequency=p['applied'].get('frequency'), unit='A', range=None)
+                    q = dict(kind=p['kind'], nominal=p['applied']['value'], frequency=p['applied'].get('frequency'), unit='A', range=None, scale=50.0)      # x 50 turns (owner, 2026-10-26)
                     self.assertEqual(r['Uncertainty'], report_pdf.point_uncertainty(q, standard=app.calibrator_model()), p['n'])
                 else:
                     q = dict(kind=p['kind'], nominal=p['nominal'], frequency=p['applied'].get('frequency'), unit='A', range=None, extra=app.unc_extra(p))
@@ -659,7 +659,7 @@ class EndToEnd(unittest.TestCase):
                     self.assertEqual(r['Uncertainty'], report_pdf.point_uncertainty(q, standard='A2LA-5500A-COIL'), p['n'])
                 self.assertIn('A2LA-5500A-COIL', p['note'])
         by_n = {p['n']: r for p, r in zip(app.points, rows)}
-        self.assertEqual(by_n[23]['Uncertainty'], '150 µA')                # below the coil range: the calibrator at 0.2 A
+        self.assertEqual(by_n[23]['Uncertainty'], '7.2 mA')                # below the coil range: the calibrator's 0.2 A figure (about 0.14 mA) x 50 turns
         self.assertEqual(by_n[24]['Uncertainty'], '5.0 A')                 # 500 A AC 50 Hz: the coil's 0.8 % (4.0 A) RSS the clamp / coil interaction (3.0 A)
         self.assertEqual(by_n[27]['Uncertainty'], '560 mA')                # 10 A DC: the coil's 1.0 mA RSS the interaction (0.55 A)
         self.assertFalse(set(PTS) - {p['n'] for p in app.points})

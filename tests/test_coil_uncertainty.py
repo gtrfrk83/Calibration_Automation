@@ -106,3 +106,32 @@ class Interaction(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class Scale(unittest.TestCase):
+    """Owner 2026-10-26: below the coil's range the calibrator's uncertainty at the sourced current is multiplied by the 50 turns."""
+    def test_scale_factor(self):
+        import coil_rule
+        self.assertEqual(coil_rule.uncertainty_scale('ACI', 10.0, 50.0), 50.0)           # AC 10 A: below 20.5 A
+        self.assertEqual(coil_rule.uncertainty_scale('ACI', 500.0, 50.0), 1.0)           # covered by the coil sheet
+        self.assertEqual(coil_rule.uncertainty_scale('DCI', 10.0), 1.0)
+        import iflex_option
+        d = json.loads((ROOT / 'specs' / 'fluke_376_pv.json').read_text(encoding='utf-8'))
+        by = {s['id']: dict(s, test='numeric') for s in d['steps']}
+        self.assertEqual(iflex_option.App.unc_scale(by['1-23']), 50.0)
+        self.assertEqual(iflex_option.App.unc_scale(by['1-24']), 1.0)
+        self.assertEqual(iflex_option.App.unc_scale(by['1-10']), 1.0)                    # not a coil point
+
+    def test_budget_and_ratios_are_referred_to_the_current_the_clamp_reads(self):
+        import uncertainty_budget as ub, tartur
+        one = ub.build('ACI', 0.2, 'A', standard='5522A', frequency=50.0)
+        fifty = ub.build('ACI', 0.2, 'A', standard='5522A', frequency=50.0, scale=50.0)
+        self.assertAlmostEqual(fifty.emu, one.emu * 50, places=12)
+        self.assertAlmostEqual(fifty.cmc, one.cmc * 50, places=12)
+        q1 = dict(kind='ACI', nominal=0.2, frequency=50.0, unit='A', range=None)
+        q50 = dict(q1, scale=50.0)
+        r1 = tartur.row_fields(q1, 9.3, 10.7, standard='5522A')
+        r50 = tartur.row_fields(q50, 9.3, 10.7, standard='5522A')
+        self.assertNotEqual(r1['TUR'], r50['TUR'])
+        self.assertLess(float(r50['TUR'].split(':')[0].lstrip('>')), 100)                # about 20:1 instead of >1000:1
+

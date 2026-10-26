@@ -96,14 +96,14 @@ def _compute(p, low, high, standard, scope):
     if standard:
         b = None
         try:
-            b = ub.build(kind, p['nominal'], ounit, standard=standard, frequency=freq, scope=sc, range_value=p.get('range'), extra=p.get('extra') or ())
+            b = ub.build(kind, p['nominal'], ounit, standard=standard, frequency=freq, scope=sc, range_value=p.get('range'), extra=p.get('extra') or (), scale=p.get('scale') or 1.0)
         except Exception as e:
             reason = f'budget not built ({type(e).__name__}); scope CMC used for the uncertainty'
         if b is not None:
             if b.reported is not None:
                 u = b.reported
             if b.hit is not None:
-                acc = b.hit.limit
+                acc = b.hit.limit * float(p.get('scale') or 1.0)
             else:
                 reason = 'no specification row of the calibrator covers this point: TAR blank'
     if standard and str(getattr(standard, 'model', standard)) == ub.COIL_MODEL and u is None:
