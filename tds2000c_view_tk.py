@@ -19,9 +19,10 @@ def setup_window(self):
     """Theme, title and size of the main window (statements of the engine's former App.__init__)."""
     import tds2000c_verification as E
     root, demo = self.root, self.demo
-    CAL_CHOICES, MODELS, POINTS, SPEC = E.CAL_CHOICES, E.MODELS, E.POINTS, E.SPEC
+    fam = getattr(self, 'fam', None) or E.TDS_FAMILY             # the family this window runs (TDS2000C, or a TBS family of tbs1000_verification.py)
+    CAL_CHOICES, MODELS, POINTS, SPEC = E.CAL_CHOICES, fam.models, fam.points, fam.spec
     ui.apply_theme(root)
-    root.title('Tektronix TDS2000C | Performance Verification' + (' [DEMO]' if demo else ''))
+    root.title(f'Tektronix {fam.name} | Performance Verification' + (' [DEMO]' if demo else ''))
     ui.fit_window(root, 1380, 880, min_w=900, min_h=680)
 
 
@@ -32,9 +33,10 @@ def finish_window(self):
 
 def build_ui(self):
     import tds2000c_verification as E                      # the engine's module state (configure(model) rebinds MODEL / POINTS / SPEC), read at call time
-    CAL_CHOICES, MODELS, POINTS, SPEC = E.CAL_CHOICES, E.MODELS, E.POINTS, E.SPEC
+    fam = getattr(self, 'fam', None) or E.TDS_FAMILY             # the family this window runs (TDS2000C, or a TBS family of tbs1000_verification.py)
+    CAL_CHOICES, MODELS, POINTS, SPEC = E.CAL_CHOICES, fam.models, fam.points, fam.spec
     root = self.root
-    sh = self.shell = ui_shell.Shell(root, 'Tektronix TDS2000C / TDS1000C-EDU  -  Performance Verification',
+    sh = self.shell = ui_shell.Shell(root, f'{fam.title}  -  Performance Verification',
                                      f'{SPEC["source"]["document"]}  |  {len(POINTS)} points in the spec',
                                      demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
     self.status = sh.status_var
@@ -48,14 +50,14 @@ def build_ui(self):
 
     d = sh.drawer_body; d.columnconfigure(1, weight=1)
     ttk.Label(d, text='Model').grid(row=0, column=0, sticky='w', pady=4)
-    m = ttk.Combobox(d, textvariable=self.v_model, values=['TDS' + x for x in MODELS], width=14, state='readonly'); m.grid(row=0, column=1, padx=(10, 0), pady=4, sticky='w')
-    m.set('TDS' + self.v_model.get().replace('TDS', ''))
+    m = ttk.Combobox(d, textvariable=self.v_model, values=[fam.prefix + x for x in MODELS], width=14, state='readonly'); m.grid(row=0, column=1, padx=(10, 0), pady=4, sticky='w')
+    m.set(fam.prefix + self.v_model.get().replace(fam.prefix, ''))
     self.btn_read_model = ttk.Button(d, text='Read model from scope', command=self.read_model); self.btn_read_model.grid(row=1, column=0, columnspan=2, sticky='w', pady=(4, 0))
     self.cfg_widgets = [m]
     m.bind('<<ComboboxSelected>>', lambda _e: self.on_config())
     ttk.Separator(d).grid(row=2, column=0, columnspan=2, sticky='ew', pady=(12, 10))
     self.addr_boxes = {}
-    for i, (key, label) in enumerate([('scope', 'TDS2000C (USB)'), ('cal', 'Calibrator (COM or GPIB)')]):
+    for i, (key, label) in enumerate([('scope', fam.addr_label), ('cal', 'Calibrator (COM or GPIB)')]):
         ttk.Label(d, text=label).grid(row=3 + i, column=0, sticky='w', pady=4)
         cb = ttk.Combobox(d, textvariable=self.addr[key], state='normal', width=34); cb.grid(row=3 + i, column=1, sticky='ew', padx=(10, 0), pady=4)
         self.addr_boxes[key] = cb

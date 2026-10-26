@@ -18,9 +18,11 @@ from qtui.shell import Shell, results_table, small_window
 
 def setup_window(self):
     """Title and size of the main window (the Qt twin of the Tk statements)."""
+    import tds2000c_verification as E
+    fam = getattr(self, 'fam', None) or E.TDS_FAMILY
     root, demo = self.root, self.demo
     H.apply_theme(root)
-    root.setWindowTitle('Tektronix TDS2000C | Performance Verification' + (' [DEMO]' if demo else ''))
+    root.setWindowTitle(f'Tektronix {fam.name} | Performance Verification' + (' [DEMO]' if demo else ''))
     H.fit_window(root, 1380, 880, min_w=900, min_h=680)
 
 
@@ -31,9 +33,10 @@ def finish_window(self):
 
 def build_ui(self):
     import tds2000c_verification as E                      # the engine's module state (configure(model) rebinds MODEL / POINTS / SPEC), read at call time
-    CAL_CHOICES, MODELS, POINTS, SPEC = E.CAL_CHOICES, E.MODELS, E.POINTS, E.SPEC
+    fam = getattr(self, 'fam', None) or E.TDS_FAMILY             # the family this window runs (TDS2000C, or a TBS family of tbs1000_verification.py)
+    CAL_CHOICES, MODELS, POINTS, SPEC = E.CAL_CHOICES, fam.models, fam.points, fam.spec
     root = self.root
-    sh = self.shell = Shell(root, 'Tektronix TDS2000C / TDS1000C-EDU  -  Performance Verification',
+    sh = self.shell = Shell(root, f'{fam.title}  -  Performance Verification',
                             f'{SPEC["source"]["document"]}  |  {len(POINTS)} points in the spec',
                             demo=self.demo, on_section=self.pick_section, version='spec v1', virtual=self.virtual)
     self.status = sh.status_var
@@ -46,16 +49,16 @@ def build_ui(self):
                     'Stay at the bench; the calibrator is returned to STANDBY after every point.', 'info')
 
     d = sh.drawer_body
-    m = drawer_row(d, 0, 'Model', H.combobox(None, self.v_model, ['TDS' + x for x in MODELS], width=14), left=True)
-    self.v_model.set('TDS' + self.v_model.get().replace('TDS', ''))
-    follow_prefixed(m, self.v_model, 'TDS')                  # the engine strips the prefix from the variable again (on_config)
+    m = drawer_row(d, 0, 'Model', H.combobox(None, self.v_model, [fam.prefix + x for x in MODELS], width=14), left=True)
+    self.v_model.set(fam.prefix + self.v_model.get().replace(fam.prefix, ''))
+    follow_prefixed(m, self.v_model, fam.prefix)                  # the engine strips the prefix from the variable again (on_config)
     self.btn_read_model = H.button(None, 'Read model from scope', self.read_model)
     d.layout().addWidget(self.btn_read_model, 1, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
     self.cfg_widgets = [m]
     m.activated.connect(lambda _i=0: self.on_config())
     drawer_separator(d, 2)
     self.addr_boxes = {}
-    for i, (key, label) in enumerate([('scope', 'TDS2000C (USB)'), ('cal', 'Calibrator (COM or GPIB)')]):
+    for i, (key, label) in enumerate([('scope', fam.addr_label), ('cal', 'Calibrator (COM or GPIB)')]):
         self.addr_boxes[key] = drawer_row(d, 3 + i, label, address_box(self.addr[key]))
     drawer_row(d, 5, 'Calibrator', H.combobox(None, self.addr['cal_model'], CAL_CHOICES, width=14), left=True)
     drawer_row(d, 6, 'Calibrator baud', H.combobox(None, self.addr['cal_baud'], ['9600', '19200', '4800', '2400', '1200'], width=9), left=True)

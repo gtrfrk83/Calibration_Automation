@@ -148,7 +148,11 @@ class Wiring(unittest.TestCase):
                   'specs/build_28x_spec.py', 'specs/fluke_287_289_pv.json',                  # 287/289 panel picture, FREQ CMC on 4-24/4-25 (20edb7d, dccc414, 8b150e7)
                   'specs/build_hookups.py', 'specs/build_hookups_ext.py',                    # drawn hook-up diagrams (8b150e7); none of these is this work
                   'specs/build_a2la_cmc_flatness.py',                                        # scope AC Flatness lines (owner, 2026-10-25)
-                  'specs/build_a2la_cmc_rtd.py')                                             # scope RTD lines (owner, 2026-10-25)
+                  'specs/build_a2la_cmc_rtd.py',                                             # scope RTD lines (owner, 2026-10-25)
+                  'tbs1000_verification.py', 'specs/README.txt',                             # Tektronix TBS1000 / TBS1000C procedures (branch tektronix-tbs1000)
+                  'Procedures/Tektronix_TBS1000C_Verification.py', 'Procedures/Tektronix_TBS1000C_Verification.procedure.json',
+                  'Procedures/Tektronix_TBS1000_Verification.py', 'Procedures/Tektronix_TBS1000_Verification.procedure.json',
+                  'specs/build_tbs1000c_spec.py', 'specs/tektronix_tbs1000c_pv.json', 'specs/build_tbs1000_spec.py', 'specs/tektronix_tbs1000_pv.json')
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
         for f in ('report_review_adapters.py', 'report_review_model.py', 'uncertainty_budget.py'):

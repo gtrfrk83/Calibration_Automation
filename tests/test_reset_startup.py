@@ -69,12 +69,14 @@ class DriversDeclareReset(unittest.TestCase):
         self.assertEqual(sorted(c.__name__ for c in all_driver_classes() if c.RESET_EXEMPT), ['Fluke28x'])
 
     def test_tds_drivers_declare_a_reset(self):
-        """The TDS scope resets with FACtory (never *RST, never the self calibration) and is flagged unverified; the scope-option calibrator inherits the
+        """The TDS scope resets with FACtory (never *RST, never the self calibration), verified against the programmer manual 077-0444-03 pp. 2-86 / 2-87
+        (owner-approved flag change, branch tektronix-tbs1000); the scope-option calibrator inherits the
         manual-backed 5522A *RST and is left with SCOPE OFF."""
         from drivers import Fluke5522AScope, TektronixTDS2000C
         reg = cmdreg.merge_commands(TektronixTDS2000C)
         self.assertEqual(reg['reset'].template, 'FACtory')
-        self.assertEqual((reg['reset'].risk, reg['reset'].kind, reg['reset'].verified), ('locked', 'set', False))
+        self.assertEqual((reg['reset'].risk, reg['reset'].kind, reg['reset'].verified), ('locked', 'set', True))
+        self.assertIn('2-86', reg['reset'].ref)
         self.assertNotIn('*CAL', ''.join(c.template for k, c in reg.items() if k in ('reset', 'status.clear', 'opc.query')))
         self.assertIn('opc.query', reg)
         sc = cmdreg.merge_commands(Fluke5522AScope)['reset']
@@ -85,7 +87,7 @@ class DriversDeclareReset(unittest.TestCase):
         """Only these resets are backed by a manual page; everything else is flagged unverified in the report."""
         ok = sorted(c.__name__ for c in all_driver_classes()
                     if not c.RESET_EXEMPT and cmdreg.merge_commands(c)['reset'].verified)
-        self.assertEqual(ok, ['Agilent3458A', 'Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke8808A', 'Fluke8808ACal', 'Fluke96270A', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x', 'TektronixTBS2000B'])     # TBS2000B: FACtory, Programmer Manual p. 92
+        self.assertEqual(ok, ['Agilent3458A', 'Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke8808A', 'Fluke8808ACal', 'Fluke96270A', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x', 'TektronixTBS2000B', 'TektronixTDS2000C'])     # TBS2000B: FACtory, Programmer Manual p. 92
 
 
 # ------------------------------------------------------------------------------------------------------------------------------

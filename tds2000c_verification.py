@@ -10,6 +10,9 @@ manual's DC source, leveled sine generator and time-mark generator.  The oscillo
 Never run unattended: the program stops and asks for every cable, terminator and splitter change.  Writes are never retried; settings are
 read back; the calibrator is put in STANDBY (and that is confirmed) after every point.
 Demo (no hardware):  python Procedures/Tektronix_TDS2000C_Verification.py --demo
+
+Shared engine: the same procedure runs other Tektronix families through a `Family` (spec, models, prompt page numbers, driver, simulator);
+TDS_FAMILY below is this procedure, unchanged.  tbs1000_verification.py declares the TBS1000 and TBS1000C families.
 """
 from __future__ import annotations
 
@@ -28,13 +31,51 @@ import reset_startup
 import virtualbench
 import drivers
 
+class Family:
+    """One oscilloscope family run by this engine: its spec (points, models, sections) and the few names, page references and driver choices
+    that differ between families.  The TDS2000C / TDS1000C-EDU family below is the original procedure (every text and command unchanged);
+    tbs1000_verification.py declares the Tektronix TBS1000 and TBS1000C families on the same engine."""
+
+    def __init__(self, spec_path, *, name, title, prefix, default_model, settings_key, scope_label, addr_label, log_name, diagram_prefix,
+                 report_title, report_source, pages, ext_source='EXT', ext_title='External edge trigger', ext_label='EXT TRIG',
+                 axis_hint='check HORizontal:MAIn:POSition and WFMPre:XZEro on this firmware', scope_driver=None, sim_bench=None, sim_cal_exact=False):
+        self.spec_path = Path(spec_path)
+        self.spec = json.loads(self.spec_path.read_text(encoding='utf-8'))
+        self.points = self.spec['points']
+        self.models = self.spec['models']
+        self.model_info = self.spec['models_info']
+        self.section_title = {s['id']: s['title'] for s in self.spec['sections']}
+        self.section_page = {s['id']: s['page'] for s in self.spec['sections']}
+        self.name, self.title, self.prefix, self.default_model = name, title, prefix, default_model
+        self.settings_key, self.scope_label, self.addr_label, self.log_name = settings_key, scope_label, addr_label, log_name
+        self.diagram_prefix, self.report_title, self.report_source = diagram_prefix, report_title, report_source
+        self.pages = dict(pages)                     # page numbers quoted in the operator prompts: warmup, selfcal, ext_figure
+        self.ext_source, self.ext_title, self.ext_label, self.axis_hint = ext_source, ext_title, ext_label, axis_hint
+        self._scope_driver, self._sim_bench = scope_driver, sim_bench
+        self.sim_cal_exact = sim_cal_exact           # demo: simulate the chosen calibrator itself (5520A too); False = the TDS2000C's 5560A / 5522A pair
+
+    def scope_driver(self):
+        return self._scope_driver() if self._scope_driver else drivers.TektronixTDS2000C
+
+    def sim_bench(self, model, cal):
+        if self._sim_bench:
+            return self._sim_bench(model, cal)
+        from drivers.simulated_tds import make_tds_bench
+        return make_tds_bench(model, cal)
+
+
 SPEC_PATH = HERE / 'specs' / 'tektronix_tds2000c_pv.json'
-SPEC = json.loads(SPEC_PATH.read_text(encoding='utf-8'))
-POINTS = SPEC['points']
-MODELS = SPEC['models']
-MODEL_INFO = SPEC['models_info']
-SECTION_TITLE = {s['id']: s['title'] for s in SPEC['sections']}
-SECTION_PAGE = {s['id']: s['page'] for s in SPEC['sections']}
+TDS_FAMILY = Family(SPEC_PATH, name='TDS2000C', title='Tektronix TDS2000C / TDS1000C-EDU', prefix='TDS', default_model='2024C', settings_key='TDS2000C',
+                    scope_label='TDS2000C', addr_label='TDS2000C (USB)', log_name='TDS2000C', diagram_prefix='hook_tds2000c',
+                    report_title='Tektronix TDS2000C performance verification',
+                    report_source='TDS2000C / TDS1000C-EDU Service Manual 077-0446-01, Chapter 4',
+                    pages=dict(warmup='4-3', selfcal='4-3', ext_figure='4-9'))
+SPEC = TDS_FAMILY.spec
+POINTS = TDS_FAMILY.points
+MODELS = TDS_FAMILY.models
+MODEL_INFO = TDS_FAMILY.model_info
+SECTION_TITLE = TDS_FAMILY.section_title
+SECTION_PAGE = TDS_FAMILY.section_page
 PLAIN_UNITS = {'', 'div'}
 SLEEP_SCALE = 1.0            # tests set this to 0
 VIRTUAL_PACE = 1.0           # a virtual-bench demo shortens the waits (virtualbench.WAIT_SCALE); 1.0 = real
@@ -68,15 +109,16 @@ class Skip(Exception):
 # which points apply
 # ======================================================================================================================
 class Config:
-    def __init__(self, model='2024C'):
+    def __init__(self, model='2024C', fam=None):
         self.model = model
+        self.fam = fam or TDS_FAMILY
 
     def as_dict(self):
         return dict(model=self.model)
 
     @property
     def info(self):
-        return MODEL_INFO[self.model]
+        return self.fam.model_info[self.model]
 
     def applies(self, p):
         return not p.get('models') or self.model in p['models']
@@ -164,10 +206,16 @@ def parse_out_reply(reply):
         raise drivers.InstrumentError(f'Unexpected calibrator OUT? reply {reply!r}')
 
 
-def hook_image(group, cal_text):
-    """diagrams/hook_tds2000c_<5560A|5522A>_<GROUP>.png, else hook_tds2000c_<GROUP>.png; (path or None, names of what was looked for)."""
+def report_notes(p, model):
+    """The point's report notes that apply to `model` (spec field 'report_notes': [{text, models?}]); the TDS2000C spec has none."""
+    return [n['text'] for n in p.get('report_notes', ()) if not n.get('models') or model in n['models']]
+
+
+def hook_image(group, cal_text, prefix='hook_tds2000c'):
+    """diagrams/hook_tds2000c_<5560A|5522A>_<GROUP>.png, else hook_tds2000c_<GROUP>.png (another family: its own prefix);
+    (path or None, names of what was looked for)."""
     cal = '5522A' if ('5522' in cal_text or '5520' in cal_text) else '5560A'
-    names = [f'hook_tds2000c_{cal}_{group}.png', f'hook_tds2000c_{group}.png']
+    names = [f'{prefix}_{cal}_{group}.png', f'{prefix}_{group}.png']
     for n in names:
         if (DIAGRAMS / n).is_file():
             return DIAGRAMS / n, names
@@ -247,18 +295,19 @@ def tar_tur_fields(p, r):
 class IO(reset_startup.IOResetMixin):
     """The oscilloscope (USB) and the calibrator."""
 
-    def __init__(self, addrs, transports=None, virtual=False):
+    def __init__(self, addrs, transports=None, virtual=False, fam=None):
         self.log = drivers.CommandLog()
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
         self.addrs = addrs
+        self.fam = fam or TDS_FAMILY
         self.scope = self.cal = None
         t = transports or {}
 
         def tr(name, **kw):
             return t[name] if name in t else drivers.open_visa(to_visa(addrs[name]), timeout=30, **kw)
         try:
-            self.scope = drivers.TektronixTDS2000C(tr('scope'), self.log, label='TDS2000C'); self.scope.connect()
+            self.scope = self.fam.scope_driver()(tr('scope'), self.log, label=self.fam.scope_label); self.scope.connect()
             text = addrs.get('cal_model', CAL_CHOICES[0])
             if '5560' in text:
                 self.cal = drivers.Fluke5560A(tr('cal', baud=int(addrs.get('cal_baud', 9600))), self.log, label='5560A')
@@ -298,7 +347,7 @@ class IO(reset_startup.IOResetMixin):
             if not new:
                 return
             with open(folder / 'command_log.txt', 'a', encoding='utf-8') as f:
-                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  TDS2000C session\n' + '\n'.join(new) + '\n')
+                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  {self.fam.log_name} session\n' + '\n'.join(new) + '\n')
         except OSError:
             pass
 
@@ -321,6 +370,7 @@ class Runner:
         self.app = app
         self.io = app.io
         self.cfg = app.cfg
+        self.fam = getattr(self.cfg, 'fam', None) or TDS_FAMILY
         self._wired = None
         self._scope_ctx = None
         self._sine = None                       # (vpp, Hz) currently output by the calibrator, None when unknown or in standby
@@ -346,7 +396,7 @@ class Runner:
         self.io.all_outputs_off()
         image = None
         if group:
-            path, names = hook_image(group, self.app.cal_text())
+            path, names = hook_image(group, self.app.cal_text(), self.fam.diagram_prefix)
             image = str(path) if path else None
             if path is None:
                 facts = (facts or []) + [('Diagram', 'not found (' + names[0] + '); follow the text steps')]
@@ -469,13 +519,14 @@ class Runner:
 
     # ---- self test / self calibration -----------------------------------------------------------------------------------------------
     def do_selftest(self, p):
-        self.wire(('SELF',), 'Self test', [('Warm up', 'The oscilloscope must have been operating continuously for twenty minutes within its operating temperature range (p. 4-3).'),
+        self.wire(('SELF',), 'Self test', [('Warm up', 'The oscilloscope must have been operating continuously for twenty minutes within its operating temperature range '
+                                                       f'(p. {self.fam.pages["warmup"]}).'),
                   ('Disconnect', 'No test equipment or hook-up is needed. Check the screen shows no error message.')])
         ok, log = self.io.scope.run_self_test()
         return (1.0 if ok else 0.0), dict(log=log[:300])
 
     def do_selfcal(self, p):
-        self.wire(('SELFCAL',), 'Self calibration', [('Disconnect', 'Disconnect all probes and cables from every channel input (p. 4-3).'),
+        self.wire(('SELFCAL',), 'Self calibration', [('Disconnect', f'Disconnect all probes and cables from every channel input (p. {self.fam.pages["selfcal"]}).'),
                   ('Wait', 'The routine takes about a minute; the oscilloscope does not answer commands meanwhile.')])
         self.status('Self calibration running (about a minute) ...')
         ok, text = self.io.scope.self_cal()
@@ -561,7 +612,7 @@ class Runner:
         one_div = p['hscale_meas']
         if abs(sum(centres) / len(centres) - p['delay']) > 1.5 * one_div:
             raise drivers.InstrumentError(f'The waveform time axis is not what the procedure expects (record centre {sum(centres) / len(centres):.9g} s, '
-                                          f'expected near {p["delay"]:g} s): check HORizontal:MAIn:POSition and WFMPre:XZEro on this firmware')
+                                          f'expected near {p["delay"]:g} s): {self.fam.axis_hint}')
         mean_edge = sum(edges) / len(edges)
         err_div = (mean_edge - p['delay']) / one_div
         cal.standby_quiet()
@@ -587,7 +638,8 @@ class Runner:
         n0 = s.num_acq(); pause(1.0); n1 = s.num_acq()
         locked = (n1 - n0) >= STABLE_MIN_ACQ
         crossings = []
-        ppc = 2500.0 / max(freq * 10 * hscale, 1e-12)          # record points per signal cycle (10 divisions on screen)
+        points, divs = getattr(s, 'RECORD_POINTS', 2500), getattr(s, 'H_DIVS', 10)
+        ppc = float(points) / max(freq * divs * hscale, 1e-12)  # record points per signal cycle (TDS: 2500 points over 10 divisions on screen)
         for times, volts in s.waveform_burst(wave_ch, STABLE_CAPTURES, half_points=math.ceil(ppc) + 2):    # +/- one cycle around the trigger point
             found = edge_times(times, volts, slope)
             if found:
@@ -598,7 +650,7 @@ class Runner:
         return stable, dict(freq=freq, slope=slope, acquisitions=n1 - n0, states=states, spread_periods=(spread / period if math.isfinite(spread) else None), level_note=note)
 
     def resolve_freq(self, tag, last):
-        return {'10M': 10e6, 'F': self.cfg.info['trig_hz'], '200M': 200e6}.get(tag, last)
+        return {'10M': 10e6, 'F': self.cfg.info['trig_hz'], '200M': 200e6, '150M': 150e6, 'BW': self.cfg.info['bw_test_hz']}.get(tag, last)
 
     def do_trig(self, p):
         ch = p['ch']
@@ -632,15 +684,16 @@ class Runner:
         return (1.0 if all(r['stable'] for r in results) else 0.0), dict(stages=results)
 
     def do_exttrig(self, p):
-        self.wire(('EXT',), 'External edge trigger', [('Disconnect', 'Remove other cables from the oscilloscope inputs.'),
-                  ('Connect', 'As the figure on p. 4-9: calibrator SCOPE output to the power splitter; one splitter output to CH1 and the other to EXT TRIG, '
+        fam = self.fam
+        self.wire(('EXT',), fam.ext_title, [('Disconnect', 'Remove other cables from the oscilloscope inputs.'),
+                  ('Connect', f'As the figure on p. {fam.pages["ext_figure"]}: calibrator SCOPE output to the power splitter; one splitter output to CH1 and the other to {fam.ext_label}, '
                               'each through a 50 Ohm feedthrough terminator (use equal-length cables).')], group='EXTTRIG')
         s = self.io.scope
         s.default_setup(); self._scope_ctx = ('EXT',)
         s.select_only(1)
         s.channel(1, vscale=p['vscale'], position=0.0, probe=1)
         s.acquire_mode('SAMple')
-        s.trigger_edge('EXT', 'RISe', 'NORMal', coupling='DC')
+        s.trigger_edge(fam.ext_source, 'RISe', 'NORMal', coupling='DC')
         s.check_errors('external trigger setup')
         self.select_levsine()
         results, last_f, src = [], None, 0.3
@@ -650,7 +703,7 @@ class Runner:
             self.check()
             last_f = self.resolve_freq(st['freq'], last_f)
             s.timebase(st['hscale'])
-            s.trigger_edge('EXT', st['slope'], 'AUTO', coupling='DC')
+            s.trigger_edge(fam.ext_source, st['slope'], 'AUTO', coupling='DC')
             if 'ch1_vpp' in st:
                 key = (st['step'], last_f)
                 src, meas = self.tune_sine(1, last_f, self._start.get(key, st['ch1_vpp'] * 1.5), st['ch1_vpp'], tol=0.10, count=3)
@@ -673,6 +726,12 @@ class Runner:
 # the application window
 # ======================================================================================================================
 class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin):
+    FAMILY = TDS_FAMILY                            # the oscilloscope family this window runs (tbs1000_verification.py subclasses with its own)
+
+    @property
+    def fam(self):
+        return self.FAMILY
+
     def __init__(self, root, demo=False, fast_demo=False):
         self.root, self.demo = root, demo
         self.init_virtual(demo, fast_demo)
@@ -681,12 +740,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.stop = False
         self.results = {}
         self.q = queue.Queue()
-        self.cfg = Config()
+        self.cfg = Config(self.fam.default_model, self.fam)
         self.ui_view.setup_window(self)
-        self.settings = ui.Settings('TDS2000C')
+        self.settings = ui.Settings(self.fam.settings_key)
         g = self.settings.get
         self.asset, self.serial = port.var(), port.var()
-        self.v_model = port.var(g('model', '2024C'))
+        self.v_model = port.var(g('model', self.fam.default_model))
         self.addr = {k: port.var(g(k, d)) for k, d in (('scope', ''), ('cal', 'COM9'), ('cal_baud', '9600'), ('cal_model', CAL_CHOICES[0]))}
         self.status = port.var()
         self.detail = port.var('Select a test point to see its limits and setup.')
@@ -705,11 +764,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return self.addr['cal_model'].get()
 
     def read_cfg(self):
-        self.cfg = Config(self.v_model.get().replace('TDS', ''))
+        self.cfg = Config(self.v_model.get().replace(self.fam.prefix, ''), self.fam)
         return self.cfg
 
     def active_points(self):
-        return [p for p in POINTS if self.cfg.applies(p)]
+        return [p for p in self.fam.points if self.cfg.applies(p)]
 
     @property
     def busy(self): return self._busy
@@ -729,7 +788,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _build_ui(self): self.ui_view.build_ui(self)
 
     def on_config(self, save=True):
-        self.v_model.set(self.v_model.get().replace('TDS', ''))
+        self.v_model.set(self.v_model.get().replace(self.fam.prefix, ''))
         self.read_cfg()
         if save:
             self.settings.set('model', self.v_model.get()); self.settings.save()
@@ -741,9 +800,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.io is None: self.test_connections()
         if self.io is None: return
         model = self.io.scope.model
-        if model in MODELS:
+        if model in self.fam.models:
             self.v_model.set(model); self.on_config()
-            port.message('info', 'Model read', f'The oscilloscope reports TDS{model} ({self.io.scope.channels} channels).')
+            port.message('info', 'Model read', f'The oscilloscope reports {self.fam.prefix}{model} ({self.io.scope.channels} channels).')
         else:
             port.message('warning', 'Model', f'Could not recognise a model in: {self.io.scope.idn}\nChoose it in the Model box.')
 
@@ -751,7 +810,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _visible(self, p):
         if not self.cfg.applies(p): return False
         rec = self.results.get(str(p['id']), {}); res = rec.get('result', '')
-        if self.show_section.get() not in ('All sections', SECTION_TITLE[p['section']]): return False
+        if self.show_section.get() not in ('All sections', self.fam.section_title[p['section']]): return False
         st = self.show_status.get()
         if st == 'Not tested' and res: return False
         if st == 'Passed' and res != 'PASS': return False
@@ -776,7 +835,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def refresh(self):
         keep = self.ui_view.table_selection(self)
-        self.ui_view.table_set_rows(self, ((str(p['id']), *self._row(p)) for p in POINTS if self._visible(p)), keep)
+        self.ui_view.table_set_rows(self, ((str(p['id']), *self._row(p)) for p in self.fam.points if self._visible(p)), keep)
         self.update_summary()
 
     def _update_row(self, p):
@@ -787,20 +846,21 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def update_summary(self):
         self.update_shell_progress(self.active_points())
-        self.update_shell_sections(self.active_points(), lambda p: SECTION_TITLE[p['section']])
+        self.update_shell_sections(self.active_points(), lambda p: self.fam.section_title[p['section']])
 
     def on_select(self, _e=None):
         sel = self.ui_view.table_selection(self)
         if not sel: return
-        p = POINTS[int(sel[0]) - 1]
+        p = self.fam.points[int(sel[0]) - 1]
         nom, lo, hi, _r, unit = display_row(p)
         raw = self.results.get(str(p['id']), {}).get('raw')
         extra = ('  |  ' + p['note']) if p.get('note') else ''
+        extra += ''.join('  |  Report note: ' + t for t in report_notes(p, self.cfg.model))
         work = ''
         if raw:
             work = '\nWorksheet: ' + ', '.join(f'{k} = {v:.6g}' if isinstance(v, float) else f'{k} = {v}' for k, v in raw.items() if not isinstance(v, (list, dict)))
         both = ('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''
-        self.detail.set(f'{p["desc"]}\nLimits: {lo} to {hi} {unit}  |  Stimulus: {"calibrator scope option" if p["stim"] == "cal" else "none"}  |  Manual page {SECTION_PAGE[p["section"]]}{extra}{work}{both}')
+        self.detail.set(f'{p["desc"]}\nLimits: {lo} to {hi} {unit}  |  Stimulus: {"calibrator scope option" if p["stim"] == "cal" else "none"}  |  Manual page {self.fam.section_page[p["section"]]}{extra}{work}{both}')
 
     # ---- connections ---------------------------------------------------------------------------------------------------------------------------
     def find_instruments(self):
@@ -821,13 +881,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         try:
             self.disconnect()
             if self.virtual:          # demo: the real IO / driver code over a simulated scope and calibrator
-                from drivers.simulated_tds import make_tds_bench
-                cal = '5560A' if '5560' in self.cal_text() else '5522A'
-                self._vb, t = make_tds_bench(self.v_model.get().replace('TDS', '') or '2024C', cal)
+                cal = virtualbench.sim_model(self.cal_text()) if self.fam.sim_cal_exact else ('5560A' if '5560' in self.cal_text() else '5522A')
+                self._vb, t = self.fam.sim_bench(self.v_model.get().replace(self.fam.prefix, '') or self.fam.default_model, cal)
                 t.pop('dmm', None)
                 set_virtual_pace(True)
-                self.io = IO(self.addrs(), transports=t, virtual=True)
-            else: self.io = IO(self.addrs())
+                self.io = IO(self.addrs(), transports=t, virtual=True, fam=self.fam)
+            else: self.io = IO(self.addrs(), fam=self.fam)
         except Exception as exc:
             self.disconnect(); self._set_conn(False)
             self.status.set('Connection error: ' + str(exc)); port.message('error', 'Connection error', str(exc)); return
@@ -869,7 +928,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             while True:
                 kind, payload, box = self.q.get_nowait()
                 if kind == 'status': self.status.set(payload)
-                elif kind == 'row': self._update_row(POINTS[payload - 1])
+                elif kind == 'row': self._update_row(self.fam.points[payload - 1])
                 elif kind == 'done': self._finished(payload)
                 elif kind == 'ask':
                     box['value'] = port.operator_prompt(payload['title'], payload['heading'], payload['steps'], facts=payload['facts'],
@@ -887,12 +946,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def rerun(self):
         sel = self.ui_view.table_selection(self)
-        if sel: self.execute([POINTS[int(sel[0]) - 1]])
+        if sel: self.execute([self.fam.points[int(sel[0]) - 1]])
         else: port.message('info', 'Selection', 'Select a test point first.')
 
     def rerun_from(self):
         sel = self.ui_view.table_selection(self)
-        if sel: self.execute(self.points_from(POINTS, sel[0]))
+        if sel: self.execute(self.points_from(self.fam.points, sel[0]))
         else: port.message('info', 'Selection', 'Select a test point first.')
 
     def execute(self, points):
@@ -957,7 +1016,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     # ---- files ----------------------------------------------------------------------------------------------------------------------------------------------
     def _checkpoint_path(self):
         name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
-        return appdata.progress_path(f'TDS{self.cfg.model}_{name}_checkpoint.json')
+        return appdata.progress_path(f'{self.fam.prefix}{self.cfg.model}_{name}_checkpoint.json')
 
     def save(self, silent=False):
         path = self._checkpoint_path()
@@ -981,15 +1040,16 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not r or r['result'] not in ('PASS', 'FAIL'): return None
         failed = r['result'] == 'FAIL'
         unc = r.get('uncertainty') or uncertainty_text(p, r.get('raw', {}))
-        sec = SECTION_TITLE[p['section']]
+        sec = self.fam.section_title[p['section']]
+        desc = p['desc'] + (' (see note)' if report_notes(p, self.cfg.model) else '')     # notes are printed under the table (export_pdf)
         if p.get('passfail'):
-            return dict(Section=sec, Description=p['desc'], Nominal='Pass', **{'Tolerance -': 'N/A', 'Tolerance +': 'N/A'}, UOM='',
+            return dict(Section=sec, Description=desc, Nominal='Pass', **{'Tolerance -': 'N/A', 'Tolerance +': 'N/A'}, UOM='',
                         **{'As Found': 'Pass' if not failed else 'Fail'}, OOT='OOT' if failed else '', **{'As Left': 'Same'}, Uncertainty='N/A')
         if p['unit'] in PLAIN_UNITS:
             nom, lo, hi, rd, unit = display_row(p, r['reading'])
-            return {'Section': sec, 'Description': p['desc'], 'Nominal': nom, 'Tolerance -': lo, 'Tolerance +': hi, 'UOM': unit, 'As Found': rd,
+            return {'Section': sec, 'Description': desc, 'Nominal': nom, 'Tolerance -': lo, 'Tolerance +': hi, 'UOM': unit, 'As Found': rd,
                     'OOT': 'OOT' if failed else '', 'As Left': 'Same', 'Uncertainty': unc}
-        row = report_pdf.cert_row(p['desc'], p['nominal'], p['low'] if p['low'] is not None else float('nan'), p['high'] if p['high'] is not None else float('nan'),
+        row = report_pdf.cert_row(desc, p['nominal'], p['low'] if p['low'] is not None else float('nan'), p['high'] if p['high'] is not None else float('nan'),
                                   p['unit'], r['reading'], failed, section=sec, uncertainty=unc)
         if p['low'] is None: row['Tolerance -'] = 'N/A'
         if p['high'] is None: row['Tolerance +'] = 'N/A'
@@ -1000,7 +1060,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def certificate_pairs(self):
         """(point, report row): As Found for every recorded point; As Left where it was measured again after an adjustment, else 'Same'."""
         pairs = []
-        for p in POINTS:
+        for p in self.fam.points:
             if not self.cfg.applies(p): continue
             row = self.found_left_row(p, lambda r: self.certificate_row(p, r))
             if row: pairs.append((p, row))
@@ -1025,7 +1085,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not rows: port.message('info', 'No results', 'No recorded results to export yet.'); return
         try: import report_pdf
         except ImportError as exc: port.message('error', 'Report export', str(exc)); return
-        details = port.report_details('Tektronix TDS2000C performance verification', parent=self.root)
+        details = port.report_details(self.fam.report_title, parent=self.root)
         if details is None: return
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
         path = port.save_file(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
@@ -1034,11 +1094,18 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         skipped = sum(1 for v in self.found.values() if v.get('result') == 'SKIP')
         note = ('Uncertainty: DC points use the laboratory A2LA scope (calibrator CMC); points the scope does not cover show N/A.'
                 + (f' {skipped} point(s) were skipped.' if skipped else ''))
+        notes = []
+        for p, _row in pairs:
+            for text in report_notes(p, self.cfg.model):
+                if text not in notes:
+                    notes.append(text)
+        if notes:
+            note += ' Notes: ' + ' '.join(f'({i}) {t}' for i, t in enumerate(notes, 1))
         try:
             if report_pdf.details_tar_tur(details):
                 rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [self.tar_tur_for(p) for p, _row in pairs])
-            report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix TDS{self.cfg.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
-                                                                 ('Source', 'TDS2000C / TDS1000C-EDU Service Manual 077-0446-01, Chapter 4')],
+            report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix {self.fam.prefix}{self.cfg.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
+                                                                 ('Source', self.fam.report_source)],
                                              demo=demo, details=details, footer_note=note, title='Calibration Data',
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:

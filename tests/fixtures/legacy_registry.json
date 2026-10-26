@@ -40,7 +40,9 @@
   "Fluke 374 Clamp Meter Performance Verification": "Fluke_374_Verification.py",
   "Fluke 375 Clamp Meter Performance Verification": "Fluke_375_Verification.py",
   "Fluke 376-II Clamp Meter Performance Verification": "Fluke_376II_Verification.py",
-  "Tektronix TBS2000B Performance Verification": "Tektronix_TBS2000B_Verification.py"
+  "Tektronix TBS2000B Performance Verification": "Tektronix_TBS2000B_Verification.py",
+  "Tektronix TBS1000C Performance Verification": "Tektronix_TBS1000C_Verification.py",
+  "Tektronix TBS1000 Performance Verification": "Tektronix_TBS1000_Verification.py"
  },
  "VERSIONS": {
   "WaveSurfer_WS4104HD.py": "51",
@@ -83,7 +85,9 @@
   "Fluke_374_Verification.py": "1",
   "Fluke_375_Verification.py": "1",
   "Fluke_376II_Verification.py": "1",
-  "Tektronix_TBS2000B_Verification.py": "1"
+  "Tektronix_TBS2000B_Verification.py": "1",
+  "Tektronix_TBS1000C_Verification.py": "1",
+  "Tektronix_TBS1000_Verification.py": "1"
  },
  "records": [
   [
@@ -372,6 +376,20 @@
    "TBS2000B",
    "Oscilloscope",
    "Tektronix_TBS2000B_Verification.py"
+  ],
+  [
+   "Tektronix TBS1000C Performance Verification",
+   "Tektronix",
+   "TBS1052C/TBS1072C/TBS1102C/TBS1202C",
+   "Oscilloscope",
+   "Tektronix_TBS1000C_Verification.py"
+  ],
+  [
+   "Tektronix TBS1000 Performance Verification",
+   "Tektronix",
+   "TBS1022/1042/1062/1064/1102/1104/1152/1154",
+   "Oscilloscope",
+   "Tektronix_TBS1000_Verification.py"
   ]
  ],
  "FILES": {
@@ -930,6 +948,48 @@
    ],
    "spec": [
     "specs/tektronix_tbs2000b_pv.json"
+   ]
+  },
+  "Tektronix_TBS1000C_Verification.py": {
+   "code": [
+    "Procedures/Tektronix_TBS1000C_Verification.py",
+    "tds2000c_verification.py",
+    "tbs1000_verification.py",
+    "tds2000c_view_tk.py",
+    "tds2000c_view_qt.py",
+    "genscope_support_view_qt.py",
+    "ui_port.py",
+    "ui_port_tk.py",
+    "drivers/base.py",
+    "drivers/transport.py",
+    "drivers/tektronix_tbs1000c.py",
+    "drivers/fluke_5522a_scope.py",
+    "drivers/fluke_5560a.py",
+    "surprise.py"
+   ],
+   "spec": [
+    "specs/tektronix_tbs1000c_pv.json"
+   ]
+  },
+  "Tektronix_TBS1000_Verification.py": {
+   "code": [
+    "Procedures/Tektronix_TBS1000_Verification.py",
+    "tds2000c_verification.py",
+    "tbs1000_verification.py",
+    "tds2000c_view_tk.py",
+    "tds2000c_view_qt.py",
+    "genscope_support_view_qt.py",
+    "ui_port.py",
+    "ui_port_tk.py",
+    "drivers/base.py",
+    "drivers/transport.py",
+    "drivers/tektronix_tbs1000.py",
+    "drivers/tektronix_tds2000c.py",
+    "drivers/fluke_5522a_scope.py",
+    "drivers/fluke_5560a.py"
+   ],
+   "spec": [
+    "specs/tektronix_tbs1000_pv.json"
    ]
   }
  },

@@ -64,12 +64,12 @@ Keysight 33210A, Agilent 33220A, Agilent 33250A (Fluke 5790B as the AC standard)
   oscillator source returns to AUTO, so the procedure selects it again); Fluke 96270A Master Reset equals `*RST` (Operator Manual p. 3-46).
 - NOT verified (manual not available when written; `verified=False`): Fluke 5560A, 8845A/8846A, 34401A, Keysight Truevolt 34460A-70A,
   34970A/34972A, 33210A/33220A/33250A (also as the AFG in the MDO4000C procedure), LeCroy WaveSurfer 4104HD, Tektronix MDO4000C (`*RST`
-  vs `FACtory`, reply format after reset), Tektronix TDS2000C (`FACtory`), generic ReferenceMeter (power meter / counters), plus `*CLS`/`*OPC?`/`SYST:ERR?` on the DMMs.
+  vs `FACtory`, reply format after reset), generic ReferenceMeter (power meter / counters), plus `*CLS`/`*OPC?`/`SYST:ERR?` on the DMMs.
 - TDS2000C procedure (`tds2000c_verification.py`): at the start of every run (first, re-run, resume) the calibrator is reset first, then the scope.
   5520A/5522A (`Fluke5522AScope`): `*RST` (Operators Manual p. 6-35; the values it evokes, p. 6-36, include SCOPE OFF, OUT_IMP Z1M, STBY), then STBY
   confirmed, then `SCOPE OFF` read back (`SCOPE?` = OFF; pp. 9-28 / 9-29). 5560A: `*RST` (UNVERIFIED), STBY confirmed, `SCOPE OFF` read back.
-  The calibrator is left in standby with no SCOPE mode; the procedure selects the mode again for each test. Scope: `FACtory` (Default Setup, p. 2-87
-  as cited by `default_setup()`; UNVERIFIED, programmer manual not available when added), then `*CLS`, `*OPC?`, `HEADer OFF`, `VERBose OFF`,
+  The calibrator is left in standby with no SCOPE mode; the procedure selects the mode again for each test. Scope: `FACtory` (Default Setup, programmer manual
+  077-0444-03 Rev B pp. 2-86 / 2-87; `*OPC?` p. 2-152, `*CLS` p. 2-58: verified=True since branch `tektronix-tbs1000`, owner-approved, commands unchanged), then `*CLS`, `*OPC?`, `HEADer OFF`, `VERBose OFF`,
   `*ESR?` clean. It is deliberately NOT `*RST` and never `*CAL?` / self calibration (the procedure runs the self test and self cal as its own points).
 - Exempt: Fluke 287/289 over IR (read-only protocol, no reset command; known state = the unchanged set-up check).
 - The 8846A adjustment procedure resets the meter when an adjustment record starts (and after reconnecting a resumed record), never between steps.
@@ -252,6 +252,30 @@ spec `specs/fluke_8808a_pv.json` (written by `specs/build_8808a_spec.py`), diagr
 - The TDS driver (`drivers/tektronix_tds2000c.py`) and `drivers/fluke_5522a_scope.py` still send through legacy write/query (not yet on the command registry);
   their wire text is locked by `tests/golden/tektronix_tds2000c.json`, `fluke_5522a_scope.json` and `engine_tds2000c.json`.
 - No procedure modifications (procmods) are wired into this engine yet. TAR/TUR: TUR only on the DC gain points (volts); TAR is blank.
+
+## Tektronix TBS1000C and TBS1000 (branch `tektronix-tbs1000`; simulated bench only, never run on hardware or a real UI)
+- One engine, two families: `tds2000c_verification.py` gained a `Family` (spec, model list, prompt page numbers, driver, simulator, names); the TDS2000C is
+  `TDS_FAMILY` (every text, command and limit unchanged: `tests/golden/engine_tds2000c.json`, `tektronix_tds2000c.json`, `fluke_5522a_scope.json` are
+  byte-identical). `tbs1000_verification.py` declares `TBS1000C_FAMILY` / `TBS1000_FAMILY` and the `App` subclasses; launchers
+  `Procedures/Tektronix_TBS1000C_Verification.py`, `Procedures/Tektronix_TBS1000_Verification.py`. The TDS views read the window title, model prefix and
+  address label from the family. Editing the shared engine / views flips the TDS2000C fingerprint ('Changed since verification'; it already flips on
+  qt-migration against main).
+- TBS1000C: spec from the Specification and Performance Verification manual 077-1583-03 Rev A (pp. 23-30); driver `drivers/tektronix_tbs1000c.py` from the
+  TBS1000C Programmer Manual 077-1691-02 (every command registered with its page). Differences from the TDS command set: TRIGger:A, WFMOutpre, WFMOutpre:ENCdg,
+  MEASUrement:IMMed:SOUrce1, CH<x>:PRObe:GAIN, CH<x>:BANdwidth FULl/TWEnty, CALibrate:INTERNal:STATus?, AUX trigger source, HORizontal:MAIn:POSition in percent
+  (the delay is HORizontal:MAIn:DELay:MODe ON + DELay:TIMe), record 2000 points over 15 divisions (set after every FACtory).
+- TBS1000 (non-C): spec from the TBS1000 Service Manual 077-0772-01 Rev D, Chapter 4; driver `drivers/tektronix_tbs1000.py` = the TDS2000C driver (same
+  programmer manual 077-0444-03 Rev B, which names the TBS1000) with TBS identification; `COMMAND_PAGES` lists the page of every command it sends.
+- UNVERIFIED (no TBS on the bench): reply formats, the TBS1000C time axis (XZEro with the delay on), the 2000-point record at 2-4 ns/div, ACQuire:NUMACq?
+  counting after RUN on the TBS1000C (counted relative to the value after RUN), the stable-trigger criteria (as TDS2000C), the 5560A / 5522A scope-option
+  commands (as TDS2000C).
+- Owner decisions (2026-10-25), each shown on the report as a point note ('(see note)' in the description, the text under the table; spec field
+  `report_notes` [{text, models?}], printed by `tds2000c_verification.report_notes`): TBS1000C time base +/-2 div from the test record (p. 24; step 13 prints
+  +/-2.5 div, kept as `printed_step_limits`); TBS1202C trigger at 200 MHz with 0.75 V p-p (1.5 div; spec 2.0 div) and Aux In ~200 mV p-p to 200 MHz (spec
+  350 mV), and TBS1152/1154 external trigger ~200 mV at 150 MHz (spec 350 mV), checked as printed (stricter than the specification); TBS1000 external
+  trigger step 10 misprint (5 ns/div) corrected to 2.5 ns/div (`printed_hscale` kept); TBS1000 bandwidth reference at 10 us/div kept (manual 10 ms/div).
+  Vertical position / offset accuracy: not built. TBS1052: not selectable (only in the TBS1000 trigger-source table, p. 1-8: no channel count, bandwidth,
+  procedure frequency or test-record row). Calibrator: the operator picks 5560A, 5522A or 5520A; the demo bench simulates the one picked (`Family.sim_cal_exact`).
 
 ## Fluke 87V notes
 - Temperature 1-50 / 1-51 are read and sourced in degC. Limits follow the 87 Series V Calibration Manual (Table 3 steps 49 / 50, printed p. 11): -1.0..1.0 at 0 degC

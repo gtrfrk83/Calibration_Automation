@@ -349,6 +349,16 @@ Procedures/Tektronix_TDS2000C_Verification.py   (engine: tds2000c_verification.p
   calibrator goes to standby after every point. Hook-up pictures: diagrams/README_tds2000c.txt.
   Demo with:  python Procedures/Tektronix_TDS2000C_Verification.py --demo
 
+Tektronix TBS1000C (TBS1052C / 1072C / 1102C / 1202C) and TBS1000 (TBS1022 to TBS1154)
+--------------------------------------------------------------------------------------
+Procedures/Tektronix_TBS1000C_Verification.py   (spec: specs/tektronix_tbs1000c_pv.json; driver: drivers/tektronix_tbs1000c.py)
+Procedures/Tektronix_TBS1000_Verification.py    (spec: specs/tektronix_tbs1000_pv.json; driver: drivers/tektronix_tbs1000.py = the TDS2000C driver)
+  The TDS2000C procedure on the same engine (tds2000c_verification.py; the two families are declared in tbs1000_verification.py): self test,
+  self calibration, DC gain, analog bandwidth, sample rate / delay time, edge trigger, external (TBS1000C: Aux In) edge trigger. TBS1000C limits
+  from its Specification and Performance Verification manual 077-1583-03 Rev A; TBS1000 limits from its Service Manual 077-0772-01 Rev D.
+  Vertical position / offset accuracy is not included (as on the TDS2000C). Same calibrator choices, prompts and report as the TDS2000C.
+  Hook-up pictures: diagrams/README_tbs1000.txt (none supplied). Demo with:  python Procedures/Tektronix_TBS1000C_Verification.py --demo
+
 Tektronix MDO4000C (MDO4024C / 4034C / 4054C / 4104C)
 -----------------------------------------------------
 Procedures/Tektronix_MDO4000C_Verification.py   (engine: mdo4000c_verification.py; spec: specs/tektronix_mdo4000c_pv.json)

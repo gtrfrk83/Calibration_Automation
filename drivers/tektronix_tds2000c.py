@@ -31,18 +31,20 @@ def _last_word(reply: str) -> str:
     return reply.strip().replace(';', ' ').split()[-1].strip('"').upper()
 
 
-# Reset to default settings at the start of a run (Stage 7 rule).  The reset is FACtory (the Default Setup button, p. 2-87 as cited by default_setup()),
-# NOT *RST and NOT *CAL? / self calibration: FACtory is the command this procedure already sends before every test set-up, so it cannot take the scope
-# anywhere the procedure does not already go, and it leaves the stored calibration (self-cal constants) alone.  The TDS programmer manual was not
-# available to the session that wrote this, so the reset is flagged UNVERIFIED (verified=False).  FACtory turns HEADer ON again, so the code's
-# header-less / short replies are restored in _reset_extra().  *CLS and *OPC? are registered (locked) so reset_to_defaults() clears and waits.
+# Reset to default settings at the start of a run (Stage 7 rule).  The reset is FACtory (the Default Setup button), NOT *RST and NOT *CAL? / self
+# calibration: FACtory is the command this procedure already sends before every test set-up, so it cannot take the scope anywhere the procedure does
+# not already go, and it leaves the stored calibration (self-cal constants) alone.  FACtory turns HEADer ON again, so the code's header-less / short
+# replies are restored in _reset_extra().  *CLS and *OPC? are registered (locked) so reset_to_defaults() clears and waits.
+# Checked in the TBS1000/B/EDU, TDS2000/B/C, TDS1000/B/C-EDU, TDS200, TPS2000/B Series Programmer manual 077-0444-03 Rev B (owner-approved flag change;
+# the commands themselves are unchanged): FACtory pp. 2-86 / 2-87, *OPC? p. 2-152, *CLS p. 2-58.
+_REF = 'TDS2000C programmer manual 077-0444-03 Rev B'
 COMMANDS = {
-    'status.clear': cmdreg.Cmd('*CLS', 'Clear status', 'Clears the status registers (never overridable)', kind='set', risk='locked', verified=False),
+    'status.clear': cmdreg.Cmd('*CLS', 'Clear status', 'Clears the status registers (never overridable)', kind='set', risk='locked', verified=True,
+                               ref=_REF + ', *CLS p. 2-58'),
 }
-COMMANDS['reset'] = cmdreg.reset_cmd(False, 'TDS2000C programmer manual (077-0444-03): FACtory p. 2-87 as cited by default_setup(); manual not available to the '
-                                            'session that added the reset, so unverified', template='FACtory',
+COMMANDS['reset'] = cmdreg.reset_cmd(True, _REF + ', FACtory pp. 2-86 / 2-87', template='FACtory',
                                      note='FACtory (Default Setup), not *RST; the self calibration is never part of the reset')
-COMMANDS['opc.query'] = cmdreg.opc_cmd(False, 'TDS2000C programmer manual: *OPC? p. 2-152 as cited by opc(); not re-checked')
+COMMANDS['opc.query'] = cmdreg.opc_cmd(True, _REF + ', *OPC? p. 2-152')
 
 
 class TektronixTDS2000C(Instrument):
