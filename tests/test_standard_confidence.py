@@ -34,6 +34,7 @@ EXPECTED = {
     '96270A': (None, 2.0),     # no level printed
     '8902A': (None, 2.0),      # no level printed
     '3458A': (None, 2.0),      # no level printed (data sheet 5965-4971E states accuracy relative to calibration standards only)
+    'T-10A': (None, 2.0),      # Minolta T-10A (owner's tree): no level printed
     'A2LA-LIGHT': (95.0, 2.0),  # the lab's own A2LA CMC (scope footnote 2: expanded, approximately 95 %, usually k = 2)
     'A2LA-5500A-COIL': (95.0, 2.0),  # the lab's own A2LA CMC lines for the 5500A/COIL (same footnote 2)
     'A2LA-CURRENT-AMP-COIL': (95.0, 2.0),  # the lab's own A2LA CMC lines, AC current with a transconductance amplifier and coil (same footnote 2)
