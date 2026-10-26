@@ -27,6 +27,7 @@ from pathlib import Path
 
 import datasheet_builder as db
 import datasheet_builder_rules as _rules
+import dsb_coil
 import dsb_sensors as sens
 from datasheet_builder_grid_standards import StandardColumnsMixin
 from datasheet_builder_check_model import CheckMixin      # the Sheet check (build-time rules 1-5), GridModel only
@@ -2121,6 +2122,8 @@ class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
                     fname = (f'{sens.short(skey)}, ' if skey else 'sensor not chosen, ') + fname         # first: the narrow FUNCTION column cuts the end of a long name
                     if not skey and p.enabled and status == 'good':
                         status = 'warn'
+                if dsb_coil.is_coil(fn, p):                                 # driven through the 50-turn coil: the calibrator sources nominal / 50
+                    fname = 'Coil, ' + fname
                 add(key=f'p:{fn.id}:{p.id}', kind='point', fid=fn.id, pid=p.id, step=(f'{fi}-{k}' if p.enabled else '') + (' *' if p.note else ''),
                     function=fname,
                     nominal=nominal, badge=badge, status=status, **limits, enabled=p.enabled, remark=bool(p.note), **self.standard_cells(fn, p, issue['problem'] if issue.get('level') == 'error' else ''), **issue)
@@ -2749,6 +2752,8 @@ class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
         if waveform:
             p.settings['waveform'] = waveform
         notes = [note] if note else []
+        if inherit and dsb_coil.offered(fn) and any(dsb_coil.is_coil(fn, q) for q in fn.points if q is not p):       # a new current row in a coil section is a coil row too
+            dsb_coil.set_coil(fn, p, True)
         if inherit and not fn.info.get('passfail') and self._copy_spec_from_neighbour(fn, p):
             notes.append('It starts with the tolerance of the nearest row in this section (change it in the boxes below).')
         return p, notes
@@ -3060,7 +3065,7 @@ class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
     def blank_form(self, fn=None):
         """What the boxes show for a new row: % of I.V. ticked, symmetric, one test point, Auto Res on."""
         return dict(types=['iv'], plus=self.blank_side(), minus=self.blank_side(), asym=False, operand='+', fs_scale='', nominal='', low='', high='',
-                    units=self.typing_unit(fn) if fn else '', freq='', level='', expect='on', sensor='', multi=False, multi_mode='span', multi_high='', multi_n='5',
+                    units=self.typing_unit(fn) if fn else '', freq='', level='', expect='on', sensor='', coil=False, multi=False, multi_mode='span', multi_high='', multi_n='5',
                     decs='', res='', auto_res=True, remark='', run=True)
 
     def _side_from_expr(self, fn, expr):
@@ -3117,7 +3122,7 @@ class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
         st = dict(key=r['key'], kind=r['kind'], sensors=sens.sensor_types(), fid=fn.id if fn else '', function=fn.name if fn else '', unit=fn.unit if fn else '', symbol=db.unit_symbol(fn.unit) if fn else '',
                   unit_choices=unit_choices(fn.unit) if fn else [], passfail=bool(fn and fn.info.get('passfail')), note='',
                   fields=dict(frequency=bool(fn and (fn.info.get('ac') or fn.info['family'] == 'generator' or fn.info.get('value'))) and not (fn and fn.unit == 'Hz'),
-                              amplitude=bool(fn and fn.info.get('amplitude')), expect=bool(fn and fn.kind == 'CONT'), sensor=bool(fn and fn.kind == 'TEMP'),
+                              amplitude=bool(fn and fn.info.get('amplitude')), expect=bool(fn and fn.kind == 'CONT'), sensor=bool(fn and fn.kind == 'TEMP'), coil=dsb_coil.offered(fn),
                               level_basis='pp' if fn and fn.info['family'] == 'scope' else 'rms'),
                   new_row=r['kind'] == 'blank', can_edit=not self.locked and r['kind'] != 'header', typed_limits=False)
         form = self.blank_form(fn)
@@ -3127,11 +3132,13 @@ class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
             st['note'] = 'Choose what this row tests (the function box), then type the value to test.'
         elif p is None and r['kind'] == 'blank' and not st['passfail']:
             self._overlay_calc(fn, None, form)               # a new row starts with the last calculation used on this sheet
+            form['coil'] = dsb_coil.offered(fn) and any(dsb_coil.is_coil(fn, q) for q in fn.points)          # ... and, in a coil section, goes through the coil too
         if p is not None:
             rng = fn.range(p.range_id)
             num, units = split_unit_text(self.fmt_value(fn, rng, p.nominal, res=p.resolution))
             if fn.kind == 'TEMP':
                 form['sensor'] = sens.sensor_of(fn, p)
+            form['coil'] = dsb_coil.is_coil(fn, p)
             form.update(nominal=num, units=units or form['units'], freq=db.format_si(p.frequency, 'Hz') if p.frequency is not None else '',
                         level=level_display(fn, p) if p.amplitude is not None else '', expect=p.settings.get('expect', 'on'), remark=p.note, run=p.enabled,
                         fs_scale=self.fmt_value(fn, rng, rng.full_scale) if rng else '')
@@ -3277,6 +3284,7 @@ class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
         if fn.kind == 'CONT':
             p.settings['expect'] = form.get('expect') or 'on'
         self._apply_sensor(fn, [p], form.get('sensor'))
+        self._apply_coil(fn, [p], form.get('coil'))
         p.note = str(form.get('remark', '')).strip()
         p.enabled = bool(form.get('run', True))
         p.edited = True
@@ -3447,12 +3455,15 @@ class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
             res = self._resolution_from_form(fn, form, units, with_units(str(form.get('nominal', '')), units))
             if r.get('pid') and fn.kind == 'TEMP':                                # the row the person was editing keeps (gets) the same choice as the rows made from it
                 self._apply_sensor(fn, [q for q in fn.points if q.id == r['pid']], form.get('sensor'))
+            if r.get('pid') and dsb_coil.offered(fn):
+                self._apply_coil(fn, [q for q in fn.points if q.id == r['pid']], form.get('coil'))
             for p in made:
                 if res is not None:
                     self._set_range_resolution(fn, fn.range(p.range_id), res, form, keep_ids=tuple(q.id for q in made))
                 if fn.kind == 'CONT':
                     p.settings['expect'] = form.get('expect') or 'on'
                 self._apply_sensor(fn, [p], form.get('sensor'))                 # each made row has its own copy of the choice
+                self._apply_coil(fn, [p], form.get('coil'))
                 p.note = str(form.get('remark', '')).strip()
                 p.enabled = bool(form.get('run', True))
                 if plus:
@@ -3493,6 +3504,37 @@ class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
     @staticmethod
     def sensor_choices():
         return sens.sensor_types()
+
+    # ---- a clamp-meter current point driven through the 50-turn coil: stored in each point's settings['coil'] (dsb_coil)
+    @staticmethod
+    def _apply_coil(fn, points, on):
+        """Write the choice into the points (call inside _do).  None / absent leaves a point as it is; True / False sets / clears it.  Only a current section can have it."""
+        if on is None or not dsb_coil.offered(fn):
+            return
+        for p in points:
+            dsb_coil.set_coil(fn, p, bool(on))
+            p.edited = True
+
+    def set_coil(self, key=None, on=True, scope='point'):
+        """Drive the selected row (scope 'point') or every row of its section (scope 'section', or a section heading) through the 50-turn coil.  ONE undo step.  The point's nominal stays
+        what the clamp reads; the calibrator then sources nominal / 50 and the uncertainty is the coil's (dsb_coil, coil_rule)."""
+        key = key or self.sel_key
+        if self.locked:
+            return Outcome(False, LOCKED_MESSAGE)
+        r = self.row(key)
+        fn = self.ds.function(r['fid']) if r and r['fid'] else None
+        if fn is None or not dsb_coil.offered(fn):
+            return Outcome(False, 'Click an AC or DC current row (or a current section heading) first: only a current test can be driven through the 50-turn coil.')
+        pts = list(fn.points) if scope == 'section' or r['kind'] == 'header' else [q for q in fn.points if q.id == r['pid']]
+        if not pts:
+            return Outcome(False, 'There is no current row here.')
+
+        def act():
+            self._apply_coil(fn, [fn.point(q.id) for q in pts], bool(on))
+            n = len(pts)
+            what = f'{n} rows' if n != 1 else 'This row'
+            return Outcome(True, f'{what} will be driven through the 50-turn coil: the calibrator sources the nominal / 50.' if on else f'{what}: not driven through the coil.', key)
+        return self._do('coil on' if on else 'coil off', act)
 
     def set_sensor(self, key=None, sensor='', scope='point'):
         """Choose how the temperature of the selected row (scope 'point') or of every row of its section (scope 'section') is sourced.  ONE undo step."""

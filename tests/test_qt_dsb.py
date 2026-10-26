@@ -25,6 +25,7 @@ except ImportError:
 
 import datasheet_builder as db  # noqa: E402
 import datasheet_builder_match as dm  # noqa: E402
+import dsb_coil  # noqa: E402
 import datasheet_builder_ui_model as M  # noqa: E402
 from tests import dsb_scenario as sc  # noqa: E402
 from tests.test_dsb_ui_model import REG  # noqa: E402
@@ -1516,6 +1517,45 @@ class StandardColumnAndCalcTests(QtDsbCase):
         self.assertIn('by hand', sheet.proxy.data(ix, Qt.ItemDataRole.ToolTipRole))
         ix2 = sheet.proxy.index(win.model.row_index(keys[1]), 5)
         self.assertEqual(sheet.proxy.data(ix2, Qt.ItemDataRole.DisplayRole), '')
+
+    # ---- clamp meter: driven through the 50-turn coil
+    def test_coil_box_is_on_current_rows_only_and_the_choice_and_section_button_work(self):
+        win = self.new_window()
+        win.auto_standards = False
+        win.function_chosen(next(c['label'] for c in win.model.function_choices() if c['kind'] == 'ACI' and not c['fid']))
+        for v in ('500 A @ 50 Hz', '300 A @ 50 Hz'):
+            self.assertTrue(self.type_cell(win, v).ok)
+        keys = [r['key'] for r in win.model.rows() if r['kind'] == 'point']
+        for k in keys:
+            f = win.model.panel_state(k)['form']
+            f['types'], f['plus']['iv'] = ['iv'], '1'
+            self.assertTrue(win.model.calc_row(k, f).ok)
+        win.model.select(keys[0], 'nominal')
+        win.sync()
+        box = win.panel_box
+        self.assertFalse(box.cells['coil'].isHidden())
+        self.assertFalse(box.v['coil'].get())
+        box.v['coil'].set(True)
+        box.coil_box.section_btn.click()                                              # 'Whole section'
+        fn = win.model.point_of(keys[0])[0]
+        self.assertEqual([dsb_coil.is_coil(fn, p) for p in fn.points], [True, True])
+        self.assertTrue(win.model.undo().ok)                                          # one undo step
+        fn = win.model.point_of(keys[0])[0]
+        self.assertEqual([dsb_coil.is_coil(fn, p) for p in fn.points], [False, False])
+        win.model.select(keys[0], 'nominal')
+        win.sync()
+        box.v['coil'].set(True)
+        self.assertTrue(win.calc().ok)                                                # the row's own box, saved with the row
+        fn = win.model.point_of(keys[0])[0]
+        self.assertEqual(sum(dsb_coil.is_coil(fn, p) for p in fn.points), 1)
+        opened = []
+        with mock.patch.object(win, '_popup', lambda menu, pos: opened.append([a.text() for a in menu.actions()])):
+            win.sheet_context(win.model.row_index(keys[1]), 1, None)
+        self.assertTrue(any('50-turn coil' in t for t in opened[0]))
+        win2 = self.new_window()
+        win2.function_chosen(self.dcv_label(win2))
+        self.assertTrue(self.type_cell(win2, '1 V').ok)
+        self.assertTrue(win2.panel_box.cells['coil'].isHidden())
 
     # ---- multiple rows are independent
     def test_changing_the_resolution_of_one_made_row_changes_only_that_row(self):

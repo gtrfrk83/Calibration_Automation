@@ -34,6 +34,7 @@ from datetime import datetime
 from decimal import localcontext
 
 import datasheet_builder as db
+import dsb_coil
 from datasheet_builder import D, DsError, DsProblem, KINDS, fmt
 
 DSB_SCHEMA = 'dsb-1'
@@ -177,15 +178,21 @@ def _engine_step(ds, fn, fi, n, p, rng, lims, period):
             step.update(kind='DCV', applied=dict(value=nominal, frequency=None))
         elif k in ('OHM2', 'OHM4'):
             step.update(kind='OHM', applied=dict(value=nominal, frequency=None))
+        elif dsb_coil.is_coil(fn, p):                                       # clamp meter on the 50-turn coil: the calibrator sources nominal / 50, the meter reads nominal
+            out = float(dsb_coil.sourced(p.nominal))
+            step.update(kind=k, applied=dict(value=out, frequency=None if p.frequency is None else float(p.frequency)),
+                        coil=dsb_coil.TURNS, unc_standard=dsb_coil.MODEL, unc_nominal=nominal)      # unc_*: the keys the Fluke 374 / 375 / 376 steps carry (NOTES.md, standing coil rule)
         else:
             step.update(kind=k, applied=dict(value=nominal, frequency=None if p.frequency is None else float(p.frequency)))
-        step['group'] = _group(fn, p)
+        step['group'] = dsb_coil.group_for(step['applied']['value']) if step.get('coil') else _group(fn, p)
     else:
         step.update(kind='NONE', group='NONE', setup_key='NONE', setup=_setup_text(fn, p, rng))
     step['id'] = p.id
     if fn.settle is not None:
         step['settle'] = fn.settle
     text = _setup_text(fn, p, rng)
+    if ready and step.get('coil'):
+        text = (dsb_coil.describe(fn, p) + ' ' + text).strip()
     if ready and text:
         step['note'] = text
     return step, ready
@@ -278,6 +285,8 @@ def export_spec(ds, period=None, plan=None, uid=None, include_datasheet=True):
                 'periods': [p.to_dict() for p in ds.periods], 'default_period': ds.default_period,
                 'engine': {'stock_runnable': hand == 0, 'points': len(steps), 'runnable': ready_n, 'hand_set': hand, 'notes': notes}},
     }
+    if any(s.get('coil') for s in steps):                  # the cable-change text of the coil rows (the 376 jaw wording); the engine reads spec['groups'][step.group]
+        spec['groups'] = {g: v for g, v in dsb_coil.groups().items() if any(s.get('group') == g for s in steps)}
     if include_datasheet:
         spec['dsb']['datasheet'] = ds.to_dict()
     if plan is not None and hasattr(plan, 'to_dict'):

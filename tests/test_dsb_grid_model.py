@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 import datasheet_builder as db  # noqa: E402
+import dsb_coil  # noqa: E402
 import datasheet_builder_specs as dbs  # noqa: E402
 import datasheet_builder_ui_model as M  # noqa: E402
 
@@ -1538,3 +1539,103 @@ class TemperatureSensorTests(MatcherBase):
         self.assertEqual(dm._scope_temperature(sc, 100, 'K'), sc.temperature(100, tc='K'))
         self.assertEqual(dm._scope_temperature(sc, 100, 'Pt385-100'), sc.temperature(100, tc='Pt385-100'))
         self.assertNotEqual(sc.temperature(100, tc='K'), sc.temperature(100, tc='Pt385-100'))
+
+
+class CoilModelTests(MatcherBase):
+    """A clamp-meter current row driven through the 50-turn coil (dsb_coil): chosen per row or per section, one undo step, copied by multiple rows, shown in the columns."""
+
+    def aci_rows(self, n=2, values=('500 A @ 50 Hz', '300 A @ 50 Hz', '100 A @ 50 Hz')):
+        g = self.g
+        label = next(c['label'] for c in g.function_choices() if c['kind'] == 'ACI' and not c['fid'])
+        self.assertTrue(g.set_target_function(label).ok)
+        for v in values[:n]:
+            g.select(next(r['key'] for r in g.rows() if r['kind'] == 'blank'), 'nominal')
+            self.assertTrue(g.commit_cell(v).ok, v)
+        keys = [r['key'] for r in self.points()]
+        for k in keys:
+            f = g.panel_state(k)['form']
+            f['types'], f['plus']['iv'] = ['iv'], '1'
+            self.assertTrue(g.calc_row(k, f).ok)
+        return keys
+
+    def coils(self, key):
+        return [dsb_coil.is_coil(*(lambda fp: (fp[0], q))(self.g.point_of(key))) for q in self.g.point_of(key)[0].points]
+
+    def test_a_current_row_offers_the_choice_and_other_rows_do_not(self):
+        k = self.aci_rows(1)[0]
+        self.assertTrue(self.g.panel_state(k)['fields']['coil'])
+        self.assertFalse(self.g.panel_state(k)['form']['coil'])
+
+    def test_a_voltage_row_has_no_coil_choice(self):
+        dcv = self.dcv_row('5 V')
+        self.assertFalse(self.g.panel_state(dcv)['fields']['coil'])
+        self.assertFalse(self.g.set_coil(dcv, True).ok)
+
+    def test_one_row_one_undo_step_and_the_section_button(self):
+        keys = self.aci_rows(3)
+        self.assertTrue(self.g.set_coil(keys[1], True).ok)
+        self.assertEqual(self.coils(keys[0]), [False, True, False])
+        self.assertIn('Coil, ', self.g.row(keys[1])['function'])
+        self.assertNotIn('Coil, ', self.g.row(keys[0])['function'])
+        self.assertTrue(self.g.undo().ok)
+        self.assertEqual(self.coils(keys[0]), [False, False, False])
+        self.assertTrue(self.g.set_coil(keys[0], True, 'section').ok)
+        self.assertEqual(self.coils(keys[0]), [True, True, True])
+        self.assertTrue(self.g.undo().ok)                                         # the whole section is ONE step
+        self.assertEqual(self.coils(keys[0]), [False, False, False])
+        self.assertTrue(self.g.redo().ok)
+        self.assertEqual(self.coils(keys[0]), [True, True, True])
+        head = next(r['key'] for r in self.g.rows() if r['kind'] == 'header' and r['fid'] == self.g.point_of(keys[0])[0].id)
+        self.assertTrue(self.g.set_coil(head, False).ok)                           # a heading clears the whole section
+        self.assertEqual(self.coils(keys[0]), [False, False, False])
+
+    def test_a_new_row_in_a_coil_section_is_a_coil_row_and_the_flag_is_saved(self):
+        keys = self.aci_rows(1)
+        self.assertTrue(self.g.set_coil(keys[0], True, 'section').ok)
+        g = self.g
+        g.select(next(r['key'] for r in g.rows() if r['kind'] == 'blank'), 'nominal')
+        self.assertTrue(g.commit_cell('200 A @ 50 Hz').ok)
+        self.assertEqual(self.coils(keys[0]), [True, True])
+        k2 = [r['key'] for r in self.points()][1]
+        self.assertTrue(g.panel_state(k2)['form']['coil'])
+        back = db.Datasheet.from_dict(g.ds.to_dict())
+        self.assertEqual([dsb_coil.is_coil(back.function('aci'), q) for q in back.function('aci').points], [True, True])
+
+    def test_multiple_rows_each_get_their_own_copy_of_the_flag(self):
+        k = self.aci_rows(1)[0]
+        f = self.g.panel_state(k)['form']
+        f.update(coil=True, multi=True, multi_high='900 A', multi_n='3', multi_mode='span')
+        self.assertTrue(self.g.calc_row(k, f).ok)
+        fn = self.g.point_of(k)[0]
+        self.assertGreaterEqual(len(fn.points), 3)
+        self.assertEqual([dsb_coil.is_coil(fn, q) for q in fn.points], [True] * len(fn.points))
+        self.assertTrue(self.g.set_coil(self.points()[1]['key'], False).ok)       # changing one leaves the rest
+        fn = self.g.point_of(k)[0]
+        self.assertEqual([dsb_coil.is_coil(fn, q) for q in fn.points].count(True), len(fn.points) - 1)
+
+    def test_the_columns_show_the_coil_and_the_calibrator_and_the_coils_uncertainty(self):
+        keys = self.aci_rows(2)
+        self.assertTrue(self.g.set_coil(keys[0], True, 'section').ok)
+        self.g.refresh_standard_columns()
+        k500 = next(r['key'] for r in self.points() if r['nominal'].startswith('500'))
+        r = self.g.row(k500)
+        a = self.g._grid_result().assignments[self.g.point_of(k500)[1].id]
+        self.assertTrue(r['standard'].endswith(' + coil'))
+        self.assertTrue(r['standard'].startswith(a.standard))
+        self.assertIn(dsb_coil.LABEL, r['standard_tip'])
+        self.assertIn(dsb_coil.LABEL, r['unc_tip'])
+        self.assertEqual(a.unc_standard, dsb_coil.MODEL)
+        self.assertEqual(r['unc'], unc_mod.format_value(a.uncertainty, 'A'))
+        self.assertEqual(r['unc'], '5.0 A')                                       # AC 500 A at 50 Hz
+        std_list = [c['label'] for c in self.g.standard_choices(keys[0])]
+        self.assertFalse([x for x in std_list if 'COIL' in x.upper()])           # never in the calibrator picker
+
+    def test_a_coil_row_does_not_change_the_other_rows_or_the_automation(self):
+        keys = self.aci_rows(2)
+        self.g.refresh_standard_columns()
+        before = {k: (self.g.row(k)['standard'], self.g.row(k)['unc']) for k in keys}
+        self.assertTrue(self.g.set_coil(keys[0], True).ok)
+        self.g.refresh_standard_columns()
+        self.assertEqual((self.g.row(keys[1])['standard'], self.g.row(keys[1])['unc']), before[keys[1]])
+        a = self.g._grid_result().assignments[self.g.point_of(keys[0])[1].id]
+        self.assertTrue(a.can_automate)                                            # the calibrator still sources it

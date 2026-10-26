@@ -12,6 +12,7 @@ from PySide6.QtGui import QGuiApplication, QKeySequence, QShortcut
 from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton, QVBoxLayout, QWidget)
 
 import datasheet_builder_ui_model as M
+import dsb_coil
 from qtui import widgets
 from qtui.screens import dsb_common as C
 from qtui.screens.dsb_check import CheckWindowMixin
@@ -483,6 +484,11 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.commit_bar_if_changed()
         return self.changed(self.model.set_sensor(None, sensor, 'section'))
 
+    def coil_section(self, on):
+        """'Whole section' beside the coil box / the right-click menu: every row of the current section is (not) driven through the 50-turn coil (ONE undo step)."""
+        self.commit_bar_if_changed()
+        return self.changed(self.model.set_coil(None, bool(on), 'section'))
+
     def delete_line(self):
         """Delete the selected line (the Delete line button and the right-click menu)."""
         self.commit_bar_if_changed()
@@ -505,6 +511,10 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
             sub = menu.addMenu('Sourced as (whole section)')
             for key, lab in self.model.sensor_choices():
                 sub.addAction(lab).triggered.connect(lambda _c=False, k=key: self.sensor_section(k))
+        fn = self.model.ds.function(row['fid']) if row and row.get('fid') else None
+        if fn is not None and row.get('kind') in ('header', 'point') and dsb_coil.offered(fn) and not getattr(self.model, 'locked', False):
+            on = row.get('kind') == 'point' and dsb_coil.is_coil(fn, self.model.point_of(row['key'])[1])
+            menu.addAction('Not through the 50-turn coil (whole section)' if on else 'Through the 50-turn coil (whole section)').triggered.connect(lambda _c=False, v=not on: self.coil_section(v))
         self._popup(menu, gpos)
 
     def goto_row(self, key):

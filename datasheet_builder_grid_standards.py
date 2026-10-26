@@ -103,6 +103,14 @@ class StandardColumnsMixin:
         else:
             out.update(standard=a.standard + (' (chosen)' if hand else ''),
                        standard_tip=f'{a.standard}: ' + ('chosen by hand.' if hand else 'the best fit, picked automatically.') + ' Click to choose another.')
+            if getattr(a, 'coil', False):                           # driven through the 50-turn coil: the calibrator sources nominal / 50, the coil is the uncertainty standard
+                import dsb_coil
+                out['standard'] = a.standard + ' + coil' + (' (chosen)' if hand else '')
+                out['standard_tip'] = (f'{a.standard} sources {a.sourced:.6g} A through the {dsb_coil.LABEL}; the meter reads {abs(float(p.nominal)):.6g} A. '
+                                       + ('Chosen by hand. ' if hand else 'The best fit, picked automatically. ')
+                                       + ('The uncertainty is the coil\'s own sheet. ' if a.unc_standard == dsb_coil.MODEL else
+                                          'The coil sheet has no row at this current: the uncertainty is the calibrator\'s at the sourced current. ')
+                                       + 'Click to choose another calibrator (the coil is not commanded, so it is never in the list).')
         if src.level == 'ok' and a is not None and a.uncertainty and a.uncertainty > 0:
             out['unc'] = uncertainty.format_value(a.uncertainty, fn.unit)
             out['unc_tip'] = f'{src.text}. Expanded uncertainty, k = 2, rounded up.'
