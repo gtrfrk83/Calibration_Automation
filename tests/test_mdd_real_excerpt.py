@@ -92,5 +92,56 @@ class Excerpt(unittest.TestCase):
             self.assertNotIn(word, text)
 
 
+class ExcerptStandard(unittest.TestCase):
+    """The real 87V excerpt with a standard chosen for the uncertainty: the figures are the standard's own, the rest is waived point by point."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.parsed = imp.parse_mdd(FIX)
+        cls.conv = mc.convert(cls.parsed)
+
+    def register(self, standard):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        res = mc.register(self.conv, self.parsed, 'tester', registry=d / 'reg.sqlite3', root=d / 'us', archive_to=d / 'arch', standard=standard)
+        self.assertTrue(res.ok, res.message)
+        import datasheet_builder as db
+        return db.load(res.uid, root=d / 'us', db=d / 'reg.sqlite3'), res
+
+    def test_the_preview_preselects_a_handheld_calibrator_and_counts_what_it_covers(self):
+        ch = mc.StandardChoice(self.conv.sheet)
+        self.assertEqual(ch.default, '5522A')
+        plan, rows, text = ch.preview('5522A')
+        c = plan.counts()
+        self.assertEqual(c['points'], 28)
+        self.assertEqual((c['sourced'], c['waived'], c['by_design']), (18, 4, 6))            # 3 frequency rows + 1 AC current row with no frequency are waived; diode / cond / degF ... carry none by design
+        self.assertEqual(sum(1 for v in rows.values() if v.endswith('(5522A)')), 18)
+        self.assertIn('18 point(s) will show the uncertainty of the 5522A', text)
+
+    def test_registered_with_the_5522a_every_covered_point_carries_its_figure_and_the_rest_a_waiver(self):
+        import datasheet_builder_rules as rules
+        ds, res = self.register('5522A')
+        self.assertEqual(res.status, 'ready')
+        named = {pid: s for pid, s in ds.assignments.items() if s != 'MANUAL'}
+        self.assertEqual(len(named), 18)
+        self.assertEqual(set(named.values()), {'5522A'})
+        w = rules.waivers(ds)
+        self.assertEqual(len(w), 4)
+        self.assertNotIn(rules.WHOLE_SHEET, w)
+        chk = rules.check(ds, dry_run_on=False)
+        self.assertEqual(chk.errors(), [])
+        self.assertEqual(sum(1 for s in chk.sources.values() if s.has_source and s.standard == '5522A'), 18)
+        self.assertEqual(sum(1 for s in chk.sources.values() if s.waived), 4)
+        for pid in named:                                                       # a point's figure is the standard's own spec row: positive, never zero
+            self.assertIn('5522A standards sheet', chk.sources[pid].text)
+
+    def test_limits_nominals_and_kinds_are_the_same_with_or_without_a_standard(self):
+        a, _ = self.register('5522A')
+        b, _ = self.register('')
+        key = lambda ds: [(fn.kind, p.nominal, p.frequency, p.overrides) for fn, p in ds.all_points()]      # noqa: E731
+        self.assertEqual(key(a), key(b))
+        self.assertEqual(key(a), key(self.conv.sheet))
+
+
 if __name__ == '__main__':
     unittest.main()

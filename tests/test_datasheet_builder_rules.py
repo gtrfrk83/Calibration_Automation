@@ -296,13 +296,13 @@ class Rule3Units(Base):
     def test_the_mudcats_import_is_clean(self):
         d = Path(tempfile.mkdtemp())
         conv = mc.convert(imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD')))
-        rules.set_waiver(conv.sheet, [rules.WHOLE_SHEET], 'manual_calibration', '', who='import')       # what mdd_convert.register records
+        rules.apply_manual_standard(conv.sheet, '', who='import', matcher=self.matcher)       # what mdd_convert.register records for 'None: waive' (per point, never the whole sheet)
         chk = rules.check(conv.sheet, matcher=self.matcher)
         self.assertEqual(chk.errors(), [], [f.text for f in chk.errors()])
         self.assertFalse(chk.dry.available)                                         # a manual calibration drives nothing
         self.assertEqual(codes(chk, 1), [])
         self.assertEqual(chk.unverified, [])
-        self.assertEqual(set(codes(chk, 5)), {'waived'})                            # the whole-sheet waiver is listed, one line per section
+        self.assertEqual(set(codes(chk, 5)), {'waived'})                            # the per-point waivers are listed, one line per section
 
 
 # ================================================================================================================================ rule 4
@@ -782,17 +782,21 @@ class Rule5Blocking(Base):
         next(p for _f, p in ds.all_points() if p.nominal == D('1500')).enabled = False
         self.assertEqual([f.code for f in rules.check(ds, matcher=self.matcher, dry_run_on=False).errors()], [])
 
-    def test_the_mudcats_import_is_recorded_as_waived_for_the_whole_sheet(self):
+    def test_the_mudcats_import_without_a_standard_is_waived_per_point_not_for_the_whole_sheet(self):
         d = Path(tempfile.mkdtemp())
         parsed = imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD'))
         conv = mc.convert(parsed)
         self.assertTrue([f for f in rules.check(conv.sheet, matcher=self.matcher).errors() if f.rule == 5])   # a converted sheet alone is not waived
-        res = mc.register(conv, parsed, 'tester', registry=d / 'reg.sqlite3', root=d / 'us', archive_to=d / 'arch')
+        res = mc.register(conv, parsed, 'tester', registry=d / 'reg.sqlite3', root=d / 'us', archive_to=d / 'arch')          # standard='' = None: waive
         self.assertTrue(res.ok, res.message)
-        ds = db.load(res.uid, root=d / 'us', db=d / 'reg.sqlite3') if hasattr(db, 'load') else None
-        if ds is not None:
-            w = rules.waivers(ds)[rules.WHOLE_SHEET]
-            self.assertEqual((w['code'], w['by']), ('manual_calibration', 'import (tester)'))
+        ds = db.load(res.uid, root=d / 'us', db=d / 'reg.sqlite3')
+        w = rules.waivers(ds)
+        self.assertNotIn(rules.WHOLE_SHEET, w)                                       # the old blanket waiver is gone
+        should = [p.id for fn, p in ds.all_points() if p.enabled and rules.should_have(fn, p)]
+        self.assertTrue(should)
+        self.assertEqual(sorted(k for k in w), sorted(should))                       # one recorded waiver per point that should carry an uncertainty, none for the others
+        self.assertTrue(all((v['code'], v['by']) == ('manual_calibration', 'import (tester)') for v in w.values()))
+        self.assertTrue(all(v == 'MANUAL' for v in ds.assignments.values()))
 
     def test_the_handheld_template_is_not_blocked(self):
         g = M.GridModel(M.Storage(Path(tempfile.mkdtemp()) / 'us', Path(tempfile.mkdtemp()) / 'r.sqlite3'), matcher_factory=lambda: self.matcher)
@@ -913,12 +917,12 @@ class Attribution(Base):
         res = mc.register(conv, parsed, 'tester', registry=d / 'reg.sqlite3', root=d / 'us', archive_to=d / 'arch')
         self.assertTrue(res.ok, res.message)
         ds = db.load(res.uid, root=d / 'us', db=d / 'reg.sqlite3')
-        w = rules.waivers(ds)[rules.WHOLE_SHEET]
-        self.assertEqual(w['reason'], 'manual calibration: imported from .MDD, no automation')
-        self.assertEqual(w['by'], 'import (tester)')
+        w = rules.waivers(ds)
+        self.assertTrue(w and rules.WHOLE_SHEET not in w)
+        self.assertTrue(all(v['reason'].startswith('manual calibration: ') and v['by'] == 'import (tester)' for v in w.values()))
         chk = rules.check(ds, matcher=self.matcher)
         note = [f for f in chk.findings if f.code == 'waived']
-        self.assertTrue(note and all('imported from .MDD, no automation' in f.text and 'import (tester)' in f.text for f in note))
+        self.assertTrue(note and all('manual calibration: no standard was chosen' in f.text and 'import (tester)' in f.text for f in note))
         self.assertIn('uncertainty waivers', db.versions(res.uid, root=d / 'us', db=d / 'reg.sqlite3')[0]['note'])
 
     def test_accepted_unit_spellings_are_listed_in_a_note(self):
@@ -1016,12 +1020,206 @@ class Rule5CmcSet(Base):
     def test_the_dmm_kinds_still_resolve_without_a_waiver(self):
         self.assertEqual([f.code for f in rules.check(dcv_sheet(), matcher=self.matcher, dry_run_on=False).errors()], [])
 
-    def test_the_mudcats_import_is_covered_by_its_whole_sheet_waiver_even_with_frequency_rows(self):
+    def test_the_mudcats_import_is_covered_by_its_waivers_even_with_frequency_rows(self):
         d = Path(tempfile.mkdtemp())
         conv = mc.convert(imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD')))
         self.assertTrue([f for f in rules.check(conv.sheet, matcher=self.matcher, dry_run_on=False).errors() if f.rule == 5])
-        rules.set_waiver(conv.sheet, [rules.WHOLE_SHEET], 'manual_calibration', 'manual calibration: imported from .MDD, no automation', who='import (t)')
+        rules.apply_manual_standard(conv.sheet, '', who='import (t)', matcher=self.matcher)
         self.assertEqual(rules.check(conv.sheet, matcher=self.matcher, dry_run_on=False).errors(), [])
+
+    def test_a_whole_sheet_waiver_of_an_older_import_still_works_unchanged(self):
+        """Existing imported manual procedures are not changed: they keep their whole-sheet waiver and are evaluated when next saved."""
+        d = Path(tempfile.mkdtemp())
+        conv = mc.convert(imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD')))
+        rules.set_waiver(conv.sheet, [rules.WHOLE_SHEET], 'manual_calibration', 'manual calibration: imported from .MDD, no automation', who='import (t)')
+        chk = rules.check(conv.sheet, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual(chk.errors(), [])
+        self.assertEqual(set(codes(chk, 5)), {'waived'})
+        self.assertTrue(all('imported from .MDD, no automation' in f.text for f in chk.findings if f.code == 'waived'))
+        self.assertTrue(any('waived (manual calibration: imported from .MDD, no automation' in s.text for s in chk.sources.values()))
+
+
+# ================================================================================================================================ manual calibrations: the standard of the uncertainty
+class ManualStandard(Base):
+    """A manual calibration carries the uncertainty of the STANDARD the author chose (owner decision) instead of a whole-sheet waiver."""
+
+    def sheet(self):
+        d = Path(tempfile.mkdtemp())
+        return mc.convert(imp.parse_mdd(mdd_synth.write_mdd(d / 'Synth 87V.MDD'))).sheet
+
+    def pts(self, ds):
+        return {int(p.id.rsplit('.p', 1)[1]): (fn, p) for fn, p in ds.all_points()}
+
+    def test_the_chosen_standard_gives_the_uncertainty_on_resolvable_points(self):
+        import report_pdf
+        import uncertainty
+        ds = self.sheet()
+        plan = rules.apply_manual_standard(ds, '5522A', who='import (t)', matcher=self.matcher)
+        pts = self.pts(ds)
+        dcv = pts[2][1]                                                          # 1.000 V DC
+        self.assertEqual(ds.assignments[dcv.id], '5522A')                       # the person's override, instead of the 'MANUAL' marker
+        self.assertEqual(ds.options['manual_standard'], '5522A')
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual(chk.errors(), [], [f.text for f in chk.errors()])
+        src = chk.sources[dcv.id]
+        self.assertTrue(src.has_source and src.standard == '5522A' and '5522A standards sheet' in src.text, src.text)
+        # the same figure as an AUTOMATED sheet gets for that standard, and as the report code works it out (k = 2, rounded up, never below the lab CMC)
+        auto = ds.copy()
+        auto.options['manual_entry'] = False
+        a = self.matcher.match(auto, overrides={dcv.id: '5522A'}).assignments[dcv.id]
+        self.assertEqual(a.status, 'assigned')
+        self.assertEqual(plan.sourced[dcv.id].uncertainty, a.uncertainty)
+        self.assertTrue(a.uncertainty > 0)
+        text = uncertainty.format_value(a.uncertainty, 'V')
+        self.assertEqual(text, report_pdf.point_uncertainty(dict(kind='DCV', nominal=1.0, frequency=None, unit='V', range=None), '5522A'))
+        # every DCV / ACV / ohm point the 5522A covers carries one
+        for n in (1, 2, 3, 4, 5, 7, 8):
+            self.assertEqual(ds.assignments[pts[n][1].id], '5522A', n)
+            self.assertTrue(chk.sources[pts[n][1].id].has_source, n)
+
+    def test_a_point_the_standard_does_not_cover_gets_a_per_point_waiver(self):
+        ds = self.sheet()
+        plan = rules.apply_manual_standard(ds, '5522A', who='import (t)', matcher=self.matcher)
+        pts = self.pts(ds)
+        nocov = pts[6][1]                                                        # an AC point with no frequency in the MDD: no row can cover it
+        self.assertIn(nocov.id, plan.waived)
+        self.assertEqual(ds.assignments[nocov.id], 'MANUAL')
+        w = rules.waivers(ds)
+        self.assertNotIn(rules.WHOLE_SHEET, w)
+        self.assertEqual((w[nocov.id]['code'], w[nocov.id]['by']), ('manual_calibration', 'import (t)'))
+        self.assertIn('5522A does not cover this point', w[nocov.id]['reason'])
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual(chk.errors(), [])
+        src = chk.sources[nocov.id]
+        self.assertFalse(src.has_source)
+        self.assertTrue(src.waived and 'waived' in src.text, src.text)
+        listed = [f for f in chk.findings if f.code == 'waived' and nocov.id in f.point_ids]
+        self.assertEqual(len(listed), 1)                                         # never silent: listed in the Sheet check
+        self.assertIn('5522A does not cover this point', listed[0].text)
+
+    def test_frequency_and_other_unresolvable_kinds_are_waived_per_point_even_with_a_standard(self):
+        ds = self.sheet()
+        plan = rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        fq = self.pts(ds)[11]                                                    # Frequency: the suite has no uncertainty calculation for it in the Builder yet
+        self.assertEqual(fq[0].kind, 'FREQ')
+        self.assertIn('no uncertainty calculation', plan.waived[fq[1].id])
+        self.assertEqual(ds.assignments[fq[1].id], 'MANUAL')
+        self.assertEqual(rules.check(ds, matcher=self.matcher, dry_run_on=False).errors(), [])
+
+    def test_none_waive_is_the_old_result_but_per_point(self):
+        ds = self.sheet()
+        self.assertTrue([f for f in rules.check(ds, matcher=self.matcher, dry_run_on=False).errors() if f.rule == 5])      # nothing chosen, nothing waived: blocked
+        plan = rules.apply_manual_standard(ds, '', who='import (t)', matcher=self.matcher)
+        self.assertEqual(plan.sourced, {})
+        self.assertTrue(all(v == 'MANUAL' for v in ds.assignments.values()))
+        should = {p.id for fn, p in ds.all_points() if rules.should_have(fn, p)}
+        self.assertEqual(set(rules.waivers(ds)), should)
+        self.assertNotIn(rules.WHOLE_SHEET, rules.waivers(ds))
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual(chk.errors(), [])
+        self.assertTrue(all(not chk.sources[pid].has_source and chk.sources[pid].waived for pid in should))
+        self.assertTrue(all('no standard was chosen' in rules.waivers(ds)[pid]['reason'] for pid in should))
+
+    def test_kinds_that_carry_no_uncertainty_by_design_need_no_waiver(self):
+        ds = self.sheet()
+        rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        by_design = [p.id for fn, p in ds.all_points() if fn.kind in ('TEMPF', 'COND', 'PCT', 'CHECK', 'DIODE', 'CONT')]
+        self.assertTrue(by_design)
+        w = rules.waivers(ds)
+        self.assertFalse([pid for pid in by_design if pid in w])
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertTrue(all(chk.sources[pid].level == 'info' and not chk.sources[pid].waived for pid in by_design))
+
+    def test_an_uncertainty_is_never_zero_or_invented(self):
+        ds = self.sheet()
+        plan = rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        self.assertTrue(plan.sourced and all(c.uncertainty and c.uncertainty > 0 for c in plan.sourced.values()))
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        for pid, src in chk.sources.items():
+            self.assertTrue(src.has_source or src.text.startswith('none: blank'), (pid, src.text))
+        # a standard that cannot source anything on the sheet puts a waiver on every point, never a made-up figure
+        ds2 = self.sheet()
+        plan2 = rules.apply_manual_standard(ds2, '5790B', matcher=self.matcher)
+        self.assertEqual(plan2.sourced, {})
+        self.assertTrue(all('5790B does not cover this point' in r or 'no uncertainty calculation' in r for r in plan2.waived.values()))
+        self.assertEqual(rules.check(ds2, matcher=self.matcher, dry_run_on=False).errors(), [])
+
+    def test_the_author_can_choose_a_different_standard_for_one_point(self):
+        ds = self.sheet()
+        rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        dcv = self.pts(ds)[2][1]
+        ds.assignments[dcv.id] = '5560A'                                          # the existing override (ds.assignments, the Builder's per-point picker)
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual(chk.sources[dcv.id].standard, '5560A')
+        self.assertIn('5560A standards sheet', chk.sources[dcv.id].text)
+        self.assertEqual(chk.sources[self.pts(ds)[3][1].id].standard, '5522A')       # the others keep the sheet's standard
+        self.assertEqual(rules.point_source(ds, self.pts(ds)[2][0].id, dcv.id, matcher=self.matcher).standard, '5560A')
+        self.assertEqual(chk.errors(), [])
+
+    def test_the_builders_picker_works_on_a_manual_sheet_and_says_nothing_is_automated(self):
+        ds = self.sheet()
+        rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        ed = M.GridModel(M.Storage(root=Path(tempfile.mkdtemp()) / "us", db_path=Path(tempfile.mkdtemp()) / "r.sqlite3"), ds, matcher_factory=lambda: self.matcher)
+        dcv = self.pts(ds)[2][1]
+        ed.run_match()
+        self.assertIn('Manual calibration', ed.match_summary_text())
+        self.assertNotIn('can be run automatically', ed.match_summary_text())
+        row = next(r for r in ed.match_rows() if r['point_id'] == dcv.id)
+        self.assertEqual((row['standard'], row['can_automate']), ('5522A', False))
+        self.assertIn('set by hand', row['automation'])
+        self.assertTrue(all(not c['can_automate'] for c in ed.candidate_rows(dcv.id)))
+        self.assertTrue(ed.set_assignment(dcv.id, '5560A').ok)
+        self.assertEqual(ed.ds.assignments[dcv.id], '5560A')
+        self.assertEqual(ed.sheet_check(compute=True).sources[dcv.id].standard, '5560A')
+
+    def test_removing_a_waiver_puts_the_error_back(self):
+        ds = self.sheet()
+        rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        pid = self.pts(ds)[6][1].id
+        rules.clear_waiver(ds, [pid])
+        chk = rules.check(ds, matcher=self.matcher, dry_run_on=False)
+        self.assertEqual([f.code for f in chk.errors()], ['no_uncertainty'])
+        self.assertIn(pid, chk.errors()[0].point_ids)
+
+    def test_a_second_apply_replaces_the_first(self):
+        ds = self.sheet()
+        rules.apply_manual_standard(ds, '', matcher=self.matcher)
+        rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        rules.apply_manual_standard(ds, '5560A', matcher=self.matcher)
+        self.assertEqual({v for v in ds.assignments.values()} - {'MANUAL'}, {'5560A'})
+        self.assertEqual(ds.options['manual_standard'], '5560A')
+        self.assertTrue(all('5522A' not in w['reason'] for w in rules.waivers(ds).values()))
+
+    def test_the_manager_list_counts_missing_uncertainties_for_a_manual_sheet(self):
+        ds = self.sheet()
+        self.assertTrue(rules.list_summary(ds, matcher=self.matcher)['missing'] > 0)
+        rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        s = rules.list_summary(ds, matcher=self.matcher)
+        self.assertEqual((s['missing'], s['runnable'], s['unverified']), (0, 0, 0))
+        self.assertEqual(s['points'], sum(1 for _f, p in ds.all_points() if p.enabled))
+
+    def test_best_fit_standard_is_preselected_from_the_sheets_kinds(self):
+        ds = self.sheet()
+        fits = mc.standard_fits(ds, matcher=self.matcher)
+        self.assertEqual(mc.best_standard(fits), '5522A')                         # handheld DMM functions: 5522A (then 5520A, 5560A) when the coverage ties
+        top = [f for f in fits if f.covered == fits[0].covered]
+        self.assertEqual([f.model for f in top][:3], ['5522A', '5520A', '5560A'])
+        self.assertTrue(all(f.covered == 0 for f in fits if f.model in ('5790B', '8563E', '3458A')))
+        # a sheet none of the standards can cover: nothing is pre-selected (None: waive)
+        diode = db.Datasheet('A', 'B', 'only diode')
+        fn = diode.add_function('DIODE', id='d')
+        fn.add_range('3', id='r')
+        db.add_point(fn, '0.5', range_id='r')
+        self.assertEqual(mc.best_standard(mc.standard_fits(diode, matcher=self.matcher)), '')
+
+    def test_non_manual_sheets_resolve_exactly_as_before(self):
+        ds = dcv_sheet()
+        chk = self.check(ds, dry_run_on=False)
+        pid = ds.functions[0].points[0].id
+        self.assertTrue(chk.sources[pid].has_source)
+        self.assertEqual(rules.list_summary(ds, matcher=self.matcher)['runnable'], 1)
+        src = rules.uncertainty_source(ds, ds.functions[0], ds.functions[0].points[0], None, manual_sheet=False)
+        self.assertIn('no standard selected', src.text)
 
 
 if __name__ == '__main__':

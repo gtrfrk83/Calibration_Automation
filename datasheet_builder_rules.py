@@ -10,6 +10,7 @@
     rules.blocking_problems(ds) -> [DsProblem ...] the error findings, for datasheet_builder.save(): a sheet with one is saved as a draft, not 'ready'
     rules.make_check_row(ds, function_id, point_id)  -> moves a point whose unit does not fit into a flagged pass / fail section (rule 3 fix)
     rules.manual_entry_for(ds, finding)              -> the rule 1 fix: those points use the operator's own standard (ds.assignments[pid] = 'MANUAL')
+    rules.plan_manual_standard(ds, std) / rules.apply_manual_standard(ds, std)   -> a MANUAL sheet's uncertainty from the standard the author chose (.MDD import); the rest waived per point
 
 THE RULES (what each function does):
   1  COVERAGE      from the standards matcher (datasheet_builder_match): a point no standard sheet covers is a WARNING that offers manual entry; a point the author
@@ -402,6 +403,100 @@ def manual_entry_for(ds, finding):
     return n
 
 
+# ============================================================================================================== manual calibrations: the standard of the uncertainty
+MANUAL_WAIVER = 'manual_calibration'
+STANDARD_KEY = 'manual_standard'                  # ds.options[STANDARD_KEY] = the default standard chosen for a manual sheet ('' = none: the uncertainty is waived)
+
+
+@dataclass
+class ManualStandardPlan:
+    """What choosing `standard` for a manual sheet does, point by point (nothing is changed by building it)."""
+    standard: str = ''
+    sourced: dict = field(default_factory=dict)        # point id -> the matcher Candidate whose uncertainty (the standard's own spec row, k = 2, rounded up) the point carries
+    waived: dict = field(default_factory=dict)         # point id -> the reason of its per-point 'manual_calibration' waiver
+    by_design: int = 0                                 # points of kinds that carry no uncertainty by design (diode, continuity, CHECK, COND, PCT, TEMPF ...): no waiver needed
+    points: int = 0
+
+    def counts(self):
+        return dict(points=self.points, sourced=len(self.sourced), waived=len(self.waived), by_design=self.by_design)
+
+
+class StandardLookup:
+    """The candidates of every loaded standard for the points of a sheet, worked out once per point (the .MDD preview asks about several standards in turn).  Read only."""
+
+    def __init__(self, ds, period=None, matcher=None):
+        self.ds, self.period, self.matcher = ds, period or ds.default_period, matcher
+        self._cache = {}
+        self.error = ''
+
+    def candidates(self, fn, p):
+        """{standard model: Candidate} for point p ({} when the standards cannot be loaded; `error` says why)."""
+        if p.id not in self._cache:
+            try:
+                if self.matcher is None:
+                    import datasheet_builder_match as dm
+                    self.matcher = dm.Matcher()
+                self._cache[p.id] = {c.standard: c for c in self.matcher.point_candidates(self.ds, fn, p, self.period)}
+            except Exception as exc:
+                self.error = f'{type(exc).__name__}: {exc}'
+                self._cache[p.id] = {}
+        return self._cache[p.id]
+
+
+def gives_uncertainty(cand):
+    """A matcher Candidate whose standard covers the point AND gives a usable (positive) uncertainty - the test of rule 5 (uncertainty_source)."""
+    return cand is not None and cand.covered and cand.uncertainty is not None and cand.uncertainty > 0
+
+
+def plan_manual_standard(ds, standard, period=None, matcher=None, lookup=None):
+    """Work out, for each enabled point of `ds`, whether `standard` ('' = none: waive) gives it an uncertainty: the same candidates as an automated sheet (the standard's own
+    specification row for the point, k = 2, rounded up, never below the lab CMC).  Points the standard does not cover, kinds the suite has no uncertainty calculation for
+    (FREQ, PERIOD ...) and everything when no standard is chosen are WAIVED with the reason; kinds that carry no uncertainty by design are only counted.  Never raises."""
+    lookup = lookup or StandardLookup(ds, period, matcher)
+    plan = ManualStandardPlan(standard=standard or '')
+    for fn, p in ds.all_points():
+        if not p.enabled:
+            continue
+        plan.points += 1
+        if _no_uncertainty_kind(fn):
+            plan.by_design += 1
+            continue
+        if not standard:
+            plan.waived[p.id] = 'manual calibration: no standard was chosen for the uncertainty (None: waive)'
+        elif fn.kind not in RESOLVABLE_KINDS:
+            plan.waived[p.id] = f'manual calibration: the suite has no uncertainty calculation for {fn.name} yet'
+        else:
+            cand = lookup.candidates(fn, p).get(standard)
+            if cand is None:
+                plan.waived[p.id] = f'manual calibration: {standard} could not be looked up' + (f' ({lookup.error})' if lookup.error else ' (not a known standard)')
+            elif gives_uncertainty(cand):
+                plan.sourced[p.id] = cand
+            else:
+                plan.waived[p.id] = (f'manual calibration: {standard} does not cover this point' + (f' ({cand.message})' if cand.message else '')
+                                     if not cand.covered else f'manual calibration: the {standard} sheet gives no usable uncertainty here')
+    return plan
+
+
+def apply_manual_standard(ds, standard, who='', period=None, matcher=None, plan=None, lookup=None):
+    """Make `standard` the uncertainty standard of the manual sheet `ds` (the owner's design for a .MDD import).  Points it covers get it as the PERSON'S OVERRIDE in
+    ds.assignments (so the sheet check, the run window and the report resolve their uncertainty through the matcher like an automated sheet); every other point that should
+    carry an uncertainty gets its own recorded waiver 'manual_calibration' with the reason (never a silent blank, never a whole-sheet waiver); ds.options['manual_standard']
+    keeps the choice.  An earlier whole-sheet or per-point manual_calibration waiver is replaced.  Returns the ManualStandardPlan."""
+    plan = plan or plan_manual_standard(ds, standard, period, matcher, lookup)
+    ids = [p.id for _f, p in ds.all_points()]
+    old = waivers(ds)
+    clear_waiver(ds, [k for k in [WHOLE_SHEET] + ids if (old.get(k) or {}).get('code') == MANUAL_WAIVER])
+    for fn, p in ds.all_points():
+        ds.assignments[p.id] = plan.standard if p.id in plan.sourced else 'MANUAL'
+    by_reason = {}
+    for pid, reason in plan.waived.items():
+        by_reason.setdefault(reason, []).append(pid)
+    for reason, pids in by_reason.items():
+        set_waiver(ds, pids, MANUAL_WAIVER, reason, who=who)
+    ds.options[STANDARD_KEY] = plan.standard
+    return plan
+
+
 # ============================================================================================================== rules 1 and 5 (from the matcher)
 def _find(ds, pid):
     for fn, p in ds.all_points():
@@ -517,8 +612,9 @@ def uncertainty_source(ds, fn, p, a, manual_sheet=False, pending=False):
         if w:
             return UncertaintySource(p.id, f'none: blank, waived ({waiver_text(w)}; {why})', False, INFO, std, True, waiver_text(w))
         return UncertaintySource(p.id, f'none: blank ({why})', False, ERROR, std, True)
-    if manual_sheet:
-        why = 'manual calibration: nothing is sourced, so no standard gives an uncertainty'
+    chosen = ds.assignments.get(p.id) if manual_sheet else None
+    if manual_sheet and (a.status == 'manual' if a is not None else chosen in (None, '', 'MANUAL')):      # a manual sheet's point WITHOUT a chosen standard (one with a standard is resolved below, as on an automated sheet)
+        why = 'manual calibration: no standard was chosen for this point, so no standard gives an uncertainty'
     elif a is None and pending:                                     # the sheet's own problems come first; they already block publishing
         return UncertaintySource(p.id, 'none: blank (not worked out yet: fix the sheet\'s problems first)', False, INFO, '', True)
     elif a is None:
@@ -526,7 +622,8 @@ def uncertainty_source(ds, fn, p, a, manual_sheet=False, pending=False):
     elif a.status == 'manual':
         why = 'no standard selected: set by hand, no standards sheet is used'
     elif a.status == 'uncovered':
-        why = 'no standards sheet covers this point'
+        named = chosen
+        why = (f'{named} does not cover this point' + (f' ({a.message})' if a.message else '')) if named not in (None, '', 'MANUAL') else 'no standards sheet covers this point'
     else:
         cand = next((c for c in a.candidates if c.standard == a.standard and c.covered), None)
         if a.uncertainty is None or not a.uncertainty > 0:
@@ -810,14 +907,30 @@ def unverified_findings(ds, uses, from_dry):
 
 
 # ============================================================================================================== the whole check
-def _match(ds, period, matcher, match):
+def _match(ds, period, matcher, match, overrides=None):
     if match is not None:
         return match, ''
     try:
         import datasheet_builder_match as dm
-        return (matcher or dm.Matcher()).match(ds, period), ''
+        return (matcher or dm.Matcher()).match(ds, period, overrides), ''
     except Exception as exc:
         return None, f'the standards could not be loaded or matched ({type(exc).__name__}: {exc})'
+
+
+def manual_standards(ds):
+    """{point id: standard model} of the enabled points of a MANUAL sheet that name a real standard (anything else - '', 'MANUAL', no entry - is 'the technician's own')."""
+    return {p.id: ds.assignments[p.id] for _f, p in ds.all_points() if p.enabled and ds.assignments.get(p.id) not in (None, '', 'MANUAL')}
+
+
+def match_manual(ds, period, matcher, match):
+    """The standards matcher for a manual sheet: ONLY the points that name a standard are looked up there (their value is that standard's own spec row); every other point is
+    'MANUAL' (the matcher would otherwise pick the best standard by itself, which a manual calibration never does).  (None, '') when no point names a standard."""
+    if match is not None:
+        return match, ''
+    if not manual_standards(ds):
+        return None, ''
+    ov = {p.id: (ds.assignments.get(p.id) or 'MANUAL') for _f, p in ds.all_points() if p.enabled}
+    return _match(ds, period, matcher, None, overrides=ov)
 
 
 def check(ds, period=None, matcher=None, match=None, dry_run_on=True, runner=None):
@@ -827,8 +940,8 @@ def check(ds, period=None, matcher=None, match=None, dry_run_on=True, runner=Non
     manual_sheet = bool(ds.options.get('manual_entry'))
     chk.findings += unit_findings(ds)                                                            # 3
     bad = db.errors(db.validate(ds))
-    if manual_sheet:                                                                             # nothing is sourced: no standard is looked for
-        res, why = None, ''
+    if manual_sheet:                                                                             # nothing is sourced; only the standard the author chose for the uncertainty is looked at
+        res, why = (None, 'the sheet has problems to fix first') if bad else match_manual(ds, period, matcher, match)
     else:
         res, why = (None, 'the sheet has problems to fix first') if bad else _match(ds, period, matcher, match)
     if why and not bad:
@@ -872,8 +985,14 @@ def point_source(ds, function_id, point_id, matcher=None, period=None):
     if p is None:
         return None
     manual_sheet = bool(ds.options.get('manual_entry'))
-    if manual_sheet or _no_uncertainty_kind(fn) or fn.kind not in RESOLVABLE_KINDS:
+    if _no_uncertainty_kind(fn) or fn.kind not in RESOLVABLE_KINDS:
         return uncertainty_source(ds, fn, p, None, manual_sheet)
+    if manual_sheet:                                              # a manual sheet's point with a chosen standard is resolved like an automated one
+        std = ds.assignments.get(p.id)
+        if std in (None, '', 'MANUAL'):
+            return uncertainty_source(ds, fn, p, None, True)
+        res, _why = _match(_one_point(ds, fn, p), period or ds.default_period, matcher, None, overrides={p.id: std})
+        return uncertainty_source(ds, fn, p, res.assignments.get(p.id) if res is not None else None, True)
     res, _why = _match(_one_point(ds, fn, p), period or ds.default_period, matcher, None)
     return uncertainty_source(ds, fn, p, res.assignments.get(p.id) if res is not None else None)
 
@@ -889,11 +1008,16 @@ def _one_point(ds, fn, p):
 
 def list_summary(ds, matcher=None, match=None):
     """What the Manager's list needs without the dry run (fast, no tkinter): dict(points, runnable, unverified, by_hand, uncovered) from the matcher, or None."""
+    manual = bool(ds.options.get('manual_entry'))
+    if manual:                                                    # nothing is run by the suite; the uncertainty comes from the standard the author chose (if any)
+        res, _why = match_manual(ds, ds.default_period, matcher, match)
+        n = sum(p.enabled for _f, p in ds.all_points())
+        missing = sum(uncertainty_source(ds, fn, p, res.assignments.get(p.id) if res is not None else None, True).level == ERROR for fn, p in ds.all_points() if p.enabled)
+        return dict(missing=missing, points=n, runnable=0, unverified=0, by_hand=n, uncovered=0)
     res, _why = _match(ds, ds.default_period, matcher, match)
     if res is None:
         return None
     pts = [a for a in res.assignments.values()]
-    manual = bool(ds.options.get('manual_entry'))
     missing = sum(uncertainty_source(ds, fn, p, res.assignments.get(p.id), manual).level == ERROR for fn, p in ds.all_points() if p.enabled)
     return dict(missing=missing, points=len(pts), runnable=sum(a.can_automate for a in pts), unverified=sum(a.status == 'assigned' and a.automation == 'unverified' for a in pts),
                 by_hand=sum(a.status == 'manual' for a in pts), uncovered=sum(a.status == 'uncovered' for a in pts))

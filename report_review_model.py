@@ -542,10 +542,35 @@ def _spec_point_spec(app, i, p, row) -> PointSpec:
                      low, high, p['unit'], std, locked, printed)
 
 
+def _manual_standard_spec(app, i, p, row, base, printed):
+    """A point of a MANUAL calibration whose Uncertainty is a standard's (dsb_runtime.DsbApp.manual_values: the standard the author chose for the sheet): it is reviewed like
+    a calibrator row - the standard can be changed here, and the figures follow the same functions.  None for every other point."""
+    get = getattr(app, 'manual_values', None)
+    run = p.get('run') or {}
+    if get is None or not printed.get('Uncertainty') or run.get('nominal') is None:
+        return None
+    try:
+        mv = get(p, app.standard_of(p, app._record_for(p)))
+    except Exception:
+        return None
+    if not mv:
+        return None
+    factor = Decimal(str(p['factor']))
+    clean = lambda d: float(f'{float(d * factor):.9g}')                # noqa: E731  (as handheld_dmm.certificate_fields)
+    q = dict(kind='OHM2' if run.get('kind') in ('OHM2', 'OHM4') else run.get('kind'), nominal=run['nominal'], frequency=run.get('frequency'),
+             unit=run.get('unit') or p['base_unit'], range=None)
+    return PointSpec(i, base['step'], base['section'], base['description'], base['nominal'], q, dict(q), clean(Decimal(p['low'])), clean(Decimal(p['high'])),
+                     p['base_unit'], mv['unc_standard'], '', printed)
+
+
 def _handheld_spec(app, i, p, row) -> PointSpec:
     printed = {k: row.get(k, '') for k in ('Uncertainty', 'TAR', 'TUR')}
     base = dict(step=_clean_text(p.get('id', i + 1)), section=row.get('Section', ''), description=row.get('Description', ''), nominal=row.get('Nominal', ''))
     plain = dict(kind=p.get('kind', ''), nominal=0, unit=p.get('base_unit', ''), frequency=None, range=None, source='none')
+    if p.get('test') == 'numeric' and not app.has_uncertainty(p):
+        spec = _manual_standard_spec(app, i, p, row, base, printed)
+        if spec is not None:
+            return spec
     if p.get('test') != 'numeric' or not app.has_uncertainty(p):
         reason = 'Not a numeric point' if p.get('test') != 'numeric' else 'No uncertainty for this point'
         if p.get('test') == 'beeper':

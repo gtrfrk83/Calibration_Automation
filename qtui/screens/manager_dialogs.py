@@ -8,7 +8,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QRadioButton, QScrollArea,
+from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QRadioButton, QScrollArea,
                                QVBoxLayout, QWidget)
 
 import ui_theme_core as core
@@ -428,6 +428,8 @@ class MddPreview:
         self.on_created, self.status = on_created, status
         self.registry, self.spec_root, self.archive_to = registry, spec_root, archive_to
         self.who = _who
+        self.std = None                                     # mdd_convert.StandardChoice of the current conversion (the 'Standard for the uncertainty' box)
+        self.unc_rows = {}
         h = conv.source['header']
         dlg = self.dialog = ModalDialog(parent, 'Import Mudcats datasheet as a manual calibration - review before creating', width=1000, modal=False)
         dlg.setMinimumHeight(760)
@@ -449,13 +451,24 @@ class MddPreview:
         from qtui.widgets import GhostButton
         names.addWidget(GhostButton('Update preview', on_click=self.rebuild))
         dlg.body.addLayout(names)
+        stdrow = QHBoxLayout()
+        stdrow.addWidget(label('Standard for the uncertainty'))
+        self.std_box = QComboBox()
+        self.std_box.setMinimumWidth(420)
+        self.std_box.currentIndexChanged.connect(lambda _i: self.show_uncertainty())
+        stdrow.addWidget(self.std_box, 1)
+        dlg.body.addLayout(stdrow)
+        self.std_text = label('', 'sub')
+        self.std_text.setWordWrap(True)
+        dlg.body.addWidget(self.std_text)
         self.existing = QVBoxLayout()
         dlg.body.addLayout(self.existing)
         self.group = QButtonGroup(dlg)
         self.grid = DataTable([Column('no', 'No.', 50, align='right'), Column('section', 'Section', 170), Column('nominal', 'Nominal (as printed)', 230),
                                Column('unit', 'Unit', 70), Column('low', 'Low', 80), Column('high', 'High', 80),
                                Column('result', 'Result', 110, getter=lambda r: self.STATUS_TEXT[r['status']]),
-                               Column('message', 'Why / note', 420, stretch=True)], [], row_tone=lambda r: {'skipped': 'fail', 'uncertain': 'warn'}.get(r['status']),
+                               Column('unc', 'Uncertainty', 150, getter=lambda r: self.unc_rows.get(r['no'], '') if r['status'] != 'skipped' else ''),
+                               Column('message', 'Why / note', 360, stretch=True)], [], row_tone=lambda r: {'skipped': 'fail', 'uncertain': 'warn'}.get(r['status']),
                               row_key=lambda r: r['no'], multi=False)
         self.grid.setMinimumHeight(380)
         dlg.body.addWidget(self.grid, 1)
@@ -487,7 +500,15 @@ class MddPreview:
         if c.skipped:
             self.pill_texts.append(f'{c.skipped} NOT converted')
             self.pills.addWidget(Badge(self.pill_texts[-1], 'bad'))
-        self.grid.set_rows(list(c.rows), keep_selection=False)
+        if self.std is None or self.std.sheet is not c.sheet:                 # a new conversion: the choices are worked out again, the person's choice is kept when it still exists
+            prior = self.selected_standard() if self.std is not None else None
+            self.std = mc.StandardChoice(c.sheet)
+            self.std_box.blockSignals(True)
+            self.std_box.clear()
+            self.std_box.addItems(self.std.labels)
+            self.std_box.setCurrentIndex(self.std.models.index(prior if prior in self.std.models else self.std.default))
+            self.std_box.blockSignals(False)
+        self.show_uncertainty()
         self._clear(self.existing)
         for b in list(self.group.buttons()):
             self.group.removeButton(b)
@@ -510,6 +531,18 @@ class MddPreview:
             self.existing.addWidget(Banner('  '.join(i.message for i in gen), 'warn'))
         self.create_btn.setEnabled(True)
 
+    def selected_standard(self):
+        """The model chosen in 'Standard for the uncertainty' ('' = None: waive)."""
+        if self.std is None or self.std_box.currentIndex() < 0:
+            return ''
+        return self.std.models[self.std_box.currentIndex()]
+
+    def show_uncertainty(self):
+        """The table's Uncertainty column and the sentence under the box for the chosen standard (nothing is saved)."""
+        _plan, self.unc_rows, text = self.std.preview(self.selected_standard())
+        self.std_text.setText(text)
+        self.grid.set_rows(list(self.conv.rows), keep_selection=False)
+
     def rebuild(self):
         import mdd_convert as mc
         try:
@@ -527,14 +560,15 @@ class MddPreview:
             if self.found and choice == 'version' and self.radio_version is not None:
                 self.radio_version.setChecked(True)
         replace = self.found[0].uid if (self.found and self.radio_version is not None and self.radio_version.isChecked()) else None
-        res = mc.register(self.conv, self.parsed, self.who(), replace_uid=replace, registry=self.registry, root=self.spec_root, archive_to=self.archive_to)
+        res = mc.register(self.conv, self.parsed, self.who(), replace_uid=replace, registry=self.registry, root=self.spec_root, archive_to=self.archive_to,
+                          standard=self.selected_standard())
         if not res.ok:
             message(self.dialog, 'error', 'Import failed', res.message or 'The procedure could not be created.')
             return False
         self.dialog.result_key = 'create'
         self.dialog.accept()
         msg = (f'Created the manual calibration "{self.conv.sheet.title}" (version {res.version}): {self.conv.converted} of {self.conv.total} test points. '
-               f'{self.conv.skipped} not converted, {self.conv.uncertain} to check. It is listed under Manual Calibrations.')
+               f'{self.conv.skipped} not converted, {self.conv.uncertain} to check. {self.std.preview(self.selected_standard())[2]} It is listed under Manual Calibrations.')
         if self.status is not None:
             self.status(msg)
         if self.on_created:

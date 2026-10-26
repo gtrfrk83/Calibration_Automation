@@ -1584,12 +1584,18 @@ class EditorModel:
         self.match_result, self.match_rev, self.match_period = res, self._rev, period
         return Outcome(True, self.match_summary_text(), res)
 
+    def _manual_sheet(self):
+        """A manual calibration: nothing is run by the suite; a standard chosen for a point only gives its uncertainty (the technician uses it by hand)."""
+        return bool(self.ds.options.get('manual_entry'))
+
     def _cap_text(self, a):
         import datasheet_builder_match as dm
         if a.status == 'manual':
             return 'set by hand (your own standard)'
         if a.status != 'assigned':
             return 'cannot automate (no standard)'
+        if self._manual_sheet():
+            return 'set by hand (manual calibration): its uncertainty is this standard\'s'
         cap = dm.automation_status(a.standard, a.kind, a.direction)
         return dm.automation_text(cap, a.kind)
 
@@ -1606,10 +1612,11 @@ class EditorModel:
             if a is None:
                 continue
             cap = self._cap_text(a)
-            level = 'bad' if a.status == 'uncovered' else 'ok' if a.can_automate else 'warn'
+            manual_std = self._manual_sheet() and a.status == 'assigned'
+            level = 'bad' if a.status == 'uncovered' else 'ok' if (a.can_automate or manual_std) else 'warn'
             row = dict(point_id=p.id, function_id=f.id, function=f.name, point=self.point_text(f, p), status=a.status, standard=a.standard or ('MANUAL' if a.status == 'manual' else ''),
                        mode=a.mode, overridden=a.overridden, tar=tartur.format_ratio(a.tar), tur=tartur.format_ratio(a.tur), automation=cap, automation_status=a.automation,
-                       can_automate=a.can_automate, reason=a.reason, message=a.message if a.status == 'uncovered' else a.automation_note, alternative=a.automatable_alternative, level=level)
+                       can_automate=a.can_automate and not manual_std, reason=a.reason, message=a.message if a.status == 'uncovered' else a.automation_note, alternative=a.automatable_alternative, level=level)
             if filter == 'uncovered' and a.status != 'uncovered':
                 continue
             if filter == 'cannot' and (a.status == 'uncovered' or a.can_automate):
@@ -1639,6 +1646,9 @@ class EditorModel:
         t = self.match_summary()['total']
         if not t['points']:
             return 'No enabled points to match.'
+        if self._manual_sheet():
+            return (f"Manual calibration: {t['assigned']} of {t['points']} points take their uncertainty from the standard chosen for them; nothing is run automatically"
+                    + (f"; {t['uncovered']} are not covered by the standard chosen" if t['uncovered'] else '') + '.')
         s = f"{t['assigned']} of {t['points']} points have a standard; {t['automatable']} can be run automatically"
         if t['unverified']:
             s += f" ({t['unverified']} with commands not yet verified on hardware)"
@@ -1658,8 +1668,10 @@ class EditorModel:
         rows = []
         for c in a.candidates:
             cap = dm.automation_status(c.standard, a.kind, a.direction)
-            rows.append(dict(standard=c.standard, covered=c.covered, tur=tartur.format_ratio(c.tur), tar=tartur.format_ratio(c.tar), automation=dm.automation_text(cap, a.kind),
-                             can_automate=cap.can_automate, reason=c.reason, message=c.message if not c.covered else '', chosen=c.standard == a.standard,
+            hand = self._manual_sheet()
+            rows.append(dict(standard=c.standard, covered=c.covered, tur=tartur.format_ratio(c.tur), tar=tartur.format_ratio(c.tar),
+                             automation='set by hand (manual calibration)' if hand else dm.automation_text(cap, a.kind),
+                             can_automate=cap.can_automate and not hand, reason=c.reason, message=c.message if not c.covered else '', chosen=c.standard == a.standard,
                              row=c.row))
         return rows
 

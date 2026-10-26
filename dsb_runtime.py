@@ -26,6 +26,11 @@ routed, no calibrator is offered or connected, and the setup / function / high-v
 point grid takes the typed readings directly (manual_grid.py: Enter = save and next point) on top of the ordinary reading window of Run All Pending.  The same
 grid entry is offered for a datasheet whose every point the matcher finds no standard for (all hand-set).
 
+A manual calibration can carry the uncertainty of the STANDARD its author chose (.MDD import: 'Standard for the uncertainty'; ds.assignments[pid] = that standard, a recorded per-point
+waiver 'manual_calibration' for every other point that should carry one): with_plan resolves it through the matcher like an automated sheet and keeps it in the point's
+assignment as `unc_standard` / `uncertainty` / `tar` / `tur` (status stays 'manual', standard '' - so routing, prompts, pass / fail and the saved readings are exactly as before);
+the report prints it in the Uncertainty column, names the standard on the row and in the header.  A DEMO run never prints one.
+
 Nothing in the datasheet, the matcher, the engine's limit tables or pass / fail logic is changed here.  Demo mode is the engine's demo mode: no commands,
 synthetic readings that are labelled as demo everywhere, reports marked as demo data.
 """
@@ -96,13 +101,15 @@ def with_plan(spec, db_path=None) -> dict:
     head = spec['dsb']
     if head.get('plan'):
         return spec
-    if (spec.get('options') or {}).get('manual_entry'):          # a manual calibration: no standard is looked for; every point is typed
+    if (spec.get('options') or {}).get('manual_entry'):          # a manual calibration: no standard is driven; every point is typed
         new = copy.deepcopy(spec)
         plan = {}
+        chosen = manual_uncertainties(spec, db_path)
         for step in new['steps']:
             if 'dsb' in step:
                 a = dict(point_id=step['dsb'].get('point_id'), status='manual', mode='manual', standard='', automation='manual',
                          message='manual calibration: the technician types the reading')
+                a.update(chosen.get(a['point_id'], {}))                  # the uncertainty of the standard the author chose for this point (never changes status / standard)
                 step['dsb']['assignment'] = plan[a['point_id']] = a
         new['dsb']['plan'] = dict(period=head.get('period'), assignments=plan, uncovered=[], summary={}, notes=['manual calibration'])
         return new
@@ -120,6 +127,26 @@ def with_plan(spec, db_path=None) -> dict:
             step['dsb']['assignment'] = a.to_dict()
     new['dsb']['plan'] = res.to_dict()
     return new
+
+
+def manual_uncertainties(spec, db_path=None) -> dict:
+    """{point id: dict(unc_standard, uncertainty, tar, tur, tolerance, unc_row)} for the points of a MANUAL spec whose datasheet (spec['dsb']['datasheet']) names a standard for the
+    uncertainty (ds.assignments[pid]) that covers the point: the matcher's own figure, the standard's specification row, k = 2, rounded up (as for an automated sheet).  {} when no
+    point names one or the standards cannot be loaded (the points then print no uncertainty, as before).  Read only."""
+    import datasheet_builder_rules as dsr
+    ds = dsp.datasheet_from_spec(spec)
+    if ds is None or not dsr.manual_standards(ds):
+        return {}
+    try:
+        res, _why = dsr.match_manual(ds, spec['dsb'].get('period'), dm.Matcher(db_path), None)
+    except Exception:
+        return {}
+    out = {}
+    for pid, a in ((res.assignments if res is not None else {}).items()):
+        if a.status == 'assigned' and a.uncertainty and a.uncertainty > 0:
+            cand = next((c for c in a.candidates if c.standard == a.standard and c.covered), None)
+            out[pid] = dict(unc_standard=a.standard, uncertainty=a.uncertainty, tar=a.tar, tur=a.tur, tolerance=a.tolerance, unc_row=cand.row if cand is not None else '')
+    return out
 
 
 def spec_for_period(spec, period) -> dict:
@@ -1611,13 +1638,24 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             if r.get('reading') is not None:
                 row['As Found'] = r.get('entered', '')
         if not row.get('Uncertainty'):
-            a = self.plan_values(p, std)
+            a = self.plan_values(p, std) or self.manual_values(p, std)
             if a and a.get('uncertainty'):
                 import uncertainty
                 row['Uncertainty'] = uncertainty.format_value(a['uncertainty'], run.get('unit') or p.get('base_unit'))
-        if not (self.manual_entry and std in ('', 'manual')):         # a manual calibration's rows carry no '[manual]' tag (all of it is by hand)
+        manual_std = (self.manual_values(p, std) or {}).get('unc_standard') if row.get('Uncertainty') else None
+        if manual_std:                                                # a manual calibration's row says which standard its uncertainty is from
+            row['Description'] = f'{row["Description"]}  [{manual_std}]'
+        elif not (self.manual_entry and std in ('', 'manual')):         # a manual calibration's rows carry no '[manual]' tag (all of it is by hand)
             row['Description'] = f'{row["Description"]}  [{std}]'
         return row
+
+    def manual_values(self, p, std):
+        """The snapshot of the standard whose uncertainty a MANUAL calibration's point carries (see manual_uncertainties), or None: not a manual calibration, a point the chosen
+        standard does not cover, a point with no standard chosen, or a DEMO reading (std 'demo': a demo report never prints a standard's uncertainty)."""
+        if not self.manual_entry or std != 'manual' or self.demo:
+            return None
+        a = (p.get('dsb') or {}).get('assignment') or {}
+        return a if a.get('unc_standard') and a.get('uncertainty') else None
 
     def plan_values(self, p, std):
         """The matcher's snapshot for the point (uncertainty, TAR, TUR) when the standard that DID the point is the one it was computed for and the limits
@@ -1639,6 +1677,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         if fields.get('TAR') or fields.get('TUR'):
             return fields
         a = self.plan_values(p, std)
+        if not a and self.manual_values(p, std) and self.period == (self.dsb.get('plan') or {}).get('period', self.dsb.get('period')):
+            a = self.manual_values(p, std)           # ratios only for the period the standard's figures were worked out for
         if not a:
             return dict(TAR='', TUR='')
         import tartur
@@ -1668,6 +1708,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
                   ('Limits applied', f'User-built datasheet, {label}'), ('Source', src['document'])]
         if shown:
             header.append(('Standards', shown))
+        unc_line = self.manual_uncertainty_line()
+        if unc_line:
+            header.append(('Uncertainty', unc_line))
         if used.get('manual') and not self.manual_entry:
             header.append(('By hand', f'{used["manual"]} point(s) set up / read by the operator ([manual])'))
         skipped = self.not_tested_sections()
@@ -1680,6 +1723,31 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         if self.demo:
             header.append(('Mode', 'DEMO - synthetic data, not calibration evidence'))
         return header
+
+    def manual_uncertainty_line(self):
+        """For a MANUAL calibration whose author chose a standard for the uncertainty: where the printed uncertainties come from, how many points carry one and how many show N/A
+        (a recorded 'manual_calibration' waiver in the procedure).  '' for every other run and for a DEMO run."""
+        if not self.manual_entry or self.demo or 'demo' in self.used_standards():
+            return ''
+        import datasheet_builder_rules as dsr
+        have, stds, without = 0, {}, 0
+        for p in self.points:
+            a = (p.get('dsb') or {}).get('assignment') or {}
+            if a.get('unc_standard') and a.get('uncertainty'):
+                have += 1
+                stds[a['unc_standard']] = stds.get(a['unc_standard'], 0) + 1
+            elif (p.get('dsb') or {}).get('kind') in dsr.SHOULD_HAVE_KINDS:
+                without += 1
+        if not have:
+            return ''
+        names = ', '.join(f'{m} ({n})' for m, n in sorted(stds.items()))
+        return (f'{names} specification, k = 2, rounded up, not below the laboratory CMC'
+                + (f'; {without} point(s) show N/A (waived in the procedure)' if without else ''))
+
+    def source_note(self):
+        note = super().source_note()
+        line = self.manual_uncertainty_line()
+        return ' '.join(x for x in (note, f'Uncertainty {line}.' if line else '') if x)
 
     def report_details(self, details):
         """The 'standards used' list gains the standards that actually did the points (their serial numbers and due dates are the technician's)."""

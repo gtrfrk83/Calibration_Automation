@@ -563,6 +563,21 @@ class Matcher:
             c.rel_unc = c.uncertainty / abs(float(p.nominal))
         return c
 
+    def point_candidates(self, ds, fn, p, period):
+        """[Candidate] for point p of function fn: every loaded standard, covered or not (unranked).  Read only; match() and the .MDD import's best-fit
+        standard use the same call."""
+        try:
+            lim = fn.limit_for(p, period, ds) if not KINDS[fn.kind].get('passfail') else None
+        except db.DsError:
+            lim = None
+        try:
+            st = stimulus(fn, p)
+            if st.error is None and st.kind in ('ACV', 'ACI', 'FLAT') and fn.direction == 'measure' and st.frequency is None and fn.kind in ('ACV', 'ACI'):
+                st.error = ('bad_point', 'AC point without a frequency')
+        except Exception as e:                                # never raise on one bad point
+            st = Stim(fn.kind, abs(p.nominal), error=('bad_point', f'cannot work out the stimulus: {e}'))
+        return [self.candidate(s, fn, p, st, lim) for s in self.standards]
+
     def match(self, ds, period=None, overrides=None):
         period = period or ds.default_period
         res = MatchResult(period=period, standards=[s.model for s in self.standards])
@@ -573,17 +588,7 @@ class Matcher:
                 continue
             a = Assignment(p.id, fn.id, fn.kind, fn.direction)
             res.assignments[p.id] = a
-            try:
-                lim = fn.limit_for(p, period, ds) if not KINDS[fn.kind].get('passfail') else None
-            except db.DsError:
-                lim = None
-            try:
-                st = stimulus(fn, p)
-                if st.error is None and st.kind in ('ACV', 'ACI', 'FLAT') and fn.direction == 'measure' and st.frequency is None and fn.kind in ('ACV', 'ACI'):
-                    st.error = ('bad_point', 'AC point without a frequency')
-            except Exception as e:                                # never raise on one bad point
-                st = Stim(fn.kind, abs(p.nominal), error=('bad_point', f'cannot work out the stimulus: {e}'))
-            cands = [self.candidate(s, fn, p, st, lim) for s in self.standards]
+            cands = self.point_candidates(ds, fn, p, period)
             ranked = _rank(cands, fn.kind)
             a.candidates = ranked + [c for c in cands if not c.covered]
             choice, forced = None, ov.get(p.id)
