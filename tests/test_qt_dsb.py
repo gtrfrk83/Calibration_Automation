@@ -82,9 +82,11 @@ class QtDsbCase(unittest.TestCase):
 
     # ---- helpers (the same names as the Tk widget tests)
     def new_window(self, handheld=False):
-        with mock.patch.object(D, 'ask_new_sheet', return_value=handheld):
+        with mock.patch.object(D, 'ask_new_sheet', side_effect=AssertionError('New asks nothing: templates come from the drop-down')):
             win = self.panel.new()
         self.assertIsInstance(win, dsb_editor.GridEditorWindow)
+        if handheld:
+            win.template_chosen(1)                                       # the Templates drop-down at the bottom of the editor
         self.windows.append(win)
         win.resize(1400, 850)                                           # the offscreen screen is small: a wide window keeps the inspector open
         win.show()
@@ -836,8 +838,24 @@ class RunAndLayoutTests(QtDsbCase):
         self.assertEqual(win.model.ds.functions, [])
         tpl = self.new_window(handheld=True)
         self.assertEqual(len(tpl.model.ds.functions), len(M.GridModel.HANDHELD_KINDS))
-        with mock.patch.object(D, 'ask_new_sheet', return_value=None):
-            self.assertIsNone(self.panel.new())                       # cancelled
+
+    def test_templates_drop_down_sits_right_of_delete_line_and_adds_the_template(self):
+        win = self.new_window()
+        box = win.template_box
+        self.assertEqual(box.itemText(0), dsb_editor.TEMPLATE_PROMPT)
+        self.assertEqual([box.itemText(i) for i in range(1, box.count())], [n for n, _ in M.GridModel.TEMPLATES])
+        self.assertGreater(box.geometry().left(), win.delete_b.geometry().right())          # to the right of the Delete line button
+        self.assertEqual(box.parentWidget(), win.delete_b.parentWidget())
+        box.setCurrentIndex(1)
+        win.template_chosen(1)
+        self.assertEqual(len(win.model.ds.functions), len(M.GridModel.HANDHELD_KINDS))
+        self.assertEqual(box.currentIndex(), 0)                                               # back to the prompt
+        win.template_chosen(1)                                                                # all there already: refused, nothing doubled
+        self.assertEqual(len(win.model.ds.functions), len(M.GridModel.HANDHELD_KINDS))
+        win.model.undo()
+        self.assertEqual(win.model.ds.functions, [])
+        win.template_chosen(0)                                                                # the prompt itself does nothing
+        self.assertEqual(win.model.ds.functions, [])
 
     def test_more_menu_add_handheld_functions(self):
         win = self.new_window()
@@ -1340,8 +1358,9 @@ class SameAsTkTests(unittest.TestCase):
             panel = D.DatasheetBuilderPanel(host, store, matcher_factory=lambda: matcher)
 
             def new(handheld):
-                with mock.patch.object(D, 'ask_new_sheet', return_value=handheld):
-                    win = panel.new()
+                win = panel.new()
+                if handheld:
+                    win.template_chosen(1)
                 windows.append(win)
                 return win
 

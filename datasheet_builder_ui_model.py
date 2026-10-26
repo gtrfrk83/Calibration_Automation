@@ -1809,8 +1809,7 @@ GRID_COLUMNS = (
 )
 # GRID_COLUMNS is the PRINTED datasheet (the template still has As Found / As Left / Out of Tol, then LOW LIMIT / HIGH LIMIT).  The on-screen grid shows only VIEW_COLUMNS: the blank
 # As Found / As Left / Out of Tol columns are not needed while building (view only; the row dicts still carry them, print_view() still prints them).
-VIEW_COLUMNS = (
-    dict(key='step', title='STEP NUM', width=90, edit=False, align='center'),
+VIEW_COLUMNS = (                       # no STEP NUM column on screen (owner, 2026-10-25): the printed datasheet keeps it (GRID_COLUMNS)
     dict(key='function', title='FUNCTION TESTED', width=270, edit=True, align='w'),
     dict(key='nominal', title='NOMINAL VALUE', width=240, edit=True, align='w'),
     dict(key='low', title='LOW LIMIT', width=160, edit=False, align='w'),
@@ -1840,7 +1839,7 @@ MULTI_MODES = (('span', 'Lo to High', 'n points spread evenly from Nominal Value
                ('units', 'n Units', 'A row every n units (in the Units of Measure), starting at Nominal Value.'),
                ('ppm', 'n ppm', 'A row every n ppm of the High value, starting at Nominal Value.'))
 UNIT_PREFIXES = {'V': ('µ', 'm', '', 'k'), 'A': ('µ', 'm', ''), 'ohm': ('m', '', 'k', 'M', 'G'), 'F': ('p', 'n', 'µ', 'm', ''), 'Hz': ('', 'k', 'M', 'G'),
-                 's': ('n', 'µ', 'm', '')}
+                 's': ('n', 'µ', 'm', ''), 'S': ('p', 'n', 'µ', 'm', '')}
 LOCK_MODES = (('edit', 'Edit Mode'), ('locked', 'Locked'))
 _NUMBER_ONLY = re.compile(r'^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$')
 _CODE_COL = {'no_spec': 'tol', 'expr_eval': 'tol', 'limit_inverted': 'tol', 'limit_value': 'tol', 'override_inverted': 'tol', 'spec_missing_period': 'tol',
@@ -2854,6 +2853,14 @@ class GridModel(CheckMixin, EditorModel):
         return res
 
     # ---- handheld multimeter template (a starting set of sections; the sheet itself still starts blank)
+    TEMPLATES = (('Handheld multimeter sections', 'DC / AC volts and current, ohms, continuity, capacitance, frequency, temperature and diode sections, empty.'),)
+
+    def add_template(self, name):
+        """Add the template called `name` (see TEMPLATES) to the sheet: one undo step.  Sections the sheet already has stay as they are."""
+        if name == self.TEMPLATES[0][0]:
+            return self.add_handheld_functions()
+        return Outcome(False, f'There is no template called "{name}".')
+
     HANDHELD_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'CONT', 'CAP', 'FREQ', 'TEMP', 'DIODE')
 
     def handheld_template(self):

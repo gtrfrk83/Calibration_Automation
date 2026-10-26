@@ -134,10 +134,7 @@ class DatasheetBuilderPanel(QWidget):
 
     # ---- actions
     def new(self):
-        handheld = ask_new_sheet(self.window())
-        if handheld is None:
-            return None
-        return self.open_editor(self.lst.new(handheld=handheld))
+        return self.open_editor(self.lst.new())            # a blank sheet at once; starting sections come from the Templates drop-down at the bottom of the editor
 
     def open_selected(self):
         uid = self._need()

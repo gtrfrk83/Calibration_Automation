@@ -26,6 +26,9 @@ INSPECTOR_W, INSPECTOR_NARROW_W, RAIL_W = 336, 290, 34
 NARROW_BELOW = 1250                      # window width (px) under which the inspector is the narrower one
 
 
+TEMPLATE_PROMPT = 'Add template...'
+
+
 class _UndoKeys(QObject):
     """Ctrl+Z / Ctrl+Y undo the SHEET even while a text box has the focus (as in the Tk build): the text box must not keep them for itself."""
 
@@ -246,6 +249,15 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         lay.addSpacing(8)
         self.delete_b = C.button('Delete line', self.delete_line, compact=True, tooltip='Delete the selected line (a heading deletes its whole section). Undo brings it back. Also Delete on the nominal cell, or right-click the line.')
         lay.addWidget(self.delete_b)
+        lay.addSpacing(8)
+        self.template_box = QComboBox()                # templates: a starting set of empty sections, added on demand (New no longer asks)
+        self.template_box.setToolTip('Add a template to this datasheet: empty sections to fill in. Sections the sheet already has stay as they are. Undo takes them out again.')
+        self.template_box.setMinimumWidth(190)
+        self.template_box.addItem(TEMPLATE_PROMPT)
+        for name, _tip in self.model.TEMPLATES:
+            self.template_box.addItem(name)
+        self.template_box.activated.connect(self.template_chosen)
+        lay.addWidget(self.template_box)
         lay.addStretch(1)
         self.grid.addWidget(foot, 3, 0)
 
@@ -560,6 +572,16 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
 
     def preview(self):
         return present(PreviewWindow(self))
+
+    def template_chosen(self, index=None):
+        """The Templates drop-down: add the chosen template's empty sections (no question: Undo takes them out again), then go back to the prompt."""
+        i = self.template_box.currentIndex() if index is None else index
+        name = self.template_box.itemText(i) if i > 0 else ''
+        self.template_box.setCurrentIndex(0)
+        if not name:
+            return None
+        res = self.model.add_template(name)
+        return self.changed(res)
 
     def add_handheld(self):
         """More > Add handheld functions...: the handheld multimeter sections this sheet does not have yet."""

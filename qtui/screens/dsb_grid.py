@@ -98,7 +98,7 @@ class SheetDelegate(CellDelegate):
 class _ShareSheet(QObject):
     """A wide sheet no longer becomes one huge FUNCTION TESTED column with the numbers squeezed at the right: the width beyond the columns' own widths is shared
     (the same idea as the Manager list), the function column keeping the largest part.  Narrower than that, the function column takes what is left, as before."""
-    WEIGHTS = (0.0, 0.0, 0.34, 0.30, 0.18, 0.18)             # '#', step, function, nominal, low, high
+    WEIGHTS = (0.0, 0.34, 0.30, 0.18, 0.18)                  # '#', function, nominal, low, high
 
     def __init__(self, grid):
         super().__init__(grid)
@@ -120,7 +120,7 @@ class _ShareSheet(QObject):
             for i, (w, k) in enumerate(zip(base, self.WEIGHTS)):
                 hh.resizeSection(i, int(w + extra * k))
             if vp < sum(base):                                # narrow: the function column gives way first (as the stretching column did)
-                hh.resizeSection(2, max(120, vp - (sum(base) - base[2])))
+                hh.resizeSection(1, max(120, vp - (sum(base) - base[1])))
         except RuntimeError:
             pass                                              # the grid went away
 
@@ -147,7 +147,7 @@ class SheetGrid(DataTable):
         hh.setMinimumSectionSize(40)
         self.verticalHeader().setDefaultSectionSize(SHEET_ROW_H)
         self.setAccessibleName('Datasheet test point sheet')
-        hh.setSectionResizeMode(2, hh.ResizeMode.Interactive)          # the function column is sized by _ShareSheet (it used to take every spare pixel)
+        hh.setSectionResizeMode(1, hh.ResizeMode.Interactive)          # the function column is sized by _ShareSheet (it used to take every spare pixel)
         self._share = _ShareSheet(self)
 
     # ---- showing the model
