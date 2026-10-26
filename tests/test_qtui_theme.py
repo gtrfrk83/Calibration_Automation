@@ -117,3 +117,52 @@ class ThemeTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@unittest.skipUnless(HAVE_QT, 'PySide6 is not installed')
+class TextScaleTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = app.create_app()
+
+    def tearDown(self):
+        theme.manager().set_text_scale(100)
+        theme.set_theme('dark')
+
+    def test_scale_resizes_type_and_controls_in_place(self):
+        m = theme.M
+        theme.manager().set_text_scale(150)
+        self.assertEqual((m.font_base, m.control_h, m.row_h), (round(13 * 1.5), 48, 51))
+        self.assertEqual(m.sm, 8)                                             # spacing is not scaled
+        self.assertIn(f'font-size: {m.font_base}px', self.app.styleSheet())   # the live style sheet follows
+        theme.manager().set_text_scale(100)
+        self.assertEqual((m.font_base, m.control_h), (13, 32))
+
+    def test_clamped_and_stepped(self):
+        self.assertEqual(theme.clamp_text_scale(10), 80)
+        self.assertEqual(theme.clamp_text_scale(999), 200)
+        self.assertEqual(theme.clamp_text_scale(112), 110)
+        self.assertEqual(theme.clamp_text_scale('junk'), 100)
+
+    def test_saved_per_person(self):
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(core.Path, 'home', return_value=Path(d)):
+            theme.manager().set_text_scale(130, save=True)
+            self.assertEqual(theme.saved_text_scale(), 130)
+        with mock.patch.dict(os.environ, {'CALSUITE_TEXT_SCALE': '120'}):
+            self.assertEqual(theme.saved_text_scale(), 120)
+
+    def test_dialog_previews_keeps_and_cancels(self):
+        from qtui.screens import help_menu
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(core.Path, 'home', return_value=Path(d)):
+            dlg = help_menu.TextSizeDialog()
+            dlg.slider.setValue(140 // 5)
+            self.assertEqual(theme.text_scale(), 140)
+            dlg.reject()
+            self.assertEqual(theme.text_scale(), 100)
+            dlg = help_menu.TextSizeDialog()
+            dlg.slider.setValue(120 // 5)
+            dlg.accept()
+            self.assertEqual((theme.text_scale(), theme.saved_text_scale()), (120, 120))
+            dlg = help_menu.TextSizeDialog()
+            dlg.reset_button.click()
+            self.assertEqual(dlg.percent(), 100)

@@ -154,6 +154,42 @@ class Metrics:
 
 
 M = Metrics()
+_BASE = Metrics()                                  # the 100 % sizes; M is rescaled in place from these (modules hold a reference to M, so it is never rebound)
+
+# Text size: a per-person percentage (Appearance > Text size).  It scales the type and the controls that must grow with it (button, row, header and badge
+# heights); spacing and corner radii stay.  Saved in ~/.calibration_suite/appearance.json as 'text_scale'.
+TEXT_SCALE_MIN, TEXT_SCALE_MAX, TEXT_SCALE_STEP, TEXT_SCALE_DEFAULT = 80, 200, 5, 100
+_SCALED = ('font_base', 'font_small', 'font_tiny', 'font_h2', 'font_h1', 'font_mono', 'control_h', 'row_h', 'header_h', 'badge_h', 'badge_h_sm')
+_text_scale = [TEXT_SCALE_DEFAULT]
+
+
+def clamp_text_scale(pct) -> int:
+    try:
+        v = int(round(float(pct) / TEXT_SCALE_STEP)) * TEXT_SCALE_STEP
+    except (TypeError, ValueError):
+        return TEXT_SCALE_DEFAULT
+    return max(TEXT_SCALE_MIN, min(TEXT_SCALE_MAX, v))
+
+
+def text_scale() -> int:
+    return _text_scale[0]
+
+
+def _apply_scale(pct: int) -> None:
+    _text_scale[0] = pct
+    for f in _SCALED:
+        object.__setattr__(M, f, max(1, round(getattr(_BASE, f) * pct / 100)))
+
+
+def saved_text_scale() -> int:
+    """CALSUITE_TEXT_SCALE, else the saved choice, else 100."""
+    env = os.environ.get('CALSUITE_TEXT_SCALE', '').strip()
+    if env:
+        return clamp_text_scale(env)
+    try:
+        return clamp_text_scale(core.Settings('appearance').get('text_scale', TEXT_SCALE_DEFAULT))
+    except Exception:
+        return TEXT_SCALE_DEFAULT
 
 _SANS = {
     'win32': ('Segoe UI Variable Text', 'Segoe UI', 'Inter', 'Noto Sans', 'DejaVu Sans', 'Arial'),
@@ -633,10 +669,23 @@ class ThemeManager(QObject):
         self.changed.emit(name)
         return name
 
+    def set_text_scale(self, pct, *, save: bool = False, app: QApplication | None = None) -> int:
+        """Rescale the type and control heights to `pct` percent and re-style every open window live.  Fixed heights that a window set when it was built
+        (table rows, badges) follow when the window is next opened."""
+        pct = clamp_text_scale(pct)
+        _apply_scale(pct)
+        self.set_theme(self._name, app=app)
+        if save:
+            store = core.Settings('appearance')
+            store.set('text_scale', pct)
+            store.save()
+        return pct
+
     def apply_initial(self, app: QApplication | None = None) -> str:
         """The start-up choice: CALSUITE_THEME, else the saved choice, else the edition default (ui_theme_core.theme_choice), limited to ENABLED_THEMES
         (dark only for now, so the others fall back to DEFAULT_THEME)."""
         choice = core.theme_choice()
+        _apply_scale(saved_text_scale())
         return self.set_theme(choice if choice in ENABLED_THEMES else DEFAULT_THEME, app=app)
 
 
@@ -712,6 +761,10 @@ def _install_combo_rows(app) -> None:
     if _combo_rows is None and app is not None:
         _combo_rows = _ComboRows(app)
         app.installEventFilter(_combo_rows)
+
+
+def set_text_scale(pct, *, save: bool = False) -> int:
+    return manager().set_text_scale(pct, save=save)
 
 
 def set_theme(theme_name: str, *, save: bool = False) -> str:

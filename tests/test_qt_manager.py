@@ -273,7 +273,7 @@ class Menus(QtCase):
         self.assertEqual(texts[:4], ['About Calibration Suite', 'Open my data folder', 'Import data from another copy...', 'Save diagnostic log for support'])
         self.assertNotIn('Appearance', texts)                                  # Appearance has its own menu, next to File
         self.assertEqual(self.win.help_actions['about'].shortcut().toString(), 'F1')
-        self.assertEqual([a.text() for a in self.win.appearance_menu.actions() if not a.isSeparator()], ['Dark', 'Light', 'Depth (soft shadows on cards and buttons)'])          # both themes, then the shadows switch
+        self.assertEqual([a.text() for a in self.win.appearance_menu.actions() if not a.isSeparator()], ['Dark', 'Light', 'Text size...', 'Larger text', 'Smaller text', 'Depth (soft shadows on cards and buttons)'])          # both themes, then the shadows switch
         self.win.help_actions['about'].trigger()
         self.assertEqual(self.boxes[-1][1], 'About Calibration Suite')
         self.assertIn('Your data folder:', self.boxes[-1][2])
