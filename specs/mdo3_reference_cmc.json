@@ -1,0 +1,12 @@
+{
+  "_note": "3 Series MDO procedure: expanded uncertainties for the stimulus and reference instruments that are NOT in the A2LA scope (same mechanism as mdo4000c_reference_cmc.json). Fill in the values from your own scope of accreditation or the instrument specifications. uncertainty = rel x |reading| + abs. A blank (null) entry is reported as N/A. Points with no input signal are always N/A. ABSAMP uses the Fluke 96270A sheet when it covers the sweep; DVMFREQ / AFGFREQ never print below the lab Frequency - Measure CMC. REFFREQ is in divisions on this procedure.",
+  "ABSAMP":   {"rel": null, "abs": null, "unit": "dB"},
+  "TPAFUNC":  {"rel": null, "abs": null, "unit": "dB"},
+  "REFFREQ":  {"rel": null, "abs": null, "unit": "div"},
+  "DELTA":    {"rel": null, "abs": null, "unit": "s"},
+  "AFGFREQ":  {"rel": null, "abs": null, "unit": "Hz"},
+  "AFGAMP":   {"rel": null, "abs": null, "unit": "V"},
+  "AFGOFF":   {"rel": null, "abs": null, "unit": "V"},
+  "DVMAC":    {"rel": null, "abs": null, "unit": "V"},
+  "DVMFREQ":  {"rel": null, "abs": null, "unit": "Hz"}
+}

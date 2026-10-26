@@ -301,7 +301,7 @@ def _setup_and_run(hn, app, proc):
         app.v_model.set('2024C')
         app.run_all()
         ok = hn.pump_poll(TIMEOUT_S)
-    elif engine == 'mdo4000c_verification.py':
+    elif engine in ('mdo4000c_verification.py', 'mdo3_verification.py'):
         from tkinter import simpledialog
         with _m.patch.object(simpledialog, 'askstring', lambda *a, **k: k.get('initialvalue'), create=True):
             app.run_all()

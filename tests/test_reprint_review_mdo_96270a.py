@@ -153,6 +153,8 @@ class Wiring(unittest.TestCase):
                   'Procedures/Tektronix_TBS1000C_Verification.py', 'Procedures/Tektronix_TBS1000C_Verification.procedure.json',
                   'Procedures/Tektronix_TBS1000_Verification.py', 'Procedures/Tektronix_TBS1000_Verification.procedure.json',
                   'specs/build_tbs1000c_spec.py', 'specs/tektronix_tbs1000c_pv.json', 'specs/build_tbs1000_spec.py', 'specs/tektronix_tbs1000_pv.json')
+        later += ('mdo3_verification.py', 'Procedures/Tektronix_MDO3_Verification.py', 'Procedures/Tektronix_MDO3_Verification.procedure.json', 'specs/README.txt',     # the 3 Series MDO procedure (branch tektronix-mdo3); not this work
+                  'specs/build_mdo3_spec.py', 'specs/tektronix_mdo3_pv.json', 'specs/mdo3_reference_cmc.json')
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
         for f in ('report_review_adapters.py', 'report_review_model.py', 'uncertainty_budget.py'):

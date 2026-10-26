@@ -1,0 +1,6462 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "mdo3_verification.IO.__init__",
+   "log": [
+    "MDO3|>>|*IDN?",
+    "MDO3|<<|TEKTRONIX,MDO34,SIM0003,CF:91.1CT FV:v1.0",
+    "MDO3|>>|*CLS",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "5560A|>>|*IDN?",
+    "5560A|<<|FLUKE,5560A,SIM0001,1.0",
+    "5560A|>>|*CLS",
+    "96270A|>>|*IDN?",
+    "96270A|<<|Fluke,96270A,SIM0001,1.00",
+    "96270A|>>|*CLS",
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|SINE",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|POW:OFFS:STAT 0",
+    "96270A|>>|POW:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|FREQ:OFFS:STAT 0",
+    "96270A|>>|FREQ:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|*IDN?",
+    "RF2|<<|Fluke,96270A,SIM0001,1.00",
+    "RF2|>>|*CLS",
+    "RF2|>>|INST SINE",
+    "RF2|>>|INST?",
+    "RF2|<<|SINE",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|UNIT:POW DBM",
+    "RF2|>>|UNIT:POW?",
+    "RF2|<<|DBM",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|POW:OFFS:STAT 0",
+    "RF2|>>|POW:OFFS:STAT?",
+    "RF2|<<|0",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|FREQ:OFFS:STAT 0",
+    "RF2|>>|FREQ:OFFS:STAT?",
+    "RF2|<<|0",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|*IDN?",
+    "FuncGen|<<|Agilent Technologies,33250A,SIM0001,1.0",
+    "FuncGen|>>|*CLS",
+    "FuncGen|>>|*IDN?",
+    "FuncGen|<<|Agilent Technologies,33250A,SIM0001,1.0",
+    "RefDMM|>>|*CLS",
+    "RefDMM|>>|*IDN?",
+    "RefDMM|<<|KEYSIGHT,SIM-METER,SIM0001,1.0",
+    "Counter|>>|*CLS",
+    "Counter|>>|*IDN?",
+    "Counter|<<|KEYSIGHT,SIM-METER,SIM0001,1.0"
+   ],
+   "method": "mdo3_verification.IO.__init__",
+   "result": "returned <mdo3_verification.IO object>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,MDO34,SIM0003,CF:91.1CT FV:v1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5560A,SIM0001,1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Fluke,96270A,SIM0001,1.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Fluke,96270A,SIM0001,1.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.0"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEYSIGHT,SIM-METER,SIM0001,1.0"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "KEYSIGHT,SIM-METER,SIM0001,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "mdo3_verification.IO.reset_at_start",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|>>|*CLS",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0",
+    "96270A|>>|*RST",
+    "96270A|>>|*CLS",
+    "96270A|>>|*OPC?",
+    "96270A|<<|1",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|INST SINE",
+    "96270A|>>|INST?",
+    "96270A|<<|SINE",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|UNIT:POW DBM",
+    "96270A|>>|UNIT:POW?",
+    "96270A|<<|DBM",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|POW:OFFS:STAT 0",
+    "96270A|>>|POW:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|FREQ:OFFS:STAT 0",
+    "96270A|>>|FREQ:OFFS:STAT?",
+    "96270A|<<|0",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|*RST",
+    "RF2|>>|*CLS",
+    "RF2|>>|*OPC?",
+    "RF2|<<|1",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|INST SINE",
+    "RF2|>>|INST?",
+    "RF2|<<|SINE",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|UNIT:POW DBM",
+    "RF2|>>|UNIT:POW?",
+    "RF2|<<|DBM",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|POW:OFFS:STAT 0",
+    "RF2|>>|POW:OFFS:STAT?",
+    "RF2|<<|0",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|FREQ:OFFS:STAT 0",
+    "RF2|>>|FREQ:OFFS:STAT?",
+    "RF2|<<|0",
+    "RF2|>>|SYST:ERR?",
+    "RF2|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|*RST",
+    "FuncGen|>>|*CLS",
+    "FuncGen|>>|*OPC?",
+    "FuncGen|<<|1",
+    "FuncGen|>>|SYSTem:ERRor?",
+    "FuncGen|<<|+0,\"No error\"",
+    "FuncGen|>>|OUTPut OFF",
+    "FuncGen|>>|OUTPut?",
+    "FuncGen|<<|0",
+    "RefDMM|>>|*RST",
+    "RefDMM|>>|*CLS",
+    "RefDMM|>>|*OPC?",
+    "RefDMM|<<|1",
+    "Counter|>>|*RST",
+    "Counter|>>|*CLS",
+    "Counter|>>|*OPC?",
+    "Counter|<<|1",
+    "MDO3|>>|*OPT?",
+    "MDO3|<<|SA3:Spectrum analyzer 3 GHz,AFG:Arbitrary Function Generator,DVM:Digital Voltmeter",
+    "MDO3|>>|*RST",
+    "MDO3|>>|*CLS",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "RESET|--|Instruments reset to default settings at start: 5560A, 96270A, RF2, FuncGen, RefDMM, Counter, MDO3"
+   ],
+   "method": "mdo3_verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "INST SINE"
+    ],
+    [
+     "Q",
+     "INST?",
+     "SINE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "UNIT:POW DBM"
+    ],
+    [
+     "Q",
+     "UNIT:POW?",
+     "DBM"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "POW:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "POW:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "FREQ:OFFS:STAT 0"
+    ],
+    [
+     "Q",
+     "FREQ:OFFS:STAT?",
+     "0"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*OPT?",
+     "SA3:Spectrum analyzer 3 GHz,AFG:Arbitrary Function Generator,DVM:Digital Voltmeter"
+    ],
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': None, 'desc': 'Signal path compensation (status Pass)', 'high': 1.0, 'id': 2, 'kind': 'SPC', 'low': 1.0, 'nominal': 1.0, 'note': 'The test record (p. 48) has a Self Test row only; the procedure (p. 90) requires a passing SPC before the other tests.', 'passfail': True, 'section': 'selftest', 'stim': 'none', 'unit': ''}",
+   "case": "mdo3_verification.Runner.run_point[SPC#2]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|CALibrate:INTERNal:STARt",
+    "MDO3|>>|CALibrate:INTERNal:STATus?",
+    "MDO3|<<|DONE",
+    "MDO3|>>|CALibrate:RESults:SPC?",
+    "MDO3|<<|PASS",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (1.0, {'status': 'PASS'})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "CALibrate:INTERNal:STARt"
+    ],
+    [
+     "sleep",
+     10.0
+    ],
+    [
+     "Q",
+     "CALibrate:INTERNal:STATus?",
+     "DONE"
+    ],
+    [
+     "Q",
+     "CALibrate:RESults:SPC?",
+     "PASS"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 1 MΩ, 10 mV/div', 'high': 1010000.0, 'id': 3, 'kind': 'IMP', 'low': 990000.0, 'nominal': 1000000.0, 'section': 'imp', 'stim': 'cal', 'term': '1M', 'unit': 'ohm', 'vscale': 0.01}",
+   "case": "mdo3_verification.Runner.run_point[IMP#3]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "5560A|>>|STBY",
+    "5560A|>>|SCOPE MEASR",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|MEASR",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 1000000",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|1.0E+06",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.01",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E-02",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "5560A|>>|*TRG",
+    "5560A|<<|1000400.0000,OHM",
+    "5560A|>>|*TRG",
+    "5560A|<<|1000400.0000,OHM",
+    "5560A|>>|*TRG",
+    "5560A|<<|1000400.0000,OHM",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (1000400.0, {'readings': [1000400.0, 1000400.0, 1000400.0]})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SCOPE MEASR"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "MEASR"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 1000000"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "1.0E+06"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.01"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E-02"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "*TRG",
+     "1000400.0000,OHM"
+    ],
+    [
+     "Q",
+     "*TRG",
+     "1000400.0000,OHM"
+    ],
+    [
+     "Q",
+     "*TRG",
+     "1000400.0000,OHM"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'bw': 'TWEnty', 'ch': 1, 'desc': 'CH1 50 Ω, 20 MHz BW, 1 mV/div', 'high': 0.5, 'id': 19, 'kind': 'BAL', 'low': -0.5, 'nominal': 0.0, 'per_div': True, 'section': 'bal', 'stim': 'none', 'term': '50', 'unit': 'div', 'vscale': 0.001}",
+   "case": "mdo3_verification.Runner.run_point[BAL#19]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 50",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|5.0E+01",
+    "MDO3|>>|CH1:BANdwidth 2.000000E+07",
+    "MDO3|>>|CH1:BANdwidth?",
+    "MDO3|<<|2.0000E+07",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.001",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E-03",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|HORizontal:SCAle 0.001",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|0.001",
+    "MDO3|>>|TRIGger:A:TYPe EDGe",
+    "MDO3|>>|TRIGger:A:EDGE:SOUrce LINE",
+    "MDO3|>>|TRIGger:A:MODe AUTO",
+    "MDO3|>>|ACQuire:MODe AVErage",
+    "MDO3|>>|ACQuire:NUMAVg 16",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS1:TYPe MEAN",
+    "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE ON",
+    "MDO3|>>|ACQuire:MODe AVErage",
+    "MDO3|>>|ACQuire:NUMAVg 16",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 16",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:MEAN?",
+    "MDO3|<<|2.000000000e-05",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.02, {'mean_volts': 2e-05})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 50"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "5.0E+01"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth 2.000000E+07"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "2.0000E+07"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E-03"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "0.001"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce LINE"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:TYPe MEAN"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE ON"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 16"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:MEAN?",
+     "2.000000000e-05"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 50 Ω, 10 mV/div, 1 GHz', 'freq': 1000000000.0, 'high': None, 'hscale': 4e-09, 'id': 203, 'kind': 'BW', 'low': 0.707, 'models': ['32-1000', '34-1000'], 'nominal': 1.0, 'ref_hscale': 0.001, 'ref_hz': 10000000.0, 'section': 'bw', 'stim': 'cal', 'term': '50', 'unit': 'ratio', 'vin_pp': 0.08, 'vscale': 0.01}",
+   "case": "mdo3_verification.Runner.run_point[BW#203]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 50",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|5.0E+01",
+    "MDO3|>>|CH1:BANdwidth FULl",
+    "MDO3|>>|CH1:BANdwidth?",
+    "MDO3|<<|1.0000E+09",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.01",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E-02",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|ACQuire:MODe SAMple",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|TRIGger:A:TYPe EDGe",
+    "MDO3|>>|TRIGger:A:EDGE:SOUrce CH1",
+    "MDO3|>>|TRIGger:A:EDGE:SLOpe RISe",
+    "MDO3|>>|TRIGger:A:MODe AUTO",
+    "5560A|>>|STBY",
+    "5560A|>>|SCOPE LEVSINE",
+    "5560A|>>|OUT 0.08V,10MHz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "MDO3|>>|HORizontal:SCAle 0.001",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|0.001",
+    "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS1:TYPe PK2pk",
+    "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE ON",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 16",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:MEAN?",
+    "MDO3|<<|8.007822050e-02",
+    "MDO3|>>|HORizontal:SCAle 4e-09",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|4e-09",
+    "5560A|>>|OUT 0.08V,1GHz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 16",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:MEAN?",
+    "MDO3|<<|6.663058757e-02",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.832068784170847, {'gain': 0.832068784170847, 'vbw_pp': 0.06663058757, 'vin_pp': 0.0800782205})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 50"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "5.0E+01"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "1.0000E+09"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.01"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E-02"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "ACQuire:MODe SAMple"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce CH1"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SLOpe RISe"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SCOPE LEVSINE"
+    ],
+    [
+     "W",
+     "OUT 0.08V,10MHz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "0.001"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:TYPe PK2pk"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE ON"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 16"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:MEAN?",
+     "8.007822050e-02"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 4e-09"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "4e-09"
+    ],
+    [
+     "W",
+     "OUT 0.08V,1GHz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 16"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:MEAN?",
+     "6.663058757e-02"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'bw': 'TWEnty', 'ch': 1, 'desc': 'CH1 1 MΩ, 20 MHz BW, 1 mV/div', 'high': 2.5, 'id': 219, 'kind': 'GAIN', 'low': -2.5, 'nominal': 0.0, 'section': 'gain', 'stim': 'cal', 'term': '1M', 'unit': '%', 'vdiff': 0.007, 'vneg': -0.0035, 'vpos': 0.0035, 'vscale': 0.001}",
+   "case": "mdo3_verification.Runner.run_point[GAIN#219]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 1000000",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|1.0E+06",
+    "MDO3|>>|CH1:BANdwidth 2.000000E+07",
+    "MDO3|>>|CH1:BANdwidth?",
+    "MDO3|<<|2.0000E+07",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.001",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E-03",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|HORizontal:SCAle 0.001",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|0.001",
+    "MDO3|>>|TRIGger:A:TYPe EDGe",
+    "MDO3|>>|TRIGger:A:EDGE:SOUrce LINE",
+    "MDO3|>>|TRIGger:A:MODe AUTO",
+    "MDO3|>>|ACQuire:MODe AVErage",
+    "MDO3|>>|ACQuire:NUMAVg 16",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP Z1M",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|OUT -0.003500000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|-0.003500000,V,1000000000.0,HZ",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS1:TYPe MEAN",
+    "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE ON",
+    "MDO3|>>|ACQuire:MODe AVErage",
+    "MDO3|>>|ACQuire:NUMAVg 16",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 16",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:MEAN?",
+    "MDO3|<<|-3.471400000e-03",
+    "5560A|>>|OUT 0.003500000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|0.003500000,V,1000000000.0,HZ",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS1:TYPe MEAN",
+    "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE ON",
+    "MDO3|>>|ACQuire:MODe AVErage",
+    "MDO3|>>|ACQuire:NUMAVg 16",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 16",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:MEAN?",
+    "MDO3|<<|3.531400000e-03",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.03999999999999787, {'vdiff': 0.0070028, 'vdiff_expected': 0.007, 'vneg_meas': -0.0034714, 'vneg_set': -0.0035, 'vpos_meas': 0.0035314, 'vpos_set': 0.0035})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 1000000"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "1.0E+06"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth 2.000000E+07"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "2.0000E+07"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E-03"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "0.001"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce LINE"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP Z1M"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "W",
+     "OUT -0.003500000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "-0.003500000,V,1000000000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:TYPe MEAN"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE ON"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 16"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:MEAN?",
+     "-3.471400000e-03"
+    ],
+    [
+     "W",
+     "OUT 0.003500000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "0.003500000,V,1000000000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:TYPe MEAN"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE ON"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 16"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:MEAN?",
+     "3.531400000e-03"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'bw': 'TWEnty', 'ch': 1, 'desc': 'CH1 1 MΩ, 20 MHz BW, 1 mV/div, offset 700 mV', 'high': 0.7073, 'hscale': 0.02, 'id': 267, 'kind': 'OFFSET', 'low': 0.6927, 'nominal': 0.7, 'note': 'The procedure (p. 101) sets 900 mV for the first row; the test record (p. 60) prints 700 mV, which is applied.', 'offset': 0.7, 'section': 'off', 'stim': 'cal', 'term': '1M', 'unit': 'V', 'vscale': 0.001}",
+   "case": "mdo3_verification.Runner.run_point[OFFSET#267]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 1000000",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|1.0E+06",
+    "MDO3|>>|CH1:BANdwidth 2.000000E+07",
+    "MDO3|>>|CH1:BANdwidth?",
+    "MDO3|<<|2.0000E+07",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.001",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E-03",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0.7",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|7.000000E-01",
+    "MDO3|>>|HORizontal:SCAle 0.02",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|0.02",
+    "MDO3|>>|TRIGger:A:TYPe EDGe",
+    "MDO3|>>|TRIGger:A:EDGE:SOUrce LINE",
+    "MDO3|>>|TRIGger:A:MODe AUTO",
+    "MDO3|>>|ACQuire:MODe AVErage",
+    "MDO3|>>|ACQuire:NUMAVg 16",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP Z1M",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|OUT 0.700000000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|0.700000000,V,1000000000.0,HZ",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS1:TYPe MEAN",
+    "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE ON",
+    "MDO3|>>|ACQuire:MODe AVErage",
+    "MDO3|>>|ACQuire:NUMAVg 16",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 16",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:MEAN?",
+    "MDO3|<<|7.003100000e-01",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.70031, {'applied': 0.7})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 1000000"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "1.0E+06"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth 2.000000E+07"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "2.0000E+07"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E-03"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0.7"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "7.000000E-01"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.02"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "0.02"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce LINE"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP Z1M"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "W",
+     "OUT 0.700000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "0.700000000,V,1000000000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:TYPe MEAN"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE ON"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 16"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:MEAN?",
+     "7.003100000e-01"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'coarse_hscale': 0.02, 'desc': 'Time-base error (80 ms mark, 400 ns/div)', 'fine_hscale': 4e-07, 'high': 2.0, 'id': 315, 'kind': 'REFFREQ', 'low': -2.0, 'nominal': 0.0, 'per_div': True, 'period': 0.08, 'section': 'srate', 'stim': 'gen', 'unit': 'div', 'vpp': 1.0}",
+   "case": "mdo3_verification.Runner.run_point[REFFREQ#315]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "FuncGen|>>|OUTPut OFF",
+    "FuncGen|>>|OUTPut:LOAD 50",
+    "FuncGen|>>|APPLy:SQUare 12.5,1,0",
+    "FuncGen|>>|FREQuency?",
+    "FuncGen|<<|12.5",
+    "FuncGen|>>|VOLTage?",
+    "FuncGen|<<|1",
+    "FuncGen|>>|SYSTem:ERRor?",
+    "FuncGen|<<|+0,\"No error\"",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 50",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|5.0E+01",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.5",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|5.000000E-01",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|HORizontal:SCAle 0.02",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|0.02",
+    "MDO3|>>|TRIGger:A:TYPe EDGe",
+    "MDO3|>>|TRIGger:A:EDGE:SOUrce CH1",
+    "MDO3|>>|TRIGger:A:EDGE:SLOpe RISe",
+    "MDO3|>>|TRIGger:A:MODe NORMal",
+    "MDO3|>>|TRIGger:A:LEVel:CH1 0",
+    "FuncGen|>>|OUTPut ON",
+    "MDO3|>>|HORizontal:DELay:MODe ON",
+    "MDO3|>>|HORizontal:DELay:TIMe 0.08",
+    "MDO3|>>|HORizontal:SCAle 4e-07",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|4e-07",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|ACQuire:STATE STOP",
+    "MDO3|>>|DATa:SOUrce CH1",
+    "MDO3|>>|DATa:ENCdg ASCIi",
+    "MDO3|>>|DATa:STARt 1",
+    "MDO3|>>|DATa:STOP 1000000",
+    "MDO3|>>|WFMOutpre:NR_Pt?",
+    "MDO3|<<|1000",
+    "MDO3|>>|DATa:STOP 1000",
+    "MDO3|>>|WFMOutpre:XINcr?",
+    "MDO3|<<|2.000000000e-09",
+    "MDO3|>>|WFMOutpre:XZEro?",
+    "MDO3|<<|7.999900000000e-02",
+    "MDO3|>>|WFMOutpre:YMUlt?",
+    "MDO3|<<|1.0",
+    "MDO3|>>|WFMOutpre:YOFf?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|WFMOutpre:YZEro?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|WFMOutpre:PT_Off?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|CURVe?",
+    "MDO3|<<|0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2",
+    "FuncGen|>>|OUTPut OFF",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.022499999988156993, {'deviation_s': 8.999999995262797e-09, 'edge_time': 0.080000009})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "W",
+     "APPLy:SQUare 12.5,1,0"
+    ],
+    [
+     "Q",
+     "FREQuency?",
+     "12.5"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 50"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "5.0E+01"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.5"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "5.000000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.02"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "0.02"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce CH1"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SLOpe RISe"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe NORMal"
+    ],
+    [
+     "W",
+     "TRIGger:A:LEVel:CH1 0"
+    ],
+    [
+     "W",
+     "OUTPut ON"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "HORizontal:DELay:MODe ON"
+    ],
+    [
+     "W",
+     "HORizontal:DELay:TIMe 0.08"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 4e-07"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "4e-07"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "W",
+     "ACQuire:STATE STOP"
+    ],
+    [
+     "W",
+     "DATa:SOUrce CH1"
+    ],
+    [
+     "W",
+     "DATa:ENCdg ASCIi"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 1000000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "1000"
+    ],
+    [
+     "W",
+     "DATa:STOP 1000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "2.000000000e-09"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "7.999900000000e-02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "1.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:PT_Off?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'bw': 'FULl', 'ch': 1, 'desc': 'CH1 50 Ω, Full BW, 100 mV/div', 'high': 0.0031, 'hscale': 0.01, 'id': 356, 'kind': 'NOISE', 'low': None, 'method': 'rms_mean', 'models': ['32-1000', '34-1000'], 'nominal': 0.0, 'section': 'noise', 'stim': 'none', 'term': '50', 'unit': 'V', 'vscale': 0.1}",
+   "case": "mdo3_verification.Runner.run_point[NOISE#356]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 50",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|5.0E+01",
+    "MDO3|>>|CH1:BANdwidth FULl",
+    "MDO3|>>|CH1:BANdwidth?",
+    "MDO3|<<|1.0000E+09",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.1",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E-01",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|HORizontal:SCAle 0.01",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|0.01",
+    "MDO3|>>|ACQuire:MODe SAMple",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|MEASUrement:GATing OFF",
+    "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS1:TYPe RMS",
+    "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE ON",
+    "MDO3|>>|MEASUrement:MEAS2:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS2:TYPe MEAN",
+    "MDO3|>>|MEASUrement:MEAS2:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS2:STATE ON",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 64",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:MEAN?",
+    "MDO3|<<|6.000000000e-04",
+    "MDO3|>>|MEASUrement:MEAS2:MEAN?",
+    "MDO3|<<|2.000000000e-05",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.000599666574022598, {'mean': 2e-05, 'rms': 0.0006})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 50"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "5.0E+01"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "1.0000E+09"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.1"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.01"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "0.01"
+    ],
+    [
+     "W",
+     "ACQuire:MODe SAMple"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "MEASUrement:GATing OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:TYPe RMS"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE ON"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS2:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS2:TYPe MEAN"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS2:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS2:STATE ON"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 64"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     4.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:MEAN?",
+     "6.000000000e-04"
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS2:MEAN?",
+     "2.000000000e-05"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 4 ns/div, 240 MHz, 100 mV/div (800 mV p-p)', 'freq': 240000000.0, 'high': 1.19e-10, 'hscale': 4e-09, 'id': 460, 'kind': 'DELTA', 'low': None, 'models': ['32-1000', '34-1000'], 'nominal': 0.0, 'section': 'dt', 'stim': 'cal', 'unit': 's', 'vpp': 0.8, 'vscale': 0.1}",
+   "case": "mdo3_verification.Runner.run_point[DELTA#460]",
+   "log": [
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 50",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|5.0E+01",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.1",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E-01",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|HORizontal:SCAle 4e-09",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|4e-09",
+    "MDO3|>>|TRIGger:A:TYPe EDGe",
+    "MDO3|>>|TRIGger:A:EDGE:SOUrce CH1",
+    "MDO3|>>|TRIGger:A:EDGE:SLOpe RISe",
+    "MDO3|>>|TRIGger:A:MODe AUTO",
+    "MDO3|>>|ACQuire:MODe SAMple",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "5560A|>>|STBY",
+    "5560A|>>|SCOPE LEVSINE",
+    "5560A|>>|OUT 0.8V,240MHz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS1:TYPe BURst",
+    "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE ON",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 100",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:STDdev?",
+    "MDO3|<<|3.000000000e-11",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (3e-11, {'source': '5560A'})",
+   "wire": [
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 50"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "5.0E+01"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.1"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 4e-09"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "4e-09"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce CH1"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SLOpe RISe"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "W",
+     "ACQuire:MODe SAMple"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SCOPE LEVSINE"
+    ],
+    [
+     "W",
+     "OUT 0.8V,240MHz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:TYPe BURst"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE ON"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 100"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     8.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:STDdev?",
+     "3.000000000e-11"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': None, 'desc': '9 kHz to 50 kHz', 'detection': 'AVErage', 'f_start': 9000.0, 'f_stop': 50000.0, 'high': -109.0, 'id': 552, 'kind': 'DANL', 'low': None, 'nominal': 0.0, 'ref_level': -15.0, 'req': ['noTPA'], 'section': 'danl', 'stim': 'none', 'unit': 'dBm/Hz'}",
+   "case": "mdo3_verification.Runner.run_point[DANL#552]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|SELect:CH1 OFF",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|SELect:RF_NORMal ON",
+    "MDO3|>>|SELect:RF_AVErage ON",
+    "MDO3|>>|SELect:RF_NORMal OFF",
+    "MDO3|>>|RF:DETECTionmethod:MODe MANual",
+    "MDO3|>>|RF:DETECTionmethod:RF_AVErage AVErage",
+    "MDO3|>>|RF:RF_AVErage:NUMAVg 32",
+    "MDO3|>>|RF:STARt 9000",
+    "MDO3|>>|RF:STOP 50000",
+    "MDO3|>>|RF:REFLevel -15",
+    "MDO3|>>|RF:REFLevel?",
+    "MDO3|<<|-1.500000E+01",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "MDO3|>>|DATa:SOUrce RF_AVErage",
+    "MDO3|>>|DATa:ENCdg ASCIi",
+    "MDO3|>>|DATa:STARt 1",
+    "MDO3|>>|DATa:STOP 1000000",
+    "MDO3|>>|WFMOutpre:NR_Pt?",
+    "MDO3|<<|401",
+    "MDO3|>>|DATa:STOP 401",
+    "MDO3|>>|WFMOutpre:XINcr?",
+    "MDO3|<<|1.025000000e+02",
+    "MDO3|>>|WFMOutpre:XZEro?",
+    "MDO3|<<|9.000000000000e+03",
+    "MDO3|>>|WFMOutpre:YMUlt?",
+    "MDO3|<<|1.0",
+    "MDO3|>>|WFMOutpre:YOFf?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|WFMOutpre:YZEro?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|WFMOutpre:PT_Off?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|CURVe?",
+    "MDO3|<<|-132,-131.421865,-131.690699,-132.41266,-132.530073,-131.870928,-131.400874,-131.808541,-132.496696,-132.45719,-131.7479,-131.407937,-131.935348,-132.557474,-132.3629,-131.636676,-131.442723,-132.065182,-132.592149,-132.251617,-131.542465,-131.503603,-132.191964,-132.599097,-132.128552,-131.469678,-131.587727,-132.309757,-132.577992,-131.999467,-131.421723,-131.691156,-132.413046,-132.529823,-131.870408,-131.400845,-131.809046,-132.496995,-132.456845,-131.747416,-131.408023,-131.935878,-132.557671,-132.362475,-131.636252,-131.442921,-132.065712,-132.592235,-132.251133,-131.54212,-131.503903,-132.192469,-132.599068,-132.128031,-131.469429,-131.588115,-132.310214,-132.577849,-131.998934,-131.421581,-131.691613,-132.413433,-132.529573,-131.869887,-131.400817,-131.809551,-132.497293,-132.456499,-131.746933,-131.408111,-131.936407,-132.557868,-132.36205,-131.635828,-131.443119,-132.066241,-132.59232,-132.250649,-131.541776,-131.504203,-132.192973,-132.599038,-132.12751,-131.46918,-131.588502,-132.31067,-132.577705,-131.998401,-131.421439,-131.69207,-132.413819,-132.529322,-131.869367,-131.40079,-131.810057,-132.497591,-132.456153,-131.74645,-131.408198,-131.936937,-132.558064,-132.361625,-131.635405,-131.443317,-132.066771,-132.592405,-132.250164,-131.541432,-131.504503,-132.193478,-132.599007,-132.12699,-131.468932,-131.58889,-132.311125,-132.577561,-131.997868,-131.421299,-131.692528,-132.414204,-132.529071,-131.868847,-131.400763,-131.810562,-132.497889,-132.455807,-131.745967,-131.408286,-131.937467,-132.558259,-132.3612,-131.634982,-131.443516,-132.067301,-132.592489,-132.24968,-131.541089,-131.504804,-132.193982,-132.598976,-132.126469,-131.468684,-131.589279,-132.311581,-132.577416,-131.997336,-131.421158,-131.692985,-132.41459,-132.528819,-131.868327,-131.400736,-131.811068,-132.498186,-132.45546,-131.745484,-131.408375,-131.937997,-132.558454,-132.360774,-131.634559,-131.443716,-132.06783,-132.592573,-132.249195,-131.540746,-131.505105,-132.194486,-132.598945,-132.125948,-131.468437,-131.589667,-132.312036,-132.577271,-131.996803,-131.421018,-131.693443,-132.414975,-132.528567,-131.867807,-131.40071,-131.811574,-132.498482,-132.455113,-131.745002,-131.408464,-131.938527,-132.558649,-132.360348,-131.634137,-131.443916,-132.068359,-132.592656,-132.24871,-131.540403,-131.505406,-132.194991,-132.598913,-132.125427,-131.46819,-131.590056,-132.312491,-132.577126,-131.99627,-131.420878,-131.693902,-132.41536,-132.528315,-131.867288,-131.400684,-131.81208,-132.498779,-132.454766,-131.74452,-131.408553,-131.939058,-132.558843,-132.359922,-131.633715,-131.444116,-132.068889,-132.592739,-132.248225,-131.540061,-131.505708,-132.195494,-132.598881,-132.124905,-131.467943,-131.590445,-132.312946,-132.57698,-131.995737,-131.420739,-131.69436,-132.415744,-132.528062,-131.866768,-131.400659,-131.812586,-132.499075,-132.454418,-131.744038,-131.408643,-131.939588,-132.559037,-132.359496,-131.633293,-131.444317,-132.069418,-132.592822,-132.24774,-131.539719,-131.50601,-132.195998,-132.598848,-132.124384,-131.467697,-131.590835,-132.313401,-132.576834,-131.995204,-131.420601,-131.694819,-132.416128,-132.527809,-131.866248,-131.400634,-131.813092,-132.49937,-132.45407,-131.743556,-131.408733,-131.940118,-132.55923,-132.359069,-131.632871,-131.444518,-132.069947,-132.592904,-132.247255,-131.539377,-131.506313,-132.196502,-132.598815,-132.123863,-131.467451,-131.591225,-132.313855,-132.576687,-131.994671,-131.420462,-131.695278,-132.416512,-132.527555,-131.865729,-131.40061,-131.813599,-132.499666,-132.453721,-131.743074,-131.408824,-131.940648,-132.559423,-132.358642,-131.63245,-131.44472,-132.070477,-132.592985,-132.246769,-131.539036,-131.506616,-132.197005,-132.598781,-132.123341,-131.467206,-131.591615,-132.314309,-132.576539,-131.994138,-131.420325,-131.695737,-132.416895,-132.527301,-131.86521,-131.400586,-131.814105,-132.499961,-132.453372,-131.742593,-131.408915,-131.941179,-132.559615,-132.358214,-131.632029,-131.444922,-132.071006,-132.593066,-132.246283,-131.538695,-131.50692,-132.197508,-132.598747,-132.12282,-131.466961,-131.592006,-132.314763,-132.576392,-131.993605,-131.420187,-131.696196,-132.417278,-132.527047,-131.86469,-131.400563,-131.814612,-132.500255,-132.453023,-131.742111,-131.409007,-131.941709,-132.559807,-132.357787,-131.631608,-131.445124,-132.071535,-132.593147,-132.245797,-131.538354,-131.507223,-132.198012,-132.598712,-132.122298,-131.466717,-131.592397,-132.315216,-132.576243,-131.993073,-131.420051,-131.696656,-132.417661,-132.526792,-131.864171,-131.40054,-131.815119,-132.500549,-132.452673,-131.74163,-131.409099,-131.942239,-132.559999,-132.357359,-131.631187,-131.445327,-132.072064,-132.593227,-132.245311,-131.538014,-131.507528,-132.198515,-132.598677",
+    "MDO3|>>|RF:RBW?",
+    "MDO3|<<|1000",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (-161.864171, {'at_hz': 47950.0, 'noise_dbm': -131.864171, 'rbw': 1000.0})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "SELect:RF_NORMal ON"
+    ],
+    [
+     "W",
+     "SELect:RF_AVErage ON"
+    ],
+    [
+     "W",
+     "SELect:RF_NORMal OFF"
+    ],
+    [
+     "W",
+     "RF:DETECTionmethod:MODe MANual"
+    ],
+    [
+     "W",
+     "RF:DETECTionmethod:RF_AVErage AVErage"
+    ],
+    [
+     "W",
+     "RF:RF_AVErage:NUMAVg 32"
+    ],
+    [
+     "W",
+     "RF:STARt 9000"
+    ],
+    [
+     "W",
+     "RF:STOP 50000"
+    ],
+    [
+     "W",
+     "RF:REFLevel -15"
+    ],
+    [
+     "Q",
+     "RF:REFLevel?",
+     "-1.500000E+01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     60.0
+    ],
+    [
+     "W",
+     "DATa:SOUrce RF_AVErage"
+    ],
+    [
+     "W",
+     "DATa:ENCdg ASCIi"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 1000000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "401"
+    ],
+    [
+     "W",
+     "DATa:STOP 401"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "1.025000000e+02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "9.000000000000e+03"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "1.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:PT_Off?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "-132,-131.421865,-131.690699,-132.41266,-132.530073,-131.870928,-131.400874,-131.808541,-132.496696,-132.45719,-131.7479,-131.407937,-131.935348,-132.557474,-132.3629,-131.636676,-131.442723,-132.065182,-132.592149,-132.251617,-131.542465,-131.503603,-132.191964,-132.599097,-132.128552,-131.469678,-131.587727,-132.309757,-132.577992,-131.999467,-131.421723,-131.691156,-132.413046,-132.529823,-131.870408,-131.400845,-131.809046,-132.496995,-132.456845,-131.747416,-131.408023,-131.935878,-132.557671,-132.362475,-131.636252,-131.442921,-132.065712,-132.592235,-132.251133,-131.54212,-131.503903,-132.192469,-132.599068,-132.128031,-131.469429,-131.588115,-132.310214,-132.577849,-131.998934,-131.421581,-131.691613,-132.413433,-132.529573,-131.869887,-131.400817,-131.809551,-132.497293,-132.456499,-131.746933,-131.408111,-131.936407,-132.557868,-132.36205,-131.635828,-131.443119,-132.066241,-132.59232,-132.250649,-131.541776,-131.504203,-132.192973,-132.599038,-132.12751,-131.46918,-131.588502,-132.31067,-132.577705,-131.998401,-131.421439,-131.69207,-132.413819,-132.529322,-131.869367,-131.40079,-131.810057,-132.497591,-132.456153,-131.74645,-131.408198,-131.936937,-132.558064,-132.361625,-131.635405,-131.443317,-132.066771,-132.592405,-132.250164,-131.541432,-131.504503,-132.193478,-132.599007,-132.12699,-131.468932,-131.58889,-132.311125,-132.577561,-131.997868,-131.421299,-131.692528,-132.414204,-132.529071,-131.868847,-131.400763,-131.810562,-132.497889,-132.455807,-131.745967,-131.408286,-131.937467,-132.558259,-132.3612,-131.634982,-131.443516,-132.067301,-132.592489,-132.24968,-131.541089,-131.504804,-132.193982,-132.598976,-132.126469,-131.468684,-131.589279,-132.311581,-132.577416,-131.997336,-131.421158,-131.692985,-132.41459,-132.528819,-131.868327,-131.400736,-131.811068,-132.498186,-132.45546,-131.745484,-131.408375,-131.937997,-132.558454,-132.360774,-131.634559,-131.443716,-132.06783,-132.592573,-132.249195,-131.540746,-131.505105,-132.194486,-132.598945,-132.125948,-131.468437,-131.589667,-132.312036,-132.577271,-131.996803,-131.421018,-131.693443,-132.414975,-132.528567,-131.867807,-131.40071,-131.811574,-132.498482,-132.455113,-131.745002,-131.408464,-131.938527,-132.558649,-132.360348,-131.634137,-131.443916,-132.068359,-132.592656,-132.24871,-131.540403,-131.505406,-132.194991,-132.598913,-132.125427,-131.46819,-131.590056,-132.312491,-132.577126,-131.99627,-131.420878,-131.693902,-132.41536,-132.528315,-131.867288,-131.400684,-131.81208,-132.498779,-132.454766,-131.74452,-131.408553,-131.939058,-132.558843,-132.359922,-131.633715,-131.444116,-132.068889,-132.592739,-132.248225,-131.540061,-131.505708,-132.195494,-132.598881,-132.124905,-131.467943,-131.590445,-132.312946,-132.57698,-131.995737,-131.420739,-131.69436,-132.415744,-132.528062,-131.866768,-131.400659,-131.812586,-132.499075,-132.454418,-131.744038,-131.408643,-131.939588,-132.559037,-132.359496,-131.633293,-131.444317,-132.069418,-132.592822,-132.24774,-131.539719,-131.50601,-132.195998,-132.598848,-132.124384,-131.467697,-131.590835,-132.313401,-132.576834,-131.995204,-131.420601,-131.694819,-132.416128,-132.527809,-131.866248,-131.400634,-131.813092,-132.49937,-132.45407,-131.743556,-131.408733,-131.940118,-132.55923,-132.359069,-131.632871,-131.444518,-132.069947,-132.592904,-132.247255,-131.539377,-131.506313,-132.196502,-132.598815,-132.123863,-131.467451,-131.591225,-132.313855,-132.576687,-131.994671,-131.420462,-131.695278,-132.416512,-132.527555,-131.865729,-131.40061,-131.813599,-132.499666,-132.453721,-131.743074,-131.408824,-131.940648,-132.559423,-132.358642,-131.63245,-131.44472,-132.070477,-132.592985,-132.246769,-131.539036,-131.506616,-132.197005,-132.598781,-132.123341,-131.467206,-131.591615,-132.314309,-132.576539,-131.994138,-131.420325,-131.695737,-132.416895,-132.527301,-131.86521,-131.400586,-131.814105,-132.499961,-132.453372,-131.742593,-131.408915,-131.941179,-132.559615,-132.358214,-131.632029,-131.444922,-132.071006,-132.593066,-132.246283,-131.538695,-131.50692,-132.197508,-132.598747,-132.12282,-131.466961,-131.592006,-132.314763,-132.576392,-131.993605,-131.420187,-131.696196,-132.417278,-132.527047,-131.86469,-131.400563,-131.814612,-132.500255,-132.453023,-131.742111,-131.409007,-131.941709,-132.559807,-132.357787,-131.631608,-131.445124,-132.071535,-132.593147,-132.245797,-131.538354,-131.507223,-132.198012,-132.598712,-132.122298,-131.466717,-131.592397,-132.315216,-132.576243,-131.993073,-131.420051,-131.696656,-132.417661,-132.526792,-131.864171,-131.40054,-131.815119,-132.500549,-132.452673,-131.74163,-131.409099,-131.942239,-132.559999,-132.357359,-131.631187,-131.445327,-132.072064,-132.593227,-132.245311,-131.538014,-131.507528,-132.198515,-132.598677"
+    ],
+    [
+     "Q",
+     "RF:RBW?",
+     "1000"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'at_freq': None, 'ch': None, 'desc': '9 kHz to 50 kHz', 'exclude': [], 'f_start': 9000.0, 'f_stop': 50000.0, 'high': -78.0, 'id': 557, 'kind': 'SPUR', 'low': None, 'nominal': 0.0, 'note': 'The test record (p. 80) records PASS or FAIL; the limit is the procedure threshold (p. 113: no spur above -78 dBm), as the specification (p. 41).', 'rbw': None, 'ref_level': -15.0, 'section': 'spur', 'stim': 'none', 'unit': 'dBm'}",
+   "case": "mdo3_verification.Runner.run_point[SPUR#557]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|SELect:CH1 OFF",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|SELect:RF_NORMal ON",
+    "MDO3|>>|SELect:RF_AVErage ON",
+    "MDO3|>>|SELect:RF_NORMal OFF",
+    "MDO3|>>|RF:RF_AVErage:NUMAVg 32",
+    "MDO3|>>|RF:STARt 9000",
+    "MDO3|>>|RF:STOP 50000",
+    "MDO3|>>|RF:REFLevel -15",
+    "MDO3|>>|RF:REFLevel?",
+    "MDO3|<<|-1.500000E+01",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "MDO3|>>|DATa:SOUrce RF_AVErage",
+    "MDO3|>>|DATa:ENCdg ASCIi",
+    "MDO3|>>|DATa:STARt 1",
+    "MDO3|>>|DATa:STOP 1000000",
+    "MDO3|>>|WFMOutpre:NR_Pt?",
+    "MDO3|<<|401",
+    "MDO3|>>|DATa:STOP 401",
+    "MDO3|>>|WFMOutpre:XINcr?",
+    "MDO3|<<|1.025000000e+02",
+    "MDO3|>>|WFMOutpre:XZEro?",
+    "MDO3|<<|9.000000000000e+03",
+    "MDO3|>>|WFMOutpre:YMUlt?",
+    "MDO3|<<|1.0",
+    "MDO3|>>|WFMOutpre:YOFf?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|WFMOutpre:YZEro?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|WFMOutpre:PT_Off?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|CURVe?",
+    "MDO3|<<|-132,-131.421865,-131.690699,-132.41266,-132.530073,-131.870928,-131.400874,-131.808541,-132.496696,-132.45719,-131.7479,-131.407937,-131.935348,-132.557474,-132.3629,-131.636676,-131.442723,-132.065182,-132.592149,-132.251617,-131.542465,-131.503603,-132.191964,-132.599097,-132.128552,-131.469678,-131.587727,-132.309757,-132.577992,-131.999467,-131.421723,-131.691156,-132.413046,-132.529823,-131.870408,-131.400845,-131.809046,-132.496995,-132.456845,-131.747416,-131.408023,-131.935878,-132.557671,-132.362475,-131.636252,-131.442921,-132.065712,-132.592235,-132.251133,-131.54212,-131.503903,-132.192469,-132.599068,-132.128031,-131.469429,-131.588115,-132.310214,-132.577849,-131.998934,-131.421581,-131.691613,-132.413433,-132.529573,-131.869887,-131.400817,-131.809551,-132.497293,-132.456499,-131.746933,-131.408111,-131.936407,-132.557868,-132.36205,-131.635828,-131.443119,-132.066241,-132.59232,-132.250649,-131.541776,-131.504203,-132.192973,-132.599038,-132.12751,-131.46918,-131.588502,-132.31067,-132.577705,-131.998401,-131.421439,-131.69207,-132.413819,-132.529322,-131.869367,-131.40079,-131.810057,-132.497591,-132.456153,-131.74645,-131.408198,-131.936937,-132.558064,-132.361625,-131.635405,-131.443317,-132.066771,-132.592405,-132.250164,-131.541432,-131.504503,-132.193478,-132.599007,-132.12699,-131.468932,-131.58889,-132.311125,-132.577561,-131.997868,-131.421299,-131.692528,-132.414204,-132.529071,-131.868847,-131.400763,-131.810562,-132.497889,-132.455807,-131.745967,-131.408286,-131.937467,-132.558259,-132.3612,-131.634982,-131.443516,-132.067301,-132.592489,-132.24968,-131.541089,-131.504804,-132.193982,-132.598976,-132.126469,-131.468684,-131.589279,-132.311581,-132.577416,-131.997336,-131.421158,-131.692985,-132.41459,-132.528819,-131.868327,-131.400736,-131.811068,-132.498186,-132.45546,-131.745484,-131.408375,-131.937997,-132.558454,-132.360774,-131.634559,-131.443716,-132.06783,-132.592573,-132.249195,-131.540746,-131.505105,-132.194486,-132.598945,-132.125948,-131.468437,-131.589667,-132.312036,-132.577271,-131.996803,-131.421018,-131.693443,-132.414975,-132.528567,-131.867807,-131.40071,-131.811574,-132.498482,-132.455113,-131.745002,-131.408464,-131.938527,-132.558649,-132.360348,-131.634137,-131.443916,-132.068359,-132.592656,-132.24871,-131.540403,-131.505406,-132.194991,-132.598913,-132.125427,-131.46819,-131.590056,-132.312491,-132.577126,-131.99627,-131.420878,-131.693902,-132.41536,-132.528315,-131.867288,-131.400684,-131.81208,-132.498779,-132.454766,-131.74452,-131.408553,-131.939058,-132.558843,-132.359922,-131.633715,-131.444116,-132.068889,-132.592739,-132.248225,-131.540061,-131.505708,-132.195494,-132.598881,-132.124905,-131.467943,-131.590445,-132.312946,-132.57698,-131.995737,-131.420739,-131.69436,-132.415744,-132.528062,-131.866768,-131.400659,-131.812586,-132.499075,-132.454418,-131.744038,-131.408643,-131.939588,-132.559037,-132.359496,-131.633293,-131.444317,-132.069418,-132.592822,-132.24774,-131.539719,-131.50601,-132.195998,-132.598848,-132.124384,-131.467697,-131.590835,-132.313401,-132.576834,-131.995204,-131.420601,-131.694819,-132.416128,-132.527809,-131.866248,-131.400634,-131.813092,-132.49937,-132.45407,-131.743556,-131.408733,-131.940118,-132.55923,-132.359069,-131.632871,-131.444518,-132.069947,-132.592904,-132.247255,-131.539377,-131.506313,-132.196502,-132.598815,-132.123863,-131.467451,-131.591225,-132.313855,-132.576687,-131.994671,-131.420462,-131.695278,-132.416512,-132.527555,-131.865729,-131.40061,-131.813599,-132.499666,-132.453721,-131.743074,-131.408824,-131.940648,-132.559423,-132.358642,-131.63245,-131.44472,-132.070477,-132.592985,-132.246769,-131.539036,-131.506616,-132.197005,-132.598781,-132.123341,-131.467206,-131.591615,-132.314309,-132.576539,-131.994138,-131.420325,-131.695737,-132.416895,-132.527301,-131.86521,-131.400586,-131.814105,-132.499961,-132.453372,-131.742593,-131.408915,-131.941179,-132.559615,-132.358214,-131.632029,-131.444922,-132.071006,-132.593066,-132.246283,-131.538695,-131.50692,-132.197508,-132.598747,-132.12282,-131.466961,-131.592006,-132.314763,-132.576392,-131.993605,-131.420187,-131.696196,-132.417278,-132.527047,-131.86469,-131.400563,-131.814612,-132.500255,-132.453023,-131.742111,-131.409007,-131.941709,-132.559807,-132.357787,-131.631608,-131.445124,-132.071535,-132.593147,-132.245797,-131.538354,-131.507223,-132.198012,-132.598712,-132.122298,-131.466717,-131.592397,-132.315216,-132.576243,-131.993073,-131.420051,-131.696656,-132.417661,-132.526792,-131.864171,-131.40054,-131.815119,-132.500549,-132.452673,-131.74163,-131.409099,-131.942239,-132.559999,-132.357359,-131.631187,-131.445327,-132.072064,-132.593227,-132.245311,-131.538014,-131.507528,-132.198515,-132.598677",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (-131.40054, {'at_hz': 48257.5})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "SELect:RF_NORMal ON"
+    ],
+    [
+     "W",
+     "SELect:RF_AVErage ON"
+    ],
+    [
+     "W",
+     "SELect:RF_NORMal OFF"
+    ],
+    [
+     "W",
+     "RF:RF_AVErage:NUMAVg 32"
+    ],
+    [
+     "W",
+     "RF:STARt 9000"
+    ],
+    [
+     "W",
+     "RF:STOP 50000"
+    ],
+    [
+     "W",
+     "RF:REFLevel -15"
+    ],
+    [
+     "Q",
+     "RF:REFLevel?",
+     "-1.500000E+01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     60.0
+    ],
+    [
+     "W",
+     "DATa:SOUrce RF_AVErage"
+    ],
+    [
+     "W",
+     "DATa:ENCdg ASCIi"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 1000000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "401"
+    ],
+    [
+     "W",
+     "DATa:STOP 401"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "1.025000000e+02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "9.000000000000e+03"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "1.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:PT_Off?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "-132,-131.421865,-131.690699,-132.41266,-132.530073,-131.870928,-131.400874,-131.808541,-132.496696,-132.45719,-131.7479,-131.407937,-131.935348,-132.557474,-132.3629,-131.636676,-131.442723,-132.065182,-132.592149,-132.251617,-131.542465,-131.503603,-132.191964,-132.599097,-132.128552,-131.469678,-131.587727,-132.309757,-132.577992,-131.999467,-131.421723,-131.691156,-132.413046,-132.529823,-131.870408,-131.400845,-131.809046,-132.496995,-132.456845,-131.747416,-131.408023,-131.935878,-132.557671,-132.362475,-131.636252,-131.442921,-132.065712,-132.592235,-132.251133,-131.54212,-131.503903,-132.192469,-132.599068,-132.128031,-131.469429,-131.588115,-132.310214,-132.577849,-131.998934,-131.421581,-131.691613,-132.413433,-132.529573,-131.869887,-131.400817,-131.809551,-132.497293,-132.456499,-131.746933,-131.408111,-131.936407,-132.557868,-132.36205,-131.635828,-131.443119,-132.066241,-132.59232,-132.250649,-131.541776,-131.504203,-132.192973,-132.599038,-132.12751,-131.46918,-131.588502,-132.31067,-132.577705,-131.998401,-131.421439,-131.69207,-132.413819,-132.529322,-131.869367,-131.40079,-131.810057,-132.497591,-132.456153,-131.74645,-131.408198,-131.936937,-132.558064,-132.361625,-131.635405,-131.443317,-132.066771,-132.592405,-132.250164,-131.541432,-131.504503,-132.193478,-132.599007,-132.12699,-131.468932,-131.58889,-132.311125,-132.577561,-131.997868,-131.421299,-131.692528,-132.414204,-132.529071,-131.868847,-131.400763,-131.810562,-132.497889,-132.455807,-131.745967,-131.408286,-131.937467,-132.558259,-132.3612,-131.634982,-131.443516,-132.067301,-132.592489,-132.24968,-131.541089,-131.504804,-132.193982,-132.598976,-132.126469,-131.468684,-131.589279,-132.311581,-132.577416,-131.997336,-131.421158,-131.692985,-132.41459,-132.528819,-131.868327,-131.400736,-131.811068,-132.498186,-132.45546,-131.745484,-131.408375,-131.937997,-132.558454,-132.360774,-131.634559,-131.443716,-132.06783,-132.592573,-132.249195,-131.540746,-131.505105,-132.194486,-132.598945,-132.125948,-131.468437,-131.589667,-132.312036,-132.577271,-131.996803,-131.421018,-131.693443,-132.414975,-132.528567,-131.867807,-131.40071,-131.811574,-132.498482,-132.455113,-131.745002,-131.408464,-131.938527,-132.558649,-132.360348,-131.634137,-131.443916,-132.068359,-132.592656,-132.24871,-131.540403,-131.505406,-132.194991,-132.598913,-132.125427,-131.46819,-131.590056,-132.312491,-132.577126,-131.99627,-131.420878,-131.693902,-132.41536,-132.528315,-131.867288,-131.400684,-131.81208,-132.498779,-132.454766,-131.74452,-131.408553,-131.939058,-132.558843,-132.359922,-131.633715,-131.444116,-132.068889,-132.592739,-132.248225,-131.540061,-131.505708,-132.195494,-132.598881,-132.124905,-131.467943,-131.590445,-132.312946,-132.57698,-131.995737,-131.420739,-131.69436,-132.415744,-132.528062,-131.866768,-131.400659,-131.812586,-132.499075,-132.454418,-131.744038,-131.408643,-131.939588,-132.559037,-132.359496,-131.633293,-131.444317,-132.069418,-132.592822,-132.24774,-131.539719,-131.50601,-132.195998,-132.598848,-132.124384,-131.467697,-131.590835,-132.313401,-132.576834,-131.995204,-131.420601,-131.694819,-132.416128,-132.527809,-131.866248,-131.400634,-131.813092,-132.49937,-132.45407,-131.743556,-131.408733,-131.940118,-132.55923,-132.359069,-131.632871,-131.444518,-132.069947,-132.592904,-132.247255,-131.539377,-131.506313,-132.196502,-132.598815,-132.123863,-131.467451,-131.591225,-132.313855,-132.576687,-131.994671,-131.420462,-131.695278,-132.416512,-132.527555,-131.865729,-131.40061,-131.813599,-132.499666,-132.453721,-131.743074,-131.408824,-131.940648,-132.559423,-132.358642,-131.63245,-131.44472,-132.070477,-132.592985,-132.246769,-131.539036,-131.506616,-132.197005,-132.598781,-132.123341,-131.467206,-131.591615,-132.314309,-132.576539,-131.994138,-131.420325,-131.695737,-132.416895,-132.527301,-131.86521,-131.400586,-131.814105,-132.499961,-132.453372,-131.742593,-131.408915,-131.941179,-132.559615,-132.358214,-131.632029,-131.444922,-132.071006,-132.593066,-132.246283,-131.538695,-131.50692,-132.197508,-132.598747,-132.12282,-131.466961,-131.592006,-132.314763,-132.576392,-131.993605,-131.420187,-131.696196,-132.417278,-132.527047,-131.86469,-131.400563,-131.814612,-132.500255,-132.453023,-131.742111,-131.409007,-131.941709,-132.559807,-132.357787,-131.631608,-131.445124,-132.071535,-132.593147,-132.245797,-131.538354,-131.507223,-132.198012,-132.598712,-132.122298,-131.466717,-131.592397,-132.315216,-132.576243,-131.993073,-131.420051,-131.696656,-132.417661,-132.526792,-131.864171,-131.40054,-131.815119,-132.500549,-132.452673,-131.74163,-131.409099,-131.942239,-132.559999,-132.357359,-131.631187,-131.445327,-132.072064,-132.593227,-132.245311,-131.538014,-131.507528,-132.198515,-132.598677"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': None, 'desc': '+10 dBm, 50 kHz', 'f_start': 50000.0, 'f_step': 100000.0, 'f_stop': 50000.0, 'high': 1.0, 'id': 564, 'kind': 'ABSAMP', 'level_dbm': 10.0, 'low': -1.0, 'nominal': 10.0, 'section': 'level', 'span': 100000.0, 'stim': 'rf', 'unit': 'dB'}",
+   "case": "mdo3_verification.Runner.run_point[ABSAMP#564]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|SELect:CH1 OFF",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|SELect:RF_NORMal ON",
+    "MDO3|>>|RF:FREQuency 50000",
+    "MDO3|>>|RF:SPAN 100000",
+    "MDO3|>>|RF:REFLevel 10",
+    "MDO3|>>|RF:REFLevel?",
+    "MDO3|<<|1.000000E+01",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "96270A|>>|FREQ 50000;:POW 10.000",
+    "96270A|>>|SYST:ERR?",
+    "96270A|<<|0",
+    "96270A|>>|FREQ?",
+    "96270A|<<|5.000000000000E+04",
+    "96270A|>>|POW?",
+    "96270A|<<|1.000000000000E+01",
+    "96270A|>>|OUTP ON",
+    "96270A|>>|OUTP?",
+    "96270A|<<|1",
+    "MDO3|>>|RF:FREQuency 50000",
+    "MDO3|>>|RF:SPAN 100000",
+    "MDO3|>>|DATa:SOUrce RF_NORMal",
+    "MDO3|>>|DATa:ENCdg ASCIi",
+    "MDO3|>>|DATa:STARt 1",
+    "MDO3|>>|DATa:STOP 1000000",
+    "MDO3|>>|WFMOutpre:NR_Pt?",
+    "MDO3|<<|401",
+    "MDO3|>>|DATa:STOP 401",
+    "MDO3|>>|WFMOutpre:XINcr?",
+    "MDO3|<<|2.500000000e+02",
+    "MDO3|>>|WFMOutpre:XZEro?",
+    "MDO3|<<|0.000000000000e+00",
+    "MDO3|>>|WFMOutpre:YMUlt?",
+    "MDO3|<<|1.0",
+    "MDO3|>>|WFMOutpre:YOFf?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|WFMOutpre:YZEro?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|WFMOutpre:PT_Off?",
+    "MDO3|<<|0.0",
+    "MDO3|>>|CURVe?",
+    "MDO3|<<|-132,-131.421865,-131.690699,-132.41266,-132.530073,-131.870928,-131.400874,-131.808541,-132.496696,-132.45719,-131.7479,-131.407937,-131.935348,-132.557474,-132.3629,-131.636676,-131.442723,-132.065182,-132.592149,-132.251617,-131.542465,-131.503603,-132.191964,-132.599097,-132.128552,-131.469678,-131.587727,-132.309757,-132.577992,-131.999467,-131.421723,-131.691156,-132.413046,-132.529823,-131.870408,-131.400845,-131.809046,-132.496995,-132.456845,-131.747416,-131.408023,-131.935878,-132.557671,-132.362475,-131.636252,-131.442921,-132.065712,-132.592235,-132.251133,-131.54212,-131.503903,-132.192469,-132.599068,-132.128031,-131.469429,-131.588115,-132.310214,-132.577849,-131.998934,-131.421581,-131.691613,-132.413433,-132.529573,-131.869887,-131.400817,-131.809551,-132.497293,-132.456499,-131.746933,-131.408111,-131.936407,-132.557868,-132.36205,-131.635828,-131.443119,-132.066241,-132.59232,-132.250649,-131.541776,-131.504203,-132.192973,-132.599038,-132.12751,-131.46918,-131.588502,-132.31067,-132.577705,-131.998401,-131.421439,-131.69207,-132.413819,-132.529322,-131.869367,-131.40079,-131.810057,-132.497591,-132.456153,-131.74645,-131.408198,-131.936937,-132.558064,-132.361625,-131.635405,-131.443317,-132.066771,-132.592405,-132.250164,-131.541432,-131.504503,-132.193478,-132.599007,-132.12699,-131.468932,-131.58889,-132.311125,-132.577561,-131.997868,-131.421299,-131.692528,-132.414204,-132.529071,-131.868847,-131.400763,-131.810562,-132.497889,-132.455807,-131.745967,-131.408286,-131.937467,-132.558259,-132.3612,-131.634982,-131.443516,-132.067301,-132.592489,-132.24968,-131.541089,-131.504804,-132.193982,-132.598976,-132.126469,-131.468684,-131.589279,-132.311581,-132.577416,-131.997336,-131.421158,-131.692985,-132.41459,-132.528819,-131.868327,-131.400736,-131.811068,-132.498186,-132.45546,-131.745484,-131.408375,-131.937997,-132.558454,-132.360774,-131.634559,-131.443716,-132.06783,-132.592573,-132.249195,-131.540746,-131.505105,-132.194486,-132.598945,-132.125948,-131.468437,-131.589667,-132.312036,-132.577271,-131.996803,-131.421018,-131.693443,-132.414975,-132.528567,-131.867807,-131.40071,-131.811574,-132.498482,-132.455113,-131.745002,-131.408464,-131.938527,-132.558649,-132.360348,-131.634137,-131.443916,-132.068359,-132.592656,-132.24871,-131.540403,-131.505406,-132.194991,-132.598913,-132.125427,9.8,9.8,9.8,-132.577126,-131.99627,-131.420878,-131.693902,-132.41536,-132.528315,-131.867288,-131.400684,-131.81208,-132.498779,-132.454766,-131.74452,-131.408553,-131.939058,-132.558843,-132.359922,-131.633715,-131.444116,-132.068889,-132.592739,-132.248225,-131.540061,-131.505708,-132.195494,-132.598881,-132.124905,-131.467943,-131.590445,-132.312946,-132.57698,-131.995737,-131.420739,-131.69436,-132.415744,-132.528062,-131.866768,-131.400659,-131.812586,-132.499075,-132.454418,-131.744038,-131.408643,-131.939588,-132.559037,-132.359496,-131.633293,-131.444317,-132.069418,-132.592822,-132.24774,-131.539719,-131.50601,-132.195998,-132.598848,-132.124384,-131.467697,-131.590835,-132.313401,-132.576834,-131.995204,-131.420601,-131.694819,-132.416128,-132.527809,-131.866248,-131.400634,-131.813092,-132.49937,-132.45407,-131.743556,-131.408733,-131.940118,-132.55923,-132.359069,-131.632871,-131.444518,-132.069947,-132.592904,-132.247255,-131.539377,-131.506313,-132.196502,-132.598815,-132.123863,-131.467451,-131.591225,-132.313855,-132.576687,-131.994671,-131.420462,-131.695278,-132.416512,-132.527555,-131.865729,-131.40061,-131.813599,-132.499666,-132.453721,-131.743074,-131.408824,-131.940648,-132.559423,-132.358642,-131.63245,-131.44472,-132.070477,-132.592985,-132.246769,-131.539036,-131.506616,-132.197005,-132.598781,-132.123341,-131.467206,-131.591615,-132.314309,-132.576539,-131.994138,-131.420325,-131.695737,-132.416895,-132.527301,-131.86521,-131.400586,-131.814105,-132.499961,-132.453372,-131.742593,-131.408915,-131.941179,-132.559615,-132.358214,-131.632029,-131.444922,-132.071006,-132.593066,-132.246283,-131.538695,-131.50692,-132.197508,-132.598747,-132.12282,-131.466961,-131.592006,-132.314763,-132.576392,-131.993605,-131.420187,-131.696196,-132.417278,-132.527047,-131.86469,-131.400563,-131.814612,-132.500255,-132.453023,-131.742111,-131.409007,-131.941709,-132.559807,-132.357787,-131.631608,-131.445124,-132.071535,-132.593147,-132.245797,-131.538354,-131.507223,-132.198012,-132.598712,-132.122298,-131.466717,-131.592397,-132.315216,-132.576243,-131.993073,-131.420051,-131.696656,-132.417661,-132.526792,-131.864171,-131.40054,-131.815119,-132.500549,-132.452673,-131.74163,-131.409099,-131.942239,-132.559999,-132.357359,-131.631187,-131.445327,-132.072064,-132.593227,-132.245311,-131.538014,-131.507528,-132.198515,-132.598677",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (-0.1999999999999993, {'points': 1, 'worst_hz': 50000.0})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "SELect:RF_NORMal ON"
+    ],
+    [
+     "W",
+     "RF:FREQuency 50000"
+    ],
+    [
+     "W",
+     "RF:SPAN 100000"
+    ],
+    [
+     "W",
+     "RF:REFLevel 10"
+    ],
+    [
+     "Q",
+     "RF:REFLevel?",
+     "1.000000E+01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "FREQ 50000;:POW 10.000"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "0"
+    ],
+    [
+     "Q",
+     "FREQ?",
+     "5.000000000000E+04"
+    ],
+    [
+     "Q",
+     "POW?",
+     "1.000000000000E+01"
+    ],
+    [
+     "W",
+     "OUTP ON"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "1"
+    ],
+    [
+     "W",
+     "RF:FREQuency 50000"
+    ],
+    [
+     "W",
+     "RF:SPAN 100000"
+    ],
+    [
+     "sleep",
+     1.5
+    ],
+    [
+     "W",
+     "DATa:SOUrce RF_NORMal"
+    ],
+    [
+     "W",
+     "DATa:ENCdg ASCIi"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 1000000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "401"
+    ],
+    [
+     "W",
+     "DATa:STOP 401"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "2.500000000e+02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "0.000000000000e+00"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "1.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "WFMOutpre:PT_Off?",
+     "0.0"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "-132,-131.421865,-131.690699,-132.41266,-132.530073,-131.870928,-131.400874,-131.808541,-132.496696,-132.45719,-131.7479,-131.407937,-131.935348,-132.557474,-132.3629,-131.636676,-131.442723,-132.065182,-132.592149,-132.251617,-131.542465,-131.503603,-132.191964,-132.599097,-132.128552,-131.469678,-131.587727,-132.309757,-132.577992,-131.999467,-131.421723,-131.691156,-132.413046,-132.529823,-131.870408,-131.400845,-131.809046,-132.496995,-132.456845,-131.747416,-131.408023,-131.935878,-132.557671,-132.362475,-131.636252,-131.442921,-132.065712,-132.592235,-132.251133,-131.54212,-131.503903,-132.192469,-132.599068,-132.128031,-131.469429,-131.588115,-132.310214,-132.577849,-131.998934,-131.421581,-131.691613,-132.413433,-132.529573,-131.869887,-131.400817,-131.809551,-132.497293,-132.456499,-131.746933,-131.408111,-131.936407,-132.557868,-132.36205,-131.635828,-131.443119,-132.066241,-132.59232,-132.250649,-131.541776,-131.504203,-132.192973,-132.599038,-132.12751,-131.46918,-131.588502,-132.31067,-132.577705,-131.998401,-131.421439,-131.69207,-132.413819,-132.529322,-131.869367,-131.40079,-131.810057,-132.497591,-132.456153,-131.74645,-131.408198,-131.936937,-132.558064,-132.361625,-131.635405,-131.443317,-132.066771,-132.592405,-132.250164,-131.541432,-131.504503,-132.193478,-132.599007,-132.12699,-131.468932,-131.58889,-132.311125,-132.577561,-131.997868,-131.421299,-131.692528,-132.414204,-132.529071,-131.868847,-131.400763,-131.810562,-132.497889,-132.455807,-131.745967,-131.408286,-131.937467,-132.558259,-132.3612,-131.634982,-131.443516,-132.067301,-132.592489,-132.24968,-131.541089,-131.504804,-132.193982,-132.598976,-132.126469,-131.468684,-131.589279,-132.311581,-132.577416,-131.997336,-131.421158,-131.692985,-132.41459,-132.528819,-131.868327,-131.400736,-131.811068,-132.498186,-132.45546,-131.745484,-131.408375,-131.937997,-132.558454,-132.360774,-131.634559,-131.443716,-132.06783,-132.592573,-132.249195,-131.540746,-131.505105,-132.194486,-132.598945,-132.125948,-131.468437,-131.589667,-132.312036,-132.577271,-131.996803,-131.421018,-131.693443,-132.414975,-132.528567,-131.867807,-131.40071,-131.811574,-132.498482,-132.455113,-131.745002,-131.408464,-131.938527,-132.558649,-132.360348,-131.634137,-131.443916,-132.068359,-132.592656,-132.24871,-131.540403,-131.505406,-132.194991,-132.598913,-132.125427,9.8,9.8,9.8,-132.577126,-131.99627,-131.420878,-131.693902,-132.41536,-132.528315,-131.867288,-131.400684,-131.81208,-132.498779,-132.454766,-131.74452,-131.408553,-131.939058,-132.558843,-132.359922,-131.633715,-131.444116,-132.068889,-132.592739,-132.248225,-131.540061,-131.505708,-132.195494,-132.598881,-132.124905,-131.467943,-131.590445,-132.312946,-132.57698,-131.995737,-131.420739,-131.69436,-132.415744,-132.528062,-131.866768,-131.400659,-131.812586,-132.499075,-132.454418,-131.744038,-131.408643,-131.939588,-132.559037,-132.359496,-131.633293,-131.444317,-132.069418,-132.592822,-132.24774,-131.539719,-131.50601,-132.195998,-132.598848,-132.124384,-131.467697,-131.590835,-132.313401,-132.576834,-131.995204,-131.420601,-131.694819,-132.416128,-132.527809,-131.866248,-131.400634,-131.813092,-132.49937,-132.45407,-131.743556,-131.408733,-131.940118,-132.55923,-132.359069,-131.632871,-131.444518,-132.069947,-132.592904,-132.247255,-131.539377,-131.506313,-132.196502,-132.598815,-132.123863,-131.467451,-131.591225,-132.313855,-132.576687,-131.994671,-131.420462,-131.695278,-132.416512,-132.527555,-131.865729,-131.40061,-131.813599,-132.499666,-132.453721,-131.743074,-131.408824,-131.940648,-132.559423,-132.358642,-131.63245,-131.44472,-132.070477,-132.592985,-132.246769,-131.539036,-131.506616,-132.197005,-132.598781,-132.123341,-131.467206,-131.591615,-132.314309,-132.576539,-131.994138,-131.420325,-131.695737,-132.416895,-132.527301,-131.86521,-131.400586,-131.814105,-132.499961,-132.453372,-131.742593,-131.408915,-131.941179,-132.559615,-132.358214,-131.632029,-131.444922,-132.071006,-132.593066,-132.246283,-131.538695,-131.50692,-132.197508,-132.598747,-132.12282,-131.466961,-131.592006,-132.314763,-132.576392,-131.993605,-131.420187,-131.696196,-132.417278,-132.527047,-131.86469,-131.400563,-131.814612,-132.500255,-132.453023,-131.742111,-131.409007,-131.941709,-132.559807,-132.357787,-131.631608,-131.445124,-132.071535,-132.593147,-132.245797,-131.538354,-131.507223,-132.198012,-132.598712,-132.122298,-131.466717,-131.592397,-132.315216,-132.576243,-131.993073,-131.420051,-131.696656,-132.417661,-132.526792,-131.864171,-131.40054,-131.815119,-132.500549,-132.452673,-131.74163,-131.409099,-131.942239,-132.559999,-132.357359,-131.631187,-131.445327,-132.072064,-132.593227,-132.245311,-131.538014,-131.507528,-132.198515,-132.598677"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'Aux out HIGH, 1 MΩ', 'high': None, 'id': 597, 'kind': 'TRIGOUT', 'low': 2.25, 'nominal': 2.25, 'section': 'trig', 'state': 'HIGH', 'stim': 'none', 'term': '1M', 'unit': 'V'}",
+   "case": "mdo3_verification.Runner.run_point[TRIGOUT#597]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 1000000",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|1.0E+06",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 1",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E+00",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
+    "MDO3|>>|MEASUrement:MEAS1:TYPe HIGH",
+    "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
+    "MDO3|>>|MEASUrement:MEAS1:STATE ON",
+    "MDO3|>>|ACQuire:MODe SAMple",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|MEASUrement:STATIstics:MODe OFF",
+    "MDO3|>>|MEASUrement:STATIstics:WEIghting 16",
+    "MDO3|>>|MEASUrement:STATIstics:MODe ALL",
+    "MDO3|>>|MEASUrement:MEAS1:MEAN?",
+    "MDO3|<<|3.300000000e+00",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (3.3, {})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 1000000"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "1.0E+06"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 1"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:TYPe HIGH"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:SOUrce1 CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:MEAS1:STATE ON"
+    ],
+    [
+     "W",
+     "ACQuire:MODe SAMple"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe OFF"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:WEIghting 16"
+    ],
+    [
+     "W",
+     "MEASUrement:STATIstics:MODe ALL"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "MEASUrement:MEAS1:MEAN?",
+     "3.300000000e+00"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': None, 'desc': 'Sine wave 10 kHz, 2.5 V p-p, 50 Ω', 'high': 10001.3, 'id': 601, 'kind': 'AFGFREQ', 'low': 9998.7, 'nominal': 10000.0, 'req': ['AFG'], 'section': 'afgf', 'stim': 'none', 'unit': 'Hz', 'vpp': 2.5, 'wave': 'SINE'}",
+   "case": "mdo3_verification.Runner.run_point[AFGFREQ#601]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|AFG:OUTPut:LOAd:IMPEDance FIFty",
+    "MDO3|>>|AFG:OUTPut:LOAd:IMPEDance?",
+    "MDO3|<<|FIFTY",
+    "MDO3|>>|AFG:FUNCtion SINE",
+    "MDO3|>>|AFG:FUNCtion?",
+    "MDO3|<<|SINE",
+    "MDO3|>>|AFG:FREQuency 10000",
+    "MDO3|>>|AFG:FREQuency?",
+    "MDO3|<<|1.000000000000E+04",
+    "MDO3|>>|AFG:AMPLitude 2.5",
+    "MDO3|>>|AFG:AMPLitude?",
+    "MDO3|<<|2.500000E+00",
+    "MDO3|>>|AFG:OFFSet 0",
+    "MDO3|>>|AFG:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|AFG:OUTPut:STATE ON",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "Counter|>>|MEASure:FREQuency?",
+    "Counter|<<|1.000000200e+04",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (10000.002, {})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:LOAd:IMPEDance FIFty"
+    ],
+    [
+     "Q",
+     "AFG:OUTPut:LOAd:IMPEDance?",
+     "FIFTY"
+    ],
+    [
+     "W",
+     "AFG:FUNCtion SINE"
+    ],
+    [
+     "Q",
+     "AFG:FUNCtion?",
+     "SINE"
+    ],
+    [
+     "W",
+     "AFG:FREQuency 10000"
+    ],
+    [
+     "Q",
+     "AFG:FREQuency?",
+     "1.000000000000E+04"
+    ],
+    [
+     "W",
+     "AFG:AMPLitude 2.5"
+    ],
+    [
+     "Q",
+     "AFG:AMPLitude?",
+     "2.500000E+00"
+    ],
+    [
+     "W",
+     "AFG:OFFSet 0"
+    ],
+    [
+     "Q",
+     "AFG:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE ON"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "MEASure:FREQuency?",
+     "1.000000200e+04"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': None, 'desc': 'Square 20 mV p-p at 1 kHz, 0 V offset, 50 Ω (rms)', 'freq': 1000.0, 'high': 0.01065, 'id': 605, 'kind': 'AFGAMP', 'low': 0.00935, 'nominal': 0.01, 'offset': 0.0, 'req': ['AFG'], 'section': 'afga', 'stim': 'none', 'unit': 'V', 'vpp': 0.02}",
+   "case": "mdo3_verification.Runner.run_point[AFGAMP#605]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|AFG:OUTPut:LOAd:IMPEDance FIFty",
+    "MDO3|>>|AFG:OUTPut:LOAd:IMPEDance?",
+    "MDO3|<<|FIFTY",
+    "MDO3|>>|AFG:FUNCtion SQUare",
+    "MDO3|>>|AFG:FUNCtion?",
+    "MDO3|<<|SQUARE",
+    "MDO3|>>|AFG:FREQuency 1000",
+    "MDO3|>>|AFG:FREQuency?",
+    "MDO3|<<|1.000000000000E+03",
+    "MDO3|>>|AFG:AMPLitude 0.02",
+    "MDO3|>>|AFG:AMPLitude?",
+    "MDO3|<<|2.000000E-02",
+    "MDO3|>>|AFG:OFFSet 0",
+    "MDO3|>>|AFG:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|AFG:OUTPut:STATE ON",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "RefDMM|>>|CONFigure:VOLTage:AC",
+    "RefDMM|>>|VOLTage:AC:BANDwidth 200",
+    "RefDMM|>>|READ?",
+    "RefDMM|<<|1.002000000e-02",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.01002, {})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:LOAd:IMPEDance FIFty"
+    ],
+    [
+     "Q",
+     "AFG:OUTPut:LOAd:IMPEDance?",
+     "FIFTY"
+    ],
+    [
+     "W",
+     "AFG:FUNCtion SQUare"
+    ],
+    [
+     "Q",
+     "AFG:FUNCtion?",
+     "SQUARE"
+    ],
+    [
+     "W",
+     "AFG:FREQuency 1000"
+    ],
+    [
+     "Q",
+     "AFG:FREQuency?",
+     "1.000000000000E+03"
+    ],
+    [
+     "W",
+     "AFG:AMPLitude 0.02"
+    ],
+    [
+     "Q",
+     "AFG:AMPLitude?",
+     "2.000000E-02"
+    ],
+    [
+     "W",
+     "AFG:OFFSet 0"
+    ],
+    [
+     "Q",
+     "AFG:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE ON"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "CONFigure:VOLTage:AC"
+    ],
+    [
+     "W",
+     "VOLTage:AC:BANDwidth 200"
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "1.002000000e-02"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': None, 'desc': 'DC 20 mV into 50 Ω', 'high': 0.0213, 'id': 607, 'kind': 'AFGOFF', 'level': 0.02, 'low': 0.0187, 'nominal': 0.02, 'req': ['AFG'], 'section': 'afgo', 'stim': 'none', 'unit': 'V'}",
+   "case": "mdo3_verification.Runner.run_point[AFGOFF#607]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|AFG:OUTPut:LOAd:IMPEDance FIFty",
+    "MDO3|>>|AFG:OUTPut:LOAd:IMPEDance?",
+    "MDO3|<<|FIFTY",
+    "MDO3|>>|AFG:FUNCtion DC",
+    "MDO3|>>|AFG:FUNCtion?",
+    "MDO3|<<|DC",
+    "MDO3|>>|AFG:OFFSet 0.02",
+    "MDO3|>>|AFG:OFFSet?",
+    "MDO3|<<|2.000000E-02",
+    "MDO3|>>|AFG:OUTPut:STATE ON",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "RefDMM|>>|CONFigure:VOLTage:DC",
+    "RefDMM|>>|READ?",
+    "RefDMM|<<|2.002000000e-02",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.02002, {})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:LOAd:IMPEDance FIFty"
+    ],
+    [
+     "Q",
+     "AFG:OUTPut:LOAd:IMPEDance?",
+     "FIFTY"
+    ],
+    [
+     "W",
+     "AFG:FUNCtion DC"
+    ],
+    [
+     "Q",
+     "AFG:FUNCtion?",
+     "DC"
+    ],
+    [
+     "W",
+     "AFG:OFFSet 0.02"
+    ],
+    [
+     "Q",
+     "AFG:OFFSet?",
+     "2.000000E-02"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE ON"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "CONFigure:VOLTage:DC"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "Q",
+     "READ?",
+     "2.002000000e-02"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 1 V/div, input -5 V, offset -5 V', 'high': -4.883, 'id': 610, 'kind': 'DVMDC', 'low': -5.117, 'nominal': -5.0, 'offset': -5.0, 'req': ['DVM'], 'section': 'dvmdc', 'stim': 'cal', 'unit': 'V', 'vscale': 1.0}",
+   "case": "mdo3_verification.Runner.run_point[DVMDC#610]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 1000000",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|1.0E+06",
+    "MDO3|>>|CH1:BANdwidth 2.000000E+07",
+    "MDO3|>>|CH1:BANdwidth?",
+    "MDO3|<<|2.0000E+07",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 1",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|1.000000E+00",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet -5",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|-5.000000E+00",
+    "MDO3|>>|HORizontal:SCAle 0.001",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|0.001",
+    "MDO3|>>|TRIGger:A:TYPe EDGe",
+    "MDO3|>>|TRIGger:A:EDGE:SOUrce LINE",
+    "MDO3|>>|TRIGger:A:MODe AUTO",
+    "MDO3|>>|ACQuire:MODe AVErage",
+    "MDO3|>>|ACQuire:NUMAVg 16",
+    "MDO3|>>|ACQuire:STOPAfter RUNSTop",
+    "MDO3|>>|ACQuire:STATE RUN",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "MDO3|>>|DVM:MODe DC",
+    "MDO3|>>|DVM:MODe?",
+    "MDO3|<<|DC",
+    "MDO3|>>|DVM:SOUrce CH2",
+    "MDO3|>>|DVM:SOUrce CH1",
+    "MDO3|>>|DVM:SOUrce?",
+    "MDO3|<<|CH1",
+    "MDO3|>>|DVM:DISPLAYSTYle MINimum",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP Z1M",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|OUT -5.000000000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|-5.000000000,V,240000000.0,HZ",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "MDO3|>>|DVM:MEASUrement:VALue?",
+    "MDO3|<<|-5.005000000e+00",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (-5.005, {})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 1000000"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "1.0E+06"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth 2.000000E+07"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "2.0000E+07"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 1"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "1.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet -5"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "-5.000000E+00"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "0.001"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce LINE"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "DVM:MODe DC"
+    ],
+    [
+     "Q",
+     "DVM:MODe?",
+     "DC"
+    ],
+    [
+     "W",
+     "DVM:SOUrce CH2"
+    ],
+    [
+     "W",
+     "DVM:SOUrce CH1"
+    ],
+    [
+     "Q",
+     "DVM:SOUrce?",
+     "CH1"
+    ],
+    [
+     "W",
+     "DVM:DISPLAYSTYle MINimum"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "W",
+     "OUT_IMP Z1M"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "W",
+     "OUT -5.000000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "-5.000000000,V,240000000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "DVM:MEASUrement:VALue?",
+     "-5.005000000e+00"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 5 mV/div, 20 mV p-p square at 1 kHz (rms)', 'freq': 1000.0, 'high': 0.0102, 'id': 646, 'kind': 'DVMAC', 'low': 0.0098, 'nominal': 0.01, 'req': ['DVM'], 'section': 'dvmac', 'stim': 'cal', 'unit': 'V', 'vpp': 0.02, 'vscale': 0.005}",
+   "case": "mdo3_verification.Runner.run_point[DVMAC#646]",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 50",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|5.0E+01",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.005",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|5.000000E-03",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|DVM:MODe ACRMS",
+    "MDO3|>>|DVM:MODe?",
+    "MDO3|<<|ACRMS",
+    "MDO3|>>|DVM:SOUrce CH2",
+    "MDO3|>>|DVM:SOUrce CH1",
+    "MDO3|>>|DVM:SOUrce?",
+    "MDO3|<<|CH1",
+    "MDO3|>>|DVM:DISPLAYSTYle MINimum",
+    "MDO3|>>|*ESR?",
+    "MDO3|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|SCOPE SQUARE",
+    "5560A|>>|OUT 0.02V,1kHz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "MDO3|>>|DVM:MEASUrement:VALue?",
+    "MDO3|<<|1.002000000e-02",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (0.01002, {})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 50"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "5.0E+01"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.005"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "5.000000E-03"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "DVM:MODe ACRMS"
+    ],
+    [
+     "Q",
+     "DVM:MODe?",
+     "ACRMS"
+    ],
+    [
+     "W",
+     "DVM:SOUrce CH2"
+    ],
+    [
+     "W",
+     "DVM:SOUrce CH1"
+    ],
+    [
+     "Q",
+     "DVM:SOUrce?",
+     "CH1"
+    ],
+    [
+     "W",
+     "DVM:DISPLAYSTYle MINimum"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "SCOPE SQUARE"
+    ],
+    [
+     "W",
+     "OUT 0.02V,1kHz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "DVM:MEASUrement:VALue?",
+     "1.002000000e-02"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'counter': 'trigger', 'desc': 'CH1 9.0000 Hz', 'freq': 9.0, 'high': 9.0002, 'hscale': 0.02, 'id': 666, 'kind': 'DVMFREQ', 'low': 8.9998, 'nominal': 9.0, 'req': ['DVM'], 'section': 'dvmf', 'stim': 'cal', 'unit': 'Hz', 'vpp': 1.0, 'vscale': 0.2, 'waveform': 'square'}",
+   "case": "mdo3_verification.Runner.run_point[DVMFREQ#666]",
+   "log": [
+    "MDO3|>>|FACtory",
+    "MDO3|>>|*OPC?",
+    "MDO3|<<|1",
+    "MDO3|>>|HEADer OFF",
+    "MDO3|>>|VERBose OFF",
+    "MDO3|>>|SELect:CH1 ON",
+    "MDO3|>>|SELect:CH2 OFF",
+    "MDO3|>>|SELect:CH3 OFF",
+    "MDO3|>>|SELect:CH4 OFF",
+    "MDO3|>>|CH1:TERmination 50",
+    "MDO3|>>|CH1:TERmination?",
+    "MDO3|<<|5.0E+01",
+    "MDO3|>>|CH1:COUPling DC",
+    "MDO3|>>|CH1:SCAle 0.2",
+    "MDO3|>>|CH1:SCAle?",
+    "MDO3|<<|2.000000E-01",
+    "MDO3|>>|CH1:POSition 0",
+    "MDO3|>>|CH1:POSition?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|CH1:OFFSet 0",
+    "MDO3|>>|CH1:OFFSet?",
+    "MDO3|<<|0.000000E+00",
+    "MDO3|>>|HORizontal:SCAle 0.02",
+    "MDO3|>>|HORizontal:SCAle?",
+    "MDO3|<<|0.02",
+    "MDO3|>>|TRIGger:A:TYPe EDGe",
+    "MDO3|>>|TRIGger:A:EDGE:SOUrce CH1",
+    "MDO3|>>|TRIGger:A:EDGE:SLOpe RISe",
+    "MDO3|>>|TRIGger:A:MODe AUTO",
+    "MDO3|>>|DISplay:TRIGFrequency ON",
+    "MDO3|>>|DISplay:TRIGFrequency?",
+    "MDO3|<<|1",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF",
+    "FuncGen|>>|OUTPut OFF",
+    "FuncGen|>>|OUTPut:LOAD 50",
+    "FuncGen|>>|APPLy:SQUare 9,1,0",
+    "FuncGen|>>|FREQuency?",
+    "FuncGen|<<|9",
+    "FuncGen|>>|VOLTage?",
+    "FuncGen|<<|1",
+    "FuncGen|>>|SYSTem:ERRor?",
+    "FuncGen|<<|+0,\"No error\"",
+    "FuncGen|>>|OUTPut ON",
+    "MDO3|>>|TRIGger:FREQuency?",
+    "MDO3|<<|9.000000900000E+00",
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (9.0000009, {'source': 'GEN', 'waveform': 'square'})",
+   "wire": [
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:TERmination 50"
+    ],
+    [
+     "Q",
+     "CH1:TERmination?",
+     "5.0E+01"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.2"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "2.000000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.000000E+00"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.02"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "0.02"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce CH1"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SLOpe RISe"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "W",
+     "DISplay:TRIGFrequency ON"
+    ],
+    [
+     "Q",
+     "DISplay:TRIGFrequency?",
+     "1"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "W",
+     "APPLy:SQUare 9,1,0"
+    ],
+    [
+     "Q",
+     "FREQuency?",
+     "9"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTPut ON"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "sleep",
+     3.0
+    ],
+    [
+     "Q",
+     "TRIGger:FREQuency?",
+     "9.000000900000E+00"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "mdo3_verification.IO.close",
+   "log": [
+    "5560A|>>|STBY",
+    "96270A|>>|OUTP OFF",
+    "96270A|>>|OUTP?",
+    "96270A|<<|0",
+    "RF2|>>|OUTP OFF",
+    "RF2|>>|OUTP?",
+    "RF2|<<|0",
+    "FuncGen|>>|OUTPut OFF",
+    "MDO3|>>|AFG:OUTPut:STATE OFF"
+   ],
+   "method": "mdo3_verification.IO.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTP OFF"
+    ],
+    [
+     "Q",
+     "OUTP?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "W",
+     "AFG:OUTPut:STATE OFF"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_mdo3",
+ "schema": 1
+}

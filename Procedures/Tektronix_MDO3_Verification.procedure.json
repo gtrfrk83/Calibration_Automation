@@ -1,0 +1,63 @@
+{
+ "schema": 1,
+ "id": "Tektronix_MDO3_Verification",
+ "name": "Tektronix 3 Series MDO Performance Verification",
+ "manufacturer": "Tektronix",
+ "model": "MDO32/MDO34",
+ "category": "Oscilloscope",
+ "version": "1",
+ "order": 45,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Tektronix_MDO3_Verification.py",
+ "engine": [
+  "mdo3_verification.py",
+  "mdo4000c_verification.py"
+ ],
+ "drivers": [
+  "tektronix_mdo3",
+  "fluke_5560a",
+  "reference_instruments"
+ ],
+ "specs": [
+  "specs/tektronix_mdo3_pv.json",
+  "specs/mdo3_reference_cmc.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Tektronix_MDO3_Verification.py",
+   "mdo3_verification.py",
+   "mdo4000c_verification.py",
+   "mdo3_view_tk.py",
+   "mdo3_view_qt.py",
+   "genscope_support_view_qt.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/tektronix_mdo3.py",
+   "drivers/fluke_5560a.py",
+   "drivers/reference_instruments.py"
+  ],
+  "spec": [
+   "specs/tektronix_mdo3_pv.json",
+   "specs/mdo3_reference_cmc.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": []
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Tektronix_MDO3_Verification.py",
+  "Procedures/Tektronix_MDO3_Verification.procedure.json",
+  "specs/tektronix_mdo3_pv.json",
+  "specs/mdo3_reference_cmc.json",
+  "specs/build_mdo3_spec.py",
+  "drivers/tektronix_mdo3.py",
+  "drivers/simulated_mdo3.py"
+ ],
+ "tests": [
+  "tests/test_mdo3_points.py"
+ ]
+}

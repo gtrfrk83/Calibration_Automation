@@ -200,6 +200,38 @@ def run_mdo():
     return c.entries
 
 
+def run_mdo3():
+    """The 3 Series MDO engine (mdo3_verification.py): one point per (kind, section) on an MDO34 1 GHz with every option except the TPA."""
+    import mdo3_verification as M
+    from drivers.simulated_mdo3 import make_mdo3_bench
+    c = gc.Case('engine_mdo3')
+    bench, t = make_mdo3_bench('34-1000')
+    wrapped = {k: rec(v) for k, v in t.items()}
+    r = Runner(c)
+    io = r.build('mdo3_verification.IO.__init__', lambda: M.IO(dict(cal_baud=9600), transports=wrapped))
+    cfg = M.Config('34-1000', 'SA3', True, True, False)
+
+    class FakeApp:
+        stop = False
+
+        def __init__(self):
+            self.io, self.cfg = io, cfg
+
+        def request(self, kind, payload=None):
+            return payload['p']['nominal'] if kind == 'manual' else True
+
+        def post(self, *a, **k):
+            pass
+
+    c.run('mdo3_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
+    runner = M.Runner(FakeApp())
+    pts = [p for p in M.POINTS if cfg.applies(p) and p['kind'] != 'SELFTEST']          # the self test needs a power-cycle dialog
+    for p in sample(pts, lambda p: (p['kind'], p['section']), 40):
+        c.run(f'mdo3_verification.Runner.run_point[{pid(p)}]', runner.run_point, p, _log=io.log)
+    c.run('mdo3_verification.IO.close', io.close, _log=io.log)
+    return c.entries
+
+
 def run_tds():
     import tds2000c_verification as T
     c = gc.Case('engine_tds2000c')
@@ -446,3 +478,4 @@ RUNS = {
 }
 from tests import golden_tbs2000b as _tbs2000b  # noqa: E402
 RUNS['tbs2000b'] = _tbs2000b.engine_run
+RUNS['mdo3'] = run_mdo3                       # 3 Series MDO (append-only; branch tektronix-mdo3)
