@@ -555,6 +555,10 @@ def _manual_standard_spec(app, i, p, row, base, printed):
         return None
     if not mv:
         return None
+    if run.get('kind') == 'PERIOD':             # the lab's Frequency - Measure CMC, relative, of 1/f (datasheet_builder_match.Matcher.frequency_cmc): no calibrator choice changes it
+        plain = dict(kind='PERIOD', nominal=0, unit=p.get('base_unit', ''), frequency=None, range=None, source='none')
+        return PointSpec(i, base['step'], base['section'], base['description'], base['nominal'], plain, plain, None, None, plain['unit'], None,
+                         'Period: the laboratory Frequency - Measure CMC (relative, of 1/f)', printed)
     factor = Decimal(str(p['factor']))
     clean = lambda d: float(f'{float(d * factor):.9g}')                # noqa: E731  (as handheld_dmm.certificate_fields)
     q = dict(kind='OHM2' if run.get('kind') in ('OHM2', 'OHM4') else run.get('kind'), nominal=run['nominal'], frequency=run.get('frequency'),

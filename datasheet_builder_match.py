@@ -148,6 +148,7 @@ DRIVER_TABLE = {
     '8563E': DriverInfo('8563E', 'HP 8563E spectrum analyzer', 'measure', '', {}, notes='Imported specification only; there is no driver.'),
     '8902A': DriverInfo('8902A', 'HP 8902A measuring receiver', 'measure', '', {}, notes='Imported specification only; there is no driver.'),
 }
+MANUAL_FREQUENCY_KINDS = ('FREQ', 'PERIOD')     # on a MANUAL sheet these take the lab's Frequency - Measure CMC alone (Matcher.manual_frequency)
 UNVERIFIED_ITEMS = sorted({f'{m.model}: {k} - {c.note or c.via}' for m in DRIVER_TABLE.values() for k, c in m.functions.items() if c.status == UNVERIFIED})
 
 LAB_DEFAULT = {   # preferred standard per function when TURs tie: the lab's own habit (handheld / Truevolt use the 5560A, scope procedure the 5522A, generators the 5790B + counter)
@@ -576,7 +577,45 @@ class Matcher:
                 st.error = ('bad_point', 'AC point without a frequency')
         except Exception as e:                                # never raise on one bad point
             st = Stim(fn.kind, abs(p.nominal), error=('bad_point', f'cannot work out the stimulus: {e}'))
-        return [self.candidate(s, fn, p, st, lim) for s in self.standards]
+        cands = [self.candidate(s, fn, p, st, lim) for s in self.standards]
+        if ds.options.get('manual_entry') and fn.kind in MANUAL_FREQUENCY_KINDS:
+            for c in cands:
+                self.manual_frequency(c, fn, p)
+        return cands
+
+    def frequency_cmc(self, kind, nominal):
+        """The laboratory's 'Frequency - Measure' CMC (GPS referenced) for a FREQ point of `nominal` Hz, in Hz; for a PERIOD point of `nominal` seconds the same RELATIVE
+        uncertainty of 1/f, in seconds.  The scope alone, as report_pdf.point_uncertainty gives a frequency (never combined with a calibrator's own frequency accuracy).  None when the
+        scope has no figure."""
+        if self.scope is None or not nominal:
+            return None
+        seconds = abs(float(nominal))
+        hz = seconds if kind == 'FREQ' else 1.0 / seconds
+        try:
+            u = self.scope.dmm('FREQ', hz, None, None, basis='measure')
+        except Exception:
+            return None
+        if u is None:
+            return None
+        return u if kind == 'FREQ' else (u / hz) * seconds
+
+    def manual_frequency(self, c, fn, p):
+        """A MANUAL sheet's FREQ / PERIOD candidate: when the standard's sheet covers the frequency, its uncertainty is the lab's Frequency - Measure CMC alone (frequency_cmc), the
+        way the engines report a frequency, not the standard's own frequency row; TUR follows from it.  A candidate that does not cover the point is left as it is."""
+        if not c.covered or not c.spec_known:
+            return c
+        value = self.frequency_cmc(fn.kind, p.nominal)
+        c.uncertainty, c.cmc = value, value
+        c.rel_unc = value / abs(float(p.nominal)) if value and p.nominal != 0 else None
+        if value is None:
+            c.notes.append('the laboratory scope has no Frequency - Measure CMC for this frequency')
+        else:
+            c.notes.append('frequency: the laboratory Frequency - Measure CMC (GPS referenced) alone, as the engines report it; the standard only has to cover the frequency')
+        c.tar, c.tur = None, None
+        if value and c.tolerance is not None and fn.kind == 'FREQ' and c.accuracy:
+            res = tartur.from_values(float(c.tolerance), fn.unit, c.accuracy, fn.unit, value, fn.unit)
+            c.tar, c.tur = res['tar'], res['tur']
+        return c
 
     def match(self, ds, period=None, overrides=None):
         period = period or ds.default_period

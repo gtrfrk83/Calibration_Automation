@@ -1097,14 +1097,66 @@ class ManualStandard(Base):
         self.assertEqual(len(listed), 1)                                         # never silent: listed in the Sheet check
         self.assertIn('5522A does not cover this point', listed[0].text)
 
-    def test_frequency_and_other_unresolvable_kinds_are_waived_per_point_even_with_a_standard(self):
+    def test_frequency_takes_the_lab_frequency_cmc_alone_when_the_standard_covers_it(self):
+        import report_pdf
+        import uncertainty
         ds = self.sheet()
         plan = rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
-        fq = self.pts(ds)[11]                                                    # Frequency: the suite has no uncertainty calculation for it in the Builder yet
-        self.assertEqual(fq[0].kind, 'FREQ')
-        self.assertIn('no uncertainty calculation', plan.waived[fq[1].id])
-        self.assertEqual(ds.assignments[fq[1].id], 'MANUAL')
+        fn, fq = self.pts(ds)[11]                                                # Frequency
+        self.assertEqual(fn.kind, 'FREQ')
+        self.assertEqual(ds.assignments[fq.id], '5522A')
+        self.assertNotIn(fq.id, plan.waived)
+        cand = plan.sourced[fq.id]
+        self.assertEqual(cand.uncertainty, cand.cmc)                              # the scope CMC alone: not the standard's own frequency row (that is far larger)
+        self.assertEqual(cand.uncertainty, report_pdf.scope().dmm('FREQ', float(fq.nominal), None, None, basis='measure'))
+        q = dict(kind='FREQ', nominal=float(fq.nominal), frequency=None, unit='Hz', range=1.0, source='x')
+        self.assertEqual(uncertainty.format_value(cand.uncertainty, 'Hz'), report_pdf.point_uncertainty(q, '5522A'))        # the engines' own report text
+        self.assertGreater(cand.uncertainty, 0)
         self.assertEqual(rules.check(ds, matcher=self.matcher, dry_run_on=False).errors(), [])
+
+    def _freq_sheet(self, kind, nominal, fs):
+        ds = db.Datasheet('Acme', 'RM-9', f'Manual {kind}')
+        ds.options['manual_entry'] = True
+        fn = ds.add_function(kind, id='f')
+        fn.add_range(fs, resolution='1e-9', id='r1')
+        ds.set_spec(fn, '0.01 % of reading')
+        db.add_point(fn, nominal, range_id='r1')
+        return ds, fn
+
+    def test_period_is_the_same_relative_uncertainty_of_one_over_f_in_seconds(self):
+        ds, fn = self._freq_sheet('PERIOD', '1 ms', '1')
+        plan = rules.apply_manual_standard(ds, '5560A', matcher=self.matcher)
+        p = fn.points[0]
+        cand = plan.sourced[p.id]
+        rel = self.matcher.scope.dmm('FREQ', 1000.0, None, None, basis='measure') / 1000.0                  # the CMC relative to the frequency
+        self.assertAlmostEqual(cand.uncertainty / 1e-3, rel, delta=rel * 1e-9)
+        self.assertTrue(0 < cand.uncertainty < 1e-9)                                                            # seconds, not hertz
+        self.assertIsNone(cand.tur)                                                                             # no ratio claimed across units
+        self.assertEqual(ds.assignments[p.id], '5560A')
+
+    def test_a_frequency_the_standard_does_not_cover_is_waived_per_point(self):
+        ds, fn = self._freq_sheet('FREQ', '50 MHz', '1e9')
+        plan = rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        pid = fn.points[0].id
+        self.assertIn(pid, plan.waived)
+        self.assertIn('5522A does not cover this point', plan.waived[pid])
+        self.assertEqual(ds.assignments[pid], 'MANUAL')
+        self.assertIn(pid, rules.waivers(ds))
+
+    def test_what_a_manual_sheet_resolves_that_an_automated_one_does_not(self):
+        self.assertEqual(rules.MANUAL_RESOLVABLE_KINDS, rules.RESOLVABLE_KINDS + ('FREQ', 'PERIOD'))
+        self.assertNotIn('FREQ', rules.RESOLVABLE_KINDS)                                       # an automated sheet's FREQ / PERIOD stay waived (the matcher's figure there is another method)
+        ds, fn = self._freq_sheet('GEN_FREQ', '1 kHz', '1e6')
+        plan = rules.apply_manual_standard(ds, '5522A', matcher=self.matcher)
+        self.assertIn('no uncertainty calculation', plan.waived[fn.points[0].id])              # still waived: no calculation for it yet
+
+    def test_the_figures_of_an_automated_sheet_are_not_touched(self):
+        ds = self.sheet()
+        auto = ds.copy()
+        auto.options['manual_entry'] = False
+        fq = self.pts(auto)[11][1]
+        a = self.matcher.match(auto, overrides={fq.id: '5522A'}).assignments[fq.id]
+        self.assertGreater(a.uncertainty, 1e-3)                                                # the standard's own frequency row, as before (not the 7e-12 relative CMC)
 
     def test_none_waive_is_the_old_result_but_per_point(self):
         ds = self.sheet()

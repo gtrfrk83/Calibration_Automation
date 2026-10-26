@@ -50,6 +50,10 @@ CMC_KIND_MAP = {'DCV': ('DCV',), 'DCI': ('DCI',), 'OHM': ('OHM2', 'OHM4'), 'CAP'
 # Kinds the suite resolves an uncertainty for TODAY: the standards matcher / handheld_dmm.has_uncertainty give a value (TEMP in degC is not in the CMC table but the
 # handheld procedures print one, so it stays).  Every other should-have kind is an ERROR until the author waives it ('not_implemented').
 RESOLVABLE_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'OHM4', 'CAP', 'TEMP')
+# A MANUAL calibration (.MDD import) also resolves FREQ and PERIOD: the laboratory's 'Frequency - Measure' CMC alone, as the engines report a frequency
+# (report_pdf.point_uncertainty), once the chosen standard's sheet covers the frequency (datasheet_builder_match.Matcher.manual_frequency).  An automated sheet keeps
+# FREQ / PERIOD waived: the matcher's figure there is the standard's own frequency row, a different method that is not changed here.
+MANUAL_RESOLVABLE_KINDS = RESOLVABLE_KINDS + ('FREQ', 'PERIOD')
 EXTRA_SHOULD_HAVE = ('TEMP',)
 
 
@@ -463,7 +467,7 @@ def plan_manual_standard(ds, standard, period=None, matcher=None, lookup=None):
             continue
         if not standard:
             plan.waived[p.id] = 'manual calibration: no standard was chosen for the uncertainty (None: waive)'
-        elif fn.kind not in RESOLVABLE_KINDS:
+        elif fn.kind not in MANUAL_RESOLVABLE_KINDS:
             plan.waived[p.id] = f'manual calibration: the suite has no uncertainty calculation for {fn.name} yet'
         else:
             cand = lookup.candidates(fn, p).get(standard)
@@ -604,7 +608,7 @@ def uncertainty_source(ds, fn, p, a, manual_sheet=False, pending=False):
         return UncertaintySource(p.id, f'none: blank ({fn.name} rows carry no uncertainty in the report)', False, INFO)
     src = None
     cand = None
-    if fn.kind not in RESOLVABLE_KINDS:
+    if fn.kind not in (MANUAL_RESOLVABLE_KINDS if manual_sheet else RESOLVABLE_KINDS):
         why = 'the suite has no uncertainty calculation for this kind yet'
         a = None
         std = ''
@@ -658,7 +662,7 @@ def source_findings(ds, res, manual_sheet, pending=False):
         out.append(Finding(5, ERROR, 'no_uncertainty', f'{len(items)} reading{"s" * (len(items) != 1)} in {fn.name} should have an uncertainty and {"have" if len(items) != 1 else "has"} none, '
                            f'so the datasheet cannot be published (the report never shows zero): ' + _names(rows),
                            ('The suite cannot calculate an uncertainty for this kind yet: press "Waive..." and choose "Uncertainty calculation for this kind is not implemented in the suite yet" '
-                            '(or another reason).' if fn.kind not in RESOLVABLE_KINDS else
+                            '(or another reason).' if fn.kind not in (MANUAL_RESOLVABLE_KINDS if manual_sheet else RESOLVABLE_KINDS) else
                             'Pick a standard whose sheet covers the point, fix the point (value, range or frequency), or press "Waive..." and record why it has none.'),
                            fid, tuple(p.id for _f, p, _s in items), fn.name, rows[0], action='waive', count=len(items)))
     for fid, items in waived.items():
@@ -933,6 +937,24 @@ def match_manual(ds, period, matcher, match):
     return _match(ds, period, matcher, None, overrides=ov)
 
 
+def manual_figures(a):
+    """The figures of a matcher Assignment `a` of a manual sheet's point that names a standard and gets a usable uncertainty from it: dict(unc_standard, uncertainty, tar, tur, tolerance,
+    unc_row) - what the run window and the report print.  None otherwise."""
+    if a is None or a.status != 'assigned' or not a.uncertainty or not a.uncertainty > 0:
+        return None
+    cand = next((c for c in a.candidates if c.standard == a.standard and c.covered), None)
+    return dict(unc_standard=a.standard, uncertainty=a.uncertainty, tar=a.tar, tur=a.tur, tolerance=a.tolerance, unc_row=cand.row if cand is not None else '')
+
+
+def manual_choices(ds, fn, p, period=None, matcher=None, lookup=None):
+    """[Candidate] of the standards a technician may pick for the uncertainty of point p of the manual sheet `ds`: those whose sheet covers the point AND give a usable uncertainty, by
+    model (the same candidates as the import preview and the Sheet check).  [] for a kind the suite has no manual uncertainty for.  Read only."""
+    if fn.kind not in MANUAL_RESOLVABLE_KINDS or _no_uncertainty_kind(fn):
+        return []
+    lookup = lookup or StandardLookup(ds, period, matcher)
+    return sorted((c for c in lookup.candidates(fn, p).values() if gives_uncertainty(c)), key=lambda c: c.standard)
+
+
 def check(ds, period=None, matcher=None, match=None, dry_run_on=True, runner=None):
     """The sheet check (rules 1-5) for `ds`.  Never raises and never changes `ds`."""
     period = period or ds.default_period
@@ -985,7 +1007,7 @@ def point_source(ds, function_id, point_id, matcher=None, period=None):
     if p is None:
         return None
     manual_sheet = bool(ds.options.get('manual_entry'))
-    if _no_uncertainty_kind(fn) or fn.kind not in RESOLVABLE_KINDS:
+    if _no_uncertainty_kind(fn) or fn.kind not in (MANUAL_RESOLVABLE_KINDS if manual_sheet else RESOLVABLE_KINDS):
         return uncertainty_source(ds, fn, p, None, manual_sheet)
     if manual_sheet:                                              # a manual sheet's point with a chosen standard is resolved like an automated one
         std = ds.assignments.get(p.id)
@@ -1004,6 +1026,9 @@ def _one_point(ds, fn, p):
     f2.points = [p]
     small.functions = [f2]
     return small
+
+
+one_point = _one_point                                            # public name for the run window's one-point match
 
 
 def list_summary(ds, matcher=None, match=None):

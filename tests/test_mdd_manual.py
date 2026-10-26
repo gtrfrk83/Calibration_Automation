@@ -310,7 +310,7 @@ class StandardChoicePreview(Fix):
         self.assertEqual(plan.counts()['sourced'] + plan.counts()['waived'] + plan.counts()['by_design'], plan.points)
         self.assertTrue(rows[2].endswith('(5522A)'), rows[2])                 # 1.000 V DC: '11 µV (5522A)'
         self.assertEqual(rows[6], 'none: waived')                             # AC point with no frequency: nothing covers it
-        self.assertEqual(rows[11], 'none: waived')                            # Frequency: the suite cannot calculate it yet
+        self.assertTrue(rows[11].endswith('Hz (5522A)'), rows[11])            # Frequency: the lab's Frequency - Measure CMC, the 5522A covers the frequency
         self.assertEqual(rows[12], 'none by design')                          # degF
         none_plan, none_rows, none_text = ch.preview('')
         self.assertEqual(none_plan.sourced, {})
@@ -470,10 +470,10 @@ class StandardUncertainty(Fix):
         self.assertTrue(ds.options['manual_entry'])
         by_n = {int(p.id.rsplit('.p', 1)[1]): (fn, p) for fn, p in ds.all_points()}
         self.assertEqual(ds.assignments[by_n[2][1].id], '5522A')
-        self.assertEqual(ds.assignments[by_n[11][1].id], 'MANUAL')                # Frequency
+        self.assertEqual(ds.assignments[by_n[11][1].id], '5522A')                 # Frequency: resolved now (the lab's Frequency - Measure CMC)
         w = rules.waivers(ds)
         self.assertNotIn(rules.WHOLE_SHEET, w)
-        self.assertIn(by_n[11][1].id, w)
+        self.assertNotIn(by_n[11][1].id, w)
         self.assertIn(by_n[6][1].id, w)
         self.assertNotIn(by_n[2][1].id, w)
         self.assertIn('uncertainty waivers', db.versions(r.uid, root=self.us, db=self.reg)[0]['note'])
@@ -605,6 +605,144 @@ class StandardUncertainty(Fix):
         rows, _pts = a.certificate_rows_and_points()
         self.assertEqual([r['Uncertainty'] for r in rows], [''] * len(rows))
         self.assertEqual(a.manual_uncertainty_line(), '')
+
+    # ---- the per-point chooser inside the run window (right-click a point > Uncertainty standard) ----------------------------------------------------
+    def entries(self, a, tag):
+        p = next(p for p in a.points if p['id'].endswith(tag))
+        return p, a.unc_menu(p)
+
+    def labels(self, a, tag):
+        return [e[0] for e in self.entries(a, tag)[1]]
+
+    def test_the_point_menu_offers_automatic_and_every_standard_that_covers_the_point(self):
+        a = self.app('5522A')
+        labels = self.labels(a, 'p0001')                                           # 100 mV DC
+        self.assertEqual(labels[0], 'Uncertainty standard: Automatic (5522A)  (selected)')
+        self.assertEqual([x.split(': ')[1].split('  ')[0] for x in labels[1:]], sorted(x.split(': ')[1].split('  ')[0] for x in labels[1:]))
+        self.assertIn('Uncertainty standard: 5560A', labels)
+        self.assertIn('Uncertainty standard: 5520A', labels)
+        self.assertTrue(all(e[2] for e in self.entries(a, 'p0001')[1]))
+        # the right-click menu of the engine carries them after 'Enter reading manually...'
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        full = [e[0] for e in a.tree_menu_extras(p['id'])]
+        self.assertEqual(full[0], 'Enter reading manually...')
+        self.assertIn('Uncertainty standard: 5560A', full)
+        # a point no standard gives an uncertainty for: one disabled line that says why; a diode / functional check: none
+        _p, none = self.entries(a, 'p0006')
+        self.assertEqual(none[0][0], 'Uncertainty standard...')
+        self.assertFalse(none[0][2])
+        self.assertIn('No standard', none[0][3])
+
+    def test_choosing_a_standard_changes_that_rows_uncertainty_tar_tur_and_tag(self):
+        import report_pdf
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        before = a.certificate_row(p, a.found[p['id']])
+        other = a.certificate_row(next(q for q in a.points if q['id'].endswith('p0002')), a.found[next(q for q in a.points if q['id'].endswith('p0002'))['id']])
+        a.set_unc_choice(p, '5560A')
+        row = a.certificate_row(p, a.found[p['id']])
+        self.assertEqual(row['Uncertainty'], report_pdf.point_uncertainty(dict(kind='DCV', nominal=0.1, frequency=None, unit='V', range=None), '5560A'))
+        self.assertNotEqual(row['Uncertainty'], before['Uncertainty'])
+        self.assertTrue(row['Description'].endswith('[5560A]'), row['Description'])
+        # TAR / TUR are the chosen standard's own (the same call the Builder's picker resolves through)
+        figs = rt.manual_uncertainties(self.spec, None, None, {a._unc_pid(p): '5560A'}, only=a._unc_pid(p))[a._unc_pid(p)]
+        import tartur
+        f = a.certificate_fields(p)
+        self.assertEqual((f['TAR'], f['TUR']), (tartur.format_ratio(figs['tar']), tartur.format_ratio(figs['tur'])))
+        self.assertEqual(a.unc_figures(p)['unc_standard'], '5560A')
+        # the menu marks the pick; the other rows are untouched
+        self.assertIn('Uncertainty standard: 5560A  (selected)', self.labels(a, 'p0001'))
+        self.assertEqual(a.certificate_row(next(q for q in a.points if q['id'].endswith('p0002')), a.found[next(q for q in a.points if q['id'].endswith('p0002'))['id']]), other)
+        # Automatic puts the procedure's own standard back
+        a.set_unc_choice(p, '')
+        self.assertEqual(a.certificate_row(p, a.found[p['id']]), before)
+
+    def test_it_is_the_builders_assignment_mechanism_and_no_second_code_path(self):
+        import datasheet_builder_rules as rules
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        pid = a._unc_pid(p)
+        a.set_unc_choice(p, '5520A')
+        ds = db.load(self.uid, root=self.us, db=self.reg)
+        ds.assignments[pid] = '5520A'                                                # what the Builder's picker does (set_assignment)
+        res, _why = rules.match_manual(ds, ds.default_period, None, None)
+        want = rules.manual_figures(res.assignments[pid])
+        self.assertEqual(a.unc_figures(p), want)
+
+    def test_the_choice_is_recorded_saved_with_the_run_and_reported(self):
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        a.set_unc_choice(p, '5560A')
+        data = a.save_fields()
+        self.assertEqual(data['dsb']['uncertainty_standards'], {p['id']: '5560A'})
+        unc = a.manual_uncertainty_line()
+        self.assertIn('5560A (1)', unc)
+        self.assertIn('5522A (', unc)
+        txt = self.pdf_text(a)
+        self.assertIn('[5560A]', txt)
+        self.assertIn('5560A (1)', txt)
+        # a run loaded from that progress gets the same choice back; a file without it clears it
+        b = self.app('5522A')
+        b.load_results(dict(data))
+        self.assertEqual(b.unc_choice, {p['id']: '5560A'})
+        c = dict(data)
+        c['dsb'] = {k: v for k, v in data['dsb'].items() if k != 'uncertainty_standards'}
+        b.load_results(c)
+        self.assertEqual(b.unc_choice, {})
+        # without a pick nothing extra is saved
+        self.assertNotIn('uncertainty_standards', self.app('5522A').save_fields()['dsb'])
+
+    def test_the_command_log_gets_a_line_but_the_record_and_pass_fail_are_unchanged(self):
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        found = dict(a.found[p['id']])
+        notes = []
+        a._log_note = notes.append
+        a.set_unc_choice(p, '5560A')
+        self.assertEqual(notes, [f'Uncertainty standard for point {p["id"]}: 5560A (was 5522A)'])
+        self.assertEqual(a.found[p['id']], found)                                    # reading, result and the 'manual' standard of the record
+        self.assertEqual(a.found[p['id']]['standard'], 'manual')
+
+    def test_a_demo_run_offers_no_choice_and_prints_no_figure_even_if_one_is_set(self):
+        a = self.app('5522A', demo=True)
+        p, entries = self.entries(a, 'p0001')
+        self.assertEqual(len(entries), 1)
+        self.assertFalse(entries[0][2])
+        self.assertIn('demo', entries[0][3].lower())
+        a.set_unc_choice(p, '5560A')                                                   # even if it is forced
+        rows, _pts = a.certificate_rows_and_points()
+        self.assertEqual([r['Uncertainty'] for r in rows], [''] * len(rows))
+        self.assertEqual(a.manual_uncertainty_line(), '')
+        txt = self.pdf_text(a)
+        self.assertIn('DEMO', txt.upper())
+        self.assertNotIn('[5560A]', txt)
+
+    def test_a_frequency_point_carries_the_lab_cmc_and_can_be_changed_to_another_covering_standard(self):
+        import report_pdf
+        a = self.app('5522A')
+        p = next(p for p in a.points if (p.get('dsb') or {}).get('kind') == 'FREQ')
+        hz = float(p['run']['nominal'])
+        want = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=hz, frequency=None, unit='Hz', range=1.0, source='x'), '5522A')
+        row = a.certificate_row(p, a.found[p['id']])
+        self.assertEqual(row['Uncertainty'], want)
+        self.assertTrue(row['Description'].endswith('[5522A]'), row['Description'])
+        self.assertIn('Uncertainty standard: 5560A', [e[0] for e in a.unc_menu(p)])
+        a.set_unc_choice(p, '5560A')
+        row2 = a.certificate_row(p, a.found[p['id']])
+        self.assertEqual(row2['Uncertainty'], want)                                    # the figure is the CMC alone, so the standard changes the tag, not the figure
+        self.assertTrue(row2['Description'].endswith('[5560A]'), row2['Description'])
+        self.assertIn('Frequency - Measure CMC alone', a.manual_uncertainty_line())
+
+    def test_the_review_window_follows_a_picked_standard(self):
+        import report_review_model as RM
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        a.set_unc_choice(p, '5560A')
+        specs, _default = RM.specs_for(a)
+        rows, _pts = a.certificate_rows_and_points()
+        s = next(s for s in specs if s.step == p['id'])
+        self.assertEqual(s.default_std, '5560A')
+        self.assertEqual(RM.evaluate(s, s.default_std).unc_text, rows[s.idx]['Uncertainty'])
 
 
 class GridEntryLogic(unittest.TestCase):

@@ -623,7 +623,7 @@ class StandardFit:
 
 def standard_fits(sheet, matcher=None, lookup=None):
     """[StandardFit] for every standard in Standards Specs (specmanager.standards()), best fit first: most points covered, then PREFERRED_STANDARDS, then name.  Only points of a kind
-    the suite can resolve an uncertainty for (datasheet_builder_rules.RESOLVABLE_KINDS) count.  Read only; [] when the standards cannot be loaded."""
+    the suite can resolve an uncertainty for (datasheet_builder_rules.MANUAL_RESOLVABLE_KINDS) count.  Read only; [] when the standards cannot be loaded."""
     import datasheet_builder_rules as rules
     import specmanager
     lookup = lookup or rules.StandardLookup(sheet, None, matcher)
@@ -633,7 +633,7 @@ def standard_fits(sheet, matcher=None, lookup=None):
         info = {}
     counts, total = {}, 0
     for fn, p in sheet.all_points():
-        if not p.enabled or fn.kind not in rules.RESOLVABLE_KINDS:
+        if not p.enabled or fn.kind not in rules.MANUAL_RESOLVABLE_KINDS:
             continue
         total += 1
         for model, cand in lookup.candidates(fn, p).items():

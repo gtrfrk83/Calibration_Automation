@@ -114,24 +114,24 @@ class ExcerptStandard(unittest.TestCase):
         plan, rows, text = ch.preview('5522A')
         c = plan.counts()
         self.assertEqual(c['points'], 28)
-        self.assertEqual((c['sourced'], c['waived'], c['by_design']), (18, 4, 6))            # 3 frequency rows + 1 AC current row with no frequency are waived; diode / cond / degF ... carry none by design
-        self.assertEqual(sum(1 for v in rows.values() if v.endswith('(5522A)')), 18)
-        self.assertIn('18 point(s) will show the uncertainty of the 5522A', text)
+        self.assertEqual((c['sourced'], c['waived'], c['by_design']), (21, 1, 6))            # the 3 frequency rows carry the lab's Frequency - Measure CMC; only the AC current row with no frequency is waived; diode / cond / degF ... carry none by design
+        self.assertEqual(sum(1 for v in rows.values() if v.endswith('(5522A)')), 21)
+        self.assertIn('21 point(s) will show the uncertainty of the 5522A', text)
 
     def test_registered_with_the_5522a_every_covered_point_carries_its_figure_and_the_rest_a_waiver(self):
         import datasheet_builder_rules as rules
         ds, res = self.register('5522A')
         self.assertEqual(res.status, 'ready')
         named = {pid: s for pid, s in ds.assignments.items() if s != 'MANUAL'}
-        self.assertEqual(len(named), 18)
+        self.assertEqual(len(named), 21)
         self.assertEqual(set(named.values()), {'5522A'})
         w = rules.waivers(ds)
-        self.assertEqual(len(w), 4)
+        self.assertEqual(len(w), 1)
         self.assertNotIn(rules.WHOLE_SHEET, w)
         chk = rules.check(ds, dry_run_on=False)
         self.assertEqual(chk.errors(), [])
-        self.assertEqual(sum(1 for s in chk.sources.values() if s.has_source and s.standard == '5522A'), 18)
-        self.assertEqual(sum(1 for s in chk.sources.values() if s.waived), 4)
+        self.assertEqual(sum(1 for s in chk.sources.values() if s.has_source and s.standard == '5522A'), 21)
+        self.assertEqual(sum(1 for s in chk.sources.values() if s.waived), 1)
         for pid in named:                                                       # a point's figure is the standard's own spec row: positive, never zero
             self.assertIn('5522A standards sheet', chk.sources[pid].text)
 
