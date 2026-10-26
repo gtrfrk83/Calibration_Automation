@@ -3,7 +3,7 @@
     python specs/build_34461a_standard.py
 
 SOURCE: Keysight data sheet 5991-1983EN 'Digital Multimeters 34460A, 34461A, 34465A (6 1/2 digit), 34470A (7 1/2 digit)', published in USA June 10, 2026,
-'Specifications 34461A' printed pp. 13 and 14 (PDF pages 13 and 14).  Shared engine and the period / confidence conventions: build_truevolt_standard.py.
+'Specifications 34461A' printed pp. 13 and 14 (PDF pages 13 and 14).  Shared engine and the period / confidence conventions: truevolt_standard_engine.py.
 Stored: DC voltage, resistance (4-wire / 2-wire with math null, and 2-wire without math null), DC current, true RMS AC voltage, true RMS AC current, capacitance,
 frequency (sine and square wave); periods 90 day / 1 yr / 2 yr (default 1 yr).  Notes only: 24 hour column, temperature coefficients, burden voltages, gate-time
 errors, continuity, diode test, DC ratio, temperature (probe accuracy + 0.05 degC / + 0.1 degC: needs the probe's own accuracy).
@@ -12,12 +12,14 @@ hand-typed transcription of key cells.
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import build_truevolt_standard as eng  # noqa: E402
-from build_truevolt_standard import D  # noqa: E402
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import truevolt_standard_engine as eng  # noqa: E402
+from truevolt_standard_engine import D  # noqa: E402
 
 VERIFIED_AGAINST_IMAGE = True
 MODEL = '34461A'
@@ -76,7 +78,7 @@ FREQ_SQ = [(10, 300e3, 'Square wave 10 Hz to 300 kHz', ('0.006', '0.010', '0.010
 def functions():
     f = []
     f.append(eng.dc_function('Voltage, DC', 'DCV', 'V', 13, DCV, lambda r, t: [6, 9] + ([10] if r == '1000 V' else []), 'V'))
-    f.append(eng.ohm_variant('Resistance [4-wire (or 2-wire with math null)]', 13, OHM, lambda r, t: [6, 11] + ([12] if r == '100 Mohm' else [])))
+    f.append(eng.ohm_variant('Resistance [4-wire or 2W with math null]', 13, OHM, lambda r, t: [6, 11] + ([12] if r == '100 Mohm' else [])))
     f.append(eng.ohm_variant('Resistance [2-wire, no math null]', 13, OHM, lambda r, t: [6, 11], extra_abs='0.2', skip=('100 Mohm',)))
     f.append(eng.dc_function('Current, DC', 'DCI', 'A', 13, DCI, lambda r, t: [6, 13] + ([14] if r == '10 A' else []), 'A'))
     f.append(eng.ac_function('Voltage, AC', 'ACV', 'V', 13, ACV_RANGES, ACV_BANDS, [6, 15], 'V'))
@@ -100,7 +102,7 @@ NOTES.update({
          '100 mV 0.0005 + 0.0005, 1 V to 1000 V 0.0005 + 0.0001 (% of reading + % of range).',
     '10': 'DC VOLTS 1000 V range: no additional voltage error is printed for the 34461A (the 34465A prints one for inputs above +/-500 V); none stored.',
     '11': 'RESISTANCE (p. 13, footnote 7): the specifications are for the 4-WIRE ohms function, or the 2-wire ohms function using math null for offset. WITHOUT math null add 0.2 ohm in the 2-wire ohms function: '
-          'stored as the separate function "Resistance [2-wire, no math null]" with a fixed 0.2 ohm term (a plain resistance lookup prefers the 4-wire function; pass variant="2-wire"). Test currents (information): '
+          'stored as the separate function "Resistance [2-wire, no math null]" with a fixed 0.2 ohm term (a plain resistance lookup prefers the 4-wire function; pass variant="2-wire"; the main function is named "4-wire or 2W with math null" on purpose, so that variant="2-wire" selects only the no-math-null rows). Test currents (information): '
           '100 ohm and 1 kohm 1 mA, 10 kohm 100 uA, 100 kohm 10 uA, 1 Mohm 5 uA, 10 Mohm 500 nA, 100 Mohm 500 nA || 10 Mohm. Temperature coefficients (not stored): 100 ohm 0.0006 + 0.0005, 1 k - 100 k 0.0006 + 0.0001, '
           '1 Mohm 0.0010 + 0.0002, 10 Mohm 0.0030 + 0.0004, 100 Mohm 0.1500 + 0.0002.',
     '12': 'RESISTANCE 100 Mohm range (p. 13): test current 500 nA in parallel with 10 Mohm (a 2-wire measurement); the no-math-null variant has NO 100 Mohm row (the footnote 0.2 ohm adder is meaningless against 0.8 % and the data sheet does not say whether it applies): UNVERIFIED.',
@@ -149,5 +151,13 @@ def build():
     return eng.build(CFG)
 
 
+def main():
+    data = build()
+    out = HERE / 'standards' / CFG['json']
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
+    eng.report(data, out)
+
+
 if __name__ == '__main__':
-    eng.main(CFG)
+    main()

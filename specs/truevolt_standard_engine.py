@@ -1,7 +1,7 @@
 """Shared engine of the Keysight Truevolt DMM standards builders (build_34461a_standard.py, build_34465a_standard.py).
 
-Not run by itself.  Each model builder holds its own printed tables (one transcription per model, read from the rendered page images) and calls
-build(cfg) / main(cfg).  The row construction reuses the helpers of build_3458a_standard.py (make_spec, make_range, amp_param, ...), so a Truevolt sheet has the
+Not run by itself (and named so that the spec editor's 'build_*_standard*.py' scan does not take it for a builder).  Each model builder holds its own printed tables (one transcription per model, read from the rendered page images), calls
+build(cfg) and writes its own JSON.  The row construction reuses the helpers of build_3458a_standard.py (make_spec, make_range, amp_param, ...), so a Truevolt sheet has the
 same stored form as the 3458A sheet: a bipolar value range per range name, 'rel' = % of reading, 'fs_rel' x 'fs_value' = % of range against the range NAME,
 direction 'input' (the DMM measures), AC rows carry the frequency band, periods are free text.
 
@@ -116,14 +116,11 @@ def build(cfg):
     return data
 
 
-def main(cfg):
-    data = build(cfg)
-    out = HERE / 'standards' / cfg['json']
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
+def report(data, out):
+    """Print what a builder wrote (the builder itself writes the file)."""
     n = sum(len(f['ranges']) for f in data['functions'])
     errs = [p for p in data['problems'] if p['level'] == 'error']
-    print(f"{cfg['model']}: {len(data['functions'])} functions, {n} ranges, {len(data['problems'])} flagged ({len(errs)} errors) -> {out}")
+    print(f"{data['standard']['model']}: {len(data['functions'])} functions, {n} ranges, {len(data['problems'])} flagged ({len(errs)} errors) -> {out}")
     for f in data['functions']:
         print(f"  {f['name']}: {len(f['ranges'])} rows")
     for p in data['problems']:
@@ -135,7 +132,7 @@ def common_notes(model, pages, scope_text, default_check):
     return {
         '1': f'SOURCE: Keysight Digital Multimeters 34460A, 34461A, 34465A (6 1/2 digit), 34470A (7 1/2 digit) data sheet {PUBLICATION}, published in USA June 10, 2026 (PDF of 28 pages, '
              f'supplied by the owner as {SOURCE_PDF}; printed page numbers equal the PDF page numbers). {model} specifications: {pages}. Built by the specs builder of this model '
-             '(shared engine specs/build_truevolt_standard.py).',
+             '(shared engine specs/truevolt_standard_engine.py).',
         '2': 'VERIFICATION: every stored number was read from RENDERED PAGE IMAGES (pdftoppm, 150 dpi for the whole page and 250 dpi for a crop of each table), never from the extracted '
              'text, and each stored table was read twice (whole page, then the crop); the two readings agree. The independent second transcription is in the model\'s test file. '
              'Read once only (information in the notes, no lookup uses them): temperature coefficients, gate-time errors, burden voltages, the temperature / continuity / diode / DC ratio lines.',
