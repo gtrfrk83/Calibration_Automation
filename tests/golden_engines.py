@@ -201,40 +201,35 @@ def run_mdo():
 
 
 def run_mdo3():
-    """The 3 Series MDO family of the same engine (configure('MDO3')): one point per (kind, section) on an MDO34 1 GHz with every option; the module is
-    configured back to the MDO4000C afterwards (the other runs of this process see it unchanged)."""
-    import mdo4000c_verification as M
+    """The 3 Series MDO engine (mdo3_verification.py): one point per (kind, section) on an MDO34 1 GHz with every option except the TPA."""
+    import mdo3_verification as M
     from drivers.simulated_mdo3 import make_mdo3_bench
-    M.configure('MDO3')
-    try:
-        c = gc.Case('engine_mdo3')
-        bench, t = make_mdo3_bench('34-1000')
-        wrapped = {k: rec(v) for k, v in t.items()}
-        r = Runner(c)
-        io = r.build('mdo4000c_verification.IO.__init__', lambda: M.IO(dict(cal_baud=9600), transports=wrapped))
-        cfg = M.Config('34-1000', 'SA3', True, True, False)
+    c = gc.Case('engine_mdo3')
+    bench, t = make_mdo3_bench('34-1000')
+    wrapped = {k: rec(v) for k, v in t.items()}
+    r = Runner(c)
+    io = r.build('mdo3_verification.IO.__init__', lambda: M.IO(dict(cal_baud=9600), transports=wrapped))
+    cfg = M.Config('34-1000', 'SA3', True, True, False)
 
-        class FakeApp:
-            stop = False
+    class FakeApp:
+        stop = False
 
-            def __init__(self):
-                self.io, self.cfg = io, cfg
+        def __init__(self):
+            self.io, self.cfg = io, cfg
 
-            def request(self, kind, payload=None):
-                return payload['p']['nominal'] if kind == 'manual' else True
+        def request(self, kind, payload=None):
+            return payload['p']['nominal'] if kind == 'manual' else True
 
-            def post(self, *a, **k):
-                pass
+        def post(self, *a, **k):
+            pass
 
-        c.run('mdo4000c_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
-        runner = M.Runner(FakeApp())
-        pts = [p for p in M.POINTS if cfg.applies(p) and p['kind'] != 'SELFTEST']          # the self test needs a power-cycle dialog
-        for p in sample(pts, lambda p: (p['kind'], p['section']), 40):
-            c.run(f'mdo4000c_verification.Runner.run_point[{pid(p)}]', runner.run_point, p, _log=io.log)
-        c.run('mdo4000c_verification.IO.close', io.close, _log=io.log)
-        return c.entries
-    finally:
-        M.configure('MDO4000C')
+    c.run('mdo3_verification.IO.reset_at_start', io.reset_at_start, _log=io.log)
+    runner = M.Runner(FakeApp())
+    pts = [p for p in M.POINTS if cfg.applies(p) and p['kind'] != 'SELFTEST']          # the self test needs a power-cycle dialog
+    for p in sample(pts, lambda p: (p['kind'], p['section']), 40):
+        c.run(f'mdo3_verification.Runner.run_point[{pid(p)}]', runner.run_point, p, _log=io.log)
+    c.run('mdo3_verification.IO.close', io.close, _log=io.log)
+    return c.entries
 
 
 def run_tds():

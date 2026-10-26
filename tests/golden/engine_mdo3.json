@@ -2,7 +2,7 @@
  "entries": [
   {
    "call": "",
-   "case": "mdo4000c_verification.IO.__init__",
+   "case": "mdo3_verification.IO.__init__",
    "log": [
     "MDO3|>>|*IDN?",
     "MDO3|<<|TEKTRONIX,MDO34,SIM0003,CF:91.1CT FV:v1.0",
@@ -76,8 +76,8 @@
     "Counter|>>|*IDN?",
     "Counter|<<|KEYSIGHT,SIM-METER,SIM0001,1.0"
    ],
-   "method": "mdo4000c_verification.IO.__init__",
-   "result": "returned <mdo4000c_verification.IO object>",
+   "method": "mdo3_verification.IO.__init__",
+   "result": "returned <mdo3_verification.IO object>",
    "wire": [
     [
      "ctl",
@@ -352,7 +352,7 @@
   },
   {
    "call": "",
-   "case": "mdo4000c_verification.IO.reset_at_start",
+   "case": "mdo3_verification.IO.reset_at_start",
    "log": [
     "5560A|>>|*RST",
     "5560A|>>|*CLS",
@@ -451,7 +451,7 @@
     "MDO3|<<|0",
     "RESET|--|Instruments reset to default settings at start: 5560A, 96270A, RF2, FuncGen, RefDMM, Counter, MDO3"
    ],
-   "method": "mdo4000c_verification.IO.reset_at_start",
+   "method": "mdo3_verification.IO.reset_at_start",
    "result": "returned <reset_startup.StartupReport object>",
    "wire": [
     [
@@ -809,7 +809,7 @@
   },
   {
    "call": "{'ch': None, 'desc': 'Signal path compensation (status Pass)', 'high': 1.0, 'id': 2, 'kind': 'SPC', 'low': 1.0, 'nominal': 1.0, 'note': 'The test record (p. 48) has a Self Test row only; the procedure (p. 90) requires a passing SPC before the other tests.', 'passfail': True, 'section': 'selftest', 'stim': 'none', 'unit': ''}",
-   "case": "mdo4000c_verification.Runner.run_point[SPC#2]",
+   "case": "mdo3_verification.Runner.run_point[SPC#2]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -840,7 +840,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (1.0, {'status': 'PASS'})",
    "wire": [
     [
@@ -952,7 +952,7 @@
   },
   {
    "call": "{'ch': 1, 'desc': 'CH1 1 MΩ, 10 mV/div', 'high': 1010000.0, 'id': 3, 'kind': 'IMP', 'low': 990000.0, 'nominal': 1000000.0, 'section': 'imp', 'stim': 'cal', 'term': '1M', 'unit': 'ohm', 'vscale': 0.01}",
-   "case": "mdo4000c_verification.Runner.run_point[IMP#3]",
+   "case": "mdo3_verification.Runner.run_point[IMP#3]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -1002,7 +1002,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (1000400.0, {'readings': [1000400.0, 1000400.0, 1000400.0]})",
    "wire": [
     [
@@ -1175,7 +1175,7 @@
   },
   {
    "call": "{'bw': 'TWEnty', 'ch': 1, 'desc': 'CH1 50 Ω, 20 MHz BW, 1 mV/div', 'high': 0.5, 'id': 19, 'kind': 'BAL', 'low': -0.5, 'nominal': 0.0, 'per_div': True, 'section': 'bal', 'stim': 'none', 'term': '50', 'unit': 'div', 'vscale': 0.001}",
-   "case": "mdo4000c_verification.Runner.run_point[BAL#19]",
+   "case": "mdo3_verification.Runner.run_point[BAL#19]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -1246,7 +1246,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.02, {'mean_volts': 2e-05})",
    "wire": [
     [
@@ -1499,8 +1499,8 @@
    ]
   },
   {
-   "call": "{'ch': 1, 'desc': 'CH1 50 Ω, 10 mV/div, 1 GHz', 'freq': 1000000000.0, 'high': None, 'hscale': 4e-09, 'id': 203, 'kind': 'BW', 'low': 0.707, 'models': ['32-1000', '34-1000'], 'nominal': 1.0, 'ref_hz': 10000000.0, 'section': 'bw', 'stim': 'cal', 'term': '50', 'unit': 'ratio', 'vin_pp': 0.08, 'vscale': 0.01}",
-   "case": "mdo4000c_verification.Runner.run_point[BW#203]",
+   "call": "{'ch': 1, 'desc': 'CH1 50 Ω, 10 mV/div, 1 GHz', 'freq': 1000000000.0, 'high': None, 'hscale': 4e-09, 'id': 203, 'kind': 'BW', 'low': 0.707, 'models': ['32-1000', '34-1000'], 'nominal': 1.0, 'ref_hscale': 0.001, 'ref_hz': 10000000.0, 'section': 'bw', 'stim': 'cal', 'term': '50', 'unit': 'ratio', 'vin_pp': 0.08, 'vscale': 0.01}",
+   "case": "mdo3_verification.Runner.run_point[BW#203]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -1549,9 +1549,9 @@
     "5560A|>>|ERR?",
     "5560A|<<|0,\"No error\"",
     "5560A|>>|OPER",
-    "MDO3|>>|HORizontal:SCAle 1e-05",
+    "MDO3|>>|HORizontal:SCAle 0.001",
     "MDO3|>>|HORizontal:SCAle?",
-    "MDO3|<<|1e-05",
+    "MDO3|<<|0.001",
     "MDO3|>>|MEASUrement:MEAS1:STATE OFF",
     "MDO3|>>|MEASUrement:MEAS1:TYPe PK2pk",
     "MDO3|>>|MEASUrement:MEAS1:SOUrce1 CH1",
@@ -1583,7 +1583,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.832068784170847, {'gain': 0.832068784170847, 'vbw_pp': 0.06663058757, 'vin_pp': 0.0800782205})",
    "wire": [
     [
@@ -1763,12 +1763,12 @@
     ],
     [
      "W",
-     "HORizontal:SCAle 1e-05"
+     "HORizontal:SCAle 0.001"
     ],
     [
      "Q",
      "HORizontal:SCAle?",
-     "1e-05"
+     "0.001"
     ],
     [
      "W",
@@ -1888,7 +1888,7 @@
   },
   {
    "call": "{'bw': 'TWEnty', 'ch': 1, 'desc': 'CH1 1 MΩ, 20 MHz BW, 1 mV/div', 'high': 2.5, 'id': 219, 'kind': 'GAIN', 'low': -2.5, 'nominal': 0.0, 'section': 'gain', 'stim': 'cal', 'term': '1M', 'unit': '%', 'vdiff': 0.007, 'vneg': -0.0035, 'vpos': 0.0035, 'vscale': 0.001}",
-   "case": "mdo4000c_verification.Runner.run_point[GAIN#219]",
+   "case": "mdo3_verification.Runner.run_point[GAIN#219]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -1998,7 +1998,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.03999999999999787, {'vdiff': 0.0070028, 'vdiff_expected': 0.007, 'vneg_meas': -0.0034714, 'vneg_set': -0.0035, 'vpos_meas': 0.0035314, 'vpos_set': 0.0035})",
    "wire": [
     [
@@ -2390,7 +2390,7 @@
   },
   {
    "call": "{'bw': 'TWEnty', 'ch': 1, 'desc': 'CH1 1 MΩ, 20 MHz BW, 1 mV/div, offset 700 mV', 'high': 0.7073, 'hscale': 0.02, 'id': 267, 'kind': 'OFFSET', 'low': 0.6927, 'nominal': 0.7, 'note': 'The procedure (p. 101) sets 900 mV for the first row; the test record (p. 60) prints 700 mV, which is applied.', 'offset': 0.7, 'section': 'off', 'stim': 'cal', 'term': '1M', 'unit': 'V', 'vscale': 0.001}",
-   "case": "mdo4000c_verification.Runner.run_point[OFFSET#267]",
+   "case": "mdo3_verification.Runner.run_point[OFFSET#267]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -2479,7 +2479,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.70031, {'applied': 0.7})",
    "wire": [
     [
@@ -2791,7 +2791,7 @@
   },
   {
    "call": "{'ch': 1, 'coarse_hscale': 0.02, 'desc': 'Time-base error (80 ms mark, 400 ns/div)', 'fine_hscale': 4e-07, 'high': 2.0, 'id': 315, 'kind': 'REFFREQ', 'low': -2.0, 'nominal': 0.0, 'per_div': True, 'period': 0.08, 'section': 'srate', 'stim': 'gen', 'unit': 'div', 'vpp': 1.0}",
-   "case": "mdo4000c_verification.Runner.run_point[REFFREQ#315]",
+   "case": "mdo3_verification.Runner.run_point[REFFREQ#315]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -2881,7 +2881,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.022499999988156993, {'deviation_s': 8.999999995262797e-09, 'edge_time': 0.080000009})",
    "wire": [
     [
@@ -3192,7 +3192,7 @@
   },
   {
    "call": "{'bw': 'FULl', 'ch': 1, 'desc': 'CH1 50 Ω, Full BW, 100 mV/div', 'high': 0.0031, 'hscale': 0.01, 'id': 356, 'kind': 'NOISE', 'low': None, 'method': 'rms_mean', 'models': ['32-1000', '34-1000'], 'nominal': 0.0, 'section': 'noise', 'stim': 'none', 'term': '50', 'unit': 'V', 'vscale': 0.1}",
-   "case": "mdo4000c_verification.Runner.run_point[NOISE#356]",
+   "case": "mdo3_verification.Runner.run_point[NOISE#356]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -3260,7 +3260,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.000599666574022598, {'mean': 2e-05, 'rms': 0.0006})",
    "wire": [
     [
@@ -3502,7 +3502,7 @@
   },
   {
    "call": "{'ch': 1, 'desc': 'CH1 4 ns/div, 240 MHz, 100 mV/div (800 mV p-p)', 'freq': 240000000.0, 'high': 1.19e-10, 'hscale': 4e-09, 'id': 460, 'kind': 'DELTA', 'low': None, 'models': ['32-1000', '34-1000'], 'nominal': 0.0, 'section': 'dt', 'stim': 'cal', 'unit': 's', 'vpp': 0.8, 'vscale': 0.1}",
-   "case": "mdo4000c_verification.Runner.run_point[DELTA#460]",
+   "case": "mdo3_verification.Runner.run_point[DELTA#460]",
    "log": [
     "MDO3|>>|FACtory",
     "MDO3|>>|*OPC?",
@@ -3570,7 +3570,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (3e-11, {'source': '5560A'})",
    "wire": [
     [
@@ -3819,7 +3819,7 @@
   },
   {
    "call": "{'ch': None, 'desc': '9 kHz to 50 kHz', 'detection': 'AVErage', 'f_start': 9000.0, 'f_stop': 50000.0, 'high': -109.0, 'id': 552, 'kind': 'DANL', 'low': None, 'nominal': 0.0, 'ref_level': -15.0, 'req': ['noTPA'], 'section': 'danl', 'stim': 'none', 'unit': 'dBm/Hz'}",
-   "case": "mdo4000c_verification.Runner.run_point[DANL#552]",
+   "case": "mdo3_verification.Runner.run_point[DANL#552]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -3880,7 +3880,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (-161.864171, {'at_hz': 47950.0, 'noise_dbm': -131.864171, 'rbw': 1000.0})",
    "wire": [
     [
@@ -4078,7 +4078,7 @@
   },
   {
    "call": "{'at_freq': None, 'ch': None, 'desc': '9 kHz to 50 kHz', 'exclude': [], 'f_start': 9000.0, 'f_stop': 50000.0, 'high': -78.0, 'id': 557, 'kind': 'SPUR', 'low': None, 'nominal': 0.0, 'note': 'The test record (p. 80) records PASS or FAIL; the limit is the procedure threshold (p. 113: no spur above -78 dBm), as the specification (p. 41).', 'rbw': None, 'ref_level': -15.0, 'section': 'spur', 'stim': 'none', 'unit': 'dBm'}",
-   "case": "mdo4000c_verification.Runner.run_point[SPUR#557]",
+   "case": "mdo3_verification.Runner.run_point[SPUR#557]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -4135,7 +4135,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (-131.40054, {'at_hz': 48257.5})",
    "wire": [
     [
@@ -4320,7 +4320,7 @@
   },
   {
    "call": "{'ch': None, 'desc': '+10 dBm, 50 kHz', 'f_start': 50000.0, 'f_step': 100000.0, 'f_stop': 50000.0, 'high': 1.0, 'id': 564, 'kind': 'ABSAMP', 'level_dbm': 10.0, 'low': -1.0, 'nominal': 10.0, 'section': 'level', 'span': 100000.0, 'stim': 'rf', 'unit': 'dB'}",
-   "case": "mdo4000c_verification.Runner.run_point[ABSAMP#564]",
+   "case": "mdo3_verification.Runner.run_point[ABSAMP#564]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -4389,7 +4389,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (-0.1999999999999993, {'points': 1, 'worst_hz': 50000.0})",
    "wire": [
     [
@@ -4607,7 +4607,7 @@
   },
   {
    "call": "{'ch': 1, 'desc': 'Aux out HIGH, 1 MΩ', 'high': None, 'id': 597, 'kind': 'TRIGOUT', 'low': 2.25, 'nominal': 2.25, 'section': 'trig', 'state': 'HIGH', 'stim': 'none', 'term': '1M', 'unit': 'V'}",
-   "case": "mdo4000c_verification.Runner.run_point[TRIGOUT#597]",
+   "case": "mdo3_verification.Runner.run_point[TRIGOUT#597]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -4662,7 +4662,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (3.3, {})",
    "wire": [
     [
@@ -4861,7 +4861,7 @@
   },
   {
    "call": "{'ch': None, 'desc': 'Sine wave 10 kHz, 2.5 V p-p, 50 Ω', 'high': 10001.3, 'id': 601, 'kind': 'AFGFREQ', 'low': 9998.7, 'nominal': 10000.0, 'req': ['AFG'], 'section': 'afgf', 'stim': 'none', 'unit': 'Hz', 'vpp': 2.5, 'wave': 'SINE'}",
-   "case": "mdo4000c_verification.Runner.run_point[AFGFREQ#601]",
+   "case": "mdo3_verification.Runner.run_point[AFGFREQ#601]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -4908,7 +4908,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (10000.002, {})",
    "wire": [
     [
@@ -5069,7 +5069,7 @@
   },
   {
    "call": "{'ch': None, 'desc': 'Square 20 mV p-p at 1 kHz, 0 V offset, 50 Ω (rms)', 'freq': 1000.0, 'high': 0.01065, 'id': 605, 'kind': 'AFGAMP', 'low': 0.00935, 'nominal': 0.01, 'offset': 0.0, 'req': ['AFG'], 'section': 'afga', 'stim': 'none', 'unit': 'V', 'vpp': 0.02}",
-   "case": "mdo4000c_verification.Runner.run_point[AFGAMP#605]",
+   "case": "mdo3_verification.Runner.run_point[AFGAMP#605]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -5113,7 +5113,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.01002, {})",
    "wire": [
     [
@@ -5259,7 +5259,7 @@
   },
   {
    "call": "{'ch': None, 'desc': 'DC 20 mV into 50 Ω', 'high': 0.0213, 'id': 607, 'kind': 'AFGOFF', 'level': 0.02, 'low': 0.0187, 'nominal': 0.02, 'req': ['AFG'], 'section': 'afgo', 'stim': 'none', 'unit': 'V'}",
-   "case": "mdo4000c_verification.Runner.run_point[AFGOFF#607]",
+   "case": "mdo3_verification.Runner.run_point[AFGOFF#607]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -5296,7 +5296,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.02002, {})",
    "wire": [
     [
@@ -5420,7 +5420,7 @@
   },
   {
    "call": "{'ch': 1, 'desc': 'CH1 1 V/div, input -5 V, offset -5 V', 'high': -4.883, 'id': 610, 'kind': 'DVMDC', 'low': -5.117, 'nominal': -5.0, 'offset': -5.0, 'req': ['DVM'], 'section': 'dvmdc', 'stim': 'cal', 'unit': 'V', 'vscale': 1.0}",
-   "case": "mdo4000c_verification.Runner.run_point[DVMDC#610]",
+   "case": "mdo3_verification.Runner.run_point[DVMDC#610]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -5508,7 +5508,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (-5.005, {})",
    "wire": [
     [
@@ -5807,7 +5807,7 @@
   },
   {
    "call": "{'ch': 1, 'desc': 'CH1 5 mV/div, 20 mV p-p square at 1 kHz (rms)', 'freq': 1000.0, 'high': 0.0102, 'id': 646, 'kind': 'DVMAC', 'low': 0.0098, 'nominal': 0.01, 'req': ['DVM'], 'section': 'dvmac', 'stim': 'cal', 'unit': 'V', 'vpp': 0.02, 'vscale': 0.005}",
-   "case": "mdo4000c_verification.Runner.run_point[DVMAC#646]",
+   "case": "mdo3_verification.Runner.run_point[DVMAC#646]",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -5869,7 +5869,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
+   "method": "mdo3_verification.Runner.run_point",
    "result": "returned (0.01002, {})",
    "wire": [
     [
@@ -6087,8 +6087,8 @@
    ]
   },
   {
-   "call": "{'ch': 1, 'counter': 'trigger', 'desc': 'CH1 9.0000 Hz', 'freq': 9.0, 'high': 9.0002, 'hscale': 0.02, 'id': 666, 'kind': 'DVMFREQ', 'low': 8.9998, 'nominal': 9.0, 'req': ['DVM'], 'section': 'dvmf', 'stim': 'cal', 'unit': 'Hz', 'vpp': 1.0, 'vscale': 0.2}",
-   "case": "mdo4000c_verification.Runner.run_point[DVMFREQ#666]",
+   "call": "{'ch': 1, 'counter': 'trigger', 'desc': 'CH1 9.0000 Hz', 'freq': 9.0, 'high': 9.0002, 'hscale': 0.02, 'id': 666, 'kind': 'DVMFREQ', 'low': 8.9998, 'nominal': 9.0, 'req': ['DVM'], 'section': 'dvmf', 'stim': 'cal', 'unit': 'Hz', 'vpp': 1.0, 'vscale': 0.2, 'waveform': 'square'}",
+   "case": "mdo3_verification.Runner.run_point[DVMFREQ#666]",
    "log": [
     "MDO3|>>|FACtory",
     "MDO3|>>|*OPC?",
@@ -6133,7 +6133,7 @@
     "MDO3|>>|AFG:OUTPut:STATE OFF",
     "FuncGen|>>|OUTPut OFF",
     "FuncGen|>>|OUTPut:LOAD 50",
-    "FuncGen|>>|APPLy:SINusoid 9,1,0",
+    "FuncGen|>>|APPLy:SQUare 9,1,0",
     "FuncGen|>>|FREQuency?",
     "FuncGen|<<|9",
     "FuncGen|>>|VOLTage?",
@@ -6153,8 +6153,8 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.Runner.run_point",
-   "result": "returned (9.0000009, {'source': 'GEN'})",
+   "method": "mdo3_verification.Runner.run_point",
+   "result": "returned (9.0000009, {'source': 'GEN', 'waveform': 'square'})",
    "wire": [
     [
      "W",
@@ -6313,7 +6313,7 @@
     ],
     [
      "W",
-     "APPLy:SINusoid 9,1,0"
+     "APPLy:SQUare 9,1,0"
     ],
     [
      "Q",
@@ -6381,7 +6381,7 @@
   },
   {
    "call": "",
-   "case": "mdo4000c_verification.IO.close",
+   "case": "mdo3_verification.IO.close",
    "log": [
     "5560A|>>|STBY",
     "96270A|>>|OUTP OFF",
@@ -6393,7 +6393,7 @@
     "FuncGen|>>|OUTPut OFF",
     "MDO3|>>|AFG:OUTPut:STATE OFF"
    ],
-   "method": "mdo4000c_verification.IO.close",
+   "method": "mdo3_verification.IO.close",
    "result": "returned None",
    "wire": [
     [

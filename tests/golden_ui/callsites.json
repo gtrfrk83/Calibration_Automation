@@ -4205,7 +4205,7 @@
    "kw": {
     "caution": "payload['caution']",
     "facts": "payload['facts']",
-    "image": "hookups.panel_image(FAMILY['panel'])",
+    "image": "hookups.panel_image('MDO4000C')",
     "ok": "payload['ok']"
    },
    "where": "App._pump"
@@ -4303,7 +4303,7 @@
   },
   {
    "args": [
-    "FAMILY['report_title']"
+    "'Tektronix MDO4000C performance verification'"
    ],
    "kind": "report_details",
    "kw": {},

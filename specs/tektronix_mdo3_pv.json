@@ -284,6 +284,8 @@
   "Bandwidth worksheet (pp. 95-96): no 10 mV/div row for 500 / 350 / 200 / 100 MHz instruments and two 1 mV/div rows (150 MHz, 100 MHz) for 200 MHz; the specification (p. 15) frequencies are used (see the notes on the points).",
   "TPA DANL (p. 82): \"50 kHz - 1 GHz (3-SA3 not installed)\"; procedure p. 120 checks 5 MHz - 1 GHz. 5 MHz used.",
   "Residual spurs (p. 80): the \"5 MHz to 2 GHz (not 1.25 GHz)\" row has no 3-SA3 qualifier; the procedure (p. 113) checks 5 MHz - 1 GHz without 3-SA3 and 5 MHz - 2 GHz with it. Built as the procedure.",
+  "DANL 2 GHz to 3 GHz (p. 112 step 8d): the centre frequency is printed as 1.5 GHz, outside the 2 GHz to 3 GHz range; 2.5 GHz used (visible note on the point).",
+  "DANL with the TPA-N-PRE (pp. 120-121): the centre frequency is not printed (\"the center frequency\"); the DANL procedure's centres are used (note on the points).",
   "DVM frequency 150 MHz (p. 88): printed +/-10 kHz; specification p. 46 (+/-(10 uHz/Hz + 1 count)) gives +/-11.5 kHz. Printed (tighter) limit applied. Specification p. 46: counter maximum 100 MHz for 100 MHz models - the 150 MHz point is not run on them."
  ],
  "points": [
@@ -3074,6 +3076,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 139
   },
@@ -3097,6 +3100,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 140
   },
@@ -3120,6 +3124,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 141
   },
@@ -3143,6 +3148,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 142
   },
   {
@@ -3165,6 +3171,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 143
   },
@@ -3188,6 +3195,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 144
   },
@@ -3211,6 +3219,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 145
   },
@@ -3234,6 +3243,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 146
   },
   {
@@ -3255,6 +3265,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 147
   },
@@ -3277,6 +3288,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 148
   },
@@ -3299,6 +3311,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 149
   },
@@ -3321,6 +3334,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 150
   },
   {
@@ -3342,6 +3356,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 151
   },
@@ -3364,6 +3379,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 152
   },
@@ -3386,6 +3402,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) lists only 1 mV/div for 100 MHz instruments; the specification (p. 15: 1 mV/div - 1 V/div, DC - 100 MHz) is used.",
    "id": 153
   },
@@ -3408,6 +3425,7 @@
    "freq": 100000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 154
   },
   {
@@ -3430,6 +3448,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (pp. 95-96) lists no 10 mV/div row for 200 MHz instruments; the specification (p. 15: 2 mV/div - 1 V/div, DC - 200 MHz) is used.",
    "id": 155
   },
@@ -3453,6 +3472,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (pp. 95-96) lists no 5 mV/div row for 200 MHz instruments; the specification (p. 15: 2 mV/div - 1 V/div, DC - 200 MHz) is used.",
    "id": 156
   },
@@ -3476,6 +3496,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 157
   },
   {
@@ -3498,6 +3519,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) prints two 1 mV/div rows for 200 MHz instruments (150 MHz and 100 MHz); the specification (p. 15: 1 mV/div - 1.99 mV/div, DC - 150 MHz) is used.",
    "id": 158
   },
@@ -3521,6 +3543,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (pp. 95-96) lists no 10 mV/div row for 200 MHz instruments; the specification (p. 15: 2 mV/div - 1 V/div, DC - 200 MHz) is used.",
    "id": 159
   },
@@ -3544,6 +3567,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (pp. 95-96) lists no 5 mV/div row for 200 MHz instruments; the specification (p. 15: 2 mV/div - 1 V/div, DC - 200 MHz) is used.",
    "id": 160
   },
@@ -3567,6 +3591,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 161
   },
   {
@@ -3589,6 +3614,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) prints two 1 mV/div rows for 200 MHz instruments (150 MHz and 100 MHz); the specification (p. 15: 1 mV/div - 1.99 mV/div, DC - 150 MHz) is used.",
    "id": 162
   },
@@ -3611,6 +3637,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (pp. 95-96) lists no 10 mV/div row for 200 MHz instruments; the specification (p. 15: 2 mV/div - 1 V/div, DC - 200 MHz) is used.",
    "id": 163
   },
@@ -3633,6 +3660,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (pp. 95-96) lists no 5 mV/div row for 200 MHz instruments; the specification (p. 15: 2 mV/div - 1 V/div, DC - 200 MHz) is used.",
    "id": 164
   },
@@ -3655,6 +3683,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 165
   },
   {
@@ -3676,6 +3705,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) prints two 1 mV/div rows for 200 MHz instruments (150 MHz and 100 MHz); the specification (p. 15: 1 mV/div - 1.99 mV/div, DC - 150 MHz) is used.",
    "id": 166
   },
@@ -3698,6 +3728,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (pp. 95-96) lists no 10 mV/div row for 200 MHz instruments; the specification (p. 15: 2 mV/div - 1 V/div, DC - 200 MHz) is used.",
    "id": 167
   },
@@ -3720,6 +3751,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (pp. 95-96) lists no 5 mV/div row for 200 MHz instruments; the specification (p. 15: 2 mV/div - 1 V/div, DC - 200 MHz) is used.",
    "id": 168
   },
@@ -3742,6 +3774,7 @@
    "freq": 200000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 169
   },
   {
@@ -3763,6 +3796,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 96) prints two 1 mV/div rows for 200 MHz instruments (150 MHz and 100 MHz); the specification (p. 15: 1 mV/div - 1.99 mV/div, DC - 150 MHz) is used.",
    "id": 170
   },
@@ -3786,6 +3820,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 95) lists no 10 mV/div row for 350 MHz instruments; the specification (p. 15: 5 mV/div - 1 V/div, DC - 350 MHz) is used.",
    "id": 171
   },
@@ -3809,6 +3844,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 172
   },
   {
@@ -3831,6 +3867,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 173
   },
   {
@@ -3853,6 +3890,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 174
   },
   {
@@ -3875,6 +3913,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 95) lists no 10 mV/div row for 350 MHz instruments; the specification (p. 15: 5 mV/div - 1 V/div, DC - 350 MHz) is used.",
    "id": 175
   },
@@ -3898,6 +3937,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 176
   },
   {
@@ -3920,6 +3960,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 177
   },
   {
@@ -3942,6 +3983,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 178
   },
   {
@@ -3963,6 +4005,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 95) lists no 10 mV/div row for 350 MHz instruments; the specification (p. 15: 5 mV/div - 1 V/div, DC - 350 MHz) is used.",
    "id": 179
   },
@@ -3985,6 +4028,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 180
   },
   {
@@ -4006,6 +4050,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 181
   },
   {
@@ -4027,6 +4072,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 182
   },
   {
@@ -4048,6 +4094,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 95) lists no 10 mV/div row for 350 MHz instruments; the specification (p. 15: 5 mV/div - 1 V/div, DC - 350 MHz) is used.",
    "id": 183
   },
@@ -4070,6 +4117,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 184
   },
   {
@@ -4091,6 +4139,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 185
   },
   {
@@ -4112,6 +4161,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 186
   },
   {
@@ -4134,6 +4184,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 95) lists no 10 mV/div row for 500 MHz instruments; the specification (p. 15: 5 mV/div - 1 V/div, DC - 500 MHz) is used.",
    "id": 187
   },
@@ -4157,6 +4208,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 188
   },
   {
@@ -4179,6 +4231,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 189
   },
   {
@@ -4201,6 +4254,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 190
   },
   {
@@ -4223,6 +4277,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 95) lists no 10 mV/div row for 500 MHz instruments; the specification (p. 15: 5 mV/div - 1 V/div, DC - 500 MHz) is used.",
    "id": 191
   },
@@ -4246,6 +4301,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 192
   },
   {
@@ -4268,6 +4324,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 193
   },
   {
@@ -4290,6 +4347,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 194
   },
   {
@@ -4311,6 +4369,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 95) lists no 10 mV/div row for 500 MHz instruments; the specification (p. 15: 5 mV/div - 1 V/div, DC - 500 MHz) is used.",
    "id": 195
   },
@@ -4333,6 +4392,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 196
   },
   {
@@ -4354,6 +4414,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 197
   },
   {
@@ -4375,6 +4436,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 198
   },
   {
@@ -4396,6 +4458,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "note": "The worksheet (p. 95) lists no 10 mV/div row for 500 MHz instruments; the specification (p. 15: 5 mV/div - 1 V/div, DC - 500 MHz) is used.",
    "id": 199
   },
@@ -4418,6 +4481,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 200
   },
   {
@@ -4439,6 +4503,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 201
   },
   {
@@ -4460,6 +4525,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 202
   },
   {
@@ -4482,6 +4548,7 @@
    "freq": 1000000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 203
   },
   {
@@ -4504,6 +4571,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 204
   },
   {
@@ -4526,6 +4594,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 205
   },
   {
@@ -4548,6 +4617,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 206
   },
   {
@@ -4570,6 +4640,7 @@
    "freq": 1000000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 207
   },
   {
@@ -4592,6 +4663,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 208
   },
   {
@@ -4614,6 +4686,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 209
   },
   {
@@ -4636,6 +4709,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 210
   },
   {
@@ -4657,6 +4731,7 @@
    "freq": 1000000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 211
   },
   {
@@ -4678,6 +4753,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 212
   },
   {
@@ -4699,6 +4775,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 213
   },
   {
@@ -4720,6 +4797,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 214
   },
   {
@@ -4741,6 +4819,7 @@
    "freq": 1000000000.0,
    "vin_pp": 0.08,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 215
   },
   {
@@ -4762,6 +4841,7 @@
    "freq": 500000000.0,
    "vin_pp": 0.04,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 216
   },
   {
@@ -4783,6 +4863,7 @@
    "freq": 350000000.0,
    "vin_pp": 0.016,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 217
   },
   {
@@ -4804,6 +4885,7 @@
    "freq": 150000000.0,
    "vin_pp": 0.008,
    "ref_hz": 10000000.0,
+   "ref_hscale": 0.001,
    "id": 218
   },
   {
@@ -11928,6 +12010,8 @@
    "f_stop": 5000000.0,
    "ref_level": -15.0,
    "detection": "AVErage",
+   "center": 2525000.0,
+   "span": 10000000.0,
    "id": 553
   },
   {
@@ -11948,6 +12032,8 @@
    "f_stop": 1000000000.0,
    "ref_level": -15.0,
    "detection": "AVErage",
+   "center": 500000000.0,
+   "span": 10000000.0,
    "id": 554
   },
   {
@@ -11968,6 +12054,8 @@
    "f_stop": 2000000000.0,
    "ref_level": -15.0,
    "detection": "AVErage",
+   "center": 1000000000.0,
+   "span": 10000000.0,
    "id": 555
   },
   {
@@ -11988,6 +12076,9 @@
    "f_stop": 3000000000.0,
    "ref_level": -15.0,
    "detection": "AVErage",
+   "center": 2500000000.0,
+   "span": 10000000.0,
+   "note": "The procedure (p. 112 step 8d) sets the centre frequency to 1.5 GHz, which is outside this 2 GHz to 3 GHz range; 2.5 GHz (the middle of the range) is used. Confirm.",
    "id": 556
   },
   {
@@ -12738,7 +12829,9 @@
    "ref_level": -30.0,
    "tpa": true,
    "detection": "AVErage",
-   "note": "The test record (p. 82) prints \"50 kHz - 1 GHz (3-SA3 not installed)\"; the procedure (p. 120 step 4) checks 5 MHz to 1 GHz, which is used.",
+   "note": "The test record (p. 82) prints \"50 kHz - 1 GHz (3-SA3 not installed)\"; the procedure (p. 120 step 4) checks 5 MHz to 1 GHz, which is used. The centre frequency is not printed for the TPA-N-PRE procedure (p. 120 steps 4d / 5d / 6d); the DANL procedure's centre is used. Confirm.",
+   "center": 500000000.0,
+   "span": 10000000.0,
    "id": 594
   },
   {
@@ -12760,6 +12853,9 @@
    "ref_level": -30.0,
    "tpa": true,
    "detection": "AVErage",
+   "center": 1000000000.0,
+   "span": 10000000.0,
+   "note": "The centre frequency is not printed for the TPA-N-PRE procedure (p. 120 steps 4d / 5d / 6d); the DANL procedure's centre is used. Confirm.",
    "id": 595
   },
   {
@@ -12781,6 +12877,9 @@
    "ref_level": -30.0,
    "tpa": true,
    "detection": "AVErage",
+   "center": 2500000000.0,
+   "span": 10000000.0,
+   "note": "The centre frequency is not printed for the TPA-N-PRE procedure (p. 120 steps 4d / 5d / 6d); the DANL procedure's centre is used. Confirm.",
    "id": 596
   },
   {
@@ -14185,6 +14284,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 666
   },
   {
@@ -14205,6 +14305,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 667
   },
   {
@@ -14225,6 +14326,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 668
   },
   {
@@ -14245,6 +14347,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 669
   },
   {
@@ -14265,6 +14368,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 670
   },
   {
@@ -14295,6 +14399,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "sine",
    "note": "Verifies the counter maximum input frequency. The specification (p. 46) gives 100 MHz for 100 MHz models, so this point is not run on them.",
    "id": 671
   },
@@ -14316,6 +14421,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 672
   },
   {
@@ -14336,6 +14442,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 673
   },
   {
@@ -14356,6 +14463,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 674
   },
   {
@@ -14376,6 +14484,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 675
   },
   {
@@ -14396,6 +14505,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 676
   },
   {
@@ -14426,6 +14536,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "sine",
    "note": "Verifies the counter maximum input frequency. The specification (p. 46) gives 100 MHz for 100 MHz models, so this point is not run on them.",
    "id": 677
   },
@@ -14454,6 +14565,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 678
   },
   {
@@ -14481,6 +14593,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 679
   },
   {
@@ -14508,6 +14621,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 680
   },
   {
@@ -14535,6 +14649,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 681
   },
   {
@@ -14562,6 +14677,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 682
   },
   {
@@ -14588,6 +14704,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "sine",
    "note": "Verifies the counter maximum input frequency. The specification (p. 46) gives 100 MHz for 100 MHz models, so this point is not run on them.",
    "id": 683
   },
@@ -14616,6 +14733,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 684
   },
   {
@@ -14643,6 +14761,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 685
   },
   {
@@ -14670,6 +14789,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 686
   },
   {
@@ -14697,6 +14817,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 687
   },
   {
@@ -14724,6 +14845,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "square",
    "id": 688
   },
   {
@@ -14750,6 +14872,7 @@
    "vscale": 0.2,
    "hscale": 0.02,
    "vpp": 1.0,
+   "waveform": "sine",
    "note": "Verifies the counter maximum input frequency. The specification (p. 46) gives 100 MHz for 100 MHz models, so this point is not run on them.",
    "id": 689
   }

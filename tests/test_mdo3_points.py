@@ -1,5 +1,5 @@
 """Tektronix 3 Series MDO (MDO32 / MDO34) procedure: the spec against a second reading of the manual, the builder, the per-model flags, the driver registry,
-the shared engine's MDO3 family (and that the MDO4000C family is untouched), every point on the simulated bench, the review-window rows, a whole
+the 3 Series engine mdo3_verification.py (and that the MDO4000C engine is untouched), every point on the simulated bench, the review-window rows, a whole
 virtual (demo) run with the PDF, and the Qt window (skipped without PySide6).  tkinter is stubbed in setUpModule.
 
 Manual: 3 Series MDO Specifications and Performance Verification 077-1499-10 (test record pp. 48-89, procedures pp. 90-130); programmer manual 077-1498-06.
@@ -35,13 +35,8 @@ def setUpModule():
     global M
     import _tk_stub
     _tk_stub.install()
-    import mdo4000c_verification as _m
+    import mdo3_verification as _m
     M = _m
-
-
-def tearDownModule():
-    if M is not None:
-        M.configure('MDO4000C')
 
 
 def models_of(p):
@@ -322,37 +317,34 @@ class Driver(unittest.TestCase):
 # ======================================================================================================================================================
 # the shared engine
 # ======================================================================================================================================================
-class EngineFamilies(unittest.TestCase):
-    def tearDown(self):
-        M.configure('MDO4000C')
-
-    def test_mdo4000c_family_is_the_module_default(self):
-        self.assertEqual(M.FAMILY_NAME, 'MDO4000C')
-        self.assertEqual(M.SPEC_PATH.name, 'tektronix_mdo4000c_pv.json')
-        self.assertEqual(M.App.VIEW, 'mdo4000c_view')
-        self.assertEqual(M.MODEL_INFO, {})
-        fam = M.FAMILIES['MDO4000C']
-        self.assertEqual((fam['label'], fam['settings'], fam['default_model'], fam['scope_addr'], fam['hv_max'], fam['trig_out']),
-                         ('MDO4000C', 'MDO4000C', '4104C', 'USB0::0x0699::0x0415::C000000::INSTR', 99.5, 'TRIGGER OUT'))
-        optional = {'OFFSET': {'hscale'}, 'SPUR': {'ref_level'}, 'DVMFREQ': {'vscale', 'hscale', 'vpp'}, 'REFFREQ': {'vpp'}}
-        for p in M.POINTS:                                         # the optional MDO3 point parameters never appear on an MDO4000C point
-            self.assertFalse({'per_div', 'method', 'coarse_hscale', 'fine_hscale', 'detection', 'counter'} & set(p), p['desc'])
-            self.assertFalse(optional.get(p['kind'], set()) & set(p), p['desc'])
-
-    def test_configure_round_trip(self):
-        before = (M.SPEC_PATH, len(M.POINTS), dict(M.SECTION_PAGE), list(M.MODELS), M.REF_CMC_PATH, M.App.VIEW)
-        M.configure('MDO3')
-        self.assertEqual((M.SPEC_PATH.name, len(M.POINTS), M.App.VIEW, M.REF_CMC_PATH.name), ('tektronix_mdo3_pv.json', len(POINTS), 'mdo3_view', 'mdo3_reference_cmc.json'))
+class OwnEngine(unittest.TestCase):
+    def test_the_3_series_has_its_own_engine_and_the_mdo4000c_engine_has_no_family_machinery(self):
+        import mdo4000c_verification as E
+        self.assertEqual((M.SPEC_PATH.name, M.REF_CMC_PATH.name, M.App.VIEW, len(M.POINTS)), ('tektronix_mdo3_pv.json', 'mdo3_reference_cmc.json', 'mdo3_view', len(POINTS)))
         self.assertEqual(M.MODELS, MODELS)
-        M.configure('MDO4000C')
-        self.assertEqual((M.SPEC_PATH, len(M.POINTS), dict(M.SECTION_PAGE), list(M.MODELS), M.REF_CMC_PATH, M.App.VIEW), before)
+        self.assertEqual((E.SPEC_PATH.name, E.App.VIEW, E.MODEL_INFO if hasattr(E, 'MODEL_INFO') else None), ('tektronix_mdo4000c_pv.json', 'mdo4000c_view', None))
+        for name in ('FAMILIES', 'FAMILY', 'configure'):
+            self.assertFalse(hasattr(E, name), name)
+        self.assertEqual(M.FAMILY['default_model'], '34-1000')
+        self.assertEqual((M.FAMILY['hv_max'], M.FAMILY['trig_out'], M.FAMILY['label']), (100.0, 'AUX OUT', 'MDO3'))
+
+    def test_the_model_independent_helpers_are_the_mdo4000c_ones(self):
+        import mdo4000c_verification as E
+        for name in ('trace_peak', 'noise_floor_max', 'max_excluding', 'to_per_hz', 'judge', 'fmt_plain', 'demo_reading', 'format_uncertainty', 'Stopped', 'Skip'):
+            self.assertIs(getattr(M, name), getattr(E, name), name)
+
+    def test_the_mdo4000c_only_executors_are_not_here(self):
+        for name in ('do_phase', 'do_imd', 'do_xtalk'):
+            self.assertFalse(hasattr(M.Runner, name), name)
+        kinds = {p['kind'].lower() for p in M.POINTS}
+        self.assertFalse([k for k in kinds if not hasattr(M.Runner, 'do_' + k)])
 
     def test_launcher(self):
         text = (ROOT / 'Procedures' / 'Tektronix_MDO3_Verification.py').read_text(encoding='utf-8')
-        self.assertIn("FAMILY = 'MDO3'", text)
-        self.assertIn('mdo4000c_verification.main(family=FAMILY)', text)
+        self.assertIn('mdo3_verification.main()', text)
+        self.assertNotIn('family', text)
         side = json.loads((ROOT / 'Procedures' / 'Tektronix_MDO3_Verification.procedure.json').read_text(encoding='utf-8'))
-        self.assertEqual((side['name'], side['seed_verified'], side['category']), ('Tektronix 3 Series MDO Performance Verification', False, 'Oscilloscope'))
+        self.assertEqual((side['name'], side['seed_verified'], side['category'], side['engine']), ('Tektronix 3 Series MDO Performance Verification', False, 'Oscilloscope', ['mdo3_verification.py', 'mdo4000c_verification.py']))
 
 
 def _fake_app(io, cfg):
@@ -391,10 +383,31 @@ def run_all_points(model, sa, afg, dvm, tpa):
     return out, io
 
 
-class SimulatedBench(unittest.TestCase):
+def run_some(model, sa, afg, dvm, tpa, want):
+    """Only the applicable points for which want(p) is true, over the simulated bench: ({id: (reading, raw, result)}, [log lines of each point])."""
+    from drivers.simulated_mdo3 import make_mdo3_bench
+    M.SLEEP_SCALE = 0
+    bench, t = make_mdo3_bench(model)
+    io = M.IO(dict(cal_baud=9600), transports=t)
+    cfg = M.Config(model, sa, afg, dvm, tpa)
+    io.reset_at_start()
+    runner = M.Runner(_fake_app(io, cfg))
+    res, logs = {}, {}
+    for p in M.POINTS:
+        if cfg.applies(p) and want(p):
+            mark = len(io.log.lines())
+            reading, raw = runner.run_point(p)
+            res[p['id']] = (reading, dict(raw, reading=reading), M.judge(p, reading))
+            logs[p['id']] = io.log.lines()[mark:]
+    io.close()
+    return res, logs
+
+
+class MethodsFollowTheManual(unittest.TestCase):
+    """Owner decision 2026-10-25: the three method differences follow the 3 Series manual (PV pp. 94, 110-112, 130), here only."""
+
     @classmethod
     def setUpClass(cls):
-        M.configure('MDO3')
         cls._sleep = mock.patch('time.sleep', lambda s: None)
         cls._sleep.start()
 
@@ -402,7 +415,85 @@ class SimulatedBench(unittest.TestCase):
     def tearDownClass(cls):
         cls._sleep.stop()
         M.SLEEP_SCALE = 1.0
-        M.configure('MDO4000C')
+
+    def test_bandwidth_reference_reading_is_at_1_ms_per_div_then_4_ns(self):
+        first = next(p for p in POINTS if p['kind'] == 'BW' and p['ch'] == 1 and '34-1000' in models_of(p))
+        self.assertEqual((first['ref_hscale'], first['hscale'], first['ref_hz']), (1e-3, 4e-9, 10e6))
+        res, logs = run_some('34-1000', 'SA3', False, False, False, lambda p: p['id'] == first['id'])
+        scales = [l for l in logs[first['id']] if 'HORizontal:SCAle ' in l and '?' not in l]
+        self.assertEqual(len(scales), 2, scales)
+        self.assertIn('HORizontal:SCAle 0.001', scales[0]); self.assertIn('HORizontal:SCAle 4e-09', scales[1])
+        self.assertFalse([l for l in logs[first['id']] if 'SCAle 1e-05' in l])
+        self.assertEqual(res[first['id']][2], 'PASS')
+
+    def test_danl_uses_the_fixed_centre_and_span_of_the_manual(self):
+        centres = {(p['f_start'], p['f_stop'], bool(p.get('tpa'))): p.get('center') for p in POINTS if p['kind'] == 'DANL'}
+        self.assertEqual({k: v for k, v in centres.items() if not k[2]}, {(9e3, 50e3, False): None, (50e3, 5e6, False): 2.525e6, (5e6, 1e9, False): 500e6,
+                                                                        (5e6, 2e9, False): 1e9, (2e9, 3e9, False): 2.5e9})
+        for p in POINTS:
+            if p['kind'] == 'DANL' and p.get('center'):
+                self.assertEqual(p['span'], 10e6)
+        tpa = {(p['f_start'], p['f_stop']): p.get('center') for p in POINTS if p['kind'] == 'DANL' and p.get('tpa')}
+        self.assertEqual(tpa[(50e3, 5e6)], None)                    # the TPA procedure has no span step for 50 kHz - 5 MHz (p. 120 step 3)
+        self.assertEqual(tpa[(5e6, 1e9)], 500e6)                    # the TPA procedure prints no centre (pp. 120-121): the DANL ones, noted on the points
+        self.assertIn('not printed', next(p for p in POINTS if p['kind'] == 'DANL' and p.get('tpa') and p['f_stop'] == 1e9)['note'])
+        res, logs = run_some('34-1000', 'SA3', False, False, False, lambda p: p['kind'] == 'DANL')
+        res2, logs2 = run_some('34-1000', 'SA3', False, False, True, lambda p: p['kind'] == 'DANL')
+        res.update(res2); logs.update(logs2)
+        self.assertEqual(len(res), 8)                               # four ranges with 3-SA3, without and with the TPA-N-PRE
+        for pid, lines in logs.items():
+            p = next(q for q in POINTS if q['id'] == pid)
+            centre_cmds = [l for l in lines if 'RF:FREQuency ' in l and '?' not in l]
+            span_cmds = [l for l in lines if 'RF:SPAN ' in l and '?' not in l]
+            if p.get('center'):
+                self.assertEqual(len(centre_cmds), 1, p['desc']); self.assertEqual(len(span_cmds), 1, p['desc'])
+                self.assertIn(f"RF:FREQuency {p['center']:.9g}", centre_cmds[0]); self.assertIn('RF:SPAN 10000000', span_cmds[0])
+            else:
+                self.assertEqual((centre_cmds, span_cmds), ([], []), p['desc'])           # start / stop only, no narrowing to the noisiest frequency
+        note = next(p for p in POINTS if p['kind'] == 'DANL' and p['f_start'] == 2e9 and not p.get('tpa'))['note']
+        self.assertIn('1.5 GHz', note); self.assertIn('2.5 GHz', note)
+
+    def test_dvm_frequency_is_a_square_time_mark_except_at_150_mhz_which_is_a_sine(self):
+        waves = {p['freq']: p['waveform'] for p in POINTS if p['kind'] == 'DVMFREQ'}
+        self.assertEqual(waves, {9.0: 'square', 99.0: 'square', 999.0: 'square', 99e3: 'square', 999e3: 'square', 150e6: 'sine'})
+        res, logs = run_some('34-1000', 'SA3', False, True, False, lambda p: p['kind'] == 'DVMFREQ' and p['ch'] == 1)
+        self.assertEqual(len(res), 6)
+        for pid, lines in logs.items():
+            p = next(q for q in POINTS if q['id'] == pid)
+            text = '\n'.join(lines)
+            if p['freq'] == 150e6:
+                self.assertIn('LEVSINE', text); self.assertNotIn('APPLy:SQUare', text); self.assertNotIn('APPLy:SINusoid', text)
+                self.assertEqual(res[pid][1]['source'], '5560A')
+            else:
+                self.assertIn(f"APPLy:SQUare {p['freq']:.9g},1,0", text); self.assertNotIn('APPLy:SINusoid', text); self.assertNotIn('LEVSINE', text)
+                self.assertEqual((res[pid][1]['source'], res[pid][1]['waveform']), ('GEN', 'square'))
+            self.assertEqual(res[pid][2], 'PASS')
+            self.assertIn('OUTPut OFF', text)                                              # the generator is switched off after the point
+
+    def test_no_generator_means_the_square_points_are_skipped_not_faked(self):
+        from drivers.simulated_mdo3 import make_mdo3_bench
+        M.SLEEP_SCALE = 0
+        bench, t = make_mdo3_bench('34-1000')
+        t.pop('gen')
+        io = M.IO(dict(cal_baud=9600), transports=t)
+        io.reset_at_start()
+        runner = M.Runner(_fake_app(io, M.Config('34-1000', 'None', False, True, False)))
+        p = next(q for q in POINTS if q['kind'] == 'DVMFREQ' and q['freq'] == 99e3 and q['ch'] == 1)
+        with self.assertRaises(M.Skip):
+            runner.run_point(p)
+        io.close()
+
+
+class SimulatedBench(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._sleep = mock.patch('time.sleep', lambda s: None)
+        cls._sleep.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._sleep.stop()
+        M.SLEEP_SCALE = 1.0
 
     def test_every_point_of_four_configurations_passes(self):
         for model, sa, afg, dvm, tpa in (('34-1000', 'SA3', True, True, False), ('34-1000', 'SA3', True, True, True), ('32-100', 'None', False, True, False),
@@ -449,12 +540,8 @@ class SimulatedBench(unittest.TestCase):
 # the review window rows (report_review_adapters: the MDO adapter, found through the engine's CAL_MODEL)
 # ======================================================================================================================================================
 class ReviewRows(unittest.TestCase):
-    def tearDown(self):
-        M.configure('MDO4000C')
-
     def test_one_spec_per_row_default_equals_printed_and_standards(self):
         import report_review_model as RM
-        M.configure('MDO3')
         with mock.patch('time.sleep', lambda s: None):
             res, io = run_all_points('34-1000', 'SA3', True, True, False)
         io.close()
@@ -499,12 +586,10 @@ class ReviewRows(unittest.TestCase):
 class VirtualRun(unittest.TestCase):
     def setUp(self):
         import virtual_harness as VH
-        M.configure('MDO3')
         self.hn = VH.VHarness().start()
 
     def tearDown(self):
         self.hn.stop()
-        M.configure('MDO4000C')
 
     def test_demo_run_records_every_point_marks_it_synthetic_and_the_pdf_is_demo(self):
         from tkinter import simpledialog
@@ -565,10 +650,8 @@ class QtWindow(unittest.TestCase):
     def setUp(self):
         import qt_genscope_harness as Q
         self.Q = Q
-        M.configure('MDO3')
         self.hn = Q.QtHarness().start()
         self.addCleanup(self.hn.stop)
-        self.addCleanup(M.configure, 'MDO4000C')
 
     def test_window_texts_and_a_virtual_run(self):
         from PySide6.QtWidgets import QAbstractButton, QComboBox, QLabel

@@ -1,6 +1,6 @@
 """Tektronix 3 Series MDO (MDO32 / MDO34) performance verification: the Qt window code.
 
-The engine is the shared mdo4000c_verification.py configured for the 'MDO3' family (configure('MDO3') sets App.VIEW = 'mdo3_view'); this view is the
+The engine is mdo3_verification.py (App.VIEW = 'mdo3_view'); this view is the
 MDO4000C Qt view (mdo4000c_view_qt.py) with the 3 Series model list, option names and texts.  Same App attributes (`self.tree`, `self.btn_run`,
 `self.cfg_widgets`, `self.addr_boxes`, `self.btn_read_opts` ...), the same shared helpers (genscope_support_view_qt).  Nothing here decides anything
 about a calibration.  No Tk import.  No front-panel photo and no hook-up diagrams are supplied for the 3 Series MDO (the prompts are text only).
@@ -37,7 +37,7 @@ def finish_window(self):
 
 
 def build_ui(self):
-    import mdo4000c_verification as E                      # the engine's module state (configure('MDO3') rebinds MODELS / POINTS / SPEC), read at call time
+    import mdo3_verification as E                          # the engine's module state (MODELS / POINTS / SPEC), read at call time
     MODELS, POINTS, SPEC = E.MODELS, E.POINTS, E.SPEC
     root = self.root
     sh = self.shell = Shell(root, f'{TITLE}  -  Performance Verification',

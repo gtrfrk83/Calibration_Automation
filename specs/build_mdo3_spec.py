@@ -8,7 +8,7 @@ pages.  Limits are built with Decimal arithmetic from the printed strings and wr
 
 Point fields (base units) are the MDO4000C engine's (specs/build_mdo_spec.py): section, kind, desc, ch, nominal, low, high (None = one-sided),
 unit, models (None = all ten model keys), req (option tokens that must all hold: SA3 noSA3 AFG DVM TPA noTPA), stim, plus per-kind
-parameters.  New optional parameters the shared engine reads only when present (absent on every MDO4000C point, so that procedure is unchanged):
+parameters.  Parameters the 3 Series engine (mdo3_verification.py) reads that the MDO4000C spec does not have:
     per_div      BAL / REFFREQ: the reading is reported in divisions (mean / V/div; edge deviation / s/div), as the test record prints it
     detection    DANL: the RF average-trace detection method (manual pp. 110, 119: Average)
     method       NOISE: 'rms_mean' = sqrt(RMS^2 - Mean^2) from two measurement slots (manual p. 104)
@@ -16,6 +16,9 @@ parameters.  New optional parameters the shared engine reads only when present (
     vpp, coarse_hscale, fine_hscale   REFFREQ: time-mark amplitude and the two time bases (manual p. 103)
     ref_level    SPUR: reference level (manual p. 113: -15 dBm)
     counter      DVMFREQ: 'trigger' = the trigger frequency counter (manual p. 130), vscale / hscale of that setup
+    waveform     DVMFREQ: 'square' = the fast-edge time mark of the manual (p. 130 step 3), 'sine' at 150 MHz
+    ref_hscale   BW: the time base of the 10 MHz reference reading (manual p. 94 step 9: 1 ms/div); hscale is that of the bandwidth reading (step 13)
+    center, span DANL: the fixed centre frequency and the 10 MHz span the manual sets before the highest noise is recorded (pp. 111-112, 120-121)
 Model keys: '<channels>-<bandwidth MHz>' = MDO32-100 ... MDO34-1000 (p. 10 model overview; bandwidth is the 3-BW-xxx option).
 """
 from __future__ import annotations
@@ -145,7 +148,7 @@ for bw in BANDWIDTHS:
             models = [m for m in chans(ch) if BW_OF[m] == bw]
             extra = {'note': BW_NOTES[(bw, vs)]} if (bw, vs) in BW_NOTES else {}
             add('bw', 'BW', f'CH{ch} 50 Ω, {vs}/div, {BWF[bw][vs]}', D(1), D('0.707'), None, 'ratio', ch=ch, term='50', vscale=q(vs), hscale=q('4 ns'),
-                freq=fr, vin_pp=8 * q(vs), ref_hz=q('10 MHz'), models=models, **extra)
+                freq=fr, vin_pp=8 * q(vs), ref_hz=q('10 MHz'), ref_hscale=q('1 ms'), models=models, **extra)
 
 # ---- DC gain (record pp. 57-59: 1 MΩ, 20 MHz BW, 0 V offset; worksheet pp. 98-100 gives Vdiff expected / Vnegative / Vpositive) ------------
 GAIN = [('1 mV', '7 mV', '2.5'), ('2 mV', '14 mV', '2.0'), ('4.98 mV', '34.86 mV', '3.0'), ('5 mV', '35 mV', '1.5'), ('10 mV', '70 mV', '1.5'),
@@ -218,10 +221,16 @@ def fname(x):
 
 DANL = [('9 kHz', '50 kHz', '-109', None), ('50 kHz', '5 MHz', '-126', None), ('5 MHz', '1 GHz', '-136', 'noSA3'), ('5 MHz', '2 GHz', '-136', 'SA3'),
         ('2 GHz', '3 GHz', '-126', 'SA3')]
+# the fixed centre frequency (10 MHz span) the manual sets before the highest noise is recorded: 50 kHz - 5 MHz 2.525 MHz (p. 111 step 4f), 5 MHz - 1 GHz "half the
+# maximum bandwidth" = 500 MHz (step 6d), 5 MHz - 2 GHz 1 GHz (p. 112 step 7d), 2 - 3 GHz printed 1.5 GHz (step 8d: outside the 2 - 3 GHz range, see DISCREPANCIES)
+DANL_CENTRE = {('50 kHz', '5 MHz'): '2.525 MHz', ('5 MHz', '1 GHz'): '500 MHz', ('5 MHz', '2 GHz'): '1 GHz', ('2 GHz', '3 GHz'): '2.5 GHz'}
 for lo_f, hi_f, lim, opt in DANL:
     a, b = q(lo_f), q(hi_f)
+    cen = {'center': q(DANL_CENTRE[(lo_f, hi_f)]), 'span': q('10 MHz')} if (lo_f, hi_f) in DANL_CENTRE else {}
+    if (lo_f, hi_f) == ('2 GHz', '3 GHz'):
+        cen['note'] = 'The procedure (p. 112 step 8d) sets the centre frequency to 1.5 GHz, which is outside this 2 GHz to 3 GHz range; 2.5 GHz (the middle of the range) is used. Confirm.'
     add('danl', 'DANL', f'{fname(a)} to {fname(b)}' + (' (3-SA3 installed)' if opt == 'SA3' else ' (3-SA3 not installed)' if opt else ''),
-        D(0), None, D(lim), 'dBm/Hz', req=[x for x in (opt, 'noTPA') if x], stim='none', f_start=a, f_stop=b, ref_level=D(-15), detection='AVErage')
+        D(0), None, D(lim), 'dBm/Hz', req=[x for x in (opt, 'noTPA') if x], stim='none', f_start=a, f_stop=b, ref_level=D(-15), detection='AVErage', **cen)
 
 # ---- residual spurious response (record p. 80 PASS / FAIL; procedure p. 113: no spur above -78 dBm, reference level -15 dBm, RBW 100 kHz
 #      above 5 MHz; specification p. 41: < -78 dBm, at 2.5 GHz < -62 dBm, at 1.25 GHz < -76 dBm) --------------------------------------------------
@@ -270,6 +279,10 @@ TDANL = [('9 kHz', '50 kHz', '-117', None), ('50 kHz', '5 MHz', '-138', None), (
 for lo_f, hi_f, lim, opt in TDANL:
     a, b = q(lo_f), q(hi_f)
     extra = {'note': 'The test record (p. 82) prints "50 kHz - 1 GHz (3-SA3 not installed)"; the procedure (p. 120 step 4) checks 5 MHz to 1 GHz, which is used.'} if opt == 'noSA3' else {}
+    if (lo_f, hi_f) in DANL_CENTRE and lo_f != '50 kHz':        # the TPA procedure (pp. 120-121 steps 4d, 5d, 6d) says only "the center frequency": the DANL procedure's centres are used (UNVERIFIED)
+        extra.update(center=q(DANL_CENTRE[(lo_f, hi_f)]), span=q('10 MHz'))
+        extra['note'] = (extra['note'] + ' ' if extra.get('note') else '') + ('The centre frequency is not printed for the TPA-N-PRE procedure (p. 120 steps 4d / 5d / 6d); '
+                                                                              "the DANL procedure's centre is used. Confirm.")
     add('tpadanl', 'DANL', f'{fname(a)} to {fname(b)} (TPA-N-PRE)' + (' (3-SA3 installed)' if opt == 'SA3' else ' (3-SA3 not installed)' if opt else ''),
         D(0), None, D(lim), 'dBm/Hz', req=[x for x in (opt, 'TPA') if x], stim='none', f_start=a, f_stop=b, ref_level=D(-30), tpa=True,
         detection='AVErage', **extra)
@@ -325,7 +338,7 @@ for ch in CH:
         models = [m for m in chans(ch) if f <= D(str(MODEL_INFO[m]['counter_max_hz']))]
         extra = {'note': 'Verifies the counter maximum input frequency. The specification (p. 46) gives 100 MHz for 100 MHz models, so this point is not run on them.'} if f > D('1e8') else {}
         add('dvmf', 'DVMFREQ', f'CH{ch} {nom}', f, q(lo), q(hi), 'Hz', ch=ch, req=['DVM'], freq=f, stim='cal', counter='trigger', vscale=q('200 mV'),
-            hscale=q('20 ms'), vpp=q('1 V'), models=models, **extra)
+            hscale=q('20 ms'), vpp=q('1 V'), waveform='sine' if f > D('1e8') else 'square', models=models, **extra)
 
 
 # =====================================================================================================================================
@@ -400,6 +413,8 @@ MISPRINTS = [
     'TPA DANL (p. 82): "50 kHz - 1 GHz (3-SA3 not installed)"; procedure p. 120 checks 5 MHz - 1 GHz. 5 MHz used.',
     'Residual spurs (p. 80): the "5 MHz to 2 GHz (not 1.25 GHz)" row has no 3-SA3 qualifier; the procedure (p. 113) checks 5 MHz - 1 GHz without '
     '3-SA3 and 5 MHz - 2 GHz with it. Built as the procedure.',
+    'DANL 2 GHz to 3 GHz (p. 112 step 8d): the centre frequency is printed as 1.5 GHz, outside the 2 GHz to 3 GHz range; 2.5 GHz used (visible note on the point).',
+    'DANL with the TPA-N-PRE (pp. 120-121): the centre frequency is not printed ("the center frequency"); the DANL procedure\'s centres are used (note on the points).',
     'DVM frequency 150 MHz (p. 88): printed +/-10 kHz; specification p. 46 (+/-(10 uHz/Hz + 1 count)) gives +/-11.5 kHz. Printed (tighter) limit applied. '
     'Specification p. 46: counter maximum 100 MHz for 100 MHz models - the 150 MHz point is not run on them.',
 ]

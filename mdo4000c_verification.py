@@ -9,12 +9,6 @@ Stimulus:   Fluke 5560A (SCOPE DCV / LEVSINE / MEASR / square) for the analog te
             5560A cannot make. The AFG tests read the oscilloscope's AFG with a SCPI DMM / counter (or typed readings).
 Never run unattended: the program stops and asks for every cable, terminator or instrument change, and for every
 front-panel-only step. Writes are never retried; all settings are read back; outputs go to standby / off after every point.
-
-Families: the same engine runs the Tektronix 3 Series MDO (MDO32 / MDO34; Procedures/Tektronix_MDO3_Verification.py calls main(family='MDO3'),
-which runs configure('MDO3'): spec specs/tektronix_mdo3_pv.json, driver drivers/tektronix_mdo3.py, window mdo3_view_*). The MDO4000C is the
-default family and every value in FAMILIES['MDO4000C'] is what this file had written in before, so that procedure is unchanged. The few point
-parameters the 3 Series spec adds (per_div, method, hscale, vpp, coarse_hscale, fine_hscale, ref_level, detection, counter, vscale) are read only
-when a point carries them; no MDO4000C point does.
 """
 from __future__ import annotations
 
@@ -42,24 +36,7 @@ POINTS = SPEC['points']
 SECTION_TITLE = {s['id']: s['title'] for s in SPEC['sections']}
 SECTION_PAGE = {s['id']: s['page'] for s in SPEC['sections']}
 MODELS = SPEC['models']
-MODEL_INFO = SPEC.get('model_info', {})        # per-model flags of a family spec (3 Series: channels, bandwidth); the MDO4000C spec has none
-PLAIN_UNITS = {'%', 'dB', 'dBm', 'dBc', 'dBm/Hz', 'dBc/Hz', 'ratio', '', 'div'}
-
-# The families this engine runs (one launcher each).  FAMILIES['MDO4000C'] holds exactly the texts / names this file used before families existed.
-FAMILIES = {
-    'MDO4000C': dict(spec='tektronix_mdo4000c_pv.json', ref_cmc='mdo4000c_reference_cmc.json', label='MDO4000C', driver='TektronixMDO4000C',
-                     view='mdo4000c_view', settings='MDO4000C', panel='MDO4000C', bench=('drivers.simulated_mdo', 'make_mdo_bench'), bench_model=False,
-                     default_model='4104C', scope_addr='USB0::0x0699::0x0415::C000000::INSTR', hv_max=99.5, trig_out='TRIGGER OUT',
-                     report_title='Tektronix MDO4000C performance verification',
-                     source='MDO4000C Specifications and Performance Verification, 077-1178-01 Rev B'),
-    'MDO3': dict(spec='tektronix_mdo3_pv.json', ref_cmc='mdo3_reference_cmc.json', label='MDO3', driver='TektronixMDO3',
-                 view='mdo3_view', settings='TektronixMDO3', panel='MDO3', bench=('drivers.simulated_mdo3', 'make_mdo3_bench'), bench_model=True,
-                 default_model='34-1000', scope_addr='', hv_max=100.0, trig_out='AUX OUT',
-                 report_title='Tektronix 3 Series MDO performance verification',
-                 source='3 Series MDO Specifications and Performance Verification, 077-1499-10'),
-}
-FAMILY_NAME = 'MDO4000C'
-FAMILY = FAMILIES[FAMILY_NAME]
+PLAIN_UNITS = {'%', 'dB', 'dBm', 'dBc', 'dBm/Hz', 'dBc/Hz', 'ratio', ''}
 CAL_MODEL = '5560A'
 FREQ_CMC_KINDS = ('DVMFREQ', 'AFGFREQ')       # frequency points: the lab's Frequency - Measure CMC (GPS-referenced) is their uncertainty         # the standards sheet (specs/standards) whose DC voltage specification is the budget for the DC gain / offset / DVM points
 ENBW_FACTOR = 1.0            # noise-equivalent bandwidth = ENBW_FACTOR x RBW when converting dBm to dBm/Hz (see README)
@@ -93,8 +70,7 @@ class Config:
             return False
         for token in p.get('req') or []:
             ok = {'SA': self.sa in ('SA3', 'SA6'), 'SA6': self.sa == 'SA6', 'noSA': self.sa == 'None', 'AFG': self.afg, 'DVM': self.dvm,
-                  'TPA': self.tpa, 'noTPA': not self.tpa,
-                  'SA3': self.sa == 'SA3', 'noSA3': self.sa != 'SA3'}[token]          # SA3 / noSA3: 3 Series option 3-SA3 (the 1 GHz analyzer is standard)
+                  'TPA': self.tpa, 'noTPA': not self.tpa}[token]
             if not ok:
                 return False
         return True
@@ -347,7 +323,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         def tr(name, **kw):
             return t[name] if name in t else drivers.open_visa(to_visa(addrs[name]), timeout=30, **kw)
         try:
-            self.scope = getattr(drivers, FAMILY['driver'])(tr('scope'), self.log, label=FAMILY['label']); self.scope.connect()
+            self.scope = drivers.TektronixMDO4000C(tr('scope'), self.log, label='MDO4000C'); self.scope.connect()
             self.cal = drivers.Fluke5560A(tr('cal', baud=int(addrs.get('cal_baud', 9600))), self.log, label='5560A')
             self.cal.open(verify_model=True); self.cal.clear_status()
             for key, cls, label in (('rf1', drivers.Fluke96270A, '96270A'), ('rf2', drivers.Fluke96270A, 'RF2'), ('gen', drivers.AgilentAFG, 'FuncGen'),
@@ -373,7 +349,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         for _ in range(attempts):
             try:
                 t = self._tr['scope'] if 'scope' in self._tr else drivers.open_visa(to_visa(self.addrs['scope']), timeout=30)
-                self.scope = getattr(drivers, FAMILY['driver'])(t, self.log, label=FAMILY['label']); self.scope.connect()
+                self.scope = drivers.TektronixMDO4000C(t, self.log, label='MDO4000C'); self.scope.connect()
                 return True
             except Exception:
                 pause(wait)
@@ -406,7 +382,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         try:
             folder = Path.home() / '.calibration_suite'; folder.mkdir(parents=True, exist_ok=True)
             with open(folder / 'command_log.txt', 'a', encoding='utf-8') as f:
-                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  {FAMILY["label"]} session\n' + '\n'.join(self.log.lines()) + '\n')
+                f.write(f'--- {datetime.now().isoformat(timespec="seconds")}  MDO4000C session\n' + '\n'.join(self.log.lines()) + '\n')
         except OSError:
             pass
 
@@ -478,9 +454,6 @@ class Runner:
     def run_point(self, p):
         global PM_PAUSE_SCALE
         PM_PAUSE_SCALE = self.io.pm_param('mdo.pause_scale', 1.0)       # procedure modification; 1.0 unless one is stored
-        info = MODEL_INFO.get(self.cfg.model)                            # a family spec's model flags (none in the MDO4000C spec)
-        if info:
-            self.io.scope.full_bw_hz = info['bandwidth_hz']              # the 3 Series driver checks the FULl bandwidth read-back against it
         fn = getattr(self, 'do_' + p['kind'].lower(), None)
         if fn is None:
             raise Skip(f'no executor for {p["kind"]}')
@@ -551,9 +524,6 @@ class Runner:
         self.wire(('BAL', ch), f'DC balance - CH{ch}', [('Terminate', f'Remove all signal cables. Fit a 50 Ω terminator on the CH{ch} input and nothing else.')])
         self.fresh_scope(('BAL', ch))
         self.dc_setup(ch, p['term'], p['bw'], p['vscale'])
-        if p.get('per_div'):                                # the 3 Series test record prints DC balance in divisions (mean / V/div, PV p. 92 step 16)
-            v = self.io.scope.mean_of(ch)
-            return v / p['vscale'], dict(mean_volts=v)
         return self.io.scope.mean_of(ch), {}
 
     # ---- DC gain ---------------------------------------------------------------------------------------------------------------------
@@ -590,10 +560,10 @@ class Runner:
         self.wire(('OFF', ch), f'DC offset - CH{ch}', [('Disconnect', 'Remove other cables from the oscilloscope inputs.'),
                   ('Connect', f'Fluke 5560A SCOPE output to CH{ch}.')])
         self.fresh_scope(('OFF', ch))
-        self.dc_setup(ch, p['term'], p['bw'], p['vscale'], offset=p['offset'], hscale=p.get('hscale', 1e-3))
+        self.dc_setup(ch, p['term'], p['bw'], p['vscale'], offset=p['offset'])
         self.dc_source(p['term'])
         if abs(p['offset']) >= 50 and self._wired_hv != (ch, p['term']):
-            self.ask('HIGH VOLTAGE', f'{abs(p["offset"]):g} V DC output', [('Safety', f'The next points apply up to {FAMILY["hv_max"]:g} V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on.')],
+            self.ask('HIGH VOLTAGE', f'{abs(p["offset"]):g} V DC output', [('Safety', 'The next points apply up to 99.5 V DC. Check the cable and connector are rated, keep clear of the connection, and never touch the BNC while the output is on.')],
                      caution='Output stays in STANDBY until you continue.', ok='Enable output')
             self._wired_hv = (ch, p['term'])
         self.apply_dc(p['offset'])
@@ -630,8 +600,6 @@ class Runner:
 
     # ---- random noise -----------------------------------------------------------------------------------------------------------------
     def do_noise(self, p):
-        if p.get('method') == 'rms_mean':
-            return self.noise_rms_mean(p)
         ch = p['ch']
         self.wire(('NOISE', ch), f'Random noise - CH{ch}', [('Disconnect', 'Disconnect everything from the oscilloscope inputs. Leave the inputs open.')])
         s = self.io.scope
@@ -647,23 +615,6 @@ class Runner:
         s.acquire_mode('SAMple')
         return smv - amv, dict(smv=smv, amv=amv)             # RMS noise = SMV - AMV
 
-    def noise_rms_mean(self, p):
-        """3 Series method (PV manual p. 104): sample mode, the point's time base, RMS and Mean measured together, RMS noise = sqrt(RMS^2 - Mean^2)."""
-        ch = p['ch']
-        self.wire(('NOISE', ch), f'Random noise - CH{ch}', [('Disconnect', 'Disconnect everything from the oscilloscope inputs. Leave the inputs open.')])
-        s = self.io.scope
-        self.fresh_scope(('NOISE', ch))
-        s.select_only(ch)
-        s.channel(ch, term=p['term'], bw=p['bw'], vscale=p['vscale'], offset=0.0, position=0.0)
-        s.timebase(p.get('hscale', 10e-3))
-        s.acquire_mode('SAMple')
-        s.gating_off()
-        s.measure_setup('RMS', f'CH{ch}', slot=1)
-        s.measure_setup('MEAN', f'CH{ch}', slot=2)
-        s.stats_reset(weighting=64); pause(4.0)
-        rms, mean = s.stat_mean(1), s.stat_mean(2)
-        return math.sqrt(max(rms * rms - mean * mean, 0.0)), dict(rms=rms, mean=mean)
-
     # ---- reference frequency ---------------------------------------------------------------------------------------------------
     def need(self, inst, name):
         if inst is None:
@@ -672,25 +623,22 @@ class Runner:
 
     def do_reffreq(self, p):
         gen = self.need(self.io.gen, 'the function generator (33220A / 33250A)')
-        vpp, fine = p.get('vpp', 2.0), p.get('fine_hscale', 200e-9)
         self.wire(('REF',), 'Reference frequency error', [('Disconnect', 'Remove other cables from the oscilloscope inputs.'),
-                  ('Connect', f'Function generator output to CH1 with a 50 Ω cable (the program sets a {1.0 / p["period"]:g} Hz square wave = {p["period"] * 1e3:g} ms mark period, {vpp:g} V p-p).'),
+                  ('Connect', 'Function generator output to CH1 with a 50 Ω cable (the program sets a 2.5 Hz square wave = 400 ms mark period, 2 V p-p).'),
                   ('Accuracy', 'The generator time base must be at least 4x better than the limit. Lock it to a 10 MHz reference if it is not already.')])
         s = self.io.scope
         self.fresh_scope(('REF',))
-        gen.square(1.0 / p['period'], vpp)
+        gen.square(1.0 / p['period'], 2.0)
         s.select_only(1)
         s.channel(1, term='50', vscale=0.5, offset=0.0, position=0.0)
-        s.timebase(p.get('coarse_hscale', 20e-3))
+        s.timebase(20e-3)
         s.trigger_edge('CH1', level=0.0, mode='NORMal')
         gen.output(True); pause(2.0)
         s.delay(p['period'])
-        s.timebase(fine)
+        s.timebase(200e-9)
         pause(2.0)
         edge = s.edge_time(1)
         gen.output(False)
-        if p.get('per_div'):                                 # the 3 Series record prints the deviation in divisions of the fine time base (PV p. 103)
-            return (edge - p['period']) / fine, dict(edge_time=edge, deviation_s=edge - p['period'])
         return edge - p['period'], dict(edge_time=edge)
 
     # ---- delta time --------------------------------------------------------------------------------------------------------------------
@@ -774,13 +722,12 @@ class Runner:
         self.wire(('DANL', bool(p.get('tpa'))), f'DANL - {label}', [('Terminate', f'Fit a 50 Ω N terminator on the {label} and make sure no signal is applied.')]
                   + ([('TPA-N-PRE', 'Push Menu on the TPA-N-PRE; on the oscilloscope set Mode to Auto.')] if p.get('tpa') else []))
         s = self.io.scope
-        det = {'detection': p['detection']} if p.get('detection') else {}      # 3 Series: average detection (PV p. 110); MDO4000C points have none
-        s.rf_setup(start=p['f_start'], stop=p['f_stop'], ref_level=p['ref_level'], averages=32, **det)
+        s.rf_setup(start=p['f_start'], stop=p['f_stop'], ref_level=p['ref_level'], averages=32)
         pause(60.0 if p['f_start'] < 50e3 else 20.0)
         xs, ys = s.rf_trace(True)
         f_pk, l_pk = noise_floor_max(xs, ys)
         if p['f_start'] >= 5e6:                               # narrow to a 10 MHz span at the noisiest frequency, as the manual does
-            s.rf_setup(center=f_pk, span=10e6, ref_level=p['ref_level'], averages=32, **det)
+            s.rf_setup(center=f_pk, span=10e6, ref_level=p['ref_level'], averages=32)
             pause(20.0)
             xs, ys = s.rf_trace(True)
             f_pk, l_pk = noise_floor_max(xs, ys)
@@ -835,7 +782,7 @@ class Runner:
         self.wire(('SPUR',), 'Residual spurious response', [('Terminate', 'Fit a 50 Ω N terminator on the RF input and make sure no signal is applied.')])
         s = self.io.scope
         s.rf_setup(start=p['f_start'] if not p['at_freq'] else p['at_freq'] - 5e6, stop=p['f_stop'] if not p['at_freq'] else p['at_freq'] + 5e6,
-                   rbw=p['rbw'], ref_level=p.get('ref_level', -25.0), averages=32)
+                   rbw=p['rbw'], ref_level=-25.0, averages=32)
         pause(60.0 if p['f_start'] < 50e3 else 30.0)
         xs, ys = s.rf_trace(True)
         if p['at_freq']:
@@ -879,7 +826,7 @@ class Runner:
 
     # ---- trigger output -----------------------------------------------------------------------------------------------------------------
     def do_trigout(self, p):
-        self.wire(('TRIG',), 'Trigger output', [('Disconnect', 'Remove other cables.'), ('Connect', f'Rear-panel {FAMILY["trig_out"]} to CH1 with a 50 Ω BNC cable.')])
+        self.wire(('TRIG',), 'Trigger output', [('Disconnect', 'Remove other cables.'), ('Connect', 'Rear-panel TRIGGER OUT to CH1 with a 50 Ω BNC cable.')])
         s = self.io.scope
         self.fresh_scope(('TRIG',))
         s.select_only(1)
@@ -958,16 +905,12 @@ class Runner:
         s = self.io.scope
         self.fresh_scope(('DVMF', ch))
         s.select_only(ch)
-        s.channel(ch, term='50', vscale=p.get('vscale', 0.5), offset=0.0, position=0.0)
-        s.timebase(p.get('hscale', 20e-3))
+        s.channel(ch, term='50', vscale=0.5, offset=0.0, position=0.0)
+        s.timebase(20e-3)
         s.trigger_edge(f'CH{ch}', mode='AUTO')
-        counter = p.get('counter') == 'trigger'             # 3 Series: the trigger frequency counter (PV p. 130), not the DVM frequency mode
-        if counter:
-            s.trigger_counter_on()
-        else:
-            s.dvm('FREQuency', ch)
-        src = self.sine_source(ch, p['freq'], p.get('vpp', 1.0), 'DVM frequency')
-        v = s.trigger_frequency() if counter else s.dvm_frequency()
+        s.dvm('FREQuency', ch)
+        src = self.sine_source(ch, p['freq'], 1.0, 'DVM frequency')
+        v = s.dvm_frequency()
         return v, dict(source=src)
 
 
@@ -984,18 +927,18 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.results = {}
         self.q = queue.Queue()
         self.cfg = Config()
-        self.pm_init('mdo', FAMILY['label'], demo=demo, lists=[POINTS], shape='band')    # procedure modifications: saved overrides for this model
+        self.pm_init('mdo', 'MDO4000C', demo=demo, lists=[POINTS], shape='band')    # procedure modifications: saved overrides for this model
         self.ui_view.setup_window(self)
-        self.settings = ui.Settings(FAMILY['settings'])
+        self.settings = ui.Settings('MDO4000C')
         g = self.settings.get
         self.asset, self.serial = port.var(), port.var()
-        self.v_model = port.var(g('model', FAMILY['default_model']))
+        self.v_model = port.var(g('model', '4104C'))
         self.v_sa = port.var(g('sa', 'None'))
         self.v_afg = port.var(g('afg', 'False') == 'True', 'bool')
         self.v_dvm = port.var(g('dvm', 'False') == 'True', 'bool')
         self.v_tpa = port.var(g('tpa', 'False') == 'True', 'bool')
         self.addr = {k: port.var(g(k, d)) for k, d in (
-            ('scope', FAMILY['scope_addr']), ('cal', 'COM9'), ('cal_baud', '9600'), ('rf1', ''), ('rf2', ''), ('gen', ''), ('dmm', ''), ('counter', ''), ('power', ''))}
+            ('scope', 'USB0::0x0699::0x0415::C000000::INSTR'), ('cal', 'COM9'), ('cal_baud', '9600'), ('rf1', ''), ('rf2', ''), ('gen', ''), ('dmm', ''), ('counter', ''), ('power', ''))}
         self.status = port.var()
         self.detail = port.var('Select a test point to see its limits and setup.')
         self.show_section = port.var('All sections')
@@ -1055,8 +998,6 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         opts = self.io.scope.installed_options()
         model = self.io.scope.model
         if model in MODELS: self.v_model.set(model)
-        elif model and f"{model}-{self.v_model.get().split('-')[-1]}" in MODELS:     # 3 Series: the reply names MDO32 / MDO34; the bandwidth option stays as chosen
-            self.v_model.set(f"{model}-{self.v_model.get().split('-')[-1]}")
         self.v_sa.set('SA6' if 'SA6' in opts else 'SA3' if 'SA3' in opts else 'None')
         self.v_afg.set('AFG' in opts); self.v_dvm.set('DVM' in opts)
         self.on_config()
@@ -1093,14 +1034,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return [p for p in POINTS if self.cfg.applies(p)]
 
     def pm_driver_classes(self):
-        return (getattr(drivers, FAMILY['driver']), drivers.Fluke5560A, drivers.Fluke96270A, drivers.AgilentAFG, drivers.ReferenceMeter)
-
-    def sim_bench(self):
-        """(bench, transports) of the family's simulated bench (demo / virtual bench and the procedure-editor dry run)."""
-        import importlib
-        module, name = FAMILY['bench']
-        make = getattr(importlib.import_module(module), name)
-        return make(self.cfg.model) if FAMILY['bench_model'] else make()
+        return (drivers.TektronixMDO4000C, drivers.Fluke5560A, drivers.Fluke96270A, drivers.AgilentAFG, drivers.ReferenceMeter)
 
     def pm_point_fields(self, view):
         out = super().pm_point_fields(view)
@@ -1113,12 +1047,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         scripted answer 'yes' and typed readings answer the point's nominal; optional instruments are present when they have an address (all of
         them when none has: the plan then assumes the full bench)."""
         import procmods_plan
+        from drivers.simulated_mdo import make_mdo_bench
         addrs = self.addrs()
         optional = ('rf1', 'rf2', 'gen', 'dmm', 'counter', 'power')
         have = [k for k in optional if (addrs.get(k) or '').strip()]
 
         def build(mods):
-            _bench, t = self.sim_bench()
+            _bench, t = make_mdo_bench()
             if have:
                 t = {k: v for k, v in t.items() if k not in optional or k in have}
             return IO(dict(cal_baud=int(addrs.get('cal_baud') or 9600)), transports=t, mods=mods)
@@ -1201,7 +1136,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         try:
             self.disconnect()
             if self.virtual:          # demo: the real IO / driver code over the simulated MDO4000C bench (scope, 5560A, 96270A x2, generator, DMM, counter)
-                self._vb, t = self.sim_bench()
+                from drivers.simulated_mdo import make_mdo_bench
+                self._vb, t = make_mdo_bench()
                 set_virtual_pace(True)
                 self.io = IO(self.addrs(), transports=t, mods=self.pm_state, virtual=True)
             else: self.io = IO(self.addrs(), mods=self.pm_state)
@@ -1252,7 +1188,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 elif kind == 'refresh': self.refresh()
                 elif kind == 'done': self._finished(payload)
                 elif kind == 'ask':
-                    ok = port.operator_prompt(payload['title'], payload['heading'], payload['steps'], facts=payload['facts'], caution=payload['caution'], ok=payload['ok'], image=hookups.panel_image(FAMILY['panel']), parent=self.root)
+                    ok = port.operator_prompt(payload['title'], payload['heading'], payload['steps'], facts=payload['facts'], caution=payload['caution'], ok=payload['ok'], image=hookups.panel_image('MDO4000C'), parent=self.root)
                     if ok and self.virtual: virtualbench.mdo_operator_confirmed(self._vb, payload['title'])      # the virtual operator pushes the front-panel button
                     box['value'] = ok; box['ev'].set()
                 elif kind == 'manual':
@@ -1438,7 +1374,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not rows: port.message('info', 'No results', 'No recorded results to export yet.'); return
         try: import report_pdf
         except ImportError as exc: port.message('error', 'Report export', str(exc)); return
-        details = port.report_details(FAMILY['report_title'], parent=self.root)
+        details = port.report_details('Tektronix MDO4000C performance verification', parent=self.root)
         if details is None: return
         asset = ''.join(c if c.isalnum() or c in '-_' else '_' for c in self.asset.get()) or 'UNASSIGNED'
         path = port.save_file(defaultextension='.pdf', filetypes=[('PDF report', '*.pdf')], initialfile=ui.report_filename(asset))
@@ -1450,13 +1386,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         note = ('Uncertainty: points without an input signal show N/A. DC gain, DC offset and DVM DC points report the larger of the laboratory A2LA oscilloscope CMC and the budget '
                 'built from the published DC voltage specification of the Fluke 5560A (divided by its coverage divisor, k = 2), rounded up; input impedance and bandwidth use the laboratory '
                 'A2LA scope (CMC only); RF, function-generator and meter points '
-                f'use the entries in specs/{REF_CMC_PATH.name} and show N/A where none is set.' + (f' {skipped} point(s) were skipped (instrument not available).' if skipped else ''))
+                'use the entries in specs/mdo4000c_reference_cmc.json and show N/A where none is set.' + (f' {skipped} point(s) were skipped (instrument not available).' if skipped else ''))
         try:
             if report_pdf.details_tar_tur(details):
                 rows = report_pdf.apply_tar_tur(rows, report_pdf.details_tar_tur(details), [self.tar_tur_for(p) for p, _row in pairs])
-            instrument = f'Tektronix {MODEL_INFO[c.model]["title"]}' if c.model in MODEL_INFO else f'Tektronix MDO{c.model}'
-            report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', instrument), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
-                                                                 ('Options', opts), ('Source', FAMILY['source'])],
+            report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', f'Tektronix MDO{c.model}'), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
+                                                                 ('Options', opts), ('Source', 'MDO4000C Specifications and Performance Verification, 077-1178-01 Rev B')],
                                              demo=demo, details=details, footer_note=note, title='Calibration Data',
                                              snapshot_context=report_pdf.context_for(self))
         except ImportError:
@@ -1470,28 +1405,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.stop = True; self._save_addrs(); self.disconnect(); port.close(self.root)
 
 
-def configure(family='MDO4000C'):
-    """Bind the module to one family (as the Truevolt / fgen / 34410A engines' configure(model)): its spec, reference-CMC file, driver, window and texts.
-    The module starts as the MDO4000C; configure('MDO4000C') gives back exactly that state."""
-    global FAMILY_NAME, FAMILY, SPEC_PATH, REF_CMC_PATH, SPEC, POINTS, SECTION_TITLE, SECTION_PAGE, MODELS, MODEL_INFO
-    FAMILY_NAME, FAMILY = family, FAMILIES[family]
-    SPEC_PATH = HERE / 'specs' / FAMILY['spec']
-    REF_CMC_PATH = HERE / 'specs' / FAMILY['ref_cmc']
-    SPEC = json.loads(SPEC_PATH.read_text(encoding='utf-8'))
-    POINTS = SPEC['points']
-    SECTION_TITLE = {s['id']: s['title'] for s in SPEC['sections']}
-    SECTION_PAGE = {s['id']: s['page'] for s in SPEC['sections']}
-    MODELS = SPEC['models']
-    MODEL_INFO = SPEC.get('model_info', {})
-    _REF.clear()
-    App.VIEW = FAMILY['view']
-    return SPEC
-
-
-def main(argv=None, family='MDO4000C'):
+def main(argv=None):
     argv = sys.argv if argv is None else argv
-    if family != FAMILY_NAME:
-        configure(family)
     def build(root):
         demo, fast = virtualbench.flags(argv)
         App(root, demo=demo, fast_demo=fast)

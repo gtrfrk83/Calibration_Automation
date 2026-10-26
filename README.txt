@@ -387,14 +387,15 @@ Procedures/Tektronix_MDO4000C_Verification.py   (engine: mdo4000c_verification.p
 
 Tektronix 3 Series MDO (MDO32 / MDO34, 100 MHz - 1 GHz)
 --------------------------------------------------------
-Procedures/Tektronix_MDO3_Verification.py   (engine: mdo4000c_verification.py, family 'MDO3'; spec: specs/tektronix_mdo3_pv.json, written by
+Procedures/Tektronix_MDO3_Verification.py   (engine: mdo3_verification.py, with the model-independent helpers of mdo4000c_verification.py; spec: specs/tektronix_mdo3_pv.json, written by
   specs/build_mdo3_spec.py; driver: drivers/tektronix_mdo3.py; windows: mdo3_view_qt.py / mdo3_view_tk.py)
   Automated performance verification from the 3 Series MDO Specifications and Performance Verification manual (077-1499-10), test record
   pp. 48-89, procedures pp. 90-130; commands from the 3 Series MDO Programmer Manual (077-1498-06), page cited per command. Same standards
   and the same uncertainty / TAR / TUR / review-window mechanism as the MDO4000C (5560A, 96270A, 33220A / 33250A, optional reference DMM /
   counter / power meter). The technician picks the model (MDO32 / MDO34 and its bandwidth) and the options (3-SA3, 3-AFG, 3-DVM, TPA-N-PRE);
   176 to 483 points apply. DC balance and the sample-rate test are reported in divisions, as the test record prints them. Not built: the
-  digital threshold (logic probe, 3-MSO) test - removed from the MDO4000C at the owner's request. Demo:  python Procedures/Tektronix_MDO3_Verification.py --demo
+  digital threshold (logic probe, 3-MSO) test - removed from the MDO4000C at the owner's request. Method as the manual prints it: bandwidth
+  reference at 1 ms/div, DANL at the fixed centre frequencies, DVM frequency with a time-mark square wave (function generator; 150 MHz a sine). Demo:  python Procedures/Tektronix_MDO3_Verification.py --demo
 
 Keysight 33210A / Agilent 33220A / Agilent 33250A function generators
 ---------------------------------------------------------------------

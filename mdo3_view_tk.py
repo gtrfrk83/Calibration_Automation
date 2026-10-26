@@ -35,7 +35,7 @@ def finish_window(self):
 
 
 def build_ui(self):
-    import mdo4000c_verification as E
+    import mdo3_verification as E
     MODELS, POINTS, SPEC = E.MODELS, E.POINTS, E.SPEC
     root = self.root
     sh = self.shell = ui_shell.Shell(root, f'{TITLE}  -  Performance Verification',

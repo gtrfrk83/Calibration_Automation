@@ -1,7 +1,7 @@
 """Software stand-in for the 3 Series MDO (MDO32 / MDO34) on the MDO bench: the same signal model as the MDO4000C simulator (simulated_mdo.SimMdo,
 linked to the simulated 5560A, 96270A, generator and meters), answering the 3 Series command texts of drivers/tektronix_mdo3.py.
 
-make_mdo3_bench(model='34-1000') returns (bench, transports) for mdo4000c_verification.IO(...) configured for the MDO3 family.  What the simulator
+make_mdo3_bench(model='34-1000') returns (bench, transports) for mdo3_verification.IO(...).  What the simulator
 does NOT model (so a pass here proves the wire sequence, not the instrument): the real *IDN? / *OPT? reply forms (invented here in the form the
 manual describes), the bandwidth read-back after FULl, the RF behaviour without 3-SA3, the trigger counter settling time.  A command a 2-channel
 MDO32 cannot take (CH3 / CH4) sets a command error in the event status register, as a real instrument would report it (assumed).

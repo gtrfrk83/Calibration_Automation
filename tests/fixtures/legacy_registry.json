@@ -914,6 +914,7 @@
   "Tektronix_MDO3_Verification.py": {
    "code": [
     "Procedures/Tektronix_MDO3_Verification.py",
+    "mdo3_verification.py",
     "mdo4000c_verification.py",
     "mdo3_view_tk.py",
     "mdo3_view_qt.py",

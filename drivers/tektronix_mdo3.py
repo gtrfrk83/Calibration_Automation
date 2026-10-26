@@ -1,8 +1,8 @@
 """Tektronix 3 Series MDO (MDO32 / MDO34) mixed-domain oscilloscope over USB (USBTMC / VISA).
 
 Every command is in COMMANDS with the page of the '3 Series MDO Oscilloscopes Programmer Manual' (077-1498-06) where its syntax and arguments
-were read.  The method names are the MDO4000C driver's (drivers/tektronix_mdo4000c.py), because the shared engine mdo4000c_verification.py
-calls them; the command texts are the 3 Series'.  Differences from the MDO4000C that matter here (all read in the manual):
+were read.  The method names are the MDO4000C driver's (drivers/tektronix_mdo4000c.py), the names the engine mdo3_verification.py (copied from
+the MDO4000C engine) calls; the command texts are the 3 Series'.  Differences from the MDO4000C that matter here (all read in the manual):
   * CH<x>:BANdwidth takes {FULl|<NR3>} (p. 2-199): the 20 MHz / 250 MHz limits are sent as numbers, not TWEnty / TWOFifty
   * the edge trigger level is per channel, TRIGger:A:LEVel:CH<x> (p. 2-778); there is no TRIGger:A:LEVel
   * DIAg:SELect ALL (p. 2-261); DIAg:STATE has no query form (p. 2-262), so the self test is followed with DIAg:RESUlt:FLAg? (p. 2-260)
