@@ -54,7 +54,7 @@ class Noise(unittest.TestCase):
         a = W.RMSNoiseApp.__new__(W.RMSNoiseApp)
         a.events, a.stop_event = queue.Queue(), threading.Event()
         a.open_bench = lambda fa, baud, sa, lg, scope_timeout=10: (None, drivers.WaveSurfer4104HD(st, log))
-        a.reset_bench = lambda fluke, scope, lg: None
+        a.reset_bench = lambda fluke, scope, lg, key=None: None
         a.save_command_log = lambda lg, name: None
         a.finish_bench = lambda fluke, scope, lg, name: scope.close()
         W.RMSNoiseApp.worker(a, 'sim', 3, 0.0, 1, 2.75, [10.0] * len(W.SCALES), 0, 2)

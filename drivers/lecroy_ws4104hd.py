@@ -71,6 +71,9 @@ COMMANDS = {
     'chan.view.set': _vbs("VBS 'app.Acquisition.C{ch}.View=True'", 'Show (turn ON) a channel', _UNV, readback='chan.view.get', verified=False,
                           placeholders=_CH),
     'chan.view.get': _vbs('VBS? "return=app.Acquisition.C{ch}.View"', 'Channel display read-back', _UNV, kind='query', verified=False, placeholders=_CH),
+    'vert.invert.get': _vbs('VBS? "return=app.Acquisition.C{ch}.Invert"', 'Channel invert read-back', _UNV, kind='query', verified=False, placeholders=_CH),
+    'vert.invert.off': _vbs("VBS 'app.Acquisition.C{ch}.Invert=False'", 'Turn the channel invert OFF', _UNV, readback='vert.invert.get', verified=False,
+                            placeholders=_CH),
     # classic remote command (impedance test)
     'cpl.set': Cmd('{channel_name}:CPL {coupling}', 'Coupling (classic command)', 'Classic remote command, e.g. C1:CPL D50 (D50 / D1M / A1M)',
                    placeholders={**_txt('channel_name', 'C1'), **_txt('coupling', 'D50')}, kind='set', readback='cpl.query', verified=True),
@@ -266,6 +269,22 @@ class WaveSurfer4104HD(Instrument):
         got = self._get('chan.view.get', ch=ch).strip().casefold()
         if got not in ('true', '-1', '1'):
             raise InstrumentError(f'CH{channel} did not turn ON: View reads {got!r}')
+
+    def ensure_not_inverted(self, channel):
+        """A DC reading with the wrong sign is an inverted channel (or a reversed cable): read the channel's Invert property and, only when it is ON, turn it OFF and read it
+        back.  Returns True when it had to be turned off.  The property path is NOT verified on a 4104HD: a reply that is not a True / False answer is left alone (returns None)."""
+        ch = self._chn(channel)
+        got = self._get('vert.invert.get', ch=ch).strip().casefold()
+        if got in ('false', '0'):
+            return False
+        if got not in ('true', '-1', '1'):
+            return None
+        self.send('vert.invert.off', ch=ch)
+        time.sleep(0.3)
+        after = self._get('vert.invert.get', ch=ch).strip().casefold()
+        if after not in ('false', '0'):
+            raise InstrumentError(f'CH{channel} Invert could not be turned OFF: reads {after!r}')
+        return True
 
     def set_bandwidth_limit(self, channel, limit):
         """limit: 'Full', '20MHz', ..."""

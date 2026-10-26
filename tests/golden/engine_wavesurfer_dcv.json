@@ -49,6 +49,20 @@
     "LeCroy WaveSurfer 4104HD|<<|VBS DC1M",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 20MHz",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.View=True'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.View\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS True",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C2.View=True'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C2.View\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS True",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C3.View=True'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C3.View\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS True",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C4.View=True'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C4.View\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS True",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.Invert\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
     "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.TriggerMode=\"Auto\" '",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.TriggerMode\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS Auto",
@@ -225,6 +239,63 @@
     ],
     [
      "W",
+     "VBS 'app.Acquisition.C1.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.View\"",
+     "VBS True"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C2.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C2.View\"",
+     "VBS True"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C3.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C3.View\"",
+     "VBS True"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C4.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C4.View\"",
+     "VBS True"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.Invert\"",
+     "VBS Mean"
+    ],
+    [
+     "W",
      "VBS 'app.Acquisition.TriggerMode=\"Auto\" '"
     ],
     [
@@ -380,11 +451,7 @@
     "LeCroy WaveSurfer 4104HD|<<|LECROY,WS4104HD,SIM0001,9.9",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 0.5",
-    "LeCroy WaveSurfer 4104HD|>>|*RST",
-    "LeCroy WaveSurfer 4104HD|>>|*CLS",
-    "LeCroy WaveSurfer 4104HD|>>|*OPC?",
-    "LeCroy WaveSurfer 4104HD|<<|1",
-    "RESET|--|Instruments reset to default settings at start: LeCroy WaveSurfer 4104HD",
+    "RESET|--|Instruments already reset at the start of this dcv run: not repeated between points",
     "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.VerScale=0.5'",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.VerScale\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 0.5",
@@ -394,14 +461,27 @@
     "LeCroy WaveSurfer 4104HD|<<|VBS DC1M",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 20MHz",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C1.View=True'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.View\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS True",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C2.View=True'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C2.View\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS True",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C3.View=True'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C3.View\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS True",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.C4.View=True'",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C4.View\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS True",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.Invert\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
     "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.TriggerMode=\"Auto\" '",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.TriggerMode\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS Auto",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
-    "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
-    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Measure.P1.Source1=\"C1\" ' ",
+    "LeCroy WaveSurfer 4104HD|<<|VBS C1",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS C1",
     "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Measure.P1.View=True ' ",
@@ -429,29 +509,6 @@
      "Q",
      "VBS? \"return=app.Acquisition.C1.VerScale\"",
      "VBS 0.5"
-    ],
-    [
-     "W",
-     "*RST"
-    ],
-    [
-     "W",
-     "*CLS"
-    ],
-    [
-     "ctl",
-     "set_timeout",
-     30.0
-    ],
-    [
-     "Q",
-     "*OPC?",
-     "1"
-    ],
-    [
-     "ctl",
-     "set_timeout",
-     10.0
     ],
     [
      "W",
@@ -494,6 +551,63 @@
     ],
     [
      "W",
+     "VBS 'app.Acquisition.C1.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.View\"",
+     "VBS True"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C2.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C2.View\"",
+     "VBS True"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C3.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C3.View\"",
+     "VBS True"
+    ],
+    [
+     "W",
+     "VBS 'app.Acquisition.C4.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C4.View\"",
+     "VBS True"
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C1.Invert\"",
+     "VBS Mean"
+    ],
+    [
+     "W",
      "VBS 'app.Acquisition.TriggerMode=\"Auto\" '"
     ],
     [
@@ -513,15 +627,7 @@
     [
      "Q",
      "VBS? \"return=app.Measure.P1.Source1\"",
-     "VBS Mean"
-    ],
-    [
-     "W",
-     "VBS 'app.Measure.P1.Source1=\"C1\" ' "
-    ],
-    [
-     "sleep",
-     0.5
+     "VBS C1"
     ],
     [
      "Q",

@@ -423,6 +423,8 @@ def run_wavesurfer():
 
         finish_bench = W.RMSNoiseApp.finish_bench
         reset_bench = W.RMSNoiseApp.reset_bench
+        RESET_REUSE_S = W.RMSNoiseApp.RESET_REUSE_S
+        show_channels_and_polarity = staticmethod(W.RMSNoiseApp.show_channels_and_polarity)
         _reset_notice = staticmethod(lambda text: True)       # the unit-under-test notice, auto-accepted in the simulated bench
         save_command_log = W.RMSNoiseApp.save_command_log
 

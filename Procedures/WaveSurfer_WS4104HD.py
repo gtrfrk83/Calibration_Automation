@@ -1337,7 +1337,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         try:
             _f, scope = self.open_bench(None, 0, address, log)
             scope.open()
-            self.reset_bench(None, scope, log)       # reset to default settings before the first point
+            self.reset_bench(None, scope, log, key='noise')       # reset to default settings before the first point
             ident = scope.idn
             self.events.put(('status', f'Connected: {ident}'))
             self.events.put(('status', 'Turning all four channels ON, DC 1 MΩ, full bandwidth, 1 ms/div'))
@@ -1832,14 +1832,33 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self._pm_bench(log, fluke, scope)
         return fluke, scope
 
-    def reset_bench(self, fluke, scope, log):
+    @staticmethod
+    def show_channels_and_polarity(scope, ch, log):
+        """DC voltage / offset points: all four channels are displayed during the readings (nothing is hidden from the technician, and the other channels are not left
+        off by the reset), and the channel under test must not be inverted (an inverted channel reads the opposite sign).  Each step is read back."""
+        for c in (1, 2, 3, 4):
+            scope.enable_channel(c)
+        if scope.ensure_not_inverted(ch):
+            log.add('--', f'CH{ch} Invert was ON: turned OFF (read back)', 'WS4104HD')
+
+    RESET_REUSE_S = 600.0              # a reset is not repeated for the next point of the same test run (same section, within this many seconds)
+
+    def reset_bench(self, fluke, scope, log, key=None):
         """Reset the calibrator and the scope (the unit under test) to their default settings before the first point of a test; the
         unit-under-test notice is asked once per session of tests (reset_startup.SessionNotice). Raises ResetDeclined / ResetFailed."""
         notice = getattr(self, '_reset_notice', None)
         if notice is None:
             notice = self._reset_notice = reset_startup.SessionNotice(
                 self.root, lambda text: port.ask_ok_cancel('Reset instruments', text, icon='warning', parent=self.root))
+        now = time.monotonic()
+        last = getattr(self, '_reset_last', None)
+        if key is not None and last is not None and last[0] == key and now - last[1] < self.RESET_REUSE_S:
+            self._reset_last = (key, now)                       # same test run: the instruments were reset at its first point, not again between points
+            log.add('--', f'Instruments already reset at the start of this {key} run: not repeated between points', 'RESET')
+            return
         reset_startup.reset_all([fluke] if fluke is not None else [], [scope] if scope is not None else [], confirm=notice, log=log)
+        if key is not None:
+            self._reset_last = (key, time.monotonic())
 
     def _pm_bench(self, log, *insts):
         """Procedure modifications: the command overrides are bound to each driver as it is opened, and a banner line goes at the top of
@@ -1886,13 +1905,15 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             scope.open()
             scope.handshake()
             stage = 'reset to default settings'
-            self.reset_bench(fluke, scope, log)       # before the first point
+            self.reset_bench(fluke, scope, log, key='dcv')       # before the first point
             ch, scale, nominal = point['channel'], point['scale_v_div'], point['nominal_v']
             # Configure the scope before energizing the calibrator output.
             stage = 'scope vertical scale write / readback'
             scope.set_vertical_scale(ch, scale)
             stage = 'scope coupling and bandwidth configuration'
             scope.configure_dc_input(ch)
+            stage = 'scope channels displayed, polarity'
+            self.show_channels_and_polarity(scope, ch, log)
             stage = 'scope trigger Auto'
             scope.set_trigger_mode('Auto')            # the reset leaves the acquisition stopped: Auto keeps P1 updating
             stage = 'scope P1 MEAN configuration'
@@ -1927,10 +1948,11 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             _f,scope=self.open_bench(None,0,self.visa_address.get().strip(),log)
             scope.open()
             scope.handshake()
-            self.reset_bench(None, scope, log)       # reset to default settings before the first point
+            self.reset_bench(None, scope, log, key='dcv')       # reset to default settings before the first point
             ch=point['channel']
             scope.set_vertical_scale(ch,point['scale_v_div'],settle=0.0)
             scope.configure_dc_input(ch)
+            self.show_channels_and_polarity(scope, ch, log)
             scope.set_trigger_mode('Auto')            # the reset leaves the acquisition stopped: Auto keeps P1 updating
             scope.configure_p1(ch,'Mean')
             time.sleep(1.5)
@@ -2184,7 +2206,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             fluke, scope = self.open_bench(fluke_address, baud, scope_address, log)
             fluke.open()
             scope.open()
-            self.reset_bench(fluke, scope, log)       # reset to default settings before the first point
+            self.reset_bench(fluke, scope, log, key='imp')       # reset to default settings before the first point
             scope.set_trigger_mode('Auto')            # the reset leaves the acquisition stopped
             # Disable previous scope function before any DUT reconfiguration.
             fluke.scope_off()
@@ -2476,12 +2498,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             scope.open()
             scope.handshake()
             stage = 'reset to default settings'
-            self.reset_bench(fluke, scope, log)       # before the first point
+            self.reset_bench(fluke, scope, log, key='offset')       # before the first point
             ch = point['channel']
             stage = 'Scope scale'
             scope.set_vertical_scale(ch, point['scale_v_div'])
             stage = 'Scope DC1M and 20 MHz'
             scope.configure_dc_input(ch)
+            stage = 'Scope channels displayed, polarity'
+            self.show_channels_and_polarity(scope, ch, log)
             stage = 'Scope vertical offset'
             scope.set_vertical_offset(ch, point['scope_offset_v'])
             stage = 'Scope trigger Auto'
@@ -2672,7 +2696,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             stage='Scope connection'
             scope.open()
             stage='reset to default settings'
-            self.reset_bench(fluke,scope,log)       # before the first point
+            self.reset_bench(fluke,scope,log, key='bw')       # before the first point
             ch=point['channel']
             amplitude=point['amplitude_vpp']
             stage='Scope scale'
@@ -2900,7 +2924,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             scope.open()
             scope.handshake()
             stage = 'reset to default settings'
-            self.reset_bench(fluke, scope, log)       # before the first point
+            self.reset_bench(fluke, scope, log, key='tb')       # before the first point
             ch, period = point['channel'], point['marker_period_s']
             stage = 'Scope scale and zero offset'
             scope.set_vertical_scale(ch, point['scale_v_div'])
@@ -3139,7 +3163,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             scope.open()
             scope.handshake()
             stage = 'reset to default settings'
-            self.reset_bench(fluke, scope, log)       # before the first point
+            self.reset_bench(fluke, scope, log, key='trig')       # before the first point
             stage = 'Scope scale, DC 1 MΩ / 20 MHz and zero offset'
             scope.set_vertical_scale(ch, point['scale_v_div'])
             scope.configure_dc_input(ch)

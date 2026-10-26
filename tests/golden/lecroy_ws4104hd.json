@@ -881,6 +881,23 @@
    ]
   },
   {
+   "call": "2",
+   "case": "WaveSurfer4104HD.ensure_not_inverted",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C2.Invert\"",
+    "WS4104HD|<<|VBS Mean"
+   ],
+   "method": "WaveSurfer4104HD.ensure_not_inverted",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C2.Invert\"",
+     "VBS Mean"
+    ]
+   ]
+  },
+  {
    "call": "'VBS? \"return=app.Acquisition.C1.VerScale\"'",
    "case": "WaveSurfer4104HD.query_retry[first try]",
    "log": [
