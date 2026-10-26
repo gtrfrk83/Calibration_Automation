@@ -4,7 +4,8 @@
     parsed = mdd_importer_v49.parse_mdd(path)           # the existing read-only parser: header + test point records, nothing executed
     conv = mdd_convert.convert(parsed)                  # Conversion: .sheet (datasheet_builder.Datasheet), .issues, .rows (one per MDD point), counts
     existing = mdd_convert.find_existing(conv, parsed)  # same file imported before / same name already a procedure (the person is asked)
-    res = mdd_convert.register(conv, parsed, who='...') # archive the .MDD, save the sheet (a new version when asked), record the import
+    res = mdd_convert.register(conv, parsed, who='...', standard='5522A')   # archive the .MDD, save the sheet (a new version when asked), record the import
+    choice = mdd_convert.StandardChoice(conv.sheet)     # the preview's 'Standard for the uncertainty' box: best fit pre-selected, 'None: waive' first
 
 SAFETY: only the 'Data Sheet Header' and 'Test Points' records that parse_mdd returns are read.  The MDD's command, script and specification sections are never
 looked at, parsed or run; the text taken from a record is cleaned of control characters and cut to a sane length; the number of points is capped.  The size limit,
@@ -597,6 +598,113 @@ def _con(path=None):
     return con
 
 
+# ============================================================================================================== the standard of the uncertainty (owner design)
+STANDARD_NONE = ''                       # 'None: waive'
+NONE_LABEL = 'None: waive the uncertainty'
+# When two standards cover the same number of points the sheet's kinds decide: a handheld-multimeter sheet (DCV / ACV / DCI / ACI / ohms / capacitance / temperature) prefers the
+# 5522A, then the 5520A, then the 5560A (owner: '5522A/5520A for handheld DMM functions').  A standard outside this list comes after it, by model name.
+PREFERRED_STANDARDS = ('5522A', '5520A', '5560A')
+
+
+@dataclass
+class StandardFit:
+    model: str
+    covered: int                         # points of a kind the suite can resolve that this standard's sheet covers with a usable uncertainty
+    total: int                           # points of such kinds in the sheet
+    description: str = ''
+
+    @property
+    def label(self):
+        if not self.total:
+            return self.model
+        what = f'covers {self.covered} of {self.total} points' if self.covered else "covers none of this sheet's points"
+        return f'{self.model}  ({what})'
+
+
+def standard_fits(sheet, matcher=None, lookup=None):
+    """[StandardFit] for every standard in Standards Specs (specmanager.standards()), best fit first: most points covered, then PREFERRED_STANDARDS, then name.  Only points of a kind
+    the suite can resolve an uncertainty for (datasheet_builder_rules.MANUAL_RESOLVABLE_KINDS) count.  Read only; [] when the standards cannot be loaded."""
+    import datasheet_builder_rules as rules
+    import specmanager
+    lookup = lookup or rules.StandardLookup(sheet, None, matcher)
+    try:
+        info = {r['model']: r.get('description', '') for r in specmanager.standards()}
+    except Exception:
+        info = {}
+    counts, total = {}, 0
+    for fn, p in sheet.all_points():
+        if not p.enabled or fn.kind not in rules.MANUAL_RESOLVABLE_KINDS:
+            continue
+        total += 1
+        for model, cand in lookup.candidates(fn, p).items():
+            counts[model] = counts.get(model, 0) + (1 if rules.gives_uncertainty(cand) else 0)
+    models = list(info) or list(counts)
+    order = {m: i for i, m in enumerate(PREFERRED_STANDARDS)}
+    fits = [StandardFit(m, counts.get(m, 0), total, info.get(m, '')) for m in models]
+    fits.sort(key=lambda f: (-f.covered, order.get(f.model, len(order)), f.model))
+    return fits
+
+
+def best_standard(fits):
+    """The pre-selected standard: the first of `fits` when it covers at least one point, else '' (None: waive)."""
+    return fits[0].model if fits and fits[0].covered else STANDARD_NONE
+
+
+def uncertainty_preview(sheet, standard, matcher=None, lookup=None):
+    """(plan, rows, text) for the import preview: `plan` = datasheet_builder_rules.ManualStandardPlan; `rows` = {MDD row number: the uncertainty the sheet will show for it, or
+    the reason it will show none}; `text` = one sentence for the preview.  Read only; nothing is saved."""
+    import datasheet_builder_rules as rules
+    import uncertainty as unc
+    plan = rules.plan_manual_standard(sheet, standard, None, matcher, lookup)
+    rows = {}
+    for fn, p in sheet.all_points():
+        if not p.enabled:
+            continue
+        n = int(p.id.rsplit('.p', 1)[1])
+        if p.id in plan.sourced:
+            rows[n] = unc.format_value(plan.sourced[p.id].uncertainty, fn.unit) + f' ({plan.standard})'
+        elif p.id in plan.waived:
+            rows[n] = 'none: waived'
+        elif rules._no_uncertainty_kind(fn):
+            rows[n] = 'none by design'
+    c = plan.counts()
+    if not plan.standard:
+        text = (f'No standard chosen: the {c["waived"]} point(s) that should carry an uncertainty each get a recorded waiver "manual calibration" (listed in the Sheet check); '
+                f'{c["by_design"]} point(s) carry none by design.')
+    else:
+        text = (f'{c["sourced"]} point(s) will show the uncertainty of the {plan.standard} (its own specification row, k = 2, rounded up); {c["waived"]} that should carry one '
+                f'will show none and get a recorded waiver "manual calibration" (the {plan.standard} does not cover them, or the suite cannot calculate that kind yet); '
+                f'{c["by_design"]} carry none by design.')
+    return plan, rows, text
+
+
+class StandardChoice:
+    """The preview's 'Standard for the uncertainty' box, without a toolkit (mdd_import_ui and its Qt twin both use it): the choices (None: waive first, then the
+    standards best fit first), the pre-selected one and what each choice would put on the sheet.  The candidates of the standards are worked out once."""
+
+    def __init__(self, sheet, matcher=None):
+        import datasheet_builder_rules as rules
+        self.sheet = sheet
+        self.lookup = rules.StandardLookup(sheet, None, matcher)
+        self.fits = standard_fits(sheet, lookup=self.lookup)
+        self.models = [STANDARD_NONE] + [f.model for f in self.fits]
+        self.labels = [NONE_LABEL] + [f.label for f in self.fits]
+        self.default = best_standard(self.fits)
+        self._shown = {}
+
+    def label_of(self, model):
+        return self.labels[self.models.index(model)] if model in self.models else NONE_LABEL
+
+    def model_of(self, label):
+        return self.models[self.labels.index(label)] if label in self.labels else STANDARD_NONE
+
+    def preview(self, model):
+        """(plan, {MDD row number: text}, sentence) for `model` ('' = None: waive); cached."""
+        if model not in self._shown:
+            self._shown[model] = uncertainty_preview(self.sheet, model, lookup=self.lookup)
+        return self._shown[model]
+
+
 @dataclass
 class Existing:
     uid: str
@@ -650,10 +758,13 @@ class RegisterResult:
     message: str = ''
 
 
-def register(conv, parsed, who='', replace_uid=None, registry=None, root=None, archive_to=None):
+def register(conv, parsed, who='', replace_uid=None, registry=None, root=None, archive_to=None, standard='', matcher=None):
     """Archive the original .MDD (immutable, named by sha256) and save the sheet as a registered manual procedure.
     replace_uid=None   a NEW procedure (a name already in use gets a '-2' suffix: nothing is overwritten)
     replace_uid='uid'  a NEW VERSION of that procedure (earlier versions are kept, as the Datasheet Builder's save does)
+    standard           the standard the technician will use ('' = None: waive).  Each point of a kind the suite can resolve that this standard's sheet covers carries
+                       that standard's uncertainty (ds.assignments[pid] = the standard); every other point that should carry one gets its own recorded waiver
+                       'manual_calibration' with the reason (Sheet check rule 5).  Never a whole-sheet waiver.
     Returns RegisterResult; nothing is registered when the sheet is not runnable (status 'draft' is reported as not ok)."""
     import mdd_importer_v49
     if conv.sheet is None:
@@ -661,12 +772,13 @@ def register(conv, parsed, who='', replace_uid=None, registry=None, root=None, a
     ds = conv.sheet.copy()
     ds.uid = replace_uid or ''
     ds.options['manual_entry'] = True
-    try:                                   # a manual calibration sources nothing: its missing uncertainty is waived for the whole sheet, in the open (Sheet check rule 5)
-        import datasheet_builder_rules as _rules
-        _rules.set_waiver(ds, [_rules.WHOLE_SHEET], 'manual_calibration', 'manual calibration: imported from .MDD, no automation', who=f'import ({who})' if who else 'import')
-    except Exception:
-        pass
     ds.assignments = {p.id: 'MANUAL' for _f, p in ds.all_points()}
+    try:                                   # fail closed: if this cannot be worked out the sheet has no waiver, rule 5 blocks it and it is saved as a draft, never published unchecked
+        import datasheet_builder_rules as _rules
+        _rules.apply_manual_standard(ds, standard or '', who=f'import ({who})' if who else 'import', matcher=matcher)
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error('The .MDD import could not apply the standard %r: %s: %s', standard, type(exc).__name__, exc)
     try:
         arch = mdd_importer_v49.archive_mdd(parsed, archive_to or archive_dir())
     except (OSError, ValueError) as e:

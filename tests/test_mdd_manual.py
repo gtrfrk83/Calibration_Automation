@@ -290,6 +290,461 @@ class ReportTag(ManualRun):
             h.stop()
 
 
+class StandardChoicePreview(Fix):
+    """The import preview's 'Standard for the uncertainty' (mdd_convert.StandardChoice; the Tk and Qt previews both use it)."""
+
+    def test_the_best_fit_standard_is_preselected_and_none_waive_is_offered_first(self):
+        ch = mc.StandardChoice(self.conv.sheet)
+        self.assertEqual(ch.labels[0], mc.NONE_LABEL)
+        self.assertEqual(ch.models[0], '')
+        self.assertEqual(ch.default, '5522A')                         # handheld DMM functions: 5522A / 5520A / 5560A tie on coverage, the 5522A is preferred
+        self.assertEqual(ch.models[1:4], ['5522A', '5520A', '5560A'])
+        self.assertTrue(ch.labels[1].startswith('5522A  (covers '))
+        self.assertEqual(ch.model_of(ch.label_of('5560A')), '5560A')
+        self.assertEqual(ch.model_of('nonsense'), '')
+
+    def test_the_preview_shows_the_uncertainty_and_where_it_comes_from(self):
+        ch = mc.StandardChoice(self.conv.sheet)
+        plan, rows, text = ch.preview('5522A')
+        self.assertIn('5522A', text)
+        self.assertEqual(plan.counts()['sourced'] + plan.counts()['waived'] + plan.counts()['by_design'], plan.points)
+        self.assertTrue(rows[2].endswith('(5522A)'), rows[2])                 # 1.000 V DC: '11 µV (5522A)'
+        self.assertEqual(rows[6], 'none: waived')                             # AC point with no frequency: nothing covers it
+        self.assertTrue(rows[11].endswith('Hz (5522A)'), rows[11])            # Frequency: the lab's Frequency - Measure CMC, the 5522A covers the frequency
+        self.assertEqual(rows[12], 'none by design')                          # degF
+        none_plan, none_rows, none_text = ch.preview('')
+        self.assertEqual(none_plan.sourced, {})
+        self.assertIn('No standard chosen', none_text)
+        self.assertNotIn('(5522A)', ' '.join(none_rows.values()))
+        self.assertIs(ch.preview('5522A')[0], plan)                           # worked out once
+
+    def test_nothing_is_saved_by_previewing(self):
+        before = json.dumps(self.conv.sheet.to_dict(), sort_keys=True)
+        mc.StandardChoice(self.conv.sheet).preview('5522A')
+        self.assertEqual(json.dumps(self.conv.sheet.to_dict(), sort_keys=True), before)
+
+    def test_qt_preview_preselects_shows_and_registers_the_standard(self):
+        try:
+            from PySide6.QtWidgets import QApplication
+        except ImportError:
+            self.skipTest('PySide6 is not installed')
+        app = QApplication.instance() or QApplication([])
+        from qtui.screens import manager_dialogs as dialogs
+        parent = __import__('PySide6.QtWidgets', fromlist=['QWidget']).QWidget()
+        pv = dialogs.MddPreview(parent, self.parsed, self.conv, None, None, self.reg, self.us, self.arch)
+        self.assertEqual(pv.selected_standard(), '5522A')
+        self.assertTrue(pv.std_box.currentText().startswith('5522A'))
+        self.assertEqual(pv.std_box.itemText(0), mc.NONE_LABEL)
+        unc_col = next(c for c in pv.grid.source_model.columns if c.key == 'unc')
+        shown = {r['no']: unc_col.getter(r) for r in pv.grid.rows()}
+        self.assertTrue(shown[2].endswith('(5522A)'), shown[2])
+        self.assertEqual(shown[16], '')                                       # a point that was not converted shows nothing
+        self.assertIn('5522A', pv.std_text.text())
+        pv.std_box.setCurrentIndex(0)                                         # None: waive
+        self.assertEqual(pv.selected_standard(), '')
+        self.assertFalse(any('(5522A)' in unc_col.getter(r) for r in pv.grid.rows()))
+        pv.std_box.setCurrentIndex(pv.std.models.index('5560A'))
+        self.assertTrue(unc_col.getter(next(r for r in pv.grid.rows() if r['no'] == 2)).endswith('(5560A)'))
+        with mock.patch.object(dialogs, 'message') as box:                       # the 'Created ...' box is modal
+            pv.create()
+        self.assertIn('5560A', box.call_args[0][3])                               # the confirmation says which standard the uncertainties are from
+        row = next(x for x in db.list_datasheets(root=self.us, db=self.reg))
+        ds = db.load(row['uid'], root=self.us, db=self.reg)
+        self.assertEqual(ds.options['manual_standard'], '5560A')
+        self.assertEqual(ds.assignments[next(p.id for fn, p in ds.all_points() if p.nominal == 1 and fn.kind == 'DCV')], '5560A')
+        pv.dialog.close()
+
+
+class TkPreviewLogic(Fix):
+    """mdd_import_ui.Preview (the Tk preview) with its widgets replaced by fakes: the logic of the 'Standard for the uncertainty' box.  The look on a real Tk is not checked here."""
+
+    class Var:
+        def __init__(self, value=''):
+            self.v = value
+
+        def get(self):
+            return self.v
+
+        def set(self, v):
+            self.v = v
+
+    class Grid:
+        def __init__(self):
+            self.rows = []
+
+        def get_children(self):
+            return list(range(len(self.rows)))
+
+        def delete(self, *a):
+            self.rows = []
+
+        def insert(self, parent, where, values=(), tags=()):
+            self.rows.append(values)
+
+    def preview(self):
+        import mdd_import_ui as M
+        V = self.Var
+        pv = M.Preview.__new__(M.Preview)
+        pv.root, pv.parsed, pv.conv, pv.on_created, pv.status = mock.MagicMock(), self.parsed, self.conv, None, None
+        pv.registry, pv.spec_root, pv.archive_to = self.reg, self.us, self.arch
+        pv.make, pv.model, pv.title = V(self.conv.sheet.make), V(self.conv.sheet.model), V(self.conv.sheet.title)
+        pv.choice, pv.std, pv.std_var = V('new'), None, V('')
+        pv.heading, pv.pills, pv.existing, pv.create_btn = (mock.MagicMock() for _ in range(4))
+        pv.pills.winfo_children.return_value = []
+        pv.existing.winfo_children.return_value = []
+        pv.std_box, pv.std_text, pv.win = mock.MagicMock(), mock.MagicMock(), mock.MagicMock()
+        pv.grid = self.Grid()
+        return M, pv
+
+    def test_preselects_shows_and_registers_the_chosen_standard(self):
+        M, pv = self.preview()
+        with mock.patch.object(M, 'ui', mock.MagicMock()), mock.patch.object(M, 'messagebox') as box:
+            pv.fill()
+            self.assertEqual(pv.selected_standard(), '5522A')
+            self.assertTrue(pv.std_var.get().startswith('5522A  (covers '))
+            self.assertIn('5522A', pv.std_text.configure.call_args.kwargs['text'])
+            self.assertTrue(pv.grid.rows[1][7].endswith('(5522A)'))
+            pv.std_var.set(pv.std.label_of(''))                                        # None: waive
+            pv.show_uncertainty()
+            self.assertEqual(pv.grid.rows[1][7], 'none: waived')
+            skipped = next(r for r in pv.grid.rows if r[0] == 16)
+            self.assertEqual(skipped[7], '')
+            pv.std_var.set(pv.std.label_of('5560A'))
+            pv.create()
+            self.assertIn('5560A', box.showinfo.call_args[0][1])
+        row = next(iter(db.list_datasheets(root=self.us, db=self.reg)))
+        self.assertEqual(db.load(row['uid'], root=self.us, db=self.reg).options['manual_standard'], '5560A')
+
+    def test_a_rebuild_keeps_the_persons_choice(self):
+        M, pv = self.preview()
+        with mock.patch.object(M, 'ui', mock.MagicMock()):
+            pv.fill()
+            pv.std_var.set(pv.std.label_of('5520A'))
+            pv.title.set('Another title')
+            pv.rebuild()
+            self.assertEqual(pv.selected_standard(), '5520A')
+
+
+class StandardUncertainty(Fix):
+    """A registered manual calibration carries the uncertainty of the standard the author chose; the run window and the PDF print it and say where it is from."""
+
+    def setUp(self):
+        super().setUp()
+        self.h = None
+
+    def tearDown(self):
+        if self.h is not None:
+            self.h.stop()
+
+    def app(self, standard, demo=False):
+        r = self.register(standard=standard)
+        self.assertTrue(r.ok, r.message)
+        self.uid = r.uid
+        self.spec = json.loads((self.us / (r.uid + '.json')).read_text())
+        if self.h is not None:
+            self.h.stop()
+        self.h = H.Harness().start()
+        a = self.h.make_app(self.spec, demo=demo)
+        for p in a.points:
+            a.type_reading(p, 'y') if p['test'] != 'numeric' else a.type_reading(p, H.typed_nominal(p))
+        return a
+
+    def pdf_text(self, app, name='A-100-2026-10-25.pdf', tar_tur=True):
+        out = str(Path(tempfile.mkdtemp()) / name)
+        d = {'technician': 'T', 'temperature': '23', 'humidity': '45', 'standards': [], 'procedure': '', 'show_tar_tur': tar_tur}
+        with mock.patch.object(report_dialog, 'ask_details', lambda parent, proc='': d), mock.patch.object(rt.hh.filedialog, 'asksaveasfilename', lambda **k: out):
+            app.export_pdf()
+        self.pdf_path = out
+        return subprocess.run(['pdftotext', '-layout', out, '-'], capture_output=True, text=True).stdout
+
+    def row_of(self, app, tag):
+        p = next(p for p in app.points if p['id'].endswith(tag))
+        return app.certificate_row(p, app.found[p['id']])
+
+    def test_registered_sheet_names_the_standard_per_point_and_waives_the_rest_per_point(self):
+        import datasheet_builder_rules as rules
+        r = self.register(standard='5522A')
+        self.assertTrue(r.ok, r.message)
+        ds = db.load(r.uid, root=self.us, db=self.reg)
+        self.assertEqual(ds.options['manual_standard'], '5522A')
+        self.assertTrue(ds.options['manual_entry'])
+        by_n = {int(p.id.rsplit('.p', 1)[1]): (fn, p) for fn, p in ds.all_points()}
+        self.assertEqual(ds.assignments[by_n[2][1].id], '5522A')
+        self.assertEqual(ds.assignments[by_n[11][1].id], '5522A')                 # Frequency: resolved now (the lab's Frequency - Measure CMC)
+        w = rules.waivers(ds)
+        self.assertNotIn(rules.WHOLE_SHEET, w)
+        self.assertNotIn(by_n[11][1].id, w)
+        self.assertIn(by_n[6][1].id, w)
+        self.assertNotIn(by_n[2][1].id, w)
+        self.assertIn('uncertainty waivers', db.versions(r.uid, root=self.us, db=self.reg)[0]['note'])
+        eng = json.loads((self.us / (r.uid + '.json')).read_text())['dsb']['engine']['check']
+        self.assertEqual((eng['errors'], eng['missing_uncertainties']), (0, 0))
+
+    def test_registered_sheet_with_none_waive_is_waived_per_point(self):
+        import datasheet_builder_rules as rules
+        r = self.register(standard='')
+        ds = db.load(r.uid, root=self.us, db=self.reg)
+        self.assertTrue(all(v == 'MANUAL' for v in ds.assignments.values()))
+        self.assertEqual(ds.options['manual_standard'], '')
+        self.assertNotIn(rules.WHOLE_SHEET, rules.waivers(ds))
+        self.assertEqual({k for k in rules.waivers(ds)}, {p.id for fn, p in ds.all_points() if rules.should_have(fn, p)})
+
+    def test_the_report_prints_the_standards_uncertainty_and_says_which_standard(self):
+        import report_pdf
+        a = self.app('5522A')
+        row = self.row_of(a, 'p0001')                                              # 100 mV DC
+        self.assertEqual(row['Uncertainty'], report_pdf.point_uncertainty(dict(kind='DCV', nominal=0.1, frequency=None, unit='V', range=None), '5522A'))
+        self.assertTrue(row['Uncertainty'].endswith('V') and row['Uncertainty'][0].isdigit())
+        self.assertTrue(row['Description'].endswith('[5522A]'), row['Description'])
+        self.assertEqual(self.row_of(a, 'p0006')['Uncertainty'], '')                  # the AC point the 5522A does not cover: blank (printed N/A), never zero
+        self.assertNotIn('[5522A]', self.row_of(a, 'p0006')['Description'])
+        self.assertNotIn('[manual]', self.row_of(a, 'p0001')['Description'])
+        txt = self.pdf_text(a)
+        self.assertIn('Calibration Data', txt)
+        self.assertIn('Uncertainty: 5522A', txt)                                   # the header line names the standard
+        self.assertIn('k = 2', txt)
+        self.assertIn(row['Uncertainty'].split()[0], txt)
+        self.assertIn('N/A', txt)                                                  # waived points print N/A, not 0
+        self.assertNotIn('standards due', txt.lower())
+        self.assertTrue(Path(self.pdf_path).name.startswith('A-100-2026'))
+
+    def test_no_printed_uncertainty_is_zero_and_the_ratios_follow_the_uncertainty(self):
+        a = self.app('5522A')
+        rows, pts = a.certificate_rows_and_points()
+        printed = [r['Uncertainty'] for r in rows if r['Uncertainty']]
+        self.assertTrue(printed)
+        for u in printed:
+            self.assertGreater(float(u.split()[0]), 0, u)
+        p = next(p for p in pts if p['id'].endswith('p0001'))
+        f = a.certificate_fields(p)
+        self.assertTrue(f['TAR'] and f['TUR'], f)
+        self.assertEqual(a.certificate_fields(next(p for p in pts if p['id'].endswith('p0006'))), dict(TAR='', TUR=''))
+
+    def test_none_waive_prints_what_the_report_always_printed(self):
+        a = self.app('')
+        rows, _pts = a.certificate_rows_and_points()
+        self.assertEqual([r['Uncertainty'] for r in rows], [''] * len(rows))
+        self.assertFalse(any('[5522A]' in r['Description'] or '[manual]' in r['Description'] for r in rows))
+        txt = self.pdf_text(a)
+        self.assertNotIn('Uncertainty:', txt)
+        self.assertIn('Calibration Data', txt)
+
+    def test_readings_limits_and_pass_fail_do_not_depend_on_the_standard(self):
+        a = self.app('5522A')
+        found_a = {k: (v['entered'], v['result'], v['reading']) for k, v in a.found.items()}
+        lims_a = [(p.get('low'), p.get('high'), p.get('nominal')) for p in a.points]
+        b = self.app('')
+        self.assertEqual(found_a, {k: (v['entered'], v['result'], v['reading']) for k, v in b.found.items()})
+        self.assertEqual(lims_a, [(p.get('low'), p.get('high'), p.get('nominal')) for p in b.points])
+        self.assertTrue(all(v['standard'] == 'manual' for v in b.found.values()))        # the record still says the technician did it by hand
+
+    def test_demo_mode_never_prints_a_standards_uncertainty(self):
+        a = self.app('5522A', demo=True)
+        rows, _pts = a.certificate_rows_and_points()
+        self.assertEqual([r['Uncertainty'] for r in rows], [''] * len(rows))
+        self.assertTrue(all(r['synthetic'] for r in a.found.values()))
+        txt = self.pdf_text(a)
+        self.assertIn('DEMO', txt.upper())
+        self.assertNotIn('Uncertainty:', txt)
+        self.assertNotIn('[5522A]', txt)
+        self.assertEqual(a.manual_uncertainty_line(), '')
+
+    def test_a_loaded_demo_result_is_not_given_a_real_uncertainty_either(self):
+        a = self.app('5522A')
+        p = a.points[0]
+        rec = dict(a.found[p['id']], standard='demo', synthetic=True)
+        row = a.certificate_row(p, rec)
+        self.assertEqual(row['Uncertainty'], '')
+        self.assertIn('[demo]', row['Description'])
+
+    def test_nothing_is_driven_and_routing_is_unchanged_by_the_standard(self):
+        a = self.app('5522A')
+        self.assertTrue(a.manual_entry)
+        self.assertFalse(a.wants_connection())
+        self.assertEqual(a.standards_needed(), [])
+        self.assertTrue(all(((p.get('dsb') or {}).get('assignment') or {}).get('status') == 'manual' for p in a.points))
+        self.assertTrue(all(rt._assigned(p) == '' for p in a.points))
+
+    def test_the_review_window_can_change_the_standard_of_a_manual_row(self):
+        import report_review_model as RM
+        a = self.app('5522A')
+        specs, default = RM.specs_for(a)
+        self.assertEqual(default, '5522A')
+        rows, _pts = a.certificate_rows_and_points()
+        changeable = [s for s in specs if not s.locked]
+        self.assertTrue(changeable)
+        for s in changeable:
+            self.assertEqual(RM.evaluate(s, s.default_std).unc_text, rows[s.idx]['Uncertainty'], s.description)         # the default is exactly what the report prints
+        locked = [s for s in specs if s.locked]
+        self.assertTrue(all(not rows[s.idx]['Uncertainty'] or s.locked for s in locked))
+        m = RM.ReviewModel(specs, default, asset='A-100')
+        first = changeable[0].idx
+        self.assertIn('5560A', m.options(first))
+        m.set_standard(first, '5560A')
+        self.assertEqual(m.rows[first].cur.standard, '5560A')
+        self.assertTrue(m.rows[first].changed)
+
+    def test_existing_whole_sheet_waiver_procedures_run_as_before(self):
+        import datasheet_builder_rules as rules
+        r = self.register(standard='')
+        ds = db.load(r.uid, root=self.us, db=self.reg)
+        old = ds.copy()
+        old.options.pop('manual_standard', None)
+        old.uid = ''
+        old.options[rules.WAIVER_KEY] = {rules.WHOLE_SHEET: dict(code='manual_calibration', reason='manual calibration: imported from .MDD, no automation', by='import (x)', at='2026-10-01T00:00:00')}
+        old.assignments = {p.id: 'MANUAL' for _f, p in old.all_points()}
+        res = db.save(old, who='x', root=self.us / 'old', db=self.d / 'old.sqlite3')
+        self.assertEqual(res.status, 'ready')
+        spec = json.loads((self.us / 'old' / (res.uid + '.json')).read_text())
+        if self.h is not None:
+            self.h.stop()
+        self.h = H.Harness().start()
+        a = self.h.make_app(spec)
+        for p in a.points:
+            a.type_reading(p, 'y') if p['test'] != 'numeric' else a.type_reading(p, H.typed_nominal(p))
+        rows, _pts = a.certificate_rows_and_points()
+        self.assertEqual([r['Uncertainty'] for r in rows], [''] * len(rows))
+        self.assertEqual(a.manual_uncertainty_line(), '')
+
+    # ---- the per-point chooser inside the run window (right-click a point > Uncertainty standard) ----------------------------------------------------
+    def entries(self, a, tag):
+        p = next(p for p in a.points if p['id'].endswith(tag))
+        return p, a.unc_menu(p)
+
+    def labels(self, a, tag):
+        return [e[0] for e in self.entries(a, tag)[1]]
+
+    def test_the_point_menu_offers_automatic_and_every_standard_that_covers_the_point(self):
+        a = self.app('5522A')
+        labels = self.labels(a, 'p0001')                                           # 100 mV DC
+        self.assertEqual(labels[0], 'Uncertainty standard: Automatic (5522A)  (selected)')
+        self.assertEqual([x.split(': ')[1].split('  ')[0] for x in labels[1:]], sorted(x.split(': ')[1].split('  ')[0] for x in labels[1:]))
+        self.assertIn('Uncertainty standard: 5560A', labels)
+        self.assertIn('Uncertainty standard: 5520A', labels)
+        self.assertTrue(all(e[2] for e in self.entries(a, 'p0001')[1]))
+        # the right-click menu of the engine carries them after 'Enter reading manually...'
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        full = [e[0] for e in a.tree_menu_extras(p['id'])]
+        self.assertEqual(full[0], 'Enter reading manually...')
+        self.assertIn('Uncertainty standard: 5560A', full)
+        # a point no standard gives an uncertainty for: one disabled line that says why; a diode / functional check: none
+        _p, none = self.entries(a, 'p0006')
+        self.assertEqual(none[0][0], 'Uncertainty standard...')
+        self.assertFalse(none[0][2])
+        self.assertIn('No standard', none[0][3])
+
+    def test_choosing_a_standard_changes_that_rows_uncertainty_tar_tur_and_tag(self):
+        import report_pdf
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        before = a.certificate_row(p, a.found[p['id']])
+        other = a.certificate_row(next(q for q in a.points if q['id'].endswith('p0002')), a.found[next(q for q in a.points if q['id'].endswith('p0002'))['id']])
+        a.set_unc_choice(p, '5560A')
+        row = a.certificate_row(p, a.found[p['id']])
+        self.assertEqual(row['Uncertainty'], report_pdf.point_uncertainty(dict(kind='DCV', nominal=0.1, frequency=None, unit='V', range=None), '5560A'))
+        self.assertNotEqual(row['Uncertainty'], before['Uncertainty'])
+        self.assertTrue(row['Description'].endswith('[5560A]'), row['Description'])
+        # TAR / TUR are the chosen standard's own (the same call the Builder's picker resolves through)
+        figs = rt.manual_uncertainties(self.spec, None, None, {a._unc_pid(p): '5560A'}, only=a._unc_pid(p))[a._unc_pid(p)]
+        import tartur
+        f = a.certificate_fields(p)
+        self.assertEqual((f['TAR'], f['TUR']), (tartur.format_ratio(figs['tar']), tartur.format_ratio(figs['tur'])))
+        self.assertEqual(a.unc_figures(p)['unc_standard'], '5560A')
+        # the menu marks the pick; the other rows are untouched
+        self.assertIn('Uncertainty standard: 5560A  (selected)', self.labels(a, 'p0001'))
+        self.assertEqual(a.certificate_row(next(q for q in a.points if q['id'].endswith('p0002')), a.found[next(q for q in a.points if q['id'].endswith('p0002'))['id']]), other)
+        # Automatic puts the procedure's own standard back
+        a.set_unc_choice(p, '')
+        self.assertEqual(a.certificate_row(p, a.found[p['id']]), before)
+
+    def test_it_is_the_builders_assignment_mechanism_and_no_second_code_path(self):
+        import datasheet_builder_rules as rules
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        pid = a._unc_pid(p)
+        a.set_unc_choice(p, '5520A')
+        ds = db.load(self.uid, root=self.us, db=self.reg)
+        ds.assignments[pid] = '5520A'                                                # what the Builder's picker does (set_assignment)
+        res, _why = rules.match_manual(ds, ds.default_period, None, None)
+        want = rules.manual_figures(res.assignments[pid])
+        self.assertEqual(a.unc_figures(p), want)
+
+    def test_the_choice_is_recorded_saved_with_the_run_and_reported(self):
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        a.set_unc_choice(p, '5560A')
+        data = a.save_fields()
+        self.assertEqual(data['dsb']['uncertainty_standards'], {p['id']: '5560A'})
+        unc = a.manual_uncertainty_line()
+        self.assertIn('5560A (1)', unc)
+        self.assertIn('5522A (', unc)
+        txt = self.pdf_text(a)
+        self.assertIn('[5560A]', txt)
+        self.assertIn('5560A (1)', txt)
+        # a run loaded from that progress gets the same choice back; a file without it clears it
+        b = self.app('5522A')
+        b.load_results(dict(data))
+        self.assertEqual(b.unc_choice, {p['id']: '5560A'})
+        c = dict(data)
+        c['dsb'] = {k: v for k, v in data['dsb'].items() if k != 'uncertainty_standards'}
+        b.load_results(c)
+        self.assertEqual(b.unc_choice, {})
+        # without a pick nothing extra is saved
+        self.assertNotIn('uncertainty_standards', self.app('5522A').save_fields()['dsb'])
+
+    def test_the_command_log_gets_a_line_but_the_record_and_pass_fail_are_unchanged(self):
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        found = dict(a.found[p['id']])
+        notes = []
+        a._log_note = notes.append
+        a.set_unc_choice(p, '5560A')
+        self.assertEqual(notes, [f'Uncertainty standard for point {p["id"]}: 5560A (was 5522A)'])
+        self.assertEqual(a.found[p['id']], found)                                    # reading, result and the 'manual' standard of the record
+        self.assertEqual(a.found[p['id']]['standard'], 'manual')
+
+    def test_a_demo_run_offers_no_choice_and_prints_no_figure_even_if_one_is_set(self):
+        a = self.app('5522A', demo=True)
+        p, entries = self.entries(a, 'p0001')
+        self.assertEqual(len(entries), 1)
+        self.assertFalse(entries[0][2])
+        self.assertIn('demo', entries[0][3].lower())
+        a.set_unc_choice(p, '5560A')                                                   # even if it is forced
+        rows, _pts = a.certificate_rows_and_points()
+        self.assertEqual([r['Uncertainty'] for r in rows], [''] * len(rows))
+        self.assertEqual(a.manual_uncertainty_line(), '')
+        txt = self.pdf_text(a)
+        self.assertIn('DEMO', txt.upper())
+        self.assertNotIn('[5560A]', txt)
+
+    def test_a_frequency_point_carries_the_lab_cmc_and_can_be_changed_to_another_covering_standard(self):
+        import report_pdf
+        a = self.app('5522A')
+        p = next(p for p in a.points if (p.get('dsb') or {}).get('kind') == 'FREQ')
+        hz = float(p['run']['nominal'])
+        want = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=hz, frequency=None, unit='Hz', range=1.0, source='x'), '5522A')
+        row = a.certificate_row(p, a.found[p['id']])
+        self.assertEqual(row['Uncertainty'], want)
+        self.assertTrue(row['Description'].endswith('[5522A]'), row['Description'])
+        self.assertIn('Uncertainty standard: 5560A', [e[0] for e in a.unc_menu(p)])
+        a.set_unc_choice(p, '5560A')
+        row2 = a.certificate_row(p, a.found[p['id']])
+        self.assertEqual(row2['Uncertainty'], want)                                    # the figure is the CMC alone, so the standard changes the tag, not the figure
+        self.assertTrue(row2['Description'].endswith('[5560A]'), row2['Description'])
+        self.assertIn('Frequency - Measure CMC alone', a.manual_uncertainty_line())
+
+    def test_the_review_window_follows_a_picked_standard(self):
+        import report_review_model as RM
+        a = self.app('5522A')
+        p = next(p for p in a.points if p['id'].endswith('p0001'))
+        a.set_unc_choice(p, '5560A')
+        specs, _default = RM.specs_for(a)
+        rows, _pts = a.certificate_rows_and_points()
+        s = next(s for s in specs if s.step == p['id'])
+        self.assertEqual(s.default_std, '5560A')
+        self.assertEqual(RM.evaluate(s, s.default_std).unc_text, rows[s.idx]['Uncertainty'])
+
+
 class GridEntryLogic(unittest.TestCase):
     """manual_grid.GridEntry with a fake tree and app (the real-Tk behaviour is checked in tests/real_tk_checks.py)."""
 
