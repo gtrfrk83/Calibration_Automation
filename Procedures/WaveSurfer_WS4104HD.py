@@ -477,6 +477,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def _confirm_found_overwrite(self, kind, what):
         if self._mode != datamode.FOUND or not self._stored_rows(datamode.LEFT, kind):
             return True
+        if self._from_step_active and getattr(self, '_chain_found_ok', None) == kind:
+            return True                                    # answered Yes for this function at the start of the 'Rerun From Selected' chain
+        ok = self._ask_found_overwrite(what)
+        if ok:
+            self._chain_found_ok = kind
+        return ok
+
+    def _ask_found_overwrite(self, what):
         return port.ask_yes_no(
             'Replace the As Found reading?',
             f'{what} already has As Left readings, so the instrument has been adjusted since the As Found run.\n\n'
@@ -634,6 +642,20 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         {'noise': self.retest_noise, 'dcv': self.retest_selected_dcv, 'impedance': self.retest_impedance,
          'offset': self.retest_offset, 'bandwidth': self.retest_bandwidth, 'timebase': self.retest_timebase, 'trigger': self.retest_trigger}[e['kind']]()
 
+    _from_step_active = False              # True only while _from_step starts the 2nd, 3rd... point of a 'Rerun From Selected' chain
+    _chain_last = None                     # (function, channel) the operator already confirmed in this chain
+
+    def _retest_prompt(self, kind, channel, *args, **kw):
+        """operator_prompt for a retest connection.  In a 'Rerun From Selected' chain the prompt is asked for the FIRST point and again only when the function or the channel
+        changes (the cable really has to move); the following points on the same channel go straight on (owner, 2026-10-26: a prompt on every point).  A single Rerun
+        Selected always asks."""
+        if self._from_step_active and self._chain_last == (kind, channel):
+            return True
+        ok = port.operator_prompt(*args, **kw)
+        if ok:
+            self._chain_last = (kind, channel)
+        return ok
+
     _from_queue = ()                       # 'Rerun From Selected': the table keys still to be re-measured, one at a time, by rerun_selected
 
     def rerun_from_selected(self):
@@ -651,6 +673,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         done = {f"{e['kind']}:{e['idx']}" for e in self.entries() if e['done']}
         self._from_queue = [k for k in keys[keys.index(sel[0]) + 1:] if k in done]
+        self._chain_last = None                                               # the first point of the chain always asks
+        self._chain_found_ok = None
         self.rerun_selected()                                                 # the selected point, through the existing path
         if not self._batch_busy():
             self._from_queue = ()
@@ -661,7 +685,11 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self._from_queue = ()
             return
         self.ui_view.select(self.utree, key)
-        self.rerun_selected()
+        self._from_step_active = True
+        try:
+            self.rerun_selected()
+        finally:
+            self._from_step_active = False
         if not self._batch_busy():
             self._from_queue = ()
 
@@ -1285,8 +1313,9 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         config = self.run_config
         row = self.rows[idx]
         channel, scale_index = row['channel'], idx % len(SCALES)
-        if not self.confirm_channel(channel, SCALES[scale_index]):
+        if not (self._from_step_active and self._chain_last == ('noise', channel)) and not self.confirm_channel(channel, SCALES[scale_index]):
             return
+        self._chain_last = ('noise', channel)
         self.noise_retest_index = idx
         self.noise_retest_result = None
         self.stop_event.clear()
@@ -1676,7 +1705,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return
         point = self.dcv_points()[idx]
         ch = point['channel']
-        if not port.operator_prompt('Confirm DCV retest connection', f'Retest DCV point {idx+1} of 80',
+        if not self._retest_prompt('dcv', ch, 'Confirm DCV retest connection', f'Retest DCV point {idx+1} of 80',
             [('Connect the cable', f'Fluke SCOPE output cable to CH{ch}.'),
              ('Remove other sources', 'No external terminators, probes or other sources on the input.'),
              ('Automatic', 'The scope is set to DC 1 M\u03a9 and 20 MHz BW for you.')],
@@ -2261,7 +2290,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         idx = self._retest_index(self.imp_tree, self.imp_rows, 'impedance', self.imp_window)
         if idx is None: return
         point = self.impedance_points()[idx]
-        if not port.operator_prompt('Confirm impedance retest', f'Retest impedance point {idx+1} of 28',
+        if not self._retest_prompt('impedance', point['channel'], 'Confirm impedance retest', f'Retest impedance point {idx+1} of 28',
             [('Output off', 'Confirm the Fluke SCOPE measurement output is OFF before moving cables.'),
              ('Connection', 'Verify the correct connection and, for EXT inputs, the input impedance.')],
             facts=[('Input', point['channel']), ('Test', point['description'])],
@@ -2284,7 +2313,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         idx=self._retest_index(self.offset_tree,self.offset_rows,'offset',self.offset_tab)
         if idx is None:return
         point=self.offset_points()[idx]
-        if not port.operator_prompt('Confirm offset retest', f'Retest offset point {idx+1} of 16',
+        if not self._retest_prompt('offset', point['channel'], 'Confirm offset retest', f'Retest offset point {idx+1} of 16',
             [('Connection', 'Confirm the Fluke SCOPE cable is connected to the correct channel.')],
             facts=[('Channel', f'CH{point["channel"]}'), ('Scope offset', f'{point["scope_offset_v"]:+g} V')],
             caution='The prior reading is replaced only on success.', ok='Ready \u2014 retest', parent=self.root):return
@@ -2304,7 +2333,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         idx=self._retest_index(self.bw_tree,self.bw_rows,'bandwidth',self.bw_tab)
         if idx is None:return
         point=self.bandwidth_points()[idx]
-        if not port.operator_prompt('Confirm bandwidth retest', f'Retest bandwidth point {idx+1} of 24',
+        if not self._retest_prompt('bandwidth', point['channel'], 'Confirm bandwidth retest', f'Retest bandwidth point {idx+1} of 24',
             [('Signal path', 'Verify a rated 50 \u03a9 signal path and the scope DC50 input.'),
              ('Signal', 'The Fluke will generate a 1 GHz sine wave.')],
             facts=[('Channel', f'CH{point["channel"]}'), ('Range', self.range_text(point["scale_v_div"]))],
@@ -3121,7 +3150,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         if self._trig_settings() is None:
             return
         point = self.trigger_points()[idx]
-        if not port.operator_prompt('Confirm trigger level retest', f'Retest trigger level point {idx+1} of 24',
+        if not self._retest_prompt('trigger', point['channel'], 'Confirm trigger level retest', f'Retest trigger level point {idx+1} of 24',
             [('Connection', f'Confirm the Fluke SCOPE output is connected to CH{point["channel"]}.'),
              ('You confirm', 'You will be asked twice whether the scope triggered.')],
             facts=[('Channel', f'CH{point["channel"]}'), ('Level', f'{point["level_v"]*1000:+.0f} mV'), ('Slope', point['slope'])],
