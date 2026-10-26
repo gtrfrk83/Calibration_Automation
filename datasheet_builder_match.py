@@ -33,6 +33,8 @@ from decimal import Decimal, localcontext
 import datasheet_builder as db
 import specmanager as sm
 import tartur
+import coil_rule
+import dsb_coil
 import dsb_sensors as sens
 import uncertainty
 import uncertainty_budget as ub
@@ -257,6 +259,7 @@ class Stim:
     coverage: list = field(default_factory=list)      # further Stim that must also be covered (the amplitude of a frequency point)
     error: tuple = None             # (code, message) when the point cannot be turned into a lookup
     sensor: str = ''                # TEMP: the sensor key (thermocouple letter or RTD key, dsb_sensors); '' for every other kind
+    unc_scale: float = 1.0          # a 50-turn-coil point BELOW the coil's range: the calibrator's uncertainty at the sourced current is multiplied by the 50 turns (coil_rule.uncertainty_scale)
 
 
 def _rms_factor(waveform, amp_unit):
@@ -280,6 +283,8 @@ def stimulus(fn, p, strict_sensor=False):
     s = {**fn.settings, **p.settings}
     if k in ('DCV', 'DIODE', 'SCOPE_GAIN', 'SCOPE_OFFSET'):
         return Stim('DCV', nom, None, out_dir)
+    if k in ('DCI', 'ACI') and dsb_coil.is_coil(fn, p):          # through the 50-turn coil: the calibrator sources nominal / 50 (the coil is never a calibrator choice)
+        return Stim(k, nom / dsb_coil.TURNS, f if k == 'ACI' else None, out_dir, unc_scale=coil_rule.uncertainty_scale(k, float(nom), None if f is None else float(f)))
     if k == 'DCI':
         return Stim('DCI', nom, None, out_dir)
     if k == 'ACV':
@@ -399,7 +404,7 @@ def _scope_temperature(scope, nominal, key):
     return f(nominal, tc=key) if f else scope.dmm('TEMP', nominal, tc=key)
 
 
-def budget(spec, hit, kind, nominal, frequency, scope, basis='generate', sensor=''):
+def budget(spec, hit, kind, nominal, frequency, scope, basis='generate', sensor='', unc_scale=1.0):
     """ub.Budget for a hit: standard accuracy / divisor, resolution / sqrt(12), CMC clamp.  Same arithmetic as uncertainty_budget.build."""
     cmc_kind = {'OHM2': 'OHM', 'OHM4': 'OHM'}.get(kind, kind)
     b = ub.Budget(cmc_kind, nominal, hit.row['unit'], spec, frequency)
@@ -415,6 +420,12 @@ def budget(spec, hit, kind, nominal, frequency, scope, basis='generate', sensor=
         b.add('Resolution', res / math.sqrt(12), 1.0, f'{res:.6g} / sqrt(12) ({src})')
     else:
         b.notes.append('resolution of this range is not recorded: not in the budget')
+    if unc_scale and float(unc_scale) != 1.0:                       # as uncertainty_budget.build(scale=): every component and the CMC floor, before the reported value is rounded up
+        for comp in b.components:
+            comp.sensitivity *= float(unc_scale)
+        if b.cmc is not None:
+            b.cmc *= float(unc_scale)
+        b.notes.append(f'referred to the current the clamp reads: x {float(unc_scale):g}')
     if b.emu is not None:
         b.reported = ub.ceil_sig(max(b.emu, b.cmc or 0.0))
     return b
@@ -457,6 +468,11 @@ class Assignment:
     kind: str
     direction: str
     cap_kind: str = ''                # the driver-table key that decides automation ('TEMP_OTHER' for a sensor the suite cannot source); '' = kind
+    coil: bool = False                # a clamp-meter current point driven through the 50-turn coil (dsb_coil): the calibrator sources nominal / 50
+    unc_standard: str = ''            # the standard the point's UNCERTAINTY comes from when it is not the one that sources it ('A2LA-5500A-COIL' for a coil point the coil covers)
+    unc_row: str = ''                 # ... and the specification row it used
+    sourced: float = None             # coil point: the current the calibrator outputs (A)
+    unc_scale: float = 1.0            # coil point below the coil's range: the calibrator's uncertainty at the sourced current is x 50
     status: str = 'uncovered'         # assigned | uncovered | manual
     standard: str = ''
     driver: str = ''
@@ -480,6 +496,8 @@ class Assignment:
     def to_dict(self, candidates=False):
         d = {k: getattr(self, k) for k in ('point_id', 'function_id', 'kind', 'direction', 'status', 'standard', 'driver', 'automation', 'automation_note',
                                            'tur', 'tar', 'uncertainty', 'tolerance', 'overridden', 'reason', 'message', 'mode', 'automatable_alternative')}
+        if self.coil:                                       # written only for a coil point: every other assignment is exactly what it was
+            d.update(coil=True, unc_standard=self.unc_standard, unc_row=self.unc_row, sourced=self.sourced, unc_scale=self.unc_scale)
         if candidates:
             d['candidates'] = [c.to_dict() for c in self.candidates]
         return d
@@ -574,9 +592,9 @@ class Matcher:
             c.notes.append(note)
         c.row = f"{hit.row['function']} / {hit.row['label']}"
         basis = 'generate' if fn.direction == 'measure' else 'measure'
-        b = budget(std.spec, hit, st.kind, float(st.value), float(st.frequency) if st.frequency is not None else None, self.scope, basis, st.sensor)
+        b = budget(std.spec, hit, st.kind, float(st.value), float(st.frequency) if st.frequency is not None else None, self.scope, basis, st.sensor, st.unc_scale)
         scale = float(st.scale)
-        c.accuracy = hit.limit * scale
+        c.accuracy = hit.limit * scale * st.unc_scale                 # TAR accuracy: x 50 in the coil fallback too
         c.cmc = None if b.cmc is None else b.cmc * scale
         c.notes += b.notes
         if b.cmc is None:
@@ -608,11 +626,62 @@ class Matcher:
                 st.error = ('bad_point', 'AC point without a frequency')
         except Exception as e:                                # never raise on one bad point
             st = Stim(fn.kind, abs(p.nominal), error=('bad_point', f'cannot work out the stimulus: {e}'))
-        cands = [self.candidate(s, fn, p, st, lim) for s in self.standards]
+        cands = [self.candidate(s, fn, p, st, lim) for s in self.standards if s.model != dsb_coil.MODEL]       # the coil is not commanded: never a calibrator choice (its sheet note 11)
         if ds.options.get('manual_entry') and fn.kind in MANUAL_FREQUENCY_KINDS:
             for c in cands:
                 self.manual_frequency(c, fn, p)
         return cands
+
+    def coil_candidate(self, ds, fn, p, period):
+        """The Candidate of the 50-turn coil's own sheet (A2LA-5500A-COIL) for a coil point, worked out at the EFFECTIVE current (what the clamp reads: the point's nominal) with
+        the clamp / coil interaction term RSS (coil_rule.extra_components), exactly as the engine procedures do it (uncertainty_budget.build(extra=...)).  None when the coil's sheet has
+        no row there (e.g. AC 10 A): the calibrator's uncertainty at the sourced current applies instead.  Never a calibrator choice: it is the point's UNCERTAINTY standard."""
+        import coil_rule
+        std = next((s for s in self.standards if s.model == dsb_coil.MODEL and s.spec is not None), None)
+        if std is None or not dsb_coil.covers(fn, p):
+            return None
+        eff = abs(float(p.nominal))
+        freq = None if p.frequency is None else float(p.frequency)
+        try:
+            lim = fn.limit_for(p, period, ds)
+        except db.DsError:
+            lim = None
+        hit = std.spec.lookup(fn.kind, eff, frequency=freq, direction='output')
+        if hit is None:
+            return None
+        b = ub.build(fn.kind, eff, fn.unit, standard=std.spec, frequency=freq, scope=self.scope, extra=coil_rule.extra_components(eff))
+        c = Candidate(dsb_coil.MODEL, covered=True, driver='', spec_known=True)
+        c.automation, c.automation_note = NO, 'the coil is not commanded: the calibrator sources the current'
+        c.row = f"{hit.row['function']} / {hit.row['label']}"
+        c.accuracy, c.cmc = hit.limit, b.cmc
+        c.uncertainty = b.reported
+        c.notes += list(b.notes) + [f'{dsb_coil.LABEL} at the effective current {eff:g} A, RSS with the clamp / coil interaction ({coil_rule.INTERACTION["text"]})']
+        tol = lim.tolerance if lim is not None else None
+        c.tolerance = float(tol) if tol is not None else None
+        if tol is not None and c.uncertainty:
+            res = tartur.from_values(float(tol), fn.unit, c.accuracy, fn.unit, c.uncertainty, fn.unit)
+            c.tar, c.tur = res['tar'], res['tur']
+        if c.uncertainty and p.nominal != 0:
+            c.rel_unc = c.uncertainty / abs(float(p.nominal))
+        return c
+
+    def _coil_pass(self, ds, res, period):
+        """A coil point's figures: the coil sheet's uncertainty / TAR / TUR when it covers the effective current (the assigned calibrator stays the AUTOMATION standard), else the
+        assigned calibrator's own (its candidate was worked out at the sourced current)."""
+        for fn, p in ds.all_points():
+            a = res.assignments.get(p.id)
+            if a is None or not dsb_coil.is_coil(fn, p):
+                continue
+            a.coil, a.sourced = True, dsb_coil.sourced_float(abs(p.nominal))
+            cc = self.coil_candidate(ds, fn, p, period)
+            if cc is not None:
+                a.unc_standard, a.unc_row = dsb_coil.MODEL, cc.row
+                a.tur, a.tar, a.uncertainty, a.tolerance = cc.tur, cc.tar, cc.uncertainty, cc.tolerance
+            elif a.status == 'assigned':
+                a.unc_scale = coil_rule.uncertainty_scale(fn.kind, abs(float(p.nominal)), None if p.frequency is None else float(p.frequency))
+                a.unc_standard = a.standard
+                cand = next((c for c in a.candidates if c.standard == a.standard and c.covered), None)
+                a.unc_row = cand.row if cand is not None else ''
 
     def frequency_cmc(self, kind, nominal):
         """The laboratory's 'Frequency - Measure' CMC (GPS referenced) for a FREQ point of `nominal` Hz, in Hz; for a PERIOD point of `nominal` seconds the same RELATIVE
@@ -690,6 +759,7 @@ class Matcher:
             if not choice.can_automate:
                 alt = next((c for c in ranked if c.can_automate and c.standard != choice.standard), None)
                 a.automatable_alternative = alt.standard if alt else ''
+        self._coil_pass(ds, res, period)
         res.notes = [f'unverified: {x}' for x in UNVERIFIED_ITEMS] if any(a.automation == UNVERIFIED for a in res.assignments.values()) else []
         return res
 

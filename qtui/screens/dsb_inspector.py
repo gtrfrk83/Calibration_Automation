@@ -117,6 +117,28 @@ class SensorBox(QWidget):
         self.combo.setCurrentIndex(i if i >= 0 else 0)
 
 
+class CoilBox(QWidget):
+    """'Driven through the 50-turn coil' of a clamp-meter current row: a check box plus a button that gives the whole section the same choice.  get_value() / set_value() work
+    with a bool.  The calibrator then sources nominal / 50 and the uncertainty is the coil's (dsb_coil, coil_rule)."""
+
+    def __init__(self):
+        super().__init__()
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(6)
+        self.check = QCheckBox('Through the 50-turn coil')
+        self.section_btn = QPushButton('Whole section')
+        self.section_btn.setToolTip('Give every row of this section the choice in the box.')
+        lay.addWidget(self.check, 1)
+        lay.addWidget(self.section_btn)
+
+    def get_value(self):
+        return self.check.isChecked()
+
+    def set_value(self, on):
+        self.check.setChecked(bool(on))
+
+
 class LevelBox(QWidget):
     """The signal level of a frequency / period / bandwidth test: a number and a unit picker (V, mV, µV, Vpp, mVpp, µVpp).  The value is stored in the basis of the
     function (volts rms; the scope functions store volts peak-to-peak).  V / mV / µV is a sine wave in rms and Vpp / mVpp / µVpp a square wave in peak-to-peak, the way the
@@ -397,7 +419,7 @@ class Inspector(QFrame):
         return b
 
     def _build_point(self, lay):
-        self._group(lay, 'point', wide=('func', 'sensor'))
+        self._group(lay, 'point', wide=('func', 'sensor', 'coil'))
         func = self._combo()
         self._cell('point', 'func', 'This row tests', func, 'What this row measures. Pick it for a new row; on a test row it moves the row to that section.')
         func.activated.connect(lambda _i: self.win.function_chosen(func.currentText()))
@@ -419,7 +441,12 @@ class Inspector(QFrame):
         self.v['sensor'] = C.Bind(self._cell('point', 'sensor', 'Sourced as', self.sensor_box, 'How the temperature is sourced: the thermocouple type or RTD the calibrator simulates. It decides which standard rows and which scope lines give the uncertainty, so it must be chosen for every temperature row. "Whole section" gives every row of this section the same choice.'))
         self.sensor_box.set_choices(sens.sensor_types())
         self.sensor_box.section_btn.clicked.connect(lambda: self.win.sensor_section(self.sensor_box.get_value()))
-        self.point_names = ('func', 'nominal', 'units', 'freq', 'level', 'expect', 'sensor')
+        self.coil_box = CoilBox()
+        self.v['coil'] = C.Bind(self._cell('point', 'coil', 'Clamp meter', self.coil_box, 'Tick this when the calibrator drives this current through the 50-turn coil (Fluke 5500A/COIL). '
+                                           'The nominal stays what the clamp reads; the calibrator sources nominal / 50, and the uncertainty is the coil\'s own (RSS with the clamp / coil '
+                                           'interaction). "Whole section" gives every row of this section the same choice.'))
+        self.coil_box.section_btn.clicked.connect(lambda: self.win.coil_section(self.coil_box.get_value()))
+        self.point_names = ('func', 'nominal', 'units', 'freq', 'level', 'expect', 'sensor', 'coil')
 
     def _build_tolerance(self, lay):
         # The limits come first: LOW and HIGH (absolute).  They are READ-ONLY displays of what the tolerance below works out; the tolerance chips / boxes,
@@ -710,7 +737,7 @@ class Inspector(QFrame):
         fields = st.get('fields', {})
         self.level_box.set_basis(fields.get('level_basis', 'rms'))
         want = {'func': True, 'nominal': True, 'units': True, 'freq': fields.get('frequency', False), 'level': fields.get('amplitude', False),
-                'expect': fields.get('expect', False), 'sensor': fields.get('sensor', False),
+                'expect': fields.get('expect', False), 'sensor': fields.get('sensor', False), 'coil': fields.get('coil', False),
                 'iv': self.types['iv'].get(), 'fs': self.types['fs'].get(), 'fs_scale': self.types['fs'].get(), 'floor': self.types['floor'].get(),
                 'db': self.types['db'].get(), 'calc': self.types['calc'].get(), 'low': False, 'high': False}      # the grid shows the limits; the read-only boxes only took room
         passfail = bool(st.get('passfail'))
@@ -772,7 +799,7 @@ class Inspector(QFrame):
         self._pv_sig = None
         if hasattr(self, 'preview_l'):
             self.preview_l.hide()
-        for k in ('nominal', 'units', 'freq', 'level', 'expect', 'sensor', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode', 'low', 'high'):
+        for k in ('nominal', 'units', 'freq', 'level', 'expect', 'sensor', 'coil', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode', 'low', 'high'):
             self.v[k].set(form[k])
         for k in M.SPEC_ORDER:
             self.types[k].set(k in form['types'])
@@ -841,7 +868,7 @@ class Inspector(QFrame):
             plus, minus = dict(self.sides['plus']), dict(self.sides['minus'])
         return dict(types=types, plus=plus, minus=minus, asym=asym,
                     operand='-' if self.v['operand'].get() == '-' else '+', fs_scale=self.v['fs_scale'].get(), nominal=self.v['nominal'].get(), units=self.v['units'].get(),
-                    freq=self.v['freq'].get(), level=self.v['level'].get(), expect=self.v['expect'].get() or 'on', sensor=self.v['sensor'].get(), multi=bool(self.b['multi'].get()),
+                    freq=self.v['freq'].get(), level=self.v['level'].get(), expect=self.v['expect'].get() or 'on', sensor=self.v['sensor'].get(), coil=bool(self.v['coil'].get()), multi=bool(self.b['multi'].get()),
                     multi_mode=self.v['multi_mode'].get() or 'span', multi_high=self.v['multi_high'].get(), multi_n=self.v['multi_n'].get(), decs=self.v['decs'].get(),
                     res=self.v['res'].get(), auto_res=bool(self.b['auto_res'].get()))
 

@@ -52,6 +52,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import appdata
 import calibrator_fit
+import coil_rule
 import drivers
 import fgen_verification as fg
 import handheld_dmm as hh
@@ -241,6 +242,10 @@ def decorate(p):
         p['dsb_device'] = f'Oscilloscope: {p["switch"]}' + (f'\\nRange: {p["range"]}' if p['range'] else '')
         return p
     # DMM-type points: the stock engine drives the routed calibrator
+    if p.get('coil') and p.get('applied'):             # a clamp-meter current point on the 50-turn coil: the calibrator sources nominal / 50 (the step's applied value), the meter reads the nominal
+        a = p['applied']
+        p['dsb_desc'] = (f'{p["section"]}, {p["range"]} range: meter reads {hh._fmt(run["nominal"], run["unit"])}'
+                         f' ({hh._fmt(a.get("value"), run["unit"])} applied through the 50-turn coil)')
     if kind in ('FREQ', 'PERIOD'):
         p['no_uncertainty'] = True                      # engine kind ACV with the frequency as the nominal: its ACV uncertainty would be for the wrong quantity
         a = p.get('applied') or {}
@@ -1647,6 +1652,16 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         finally:
             self._row_std = None
         run = p.get('run') or {}
+        coil_tag = ''
+        if self.coil_point(p):                                         # a 50-turn-coil point: the coil's sheet at the effective current + the clamp / coil interaction, or below the coil's range the
+            import report_pdf                                         # calibrator's figure at the sourced current x 50 (coil_rule), exactly as iflex_option.App.certificate_row
+            nom, cstd = self.unc_source(p)
+            self._row_std = std
+            try:
+                row['Uncertainty'] = report_pdf.point_uncertainty(self._coil_q(p, nom, p['base_unit']), standard=cstd or self.calibrator_model())
+            finally:
+                self._row_std = None
+            coil_tag = ', 50-turn coil'
         if run.get('op', 'dmm') != 'dmm' or run.get('kind') in ('FREQ', 'PERIOD'):
             if run.get('kind') in ('FREQ', 'PERIOD'):
                 row['Nominal'] = row['Nominal'].split(' @ ')[0]
@@ -1665,8 +1680,51 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         if manual_std:                                                # a manual calibration's row says which standard its uncertainty is from
             row['Description'] = f'{row["Description"]}  [{manual_std}]'
         elif not (self.manual_entry and std in ('', 'manual')):         # a manual calibration's rows carry no '[manual]' tag (all of it is by hand)
-            row['Description'] = f'{row["Description"]}  [{std}]'
+            row['Description'] = f'{row["Description"]}  [{std}{coil_tag}]'
         return row
+
+    def coil_point(self, p):
+        """True for a clamp-meter current point driven through the 50-turn coil in a REAL run that carries an uncertainty (a demo prints no standard's figures)."""
+        return (not self.demo and bool(p.get('coil')) and bool(p.get('unc_standard')) and p.get('test') == 'numeric' and self.has_uncertainty(p)
+                and (p.get('applied') or {}).get('value') is not None)
+
+    def _coil_q(self, p, nom, unit):
+        """The uncertainty_budget point dict of a coil point: the interaction term of a coil-covered point, the x 50 scale of the below-range fallback (only written when not 1)."""
+        q = dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=unit, range=None, extra=self.unc_extra(p))
+        if self.unc_scale(p) != 1.0:
+            q['scale'] = self.unc_scale(p)
+        return q
+
+    def unc_scale(self, p):
+        """1 for every point but a 50-turn-coil point BELOW the coil's range, where the calibrator's uncertainty at the sourced current is multiplied by the 50 turns (owner, 2026-10-26):
+        the same contract as iflex_option.App.unc_scale (the Report Review reads it)."""
+        if p.get('coil') and p.get('unc_standard') and not self.demo and (p.get('applied') or {}).get('value') is not None:
+            return coil_rule.uncertainty_scale(p['kind'], p.get('unc_nominal', p.get('nominal')), (p.get('applied') or {}).get('frequency'))
+        return 1.0
+
+    def coil_covered(self, p):
+        """True for a clamp-meter current point driven through the 50-turn coil whose EFFECTIVE current the coil's sheet covers (a real run: a demo prints no standard's figures): its
+        uncertainty and TAR / TUR are the coil's (coil_rule), the same as the Fluke 374 / 375 / 376 procedures (iflex_option.App.unc_source).  A coil point below the coil's range keeps the
+        calibrator's figures at the sourced current (the engine's own)."""
+        if p.get('test') != 'numeric' or not self.has_uncertainty(p):
+            return False
+        return self.unc_source(p)[1] is not None
+
+    def unc_source(self, p):
+        """(nominal, standard or None) the uncertainty of a point is worked out at: the same contract as iflex_option.App.unc_source (the Report Review reads it).  A clamp-meter current
+        point on the 50-turn coil that the coil's sheet covers: the coil's sheet at the EFFECTIVE current; a coil point below the coil's range and every other point: the calibrator in use
+        (None) at the sourced / applied value.  A demo run never takes a standard's figures."""
+        a = p.get('applied') or {}
+        if p.get('coil') and p.get('unc_standard') and not self.demo and a.get('value') is not None:
+            nom, std, _extra = coil_rule.uncertainty_source(p['kind'], p.get('unc_nominal', p.get('nominal')), a['value'], a.get('frequency'))
+            return nom, std
+        return a.get('value', 0), None
+
+    def unc_extra(self, p):
+        """The clamp / coil interaction of a coil point the coil's sheet covers (an uncertainty_budget `extra`), else nothing."""
+        if self.unc_source(p)[1] is not None:
+            return coil_rule.extra_components(p.get('unc_nominal', p.get('nominal')))
+        return ()
 
     def manual_values(self, p, std):
         """The snapshot of the standard whose uncertainty a MANUAL calibration's point carries (see manual_uncertainties), or None: not a manual calibration, a point the chosen
@@ -1766,6 +1824,19 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
     def certificate_fields(self, p):
         r = self._record_for(p)
         std = self.standard_of(p, r)
+        if self.coil_point(p):
+            try:
+                import tartur
+                factor = Decimal(str(p['factor']))
+                clean = lambda d: float(f'{float(d * factor):.9g}')      # noqa: E731  (as handheld_dmm.certificate_fields)
+                nom, cstd = self.unc_source(p)
+                self._row_std = std
+                try:
+                    return tartur.row_fields(self._coil_q(p, nom, p['base_unit']), clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=cstd or self.calibrator_model())
+                finally:
+                    self._row_std = None
+            except Exception:
+                return dict(TAR='', TUR='')
         self._row_std = std
         try:
             fields = super().certificate_fields(p)

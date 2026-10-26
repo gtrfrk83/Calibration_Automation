@@ -655,6 +655,13 @@ def uncertainty_source(ds, fn, p, a, manual_sheet=False, pending=False):
             why = f'{a.standard}: ' + ('it has no specification sheet imported' if cand is not None and not cand.spec_known else 'its sheet gives no usable uncertainty here')
         else:
             row = f' ({cand.row})' if cand is not None and cand.row else ''
+            if getattr(a, 'coil', False):                           # a clamp-meter current point driven through the 50-turn coil (dsb_coil): the coil's sheet, or the calibrator's below its range
+                import dsb_coil
+                if a.unc_standard == dsb_coil.MODEL:
+                    return UncertaintySource(p.id, f'{dsb_coil.LABEL} standards sheet ({a.unc_row}) at the effective current, RSS with the clamp / coil interaction; '
+                                                   f'{a.standard} sources {a.sourced:.6g} A', True, 'ok', dsb_coil.MODEL, True)
+                return UncertaintySource(p.id, f'{a.standard} standards sheet{row} at the sourced {a.sourced:.6g} A, x {a.unc_scale:g} turns (below the coil\'s range: no coil line, no interaction term)',
+                                         True, 'ok', a.standard, True)
             return UncertaintySource(p.id, f'{a.standard} standards sheet{row}', True, 'ok', a.standard, True)
     std = a.standard if a is not None and a.status not in ('manual', 'uncovered') else ''
     w = waiver_for(ds, p.id)
