@@ -16,6 +16,7 @@ import subprocess
 import sys
 from datetime import date
 
+import demo_history
 import labregistry as reg
 import report_snapshot as snap
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt
@@ -25,7 +26,7 @@ from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QMenu, QSizePolicy, QSpl
 from .. import theme
 from ..table import Column, DataTable
 from ..theme import M
-from ..widgets import MessageDialog, ModalDialog, PrimaryButton, SearchField, SecondaryButton, label
+from ..widgets import Banner, MessageDialog, ModalDialog, PrimaryButton, SearchField, SecondaryButton, label
 from ._share import ShareWidth
 from .report_details import demo_title
 
@@ -75,9 +76,15 @@ class AssetHistoryPanel(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._points = []
+        self.demo = False                                        # True = showing the fictional demonstration history (Help > Show demonstration asset history)
+        self.db = None                                           # the demo registry file while demo is on (read only); None = the real registry
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(M.sm)
+        self.banner = Banner(f'<b>{demo_history.BANNER}</b>', 'warn')
+        self.banner.setAccessibleName('Demonstration data notice')
+        self.banner.hide()
+        root.addWidget(self.banner)
 
         bar = QHBoxLayout()
         bar.setSpacing(M.sm)
@@ -194,19 +201,48 @@ class AssetHistoryPanel(QWidget):
         v.addWidget(table, 1)
         return w
 
+    # ------------------------------------------------------------------------------------------------------------------ demonstration history
+    def set_demo(self, on: bool):
+        """Show the fictional demonstration history (True) or the real one (False).  Returns the state afterwards (a demo file that can not be made or
+        fails its checks leaves the real history showing and says why).  The real registry is not opened or changed by this; the demo file is only read."""
+        if on:
+            path = demo_history.ensure()
+            ok, why = demo_history.verify(path) if path else (False, 'The demonstration history could not be created in your data folder.')
+            if not ok:
+                _error(self._toplevel(), 'Demonstration asset history', why)
+                on = False
+            else:
+                self.db = path
+        if not on:
+            self.db = None
+        self.demo = bool(on)
+        self.banner.setVisible(self.demo)
+        for w in (self.btn_regen, self.btn_open):
+            w.setEnabled(not self.demo)
+        self.act_regen.setEnabled(not self.demo)
+        self.act_open.setEnabled(not self.demo)
+        self.term.setText('')                                    # a search typed for the other history would only hide rows
+        self.refresh()
+        return self.demo
+
     # ------------------------------------------------------------------------------------------------------------------ data
     def _toplevel(self):
         return self.window()
 
     def refresh(self):
         rows = []
-        for r in reg.assets_overview(self.term.text().strip()):
-            due, _ = reg.next_due(r['asset_id'])
+        for r in reg.assets_overview(self.term.text().strip(), db=self.db):
+            if self.demo and not str(r['asset_id']).upper().startswith(demo_history.PREFIX):
+                continue                                         # belt and braces: demonstration mode never shows a non-DEMO asset
+            due, _ = reg.next_due(r['asset_id'], db=self.db)
             overdue = bool(due and due < date.today())
             rows.append(dict(r, overdue=overdue, result='OUT OF TOLERANCE' if r['failed'] else 'PASS', last=r['last'][:10],
                              due=(due.isoformat() + ('  OVERDUE' if overdue else '')) if due else ''))
         self.assets.set_rows(rows)
-        self.note.setText(f'{len(rows)} instrument(s) with reports on this computer.' if rows else 'No reports recorded yet: history is added each time a PDF report is exported.')
+        if self.demo:
+            self.note.setText(f'{len(rows)} fictional instrument(s). Nothing here is a real calibration record.')
+        else:
+            self.note.setText(f'{len(rows)} instrument(s) with reports on this computer.' if rows else 'No reports recorded yet: history is added each time a PDF report is exported.')
         self.show_runs()
 
     def _asset(self):
@@ -217,7 +253,7 @@ class AssetHistoryPanel(QWidget):
         keep = [r['id'] for r in self.runs.selected_rows()]
         asset = self._asset()
         rows = []
-        for r in (reg.runs_for(asset) if asset else []):
+        for r in (reg.runs_for(asset, db=self.db) if asset else []):
             rows.append(dict(r, date=r['run_at'].replace('T', ' ')[:16], tech=r['technician'], points=r['total'], failed=r['failed'] or '',
                              file=os.path.basename(r['report_file']), fail=bool(r['failed']), failed_n=r['failed'], procedure=r['procedure']))
         self.runs.set_rows(rows, keep_selection=False)
@@ -229,7 +265,7 @@ class AssetHistoryPanel(QWidget):
     def show_points(self):
         sel = self.runs.selected_rows()
         run_id = int(sel[0]['id']) if sel else None
-        self._points = reg.points_for(run_id) if run_id is not None else []
+        self._points = reg.points_for(run_id, db=self.db) if run_id is not None else []
         rows = []
         for n, p in enumerate(self._points):
             pct = '' if p['dev_pct'] is None else f"{p['dev_pct']:+.0f}%"
@@ -240,6 +276,9 @@ class AssetHistoryPanel(QWidget):
     # ------------------------------------------------------------------------------------------------------------------ regenerate the PDF of an event
     def _show_regen_hint(self, run_id):
         """One line saying whether the selected event can be printed again (report_snapshot.availability); never raises."""
+        if self.demo:
+            self.regen_note.setText(demo_history.PDF_HINT if run_id is not None else '')
+            return
         try:
             self.regen_note.setText(snap.availability(run_id)[1] if run_id is not None else '')
         except Exception:
@@ -252,6 +291,9 @@ class AssetHistoryPanel(QWidget):
     def regenerate_pdf(self):
         """Print the selected event's report again (report_snapshot.regenerate): ask where to save, never overwrite without asking."""
         parent = self._toplevel()
+        if self.demo:                                            # demonstration events are never printed: no dialog, no file, nothing written
+            _info(parent, 'Regenerate PDF', demo_history.PDF_REFUSAL)
+            return
         run_id = self._selected_run_id()
         if run_id is None:
             _info(parent, 'Regenerate PDF', 'Select a report in the middle table first.')
@@ -285,6 +327,9 @@ class AssetHistoryPanel(QWidget):
             self.menu.popup(self.runs.viewport().mapToGlobal(pos))
 
     def open_report(self):
+        if self.demo:
+            _info(self._toplevel(), 'Report', 'Demonstration events have no PDF.')
+            return
         sel = self.runs.selected_rows()
         run = next((r for r in reg.runs_for(self._asset() or '') if sel and r['id'] == sel[0]['id']), None)
         if not run or not run['report_file'] or not os.path.exists(run['report_file']):
@@ -301,7 +346,7 @@ class AssetHistoryPanel(QWidget):
             _info(self._toplevel(), 'Drift', 'Select a test point in the lower table first.')
             return
         p = self._points[sel[0]['n']]
-        open_drift_chart(self._toplevel(), asset, p['section'], p['description'], p['unit'])
+        open_drift_chart(self._toplevel(), asset, p['section'], p['description'], p['unit'], db=self.db)
 
 
 # ================================================================================================ small windows
@@ -378,12 +423,13 @@ class DriftChart(QWidget):
             p.drawText(QRectF(x(i) - 60, y(v) - 26, 120, 18), Qt.AlignmentFlag.AlignCenter, f'{fnd} {self.unit}'.strip())
 
 
-def open_drift_chart(parent, asset, section, description, unit=''):
-    data = reg.drift(asset, section, description)
+def open_drift_chart(parent, asset, section, description, unit='', db=None):
+    data = reg.drift(asset, section, description, db=db)
     dlg = ModalDialog(parent, 'Drift', width=820)
-    dlg.setWindowTitle(demo_title('Drift'))
+    dlg.setWindowTitle(demo_title('Drift') + (' [DEMONSTRATION DATA]' if db is not None else ''))
     dlg.title_label.setText(f'{asset}  -  {description}')
-    dlg.sub_label.setText(f'{section}   |   as-found error as a % of the tolerance, one point per report.  0 = on nominal; +100 / -100 = at a limit.')
+    dlg.sub_label.setText(('DEMONSTRATION DATA (fictional)   |   ' if db is not None else '') +
+                          f'{section}   |   as-found error as a % of the tolerance, one point per report.  0 = on nominal; +100 / -100 = at a limit.')
     dlg.sub_label.show()
     dlg.chart = DriftChart(data, unit)
     dlg.body.addWidget(dlg.chart)
