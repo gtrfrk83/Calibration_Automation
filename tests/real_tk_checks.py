@@ -2004,7 +2004,7 @@ def checks_fluke_376():
     with mock.patch.object(XO.messagebox, 'askyesno', lambda *a, **k: asked.append(a) or True):
         box.invoke()                                              # the operator turns the iFlex tests OFF
         pump(root, 20)
-    check('376 run window: OFF asks first, then 29 points, the label says so', len(asked) == 1 and 'not tested (no iFlex supplied)' in asked[0][1] and len(tree.get_children()) == 29
+    check('376 run window: OFF asks first, then 29 points, the label says so', len(asked) == 1 and 'not tested (no iFlex supplied)' in asked[0][1] and len(tree.get_children()) == 34
           and 'OFF' in str(app._include_labels['iflex'].cget('text')) and not app.include_is_on('iflex'), (asked, len(tree.get_children())))
     check('376 run window OFF: no iFlex section in the list', not any('iFlex' in str(tree.item(k, 'values')[1]) for k in tree.get_children()), [tree.item(k, 'values')[1] for k in tree.get_children()][-3:])
     grab(root, 'fluke376_run_window_iflex_off')
@@ -2209,7 +2209,7 @@ def checks_fluke_376_queue():
         while drawer.master is not None and not isinstance(drawer.master, tk.Tk) and drawer.winfo_width() < 300:
             drawer = drawer.master
         notes = [str(c.cget('text')) for c in walk(drawer) if isinstance(c, ttk.Label) and ('points' in str(c.cget('text')))]
-        check('376 queue: each row says its point count and, when OFF, not tested', any('38 points' == n for n in notes) and any('29 points, not tested' in n for n in notes), notes)
+        check('376 queue: each row says its point count and, when OFF, not tested', any('38 points' == n for n in notes) and any('34 points, not tested' in n for n in notes), notes)
         clipped = [c for c in walk(drawer) if c.winfo_ismapped() and not inside(drawer, c) and c is not drawer]
         check('376 queue: nothing clipped in the drawer', not clipped, [(str(c), c.cget('text') if hasattr(c, 'cget') and 'text' in c.keys() else '') for c in clipped][:5])
         app.queue_show('4412')
@@ -2228,8 +2228,8 @@ def checks_fluke_376_queue():
               and 'Asset 4412' in str(app._include_labels['iflex'].cget('text')), str(app._include_labels['iflex'].cget('text')))
         app.queue_show('4413')
         pump(root, 20)
-        check('376 queue: meter 4413 (OFF) shows 29 points and no iFlex section', len(app.tree.get_children()) == 29 and not app.include_is_on('iflex')
-              and not any('iFlex' in str(app.tree.item(k, 'values')[1]) for k in app.tree.get_children()) and 'Asset 4413' in str(app._include_labels['iflex'].cget('text')),
+        check('376 queue: meter 4413 (OFF) shows 34 points and no iFlex-with-coil section', len(app.tree.get_children()) == 34 and not app.include_is_on('iflex')
+              and not any('iFlex, ' in str(app.tree.item(k, 'values')[1]) for k in app.tree.get_children()) and 'Asset 4413' in str(app._include_labels['iflex'].cget('text')),
               len(app.tree.get_children()))
         grab(root, 'fluke376_queue_meter_off')
         box = next(c for c in boxes if str(c.cget('text')).startswith('4413'))

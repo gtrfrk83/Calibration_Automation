@@ -9,7 +9,9 @@ Uncertainty of such a point:
     * RSS with the clamp / coil INTERACTION term of the coil data sheet, +/-(0.50 % of the effective output + 0.5 A) (the larger of the two figures the data sheet
       gives, 0.25 % for toroidal-wound clamps such as the 80i-600 and 0.50 % for the others; the 374 / 375 / 376 jaw is not named, so the larger is used: UNVERIFIED, owner
       to confirm), used as a +/- limit divided by the coverage divisor 2 like every standard's specification;
-    * a point whose SOURCED current is below the coil's range (AC under 20.5 A) takes the CALIBRATOR's uncertainty at the sourced current instead, with no interaction term.
+    * a point whose SOURCED current is below the coil's range (AC under 20.5 A) takes the CALIBRATOR's uncertainty at the sourced current instead, with no interaction term,
+      SCALED by the 50 turns (owner, 2026-10-26: the clamp reads 50 times the calibrator's current, so the calibrator's uncertainty - and its TAR accuracy and CMC floor - are
+      referred to the effective current: x 50).
 The coil's own scope line is the CMC floor (the larger overlapping amplifier / calibrator lines of the CMC table are other equipment).
 Used by iflex_option.App (the 374 / 375 / 376 / 376-II procedures) and the Datasheet Builder.  tests/test_coil_uncertainty.py guards the procedures."""
 from __future__ import annotations
@@ -63,3 +65,9 @@ def uncertainty_source(kind, effective, sourced, frequency=None, interaction=Non
     if covers(kind, effective, frequency):
         return effective, COIL_MODEL, extra_components(effective, interaction)
     return sourced, None, ()
+
+
+def uncertainty_scale(kind, effective, frequency=None) -> float:
+    """The factor the calibrator's uncertainty (budget, CMC floor and TAR accuracy) is multiplied by: 1 where the coil's sheet covers the point, TURNS (50) in the
+    below-range fallback, where the calibrator's figure at the sourced current is referred to the effective current."""
+    return 1.0 if covers(kind, effective, frequency) else float(TURNS)

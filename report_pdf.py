@@ -285,7 +285,7 @@ def point_uncertainty(p, standard=None) -> str:
     if standard:
         try:
             import uncertainty_budget
-            b = uncertainty_budget.build(p['kind'], p['nominal'], unit, standard=standard, frequency=p.get('frequency'), scope=sc, range_value=p.get('range'), extra=p.get('extra') or ())
+            b = uncertainty_budget.build(p['kind'], p['nominal'], unit, standard=standard, frequency=p.get('frequency'), scope=sc, range_value=p.get('range'), extra=p.get('extra') or (), scale=p.get('scale') or 1.0)
             if b.reported is not None:
                 return uncertainty.format_value(b.reported, unit)
         except Exception:
@@ -293,6 +293,8 @@ def point_uncertainty(p, standard=None) -> str:
     if standard and str(getattr(standard, 'model', standard)) == 'A2LA-5500A-COIL':
         return ''                                           # the coil's own sheet had no row for this point: the table's other (amplifier / calibrator) lines are not the coil's, so no value is printed
     value = sc.dmm(p['kind'], p['nominal'], p.get('range'), p.get('frequency'), source=standard)
+    if value is not None and p.get('scale'):
+        value = value * float(p['scale'])
     return uncertainty.format_value(value, unit) if value is not None else ''
 
 

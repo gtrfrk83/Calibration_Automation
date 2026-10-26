@@ -63,7 +63,7 @@ ALL, NO374, ONLY376 = MODELS, ('375', '376', '376-II'), ('376', '376-II')
 TURNS = 50
 # the window option shown before Run (iflex_option.py): the steps tagged include='iflex' run only while it is on.  Default ON; never skipped silently.
 INCLUDE_IFLEX = dict(id='iflex', label='iFlex probe supplied: run the iFlex tests', default=True, count_text='iFlex point',
-                     off_text='not tested (no iFlex supplied)', on_text='tested (iFlex supplied)')
+                     off_text='not tested (no iFlex supplied); the iFlex simulation points are still tested', on_text='tested (iFlex supplied)')
 
 # display unit -> (factor to base unit, base unit); Table 1 prints 'KΩ' (capital K): shown as kΩ
 UNITS = {'V': ('1', 'V'), 'mV': ('0.001', 'V'), 'Ω': ('1', 'ohm'), 'kΩ': ('1000', 'ohm'), 'µF': ('0.000001', 'F'), 'A': ('1', 'A')}
@@ -231,8 +231,8 @@ def build_steps():
         high_f = fmt(D(high).quantize(D(res))) if decimals(high) < decimals(res) else high
         assert D(low_f) == D(low) and D(high_f) == D(high), f'{TABLE}-{n}: reformatting changed a limit'
         step = dict(table=TABLE, step=n, section=section, switch=SW[sw], range=rng, models=list(models), kind=kind)
-        if extra.get('iflex') or extra.get('sim'):
-            step['include'] = 'iflex'                                     # the iFlex on / off toggle (iflex_option.py): these points are run only while the iFlex tests are on
+        if extra.get('iflex'):
+            step['include'] = 'iflex'                                     # the iFlex on / off toggle (iflex_option.py): ONLY the iFlex-with-coil points (they need the iFlex probe itself) run only while it is on; the iFlex SIMULATION points (owner, 2026-10-26) are always run
         step.update(display_unit=unit, factor=float(D(factor)), base_unit=base, low=low_f, high=high_f, test='numeric',
                     applied=dict(value=clean(applied), frequency=float(freq) if freq else None), nominal=clean(D(nominal) * D(factor)))
         if extra.get('printed'):
@@ -418,8 +418,8 @@ def build_spec():
                     report_note=REPORT_NOTE, note=SOURCE_NOTE),
         models={'374': dict(name='Fluke 374', brand='Fluke', model_note='Fluke 374 FC true-rms clamp meter (600.0 A jaw, 1000 V, 6000 ohm, no mV): Table 1, 28 points (19 without the iFlex tests)'),
                 '375': dict(name='Fluke 375', brand='Fluke', model_note='Fluke 375 FC true-rms clamp meter (600.0 A jaw, 1000 V, 60 kohm, mV): Table 1, 34 points (25 without the iFlex tests)'),
-                '376': dict(name='Fluke 376', brand='Fluke', model_note='Fluke 376 FC true-rms clamp meter (999.9 A jaw, 1000 V, iFlex 2500 A): Table 1, 38 points (29 without the iFlex tests)'),
-                '376-II': dict(name='Fluke 376-II', brand='Fluke', model_note='Fluke 376-II true-rms clamp meter: Table 1 prints one column for the 376 and the 376-II, 38 points (29 without the iFlex tests); not in the Users Manual: 376 FC figures assumed')},
+                '376': dict(name='Fluke 376', brand='Fluke', model_note='Fluke 376 FC true-rms clamp meter (999.9 A jaw, 1000 V, iFlex 2500 A): Table 1, 38 points (34 without the iFlex-with-coil tests)'),
+                '376-II': dict(name='Fluke 376-II', brand='Fluke', model_note='Fluke 376-II true-rms clamp meter: Table 1 prints one column for the 376 and the 376-II, 38 points (34 without the iFlex-with-coil tests); not in the Users Manual: 376 FC figures assumed')},
         groups=GROUPS,
         steps=steps), flagged
 
