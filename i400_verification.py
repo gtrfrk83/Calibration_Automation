@@ -88,7 +88,9 @@ class Reading34401A(_ScpiReading, drivers.Agilent34401A):
 
 DMMS = {'Keysight 34410A': ('34410A', drivers.Keysight34410A), 'Keysight 34411A': ('34411A', drivers.Keysight34411A),
         'Fluke 8846A': ('8846A', Reading8846A), 'Agilent 34401A': ('34401A', Reading34401A)}
-DEFAULT_DMM = 'Keysight 34410A'
+MANUAL = 'Manual entry (typed)'                  # no reading multimeter on the bus: the program drives the calibrator and the operator types the reading
+DMM_CHOICES = [MANUAL] + list(DMMS)
+DEFAULT_DMM = MANUAL
 DMM_INPUT = {'34410A': 'the front 3 A (I) terminal and LO', '34411A': 'the front 3 A (I) terminal and LO', '34401A': 'the 3 A input and LO',
              '8846A': 'the 10 A input and LO'}                    # which input carries 408 mA: UNVERIFIED for the 8846A (the mA input is fused for 400 mA)
 
@@ -155,24 +157,28 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
         cal_name, cal_cls = CALIBRATORS[cal_model]
-        dmm_short, dmm_cls = DMMS[dmm_model]
-        self.dmm_short = dmm_short
-        if transports:
+        self.manual = dmm_model == MANUAL
+        self.dmm_short = '' if self.manual else DMMS[dmm_model][0]
+        if self.manual:
+            dmm_t = None
+            cal_t = transports[1] if transports else drivers.open_visa(to_cal_visa(cal_address), timeout=20, baud=cal_baud)
+        elif transports:
             dmm_t, cal_t = transports
         else:
             dmm_t = drivers.open_visa(to_visa(dmm_address, interface), timeout=30)
             cal_t = drivers.open_visa(to_cal_visa(cal_address), timeout=20, baud=cal_baud)
-        self.dmm = dmm_cls(dmm_t, self.log, label=dmm_short)
+        self.dmm = None if self.manual else DMMS[dmm_model][1](dmm_t, self.log, label=self.dmm_short)
         self.cal = cal_cls(cal_t, self.log, label=cal_name)
         try:
             self.cal.open(verify_model=True)
             self.cal.clear_status()
-            self.dmm.connect()
-            self.dmm.check_errors('connecting')
+            if self.dmm is not None:
+                self.dmm.connect()
+                self.dmm.check_errors('connecting')
             self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
-        self.ident = self.dmm.idn
+        self.ident = 'manual entry (no multimeter)' if self.manual else self.dmm.idn
         self.guards = []
         if surprise_handler is not None:
             self.enable_surprise(surprise_handler)
@@ -180,15 +186,15 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def enable_surprise(self, handler, force=False):
         """Stop on surprise (surprise.py, opt-in), as the other bench engines: a reply that is not a number for READ?, the meter's set-and-read-back that does not match and the
         calibrator's error queue after an output are Stop-only surprises; the meter's error queue is Stop / Continue.  No write is ever repeated.  A virtual command log is left alone."""
-        self.guards = [g for g in (surprise.attach_guard(self.dmm, handler, force, expect={'read': 'float'}, stop_only=True),
+        self.guards = [g for g in ((surprise.attach_guard(self.dmm, handler, force, expect={'read': 'float'}, stop_only=True) if self.dmm is not None else None),
                                    surprise.attach_guard(self.cal, handler, force, stop_only=True)) if g]
         return self.guards
 
     def reset_roles(self):
-        return [self.cal], [self.dmm]
+        return [self.cal], ([] if self.dmm is None else [self.dmm])
 
     def pm_drivers(self):
-        return (self.dmm, self.cal)
+        return (self.cal,) if self.dmm is None else (self.dmm, self.cal)
 
     def standby(self):
         self.cal.standby_quiet()
@@ -196,9 +202,10 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def close(self):
         try: self.standby()
         except Exception: pass
-        try: self.dmm.cleanup()                     # back to front panel control
-        except Exception: pass
-        for obj in (self.dmm, self.cal):
+        if self.dmm is not None:
+            try: self.dmm.cleanup()                 # back to front panel control
+            except Exception: pass
+        for obj in ((self.cal,) if self.dmm is None else (self.dmm, self.cal)):
             try: obj.close()
             except Exception: pass
         self.save_log()
@@ -236,6 +243,19 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         finally:
             self.standby()
 
+    def source_point(self, p):
+        """Manual entry: the calibrator is set, checked and operated at the point's current; the operator reads the clamp output on their meter and types it.
+        The output stays ON until `standby()` (the engine puts it in standby right after the reading is typed)."""
+        a = p['applied']
+        self.standby()
+        try:
+            self.cal.set_output_amps(a['value'], a['frequency'], dc=False)
+            surprise.checked(self.cal, self.cal.check_error, p['description'], stop_only=True)
+            self.cal.operate_unverified()
+            time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
+        except Exception:
+            self.standby(); raise
+
     @procmods_engine.point_commands()
     def measure(self, p):
         """The clamp's output for the calibrator current of the point (Table 3: 'Output')."""
@@ -262,7 +282,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.addrs = {i: s.get(f'dmm_addr_{i}', DEFAULT_ADDR[i]) for i in INTERFACES}
         self._iface_shown = self.interface.get()
         self.dmm_addr = port.var(self.addrs[self._iface_shown])
-        self.dmm_model = port.var(s.get('dmm_model', DEFAULT_DMM) if s.get('dmm_model', DEFAULT_DMM) in DMMS else DEFAULT_DMM)
+        self.dmm_model = port.var(s.get('dmm_model', DEFAULT_DMM) if s.get('dmm_model', DEFAULT_DMM) in DMM_CHOICES else DEFAULT_DMM)
         self.precal = port.var(s.get('precal', 'yes') != 'no', 'bool')
         self.cal_offer = calibrator_fit.make_offer('5520A', calibrator_fit.dmm_requests(self.cal_requests()), unverified=drivers.Fluke5520A.unverified_summary())
         self.cal_model = port.var(s.get('cal_model', 'Fluke 5522A') if s.get('cal_model', 'Fluke 5522A') in CALIBRATORS else 'Fluke 5522A')
@@ -293,7 +313,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def cal_key(self): return CALIBRATORS[self.cal_model.get()][0]
 
     @property
-    def dmm_short(self): return DMMS[self.dmm_model.get()][0]
+    def manual(self): return self.dmm_model.get() == MANUAL
+
+    @property
+    def precal_on(self): return bool(self.precal.get()) and not self.manual      # manual entry: no pre-calibration (the operator applies any meter correction)
+
+    @property
+    def dmm_short(self): return '' if self.manual else DMMS[self.dmm_model.get()][0]
 
     def cal_choices(self):
         """All three calibrators are offered (the owner's choice); the 5520A note says whether its published specification covers every sourced current."""
@@ -338,7 +364,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if not self.demo: self._save_settings()
         self.refresh()
 
-    def pm_driver_classes(self): return (DMMS[self.dmm_model.get()][1], *[cls for _n, cls in CALIBRATORS.values()])
+    def pm_driver_classes(self): return (*(() if self.manual else (DMMS[self.dmm_model.get()][1],)), *[cls for _n, cls in CALIBRATORS.values()])
 
     def pm_plan_point(self, p):
         """The commands IO.measure sends for point p: a dry run of that routine on the simulated bench (procmods_plan)."""
@@ -412,7 +438,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                         + corr + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     # ------------------------------------------------------------------ wiring text
-    def _dmm_input(self): return DMM_INPUT[self.dmm_short]
+    def _dmm_input(self): return 'your meter\'s AC current input (and COM)' if self.manual else DMM_INPUT[self.dmm_short]
 
     def _cal_out(self, group):
         """The calibrator terminals of a group (the 376 / 365 texts: 5560A VI AUX / 30A, 5522A and 5520A AUX / 20 A)."""
@@ -455,7 +481,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             from drivers.simulated_i400 import make_i400_bench
             self._vb = make_i400_bench(self.cal_key, self.interface.get())
             return IO('virtual', 'virtual', self.cal_model.get(), 9600, self.interface.get(), transports=(self._vb[2], self._vb[1]), mods=self.pm_state, virtual=True,
-                      dmm_model='Keysight 34410A')            # the simulated multimeter answers as a 34410A whatever model is chosen
+                      dmm_model=MANUAL if self.manual else 'Keysight 34410A')            # the simulated multimeter answers as a 34410A whatever model is chosen
         return IO(self.dmm_addr.get(), self.cal_addr.get(), self.cal_model.get(), int(self.cal_baud.get()), self.interface.get(), mods=self.pm_state,
                   surprise_handler=self._surprise_handler(), dmm_model=self.dmm_model.get())
 
@@ -476,9 +502,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self._set_conn(True)
         if not self.demo: self._save_settings()
         tag = ' ' + virtualbench.VIRTUAL_TAG if self.virtual else ''
-        warn = self.io.dmm.firmware_warning()
+        warn = '' if self.io.dmm is None else self.io.dmm.firmware_warning()
         self.status.set('Connected: ' + self.io.ident + tag + '. Calibrator output is NOT enabled.' + (f' WARNING: {warn}.' if warn else ''))
-        port.message('info', 'Connected' + (' (DEMO)' if self.virtual else ''), f'Reading multimeter {self.dmm_model.get()}: {self.io.ident}\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\n'
+        port.message('info', 'Connected' + (' (DEMO)' if self.virtual else ''), f'Reading: {self.dmm_model.get()} - {self.io.ident}\n{self.cal_model.get()}: {self.io.cal.idn}{tag}\n'
                             f'Calibrator output is not enabled.' + (f'\n\nWARNING: {warn}.' if warn else ''))
 
     def disconnect(self):
@@ -521,9 +547,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             [('Clamp', 'Inspect the clamp before use (cracks, damaged jaw insulation, output cable). Do not use a damaged clamp (Maintenance, p. 4). Clean the jaw-mating surfaces: a dirty jaw closes badly and gives errors.'),
              ('Conditions', 'Reference conditions (p. 3): 23 +/- 5 C, 20 to 75 % RH, the conductor centred in the jaw opening, no dc component, no adjacent conductor.'),
              ('Warm-up', 'Allow the calibrator and the reading multimeter their own warm-up time (the i400 manual states none).'),
-             ('Multimeter', f'The reading multimeter ({self.dmm_model.get()}) is set by the program: AC current, manual range, AC filter. Its mA/A input is fused: use the input that carries 408 mA.')],
+             ('Multimeter', 'Manual entry: you read the clamp output on your own multimeter (AC current, mA range) and type the reading in mA when asked. The program only drives the calibrator.' if self.manual else
+                            f'The reading multimeter ({self.dmm_model.get()}) is set by the program: AC current, manual range, AC filter. Its mA/A input is fused: use the input that carries 408 mA.')],
             facts=[('Limits', 'as printed in the manual (Table 3, p. 6)'), ('Calibrator', self.cal_model.get()), ('Reading multimeter', self.dmm_model.get()),
-                   ('Multimeter pre-calibration', 'ON' if self.precal.get() else 'OFF')],
+                   ('Multimeter pre-calibration', 'ON' if self.precal_on else 'OFF')],
             caution='The program restores the multimeter and calibrator to their factory defaults before the first point. Stay at the bench: up to 8 A flows through the coil.',
             ok='Conditions met - start', parent=self.root)
 
@@ -541,7 +568,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     # ------------------------------------------------------------------ multimeter pre-calibration
     def _need_precal(self, points):
-        return [p for p in points if str(p['id']) not in self.dmm_corr] if self.precal.get() else []
+        return [p for p in points if str(p['id']) not in self.dmm_corr] if self.precal_on else []
 
     def _prompt_precal(self, steps):
         image = find_diagram(self.cal_key, 'DMM_REF')
@@ -631,6 +658,17 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if self.fast_demo:
             reading = p['nominal'] + p['error'] * math.sin(p['id'] * 1.71) * 0.38   # deterministic, labelled synthetic
             self._record(p, reading, True, raw=reading); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+        elif self.manual:
+            def work():
+                try:
+                    self.io.source_point(p)
+                    port.post(self.root, lambda: self._ask_typed(points, i, p, key))
+                except Exception as exc:
+                    try: self.io.standby()
+                    except Exception: pass
+                    err = exc
+                    port.post(self.root, lambda err=err: self._error(err))
+            threading.Thread(target=work, daemon=True).start()
         else:
             def work():
                 try:
@@ -643,9 +681,42 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                     port.post(self.root, lambda err=err: self._error(err))
             threading.Thread(target=work, daemon=True).start()
 
+    @staticmethod
+    def parse_typed_ma(text):
+        """The typed clamp-output reading in mA -> amps (Decimal-exact text; ValueError if it is not a number)."""
+        t = str(text).strip().replace(',', '')
+        try:
+            value = Decimal(t)
+        except Exception:
+            raise ValueError(f'"{text}" is not a number. Type the multimeter reading in mA.')
+        if not value.is_finite():
+            raise ValueError(f'"{text}" is not a number. Type the multimeter reading in mA.')
+        return float(value / 1000)
+
+    def _ask_typed(self, points, i, p, key):
+        """Manual entry: the calibrator output is ON at the point; the operator types the reading in mA, then the output goes to standby."""
+        shim = dict(p, n=p['id'], test='numeric', dsb_desc=p['description'], section=p['section_title'], switch='AC mA  (clamp output cable on the multimeter current input)', range='')
+        lo, hi = (p['nominal'] - p['error']) * 1000, (p['nominal'] + p['error']) * 1000
+        fill = dict(demo_fill=lambda: virtualbench.plausible_text(f'{lo:.6g}', f'{hi:.6g}', p['id'], self.virtual_failures())) if self.virtual else {}
+        try:
+            import handheld_dmm
+            r = handheld_dmm.ask_reading(self.root, shim, len(POINTS), f'{p["applied"]["value"]:g} A at {p["applied"]["frequency"]:g} Hz through {p["turns"]} turn' + ('s' if p['turns'] != 1 else '')
+                                 + f' (LCOMP {p["lcomp"]})', f'Clamp {p["clamp_amps"]:g} A: expect {p["nominal"] * 1000:g} mA', f'{lo:.6g} to {hi:.6g} mA', 'numeric',
+                                 unit='mA', validate=self.parse_typed_ma, device='MULTIMETER', source='CLAMP OUTPUT', **fill)
+        finally:
+            try: self.io.standby()
+            except Exception: pass
+        if r['action'] == 'stop':
+            self.busy = False; self.stop = True; self._next(points, len(points), key); return
+        if r['action'] == 'skip':
+            port.after(self.root, 30, lambda: self._next(points, i + 1, key)); return
+        reading = self.parse_typed_ma(r['text'])
+        self._record(p, reading, bool(self.demo), raw=reading)
+        port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+
     def _done(self, points, i, p, reading, key):
         corr = self.dmm_corr.get(str(p['id']))
-        corrected = reading + corr['correction'] if (corr and self.precal.get()) else reading
+        corrected = reading + corr['correction'] if (corr and self.precal_on) else reading
         self._record(p, corrected, bool(self.demo), raw=reading); port.after(self.root, 30, lambda: self._next(points, i + 1, key))
 
     def _error(self, exc):
@@ -654,7 +725,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _record(self, p, reading, synthetic, raw=None):
         result = 'PASS' if judge(p, reading) else 'FAIL'
         corr = self.dmm_corr.get(str(p['id']))
-        extra = dict(raw=raw, correction=(corr['correction'] if corr and self.precal.get() else 0.0), precal=bool(self.precal.get() and corr)) if raw is not None else {}
+        extra = dict(raw=raw, correction=(corr['correction'] if corr and self.precal_on else 0.0), precal=bool(self.precal_on and corr)) if raw is not None else {}
         self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()],
                                           timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **extra, **self.pm_result_fields())
         self._update_row(p); self.save(silent=True)
@@ -749,8 +820,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 rows = report_pdf.apply_tar_tur(rows, details.get('show_tar_tur'), [self.certificate_fields(p) for p in pts])
             std = self.cal_key if self.cal_key in ('5522A', '5560A', '5520A') else None
             report_pdf.write_calibration_pdf(path, rows, header=[('Instrument', TITLE), ('Instrument ID', self.asset.get()), ('Serial', self.serial.get()),
-                                                                 ('Calibrator', self.cal_model.get()), ('Reading multimeter', f'{self.dmm_model.get()} ({self.io.ident if self.io else "not connected"})'),
-                                                                 ('Multimeter pre-calibration', 'applied (Table 3 footnote)' if self.precal.get() else 'not applied'),
+                                                                 ('Calibrator', self.cal_model.get()), ('Reading multimeter', (self.dmm_model.get() if self.manual else f'{self.dmm_model.get()} ({self.io.ident if self.io else "not connected"})')),
+                                                                 ('Multimeter pre-calibration', 'applied (Table 3 footnote)' if self.precal_on else 'not applied'),
                                                                  ('Limits applied', self.period.get()), ('Source', 'Fluke i400 Calibration Information 2414311, Table 3 (p. 6)')],
                                              demo=demo, details=details, footer_note=report_pdf.uncertainty_note(rows, std), snapshot_context=report_pdf.context_for(self))
         except ImportError:

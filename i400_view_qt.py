@@ -39,7 +39,7 @@ def build_ui(self):
     # settings and connections live in the slide-in drawer
     f = Form(sh.drawer_body)
     self.period_combo = f.row('Limits to apply', f.combo(self.period, list(PERIODS), 28, command=self.on_period))
-    self.dmm_combo = f.row('Reading multimeter', f.combo(self.dmm_model, list(E.DMMS), 18, command=self.on_dmm))
+    self.dmm_combo = f.row('Reading multimeter', f.combo(self.dmm_model, list(E.DMM_CHOICES), 22, command=self.on_dmm))
     self.precal_check = f.wide(H.checkbutton(None, 'Pre-calibrate the multimeter at each step (Table 3 footnote)', self.precal, lambda *_: None))
     f.rule()
     self.iface_combo = f.row('Multimeter interface', f.combo(self.interface, list(INTERFACES), 10, command=self.on_interface))

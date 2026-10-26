@@ -52,7 +52,7 @@ def build_ui(self):
     self.period_combo.grid(row=0, column=1, sticky='w', padx=(10, 0), pady=4)
     self.period_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_period())
     ttk.Label(d, text='Reading multimeter').grid(row=1, column=0, sticky='w', pady=4)
-    self.dmm_combo = ttk.Combobox(d, textvariable=self.dmm_model, values=list(E.DMMS), width=18, state='readonly')
+    self.dmm_combo = ttk.Combobox(d, textvariable=self.dmm_model, values=list(E.DMM_CHOICES), width=18, state='readonly')
     self.dmm_combo.grid(row=1, column=1, sticky='w', padx=(10, 0), pady=4); self.dmm_combo.bind('<<ComboboxSelected>>', lambda _e: self.on_dmm())
     self.precal_check = ttk.Checkbutton(d, text='Pre-calibrate the multimeter at each step (Table 3 footnote)', variable=self.precal)
     self.precal_check.grid(row=2, column=0, columnspan=2, sticky='w', pady=(2, 10))

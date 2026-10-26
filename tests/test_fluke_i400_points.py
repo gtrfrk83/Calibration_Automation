@@ -68,7 +68,7 @@ class Flow(unittest.TestCase):
 
     def app(self, fast=False, cal='Fluke 5560A', **settings):
         a = A.App(self.hn.root, demo=True, fast_demo=fast)
-        a.asset.set('A-1'); a.serial.set('S-1'); a.cal_model.set(cal)
+        a.asset.set('A-1'); a.serial.set('S-1'); a.cal_model.set(cal); a.dmm_model.set(settings.pop('dmm_model', 'Keysight 34410A'))
         for k, v in settings.items():
             getattr(a, k).set(v)
         self.hn.app = a
@@ -158,6 +158,41 @@ class Flow(unittest.TestCase):
             self.assertIn('CONF:CURR:AC 0.01', sent)
             d.check_errors('test')
             self.assertEqual(d.front_rear(), 'FRONT'); self.assertEqual(d.firmware_warning(), '')
+
+
+class Manual(Flow):
+    """Manual entry: the calibrator is driven, the operator types the reading (mA), no multimeter, no pre-calibration."""
+    def test_default_is_manual(self):
+        self.assertEqual(A.DEFAULT_DMM, A.MANUAL)
+
+    def test_manual_run_types_readings_and_skips_precal(self):
+        a = self.app(cal='Fluke 5522A', dmm_model=A.MANUAL)
+        self.assertTrue(a.manual and not a.precal_on)
+        self.hn.default_reading = lambda p: {1: '1.010', 2: '100.5', 3: '400.2'}[p['id']]
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(a.dmm_corr, {})
+        self.assertIsNone(a.io.dmm)
+        self.assertEqual({k: v['result'] for k, v in a.results.items()}, {'1': 'PASS', '2': 'PASS', '3': 'PASS'})
+        self.assertAlmostEqual(a.results['2']['reading'], 0.1005, places=9)
+        cal = [t for d, t in VH.wire(a.io) if d == '5522A']
+        self.assertIn('OUT 8A,60Hz', cal)
+        self.assertFalse([t for t in cal if t.startswith('OUT 0.')])               # no direct pre-calibration outputs
+        for i, t in enumerate(cal):
+            if t == 'OPER':
+                self.assertEqual(next(x for x in cal[i + 1:] if x != 'OPER?'), 'STBY')
+        self.assertEqual(cal[-1], 'STBY')
+
+    def test_typed_out_of_limit_fails(self):
+        a = self.app(dmm_model=A.MANUAL)
+        self.hn.default_reading = lambda p: {1: '1.090', 2: '100.0', 3: '400.0'}[p['id']]
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(a.results['1']['result'], 'FAIL')
+
+    def test_parse(self):
+        self.assertAlmostEqual(A.App.parse_typed_ma('100.5'), 0.1005)
+        for bad in ('', 'abc', 'nan'):
+            with self.assertRaises(ValueError):
+                A.App.parse_typed_ma(bad)
 
 
 class Registration(unittest.TestCase):
