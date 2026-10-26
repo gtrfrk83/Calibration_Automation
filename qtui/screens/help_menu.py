@@ -91,6 +91,15 @@ def add_help_menu(window: QMainWindow):
     add('import', 'Import data from another copy...', lambda: import_data(window))
     add('log', 'Save diagnostic log for support', lambda: save_log(window))
     menu.addSeparator()
+    if hasattr(window, 'set_demo_history'):                        # the Manager only: a check item, off at every start (never remembered)
+        demo = QAction('Show demonstration asset history', window)
+        demo.setCheckable(True)
+        demo.setChecked(False)
+        demo.setStatusTip('Fictional assets for showing the suite; the real history is not touched')
+        demo.toggled.connect(lambda on: window.set_demo_history(on))
+        menu.addAction(demo)
+        window.help_actions['demo_history'] = demo
+        menu.addSeparator()
     window.help_menu = menu
     return menu
 

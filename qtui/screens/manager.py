@@ -313,6 +313,26 @@ class ManagerWindow(QMainWindow):
                 panel.refresh()
         self.status.set(mm.TAB_STATUS[key])
 
+    def set_demo_history(self, on):
+        """Help > Show demonstration asset history: the Asset History tab reads the fictional demo file (read only, banner on top) instead of the real
+        history.  Never remembered: every start shows the real history.  Returns the state afterwards; the Help item always agrees with it."""
+        panel = self.history_panel
+        if panel is None or not hasattr(panel, 'set_demo'):
+            state = False
+        else:
+            state = panel.set_demo(bool(on))
+        act = getattr(self, 'help_actions', {}).get('demo_history')
+        if act is not None and act.isChecked() != state:
+            act.blockSignals(True)
+            act.setChecked(state)
+            act.blockSignals(False)
+        if state:
+            self.select_tab('asset_history')
+            self.status.set('Showing DEMONSTRATION asset history: fictional assets, not real calibration records. Turn it off in the Help menu.')
+        else:
+            self.status.set(mm.TAB_STATUS['asset_history'] if self.tabs.currentIndex() == 1 else mm.START_STATUS)
+        return state
+
     def select_tab(self, key):
         self.tabs.setCurrentIndex([k for k, _t in MAIN_TABS].index(key))
 

@@ -55,9 +55,28 @@ CREATE INDEX IF NOT EXISTS points_run ON points(run_id);
 '''
 
 
+DEMO_DB_NAME = 'lab_registry_demo.sqlite3'          # the demonstration history (demo_history.py): a SEPARATE file, never written through this module
+
+
+class DemoRegistryError(sqlite3.DatabaseError):
+    """Raised (and, being a sqlite3 error, swallowed like any database problem) when something tries to WRITE to the demonstration registry."""
+
+
 @contextmanager
 def _db(path=None):
-    con = sqlite3.connect(str(path or DB), timeout=5)
+    """The registry connection.  `path` None = the real lab_registry.sqlite3 (read/write, schema created if missing, as always).  An explicit `path`
+    (only the demonstration file today) is opened READ ONLY with no schema statement, so it can never be changed from here.  A write connection to a
+    file named like the demonstration registry is refused (DemoRegistryError), whatever the module-level DB points at."""
+    if path:
+        con = sqlite3.connect(f'file:{Path(str(path)).as_posix()}?mode=ro', uri=True, timeout=5)
+        try:
+            yield con
+        finally:
+            con.close()
+        return
+    if Path(str(DB)).name.lower() == DEMO_DB_NAME:
+        raise DemoRegistryError('the demonstration registry is read only')
+    con = sqlite3.connect(str(DB), timeout=5)
     try:
         con.execute('PRAGMA foreign_keys=ON')
         con.executescript(SCHEMA)
@@ -149,9 +168,9 @@ def instrument_record(asset):
         return None
 
 
-def runs_for(asset):
+def runs_for(asset, db=None):
     try:
-        with _db() as con:
+        with _db(db) as con:
             rows = con.execute('SELECT id,asset_id,serial,model,procedure,run_at,technician,total,failed,report_file FROM runs WHERE asset_id=? ORDER BY run_at DESC, id DESC',
                                (asset.strip(),)).fetchall()
     except sqlite3.Error:
@@ -160,9 +179,9 @@ def runs_for(asset):
     return [dict(zip(keys, r)) for r in rows]
 
 
-def points_for(run_id):
+def points_for(run_id, db=None):
     try:
-        with _db() as con:
+        with _db(db) as con:
             rows = con.execute('SELECT section,description,nominal,low,high,unit,found,result,dev_pct FROM points WHERE run_id=? ORDER BY rowid', (run_id,)).fetchall()
     except sqlite3.Error:
         return []
@@ -170,10 +189,10 @@ def points_for(run_id):
     return [dict(zip(keys, r)) for r in rows]
 
 
-def assets_overview(term=''):
-    """One row per asset that has history: latest run, run count, whether the latest run passed."""
+def assets_overview(term='', db=None):
+    """One row per asset that has history: latest run, run count, whether the latest run passed.  `db`: read this registry file instead (demonstration data)."""
     try:
-        with _db() as con:
+        with _db(db) as con:
             rows = con.execute('''SELECT r.asset_id, r.serial, r.model, r.run_at, r.failed, r.total, r.procedure,
                                          (SELECT COUNT(*) FROM runs c WHERE c.asset_id=r.asset_id)
                                   FROM runs r WHERE r.id=(SELECT id FROM runs x WHERE x.asset_id=r.asset_id ORDER BY x.run_at DESC, x.id DESC LIMIT 1)
@@ -185,8 +204,26 @@ def assets_overview(term=''):
     return [dict(zip(keys, r)) for r in rows]
 
 
-def next_due(asset):
-    """(date or None, interval_months or None): last report date + the interval stored for the instrument."""
+def demo_interval(asset, db):
+    """Calibration interval (months) of a demonstration asset: the demo file's own demo_assets table (the Manager's instruments table is never consulted)."""
+    try:
+        with _db(db) as con:
+            row = con.execute('SELECT interval_months FROM demo_assets WHERE asset_id=?', (asset.strip(),)).fetchone()
+    except sqlite3.Error:
+        return None
+    return row[0] if row else None
+
+
+def next_due(asset, db=None):
+    """(date or None, interval_months or None): last report date + the interval stored for the instrument.
+    With `db` (demonstration data) the interval comes from that file, never from the Manager's instruments table."""
+    if db is not None:
+        interval = demo_interval(asset, db)
+        runs = runs_for(asset, db)
+        if not interval or not runs:
+            return None, interval
+        last = parse_date(runs[0]['run_at'][:10])
+        return (add_months(last, interval) if last else None), interval
     rec = instrument_record(asset)
     runs = runs_for(asset)
     if not rec or not rec[2] or not runs:
@@ -195,10 +232,10 @@ def next_due(asset):
     return (add_months(last, rec[2]) if last else None), rec[2]
 
 
-def drift(asset, section, description):
+def drift(asset, section, description, db=None):
     """Oldest-first [(run_at, found text, dev_pct)] for one test point of an asset."""
     try:
-        with _db() as con:
+        with _db(db) as con:
             rows = con.execute('''SELECT r.run_at,p.found,p.dev_pct FROM points p JOIN runs r ON r.id=p.run_id
                                   WHERE r.asset_id=? AND p.section=? AND p.description=? ORDER BY r.run_at, r.id''', (asset.strip(), section, description)).fetchall()
     except sqlite3.Error:

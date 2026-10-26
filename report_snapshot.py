@@ -109,9 +109,17 @@ def _db_path(path=None):
     return Path(labregistry.DB)
 
 
+class DemoRegistry(sqlite3.DatabaseError):
+    """The history is the fictional demonstration registry: it is never snapshotted, rebuilt or printed (a sqlite3 error, so every caller already copes)."""
+
+
 @contextmanager
 def _db(path=None):
-    con = sqlite3.connect(str(_db_path(path)), timeout=5)
+    import demo_history
+    target = _db_path(path)
+    if demo_history.is_demo_db(target):
+        raise DemoRegistry('demonstration data is never turned into a report')
+    con = sqlite3.connect(str(target), timeout=5)
     try:
         con.execute('PRAGMA foreign_keys=ON')
         import labregistry
@@ -337,6 +345,9 @@ def _points(run_id, db_path):
 def plan(run_id, db_path=None) -> Plan:
     """What 'Regenerate PDF' can do for an event: from the saved snapshot, rebuilt from history rows, or nothing (with the reason).
     A snapshot that fails its checksum is never replaced by a rebuild: the event is refused."""
+    import demo_history
+    if demo_history.is_demo_db(_db_path(db_path)):
+        return Plan(NONE, demo_history.PDF_REFUSAL, None, None, ())
     run = run_row(run_id, db_path)
     if run is None:
         return Plan(NONE, 'This history entry could not be read.', None, None, ())
@@ -391,6 +402,8 @@ def write_report(data, path, kind, now=None):
     """Write the PDF for a snapshot / rebuilt dict through report_pdf.write_calibration_pdf (the same code as the original).  The history is not
     touched (record_history=False).  Written to a temporary file next to `path` and moved into place, so a failure never leaves half a file."""
     import report_pdf
+    if data.get('demo'):
+        raise DemoRegistry('demonstration data is never turned into a report')
     details = _restore(data['details'])
     tmp = str(path) + '.reprint.tmp'
     try:
