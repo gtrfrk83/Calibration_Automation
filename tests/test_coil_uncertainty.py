@@ -73,7 +73,7 @@ class Review(unittest.TestCase):
         self.assertEqual(m.table()[0]['standard'], COIL)
         m.set_default('5522A')
         self.assertEqual(m.table()[0]['standard'], COIL)
-        self.assertEqual(m.table()[0]['reported'], '4.0 A')
+        self.assertEqual(m.rows[0].cur.reported, 4.0)
         self.assertFalse(m.set_standard(0, '5560A'))                       # the coil is not a calibrator choice
 
     def test_an_uncovered_coil_row_is_open_for_a_typed_value(self):

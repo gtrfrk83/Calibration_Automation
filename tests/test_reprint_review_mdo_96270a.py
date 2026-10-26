@@ -159,6 +159,7 @@ class Wiring(unittest.TestCase):
                   'specs/build_tbs2000b_spec.py', 'specs/tektronix_tbs2000b_pv.json',
                   'specs/build_5560a_standard_from_manual.py', 'specs/analyze_5560a_spec_check.py', 'specs/fluke_5560a_spec_check.md',          # the 5560A sheet re-run from the manual (branch fluke-5560a-spec-check)
                   'specs/standards/fluke_5560a_standard.json')
+        later += ('specs/build_fluke_376_spec.py', 'specs/fluke_376_pv.json')                                                                  # the 50-turn coil uncertainty rule (2026-10-26)
         self.assertEqual([f for f in base if (f.endswith('_verification.py') or f.startswith('Procedures/') or f.startswith('specs/')) and f not in later and f not in ui_ported.files()], [])
         text = ''.join(p.read_text(encoding='utf-8') for p in (ROOT / 'Procedures').glob('*.procedure.json'))
         for f in ('report_review_adapters.py', 'report_review_model.py', 'uncertainty_budget.py'):

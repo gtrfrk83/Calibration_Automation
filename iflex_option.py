@@ -1,7 +1,7 @@
 """Window option 'iFlex probe supplied: run the iFlex tests' for the Fluke 374 / 375 / 376 / 376-II clamp meter procedures (handheld engine, handheld_dmm.App).
 
 Not every clamp meter is received with its iFlex probe.  This option decides whether the iFlex tests (the steps tagged "include": "iflex" in specs/fluke_376_pv.json: the 5 iFlex
-simulated points and the 4 iFlex-with-coil points) are part of the run.  It is a subclass of handheld_dmm.App and touches NO shared file: the engine's own hooks are used
+simulated points and the 4 iFlex-with-coil points) are part of the run.  It is a subclass of handheld_dmm.App and touches NO shared file (it also carries the 50-turn-coil uncertainty rule, see unc_source): the engine's own hooks are used
 (build_points, report_header, source_note, save_fields, load_results, execute).
 
 Behaviour
@@ -248,6 +248,40 @@ class App(handheld_dmm.App):
                 (f', {shown} recorded earlier kept' if shown else '') + f' ({len(pts)} points in all).')
 
     # ------------------------------------------------------------------ window
+    # ---- 50-turn coil uncertainty (owner rule 2026-10-26, NOTES.md): a coil point carries unc_standard / unc_nominal (specs/build_fluke_376_spec.py) ----
+    @staticmethod
+    def unc_source(p):
+        """(nominal, standard or None) the uncertainty of a point is worked out at: a 50-turn-coil point uses the A2LA-5500A-COIL sheet at the EFFECTIVE current the jaw sees
+        (unc_nominal), every other point the applied value and the calibrator in use (None = the caller's calibrator).  The Report Review reads this too."""
+        if p.get('unc_standard'):
+            return p.get('unc_nominal', p.get('nominal')), p['unc_standard']
+        return p['applied']['value'], None
+
+    def _coil_point(self, p):
+        return bool(p.get('unc_standard')) and p.get('test') == 'numeric' and self.has_uncertainty(p)
+
+    def certificate_row(self, p, r):
+        row = super().certificate_row(p, r)
+        if self._coil_point(p):
+            import report_pdf
+            nom, std = self.unc_source(p)
+            row['Uncertainty'] = report_pdf.point_uncertainty(dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None), standard=std)
+        return row
+
+    def certificate_fields(self, p):
+        if not self._coil_point(p):
+            return super().certificate_fields(p)
+        try:
+            import tartur
+            from decimal import Decimal
+            factor = Decimal(str(p['factor']))
+            clean = lambda d: float(f'{float(d * factor):.9g}')               # noqa: E731  (as handheld_dmm.certificate_fields)
+            nom, std = self.unc_source(p)
+            q = dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)
+            return tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=std)
+        except Exception:
+            return dict(TAR='', TUR='')
+
     def _build_ui(self):
         super()._build_ui()
         defs = self.include_defs()
