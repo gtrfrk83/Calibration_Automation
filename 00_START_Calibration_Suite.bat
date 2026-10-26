@@ -26,7 +26,7 @@ if errorlevel 1 (
   if errorlevel 1 (
     echo.
     echo PySide6 still could not be loaded. Send the lines above to the person who maintains the suite.
-    echo ^(PySide6 supports Python 3.9 to 3.13; a newer Python than that needs an older one installed next to it.^)
+    echo ^(PySide6 may not have a build yet for the very newest Python; install an older Python 3 next to it and run this again.^)
     pause
     exit /b 1
   )
