@@ -52,6 +52,9 @@ class FakeMenu:
     def add_command(self, **kw):
         self.items.append(kw)
 
+    def add_separator(self):
+        pass
+
     def tk_popup(self, x, y):
         self.popped = (x, y)
 
@@ -123,7 +126,7 @@ class Wiring(unittest.TestCase):
         self.assertEqual(tree.bound['<Button-3>'](FakeEvent), 'break')
         menu = FakeMenu.last
         self.assertEqual(tree.sel, ('68',), 'the row is selected')
-        self.assertEqual([(i['label'], i['state']) for i in menu.items], [('Edit', 'normal')])
+        self.assertEqual([(i['label'], i['state']) for i in menu.items], [('Edit', 'normal'), ('Run from here', 'normal')])
         self.assertEqual(menu.popped, (100, 200))
 
     def test_a_click_off_the_rows_does_nothing(self):

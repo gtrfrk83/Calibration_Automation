@@ -104,6 +104,14 @@ class TreeMenu:
                         menu.addAction(reason[:90] + ('...' if len(reason) > 90 else '')).setEnabled(False)
             except Exception:
                 pass
+        run = PM.run_from_entry(app)                            # 'Run from here' = the Rerun From Selected button, for every procedure that has one
+        if run is not None:
+            menu.addSeparator()
+            a = menu.addAction(run[0])
+            a.setEnabled(bool(run[2]))
+            a.triggered.connect(lambda _c=False, c=run[1]: c())
+            if not run[2] and run[3]:
+                menu.addAction(run[3]).setEnabled(False)
         if isinstance(self.tree, DataTable) and self.tree.selected_count():
             menu.addSeparator()
             menu.addAction('Copy').triggered.connect(lambda _c=False: self.tree.copy_selection())

@@ -158,6 +158,33 @@ def _same(name, a, b) -> bool:
 
 
 # ------------------------------------------------------------------------------------------------------------ the menu
+def run_from_entry(app):
+    """The right-click 'Run from here' of every point list: (label, command, enabled, reason) or None when the procedure has no Rerun From.
+    It is the same action as the 'Rerun From Selected' button (the right-click has already selected the row), so it needs no new run logic.
+    Independent of the Edit lock: a verified procedure can still be run.  Never raises."""
+    try:
+        fn = getattr(app, 'rerun_from', None) or getattr(app, 'rerun_from_selected', None)
+        if fn is None:
+            return None
+        busy = bool(getattr(app, 'busy', False))
+        bb = getattr(app, '_batch_busy', None)
+        if not busy and callable(bb):
+            busy = bool(bb())
+        if busy:
+            return ('Run from here', fn, False, 'A test is running. Stop it first.')
+        btn = getattr(app, 'btn_rerun_from', None)
+        if btn is not None:
+            try:
+                ok = btn.isEnabled() if hasattr(btn, 'isEnabled') else str(btn['state']) != 'disabled'
+            except Exception:
+                ok = True
+            if not ok:
+                return ('Run from here', fn, False, 'Not available right now.')
+        return ('Run from here', fn, True, '')
+    except Exception:
+        return None
+
+
 def menu_state(app, pid) -> tuple:
     """(enabled, reason) for the right-click 'Edit' of point `pid`.  Disabled, with the reason, when the procedure is verified / locked or the
     point is being measured right now.  Never raises."""

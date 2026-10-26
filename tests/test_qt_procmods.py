@@ -608,7 +608,7 @@ class PointEditorWiring(unittest.TestCase):
         ex = self.right_click(tm, tree, 0)
         ex.assert_called_once()
         self.assertEqual(tree.selected_keys(), ['68'], 'the row is selected')
-        self.assertEqual([(a.text(), a.isEnabled()) for a in tm.menu.actions() if not a.isSeparator() and a.text() != 'Copy'], [('Edit', True)])
+        self.assertEqual([(a.text(), a.isEnabled()) for a in tm.menu.actions() if not a.isSeparator() and a.text() != 'Copy'], [('Edit', True), ('Run from here', True)])
         self.assertEqual(tm.pid, '68')
         self.assertEqual(PP.selected_point(self.app), '68')
 

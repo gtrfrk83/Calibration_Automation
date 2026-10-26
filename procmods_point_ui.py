@@ -57,6 +57,12 @@ def attach_tree_menu(app, tree, resolver=None, lock=None):
                             menu.add_command(label=reason[:90] + ('...' if len(reason) > 90 else ''), state='disabled')
                 except Exception:
                     pass
+            run = PM.run_from_entry(app)                            # 'Run from here' = the Rerun From Selected button, for every procedure that has one
+            if run is not None:
+                menu.add_separator()
+                menu.add_command(label=run[0], command=run[1], state='normal' if run[2] else 'disabled')
+                if not run[2] and run[3]:
+                    menu.add_command(label=run[3], state='disabled')
             menu.tk_popup(event.x_root, event.y_root)
         finally:
             try:

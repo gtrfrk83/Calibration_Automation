@@ -41,6 +41,12 @@ class TreeMenu:
                         out.append((reason[:90] + ('...' if len(reason) > 90 else ''), None, False))
             except Exception:
                 pass
+        run = PM.run_from_entry(app)                             # 'Run from here' = the Rerun From Selected button, for every procedure that has one
+        if run is not None:
+            out.append(('-', None, False))
+            out.append((run[0], run[1], run[2]))
+            if not run[2] and run[3]:
+                out.append((run[3], None, False))
         return out
 
     def build(self, pid, parent=None):

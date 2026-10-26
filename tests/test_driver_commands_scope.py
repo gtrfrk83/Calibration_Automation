@@ -247,7 +247,7 @@ class Fluke28xLocked(unittest.TestCase):
 class Describe(unittest.TestCase):
     # (count, {risk: n}, {verified: n}) pinned so a new command has to be classified on purpose
     EXPECT = {
-        'lecroy': (33, {'normal': 27, 'locked': 6, 'output': 0}, {True: 24, False: 9}),
+        'lecroy': (37, {'normal': 31, 'locked': 6, 'output': 0}, {True: 24, False: 13}),
         'mdo': (102, {'normal': 78, 'locked': 22, 'output': 2}, {True: 86, False: 16}),
         '28x': (3, {'normal': 0, 'locked': 3, 'output': 0}, {True: 3, False: 0}),
     }
