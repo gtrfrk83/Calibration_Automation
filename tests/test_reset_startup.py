@@ -96,6 +96,7 @@ ENGINES = {          # source file -> (function that starts a run, name of the r
     'dacq_verification.py': ('execute', 'reset_then', '_next'),
     'keithley2000_verification.py': ('execute', 'reset_then', '_next'),
     'agilent34410a_verification.py': ('execute', 'reset_then', '_next'),
+    'i400_verification.py': ('execute', 'reset_then', '_next'),
     'fgen_verification.py': ('execute', 'reset_then', '_next'),
     'handheld_dmm.py': ('execute', 'reset_then', '_next'),
     'dsb_runtime.py': ('execute', 'reset_then', '_next'),                  # user-built datasheets (Datasheet Builder runtime)
