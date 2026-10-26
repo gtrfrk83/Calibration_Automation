@@ -114,6 +114,20 @@ class Base(unittest.TestCase):
 class EditorScenario(Base):
     """checks_spec_editor of the real-Tk checks, step by step."""
 
+    def test_function_type_chips_filter_the_rows(self):
+        ed = self.editor()
+        codes = ed.row_kind_codes()
+        self.assertEqual(codes[0], '')
+        every = len(ed.grid_rows.iids())
+        self.assertEqual(every, len(ed.doc.lines()))
+        if len(codes) > 1:
+            ed.kind_filter._buttons[codes[1]].click()
+            shown = ed.grid_rows.iids()
+            self.assertTrue(0 < len(shown) <= every)
+            self.assertTrue(all(ed._range_kind(ed.doc.line(i).rng) == codes[1] for i in shown))
+            ed.kind_filter._buttons[''].click()
+            self.assertEqual(len(ed.grid_rows.iids()), every)
+
     def test_opens_with_the_sheet_loaded_and_nothing_pending(self):
         ed = self.editor()
         self.assertIsNotNone(ed.doc)
