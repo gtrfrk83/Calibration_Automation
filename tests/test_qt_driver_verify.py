@@ -30,7 +30,8 @@ class Window(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.db = Path(self.tmp.name) / 'lab_registry.sqlite3'
-        self.w = W.DriverVerifyWindow(None, db=self.db)
+        self.logs = Path(self.tmp.name) / 'logs'
+        self.w = W.DriverVerifyWindow(None, db=self.db, log_folder=self.logs)
         self.w.show()
         self.addCleanup(self.w.close)
         names = [c[0] for c in self.w.catalog]
@@ -100,6 +101,69 @@ class Window(unittest.TestCase):
             self.w.settle(True)
         self.assertEqual(row.result.status, 'pass')
         self.assertTrue(row.result.confirmed_by_tester)
+
+    def real_window(self):
+        """A window whose transport is the simulator but which is NOT marked simulated (stands in for real hardware)."""
+        from drivers.simulated import make_bench
+        w = W.DriverVerifyWindow(None, db=self.db, log_folder=self.logs, transport_factory=lambda cls, addr, baud, sim: make_bench()[1])
+        self.addCleanup(w.close)
+        names = [c[0] for c in w.catalog]
+        w.driver_box.setCurrentIndex(next(i for i, n in enumerate(names) if n.startswith('Fluke 5560A')))
+        w.address_e.setText('ASRL9::INSTR')
+        w.connect_driver()
+        self.assertIsNotNone(w.driver, w.state.text())
+        return w
+
+    def test_a_simulated_run_leaves_no_log_files(self):
+        self.connect()
+        self.w.run_ticked()
+        self.w.wait()
+        self.assertFalse(self.logs.exists())
+
+    def test_a_real_run_writes_a_transcript_and_csv_even_if_never_saved(self):
+        w = self.real_window()
+        w.run_ticked()
+        w.wait()
+        self.assertIsNotNone(w.run_files)
+        txt, csv_ = w.run_files
+        text = txt.read_text(encoding='utf-8')
+        self.assertIn('passed', text)
+        self.assertIn('--- command log ---', text)
+        self.assertIn('*IDN?', text)
+        self.assertTrue(csv_.exists())
+        self.assertNotIn('SIMULATED', csv_.read_text(encoding='utf-8-sig'))
+
+    def test_closing_saves_an_unsaved_real_run_and_the_status_tab_shows_it(self):
+        w = self.real_window()
+        w.run_ticked()
+        w.wait()
+        self.assertTrue(w.unsaved)
+        self.assertEqual(V.load_runs('Fluke5560A', db=self.db), [])
+        w.close()
+        self.assertEqual(len(V.load_runs('Fluke5560A', db=self.db)), 1)
+        w2 = W.DriverVerifyWindow(None, db=self.db, log_folder=self.logs)
+        self.addCleanup(w2.close)
+        w2.refresh_status()
+        row = next(r for r in w2.status_rows if r['cls'] == 'Fluke5560A')
+        self.assertGreater(row['passed'], 5)
+        self.assertEqual(row['state'], 'partly tested')
+        self.assertTrue(row['last_tested'])
+        other = next(r for r in w2.status_rows if r['cls'] == 'TektronixMDO3')
+        self.assertEqual((other['state'], other['passed']), ('not tested', 0))
+
+    def test_the_last_on_bench_column_and_status_export(self):
+        w = self.real_window()
+        w.run_ticked()
+        w.wait()
+        w.save_record()
+        row = next(r for r in w.rows if r.step.key == 'oper.query')
+        self.assertTrue(w._bench_text(row).startswith('pass'))
+        out = Path(self.tmp.name) / 'status.csv'
+        with mock.patch.object(w, '_status_path', return_value=str(out)):
+            w.export_status()
+        text = out.read_text(encoding='utf-8-sig')
+        self.assertIn('Fluke 5560A', text)
+        self.assertIn('partly tested', text)
 
     def test_connecting_without_an_address_says_so(self):
         self.w.sim_cb.setChecked(False)

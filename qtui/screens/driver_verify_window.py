@@ -14,7 +14,8 @@ import queue
 import threading
 
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QInputDialog, QLineEdit, QPlainTextEdit, QProgressBar, QVBoxLayout, QWidget, QDialog
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QFileDialog, QHBoxLayout, QInputDialog, QLineEdit, QPlainTextEdit, QProgressBar, QTabWidget,
+                               QVBoxLayout, QWidget)
 
 import driver_verify as V
 from qtui.table import Column, DataTable
@@ -48,7 +49,7 @@ class _Row:
 
 
 class DriverVerifyWindow(QDialog):
-    def __init__(self, parent=None, transport_factory=None, catalog=None, db=None):
+    def __init__(self, parent=None, transport_factory=None, catalog=None, db=None, log_folder=None):
         super().__init__(parent)
         self.setWindowTitle('Driver verification')
         self.resize(1180, 760)
@@ -57,6 +58,7 @@ class DriverVerifyWindow(QDialog):
         self.transport_factory = transport_factory or self._default_transport
         self.catalog = catalog if catalog is not None else V.driver_catalog()
         self.db = db
+        self.log_folder = log_folder
         self.driver = self.verifier = None
         self.simulated = False
         self.results = []
@@ -65,12 +67,25 @@ class DriverVerifyWindow(QDialog):
         self.events = queue.Queue()
         self.thread = None
         self.last_run_id = ''
+        self.saved = {}                      # {command key: saved result} of the connected driver, for the 'Last on bench' column
+        self.unsaved = False
+        self.run_files = None
 
         body = QVBoxLayout(self)
         body.setContentsMargins(M.xl, M.lg, M.xl, M.lg)
         body.setSpacing(M.sm + 2)
         body.addWidget(label('Driver verification', 'h2'))
         body.addWidget(Banner(INTRO, 'info'))
+
+        self.tabs = QTabWidget()
+        body.addWidget(self.tabs, 1)
+        test_page = QWidget()
+        tl = QVBoxLayout(test_page)
+        tl.setContentsMargins(0, M.sm, 0, 0)
+        tl.setSpacing(M.sm + 2)
+        self.tabs.addTab(test_page, 'Test')
+        self._build_status_page()
+        self.tabs.currentChanged.connect(lambda i: self.refresh_status() if i == 1 else None)
 
         bar = QHBoxLayout()
         self.driver_box = QComboBox()
@@ -87,10 +102,10 @@ class DriverVerifyWindow(QDialog):
         for w, s in ((label('Driver'), 0), (self.driver_box, 2), (label('Address'), 0), (self.address_e, 3), (label('Baud'), 0), (self.baud_e, 0),
                      (self.sim_cb, 0), (label('Tester'), 0), (self.tester_e, 0), (self.btn_connect, 0)):
             bar.addWidget(w, s)
-        body.addLayout(bar)
+        tl.addLayout(bar)
         self.driver_box.currentIndexChanged.connect(self._driver_changed)
         self.state = label('Not connected.', 'muted')
-        body.addWidget(self.state)
+        tl.addWidget(self.state)
 
         cols = [Column('pick', 'Test', width=48, kind='checkbox', editable=lambda r: r.step.sendable, getter=lambda r: r.pick, setter=self._set_pick),
                 Column('key', 'Command', width=190, getter=lambda r: r.step.key),
@@ -98,10 +113,11 @@ class DriverVerifyWindow(QDialog):
                 Column('mode', 'Kind', width=64, getter=lambda r: r.step.mode),
                 Column('flag', 'Driver says', width=104, getter=lambda r: 'verified' if r.flag else 'unverified',
                        tone=lambda r: 'good' if r.flag else 'muted'),
+                Column('bench', 'Last on bench', width=118, getter=lambda r: self._bench_text(r), tone=lambda r: 'muted'),
                 Column('status', 'Result', width=84, kind='badge', badge=lambda v, r: BADGES.get(str(v).split()[0] if v else '', 'neutral'), getter=lambda r: r.status),
                 Column('detail', 'Reply / note', width=330, getter=lambda r: r.detail)]
         self.table = DataTable(cols, [], row_key=id, empty_text='Connect to an instrument to list its commands.')
-        body.addWidget(self.table, 1)
+        tl.addWidget(self.table, 1)
 
         pick_bar = QHBoxLayout()
         self.btn_queries = SecondaryButton('Tick all queries', on_click=lambda: self.tick('query'))
@@ -114,17 +130,17 @@ class DriverVerifyWindow(QDialog):
         pick_bar.addStretch(1)
         for b in (self.btn_ok, self.btn_bad):
             pick_bar.addWidget(b)
-        body.addLayout(pick_bar)
+        tl.addLayout(pick_bar)
 
         self.progress = QProgressBar()
         self.progress.setTextVisible(False)
         self.progress.setMaximumHeight(8)
-        body.addWidget(self.progress)
-        body.addWidget(label('Findings', 'h3'))
+        tl.addWidget(self.progress)
+        tl.addWidget(label('Findings', 'h3'))
         self.findings = QPlainTextEdit()
         self.findings.setReadOnly(True)
         self.findings.setMaximumHeight(110)
-        body.addWidget(self.findings)
+        tl.addWidget(self.findings)
 
         foot = QHBoxLayout()
         self.btn_run = PrimaryButton('Run ticked commands', on_click=self.run_ticked)
@@ -137,7 +153,7 @@ class DriverVerifyWindow(QDialog):
         foot.addStretch(1)
         for b in (self.btn_save, self.btn_csv, self.btn_disc):
             foot.addWidget(b)
-        body.addLayout(foot)
+        tl.addLayout(foot)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._poll)
         self._driver_changed()
@@ -183,7 +199,8 @@ class DriverVerifyWindow(QDialog):
         self.driver, self.simulated = drv, sim
         self.verifier = V.Verifier(drv, confirm=self._approved, simulated=sim)
         self.plan = V.build_plan(drv)
-        saved = V.last_status(cls.__name__, self.db) if not sim else {}
+        saved = V.latest_results(cls.__name__, self.db) if not sim else {}
+        self.saved, self.unsaved, self.run_files = saved, False, None
         self.rows = [_Row(s, bool(s.cmd.verified)) for s in self.plan]
         self.results = []
         self.table.set_rows(self.rows, keep_selection=False)
@@ -294,6 +311,7 @@ class DriverVerifyWindow(QDialog):
                 self.timer.stop()
                 self._buttons()
                 self._findings()
+                self._run_finished()
         self.table.refresh()
 
     def wait(self, timeout=60.0):
@@ -315,6 +333,64 @@ class DriverVerifyWindow(QDialog):
         head = ('SIMULATED - NOT EVIDENCE.  ' if self.simulated else '') + f'{c["pass"]} passed, {c["check"]} to check, {c["fail"]} failed.'
         self.findings.setPlainText('\n'.join([head] + [f'{f.level.upper():5s} {f.text}' for f in notes]))
 
+    def _bench_text(self, row):
+        s = self.saved.get(row.step.key)
+        return f'{s["status"]} {s["tested_at"][:10]}' if s else ''
+
+    def _run_finished(self):
+        """Every finished run on a real instrument leaves a transcript and a CSV in the log folder (never for a simulated run), whether or not it is saved."""
+        self.unsaved = bool(self.results) and not self.simulated
+        if self.simulated or not self.results:
+            return
+        try:
+            self.run_files = V.write_run_files(self.plan, self.results, self.driver.log.lines(), driver_name=type(self.driver).__name__,
+                                               model=getattr(self.driver, 'MODEL', ''), idn=self.driver.idn, address=self.address_e.text().strip(),
+                                               tester=self.tester_e.text().strip(), folder=self.log_folder)
+            self._say(f'Run finished. Log written to {self.run_files[0]}. Press Save record to add it to the status list.')
+        except OSError as exc:
+            self._say(f'Run finished, but the log files could not be written: {exc}')
+
+    # ------------------------------------------------------------------ status page
+    def _build_status_page(self):
+        page = QWidget()
+        lay = QVBoxLayout(page)
+        lay.setContentsMargins(0, M.sm, 0, 0)
+        lay.addWidget(label('One line per driver, from the saved records: how many of its sendable commands have a result from a real instrument. The driver '
+                            'verified flags in the code are shown beside it and are not changed.', 'muted', wrap=True))
+        cols = [Column('driver', 'Driver', width=340), Column('state', 'State', width=140, kind='badge',
+                badge_map={'all bench-verified': 'good', 'partly tested': 'warn', 'failures': 'bad', 'not tested': 'neutral'}),
+                Column('sendable', 'Sendable', width=90, align='right'), Column('passed', 'Passed', width=76, align='right'),
+                Column('check', 'Check', width=70, align='right'), Column('failed', 'Failed', width=70, align='right'),
+                Column('untested', 'Untested', width=86, align='right'), Column('flag_verified', 'Flag: verified', width=120, align='right'),
+                Column('last_tested', 'Last tested', width=150), Column('tester', 'Tester', width=100), Column('instrument', 'Instrument', width=240, stretch=True)]
+        for c in cols:
+            c.getter = (lambda k: lambda r: r[k])(c.key)                       # rows are dicts
+        self.status_table = DataTable(cols, [], row_key=lambda r: r['driver'], empty_text='No saved results yet.')
+        lay.addWidget(self.status_table, 1)
+        row = QHBoxLayout()
+        row.addStretch(1)
+        self.btn_status_csv = SecondaryButton('Export status CSV...', on_click=self.export_status)
+        self.btn_log_folder = SecondaryButton('Show log folder', on_click=lambda: self._say(f'Run logs are written to {self.log_folder or V.log_dir()}'))
+        row.addWidget(self.btn_log_folder)
+        row.addWidget(self.btn_status_csv)
+        lay.addLayout(row)
+        self.tabs.addTab(page, 'Status')
+
+    def refresh_status(self):
+        self.status_rows = V.status_overview(self.catalog, self.db)
+        self.status_table.set_rows(self.status_rows, keep_selection=False)
+
+    def _status_path(self):
+        path, _f = QFileDialog.getSaveFileName(self, 'Export status', 'driver_verification_status.csv', 'CSV (*.csv)')
+        return path
+
+    def export_status(self):
+        self.refresh_status()
+        path = self._status_path()
+        if path:
+            V.write_status_csv(path, self.status_rows)
+            self._say(f'Exported {path}.')
+
     # ------------------------------------------------------------------ records
     def save_record(self):
         if not self.results:
@@ -327,6 +403,9 @@ class DriverVerifyWindow(QDialog):
         except V.SimulatedError as exc:
             self._say(str(exc))
             return
+        self.unsaved = False
+        self.saved = V.latest_results(type(self.driver).__name__, self.db)
+        self.table.refresh()
         self._say(f'Saved as {self.last_run_id}.')
 
     def _csv_path(self):
@@ -360,6 +439,11 @@ class DriverVerifyWindow(QDialog):
         self.address_e.setEnabled(not connected)
 
     def closeEvent(self, ev):
+        if self.unsaved and self.results and not self.simulated and self.driver is not None:          # a real run is never lost: it is saved when the window closes
+            try:
+                self.save_record()
+            except Exception:
+                pass
         if self.thread is not None and self.thread.is_alive():
             self.stop()
             self.thread.join(5)

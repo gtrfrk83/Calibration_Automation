@@ -398,3 +398,70 @@ def write_csv(path, plan, results, *, driver_name='', model='', idn='', address=
             w.writerow([r.key, r.wire, st.cmd.kind if st else '', st.cmd.risk if st else '', 'verified' if st and st.cmd.verified else 'unverified',
                         r.status + (' (simulated)' if simulated else '') + (' (settled by tester)' if r.confirmed_by_tester else ''), r.reply, r.readback,
                         r.error, r.note, r.seconds])
+
+
+# ---------------------------------------------------------------------------------------------------------------- run files and status overview
+def log_dir():
+    """Folder of the automatic run files (transcript + CSV): <data folder>/driver_verification_logs."""
+    import appdata
+    return appdata.data_dir() / 'driver_verification_logs'
+
+
+def write_run_files(plan, results, transcript, *, driver_name, model='', idn='', address='', tester='', simulated=False, folder=None):
+    """Write the transcript (every command sent and every reply, as the driver logged it, passwords already masked) and the CSV of one run.
+    Returns (txt_path, csv_path), or None for a simulated run (demo results leave no files that look like evidence)."""
+    if simulated:
+        return None
+    from pathlib import Path
+    folder = Path(folder) if folder else log_dir()
+    folder.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+    base = folder / f'{stamp}_{re.sub(r"[^A-Za-z0-9]+", "", driver_name)}'
+    txt, csv_path = base.with_suffix('.txt'), base.with_suffix('.csv')
+    c = {s: sum(1 for r in results if r.status == s) for s in ('pass', 'check', 'fail', 'skipped')}
+    head = [f'Driver verification  {datetime.now().isoformat(timespec="seconds")}', f'driver {driver_name}   model {model}', f'instrument {idn}   address {address}',
+            f'tester {tester}', f'{c["pass"]} passed, {c["check"]} to check, {c["fail"]} failed, {c["skipped"]} not sent', '']
+    body = [f'{r.status.upper():7s} {r.key:30s} {r.wire}' + (f'   -> {r.reply or r.readback}' if (r.reply or r.readback) else '') +
+            (f'   !! {r.error}' if r.error else '') + (f'   ({r.note})' if r.note else '') for r in results]
+    txt.write_text('\n'.join(head + body + ['', '--- command log ---'] + [str(x) for x in transcript]) + '\n', encoding='utf-8')
+    write_csv(csv_path, plan, results, driver_name=driver_name, model=model, idn=idn, address=address, tester=tester, simulated=False)
+    return txt, csv_path
+
+
+def latest_results(driver_name, db=None) -> dict:
+    """{key: {'status', 'tested_at', 'tester', 'idn', 'flag'}} the most recent saved result of each command of a driver."""
+    try:
+        con = _connect(db)
+    except sqlite3.Error:
+        return {}
+    try:
+        rows = con.execute('SELECT key,status,tested_at,tester,idn,flag_verified FROM driver_verification WHERE driver=? ORDER BY id', (driver_name,)).fetchall()
+    finally:
+        con.close()
+    return {k: dict(status=s, tested_at=t, tester=who, idn=idn, flag=bool(f)) for k, s, t, who, idn, f in rows}
+
+
+def status_overview(catalog, db=None) -> list:
+    """One row per driver: how many of its sendable commands have a saved bench result, and how they came out.  The driver flags are shown, not changed."""
+    out = []
+    for label_, cls in catalog:
+        plan = build_plan(cls)
+        sendable = [s for s in plan if s.sendable]
+        got = latest_results(cls.__name__, db)
+        rec = [got[s.key] for s in sendable if s.key in got]
+        n = lambda st: sum(1 for r in rec if r['status'] == st)     # noqa: E731
+        last = max(rec, key=lambda r: r['tested_at']) if rec else None
+        out.append(dict(driver=label_, cls=cls.__name__, commands=len(plan), sendable=len(sendable), flag_verified=sum(1 for s in plan if s.cmd.verified),
+                        passed=n('pass'), check=n('check'), failed=n('fail'), untested=len(sendable) - len(rec),
+                        last_tested=last['tested_at'] if last else '', tester=last['tester'] if last else '', instrument=last['idn'] if last else '',
+                        state=('not tested' if not rec else 'all bench-verified' if n('pass') == len(sendable) else 'failures' if n('fail') else 'partly tested')))
+    return out
+
+
+def write_status_csv(path, rows):
+    cols = ['driver', 'commands', 'sendable', 'flag_verified', 'passed', 'check', 'failed', 'untested', 'state', 'last_tested', 'tester', 'instrument']
+    with open(path, 'w', newline='', encoding='utf-8-sig') as fh:
+        w = csv.writer(fh)
+        w.writerow(cols)
+        for r in rows:
+            w.writerow([r[c] for c in cols])
