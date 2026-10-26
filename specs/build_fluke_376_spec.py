@@ -25,7 +25,7 @@ What Table 1 means for the current rows:
       (100 / 1000 / 2000 / 2500 / 2500 A; the simulated Rogowski coil voltage is proportional to frequency: 30 uV per A at 50 Hz, 300 uV per A at 500 Hz).
   'iFlex Current Probe (with 50-turn Coil)': the iFlex loop around the same 50-turn coil, the calibrator drives the coil current.
 
-Uncertainty (owner decision, 2026-10-26): the 50-turn COIL points (jaw and iFlex-with-coil) carry the uncertainty of the Fluke 5500A/COIL's own A2LA scope lines (standard A2LA-5500A-COIL, specs/standards/a2la_5500a_coil_standard.json)
+Uncertainty (owner decision, 2026-10-26): the 50-turn COIL points (jaw and iFlex-with-coil) carry the uncertainty of the Fluke 5500A/COIL's own A2LA scope lines (standard A2LA-5500A-COIL, the shipped coil standard sheet)
 at the EFFECTIVE current the jaw sees (the nominal, step.unc_nominal), not the calibrator's at the coil current; a coil point the coil's lines do not cover (AC below 20.5 A) prints no uncertainty (nothing is extrapolated).
 The other sourced points (volts, ohms, capacitance, the iFlex simulation voltage as printed) carry the regular calibrator uncertainty at the actual calibrator OUTPUT, through the existing mechanism.  The iFlex simulation rows are sourced as AC volts and read in amps: their Uncertainty is the calibrator's
 AC VOLTS uncertainty (step.unc_unit 'V' tells the engine the unit of the source); TAR / TUR stay blank there (a tolerance in amps is never divided by an uncertainty in volts).
