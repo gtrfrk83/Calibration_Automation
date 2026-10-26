@@ -155,8 +155,8 @@ class Dmm(M):
         self.assertIsNotNone(a.tur)                                            # degC tolerance against a degC accuracy
         cand = next(c for c in a.candidates if c.standard == a.standard)
         self.assertIn('Type K', cand.row)
-        self.assertIsNone(cand.cmc)                                            # temperature is not in the A2LA scope: no clamp
-        self.assertTrue(any('A2LA' in n for n in cand.notes))
+        self.assertIsNotNone(cand.cmc)                                         # the scope's Type K line is the CMC for a Type K point (any other sensor: its own line)
+        self.assertFalse(any('A2LA' in n for n in cand.notes))
         hot = res.assignments['temp.r2000.+1300']
         self.assertEqual(hot.status, 'assigned')                               # 1372 degC is the K limit
 

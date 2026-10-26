@@ -7,7 +7,7 @@ Recalc all.  Every decision is in datasheet_builder_ui_model.GridModel; this cla
 read-only (filled only from the tolerance calculator).  No Tk import."""
 from __future__ import annotations
 
-from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtCore import QEvent, QObject, QTimer, Qt
 from PySide6.QtGui import QGuiApplication, QKeySequence, QShortcut
 from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton, QVBoxLayout, QWidget)
 
@@ -24,6 +24,9 @@ from qtui.theme import M as SZ
 
 INSPECTOR_W, INSPECTOR_NARROW_W, RAIL_W = 336, 290, 34
 NARROW_BELOW = 1250                      # window width (px) under which the inspector is the narrower one
+
+
+TEMPLATE_PROMPT = 'Add template...'
 
 
 class _UndoKeys(QObject):
@@ -246,6 +249,15 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         lay.addSpacing(8)
         self.delete_b = C.button('Delete line', self.delete_line, compact=True, tooltip='Delete the selected line (a heading deletes its whole section). Undo brings it back. Also Delete on the nominal cell, or right-click the line.')
         lay.addWidget(self.delete_b)
+        lay.addSpacing(8)
+        self.template_box = QComboBox()                # templates: a starting set of empty sections, added on demand (New no longer asks)
+        self.template_box.setToolTip('Add a template to this datasheet: empty sections to fill in. Sections the sheet already has stay as they are. Undo takes them out again.')
+        self.template_box.setMinimumWidth(190)
+        self.template_box.addItem(TEMPLATE_PROMPT)
+        for name, _tip in self.model.TEMPLATES:
+            self.template_box.addItem(name)
+        self.template_box.activated.connect(self.template_chosen)
+        lay.addWidget(self.template_box)
         lay.addStretch(1)
         self.grid.addWidget(foot, 3, 0)
 
@@ -351,6 +363,7 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.problem_pill.set(f'{c["errors"]} to fix' if c['errors'] else f'{c["warnings"]} warning(s)' if c['warnings'] else 'no problems',
                               'bad' if c['errors'] else 'warn' if c['warnings'] else 'good')
         self.refresh_check()
+        self._schedule_standards()
         self.count_l.setText(f'{sum(1 for r in m.rows() if r["kind"] != "blank")} rows')
         self.undo_b.setEnabled(bool(m.can_undo))
         self.redo_b.setEnabled(bool(m.can_redo))
@@ -391,6 +404,84 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         self.commit_bar_if_changed()
         self.model.select_at(r, c)
         self.sync()
+        if M.COL_KEYS[c] == 'standard':
+            self.open_standard_menu()
+
+    # ---- the STANDARD column: a drop-down of the standards that cover the point (and 'Automatic'); the UNCERTAINTY cell follows
+    STANDARD_DELAY_MS = 350
+    auto_standards = True                  # False: the cells are worked out only when asked for (tests)
+
+    def update_standard_columns(self):
+        """Work out the STANDARD / UNCERTAINTY cells once the edits have settled (the matcher is not cheap on a big sheet): blank until then."""
+        try:
+            if not self.model.standard_columns_ready() and self.model.refresh_standard_columns():
+                self.sheet.reload()
+        except RuntimeError:
+            pass                                                   # the window went away
+
+    def _schedule_standards(self):
+        if not self.auto_standards or self.model.standard_columns_ready():
+            return
+        t = getattr(self, '_std_timer', None)
+        if t is None:
+            t = self._std_timer = QTimer(self)
+            t.setSingleShot(True)
+            t.timeout.connect(self.update_standard_columns)
+        t.start(self.STANDARD_DELAY_MS)                            # every edit restarts the wait
+
+    def standard_menu(self):
+        """The drop-down for the selected STANDARD cell (a QMenu, not yet shown), or None when the row has no choice to make."""
+        m = self.model
+        self.update_standard_columns()
+        row = m.selected_row()
+        choices = m.standard_choices(row['key']) if row else []
+        if not choices:
+            return None
+        menu = QMenu(self.sheet)
+        menu.setToolTipsVisible(True)
+        sub = None
+        for ch in choices:
+            if ch['scope'] == 'section' and row['kind'] == 'point':
+                if sub is None:
+                    menu.addSeparator()
+                    sub = menu.addMenu('Set for the whole section')
+                target = sub
+            else:
+                target = menu
+            act = target.addAction(ch['label'])
+            act.setCheckable(True)
+            act.setChecked(bool(ch['checked']))
+            act.setEnabled(bool(ch['enabled']) and not getattr(m, 'locked', False))
+            act.triggered.connect(lambda _c=False, k=row['key'], v=ch['value'], sc=ch['scope']: self.standard_chosen(k, v, sc))
+        return menu
+
+    def open_standard_menu(self):
+        row = self.model.selected_row()
+        if not row or row['kind'] not in ('point', 'header'):
+            return None
+        menu = self.standard_menu()
+        if menu is None:
+            self._outcome = ''
+            self.status.set('No standard to choose for this row (it carries no uncertainty, or no standards are loaded).')
+            return None
+        rect = self.sheet.cell_rect(self.model.row_index(), M.COL_KEYS.index('standard'))
+        self._popup(menu, self.sheet.viewport().mapToGlobal(rect.bottomLeft()))
+        return menu
+
+    def _popup(self, menu, pos):
+        menu.exec(pos)
+
+    def standard_chosen(self, key, value, scope='point'):
+        """A choice in the drop-down: ds.assignments (ONE undo step), the same as 'Use this standard for the point' on the Automation page."""
+        self.commit_bar_if_changed()
+        out = self.changed(self.model.choose_standard(key, value, scope))
+        self.update_standard_columns()                             # the uncertainty cell follows at once
+        return out
+
+    def sensor_section(self, sensor):
+        """'Whole section' / the right-click menu: every row of the temperature section gets the same sensor (ONE undo step)."""
+        self.commit_bar_if_changed()
+        return self.changed(self.model.set_sensor(None, sensor, 'section'))
 
     def delete_line(self):
         """Delete the selected line (the Delete line button and the right-click menu)."""
@@ -410,7 +501,11 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         act = menu.addAction(label)
         act.setEnabled(bool(row) and row.get('kind') != 'blank' and not getattr(self.model, 'locked', False))
         act.triggered.connect(self.delete_line)
-        menu.exec(gpos)
+        if row and row.get('fid') and row.get('kind') in ('header', 'point') and self.model.ds.function(row['fid']).kind == 'TEMP' and not getattr(self.model, 'locked', False):
+            sub = menu.addMenu('Sourced as (whole section)')
+            for key, lab in self.model.sensor_choices():
+                sub.addAction(lab).triggered.connect(lambda _c=False, k=key: self.sensor_section(k))
+        self._popup(menu, gpos)
 
     def goto_row(self, key):
         self.model.select(key, 'nominal')
@@ -442,6 +537,8 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
         return None
 
     def focus_bar(self, select_all=False):
+        if self.model.sel_col == 'standard':                        # Enter / F2 / double-click on a STANDARD cell opens its drop-down instead of the Edit Cell bar
+            return self.open_standard_menu()
         ok, why = self.model.cell_editable()
         if not ok:
             self.set_issue(self.model.selected_row(), False, why, fresh=True)
@@ -560,6 +657,16 @@ class GridEditorWindow(CheckWindowMixin, QWidget):
 
     def preview(self):
         return present(PreviewWindow(self))
+
+    def template_chosen(self, index=None):
+        """The Templates drop-down: add the chosen template's empty sections (no question: Undo takes them out again), then go back to the prompt."""
+        i = self.template_box.currentIndex() if index is None else index
+        name = self.template_box.itemText(i) if i > 0 else ''
+        self.template_box.setCurrentIndex(0)
+        if not name:
+            return None
+        res = self.model.add_template(name)
+        return self.changed(res)
 
     def add_handheld(self):
         """More > Add handheld functions...: the handheld multimeter sections this sheet does not have yet."""

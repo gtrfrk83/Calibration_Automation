@@ -516,7 +516,7 @@ def coverage_findings(ds, res):
         return out
     by_fn = {}
     for a in res.assignments.values():
-        if a.status != 'uncovered':
+        if a.status != 'uncovered' or a.reason == 'no_sensor':          # a temperature point with no sensor chosen is reported by sensor_findings, not as 'no standard covers it'
             continue
         by_fn.setdefault((a.function_id, a.overridden), []).append(a)
     for (fid, overridden), alist in by_fn.items():
@@ -536,6 +536,27 @@ def coverage_findings(ds, res):
             out.append(Finding(1, WARN, 'not_covered', f'{len(alist)} point{"s" * (len(alist) != 1)} in {name} {"are" if len(alist) != 1 else "is"} outside every {who} range and standards sheet: '
                                + _names(rows), 'Press "Apply the fix" to enter it by hand (the operator uses their own standard), or import a standards sheet that covers it.',
                                fid, pids, name, rows[0], action='manual_entry', count=len(alist)))
+    return out
+
+
+def sensor_findings(ds):
+    """Rule 5, temperature: how the temperature is SOURCED (thermocouple type or RTD) decides which specification rows and which scope lines give the uncertainty, so it has to
+    be chosen for every enabled temperature point (dsb_sensors).  An ERROR (blocks publishing) per section; the finding goes to the first row.  Nothing is assumed: an old
+    point with only settings['tc_type'] has its choice; one with neither is reported here (when the sheet is checked or saved, never at load)."""
+    import dsb_sensors as sens
+    out = []
+    if ds.options.get('manual_entry'):
+        return out
+    for fn in ds.functions:
+        if fn.kind != 'TEMP':
+            continue
+        miss = [p for p in fn.points if p.enabled and not sens.sensor_of(fn, p)]
+        if miss:
+            rows = [point_text(fn, p) for p in miss]
+            out.append(Finding(5, ERROR, 'sensor_not_chosen', f'{len(miss)} temperature reading{"s" * (len(miss) != 1)} in {fn.name} {"have" if len(miss) != 1 else "has"} no sensor chosen, so '
+                               f'no uncertainty can be assigned: ' + _names(rows),
+                               sens.NOT_CHOSEN + ': pick it in the row panel (Sourced as), or set it for the whole section at once.',
+                               fn.id, tuple(p.id for p in miss), fn.name, rows[0], count=len(miss)))
     return out
 
 
@@ -971,6 +992,7 @@ def check(ds, period=None, matcher=None, match=None, dry_run_on=True, runner=Non
     chk.findings += coverage_findings(ds, res)                                                   # 1
     chk.sources, src_findings = source_findings(ds, res, manual_sheet, pending=bool(bad))   # 5
     chk.findings += src_findings
+    chk.findings += sensor_findings(ds)                                                          # 5 (temperature: how it is sourced)
     if dry_run_on and not manual_sheet and res is not None:
         chk.dry = dry_run(ds, res, period, runner)                                               # 4
         chk.findings += dry_findings(ds, res, chk.dry)

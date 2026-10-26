@@ -15,9 +15,24 @@ from qtui import theme
 from qtui.table import CellDelegate, Column, DataTable
 
 SHEET_ROW_H = 28
+STD_C = M.COL_KEYS.index('standard') + 1          # table column (the number column is 0) of the STANDARD cell; the UNCERTAINTY cell is the next one
 KEYSYMS = {Qt.Key.Key_Up: 'Up', Qt.Key.Key_Down: 'Down', Qt.Key.Key_Left: 'Left', Qt.Key.Key_Right: 'Right', Qt.Key.Key_PageUp: 'Prior', Qt.Key.Key_PageDown: 'Next',
            Qt.Key.Key_Tab: 'Tab', Qt.Key.Key_Backtab: 'ISO_Left_Tab', Qt.Key.Key_Home: 'Home', Qt.Key.Key_End: 'End', Qt.Key.Key_Return: 'Return',
            Qt.Key.Key_Enter: 'KP_Enter', Qt.Key.Key_F2: 'F2', Qt.Key.Key_Delete: 'Delete', Qt.Key.Key_Backspace: 'BackSpace', Qt.Key.Key_Escape: 'Escape'}
+
+
+def _standard_tip(row):
+    if row['kind'] == 'header':
+        return 'Click to set the standard for the whole section.'
+    return row.get('standard_tip', '') if row['kind'] == 'point' else ''
+
+
+def _function_tip(row):
+    return row.get('function', '') if row['kind'] == 'point' and len(row.get('function', '')) > 28 else ''      # a long name (with the temperature sensor) is cut by the column: the whole of it here
+
+
+def _unc_tip(row):
+    return row.get('unc_tip', '') if row['kind'] == 'point' else ''
 
 
 class SheetDelegate(CellDelegate):
@@ -58,6 +73,12 @@ class SheetDelegate(CellDelegate):
             painter.fillRect(r, QColor(t['head_hi']))
             painter.setPen(border)
             painter.drawRect(r.adjusted(0, 0, -1, -1))
+            if c >= STD_C:                                # a heading shows nothing in the STANDARD / UNCERTAINTY cells (the STANDARD one opens the whole-section drop-down)
+                if c == STD_C and sel_row and self.grid.sel_c == c:
+                    painter.setPen(QPen(QColor(t['primary']), 2))
+                    painter.drawRect(r.adjusted(1, 1, -2, -2))
+                painter.restore()
+                return
             bad = bool(row['problem']) and row['level'] == 'error'
             label = row['function'] + (f'   - {row["problem"]}' if bad else '')
             painter.setPen(QColor(t['bad'] if bad else t['text']))
@@ -78,17 +99,22 @@ class SheetDelegate(CellDelegate):
         painter.setPen(border)
         painter.drawRect(r.adjusted(0, 0, -1, -1))
         marked = key in ('low', 'high') and row.get('limits_from') == 'typed'
-        fg = t['on_primary'] if sel_cell else t['muted'] if (not row['enabled'] and row['kind'] == 'point') else t['text']
+        quiet = key == 'standard' and (row.get('standard', '') in ('MANUAL', 'none covers it'))
+        fg = t['on_primary'] if sel_cell else t['muted'] if ((not row['enabled'] and row['kind'] == 'point') or quiet) else t['text']
         painter.setFont(base)
         painter.setPen(QColor(fg))
         fm = painter.fontMetrics()
-        room = r.width() - 16 - (44 if marked else 0)
+        arrow = key == 'standard' and row['kind'] == 'point' and bool(row.get('standard'))
+        room = r.width() - 16 - (44 if marked else 0) - (14 if arrow else 0)
         text = fm.elidedText(str(row.get(key, '') or ''), Qt.TextElideMode.ElideRight, max(10, room))
         if text:
             if col['align'] == 'center':
                 painter.drawText(r, int(Qt.AlignmentFlag.AlignCenter), text)
             else:
                 painter.drawText(r.adjusted(8, 0, -8, 0), int(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft), text)
+        if arrow:                                          # it is a drop-down
+            painter.setPen(QColor(t['on_primary'] if sel_cell else t['muted']))
+            painter.drawText(r.adjusted(0, 0, -6, 0), int(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight), '\u25be')
         if marked:
             painter.setPen(QColor(t['on_primary'] if sel_cell else t['muted']))
             painter.drawText(r.adjusted(0, 0, -6, 0), int(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight), 'typed')
@@ -98,7 +124,7 @@ class SheetDelegate(CellDelegate):
 class _ShareSheet(QObject):
     """A wide sheet no longer becomes one huge FUNCTION TESTED column with the numbers squeezed at the right: the width beyond the columns' own widths is shared
     (the same idea as the Manager list), the function column keeping the largest part.  Narrower than that, the function column takes what is left, as before."""
-    WEIGHTS = (0.0, 0.0, 0.34, 0.30, 0.18, 0.18)             # '#', step, function, nominal, low, high
+    WEIGHTS = (0.0, 0.38, 0.14, 0.10, 0.10, 0.17, 0.11)      # '#', function, nominal, low, high, standard, uncertainty
 
     def __init__(self, grid):
         super().__init__(grid)
@@ -120,7 +146,7 @@ class _ShareSheet(QObject):
             for i, (w, k) in enumerate(zip(base, self.WEIGHTS)):
                 hh.resizeSection(i, int(w + extra * k))
             if vp < sum(base):                                # narrow: the function column gives way first (as the stretching column did)
-                hh.resizeSection(2, max(120, vp - (sum(base) - base[2])))
+                hh.resizeSection(1, max(120, vp - (sum(base) - base[1])))
         except RuntimeError:
             pass                                              # the grid went away
 
@@ -129,7 +155,8 @@ class SheetGrid(DataTable):
     def __init__(self, model, on_click, on_key, on_edit, parent=None):
         cols = [Column('n', '#', 44, align='center')]
         for c in M.VIEW_COLUMNS:
-            cols.append(Column(c['key'], c['title'], c['width'], align='center' if c['align'] == 'center' else 'left', stretch=c['key'] == 'function'))
+            tip = {'standard': _standard_tip, 'unc': _unc_tip, 'function': _function_tip}.get(c['key'])           # the reason behind a STANDARD / UNCERTAINTY cell (also why an UNCERTAINTY cell is blank)
+            cols.append(Column(c['key'], c['title'], c['width'], align='center' if c['align'] == 'center' else 'left', stretch=c['key'] == 'function', tooltip=tip))
         super().__init__(cols, [], row_key=lambda r: r['key'], multi=False, alternating=False, empty_text='', parent=parent)
         self.model, self.on_click, self.on_key, self.on_edit = model, on_click, on_key, on_edit
         self.sel_key, self.sel_c = None, 1
@@ -147,7 +174,7 @@ class SheetGrid(DataTable):
         hh.setMinimumSectionSize(40)
         self.verticalHeader().setDefaultSectionSize(SHEET_ROW_H)
         self.setAccessibleName('Datasheet test point sheet')
-        hh.setSectionResizeMode(2, hh.ResizeMode.Interactive)          # the function column is sized by _ShareSheet (it used to take every spare pixel)
+        hh.setSectionResizeMode(1, hh.ResizeMode.Interactive)          # the function column is sized by _ShareSheet (it used to take every spare pixel)
         self._share = _ShareSheet(self)
 
     # ---- showing the model
@@ -160,7 +187,7 @@ class SheetGrid(DataTable):
             self.clearSpans()
             for i, r in enumerate(rows):
                 if r['kind'] == 'header':
-                    self.setSpan(i, 1, 1, len(M.VIEW_COLUMNS))
+                    self.setSpan(i, 1, 1, STD_C - 1)                # the heading spans FUNCTION..HIGH; its STANDARD cell stays separate
         self.show_selection()
 
     def show_selection(self) -> None:

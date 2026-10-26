@@ -27,6 +27,8 @@ from pathlib import Path
 
 import datasheet_builder as db
 import datasheet_builder_rules as _rules
+import dsb_sensors as sens
+from datasheet_builder_grid_standards import StandardColumnsMixin
 from datasheet_builder_check_model import CheckMixin      # the Sheet check (build-time rules 1-5), GridModel only
 
 D = Decimal
@@ -53,7 +55,6 @@ S_HEADER, S_FUNCTIONS, S_RANGES, S_SPEC, S_POINTS, S_AUTOMATION, S_REVIEW = rang
 
 KIND_GROUPS = (('dmm', 'Multimeter / handheld / calibrator'), ('scope', 'Oscilloscope'), ('generator', 'Signal / function generator'))
 SETTING_FIELDS = {
-    'TEMP': [('tc_type', 'Thermocouple type', ['K', 'J', 'T', 'E', 'N', 'R', 'S', 'B'], 'K')],
     'GEN_AMPL': [('waveform', 'Waveform', ['SIN', 'SQU', 'DC'], 'SIN'), ('load', 'Load', ['INF', '50'], 'INF'), ('amp_unit', 'Amplitude is in', ['Vrms', 'Vpp', 'Vp'], 'Vrms')],
     'GEN_FLAT': [('waveform', 'Waveform', ['SIN', 'SQU'], 'SIN'), ('amp_unit', 'Amplitude is in', ['Vrms', 'Vpp', 'Vp'], 'Vrms')],
 }
@@ -1567,6 +1568,10 @@ class EditorModel:
             else:
                 import datasheet_builder_match as dm
                 self._matcher = dm.Matcher()
+            try:
+                self._matcher.strict_sensor = True      # the Builder never assumes a temperature sensor (the Manager list and the run keep the old Type K reading)
+            except AttributeError:
+                pass
         return self._matcher
 
     def run_match(self, period=None):
@@ -1596,7 +1601,7 @@ class EditorModel:
             return 'cannot automate (no standard)'
         if self._manual_sheet():
             return 'set by hand (manual calibration): its uncertainty is this standard\'s'
-        cap = dm.automation_status(a.standard, a.kind, a.direction)
+        cap = dm.automation_status(a.standard, a.cap_kind or a.kind, a.direction)
         return dm.automation_text(cap, a.kind)
 
     def match_rows(self, fid=None, filter='all'):
@@ -1667,7 +1672,7 @@ class EditorModel:
         a = self.match_result.assignments[pid]
         rows = []
         for c in a.candidates:
-            cap = dm.automation_status(c.standard, a.kind, a.direction)
+            cap = dm.automation_status(c.standard, a.cap_kind or a.kind, a.direction)
             hand = self._manual_sheet()
             rows.append(dict(standard=c.standard, covered=c.covered, tur=tartur.format_ratio(c.tur), tar=tartur.format_ratio(c.tar),
                              automation='set by hand (manual calibration)' if hand else dm.automation_text(cap, a.kind),
@@ -1821,12 +1826,13 @@ GRID_COLUMNS = (
 )
 # GRID_COLUMNS is the PRINTED datasheet (the template still has As Found / As Left / Out of Tol, then LOW LIMIT / HIGH LIMIT).  The on-screen grid shows only VIEW_COLUMNS: the blank
 # As Found / As Left / Out of Tol columns are not needed while building (view only; the row dicts still carry them, print_view() still prints them).
-VIEW_COLUMNS = (
-    dict(key='step', title='STEP NUM', width=90, edit=False, align='center'),
+VIEW_COLUMNS = (                       # no STEP NUM column on screen (owner, 2026-10-25): the printed datasheet keeps it (GRID_COLUMNS)
     dict(key='function', title='FUNCTION TESTED', width=270, edit=True, align='w'),
     dict(key='nominal', title='NOMINAL VALUE', width=240, edit=True, align='w'),
     dict(key='low', title='LOW LIMIT', width=160, edit=False, align='w'),
     dict(key='high', title='HIGH LIMIT', width=160, edit=False, align='w'),
+    dict(key='standard', title='STANDARD', width=150, edit=False, align='w'),         # the standard used for the point (click to choose); worked out after edits settle
+    dict(key='unc', title='UNCERTAINTY', width=120, edit=False, align='w'),           # read-only: the point's uncertainty as the sheet check resolves it (blank when it cannot be)
 )
 # The tolerance is shown as the two ABSOLUTE limits (nominal -/+ tolerance, worked out with the same exact Decimal limit maths as ever), never as a +/- error.
 # The two limit cells are READ-ONLY displays: the limits are made only by the tolerance calculator (Inspector, section Limits and tolerance: the chips and
@@ -1852,7 +1858,7 @@ MULTI_MODES = (('span', 'Lo to High', 'n points spread evenly from Nominal Value
                ('units', 'n Units', 'A row every n units (in the Units of Measure), starting at Nominal Value.'),
                ('ppm', 'n ppm', 'A row every n ppm of the High value, starting at Nominal Value.'))
 UNIT_PREFIXES = {'V': ('µ', 'm', '', 'k'), 'A': ('µ', 'm', ''), 'ohm': ('m', '', 'k', 'M', 'G'), 'F': ('p', 'n', 'µ', 'm', ''), 'Hz': ('', 'k', 'M', 'G'),
-                 's': ('n', 'µ', 'm', '')}
+                 's': ('n', 'µ', 'm', ''), 'S': ('p', 'n', 'µ', 'm', '')}
 LOCK_MODES = (('edit', 'Edit Mode'), ('locked', 'Locked'))
 _NUMBER_ONLY = re.compile(r'^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$')
 _CODE_COL = {'no_spec': 'tol', 'expr_eval': 'tol', 'limit_inverted': 'tol', 'limit_value': 'tol', 'override_inverted': 'tol', 'spec_missing_period': 'tol',
@@ -1933,6 +1939,16 @@ def insert_at(text, pos, symbol):
 def copy_spec(entry):
     """A separate copy of a SpecEntry (so two rows never share one object)."""
     return db.SpecEntry.from_dict(copy.deepcopy(entry.to_dict())) if entry is not None else None
+
+
+CALC_KEYS = ('types', 'plus', 'minus', 'asym', 'operand', 'units', 'decs', 'res', 'auto_res', 'fs_scale', 'multi_mode', 'multi_high', 'multi_n')
+# The tolerance calculator boxes that a Calc used, kept as typed (Point.calc, and the sheet's last one in ds.options['last_calc']).  Display / re-edit only: the
+# limits are always worked out from Point.spec (the exact Decimal expressions), never from these texts.
+STICKY_UNIT_FREE = ('types', 'plus', 'minus', 'asym', 'operand')
+
+
+def _spec_sig(p):
+    return json.dumps(p.spec.to_dict(), sort_keys=True) if p.spec is not None else ''
 
 
 def _decimals_of(value):
@@ -2020,7 +2036,7 @@ class Resolved:
     kind: str = ''
 
 
-class GridModel(CheckMixin, EditorModel):
+class GridModel(StandardColumnsMixin, CheckMixin, EditorModel):
     """The datasheet grid: everything the window needs, with no tkinter.
 
         g = GridModel(Storage())                      # or GridModel.open(storage, uid)
@@ -2072,7 +2088,7 @@ class GridModel(CheckMixin, EditorModel):
     def rows(self):
         """Every row of the sheet, top to bottom: a heading for each section, its test points, an empty row under an empty section, then empty rows
         at the end.  Cached until the datasheet changes."""
-        stamp = (self._rev, self.period, self.extra_blank)
+        stamp = (self._rev, self.period, self.extra_blank, self._x_ready)
         if self._rows_cache and self._rows_cache[0] == stamp:
             return self._rows_cache[1]
         by_point, by_func = self._problem_index()
@@ -2080,7 +2096,8 @@ class GridModel(CheckMixin, EditorModel):
 
         def add(**kw):
             for k, v in (('found', ''), ('left', ''), ('oot', ''), ('problem', ''), ('level', ''), ('bad', ()), ('enabled', True), ('remark', False),
-                         ('step', ''), ('function', ''), ('nominal', ''), ('low', ''), ('high', ''), ('formula', ''), ('limits_from', ''), ('pid', ''), ('fid', ''), ('badge', ''), ('status', '')):
+                         ('step', ''), ('function', ''), ('nominal', ''), ('low', ''), ('high', ''), ('formula', ''), ('limits_from', ''), ('pid', ''), ('fid', ''), ('badge', ''), ('status', ''),
+                         ('standard', ''), ('standard_tip', ''), ('std_hand', False), ('unc', ''), ('unc_tip', '')):
                 kw.setdefault(k, v)
             kw['n'] = len(out) + 1
             out.append(kw)
@@ -2098,9 +2115,15 @@ class GridModel(CheckMixin, EditorModel):
                 nominal = self.nominal_text(fn, p)
                 status = ('off' if not p.enabled else 'bad' if issue.get('level') == 'error' else 'warn' if issue.get('level') == 'warn'
                           or (not fn.info.get('passfail') and not limits['low'] and not limits['high']) else 'good')
+                fname = f'{fn.name}, {self.range_text(fn, rng)} range' if rng is not None and len(fn.ranges) > 1 else fn.name
+                if fn.kind == 'TEMP':                                       # how the temperature is sourced is part of the row: 'Type K', 'RTD Pt 385, 100 ohm'
+                    skey = sens.sensor_of(fn, p)
+                    fname = (f'{sens.short(skey)}, ' if skey else 'sensor not chosen, ') + fname         # first: the narrow FUNCTION column cuts the end of a long name
+                    if not skey and p.enabled and status == 'good':
+                        status = 'warn'
                 add(key=f'p:{fn.id}:{p.id}', kind='point', fid=fn.id, pid=p.id, step=(f'{fi}-{k}' if p.enabled else '') + (' *' if p.note else ''),
-                    function=f'{fn.name}, {self.range_text(fn, rng)} range' if rng is not None and len(fn.ranges) > 1 else fn.name,
-                    nominal=nominal, badge=badge, status=status, **limits, enabled=p.enabled, remark=bool(p.note), **issue)
+                    function=fname,
+                    nominal=nominal, badge=badge, status=status, **limits, enabled=p.enabled, remark=bool(p.note), **self.standard_cells(fn, p, issue['problem'] if issue.get('level') == 'error' else ''), **issue)
             if not fn.points:
                 add(key=f'e:{fn.id}', kind='blank', fid=fn.id)
         for i in range(max(SPARE_ROWS, MIN_ROWS - len(out)) + self.extra_blank):
@@ -2144,7 +2167,7 @@ class GridModel(CheckMixin, EditorModel):
         forced = _prefix_value(rng.display_unit or fn.display_unit) if rng is not None and (rng.display_unit or fn.display_unit) else ''
         return shared_prefix(values, fn.unit, forced)
 
-    def fmt_value(self, fn, rng, value, prefix=None):
+    def fmt_value(self, fn, rng, value, prefix=None, res=None):
         """'5.000 V': display only.  The digits are the exact value's; when the range has a resolution the number is padded with zeros to it."""
         if value is None:
             return ''
@@ -2153,12 +2176,13 @@ class GridModel(CheckMixin, EditorModel):
         with db.localcontext() as c:
             c.prec = db.PREC
             need = _decimals_of(db.dec(value) / db.D(10) ** exp) if value != 0 else 0
-            res = _decimals_of(rng.resolution / db.D(10) ** exp) if rng is not None and rng.resolution else 0
+            r = res if res is not None else (rng.resolution if rng is not None else None)
+            res = _decimals_of(r / db.D(10) ** exp) if r else 0
         return db.format_si(value, fn.unit, prefix=pre, decimals=max(need, res))
 
     def nominal_text(self, fn, p):
         """The nominal cell: '+5 V', '5 V @ 1 kHz', '1 kHz, level 1 V'.  parse_nominal reads the same grammar back."""
-        s = self.fmt_value(fn, fn.range(p.range_id), p.nominal)
+        s = self.fmt_value(fn, fn.range(p.range_id), p.nominal, res=p.resolution)
         if p.nominal > 0 and fn.unit and self._signed(fn):
             s = '+' + s
         if p.frequency is not None:
@@ -2250,13 +2274,13 @@ class GridModel(CheckMixin, EditorModel):
             return '', ''
         rng = fn.range(p.range_id)
         long_ = lambda v: v is not None and len(v.as_tuple().digits) > 12
-        if rng is not None and rng.resolution is None and (long_(lim.low) or long_(lim.high)):
+        if rng is not None and fn.resolution_of(p) is None and (long_(lim.low) or long_(lim.high)):
             lim = copy.copy(lim)                                 # a tolerance in dB makes an endless decimal: shown to 9 digits (display only)
             lim.low = db._sig(lim.low, 9) if long_(lim.low) else lim.low
             lim.high = db._sig(lim.high, 9) if long_(lim.high) else lim.high
         pre = self._prefix_for(fn, rng, [v for v in (lim.low, lim.high, p.nominal) if v is not None])
-        lo = self.fmt_value(fn, rng, lim.low, pre) if lim.low is not None else 'open'
-        hi = self.fmt_value(fn, rng, lim.high, pre) if lim.high is not None else 'open'
+        lo = self.fmt_value(fn, rng, lim.low, pre, res=p.resolution) if lim.low is not None else 'open'
+        hi = self.fmt_value(fn, rng, lim.high, pre, res=p.resolution) if lim.high is not None else 'open'
         if lim.one_sided and lim.bound_used:                 # 'at least -3 dB': the other side is only the bound the engine needs (low <= reading <= high), not a limit
             mode = (fn.governing(p) or [None])[0].mode if fn.governing(p) else ''
             lo, hi = ('no limit' if mode == 'high_only' else lo), ('no limit' if mode == 'low_only' else hi)
@@ -2501,6 +2525,9 @@ class GridModel(CheckMixin, EditorModel):
                 return ''
             text = self.limit_cells(fn, p)[col == 'high']
             return '' if text in ('open', 'no limit') else text
+        if col in ('standard', 'unc'):
+            r = self.row(key)
+            return (r or {}).get(col, '')
         return ''
 
     def cell_editable(self, key=None, col=None):
@@ -2515,6 +2542,10 @@ class GridModel(CheckMixin, EditorModel):
             return False, 'Step numbers are worked out from the order of the rows.'
         if col in ('low', 'high'):
             return False, LIMITS_HINT
+        if col == 'unc':
+            return False, 'The uncertainty is worked out from the standard that is used for the point: choose the standard in the STANDARD cell.'
+        if col == 'standard':
+            return False, 'Choose the standard from the drop-down: click the cell, or press Enter.'
         if self.locked:
             return False, LOCKED_MESSAGE
         if r['kind'] == 'header' and col != 'function':
@@ -2704,6 +2735,7 @@ class GridModel(CheckMixin, EditorModel):
         if src is None:
             return False
         p.spec = copy_spec(src.spec)
+        self._inherit_calc(src, p)
         return True
 
     def _create_point(self, fn, nominal, freq=None, amp=None, want_fs=None, inherit=True, waveform=None):
@@ -2866,6 +2898,14 @@ class GridModel(CheckMixin, EditorModel):
         return res
 
     # ---- handheld multimeter template (a starting set of sections; the sheet itself still starts blank)
+    TEMPLATES = (('Handheld multimeter sections', 'DC / AC volts and current, ohms, continuity, capacitance, frequency, temperature and diode sections, empty.'),)
+
+    def add_template(self, name):
+        """Add the template called `name` (see TEMPLATES) to the sheet: one undo step.  Sections the sheet already has stay as they are."""
+        if name == self.TEMPLATES[0][0]:
+            return self.add_handheld_functions()
+        return Outcome(False, f'There is no template called "{name}".')
+
     HANDHELD_KINDS = ('DCV', 'ACV', 'DCI', 'ACI', 'OHM2', 'CONT', 'CAP', 'FREQ', 'TEMP', 'DIODE')
 
     def handheld_template(self):
@@ -2948,6 +2988,49 @@ class GridModel(CheckMixin, EditorModel):
         p.overrides.pop(self.period, None)                   # typed limits would win over the statement: the new statement replaces them
         p.edited = True
 
+    # ---- the calculation that made a row's limits is kept (as typed) with the row, and the last one is the sheet's starting point for the next row
+    def _remember_calc(self, fn, p, form):
+        """Keep the boxes of this Calc: on the row (its own copy) and as the sheet's last calculation.  Call inside _do, after _set_spec.  The 'Multiple Test Points' tick
+        is an action, not a setting, so it is not kept (its mode / n / High are)."""
+        calc = {k: copy.deepcopy(form[k]) for k in CALC_KEYS if k in form}
+        res = fn.resolution_of(p)
+        calc.update(res_si=db.fmt(res) if res is not None else '', spec_sig=_spec_sig(p))
+        p.calc = calc
+        self.ds.options['last_calc'] = dict(kind=fn.kind, form={k: copy.deepcopy(form[k]) for k in CALC_KEYS if k in form and k != 'fs_scale'})
+
+    def _inherit_calc(self, src, dst):
+        """A row that took another row's tolerance statement takes its calculation too (its own copy)."""
+        if src.calc and dst.spec is not None and src.calc.get('spec_sig') == _spec_sig(src):
+            dst.calc = dict(copy.deepcopy(src.calc), spec_sig=_spec_sig(dst))
+        else:
+            dst.calc = None
+
+    def _overlay_calc(self, fn, p, form):
+        """Show the kept calculation in the boxes: the row's own, else (a new row, or a row with no tolerance yet) the sheet's last one.  True when applied."""
+        if p is not None and p.calc and p.spec is not None and p.calc.get('spec_sig') == _spec_sig(p):
+            c = copy.deepcopy(p.calc)
+            res = fn.resolution_of(p)
+            if c.get('res_si') != (db.fmt(res) if res is not None else ''):
+                for k in ('decs', 'res', 'auto_res'):                       # the resolution was changed elsewhere since: show the real one
+                    c.pop(k, None)
+            for k in CALC_KEYS:
+                if k in c and k not in ('units', 'fs_scale'):                # the row's own unit and range always come from the row itself (a copied calculation may be another row's)
+                    form[k] = c[k]
+            return True
+        if p is not None and (p.spec is not None or fn.governing(p) or self.typed_limits(p) is not None):
+            return False
+        last = self.ds.options.get('last_calc')
+        if not last or fn is None:
+            return False
+        f = last.get('form') or {}
+        same = last.get('kind') == fn.kind
+        if not same and any(t in f.get('types', ()) for t in ('floor', 'calc', 'db')):
+            return False
+        for k in CALC_KEYS:
+            if k in f and (same or k in STICKY_UNIT_FREE):
+                form[k] = copy.deepcopy(f[k])
+        return True
+
     def clear_typed_limits(self, key=None):
         """Drop the stored Low / High pair of the row for the period on show (an old sheet may still hold one; the Builder no longer writes them).  The
         limits then come from the row's tolerance statement; with none they are empty until the tolerance calculator (Calc) gives the row one.  One undo
@@ -2977,7 +3060,7 @@ class GridModel(CheckMixin, EditorModel):
     def blank_form(self, fn=None):
         """What the boxes show for a new row: % of I.V. ticked, symmetric, one test point, Auto Res on."""
         return dict(types=['iv'], plus=self.blank_side(), minus=self.blank_side(), asym=False, operand='+', fs_scale='', nominal='', low='', high='',
-                    units=self.typing_unit(fn) if fn else '', freq='', level='', expect='on', multi=False, multi_mode='span', multi_high='', multi_n='5',
+                    units=self.typing_unit(fn) if fn else '', freq='', level='', expect='on', sensor='', multi=False, multi_mode='span', multi_high='', multi_n='5',
                     decs='', res='', auto_res=True, remark='', run=True)
 
     def _side_from_expr(self, fn, expr):
@@ -3031,10 +3114,10 @@ class GridModel(CheckMixin, EditorModel):
         fn, p = self.point_of(r['key'])
         if fn is None and r['kind'] == 'blank':
             fn = self.target_function()
-        st = dict(key=r['key'], kind=r['kind'], fid=fn.id if fn else '', function=fn.name if fn else '', unit=fn.unit if fn else '', symbol=db.unit_symbol(fn.unit) if fn else '',
+        st = dict(key=r['key'], kind=r['kind'], sensors=sens.sensor_types(), fid=fn.id if fn else '', function=fn.name if fn else '', unit=fn.unit if fn else '', symbol=db.unit_symbol(fn.unit) if fn else '',
                   unit_choices=unit_choices(fn.unit) if fn else [], passfail=bool(fn and fn.info.get('passfail')), note='',
                   fields=dict(frequency=bool(fn and (fn.info.get('ac') or fn.info['family'] == 'generator' or fn.info.get('value'))) and not (fn and fn.unit == 'Hz'),
-                              amplitude=bool(fn and fn.info.get('amplitude')), expect=bool(fn and fn.kind == 'CONT'),
+                              amplitude=bool(fn and fn.info.get('amplitude')), expect=bool(fn and fn.kind == 'CONT'), sensor=bool(fn and fn.kind == 'TEMP'),
                               level_basis='pp' if fn and fn.info['family'] == 'scope' else 'rms'),
                   new_row=r['kind'] == 'blank', can_edit=not self.locked and r['kind'] != 'header', typed_limits=False)
         form = self.blank_form(fn)
@@ -3042,20 +3125,26 @@ class GridModel(CheckMixin, EditorModel):
             st['note'] = 'This is a section heading. Click a test row to see and change its tolerance.'
         elif fn is None:
             st['note'] = 'Choose what this row tests (the function box), then type the value to test.'
+        elif p is None and r['kind'] == 'blank' and not st['passfail']:
+            self._overlay_calc(fn, None, form)               # a new row starts with the last calculation used on this sheet
         if p is not None:
             rng = fn.range(p.range_id)
-            num, units = split_unit_text(self.fmt_value(fn, rng, p.nominal))
+            num, units = split_unit_text(self.fmt_value(fn, rng, p.nominal, res=p.resolution))
+            if fn.kind == 'TEMP':
+                form['sensor'] = sens.sensor_of(fn, p)
             form.update(nominal=num, units=units or form['units'], freq=db.format_si(p.frequency, 'Hz') if p.frequency is not None else '',
                         level=level_display(fn, p) if p.amplitude is not None else '', expect=p.settings.get('expect', 'on'), remark=p.note, run=p.enabled,
                         fs_scale=self.fmt_value(fn, rng, rng.full_scale) if rng else '')
-            if rng is not None and rng.resolution:
+            pres = fn.resolution_of(p)
+            if rng is not None and pres:
                 pre = prefix_of_units(form['units'], fn.unit)
                 with db.localcontext() as c:
                     c.prec = db.PREC
-                    form['decs'] = str(_decimals_of(rng.resolution / db.D(10) ** dict(db._PREFIX_ORDER)[pre]))
-                    form['res'] = self.fmt_value(fn, rng, rng.resolution, pre)
+                    form['decs'] = str(_decimals_of(pres / db.D(10) ** dict(db._PREFIX_ORDER)[pre]))
+                    form['res'] = self.fmt_value(fn, rng, pres, pre, res=pres)
             if not st['passfail']:
                 self._form_from_spec(fn, p, form)
+                self._overlay_calc(fn, p, form)
                 lo_t, hi_t = self.limit_cells(fn, p)                      # the Low / High limit boxes: always read-only displays of the calculated limits
                 form.update(low='' if lo_t in ('open', 'no limit') else lo_t, high='' if hi_t in ('open', 'no limit') else hi_t)
                 st['typed_limits'] = self.typed_limits(p) is not None
@@ -3133,17 +3222,29 @@ class GridModel(CheckMixin, EditorModel):
         return bool(str(form.get('decs') or '').strip()) or not form.get('auto_res', True)
 
     def _set_range_resolution(self, fn, rng, res, form, keep_ids=()):
-        """Give the range the resolution asked for.  Rows on a range share its resolution (counts and rounding use it), so a resolution that only came from the
-        decimals of a typed nominal never replaces a different one the range already has; one the person typed does, and the message names the other rows it changes."""
-        if res is None or rng is None or rng.resolution == res:
+        """Give the rows `keep_ids` the resolution asked for.  A range with no resolution yet gets it (the first rows made on it define it); after that a
+        resolution that differs from the range's belongs to THOSE rows only (Point.resolution): the other rows on the range keep theirs, so changing one point never
+        changes its neighbours.  A resolution that only came from the decimals of a typed nominal never replaces a different one the range already has."""
+        if res is None or rng is None:
+            return ''
+        mine = [q for q in fn.points if q.id in keep_ids]
+        others = [q for q in fn.points if q.range_id == rng.id and q.id not in keep_ids]
+        if rng.resolution is None and not others:
+            rng.resolution = res
+            for q in mine:
+                q.resolution = None
+            return ''
+        if rng.resolution == res:
+            for q in mine:
+                q.resolution = None                        # back to the range's own
             return ''
         if rng.resolution is not None and not self._explicit_resolution(form):
-            return f'The range keeps its resolution of {show(rng.resolution, fn.unit)} (rows on one range share it; change it in Decimals shown).'
-        others = [q for q in fn.points if q.range_id == rng.id and q.id not in keep_ids]
-        had = rng.resolution is not None
-        rng.resolution = res
-        if had and others:
-            return f'The resolution of this range is now {show(res, fn.unit)}: the {len(others)} other row(s) on it were recalculated with it.'
+            return f'The range keeps its resolution of {show(rng.resolution, fn.unit)} (type Decimals shown or Meas Res to give a row its own).'
+        for q in mine:
+            q.resolution = res
+        if others or rng.resolution is not None:
+            n = len(mine)
+            return (f'This row has a resolution of {show(res, fn.unit)} of its own' if n == 1 else f'These {n} rows have a resolution of {show(res, fn.unit)} of their own') + ': the other rows on the range keep theirs.'
         return ''
 
     def _apply_row(self, fn, p, form, want_fs):
@@ -3175,6 +3276,7 @@ class GridModel(CheckMixin, EditorModel):
         note = (note + ' ' + res_note).strip() if res_note else note
         if fn.kind == 'CONT':
             p.settings['expect'] = form.get('expect') or 'on'
+        self._apply_sensor(fn, [p], form.get('sensor'))
         p.note = str(form.get('remark', '')).strip()
         p.enabled = bool(form.get('run', True))
         p.edited = True
@@ -3183,6 +3285,7 @@ class GridModel(CheckMixin, EditorModel):
             had_typed = self.typed_limits(p) is not None
             plus, minus = self.form_spec_texts(fn, form)
             self._set_spec(fn, p, plus, minus)                    # the new statement replaces any stored typed Low / High pair of the period
+            self._remember_calc(fn, p, form)
             if had_typed:
                 note = ('The typed limits of this row were replaced by the calculated ones. ' + note).strip()
             info = db.point_limits(self.ds, fn, p, self.period)
@@ -3342,15 +3445,19 @@ class GridModel(CheckMixin, EditorModel):
             if not made:
                 raise db.DsError('multi', 'Every one of those rows is already on the sheet.')
             res = self._resolution_from_form(fn, form, units, with_units(str(form.get('nominal', '')), units))
+            if r.get('pid') and fn.kind == 'TEMP':                                # the row the person was editing keeps (gets) the same choice as the rows made from it
+                self._apply_sensor(fn, [q for q in fn.points if q.id == r['pid']], form.get('sensor'))
             for p in made:
                 if res is not None:
                     self._set_range_resolution(fn, fn.range(p.range_id), res, form, keep_ids=tuple(q.id for q in made))
                 if fn.kind == 'CONT':
                     p.settings['expect'] = form.get('expect') or 'on'
+                self._apply_sensor(fn, [p], form.get('sensor'))                 # each made row has its own copy of the choice
                 p.note = str(form.get('remark', '')).strip()
                 p.enabled = bool(form.get('run', True))
                 if plus:
                     self._set_spec(fn, p, plus, minus)
+                    self._remember_calc(fn, p, form)
                     info = db.point_limits(self.ds, fn, p, self.period)
                     if info.get('error'):
                         raise db.DsError('tol', info['error'])
@@ -3365,6 +3472,47 @@ class GridModel(CheckMixin, EditorModel):
         if res.ok:
             self.select(res.detail)
         return res
+
+    # ---- how a temperature is sourced (thermocouple type or RTD): stored in each point's settings['sensor']
+    @staticmethod
+    def _apply_sensor(fn, points, key):
+        """Write the choice into the points (call inside _do).  None / absent leaves a point as it is; '' removes the choice; the old tc_type letter is replaced by it."""
+        if fn.kind != 'TEMP' or key is None:
+            return
+        if key and key not in dict(sens.sensor_types()):
+            raise db.DsError('sensor', f'"{key}" is not a thermocouple type or RTD the builder knows.')
+        for p in points:
+            if key:
+                p.settings['sensor'] = key
+                p.settings.pop('tc_type', None)
+            else:
+                p.settings.pop('sensor', None)
+                p.settings.pop('tc_type', None)
+            p.edited = True
+
+    @staticmethod
+    def sensor_choices():
+        return sens.sensor_types()
+
+    def set_sensor(self, key=None, sensor='', scope='point'):
+        """Choose how the temperature of the selected row (scope 'point') or of every row of its section (scope 'section') is sourced.  ONE undo step."""
+        key = key or self.sel_key
+        if self.locked:
+            return Outcome(False, LOCKED_MESSAGE)
+        r = self.row(key)
+        fn = self.ds.function(r['fid']) if r and r['fid'] else None
+        if fn is None or fn.kind != 'TEMP':
+            return Outcome(False, 'Click a temperature row (or a temperature section heading) first.')
+        pts = list(fn.points) if scope == 'section' or r['kind'] == 'header' else [q for q in fn.points if q.id == r['pid']]
+        if not pts:
+            return Outcome(False, 'There is no temperature row here to choose a sensor for.')
+
+        def act():
+            self._apply_sensor(fn, [fn.point(q.id) for q in pts], sensor)
+            n = len(pts)
+            what = f'{n} rows' if n != 1 else 'This row'
+            return Outcome(True, f'{what} will be sourced as {sens.label(sensor)}.' if sensor else f'{what}: no sensor chosen.', key)
+        return self._do('choose sensor', act)
 
     # ---- the other buttons
     def recalc_all(self):
@@ -3398,6 +3546,7 @@ class GridModel(CheckMixin, EditorModel):
                 if scope == 'missing' and has:
                     continue
                 q.spec = copy_spec(q0.spec)
+                self._inherit_calc(q0, q)
                 if scope != 'missing':
                     q.overrides.clear()
                 q.edited = True

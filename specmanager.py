@@ -753,14 +753,14 @@ class StandardSpec:
             hits = preferred or hits
         return max(hits, key=lambda h: h.limit)
 
-    def lookup_temperature(self, celsius, tc='K', direction='output', period=None):
+    def lookup_temperature(self, celsius, tc='K', direction='output', period=None, variant=None):
         """Thermocouple SIMULATION accuracy (degC) of the standard at one temperature, for thermocouple type `tc` (default K).
         Own lookup because lookup() works on magnitudes (a negative temperature would match the wrong band) and the sheets also carry the same
         table in degF.  Only rows in degC, in the thermocouple function of that type, in the given direction (the calibrator SOURCES: 'output') and
         with the period asked for (default: the standard's, '1 yr') are used.  Bands are closed signed intervals; at a border the LARGER limit is
         used (the same rule as lookup() and the scope CMC).  Never extrapolates: a temperature outside every band returns None."""
         period = period or self.period
-        want = re.compile(rf'type\s*{re.escape(str(tc).strip())}\b', re.I)
+        want = re.compile(rf'type\s*{re.escape(str(tc).strip())}\b', re.I) if not variant else re.compile(re.escape(variant), re.I)       # variant: the text of any sensor's function name ('Type J', 'Pt 385, 100 Ohm')
         hits = []
         for r in self.rows:
             if r['kind'] != 'TEMP' or r['direction'] != direction or r['unit'] != 'degC' or r['amp_lo'] is None or r['amp_hi'] is None:
@@ -780,7 +780,7 @@ class StandardSpec:
         if r.get('resolution'):
             src = {'edited': 'edited in the manager', 'manual': "resolution column printed in the manufacturer's manual"}.get(r.get('res_src'), 'last digit of the printed range')
             return float(r['resolution']), src
-        if r.get('kind') == 'TEMP' and r.get('unit') == 'degC' and self.model in TC_RESOLUTION:       # the sheet carries no digits for degC rows
+        if r.get('kind') == 'TEMP' and r.get('unit') == 'degC' and self.model in TC_RESOLUTION and 'rtd' not in r.get('function', '').lower():       # the manual's 0.01 degC is the thermocouple resolution       # the sheet carries no digits for degC rows
             res, src = TC_RESOLUTION[self.model]
             return res, src
         return None, 'resolution of this range is not recorded'

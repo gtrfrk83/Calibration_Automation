@@ -265,7 +265,7 @@ def checks_manager_windows():
     win.panel_box.types['iv'].set(True)
     win.panel_box.v['iv'].set('0.05')
     check('grid: calculate tolerance', win.calc().ok)
-    x, y, _a, _b = win.sheet.geo.box(1, 2)
+    x, y, _a, _b = win.sheet.geo.box(1, 1)
     win.sheet.event_generate('<Button-1>', x=x + 5, y=y + 5)
     pump(root, 5)
     check('grid: mouse click selects a cell', win.model.sel_col == 'nominal', win.model.sel_col)

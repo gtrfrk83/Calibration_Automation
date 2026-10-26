@@ -134,8 +134,9 @@ class FlowTests(Base):
         self.assertEqual(kinds['OHM2']['symbol'], 'Ω')
         self.assertEqual({k['group'] for k in kinds.values()}, {'dmm', 'scope', 'generator'})
         self.assertTrue(ed.add_function('TEMP'))
-        self.assertEqual(ed.setting_fields(ed.fid)[0]['value'], 'K')
-        self.assertTrue(ed.set_function_setting(ed.fid, 'tc_type', 'J'))
+        self.assertEqual(ed.setting_fields(ed.fid), [])                # a new temperature section assumes no sensor (it is chosen per point, 'Sourced as')
+        self.assertNotIn('tc_type', ed.fn().settings)
+        self.assertTrue(ed.set_function_setting(ed.fid, 'tc_type', 'J'))   # an old sheet's section-level letter is still stored and read
         self.assertEqual(ed.fn().settings['tc_type'], 'J')
         self.assertTrue(ed.add_function('GEN_AMPL'))
         self.assertEqual(ed.fn().direction, 'source')

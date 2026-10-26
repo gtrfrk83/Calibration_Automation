@@ -93,6 +93,7 @@ class Sheet:
             self.assertOk(self.calc(self.points(fid)[0]['key'], **tol))
             for v in values[1:]:
                 self.assertOk(self.add_row(name, v))
+        self.assertOk(g.set_sensor(self.points('temp')[0]['key'], 'K', 'section'))        # temperature must say how it is sourced ('Sourced as'): the mock's calibrator makes Type K
         return g
 
 
