@@ -3214,7 +3214,7 @@
    "parameter": "Electrical Calibration of Thermocouple Indicators",
    "kind": "TEMP",
    "standard": "Multifunction calibrator",
-   "notes": "Thermocouple simulation, degC (printed p. 13 of 47, verified against the page image). bands = Type K; types = B C D E J K L N R S T U.",
+   "notes": "Thermocouple and RTD simulation, degC. Thermocouples: printed pp. 12-13 of 47 (types B C D p. 12, E J K L N R S T U p. 13), bands = Type K; types = B C D E J K L N R S T U (Types BP and XK, p. 14, are not loaded). RTDs: printed pp. 14-15 of 47, types Pt385-100 Pt385-200 Pt385-500 Pt385-1000 Pt3926-100 Pt3916-100 Cu427-10 PtNi385-120 (scope line \"Ni 672, 120 ohm\"); Pt395-100 is not on the scope. All verified against the rendered page images.",
    "bands": [
     {
      "lo": -200,
@@ -3686,6 +3686,350 @@
       "hi": 600,
       "rel": 0.0,
       "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "Pt385-100": [
+     {
+      "lo": -200,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.041,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 0,
+      "hi": 100,
+      "rel": 0.0,
+      "abs": 0.052,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 100,
+      "hi": 300,
+      "rel": 0.0,
+      "abs": 0.073,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 300,
+      "hi": 400,
+      "rel": 0.0,
+      "abs": 0.083,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 400,
+      "hi": 630,
+      "rel": 0.0,
+      "abs": 0.095,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 630,
+      "hi": 800,
+      "rel": 0.0,
+      "abs": 0.18,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "Pt385-200": [
+     {
+      "lo": -200,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.031,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 0,
+      "hi": 100,
+      "rel": 0.0,
+      "abs": 0.032,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 100,
+      "hi": 260,
+      "rel": 0.0,
+      "abs": 0.043,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 260,
+      "hi": 300,
+      "rel": 0.0,
+      "abs": 0.092,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 300,
+      "hi": 400,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 400,
+      "hi": 600,
+      "rel": 0.0,
+      "abs": 0.11,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 600,
+      "hi": 630,
+      "rel": 0.0,
+      "abs": 0.12,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "Pt385-500": [
+     {
+      "lo": -200,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.031,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 0,
+      "hi": 100,
+      "rel": 0.0,
+      "abs": 0.032,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 100,
+      "hi": 260,
+      "rel": 0.0,
+      "abs": 0.042,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 260,
+      "hi": 300,
+      "rel": 0.0,
+      "abs": 0.091,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 300,
+      "hi": 400,
+      "rel": 0.0,
+      "abs": 0.1,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 400,
+      "hi": 600,
+      "rel": 0.0,
+      "abs": 0.12,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 600,
+      "hi": 630,
+      "rel": 0.0,
+      "abs": 0.13,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "Pt385-1000": [
+     {
+      "lo": -200,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.021,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 0,
+      "hi": 100,
+      "rel": 0.0,
+      "abs": 0.033,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 100,
+      "hi": 260,
+      "rel": 0.0,
+      "abs": 0.044,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 260,
+      "hi": 300,
+      "rel": 0.0,
+      "abs": 0.054,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 300,
+      "hi": 400,
+      "rel": 0.0,
+      "abs": 0.055,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 400,
+      "hi": 600,
+      "rel": 0.0,
+      "abs": 0.058,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 600,
+      "hi": 630,
+      "rel": 0.0,
+      "abs": 0.18,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "Pt3926-100": [
+     {
+      "lo": -200,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.041,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 0,
+      "hi": 100,
+      "rel": 0.0,
+      "abs": 0.052,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 100,
+      "hi": 300,
+      "rel": 0.0,
+      "abs": 0.073,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 300,
+      "hi": 400,
+      "rel": 0.0,
+      "abs": 0.083,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 400,
+      "hi": 630,
+      "rel": 0.0,
+      "abs": 0.095,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "Pt3916-100": [
+     {
+      "lo": -200,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.041,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 0,
+      "hi": 100,
+      "rel": 0.0,
+      "abs": 0.052,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 100,
+      "hi": 300,
+      "rel": 0.0,
+      "abs": 0.073,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 300,
+      "hi": 400,
+      "rel": 0.0,
+      "abs": 0.083,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 400,
+      "hi": 630,
+      "rel": 0.0,
+      "abs": 0.095,
+      "rng": 0.0,
+      "gt": true
+     }
+    ],
+    "Cu427-10": [
+     {
+      "lo": -80,
+      "hi": 260,
+      "rel": 0.0,
+      "abs": 0.25,
+      "rng": 0.0,
+      "gt": false
+     }
+    ],
+    "PtNi385-120": [
+     {
+      "lo": -80,
+      "hi": 0,
+      "rel": 0.0,
+      "abs": 0.021,
+      "rng": 0.0,
+      "gt": false
+     },
+     {
+      "lo": 0,
+      "hi": 100,
+      "rel": 0.0,
+      "abs": 0.031,
+      "rng": 0.0,
+      "gt": true
+     },
+     {
+      "lo": 100,
+      "hi": 260,
+      "rel": 0.0,
+      "abs": 0.042,
       "rng": 0.0,
       "gt": true
      }

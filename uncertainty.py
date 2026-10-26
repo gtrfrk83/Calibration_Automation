@@ -38,8 +38,23 @@ def _src(source):
     return '5560A' if '5560' in text else '5522A' if ('5522' in text or '5520' in text) else None
 
 
+TC_TYPES = ('B', 'C', 'D', 'E', 'J', 'K', 'L', 'N', 'R', 'S', 'T', 'U')
+# canonical sensor keys of the TEMP entry's 'types' (shared with the Datasheet Builder): key -> display label.  A key with no bands in the file is not offered.
+RTD_LABELS = {'Pt385-100': 'Pt 385, 100 Ω', 'Pt385-200': 'Pt 385, 200 Ω', 'Pt385-500': 'Pt 385, 500 Ω', 'Pt385-1000': 'Pt 385, 1000 Ω',
+              'Pt3926-100': 'Pt 3926, 100 Ω', 'Pt3916-100': 'Pt 3916, 100 Ω', 'Pt395-100': 'Pt 395, 100 Ω', 'Cu427-10': 'Cu 427, 10 Ω',
+              'PtNi385-120': 'Ni 672, 120 Ω'}
+
+
+def sensor_types(scope=None):
+    """Ordered [(key, label)] of the temperature sensors the scope has bands for: thermocouples B C D E J K L N R S T U ('Type B' ...), then the RTDs
+    ('Pt385-100' ... 'PtNi385-120').  The key is what `Scope.dmm('TEMP', ..., tc=key)` / `Scope.temperature` take."""
+    entry = (scope or load()).entries.get(('generate', 'TEMP')) or {}
+    have = entry.get('types') or {}
+    return [(k, f'Type {k}') for k in TC_TYPES if have.get(k)] + [(k, lb) for k, lb in RTD_LABELS.items() if have.get(k)]
+
+
 def _tc_bands(entry, tc):
-    """The bands of one thermocouple type of the TEMP entry (Type K when none is named)."""
+    """The bands of one sensor type (thermocouple letter or RTD key) of the TEMP entry (Type K when none is named); an unknown key has no bands."""
     return (entry.get('types') or {}).get(tc or 'K') or ([] if entry.get('types') else entry['bands'])
 
 
@@ -93,6 +108,11 @@ class Scope:
         src = _src(source)
         hits = [_u(b, value) for b in entry['bands'] if _inside(value, b['lo'], b['hi']) and (not src or b.get('src') in (None, src))]
         return max(hits) if hits else None
+
+    def temperature(self, celsius, tc='K'):
+        """CMC in degC of the electrical simulation of sensor `tc` (a thermocouple letter or an RTD key, see `sensor_types`) at `celsius`, or None
+        (outside the printed bands or an unknown key: never a guess)."""
+        return self.dmm('TEMP', celsius, tc=tc)
 
     def ac_flatness(self, level, frequency):
         """Relative CMC (a fraction of the reading, k = 2) of 'AC Voltage - Measure, AC Flatness - Relative to 1 kHz' for a sine of `level` V rms at

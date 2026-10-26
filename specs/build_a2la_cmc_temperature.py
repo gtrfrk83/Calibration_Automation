@@ -13,6 +13,7 @@ The entry's 'bands' are Type K (what the handheld procedures simulate); 'types' 
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 PATH = Path(__file__).resolve().parent / 'a2la_1888_03_cmc.json'
@@ -39,10 +40,17 @@ def bands(rows):
 
 def main():
     data = json.loads(PATH.read_text(encoding='utf-8'))
+    old = next((e for e in data['entries'] if e['kind'] == 'TEMP'), None)
+    had_rtd = bool(old and any(k not in TYPES for k in old.get('types', {})))          # RTD keys belong to specs/build_a2la_cmc_rtd.py: put them back
+    at = data['entries'].index(old) if old else len(data['entries'])                 # keep the entry's place in the file
     data['entries'] = [e for e in data['entries'] if e['kind'] != 'TEMP']
-    data['entries'].append(dict(parameter='Electrical Calibration of Thermocouple Indicators', kind='TEMP', standard='Multifunction calibrator',
+    data['entries'].insert(at, dict(parameter='Electrical Calibration of Thermocouple Indicators', kind='TEMP', standard='Multifunction calibrator',
                                 notes='Thermocouple simulation, degC (printed p. 13 of 47, verified against the page image). bands = Type K; types = B C D E J K L N R S T U.',
                                 bands=bands(TYPES['K']), types={t: bands(r) for t, r in TYPES.items()}, basis='generate'))
+    if had_rtd:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import build_a2la_cmc_rtd
+        build_a2la_cmc_rtd.apply(data)
     PATH.write_text(json.dumps(data, indent=1, ensure_ascii=True), encoding='utf-8')
     print('written')
 
