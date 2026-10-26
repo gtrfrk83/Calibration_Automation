@@ -78,7 +78,7 @@ def functions():
     f = []
     f.append(eng.dc_function('Voltage, DC', 'DCV', 'V', 15, DCV, lambda r, t: [6, 9] + ([10] if r == '1000 V' else []), 'V'))
     f.append(eng.ohm_variant('Resistance [4-wire or 2W with math null]', 15, OHM, lambda r, t: [6, 11] + ([12] if r in ('100 Mohm', '1 Gohm') else [])))
-    f.append(eng.ohm_variant('Resistance [2-wire, no math null]', 15, OHM, lambda r, t: [6, 11], extra_abs='0.2', skip=('100 Mohm', '1 Gohm')))
+    f.append(eng.ohm_variant('Resistance [2-wire, no math null]', 15, OHM, lambda r, t: [6, 11] + ([12] if r in ('100 Mohm', '1 Gohm') else []), extra_abs='0.2', no_adder=('100 Mohm', '1 Gohm')))
     f.append(eng.dc_function('Current, DC', 'DCI', 'A', 15, DCI, lambda r, t: [6, 13] + ([14] if t else []) + ([15] if r == '10 A' else []), 'A'))
     f.append(eng.ac_function('Voltage, AC', 'ACV', 'V', 16, ACV_RANGES, ACV_BANDS, [6, 16], 'V'))
     cur = dict(name='Current, AC', direction='input', page=16, ranges=[])
@@ -105,7 +105,7 @@ NOTES.update({
           '"Resistance [2-wire, no math null]" with a fixed 0.2 ohm term (a plain lookup prefers the 4-wire function; pass variant="2-wire"; the main function is named "4-wire or 2W with math null" on purpose, so that variant="2-wire" selects only the no-math-null rows). Footnote 8 also: the 100 Mohm and 1 Gohm ranges are 2-wire ohms function only, and "see the manual for low power ohms '
           'specification and measurement currents" (the low-power ohms figures are NOT in the data sheet and NOT stored). Temperature coefficients (not stored, non ACAL / with ACAL): 100 ohm 0.0006 + 0.0005 / 0.0002 + 0.0005, 1 k - 100 k 0.0006 + 0.0001 / 0.0002 + 0.0001, '
           '1 Mohm 0.0010 + 0.0002 / 0.0002 + 0.0002, 10 Mohm 0.0030 + 0.0004 / 0.0030 + 0.0004, 100 Mohm 0.1000 + 0.0001 / 0.0100 + 0.0001, 1 Gohm 1.0000 + 0.0001 / 0.1000 + 0.0001.',
-    '12': 'RESISTANCE 100 Mohm and 1 Gohm (footnote 8): 2-wire function only; the no-math-null variant has NO row for them (the 0.2 ohm adder is not applicable to a range that exists only as 2-wire; the data sheet does not say): UNVERIFIED.',
+    '12': 'RESISTANCE 100 Mohm and 1 Gohm (footnote 8): 2-wire function only. OWNER DECISION: the "Resistance [2-wire, no math null]" function ALSO carries these two ranges, with the same figures as the 4-wire / math-null rows and NO 0.2 ohm adder (the 0.2 ohm is negligible against 0.3 % and 3 %, and these ranges exist only as 2-wire). The data sheet itself does not say whether the footnote 8 adder applies to them: the choice is the owner\'s, not a printed fact.',
     '13': 'DC CURRENT (p. 15): ranges 1 uA to 10 A; burden voltage at full scale (p. 16, information): 1 uA < 0.0011 V, 10 uA < 0.011 V, 100 uA < 0.11 V, 1 mA < 0.11 V, 10 mA < 0.027 V, 100 mA < 0.27 V, 1 A < 0.7 V / 0.05 V, 3 A < 2.0 V / 0.15 V '
           '(the second value is obtained on the 10 A input, footnote 21), 10 A < 0.5 V. Temperature coefficients (not stored): 1 uA 0.0020 + 0.0010, 10 uA 0.0015 + 0.0006, 100 uA 0.0015 + 0.0004, 1 mA 0.0015 + 0.0005, 10 mA 0.0020 + 0.0020, 100 mA 0.0020 + 0.0005, '
           '1 A 0.0050 + 0.0010, 3 A 0.0050 + 0.0020, 10 A 0.0050 + 0.0010. The printed 1 mA 24 hour cell reads "0.0070+ 0.0030" (spacing misprint, not stored).',
@@ -142,7 +142,7 @@ PROBLEMS = [
     dict(level='warn', where='standard', what='The "% of range" term is taken against the range NAME (0.1 V on the 100 mV range ...); the data sheet does not define "range". UNVERIFIED.'),
     dict(level='warn', where='standard', what='No resolution is recorded on any row: the budget has no resolution term for this standard.'),
     dict(level='warn', where='Voltage, DC / Resistance', what='DC voltage and resistance figures assume ACAL run within the last 2 days (footnote 1) and TACAL +/- 2 degC; the lab must run ACAL (or the temperature coefficient applies).'),
-    dict(level='warn', where='Resistance [2-wire, no math null]', what='No rows for the 100 Mohm and 1 Gohm ranges (2-wire only); the low-power ohms specification is not in the data sheet ("see the manual").'),
+    dict(level='warn', where='Resistance [2-wire, no math null] / 100 Mohm, 1 Gohm', what='Stored with the same figures as the 4-wire / math-null rows and NO 0.2 ohm adder (owner decision, note 12); the data sheet does not say. The low-power ohms specification is not in the data sheet ("see the manual").'),
     dict(level='warn', where='Voltage, DC / 1000 V', what='Footnote 9: add 0.02 mV per additional volt above +/-500 V; not in the stored row.'),
     dict(level='warn', where='Current, DC / 1 uA, 10 uA, 100 uA', what='Typical, not warranted ("(typ)").'),
     dict(level='warn', where='Current, DC / Current, AC / 10 A', what='Footnote 4: add 2 mA base per amp for inputs greater than 5 Arms; not in the stored 10 A rows.'),

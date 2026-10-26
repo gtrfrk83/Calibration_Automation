@@ -55,16 +55,17 @@ def dc_function(name, kind, unit, page, rows, notes_fn, label_unit_text):
     return f
 
 
-def ohm_variant(name, page, rows, notes_fn, extra_abs=None, skip=()):
-    """Resistance rows; extra_abs = 0.2 (ohm) for the 2-wire function without math null; skip = range names left out."""
+def ohm_variant(name, page, rows, notes_fn, extra_abs=None, skip=(), no_adder=()):
+    """Resistance rows; extra_abs = 0.2 (ohm) for the 2-wire function without math null; skip = range names left out; no_adder = ranges stored with the printed figure and NO extra_abs."""
     f = dict(name=name, direction='input', page=page, ranges=[])
     for rname, rsi, fs, cells, typical in rows:
         if rname in skip:
             continue
         specs = []
+        ab = None if rname in no_adder else extra_abs
         for per, cell in zip(PERIODS, cells):
             reading, _o, rng = split_terms(cell)
-            specs.append(make_spec(per, reading + '%', rng, rname, D(rsi), range_pct=True, abs_term=extra_abs, abs_unit='ohm' if extra_abs else ''))
+            specs.append(make_spec(per, reading + '%', rng, rname, D(rsi), range_pct=True, abs_term=ab, abs_unit='ohm' if ab else ''))
         fsd = D(fs)
         f['ranges'].append(make_range(name, f'{rname} range', rname, 'OHM', [amp_param(fs, 'ohm', f'-{si_range_text(fsd, "ohm")} to {si_range_text(fsd, "ohm")}',
                                                                                         notes=notes_fn(rname, typical))], specs, page))

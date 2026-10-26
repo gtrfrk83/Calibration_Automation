@@ -13,7 +13,7 @@
   "approve_date": "",
   "source_pdf": "Digital_Multimeters_34460A_34461A_34465A_6__digit_34470A_7__digit.pdf",
   "sheet_generated": "",
-  "built": "2026-10-26T19:34:48"
+  "built": "2026-10-26T19:47:06"
  },
  "notes": {
   "1": "SOURCE: Keysight Digital Multimeters 34460A, 34461A, 34465A (6 1/2 digit), 34470A (7 1/2 digit) data sheet 5991-1983EN, published in USA June 10, 2026 (PDF of 28 pages, supplied by the owner as Digital_Multimeters_34460A_34461A_34465A_6__digit_34470A_7__digit.pdf; printed page numbers equal the PDF page numbers). 34465A specifications: pp. 15-17 (DC voltage, resistance, DC current, continuity, diode, DC:DC ratio, temperature: p. 15; true RMS AC voltage, true RMS AC current, capacitance, frequency, burden voltages: p. 16; footnotes: p. 17). Built by the specs builder of this model (shared engine specs/truevolt_standard_engine.py).",
@@ -27,7 +27,7 @@
   "9": "DC VOLTS (p. 15): 100 mV to 1000 V. Temperature coefficient (information, not stored): footnote 6 (non ACAL): add per degC outside the last TACAL +/- 2 degC: 100 mV 0.0005 + 0.0005, 1 V - 1000 V 0.0005 + 0.0001; footnote 7 (with ACAL): add per degC outside TACAL +/- 2 degC: 100 mV 0.0002 + 0.0005, 1 V - 1000 V 0.0002 + 0.0001 (% of reading + % of range). The 1000 V range has no 20 % over range.",
   "10": "DC VOLTS 1000 V (footnote 9): for each additional volt over +/-500 V add 0.02 mV of error. NOT in the stored 1000 V row.",
   "11": "RESISTANCE (p. 15, footnote 8): the specifications are for the 4-WIRE ohms function, or the 2-wire ohms function using math null for offset. WITHOUT math null add 0.2 ohm in the 2-wire ohms function: stored as the separate function \"Resistance [2-wire, no math null]\" with a fixed 0.2 ohm term (a plain lookup prefers the 4-wire function; pass variant=\"2-wire\"; the main function is named \"4-wire or 2W with math null\" on purpose, so that variant=\"2-wire\" selects only the no-math-null rows). Footnote 8 also: the 100 Mohm and 1 Gohm ranges are 2-wire ohms function only, and \"see the manual for low power ohms specification and measurement currents\" (the low-power ohms figures are NOT in the data sheet and NOT stored). Temperature coefficients (not stored, non ACAL / with ACAL): 100 ohm 0.0006 + 0.0005 / 0.0002 + 0.0005, 1 k - 100 k 0.0006 + 0.0001 / 0.0002 + 0.0001, 1 Mohm 0.0010 + 0.0002 / 0.0002 + 0.0002, 10 Mohm 0.0030 + 0.0004 / 0.0030 + 0.0004, 100 Mohm 0.1000 + 0.0001 / 0.0100 + 0.0001, 1 Gohm 1.0000 + 0.0001 / 0.1000 + 0.0001.",
-  "12": "RESISTANCE 100 Mohm and 1 Gohm (footnote 8): 2-wire function only; the no-math-null variant has NO row for them (the 0.2 ohm adder is not applicable to a range that exists only as 2-wire; the data sheet does not say): UNVERIFIED.",
+  "12": "RESISTANCE 100 Mohm and 1 Gohm (footnote 8): 2-wire function only. OWNER DECISION: the \"Resistance [2-wire, no math null]\" function ALSO carries these two ranges, with the same figures as the 4-wire / math-null rows and NO 0.2 ohm adder (the 0.2 ohm is negligible against 0.3 % and 3 %, and these ranges exist only as 2-wire). The data sheet itself does not say whether the footnote 8 adder applies to them: the choice is the owner's, not a printed fact.",
   "13": "DC CURRENT (p. 15): ranges 1 uA to 10 A; burden voltage at full scale (p. 16, information): 1 uA < 0.0011 V, 10 uA < 0.011 V, 100 uA < 0.11 V, 1 mA < 0.11 V, 10 mA < 0.027 V, 100 mA < 0.27 V, 1 A < 0.7 V / 0.05 V, 3 A < 2.0 V / 0.15 V (the second value is obtained on the 10 A input, footnote 21), 10 A < 0.5 V. Temperature coefficients (not stored): 1 uA 0.0020 + 0.0010, 10 uA 0.0015 + 0.0006, 100 uA 0.0015 + 0.0004, 1 mA 0.0015 + 0.0005, 10 mA 0.0020 + 0.0020, 100 mA 0.0020 + 0.0005, 1 A 0.0050 + 0.0010, 3 A 0.0050 + 0.0020, 10 A 0.0050 + 0.0010. The printed 1 mA 24 hour cell reads \"0.0070+ 0.0030\" (spacing misprint, not stored).",
   "14": "DC CURRENT TYPICAL: the 1 uA, 10 uA and 100 uA rows are printed \"(typ)\" - typical, not warranted; the labels say so.",
   "15": "CURRENT 10 A range (footnote 4): only available on a separate front panel connector. Add 2 mA base per amp for inputs greater than 5 Arms. NOT in the stored 10 A rows (DC and AC). The 3 A and 10 A ranges have no 20 % over range (footnote 2).",
@@ -1287,6 +1287,134 @@
      "variant": "2-wire, no math null",
      "amp_lo": -12000000.0,
      "amp_hi": 12000000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 Mohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120000000.0,
+       "hi": 120000000.0,
+       "unit": "ohm",
+       "text": "-120000000 ohm to 120000000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11,
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.003,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.3000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.004,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.4000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 Mohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -120000000.0,
+     "amp_hi": 120000000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 Gohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1200000000.0,
+       "hi": 1200000000.0,
+       "unit": "ohm",
+       "text": "-1200000000 ohm to 1200000000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11,
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.02,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(2.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.03,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.04,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(4.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 Gohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -1200000000.0,
+     "amp_hi": 1200000000.0,
      "unit": "ohm",
      "freq_lo": null,
      "freq_hi": null,
@@ -5793,8 +5921,8 @@
   },
   {
    "level": "warn",
-   "where": "Resistance [2-wire, no math null]",
-   "what": "No rows for the 100 Mohm and 1 Gohm ranges (2-wire only); the low-power ohms specification is not in the data sheet (\"see the manual\")."
+   "where": "Resistance [2-wire, no math null] / 100 Mohm, 1 Gohm",
+   "what": "Stored with the same figures as the 4-wire / math-null rows and NO 0.2 ohm adder (owner decision, note 12); the data sheet does not say. The low-power ohms specification is not in the data sheet (\"see the manual\")."
   },
   {
    "level": "warn",

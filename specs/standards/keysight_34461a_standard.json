@@ -13,7 +13,7 @@
   "approve_date": "",
   "source_pdf": "Digital_Multimeters_34460A_34461A_34465A_6__digit_34470A_7__digit.pdf",
   "sheet_generated": "",
-  "built": "2026-10-26T19:34:48"
+  "built": "2026-10-26T19:47:06"
  },
  "notes": {
   "1": "SOURCE: Keysight Digital Multimeters 34460A, 34461A, 34465A (6 1/2 digit), 34470A (7 1/2 digit) data sheet 5991-1983EN, published in USA June 10, 2026 (PDF of 28 pages, supplied by the owner as Digital_Multimeters_34460A_34461A_34465A_6__digit_34470A_7__digit.pdf; printed page numbers equal the PDF page numbers). 34461A specifications: pp. 13-14 (DC voltage, true RMS AC voltage, resistance, DC current, capacitance, true RMS AC current: p. 13; AC current 1 A / 3 A / 10 A ranges, frequency and the footnotes: p. 14). Built by the specs builder of this model (shared engine specs/truevolt_standard_engine.py).",

@@ -46,8 +46,8 @@ class Sheet(TruevoltChecks, unittest.TestCase):
     JSON_PATH = os.path.join(HERE, 'specs', 'standards', 'keysight_34465a_standard.json')
     BUILDER = b
     KEY = KEY
-    ROWS = 83
-    KINDS = {'DCV': 5, 'OHM': 14, 'DCI': 9, 'ACV': 30, 'ACI': 14, 'CAP': 6, 'FREQ': 5}
+    ROWS = 85
+    KINDS = {'DCV': 5, 'OHM': 16, 'DCI': 9, 'ACV': 30, 'ACI': 14, 'CAP': 6, 'FREQ': 5}
     PAGES = {15, 16}
     DCV10_1YR = 10 * 3.0e-5 + 10 * 4e-6          # 0.0030 % of 10 V + 0.0004 % of the 10 V range = 340 uV
     DCV10_90D = 10 * 2.0e-5 + 10 * 4e-6          # 240 uV
@@ -71,7 +71,18 @@ class Sheet(TruevoltChecks, unittest.TestCase):
         self.assertEqual(sum('typical' in l for (f, l) in self.rng if f == 'Current, DC'), 3)           # 1, 10, 100 uA
         self.assertEqual(self.hit('OHM', 5e8).row['label'], '1 Gohm range')
         self.assertIsNone(self.hit('OHM', 1.5e9))
-        self.assertIsNone(self.hit('OHM', 5e8, variant='2-wire'))                                         # 100 Mohm / 1 Gohm are 2-wire only: no no-math-null rows
+        # owner: 100 Mohm and 1 Gohm are in the 2-wire (no math null) function too, same figures, NO 0.2 ohm adder
+        for lab, per, rd in (('100 Mohm range', '1 yr', '0.3000'), ('1 Gohm range', '1 yr', '3.0000'), ('1 Gohm range', '2 yr', '4.0000')):
+            two = self.rng[('Resistance [2-wire, no math null]', lab)]
+            four = self.rng[(R, lab)]
+            self.assertEqual(two['specs'], four['specs'])
+            sp = next(s for s in two['specs'] if s['period'] == per)
+            self.assertEqual((sp['abs'], sp['unit']), (0.0, ''))
+            self.assertEqual(sp['rel'], float(__import__('decimal').Decimal(rd) / 100))
+        h = self.hit('OHM', 5e8, variant='2-wire')
+        self.assertEqual(h.row['function'], 'Resistance [2-wire, no math null]')
+        self.assertAlmostEqual(h.limit, self.hit('OHM', 5e8).limit, 6)
+        self.assertEqual(self.hit('OHM', 1000.0, variant='2-wire').limit - self.hit('OHM', 1000.0).limit, 0.2)
         self.assertEqual(self.hit('DCI', 8.0).row['label'], '10 A range')
         self.assertTrue(self.hit('ACI', 1.0, frequency=7e3).row['label'].endswith('(typical)'))
         self.assertEqual(sum('typical' in l for (f, l) in self.rng if f == 'Current, AC'), 7)
