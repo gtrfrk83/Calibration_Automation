@@ -85,7 +85,7 @@ class DriversDeclareReset(unittest.TestCase):
         """Only these resets are backed by a manual page; everything else is flagged unverified in the report."""
         ok = sorted(c.__name__ for c in all_driver_classes()
                     if not c.RESET_EXEMPT and cmdreg.merge_commands(c)['reset'].verified)
-        self.assertEqual(ok, ['Agilent3458A', 'Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke8808A', 'Fluke8808ACal', 'Fluke96270A', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x'])
+        self.assertEqual(ok, ['Agilent3458A', 'Fluke5522A', 'Fluke5522AComp', 'Fluke5522AScope', 'Fluke5560A', 'Fluke5790B', 'Fluke8808A', 'Fluke8808ACal', 'Fluke96270A', 'Keithley2000', 'Keithley2000Cal', 'Keysight34410A', 'Keysight34411A', 'Keysight53131A', 'Keysight53132A', 'Keysight5313x', 'TektronixTBS2000B'])     # TBS2000B: FACtory, Programmer Manual p. 92
 
 
 # ------------------------------------------------------------------------------------------------------------------------------
@@ -99,6 +99,7 @@ ENGINES = {          # source file -> (function that starts a run, name of the r
     'dsb_runtime.py': ('execute', 'reset_then', '_next'),                  # user-built datasheets (Datasheet Builder runtime)
     'mdo4000c_verification.py': ('_worker', 'reset_run', 'run_point'),
     'tds2000c_verification.py': ('_worker', 'reset_run', 'run_point'),
+    'tbs2000b_verification.py': ('_worker', 'reset_run', 'run_point'),
     'Procedures/Agilent_34401A.py': ('execute', 'reset_then', '_next'),
     'Procedures/Fluke_8846A_Verification.py': ('execute', 'reset_then', '_next'),
     'fluke8808a_verification.py': ('execute', 'reset_then', '_next'),

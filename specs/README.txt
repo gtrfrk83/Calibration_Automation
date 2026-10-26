@@ -192,3 +192,9 @@ User-built datasheets (Datasheet Builder; NOT stored in this folder)
   Values inside 'dsb' are SI base units as exact decimal strings; low / high / nominal / factor / applied of the step itself follow the handheld convention above.
   A point may carry its own 'spec' (one SpecEntry; the grid editor writes it) inside dsb.datasheet.functions[].points[]; it governs that point instead of the function table. Optional, additive.
   Points the stock handheld engine cannot drive (scope bandwidth / time base / trigger, generator functions) are exported as hand-set points (kind NONE or VISUAL, group NONE).
+
+tektronix_tbs2000b_pv.json (schema 2, the TDS2000C layout; written by build_tbs2000b_spec.py)
+  TBS2000B Series Oscilloscope Specification and Performance Verification 077-1538-03 Rev D, pp. 19-26, read from the page images: self test, SPC, bandwidth (2.12 V min), vertical offset accuracy
+  (source +/- 0.2 div, 4 rows per channel), time base (+/-2.5 div at 10 ns/div, 1 ms marker and delay), DC balance (+/-21 mV at 200 mV/div). models / models_info: 2072B 2074B 2102B 2104B 2202B 2204B
+  (channels, bw_mhz, bw_test_hz); points on CH3 / CH4 list the 4-channel models. source.deviations lists where the procedure departs from the manual; point.printed keeps the printed values
+  (bandwidth reference 1 kHz / 400 us/div). The builder recomputes every limit in Decimal from the specifications pp. 11-13 and aborts on a disagreement.

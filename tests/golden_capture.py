@@ -206,13 +206,18 @@ for _cls in ('Fluke5560A', 'Fluke5520A', 'Fluke5522A', 'Fluke8846A', 'Fluke8808A
         if _cls in _fixture:
             _fixture[_cls]['covered'].append('reset_to_defaults')
 
+from tests import golden_tbs2000b as _tbs2000b  # noqa: E402  (TBS2000B driver / engine cases; reset_to_defaults is in its own covered list)
+COVERAGE['tektronix_tbs2000b'] = _tbs2000b.COVERAGE
+
 # Driver source files scanned by the f-string lint (everything that sends commands)
 LINT_FILES = ['base', 'fluke_5560a', 'scpi_dmm', 'fluke_8808a', 'keysight_truevolt', 'keysight_dacq', 'keysight_332xx', 'keysight_5313x', 'fluke_5790b',
               'fluke_28x', 'lecroy_ws4104hd', 'tektronix_mdo4000c', 'tektronix_tds2000c', 'fluke_5522a_scope', 'reference_instruments', 'keithley_2000', 'keithley_2000_cal', 'fluke_8808a_cal', 'keysight_34410a', 'agilent_3458a']
+LINT_FILES.append('tektronix_tbs2000b')
 
 # Engines whose bench I/O is exercised by a short simulated run (name -> description). Others are listed in the report as not coverable.
 ENGINES = ('truevolt_34470A', 'dacq_34970A', 'dacq_34972A', 'fgen_33220A', 'mdo4000c', 'tds2000c', 'agilent_34401a', 'fluke_8846a', 'handheld_5522a',
            'wavesurfer_dcv', 'keithley_2000', 'keysight_34410a', 'keysight_34411a')
+ENGINES += ('tbs2000b',)
 
 
 # =====================================================================================================================================
@@ -1636,6 +1641,7 @@ DRIVER_CASES = {
     'keysight_34411a': _with_resets(cases_34411a, resets_34411a),
     'agilent_3458a': cases_3458a_all,
 }
+DRIVER_CASES['tektronix_tbs2000b'] = _tbs2000b.driver_cases
 
 
 def capture_driver_transcripts():

@@ -1,0 +1,3490 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "tbs2000b_verification.IO.__init__",
+   "log": [
+    "TBS2000B|>>|*IDN?",
+    "TBS2000B|<<|TEKTRONIX,TBS2204B,SIM0001,CF:91.1CT FV:v1.30",
+    "TBS2000B|>>|*CLS",
+    "TBS2000B|>>|HEADer OFF",
+    "TBS2000B|>>|VERBose OFF",
+    "TBS2000B|>>|*IDN?",
+    "TBS2000B|<<|TEKTRONIX,TBS2204B,SIM0001,CF:91.1CT FV:v1.30",
+    "5560A|>>|*IDN?",
+    "5560A|<<|FLUKE,5560A,SIM0001,1.0",
+    "5560A|>>|*CLS"
+   ],
+   "method": "tbs2000b_verification.IO.__init__",
+   "result": "returned <tbs2000b_verification.IO object>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TBS2204B,SIM0001,CF:91.1CT FV:v1.30"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "TEKTRONIX,TBS2204B,SIM0001,CF:91.1CT FV:v1.30"
+    ],
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "FLUKE,5560A,SIM0001,1.0"
+    ],
+    [
+     "W",
+     "*CLS"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "tbs2000b_verification.IO.reset_at_start",
+   "log": [
+    "5560A|>>|*RST",
+    "5560A|>>|*CLS",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0",
+    "5560A|>>|SCOPE OFF",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|OFF",
+    "TBS2000B|>>|FACtory",
+    "TBS2000B|>>|*CLS",
+    "TBS2000B|>>|*OPC?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|HEADer OFF",
+    "TBS2000B|>>|VERBose OFF",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "RESET|--|Instruments reset to default settings at start: 5560A, TBS2000B"
+   ],
+   "method": "tbs2000b_verification.IO.reset_at_start",
+   "result": "returned <reset_startup.StartupReport object>",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ],
+    [
+     "W",
+     "SCOPE OFF"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "OFF"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': None, 'desc': 'Self test (Utility > Diagnostics > Self Test, 1 loop: passed)', 'high': 1, 'id': 1, 'kind': 'SELFTEST', 'low': 1, 'nominal': 1, 'note': 'p. 22: started remotely (DIAg:LOOP:OPTion ONCE, DIAg:SELect ALL, DIAg:STATE EXECute = Loop 1 Times), end awaited with BUSY? (not documented for the self test), result DIAg:RESUlt:FLAg? / LOG?. The scope must have run 20 minutes first.', 'passfail': True, 'section': 'selftest', 'stim': 'none', 'unit': ''}",
+   "case": "tbs2000b_verification.Runner.run_point[SELFTEST#1]",
+   "log": [
+    "5560A|>>|STBY",
+    "TBS2000B|>>|FACtory",
+    "TBS2000B|>>|*OPC?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|HEADer OFF",
+    "TBS2000B|>>|VERBose OFF",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|DIAg:LOOP:OPTion ONCE",
+    "TBS2000B|>>|DIAg:SELect ALL",
+    "TBS2000B|>>|DIAg:STATE EXECute",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|BUSY?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|DIAg:RESUlt:FLAg?",
+    "TBS2000B|<<|PASS",
+    "TBS2000B|>>|DIAg:RESUlt:LOG?",
+    "TBS2000B|<<|\"PASS--CPU,PASS--DISPLAY,PASS--FPANEL,PASS--IO,PASS--ACQ,PASS--ROM,PASS--APPKEY\"",
+    "5560A|>>|STBY"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (1.0, {'log': '\"PASS--CPU,PASS--DISPLAY,PASS--FPANEL,PASS--IO,PASS--ACQ,PASS--ROM,PASS--APPKEY\"'})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "DIAg:LOOP:OPTion ONCE"
+    ],
+    [
+     "W",
+     "DIAg:SELect ALL"
+    ],
+    [
+     "W",
+     "DIAg:STATE EXECute"
+    ],
+    [
+     "sleep",
+     5.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "Q",
+     "BUSY?",
+     "0"
+    ],
+    [
+     "Q",
+     "DIAg:RESUlt:FLAg?",
+     "PASS"
+    ],
+    [
+     "Q",
+     "DIAg:RESUlt:LOG?",
+     "\"PASS--CPU,PASS--DISPLAY,PASS--FPANEL,PASS--IO,PASS--ACQ,PASS--ROM,PASS--APPKEY\""
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': None, 'desc': 'Signal path compensation (Compensate Signal Paths: passed)', 'high': 1, 'id': 2, 'kind': 'SPC', 'low': 1, 'nominal': 1, 'note': 'p. 22: all probes and cables removed first; repeat if the temperature changes by more than 10 degC. Run remotely with *CAL?, confirmed with CALibrate:RESults:SPC?.', 'passfail': True, 'section': 'selftest', 'stim': 'none', 'unit': ''}",
+   "case": "tbs2000b_verification.Runner.run_point[SPC#2]",
+   "log": [
+    "5560A|>>|STBY",
+    "TBS2000B|>>|*CAL?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|CALibrate:RESults:SPC?",
+    "TBS2000B|<<|PASS",
+    "5560A|>>|STBY"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (1.0, {'result': '*CAL? = 0, CALibrate:RESults:SPC? = PASS'})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     600.0
+    ],
+    [
+     "Q",
+     "*CAL?",
+     "0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "Q",
+     "CALibrate:RESults:SPC?",
+     "PASS"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 bandwidth: 3 V p-p reference, Vpk-pk at the model frequency', 'high': None, 'hscale': 1e-08, 'hscale_ref': 1e-05, 'id': 3, 'kind': 'BW', 'low': 2.12, 'nominal': 2.12, 'note': 'Owner-approved (2026-10-25): 50 kHz reference at 10 us/div; the manual prints 1 kHz at 400 us/div. p. 23: 500 mV/div, trigger coupling Noise Reject, source = channel under test, 50 ohm feedthrough terminator. The reference is set at 50 kHz, not the 1 kHz of step 14: the calibrator leveled sine starts at 50 kHz, which is also the equipment table frequency (p. 19); shown at 10 us/div instead of 400 us/div so a few cycles fill the screen. Model frequency 70 / 100 / 200 MHz (step 16) at 10 ns/div.', 'printed': {'hscale_ref': 0.0004, 'ref_hz': 1000.0}, 'ref_high': 3.02, 'ref_hz': 50000.0, 'ref_low': 2.98, 'ref_target': 3.0, 'section': 'bw', 'stim': 'cal', 'unit': 'V', 'vscale': 0.5}",
+   "case": "tbs2000b_verification.Runner.run_point[BW#3]",
+   "log": [
+    "5560A|>>|STBY",
+    "TBS2000B|>>|FACtory",
+    "TBS2000B|>>|*OPC?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|HEADer OFF",
+    "TBS2000B|>>|VERBose OFF",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|SELect:CH1 ON",
+    "TBS2000B|>>|SELect:CH2 OFF",
+    "TBS2000B|>>|SELect:CH3 OFF",
+    "TBS2000B|>>|SELect:CH4 OFF",
+    "TBS2000B|>>|CH1:COUPling DC",
+    "TBS2000B|>>|CH1:COUPling?",
+    "TBS2000B|<<|DC",
+    "TBS2000B|>>|CH1:BANdwidth FULl",
+    "TBS2000B|>>|CH1:BANdwidth?",
+    "TBS2000B|<<|FULL",
+    "TBS2000B|>>|CH1:PRObe:GAIN 1",
+    "TBS2000B|>>|CH1:PRObe:GAIN?",
+    "TBS2000B|<<|1.0000E+00",
+    "TBS2000B|>>|CH1:SCAle 0.5",
+    "TBS2000B|>>|CH1:SCAle?",
+    "TBS2000B|<<|5.0000E-01",
+    "TBS2000B|>>|CH1:POSition 0",
+    "TBS2000B|>>|CH1:POSition?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|ACQuire:MODe AVErage",
+    "TBS2000B|>>|ACQuire:MODe?",
+    "TBS2000B|<<|AVERAGE",
+    "TBS2000B|>>|ACQuire:NUMAVg 16",
+    "TBS2000B|>>|ACQuire:NUMAVg?",
+    "TBS2000B|<<|16",
+    "TBS2000B|>>|ACQuire:STOPAfter RUNSTop",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|TRIGger:A:TYPe EDGe",
+    "TBS2000B|>>|TRIGger:A:EDGE:SOUrce CH1",
+    "TBS2000B|>>|TRIGger:A:EDGE:SOUrce?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|TRIGger:A:EDGE:SLOpe RISe",
+    "TBS2000B|>>|TRIGger:A:EDGE:SLOpe?",
+    "TBS2000B|<<|RISE",
+    "TBS2000B|>>|TRIGger:A:EDGE:COUPling NOISErej",
+    "TBS2000B|>>|TRIGger:A:EDGE:COUPling?",
+    "TBS2000B|<<|NOISEREJ",
+    "TBS2000B|>>|TRIGger:A:MODe AUTO",
+    "TBS2000B|>>|TRIGger:A:MODe?",
+    "TBS2000B|<<|AUTO",
+    "TBS2000B|>>|HORizontal:SCAle 1e-05",
+    "TBS2000B|>>|HORizontal:SCAle?",
+    "TBS2000B|<<|1.0000E-05",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE LEVSINE",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|LEVSINE",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|OUT_IMP Z50",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|50,OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT 3V,50kHz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT?",
+    "5560A|<<|3.000000000,V,50000.0,HZ",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1 CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe PK2pk",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe?",
+    "TBS2000B|<<|PK2PK",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|30",
+    "TBS2000B|>>|MEASUrement:IMMed:VALue?",
+    "TBS2000B|<<|3.0000E+00",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|HORizontal:SCAle 1e-08",
+    "TBS2000B|>>|HORizontal:SCAle?",
+    "TBS2000B|<<|1.0000E-08",
+    "5560A|>>|OUT 3V,200MHz",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT?",
+    "5560A|<<|3.000000000,V,200000000.0,HZ",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1 CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe PK2Pk",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe?",
+    "TBS2000B|<<|PK2PK",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|30",
+    "TBS2000B|>>|MEASUrement:IMMed:VALue?",
+    "TBS2000B|<<|2.4412E+00",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (2.4412, {'freq': 200000000.0, 'ref_hz': 50000.0, 'src_vpp': 3.0, 'vbw_pp': 2.4412, 'vin_pp': 3.0})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "Q",
+     "CH1:COUPling?",
+     "DC"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "FULL"
+    ],
+    [
+     "W",
+     "CH1:PRObe:GAIN 1"
+    ],
+    [
+     "Q",
+     "CH1:PRObe:GAIN?",
+     "1.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.5"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "5.0000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.0000E+00"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "Q",
+     "ACQuire:MODe?",
+     "AVERAGE"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMAVg?",
+     "16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce CH1"
+    ],
+    [
+     "Q",
+     "TRIGger:A:EDGE:SOUrce?",
+     "CH1"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SLOpe RISe"
+    ],
+    [
+     "Q",
+     "TRIGger:A:EDGE:SLOpe?",
+     "RISE"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:COUPling NOISErej"
+    ],
+    [
+     "Q",
+     "TRIGger:A:EDGE:COUPling?",
+     "NOISEREJ"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "Q",
+     "TRIGger:A:MODe?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 1e-05"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "1.0000E-05"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "SCOPE LEVSINE"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "LEVSINE"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "W",
+     "OUT_IMP Z50"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "50,OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 3V,50kHz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT?",
+     "3.000000000,V,50000.0,HZ"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:SOUrce1 CH1"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:SOUrce1?",
+     "CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:TYPe PK2pk"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:TYPe?",
+     "PK2PK"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "sleep",
+     0.1
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "30"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:VALue?",
+     "3.0000E+00"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 1e-08"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "1.0000E-08"
+    ],
+    [
+     "W",
+     "OUT 3V,200MHz"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT?",
+     "3.000000000,V,200000000.0,HZ"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:SOUrce1 CH1"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:SOUrce1?",
+     "CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:TYPe PK2Pk"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:TYPe?",
+     "PK2PK"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "sleep",
+     0.1
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "30"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:VALue?",
+     "2.4412E+00"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 offset +0.8 V, 200 mV/div, trace at -5 div: +1.8 V in', 'high': 1.84, 'id': 7, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': 1.76, 'nominal': 1.8, 'note': 'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.', 'offset': 0.8, 'position': -5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 0.2, 'vsrc': 1.8}",
+   "case": "tbs2000b_verification.Runner.run_point[OFFSET#7]",
+   "log": [
+    "5560A|>>|STBY",
+    "TBS2000B|>>|FACtory",
+    "TBS2000B|>>|*OPC?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|HEADer OFF",
+    "TBS2000B|>>|VERBose OFF",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|SELect:CH1 ON",
+    "TBS2000B|>>|SELect:CH2 OFF",
+    "TBS2000B|>>|SELect:CH3 OFF",
+    "TBS2000B|>>|SELect:CH4 OFF",
+    "TBS2000B|>>|ACQuire:MODe AVErage",
+    "TBS2000B|>>|ACQuire:MODe?",
+    "TBS2000B|<<|AVERAGE",
+    "TBS2000B|>>|ACQuire:NUMAVg 16",
+    "TBS2000B|>>|ACQuire:NUMAVg?",
+    "TBS2000B|<<|16",
+    "TBS2000B|>>|ACQuire:STOPAfter RUNSTop",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1 CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe MEAN",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe?",
+    "TBS2000B|<<|MEAN",
+    "TBS2000B|>>|CH1:COUPling DC",
+    "TBS2000B|>>|CH1:COUPling?",
+    "TBS2000B|<<|DC",
+    "TBS2000B|>>|CH1:BANdwidth FULl",
+    "TBS2000B|>>|CH1:BANdwidth?",
+    "TBS2000B|<<|FULL",
+    "TBS2000B|>>|CH1:PRObe:GAIN 1",
+    "TBS2000B|>>|CH1:PRObe:GAIN?",
+    "TBS2000B|<<|1.0000E+00",
+    "TBS2000B|>>|CH1:SCAle 0.2",
+    "TBS2000B|>>|CH1:SCAle?",
+    "TBS2000B|<<|2.0000E-01",
+    "TBS2000B|>>|CH1:POSition -5",
+    "TBS2000B|>>|CH1:POSition?",
+    "TBS2000B|<<|-5.0000E+00",
+    "TBS2000B|>>|CH1:OFFSet 0.8",
+    "TBS2000B|>>|CH1:OFFSet?",
+    "TBS2000B|<<|8.0000E-01",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|50,OHM",
+    "5560A|>>|OUT_IMP Z1M",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT 1.800000000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|1.800000000,V,200000000.0,HZ",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1 CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe MEAN",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe?",
+    "TBS2000B|<<|MEAN",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|30",
+    "TBS2000B|>>|MEASUrement:IMMed:VALue?",
+    "TBS2000B|<<|1.8084E+00",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (1.8084, {'applied': 1.8, 'offset': 0.8, 'position': -5.0, 'trace_div': 0.041999999999999815, 'vscale': 0.2})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "Q",
+     "ACQuire:MODe?",
+     "AVERAGE"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMAVg?",
+     "16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:SOUrce1 CH1"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:SOUrce1?",
+     "CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:TYPe MEAN"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:TYPe?",
+     "MEAN"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "Q",
+     "CH1:COUPling?",
+     "DC"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "FULL"
+    ],
+    [
+     "W",
+     "CH1:PRObe:GAIN 1"
+    ],
+    [
+     "Q",
+     "CH1:PRObe:GAIN?",
+     "1.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.2"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "2.0000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition -5"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "-5.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0.8"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "8.0000E-01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "50,OHM"
+    ],
+    [
+     "W",
+     "OUT_IMP Z1M"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 1.800000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "1.800000000,V,200000000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:SOUrce1 CH1"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:SOUrce1?",
+     "CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:TYPe MEAN"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:TYPe?",
+     "MEAN"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "sleep",
+     0.1
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "30"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:VALue?",
+     "1.8084E+00"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 offset -0.8 V, 200 mV/div, trace at +5 div: -1.8 V in', 'high': -1.76, 'id': 8, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': -1.84, 'nominal': -1.8, 'note': 'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 200 mV/div = +/- 0.04 V. Specification p. 11: +/-0.195 div here.', 'offset': -0.8, 'position': 5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 0.2, 'vsrc': -1.8}",
+   "case": "tbs2000b_verification.Runner.run_point[OFFSET#8]",
+   "log": [
+    "TBS2000B|>>|CH1:COUPling DC",
+    "TBS2000B|>>|CH1:COUPling?",
+    "TBS2000B|<<|DC",
+    "TBS2000B|>>|CH1:BANdwidth FULl",
+    "TBS2000B|>>|CH1:BANdwidth?",
+    "TBS2000B|<<|FULL",
+    "TBS2000B|>>|CH1:PRObe:GAIN 1",
+    "TBS2000B|>>|CH1:PRObe:GAIN?",
+    "TBS2000B|<<|1.0000E+00",
+    "TBS2000B|>>|CH1:SCAle 0.2",
+    "TBS2000B|>>|CH1:SCAle?",
+    "TBS2000B|<<|2.0000E-01",
+    "TBS2000B|>>|CH1:POSition 5",
+    "TBS2000B|>>|CH1:POSition?",
+    "TBS2000B|<<|5.0000E+00",
+    "TBS2000B|>>|CH1:OFFSet -0.8",
+    "TBS2000B|>>|CH1:OFFSet?",
+    "TBS2000B|<<|-8.0000E-01",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT -1.800000000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|-1.800000000,V,200000000.0,HZ",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1 CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe MEAN",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe?",
+    "TBS2000B|<<|MEAN",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|30",
+    "TBS2000B|>>|MEASUrement:IMMed:VALue?",
+    "TBS2000B|<<|-1.8060E+00",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (-1.806, {'applied': -1.8, 'offset': -0.8, 'position': 5.0, 'trace_div': -0.02999999999999936, 'vscale': 0.2})",
+   "wire": [
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "Q",
+     "CH1:COUPling?",
+     "DC"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "FULL"
+    ],
+    [
+     "W",
+     "CH1:PRObe:GAIN 1"
+    ],
+    [
+     "Q",
+     "CH1:PRObe:GAIN?",
+     "1.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.2"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "2.0000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition 5"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "5.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet -0.8"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "-8.0000E-01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT -1.800000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "-1.800000000,V,200000000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:SOUrce1 CH1"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:SOUrce1?",
+     "CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:TYPe MEAN"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:TYPe?",
+     "MEAN"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "sleep",
+     0.1
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "30"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:VALue?",
+     "-1.8060E+00"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 offset +20 V, 5 V/div, trace at -5 div: +45 V in', 'high': 46.0, 'id': 9, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': 44.0, 'nominal': 45.0, 'note': 'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.', 'offset': 20.0, 'position': -5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 5.0, 'vsrc': 45.0}",
+   "case": "tbs2000b_verification.Runner.run_point[OFFSET#9]",
+   "log": [
+    "TBS2000B|>>|CH1:COUPling DC",
+    "TBS2000B|>>|CH1:COUPling?",
+    "TBS2000B|<<|DC",
+    "TBS2000B|>>|CH1:BANdwidth FULl",
+    "TBS2000B|>>|CH1:BANdwidth?",
+    "TBS2000B|<<|FULL",
+    "TBS2000B|>>|CH1:PRObe:GAIN 1",
+    "TBS2000B|>>|CH1:PRObe:GAIN?",
+    "TBS2000B|<<|1.0000E+00",
+    "TBS2000B|>>|CH1:SCAle 5",
+    "TBS2000B|>>|CH1:SCAle?",
+    "TBS2000B|<<|5.0000E+00",
+    "TBS2000B|>>|CH1:POSition -5",
+    "TBS2000B|>>|CH1:POSition?",
+    "TBS2000B|<<|-5.0000E+00",
+    "TBS2000B|>>|CH1:OFFSet 20",
+    "TBS2000B|>>|CH1:OFFSet?",
+    "TBS2000B|<<|2.0000E+01",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT 45.000000000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|45.000000000,V,200000000.0,HZ",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1 CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe MEAN",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe?",
+    "TBS2000B|<<|MEAN",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|30",
+    "TBS2000B|>>|MEASUrement:IMMed:VALue?",
+    "TBS2000B|<<|4.5181E+01",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (45.181, {'applied': 45.0, 'offset': 20.0, 'position': -5.0, 'trace_div': 0.03619999999999912, 'vscale': 5.0})",
+   "wire": [
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "Q",
+     "CH1:COUPling?",
+     "DC"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "FULL"
+    ],
+    [
+     "W",
+     "CH1:PRObe:GAIN 1"
+    ],
+    [
+     "Q",
+     "CH1:PRObe:GAIN?",
+     "1.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:SCAle 5"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "5.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:POSition -5"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "-5.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 20"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "2.0000E+01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT 45.000000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "45.000000000,V,200000000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:SOUrce1 CH1"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:SOUrce1?",
+     "CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:TYPe MEAN"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:TYPe?",
+     "MEAN"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "sleep",
+     0.1
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "30"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:VALue?",
+     "4.5181E+01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'desc': 'CH1 offset -20 V, 5 V/div, trace at +5 div: -45 V in', 'high': -44.0, 'id': 10, 'kind': 'OFFSET', 'limit_div': 0.2, 'low': -46.0, 'nominal': -45.0, 'note': 'Owner (2026-10-25): the 5560A / 5522A scope outputs deliver +/-45 V into 1 MOhm, so the calibrator drives every offset point. p. 24: the trace must be within 0.2 division of the centre line (pass / fail in the test record); recorded as the MEAN the scope measures, limits = source +/- 0.2 div x 5 V/div = +/- 1.0 V. Specification p. 11: +/-0.190 div here.', 'offset': -20.0, 'position': 5.0, 'section': 'offset', 'stim': 'cal', 'unit': 'V', 'vscale': 5.0, 'vsrc': -45.0}",
+   "case": "tbs2000b_verification.Runner.run_point[OFFSET#10]",
+   "log": [
+    "TBS2000B|>>|CH1:COUPling DC",
+    "TBS2000B|>>|CH1:COUPling?",
+    "TBS2000B|<<|DC",
+    "TBS2000B|>>|CH1:BANdwidth FULl",
+    "TBS2000B|>>|CH1:BANdwidth?",
+    "TBS2000B|<<|FULL",
+    "TBS2000B|>>|CH1:PRObe:GAIN 1",
+    "TBS2000B|>>|CH1:PRObe:GAIN?",
+    "TBS2000B|<<|1.0000E+00",
+    "TBS2000B|>>|CH1:SCAle 5",
+    "TBS2000B|>>|CH1:SCAle?",
+    "TBS2000B|<<|5.0000E+00",
+    "TBS2000B|>>|CH1:POSition 5",
+    "TBS2000B|>>|CH1:POSition?",
+    "TBS2000B|<<|5.0000E+00",
+    "TBS2000B|>>|CH1:OFFSet -20",
+    "TBS2000B|>>|CH1:OFFSet?",
+    "TBS2000B|<<|-2.0000E+01",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE DCV",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|FUNC?",
+    "5560A|<<|SDCV",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|VOLT",
+    "5560A|>>|OUT_IMP?",
+    "5560A|<<|1000000,OHM",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT -45.000000000V",
+    "5560A|>>|OUT?",
+    "5560A|<<|-45.000000000,V,200000000.0,HZ",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1 CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe MEAN",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe?",
+    "TBS2000B|<<|MEAN",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|30",
+    "TBS2000B|>>|MEASUrement:IMMed:VALue?",
+    "TBS2000B|<<|-4.5179E+01",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (-45.179, {'applied': -45.0, 'offset': -20.0, 'position': 5.0, 'trace_div': -0.035800000000000054, 'vscale': 5.0})",
+   "wire": [
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "Q",
+     "CH1:COUPling?",
+     "DC"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "FULL"
+    ],
+    [
+     "W",
+     "CH1:PRObe:GAIN 1"
+    ],
+    [
+     "Q",
+     "CH1:PRObe:GAIN?",
+     "1.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:SCAle 5"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "5.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:POSition 5"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "5.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet -20"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "-2.0000E+01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "SCOPE DCV"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "FUNC?",
+     "SDCV"
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "VOLT"
+    ],
+    [
+     "Q",
+     "OUT_IMP?",
+     "1000000,OHM"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OUT -45.000000000V"
+    ],
+    [
+     "Q",
+     "OUT?",
+     "-45.000000000,V,200000000.0,HZ"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:SOUrce1 CH1"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:SOUrce1?",
+     "CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:TYPe MEAN"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:TYPe?",
+     "MEAN"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "sleep",
+     0.1
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "30"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:VALue?",
+     "-4.5179E+01"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'ch': 1, 'delay': 0.001, 'desc': 'Time base: rising edge of the 1 ms marker at 1 ms delay, from the centre line (divisions)', 'high': 2.5, 'hscale_meas': 1e-08, 'hscale_set': 0.001, 'id': 23, 'kind': 'TIMEBASE', 'low': -2.5, 'nominal': 0.0, 'note': '1 division of displacement = 10 ppm time base error (p. 25 note); +/-2.5 div = +/-25 ns. Edge position measured from the acquired waveform, not by eye. The equipment table (p. 19) lists a 10 ms time mark; the procedure (step 2) uses 1 ms, which is used here.', 'period': 0.001, 'section': 'timebase', 'stim': 'cal', 'unit': 'div', 'vscale': 0.5}",
+   "case": "tbs2000b_verification.Runner.run_point[TIMEBASE#23]",
+   "log": [
+    "5560A|>>|STBY",
+    "TBS2000B|>>|FACtory",
+    "TBS2000B|>>|*OPC?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|HEADer OFF",
+    "TBS2000B|>>|VERBose OFF",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|SELect:CH1 ON",
+    "TBS2000B|>>|SELect:CH2 OFF",
+    "TBS2000B|>>|SELect:CH3 OFF",
+    "TBS2000B|>>|SELect:CH4 OFF",
+    "TBS2000B|>>|CH1:COUPling DC",
+    "TBS2000B|>>|CH1:COUPling?",
+    "TBS2000B|<<|DC",
+    "TBS2000B|>>|CH1:BANdwidth FULl",
+    "TBS2000B|>>|CH1:BANdwidth?",
+    "TBS2000B|<<|FULL",
+    "TBS2000B|>>|CH1:PRObe:GAIN 1",
+    "TBS2000B|>>|CH1:PRObe:GAIN?",
+    "TBS2000B|<<|1.0000E+00",
+    "TBS2000B|>>|CH1:SCAle 0.5",
+    "TBS2000B|>>|CH1:SCAle?",
+    "TBS2000B|<<|5.0000E-01",
+    "TBS2000B|>>|CH1:POSition 0",
+    "TBS2000B|>>|CH1:POSition?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|ACQuire:MODe SAMple",
+    "TBS2000B|>>|ACQuire:MODe?",
+    "TBS2000B|<<|SAMPLE",
+    "TBS2000B|>>|ACQuire:STOPAfter RUNSTop",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|TRIGger:A:TYPe EDGe",
+    "TBS2000B|>>|TRIGger:A:EDGE:SOUrce CH1",
+    "TBS2000B|>>|TRIGger:A:EDGE:SOUrce?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|TRIGger:A:EDGE:SLOpe RISe",
+    "TBS2000B|>>|TRIGger:A:EDGE:SLOpe?",
+    "TBS2000B|<<|RISE",
+    "TBS2000B|>>|TRIGger:A:EDGE:COUPling DC",
+    "TBS2000B|>>|TRIGger:A:EDGE:COUPling?",
+    "TBS2000B|<<|DC",
+    "TBS2000B|>>|TRIGger:A:MODe AUTO",
+    "TBS2000B|>>|TRIGger:A:MODe?",
+    "TBS2000B|<<|AUTO",
+    "TBS2000B|>>|HORizontal:RECOrdlength 2000",
+    "TBS2000B|>>|HORizontal:RECOrdlength?",
+    "TBS2000B|<<|2000",
+    "TBS2000B|>>|HORizontal:SCAle 0.001",
+    "TBS2000B|>>|HORizontal:SCAle?",
+    "TBS2000B|<<|1.0000E-03",
+    "5560A|>>|STBY",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE MARKER",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|SCOPE?",
+    "5560A|<<|MARKER",
+    "5560A|>>|OUT 0.001S",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|OUT?",
+    "5560A|<<|1.000000000E-03,S",
+    "5560A|>>|OPER",
+    "5560A|>>|OPER?",
+    "5560A|<<|1",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|TRIGger:A SETLevel",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|TRIGger:A:MODe NORMal",
+    "TBS2000B|>>|TRIGger:A:MODe?",
+    "TBS2000B|<<|NORMAL",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|DATa:SOUrce CH1",
+    "TBS2000B|>>|WFMOutpre:ENCdg ASCii",
+    "TBS2000B|>>|DATa:WIDth 1",
+    "TBS2000B|>>|DATa:STARt 1",
+    "TBS2000B|>>|DATa:STOP 2000",
+    "TBS2000B|>>|WFMOutpre:NR_Pt?",
+    "TBS2000B|<<|2000",
+    "TBS2000B|>>|WFMOutpre:XINcr?",
+    "TBS2000B|<<|7.5000E-06",
+    "TBS2000B|>>|WFMOutpre:XZEro?",
+    "TBS2000B|<<|-7.500000000E-03",
+    "TBS2000B|>>|WFMOutpre:YMUlt?",
+    "TBS2000B|<<|2.0000E-02",
+    "TBS2000B|>>|WFMOutpre:YOFf?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|WFMOutpre:YZEro?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|CURVe?",
+    "TBS2000B|<<|4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|CH1:POSition -1",
+    "TBS2000B|>>|CH1:POSition?",
+    "TBS2000B|<<|-1.0000E+00",
+    "TBS2000B|>>|HORizontal:DELay:MODe ON",
+    "TBS2000B|>>|HORizontal:DELay:MODe?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|HORizontal:DELay:TIMe 0.001",
+    "TBS2000B|>>|HORizontal:DELay:TIMe?",
+    "TBS2000B|<<|1.0000E-03",
+    "TBS2000B|>>|HORizontal:SCAle 1e-08",
+    "TBS2000B|>>|HORizontal:SCAle?",
+    "TBS2000B|<<|1.0000E-08",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|DATa:SOUrce CH1",
+    "TBS2000B|>>|WFMOutpre:ENCdg ASCii",
+    "TBS2000B|>>|DATa:WIDth 1",
+    "TBS2000B|>>|DATa:STARt 1",
+    "TBS2000B|>>|DATa:STOP 2000",
+    "TBS2000B|>>|WFMOutpre:NR_Pt?",
+    "TBS2000B|<<|2000",
+    "TBS2000B|>>|WFMOutpre:XINcr?",
+    "TBS2000B|<<|1.0000E-09",
+    "TBS2000B|>>|WFMOutpre:XZEro?",
+    "TBS2000B|<<|9.990000000E-04",
+    "TBS2000B|>>|WFMOutpre:YMUlt?",
+    "TBS2000B|<<|2.0000E-02",
+    "TBS2000B|>>|WFMOutpre:YOFf?",
+    "TBS2000B|<<|-2.5000E+01",
+    "TBS2000B|>>|WFMOutpre:YZEro?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|CURVe?",
+    "TBS2000B|<<|-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|30",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|40",
+    "TBS2000B|>>|DATa:SOUrce CH1",
+    "TBS2000B|>>|WFMOutpre:ENCdg ASCii",
+    "TBS2000B|>>|DATa:WIDth 1",
+    "TBS2000B|>>|DATa:STARt 1",
+    "TBS2000B|>>|DATa:STOP 2000",
+    "TBS2000B|>>|WFMOutpre:NR_Pt?",
+    "TBS2000B|<<|2000",
+    "TBS2000B|>>|WFMOutpre:XINcr?",
+    "TBS2000B|<<|1.0000E-09",
+    "TBS2000B|>>|WFMOutpre:XZEro?",
+    "TBS2000B|<<|9.990000000E-04",
+    "TBS2000B|>>|WFMOutpre:YMUlt?",
+    "TBS2000B|<<|2.0000E-02",
+    "TBS2000B|>>|WFMOutpre:YOFf?",
+    "TBS2000B|<<|-2.5000E+01",
+    "TBS2000B|>>|WFMOutpre:YZEro?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|CURVe?",
+    "TBS2000B|<<|-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|50",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|60",
+    "TBS2000B|>>|DATa:SOUrce CH1",
+    "TBS2000B|>>|WFMOutpre:ENCdg ASCii",
+    "TBS2000B|>>|DATa:WIDth 1",
+    "TBS2000B|>>|DATa:STARt 1",
+    "TBS2000B|>>|DATa:STOP 2000",
+    "TBS2000B|>>|WFMOutpre:NR_Pt?",
+    "TBS2000B|<<|2000",
+    "TBS2000B|>>|WFMOutpre:XINcr?",
+    "TBS2000B|<<|1.0000E-09",
+    "TBS2000B|>>|WFMOutpre:XZEro?",
+    "TBS2000B|<<|9.990000000E-04",
+    "TBS2000B|>>|WFMOutpre:YMUlt?",
+    "TBS2000B|<<|2.0000E-02",
+    "TBS2000B|>>|WFMOutpre:YOFf?",
+    "TBS2000B|<<|-2.5000E+01",
+    "TBS2000B|>>|WFMOutpre:YZEro?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|CURVe?",
+    "TBS2000B|<<|-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|70",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|80",
+    "TBS2000B|>>|DATa:SOUrce CH1",
+    "TBS2000B|>>|WFMOutpre:ENCdg ASCii",
+    "TBS2000B|>>|DATa:WIDth 1",
+    "TBS2000B|>>|DATa:STARt 1",
+    "TBS2000B|>>|DATa:STOP 2000",
+    "TBS2000B|>>|WFMOutpre:NR_Pt?",
+    "TBS2000B|<<|2000",
+    "TBS2000B|>>|WFMOutpre:XINcr?",
+    "TBS2000B|<<|1.0000E-09",
+    "TBS2000B|>>|WFMOutpre:XZEro?",
+    "TBS2000B|<<|9.990000000E-04",
+    "TBS2000B|>>|WFMOutpre:YMUlt?",
+    "TBS2000B|<<|2.0000E-02",
+    "TBS2000B|>>|WFMOutpre:YOFf?",
+    "TBS2000B|<<|-2.5000E+01",
+    "TBS2000B|>>|WFMOutpre:YZEro?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|CURVe?",
+    "TBS2000B|<<|-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|90",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|100",
+    "TBS2000B|>>|DATa:SOUrce CH1",
+    "TBS2000B|>>|WFMOutpre:ENCdg ASCii",
+    "TBS2000B|>>|DATa:WIDth 1",
+    "TBS2000B|>>|DATa:STARt 1",
+    "TBS2000B|>>|DATa:STOP 2000",
+    "TBS2000B|>>|WFMOutpre:NR_Pt?",
+    "TBS2000B|<<|2000",
+    "TBS2000B|>>|WFMOutpre:XINcr?",
+    "TBS2000B|<<|1.0000E-09",
+    "TBS2000B|>>|WFMOutpre:XZEro?",
+    "TBS2000B|<<|9.990000000E-04",
+    "TBS2000B|>>|WFMOutpre:YMUlt?",
+    "TBS2000B|<<|2.0000E-02",
+    "TBS2000B|>>|WFMOutpre:YOFf?",
+    "TBS2000B|<<|-2.5000E+01",
+    "TBS2000B|>>|WFMOutpre:YZEro?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|CURVe?",
+    "TBS2000B|<<|-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|110",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|120",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|STBY",
+    "5560A|>>|OPER?",
+    "5560A|<<|0"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (0.2499999999985153, {'delay_s': 0.001, 'edge_s': 0.0010000025, 'ppm': 2.499999999985153, 'spread_s': 0.0})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "Q",
+     "CH1:COUPling?",
+     "DC"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "FULL"
+    ],
+    [
+     "W",
+     "CH1:PRObe:GAIN 1"
+    ],
+    [
+     "Q",
+     "CH1:PRObe:GAIN?",
+     "1.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.5"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "5.0000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.0000E+00"
+    ],
+    [
+     "W",
+     "ACQuire:MODe SAMple"
+    ],
+    [
+     "Q",
+     "ACQuire:MODe?",
+     "SAMPLE"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce CH1"
+    ],
+    [
+     "Q",
+     "TRIGger:A:EDGE:SOUrce?",
+     "CH1"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SLOpe RISe"
+    ],
+    [
+     "Q",
+     "TRIGger:A:EDGE:SLOpe?",
+     "RISE"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:COUPling DC"
+    ],
+    [
+     "Q",
+     "TRIGger:A:EDGE:COUPling?",
+     "DC"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "Q",
+     "TRIGger:A:MODe?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "HORizontal:RECOrdlength 2000"
+    ],
+    [
+     "Q",
+     "HORizontal:RECOrdlength?",
+     "2000"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "1.0000E-03"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "SCOPE MARKER"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "SCOPE?",
+     "MARKER"
+    ],
+    [
+     "W",
+     "OUT 0.001S"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "OUT?",
+     "1.000000000E-03,S"
+    ],
+    [
+     "W",
+     "OPER"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "1"
+    ],
+    [
+     "sleep",
+     2.0
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "TRIGger:A SETLevel"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe NORMal"
+    ],
+    [
+     "Q",
+     "TRIGger:A:MODe?",
+     "NORMAL"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "W",
+     "DATa:SOUrce CH1"
+    ],
+    [
+     "W",
+     "WFMOutpre:ENCdg ASCii"
+    ],
+    [
+     "W",
+     "DATa:WIDth 1"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "7.5000E-06"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "-7.500000000E-03"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "2.0000E-02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "0.0000E+00"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0000E+00"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,50,48,46,44,43,41,40,38,37,35,34,33,32,31,29,28,27,26,25,24,23,23,22,21,20,19,19,18,17,17,16,16,15,14,14,13,13,12,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,48,47,45,43,42,40,39,37,36,35,33,32,31,30,29,28,27,26,25,24,23,22,21,20,20,19,18,18,17,16,16,15,15,14,14,13,13,12,12,11,11,10,10,10,9,9,9,8,8,8,7,7,7,7,6,6,6,6,6,5,5,5,5,5,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,49,47,45,44,42,41,39,38,36,35,34,32,31,30,29,28,27,26,25,24,23,22,22,21,20,19,19,18,17,17,16,15,15,14,14,13,13,12,12,11,11,11,10,10,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,5,5,4"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "CH1:POSition -1"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "-1.0000E+00"
+    ],
+    [
+     "W",
+     "HORizontal:DELay:MODe ON"
+    ],
+    [
+     "Q",
+     "HORizontal:DELay:MODe?",
+     "1"
+    ],
+    [
+     "W",
+     "HORizontal:DELay:TIMe 0.001"
+    ],
+    [
+     "Q",
+     "HORizontal:DELay:TIMe?",
+     "1.0000E-03"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 1e-08"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "1.0000E-08"
+    ],
+    [
+     "sleep",
+     1.0
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "W",
+     "DATa:SOUrce CH1"
+    ],
+    [
+     "W",
+     "WFMOutpre:ENCdg ASCii"
+    ],
+    [
+     "W",
+     "DATa:WIDth 1"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "1.0000E-09"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "9.990000000E-04"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "2.0000E-02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "-2.5000E+01"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0000E+00"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "30"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "40"
+    ],
+    [
+     "W",
+     "DATa:SOUrce CH1"
+    ],
+    [
+     "W",
+     "WFMOutpre:ENCdg ASCii"
+    ],
+    [
+     "W",
+     "DATa:WIDth 1"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "1.0000E-09"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "9.990000000E-04"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "2.0000E-02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "-2.5000E+01"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0000E+00"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "50"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "60"
+    ],
+    [
+     "W",
+     "DATa:SOUrce CH1"
+    ],
+    [
+     "W",
+     "WFMOutpre:ENCdg ASCii"
+    ],
+    [
+     "W",
+     "DATa:WIDth 1"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "1.0000E-09"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "9.990000000E-04"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "2.0000E-02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "-2.5000E+01"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0000E+00"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "70"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "80"
+    ],
+    [
+     "W",
+     "DATa:SOUrce CH1"
+    ],
+    [
+     "W",
+     "WFMOutpre:ENCdg ASCii"
+    ],
+    [
+     "W",
+     "DATa:WIDth 1"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "1.0000E-09"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "9.990000000E-04"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "2.0000E-02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "-2.5000E+01"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0000E+00"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "90"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "100"
+    ],
+    [
+     "W",
+     "DATa:SOUrce CH1"
+    ],
+    [
+     "W",
+     "WFMOutpre:ENCdg ASCii"
+    ],
+    [
+     "W",
+     "DATa:WIDth 1"
+    ],
+    [
+     "W",
+     "DATa:STARt 1"
+    ],
+    [
+     "W",
+     "DATa:STOP 2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:NR_Pt?",
+     "2000"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XINcr?",
+     "1.0000E-09"
+    ],
+    [
+     "Q",
+     "WFMOutpre:XZEro?",
+     "9.990000000E-04"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YMUlt?",
+     "2.0000E-02"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YOFf?",
+     "-2.5000E+01"
+    ],
+    [
+     "Q",
+     "WFMOutpre:YZEro?",
+     "0.0000E+00"
+    ],
+    [
+     "Q",
+     "CURVe?",
+     "-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,-25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "sleep",
+     0.2
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "110"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "120"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "Q",
+     "OPER?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'averages': 16, 'ch': 1, 'desc': 'CH1 DC balance, 200 mV/div, 50 ohm terminated (mean)', 'high': 0.021, 'hscale': 0.001, 'id': 24, 'kind': 'DCBAL', 'low': -0.021, 'nominal': 0.0, 'note': 'p. 26: no signal, 50 ohm terminator on the input, AC Line trigger, Average 16, 1 ms/div, DC coupling, MEAN measurement.', 'section': 'dcbal', 'stim': 'none', 'unit': 'V', 'vscale': 0.2}",
+   "case": "tbs2000b_verification.Runner.run_point[DCBAL#24]",
+   "log": [
+    "5560A|>>|STBY",
+    "TBS2000B|>>|FACtory",
+    "TBS2000B|>>|*OPC?",
+    "TBS2000B|<<|1",
+    "TBS2000B|>>|HEADer OFF",
+    "TBS2000B|>>|VERBose OFF",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|HORizontal:SCAle 0.001",
+    "TBS2000B|>>|HORizontal:SCAle?",
+    "TBS2000B|<<|1.0000E-03",
+    "TBS2000B|>>|TRIGger:A:TYPe EDGe",
+    "TBS2000B|>>|TRIGger:A:EDGE:SOUrce LINE",
+    "TBS2000B|>>|TRIGger:A:EDGE:SOUrce?",
+    "TBS2000B|<<|LINE",
+    "TBS2000B|>>|TRIGger:A:EDGE:SLOpe RISe",
+    "TBS2000B|>>|TRIGger:A:EDGE:SLOpe?",
+    "TBS2000B|<<|RISE",
+    "TBS2000B|>>|TRIGger:A:MODe AUTO",
+    "TBS2000B|>>|TRIGger:A:MODe?",
+    "TBS2000B|<<|AUTO",
+    "TBS2000B|>>|ACQuire:MODe AVErage",
+    "TBS2000B|>>|ACQuire:MODe?",
+    "TBS2000B|<<|AVERAGE",
+    "TBS2000B|>>|ACQuire:NUMAVg 16",
+    "TBS2000B|>>|ACQuire:NUMAVg?",
+    "TBS2000B|<<|16",
+    "TBS2000B|>>|ACQuire:STOPAfter RUNSTop",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|SELect:CH1 ON",
+    "TBS2000B|>>|SELect:CH2 OFF",
+    "TBS2000B|>>|SELect:CH3 OFF",
+    "TBS2000B|>>|SELect:CH4 OFF",
+    "TBS2000B|>>|CH1:COUPling DC",
+    "TBS2000B|>>|CH1:COUPling?",
+    "TBS2000B|<<|DC",
+    "TBS2000B|>>|CH1:BANdwidth FULl",
+    "TBS2000B|>>|CH1:BANdwidth?",
+    "TBS2000B|<<|FULL",
+    "TBS2000B|>>|CH1:PRObe:GAIN 1",
+    "TBS2000B|>>|CH1:PRObe:GAIN?",
+    "TBS2000B|<<|1.0000E+00",
+    "TBS2000B|>>|CH1:SCAle 0.2",
+    "TBS2000B|>>|CH1:SCAle?",
+    "TBS2000B|<<|2.0000E-01",
+    "TBS2000B|>>|CH1:POSition 0",
+    "TBS2000B|>>|CH1:POSition?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|CH1:OFFSet 0",
+    "TBS2000B|>>|CH1:OFFSet?",
+    "TBS2000B|<<|0.0000E+00",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1 CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:SOUrce1?",
+    "TBS2000B|<<|CH1",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe MEAN",
+    "TBS2000B|>>|MEASUrement:IMMed:TYPe?",
+    "TBS2000B|<<|MEAN",
+    "TBS2000B|>>|ACQuire:STATE RUN",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|10",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|20",
+    "TBS2000B|>>|ACQuire:NUMACq?",
+    "TBS2000B|<<|30",
+    "TBS2000B|>>|MEASUrement:IMMed:VALue?",
+    "TBS2000B|<<|1.2000E-03",
+    "TBS2000B|>>|*ESR?",
+    "TBS2000B|<<|0",
+    "5560A|>>|STBY"
+   ],
+   "method": "tbs2000b_verification.Runner.run_point",
+   "result": "returned (0.0012, {'averages': 16, 'vscale': 0.2})",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "FACtory"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     15.0
+    ],
+    [
+     "W",
+     "HEADer OFF"
+    ],
+    [
+     "W",
+     "VERBose OFF"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "HORizontal:SCAle 0.001"
+    ],
+    [
+     "Q",
+     "HORizontal:SCAle?",
+     "1.0000E-03"
+    ],
+    [
+     "W",
+     "TRIGger:A:TYPe EDGe"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SOUrce LINE"
+    ],
+    [
+     "Q",
+     "TRIGger:A:EDGE:SOUrce?",
+     "LINE"
+    ],
+    [
+     "W",
+     "TRIGger:A:EDGE:SLOpe RISe"
+    ],
+    [
+     "Q",
+     "TRIGger:A:EDGE:SLOpe?",
+     "RISE"
+    ],
+    [
+     "W",
+     "TRIGger:A:MODe AUTO"
+    ],
+    [
+     "Q",
+     "TRIGger:A:MODe?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "ACQuire:MODe AVErage"
+    ],
+    [
+     "Q",
+     "ACQuire:MODe?",
+     "AVERAGE"
+    ],
+    [
+     "W",
+     "ACQuire:NUMAVg 16"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMAVg?",
+     "16"
+    ],
+    [
+     "W",
+     "ACQuire:STOPAfter RUNSTop"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "W",
+     "SELect:CH1 ON"
+    ],
+    [
+     "W",
+     "SELect:CH2 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH3 OFF"
+    ],
+    [
+     "W",
+     "SELect:CH4 OFF"
+    ],
+    [
+     "W",
+     "CH1:COUPling DC"
+    ],
+    [
+     "Q",
+     "CH1:COUPling?",
+     "DC"
+    ],
+    [
+     "W",
+     "CH1:BANdwidth FULl"
+    ],
+    [
+     "Q",
+     "CH1:BANdwidth?",
+     "FULL"
+    ],
+    [
+     "W",
+     "CH1:PRObe:GAIN 1"
+    ],
+    [
+     "Q",
+     "CH1:PRObe:GAIN?",
+     "1.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:SCAle 0.2"
+    ],
+    [
+     "Q",
+     "CH1:SCAle?",
+     "2.0000E-01"
+    ],
+    [
+     "W",
+     "CH1:POSition 0"
+    ],
+    [
+     "Q",
+     "CH1:POSition?",
+     "0.0000E+00"
+    ],
+    [
+     "W",
+     "CH1:OFFSet 0"
+    ],
+    [
+     "Q",
+     "CH1:OFFSet?",
+     "0.0000E+00"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:SOUrce1 CH1"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:SOUrce1?",
+     "CH1"
+    ],
+    [
+     "W",
+     "MEASUrement:IMMed:TYPe MEAN"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:TYPe?",
+     "MEAN"
+    ],
+    [
+     "W",
+     "ACQuire:STATE RUN"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "10"
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "20"
+    ],
+    [
+     "sleep",
+     0.1
+    ],
+    [
+     "Q",
+     "ACQuire:NUMACq?",
+     "30"
+    ],
+    [
+     "Q",
+     "MEASUrement:IMMed:VALue?",
+     "1.2000E-03"
+    ],
+    [
+     "Q",
+     "*ESR?",
+     "0"
+    ],
+    [
+     "W",
+     "STBY"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "tbs2000b_verification.IO.close",
+   "log": [
+    "5560A|>>|STBY"
+   ],
+   "method": "tbs2000b_verification.IO.close",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "ctl",
+     "close"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  }
+ ],
+ "name": "engine_tbs2000b",
+ "schema": 1
+}
