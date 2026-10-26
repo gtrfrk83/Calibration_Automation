@@ -19,6 +19,7 @@ Rules (project):
 from __future__ import annotations
 
 import json
+import os
 import math
 import re
 import sqlite3
@@ -487,6 +488,9 @@ def standard(key, path=None):
     if str(path or DB) not in _CONF_SYNCED:         # once per process and database: confidence level of an older import (see sync_confidence)
         _CONF_SYNCED.add(str(path or DB))
         sync_confidence(path=path)
+    ck = (str(path or DB), key, _db_signature(path))
+    if ck[2] is not None and ck in _STD_CACHE:      # the same database file, unchanged since the last read: reuse the loaded sheet (the sheet's rows were re-read for every test point)
+        return _STD_CACHE[ck]
     try:
         with _db(path) as con:
             row = None
@@ -503,9 +507,30 @@ def standard(key, path=None):
                     hit = [m for m in models if re.search(rf'(?<![a-z0-9]){re.escape(m.lower())}(?![a-z0-9])', low)]
                     if hit:
                         row = con.execute('SELECT id FROM standards WHERE model=?', (max(hit, key=len),)).fetchone()
-            return StandardSpec(row[0], path) if row else None
+            spec = StandardSpec(row[0], path) if row else None
     except sqlite3.Error:
         return None
+    if ck[2] is not None:
+        if len(_STD_CACHE) > 64:
+            _STD_CACHE.clear()
+        _STD_CACHE[ck] = spec
+    return spec
+
+
+_STD_CACHE = {}
+
+
+def _db_signature(path=None):
+    """(mtime, size) of the database file and its journal files; changes whenever anything is written, so a cached sheet is never stale."""
+    base = str(path or DB)
+    sig = []
+    for suffix in ('', '-wal', '-journal'):
+        try:
+            st = os.stat(base + suffix)
+            sig.append((st.st_mtime_ns, st.st_size))
+        except OSError:
+            sig.append(None)
+    return tuple(sig) if sig[0] is not None else None
 
 
 def set_standard_field(standard_id, field, value, who='', reason='', path=None):
