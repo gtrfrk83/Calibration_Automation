@@ -211,12 +211,18 @@ class ManagerWindow(QMainWindow):
         self._first_tab.stop()
         if self.find_window is not None and hasattr(self.find_window, 'close'):
             self.find_window.close()
+        if getattr(self, 'driver_verify_window', None) is not None:
+            self.driver_verify_window.close()
         super().closeEvent(ev)
 
     # ------------------------------------------------------------------ menus
     def build_menus(self):
         bar = self.menuBar()
         file_menu = bar.addMenu('&File')
+        self.act_driver_verify = QAction('&Driver verification...', self)
+        self.act_driver_verify.triggered.connect(lambda _c=False: self.driver_verification())
+        file_menu.addAction(self.act_driver_verify)
+        file_menu.addSeparator()
         self.act_exit = QAction('E&xit', self)
         self.act_exit.setShortcut(QKeySequence('Ctrl+Q'))
         self.act_exit.triggered.connect(self.close)
@@ -773,6 +779,11 @@ class ManagerWindow(QMainWindow):
         demo = self.demo if demo is None else demo
         if self._launch(name, script, demo):
             self.status.set(f'Launched {name}' + (' in demo mode.' if demo else '.'))
+
+    def driver_verification(self):
+        from qtui.screens import driver_verify_window
+        self.driver_verify_window = driver_verify_window.open_driver_verify(self)
+        return self.driver_verify_window
 
     def find_instruments(self):
         self.find_window = find_instruments.open_find_instruments(self)
