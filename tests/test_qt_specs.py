@@ -741,7 +741,8 @@ class SpecsTab(unittest.TestCase):
         self.assertEqual(chips['5522A'][f'99 % {SV.DOT} {SV.DIVIDE} 2.576'], 'info')
         self.assertEqual(chips['8563E'][f'k = 2 assumed {SV.DOT} {SV.DIVIDE} 2'], 'neutral')
         self.assertTrue(any(k == 'warn' for k in chips['5520A'].values()))
-        self.assertFalse(any(t.endswith('issues') for t in chips['5560A']))
+        # 2026-10-25: the 5560A sheet was rebuilt from the manufacturer's document; its builder records 14 warnings (not loaded / unverified items) as sheet issues
+        self.assertTrue(any(t.endswith('issues') and k == 'warn' for t, k in chips['5560A'].items()))
         self.assertEqual(p.sel, min(self.ids.values(), key=lambda k: p._info[k]['std']['model']))
         self.assertEqual(p.h_title.text(), self.models[0])
 
@@ -996,12 +997,13 @@ class SpecsTab(unittest.TestCase):
         p = self.p
         p.select(self.ids['5560A'])
         pump(3)
-        self.assertEqual(p.displayed_columns(), ['range', 'span', 'freq', 'res', 'p1'])
+        # 2026-10-25: the sheet rebuilt from the document carries 1 yr and 90 day columns (256 rows) and 14 recorded warnings
+        self.assertEqual(p.displayed_columns(), ['range', 'span', 'freq', 'res', 'p1', 'p2'])
         self.assertEqual(p.rows.headerItem().text(4), '1 YR SPEC')
-        self.assertEqual(p.rows.headerItem().text(5), '')
-        self.assertEqual((p.h_title.text(), p.count_lbl.text()), ('5560A', 'Showing 147 of 147 ranges'))
-        self.assertEqual(p.issues_chip.kind, 'good')
-        self.assertTrue(p.issues_chip.text().startswith('0 sheet issues'))
+        self.assertEqual(p.rows.headerItem().text(5), '90 DAY SPEC')
+        self.assertEqual((p.h_title.text(), p.count_lbl.text()), ('5560A', 'Showing 256 of 256 ranges'))
+        self.assertEqual(p.issues_chip.kind, 'warn')
+        self.assertTrue(p.issues_chip.text().startswith('14 sheet issues'))
         p.select(self.ids['8902A'])
         pump(3)
         self.assertEqual((p.rows.headerItem().text(4), p.rows.headerItem().text(5)), ('SPEC', 'SUPPLEMENTAL'))
@@ -1032,7 +1034,7 @@ class SpecsTab(unittest.TestCase):
         p.pick_box.setCurrentText('5560A')
         p._pick_chosen()
         pump(3)
-        self.assertEqual((p.h_title.text(), p.count_lbl.text()), ('5560A', 'Showing 147 of 147 ranges'))
+        self.assertEqual((p.h_title.text(), p.count_lbl.text()), ('5560A', 'Showing 256 of 256 ranges'))
         self.host.resize(1260, 700)
         pump(5)
         self.assertTrue(p.rail_visible() and not p.pickbar.isVisible())

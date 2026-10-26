@@ -232,7 +232,9 @@ class Problems(unittest.TestCase):
     def test_problems_of_reads_what_the_import_stored(self):
         sm.seed(path=DB)
         by = {s['model']: s['id'] for s in sm.standards(DB)}
-        self.assertEqual(sm.problems_of(by['5560A'], DB), [])
+        # 2026-10-25: the 5560A sheet rebuilt from the document stores its 14 warnings (unverified / not loaded items), no errors (was [] for the old sheet)
+        p5560 = sm.problems_of(by['5560A'], DB)
+        self.assertEqual((len(p5560), {p['level'] for p in p5560}), (14, {'warn'}))
         probs = sm.problems_of(by['5520A'], DB)
         self.assertTrue(probs and all({'level', 'where', 'what'} <= set(p) for p in probs))
         self.assertEqual(sm.problems_of(99999, DB), [])

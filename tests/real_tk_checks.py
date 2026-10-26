@@ -1006,9 +1006,10 @@ def checks_standards_specs():
     # ---- other standards: 5560A (one period), 8902A (periods other than 1 yr), arrows in the rail
     p.select(ids['5560A'])
     pump(root, 20)
-    check('specs: 5560A shows only its 1 yr column', list(tree['displaycolumns']) == ['span', 'freq', 'res', 'p1'] and tree.heading('p1', 'text') == '1 YR SPEC'
-          and tree.heading('p2', 'text') == '' and p.h_title.cget('text') == '5560A' and p.count_lbl.cget('text') == 'Showing 147 of 147 ranges', list(tree['displaycolumns']))
-    check('specs: 5560A has no sheet issues: green pill', p.issues_chip.kind == 'good' and p.issues_chip.text.startswith('0 sheet issues'))
+    # 2026-10-25 (not run here, no Tk): the 5560A sheet rebuilt from the document has 1 yr and 90 day columns, 256 rows and 14 recorded warnings
+    check('specs: 5560A shows its 1 yr and 90 day columns', list(tree['displaycolumns']) == ['span', 'freq', 'res', 'p1', 'p2'] and tree.heading('p1', 'text') == '1 YR SPEC'
+          and tree.heading('p2', 'text') == '90 DAY SPEC' and p.h_title.cget('text') == '5560A' and p.count_lbl.cget('text') == 'Showing 256 of 256 ranges', list(tree['displaycolumns']))
+    check('specs: 5560A has 14 sheet warnings: amber pill', p.issues_chip.kind == 'warn' and p.issues_chip.text.startswith('14 sheet issues'))
     grab('5560A_1260')
     p.select(ids['8902A'])
     pump(root, 20)
@@ -1059,7 +1060,7 @@ def checks_standards_specs_small():
     p.pick_box.set('5560A')
     p.pick_box.event_generate('<<ComboboxSelected>>')
     pump(root, 20)
-    check('specs 900: the selector picks a standard', p.h_title.cget('text') == '5560A' and p.count_lbl.cget('text') == 'Showing 147 of 147 ranges')
+    check('specs 900: the selector picks a standard', p.h_title.cget('text') == '5560A' and p.count_lbl.cget('text') == 'Showing 256 of 256 ranges')
     root.geometry('1260x700+0+0')
     pump(root, 40)
     check('specs: the rail comes back when the window widens', p.rail.winfo_ismapped() and not p.pickbar.winfo_ismapped())
