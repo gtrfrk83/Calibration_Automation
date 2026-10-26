@@ -200,7 +200,7 @@ GROUPS = {
             ('Standby', 'The calibrator is put in STANDBY before you rewire (in manual-calibrator mode, put it in STANDBY yourself).'),
             ('Coil', 'The wired coil is 20 turns (Table 3, printed p. 8). Connect its two ends to the calibrator: Fluke 5522A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use wire and plugs rated for the current.'),
             ('Jaw', 'Close the detachable jaw around ALL 20 turns of the coil together, jaw fully closed, the coil centred in the opening, the coil leads kept away from the meter body. The meter then reads 20 x the calibrator current. (The manual gives no jaw placement beyond "20 turn coil": UNVERIFIED.)'),
-            ('LCOMP', 'Fluke 5522A: for the AC points switch inductive-load compensation (LCOMP) ON at the calibrator front panel (5522A Operators Manual: used to drive multi-turn coils and current clamps). The program does not set it: UNVERIFIED for this coil.'),
+            ('LCOMP', 'Fluke 5522A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='This point drives current through a coil. Keep the calibrator in STANDBY whenever you touch the coil or leads. Do not exceed the jaw rating (600 V or 200 A, Safety Information p. 3).',
         diagram='diagrams/hook_fluke365_COIL_AUX.png'),
@@ -214,7 +214,7 @@ GROUPS = {
             ('Standby', 'The calibrator is put in STANDBY before you rewire (in manual-calibrator mode, put it in STANDBY yourself).'),
             ('Coil', 'Move the two ends of the 20-turn coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil wire, plugs and leads must carry up to 9.5 A.'),
             ('Jaw', 'The detachable jaw stays closed around ALL 20 turns of the coil (centred, jaw fully closed, leads away from the meter body). The meter reads 20 x the calibrator current: 5 A reads 100 A, 9.5 A reads 190 A.'),
-            ('LCOMP', 'Fluke 5522A: AC points with LCOMP ON, as for the low-current points (not set by the program; UNVERIFIED for this coil).'),
+            ('LCOMP', 'Fluke 5522A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points (the 20-turn coil: LCOMP ON for it is UNVERIFIED).'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='Up to 9.5 A flows in the coil. Keep the calibrator in STANDBY whenever you touch the coil or leads; check that the coil and leads are not warm after a long run. '
                 'Do not exceed the jaw rating (600 V or 200 A, Safety Information p. 3).',

@@ -109,6 +109,27 @@ class Flow(unittest.TestCase):
                 self.assertEqual(nxt, 'STBY')
         self.assertEqual(cal[-1], 'STBY')
 
+    def test_lcomp_on_for_coil_steps_off_for_wire_and_direct(self):
+        """Owner request 2026-10-26: LCOMP ON at the calibrator for the 50-turn coil steps (Table 3 steps 2 and 3), OFF for the wire step and the direct pre-calibration."""
+        a = self.app(cal='Fluke 5522A')
+        self.assertTrue(self.hn.run_all())
+        cal = [t for d, t in VH.wire(a.io) if d == '5522A']
+        for out in ('OUT 2A,400Hz', 'OUT 8A,60Hz'):
+            i = cal.index(out)
+            self.assertEqual(cal[i + 1:i + 3], ['LCOMP ON', 'LCOMP?'], out)
+            self.assertIn('OPER', cal[i + 3:i + 8])
+        for out in ('OUT 1A,45Hz', 'OUT 0.001A,45Hz', 'OUT 0.1A,400Hz', 'OUT 0.4A,60Hz'):
+            i = cal.index(out)
+            self.assertFalse(cal[i + 1].startswith('LCOMP ON'), out)
+        self.assertEqual(cal.count('LCOMP ON'), 2)
+        self.assertGreaterEqual(cal.count('LCOMP OFF'), 2)
+        self.assertEqual(cal[-1], 'STBY')
+
+    def test_lcomp_5560a_not_sent(self):
+        a = self.app(cal='Fluke 5560A')
+        self.assertTrue(self.hn.run_all())
+        self.assertFalse(any(t.startswith('LCOMP') for _d, t in VH.wire(a.io)))
+
     def test_clamp_path_reading_and_correction(self):
         io, dt = self.io()
         dt.path = 'direct'

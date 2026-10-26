@@ -121,8 +121,16 @@ class SimFlukeTransport(_SimBase):
         if m and f['scope'] == 'MARKER':
             f['period'] = float(m.group(1)); return None
         if u == 'OUT?' and f['scope'] == 'MARKER': return f"{f.get('period', 0.0):.9E},S"
+        if u.startswith('LCOMP'):                          # 5522A Operators Manual p. 6-23; the 5560A has no LCOMP for its own current output (only LCOMP_52120)
+            if self.model == '5560A':
+                raise TransportError(f'simulated {self.model}: unknown command {cmd!r}')
+            if u == 'LCOMP?': return 'ON' if f.get('lcomp') else 'OFF'
+            mode = u.split()[1]
+            if mode == 'ON' and f.get('operate') is not None and f.get('freq') and not ((f['freq'] < 440) if abs(f['volts']) < 0.33 else (f['freq'] < 1000)):
+                self.errors = getattr(self, 'errors', []) + ['-221,"Settings conflict"']; return None
+            f['lcomp'] = mode == 'ON'; return None
         if u == '*RST':
-            f.update(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', wave='SINE', duty=50.0, offset=0.0); f.pop('period', None)
+            f.update(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', wave='SINE', duty=50.0, offset=0.0, lcomp=False, unit='V'); f.pop('period', None)
             self.errors = []; self.next_error = None; return None
         if u == '*OPC?': return '1'
         if u == 'STBY': f['operate'] = False; return None
@@ -138,7 +146,12 @@ class SimFlukeTransport(_SimBase):
         if u == 'FUNC?': return f['func']
         if u.startswith('OUT_IMP '): f['imp'] = '1M' if '1M' in cmd.split()[1].upper() else '50'; return None
         if u == 'OUT_IMP?': return '1000000,OHM' if f['imp'] == '1M' else '50,OHM'
-        if u.startswith('TC_TYPE '): f['tc'] = cmd.split()[1].upper(); return None
+        if u == 'TSENS_TYPE TC': return None
+        if u == 'TC_TYPE?': return f.get('tc', 'K')
+        if u.startswith('TC_TYPE '):
+            if self.model == '5560A' and f.get('unit') != 'CEL':       # bench: 7028,"TC type can only be set while in TC Source/Measure function"
+                self.errors = getattr(self, 'errors', []) + ['7028,"TC type can only be set while in TC Source/Measure function"']; return None
+            f['tc'] = cmd.split()[1].upper(); f['volts'] = 0.0; return None
         m = re.match(r'OUT\s+([-+0-9.eE]+)(V|A|OHM|F|NF|UF|CEL)(?:,\s*([0-9.]+)\s*(HZ|KHZ|MHZ|GHZ))?$', u)
         if m:
             f['volts'] = float(m.group(1))

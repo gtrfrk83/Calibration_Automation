@@ -46,7 +46,7 @@ POINTS = procspec.flatten(SPEC)
 procspec.apply_period(POINTS, SPEC['default_period'])
 PERIODS = {'Limits printed in the manual': 'printed'}
 PERIOD_LABEL = {v: k for k, v in PERIODS.items()}
-# The calibrators (the owner picks one).  The 5520A uses the 5522A-family driver; its LCOMP command is NOT in any driver: the operator sets LCOMP at the front panel (the hook-up prompt says so).
+# The calibrators (the owner picks one).  The 5520A uses the 5522A-family driver; the program sets LCOMP ON for the coil steps through the driver (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED).
 CALIBRATORS = {'Fluke 5560A': ('5560A', drivers.Fluke5560A), 'Fluke 5522A': ('5522A', drivers.Fluke5522AComp), 'Fluke 5520A': ('5520A', drivers.Fluke5520A)}
 INTERFACES = ('GPIB', 'USB')
 DEFAULT_ADDR = {'GPIB': 'GPIB0::22::INSTR', 'USB': 'USB0::0x0957::0x0607::MY00000000::INSTR'}      # GPIB factory address 22 (34410A UG p. 90); the USB IDs are an UNVERIFIED example
@@ -198,6 +198,28 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
 
     def standby(self):
         self.cal.standby_quiet()
+        self._lcomp_off()
+
+    def _lcomp_off(self):
+        """LCOMP OFF after a coil point (set once, read back, never retried; a failure is logged)."""
+        if not getattr(self, '_lcomp_on', False): return
+        self._lcomp_on = False
+        try:
+            self.cal.set_lcomp(False)
+            self.cal.check_error('LCOMP OFF')
+        except Exception as exc:
+            self.log.add('!!', f'LCOMP was NOT confirmed OFF: {exc}', self.cal.label)
+        self.cal.standby_quiet()                    # the last command is STBY again: the output is left in standby
+
+    def _lcomp_for(self, p, amps, hz):
+        """Table 3 'LCOMP ON' (steps 2 and 3, the 50-turn coil): set on a 5522A / 5520A (LCOMP ON, read back with LCOMP?) after the output is programmed and before it is
+        operated.  Not set outside what the calibrator allows (5522A Operators Manual p. 6-23) or on a 5560A (no LCOMP command for its own output: the operator's setting)."""
+        if p.get('lcomp') != 'ON' or not hasattr(self.cal, 'set_lcomp'): return
+        if not self.cal.lcomp_allowed(amps, hz):
+            self.log.add('!!', f'LCOMP not set: {hz} Hz at {amps} A is outside what the calibrator allows', self.cal.label); return
+        self.cal.set_lcomp(True)
+        self._lcomp_on = True
+        surprise.checked(self.cal, self.cal.check_error, p['description'], stop_only=True)
 
     def close(self):
         try: self.standby()
@@ -228,12 +250,13 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         """The point as the driver wants it: AC current, the point's range, the spec's AC filter."""
         return dict(p, kind='ACI', ac_bandwidth=p.get('filter_hz') or SPEC['measure']['ac_bandwidth'])
 
-    def _output_and_read(self, p, amps, hz):
+    def _output_and_read(self, p, amps, hz, lcomp=True):
         self.standby()
         try:
             surprise.checked(self.dmm, self.dmm.configure_point, self.meter_point(p), kind='readback', expected='the value that was set', stop_only=True)
             surprise.checked(self.dmm, self.dmm.check_errors, 'configuring ' + p['description'])
             self.cal.set_output_amps(amps, hz, dc=False)
+            if lcomp: self._lcomp_for(p, amps, hz)
             surprise.checked(self.cal, self.cal.check_error, p['description'], stop_only=True)   # the calibrator refuses outputs it cannot make; never operate then
             self.cal.operate_unverified()
             time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
@@ -250,6 +273,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         self.standby()
         try:
             self.cal.set_output_amps(a['value'], a['frequency'], dc=False)
+            self._lcomp_for(p, a['value'], a['frequency'])
             surprise.checked(self.cal, self.cal.check_error, p['description'], stop_only=True)
             self.cal.operate_unverified()
             time.sleep(virtualbench.scaled(self.settle(p), self.virtual))
@@ -264,7 +288,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
 
     def measure_direct(self, p):
         """The multimeter pre-calibration (Table 3 footnote): the calibrator straight into the multimeter at the clamp's nominal output (1 mA / 100 mA / 400 mA), LCOMP OFF."""
-        return self._output_and_read(p, p['nominal'], p['applied']['frequency'])
+        return self._output_and_read(p, p['nominal'], p['applied']['frequency'], lcomp=False)
 
 
 class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.ProcModsMixin):
@@ -458,7 +482,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if group == 'WIRE_1T':
             return (f'Calibrator {out} through a single-turn copper wire loop (larger than #14 gauge, about 6 in diameter); close the clamp jaws round the wire, centred (Figure 2, p. 6). '
                     f'Clamp output cable to {self._dmm_input()}. LCOMP OFF. (Calibrator: {cal}.)')
-        lcomp = 'Set LCOMP ON at the calibrator front panel (not set by the program).' if cal != '5560A' else 'The 5560A has no LCOMP setting in this procedure: no compensation is set.'
+        lcomp = ('The program turns LCOMP ON at the calibrator for this point (and OFF afterwards).' if cal != '5560A'
+                 else 'The 5560A has no LCOMP command for its own output: set compensation on the calibrator yourself if your 5560A configuration needs it.')
         return (f'Calibrator {out} through the 50-turn coil (Fluke 5500A/Coil); close the clamp jaws round the coil, centred (Figure 3, p. 7). '
                 f'The clamp reads 50 x the calibrator current. Clamp output cable to {self._dmm_input()}. {lcomp}')
 

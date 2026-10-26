@@ -612,19 +612,94 @@
    "call": "100.0",
    "case": "Fluke5560A.set_output_temperature",
    "log": [
+    "5560A|>>|TSENS_TYPE TC",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|OUT 100CEL",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
     "5560A|>>|TC_TYPE K",
-    "5560A|>>|OUT 100CEL"
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|TC_TYPE?",
+    "5560A|<<|K",
+    "5560A|>>|OUT 100CEL",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1"
    ],
    "method": "Fluke5560A.set_output_temperature",
    "result": "returned None",
    "wire": [
     [
      "W",
-     "TC_TYPE K"
+     "TSENS_TYPE TC"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
     ],
     [
      "W",
      "OUT 100CEL"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "TC_TYPE K"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "TC_TYPE?",
+     "K"
+    ],
+    [
+     "W",
+     "OUT 100CEL"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
     ]
    ]
   },
@@ -632,19 +707,94 @@
    "call": "25.5, 'J'",
    "case": "Fluke5560A.set_output_temperature[type J]",
    "log": [
+    "5560A|>>|TSENS_TYPE TC",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|OUT 25.5CEL",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
     "5560A|>>|TC_TYPE J",
-    "5560A|>>|OUT 25.5CEL"
+    "5560A|>>|*OPC?",
+    "5560A|<<|1",
+    "5560A|>>|ERR?",
+    "5560A|<<|0,\"No error\"",
+    "5560A|>>|TC_TYPE?",
+    "5560A|<<|J",
+    "5560A|>>|OUT 25.5CEL",
+    "5560A|>>|*OPC?",
+    "5560A|<<|1"
    ],
    "method": "Fluke5560A.set_output_temperature",
    "result": "returned None",
    "wire": [
     [
      "W",
-     "TC_TYPE J"
+     "TSENS_TYPE TC"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
     ],
     [
      "W",
      "OUT 25.5CEL"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "W",
+     "TC_TYPE J"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
+    [
+     "Q",
+     "TC_TYPE?",
+     "J"
+    ],
+    [
+     "W",
+     "OUT 25.5CEL"
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "sleep",
+     0.5
     ]
    ]
   },
@@ -1030,6 +1180,50 @@
      "Q",
      "*IDN?",
      "FLUKE,5522A,SIM0001,1.0"
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "Fluke5522A.set_lcomp[ON]",
+   "log": [
+    "5522A|>>|LCOMP ON",
+    "5522A|>>|LCOMP?",
+    "5522A|<<|ON"
+   ],
+   "method": "Fluke5522A.set_lcomp",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "LCOMP ON"
+    ],
+    [
+     "Q",
+     "LCOMP?",
+     "ON"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "Fluke5522A.set_lcomp[OFF]",
+   "log": [
+    "5522A|>>|LCOMP OFF",
+    "5522A|>>|LCOMP?",
+    "5522A|<<|OFF"
+   ],
+   "method": "Fluke5522A.set_lcomp",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "LCOMP OFF"
+    ],
+    [
+     "Q",
+     "LCOMP?",
+     "OFF"
     ]
    ]
   },

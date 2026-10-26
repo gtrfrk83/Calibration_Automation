@@ -1096,13 +1096,13 @@
         "coil_rule.py",
         "ui_port.py",
         "ui_port_tk.py",
-        "hookups.py#fluke323",
+        "hookups.py",
         "drivers/base.py",
         "drivers/transport.py",
         "drivers/fluke_5560a.py"
       ],
       "spec": [
-        "specs/fluke_323_pv.json#323"
+        "specs/fluke_323_pv.json"
       ]
     },
     "Fluke_324_Verification.py": {
@@ -1117,13 +1117,13 @@
         "coil_rule.py",
         "ui_port.py",
         "ui_port_tk.py",
-        "hookups.py#fluke323",
+        "hookups.py",
         "drivers/base.py",
         "drivers/transport.py",
         "drivers/fluke_5560a.py"
       ],
       "spec": [
-        "specs/fluke_323_pv.json#324"
+        "specs/fluke_323_pv.json"
       ]
     },
     "Fluke_325_Verification.py": {
@@ -1138,13 +1138,13 @@
         "coil_rule.py",
         "ui_port.py",
         "ui_port_tk.py",
-        "hookups.py#fluke323",
+        "hookups.py",
         "drivers/base.py",
         "drivers/transport.py",
         "drivers/fluke_5560a.py"
       ],
       "spec": [
-        "specs/fluke_323_pv.json#325"
+        "specs/fluke_323_pv.json"
       ]
     }
   },

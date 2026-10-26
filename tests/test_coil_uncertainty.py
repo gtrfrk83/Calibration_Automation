@@ -22,6 +22,8 @@ def steps_with_coil():
             continue
         for s in d.get('steps', []) if isinstance(d, dict) else []:
             text = json.dumps(s)
+            if s.get('unc_kind') == 'FREQ':
+                continue               # the 325 Frequency rows: the lab's Frequency - Measure CMC alone (existing mechanism), not the coil sheet
             if 'COIL' in str(s.get('group', '')) and ('50-turn' in text or '50 turns' in text or 'x 50' in text):
                 yield f.name, s
 

@@ -338,7 +338,7 @@ GROUPS = {
             ('Coil', 'The wired coil is 50 turns (Table 2, printed p. 4: 55XXA/COIL). Connect its two ends to the calibrator: Fluke 5522A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use plugs rated for the current.'),
             ('Jaw', 'Close the detachable jaw around the coil, jaw fully closed, the coil centred in the opening, the coil leads kept away from the meter body. The meter then reads 50 x the calibrator current: '
                     '0.2 A reads 10 A. (How the jaw sits on the 55XXA/COIL is not described in either manual: UNVERIFIED.)'),
-            ('LCOMP', 'Fluke 5522A: for the AC points switch inductive-load compensation (LCOMP) ON at the calibrator front panel when the coil needs it. The program does not set it: UNVERIFIED for this coil.'),
+            ('LCOMP', 'Fluke 5522A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='This point drives current through a coil. Keep the calibrator in STANDBY whenever you touch the coil or leads. The jaw is marked 1000 A, CAT III 1000 V (Figure 1).',
         diagram='diagrams/hook_fluke376_COIL_AUX.png'),
@@ -348,7 +348,7 @@ GROUPS = {
         steps=COIL_JAW + [
             ('Coil', 'Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 18 A (the lab\'s coil and calibrator can do 6 A at 440 Hz and 18 A: owner-confirmed).'),
             ('Jaw', 'The detachable jaw stays closed around the coil (centred, jaw fully closed, leads away from the meter body). The meter reads 50 x the calibrator current: 10 A reads 500 A, 18 A reads 900 A, 6 A reads 300 A.'),
-            ('LCOMP', 'Fluke 5522A: AC points with LCOMP ON when the coil needs it (not set by the program; UNVERIFIED for this coil).'),
+            ('LCOMP', 'Fluke 5522A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='Up to 18 A flows in the coil. Duty cycle: the 5500A/COIL data recorded in NOTES.md allows 11 A continuously and 20 A for 2 minutes (then 8 minutes rest); not confirmed for this coil (UNVERIFIED). '
                 'Keep the calibrator in STANDBY whenever you touch the coil or leads; check that the coil and leads are not warm after a long run.',

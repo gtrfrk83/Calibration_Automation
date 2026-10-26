@@ -82,6 +82,10 @@ COMMANDS = {
                      placeholders={'farads': _f(0.01)}, kind='set', verified=False),
     'tc.type': Cmd('TC_TYPE {tc_type}', 'Thermocouple type', 'Not verified on a 5560A',
                    placeholders={'tc_type': Placeholder('str', '', 'K')}, kind='set', verified=False),
+    'tsens.tc': Cmd('TSENS_TYPE TC', 'Temperature source: thermocouple', 'Selects the thermocouple (not RTD) temperature source. 5560A Remote Programmers Manual p. 117', kind='set', verified=True,
+                    ref='5560A/5550A/5540A/5530A Remote Programmers Manual p. 117 (TSENS_TYPE)'),
+    'tc.query': Cmd('TC_TYPE?', 'Thermocouple type query', 'Returns the thermocouple type, e.g. K. 5560A Remote Programmers Manual p. 110', kind='query', verified=True,
+                    ref='5560A/5550A/5540A/5530A Remote Programmers Manual p. 110 (TC_TYPE?)'),
     'out.temp': Cmd('OUT {celsius:.9g}CEL', 'Thermocouple simulation temperature', 'Not verified on a 5560A',
                     placeholders={'celsius': _f(100.0)}, kind='set', verified=False),
     # ---- square wave with a duty cycle and a DC offset (handheld DMM duty-cycle and Peak Min/Max points). Coupled commands:
@@ -322,11 +326,37 @@ class Fluke5560A(Instrument):
         else:
             self.send('out.cap.f', farads=farads)
 
+    enter_tc_function_first = True        # 5560A: TC_TYPE is refused (7028, "TC type can only be set while in TC Source/Measure function") until a temperature output has been programmed
+
     def set_output_temperature(self, celsius, tc_type='K'):
-        """Thermocouple simulation: select the type, then the temperature in degrees C.
-        NOT yet verified on a 5560A - the procedure reads the error queue after it and never operates after a rejection."""
-        self.send('tc.type', tc_type=tc_type)
+        """Thermocouple simulation.  5560A (bench error 7028 on the first temperature point when TC_TYPE came first): TSENS_TYPE TC, `OUT <t>CEL` to enter the TC Source
+        function (this reverts the type to the Instrument Setup default), then TC_TYPE (a type change resets the output to 0 C), TC_TYPE? read back and compared, and
+        `OUT <t>CEL` again.  Every write once; the caller reads the error queue after it and never operates after a rejection.  The order (function first) is the bench
+        error's requirement; the commands are in the 5560A Remote Programmers Manual (TSENS_TYPE p. 117, TC_TYPE p. 110, TC_MEAS p. 108).  5522A: type then temperature, as before."""
+        if not self.enter_tc_function_first:
+            self.send('tc.type', tc_type=tc_type)
+            self.send('out.temp', celsius=celsius)
+            return
+        self.send('tsens.tc')
+        self._tc_wait()
         self.send('out.temp', celsius=celsius)
+        self._tc_wait()
+        self.check_error(f'entering the thermocouple function ({celsius:g} C)')
+        self.send('tc.type', tc_type=tc_type)
+        self._tc_wait()
+        self.check_error(f'thermocouple type {tc_type}')
+        got = self.ask('tc.query').strip().upper()
+        if got != tc_type.upper():
+            raise InstrumentError(f'{self.label} thermocouple type mismatch: TC_TYPE?={got!r} vs {tc_type!r}')
+        self.send('out.temp', celsius=celsius)
+        self._tc_wait()
+
+    TC_SETTLE_S = 0.5          # the function change switches relays: the next command waits for *OPC? and this pause (the bench showed the commands arriving too fast)
+
+    def _tc_wait(self):
+        """*OPC? (a read-only query) then a short pause before the next thermocouple command."""
+        self.ask('opc.query')
+        time.sleep(self.TC_SETTLE_S)
 
     # ---- square wave with duty cycle and DC offset (NORMAL terminals) --------------------------------------------
     wave_nonsine = False        # True from the moment a square wave is programmed until WAVE SINE is read back (never leave a square wave selected)
@@ -417,11 +447,18 @@ class Fluke5560A(Instrument):
 
 
 class Fluke5522A(Fluke5560A):
+    enter_tc_function_first = False       # unchanged 5522A / 5520A order: TC_TYPE, then OUT <t>CEL
     """Fluke 5522A (and the 5520A / 5502A / 5500A family): same OUT / OPER / STBY / ERR? command set for the
     outputs the DMM procedures use. Offered so the handheld-meter procedures run with the calibrator the manual lists."""
     MODEL = 'Fluke 5522A'
     IDN_MATCH = ('5522', '5520', '5502', '5500')
     COMMANDS = {
+        # inductive load compensation for ac current output (the 50-turn coil and current clamps are inductive loads: 5522A Operators Manual p. 11-7 note '* LCOMP ON is used to drive
+        # inductive loads like the 5500A/COIL and current clamps').  LCOMP ON | OFF, LCOMP? answers ON | OFF (p. 6-23).  Allowed below 440 Hz for amplitudes below 0.33 A and below 1 kHz at 0.33 A or more.
+        'lcomp.set': Cmd('LCOMP {mode}', 'Inductive load compensation', 'ON or OFF: inductive load compensation for ac current output (coil and clamp points)',
+                         placeholders={'mode': Placeholder('enum', '', 'OFF', enum=('ON', 'OFF'))}, kind='set', readback='lcomp.query', verified=True,
+                         ref='5522A Operators Manual p. 6-23 (LCOMP ON | OFF)'),
+        'lcomp.query': Cmd('LCOMP?', 'Inductive load compensation query', 'Returns ON or OFF', kind='query', verified=True, ref='5522A Operators Manual p. 6-23 (LCOMP?)'),
         'reset': cmdreg.reset_cmd(True, '5522A Operators Manual p. 6-35 (*RST: power-up state, STBY, holds off later commands until done)'),
         'opc.query': cmdreg.opc_cmd(True, '5522A Operators Manual p. 5-44 (Using *OPC?, *OPC, *WAI)'),
         # square wave with duty cycle and DC offset: syntax from the Operators Manual (WAVE p. 6-48, DC_OFFSET p. 6-13, DUTY p. 6-14, coupled
@@ -437,6 +474,22 @@ class Fluke5522A(Fluke5560A):
         'wave.sine.offset0': dataclasses.replace(COMMANDS['wave.sine.offset0'], verified=True, ref='5522A Operators Manual pp. 6-48, 6-13, 5-28 (WAVE, DC_OFFSET, coupled commands)',
                                                  description='One compound line of coupled commands, sent in standby after a square-wave point'),
     }
+
+
+    @staticmethod
+    def lcomp_allowed(amps, frequency_hz) -> bool:
+        """5522A Operators Manual p. 6-23: compensation is allowed below 440 Hz when the amplitude is below 0.33 A, and below 1 kHz at 0.33 A or more."""
+        if not frequency_hz:
+            return False
+        return frequency_hz < (440 if abs(amps) < 0.33 else 1000)
+
+    def set_lcomp(self, on: bool):
+        """LCOMP ON | OFF, read back with LCOMP? and compared.  Sent once, never retried; the caller reads the error queue (check_error) afterwards."""
+        mode = 'ON' if on else 'OFF'
+        self.send('lcomp.set', mode=mode)
+        reply = self.ask('lcomp.query').strip().upper()
+        if reply != mode:
+            raise InstrumentError(f'{self.label}: inductive load compensation {mode} was not accepted (LCOMP? answered {reply!r})')
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------

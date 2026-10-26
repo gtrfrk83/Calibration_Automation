@@ -233,11 +233,42 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         """Output to STANDBY; a calibrator left on a square wave (duty-cycle / Peak Min Max points) is put back to WAVE SINE with no DC offset
         straight after (once, read back; a failure is logged and the next point refuses to start, see apply)."""
         self.cal.standby_quiet()
+        self._lcomp_off()
         if getattr(self.cal, 'wave_nonsine', False):
             try:
                 self.cal.restore_sine()
             except Exception as exc:
                 self.log.add('!!', f'square wave NOT changed back to sine: {exc}', self.cal.label)
+
+    @staticmethod
+    def uses_coil(p):
+        """AC current through the 50-turn coil (the coil groups, or a point carrying the coil uncertainty rule)."""
+        return p.get('kind') == 'ACI' and ('COIL' in str(p.get('group') or '') or bool(p.get('unc_standard')))
+
+    def _lcomp_off(self):
+        """LCOMP OFF after a coil point (set once, read back; a failure is logged, never retried)."""
+        if not getattr(self, '_lcomp_on', False):
+            return
+        self._lcomp_on = False
+        try:
+            self.cal.set_lcomp(False)
+            self.cal.check_error('LCOMP OFF')
+        except Exception as exc:
+            self.log.add('!!', f'LCOMP was NOT confirmed OFF: {exc}', self.cal.label)
+        self.cal.standby_quiet()                    # the last command is STBY again: the output is left in standby
+
+    def _lcomp_for(self, p, amps, hz, context):
+        """Inductive load compensation ON for an AC current point through the 50-turn coil (5522A / 5520A: LCOMP ON, read back).  Outside the range the calibrator
+        allows (below 440 Hz under 0.33 A, below 1 kHz from 0.33 A) it is not set and the reason is logged; a calibrator without LCOMP (5560A) leaves it to the
+        operator (the point's group text says so)."""
+        if not self.uses_coil(p) or not hasattr(self.cal, 'set_lcomp'):
+            return
+        if not self.cal.lcomp_allowed(amps, hz):
+            self.log.add('!!', f'LCOMP not set: {hz} Hz at {amps} A is outside what the calibrator allows for compensation', self.cal.label)
+            return
+        self.cal.set_lcomp(True)
+        self._lcomp_on = True
+        self.cal.check_error(context)
 
     def close(self):
         try:
@@ -302,6 +333,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         else:
             if kind in ('DCI', 'ACI'):
                 self.cal.set_output_amps(v, f, dc=kind == 'DCI')
+                if kind == 'ACI':
+                    self._lcomp_for(p, v, f, context)
             elif kind == 'OHM':
                 self.cal.set_output_ohms(v)
             elif kind == 'CAP':

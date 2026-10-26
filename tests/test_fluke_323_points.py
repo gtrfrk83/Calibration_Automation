@@ -198,6 +198,34 @@ class EndToEnd(unittest.TestCase):
                 self.assertTrue(all(not r['synthetic'] and r['source'] == 'typed' for r in app.found.values()))
                 self.hn.stop(); self.hn = H.Harness().start()
 
+    def test_lcomp_on_for_ac_coil_points_only_and_off_after(self):
+        """Owner request 2026-10-26: LCOMP ON on the calibrator for AC current points through the 50-turn coil (5522A Operators Manual p. 6-23), OFF afterwards."""
+        app, io = self.run_perfect('325')
+        texts = [t for _i, t in H.wire(io)]
+        outs = [i for i, t in enumerate(texts) if t.startswith('OUT ') and not t.endswith('?')]
+        lcomp = [(i, t) for i, t in enumerate(texts) if t.startswith('LCOMP') and t != 'LCOMP?']
+        ons = [i for i, t in lcomp if t == 'LCOMP ON']
+        # coil AC points: 0.2 A 5 Hz, 0.2 A 50 Hz, (0.2 A 500 Hz is outside the allowed range), 0.2/0.6/2/6 A at 50 Hz
+        self.assertEqual(len(ons), 6)
+        for i in ons:
+            self.assertTrue(texts[i - 1].startswith('OUT '))
+            self.assertIn('OPER', texts[i + 1:i + 8])                      # LCOMP ON is read back and then the output is operated
+            self.assertEqual(texts[i + 1], 'LCOMP?')
+        self.assertFalse(any(t.startswith('OUT 0.2A,500Hz') and texts[i + 1].startswith('LCOMP ON') for i, t in enumerate(texts) if t.startswith('OUT ')))
+        self.assertFalse(any(texts[i].endswith(',0Hz') and texts[i + 1].startswith('LCOMP ON') for i in outs if i + 1 < len(texts)))      # DC points
+        self.assertEqual(sum(1 for _i, t in lcomp if t == 'LCOMP OFF'), 6)
+        self.assertEqual(texts[-1], 'STBY')
+
+    def test_5560a_gets_no_lcomp_command(self):
+        app, io = self.run_perfect('325', '5560A')
+        self.assertFalse(any(t.startswith('LCOMP') for _i, t in H.wire(io)))
+
+    def test_lcomp_allowed_rule(self):
+        from drivers.fluke_5560a import Fluke5522A as F
+        self.assertTrue(F.lcomp_allowed(0.2, 439)); self.assertFalse(F.lcomp_allowed(0.2, 440)); self.assertFalse(F.lcomp_allowed(0.2, 500))
+        self.assertTrue(F.lcomp_allowed(0.33, 999)); self.assertFalse(F.lcomp_allowed(0.33, 1000)); self.assertTrue(F.lcomp_allowed(8, 400))
+        self.assertFalse(F.lcomp_allowed(1, 0))
+
     def test_wire_log_325_coil_outputs_standby_and_dc_zero_hz(self):
         app, io = self.run_perfect('325')
         texts = [t for _i, t in H.wire(io)]

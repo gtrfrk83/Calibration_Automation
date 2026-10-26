@@ -94,7 +94,7 @@ COVERAGE = {
                      'standby_quiet', 'apply_scope_dc'],
             no_command=[]),
         'Fluke5520A': dict(covered=['open'], no_command=['unverified_summary']),   # reuses the 5522A command set; own registry flags
-        'Fluke5522A': dict(covered=['open'], no_command=[]),                # inherits everything; only identity differs
+        'Fluke5522A': dict(covered=['open', 'set_lcomp'], no_command=['lcomp_allowed']),    # inherits the rest; LCOMP ON/OFF with read-back (owner request 2026-10-26)
     },
     'scpi_dmm': {
         'ScpiDmm': dict(covered=['connect', 'remote', 'local', 'cleanup', 'configure', 'configure_frequency', 'read'], no_command=[]),
@@ -577,6 +577,8 @@ def cases_fluke_5560a(c):
     ft2 = make_dacq_bench(cal='5522A')[1]
     cal2 = c.inst(Fluke5522A, ft2, opened=False, label='5522A')
     c.run('Fluke5522A.open', cal2.open)
+    c.run('Fluke5522A.set_lcomp[ON]', cal2.set_lcomp, True)
+    c.run('Fluke5522A.set_lcomp[OFF]', cal2.set_lcomp, False)
     ft3 = make_dacq_bench(cal='5520A')[1]
     cal3 = c.inst(Fluke5520A, ft3, opened=False, label='5520A')
     c.run('Fluke5520A.open', cal3.open)

@@ -253,7 +253,7 @@ GROUPS = {
         steps=coil_common() + [
             ('Coil', 'The wired coil is 50 turns (Table 3, printed p. 8: 5500A/COIL). Connect its two ends to the calibrator current output and ground (Figure 5): Fluke 5522A / 5520A AUX HI and AUX LO; Fluke 5560A VI AUX (HI) and OUTPUT LO. Use plugs rated for the current.'),
             ('Jaw', 'Close the jaw around the coil, fully closed, the coil centred in the opening, the coil leads kept away from the meter body. The meter then reads 50 x the calibrator current (0.2 A reads 10 A).'),
-            ('LCOMP', 'Fluke 5522A / 5520A: for the AC points switch inductive-load compensation (LCOMP) ON at the calibrator front panel when the coil needs it. The program does not set it: UNVERIFIED for this coil.'),
+            ('LCOMP', 'Fluke 5522A / 5520A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='This point drives current through a coil. Keep the calibrator in STANDBY whenever you touch the coil or leads.',
         diagram='diagrams/hook_fluke323_COIL_AUX.png'),
@@ -263,7 +263,7 @@ GROUPS = {
         steps=coil_common() + [
             ('Coil', 'Move the two ends of the 50-turn coil to the calibrator high-current terminals: Fluke 5522A / 5520A 20 A and AUX LO; Fluke 5560A 30A and OUTPUT LO. The coil, plugs and leads must carry up to 7.8 A (4.2 A and 7.8 A on the 323, 6 A on the 324 and 325).'),
             ('Jaw', 'The jaw stays closed around the coil (centred, fully closed, leads away from the meter body). The meter reads 50 x the calibrator current: 4.2 A reads 210 A, 6 A reads 300 A, 7.8 A reads 390 A.'),
-            ('LCOMP', 'Fluke 5522A / 5520A: AC points with LCOMP ON when the coil needs it (not set by the program; UNVERIFIED for this coil).'),
+            ('LCOMP', 'Fluke 5522A / 5520A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points.'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='Up to 7.8 A flows in the coil. Keep the calibrator in STANDBY whenever you touch the coil or leads; check that the coil and leads are not warm after a long run (duty cycle not confirmed for this coil: UNVERIFIED).',
         diagram='diagrams/hook_fluke323_COIL_20A.png'),

@@ -76,7 +76,7 @@
     ],
     [
      "LCOMP",
-     "Fluke 5522A: for the AC points switch inductive-load compensation (LCOMP) ON at the calibrator front panel when the coil needs it. The program does not set it: UNVERIFIED for this coil."
+     "Fluke 5522A: the program turns inductive-load compensation (LCOMP) ON for every AC point through the coil (read back with LCOMP?) and OFF afterwards (5522A Operators Manual p. 6-23; on the 5520A the command is UNVERIFIED). Where the calibrator does not allow it (440 Hz and above below 0.33 A; 1 kHz and above from 0.33 A) it is not set and the log says so. 5560A: no LCOMP command for its own output - set it yourself if needed."
     ],
     [
      "Check",
@@ -112,7 +112,7 @@
     ],
     [
      "LCOMP",
-     "Fluke 5522A: AC points with LCOMP ON when the coil needs it (not set by the program; UNVERIFIED for this coil)."
+     "Fluke 5522A: AC points through the coil - the program turns LCOMP ON for each (and OFF afterwards), as for the low-current points."
     ],
     [
      "Check",

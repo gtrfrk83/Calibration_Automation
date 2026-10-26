@@ -376,13 +376,17 @@ class Calibrators(unittest.TestCase):
                 io.apply(p)
                 sent = t.sent[n0:]
                 outs = [c for c in sent if c.upper().startswith('OUT ') and not c.endswith('?')]
-                self.assertEqual(outs, [tbl[n][4]], (cal, model, n))                    # one OUT, sent once (never retried)
+                self.assertEqual(outs, [tbl[n][4]] * (2 if (cal == '5560A' and p['kind'] == 'TEMP') else 1), (cal, model, n))     # one OUT, sent once (never retried); 5560A temperature: OUT, TC_TYPE, OUT
                 self.assertEqual(sent[0], 'STBY', (cal, model, n))                        # standby before every setup
                 self.assertLess(sent.index(tbl[n][4]), sent.index('ERR?'), (cal, model, n))
                 self.assertLess(sent.index('ERR?'), sent.index('OPER'), (cal, model, n))  # the error queue is read, and only then the output enabled
                 self.assertEqual(sum(1 for c in sent if c == 'OPER'), 1, (cal, model, n))
                 if p['kind'] == 'TEMP':
-                    self.assertEqual(sent[1], 'TC_TYPE K')
+                    if cal == '5560A':     # 5560A: the TC function is entered first (bench error 7028), then TC_TYPE, read back, and the temperature is programmed again
+                        cmds = [c for c in sent if c.startswith(('TSENS', 'TC_TYPE', 'OUT '))]
+                        self.assertEqual([c for c in cmds if c != 'TC_TYPE?'], ['TSENS_TYPE TC', tbl[n][4], 'TC_TYPE K', tbl[n][4]], (cal, model, n))
+                    else:
+                        self.assertEqual(sent[1], 'TC_TYPE K')
                 io.standby()
                 self.assertEqual(t.sent[-1], 'STBY', (cal, model, n))
                 if p['kind'] in ('DCV', 'DCI'):
