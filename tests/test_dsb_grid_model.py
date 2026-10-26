@@ -1425,15 +1425,15 @@ class TemperatureSensorTests(MatcherBase):
         for s in ('K', 'T', 'Pt385-100'):
             self.assertTrue(self.g.set_sensor(k, s).ok)
             seen[s] = self.cell(k)
-        self.assertEqual(seen['K'][0], '5560A')
-        self.assertEqual(seen['T'][0], '5522A')
-        self.assertEqual(seen['Pt385-100'][0], '5522A')
+        self.assertEqual(seen['K'][0], '5560A')                                   # the 5560A sheet (rebuilt from the manual) covers every thermocouple and wins on TUR
+        self.assertEqual(seen['T'][0], '5560A')
+        self.assertEqual(seen['Pt385-100'][0], '5522A')                           # RTD rows exist on the 5522A / 5520A only
         self.assertIn('Type K', seen['K'][2])
-        self.assertIn('RTD Pt 385, 100 ohm', seen['Pt385-100'][2])
+        self.assertIn('Pt 385, 100', seen['Pt385-100'][2])                         # the scope's own label
         self.assertEqual(len({v[1] for v in seen.values()}), 3)                  # three different numbers: not Type K's for everything
         self.assertTrue(all(v[1] for v in seen.values()))
 
-    def test_non_k_sensors_are_set_by_hand_and_an_uncovered_type_is_blank(self):
+    def test_non_k_sensors_are_set_by_hand_and_a_point_outside_every_standard_is_blank(self):
         k = self.temp_rows()[0]
         _fn, p = self.g.point_of(k)
         self.g.set_sensor(k, 'Pt385-100')
@@ -1441,10 +1441,38 @@ class TemperatureSensorTests(MatcherBase):
         a = self.g._grid_result().assignments[p.id]
         self.assertEqual((a.status, a.cap_kind, a.automation), ('assigned', 'TEMP_OTHER', 'manual'))
         self.assertIn('by hand', self.g.row(k)['standard_tip'])
-        self.g.set_sensor(k, 'D')
-        std, unc, _f = self.cell(k)
+        self.assertTrue(self.g.row(k)['unc'])                                      # the scope now has RTD lines: a figure, never blank
+        hot = self.temp_rows_at('2000 degC')                                       # far above every simulation row of every standard
+        self.g.set_sensor(hot, 'Pt385-100')
+        std, unc, _f = self.cell(hot)
         self.assertEqual(unc, '')
         self.assertIn('none covers', std)
+
+    def temp_rows_at(self, nominal):
+        g = self.g
+        g.select(next(r['key'] for r in g.rows() if r['kind'] == 'blank'), 'nominal')
+        self.assertTrue(g.commit_cell(nominal).ok)
+        k = [r['key'] for r in self.points()][-1]
+        f = g.panel_state(k)['form']
+        f['types'], f['plus']['floor'] = ['floor'], '1 degC'
+        self.assertTrue(g.calc_row(k, f).ok)
+        return k
+
+    def test_every_sensor_uses_its_own_scope_line_and_the_larger_of_cmc_and_budget(self):
+        sc = unc_mod.load()
+        k = self.temp_rows()[0]
+        _fn, p = self.g.point_of(k)
+        for key, _label in unc_mod.sensor_types(sc):
+            self.g.set_sensor(k, key)
+            self.g.refresh_standard_columns()
+            a = self.g._grid_result().assignments[p.id]
+            if a.status != 'assigned':
+                continue
+            cand = next(c for c in a.candidates if c.standard == a.standard)
+            want = sc.temperature(100, tc=key)
+            self.assertEqual(cand.cmc, want, key)                                  # that sensor's scope line (None where the scope has none)
+            if want is not None:
+                self.assertGreaterEqual(a.uncertainty, want, key)                 # never below the lab's CMC
 
     def test_one_undo_step_for_a_point_and_for_a_section(self):
         keys = self.temp_rows(3)
@@ -1506,8 +1534,7 @@ class TemperatureSensorTests(MatcherBase):
         self.assertEqual(back.function(fn.id).point(p.id).settings['sensor'], 'PtNi385-120')
 
     def test_scope_cmc_follows_the_sensor(self):
-        if not hasattr(unc_mod.Scope, 'temperature'):
-            self.skipTest('this scope has no Scope.temperature yet (branch scope-rtd-cmc)')
-        sc = unc_mod.Scope()
+        sc = unc_mod.load()
         self.assertEqual(dm._scope_temperature(sc, 100, 'K'), sc.temperature(100, tc='K'))
         self.assertEqual(dm._scope_temperature(sc, 100, 'Pt385-100'), sc.temperature(100, tc='Pt385-100'))
+        self.assertNotEqual(sc.temperature(100, tc='K'), sc.temperature(100, tc='Pt385-100'))
