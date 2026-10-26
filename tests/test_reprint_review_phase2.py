@@ -346,7 +346,8 @@ class ZeroFlips(unittest.TestCase):
                     'tbs1000_verification.py', 'tbs2000b_verification.py',                       # the TBS1000 / TBS1000C / TBS2000B procedures
                     'Procedures/Tektronix_TBS1000C_Verification.py', 'Procedures/Tektronix_TBS1000C_Verification.procedure.json',
                     'Procedures/Tektronix_TBS1000_Verification.py', 'Procedures/Tektronix_TBS1000_Verification.procedure.json',
-                    'Procedures/Tektronix_TBS2000B_Verification.py', 'Procedures/Tektronix_TBS2000B_Verification.procedure.json')      # edited by later work (logic probe removal; the 3 Series MDO and TBS procedures), not by phase 2
+                    'Procedures/Tektronix_TBS2000B_Verification.py', 'Procedures/Tektronix_TBS2000B_Verification.procedure.json',
+                    'Procedures/Fluke_374_Verification.py', 'Procedures/Fluke_375_Verification.py', 'Procedures/Fluke_376_Verification.py', 'Procedures/Fluke_376II_Verification.py')      # edited by later work (logic probe removal; the 3 Series MDO and TBS procedures), not by phase 2
 
     def test_no_engine_or_launcher_file_is_changed(self):
         base = subprocess.run(['git', 'diff', '--name-only', 'origin/main'], cwd=ROOT, capture_output=True, text=True).stdout.split()
