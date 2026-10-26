@@ -1893,8 +1893,10 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             scope.set_vertical_scale(ch, scale)
             stage = 'scope coupling and bandwidth configuration'
             scope.configure_dc_input(ch)
+            stage = 'scope trigger Auto'
+            scope.set_trigger_mode('Auto')            # the reset leaves the acquisition stopped: Auto keeps P1 updating
             stage = 'scope P1 MEAN configuration'
-            scope.configure_p1(ch, 'Mean', show=False)
+            scope.configure_p1(ch, 'Mean')
             stage = 'Fluke standby, SCOPE DCV, output level and OPER'
             fluke.apply_scope_dc(nominal)
             # The first P1 query is deliberately discarded to avoid a cached reading after the transition.
@@ -1929,9 +1931,10 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             ch=point['channel']
             scope.set_vertical_scale(ch,point['scale_v_div'],settle=0.0)
             scope.configure_dc_input(ch)
-            scope.configure_p1(ch,'Mean',show=False)
+            scope.set_trigger_mode('Auto')            # the reset leaves the acquisition stopped: Auto keeps P1 updating
+            scope.configure_p1(ch,'Mean')
             time.sleep(1.5)
-            self.events.put(('dc_value',point,scope.read_p1()))
+            self.events.put(('dc_value',point,scope.read_p1_when_ready()))
         except Exception as exc:
             self.events.put(('dc_error',str(exc)))
         finally:
@@ -2182,6 +2185,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             fluke.open()
             scope.open()
             self.reset_bench(fluke, scope, log)       # reset to default settings before the first point
+            scope.set_trigger_mode('Auto')            # the reset leaves the acquisition stopped
             # Disable previous scope function before any DUT reconfiguration.
             fluke.scope_off()
             ch = point['channel']
@@ -2480,8 +2484,10 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             scope.configure_dc_input(ch)
             stage = 'Scope vertical offset'
             scope.set_vertical_offset(ch, point['scope_offset_v'])
+            stage = 'Scope trigger Auto'
+            scope.set_trigger_mode('Auto')            # the reset leaves the acquisition stopped: Auto keeps P1 updating
             stage = 'P1 MEAN setup'
-            scope.configure_p1(ch, 'Mean', show=False)
+            scope.configure_p1(ch, 'Mean')
             stage = 'Fluke SCOPE DCV mode'
             fluke.select_scope_dcv('1M')
             stage = 'Fluke output setting'
@@ -2648,7 +2654,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
 
     @staticmethod
     def read_bandwidth_vpp(scope):
-        val=scope.read_p1()
+        val=scope.read_p1_when_ready()
         if val<=0:
             raise RuntimeError(f'Invalid P1 PkPk amplitude {val}')
         return val
@@ -2680,6 +2686,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             stage='Scope trigger source'
             # Source verification is mandatory: never silently measure the wrong channel.
             scope.set_edge_trigger_source(ch)
+            stage='Scope trigger Auto'
+            scope.set_trigger_mode('Auto')            # the reset leaves the acquisition stopped: Auto keeps P1 updating
             stage='Scope P1 PkPk'
             scope.configure_p1(ch,'PkPk')
             stage='Scope 50 kHz horizontal timebase (10 us/div)'
@@ -2908,7 +2916,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             stage = 'Scope horizontal scale (about 100 marker periods on screen)'
             scope.set_timebase(10 * period)
             stage = 'Scope P1 Freq'
-            scope.configure_p1(ch, 'Freq', show=False)
+            scope.configure_p1(ch, 'Freq')
             stage = 'Fluke SCOPE MARKER'
             fluke.select_scope_marker()
             stage = 'Fluke marker period'
@@ -2917,12 +2925,12 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             fluke.operate()
             stage = 'Settling, discarding first P1 read'
             time.sleep(settle)
-            scope.read_p1()
+            scope.read_p1_when_ready()
             stage = 'P1 Freq readings'
             readings = []
             for _ in range(samples):
                 time.sleep(self.pm_param('ws.tb_read_gap', TB_READ_GAP_S))
-                readings.append(scope.read_p1())
+                readings.append(scope.read_p1_when_ready())
             stage = 'Fluke standby after point'
             fluke.standby()
             mean = sum(readings) / len(readings)

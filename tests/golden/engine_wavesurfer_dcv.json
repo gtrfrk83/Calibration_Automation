@@ -49,6 +49,9 @@
     "LeCroy WaveSurfer 4104HD|<<|VBS DC1M",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 20MHz",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.TriggerMode=\"Auto\" '",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.TriggerMode\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS Auto",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
@@ -56,6 +59,7 @@
     "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Measure.P1.Source1=\"C1\" ' ",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS C1",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Measure.P1.View=True ' ",
     "Fluke 5560A|>>|STBY",
     "Fluke 5560A|>>|OPER?",
     "Fluke 5560A|<<|0",
@@ -220,6 +224,19 @@
      "VBS 20MHz"
     ],
     [
+     "W",
+     "VBS 'app.Acquisition.TriggerMode=\"Auto\" '"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.TriggerMode\"",
+     "VBS Auto"
+    ],
+    [
      "Q",
      "VBS? \"return=app.Measure.P1.ParamEngine\"",
      "VBS Mean"
@@ -241,6 +258,10 @@
      "Q",
      "VBS? \"return=app.Measure.P1.Source1\"",
      "VBS C1"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.View=True ' "
     ],
     [
      "W",
@@ -373,6 +394,9 @@
     "LeCroy WaveSurfer 4104HD|<<|VBS DC1M",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.C1.BandwidthLimit\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 20MHz",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Acquisition.TriggerMode=\"Auto\" '",
+    "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Acquisition.TriggerMode\"",
+    "LeCroy WaveSurfer 4104HD|<<|VBS Auto",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.ParamEngine\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS Mean",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
@@ -380,6 +404,7 @@
     "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Measure.P1.Source1=\"C1\" ' ",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Source1\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS C1",
+    "LeCroy WaveSurfer 4104HD|>>|VBS 'app.Measure.P1.View=True ' ",
     "LeCroy WaveSurfer 4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
     "LeCroy WaveSurfer 4104HD|<<|VBS 0"
    ],
@@ -468,6 +493,19 @@
      "VBS 20MHz"
     ],
     [
+     "W",
+     "VBS 'app.Acquisition.TriggerMode=\"Auto\" '"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.TriggerMode\"",
+     "VBS Auto"
+    ],
+    [
      "Q",
      "VBS? \"return=app.Measure.P1.ParamEngine\"",
      "VBS Mean"
@@ -489,6 +527,10 @@
      "Q",
      "VBS? \"return=app.Measure.P1.Source1\"",
      "VBS C1"
+    ],
+    [
+     "W",
+     "VBS 'app.Measure.P1.View=True ' "
     ],
     [
      "sleep",
