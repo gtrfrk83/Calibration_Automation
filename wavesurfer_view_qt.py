@@ -185,17 +185,19 @@ def build_unified(self):
     g.addWidget(visa, 2, 1)
     self.btn_scope = H.button(None, 'Test scope', self.test_connection)
     g.addWidget(self.btn_scope, 3, 1, alignment=_LEFT)
-    g.addWidget(H.label_(None, 'Fluke 5560A VISA'), 4, 0)
-    g.addWidget(H.entry(None, self.fluke_address, width=34), 4, 1)
-    g.addWidget(H.label_(None, 'Fluke baud'), 5, 0)
+    g.addWidget(H.label_(None, 'Calibrator'), 4, 0)
+    g.addWidget(H.combobox(None, self.fluke_model, self.CAL_CHOICES, width=16, state='readonly', command=self.on_cal_model), 4, 1, alignment=_LEFT)
+    g.addWidget(H.label_(None, 'Calibrator VISA'), 5, 0)
+    g.addWidget(H.entry(None, self.fluke_address, width=34), 5, 1)
+    g.addWidget(H.label_(None, 'Calibrator baud'), 6, 0)
     baud = H.entry(None, self.fluke_baud, width=10)
     baud.setFixedWidth(110)
-    g.addWidget(baud, 5, 1, alignment=_LEFT)
-    g.addWidget(H.button(None, 'Test Fluke', self.test_fluke), 6, 1, alignment=_LEFT)
-    g.addWidget(H.separator(), 7, 0, 1, 2)
-    g.addWidget(H.button(None, 'Test settings...', self.show_settings_dialog), 8, 0, 1, 2, alignment=_LEFT)
-    g.addWidget(H.label_(None, 'Settle times, samples, channels and limits are in Test settings. Fluke output stays in STANDBY between points.', 'Muted.TLabel', wraplength=340),
-                9, 0, 1, 2)
+    g.addWidget(baud, 6, 1, alignment=_LEFT)
+    g.addWidget(H.button(None, 'Test calibrator', self.test_fluke), 7, 1, alignment=_LEFT)
+    g.addWidget(H.separator(), 8, 0, 1, 2)
+    g.addWidget(H.button(None, 'Test settings...', self.show_settings_dialog), 9, 0, 1, 2, alignment=_LEFT)
+    g.addWidget(H.label_(None, 'Settle times, samples, channels and limits are in Test settings. Calibrator output stays in STANDBY between points.', 'Muted.TLabel', wraplength=340),
+                10, 0, 1, 2)
 
     # action bar
     self.btn_run = sh.add_action('▶  Run All Pending', self.run_pending, accent=True, short='▶  Run')

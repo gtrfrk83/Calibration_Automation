@@ -112,8 +112,8 @@ def show_dcv(self):
     lay.addWidget(H.label_(None, 'DC Voltage Verification • 80 test points', 'Section.TLabel'))
     lay.addWidget(K.text('Fluke automatic DCV uses the SCOPE output connector (not NORMAL terminals). Scope P1 MEAN, 20 MHz bandwidth and DC 1 MΩ are configured and verified '
                          'automatically. Confirm connections before enabling output.'))
-    lay.addWidget(K.row(H.label_(None, 'Fluke VISA'), H.entry(None, self.fluke_address, width=20), H.label_(None, 'Baud'), H.entry(None, self.fluke_baud, width=8),
-                        H.button(None, 'Test Fluke ID', self.test_fluke), spacing=6))
+    lay.addWidget(K.row(H.label_(None, 'Calibrator'), H.combobox(None, self.fluke_model, self.CAL_CHOICES, width=14, state='readonly', command=self.on_cal_model), H.label_(None, 'VISA'), H.entry(None, self.fluke_address, width=20), H.label_(None, 'Baud'), H.entry(None, self.fluke_baud, width=8),
+                        H.button(None, 'Test calibrator ID', self.test_fluke), spacing=6))
     lay.addWidget(K.row(H.label_(None, 'DCV settle time after OPER (seconds; default 3.0)'), H.entry(None, self.dc_settle, width=8)))
     lay.addWidget(K.text('After the configured settling delay, discard one P1 read, wait 0.5 s, then use one P1 MEAN reading per DCV point. Fluke STBY is verified after each point.'))
     # Manual Next button intentionally not displayed; retained internally for state handling.

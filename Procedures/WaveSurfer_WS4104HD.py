@@ -39,6 +39,9 @@ TRIG_START_V = 0.100             # the Fluke starts 100 mV before the level
 TRIG_HSCALE = 1e-3
 
 
+
+CAL_CHOICES = ['Fluke 5560A', 'Fluke 5522A', 'Fluke 5520A']      # calibrators the connections table offers (the 5522A / 5520A through their scope option, drivers.Fluke5522AScope)
+
 class OperatorCancelled(Exception):
     """The technician chose Cancel at a prompt inside a measurement."""
 
@@ -150,6 +153,8 @@ PM_VARS = (('delay', 'ws.rms_delay', 3, '3'), ('samples', 'ws.rms_samples', 5, '
 
 
 class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
+    _cal_choice = CAL_CHOICES[0]                          # the selected calibrator (instances override it from the connections table)
+    CAL_CHOICES = CAL_CHOICES                            # the views read the calibrator list from the app
     VIEW = 'wavesurfer_view'                             # the toolkit's window code: wavesurfer_view_tk (Tk), later _qt
 
     @property
@@ -186,6 +191,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         self.noise_retest_result = None
         self.dc_checkpoint = appdata.progress_path('dcv_checkpoint_v6.json')
         self.fluke_address = port.var('ASRL9::INSTR')
+        self.fluke_model = port.var(CAL_CHOICES[0])        # the calibrator: Fluke 5560A, 5522A or 5520A (scope option), chosen in the connections table
+        self._cal_choice = CAL_CHOICES[0]                  # plain copy read by the worker threads (never a UI variable)
         self.fluke_baud = port.var('9600')
         self.dc_status = port.var('DC voltage verification ready')
         self.dc_reading = port.var('—')
@@ -817,7 +824,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return False
 
     def pm_driver_classes(self):
-        return (drivers.WaveSurfer4104HD, drivers.Fluke5560A)
+        return (drivers.WaveSurfer4104HD, drivers.Fluke5560A, drivers.Fluke5522AScope)
 
     def pm_supports_skip(self):
         return False
@@ -1335,6 +1342,8 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.events.put(('status', f'Connected: {ident}'))
             scope.configure_p1(channel, 'StandardDeviation')
             self.events.put(('status', f'P1 configured: waveform StdDev of CH{channel} (readback verified)'))
+            scope.set_trigger_mode('Auto')      # a stopped acquisition leaves P1 frozen: Auto keeps the StdDev updating (readback verified)
+            self.events.put(('status', f'Trigger mode Auto (readback verified); P1 follows CH{channel}'))
             for idx in range(start_index, len(SCALES) if stop_index is None else stop_index):
                 scale, limit = SCALES[idx], limits[idx]
                 if self.stop_event.is_set():
@@ -1342,6 +1351,11 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 # Set the range and confirm the instrument actually accepted it.
                 scope.set_vertical_scale(channel, scale, settle=0.0)
                 if self.stop_event.wait(delay):
+                    break
+                scope.configure_p1(channel, 'StandardDeviation')    # re-assert (readback verified) that P1 is the StdDev of THIS channel before every point
+                scope.set_trigger_mode('Auto')                       # and that the acquisition is running, so P1 is updated
+                scope.read_p1()                                      # discard one possibly stale value left from the previous range
+                if self.stop_event.wait(0.5):
                     break
                 readings = []
                 for _ in range(samples):
@@ -1785,10 +1799,28 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         else:
             self.enter_dcv_manual(point)
 
+    def on_cal_model(self):
+        """The calibrator box changed: remember the choice for the worker threads."""
+        v = self.fluke_model.get()
+        self._cal_choice = v if v in CAL_CHOICES else CAL_CHOICES[0]
+
+    def cal_name(self):
+        """'5560A', '5522A' or '5520A' (the selected calibrator)."""
+        return self._cal_choice.split()[-1]
+
+    def cal_std(self):
+        """The specmanager standard name the uncertainty / TAR of the selected calibrator come from (its own sheet: 5560A, 5522A or 5520A)."""
+        return self.cal_name()
+
     def open_bench(self, fluke_addr, baud, scope_addr, log, scope_timeout=10):
         """Create the calibrator and scope drivers. (Tests replace this with simulated transports.)
         Either address may be None when that instrument is not needed."""
-        fluke = drivers.Fluke5560A(drivers.open_visa(fluke_addr, baud=baud), log) if fluke_addr else None
+        if not fluke_addr:
+            fluke = None
+        elif self.cal_name() == '5560A':
+            fluke = drivers.Fluke5560A(drivers.open_visa(fluke_addr, baud=baud), log)
+        else:                                  # 5522A / 5520A with the scope option: the same procedure steps through drivers.Fluke5522AScope
+            fluke = drivers.Fluke5522AScope(drivers.open_visa(fluke_addr, baud=baud), log, label=f'{self.cal_name()}')
         scope = (drivers.WaveSurfer4104HD(drivers.open_visa(scope_addr, timeout=scope_timeout), log)
                  if scope_addr else None)
         self._pm_bench(log, fluke, scope)
@@ -1909,7 +1941,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         row=dict(point, measured_v=value, error_v=value-point['nominal_v'],
                  result='PASS' if point['lower_v'] <= value <= point['upper_v'] else 'FAIL',
                  measurement_method=method,timestamp=datetime.now().isoformat(timespec='seconds'),
-                 stimulus=('Fluke 5560A SCOPE DCV / OUT / OPER / STBY' if method.startswith('automatic') else 'Fluke 5560A guided/manual output'),
+                 stimulus=(f'Fluke {self.cal_name()} SCOPE DCV / OUT / OPER / STBY' if method.startswith('automatic') else f'Fluke {self.cal_name()} guided/manual output'),
                  note='Limits from uploaded report; no guard band; scope P1 MEAN and source verified for automatic reads')
         if stats: row.update(stats)
         if method.endswith('selected-point retest'):
@@ -2105,7 +2137,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             )
             prompt = dict(heading=f'Impedance point {index+1} of 28',
                 steps=[('Output off', 'Verify the Fluke SCOPE MEASR output is OFF before moving the cable.'),
-                       ('Connect', f'Fluke 5560A SCOPE measurement cable directly to {target}. Remove other signal sources and external terminators.'),
+                       ('Connect', f'Fluke {self.cal_name()} SCOPE measurement cable directly to {target}. Remove other signal sources and external terminators.'),
                        ('Input mode', detail)],
                 facts=[('Input', target), ('Test', point['description']), ('Input setting', mode)],
                 caution='Click OK only after the cable and input mode are safe.',
@@ -2261,7 +2293,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         row = dict(point, measured_ohm=value, error_ohm=value-point['nominal_ohm'],
                    result='PASS' if point['lower_ohm'] <= value <= point['upper_ohm'] else 'FAIL',
                    individual_readings_ohm=';'.join(f'{x:.9g}' for x in values),
-                   measurement_method='Fluke 5560A SCOPE MEASR / *TRG',
+                   measurement_method=f'Fluke {self.cal_name()} SCOPE MEASR / *TRG',
                    timestamp=datetime.now().isoformat(timespec='seconds'),
                    note='HAZ-OSC-02 acceptance limits; no uncertainty guard band')
         retest_idx=getattr(self,'imp_retest_index',None)
@@ -2468,7 +2500,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         row=dict(point,fluke_programmed_v=programmed,measured_v=measured,
                  error_v=measured-point['nominal_v'],
                  result='PASS' if point['lower_v']<=measured<=point['upper_v'] else 'FAIL',
-                 method='Fluke 5560A SCOPE DCV / scope P1 MEAN at programmed offset',
+                 method=f'Fluke {self.cal_name()} SCOPE DCV / scope P1 MEAN at programmed offset',
                  timestamp=datetime.now().isoformat(timespec='seconds'))
         retest_idx=getattr(self,'offset_retest_index',None)
         if retest_idx is not None:
@@ -2800,7 +2832,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
              ('Automatic', 'The program sets CH1 to DC 50 Ω, full bandwidth and P1 Freq, then outputs the time marker.')],
             facts=[('Marker period', f'{period*1e6:g} µs'), ('Frequency', f'{nominal/1e3:g} kHz'),
                    ('Limit', f'±{TIMEBASE_LIMIT_HZ:.3f} Hz')],
-            caution='First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the '
+            caution=f'First hardware run: the {self.cal_name()} SCOPE MARKER commands are not yet verified. The test stops without enabling the '
                     'output if the calibrator rejects them. Check the marker period against your procedure (Test settings).',
             ok='Connected and safe — run', parent=self.root)
 
@@ -2906,7 +2938,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         spread = (sum((x - mean) ** 2 for x in readings) / (len(readings) - 1)) ** .5 if len(readings) > 1 else 0.0
         row = dict(point, readings_hz=readings, mean_hz=mean, error_hz=error, stdev_hz=spread,
                    result='PASS' if point['lower_hz'] <= error <= point['upper_hz'] else 'FAIL',
-                   method=f'Fluke 5560A SCOPE MARKER {point["marker_period_s"]*1e6:g} us into DC 50 Ohm; scope P1 Freq, mean of {len(readings)}',
+                   method=f'Fluke {self.cal_name()} SCOPE MARKER {point["marker_period_s"]*1e6:g} us into DC 50 Ohm; scope P1 Freq, mean of {len(readings)}',
                    timestamp=datetime.now().isoformat(timespec='seconds'),
                    note='Limits from HAZ-OSC-02 data sheet; no guard band')
         if stale_errors:
@@ -3154,7 +3186,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     def record_trigger(self, point, info):
         passed = not info['triggered_short'] and info['triggered_past'] is True
         row = dict(point, **info, result='PASS' if passed else 'FAIL',
-                   method='Bracket: Fluke 5560A SCOPE DCV stepped to 20 mV short of and 20 mV past the level; scope Single edge trigger; operator confirmed',
+                   method=f'Bracket: Fluke {self.cal_name()} SCOPE DCV stepped to 20 mV short of and 20 mV past the level; scope Single edge trigger; operator confirmed',
                    timestamp=datetime.now().isoformat(timespec='seconds'),
                    note='Limits from HAZ-OSC-02 data sheet; pass/fail by bracket, no trigger voltage measured')
         row['outcome'] = self.trigger_outcome(row)
@@ -3314,12 +3346,12 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
         return f'{scale:g}V/Div'
 
     @staticmethod
-    def _dc_budget_value(volts, sc):
+    def _dc_budget_value(volts, sc, standard='5560A'):
         """(value, 'V') for a DC level the Fluke 5560A applies to a 1 MOhm input: the larger of the 5560A budget (its published DC voltage specification /
         coverage divisor, k = 2) and the scope's oscilloscope DC CMC, unrounded; None when the scope has no entry for the level.  The CMC dominates
         at every WS4104HD level today (the budget is below 3 % of it); the budget only matters if the sheet or the divisor is edited."""
         import uncertainty_budget
-        b=uncertainty_budget.osc_dc(volts,'1M','5560A',sc)
+        b=uncertainty_budget.osc_dc(volts,'1M',standard,sc)
         return (b.value,'V') if b is not None else None
 
     def scope_uncertainty_value(self, kind, r):
@@ -3330,11 +3362,11 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             return None
         try:
             if kind=='dcv':
-                return self._dc_budget_value(r['nominal_v'],sc)   # absolute volts, as the row is in volts
+                return self._dc_budget_value(r['nominal_v'],sc,self.cal_std())   # absolute volts, as the row is in volts
             elif kind=='impedance':
                 value,unit,_=sc.oscilloscope('impedance',ohms=r['nominal_ohm'])
             elif kind=='offset':
-                return self._dc_budget_value(r['nominal_v'],sc)
+                return self._dc_budget_value(r['nominal_v'],sc,self.cal_std())
             elif kind=='timebase':
                 # the 5560A scope marker is locked to the GPS-referenced lab standard: the lab's Frequency - Measure CMC at the marker frequency, on its own
                 value,unit=sc.dmm('FREQ',r['nominal_hz'],None,None,basis='measure'),'Hz'
@@ -3347,7 +3379,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                     sourced=max(abs(r['short_v']),abs(r['past_v']))
                 else:
                     sourced=abs(r['level_v'])+TRIG_LIMIT_V          # results saved before the sourced steps were recorded
-                return self._dc_budget_value(sourced,sc)
+                return self._dc_budget_value(sourced,sc,self.cal_std())
             else:
                 return None
         except (KeyError,TypeError,ZeroDivisionError):
@@ -3381,13 +3413,13 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                 u,uu=uncertainty.round_up(parts[0]),parts[1]
             acc=au=None
             if kind in ('dcv','offset'):
-                acc,au=tartur.standard_accuracy('5560A','DCV',abs(r['nominal_v']))
+                acc,au=tartur.standard_accuracy(self.cal_std(),'DCV',abs(r['nominal_v']))
             elif kind=='trigger':
                 if 'short_v' in r and 'past_v' in r:
                     sourced=max(abs(r['short_v']),abs(r['past_v']))
                 else:
                     sourced=abs(r['level_v'])+TRIG_LIMIT_V
-                acc,au=tartur.standard_accuracy('5560A','DCV',sourced)
+                acc,au=tartur.standard_accuracy(self.cal_std(),'DCV',sourced)
             tol=tartur.half_width(r[keys[0]],r[keys[1]])
             return tartur.ratio_fields(tartur.from_values(tol,keys[2],acc,au,u,uu))
         except Exception:
@@ -3545,7 +3577,7 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                                       ('Instrument ID',self.instrument_id.get().strip() or 'NOT ENTERED'),
                                       ('Serial',self.serial.get().strip())],
                 demo=self.any_synthetic(),details=details,
-                footer_note=report_pdf.uncertainty_note(rows,'5560A'),title='Calibration Data',
+                footer_note=report_pdf.uncertainty_note(rows,self.cal_std()),title='Calibration Data',
                 snapshot_context=report_pdf.context_for(self))
         except ImportError:
             port.message('error', 'PDF export dependency','Install the PDF package with:  py -m pip install reportlab')

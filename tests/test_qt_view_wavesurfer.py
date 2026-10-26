@@ -458,7 +458,7 @@ class WindowBehaviour(QtCase):
         a.shell.open_drawer()
         QApplication.processEvents()
         texts = [w.text() for w in a.shell.drawer.findChildren(QLabel)] + [w.text() for w in a.shell.drawer.findChildren(QPushButton)]
-        for t in ('Model', 'Teledyne LeCroy WaveSurfer 4104HD', 'Scope VISA address', 'Test scope', 'Fluke 5560A VISA', 'Fluke baud', 'Test Fluke', 'Test settings...'):
+        for t in ('Model', 'Teledyne LeCroy WaveSurfer 4104HD', 'Scope VISA address', 'Test scope', 'Calibrator', 'Calibrator VISA', 'Calibrator baud', 'Test calibrator', 'Test settings...'):
             self.assertIn(t, texts)
         edits = a.shell.drawer.findChildren(QLineEdit)
         self.assertEqual([e.text() for e in edits], [a.visa_address.get(), a.fluke_address.get(), a.fluke_baud.get()])
