@@ -96,7 +96,7 @@ def _compute(p, low, high, standard, scope):
     if standard:
         b = None
         try:
-            b = ub.build(kind, p['nominal'], ounit, standard=standard, frequency=freq, scope=sc, range_value=p.get('range'))
+            b = ub.build(kind, p['nominal'], ounit, standard=standard, frequency=freq, scope=sc, range_value=p.get('range'), extra=p.get('extra') or ())
         except Exception as e:
             reason = f'budget not built ({type(e).__name__}); scope CMC used for the uncertainty'
         if b is not None:

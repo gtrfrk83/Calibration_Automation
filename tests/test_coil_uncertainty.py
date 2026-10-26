@@ -55,9 +55,16 @@ class Numbers(unittest.TestCase):
     def test_dc_10_a_uses_the_coil_dc_row(self):
         self.assertAlmostEqual(self.ev('DCI', 10.0, None, 9.0, 11.0).reported, 0.001)        # 90 uA/A + 0.1 mA
 
-    def test_ac_10_a_is_below_the_coils_20_5_a_ac_range_and_is_not_in_scope(self):
-        e = self.ev('ACI', 10.0, 50.0, 9.3, 10.7)
-        self.assertEqual((e.unc_text, e.status), ('', R.NOT_IN_SCOPE))
+    def test_ac_10_a_is_below_the_coils_20_5_a_ac_range_so_the_calibrator_is_used(self):
+        import iflex_option
+        d = json.loads((ROOT / 'specs' / 'fluke_376_pv.json').read_text(encoding='utf-8'))
+        by = {s['id']: s for s in d['steps']}
+        s = dict(by['1-23'], test='numeric')
+        self.assertEqual(iflex_option.App.unc_source(s), (0.2, None))                       # the sourced current and the calibrator in use
+        self.assertEqual(iflex_option.App.unc_source(dict(by['1-35'], test='numeric')), (0.2, None))
+        self.assertEqual(iflex_option.App.unc_source(by['1-24']), (500.0, COIL))            # covered: the coil sheet at the effective current
+        self.assertEqual(iflex_option.App.unc_source(by['1-27']), (10.0, COIL))             # DC 10 A: the coil's DC row (2 to 20 A)
+        # the coil's own sheet alone prints nothing for AC 10 A (nothing is extrapolated)
         self.assertEqual(report_pdf.point_uncertainty(dict(kind='ACI', nominal=10.0, frequency=50.0, unit='A', range=None), standard=COIL), '')
 
 
@@ -76,10 +83,25 @@ class Review(unittest.TestCase):
         self.assertEqual(m.rows[0].cur.reported, 4.0)
         self.assertFalse(m.set_standard(0, '5560A'))                       # the coil is not a calibrator choice
 
-    def test_an_uncovered_coil_row_is_open_for_a_typed_value(self):
-        m = R.ReviewModel([self.spec('ACI', 10.0, 50.0, 9.3, 10.7)], default_standard='5560A')
-        self.assertEqual(m.table()[0]['status'], R.NOT_IN_SCOPE)
-        self.assertTrue(m.set_typed(0, '80 mA', source='owner', reason='below the coil lines')[0])
+
+
+class Interaction(unittest.TestCase):
+    def test_the_interaction_term_and_the_pure_rule(self):
+        import coil_rule
+        self.assertAlmostEqual(coil_rule.interaction_limit(500.0), 3.0)                  # 0.50 % of 500 A + 0.5 A
+        (name, u, sens), = coil_rule.extra_components(500.0)
+        self.assertAlmostEqual(u, 1.5)                                                   # limit / 2
+        self.assertEqual(coil_rule.sourced_current(500.0), 10.0)
+        self.assertEqual(coil_rule.uncertainty_source('ACI', 500.0, 10.0, 50.0)[1], COIL)
+        self.assertEqual(coil_rule.uncertainty_source('ACI', 10.0, 0.2, 50.0), (0.2, None, ()))      # below the coil's range: the calibrator at the sourced current, no interaction
+        self.assertEqual(coil_rule.uncertainty_source('DCI', 10.0, 0.2)[1], COIL)
+
+    def test_it_is_rss_with_the_coil_line(self):
+        import uncertainty_budget as ub
+        import coil_rule
+        b = ub.build('ACI', 500.0, 'A', standard=COIL, frequency=50.0, extra=coil_rule.extra_components(500.0))
+        self.assertAlmostEqual(b.emu, (4.0 ** 2 + 3.0 ** 2) ** 0.5, 6)                  # 5.0 A, k = 2
+        self.assertEqual(b.reported, 5.0)
 
 
 if __name__ == '__main__':

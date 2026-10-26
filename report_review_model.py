@@ -122,7 +122,7 @@ def evaluate(spec: PointSpec, standard) -> Evaluation:
     emu = cmc = rep = None
     try:
         if std and sc is not None and q.get('source') != 'none':
-            b = ub.build(q['kind'], q['nominal'], unit, standard=std, frequency=q.get('frequency'), scope=sc, range_value=q.get('range'))
+            b = ub.build(q['kind'], q['nominal'], unit, standard=std, frequency=q.get('frequency'), scope=sc, range_value=q.get('range'), extra=q.get('extra') or ())
             emu, cmc, rep = b.emu, b.cmc, b.reported
         elif sc is not None and q.get('source') != 'none':
             cmc = sc.dmm(q['kind'], q['nominal'], q.get('range'), q.get('frequency'), source=std)
@@ -588,8 +588,9 @@ def _handheld_spec(app, i, p, row) -> PointSpec:
     kind = 'OHM2' if p['kind'] == 'OHM' else p['kind']
     a = p.get('applied') or {}
     nom, coil = app.unc_source(p) if hasattr(app, 'unc_source') else (a.get('value', 0), None)       # a 50-turn-coil point: the coil sheet at the effective current
-    q = dict(kind=kind, nominal=nom, frequency=a.get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None)     # as certificate_row
-    q_tar = dict(kind=kind, nominal=nom, frequency=a.get('frequency'), unit=p['base_unit'], range=None)                       # as certificate_fields
+    extra = app.unc_extra(p) if (coil and hasattr(app, 'unc_extra')) else ()                         # + the clamp / coil interaction
+    q = dict(kind=kind, nominal=nom, frequency=a.get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None, extra=extra)     # as certificate_row
+    q_tar = dict(kind=kind, nominal=nom, frequency=a.get('frequency'), unit=p['base_unit'], range=None, extra=extra)                       # as certificate_fields
     locked = ''
     if p.get('unc_kind') == 'FREQ':
         import handheld_dmm

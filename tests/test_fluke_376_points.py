@@ -635,13 +635,10 @@ class EndToEnd(unittest.TestCase):
         # every one of the 38 points carries an uncertainty; TAR and TUR on all but the five iFlex simulation points (a tolerance in amps is never divided by volts)
         rows = app.certificate_rows()
         self.assertEqual(len(rows), 38)
-        blank = [r['Description'] for r in rows if not r['Uncertainty']]
-        self.assertEqual(blank, ['Jaw, 0.2 A x 50 turns', 'iFlex, 0.2 A x 50 turns'], blank)       # the two AC 10 A coil points: below the coil's 20.5 A AC lines, nothing is extrapolated
+        self.assertTrue(all(r['Uncertainty'] != '' for r in rows), [r['Description'] for r in rows if not r['Uncertainty']])
         fields = [app.certificate_fields(p) for p in app.points]
         for p, f in zip(app.points, fields):
             if p['n'] in IFLEX_SIM:
-                self.assertEqual((f['TAR'], f['TUR']), ('', ''), p['n'])
-            elif p['n'] in (23, 35):                                                      # AC 10 A on the coil: below the coil's 20.5 A AC lines, no uncertainty and no ratios
                 self.assertEqual((f['TAR'], f['TUR']), ('', ''), p['n'])
             else:
                 self.assertTrue(f['TAR'] != '' and f['TUR'] != '', (p['n'], f))
@@ -653,12 +650,18 @@ class EndToEnd(unittest.TestCase):
         rows = app.certificate_rows()
         for p, r in zip(app.points, rows):
             if p['n'] in COIL_POINTS:
-                q = dict(kind=p['kind'], nominal=p['nominal'], frequency=p['applied'].get('frequency'), unit='A', range=None)
-                self.assertEqual(r['Uncertainty'], report_pdf.point_uncertainty(q, standard='A2LA-5500A-COIL'), p['n'])
+                if p['n'] in (23, 35):                                       # AC 10 A: below the coil's 20.5 A AC lines -> the calibrator's uncertainty at the sourced current (owner, 2026-10-26)
+                    q = dict(kind=p['kind'], nominal=p['applied']['value'], frequency=p['applied'].get('frequency'), unit='A', range=None)
+                    self.assertEqual(r['Uncertainty'], report_pdf.point_uncertainty(q, standard=app.calibrator_model()), p['n'])
+                else:
+                    q = dict(kind=p['kind'], nominal=p['nominal'], frequency=p['applied'].get('frequency'), unit='A', range=None, extra=app.unc_extra(p))
+                    self.assertTrue(app.unc_extra(p), p['n'])                 # the clamp / coil interaction is part of every covered coil point
+                    self.assertEqual(r['Uncertainty'], report_pdf.point_uncertainty(q, standard='A2LA-5500A-COIL'), p['n'])
                 self.assertIn('A2LA-5500A-COIL', p['note'])
         by_n = {p['n']: r for p, r in zip(app.points, rows)}
-        self.assertEqual(by_n[24]['Uncertainty'], '4.0 A')                 # 500 A AC 50 Hz: 0.8 %
-        self.assertEqual(by_n[27]['Uncertainty'], '1.0 mA')                # 10 A DC: 90 uA/A + 0.1 mA
+        self.assertEqual(by_n[23]['Uncertainty'], '150 µA')                # below the coil range: the calibrator at 0.2 A
+        self.assertEqual(by_n[24]['Uncertainty'], '5.0 A')                 # 500 A AC 50 Hz: the coil's 0.8 % (4.0 A) RSS the clamp / coil interaction (3.0 A)
+        self.assertEqual(by_n[27]['Uncertainty'], '560 mA')                # 10 A DC: the coil's 1.0 mA RSS the interaction (0.55 A)
         self.assertFalse(set(PTS) - {p['n'] for p in app.points})
 
     def test_iflex_simulation_uncertainty_is_the_calibrators_ac_volts_in_volts(self):

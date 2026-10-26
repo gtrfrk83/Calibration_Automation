@@ -285,7 +285,7 @@ def point_uncertainty(p, standard=None) -> str:
     if standard:
         try:
             import uncertainty_budget
-            b = uncertainty_budget.build(p['kind'], p['nominal'], unit, standard=standard, frequency=p.get('frequency'), scope=sc, range_value=p.get('range'))
+            b = uncertainty_budget.build(p['kind'], p['nominal'], unit, standard=standard, frequency=p.get('frequency'), scope=sc, range_value=p.get('range'), extra=p.get('extra') or ())
             if b.reported is not None:
                 return uncertainty.format_value(b.reported, unit)
         except Exception:

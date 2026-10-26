@@ -28,6 +28,7 @@ from __future__ import annotations
 import re
 from datetime import datetime
 
+import coil_rule
 import handheld_dmm
 import run_queue as RQ
 import ui_port
@@ -249,23 +250,34 @@ class App(handheld_dmm.App):
 
     # ------------------------------------------------------------------ window
     # ---- 50-turn coil uncertainty (owner rule 2026-10-26, NOTES.md): a coil point carries unc_standard / unc_nominal (specs/build_fluke_376_spec.py) ----
-    @staticmethod
-    def unc_source(p):
-        """(nominal, standard or None) the uncertainty of a point is worked out at: a 50-turn-coil point uses the A2LA-5500A-COIL sheet at the EFFECTIVE current the jaw sees
-        (unc_nominal), every other point the applied value and the calibrator in use (None = the caller's calibrator).  The Report Review reads this too."""
+    @classmethod
+    def unc_source(cls, p):
+        """(nominal, standard or None) the uncertainty of a point is worked out at (coil_rule.py): a 50-turn-coil point the coil's sheet covers uses A2LA-5500A-COIL at the
+        EFFECTIVE current the jaw sees; a coil point BELOW the coil's range (AC under 20.5 A) and every other point use the calibrator in use (None) at the sourced value
+        (owner, 2026-10-26).  The Report Review reads this too."""
         if p.get('unc_standard'):
-            return p.get('unc_nominal', p.get('nominal')), p['unc_standard']
+            nom, std, _extra = coil_rule.uncertainty_source(p['kind'], p.get('unc_nominal', p.get('nominal')), p['applied']['value'], (p.get('applied') or {}).get('frequency'),
+                                                           p.get('unc_interaction'))
+            return nom, std
         return p['applied']['value'], None
 
+    @classmethod
+    def unc_extra(cls, p):
+        """Extra budget components of a point: the clamp / coil interaction of a coil point the coil's sheet covers (else none)."""
+        if p.get('unc_standard') and cls.unc_source(p)[1] is not None:
+            return coil_rule.extra_components(p.get('unc_nominal', p.get('nominal')), p.get('unc_interaction'))
+        return ()
+
     def _coil_point(self, p):
-        return bool(p.get('unc_standard')) and p.get('test') == 'numeric' and self.has_uncertainty(p)
+        return bool(p.get('unc_standard')) and p.get('test') == 'numeric' and self.has_uncertainty(p) and self.unc_source(p)[1] is not None
 
     def certificate_row(self, p, r):
         row = super().certificate_row(p, r)
         if self._coil_point(p):
             import report_pdf
             nom, std = self.unc_source(p)
-            row['Uncertainty'] = report_pdf.point_uncertainty(dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None), standard=std)
+            row['Uncertainty'] = report_pdf.point_uncertainty(dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None,
+                                                                   extra=self.unc_extra(p)), standard=std)
         return row
 
     def certificate_fields(self, p):
@@ -277,7 +289,7 @@ class App(handheld_dmm.App):
             factor = Decimal(str(p['factor']))
             clean = lambda d: float(f'{float(d * factor):.9g}')               # noqa: E731  (as handheld_dmm.certificate_fields)
             nom, std = self.unc_source(p)
-            q = dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)
+            q = dict(kind=p['kind'], nominal=nom, frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None, extra=self.unc_extra(p))
             return tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=std)
         except Exception:
             return dict(TAR='', TUR='')
