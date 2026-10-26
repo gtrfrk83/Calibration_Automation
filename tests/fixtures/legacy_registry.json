@@ -40,9 +40,9 @@
   "Fluke 374 Clamp Meter Performance Verification": "Fluke_374_Verification.py",
   "Fluke 375 Clamp Meter Performance Verification": "Fluke_375_Verification.py",
   "Fluke 376-II Clamp Meter Performance Verification": "Fluke_376II_Verification.py",
-  "Tektronix TBS2000B Performance Verification": "Tektronix_TBS2000B_Verification.py",
   "Tektronix TBS1000C Performance Verification": "Tektronix_TBS1000C_Verification.py",
   "Tektronix TBS1000 Performance Verification": "Tektronix_TBS1000_Verification.py",
+  "Tektronix TBS2000B Performance Verification": "Tektronix_TBS2000B_Verification.py",
   "Tektronix 3 Series MDO Performance Verification": "Tektronix_MDO3_Verification.py"
  },
  "VERSIONS": {
@@ -86,9 +86,9 @@
   "Fluke_374_Verification.py": "1",
   "Fluke_375_Verification.py": "1",
   "Fluke_376II_Verification.py": "1",
-  "Tektronix_TBS2000B_Verification.py": "1",
   "Tektronix_TBS1000C_Verification.py": "1",
   "Tektronix_TBS1000_Verification.py": "1",
+  "Tektronix_TBS2000B_Verification.py": "1",
   "Tektronix_MDO3_Verification.py": "1"
  },
  "records": [
@@ -373,13 +373,6 @@
    "Fluke_376II_Verification.py"
   ],
   [
-   "Tektronix TBS2000B Performance Verification",
-   "Tektronix",
-   "TBS2000B",
-   "Oscilloscope",
-   "Tektronix_TBS2000B_Verification.py"
-  ],
-  [
    "Tektronix TBS1000C Performance Verification",
    "Tektronix",
    "TBS1052C/TBS1072C/TBS1102C/TBS1202C",
@@ -392,6 +385,13 @@
    "TBS1022/1042/1062/1064/1102/1104/1152/1154",
    "Oscilloscope",
    "Tektronix_TBS1000_Verification.py"
+  ],
+  [
+   "Tektronix TBS2000B Performance Verification",
+   "Tektronix",
+   "TBS2000B",
+   "Oscilloscope",
+   "Tektronix_TBS2000B_Verification.py"
   ],
   [
    "Tektronix 3 Series MDO Performance Verification",
@@ -938,27 +938,6 @@
     "specs/fluke_376_pv.json"
    ]
   },
-  "Tektronix_TBS2000B_Verification.py": {
-   "code": [
-    "Procedures/Tektronix_TBS2000B_Verification.py",
-    "tbs2000b_verification.py",
-    "tds2000c_verification.py",
-    "tbs2000b_view_tk.py",
-    "tbs2000b_view_qt.py",
-    "tds2000c_view_tk.py",
-    "genscope_support_view_qt.py",
-    "ui_port.py",
-    "ui_port_tk.py",
-    "drivers/base.py",
-    "drivers/transport.py",
-    "drivers/tektronix_tbs2000b.py",
-    "drivers/fluke_5522a_scope.py",
-    "drivers/fluke_5560a.py"
-   ],
-   "spec": [
-    "specs/tektronix_tbs2000b_pv.json"
-   ]
-  },
   "Tektronix_TBS1000C_Verification.py": {
    "code": [
     "Procedures/Tektronix_TBS1000C_Verification.py",
@@ -999,6 +978,27 @@
    ],
    "spec": [
     "specs/tektronix_tbs1000_pv.json"
+   ]
+  },
+  "Tektronix_TBS2000B_Verification.py": {
+   "code": [
+    "Procedures/Tektronix_TBS2000B_Verification.py",
+    "tbs2000b_verification.py",
+    "tds2000c_verification.py",
+    "tbs2000b_view_tk.py",
+    "tbs2000b_view_qt.py",
+    "tds2000c_view_tk.py",
+    "genscope_support_view_qt.py",
+    "ui_port.py",
+    "ui_port_tk.py",
+    "drivers/base.py",
+    "drivers/transport.py",
+    "drivers/tektronix_tbs2000b.py",
+    "drivers/fluke_5522a_scope.py",
+    "drivers/fluke_5560a.py"
+   ],
+   "spec": [
+    "specs/tektronix_tbs2000b_pv.json"
    ]
   },
   "Tektronix_MDO3_Verification.py": {

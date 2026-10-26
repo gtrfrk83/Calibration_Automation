@@ -160,22 +160,6 @@
    "query_retry_f": 0,
    "write_f": 0
   },
-  "tektronix_tbs2000b": {
-   "concat_f": 0,
-   "format_f": 0,
-   "helper_f": 0,
-   "query_f": 0,
-   "query_retry_f": 0,
-   "write_f": 0
-  },
-  "tektronix_tds2000c": {
-   "concat_f": 0,
-   "format_f": 0,
-   "helper_f": 6,
-   "query_f": 0,
-   "query_retry_f": 0,
-   "write_f": 4
-  },
   "tektronix_tbs1000": {
    "concat_f": 0,
    "format_f": 0,
@@ -191,6 +175,22 @@
    "query_f": 0,
    "query_retry_f": 0,
    "write_f": 0
+  },
+  "tektronix_tbs2000b": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
+  "tektronix_tds2000c": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 6,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 4
   }
  },
  "schema": 1

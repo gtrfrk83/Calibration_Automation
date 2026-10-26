@@ -6,7 +6,7 @@
  "model": "TBS2000B",
  "category": "Oscilloscope",
  "version": "1",
- "order": 40,
+ "order": 41,
  "description": "Tektronix TBS2072B / 2074B / 2102B / 2104B / 2202B / 2204B performance verification (one family spec, model chosen in the window)",
  "launcher": "Procedures/Tektronix_TBS2000B_Verification.py",
  "engine": [

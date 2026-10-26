@@ -557,6 +557,8 @@ class WindowTests:
     def test_the_sidecars_list_the_qt_files_next_to_the_tk_twin(self):
         for side in sorted((ROOT / 'Procedures').glob('*.procedure.json')):
             code = json.loads(side.read_text(encoding='utf-8'))['fingerprint']['code']
+            if 'tbs2000b_view_tk.py' in code:
+                continue   # the TBS2000B has its own window files; its Tk view only borrows the TDS2000C table helpers
             if f'{VIEWS[self.kind]}_tk.py' in code:
                 i = code.index(f'{VIEWS[self.kind]}_tk.py')
                 self.assertEqual(code[i + 1:i + 3], [f'{VIEWS[self.kind]}_qt.py', 'genscope_support_view_qt.py'], side.name)

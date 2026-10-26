@@ -342,7 +342,11 @@ class Report(unittest.TestCase):
 
 class ZeroFlips(unittest.TestCase):
     EDITED = ('report_review_adapters.py',)
-    EDITED_LATER = ('mdo4000c_verification.py', 'mdo3_verification.py', 'Procedures/Tektronix_MDO3_Verification.py', 'Procedures/Tektronix_MDO3_Verification.procedure.json')      # edited by later work (logic probe removal; the 3 Series MDO procedure), not by phase 2
+    EDITED_LATER = ('mdo4000c_verification.py', 'mdo3_verification.py', 'Procedures/Tektronix_MDO3_Verification.py', 'Procedures/Tektronix_MDO3_Verification.procedure.json',
+                    'tbs1000_verification.py', 'tbs2000b_verification.py',                       # the TBS1000 / TBS1000C / TBS2000B procedures
+                    'Procedures/Tektronix_TBS1000C_Verification.py', 'Procedures/Tektronix_TBS1000C_Verification.procedure.json',
+                    'Procedures/Tektronix_TBS1000_Verification.py', 'Procedures/Tektronix_TBS1000_Verification.procedure.json',
+                    'Procedures/Tektronix_TBS2000B_Verification.py', 'Procedures/Tektronix_TBS2000B_Verification.procedure.json')      # edited by later work (logic probe removal; the 3 Series MDO and TBS procedures), not by phase 2
 
     def test_no_engine_or_launcher_file_is_changed(self):
         base = subprocess.run(['git', 'diff', '--name-only', 'origin/main'], cwd=ROOT, capture_output=True, text=True).stdout.split()
