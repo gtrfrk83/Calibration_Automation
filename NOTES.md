@@ -1952,3 +1952,6 @@ The WaveSurfer procedure no longer has the "Export Excel (.xlsx)" button, `expor
 
 ## Owner change: right-click "Run from here" on every point list
 Right-clicking a test point now offers "Run from here" under Edit (and the engine's own entries) in every procedure that has Rerun From Selected. It is the same action as that button (the right-click selects the row first): `procmods_point_model.run_from_entry(app)` feeds the three point menus (procmods_view_qt.py, qtui/screens/procmods_point_editor.py, procmods_point_ui.py). It is greyed, with the reason, while a test is running or when the button is disabled, and it does not depend on the Edit lock (a verified procedure can still be run). WaveSurfer keeps its own Rerun From semantics (the selected point and the measured points after it).
+
+## Owner change: the batch file installs every package
+00_START_Calibration_Suite.bat now also installs pyvisa, pyserial, reportlab and openpyxl (when missing, into the same Python as PySide6) before starting the Manager. A failed optional install only prints pip's message; the Manager still starts. Not tried on Windows (Linux sandbox). A VISA backend (NI-VISA / Keysight IO Libraries, or pip pyvisa-py) is still a separate install.
