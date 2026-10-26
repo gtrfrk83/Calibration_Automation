@@ -585,6 +585,11 @@ class QtWindow(unittest.TestCase):
         for t in ('AFG (3-AFG)', 'DVM (3-DVM)', 'TPA-N-PRE attached', '3 Series MDO (USB)', 'Fluke 5560A', 'Fluke 96270A (RF)', 'Read options from scope'):
             self.assertIn(t, texts)
         self.assertEqual(app.v_model.get(), '34-1000')
+        row = app.uut_options_row                                     # model and options sit on the main window (as the MDO4000C view), addresses only in the drawer
+        self.assertTrue(row.isVisibleTo(win))
+        for w in app.cfg_widgets + [app.btn_read_opts]:
+            self.assertTrue(row.isAncestorOf(w), w)
+            self.assertFalse(app.shell.drawer_body.isAncestorOf(w), w)
         app.run_all()
         self.assertTrue(self.hn.pump(600))
         want = sum(applies(p, '34-1000', 'None', False, False, False) for p in POINTS)

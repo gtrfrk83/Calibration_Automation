@@ -7,12 +7,12 @@ about a calibration.  No Tk import.  No front-panel photo and no hook-up diagram
 """
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QHBoxLayout, QWidget
 
 import datamode
 import virtualbench
 from qtui import shell_helpers as H
-from genscope_support_view_qt import (action_bar, address_box, attach_history, detail_panel, drawer_buttons, drawer_check, drawer_note, drawer_row, drawer_separator, filter_bar, follow_prefixed,
+from genscope_support_view_qt import (action_bar, address_box, attach_history, detail_panel, drawer_buttons, drawer_note, drawer_row, filter_bar, follow_prefixed,
                                    set_choices_for, table_has, table_select, table_selection, table_set_rows, table_update_row, widen_columns, share_table)  # noqa: F401  (the table_* names are the view's API)
 from qtui.shell import Shell, results_table, small_window
 
@@ -51,24 +51,33 @@ def build_ui(self):
     if self.demo: sh.notice(self.banner_text(), 'warn', title=virtualbench.BANNER_TITLE)
     else: sh.notice(NOTICE, 'info')
 
-    d = sh.drawer_body
-    m = drawer_row(d, 0, 'Model', H.combobox(None, self.v_model, ['MDO' + x for x in MODELS], width=12), left=True)
+    # the unit under test's model and options: on the main window (under the identity strip), not hidden in the Connections drawer
+    uut = QWidget()
+    row = QHBoxLayout(uut)
+    row.setContentsMargins(0, 0, 0, 0)
+    row.setSpacing(10)
+    m = H.combobox(None, self.v_model, ['MDO' + x for x in MODELS], width=12)
     self.v_model.set('MDO' + self.v_model.get().replace('MDO', ''))
     follow_prefixed(m, self.v_model, 'MDO')                  # the engine strips the prefix from the variable again (on_config)
-    sa = drawer_row(d, 1, 'Spectrum analyzer', H.combobox(None, self.v_sa, ['None', 'SA3'], width=10), left=True)
-    checks = [drawer_check(d, 2, 'AFG (3-AFG)', self.v_afg, self.on_config),
-              drawer_check(d, 3, 'DVM (3-DVM)', self.v_dvm, self.on_config),
-              drawer_check(d, 4, 'TPA-N-PRE attached', self.v_tpa, self.on_config)]
+    sa = H.combobox(None, self.v_sa, ['None', 'SA3'], width=10)
+    checks = [H.checkbutton(None, 'AFG (3-AFG)', self.v_afg, self.on_config), H.checkbutton(None, 'DVM (3-DVM)', self.v_dvm, self.on_config),
+              H.checkbutton(None, 'TPA-N-PRE attached', self.v_tpa, self.on_config)]
     self.btn_read_opts = H.button(None, 'Read options from scope', self.read_options)
-    d.layout().addWidget(self.btn_read_opts, 5, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
+    for w in (H.label_(None, 'Model'), m, H.label_(None, 'Spectrum analyzer'), sa, *checks, self.btn_read_opts):
+        row.addWidget(w)
+    row.addStretch(1)
+    uut.setToolTip(MODEL_NOTE)
+    sh.notice_layout.insertWidget(0, uut)
+    self.uut_options_row = uut
     self.cfg_widgets = [m, sa] + checks
     for w in (m, sa): w.activated.connect(lambda _i=0: self.on_config())
-    drawer_separator(d, 6)
+
+    d = sh.drawer_body
     self.addr_boxes = {}
     for i, (key, label) in enumerate(ADDRESS_ROWS):
-        self.addr_boxes[key] = drawer_row(d, 7 + i, label, address_box(self.addr[key]))
-    drawer_row(d, 7 + len(ADDRESS_ROWS), '5560A baud', H.combobox(None, self.addr['cal_baud'], ['9600', '19200', '4800', '2400', '1200'], width=9), left=True)
-    drawer_note(d, 8 + len(ADDRESS_ROWS), MODEL_NOTE)
+        self.addr_boxes[key] = drawer_row(d, i, label, address_box(self.addr[key]))
+    drawer_row(d, len(ADDRESS_ROWS), '5560A baud', H.combobox(None, self.addr['cal_baud'], ['9600', '19200', '4800', '2400', '1200'], width=9), left=True)
+    drawer_note(d, 1 + len(ADDRESS_ROWS), 'Leave an address blank if that instrument is not used. Without a reference DMM / counter the AFG readings are typed in.')
     drawer_buttons(self, sh)
 
     action_bar(self, sh)

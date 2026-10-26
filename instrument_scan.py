@@ -106,6 +106,7 @@ FAMILIES = (
     Family('3458A', 'Keysight / HP 3458A multimeter', r'^3458A$', 'Agilent3458A', probe='ID?',
            source='3458A User\'s Guide p. 276: ID? answers "Keysight 3458A" (older firmware "HP3458A"); no serial number in the reply'),
     Family('MDO4000C', 'Tektronix MDO4000C oscilloscope', r'^MDO4\d{3}C?$', 'TektronixMDO4000C', source='assumed: TEKTRONIX,MDO4104C,<serial>,CF:91.1CT FV:<fw>'),
+    Family('MDO3', 'Tektronix 3 Series MDO oscilloscope (MDO32 / MDO34)', r'^MDO3[24]$', 'TektronixMDO3', source='assumed: TEKTRONIX,MDO34,<serial>,CF:91.1CT FV:<fw> (UNVERIFIED; drivers/tektronix_mdo3.py)'),
     Family('TDS2000C', 'Tektronix TDS2000C / TDS1000C-EDU oscilloscope', r'^TDS\d{4}C(-EDU)?$', 'TektronixTDS2000C',
            source='assumed: TEKTRONIX,TDS 2024C,<serial>,CF:91.1CT FV:v24.00 (as drivers/tektronix_tds2000c.py)'),
     Family('WS4104HD', 'Teledyne LeCroy WaveSurfer 4104HD', r'^WS4\d{3}HD$', 'WaveSurfer4104HD',
