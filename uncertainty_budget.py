@@ -61,6 +61,9 @@ class Budget:
         self.components.append(Component(name, u, sensitivity, source))
 
 
+COIL_MODEL = 'A2LA-5500A-COIL'          # specs/standards/a2la_5500a_coil_standard.json (the Fluke 5500A/COIL, 50 turns): used by the clamp meters on that coil
+
+
 def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None, type_a=(), extra=(), scope=None, range_value=None,
           direction='output', basis=None, cmc=None):
     """Budget for one applied point.  `standard` is a specmanager.StandardSpec (or model text); `resolution` overrides the sheet-derived
@@ -91,6 +94,8 @@ def build(kind, nominal, unit='', standard=None, frequency=None, resolution=None
         else:
             hit = standard.lookup('OHM' if kind in ('OHM2', 'OHM4') else kind, nominal, frequency=frequency, direction=direction)
         b.hit = hit
+        if getattr(standard, 'model', '') == COIL_MODEL:       # the 50-turn coil: its own scope lines ARE the floor; the larger overlapping amplifier / calibrator lines of the table are other equipment
+            b.cmc = hit.limit if hit is not None else None
         if hit is None:
             b.notes.append(f'{standard.model}: no specification row covers this point')
         else:

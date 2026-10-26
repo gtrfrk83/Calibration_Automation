@@ -106,6 +106,8 @@ def _compute(p, low, high, standard, scope):
                 acc = b.hit.limit
             else:
                 reason = 'no specification row of the calibrator covers this point: TAR blank'
+    if standard and str(getattr(standard, 'model', standard)) == ub.COIL_MODEL and u is None:
+        return _blank("the 5500A/COIL's own lines do not cover this point: no uncertainty, no ratio", tolerance=tol)      # the table's other lines are other equipment
     if u is None and cmc is not None:
         u = uncertainty.round_up(cmc)                              # the printed value when no budget is available
     tur = tol / u if u and u > 0 else None

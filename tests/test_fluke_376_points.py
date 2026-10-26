@@ -228,8 +228,9 @@ class Spec(unittest.TestCase):
             if n in COIL_POINTS:
                 self.assertIn(p['kind'], ('ACI', 'DCI'))
                 self.assertEqual(D(str(p['applied']['value'])) * 50, D(str(p['nominal'])), n)
-                self.assertNotIn('no_uncertainty', p, n)             # every current point carries the calibrator's current uncertainty (unscaled)
-                self.assertIn('NOT multiplied by 50', p['note'], n)
+                self.assertNotIn('no_uncertainty', p, n)             # every current point carries an uncertainty, the 5500A/COIL's (AC below 20.5 A: none printed, see test_coil_uncertainty)
+                self.assertIn('A2LA-5500A-COIL', p['note'], n)
+                self.assertEqual((p['unc_standard'], p['unc_nominal']), ('A2LA-5500A-COIL', p['nominal']), n)
                 self.assertIn('50 turns', p['report_desc'])
                 self.assertIn('50-turn coil', h.describe(p))
                 self.assertNotIn('unc_unit', p)
@@ -634,24 +635,30 @@ class EndToEnd(unittest.TestCase):
         # every one of the 38 points carries an uncertainty; TAR and TUR on all but the five iFlex simulation points (a tolerance in amps is never divided by volts)
         rows = app.certificate_rows()
         self.assertEqual(len(rows), 38)
-        self.assertTrue(all(r['Uncertainty'] != '' for r in rows), [r['Description'] for r in rows if not r['Uncertainty']])
+        blank = [r['Description'] for r in rows if not r['Uncertainty']]
+        self.assertEqual(blank, ['Jaw, 0.2 A x 50 turns', 'iFlex, 0.2 A x 50 turns'], blank)       # the two AC 10 A coil points: below the coil's 20.5 A AC lines, nothing is extrapolated
         fields = [app.certificate_fields(p) for p in app.points]
         for p, f in zip(app.points, fields):
             if p['n'] in IFLEX_SIM:
                 self.assertEqual((f['TAR'], f['TUR']), ('', ''), p['n'])
+            elif p['n'] in (23, 35):                                                      # AC 10 A on the coil: below the coil's 20.5 A AC lines, no uncertainty and no ratios
+                self.assertEqual((f['TAR'], f['TUR']), ('', ''), p['n'])
             else:
                 self.assertTrue(f['TAR'] != '' and f['TUR'] != '', (p['n'], f))
 
-    def test_current_uncertainty_is_the_calibrators_at_the_output_current_unscaled(self):
-        """Owner-chosen convention: Uncertainty = the regular calibrator current uncertainty at point / 50 (no x50, no coil); TAR / TUR use it as it is."""
+    def test_coil_point_uncertainty_is_the_5500a_coil_sheet_at_the_effective_current(self):
+        """Owner decision 2026-10-26: the 50-turn coil points use the A2LA 5500A/COIL sheet at the effective (meter) current, never the calibrator's at the coil current."""
         import report_pdf
         app, io = self.run_perfect('5522A')
         rows = app.certificate_rows()
         for p, r in zip(app.points, rows):
             if p['n'] in COIL_POINTS:
-                q = dict(kind=p['kind'], nominal=p['applied']['value'], frequency=p['applied'].get('frequency'), unit='A', range=None)
-                self.assertEqual(r['Uncertainty'], report_pdf.point_uncertainty(q, standard=app.calibrator_model()), p['n'])
-                self.assertIn('NOT multiplied by 50', p['note'])
+                q = dict(kind=p['kind'], nominal=p['nominal'], frequency=p['applied'].get('frequency'), unit='A', range=None)
+                self.assertEqual(r['Uncertainty'], report_pdf.point_uncertainty(q, standard='A2LA-5500A-COIL'), p['n'])
+                self.assertIn('A2LA-5500A-COIL', p['note'])
+        by_n = {p['n']: r for p, r in zip(app.points, rows)}
+        self.assertEqual(by_n[24]['Uncertainty'], '4.0 A')                 # 500 A AC 50 Hz: 0.8 %
+        self.assertEqual(by_n[27]['Uncertainty'], '1.0 mA')                # 10 A DC: 90 uA/A + 0.1 mA
         self.assertFalse(set(PTS) - {p['n'] for p in app.points})
 
     def test_iflex_simulation_uncertainty_is_the_calibrators_ac_volts_in_volts(self):

@@ -25,8 +25,9 @@ What Table 1 means for the current rows:
       (100 / 1000 / 2000 / 2500 / 2500 A; the simulated Rogowski coil voltage is proportional to frequency: 30 uV per A at 50 Hz, 300 uV per A at 500 Hz).
   'iFlex Current Probe (with 50-turn Coil)': the iFlex loop around the same 50-turn coil, the calibrator drives the coil current.
 
-Uncertainty (owner decision): every sourced point carries the regular calibrator uncertainty at the actual calibrator OUTPUT (the coil current as it is, NOT multiplied by 50;
-the iFlex simulation voltage as printed), through the existing mechanism.  The iFlex simulation rows are sourced as AC volts and read in amps: their Uncertainty is the calibrator's
+Uncertainty (owner decision, 2026-10-26): the 50-turn COIL points (jaw and iFlex-with-coil) carry the uncertainty of the Fluke 5500A/COIL's own A2LA scope lines (standard A2LA-5500A-COIL, specs/standards/a2la_5500a_coil_standard.json)
+at the EFFECTIVE current the jaw sees (the nominal, step.unc_nominal), not the calibrator's at the coil current; a coil point the coil's lines do not cover (AC below 20.5 A) prints no uncertainty (nothing is extrapolated).
+The other sourced points (volts, ohms, capacitance, the iFlex simulation voltage as printed) carry the regular calibrator uncertainty at the actual calibrator OUTPUT, through the existing mechanism.  The iFlex simulation rows are sourced as AC volts and read in amps: their Uncertainty is the calibrator's
 AC VOLTS uncertainty (step.unc_unit 'V' tells the engine the unit of the source); TAR / TUR stay blank there (a tolerance in amps is never divided by an uncertainty in volts).
 
 Cross-check against the PRINTED accuracy (Users Manual, General Specifications; the Calibration Manual prints none):
@@ -89,12 +90,12 @@ UM = 'Users Manual'
 NOTE_OHMS = 'Table 1 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.'
 NOTE_RANGE = 'Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges).'
 NOTE_COIL = ('The calibrator drives the {turns}-turn coil and the meter reads {turns} x the calibrator current: {applied} A in, {nominal} A on the meter. The limits are the meter readings (Table 1, printed p. 4). '
-             'Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current ({applied} A), as it is, NOT multiplied by {turns} and without the coil; '
-             'TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1.')
+             'Uncertainty (owner decision): the 5500A/COIL\'s own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees ({nominal} A), not the calibrator\'s at {applied} A; '
+             'no value is printed where the coil\'s lines do not cover the point (AC below 20.5 A). TAR / TUR compare it with the meter-reading tolerance printed in Table 1.')
 NOTE_IFLEX_SIM = ('iFlex simulation (printed p. 3): calibrator Output HI to the iFlex 2 mm jack (far left), Output LO to the black COM jack; the calibrator drives {applied} {unit} AC at {freq} Hz and the meter '
                   'reads {nominal} A. Uncertainty (owner-chosen convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts).')
-NOTE_IFLEX_COIL = ('The iFlex loop is placed around the {turns}-turn coil and the calibrator drives the coil: {applied} A in, {nominal} A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): '
-                   'the regular calibrator current uncertainty at {applied} A, NOT multiplied by {turns}; TAR / TUR compare it with the meter-reading tolerance.')
+NOTE_IFLEX_COIL = ('The iFlex loop is placed around the {turns}-turn coil and the calibrator drives the coil: {applied} A in, {nominal} A on the meter (Table 1, printed p. 4). Uncertainty (owner decision): '
+                   'the 5500A/COIL\'s own scope uncertainty (A2LA-5500A-COIL) at the effective {nominal} A, not at {applied} A; none where the coil\'s lines do not cover the point (AC below 20.5 A); TAR / TUR compare it with the meter-reading tolerance.')
 NOTE_440 = ('6 A at 440 Hz: the lab\'s coil and calibrator are able to make it (owner-confirmed). If the calibrator refuses the output the run stops at this point.')
 NOTE_18A = ('18 A: the lab\'s coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes '
             '(above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point.')
@@ -305,6 +306,9 @@ def build_steps():
             notes.append(f'CHECK (printed limit not changed; {UM} {page}): ' + '; '.join(what_[k] for k in kinds_here) + '. ' + ' | '.join(f'{", ".join(ms)}: {t}' for t, ms in merged.items()) + '.')
             flagged.append((f'{TABLE}-{n}', verdict, section, applied, freq, nominal, low, high, {m: v for m, (i, v) in per.items()}))
         step['group'] = group_for(kind, applied, extra)
+        if extra.get('coil'):                                      # 50-turn coil points: the uncertainty is the A2LA 5500A/COIL sheet at the EFFECTIVE current the jaw sees (the nominal), not the calibrator's at the coil current
+            step['unc_standard'] = 'A2LA-5500A-COIL'
+            step['unc_nominal'] = step['nominal']
         if 'settle' in extra:
             step['settle'] = extra['settle']
         step['note'] = ' '.join(notes)

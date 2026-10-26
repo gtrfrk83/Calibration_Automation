@@ -171,8 +171,8 @@ class Sheet(unittest.TestCase):
         r = tartur.compute({'kind': 'ACI', 'unit': 'A', 'nominal': 500.0, 'frequency': 50.0}, 495.0, 505.0, standard=MODEL)
         self.assertAlmostEqual(r['accuracy'], 4.0, 9)                      # TAR: the sheet's 0.8 % of 500 A
         self.assertAlmostEqual(r['tar'], 5.0 / 4.0, 6)
-        self.assertAlmostEqual(r['uncertainty'], 4.4, 6)                    # reported: never below the scope CMC (0.7 % + 0.84 A of 500 A = 4.34 A, rounded up)
-        self.assertAlmostEqual(r['tur'], 5.0 / 4.4, 6)
+        self.assertAlmostEqual(r['uncertainty'], 4.0, 6)                    # reported: the coil's own line is the floor (0.8 % of 500 A); the amplifier / coil line (0.7 % + 0.84 A = 4.34 A) is other equipment
+        self.assertAlmostEqual(r['tur'], 5.0 / 4.0, 6)
         lim, unit = tartur.standard_accuracy(MODEL, 'DCI', 100.0)
         self.assertAlmostEqual(lim, 0.016, 12)
         self.assertEqual(unit, 'A')

@@ -54,8 +54,10 @@ class SourceWiring(unittest.TestCase):
         self.assertIn('certificate_fields', body)
         fields = s[s.index('def certificate_fields'):s.index('def export_pdf')]
         self.assertIn('tartur.row_fields', fields)
-        self.assertIn('standard=self.calibrator_model()', fields)
-        self.assertIn('standard=self.calibrator_model()', s[s.index('def certificate_row('):s.index('def certificate_rows(')])
+        self.assertIn('self.calibrator_model()', fields)
+        self.assertIn('unc_source', fields)                                  # a 50-turn-coil point: the coil sheet at the effective current
+        self.assertIn('self.calibrator_model()', s[s.index('def certificate_row('):s.index('def certificate_rows(')])
+        self.assertIn('unc_source', s[s.index('def certificate_row('):s.index('def certificate_rows(')])
 
     def test_helpers_exist(self):
         import report_pdf

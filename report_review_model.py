@@ -23,7 +23,7 @@ from decimal import Decimal
 
 FORMAT_VERSION = 1
 SOURCE_STANDARDS = ('5560A', '5522A', '5520A')                     # calibrators that SOURCE a point for the multimeter engines (uncertainty_budget direction 'output')
-LABELS = {'5560A': 'Fluke 5560A', '5522A': 'Fluke 5522A', '5520A': 'Fluke 5520A'}
+LABELS = {'5560A': 'Fluke 5560A', '5522A': 'Fluke 5522A', '5520A': 'Fluke 5520A', 'A2LA-5500A-COIL': 'Fluke 5500A/COIL (50 turns)'}
 LOCKED_FREQUENCY = 'Lab frequency'
 
 AS_BUDGETED, RAISED, NOT_IN_SCOPE, CHANGED, NO_UNC = 'As budgeted', 'Raised to scope', 'Not in scope', 'Standard changed', 'No uncertainty required'
@@ -132,7 +132,7 @@ def evaluate(spec: PointSpec, standard) -> Evaluation:
     if _finite(cmc) and _finite(rep) and rep < cmc * (1 - 1e-12):          # cannot happen (build rounds UP and floors at the CMC); a belt-and-braces clamp
         rep = uncertainty.round_up(cmc)
     if not text:
-        status = NO_UNC
+        status = NOT_IN_SCOPE if spec.expects else NO_UNC           # a coil point the coil's lines do not cover is 'Not in scope', not 'no uncertainty required'
     elif cmc is None:
         status = NOT_IN_SCOPE
     elif emu is not None and emu < cmc * (1 - 1e-9):
@@ -301,6 +301,9 @@ class Row:
     def follow(self, default_std):
         """Re-evaluate for the run default (rows the person set themselves keep their own standard)."""
         std = self.manual if self.manual is not None else (default_std if not self.spec.locked else self.spec.default_std)
+        opts = self.spec.options
+        if self.manual is None and opts is not None and not self.spec.locked and std not in opts:
+            std = self.spec.default_std                      # a row with a fixed list of standards (the 50-turn-coil points: the 5500A/COIL sheet) is not moved by the run default
         self.cur = self.base if std == self.spec.default_std else evaluate(self.spec, std)
 
     @property
@@ -584,8 +587,9 @@ def _handheld_spec(app, i, p, row) -> PointSpec:
     clean = lambda d: float(f'{float(d * factor):.9g}')                # noqa: E731  (as handheld_dmm.certificate_fields)
     kind = 'OHM2' if p['kind'] == 'OHM' else p['kind']
     a = p.get('applied') or {}
-    q = dict(kind=kind, nominal=a.get('value', 0), frequency=a.get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None)     # as certificate_row
-    q_tar = dict(kind=kind, nominal=a.get('value', 0), frequency=a.get('frequency'), unit=p['base_unit'], range=None)                       # as certificate_fields
+    nom, coil = app.unc_source(p) if hasattr(app, 'unc_source') else (a.get('value', 0), None)       # a 50-turn-coil point: the coil sheet at the effective current
+    q = dict(kind=kind, nominal=nom, frequency=a.get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None)     # as certificate_row
+    q_tar = dict(kind=kind, nominal=nom, frequency=a.get('frequency'), unit=p['base_unit'], range=None)                       # as certificate_fields
     locked = ''
     if p.get('unc_kind') == 'FREQ':
         import handheld_dmm
@@ -599,12 +603,19 @@ def _handheld_spec(app, i, p, row) -> PointSpec:
         std = app.calibrator_model()
     finally:
         app._row_std = prev
+    if coil and not locked:
+        std = coil                                                     # the coil's own sheet, whatever calibrator drives it
     if not locked and not std:
         locked = 'No calibrator applies'
-    if not locked and not printed['Uncertainty']:
+    if not locked and not printed['Uncertainty'] and not coil:           # a coil point the coil's lines do not cover stays open: 'Not in scope', a value may be typed
         locked = 'No uncertainty is printed for this point'
-    return PointSpec(i, base['step'], base['section'], base['description'], base['nominal'], q, q_tar, clean(Decimal(p['low'])), clean(Decimal(p['high'])),
+    spec = PointSpec(i, base['step'], base['section'], base['description'], base['nominal'], q, q_tar, clean(Decimal(p['low'])), clean(Decimal(p['high'])),
                      p['base_unit'], std, locked, printed)
+    if coil and not locked:
+        spec.expects = True
+        spec.options = [coil]                                          # not a calibrator choice: the coil is not commanded, the sheet is fixed for these points
+        spec.std_label = LABELS.get(coil, coil)
+    return spec
 
 
 def specs_for(app, kinds=None):

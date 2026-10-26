@@ -1107,7 +1107,9 @@
    "settle": 5,
    "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 10 A @ 50 Hz",
    "group": "COIL_AUX",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.2 A in, 10 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (0.2 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A.",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 10.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.2 A in, 10 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (10 A), not the calibrator's at 0.2 A; no value is printed where the coil's lines do not cover the point (AC below 20.5 A). TAR / TUR compare it with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A.",
    "ref": "T1 #23",
    "id": "1-23"
   },
@@ -1141,7 +1143,9 @@
    "settle": 5,
    "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 500 A @ 50 Hz",
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 10 A in, 500 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (10 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A.",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 500.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 10 A in, 500 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (500 A), not the calibrator's at 10 A; no value is printed where the coil's lines do not cover the point (AC below 20.5 A). TAR / TUR compare it with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A.",
    "ref": "T1 #24",
    "id": "1-24"
   },
@@ -1173,7 +1177,9 @@
    "settle": 5,
    "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 900 A @ 50 Hz",
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (18 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point.",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 900.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (900 A), not the calibrator's at 18 A; no value is printed where the coil's lines do not cover the point (AC below 20.5 A). TAR / TUR compare it with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point.",
    "ref": "T1 #25",
    "id": "1-25"
   },
@@ -1207,7 +1213,9 @@
    "settle": 5,
    "dsb_desc": "AC amps, jaw on the 50-turn coil: meter reads 300 A @ 440 Hz",
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 6 A in, 300 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (6 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 6 A at 440 Hz: the lab's coil and calibrator are able to make it (owner-confirmed). If the calibrator refuses the output the run stops at this point.",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 300.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 6 A in, 300 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (300 A), not the calibrator's at 6 A; no value is printed where the coil's lines do not cover the point (AC below 20.5 A). TAR / TUR compare it with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 6 A at 440 Hz: the lab's coil and calibrator are able to make it (owner-confirmed). If the calibrator refuses the output the run stops at this point.",
    "ref": "T1 #26",
    "id": "1-26"
   },
@@ -1241,7 +1249,9 @@
    "settle": 5,
    "dsb_desc": "DC amps, jaw on the 50-turn coil: meter reads 10 A",
    "group": "COIL_AUX",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.2 A in, 10 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (0.2 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. Users Manual p. 11 (DC amps): dial on A⎓, press the yellow button (ZERO) with the jaw clear of any conductor until the display reads 0.0, then close the jaw around the coil. Zero before the calibrator drives current; never with the coil energised. (Whether ZERO has to be repeated before every DC amps point is not stated: UNVERIFIED.)",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 10.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 0.2 A in, 10 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (10 A), not the calibrator's at 0.2 A; no value is printed where the coil's lines do not cover the point (AC below 20.5 A). TAR / TUR compare it with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. Users Manual p. 11 (DC amps): dial on A⎓, press the yellow button (ZERO) with the jaw clear of any conductor until the display reads 0.0, then close the jaw around the coil. Zero before the calibrator drives current; never with the coil energised. (Whether ZERO has to be repeated before every DC amps point is not stated: UNVERIFIED.)",
    "ref": "T1 #27",
    "id": "1-27"
   },
@@ -1352,7 +1362,9 @@
     }
    },
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 10 A in, 500 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (10 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. CHECK (printed limit not changed; Users Manual p. 23): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±5 from the nominal vs half of the specification ±5.25; high limit ±5 from the nominal vs half of the specification ±5.25; full specification ±10.5 A).",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 500.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 10 A in, 500 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (500 A), not the calibrator's at 10 A; no value is printed where the coil's lines do not cover the point (AC below 20.5 A). TAR / TUR compare it with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. CHECK (printed limit not changed; Users Manual p. 23): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±5 from the nominal vs half of the specification ±5.25; high limit ±5 from the nominal vs half of the specification ±5.25; full specification ±10.5 A).",
    "ref": "T1 #28",
    "id": "1-28"
   },
@@ -1425,7 +1437,9 @@
     }
    },
    "group": "COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at the calibrator output current (18 A), as it is, NOT multiplied by 50 and without the coil; TAR / TUR compare that unscaled value with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point. CHECK (printed limit not changed; Users Manual p. 23): the printed limit is inside the full specification but is neither the full specification nor half of it. 376, 376-II: tighter (low limit ±9 from the nominal vs half of the specification ±9.25; high limit ±9 from the nominal vs half of the specification ±9.25; full specification ±18.5 A).",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 900.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The calibrator drives the 50-turn coil and the meter reads 50 x the calibrator current: 18 A in, 900 A on the meter. The limits are the meter readings (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees (900 A), not the calibrator's at 18 A; no value is printed where the coil's lines do not cover the point (AC below 20.5 A). TAR / TUR compare it with the meter-reading tolerance printed in Table 1. Jaw range: 600.0 A on the 374 and 375, 999.9 A on the 376 (Users Manual p. 20); resolution 0.1 A. 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point. CHECK (printed limit not changed; Users Manual p. 23): the printed limit is inside the full specification but is neither the full specification nor half of it. 376, 376-II: tighter (low limit ±9 from the nominal vs half of the specification ±9.25; high limit ±9 from the nominal vs half of the specification ±9.25; full specification ±18.5 A).",
    "ref": "T1 #29",
    "id": "1-29"
   },
@@ -1635,7 +1649,9 @@
    "settle": 5,
    "dsb_desc": "iFlex loop on the 50-turn coil, 2500 A range: meter reads 10 A @ 50 Hz",
    "group": "IFLEX_COIL_AUX",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 0.2 A in, 10 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 0.2 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21).",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 10.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 0.2 A in, 10 A on the meter (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective 10 A, not at 0.2 A; none where the coil's lines do not cover the point (AC below 20.5 A); TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21).",
    "ref": "T1 #35",
    "id": "1-35"
   },
@@ -1747,7 +1763,9 @@
     }
    },
    "group": "IFLEX_COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 10 A in, 500 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 10 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). CHECK (printed limit not changed; Users Manual p. 21): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±7 from the nominal vs half of the specification ±7.75; high limit ±7 from the nominal vs half of the specification ±7.75; full specification ±15.5 A).",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 500.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 10 A in, 500 A on the meter (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective 500 A, not at 10 A; none where the coil's lines do not cover the point (AC below 20.5 A); TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). CHECK (printed limit not changed; Users Manual p. 21): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±7 from the nominal vs half of the specification ±7.75; high limit ±7 from the nominal vs half of the specification ±7.75; full specification ±15.5 A).",
    "ref": "T1 #36",
    "id": "1-36"
   },
@@ -1859,7 +1877,9 @@
     }
    },
    "group": "IFLEX_COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 18 A in, 900 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 18 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point. CHECK (printed limit not changed; Users Manual p. 21): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±13 from the nominal vs half of the specification ±13.75; high limit ±13 from the nominal vs half of the specification ±13.75; full specification ±27.5 A).",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 900.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 18 A in, 900 A on the meter (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective 900 A, not at 18 A; none where the coil's lines do not cover the point (AC below 20.5 A); TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). 18 A: the lab's coil and calibrator are able to make it (owner-confirmed). Duty cycle (UNVERIFIED for this coil): the 5500A/COIL data recorded in NOTES.md allows 11 A rms continuously and up to 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF): keep the output ON only as long as the reading needs and let the coil rest 8 minutes before the next high-current point. CHECK (printed limit not changed; Users Manual p. 21): the printed limit is inside the full specification but is neither the full specification nor half of it. 374, 375, 376, 376-II: tighter (low limit ±13 from the nominal vs half of the specification ±13.75; high limit ±13 from the nominal vs half of the specification ±13.75; full specification ±27.5 A).",
    "ref": "T1 #37",
    "id": "1-37"
   },
@@ -1894,7 +1914,9 @@
    "settle": 5,
    "dsb_desc": "iFlex loop on the 50-turn coil, 2500 A range: meter reads 300 A @ 440 Hz",
    "group": "IFLEX_COIL_20A",
-   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 6 A in, 300 A on the meter (Table 1, printed p. 4). Uncertainty (owner-chosen convention): the regular calibrator current uncertainty at 6 A, NOT multiplied by 50; TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). 6 A at 440 Hz: the lab's coil and calibrator are able to make it (owner-confirmed). If the calibrator refuses the output the run stops at this point.",
+   "unc_standard": "A2LA-5500A-COIL",
+   "unc_nominal": 300.0,
+   "note": "Table 1 names no range: the range shown is the one the published resolutions put this reading in (Users Manual pp. 20-26; the meter autoranges). The iFlex loop is placed around the 50-turn coil and the calibrator drives the coil: 6 A in, 300 A on the meter (Table 1, printed p. 4). Uncertainty (owner decision): the 5500A/COIL's own scope uncertainty (A2LA-5500A-COIL) at the effective 300 A, not at 6 A; none where the coil's lines do not cover the point (AC below 20.5 A); TAR / TUR compare it with the meter-reading tolerance. iFlex range 2500 A: 0.1 A resolution up to 999.9 A, 1 A up to 2500 A (Users Manual p. 21). 6 A at 440 Hz: the lab's coil and calibrator are able to make it (owner-confirmed). If the calibrator refuses the output the run stops at this point.",
    "ref": "T1 #38",
    "id": "1-38"
   }

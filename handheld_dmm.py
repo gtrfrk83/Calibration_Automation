@@ -1304,9 +1304,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             if self.has_uncertainty(p) and p.get('unc_kind') == 'FREQ':       # a frequency reading: the Frequency - Measure CMC ALONE (GPS-referenced), never the calibrator's voltage uncertainty
                 unc = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None))
             elif self.has_uncertainty(p):
-                unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
+                nom, std = self.unc_source(p)
+                unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=nom,
                                                         frequency=p['applied'].get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None),
-                                                        standard=self.calibrator_model())      # unc_unit (opt-in, Fluke 376 iFlex simulation): the source is volts, the reading is amps
+                                                        standard=std or self.calibrator_model())      # unc_unit (opt-in, Fluke 376 iFlex simulation): the source is volts, the reading is amps
             a = p.get('applied') or {}
             freq = a.get('frequency') if p['kind'] in ('ACV', 'ACI') and p['display_unit'] != 'kHz' and not p.get('no_freq_suffix') else None      # no_freq_suffix: opt-in per point (Fluke 170 series Hz-unit frequency rows)
             row = report_pdf.cert_row(f'{p["range"]} range' if p['range'] else describe(p), p['nominal'], clean(Decimal(p['low'])), clean(Decimal(p['high'])),
@@ -1349,6 +1350,15 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         return rows, pts
 
     @staticmethod
+    def unc_source(p):
+        """(nominal, standard or None) the uncertainty of a point is worked out at.  A point that carries `unc_standard` (the clamp meters on the 50-turn coil:
+        Fluke 374 / 375 / 376 / 376-II, spec fluke_376_pv.json) uses THAT standard's sheet (A2LA-5500A-COIL) at `unc_nominal`, the EFFECTIVE current the jaw sees; every other
+        point uses the applied value and the calibrator in use."""
+        if p.get('unc_standard'):
+            return p.get('unc_nominal', p.get('nominal')), p['unc_standard']
+        return p['applied']['value'], None
+
+    @staticmethod
     def has_uncertainty(p):
         """True for the points that carry an Uncertainty (and TAR / TUR): numeric DCV / ACV / DCI / ACI / OHM / CAP with a source, and the
         thermocouple-simulation TEMP points (degC only: a degF point has no degC calibrator specification, so it stays blank)."""
@@ -1371,11 +1381,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             factor = Decimal(str(p['factor']))
             clean = lambda d: float(f'{float(d * factor):.9g}')
             if p.get('unc_kind') == 'FREQ':            # frequency reading: Frequency - Measure CMC alone, no calibrator budget mixed in (so TAR is blank, TUR is against the CMC)
-                q = dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None)
+                q, cstd = dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None), None
             else:
-                q = dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
+                nom, cstd = self.unc_source(p)
+                q = dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=nom,
                          frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)
-            fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=self.calibrator_model())
+            fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=cstd or self.calibrator_model())
             if p.get('unc_kind') == 'FREQ':
                 fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=None)
             return fields
