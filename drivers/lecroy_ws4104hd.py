@@ -67,6 +67,10 @@ COMMANDS = {
                           'Also used for the 20 MHz state of configure_dc_input', readback='bandwidth.get',
                           placeholders={**_CH, **_txt('limit', '20MHz')}),
     'bandwidth.get': _vbs('VBS? "return=app.Acquisition.C{ch}.BandwidthLimit"', 'Bandwidth limit read-back', kind='query', placeholders=_CH),
+    # channel display (the noise test turns all four channels ON)
+    'chan.view.set': _vbs("VBS 'app.Acquisition.C{ch}.View=True'", 'Show (turn ON) a channel', _UNV, readback='chan.view.get', verified=False,
+                          placeholders=_CH),
+    'chan.view.get': _vbs('VBS? "return=app.Acquisition.C{ch}.View"', 'Channel display read-back', _UNV, kind='query', verified=False, placeholders=_CH),
     # classic remote command (impedance test)
     'cpl.set': Cmd('{channel_name}:CPL {coupling}', 'Coupling (classic command)', 'Classic remote command, e.g. C1:CPL D50 (D50 / D1M / A1M)',
                    placeholders={**_txt('channel_name', 'C1'), **_txt('coupling', 'D50')}, kind='set', readback='cpl.query', verified=True),
@@ -254,6 +258,15 @@ class WaveSurfer4104HD(Instrument):
         self._set_text_verified('coupling.set', 'coupling.get', f'{self._ch(channel)}.Coupling', coupling, settle=self.RELAY_SETTLE,
                                 ch=self._chn(channel), coupling=coupling)
 
+    def enable_channel(self, channel):
+        """Turn a channel ON (display) and read it back: MAUI answers True / -1 / 1 for ON.  The property path is NOT verified on a 4104HD."""
+        ch = self._chn(channel)
+        self.send('chan.view.set', ch=ch)
+        time.sleep(0.3)
+        got = self._get('chan.view.get', ch=ch).strip().casefold()
+        if got not in ('true', '-1', '1'):
+            raise InstrumentError(f'CH{channel} did not turn ON: View reads {got!r}')
+
     def set_bandwidth_limit(self, channel, limit):
         """limit: 'Full', '20MHz', ..."""
         self._set_text_verified('bandwidth.set', 'bandwidth.get', f'{self._ch(channel)}.BandwidthLimit', limit, settle=self.RELAY_SETTLE,
@@ -355,6 +368,18 @@ class WaveSurfer4104HD(Instrument):
     def read_p1(self) -> float:
         """Current P1 value (volts for Mean / StandardDeviation / PkPk, hertz for Freq)."""
         return self._get_float('p1.value.get', f'{P1}.Out.Result.Value')
+
+    def read_p1_when_ready(self, timeout_s=20.0, interval_s=0.5):
+        """P1 as a number once the scope has one: right after a range / channel / trigger change MAUI answers 'No Data Available' until a new acquisition has been
+        measured.  Only this read-only query is repeated (never a write); raises the scope's own error when no number arrives within the time."""
+        deadline = time.monotonic() + timeout_s
+        while True:
+            try:
+                return self.read_p1()
+            except InstrumentError as exc:
+                if 'did not return a number' not in str(exc) or time.monotonic() >= deadline:
+                    raise
+            time.sleep(interval_s)
 
     def read_p1_settled(self, settle_s, discard_gap_s=0.5):
         """Wait, discard one possibly stale reading, then return a fresh one."""

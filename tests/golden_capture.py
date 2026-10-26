@@ -148,7 +148,7 @@ COVERAGE = {
             covered=['query_retry', 'vbs_get', 'vbs_get_float', 'vbs_set_number', 'vbs_set_text', 'handshake', 'set_vertical_scale',
                      'set_vertical_offset', 'ensure_zero_offset', 'set_coupling', 'set_bandwidth_limit', 'set_coupling_legacy',
                      'configure_dc_input', 'set_timebase', 'set_edge_trigger_source', 'set_trigger_slope', 'set_trigger_level',
-                     'set_trigger_mode', 'trigger_mode', 'configure_p1', 'read_p1', 'read_p1_settled'],
+                     'set_trigger_mode', 'trigger_mode', 'configure_p1', 'read_p1', 'read_p1_settled', 'enable_channel', 'read_p1_when_ready'],
             no_command=[]),
     },
     'tektronix_mdo4000c': {
@@ -1154,6 +1154,8 @@ def cases_lecroy(c):
     bench.fluke.update(operate=True, volts=1.0, scope='VOLT')
     c.run('WaveSurfer4104HD.read_p1', w.read_p1)
     c.run('WaveSurfer4104HD.read_p1_settled', w.read_p1_settled, 2.0)
+    c.run('WaveSurfer4104HD.read_p1_when_ready', w.read_p1_when_ready, 2.0, 0.0)
+    c.run('WaveSurfer4104HD.enable_channel', w.enable_channel, 2)
     c.run('WaveSurfer4104HD.query_retry[first try]', w.query_retry, 'VBS? "return=app.Acquisition.C1.VerScale"')
     # read recovery (device clear, then close and reopen), needs a transport that fails
     flaky = c.inst(WaveSurfer4104HD, Scripted([(r'^VBS\?', [TransportError('timeout'), 'VBS 0.01'])]), label='WS4104HD')

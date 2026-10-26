@@ -838,6 +838,49 @@
    ]
   },
   {
+   "call": "2.0, 0.0",
+   "case": "WaveSurfer4104HD.read_p1_when_ready",
+   "log": [
+    "WS4104HD|>>|VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+    "WS4104HD|<<|VBS 1.0006"
+   ],
+   "method": "WaveSurfer4104HD.read_p1_when_ready",
+   "result": "returned 1.0006",
+   "wire": [
+    [
+     "Q",
+     "VBS? \"return=app.Measure.P1.Out.Result.Value\"",
+     "VBS 1.0006"
+    ]
+   ]
+  },
+  {
+   "call": "2",
+   "case": "WaveSurfer4104HD.enable_channel",
+   "log": [
+    "WS4104HD|>>|VBS 'app.Acquisition.C2.View=True'",
+    "WS4104HD|>>|VBS? \"return=app.Acquisition.C2.View\"",
+    "WS4104HD|<<|VBS True"
+   ],
+   "method": "WaveSurfer4104HD.enable_channel",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "VBS 'app.Acquisition.C2.View=True'"
+    ],
+    [
+     "sleep",
+     0.3
+    ],
+    [
+     "Q",
+     "VBS? \"return=app.Acquisition.C2.View\"",
+     "VBS True"
+    ]
+   ]
+  },
+  {
    "call": "'VBS? \"return=app.Acquisition.C1.VerScale\"'",
    "case": "WaveSurfer4104HD.query_retry[first try]",
    "log": [

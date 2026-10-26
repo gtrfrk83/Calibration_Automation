@@ -63,9 +63,34 @@ class Noise(unittest.TestCase):
         self.assertTrue(any('P1.Source1="C3"' in t for t in sent), sent)
         first_read = next(i for i, t in enumerate(sent) if 'P1.Out.Result.Value' in t)
         self.assertLess(sent.index('VBS \'app.Acquisition.TriggerMode="Auto" \''), first_read)       # Auto before the first value is read
+        for ch in (1, 2, 3, 4):                                                    # all four channels ON, DC 1 MOhm, full bandwidth (the test's stated setup)
+            self.assertTrue(any(f'C{ch}.View=True' in t for t in sent), ch)
+            self.assertTrue(any(f'C{ch}.Coupling="DC1M"' in t for t in sent), ch)
+            self.assertTrue(any(f'C{ch}.BandwidthLimit="Full"' in t for t in sent), ch)
+        self.assertTrue(any('HorScale=0.001' in t for t in sent), sent)
+        self.assertLess(max(i for i, t in enumerate(sent) if 'Acquisition.C' in t and '.View=True' in t), first_read)         # channels are set up before P1 is read
         kinds = [e[0] for e in list(a.events.queue)]
         self.assertNotIn('error', kinds, list(a.events.queue))
         self.assertEqual(kinds.count('row'), 2)
+
+
+class NoData(unittest.TestCase):
+    def test_p1_is_waited_for_not_failed_on_no_data_available(self):
+        import drivers
+        from drivers.base import InstrumentError
+        sc = drivers.WaveSurfer4104HD.__new__(drivers.WaveSurfer4104HD)
+        replies = ['No Data Available', 'No Data Available', '0.00042']
+        calls = []
+
+        def fake_get(key, path=None, **kw):
+            calls.append(key)
+            return replies.pop(0)
+        sc._get = fake_get
+        value = sc.read_p1_when_ready(timeout_s=5, interval_s=0.0)
+        self.assertEqual((value, len(calls)), (0.00042, 3))
+        sc._get = lambda *a, **k: 'No Data Available'
+        with self.assertRaises(InstrumentError):                                         # still no data after the time: the scope's own message
+            sc.read_p1_when_ready(timeout_s=0.05, interval_s=0.01)
 
 
 if __name__ == '__main__':

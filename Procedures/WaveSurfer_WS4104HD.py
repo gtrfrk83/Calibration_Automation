@@ -1340,6 +1340,12 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             self.reset_bench(None, scope, log)       # reset to default settings before the first point
             ident = scope.idn
             self.events.put(('status', f'Connected: {ident}'))
+            self.events.put(('status', 'Turning all four channels ON, DC 1 MΩ, full bandwidth, 1 ms/div'))
+            for ch in (1, 2, 3, 4):                       # the noise test's stated setup: all channels ON, DC 1 MOhm, full bandwidth (each readback verified)
+                scope.enable_channel(ch)
+                scope.set_coupling(ch, 'DC1M')
+                scope.set_bandwidth_limit(ch, 'Full')
+            scope.set_timebase(1e-3)
             scope.configure_p1(channel, 'StandardDeviation')
             self.events.put(('status', f'P1 configured: waveform StdDev of CH{channel} (readback verified)'))
             scope.set_trigger_mode('Auto')      # a stopped acquisition leaves P1 frozen: Auto keeps the StdDev updating (readback verified)
@@ -1354,14 +1360,14 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
                     break
                 scope.configure_p1(channel, 'StandardDeviation')    # re-assert (readback verified) that P1 is the StdDev of THIS channel before every point
                 scope.set_trigger_mode('Auto')                       # and that the acquisition is running, so P1 is updated
-                scope.read_p1()                                      # discard one possibly stale value left from the previous range
+                scope.read_p1_when_ready()                           # wait until the scope has a P1 value (it says 'No Data Available' right after a change), discard it
                 if self.stop_event.wait(0.5):
                     break
                 readings = []
                 for _ in range(samples):
                     if self.stop_event.is_set():
                         break
-                    volts = scope.read_p1()
+                    volts = scope.read_p1_when_ready()
                     if volts <= 0:
                         raise ValueError(f'Invalid P1 value at {scale} V/div: {volts!r}')
                     readings.append(volts)
