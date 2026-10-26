@@ -1024,5 +1024,53 @@ class Rule5CmcSet(Base):
         self.assertEqual(rules.check(conv.sheet, matcher=self.matcher, dry_run_on=False).errors(), [])
 
 
+class SensorRule(Base):
+    """Rule 5, temperature: the sensor a temperature point is sourced as must be chosen (an ERROR that blocks publishing); old tc_type sheets keep working."""
+
+    def temp_sheet(self, **settings):
+        ds = db.Datasheet('A', 'T1', 'T')
+        ds.set_periods([('1y', 'y')], '1y')
+        t = ds.add_function('TEMP', settings=dict(settings))
+        t.add_range('2000', '0.1')
+        ds.set_spec(t, '1 °C')
+        db.add_point(t, 100)
+        db.add_point(t, 150)
+        return ds, t
+
+    def sensor_findings(self, ds):
+        return [f for f in self.check(ds).findings if f.code == 'sensor_not_chosen']
+
+    def test_no_choice_is_an_error_naming_the_rows_and_pointing_at_the_first(self):
+        ds, t = self.temp_sheet()
+        f = self.sensor_findings(ds)
+        self.assertEqual([(x.level, x.rule, x.count) for x in f], [('error', 5, 2)])
+        self.assertEqual(f[0].point_ids, tuple(p.id for p in t.points))
+        self.assertIn('no sensor chosen', f[0].text)
+        self.assertEqual([x.code for x in self.check(ds).findings if x.code == 'not_covered'], [])      # not also reported as 'no standard covers it'
+
+    def test_a_point_sensor_or_an_old_tc_type_satisfies_it(self):
+        ds, t = self.temp_sheet()
+        t.points[0].settings['sensor'] = 'Pt385-100'
+        self.assertEqual(len(self.sensor_findings(ds)[0].point_ids), 1)             # only the other one is missing
+        t.points[1].settings['sensor'] = 'J'
+        self.assertEqual(self.sensor_findings(ds), [])
+        old, _t = self.temp_sheet(tc_type='K')
+        self.assertEqual(self.sensor_findings(old), [])
+
+    def test_a_disabled_point_and_a_manual_entry_sheet_are_not_reported(self):
+        ds, t = self.temp_sheet()
+        for p in t.points:
+            p.enabled = False
+        self.assertEqual(self.sensor_findings(ds), [])
+        ds2, _t2 = self.temp_sheet()
+        ds2.options['manual_entry'] = True
+        self.assertEqual(self.sensor_findings(ds2), [])
+
+    def test_nothing_is_reported_at_load(self):
+        ds, _t = self.temp_sheet()
+        back = db.Datasheet.from_dict(ds.to_dict())
+        self.assertEqual(db.errors(db.validate(back)), [])                       # loading and validating say nothing; only the sheet check does
+
+
 if __name__ == '__main__':
     unittest.main()

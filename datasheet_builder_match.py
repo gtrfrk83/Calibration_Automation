@@ -33,6 +33,7 @@ from decimal import Decimal, localcontext
 import datasheet_builder as db
 import specmanager as sm
 import tartur
+import dsb_sensors as sens
 import uncertainty
 import uncertainty_budget as ub
 from datasheet_builder import D, KINDS
@@ -77,6 +78,7 @@ def _calibrator(driver, scope_driver, scope_status, marker_status, scope_note, m
         'FREQ': _c(OK, driver, 'set_output_volts(amplitude, f)', 'sourced as an AC volts point at the frequency (as the handheld 87V / 110 Hz points)'),
         'PERIOD': _c(OK, driver, 'set_output_volts(amplitude, 1/T)', 'sourced as an AC volts point at 1 / period'),
         'TEMP': _c(UNVERIFIED, driver, 'set_output_temperature(c, tc_type)', _UNV_TC),
+        'TEMP_OTHER': _c(MANUAL, driver, '', 'the run engine sources thermocouple Type K only; any other thermocouple type and every RTD is set on the calibrator by hand'),
         'DIODE': _c(OK, driver, 'set_output_volts(v, dc=True)', 'the calibrator supplies the forward voltage'),
         'CONT': _c(OK, driver, 'set_output_ohms(r)'),
         'SCOPE_GAIN': _c(scope_status, scope_driver, 'select_scope_dcv + set_dc_volts', scope_note),
@@ -93,6 +95,8 @@ def _calibrator_5520A():
     for kind, cap in _calibrator('Fluke5520A', 'Fluke5520A', NO, NO, '', '').items():
         if kind.startswith('SCOPE_'):
             out[kind] = _c(NO, 'Fluke5520A', '', _5520_SCOPE_NOTE)
+        elif kind == 'TEMP_OTHER':
+            out[kind] = cap
         else:
             out[kind] = _c(UNVERIFIED, cap.driver, cap.via, cap.note or _5520_NOTE)
     return out
@@ -158,6 +162,11 @@ LAB_DEFAULT = {   # preferred standard per function when TURs tie: the lab's own
 
 def lab_default(kind):
     return LAB_DEFAULT.get(kind) or LAB_DEFAULT.get(KINDS[kind]['family']) or []
+
+
+def capability_kind(fn, p):
+    """The driver-table key for a point: its kind, except a temperature point that is not thermocouple Type K ('TEMP_OTHER': the run engine sources Type K only)."""
+    return sens.automation_kind({**fn.settings, **p.settings}, fn.kind) if fn.kind == 'TEMP' else fn.kind
 
 
 def automation_status(model, kind, direction=None):
@@ -246,6 +255,7 @@ class Stim:
     scale: Decimal = D(1)           # datasheet unit per row unit (Vpp per V rms ...)
     coverage: list = field(default_factory=list)      # further Stim that must also be covered (the amplitude of a frequency point)
     error: tuple = None             # (code, message) when the point cannot be turned into a lookup
+    sensor: str = ''                # TEMP: the sensor key (thermocouple letter or RTD key, dsb_sensors); '' for every other kind
 
 
 def _rms_factor(waveform, amp_unit):
@@ -262,7 +272,7 @@ def _rms_factor(waveform, amp_unit):
     return None
 
 
-def stimulus(fn, p):
+def stimulus(fn, p, strict_sensor=False):
     """What the standard has to source / measure for point p of function fn (a Stim)."""
     k, nom, f = fn.kind, abs(p.nominal), p.frequency
     out_dir = 'output' if fn.direction == 'measure' else 'input'
@@ -284,7 +294,13 @@ def stimulus(fn, p):
         cov = [Stim('ACV', p.amplitude, freq, out_dir)] if p.amplitude else []
         return Stim('FREQ', freq, None, out_dir, coverage=cov)
     if k == 'TEMP':
-        return Stim('TEMP', nom if p.nominal >= 0 else abs(p.nominal), None, out_dir, variant='Type ' + str(s.get('tc_type', 'K')), unit='degC')
+        key = sens.sensor_of(fn, p)
+        if not key and strict_sensor:                      # the Builder: no sensor is assumed for a temperature point (the old handheld sheets still read Type K)
+            return Stim('TEMP', p.nominal, None, out_dir, unit='degC', error=('no_sensor', sens.NOT_CHOSEN))
+        if not key:                                        # an old sheet: its letter as it was (an unknown one finds no standard), else Type K as before
+            raw = str({**fn.settings, **p.settings}.get('tc_type') or 'K').strip()
+            return Stim('TEMP', p.nominal, None, out_dir, variant='Type ' + raw, unit='degC', sensor=raw)
+        return Stim('TEMP', p.nominal, None, out_dir, variant=sens.variant_for(key), unit='degC', sensor=key)     # signed: a temperature below zero is a different band
     if k in ('SCOPE_BW', 'SCOPE_TRIGGER'):
         return Stim('FLAT', p.amplitude or D(0), f, out_dir)
     if k == 'SCOPE_TIMEBASE':
@@ -323,6 +339,8 @@ def _view(spec, unit):
 def _lookup(spec, st):
     view = _view(spec, st.unit)
     value, freq = float(st.value), (float(st.frequency) if st.frequency is not None else None)
+    if st.kind == 'TEMP':                                    # the thermocouple / RTD simulation lines of that sensor, signed degC bands, never the magnitude lookup
+        return view.lookup_temperature(value, variant=st.variant, direction=st.direction), view, ''
     hit = view.lookup(st.kind, value, frequency=freq, variant=st.variant, direction=st.direction)
     if hit is None and st.variant and st.kind == 'OHM':      # 2-wire / 4-wire: a sheet with one resistance function serves both (never done for a thermocouple type)
         hit = view.lookup(st.kind, value, frequency=freq, variant='', direction=st.direction)
@@ -341,6 +359,7 @@ def explain(spec, st, view=None):
     view = view or _view(spec, st.unit)
     value = float(st.value)
     freq = float(st.frequency) if st.frequency is not None else None
+    band_of = (lambda r: (min(r['amp_lo'], r['amp_hi']), max(r['amp_lo'], r['amp_hi']))) if st.kind == 'TEMP' else _band        # temperatures are signed
     try:
         rows = [r for r in view._eligible(st.kind, st.variant, st.direction) if r['amp_lo'] is not None]
     except Exception:
@@ -351,8 +370,8 @@ def explain(spec, st, view=None):
     if not rows:
         what = st.kind + (f' ({st.variant})' if st.variant else '')
         return 'no_standard_for_function', f'{name} has no {what} ({"source" if st.direction == "output" else "measure"}) specification on its sheet'
-    lo_all, hi_all = min(_band(r)[0] for r in rows), max(_band(r)[1] for r in rows)
-    inside = [r for r in rows if _band(r)[0] <= value <= _band(r)[1]]
+    lo_all, hi_all = min(band_of(r)[0] for r in rows), max(band_of(r)[1] for r in rows)
+    inside = [r for r in rows if band_of(r)[0] <= value <= band_of(r)[1]]
     unit = rows[0]['unit']
     if not inside:
         side = 'above' if value > hi_all else 'below'
@@ -373,12 +392,20 @@ def explain(spec, st, view=None):
     return 'no_spec_row', f'{name}: no specification for the standard\'s period at this point'
 
 
-def budget(spec, hit, kind, nominal, frequency, scope, basis='generate'):
+def _scope_temperature(scope, nominal, key):
+    """The lab scope CMC (degC) for a sensor key: Scope.temperature(nominal, tc=key) where the scope has it (thermocouples and RTDs), else the older Scope.dmm('TEMP', ..., tc=key)."""
+    f = getattr(scope, 'temperature', None)
+    return f(nominal, tc=key) if f else scope.dmm('TEMP', nominal, tc=key)
+
+
+def budget(spec, hit, kind, nominal, frequency, scope, basis='generate', sensor=''):
     """ub.Budget for a hit: standard accuracy / divisor, resolution / sqrt(12), CMC clamp.  Same arithmetic as uncertainty_budget.build."""
     cmc_kind = {'OHM2': 'OHM', 'OHM4': 'OHM'}.get(kind, kind)
     b = ub.Budget(cmc_kind, nominal, hit.row['unit'], spec, frequency)
     if scope is not None and cmc_kind in ('DCV', 'ACV', 'DCI', 'ACI', 'OHM', 'CAP', 'FREQ'):
         b.cmc = scope.dmm(cmc_kind, nominal, None, frequency, basis=basis)
+    elif scope is not None and cmc_kind == 'TEMP' and sensor:       # that sensor's own CMC lines (Type K is no longer assumed); None outside them: nothing is invented
+        b.cmc = _scope_temperature(scope, nominal, sensor)
     b.hit = hit
     div, why = spec.divisor()
     b.add(f'{spec.model} accuracy', hit.limit / div, 1.0, f'{hit.limit:.6g} / {div:g} ({why})')
@@ -428,6 +455,7 @@ class Assignment:
     function_id: str
     kind: str
     direction: str
+    cap_kind: str = ''                # the driver-table key that decides automation ('TEMP_OTHER' for a sensor the suite cannot source); '' = kind
     status: str = 'uncovered'         # assigned | uncovered | manual
     standard: str = ''
     driver: str = ''
@@ -498,6 +526,8 @@ def _rank(cands, kind):
 class Matcher:
     """Loads the standards once; match() can then be called again and again (e.g. when the person changes an override)."""
 
+    strict_sensor = False             # True (the Builder): a temperature point with no sensor chosen is NOT matched as Type K but reported as 'choose the sensor'
+
     def __init__(self, db_path=None, models=None, scope=None):
         self.db_path = db_path
         self.standards = load_standards(db_path, models)
@@ -510,9 +540,10 @@ class Matcher:
 
     def candidate(self, std, fn, p, st, lim):
         c = Candidate(std.model, driver=std.info.driver)
-        cap = std.info.functions.get(fn.kind)
+        ck = capability_kind(fn, p)
+        cap = std.info.functions.get(ck)
         if cap is None:
-            cap = automation_status(std.model, fn.kind)
+            cap = automation_status(std.model, ck)
         c.automation, c.automation_note = cap.status, (cap.note or cap.via)
         if cap.driver:
             c.driver = cap.driver
@@ -542,7 +573,7 @@ class Matcher:
             c.notes.append(note)
         c.row = f"{hit.row['function']} / {hit.row['label']}"
         basis = 'generate' if fn.direction == 'measure' else 'measure'
-        b = budget(std.spec, hit, st.kind, float(st.value), float(st.frequency) if st.frequency is not None else None, self.scope, basis)
+        b = budget(std.spec, hit, st.kind, float(st.value), float(st.frequency) if st.frequency is not None else None, self.scope, basis, st.sensor)
         scale = float(st.scale)
         c.accuracy = hit.limit * scale
         c.cmc = None if b.cmc is None else b.cmc * scale
@@ -572,13 +603,14 @@ class Matcher:
             if not p.enabled:
                 continue
             a = Assignment(p.id, fn.id, fn.kind, fn.direction)
+            a.cap_kind = capability_kind(fn, p)
             res.assignments[p.id] = a
             try:
                 lim = fn.limit_for(p, period, ds) if not KINDS[fn.kind].get('passfail') else None
             except db.DsError:
                 lim = None
             try:
-                st = stimulus(fn, p)
+                st = stimulus(fn, p, self.strict_sensor)
                 if st.error is None and st.kind in ('ACV', 'ACI', 'FLAT') and fn.direction == 'measure' and st.frequency is None and fn.kind in ('ACV', 'ACI'):
                     st.error = ('bad_point', 'AC point without a frequency')
             except Exception as e:                                # never raise on one bad point

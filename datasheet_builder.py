@@ -656,9 +656,12 @@ class Point:
     overrides: dict = field(default_factory=dict)    # {period id: {'low': str|None, 'high': str|None}}  (SI strings)
     note: str = ''
     spec: Optional['SpecEntry'] = None       # this point's OWN specification (the datasheet grid's row tolerance); None = the function's spec table applies
+    calc: Optional[dict] = None              # the tolerance calculator inputs that made this point's limits, as typed (grid only; display / re-edit, never used to work out a limit)
+    resolution: Optional[Decimal] = None     # this point's OWN display resolution (SI); None = the range's.  Set when ONE row is given a resolution different from its range's, so the other rows on the range keep theirs
 
     def __post_init__(self):
         self.nominal = dec(self.nominal, 'nominal')
+        self.resolution = None if self.resolution in (None, '') else dec(self.resolution, 'resolution')
         self.frequency = None if self.frequency in (None, '') else dec(self.frequency, 'frequency')
         self.amplitude = None if self.amplitude in (None, '') else dec(self.amplitude, 'amplitude')
 
@@ -669,13 +672,17 @@ class Point:
              'edited': self.edited, 'enabled': self.enabled, 'settings': dict(self.settings), 'overrides': copy.deepcopy(self.overrides), 'note': self.note}
         if self.spec is not None:                 # written only when set, so every file made before the datasheet grid is unchanged
             d['spec'] = self.spec.to_dict()
+        if self.resolution is not None:           # likewise written only when set
+            d['resolution'] = fmt(self.resolution)
+        if self.calc:
+            d['calc'] = copy.deepcopy(self.calc)
         return d
 
     @classmethod
     def from_dict(cls, d):
         return cls(d['id'], d['range_id'], d['nominal'], d.get('frequency'), d.get('amplitude'), d.get('label', ''), d.get('origin', 'user'),
                    bool(d.get('edited')), bool(d.get('enabled', True)), dict(d.get('settings') or {}), copy.deepcopy(d.get('overrides') or {}),
-                   d.get('note', ''), SpecEntry.from_dict(d['spec']) if d.get('spec') else None)
+                   d.get('note', ''), SpecEntry.from_dict(d['spec']) if d.get('spec') else None, copy.deepcopy(d.get('calc')) or None, d.get('resolution'))
 
 
 RULE_TYPES = ('percent_of_range', 'zero_and_full', 'fixed', 'linear', 'log', 'decade_125', 'frequency_sweep')
@@ -852,6 +859,13 @@ class Function:
         top = max(e.score for e in hits)
         return hits, [e for e in hits if e.score == top]
 
+    def resolution_of(self, point):
+        """The display resolution (SI) that applies to `point`: its own when it has one (Point.resolution), else its range's, else None."""
+        if point.resolution is not None:
+            return point.resolution
+        rng = self.range(point.range_id)
+        return rng.resolution if rng is not None else None
+
     def governing(self, point):
         """The specification entries that decide `point`: its own (Point.spec, the grid's row tolerance) when it has one, else the most specific
         entries of the function's table ([] when none applies)."""
@@ -870,7 +884,8 @@ class Function:
             high = dec(ov['high']) if ov.get('high') not in (None, '') else None
             return Limit(point.nominal, low, high, None if low is None else point.nominal - low, None if high is None else high - point.nominal,
                          'override', one_sided=low is None or high is None)
-        ctx = Ctx(point.nominal, rng.full_scale if rng else None, rng.resolution if rng else None, point.frequency)
+        res_pt = self.resolution_of(point)
+        ctx = Ctx(point.nominal, rng.full_scale if rng else None, res_pt, point.frequency)
         tops = self.governing(point)
         if not tops:
             raise DsError('no_spec', f'{self.id}: no specification covers range {point.range_id!r} at frequency {fmt(point.frequency) if point.frequency is not None else "-"}')
@@ -895,8 +910,8 @@ class Function:
             bound_used = entry.bound is not None
         lim = Limit(point.nominal, low, high, tol.minus, tol.plus, 'spec', ambiguous=len(tops) > 1, one_sided=entry.mode != 'both',
                     bound_used=bound_used)
-        if rounding == 'outward' and rng and rng.resolution:
-            step = rng.resolution
+        if rounding == 'outward' and rng and res_pt:
+            step = res_pt
             with localcontext() as c:
                 c.prec = PREC
                 if lim.low is not None:
@@ -1467,7 +1482,7 @@ def _validate_function(ds, fn, add, seen_f, all_ids):
                 add('spec_period_unknown', f'Specification entry {i + 1} has an expression for period {p!r}, which the datasheet does not define.', 'warn', ew)
         for p, ex in list(e.exprs.items()) + list(e.exprs_minus.items()):
             for t in ex.terms() if isinstance(ex, Expr) else []:
-                if t.kind == 'counts' and not any(r.resolution for r in fn.ranges if e.range_id in (None, r.id)):
+                if t.kind == 'counts' and not any(r.resolution for r in fn.ranges if e.range_id in (None, r.id)) and not any(q.resolution for q in fn.points if e.range_id in (None, q.range_id)):
                     add('expr_context', f'Specification entry {i + 1} uses counts but no range has a resolution.', where=ew)
                 if t.kind in ('pct_range', 'ppm_range') and not fn.ranges:
                     add('expr_context', f'Specification entry {i + 1} uses a percentage of range but there are no ranges.', where=ew)
@@ -1493,6 +1508,8 @@ def _validate_function(ds, fn, add, seen_f, all_ids):
             add('point_outside_range', f'Point {p.id}: {fmt(p.nominal)} {info["unit"]} is outside range {rng.id} (limit {fmt(rng.top)}).', where=pw)
         elif rng is not None and info.get('value') and not (0 < abs(p.nominal) <= rng.top):
             add('point_outside_range', f'Point {p.id}: {fmt(p.nominal)} is outside range {rng.id} (limit {fmt(rng.top)}).', where=pw)
+        if p.resolution is not None and (p.resolution <= 0 or (rng is not None and p.resolution > rng.full_scale)):
+            add('range_resolution', f'Point {p.id}: the resolution must be above zero and not larger than the full scale.', where=pw)
         manual = bool(ds.options.get('manual_entry')) and info['family'] == 'dmm'      # a manual calibration: nothing is sourced, so a missing frequency / amplitude is only a warning
         if info.get('ac') and (p.frequency is None or p.frequency <= 0):
             add('no_frequency', f'Point {p.id}: {fn.kind} needs a frequency above zero.', 'warn' if manual else 'error', pw)

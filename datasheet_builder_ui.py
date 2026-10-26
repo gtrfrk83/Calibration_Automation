@@ -1741,7 +1741,7 @@ class Inspector(ttk.Frame):
         else:
             self.title_l.configure(text=f'ROW {row["n"]}')
             self.of_l.configure(text=f'Row {row["n"]} of {total}')
-            self.sub_l.configure(text=' · '.join(x for x in (row['step'].replace(' *', ''), row['function']) if x))
+            self.sub_l.configure(text=row['function'])
 
     def load(self, state):
         """Fill the boxes from M.GridModel.panel_state()."""

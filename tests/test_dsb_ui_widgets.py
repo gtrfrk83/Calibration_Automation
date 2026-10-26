@@ -114,7 +114,7 @@ class GridWidgetStubTests(unittest.TestCase):
         self.assertEqual(win.sheet_key(Ev('7', '7')), 'break')
         self.assertEqual(win.bar_v.get(), '7')
         self.assertIsNone(win.sheet_key(Ev('c', 'c', state=0x4)))        # Ctrl+C is left alone
-        win.model.select(key, 'step')
+        win.model.select(key, 'low')
         win.sync()
         self.assertEqual(win.sheet_key(Ev('x', 'x')), 'break')           # a read-only cell: a reason, no edit
         self.assertTrue(win.issue.get())
@@ -148,7 +148,7 @@ class GridWidgetStubTests(unittest.TestCase):
     def test_mouse_selection_and_scroll(self):
         win, key = self.build()
         geo = win.sheet.geo
-        x, y, _x1, _y1 = geo.box(1, 2)
+        x, y, _x1, _y1 = geo.box(1, 1)
         win.sheet._click(Ev(x=x + 3, y=y + 3))
         self.assertEqual(win.model.sel_col, 'nominal')
         win.sheet.scroll_cmd('scroll', 1, 'units')
@@ -306,8 +306,8 @@ class GridWidgetStubTests(unittest.TestCase):
         self.assertTrue(res.ok, res.message)
         win.model.select(key, 'high')                                 # the cells: the sheet draws both limit columns
         win.sync()
-        self.assertEqual(len(win.sheet.geo.widths), 5)
-        self.assertEqual([c['key'] for c in self.ui.M.VIEW_COLUMNS][-2:], ['low', 'high'])
+        self.assertEqual(len(win.sheet.geo.widths), 6)
+        self.assertEqual([c['key'] for c in self.ui.M.VIEW_COLUMNS][-4:], ['low', 'high', 'standard', 'unc'])
 
     def test_typing_in_a_limit_cell_shows_the_hint_and_does_not_edit(self):
         win, key = self.build()
@@ -373,7 +373,7 @@ class GridWidgetStubTests(unittest.TestCase):
         win.bar_v.set('abc')
         win.commit_bar('down')
         self.assertTrue(win.status.get().startswith('Cannot do that'))
-        win.model.select(key, 'step')
+        win.model.select(key, 'low')
         win.sync()                                                    # moving the selection clears the old message
         self.assertFalse(win.status.get().startswith('Cannot do that'))
         win.sheet_key(Ev('x', 'x'))

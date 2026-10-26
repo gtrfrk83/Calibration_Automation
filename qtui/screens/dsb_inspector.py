@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFrame, QGrid
                                QVBoxLayout, QWidget)
 
 import datasheet_builder_ui_model as M
+import dsb_sensors as sens
 from qtui import widgets
 from qtui.screens import dsb_common as C
 from qtui.theme import M as SZ
@@ -75,6 +76,45 @@ class FreqBox(QWidget):
             self.edit.setText(t)
             if not t:
                 self.unit.setCurrentText('Hz')
+
+
+class SensorBox(QWidget):
+    """'Sourced as' of a temperature row: a thermocouple type or an RTD (dsb_sensors.sensor_types()), plus a button that gives the whole section the same choice.
+    get_value() / set_value() work with the sensor KEY ('' = not chosen yet)."""
+    NONE = '(choose how it is sourced)'
+
+    def __init__(self):
+        super().__init__()
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(6)
+        self.combo = QComboBox()
+        self.combo.setMinimumContentsLength(4)
+        self.combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self.section_btn = QPushButton('Whole section')
+        self.section_btn.setToolTip('Give every row of this section the choice in the box.')
+        lay.addWidget(self.combo, 1)
+        lay.addWidget(self.section_btn)
+
+    def set_choices(self, pairs):
+        have = [self.combo.itemData(i) for i in range(1, self.combo.count())]
+        if have == [k for k, _l in pairs]:
+            return
+        keep = self.get_value()
+        self.combo.blockSignals(True)
+        self.combo.clear()
+        self.combo.addItem(self.NONE, '')
+        for k, lab in pairs:
+            self.combo.addItem(lab, k)
+        self.combo.blockSignals(False)
+        self.set_value(keep)
+
+    def get_value(self):
+        return self.combo.currentData() or ''
+
+    def set_value(self, key):
+        i = self.combo.findData(key or '')
+        self.combo.setCurrentIndex(i if i >= 0 else 0)
 
 
 class LevelBox(QWidget):
@@ -357,7 +397,7 @@ class Inspector(QFrame):
         return b
 
     def _build_point(self, lay):
-        self._group(lay, 'point', wide=('func',))
+        self._group(lay, 'point', wide=('func', 'sensor'))
         func = self._combo()
         self._cell('point', 'func', 'This row tests', func, 'What this row measures. Pick it for a new row; on a test row it moves the row to that section.')
         func.activated.connect(lambda _i: self.win.function_chosen(func.currentText()))
@@ -375,7 +415,11 @@ class Inspector(QFrame):
         self.entries.append(self.level_box.edit)
         self.v['level'] = C.Bind(self._cell('point', 'level', 'Signal level', self.level_box, 'The level of the signal applied while a frequency, period or bandwidth is tested: type the number and pick the unit (V, mV, \u00b5V, Vpp ...). A level in the other basis than the one the test stores (rms or peak-to-peak) is converted for a sine wave.'))
         self.v['expect'] = C.Bind(self._cell('point', 'expect', 'Beeper should be', self._combo(['on', 'off'])))
-        self.point_names = ('func', 'nominal', 'units', 'freq', 'level', 'expect')
+        self.sensor_box = SensorBox()
+        self.v['sensor'] = C.Bind(self._cell('point', 'sensor', 'Sourced as', self.sensor_box, 'How the temperature is sourced: the thermocouple type or RTD the calibrator simulates. It decides which standard rows and which scope lines give the uncertainty, so it must be chosen for every temperature row. "Whole section" gives every row of this section the same choice.'))
+        self.sensor_box.set_choices(sens.sensor_types())
+        self.sensor_box.section_btn.clicked.connect(lambda: self.win.sensor_section(self.sensor_box.get_value()))
+        self.point_names = ('func', 'nominal', 'units', 'freq', 'level', 'expect', 'sensor')
 
     def _build_tolerance(self, lay):
         # The limits come first: LOW and HIGH (absolute).  They are READ-ONLY displays of what the tolerance below works out; the tolerance chips / boxes,
@@ -666,7 +710,7 @@ class Inspector(QFrame):
         fields = st.get('fields', {})
         self.level_box.set_basis(fields.get('level_basis', 'rms'))
         want = {'func': True, 'nominal': True, 'units': True, 'freq': fields.get('frequency', False), 'level': fields.get('amplitude', False),
-                'expect': fields.get('expect', False),
+                'expect': fields.get('expect', False), 'sensor': fields.get('sensor', False),
                 'iv': self.types['iv'].get(), 'fs': self.types['fs'].get(), 'fs_scale': self.types['fs'].get(), 'floor': self.types['floor'].get(),
                 'db': self.types['db'].get(), 'calc': self.types['calc'].get(), 'low': False, 'high': False}      # the grid shows the limits; the read-only boxes only took room
         passfail = bool(st.get('passfail'))
@@ -716,7 +760,7 @@ class Inspector(QFrame):
         else:
             self.title_l.setText(f'ROW {row["n"]}')
             self.of_l.setText(f'Row {row["n"]} of {total}')
-            self.sub_l.setText(' · '.join(x for x in (row['step'].replace(' *', ''), row['function']) if x))
+            self.sub_l.setText(row['function'])               # no step number on screen (the printed sheet keeps it)
 
     def load(self, state):
         """Fill the boxes from GridModel.panel_state()."""
@@ -728,7 +772,7 @@ class Inspector(QFrame):
         self._pv_sig = None
         if hasattr(self, 'preview_l'):
             self.preview_l.hide()
-        for k in ('nominal', 'units', 'freq', 'level', 'expect', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode', 'low', 'high'):
+        for k in ('nominal', 'units', 'freq', 'level', 'expect', 'sensor', 'fs_scale', 'multi_high', 'multi_n', 'decs', 'res', 'multi_mode', 'low', 'high'):
             self.v[k].set(form[k])
         for k in M.SPEC_ORDER:
             self.types[k].set(k in form['types'])
@@ -797,7 +841,7 @@ class Inspector(QFrame):
             plus, minus = dict(self.sides['plus']), dict(self.sides['minus'])
         return dict(types=types, plus=plus, minus=minus, asym=asym,
                     operand='-' if self.v['operand'].get() == '-' else '+', fs_scale=self.v['fs_scale'].get(), nominal=self.v['nominal'].get(), units=self.v['units'].get(),
-                    freq=self.v['freq'].get(), level=self.v['level'].get(), expect=self.v['expect'].get() or 'on', multi=bool(self.b['multi'].get()),
+                    freq=self.v['freq'].get(), level=self.v['level'].get(), expect=self.v['expect'].get() or 'on', sensor=self.v['sensor'].get(), multi=bool(self.b['multi'].get()),
                     multi_mode=self.v['multi_mode'].get() or 'span', multi_high=self.v['multi_high'].get(), multi_n=self.v['multi_n'].get(), decs=self.v['decs'].get(),
                     res=self.v['res'].get(), auto_res=bool(self.b['auto_res'].get()))
 

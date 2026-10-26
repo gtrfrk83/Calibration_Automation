@@ -361,17 +361,13 @@ class PrintTests(Base):
         self.assertTrue(out.read_bytes().startswith(b'%PDF'))
 
 
-if __name__ == '__main__':
-    unittest.main()
-
-
 class ViewColumnsTests(Base):
     """The on-screen grid has no As Found / As Left / Out of Tol columns (view only); the printed sheet still has them."""
 
-    def test_screen_columns_are_step_function_nominal_low_high(self):
-        self.assertEqual(M.COL_KEYS, ('step', 'function', 'nominal', 'low', 'high'))
-        self.assertEqual(M.EDIT_COLS, ('function', 'nominal'))                # the two limit columns are read-only displays
-        self.assertEqual(len(M.GridGeometry().widths), 5)
+    def test_screen_columns_are_function_nominal_low_high_standard_uncertainty(self):
+        self.assertEqual(M.COL_KEYS, ('function', 'nominal', 'low', 'high', 'standard', 'unc'))         # no STEP NUM on screen
+        self.assertEqual(M.EDIT_COLS, ('function', 'nominal'))                # the limit, standard and uncertainty columns are not typed in
+        self.assertEqual(len(M.GridGeometry().widths), 6)
         self.assertNotIn('tol', M.COL_KEYS)                           # no +/- tolerance column next to the limits
 
     def test_printed_sheet_keeps_the_template_columns(self):
@@ -391,18 +387,18 @@ class ViewColumnsTests(Base):
         if res.ok:
             self.assertTrue(out.exists())
 
-    def test_navigation_and_selection_work_with_five_columns(self):
+    def test_navigation_and_selection_work_with_six_columns(self):
         key = self.dcv_row('5 V')
         g = self.g
-        g.select(key, 'step')
+        g.select(key, 'function')
         g.nav('Right')
-        self.assertEqual(g.sel_col, 'function')
+        self.assertEqual(g.sel_col, 'nominal')
         g.nav('End')
-        self.assertEqual(g.sel_col, 'high')
+        self.assertEqual(g.sel_col, 'unc')
         g.nav('Right')
-        self.assertEqual(g.sel_col, 'high')                          # stops at the last column
+        self.assertEqual(g.sel_col, 'unc')                           # stops at the last column
         g.nav('Home')
-        self.assertEqual(g.sel_col, 'step')
+        self.assertEqual(g.sel_col, 'function')
         g.select(key, 'low')
         g.tab()                                                      # from a read-only limit cell: the next cell you can type in is the first one of the next row
         self.assertEqual(g.sel_col, 'function')
@@ -415,6 +411,12 @@ class ViewColumnsTests(Base):
         self.assertIsNone(geo.col_at(44 + 920 + 1))
         geo.fit(1000)
         self.assertEqual(len(geo.widths), 5)
+        g.select(key, 'standard')                                    # the STANDARD and UNCERTAINTY cells can be selected but not typed in
+        self.assertFalse(g.cell_editable()[0])
+        g.select(key, 'unc')
+        self.assertFalse(g.cell_editable()[0])
+        g.tab()
+        self.assertEqual(g.sel_col, 'function')                      # Tab skips them
 
     def test_row_dicts_still_carry_the_blank_columns(self):
         self.dcv_row('5 V')
@@ -656,6 +658,7 @@ class DeepDiveFixTests(Base):
         g.select(blank, 'nominal')
         f2 = dict(g.panel_state()['form'], nominal='1.0', types=['calc'])
         f2['plus'] = dict(f2['plus'], calc='0.05 % of reading + 2 counts')
+        f2['decs'] = ''                                   # (the sheet's last calculation, 4 decimals, is what a new row starts with: type nothing here)
         res = g.calc_row(None, f2)
         self.assertTrue(res.ok, res.message)
         self.assertIn('keeps its resolution', res.message)
@@ -939,6 +942,8 @@ class ToleranceFromAboveTests(Base):
         self.assertTrue(g.calc_row(key, f).ok)
         blank = next(r['key'] for r in g.rows() if r['kind'] == 'blank')
         g.select(blank, 'nominal')
+        self.assertEqual(g.panel_state()['form']['plus']['iv'], '0.05')          # a new row starts with the sheet's last calculation (sticky default)
+        g.ds.options.pop('last_calc')
         self.assertEqual(g.panel_state()['form']['plus']['iv'], '')
         self.assertTrue(g.use_tolerance_above().ok)
         self.assertEqual(g.panel_state()['form']['plus']['iv'], '0.05')          # survives any redraw
@@ -948,7 +953,7 @@ class ToleranceFromAboveTests(Base):
         self.assertTrue(g.calc_row(form=form).ok)
         self.assertIsNone(g.borrowed_tol)
         g.select(next(r['key'] for r in g.rows() if r['kind'] == 'blank'), 'nominal')
-        self.assertEqual(g.panel_state()['form']['plus']['iv'], '')
+        self.assertEqual(g.panel_state()['form']['plus']['iv'], '0.05')          # the Calc just made is now the sheet's last one
 
     def test_use_tolerance_says_so_when_nothing_is_above(self):
         self.assertTrue(self.g.set_target_function('DC volts').ok)
@@ -978,3 +983,531 @@ class _FakeMatch:
 
 
 from unittest import mock  # noqa: E402,F401
+
+
+# ------------------------------------------------------------------------------------------------------------------------ new in this branch
+import datasheet_builder_match as dm  # noqa: E402
+import datasheet_builder_rules as rules  # noqa: E402
+import uncertainty as unc_mod  # noqa: E402
+from tests.test_dsb_ui_model import REG  # noqa: E402
+
+
+class MatcherBase(Base):
+    def setUp(self):
+        super().setUp()
+        self.matcher = dm.Matcher(REG)
+        self.g = M.GridModel(self.store, matcher_factory=lambda: self.matcher)
+
+    def points(self):
+        return [r for r in self.g.rows() if r['kind'] == 'point']
+
+    def dcv_series(self, low='1 V', high='9 V', n='5', iv='0.05', **extra):
+        key = self.dcv_row(low)
+        f = self.form(key, iv=iv)
+        f.update(multi=True, multi_high=high, multi_n=n, multi_mode='span', **extra)
+        res = self.g.calc_row(key, f)
+        self.assertTrue(res.ok, res.message)
+        return [r['key'] for r in self.points()]
+
+
+class TemplatesModelTests(Base):
+    def test_template_is_one_undo_step_and_never_doubles(self):
+        g = self.g
+        self.assertEqual(g.ds.functions, [])
+        self.assertTrue(g.add_template('Handheld multimeter sections').ok)
+        n = len(g.ds.functions)
+        self.assertEqual(n, len(M.GridModel.HANDHELD_KINDS))
+        self.assertFalse(g.add_template('Handheld multimeter sections').ok)       # all there: refused, nothing doubled
+        self.assertEqual(len(g.ds.functions), n)
+        self.assertFalse(g.add_template('No such template').ok)
+        self.assertTrue(g.undo().ok)
+        self.assertEqual(g.ds.functions, [])                                     # ONE undo step takes the whole template out
+
+    def test_sections_the_sheet_already_has_stay_as_they_are(self):
+        key = self.dcv_row('5 V')
+        before = len(self.g.point_of(key)[0].points)
+        self.assertTrue(self.g.add_template('Handheld multimeter sections').ok)
+        self.assertEqual(sum(f.kind == 'DCV' for f in self.g.ds.functions), 1)
+        self.assertEqual(len(self.g.point_of(key)[0].points), before)
+
+
+class ConductanceTests(Base):
+    def conductance(self, text):
+        self.assertTrue(self.g.set_target_function('Conductance').ok)
+        self.g.select(next(r['key'] for r in self.g.rows() if r['kind'] == 'blank'), 'nominal')
+        res = self.g.commit_cell(text)
+        self.assertTrue(res.ok, res.message)
+        return [r['key'] for r in self.g.rows() if r['kind'] == 'point'][-1]
+
+    def test_units_drop_down_lists_pS_to_S_and_typing_nS_stores_si(self):
+        key = self.conductance('5 nS')
+        self.assertEqual(self.g.panel_state(key)['unit_choices'], ['pS', 'nS', 'µS', 'mS', 'S'])
+        self.assertEqual(M.unit_choices('S'), ['pS', 'nS', 'µS', 'mS', 'S'])
+        _fn, p = self.g.point_of(key)
+        self.assertEqual(p.nominal, Decimal('5e-9'))
+
+    def test_limits_for_nS_and_mS_rows(self):
+        k1 = self.conductance('5 nS')
+        f = self.form(k1, types=['iv', 'floor'], iv='1', floor='0.5 nS')
+        self.assertTrue(self.g.calc_row(k1, f).ok)
+        k2 = self.conductance('2 mS')
+        f = self.form(k2, types=['iv', 'floor'], iv='1', floor='0.5 µS')
+        self.assertTrue(self.g.calc_row(k2, f).ok)
+        by = {r['nominal']: r for r in self.g.rows() if r['kind'] == 'point'}
+        self.assertEqual((by['5 nS']['low'], by['5 nS']['high']), ('4.45 nS', '5.55 nS'))          # 1 % of 5 nS + 0.5 nS
+        self.assertEqual((by['2 mS']['low'], by['2 mS']['high']), ('1.9795 mS', '2.0205 mS'))      # 1 % of 2 mS + 0.5 µS
+        fn, p = self.g.point_of(k1)
+        lim = fn.limit_for(p, self.g.period)
+        self.assertEqual((lim.low, lim.high), (Decimal('4.45e-9'), Decimal('5.55e-9')))            # exact Decimal maths, only the display is scaled
+
+
+class NoStepColumnTests(Base):
+    def test_rows_carry_step_internally_but_the_screen_has_no_such_column(self):
+        self.dcv_row('5 V')
+        self.assertNotIn('step', M.COL_KEYS)
+        self.assertTrue([r for r in self.g.rows() if r['kind'] == 'point'][0]['step'])
+        self.assertEqual(self.g.print_view()['columns'][0], 'STEP NUM')
+
+
+class MultiRowIndependenceTests(MatcherBase):
+    """Owner bug: rows made together by 'Multiple Test Points' all changed when ONE of them was brought back into the calculator to change its resolution
+    (the resolution lived on the shared range).  A row's own resolution is its own (Point.resolution)."""
+
+    def test_changing_the_resolution_of_one_row_leaves_the_others_alone(self):
+        keys = self.dcv_series(decs='3')
+        g = self.g
+        before = {r['key']: (r['nominal'], r['low'], r['high']) for r in self.points()}
+        fn = g.ds.functions[0]
+        self.assertEqual({q.resolution for q in fn.points}, {None})
+        k = keys[2]
+        f = g.panel_state(k)['form']
+        f.update(decs='5', auto_res=True)
+        res = g.calc_row(k, f)
+        self.assertTrue(res.ok, res.message)
+        self.assertIn('of its own', res.message)
+        after = {r['key']: (r['nominal'], r['low'], r['high']) for r in self.points()}
+        for other in keys:
+            if other != k:
+                self.assertEqual(after[other], before[other], other)             # every other row of the run: same value, same limits
+        self.assertNotEqual(after[k], before[k])                               # the changed row has its 5 decimals
+        _fn, p = g.point_of(k)
+        self.assertEqual(p.resolution, Decimal('0.00001'))
+        self.assertEqual([q.resolution for q in fn.points if q.id != p.id], [None] * (len(fn.points) - 1))
+        self.assertTrue(g.undo().ok)
+        self.assertEqual({r['key']: (r['nominal'], r['low'], r['high']) for r in self.points()}, before)           # one undo step
+
+    def test_calc_on_one_row_changes_only_that_row(self):
+        keys = self.dcv_series()
+        g = self.g
+        before = {r['key']: (r['low'], r['high']) for r in self.points()}
+        k = keys[3]
+        f = g.panel_state(k)['form']
+        f['plus'] = dict(f['plus'], iv='0.2')
+        self.assertTrue(g.calc_row(k, f).ok)
+        after = {r['key']: (r['low'], r['high']) for r in self.points()}
+        self.assertEqual([x for x in keys if after[x] != before[x]], [k])
+        specs = [g.point_of(x)[1].spec for x in keys[1:]]
+        self.assertEqual(len({id(sp) for sp in specs}), len(specs))                 # no two rows share one SpecEntry object
+
+    def test_row_resolution_survives_save_and_load_and_old_files_are_unchanged(self):
+        keys = self.dcv_series()
+        g = self.g
+        f = g.panel_state(keys[2])['form']
+        f.update(decs='4', auto_res=True)
+        self.assertTrue(g.calc_row(keys[2], f).ok)
+        pid = g.point_of(keys[2])[1].id
+        data = json.loads(g.ds.to_json())
+        pts = {p['id']: p for fn in data['functions'] for p in fn['points']}
+        self.assertEqual([k for k, p in pts.items() if 'resolution' in p], [pid])    # written only where set: files made before are unchanged
+        again = db.Datasheet.from_json(g.ds.to_json())
+        self.assertEqual(again.functions[0].point(pid).resolution, Decimal('0.0001'))
+
+    def test_giving_a_row_its_ranges_resolution_again_drops_its_own(self):
+        keys = self.dcv_series(decs='3')
+        g = self.g
+        f = g.panel_state(keys[2])['form']
+        f.update(decs='5', auto_res=True)
+        self.assertTrue(g.calc_row(keys[2], f).ok)
+        f = g.panel_state(keys[2])['form']
+        f.update(decs='3', auto_res=True)
+        self.assertTrue(g.calc_row(keys[2], f).ok)
+        self.assertIsNone(g.point_of(keys[2])[1].resolution)
+
+    def test_the_ranges_page_still_changes_the_whole_range(self):
+        keys = self.dcv_series(decs='3')
+        g = self.g
+        f = g.panel_state(keys[2])['form']
+        f.update(decs='5', auto_res=True)
+        self.assertTrue(g.calc_row(keys[2], f).ok)
+        fn = g.ds.functions[0]
+        rid = g.point_of(keys[3])[1].range_id
+        self.assertTrue(g.edit_range(fn.id, rid, resolution='0.01').ok)               # an explicit range-wide action
+        self.assertEqual(fn.resolution_of(g.point_of(keys[3])[1]), Decimal('0.01'))
+        self.assertEqual(fn.resolution_of(g.point_of(keys[2])[1]), Decimal('0.00001'))   # the row that has its own keeps it
+
+
+class CalcMemoryTests(MatcherBase):
+    """Owner request: the last tolerance calculation is kept: the boxes keep what was typed, each row remembers its own, a new row starts with the last one."""
+
+    def test_boxes_keep_what_was_typed_after_calc(self):
+        key = self.dcv_row('5 V')
+        f = self.form(key, types=['iv', 'floor'], iv='0.050', floor='0.0020 V')
+        f.update(decs='4', auto_res=True)
+        self.assertTrue(self.g.calc_row(key, f).ok)
+        got = self.g.panel_state(key)['form']
+        self.assertEqual(got['plus']['iv'], '0.050')                              # not rewritten to 0.05
+        self.assertEqual(got['plus']['floor'], '0.0020 V')                        # not rewritten to 2 mV
+        self.assertEqual(got['types'], ['iv', 'floor'])
+        self.assertEqual(got['decs'], '4')
+
+    def test_multiple_rows_settings_are_kept_and_each_row_has_its_own_copy(self):
+        keys = self.dcv_series(low='1 V', high='9 V', n='5', iv='0.050')
+        g = self.g
+        got = g.panel_state(keys[2])['form']
+        self.assertEqual((got['multi_mode'], got['multi_n'], got['multi_high']), ('span', '5', '9 V'))
+        self.assertFalse(got['multi'])                                            # generating again is an action, not a setting
+        calcs = [g.point_of(k)[1].calc for k in keys if g.point_of(k)[1].calc]
+        self.assertGreaterEqual(len(calcs), 4)
+        self.assertEqual(len({id(c) for c in calcs}), len(calcs))                 # separate dicts, nothing shared
+        f = g.panel_state(keys[3])['form']
+        f['plus'] = dict(f['plus'], iv='0.2')
+        self.assertTrue(g.calc_row(keys[3], f).ok)
+        self.assertEqual(g.panel_state(keys[3])['form']['plus']['iv'], '0.2')
+        self.assertEqual(g.panel_state(keys[2])['form']['plus']['iv'], '0.050')    # the neighbour still shows its own
+
+    def test_new_row_starts_with_the_last_calculation(self):
+        key = self.dcv_row('5 V')
+        self.assertTrue(self.g.calc_row(key, self.form(key, iv='0.07')).ok)
+        self.g.select(self.next_blank(), 'nominal')
+        self.assertEqual(self.g.panel_state()['form']['plus']['iv'], '0.07')
+        self.assertTrue(self.g.commit_cell('6 V').ok)                              # typed straight in the sheet
+        self.assertTrue(self.g.calc_row(key, self.form(key, iv='0.09')).ok)       # a later Calc becomes the new default
+        self.g.select(self.next_blank(), 'nominal')
+        self.assertEqual(self.g.panel_state()['form']['plus']['iv'], '0.09')
+
+    def next_blank(self):
+        return next(r['key'] for r in self.g.rows() if r['kind'] == 'blank')
+
+    def test_calculation_is_part_of_the_same_undo_step_and_saved_with_the_sheet(self):
+        key = self.dcv_row('5 V')
+        self.assertTrue(self.g.calc_row(key, self.form(key, iv='0.07')).ok)
+        again = db.Datasheet.from_json(self.g.ds.to_json())
+        _fn, p = self.g.point_of(key)
+        self.assertEqual(again.functions[0].point(p.id).calc['plus']['iv'], '0.07')
+        self.assertEqual(again.options['last_calc']['form']['plus']['iv'], '0.07')
+        self.assertTrue(self.g.undo().ok)
+        self.assertNotIn('last_calc', self.g.ds.options)
+        self.assertIsNone(self.g.point_of(key)[1].calc)
+
+    def test_limits_are_worked_out_exactly_as_before(self):
+        key = self.dcv_row('5 V')
+        f = self.form(key, types=['iv', 'floor'], iv='0.050', floor='0.0020 V')
+        self.assertTrue(self.g.calc_row(key, f).ok)
+        row = self.points_of()[0]
+        self.assertEqual((row['low'], row['high']), ('4.9955 V', '5.0045 V'))      # 0.05 % of 5 V + 2 mV, exact Decimal maths
+
+    def points_of(self):
+        return [r for r in self.g.rows() if r['kind'] == 'point']
+
+    def test_a_stale_calculation_is_not_shown_once_the_tolerance_changed_elsewhere(self):
+        key = self.dcv_row('5 V')
+        self.assertTrue(self.g.calc_row(key, self.form(key, iv='0.07')).ok)
+        _fn, p = self.g.point_of(key)
+        p.spec = M.copy_spec(p.spec)
+        p.spec.exprs[self.g.period] = db.parse_expr('0.5 % of reading', 'V')       # edited on another page
+        self.g._rev += 1
+        self.g._rows_cache = None
+        self.assertEqual(self.g.panel_state(key)['form']['plus']['iv'], '0.5')     # shows the real tolerance, not the old text
+
+
+class StandardColumnsTests(MatcherBase):
+    def setUp(self):
+        super().setUp()
+        self.keys = self.dcv_series(iv='0.05')            # keys[0] is the 1 V row that existed first and has no tolerance; the other four have one
+        self.g.add_template('Handheld multimeter sections')
+
+    def cells(self, key):
+        r = self.g.row(key)
+        return r['standard'], r['unc']
+
+    def test_blank_until_worked_out_then_filled_and_cached(self):
+        g = self.g
+        self.assertFalse(g.standard_columns_ready())
+        self.assertEqual(self.cells(self.keys[2]), ('', ''))
+        self.assertTrue(g.refresh_standard_columns())
+        self.assertFalse(g.refresh_standard_columns())                            # cached for this version of the sheet
+        std, unc = self.cells(self.keys[2])
+        fn, p = g.point_of(self.keys[2])
+        a = g._grid_result().assignments[p.id]
+        self.assertEqual(unc, unc_mod.format_value(a.uncertainty, fn.unit))        # formatted like the report
+        self.assertEqual(std, a.standard)
+        self.assertIn('k = 2', g.row(self.keys[2])['unc_tip'])
+        g.select(self.keys[3], 'nominal')
+        self.assertTrue(g.standard_columns_ready())                                # moving about keeps the cache
+        g.clear_row(self.keys[1])
+        self.assertFalse(g.standard_columns_ready())                                # an edit makes them blank again until re-worked-out
+
+    def test_headings_and_kinds_without_uncertainty_show_nothing(self):
+        g = self.g
+        g.select(next(r['key'] for r in g.rows() if r['kind'] == 'blank' and r['fid'] and g.ds.function(r['fid']).kind == 'DIODE'), 'nominal')
+        self.assertTrue(g.commit_cell('0.5 V').ok)
+        g.refresh_standard_columns()
+        seen = 0
+        for r in g.rows():
+            if r['kind'] == 'header':
+                self.assertEqual((r['standard'], r['unc']), ('', ''))
+            if r['kind'] == 'point' and g.ds.function(r['fid']).kind == 'DIODE':
+                seen += 1
+                self.assertEqual((r['standard'], r['unc'], r['unc_tip']), ('', '', ''))
+        self.assertEqual(seen, 1)
+
+    def test_row_without_limits_is_blank_with_the_reason(self):
+        g = self.g
+        g.refresh_standard_columns()
+        row = g.row(self.keys[0])
+        self.assertEqual(row['unc'], '')
+        self.assertIn('fix this row first', row['unc_tip'])
+
+    def test_choose_a_standard_for_one_point_in_one_undo_step(self):
+        g = self.g
+        g.refresh_standard_columns()
+        k = self.keys[2]
+        choices = g.standard_choices(k)
+        self.assertEqual(choices[0]['label'], 'Automatic (best fit)')
+        covering = [c for c in choices if c['scope'] == 'point' and c['value'] not in ('', 'MANUAL')]
+        self.assertGreaterEqual(len(covering), 2)
+        auto = self.cells(k)[0]
+        other = next(c for c in covering if c['value'] != auto)
+        _fn, p = g.point_of(k)
+        res = g.choose_standard(k, other['value'])
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(g.ds.assignments[p.id], other['value'])                     # exactly what the Automation page writes
+        g.refresh_standard_columns()
+        std, unc = self.cells(k)
+        self.assertEqual(std, other['value'] + ' (chosen)')
+        self.assertTrue(unc)
+        self.assertTrue(g.row(k)['std_hand'])
+        self.assertTrue(g.undo().ok)                                                 # ONE step
+        self.assertNotIn(p.id, g.ds.assignments)
+        g.refresh_standard_columns()
+        self.assertEqual(self.cells(k)[0], auto)
+        self.assertTrue(g.choose_standard(k, other['value']).ok)
+        self.assertTrue(g.choose_standard(k, '').ok)                                 # Automatic again
+        self.assertNotIn(p.id, g.ds.assignments)
+
+    def test_same_as_the_automation_page(self):
+        g = self.g
+        g.refresh_standard_columns()
+        k = self.keys[2]
+        _fn, p = g.point_of(k)
+        want = next(c['value'] for c in g.standard_choices(k) if c['scope'] == 'point' and c['value'] not in ('', 'MANUAL') and c['value'] != self.cells(k)[0])
+        other = M.GridModel(self.store, db.Datasheet.from_json(g.ds.to_json()), matcher_factory=lambda: self.matcher)
+        self.assertTrue(other.set_assignment(p.id, want).ok)
+        self.assertTrue(g.choose_standard(k, want).ok)
+        self.assertEqual(other.ds.assignments, g.ds.assignments)
+
+    def test_a_standard_that_does_not_cover_the_point_is_refused(self):
+        g = self.g
+        g.refresh_standard_columns()
+        res = g.choose_standard(self.keys[2], 'NO-SUCH-STANDARD')
+        self.assertFalse(res.ok)
+        self.assertEqual(g.ds.assignments, {})
+
+    def test_set_for_the_whole_section_from_the_heading(self):
+        g = self.g
+        g.refresh_standard_columns()
+        head = next(r['key'] for r in g.rows() if r['kind'] == 'header' and r['function'] == 'DC volts')
+        choices = g.standard_choices(head)
+        self.assertTrue(all(c['scope'] == 'section' for c in choices))
+        self.assertTrue(any(c['label'].startswith('Set for the whole section:') for c in choices))
+        std = next(c['value'] for c in choices if c['value'] not in ('', 'MANUAL'))
+        n_before = len(g._undo)
+        res = g.choose_standard(head, std)
+        self.assertTrue(res.ok, res.message)
+        self.assertEqual(len(g._undo), n_before + 1)                                  # one undo step for the whole section
+        pids = {p.id for p in g.ds.function(g.row(head)['fid']).points if p.enabled}
+        self.assertEqual({k for k, v in g.ds.assignments.items() if v == std}, pids)
+        g.refresh_standard_columns()
+        for r in g.rows():
+            if r['kind'] == 'point' and r['unc']:
+                self.assertEqual(r['standard'], std + ' (chosen)')
+        self.assertTrue(g.undo().ok)
+        self.assertEqual(g.ds.assignments, {})
+        self.assertTrue(g.choose_standard(self.keys[2], std, scope='section').ok)       # also offered from a point row
+        self.assertEqual(len(g.ds.assignments), len(pids))
+
+    def test_blank_by_waiver_says_so_in_the_tooltip(self):
+        g = self.g
+        g.refresh_standard_columns()
+        k = self.keys[2]
+        _fn, p = g.point_of(k)
+        self.assertTrue(g.choose_standard(k, 'MANUAL').ok)
+        g.refresh_standard_columns()
+        self.assertEqual(g.row(k)['unc'], '')                                         # never zero
+        self.assertEqual(g.row(k)['standard'], 'MANUAL')
+        self.assertIn('none: blank', g.row(k)['unc_tip'])
+        self.assertNotIn('waived', g.row(k)['unc_tip'])
+        self.assertTrue(g._do('waive', lambda: rules.set_waiver(g.ds, [p.id], 'other', 'own standard, certified')).ok)
+        g.refresh_standard_columns()
+        self.assertEqual(g.row(k)['unc'], '')
+        self.assertIn('waived', g.row(k)['unc_tip'])
+        self.assertIn('own standard, certified', g.row(k)['unc_tip'])
+
+    def test_the_printed_sheet_does_not_change(self):
+        g = self.g
+        before = json.dumps(g.print_view(), sort_keys=True, default=str)
+        g.refresh_standard_columns()
+        self.assertEqual(json.dumps(g.print_view(), sort_keys=True, default=str), before)
+        std = next(c['value'] for c in g.standard_choices(self.keys[2]) if c['scope'] == 'point' and c['value'] not in ('', 'MANUAL'))
+        g.choose_standard(self.keys[2], std)
+        g.refresh_standard_columns()
+        self.assertEqual(json.dumps(g.print_view(), sort_keys=True, default=str), before)
+        self.assertNotIn('STANDARD', g.print_view()['columns'])
+        self.assertNotIn('UNCERTAINTY', g.print_view()['columns'])
+
+    def test_a_matcher_that_fails_leaves_the_cells_blank_and_the_sheet_working(self):
+        class Broken:
+            def match(self, *a, **k):
+                raise RuntimeError('no standards database')
+        g = M.GridModel(self.store, db.Datasheet.from_json(self.g.ds.to_json()), matcher_factory=Broken)
+        self.assertTrue(g.refresh_standard_columns())
+        r = [r for r in g.rows() if r['kind'] == 'point'][2]
+        self.assertEqual((r['standard'], r['unc']), ('', ''))
+        self.assertIn('could not be loaded', r['unc_tip'])
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+class TemperatureSensorTests(MatcherBase):
+    """Temperature is sourced as a thermocouple type or an RTD: chosen per point, required, and it decides the standard's rows and the scope CMC."""
+
+    def temp_rows(self, n=1, nominal='100 degC'):
+        g = self.g
+        self.assertTrue(g.set_target_function('Temperature (simulated)').ok)
+        for i in range(n):
+            g.select(next(r['key'] for r in g.rows() if r['kind'] == 'blank'), 'nominal')
+            self.assertTrue(g.commit_cell(nominal if i == 0 else f'{100 + 10 * i} degC').ok)
+        keys = [r['key'] for r in self.points()]
+        for k in keys:
+            f = g.panel_state(k)['form']
+            f['types'] = ['floor']
+            f['plus']['floor'] = '1 degC'
+            self.assertTrue(g.calc_row(k, f).ok)
+        return keys
+
+    def cell(self, k):
+        self.g.refresh_standard_columns()
+        r = self.g.row(k)
+        return r['standard'], r['unc'], r['function']
+
+    def test_a_new_temperature_section_assumes_no_sensor(self):
+        k = self.temp_rows()[0]
+        fn, p = self.g.point_of(k)
+        self.assertNotIn('tc_type', fn.settings)
+        self.assertNotIn('sensor', p.settings)
+        self.assertEqual(self.g.panel_state(k)['form']['sensor'], '')
+        std, unc, func = self.cell(k)
+        self.assertEqual((std, unc), ('', ''))                                    # blank with the reason, never zero and never Type K
+        self.assertIn('sensor not chosen', func)
+        self.assertIn('how the temperature is sourced', self.g.row(k)['unc_tip'])
+        self.assertTrue(self.g.panel_state(k)['fields']['sensor'])
+
+    def test_choices_include_thermocouples_and_rtds(self):
+        keys = [k for k, _l in self.g.panel_state(self.temp_rows()[0])['sensors']]
+        for want in ('K', 'J', 'T', 'Pt385-100', 'Pt385-1000', 'Cu427-10', 'PtNi385-120'):
+            self.assertIn(want, keys)
+
+    def test_the_choice_moves_the_standard_and_the_uncertainty(self):
+        k = self.temp_rows()[0]
+        seen = {}
+        for s in ('K', 'T', 'Pt385-100'):
+            self.assertTrue(self.g.set_sensor(k, s).ok)
+            seen[s] = self.cell(k)
+        self.assertEqual(seen['K'][0], '5560A')
+        self.assertEqual(seen['T'][0], '5522A')
+        self.assertEqual(seen['Pt385-100'][0], '5522A')
+        self.assertIn('Type K', seen['K'][2])
+        self.assertIn('RTD Pt 385, 100 ohm', seen['Pt385-100'][2])
+        self.assertEqual(len({v[1] for v in seen.values()}), 3)                  # three different numbers: not Type K's for everything
+        self.assertTrue(all(v[1] for v in seen.values()))
+
+    def test_non_k_sensors_are_set_by_hand_and_an_uncovered_type_is_blank(self):
+        k = self.temp_rows()[0]
+        _fn, p = self.g.point_of(k)
+        self.g.set_sensor(k, 'Pt385-100')
+        self.g.refresh_standard_columns()
+        a = self.g._grid_result().assignments[p.id]
+        self.assertEqual((a.status, a.cap_kind, a.automation), ('assigned', 'TEMP_OTHER', 'manual'))
+        self.assertIn('by hand', self.g.row(k)['standard_tip'])
+        self.g.set_sensor(k, 'D')
+        std, unc, _f = self.cell(k)
+        self.assertEqual(unc, '')
+        self.assertIn('none covers', std)
+
+    def test_one_undo_step_for_a_point_and_for_a_section(self):
+        keys = self.temp_rows(3)
+        def sensors():                                                              # undo puts back a copy of the sheet: look the section up again
+            return [q.settings.get('sensor') for q in self.g.point_of(keys[0])[0].points]
+        self.assertTrue(self.g.set_sensor(keys[1], 'J').ok)
+        self.assertEqual(sensors(), [None, 'J', None])
+        self.assertTrue(self.g.undo().ok)
+        self.assertEqual(sensors(), [None, None, None])
+        self.assertTrue(self.g.set_sensor(keys[0], 'Cu427-10', 'section').ok)
+        self.assertEqual(set(sensors()), {'Cu427-10'})
+        self.assertTrue(self.g.undo().ok)
+        self.assertEqual(sensors(), [None, None, None])
+        self.assertTrue(self.g.redo().ok)
+        self.assertEqual(set(sensors()), {'Cu427-10'})
+
+    def test_multiple_rows_each_get_their_own_copy_of_the_choice(self):
+        k = self.temp_rows()[0]
+        f = self.g.panel_state(k)['form']
+        f.update(sensor='T', multi=True, multi_high='140 degC', multi_n='3', multi_mode='span')
+        f['types'] = ['floor']
+        f['plus']['floor'] = '1 degC'
+        self.assertTrue(self.g.calc_row(k, f).ok)
+        fn, _p = self.g.point_of(k)
+        self.assertGreaterEqual(len(fn.points), 3)
+        self.assertEqual([q.settings.get('sensor') for q in fn.points], ['T'] * len(fn.points))
+        self.assertTrue(self.g.set_sensor(self.points()[1]['key'], 'S').ok)       # changing one leaves the rest
+        fn, _p = self.g.point_of(k)
+        self.assertEqual([q.settings.get('sensor') for q in fn.points].count('T'), len(fn.points) - 1)
+
+    def test_old_sheets_with_tc_type_keep_working(self):
+        k = self.temp_rows(2)[0]
+        fn, _p = self.g.point_of(k)
+        fn.settings['tc_type'] = 'J'                                               # an old sheet: the letter on the section
+        self.assertEqual(self.g.panel_state(k)['form']['sensor'], 'J')
+        _std, unc, func = self.cell(k)
+        self.assertIn('Type J', func)
+        self.assertTrue(unc)
+        chk = self.g.sheet_check(dry_run=False)
+        self.assertEqual([f for f in chk.findings if f.code == 'sensor_not_chosen'], [])
+
+    def test_the_sheet_check_blocks_until_every_point_has_a_sensor_and_jumps_to_the_row(self):
+        keys = self.temp_rows(2)
+        self.g.set_sensor(keys[0], 'K')
+        chk = self.g.sheet_check(dry_run=False)
+        bad = [f for f in chk.findings if f.code == 'sensor_not_chosen']
+        self.assertEqual(len(bad), 1)
+        self.assertEqual(bad[0].level, rules.ERROR)
+        self.assertEqual(bad[0].key, keys[1])                                      # jumps to the first row without a sensor
+        self.g.set_sensor(keys[1], 'J')
+        chk = self.g.sheet_check(dry_run=False)
+        self.assertEqual([f for f in chk.findings if f.code == 'sensor_not_chosen'], [])
+
+    def test_the_choice_is_saved_and_loaded(self):
+        k = self.temp_rows()[0]
+        self.g.set_sensor(k, 'PtNi385-120')
+        fn, p = self.g.point_of(k)
+        back = db.Datasheet.from_dict(self.g.ds.to_dict())
+        self.assertEqual(back.function(fn.id).point(p.id).settings['sensor'], 'PtNi385-120')
+
+    def test_scope_cmc_follows_the_sensor(self):
+        if not hasattr(unc_mod.Scope, 'temperature'):
+            self.skipTest('this scope has no Scope.temperature yet (branch scope-rtd-cmc)')
+        sc = unc_mod.Scope()
+        self.assertEqual(dm._scope_temperature(sc, 100, 'K'), sc.temperature(100, tc='K'))
+        self.assertEqual(dm._scope_temperature(sc, 100, 'Pt385-100'), sc.temperature(100, tc='Pt385-100'))

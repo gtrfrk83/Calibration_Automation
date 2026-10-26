@@ -131,6 +131,9 @@ class QtDsbCase(unittest.TestCase):
         box = win.panel_box
         self.assertEqual(box.copy_b.text(), 'Use tolerance of row above')
         self.assertTrue(box.copy_b.isEnabled())
+        self.assertEqual(box.v['iv'].get(), '0.05')                 # a new row starts with the sheet's last calculation (sticky default)
+        win.model.ds.options.pop('last_calc')                       # without it the button is how the row above is brought in
+        win.sync()
         self.assertEqual(box.v['iv'].get(), '')
         res = win.copy_down()
         self.assertTrue(res.ok, res.message)
@@ -153,7 +156,7 @@ class QtDsbCase(unittest.TestCase):
         blank2 = next(r['key'] for r in win.model.rows() if r['kind'] == 'blank')
         win.model.select(blank2, 'nominal')
         win.sync()
-        self.assertEqual(box.v['iv'].get(), '')
+        self.assertEqual(box.v['iv'].get(), '0.05')                 # the Calc just made is the sheet's last one
 
     def test_asymmetrical_tolerance_is_two_floor_boxes_in_view(self):
         win, key = self.build()
@@ -175,7 +178,7 @@ class QtDsbCase(unittest.TestCase):
         self.assertTrue(res.ok, res.message)
         win.model.select(key, 'low')
         win.sync()
-        self.assertEqual((box.v['floor_plus'].get(), box.v['floor_minus'].get()), ('2 V', '1 V'))
+        self.assertEqual((box.v['floor_plus'].get(), box.v['floor_minus'].get()), ('2', '1'))          # the boxes keep what was typed after Calc (the kept calculation), not the value re-written with its unit
         self.assertTrue(box.b['asym'].get())
         low, high = win.model.panel_state(key)['form']['low'], win.model.panel_state(key)['form']['high']
         self.assertEqual((low.replace(' V', ''), high.replace(' V', '')), ('4', '7'))
@@ -237,9 +240,9 @@ class EditorTests(QtDsbCase):
         self.key(sheet, Qt.Key.Key_Backtab, Qt.KeyboardModifier.ShiftModifier)
         self.assertEqual(win.model.sel_col, 'nominal')                     # Shift+Tab goes back to the previous cell you can type in
         self.key(sheet, Qt.Key.Key_End)
-        self.assertEqual(win.model.sel_col, 'high')
+        self.assertEqual(win.model.sel_col, 'unc')
         self.key(sheet, Qt.Key.Key_Home)
-        self.assertEqual(win.model.sel_col, 'step')
+        self.assertEqual(win.model.sel_col, 'function')
         win.model.select(key, 'nominal')
         win.sync()
         self.key(sheet, Qt.Key.Key_F2)                                     # starts editing: focus goes to the Edit Cell bar with the whole text selected
@@ -252,7 +255,7 @@ class EditorTests(QtDsbCase):
         self.assertEqual(win.bar.text(), '7')
         self.assertEqual(win.bar.cursorPosition(), 1)
         win.cancel_bar()
-        win.model.select(key, 'step')
+        win.model.select(key, 'low')
         win.sync()
         QTest.keyClicks(sheet, 'x')                                        # a read-only cell: a reason, no edit
         self.assertTrue(win.issue.get())
@@ -324,22 +327,22 @@ class EditorTests(QtDsbCase):
         self.app.processEvents()
         sheet = win.sheet
         ri = win.model.row_index(key)
-        rect = sheet.cell_rect(ri, 1)
+        rect = sheet.cell_rect(ri, 0)
         QTest.mouseClick(sheet.viewport(), Qt.MouseButton.LeftButton, pos=rect.center())
         self.assertEqual((win.model.sel_key, win.model.sel_col), (key, 'function'))
-        rect = sheet.cell_rect(ri, 2)
+        rect = sheet.cell_rect(ri, 1)
         QTest.mouseClick(sheet.viewport(), Qt.MouseButton.LeftButton, pos=rect.center())
         self.assertEqual(win.model.sel_col, 'nominal')
         QTest.mouseDClick(sheet.viewport(), Qt.MouseButton.LeftButton, pos=rect.center())
         self.assertTrue(win.bar.hasFocus())
-        rect = sheet.cell_rect(ri, 3)
+        rect = sheet.cell_rect(ri, 2)
         QTest.mouseClick(sheet.viewport(), Qt.MouseButton.LeftButton, pos=rect.center())      # a read-only limit cell is selectable
         self.assertEqual(win.model.sel_col, 'low')
         head = next(r['key'] for r in win.model.rows() if r['kind'] == 'header')
-        rect = sheet.cell_rect(win.model.row_index(head), 2)
-        QTest.mouseClick(sheet.viewport(), Qt.MouseButton.LeftButton, pos=rect.center())      # a section heading spans the columns
+        rect = sheet.cell_rect(win.model.row_index(head), 1)
+        QTest.mouseClick(sheet.viewport(), Qt.MouseButton.LeftButton, pos=rect.center())      # a section heading spans FUNCTION..HIGH (its STANDARD / UNCERTAINTY cells stay separate)
         self.assertEqual(win.model.sel_key, head)
-        self.assertEqual(sheet.columnSpan(win.model.row_index(head), 1), 5)
+        self.assertEqual(sheet.columnSpan(win.model.row_index(head), 1), 4)
 
     def test_clicking_away_commits_a_typed_change(self):
         win, key = self.build()
@@ -525,8 +528,8 @@ class InspectorTests(QtDsbCase):
         self.assertTrue(box.clear_typed_b.isHidden())
         res = win.calc()                                              # Calc works the limits out from the tolerance boxes, as always
         self.assertTrue(res.ok, res.message)
-        self.assertEqual(len(win.sheet.source_model.columns), 6)           # the number column and five cells: both limit columns are drawn
-        self.assertEqual([c['key'] for c in M.VIEW_COLUMNS][-2:], ['low', 'high'])
+        self.assertEqual(len(win.sheet.source_model.columns), 7)           # the number column and six cells: both limit columns, STANDARD and UNCERTAINTY are drawn
+        self.assertEqual([c['key'] for c in M.VIEW_COLUMNS][-4:], ['low', 'high', 'standard', 'unc'])
 
     def test_typing_in_a_limit_cell_shows_the_hint_and_does_not_edit(self):
         win, key = self.build()
@@ -646,7 +649,7 @@ class InspectorTests(QtDsbCase):
         win.bar.setText('abc')
         win.commit_bar('down')
         self.assertTrue(win.status.get().startswith('Cannot do that'))
-        win.model.select(key, 'step')
+        win.model.select(key, 'low')
         win.sync()                                                    # moving the selection clears the old message
         self.assertFalse(win.status.get().startswith('Cannot do that'))
         QTest.keyClicks(win.sheet, 'x')
@@ -1289,6 +1292,260 @@ class SheetQualityTests(QtDsbCase):
         px = {img.pixel(x, y) for x in range(0, img.width(), 40) for y in range(0, img.height(), 40)}
         self.assertGreater(len(px), 5)
         self.assertLess(img.pixelColor(img.width() - 3, img.height() - 3).lightness(), 100)       # dark window
+
+
+class StandardColumnAndCalcTests(QtDsbCase):
+    """The STANDARD and UNCERTAINTY columns, multiple-rows independence and the kept calculation, through the real window."""
+
+    def series(self, decs='3'):
+        win = self.new_window()
+        win.auto_standards = False                                         # the cells are worked out when the test asks for them
+        win.function_chosen(self.dcv_label(win))
+        self.assertTrue(self.type_cell(win, '1 V').ok)
+        key = next(r['key'] for r in win.model.rows() if r['kind'] == 'point')
+        win.model.select(key, 'nominal')
+        win.sync()
+        box = win.panel_box
+        box.types['iv'].set(True), box.v['iv'].set('0.050')
+        box.b['multi'].set(True), box.v['multi_high'].set('9 V'), box.v['multi_n'].set('5'), box.v['decs'].set(decs)
+        res = win.calc()
+        self.assertTrue(res.ok, res.message)
+        return win, [r['key'] for r in win.model.rows() if r['kind'] == 'point']
+
+    def pump(self, win):
+        win.update_standard_columns()
+        self.app.processEvents()
+
+    # ---- columns
+    def test_columns_are_there_fit_and_headings_show_nothing(self):
+        win, keys = self.series()
+        titles = [c.title for c in win.sheet.source_model.columns]
+        self.assertEqual(titles, ['#', 'FUNCTION TESTED', 'NOMINAL VALUE', 'LOW LIMIT', 'HIGH LIMIT', 'STANDARD', 'UNCERTAINTY'])
+        self.pump(win)
+        sheet = win.sheet
+        total = sum(sheet.columnWidth(i) for i in range(sheet.proxy.columnCount()))
+        self.assertLessEqual(total, sheet.viewport().width() + 3)                 # nothing hangs out of the window at this width
+        head = next(r for r in win.model.rows() if r['kind'] == 'header')
+        self.assertEqual((head['standard'], head['unc']), ('', ''))
+        row = win.model.row(keys[2])
+        self.assertTrue(row['standard'] and row['unc'])
+        ix = sheet.proxy.index(win.model.row_index(keys[2]), 6)
+        self.assertEqual(sheet.proxy.data(ix, Qt.ItemDataRole.ToolTipRole), row['unc_tip'])
+
+    def test_narrow_window_still_works(self):
+        win, keys = self.series()
+        win.resize(980, 700)
+        self.app.processEvents()
+        self.pump(win)
+        self.assertTrue(win.model.row(keys[2])['unc'])
+        self.assertGreater(win.sheet.columnWidth(1), 100)
+
+    def test_cells_are_blank_until_the_edits_settle_then_filled_by_the_timer(self):
+        win, keys = self.series()
+        win.auto_standards = True
+        self.assertEqual(win.model.row(keys[2])['unc'], '')
+        win.changed()                                                        # any refresh restarts the wait
+        self.assertTrue(win._std_timer.isActive())
+        win._std_timer.stop()
+        win._std_timer.timeout.emit()
+        self.assertTrue(win.model.row(keys[2])['unc'])
+
+    # ---- the drop-down
+    def test_click_enter_and_f2_on_the_standard_cell_open_the_drop_down(self):
+        win, keys = self.series()
+        self.pump(win)
+        opened = []
+        with mock.patch.object(win, '_popup', lambda menu, pos: opened.append([x.text() for x in menu.actions()])):
+            ri = win.model.row_index(keys[2])
+            rect = win.sheet.cell_rect(ri, 4)
+            QTest.mouseClick(win.sheet.viewport(), Qt.MouseButton.LeftButton, pos=rect.center())
+            self.assertEqual(win.model.sel_col, 'standard')
+            self.assertEqual(len(opened), 1)
+            self.key(win.sheet, Qt.Key.Key_Return)
+            self.key(win.sheet, Qt.Key.Key_F2)
+            self.assertEqual(len(opened), 3)
+            win.model.select(keys[2], 'nominal')
+            win.sync()
+            self.key(win.sheet, Qt.Key.Key_Return)                           # on any other cell Enter still edits
+            self.assertEqual(len(opened), 3)
+        labels = opened[0]
+        self.assertEqual(labels[0], 'Automatic (best fit)')
+        self.assertTrue(any('TUR' in x for x in labels))
+        self.assertIn('Set for the whole section', labels)
+
+    def test_choosing_a_standard_sets_the_assignment_in_one_undo_step_and_updates_the_uncertainty(self):
+        win, keys = self.series()
+        self.pump(win)
+        m = win.model
+        win.model.select(keys[2], 'standard')
+        menu = win.standard_menu()
+        auto_unc = m.row(keys[2])['unc']
+        auto_std = m.row(keys[2])['standard']
+        act = next(a for a in menu.actions() if a.text().split()[0] in ('5522A', '5520A', '5560A') and a.text().split()[0] != auto_std)
+        steps = len(m._undo)
+        act.trigger()
+        self.assertEqual(len(m._undo), steps + 1)
+        pid = m.point_of(keys[2])[1].id
+        self.assertEqual(m.ds.assignments[pid], act.text().split()[0])
+        row = m.row(keys[2])
+        self.assertEqual(row['standard'], act.text().split()[0] + ' (chosen)')          # marked as chosen by hand
+        self.assertTrue(row['unc'])
+        win.undo()
+        self.pump(win)
+        self.assertNotIn(pid, m.ds.assignments)
+        self.assertEqual((m.row(keys[2])['standard'], m.row(keys[2])['unc']), (auto_std, auto_unc))
+
+    def test_whole_section_from_the_heading_cell(self):
+        win, keys = self.series()
+        self.pump(win)
+        m = win.model
+        head = next(r['key'] for r in m.rows() if r['kind'] == 'header')
+        m.select(head, 'standard')
+        win.sync()
+        menu = win.standard_menu()
+        texts = [a.text() for a in menu.actions()]
+        self.assertTrue(any(t.startswith('Set for the whole section:') for t in texts))
+        act = next(a for a in menu.actions() if a.text().startswith('Set for the whole section: 5'))
+        steps = len(m._undo)
+        act.trigger()
+        self.assertEqual(len(m._undo), steps + 1)
+        std = act.text().split(': ')[1].split()[0]
+        self.assertEqual({v for v in m.ds.assignments.values()}, {std})
+        self.assertEqual(len(m.ds.assignments), len([k for k in keys if m.point_of(k)[1].enabled]))
+
+    def test_the_automation_page_still_works_with_the_grid_choices(self):
+        win, keys = self.series()
+        self.pump(win)
+        m = win.model
+        pid = m.point_of(keys[2])[1].id
+        win.model.select(keys[2], 'standard')
+        std = next(a.text().split()[0] for a in win.standard_menu().actions() if a.text().split()[0] in ('5522A', '5520A', '5560A') and a.text().split()[0] != m.row(keys[2])['standard'])
+        self.assertTrue(win.standard_chosen(keys[2], std, 'point').ok)
+        dlg = win.open_standards()
+        self.assertIsNotNone(dlg.page)                                    # the page opens on the same sheet (it needs the header filled in to run: test_standards_page)
+        self.assertEqual(m.ds.assignments[pid], std)                      # the page reads the very same ds.assignments entry the grid wrote
+        dlg.reject()
+
+    def test_the_printed_preview_has_no_standard_or_uncertainty_columns(self):
+        win, keys = self.series()
+        self.pump(win)
+        cols = win.model.print_view()['columns']
+        self.assertNotIn('STANDARD', cols)
+        self.assertNotIn('UNCERTAINTY', cols)
+
+    # ---- temperature: Sourced as
+    def temp_window(self, n=2):
+        win = self.new_window()
+        win.auto_standards = False
+        win.function_chosen(next(c['label'] for c in win.model.function_choices() if c['kind'] == 'TEMP' and not c['fid']))
+        for i in range(n):
+            self.assertTrue(self.type_cell(win, f'{100 + 10 * i} degC').ok)
+        keys = [r['key'] for r in win.model.rows() if r['kind'] == 'point']
+        for k in keys:
+            f = win.model.panel_state(k)['form']
+            f['types'], f['plus']['floor'] = ['floor'], '1 degC'
+            self.assertTrue(win.model.calc_row(k, f).ok)
+        win.model.select(keys[0], 'nominal')
+        win.sync()
+        return win, keys
+
+    def test_sourced_as_box_is_on_temperature_rows_only_and_lists_thermocouples_and_rtds(self):
+        win, keys = self.temp_window()
+        box = win.panel_box
+        self.assertFalse(box.cells['sensor'].isHidden())
+        labels = [box.sensor_box.combo.itemText(i) for i in range(box.sensor_box.combo.count())]
+        self.assertIn('Thermocouple Type K', labels)
+        self.assertIn('RTD Pt 385, 100 ohm', labels)
+        self.assertEqual(box.v['sensor'].get(), '')                                # nothing is assumed
+        win2 = self.new_window()
+        win2.function_chosen(self.dcv_label(win2))
+        self.assertTrue(self.type_cell(win2, '1 V').ok)
+        self.assertTrue(win2.panel_box.cells['sensor'].isHidden())
+
+    def test_choosing_in_the_box_and_saving_the_row_sets_that_point_and_one_undo_step(self):
+        win, keys = self.temp_window()
+        box = win.panel_box
+        box.v['sensor'].set('Pt385-100')
+        self.assertEqual(box.v['sensor'].get(), 'Pt385-100')
+        self.assertTrue(win.calc().ok)
+        fn = win.model.point_of(keys[0])[0]
+        self.assertEqual([p.settings.get('sensor') for p in fn.points], ['Pt385-100', None])
+        self.assertIn('RTD Pt 385, 100 ohm', win.model.row(keys[0])['function'])
+        self.assertIn('sensor not chosen', win.model.row(keys[1])['function'])
+        self.assertTrue(win.model.undo().ok)
+        fn = win.model.point_of(keys[0])[0]
+        self.assertEqual([p.settings.get('sensor') for p in fn.points], [None, None])
+
+    def test_whole_section_button_and_the_right_click_menu(self):
+        win, keys = self.temp_window(3)
+        win.panel_box.v['sensor'].set('J')
+        win.panel_box.sensor_box.section_btn.click()
+        fn = win.model.point_of(keys[0])[0]
+        self.assertEqual({p.settings.get('sensor') for p in fn.points}, {'J'})
+        opened = []
+        with mock.patch.object(win, '_popup', lambda menu, pos: opened.append(menu)):
+            win.sheet_context(win.model.row_index(keys[1]), 1, None)
+        menu = opened[0]
+        sub = next(a for a in menu.actions() if a.text().startswith('Sourced as'))
+        sub.menu().actions()[0].trigger()                                          # the first thermocouple in the list
+        fn = win.model.point_of(keys[0])[0]
+        self.assertEqual(len({p.settings.get('sensor') for p in fn.points}), 1)
+        self.assertNotEqual({p.settings.get('sensor') for p in fn.points}, {'J'})
+
+    def test_the_sheet_check_lists_an_error_for_a_point_without_a_sensor_and_jumps_to_it(self):
+        win, keys = self.temp_window()
+        win.model.set_sensor(keys[0], 'K')
+        msg = win.check_blocks_run()
+        self.assertIsNotNone(msg)                                                  # blocks the run and publishing
+        chk = win.model.sheet_check(compute=False)
+        bad = [f for f in chk.errors() if f.code == 'sensor_not_chosen']
+        self.assertEqual(len(bad), 1)
+        self.assertEqual(bad[0].key, keys[1])
+        win.goto_row(bad[0].key)
+        self.assertEqual(win.model.sel_key, keys[1])
+        win.model.set_sensor(keys[1], 'K')
+        self.assertIsNone(win.check_blocks_run())
+
+    def test_the_standard_and_uncertainty_cells_show_the_sensor_in_the_tooltips(self):
+        win, keys = self.temp_window()
+        win.model.set_sensor(keys[0], 'Pt385-100')
+        self.pump(win)
+        sheet = win.sheet
+        ix = sheet.proxy.index(win.model.row_index(keys[0]), 5)
+        self.assertIn('RTD Pt 385, 100 ohm', sheet.proxy.data(ix, Qt.ItemDataRole.ToolTipRole))
+        self.assertIn('by hand', sheet.proxy.data(ix, Qt.ItemDataRole.ToolTipRole))
+        ix2 = sheet.proxy.index(win.model.row_index(keys[1]), 5)
+        self.assertEqual(sheet.proxy.data(ix2, Qt.ItemDataRole.DisplayRole), '')
+
+    # ---- multiple rows are independent
+    def test_changing_the_resolution_of_one_made_row_changes_only_that_row(self):
+        win, keys = self.series(decs='3')
+        m = win.model
+        before = {r['key']: (r['nominal'], r['low'], r['high']) for r in m.rows() if r['kind'] == 'point'}
+        k = keys[2]
+        m.select(k, 'nominal')
+        win.sync()
+        box = win.panel_box
+        self.assertFalse(box.b['multi'].get())                               # coming back to ONE row: the series tick is off, its settings are kept
+        self.assertEqual((box.v['multi_n'].get(), box.v['multi_high'].get(), box.v['iv'].get()), ('5', '9 V', '0.050'))
+        box.v['decs'].set('5')
+        res = win.calc()
+        self.assertTrue(res.ok, res.message)
+        after = {r['key']: (r['nominal'], r['low'], r['high']) for r in m.rows() if r['kind'] == 'point'}
+        self.assertEqual([x for x in after if after[x] != before.get(x)], [m.sel_key])
+        self.assertEqual(box.v['decs'].get(), '5')                           # the boxes keep what was typed
+        # another made row still shows its own calculation
+        m.select(keys[3], 'nominal')
+        win.sync()
+        self.assertEqual(box.v['decs'].get(), '3')
+        self.assertEqual(box.v['iv'].get(), '0.050')
+
+    def test_a_new_row_starts_with_the_last_calculation(self):
+        win, keys = self.series()
+        blank = next(r['key'] for r in win.model.rows() if r['kind'] == 'blank')
+        win.model.select(blank, 'nominal')
+        win.sync()
+        self.assertEqual((win.panel_box.v['iv'].get(), win.panel_box.v['decs'].get()), ('0.050', '3'))
 
 
 class RulesTests(unittest.TestCase):

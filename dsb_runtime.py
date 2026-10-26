@@ -305,6 +305,7 @@ def route_for(p, connected, prefer=()) -> Route:
     """Which standard does point p?  `connected` = models whose driver is open; `prefer` = the engine's own calibrator choice (tried after the assigned one)."""
     run = p['run']
     kind, direction = run['kind'], run['direction']
+    ckind = dm.sens.automation_kind(run.get('settings'), kind)             # a temperature point that is not thermocouple Type K is set by hand ('TEMP_OTHER')
     want = 'measure' if direction == 'source' else 'source'
     assigned = _assigned(p)
     why = []
@@ -324,7 +325,7 @@ def route_for(p, connected, prefer=()) -> Route:
             if model == assigned:
                 why.append(f'assigned {model} is not connected')
             continue
-        cap = dm.automation_status(model, kind, direction)
+        cap = dm.automation_status(model, ckind, direction)
         if not cap.can_automate:
             why.append(f'{model}: ' + dm.automation_text(cap, kind))
             continue
