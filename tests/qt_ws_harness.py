@@ -3,7 +3,7 @@ whose every prompt opens the REAL Qt dialog and is answered by a scripted operat
 
 What is checked while it runs: each dialog's title, body text, button names (and the steps / facts / caution of an operator prompt) are what the engine asked for, the
 dialog's return value equals the scripted answer, and the canonical record of every prompt (ui_port.record, the form of tests/golden_ui/*.json) is kept in `.prompts`.
-The scenarios are the ones of tests/ui_prompt_capture_ws.py (8 scenarios, 233 prompts of the Tk build): the same method calls, with the Tk widget mocks (`a.dc_tree.selection.
+The scenarios are the ones of tests/ui_prompt_capture_ws.py (8 scenarios, 225 prompts of the Tk build): the same method calls, with the Tk widget mocks (`a.dc_tree.selection.
 return_value = ...`) replaced by `TreeShim` (what the engine reads from a table through the view) and the real Qt tables behind everything else.  The report writers are
 fakes (nothing is written), `threading.Thread` is synchronous inside the engine module and the worker threads' events are the fakes' of the Tk scenarios, exactly as there.
 The one prompt this does not open for real is report_details (QtUiPort shows the plain popup for it; its window is another package's): it is recorded and answered.
@@ -772,7 +772,6 @@ def run_scenarios(only=None):
         a = hn.app
         with mock.patch.object(report_pdf, 'write_calibration_pdf', lambda filename, rows, **k: len(rows)):
             a.export_pdf_report()
-            a.export_professional_excel()
             a.export_calibration_section('dcv')
             a.write_certificate_pdf('x.pdf', [])
             a.load_demo_data()
@@ -781,7 +780,6 @@ def run_scenarios(only=None):
             hn.rule(lambda r: {} if r['kind'] == 'report_details' else None)
             a.export_pdf_report()
             a.export_calibration_section('noise')
-            a.export_professional_excel()
             hn.answers.save_path = 'Calibration Data WS-1.pdf'
             a.export_pdf_report()
             a.export_calibration_section('trigger')
@@ -789,13 +787,6 @@ def run_scenarios(only=None):
                 a.export_pdf_report()
             with mock.patch.object(report_pdf, 'write_calibration_pdf', side_effect=ImportError('reportlab')):
                 a.export_pdf_report()
-            hn.answers.save_path = 'Calibration Data WS-1.xlsx'
-            with mock.patch.object(W, 'make_report', lambda groups, filename, **k: 7):
-                a.export_professional_excel()
-            with mock.patch.object(W, 'make_report', side_effect=RuntimeError('locked')):
-                a.export_professional_excel()
-            with mock.patch.object(W, 'make_report', side_effect=ImportError('openpyxl')):
-                a.export_professional_excel()
             hn.clear_rules()
         done('exports', hn)
 

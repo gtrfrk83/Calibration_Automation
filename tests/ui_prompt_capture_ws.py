@@ -536,7 +536,6 @@ def _run_wavesurfer(make_harness):
     hn, a = new()
     with mock.patch.object(report_pdf, 'write_calibration_pdf', lambda filename, rows, **k: len(rows)):
         a.export_pdf_report()                                             # nothing recorded -> info
-        a.export_professional_excel()                                     # nothing recorded -> info
         a.export_calibration_section('dcv')                               # nothing recorded -> info
         a.write_certificate_pdf('x.pdf', [])                              # nothing recorded -> info
         a.load_demo_data()
@@ -545,7 +544,6 @@ def _run_wavesurfer(make_harness):
         rule(hn, lambda r: {} if r['kind'] == 'report_details' else None)
         a.export_pdf_report()                                              # details given, save-as cancelled
         a.export_calibration_section('noise')                             # details given, save-as cancelled
-        a.export_professional_excel()                                     # save-as cancelled
         hn.answers.save_path = 'Calibration Data WS-1.pdf'
         a.export_pdf_report()                                              # 'Report exported'
         a.export_calibration_section('trigger')                           # 'Report exported'
@@ -553,13 +551,6 @@ def _run_wavesurfer(make_harness):
             a.export_pdf_report()                                          # 'PDF export error'
         with mock.patch.object(report_pdf, 'write_calibration_pdf', side_effect=ImportError('reportlab')):
             a.export_pdf_report()                                          # 'PDF export dependency'
-        hn.answers.save_path = 'Calibration Data WS-1.xlsx'
-        with mock.patch.object(W, 'make_report', lambda groups, filename, **k: 7):
-            a.export_professional_excel()                                  # 'Report exported'
-        with mock.patch.object(W, 'make_report', side_effect=RuntimeError('locked')):
-            a.export_professional_excel()                                  # 'Excel export error'
-        with mock.patch.object(W, 'make_report', side_effect=ImportError('openpyxl')):
-            a.export_professional_excel()                                  # 'Excel export dependency'
         hn.answers.rules.clear()
     done('exports', hn)
 

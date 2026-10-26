@@ -50,91 +50,6 @@ FIELDS=('Description','Nominal','Tolerance -','Tolerance +','UOM','As Found','OO
 SECTIONS=[('RMS NOISE','noise'),('DC VOLTAGE / GAIN','dcv'),('INPUT IMPEDANCE','impedance'),('VERTICAL OFFSET / P1 MEAN','offset'),('ANALOG BANDWIDTH / LEVSINE','bandwidth'),
           ('TIME BASE ACCURACY','timebase'),('TRIGGER LEVEL ACCURACY','trigger')]
 
-def make_report(groups, output_path, synthetic=False, instrument_id=""):
-    from openpyxl import Workbook
-    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
-    from openpyxl.utils import get_column_letter
-    from openpyxl.worksheet.page import PageMargins
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = 'Calibration Data'
-    ws.sheet_view.showGridLines = False
-    widths = [43, 31, 19, 19, 14, 19, 11, 17, 20]
-    for idx, width in enumerate(widths, 1):
-        ws.column_dimensions[get_column_letter(idx)].width = width
-
-    def band(row, text, bg, fg, size=11, height=27, bold=True):
-        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=9)
-        for cells in ws.iter_rows(min_row=row, max_row=row, min_col=1, max_col=9):
-            for cell in cells:
-                cell.fill = PatternFill('solid', fgColor=bg)
-        c = ws.cell(row, 1, text)
-        c.font = Font(name='Aptos', size=size, bold=bold, color=fg)
-        c.alignment = Alignment(vertical='center', indent=1)
-        ws.row_dimensions[row].height = height
-
-    band(1, 'OSCILLOSCOPE  |  CALIBRATION DATA', '12253D', 'FFFFFF', 17, 38)
-    subtitle = 'WS4104HD  •  RESULTS SUMMARY'
-    if synthetic:
-        subtitle += '  •  SYNTHETIC DEMONSTRATION — NOT CALIBRATION EVIDENCE'
-    band(2, subtitle, '203A58', 'D6E6F5', 10, 27, False)
-    band(3, 'INSTRUMENT ID:  ' + (str(instrument_id).strip() or 'NOT ENTERED'),
-         'FFFFFF', '18334F', 12, 28)
-    total = sum(len(v) for v in groups.values())
-    failures = sum(1 for vv in groups.values() for v in vv if str(v.get('OOT', '')).strip())
-    band(4, f'TOTAL TEST POINTS: {total}     |     OOT: {failures}     |     SECTIONS: {sum(bool(v) for v in groups.values())}',
-         'E9F1F8', '18334F', 10, 28)
-
-    r = 6
-    seq = 0
-    thin = Side(style='hair', color='DCE4EC')
-    for label, key in SECTIONS:
-        rows = groups.get(key, [])
-        if not rows:
-            continue
-        band(r, f'{label}   |   {len(rows)} POINTS', '214C71', 'FFFFFF', 12, 28)
-        r += 1
-        for col, name in enumerate(FIELDS, 1):
-            cell = ws.cell(r, col, name)
-            cell.fill = PatternFill('solid', fgColor='BFD2E3')
-            cell.font = Font(name='Aptos', size=10, bold=True, color='17304A')
-            cell.alignment = Alignment(vertical='center', wrap_text=True)
-            cell.border = Border(bottom=Side(style='thin', color='91A8BB'))
-        ws.row_dimensions[r].height = 28
-        r += 1
-        for i, row in enumerate(rows):
-            seq += 1
-            for col, field in enumerate(FIELDS, 1):
-                val = row.get(field, '')
-                cell = ws.cell(r, col, val if val is not None else '')
-                cell.font = Font(name='Aptos', size=10, color='24364A')
-                cell.fill = PatternFill('solid', fgColor='F0F4F8' if i % 2 == 0 else 'FFFFFF')
-                cell.border = Border(bottom=thin)
-                cell.alignment = Alignment(vertical='center', wrap_text=(col == 1))
-            if str(row.get('OOT', '')).strip():
-                cell = ws.cell(r, 7)
-                cell.fill = PatternFill('solid', fgColor='FCE1E1')
-                cell.font = Font(name='Aptos', size=10, bold=True, color='A32121')
-            ws.row_dimensions[r].height = 25
-            r += 1
-        r += 2
-
-    ws.freeze_panes = 'A5'
-    ws.sheet_properties.pageSetUpPr.fitToPage = True
-    ws.page_setup.orientation = 'landscape'
-    ws.page_setup.paperSize = ws.PAPERSIZE_A3
-    ws.page_setup.fitToWidth = 1
-    ws.page_setup.fitToHeight = 0
-    ws.print_options.horizontalCentered = True
-    ws.page_margins = PageMargins(left=.3, right=.3, top=.5, bottom=.5, header=.2, footer=.2)
-    ws.oddFooter.center.text = 'Page &P of &N'
-    ws.print_area = f'A1:I{max(4, r-2)}'
-    wb.save(str(output_path))
-    return seq
-
-
-
 # Procedure modifications (procmods_engine): which tolerance fields of each section's points can be overridden.
 # section -> (nominal field or None, low field, high field, fields that identify the point besides the section)
 PM_SECTIONS = {
@@ -3676,33 +3591,6 @@ class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
             filetypes=[('PDF report','*.pdf')])
         if filename:
             self.write_certificate_pdf(filename,sections,details)
-
-    def export_professional_excel(self):
-        if not self.sync_asset():
-            return
-        sections=('noise','dcv','impedance','offset','bandwidth','timebase','trigger')
-        groups={k:self.certificate_rows(k) for k in sections}
-        if not any(groups.values()):
-            port.message('info', 'No results','No calibration results to export.')
-            return
-        filename=port.save_file(
-            defaultextension='.xlsx',
-            initialfile=ui.report_filename(self.instrument_id.get(),'.xlsx'),
-            filetypes=[('Excel workbook','*.xlsx')])
-        if not filename:
-            return
-        try:
-            count=make_report(groups,filename,synthetic=getattr(self,'demo_mode',False),
-                              instrument_id=self.instrument_id.get())
-        except ImportError:
-            port.message('error', 'Excel export dependency',
-                'Install the Excel formatting package with: py -m pip install openpyxl')
-            return
-        except Exception as exc:
-            port.message('error', 'Excel export error',str(exc))
-            return
-        port.message('info', 'Report exported',
-            f'Created formatted Excel report with {count} test points:\n{filename}')
 
 
 # Procedure modifications: every section's point list goes through pm_section_points().  The original functions are left exactly as

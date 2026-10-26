@@ -864,14 +864,6 @@
     "OK"
    ],
    "kind": "info",
-   "text": "No calibration results to export.",
-   "title": "No results"
-  },
-  {
-   "buttons": [
-    "OK"
-   ],
-   "kind": "info",
    "text": "No dcv measurements to export.",
    "title": "No results"
   },
@@ -943,22 +935,6 @@
      ]
     ],
     "initialfile": "WS-1-noise-<date>.pdf"
-   },
-   "text": "",
-   "title": ""
-  },
-  {
-   "answer": "",
-   "kind": "save_file",
-   "options": {
-    "defaultextension": ".xlsx",
-    "filetypes": [
-     [
-      "Excel workbook",
-      "*.xlsx"
-     ]
-    ],
-    "initialfile": "WS-1-<date>.xlsx"
    },
    "text": "",
    "title": ""
@@ -1082,78 +1058,6 @@
    "kind": "error",
    "text": "Install the PDF package with:  py -m pip install reportlab",
    "title": "PDF export dependency"
-  },
-  {
-   "answer": "Calibration Data WS-1.xlsx",
-   "kind": "save_file",
-   "options": {
-    "defaultextension": ".xlsx",
-    "filetypes": [
-     [
-      "Excel workbook",
-      "*.xlsx"
-     ]
-    ],
-    "initialfile": "WS-1-<date>.xlsx"
-   },
-   "text": "",
-   "title": ""
-  },
-  {
-   "buttons": [
-    "OK"
-   ],
-   "kind": "info",
-   "text": "Created formatted Excel report with 7 test points:\nCalibration Data WS-1.xlsx",
-   "title": "Report exported"
-  },
-  {
-   "answer": "Calibration Data WS-1.xlsx",
-   "kind": "save_file",
-   "options": {
-    "defaultextension": ".xlsx",
-    "filetypes": [
-     [
-      "Excel workbook",
-      "*.xlsx"
-     ]
-    ],
-    "initialfile": "WS-1-<date>.xlsx"
-   },
-   "text": "",
-   "title": ""
-  },
-  {
-   "buttons": [
-    "OK"
-   ],
-   "kind": "error",
-   "text": "locked",
-   "title": "Excel export error"
-  },
-  {
-   "answer": "Calibration Data WS-1.xlsx",
-   "kind": "save_file",
-   "options": {
-    "defaultextension": ".xlsx",
-    "filetypes": [
-     [
-      "Excel workbook",
-      "*.xlsx"
-     ]
-    ],
-    "initialfile": "WS-1-<date>.xlsx"
-   },
-   "text": "",
-   "title": ""
-  },
-  {
-   "buttons": [
-    "OK"
-   ],
-   "kind": "error",
-   "text": "Install the Excel formatting package with: py -m pip install openpyxl",
-   "title": "Excel export dependency"
   }
  ],
  "noise": [

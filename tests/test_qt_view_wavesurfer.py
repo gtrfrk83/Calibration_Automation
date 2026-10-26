@@ -3,7 +3,7 @@ tests) when PySide6 is not importable.
 
   * static: the Qt files are Tk-free and under 1,500 lines, the view has every public function of wavesurfer_view_tk.py, every text of the Tk view is in the Qt files,
     the procedure's sidecar fingerprint lists them;
-  * the 8 scenarios / 233 prompts of tests/golden_ui/ui_prompts_wavesurfer.json, played through the REAL engine on the Qt view with a real Qt dialog for every prompt
+  * the 8 scenarios / 225 prompts of tests/golden_ui/ui_prompts_wavesurfer.json, played through the REAL engine on the Qt view with a real Qt dialog for every prompt
     (tests/qt_ws_harness.py: the operator presses the buttons / types the answers; title, text and buttons are checked on screen);
   * the widget-state record of the Tk window (tests/qt_ref/wavesurfer_tk_state.json, real Tk 9 under Xvfb) equals the Qt window's, busy and idle;
   * the engine's DC voltage point methods (the golden engine_wavesurfer_dcv flow) run on the Qt App give the golden wire transcript;
@@ -101,10 +101,10 @@ class StaticTests(unittest.TestCase):
         self.assertIn('wavesurfer_view_qt.py', side['own_files'])
         self.assertTrue(side['seed_verified'])
 
-    def test_the_fixture_is_the_8_scenario_233_prompt_one(self):
+    def test_the_fixture_is_the_8_scenario_225_prompt_one(self):
         data = json.loads(FIXTURE.read_text(encoding='utf-8'))
         self.assertEqual(len(data), 8)
-        self.assertEqual(sum(len(v) for v in data.values()), 233)
+        self.assertEqual(sum(len(v) for v in data.values()), 225)
 
 
 if HAVE_QT:
@@ -196,10 +196,10 @@ class PromptSequences(QtCase):
     def test_close_window(self):
         self.check('close_window')
 
-    def test_all_233(self):
+    def test_all_225(self):
         out = HN.run_scenarios()
         self.assertEqual(sorted(out), sorted(self.want))
-        self.assertEqual(sum(len(v) for v in out.values()), 233)
+        self.assertEqual(sum(len(v) for v in out.values()), 225)
 
 
 # ====================================================================================================================================================

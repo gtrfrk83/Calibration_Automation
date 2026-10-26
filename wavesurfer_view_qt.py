@@ -206,7 +206,6 @@ def build_unified(self):
     self.btn_rerun_from = sh.add_action('Rerun From Selected', self.rerun_from_selected, short='From here')
     self.btn_stop = sh.add_action('■  Stop', self.stop_all, danger=True, short='■ Stop', state='disabled')
     sh.add_action('Export Report (PDF)', self.export_pdf_report, side='right', short='PDF')
-    sh.add_action('Export Excel (.xlsx)', self.export_professional_excel, side='right', short='Excel')
     self.btn_clear = sh.add_action('Clear function results', self.clear_function, side='right', short='Clear')
     self.pm_live_attach(sh)                                    # 'Edit point': the point editor for the selected row, usable during a run; right-click > Edit as well
 

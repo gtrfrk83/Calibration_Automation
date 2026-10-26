@@ -1441,7 +1441,7 @@
    "kw": {
     "default": "'no'"
    },
-   "where": "RMSNoiseApp._confirm_found_overwrite"
+   "where": "RMSNoiseApp._ask_found_overwrite"
   },
   {
    "args": [
@@ -1487,6 +1487,14 @@
    "kind": "info",
    "kw": {},
    "where": "RMSNoiseApp.rerun_selected"
+  },
+  {
+   "args": [
+    "*args"
+   ],
+   "kind": "operator_prompt",
+   "kw": {},
+   "where": "RMSNoiseApp._retest_prompt"
   },
   {
    "args": [
@@ -1868,20 +1876,6 @@
   },
   {
    "args": [
-    "'Confirm DCV retest connection'",
-    "f'Retest DCV point {idx + 1} of 80'",
-    "[('Connect the cable', f'Fluke SCOPE output cable to CH{ch}.'), ('Remove other sources', 'No external terminators, probes or other sources on the input.'), ('Automatic', 'The scope is set to DC 1 MΩ and 20 MHz BW for you.')]"
-   ],
-   "kind": "operator_prompt",
-   "kw": {
-    "caution": "'The previous reading is kept in the retest history. A good new reading replaces the displayed result; an error leaves it unchanged.'",
-    "facts": "[('Channel', f'CH{ch}'), ('Test voltage', f\"{point['nominal_v']:+g} V\"), ('Range', self.range_text(point['scale_v_div']))]",
-    "ok": "'Connected — retest'"
-   },
-   "where": "RMSNoiseApp.retest_selected_dcv"
-  },
-  {
-   "args": [
     "'Busy'",
     "'Wait for the current measurement to finish.'"
    ],
@@ -2143,20 +2137,6 @@
   },
   {
    "args": [
-    "'Confirm impedance retest'",
-    "f'Retest impedance point {idx + 1} of 28'",
-    "[('Output off', 'Confirm the Fluke SCOPE measurement output is OFF before moving cables.'), ('Connection', 'Verify the correct connection and, for EXT inputs, the input impedance.')]"
-   ],
-   "kind": "operator_prompt",
-   "kw": {
-    "caution": "'The prior reading is replaced only after a successful retest.'",
-    "facts": "[('Input', point['channel']), ('Test', point['description'])]",
-    "ok": "'Ready — retest'"
-   },
-   "where": "RMSNoiseApp.retest_impedance"
-  },
-  {
-   "args": [
     "'Settings'",
     "'Check settle time, samples, and baud.'"
    ],
@@ -2166,40 +2146,12 @@
   },
   {
    "args": [
-    "'Confirm offset retest'",
-    "f'Retest offset point {idx + 1} of 16'",
-    "[('Connection', 'Confirm the Fluke SCOPE cable is connected to the correct channel.')]"
-   ],
-   "kind": "operator_prompt",
-   "kw": {
-    "caution": "'The prior reading is replaced only on success.'",
-    "facts": "[('Channel', f\"CH{point['channel']}\"), ('Scope offset', f\"{point['scope_offset_v']:+g} V\")]",
-    "ok": "'Ready — retest'"
-   },
-   "where": "RMSNoiseApp.retest_offset"
-  },
-  {
-   "args": [
     "'Settings'",
     "'Check settle time and baud.'"
    ],
    "kind": "error",
    "kw": {},
    "where": "RMSNoiseApp.retest_offset"
-  },
-  {
-   "args": [
-    "'Confirm bandwidth retest'",
-    "f'Retest bandwidth point {idx + 1} of 24'",
-    "[('Signal path', 'Verify a rated 50 Ω signal path and the scope DC50 input.'), ('Signal', 'The Fluke will generate a 1 GHz sine wave.')]"
-   ],
-   "kind": "operator_prompt",
-   "kw": {
-    "caution": "'The prior result is replaced only on success.'",
-    "facts": "[('Channel', f\"CH{point['channel']}\"), ('Range', self.range_text(point['scale_v_div']))]",
-    "ok": "'Ready — retest'"
-   },
-   "where": "RMSNoiseApp.retest_bandwidth"
   },
   {
    "args": [
@@ -2389,7 +2341,7 @@
    ],
    "kind": "operator_prompt",
    "kw": {
-    "caution": "'First hardware run: the 5560A SCOPE MARKER commands are not yet verified. The test stops without enabling the output if the calibrator rejects them. Check the marker period against your procedure (Test settings).'",
+    "caution": "f'First hardware run: the {self.cal_name()} SCOPE MARKER commands are not yet verified. The test stops without enabling the output if the calibrator rejects them. Check the marker period against your procedure (Test settings).'",
     "facts": "[('Marker period', f'{period * 1000000.0:g} µs'), ('Frequency', f'{nominal / 1000.0:g} kHz'), ('Limit', f'±{TIMEBASE_LIMIT_HZ:.3f} Hz')]",
     "ok": "'Connected and safe — run'"
    },
@@ -2484,20 +2436,6 @@
     "ok": "'Connected and safe — continue'"
    },
    "where": "RMSNoiseApp.next_trigger"
-  },
-  {
-   "args": [
-    "'Confirm trigger level retest'",
-    "f'Retest trigger level point {idx + 1} of 24'",
-    "[('Connection', f\"Confirm the Fluke SCOPE output is connected to CH{point['channel']}.\"), ('You confirm', 'You will be asked twice whether the scope triggered.')]"
-   ],
-   "kind": "operator_prompt",
-   "kw": {
-    "caution": "'The prior result is replaced only when the retest completes.'",
-    "facts": "[('Channel', f\"CH{point['channel']}\"), ('Level', f\"{point['level_v'] * 1000:+.0f} mV\"), ('Slope', point['slope'])]",
-    "ok": "'Ready — retest'"
-   },
-   "where": "RMSNoiseApp.retest_trigger"
   },
   {
    "args": [
@@ -2632,52 +2570,6 @@
     "initialfile": "ui.report_filename(self.instrument_id.get())"
    },
    "where": "RMSNoiseApp.export_pdf_report"
-  },
-  {
-   "args": [
-    "'No results'",
-    "'No calibration results to export.'"
-   ],
-   "kind": "info",
-   "kw": {},
-   "where": "RMSNoiseApp.export_professional_excel"
-  },
-  {
-   "args": [],
-   "kind": "save_file",
-   "kw": {
-    "defaultextension": "'.xlsx'",
-    "filetypes": "[('Excel workbook', '*.xlsx')]",
-    "initialfile": "ui.report_filename(self.instrument_id.get(), '.xlsx')"
-   },
-   "where": "RMSNoiseApp.export_professional_excel"
-  },
-  {
-   "args": [
-    "'Excel export dependency'",
-    "'Install the Excel formatting package with: py -m pip install openpyxl'"
-   ],
-   "kind": "error",
-   "kw": {},
-   "where": "RMSNoiseApp.export_professional_excel"
-  },
-  {
-   "args": [
-    "'Excel export error'",
-    "str(exc)"
-   ],
-   "kind": "error",
-   "kw": {},
-   "where": "RMSNoiseApp.export_professional_excel"
-  },
-  {
-   "args": [
-    "'Report exported'",
-    "f'Created formatted Excel report with {count} test points:\\n{filename}'"
-   ],
-   "kind": "info",
-   "kw": {},
-   "where": "RMSNoiseApp.export_professional_excel"
   }
  ],
  "agilent34410a_verification.py": [
