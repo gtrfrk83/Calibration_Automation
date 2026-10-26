@@ -281,8 +281,8 @@ class Spec(unittest.TestCase):
         self.assertNotIn('ir', o)                                # no remote interface: readings are typed
         self.assertEqual([d['id'] for d in o['include_toggles']], ['iflex'])
         self.assertIs(o['include_toggles'][0]['default'], True)         # a meter that has an iFlex gets every test
-        self.assertEqual(o['include_toggles'][0]['off_text'], 'not tested (no iFlex supplied)')
-        self.assertEqual([p['n'] for p in PTS.values() if p.get('include') == 'iflex'], list(IFLEX_POINTS))
+        self.assertEqual(o['include_toggles'][0]['off_text'], 'not tested (no iFlex supplied); the iFlex simulation points are still tested')
+        self.assertEqual([p['n'] for p in PTS.values() if p.get('include') == 'iflex'], [35, 36, 37, 38])
         self.assertFalse([p for p in PTS.values() if p.get('include') and p['section'] not in ('iFlex simulated', 'iFlex with coil')])
 
     def test_groups(self):
@@ -700,7 +700,7 @@ class EndToEnd(unittest.TestCase):
         self.assertIn('DEMO', text.upper())
 
 
-OFF_COUNTS = {'374': 19, '375': 25, '376': 29, '376-II': 29}
+OFF_COUNTS = {'374': 24, '375': 30, '376': 34, '376-II': 34}
 ON_COUNTS = {'374': 28, '375': 34, '376': 38, '376-II': 38}
 
 
@@ -727,33 +727,33 @@ def _prompt_counts(f):
 class IFlexPrompts(unittest.TestCase):
     """Prompt counts with the iFlex option ON and OFF, per model (the same prompt flow the engine runs, dialogs recorded)."""
     def test_counts_per_model_on_and_off(self):
-        want = {('374', False): (8, 7, 1, 28), ('374', True): (5, 6, 1, 19), ('375', False): (8, 8, 1, 34), ('375', True): (5, 7, 1, 25),
-                ('376', False): (8, 8, 1, 38), ('376', True): (5, 7, 1, 29), ('376-II', False): (8, 8, 1, 38), ('376-II', True): (5, 7, 1, 29)}
+        want = {('374', False): (8, 7, 1, 28), ('374', True): (6, 7, 1, 24), ('375', False): (8, 8, 1, 34), ('375', True): (6, 8, 1, 30),
+                ('376', False): (8, 8, 1, 38), ('376', True): (6, 8, 1, 34), ('376-II', False): (8, 8, 1, 38), ('376-II', True): (6, 8, 1, 34)}
         for (model, off), counts in want.items():
             got = _prompt_counts(_flow(model, off))
             self.assertEqual((got['cable'], got['function'], got['hv'], got['reading']), counts, (model, off))
         totals = {k: sum(v) for k, v in want.items()}
-        self.assertEqual((totals[('376', False)], totals[('376', True)]), (55, 42))
-        self.assertEqual({m: (totals[(m, False)], totals[(m, True)]) for m in MODELS}, {'374': (44, 31), '375': (51, 38), '376': (55, 42), '376-II': (55, 42)})
+        self.assertEqual((totals[('376', False)], totals[('376', True)]), (55, 49))
+        self.assertEqual({m: (totals[(m, False)], totals[(m, True)]) for m in MODELS}, {'374': (44, 38), '375': (51, 45), '376': (55, 49), '376-II': (55, 49)})
 
     def test_off_never_asks_for_an_iflex_prompt(self):
         for model in MODELS:
             f = _flow(model, True)
             self.assertEqual([e[1] for e in f.events if e[0] == 'point'], list(range(1, OFF_COUNTS[model] + 1)), model)       # renumbered, no gap
-            self.assertFalse([sw for _n, sw in f.functions() if 'iFlex' in sw], model)
+            self.assertEqual(len([sw for _n, sw in f.functions() if 'iFlex' in sw]), 1, model)      # only the simulation function prompt stays
             self.assertFalse([e for e in f.events if e[0] == 'setup' and e[1] > OFF_COUNTS[model]], model)
             self.assertTrue(all(p.get('include') != 'iflex' for p in f.app.points), model)
 
     def test_off_376_cable_and_function_points(self):
         f = _flow('376', True)
-        self.assertEqual([e[1] for e in f.events if e[0] == 'setup'], [1, 23, 24, 27, 28])         # VOHM, the coil AUX / 20 A moves; no iFlex leads, no iFlex loop
-        self.assertEqual([int(n) for n, _sw in f.functions()], [1, 5, 9, 13, 20, 23, 27])
-        self.assertEqual([sw for _n, sw in f.functions()], FUNCTION_PROMPTS[:7])
+        self.assertEqual([e[1] for e in f.events if e[0] == 'setup'], [1, 23, 24, 27, 28, 30])      # VOHM, the coil AUX / 20 A moves, the iFlex simulation leads; no iFlex loop
+        self.assertEqual([int(n) for n, _sw in f.functions()], [1, 5, 9, 13, 20, 23, 27, 30])
+        self.assertEqual([sw for _n, sw in f.functions()], FUNCTION_PROMPTS[:8])
 
     def test_per_point_rule_counts(self):
         """With the per-point high-voltage rule of the other handhelds the 376 asks 6 times either way (no iFlex point is high voltage): 60 ON, 47 OFF."""
         on, off = _prompt_counts(_flow('376', False, once=False)), _prompt_counts(_flow('376', True, once=False))
-        self.assertEqual((sum(on.values()), sum(off.values())), (60, 47))
+        self.assertEqual((sum(on.values()), sum(off.values())), (60, 54))
 
 
 class IFlexOption(unittest.TestCase):
@@ -781,20 +781,21 @@ class IFlexOption(unittest.TestCase):
             self.assertEqual(len(app.points), ON_COUNTS[model], model)
             self.assertEqual(app._include_vars['iflex'].get(), True)
             self.assertIn('ON', app.include_text())
-            self.assertEqual(sum(1 for p in app.points if p.get('include') == 'iflex'), 9, model)      # all four models have all nine iFlex points (the X columns)
+            self.assertEqual(sum(1 for p in app.points if p.get('include') == 'iflex'), 4, model)      # all four models have the 4 iFlex-with-coil points; the 5 simulation points are never tagged
 
     def test_off_asks_first_says_what_happens_and_changes_the_list(self):
         app, _ = self.make()
         self.assertTrue(app.set_include('iflex', False))
         q = self.ask()
         self.assertEqual(len(q), 1)
-        self.assertIn('9 iFlex point(s) will not be run', q[0][3])
+        self.assertIn('4 iFlex point(s) will not be run', q[0][3])
         self.assertIn('not tested (no iFlex supplied)', q[0][3])
-        self.assertEqual(len(app.points), 29)
-        self.assertEqual([p['n'] for p in app.points], list(range(1, 30)))
+        self.assertEqual(len(app.points), 34)
+        self.assertEqual([p['n'] for p in app.points], list(range(1, 35)))
         self.assertEqual(set(app.by_id), {p['id'] for p in app.points})
         self.assertIn('OFF', app.include_text())
-        self.assertNotIn('iFlex simulated', [s for s in (p['section'] for p in app.points)])
+        self.assertIn('iFlex simulated', [p['section'] for p in app.points])              # the simulation points stay
+        self.assertFalse([p for p in app.points if 'iFlex, ' in p.get('desc', '')])
         self.assertTrue(app.set_include('iflex', True, ask=False))
         self.assertEqual(len(app.points), 38)
         self.assertEqual([p['id'] for p in app.points], [f'1-{n}' for n in range(1, 39)])        # back in manual order, ids unchanged
@@ -818,7 +819,7 @@ class IFlexOption(unittest.TestCase):
         app._on_include_click('iflex')
         self.assertFalse(app.include_is_on('iflex'))
         self.assertEqual(app._include_vars['iflex'].get(), False)
-        self.assertEqual(len(app.points), 29)
+        self.assertEqual(len(app.points), 34)
 
     def test_it_cannot_change_during_a_run(self):
         app, _ = self.make()
@@ -840,16 +841,16 @@ class IFlexOption(unittest.TestCase):
             self.assertTrue(self.hn.run_all(), model)
             self.assertEqual(len(app.found), OFF_COUNTS[model], model)
             self.assertEqual({r['result'] for r in app.found.values()}, {'PASS'}, model)
-            self.assertFalse([k for k in app.found if int(k.split('-')[1]) >= 30], model)           # no iFlex point was run
+            self.assertFalse([k for k in app.found if int(k.split('-')[1]) >= 35], model)           # no iFlex-with-coil point was run (the simulation points 1-30..1-34 are)
             texts = [t for _i, t in H.wire(io)]
             outs = [t for t in texts if t.startswith('OUT ') and not t.endswith('?')]
-            self.assertEqual(outs, [OUT_COMMANDS[int(p['id'].split('-')[1])] for p in app.points], model)         # not a single iFlex output
+            self.assertEqual(outs, [OUT_COMMANDS[int(p['id'].split('-')[1])] for p in app.points], model)         # not a single iFlex-with-coil output
             self.assertEqual(texts[-1], 'STBY', model)
             titles = [d[1] for d in self.hn.dialogs if d[0] == 'confirm']
-            self.assertEqual(titles.count('Change the cables'), 5, model)
-            self.assertEqual(titles.count('Change the function'), {'374': 6}.get(model, 7), model)
+            self.assertEqual(titles.count('Change the cables'), 6, model)
+            self.assertEqual(titles.count('Change the function'), {'374': 7}.get(model, 8), model)
             self.assertEqual(len([d for d in self.hn.dialogs if d[0] == 'reading']), OFF_COUNTS[model], model)
-            self.assertFalse([d for d in self.hn.dialogs if d[0] == 'confirm' and ('iFlex' in ' '.join(d[3]) or 'iFlex' in str(d[2]))], model)
+            self.assertFalse([d for d in self.hn.dialogs if d[0] == 'confirm' and ('iFlex' in ' '.join(d[3]) or 'iFlex' in str(d[2])) and 'imulat' not in str(d[2])], model)      # only the iFlex SIMULATION prompts remain
             self.assertEqual(len([d for d in self.hn.dialogs if d[0] == 'box' and d[2] == 'HIGH VOLTAGE']), 1, model)
             self.hn.stop()
             self.hn = H.Harness().start()
@@ -872,18 +873,18 @@ class IFlexOption(unittest.TestCase):
         self.hn.default_reading = H.typed_nominal
         self.assertTrue(self.hn.run_all())
         self.assertEqual(len(app.found), 38)
-        for n in range(31, 39):                                     # only the first iFlex point (1-30) keeps a reading
+        for n in range(36, 39):                                     # only the first iFlex-with-coil point (1-35) keeps a reading
             del app.found[f'1-{n}']
         self.assertTrue(app.set_include('iflex', False))
         self.assertIn('1 reading(s) already recorded stay', self.ask()[0][3])
-        self.assertEqual(len(app.points), 30)                       # 29 + the recorded 1-30
-        self.assertEqual(app.points[-1]['id'], '1-30')
-        self.assertEqual(len(app.found), 30)                        # nothing was discarded
-        self.assertEqual(app.found['1-30']['result'], 'PASS')
+        self.assertEqual(len(app.points), 35)                       # 34 + the recorded 1-35
+        self.assertEqual(app.points[-1]['id'], '1-35')
+        self.assertEqual(len(app.found), 35)                        # nothing was discarded
+        self.assertEqual(app.found['1-35']['result'], 'PASS')
         self.assertIn('1 recorded earlier kept', app.include_text())
-        self.assertEqual(app._include_log[-1]['recorded'], 30)
+        self.assertEqual(app._include_log[-1]['recorded'], 35)
         rows = app.certificate_rows()
-        self.assertEqual(len(rows), 30)                             # the recorded iFlex reading stays in the report
+        self.assertEqual(len(rows), 35)                             # the recorded iFlex reading stays in the report
         header = dict(app.report_header(app.spec['source']))
         self.assertIn('1 reading(s) recorded before it was turned off are included', header['iFlex tests'])
 
@@ -897,7 +898,7 @@ class IFlexOption(unittest.TestCase):
         data = json.loads(path.read_text())
         self.assertEqual(data['include'], {'iflex': False})
         self.assertEqual([(e['id'], e['value']) for e in data['include_log']], [('iflex', False)])
-        self.assertEqual(len(data['results']), 29)
+        self.assertEqual(len(data['results']), 34)
         self.assertEqual(data['model'], '376')
         # a new window: default ON; loading the progress file restores OFF and the 29-point list
         app2, _ = self.make()
@@ -906,9 +907,9 @@ class IFlexOption(unittest.TestCase):
         with mock.patch.object(h.filedialog, 'askopenfilename', lambda **k: str(path)):
             app2.load()
         self.assertFalse(app2.include_is_on('iflex'))
-        self.assertEqual(len(app2.points), 29)
+        self.assertEqual(len(app2.points), 34)
         self.assertEqual(app2._include_vars['iflex'].get(), False)
-        self.assertEqual(len(app2.found), 29)
+        self.assertEqual(len(app2.found), 34)
         self.assertEqual(app2._include_log, app._include_log)
         # ... and a progress file saved ON puts it back ON, and one saved before the option existed (no 'include' key) is ON
         data['include'] = {'iflex': True}
@@ -937,7 +938,7 @@ class IFlexOption(unittest.TestCase):
         with mock.patch.object(h.filedialog, 'askopenfilename', lambda **k: str(app._checkpoint_path())):
             app2.load()
         self.assertFalse(app2.include_is_on('iflex'))
-        self.assertEqual(len(app2.points), 29 + 8)                  # the 8 recorded iFlex readings are kept, the missing 1-35 is not asked for
+        self.assertEqual(len(app2.points), 34 + 3)                  # the 3 recorded iFlex-with-coil readings are kept, the missing 1-35 is not asked for
         self.assertNotIn('1-35', app2.by_id)
 
     def test_pdf_with_the_iflex_tests_on(self):
@@ -965,20 +966,20 @@ class IFlexOption(unittest.TestCase):
         flat = ' '.join(text.split())
         self.assertIn('iFlex tests: Not tested (no iFlex supplied)', flat)
         self.assertNotIn('iFlex, 18 A', flat)                                        # the points that were not run have no row
-        self.assertNotIn('mV applied', flat)
+        self.assertIn('mV applied', flat)                                          # the simulation points are still in the report
         self.assertIn('Jaw, 18 A x 50 turns', flat)
-        self.assertEqual(len(app.certificate_rows()), 29)
+        self.assertEqual(len(app.certificate_rows()), 34)
         self.assertNotIn('Cover', text)
         self.assertNotIn('DEMO', text.upper().replace('DEMONSTRAT', ''))             # a real run is never marked demo
         self.assertIn('RESULT: PASS', text.upper())
         self.assertNotIn('PENDING', text.upper())                                    # not shown as failed or pending
-        self.assertIn('not tested (no iFlex supplied).', app.source_note())          # the report note repeats the setting
+        self.assertIn('not tested (no iFlex supplied); the iFlex simulation points are still tested', app.source_note())          # the report note repeats the setting
 
     def test_demo_off_stays_demo(self):
         app, _ = self.make(demo=True)
         self.assertTrue(app.set_include('iflex', False))
         self.assertTrue(self.hn.run_all())
-        self.assertEqual(len(app.found), 29)
+        self.assertEqual(len(app.found), 34)
         self.assertTrue(all(r['synthetic'] for r in app.found.values()))
         out, seen, text = self.pdf(app)
         self.assertIn('DEMO', text.upper())

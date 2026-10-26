@@ -129,7 +129,7 @@ class PerMeterSetting(Base):
         self.assertTrue(a.extra['include']['iflex'])
         self.assertFalse(b.extra['include']['iflex'])
         self.assertEqual(len(app.points), 38)                                  # the window lists the union: any meter takes part
-        self.assertEqual((app.queue_total(a), app.queue_total(b)), (38, 29))
+        self.assertEqual((app.queue_total(a), app.queue_total(b)), (38, 34))
         self.assertIn('ON for 1 of 2', app.queue_chip_text())
         self.assertIn('iFlex ON', app.queue_status_text(self.A))
         self.assertIn('iFlex OFF', app.queue_status_text(self.B))
@@ -148,7 +148,7 @@ class PerMeterSetting(Base):
         self.assertFalse(app._include_vars['iflex'].get())
         self.assertFalse(app.include_is_on())
         shown = [p for p in app.points if app._visible(p)]
-        self.assertEqual(len(shown), 29)                                       # the iFlex points are not shown as pending for the meter that does not take part
+        self.assertEqual(len(shown), 34)                                       # the iFlex points are not shown as pending for the meter that does not take part
         self.assertEqual(sum(1 for p in app.points if p.get('include') == 'iflex' and app._visible(p)), 0)
         app._on_include_click('iflex')                                         # the box is the shown meter's: switching it back ON
         app._include_vars['iflex'].set(True)
@@ -162,7 +162,7 @@ class PerMeterSetting(Base):
         q = [d for d in self.hn.dialogs if d[0] == 'box' and d[2] == 'Skip the iFlex tests']
         self.assertEqual(len(q), 1)
         self.assertIn(f'Asset {self.B}', q[0][3])
-        self.assertIn('9 iFlex point(s) will not be run', q[0][3])
+        self.assertIn('4 iFlex point(s) will not be run', q[0][3])
         self.assertTrue(app.queue.find(self.A).extra['include']['iflex'])
 
     def test_declining_keeps_it_on_and_the_drawer_box_snaps_back(self):
@@ -186,19 +186,20 @@ class PerMeterSetting(Base):
     def test_a_recorded_reading_is_never_discarded(self):
         app = self.real()
         a, b = app.queue.meters
-        b.found['1-31'] = dict(result='PASS', entered='1000', reading=1000.0, data='As Found', synthetic=False, source='typed')
+        b.found['1-36'] = dict(result='PASS', entered='1000', reading=1000.0, data='As Found', synthetic=False, source='typed')
         self.assertTrue(app.set_include('iflex', False, ask=False, meter=b))
-        self.assertIn('1-31', b.found)                                          # kept
-        self.assertTrue(b.wants(app.by_id['1-31']))                             # and still part of this meter's list
-        self.assertFalse(b.wants(app.by_id['1-30']))
-        self.assertEqual(app.queue_total(b), 30)
+        self.assertIn('1-36', b.found)                                          # kept
+        self.assertTrue(b.wants(app.by_id['1-36']))                             # and still part of this meter's list
+        self.assertFalse(b.wants(app.by_id['1-35']))
+        self.assertTrue(b.wants(app.by_id['1-30']))                              # the simulation points are never dropped
+        self.assertEqual(app.queue_total(b), 35)
         self.assertEqual(app.queue_total(a), 38)
 
     def test_all_meters_off_shortens_the_window_list(self):
         app = self.real(off=(self.A, self.B))
-        self.assertEqual(len(app.points), 29)
+        self.assertEqual(len(app.points), 34)
         self.assertIn('iFlex OFF for all', app.queue_chip_text())
-        self.assertEqual({p['n'] for p in app.points}, set(range(1, 30)))
+        self.assertEqual({p['n'] for p in app.points}, set(range(1, 35)))
 
     def test_single_meter_runs_are_unchanged(self):
         app = self.real(assets=(self.A,))
@@ -206,7 +207,7 @@ class PerMeterSetting(Base):
         self.assertEqual(len(app.points), 38)
         self.assertEqual(app.queue_chip_text(), '')
         app.set_include('iflex', False, ask=False)
-        self.assertEqual(len(app.points), 29)
+        self.assertEqual(len(app.points), 34)
         self.assertFalse(app.queue.meters[0].extra['include']['iflex'])         # the one meter in the list carries it too
 
 
@@ -227,7 +228,7 @@ class Planning(Base):
         self.assertEqual(sorted(got[self.A]), sorted(p['id'] for p in app.points))
         self.assertEqual(sorted(got[self.B]), sorted(p['id'] for p in app.points if p.get('include') != 'iflex'))
         self.assertEqual(len(got[self.A]), 38)
-        self.assertEqual(len(got[self.B]), 29)
+        self.assertEqual(len(got[self.B]), 34)
         for u in units:
             if any(p.get('include') == 'iflex' for p in u.points):
                 self.assertEqual([m.asset for m in u.meters], [self.A])         # the iFlex points: a unit for the meter that has them
@@ -247,18 +248,18 @@ class Planning(Base):
         app = self.real(assets=(self.A, self.B, self.C), off=(self.C,))
         units = self.units(app)
         for u in units:
-            ids = {p['id'] for p in u.points}
-            if u.shared and ids & {'1-30', '1-31'}:
-                self.assertEqual([m.asset for m in u.needs['1-30']], [self.A, self.B])
+            if any(p.get('include') == 'iflex' for p in u.points):
+                self.assertNotIn(self.C, [m.asset for m in u.meters])               # the iFlex-with-coil points never name the meter without the iFlex
+        self.assertIn(self.C, {m.asset for u in units for m in u.meters if any(p['id'] == '1-30' for p in u.points)})       # the simulation points include it
         self.assertEqual({m.asset for u in units for m in u.meters if any(p.get('include') == 'iflex' for p in u.points)}, {self.A, self.B})
 
     def test_the_setup_summary_counts_only_the_points_each_meter_takes_part_in(self):
         app = self.real(off=(self.B,))
         info = RQ.summary(app.points, app.queue, app.queue_options())
-        self.assertEqual((info['points'], info['meters'], info['alone']), (38, 2, 38 + 29))
+        self.assertEqual((info['points'], info['meters'], info['alone']), (38, 2, 38 + 34))
         text = app.queue_summary([(self.A, '', ''), (self.B, '', '')], RQ.POINT_BY_POINT)       # the set-up window: B's saved setting (OFF) is used
-        self.assertIn('= 67 settings one meter at a time', text['body'])
-        self.assertIn('needs 55 (12 shared', text['body'])                                       # 12 shared voltage points + 17 other points x 2 meters + 9 iFlex points for A alone
+        self.assertIn('= 72 settings one meter at a time', text['body'])
+        self.assertIn('needs 55 (17 shared', text['body'])                                       # 17 shared voltage points (12 + the 5 iFlex simulation points) + 17 other points x 2 meters + 4 iFlex-with-coil points for A alone
         other = self.real(assets=(self.A + 'x', self.B + 'x'))
         info_on = RQ.summary(other.points, other.queue, other.queue_options())
         self.assertEqual(info_on['alone'], 76)
@@ -266,7 +267,7 @@ class Planning(Base):
     def test_progress_totals_are_per_meter(self):
         app = self.real(off=(self.B,))
         rows = RQ.progress(app.queue, app.points)
-        self.assertEqual([r['total'] for r in rows], [38, 29])
+        self.assertEqual([r['total'] for r in rows], [38, 34])
 
     def test_lacking_ignores_the_points_a_meter_does_not_take_part_in(self):
         app = self.real(off=(self.B,))
@@ -279,7 +280,7 @@ class Planning(Base):
         for p in app.points:
             if p.get('include') == 'iflex':
                 a.found[str(p['id'])] = dict(result='PASS')
-        self.assertEqual(app.queue_pending(app.points), [])                      # B is complete with 29 points
+        self.assertEqual(app.queue_pending(app.points), [])                      # B is complete with 34 points
 
 
 # ===================================================================================================================== running
@@ -289,13 +290,13 @@ class Running(Base):
         self.assertTrue(self.hn.run_all())
         self.assertFalse(self.hn.boxes('showerror'))
         a, b = app.queue.meters
-        self.assertEqual((len(a.found), len(b.found)), (38, 29))
+        self.assertEqual((len(a.found), len(b.found)), (38, 34))
         self.assertFalse(set(b.found) & iflex_ids(app))                          # no iFlex reading was asked for meter B
         self.assertEqual(set(a.found) & iflex_ids(app), iflex_ids(app))
         for m in (a, b):
             self.assertEqual({r['result'] for r in m.found.values()}, {'PASS'})
             self.assertTrue(all(not r['synthetic'] for r in m.found.values()))
-        self.assertEqual((a.status, b.status), ('Done', 'Done'))                 # B is complete with its 29 points
+        self.assertEqual((a.status, b.status), ('Done', 'Done'))                 # B is complete with its 34 points
         # the iFlex points were read in single-meter windows (asset A only), never in a window that names B
         for d in self.windows('readings'):
             if d[1] in iflex_ids(app):
@@ -330,7 +331,7 @@ class Running(Base):
         # point by point, two meters: the shared part (voltage) is prompted once for both; resistance, capacitance and current are one meter at a time (a cable / function
         # prompt per meter and a swap prompt between them).  Meter B without the iFlex tests skips the iFlex-loop cable prompts and the coil iFlex reading windows.
         self.assertEqual(got['on_on'], dict(cable=16, function=14, setup=0, next_meter=4, hv=1, readings=59))
-        self.assertEqual(got['on_off'], dict(cable=14, function=12, setup=0, next_meter=2, hv=1, readings=55))
+        self.assertEqual(got['on_off'], dict(cable=14, function=13, setup=0, next_meter=3, hv=1, readings=55))
         # the same flow without any iFlex point at all (both OFF) is the shortest
         self.hn.stop()
         self.hn = VH.VHarness().start()
@@ -338,16 +339,17 @@ class Running(Base):
         self.real(off=(self.A, self.B))
         self.assertTrue(self.hn.run_all())
         both_off = self.counts()
-        self.assertEqual(both_off['readings'], 12 + 2 * 17)                      # 12 shared voltage windows + the 17 other points once per meter (no iFlex point at all)
+        self.assertEqual(both_off['readings'], 17 + 2 * 17)                      # 17 shared voltage windows (12 + 5 iFlex simulation) + the 17 other points once per meter (no iFlex point at all)
         self.assertLessEqual(both_off['cable'], got['on_off']['cable'])
 
     def test_prompts_name_only_the_meters_wired_for_the_point(self):
         app = self.real(assets=(self.A, self.B, self.C), off=(self.C,))
         self.assertTrue(self.hn.run_all())
         texts = [(d[1], ' '.join(map(str, d[3:]))) for d in self.hn.dialogs if d[0] == 'confirm']
+        coil_texts = [' '.join(map(str, d[2:])) for d in self.hn.dialogs if d[0] == 'confirm' and 'imulat' not in str(d[2]) and 'imulat' not in ' '.join(map(str, d[3:]))]
         first = [t for title, t in texts if title in ('Change the cables', 'Change the function') and f'{self.A}, {self.B}, {self.C}' in t]
         self.assertTrue(first)                                                    # the shared part names all three
-        tail = [t for title, t in texts if title in ('Change the cables', 'Change the function') and ('iFlex' in t)]
+        tail = [t for t in coil_texts if 'iFlex' in t]
         self.assertTrue(tail)
         for t in tail:
             self.assertNotIn(self.C, t)                                          # the iFlex prompts never name the meter without the iFlex tests
@@ -356,8 +358,8 @@ class Running(Base):
         app = self.real(mode=RQ.ONE_AT_A_TIME, off=(self.B,))
         self.assertTrue(self.hn.run_all())
         a, b = app.queue.meters
-        self.assertEqual((len(a.found), len(b.found)), (38, 29))
-        self.assertEqual(self.counts()['readings'], 38 + 29)
+        self.assertEqual((len(a.found), len(b.found)), (38, 34))
+        self.assertEqual(self.counts()['readings'], 38 + 34)
 
     def test_run_all_pending_again_asks_for_nothing_when_every_meter_is_complete(self):
         app = self.real(off=(self.B,))
@@ -370,7 +372,7 @@ class Running(Base):
     def test_rerun_selected_respects_the_setting(self):
         app = self.real(off=(self.B,))
         self.hn.run_all()
-        p = app.by_id['1-30']
+        p = app.by_id['1-35']
         app._queue_force = True
         self.hn.default_reading = typed_nominal
         app.set_data_mode('left')
@@ -378,8 +380,8 @@ class Running(Base):
         app.execute([p])
         self.hn.pump()
         a, b = app.queue.meters
-        self.assertIn('1-30', a.left)
-        self.assertNotIn('1-30', b.left)
+        self.assertIn('1-35', a.left)
+        self.assertNotIn('1-35', b.left)
 
 
 # ===================================================================================================================== checkpoint, queue file, resume
@@ -403,13 +405,13 @@ class Persistence(Base):
 
     def test_a_new_window_restores_the_setting_and_resumes_each_meter(self):
         app = self.real(off=(self.B,))
-        stop_at = app.by_id['1-33']                                              # stop inside the iFlex points: A has 32 readings, B has 29
+        stop_at = app.by_id['1-36']                                              # stop inside the iFlex-with-coil points: A has 35 readings, B has all 34 of its own
         self.hn.queue_action[stop_at['id']] = 'stop'
         self.hn.run_all()
         a, b = app.queue.meters
         done = {m.asset: set(m.found) for m in (a, b)}
-        self.assertEqual(len(done[self.B]), 29)
-        self.assertTrue(len(done[self.A]) >= 30)
+        self.assertEqual(len(done[self.B]), 34)
+        self.assertTrue(len(done[self.A]) >= 35)
         self.hn.stop()
         self.hn = VH.VHarness(home=self.home).start()
         self.hn.fill = False
@@ -418,13 +420,13 @@ class Persistence(Base):
         self.assertTrue(a2.extra['include']['iflex'])
         self.assertFalse(b2.extra['include']['iflex'])                           # restored from B's own checkpoint
         self.assertIn('iFlex OFF', app2.queue_status_text(self.B))
-        self.assertEqual(app2.queue_total(b2), 29)
-        self.assertIn('Saved progress: 29 of 29', app2.queue_status_text(self.B))
+        self.assertEqual(app2.queue_total(b2), 34)
+        self.assertIn('Saved progress: 34 of 34', app2.queue_status_text(self.B))
         self.hn.box_answer['askyesnocancel'] = True
         self.hn.run_all()
         asked = [d for d in self.hn.dialogs if d[0] == 'box' and d[1] == 'askyesnocancel']
         self.assertEqual(len(asked), 1)
-        self.assertEqual((len(a2.found), len(b2.found)), (38, 29))
+        self.assertEqual((len(a2.found), len(b2.found)), (38, 34))
         measured = {d[1] for d in self.windows('readings')} | {d[1] for d in self.windows('reading')}
         self.assertFalse(measured & done[self.A])                                 # points already recorded are not measured again
         self.assertFalse(measured & set(b2.found))                                 # nothing was asked for meter B at all
@@ -462,7 +464,7 @@ class Persistence(Base):
         self.hn.box_answer['askyesnocancel'] = False
         self.hn.run_all()
         a2, b2 = app2.queue.meters
-        self.assertEqual((len(a2.found), len(b2.found)), (38, 29))
+        self.assertEqual((len(a2.found), len(b2.found)), (38, 34))
         self.assertFalse(b2.extra['include']['iflex'])
 
     def test_load_progress_brings_the_setting_of_that_file(self):
@@ -503,34 +505,35 @@ class Reports(Base):
         self.assertIn('Not tested (no iFlex supplied)', ' '.join(tb.split()))
         self.assertNotIn('Tested (iFlex supplied)', ' '.join(tb.split()))
         self.assertIn('iFlex simulated', ta)                                      # A has the iFlex rows
-        self.assertNotIn('iFlex simulated', tb)                                   # B has none
+        self.assertIn('iFlex simulated', tb)                                      # B still has the simulation rows
         self.assertNotIn('iFlex with coil', tb)
 
     def test_row_counts_match_the_points_each_meter_took_part_in(self):
         app = self.real(off=(self.B,))
         self.hn.run_all()
-        for m, n in zip(app.queue.meters, (38, 29)):
+        for m, n in zip(app.queue.meters, (38, 34)):
             app._queue_activate(m)
             rows, _pts = app.certificate_rows_and_points()
             self.assertEqual(len(rows), n, m.asset)
         import labregistry
         self.export(app)
-        self.assertEqual([labregistry.runs_for(a)[0]['total'] for a in (self.A, self.B)], [38, 29])
+        self.assertEqual([labregistry.runs_for(a)[0]['total'] for a in (self.A, self.B)], [38, 34])
 
     def test_a_reading_recorded_before_turning_it_off_stays_in_the_report(self):
         app = self.real()
         a, b = app.queue.meters
-        self.hn.queue_action['1-32'] = 'stop'
         self.hn.run_all()
-        self.assertIn('1-31', b.found)
+        for n in (37, 38):                                                       # only the first two iFlex-with-coil readings were taken
+            del b.found[f'1-{n}']
+        self.assertIn('1-36', b.found)
         app.set_include('iflex', False, ask=False, meter=b)
         app._queue_activate(b)
         header = dict(app.report_header(app.spec['source']))
         self.assertIn('Not tested', header['iFlex tests'])
         self.assertIn('recorded before it was turned off are included', header['iFlex tests'])
         rows, pts = app.certificate_rows_and_points()
-        self.assertEqual(len(rows), 31)                                          # 29 plus the two iFlex readings taken before it was turned off (1-30, 1-31)
-        self.assertIn('1-31', [p['id'] for p in pts])
+        self.assertEqual(len(rows), 36)                                          # 34 plus the two iFlex-with-coil readings taken before it was turned off (1-35, 1-36)
+        self.assertIn('1-36', [p['id'] for p in pts])
         self.assertEqual(sum(1 for p in pts if p.get('include') == 'iflex'), 2)
 
 
@@ -540,7 +543,7 @@ class Demo(Base):
         self.assertTrue(app.virtual)
         self.assertTrue(self.hn.run_all())
         a, b = app.queue.meters
-        self.assertEqual((len(a.found), len(b.found)), (38, 29))
+        self.assertEqual((len(a.found), len(b.found)), (38, 34))
         for m in (a, b):
             self.assertTrue(all(r['synthetic'] for r in m.found.values()), m.asset)
         self.assertTrue(app.any_synthetic())
@@ -561,7 +564,7 @@ class Demo(Base):
         app = self.demo(off=(self.B,), fast=True)
         self.assertTrue(self.hn.run_all())
         a, b = app.queue.meters
-        self.assertEqual((len(a.found), len(b.found)), (38, 29))
+        self.assertEqual((len(a.found), len(b.found)), (38, 34))
 
 
 class Models(Base):
@@ -574,7 +577,7 @@ class Models(Base):
             full = len(app.points)
             self.assertTrue(self.hn.run_all(), model)
             a, b = app.queue.meters
-            self.assertEqual((len(a.found), len(b.found)), (full, full - 9), model)
+            self.assertEqual((len(a.found), len(b.found)), (full, full - 4), model)
             self.assertEqual({r['result'] for m in (a, b) for r in m.found.values()}, {'PASS'}, model)
 
 

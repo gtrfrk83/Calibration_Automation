@@ -14,7 +14,7 @@
     "label": "iFlex probe supplied: run the iFlex tests",
     "default": true,
     "count_text": "iFlex point",
-    "off_text": "not tested (no iFlex supplied)",
+    "off_text": "not tested (no iFlex supplied); the iFlex simulation points are still tested",
     "on_text": "tested (iFlex supplied)"
    }
   ]
@@ -41,12 +41,12 @@
   "376": {
    "name": "Fluke 376",
    "brand": "Fluke",
-   "model_note": "Fluke 376 FC true-rms clamp meter (999.9 A jaw, 1000 V, iFlex 2500 A): Table 1, 38 points (29 without the iFlex tests)"
+   "model_note": "Fluke 376 FC true-rms clamp meter (999.9 A jaw, 1000 V, iFlex 2500 A): Table 1, 38 points (34 without the iFlex-with-coil tests)"
   },
   "376-II": {
    "name": "Fluke 376-II",
    "brand": "Fluke",
-   "model_note": "Fluke 376-II true-rms clamp meter: Table 1 prints one column for the 376 and the 376-II, 38 points (29 without the iFlex tests); not in the Users Manual: 376 FC figures assumed"
+   "model_note": "Fluke 376-II true-rms clamp meter: Table 1 prints one column for the 376 and the 376-II, 38 points (34 without the iFlex-with-coil tests); not in the Users Manual: 376 FC figures assumed"
   }
  },
  "groups": {
@@ -1456,7 +1456,6 @@
     "376-II"
    ],
    "kind": "ACV",
-   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1491,7 +1490,6 @@
     "376-II"
    ],
    "kind": "ACV",
-   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1526,7 +1524,6 @@
     "376-II"
    ],
    "kind": "ACV",
-   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1561,7 +1558,6 @@
     "376-II"
    ],
    "kind": "ACV",
-   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
@@ -1596,7 +1592,6 @@
     "376-II"
    ],
    "kind": "ACV",
-   "include": "iflex",
    "display_unit": "A",
    "factor": 1.0,
    "base_unit": "A",
