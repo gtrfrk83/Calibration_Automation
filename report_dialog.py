@@ -69,6 +69,8 @@ def ask_details_plain(parent, procedure=''):
     tar_var, tur_var = tk.BooleanVar(value=remembered.tar), tk.BooleanVar(value=remembered.tur)
     ttk.Checkbutton(outer, text='Show TAR on the data file', variable=tar_var).pack(anchor='w', pady=(12, 0))
     ttk.Checkbutton(outer, text='Show TUR on the data file', variable=tur_var).pack(anchor='w')
+    left_var = tk.BooleanVar(value=report_pdf.remembered_left_numeric())
+    ttk.Checkbutton(outer, text='As left data as numerical', variable=left_var).pack(anchor='w')
     result = {'ok': None}
 
     def done(ok):
@@ -79,6 +81,8 @@ def ask_details_plain(parent, procedure=''):
             details['show_tar'], details['show_tur'] = bool(tar_var.get()), bool(tur_var.get())
             details['show_tar_tur'] = report_pdf.TarTur(details['show_tar'], details['show_tur'])      # truthy if either is on
             report_pdf.remember_show_tar_tur(details['show_tar_tur'])
+            details['left_numeric'] = bool(left_var.get())
+            report_pdf.remember_left_numeric(details['left_numeric'])
             for k in ('technician', 'temperature', 'humidity'):
                 store.set(k, details[k])
             store.set('standards', details['standards']); store.save()

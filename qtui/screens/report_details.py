@@ -107,8 +107,11 @@ def ask_details_plain(parent, procedure=''):
     tur = QCheckBox('Show TUR on the data file')
     tur.setChecked(bool(remembered.tur))
     dlg.body.addSpacing(M.xs)
+    left = QCheckBox('As left data as numerical')
+    left.setChecked(report_pdf.remembered_left_numeric())
     dlg.body.addWidget(tar)
     dlg.body.addWidget(tur)
+    dlg.body.addWidget(left)
     result = {'ok': None}
 
     def done():
@@ -118,6 +121,8 @@ def ask_details_plain(parent, procedure=''):
         details['show_tar'], details['show_tur'] = bool(tar.isChecked()), bool(tur.isChecked())
         details['show_tar_tur'] = report_pdf.TarTur(details['show_tar'], details['show_tur'])      # truthy if either is on
         report_pdf.remember_show_tar_tur(details['show_tar_tur'])
+        details['left_numeric'] = bool(left.isChecked())
+        report_pdf.remember_left_numeric(details['left_numeric'])
         store.set('standards', details['standards'])
         store.save()
         result['ok'] = details
