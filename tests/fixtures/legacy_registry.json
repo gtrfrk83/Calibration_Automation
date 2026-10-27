@@ -47,7 +47,8 @@
     "Fluke i400 AC Current Clamp Verification": "Fluke_i400_Verification.py",
     "Fluke 323 Clamp Meter Performance Verification": "Fluke_323_Verification.py",
     "Fluke 324 Clamp Meter Performance Verification": "Fluke_324_Verification.py",
-    "Fluke 325 Clamp Meter Performance Verification": "Fluke_325_Verification.py"
+    "Fluke 325 Clamp Meter Performance Verification": "Fluke_325_Verification.py",
+    "Fluke 381 Clamp Meter Performance Verification": "Fluke_381_Verification.py"
   },
   "VERSIONS": {
     "WaveSurfer_WS4104HD.py": "51",
@@ -97,7 +98,8 @@
     "Fluke_i400_Verification.py": "1",
     "Fluke_323_Verification.py": "1",
     "Fluke_324_Verification.py": "1",
-    "Fluke_325_Verification.py": "1"
+    "Fluke_325_Verification.py": "1",
+    "Fluke_381_Verification.py": "1"
   },
   "records": [
     [
@@ -435,6 +437,13 @@
       "325",
       "Clamp Meter",
       "Fluke_325_Verification.py"
+    ],
+    [
+      "Fluke 381 Clamp Meter Performance Verification",
+      "Fluke",
+      "381",
+      "Clamp Meter",
+      "Fluke_381_Verification.py"
     ]
   ],
   "FILES": {
@@ -1145,6 +1154,27 @@
       ],
       "spec": [
         "specs/fluke_323_pv.json"
+      ]
+    },
+    "Fluke_381_Verification.py": {
+      "code": [
+        "Procedures/Fluke_381_Verification.py",
+        "handheld_dmm.py",
+        "handheld_dmm_view_tk.py",
+        "handheld_dmm_view_qt.py",
+        "iflex_option.py",
+        "iflex_option_view_tk.py",
+        "iflex_option_view_qt.py",
+        "coil_rule.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_381_pv.json"
       ]
     }
   },

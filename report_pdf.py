@@ -280,8 +280,9 @@ def point_uncertainty(p, standard=None) -> str:
         return ''
     import uncertainty
     unit = 'ohm' if p['kind'].startswith('OHM') else p['unit']
-    if p['kind'] == 'FREQ':
+    if p['kind'] == 'FREQ' and not p.get('use_standard'):
         standard = None             # a frequency is measured against the GPS-referenced lab standard: the 'Frequency - Measure' CMC ALONE, never combined with the calibrator's own frequency accuracy
+                                    # use_standard (opt-in per point, Fluke 381): the frequency is the calibrator's own OUTPUT frequency, so its published frequency specification is the budget
     if standard:
         try:
             import uncertainty_budget

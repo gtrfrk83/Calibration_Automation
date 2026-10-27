@@ -1,0 +1,58 @@
+{
+ "schema": 1,
+ "id": "Fluke_381_Verification",
+ "name": "Fluke 381 Clamp Meter Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "381",
+ "category": "Clamp Meter",
+ "version": "1",
+ "order": 64,
+ "description": "Fluke 381 Remote Display Clamp Meter Performance Verification: this launcher runs the 381, 47 points (42 without the iFlex-with-coil tests)",
+ "launcher": "Procedures/Fluke_381_Verification.py",
+ "engine": [
+  "handheld_dmm.py",
+  "iflex_option.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_381_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_381_Verification.py",
+   "handheld_dmm.py",
+   "handheld_dmm_view_tk.py",
+   "handheld_dmm_view_qt.py",
+   "iflex_option.py",
+   "iflex_option_view_tk.py",
+   "iflex_option_view_qt.py",
+   "coil_rule.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "hookups.py#fluke381",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_381_pv.json#381"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke381",
+  "diagram_prefixes": [
+   "hook_fluke381"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_381_Verification.py",
+  "Procedures/Fluke_381_Verification.procedure.json",
+  "specs/fluke_381_pv.json",
+  "specs/build_fluke_381_spec.py",
+  "diagrams/README_fluke381.txt",
+  "tests/test_fluke_381_points.py"
+ ]
+}

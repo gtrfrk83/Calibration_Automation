@@ -140,6 +140,17 @@ def function_change_card(p, total, standby_text, standby_known=False):
     return dict(n=p['n'], total=total, test=describe(p), meter_line=meter, steps=steps)
 
 
+# Owner decision 2026-10-26: on the handheld multimeters and clamp meters every frequency reading whose standard is a calibrator takes the uncertainty of the
+# CALIBRATOR'S OWN OUTPUT FREQUENCY SPECIFICATION (uncertainty_budget, 'FREQ' with the calibrator model).  Set this ONE switch to False to get the older
+# lab rule back: the 'Frequency - Measure' CMC alone, never combined with the calibrator.  Bench DMMs, scopes, generators and counters are not affected.
+FREQ_UNCERTAINTY_FROM_CALIBRATOR = True
+
+
+def freq_from_calibrator():
+    """True while the owner rule (2026-10-26) is on: a frequency reading is judged by the calibrator's own output-frequency specification."""
+    return bool(FREQ_UNCERTAINTY_FROM_CALIBRATOR)
+
+
 def unc_frequency(p):
     """The frequency (Hz) a frequency-reading point (unc_kind FREQ) is judged at: the applied frequency, or `unc_frequency` for a point whose calibrator is set by hand."""
     a = p.get('applied') or {}
@@ -1334,8 +1345,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             clean = lambda d: float(f'{float(d * factor):.9g}')
             unit = SYMBOL[p['base_unit']]
             unc = ''
-            if self.has_uncertainty(p) and p.get('unc_kind') == 'FREQ':       # a frequency reading: the Frequency - Measure CMC ALONE (GPS-referenced), never the calibrator's voltage uncertainty
-                unc = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None))
+            if self.has_uncertainty(p) and p.get('unc_kind') == 'FREQ':       # a frequency reading: the calibrator's own output-frequency spec (FREQ_UNCERTAINTY_FROM_CALIBRATOR); switched off, the Frequency - Measure CMC alone
+                unc = report_pdf.point_uncertainty(dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None,
+                                                        use_standard=freq_from_calibrator()), standard=self.calibrator_model() if freq_from_calibrator() else None)
             elif self.has_uncertainty(p):
                 unc = report_pdf.point_uncertainty(dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
                                                         frequency=p['applied'].get('frequency'), unit=p.get('unc_unit') or p['base_unit'], range=None),
@@ -1386,7 +1398,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         """True for the points that carry an Uncertainty (and TAR / TUR): numeric DCV / ACV / DCI / ACI / OHM / CAP with a source, and the
         thermocouple-simulation TEMP points (degC only: a degF point has no degC calibrator specification, so it stays blank)."""
         if p.get('unc_kind') == 'FREQ' and unc_frequency(p) is not None and not p.get('no_uncertainty'):
-            return True                   # a frequency reading is judged against the lab's Frequency - Measure CMC alone: no applied source needed (a hand-set calibrator point)
+            return True                   # a frequency reading carries an uncertainty (calibrator's frequency spec, or the CMC alone when the switch is off): no applied source needed (a hand-set calibrator point)
         if not p.get('applied') or p.get('no_uncertainty'):
             return False
         if p['kind'] == 'TEMP':
@@ -1403,13 +1415,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             import tartur
             factor = Decimal(str(p['factor']))
             clean = lambda d: float(f'{float(d * factor):.9g}')
-            if p.get('unc_kind') == 'FREQ':            # frequency reading: Frequency - Measure CMC alone, no calibrator budget mixed in (so TAR is blank, TUR is against the CMC)
-                q = dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None)
+            if p.get('unc_kind') == 'FREQ':            # frequency reading: switch on, the calibrator's frequency spec (TAR and TUR as any point); switch off, the CMC alone (TAR blank)
+                q = dict(kind='FREQ', nominal=unc_frequency(p), frequency=None, unit='Hz', range=None, use_standard=freq_from_calibrator())
             else:
                 q = dict(kind='OHM2' if p['kind'] == 'OHM' else p['kind'], nominal=p['applied']['value'],
                          frequency=p['applied'].get('frequency'), unit=p['base_unit'], range=None)
             fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=self.calibrator_model())
-            if p.get('unc_kind') == 'FREQ':
+            if p.get('unc_kind') == 'FREQ' and not freq_from_calibrator():
                 fields = tartur.row_fields(q, clean(Decimal(p['low'])), clean(Decimal(p['high'])), standard=None)
             return fields
         except Exception:

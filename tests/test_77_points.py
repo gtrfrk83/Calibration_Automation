@@ -410,9 +410,10 @@ class EndToEnd(unittest.TestCase):
         self.assertNotIn('DEMO', text.upper().replace('DEMONSTRAT', ''))          # a real run is never marked demo
         self.assertRegex(text, r'Uncertainty\s+TAR\s+TUR')
         self.assertNotIn('Cover', text)
-        # TAR / TUR: the frequency point is read in Hz, a 'natural unit' mismatch: no ratio there
+        # frequency point (owner decision 2026-10-26): the calibrator's own frequency spec in Hz (5522A 5.8 Hz at 50 kHz), TUR 10.3 against the +-60 Hz limits
         line = next(l for l in text.splitlines() if '99.99 kHz range' in l)
-        self.assertNotRegex(line, r'\d+\.\d:1')
+        self.assertIn('5.8 Hz', line)
+        self.assertIn('10.3:1', line)
 
     def test_demo_never_produces_real_looking_evidence(self):
         app, _ = self.make(demo=True)

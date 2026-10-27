@@ -1,4 +1,5 @@
-"""Handheld frequency steps print the Frequency - Measure CMC alone (branch uncertainty-engines, part B).  Run:  python -m unittest tests.test_freq_steps_cmc
+"""Handheld frequency steps: the OLD rule (Frequency - Measure CMC alone, reachable with handheld_dmm.FREQ_UNCERTAINTY_FROM_CALIBRATOR = False) and the
+CURRENT default (owner decision 2026-10-26: the calibrator's own output-frequency specification) (branch uncertainty-engines, part B).  Run:  python -m unittest tests.test_freq_steps_cmc
 
 The 77 IV, 110-series, 87V and 287 / 289 steps that source AC volts and READ a frequency used to print the calibrator's VOLTAGE uncertainty with a Hz
 unit ('2.9 mHz').  Owner: all frequency interfaces are tied to the GPS-referenced lab standard, so the lab's 'Frequency - Measure' CMC (7.1e-12 of
@@ -35,6 +36,26 @@ for _sid, _text, _f in (('2-16', '320 pHz', 45.0), ('2-17', '6.4 nHz', 900.0), (
     EXPECTED[('fluke_170_series_pv.json', _sid)] = (_text, _f)       # 45 Hz 3.195e-10, 900 Hz 6.39e-9, 9 kHz 6.39e-8, 50 kHz 3.55e-7: rounded up to 2 s.f.      # 7.1e-12 x f, rounded UP to 2 s.f.: 3.55e-7 -> 3.6e-7, 7.096e-7 -> 7.1e-7, 1.416e-6 -> 1.5e-6, 3.195e-10 -> 3.2e-10
 
 
+NEW = {('fluke_77iv_pv.json', '2-17'): ('5.8 Hz', '130 mHz'), ('fluke_110_series_pv.json', '3-17'): ('5.8 Hz', '130 mHz'),
+       ('fluke_87v_pv.json', '1-11'): ('5.8 Hz', '250 mHz'), ('fluke_87v_pv.json', '1-12'): ('58 Hz', '500 mHz'),
+       ('fluke_87v_pv.json', '1-13'): ('5.8 Hz', '250 mHz'), ('fluke_87v_pv.json', '1-14'): ('5.8 Hz', '250 mHz'),
+       ('fluke_287_289_pv.json', '4-24'): ('5.8 mHz', '120 µHz')}
+for _sid, _a, _b in (('2-16', '5.8 mHz', '120 µHz'), ('2-17', '58 mHz', '2.3 mHz'), ('2-18', '580 mHz', '23 mHz'), ('2-19', '5.8 Hz', '130 mHz'), ('2-25', '5.8 mHz', '120 µHz'),
+                     ('2-26', '5.8 Hz', '130 mHz'), ('3-16', '5.8 mHz', '120 µHz'), ('3-17', '58 mHz', '2.3 mHz'), ('3-18', '580 mHz', '23 mHz'), ('3-19', '5.8 Hz', '130 mHz'),
+                     ('3-25', '5.8 mHz', '120 µHz')):
+    NEW[('fluke_170_series_pv.json', _sid)] = (_a, _b)          # (5522A / 5520A, 5560A)
+
+
+class OldRule:
+    """Run a test with the switch off (the lab Frequency - Measure CMC alone)."""
+    def setUp(self):
+        self._sw = H.FREQ_UNCERTAINTY_FROM_CALIBRATOR
+        H.FREQ_UNCERTAINTY_FROM_CALIBRATOR = False
+
+    def tearDown(self):
+        H.FREQ_UNCERTAINTY_FROM_CALIBRATOR = self._sw
+
+
 def steps(name):
     d = json.loads((ROOT / 'specs' / name).read_text(encoding='utf-8'))
     return d.get('steps', [])
@@ -60,7 +81,7 @@ def row(s, model='5522A'):
     return App(model).certificate_row(s, dict(result='PASS', reading=s['nominal'], entered='x'))
 
 
-class FrequencyRows(unittest.TestCase):
+class FrequencyRows(OldRule, unittest.TestCase):
     def test_the_frequency_steps_carry_the_marker(self):
         for name, ids in FIXED.items():
             found = [s['id'] for s in steps(name) if s.get('base_unit') == 'Hz' and s['kind'] == 'ACV' and s.get('applied') and s.get('unc_kind') == 'FREQ']
@@ -83,6 +104,11 @@ class FrequencyRows(unittest.TestCase):
             self.assertEqual(f['TAR'], '', (name, sid))                           # no calibrator frequency accuracy is used: not well defined, left blank
             self.assertEqual(f['TUR'], '>1000:1', (name, sid))                    # tolerance of several mHz to Hz over a sub-microhertz CMC
 
+    def test_the_old_rule_is_reached_by_the_one_switch(self):
+        self.assertFalse(H.FREQ_UNCERTAINTY_FROM_CALIBRATOR)
+        self.assertEqual(row(step('fluke_323_pv.json', '4-28'))['Uncertainty'], '360 pHz')
+        self.assertEqual(row(step('fluke_323_pv.json', '4-27'))['Uncertainty'], '')      # 5 Hz: below the CMC's 10 Hz start, no uncertainty
+
     def test_nothing_else_changed(self):
         """Every Hz-reading step with a source carries the marker (the sourceless 4-25 / 1-15 rows have no source and no uncertainty)."""
         left = set()
@@ -103,6 +129,45 @@ class FrequencyRows(unittest.TestCase):
         src = (ROOT / 'specs' / 'build_87v_spec.py').read_text(encoding='utf-8')
         self.assertEqual(src.count("unc_kind='FREQ')"), 3)
         self.assertIn("'no_uncertainty', 'unc_kind'", src)
+
+
+class CalibratorFrequencyRule(unittest.TestCase):
+    """Owner decision 2026-10-26 (default): every handheld FREQ point takes the calibrator's own output-frequency specification."""
+    def test_default_is_on(self):
+        self.assertTrue(H.FREQ_UNCERTAINTY_FROM_CALIBRATOR)
+
+    def test_printed_values_and_ratios(self):
+        for (name, sid), (t5522, t5560) in NEW.items():
+            s = step(name, sid)
+            for model, text in (('5522A', t5522), ('5520A', t5522), ('5560A', t5560)):
+                self.assertEqual(row(s, model)['Uncertainty'], text, (name, sid, model))
+                f = App(model).certificate_fields(s)
+                self.assertTrue(f['TUR'] and f['TAR'], (name, sid, model, f))
+
+    def test_323_family_including_the_5_hz_point(self):
+        want = {'4-27': ('5.8 mHz', '13 µHz'), '4-28': ('5.8 mHz', '130 µHz'), '4-29': ('58 mHz', '1.3 mHz')}      # 5 / 50 / 500 Hz
+        for sid, (a, b) in want.items():
+            s = step('fluke_323_pv.json', sid)
+            self.assertEqual(row(s, '5522A')['Uncertainty'], a, sid)
+            self.assertEqual(row(s, '5560A')['Uncertainty'], b, sid)
+
+    def test_no_calibrator_falls_back_to_the_cmc(self):
+        self.assertEqual(row(step('fluke_323_pv.json', '4-28'), None)['Uncertainty'], '360 pHz')
+
+    def test_nothing_but_the_uncertainty_cells_changed(self):
+        s = step('fluke_323_pv.json', '4-28')
+        on = row(s)
+        H.FREQ_UNCERTAINTY_FROM_CALIBRATOR = False
+        try:
+            off = row(s)
+        finally:
+            H.FREQ_UNCERTAINTY_FROM_CALIBRATOR = True
+        self.assertEqual({k: v for k, v in on.items() if k != 'Uncertainty'}, {k: v for k, v in off.items() if k != 'Uncertainty'})
+
+    def test_bench_default_of_report_pdf_is_unchanged(self):
+        import report_pdf
+        q = dict(kind='FREQ', nominal=50.0, frequency=None, unit='Hz', range=None)
+        self.assertEqual(report_pdf.point_uncertainty(q, standard='5522A'), report_pdf.point_uncertainty(q))
 
 
 if __name__ == '__main__':
