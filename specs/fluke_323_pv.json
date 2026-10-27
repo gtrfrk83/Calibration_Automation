@@ -26,7 +26,7 @@
   "324": {
    "name": "Fluke 324",
    "brand": "Fluke",
-   "model_note": "Fluke 324 true-rms clamp meter: Table 4, 24 points (adds temperature and capacitance)"
+   "model_note": "Fluke 324 true-rms clamp meter: Table 4, 22 points (adds temperature and capacitance; the 10 kohm and 30 kohm rows are removed - the 324 cannot measure above 4000 ohm)"
   },
   "325": {
    "name": "Fluke 325",
@@ -732,7 +732,6 @@
    "switch": "Ω  (ohms)",
    "range": "",
    "models": [
-    "324",
     "325"
    ],
    "kind": "OHM",
@@ -749,7 +748,7 @@
    "nominal": 10000.0,
    "tol_text": "Table 4: 9.85 to 10.15 kΩ",
    "group": "VOHM",
-   "note": "Table 4 names no range and no resolution (the Calibration Manual prints neither): the meter autoranges; the limits are shown with the decimals Table 4 prints. Table 4 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads.",
+   "note": "Table 4 names no range and no resolution (the Calibration Manual prints neither): the meter autoranges; the limits are shown with the decimals Table 4 prints. Table 4 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads. Fluke 324: the 324 cannot measure above 4000 ohm, so this point (printed for the 324 and 325 in Table 4) is removed for the 324 (owner decision 2026-10-27: error in the Fluke performance verification table). It stays for the 325.",
    "ref": "T4 #22",
    "id": "4-22"
   },
@@ -760,7 +759,6 @@
    "switch": "Ω  (ohms)",
    "range": "",
    "models": [
-    "324",
     "325"
    ],
    "kind": "OHM",
@@ -793,7 +791,7 @@
     }
    },
    "group": "VOHM",
-   "note": "Table 4 names no range and no resolution (the Calibration Manual prints neither): the meter autoranges; the limits are shown with the decimals Table 4 prints. Table 4 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads. PRINTED MISPRINT: Table 4 prints the limits of this row as 34.65 KΩ and 30.35 Ω. The row is symmetric about the nominal like its neighbours (10K: +-1.5 %; 3000 Ω: +-35 Ω), so the limits used are 29.65 kΩ and 30.35 kΩ. The printed limits are not used. UNVERIFIED against a second source.",
+   "note": "Table 4 names no range and no resolution (the Calibration Manual prints neither): the meter autoranges; the limits are shown with the decimals Table 4 prints. Table 4 does not say whether the limits include test lead resistance (UNVERIFIED); use short leads. Fluke 324: the 324 cannot measure above 4000 ohm, so this point (printed for the 324 and 325 in Table 4) is removed for the 324 (owner decision 2026-10-27: error in the Fluke performance verification table). It stays for the 325. PRINTED MISPRINT: Table 4 prints the limits of this row as 34.65 KΩ and 30.35 Ω. The row is symmetric about the nominal like its neighbours (10K: +-1.5 %; 3000 Ω: +-35 Ω), so the limits used are 29.65 kΩ and 30.35 kΩ. The printed limits are not used. UNVERIFIED against a second source.",
    "ref": "T4 #23",
    "id": "4-23"
   },

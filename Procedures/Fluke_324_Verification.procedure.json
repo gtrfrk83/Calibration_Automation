@@ -7,7 +7,7 @@
  "category": "Clamp Meter",
  "version": "1",
  "order": 62,
- "description": "Fluke 323 / 324 / 325 Clamp Meter Performance Verification (family spec): this launcher runs the 324, 24 points",
+ "description": "Fluke 323 / 324 / 325 Clamp Meter Performance Verification (family spec): this launcher runs the 324, 22 points",
  "launcher": "Procedures/Fluke_324_Verification.py",
  "engine": [
   "handheld_dmm.py",
