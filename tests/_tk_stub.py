@@ -93,6 +93,7 @@ class _ShimModule(types.ModuleType):
     def __init__(self, name, base=None):
         super().__init__(name)
         self._base = base
+        self._cal_shim = True
 
     def __getattr__(self, name):
         if name.startswith('__'):
@@ -209,7 +210,7 @@ def install_legacy_layer():
     import ui_port
     import ui_theme_core
     for name, base in (('ui_theme', ui_theme_core), ('ui_shell', None), ('report_dialog', None)):
-        if name not in sys.modules or not isinstance(sys.modules[name], _ShimModule):
+        if not vars(sys.modules[name]).get('_cal_shim') if name in sys.modules else True:
             sys.modules[name] = _ShimModule(name, base)
     rd = sys.modules['report_dialog']
     if 'ask_details' not in vars(rd):
@@ -234,9 +235,12 @@ def install_legacy_layer():
         for n in ('COVERED', 'SHORT', 'UNAVAILABLE', 'asset_of', 'build_models', 'find_app', 'finish', 'hint_kinds', 'is_demo'):
             setattr(rr, n, getattr(flow, n))
 
+        class NoWindow(RuntimeError):
+            pass
+
         class ReviewWindow:
             def __init__(self, *a, **k):
-                raise RuntimeError('no review window without a toolkit: the test replaces report_review.ReviewWindow')
+                raise NoWindow('no review window without a toolkit: the test replaces report_review.ReviewWindow')
         rr.ReviewWindow = ReviewWindow
 
         def ask(parent, procedure='', app=None):
@@ -246,22 +250,26 @@ def install_legacy_layer():
             models, demo = built
             details = None
             for n, model in enumerate(models, 1):
-                win = rr.ReviewWindow(parent, model, procedure, demo=demo, details=details, position=(n, len(models)))
+                try:
+                    win = rr.ReviewWindow(parent, model, procedure, demo=demo, details=details, position=(n, len(models)))
+                except NoWindow:
+                    return rr.UNAVAILABLE                      # like the Tk flow: when the window cannot be built, the plain popup follows
                 details = win.run()
                 if details is None:
                     return None
             return rr.finish(models, details)
         rr.ask = ask
         sys.modules['report_review'] = rr
-    port_cls = _stub_port_class()
-    if not isinstance(sys.modules.get('ui_port_tk'), types.ModuleType):
+    existing = sys.modules.get('ui_port_tk')
+    port_cls = existing.TkUiPort if isinstance(existing, types.ModuleType) and hasattr(existing, 'TkUiPort') else _stub_port_class()
+    if not isinstance(existing, types.ModuleType):
         m = types.ModuleType('ui_port_tk')                     # tests patch ui_port_tk.messagebox / .filedialog: the stub modules the stub port calls
         m.TkUiPort = port_cls
         m.messagebox = sys.modules['tkinter.messagebox']
         m.filedialog = sys.modules['tkinter.filedialog']
         m.simpledialog = sys.modules['tkinter.simpledialog']
         sys.modules['ui_port_tk'] = m
-    if ui_port._ui is None:
+    if not isinstance(ui_port._ui, port_cls):             # an earlier test module may have left another port installed
         ui_port.set_ui(port_cls())
 
 
