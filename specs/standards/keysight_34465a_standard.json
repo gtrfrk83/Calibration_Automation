@@ -1,0 +1,5963 @@
+{
+ "schema": 1,
+ "standard": {
+  "manufacturer": "Keysight Technologies (Agilent)",
+  "model": "34465A",
+  "description": "6 1/2 digit Truevolt digital multimeter, ACAL capable (Keysight data sheet 5991-1983EN)",
+  "confidence_text": "95 % (k = 2): the data sheet prints \"These specifications are compliant to ISO/IEC 17025 for k = 2\" at the head of each model's specification table (5991-1983EN printed p. 13 for the 34461A, p. 15 for the 34465A); it prints no percentage, so 95 % is the coverage probability that goes with k = 2",
+  "confidence_pct": 95.0,
+  "reference": "Keysight Digital Multimeters 34460A/34461A/34465A/34470A data sheet 5991-1983EN, published June 10, 2026, \"Specifications 34465A\" printed pp. 15-17",
+  "revision": "5991-1983EN (published in USA, June 10, 2026)",
+  "author": "written by specs/build_34465a_standard.py from the rendered page images of the data sheet",
+  "approved_by": "",
+  "approve_date": "",
+  "source_pdf": "Digital_Multimeters_34460A_34461A_34465A_6__digit_34470A_7__digit.pdf",
+  "sheet_generated": "",
+  "built": "2026-10-26T19:47:06"
+ },
+ "notes": {
+  "1": "SOURCE: Keysight Digital Multimeters 34460A, 34461A, 34465A (6 1/2 digit), 34470A (7 1/2 digit) data sheet 5991-1983EN, published in USA June 10, 2026 (PDF of 28 pages, supplied by the owner as Digital_Multimeters_34460A_34461A_34465A_6__digit_34470A_7__digit.pdf; printed page numbers equal the PDF page numbers). 34465A specifications: pp. 15-17 (DC voltage, resistance, DC current, continuity, diode, DC:DC ratio, temperature: p. 15; true RMS AC voltage, true RMS AC current, capacitance, frequency, burden voltages: p. 16; footnotes: p. 17). Built by the specs builder of this model (shared engine specs/truevolt_standard_engine.py).",
+  "2": "VERIFICATION: every stored number was read from RENDERED PAGE IMAGES (pdftoppm, 150 dpi for the whole page and 250 dpi for a crop of each table), never from the extracted text, and each stored table was read twice (whole page, then the crop); the two readings agree. The independent second transcription is in the model's test file. Read once only (information in the notes, no lookup uses them): temperature coefficients, gate-time errors, burden voltages, the temperature / continuity / diode / DC ratio lines.",
+  "3": "CONFIDENCE LEVEL: the data sheet prints \"These specifications are compliant to ISO/IEC 17025 for k = 2\" at the head of the specification table, and \"specifications include measurement uncertainty and were created in compliance with ISO-17025\" (p. 28). It prints NO percentage. Stored as confidence_pct 95.0 (k = 2, the coverage probability that belongs to k = 2; repository rule: 95 % -> divisor 2.0, see NOTES.md \"Confidence level rule\"). The inference k = 2 -> 95 % is the repository's, not a printed figure: FLAG.",
+  "4": "PERIODS: \"90 day\", \"1 yr\" and \"2 yr\" are stored (three period labels in the free-text period field; no schema change). The printed 24 hour column (relative to calibration standards, footnote 3) is NOT stored. Conditions of the stored columns: 90 day / 1 year / 2 year at the TCAL +/- 5 degC the table heads print: DC voltage and resistance (the first table of p. 15) are printed at TACAL +/- 2 degC (24 hour: +/- 1 degC), TACAL being the temperature of the last ACAL (footnote 1: ACAL run within the last 2 days); the DC current, AC and other functions are at TCAL +/- 5 degC. Footnote 1: specifications are for a 90-minute warm-up, integration setting of 10 or 100 NPLC, auto-zero on, AC slow filter.",
+  "5": "DEFAULT PERIOD = \"1 yr\" (owner: the uncertainty assignment uses the 1 year column). StandardSpec.period defaults to \"1 yr\" for this sheet, so the plain lookup used by the budget (specmanager lookup, tartur.standard_accuracy, uncertainty_budget.build) returns the 1 year figure; for the 34465A that is +/-(0.0030 % of reading + 0.0004 % of the 10 V range) on the 10 V range. The 90 day and 2 year figures are reachable with period=\"90 day\" / \"2 yr\". A test (tests/test_standard_34465a.py) fails if the default lookup stops returning the 1 yr figure.",
+  "6": "ACCURACY FORM: +/-(% of reading + % of range). The data sheet does not define \"range\" for the % of range term; it is taken against the range NAME (100 mV range -> 0.1 V, 10 V -> 10 V, 1 kohm -> 1000 ohm, 100 uA -> 1e-4 A), the Keysight convention and the one the 3458A sheet follows; UNVERIFIED for these data sheets. The value range of each row runs from -full scale to +full scale; footnote 2 of the data sheet: the ranges run 20 % over range (full scale 120 mV, 1.2 V, 12 V, 120 V, 120 ohm ... 1.2 uA ... 1.2 A, 1.2 nF ... 120 uF) EXCEPT 1000 V DC, 750 V AC, the 3 A and 10 A current ranges and the diode test (0 %): those rows end at the range name itself (1000 V, 750 V, 3 A, 10 A).",
+  "7": "DIRECTION: \"input\" - the DMM measures (same as the 3458A, 5790B, 8563E and 8902A sheets). specmanager.StandardSpec.lookup defaults to direction \"output\" and the budget (uncertainty_budget.build) must be asked with direction \"input\"; tartur.standard_accuracy has the argument. The Datasheet Builder matcher uses the row direction itself.",
+  "8": "RESOLUTION: no row carries a resolution (the specification tables print none; reading resolution depends on the aperture / NPLC setting). The budget therefore has NO resolution term for this standard; the Standards Specs tab can record one. Reading noise, the gate-time errors and the temperature coefficients are NOT in any stored row.",
+  "9": "DC VOLTS (p. 15): 100 mV to 1000 V. Temperature coefficient (information, not stored): footnote 6 (non ACAL): add per degC outside the last TACAL +/- 2 degC: 100 mV 0.0005 + 0.0005, 1 V - 1000 V 0.0005 + 0.0001; footnote 7 (with ACAL): add per degC outside TACAL +/- 2 degC: 100 mV 0.0002 + 0.0005, 1 V - 1000 V 0.0002 + 0.0001 (% of reading + % of range). The 1000 V range has no 20 % over range.",
+  "10": "DC VOLTS 1000 V (footnote 9): for each additional volt over +/-500 V add 0.02 mV of error. NOT in the stored 1000 V row.",
+  "11": "RESISTANCE (p. 15, footnote 8): the specifications are for the 4-WIRE ohms function, or the 2-wire ohms function using math null for offset. WITHOUT math null add 0.2 ohm in the 2-wire ohms function: stored as the separate function \"Resistance [2-wire, no math null]\" with a fixed 0.2 ohm term (a plain lookup prefers the 4-wire function; pass variant=\"2-wire\"; the main function is named \"4-wire or 2W with math null\" on purpose, so that variant=\"2-wire\" selects only the no-math-null rows). Footnote 8 also: the 100 Mohm and 1 Gohm ranges are 2-wire ohms function only, and \"see the manual for low power ohms specification and measurement currents\" (the low-power ohms figures are NOT in the data sheet and NOT stored). Temperature coefficients (not stored, non ACAL / with ACAL): 100 ohm 0.0006 + 0.0005 / 0.0002 + 0.0005, 1 k - 100 k 0.0006 + 0.0001 / 0.0002 + 0.0001, 1 Mohm 0.0010 + 0.0002 / 0.0002 + 0.0002, 10 Mohm 0.0030 + 0.0004 / 0.0030 + 0.0004, 100 Mohm 0.1000 + 0.0001 / 0.0100 + 0.0001, 1 Gohm 1.0000 + 0.0001 / 0.1000 + 0.0001.",
+  "12": "RESISTANCE 100 Mohm and 1 Gohm (footnote 8): 2-wire function only. OWNER DECISION: the \"Resistance [2-wire, no math null]\" function ALSO carries these two ranges, with the same figures as the 4-wire / math-null rows and NO 0.2 ohm adder (the 0.2 ohm is negligible against 0.3 % and 3 %, and these ranges exist only as 2-wire). The data sheet itself does not say whether the footnote 8 adder applies to them: the choice is the owner's, not a printed fact.",
+  "13": "DC CURRENT (p. 15): ranges 1 uA to 10 A; burden voltage at full scale (p. 16, information): 1 uA < 0.0011 V, 10 uA < 0.011 V, 100 uA < 0.11 V, 1 mA < 0.11 V, 10 mA < 0.027 V, 100 mA < 0.27 V, 1 A < 0.7 V / 0.05 V, 3 A < 2.0 V / 0.15 V (the second value is obtained on the 10 A input, footnote 21), 10 A < 0.5 V. Temperature coefficients (not stored): 1 uA 0.0020 + 0.0010, 10 uA 0.0015 + 0.0006, 100 uA 0.0015 + 0.0004, 1 mA 0.0015 + 0.0005, 10 mA 0.0020 + 0.0020, 100 mA 0.0020 + 0.0005, 1 A 0.0050 + 0.0010, 3 A 0.0050 + 0.0020, 10 A 0.0050 + 0.0010. The printed 1 mA 24 hour cell reads \"0.0070+ 0.0030\" (spacing misprint, not stored).",
+  "14": "DC CURRENT TYPICAL: the 1 uA, 10 uA and 100 uA rows are printed \"(typ)\" - typical, not warranted; the labels say so.",
+  "15": "CURRENT 10 A range (footnote 4): only available on a separate front panel connector. Add 2 mA base per amp for inputs greater than 5 Arms. NOT in the stored 10 A rows (DC and AC). The 3 A and 10 A ranges have no 20 % over range (footnote 2).",
+  "16": "TRUE RMS AC VOLTAGE (p. 16): 100 mV, 1 V, 10 V, 100 V and 750 V ranges share one table; footnote 14: sine wave input > 0.3 % of range and > 1 mVrms; 750 V range limited to 8 x 10^7 V.Hz; for each additional volt over 300 Vrms add 1 mVrms of error (NOT stored); footnote 15: slow filter (3 Hz, 20 Hz, 200 Hz) low-frequency performance. Temperature coefficients (not stored, add per degC outside TCAL +/- 5 degC, footnote 5): 3-5 Hz 0.010 + 0.003, 5-10 Hz 0.008 + 0.003, 10 Hz-20 kHz 0.007 + 0.003, 20-50 kHz 0.010 + 0.005, 50-100 kHz 0.060 + 0.008, 100-300 kHz 0.200 + 0.020. A band edge belongs to both bands; the larger limit is used there (repository rule). The 750 V range has no 20 % over range.",
+  "17": "TRUE RMS AC CURRENT (p. 16, footnotes 16, 17): sine wave input > 1 % of range and > 10 uArms; specifications are for sine wave input unless stated otherwise. The 5 kHz to 10 kHz band is TYPICAL on every range (labels say so). 100 uA, 1 mA, 10 mA, 100 mA and 1 A share one table; 3 A and 10 A have their own. Temperature coefficients (not stored): 0.015 + 0.006 (3 Hz-5 kHz), 0.030 + 0.006 (5-10 kHz). The 24 hour and 90 day cells of the 100 uA - 1 A group differ (0.07 / 0.09) from the 1 year / 2 year cells (0.10): stored as printed.",
+  "18": "CAPACITANCE (p. 16): 1 nF to 100 uF, % of reading + % of range, the same figure in the 90 day, 1 year and 2 year columns (temperature coefficients 0.05 + 0.05 for 1 nF, 0.05 + 0.01 for the rest; not stored). Footnote 20: for using Math Null zeroing; high dissipation factor capacitors may show different results than a single frequency measurement; film capacitors usually have lower dissipation factors. The printed superscript on the Capacitance heading is 21 (footnote 21 is about burden voltage): the data sheet's footnote numbering is shifted here; footnote 20 is read as the capacitance one (UNVERIFIED). Rows are stored as bipolar value ranges like every sheet.",
+  "19": "FREQUENCY (p. 16): % of reading, 100 mV, 1 V, 10 V, 100 V and 750 V ranges; footnote 19 (printed superscript 18, 20): input > 100 mV; for 10 mV to 100 mV inputs multiply the % of reading error by 10; amplitude 10 % - 120 % of range except 14 % - 100 % for 750 ACV; 1 second gate time (7 digits). Stored by frequency band only. Temperature coefficient: 0.0002 (% of reading per degC) for every band (not stored). The footnote numbering of this section is shifted in the data sheet (see note 18): UNVERIFIED which footnote belongs to which heading.",
+  "20": "FREQUENCY square wave (footnote 18): square wave input specified for 10 Hz to 300 kHz for a 1 second aperture; for shorter apertures the minimum frequency requires > 2 cycles. Stored as the separate function \"Frequency [Square wave]\" (variant=\"square\"). Additional frequency errors (% of reading, NOT stored; by aperture 1 s (0.1 ppm) / 0.1 s (1 ppm) / 0.01 s (10 ppm) / 0.001 s (100 ppm)): 3-40 Hz 0 / 0.100 / 0.160 / 0.160; 40-100 Hz 0 / 0.030 / 0.160 / 0.160; 100 Hz-1 kHz 0 / 0.020 / 0.200 / 0.200; 1 kHz-300 kHz 0 / 0.004 / 0.030 / 0.240; square wave 0 / 0 / 0 / 0.003.",
+  "21": "NOT STORED: 24 hour column; continuity (1 kohm) and diode test (5 V) rows; DC:DC ratio (typical: normalized input accuracy + normalized reference accuracy); digitizing (typical SFDR / SNDR / bandwidth, p. 17); temperature (p. 15, footnote 12 \"limited by the selected probe\"): PT100 \"Probe accuracy + 0.05 degC\", thermistor \"Probe accuracy + 0.1 degC\", K, J, T, E, N thermocouples \"Probe accuracy + reference junction accuracy + 0.3 degC\", R thermocouple (250 to 1760 degC) \"+ 0.5 degC\". They need the probe's own (and the reference junction's, typically +/- 1.0 degC with the U1180A, footnote 13) accuracy, so no number can be stored for the DMM alone. The footnote superscripts 13 / 14 / 23 on the PT100, R thermocouple and thermistor lines do not match the footnote texts well; not used."
+ },
+ "limits": [
+  {
+   "function": "Voltage, DC",
+   "limit": "100 mV to 1000 V: % of reading + % of range (90 day / 1 yr / 2 yr; TACAL +/- 2 degC).",
+   "page": "15"
+  },
+  {
+   "function": "Resistance",
+   "limit": "100 ohm to 1 Gohm; 4-wire (or 2-wire with math null); 100 Mohm and 1 Gohm 2-wire only; 2-wire without math null adds 0.2 ohm.",
+   "page": "15"
+  },
+  {
+   "function": "Current, DC",
+   "limit": "1 uA to 10 A; 1 uA, 10 uA, 100 uA typical.",
+   "page": "15"
+  },
+  {
+   "function": "Voltage, AC",
+   "limit": "True RMS, 100 mV to 750 V, 3 Hz to 300 kHz, six bands.",
+   "page": "16"
+  },
+  {
+   "function": "Current, AC",
+   "limit": "True RMS, 100 uA to 10 A, 3 Hz to 5 kHz; 5 kHz to 10 kHz typical.",
+   "page": "16"
+  },
+  {
+   "function": "Capacitance",
+   "limit": "1 nF to 100 uF.",
+   "page": "16"
+  },
+  {
+   "function": "Frequency",
+   "limit": "% of reading, 3 Hz to 300 kHz (sine) and 10 Hz to 300 kHz (square wave), 1 s aperture.",
+   "page": "16"
+  }
+ ],
+ "functions": [
+  {
+   "name": "Voltage, DC",
+   "direction": "input",
+   "page": 15,
+   "ranges": [
+    {
+     "label": "100 mV range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "V",
+       "text": "-120 mV to 120 mV",
+       "annot": "",
+       "notes": [
+        6,
+        9
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 4e-05,
+       "fs_rel": 3.5e-05,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0040 % I.V. + 0.0035 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 5e-05,
+       "fs_rel": 3.5e-05,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0050 % I.V. + 0.0035 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 6.5e-05,
+       "fs_rel": 3.5e-05,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0065 % I.V. + 0.0035 % of range{\"Range\" = 100 mV})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mV",
+     "kind": "DCV",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "V",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 V range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "V",
+       "text": "-1.2 V to 1.2 V",
+       "annot": "",
+       "notes": [
+        6,
+        9
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 2.5e-05,
+       "fs_rel": 4e-06,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0025 % I.V. + 0.0004 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 3.5e-05,
+       "fs_rel": 4e-06,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0035 % I.V. + 0.0004 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5e-05,
+       "fs_rel": 4e-06,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0050 % I.V. + 0.0004 % of range{\"Range\" = 1 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 V",
+     "kind": "DCV",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "V",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 V range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12.0,
+       "hi": 12.0,
+       "unit": "V",
+       "text": "-12 V to 12 V",
+       "annot": "",
+       "notes": [
+        6,
+        9
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 2e-05,
+       "fs_rel": 4e-06,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0020 % I.V. + 0.0004 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 3e-05,
+       "fs_rel": 4e-06,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0030 % I.V. + 0.0004 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 4.5e-05,
+       "fs_rel": 4e-06,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0045 % I.V. + 0.0004 % of range{\"Range\" = 10 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 V",
+     "kind": "DCV",
+     "variant": "",
+     "amp_lo": -12.0,
+     "amp_hi": 12.0,
+     "unit": "V",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 V range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "V",
+       "text": "-120 V to 120 V",
+       "annot": "",
+       "notes": [
+        6,
+        9
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 3.5e-05,
+       "fs_rel": 6e-06,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0035 % I.V. + 0.0006 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 4e-05,
+       "fs_rel": 6e-06,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0040 % I.V. + 0.0006 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5.5e-05,
+       "fs_rel": 6e-06,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0055 % I.V. + 0.0006 % of range{\"Range\" = 100 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 V",
+     "kind": "DCV",
+     "variant": "",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "V",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1000 V range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1000.0,
+       "hi": 1000.0,
+       "unit": "V",
+       "text": "-1000 V to 1000 V",
+       "annot": "",
+       "notes": [
+        6,
+        9,
+        10
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 3.5e-05,
+       "fs_rel": 6e-06,
+       "fs_value": 1000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0035 % I.V. + 0.0006 % of range{\"Range\" = 1000 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 4e-05,
+       "fs_rel": 6e-06,
+       "fs_value": 1000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0040 % I.V. + 0.0006 % of range{\"Range\" = 1000 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5.5e-05,
+       "fs_rel": 6e-06,
+       "fs_value": 1000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0055 % I.V. + 0.0006 % of range{\"Range\" = 1000 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1000 V",
+     "kind": "DCV",
+     "variant": "",
+     "amp_lo": -1000.0,
+     "amp_hi": 1000.0,
+     "unit": "V",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Resistance [4-wire or 2W with math null]",
+   "direction": "input",
+   "page": 15,
+   "ranges": [
+    {
+     "label": "100 ohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "ohm",
+       "text": "-120 ohm to 120 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 5e-05,
+       "fs_rel": 4e-05,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0050 % I.V. + 0.0040 % of range{\"Range\" = 100 ohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 6e-05,
+       "fs_rel": 4e-05,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0060 % I.V. + 0.0040 % of range{\"Range\" = 100 ohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 7e-05,
+       "fs_rel": 4e-05,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0070 % I.V. + 0.0040 % of range{\"Range\" = 100 ohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 ohm",
+     "kind": "OHM",
+     "variant": "4-wire or 2W with math null",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 kohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1200.0,
+       "hi": 1200.0,
+       "unit": "ohm",
+       "text": "-1200 ohm to 1200 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 3e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0030 % I.V. + 0.0005 % of range{\"Range\" = 1 kohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 4e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0040 % I.V. + 0.0005 % of range{\"Range\" = 1 kohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0050 % I.V. + 0.0005 % of range{\"Range\" = 1 kohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 kohm",
+     "kind": "OHM",
+     "variant": "4-wire or 2W with math null",
+     "amp_lo": -1200.0,
+     "amp_hi": 1200.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 kohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12000.0,
+       "hi": 12000.0,
+       "unit": "ohm",
+       "text": "-12000 ohm to 12000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 3e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 10000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0030 % I.V. + 0.0005 % of range{\"Range\" = 10 kohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 4e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 10000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0040 % I.V. + 0.0005 % of range{\"Range\" = 10 kohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 10000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0050 % I.V. + 0.0005 % of range{\"Range\" = 10 kohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 kohm",
+     "kind": "OHM",
+     "variant": "4-wire or 2W with math null",
+     "amp_lo": -12000.0,
+     "amp_hi": 12000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 kohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120000.0,
+       "hi": 120000.0,
+       "unit": "ohm",
+       "text": "-120000 ohm to 120000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 3e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 100000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0030 % I.V. + 0.0005 % of range{\"Range\" = 100 kohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 4e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 100000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0040 % I.V. + 0.0005 % of range{\"Range\" = 100 kohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 100000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0050 % I.V. + 0.0005 % of range{\"Range\" = 100 kohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 kohm",
+     "kind": "OHM",
+     "variant": "4-wire or 2W with math null",
+     "amp_lo": -120000.0,
+     "amp_hi": 120000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 Mohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1200000.0,
+       "hi": 1200000.0,
+       "unit": "ohm",
+       "text": "-1200000 ohm to 1200000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 6e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0060 % I.V. + 0.0005 % of range{\"Range\" = 1 Mohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 7e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0070 % I.V. + 0.0005 % of range{\"Range\" = 1 Mohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 8e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0080 % I.V. + 0.0005 % of range{\"Range\" = 1 Mohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 Mohm",
+     "kind": "OHM",
+     "variant": "4-wire or 2W with math null",
+     "amp_lo": -1200000.0,
+     "amp_hi": 1200000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 Mohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12000000.0,
+       "hi": 12000000.0,
+       "unit": "ohm",
+       "text": "-12000000 ohm to 12000000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0002,
+       "fs_rel": 1e-05,
+       "fs_value": 10000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0200 % I.V. + 0.0010 % of range{\"Range\" = 10 Mohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.00025,
+       "fs_rel": 1e-05,
+       "fs_value": 10000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0250 % I.V. + 0.0010 % of range{\"Range\" = 10 Mohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0003,
+       "fs_rel": 1e-05,
+       "fs_value": 10000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0300 % I.V. + 0.0010 % of range{\"Range\" = 10 Mohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 Mohm",
+     "kind": "OHM",
+     "variant": "4-wire or 2W with math null",
+     "amp_lo": -12000000.0,
+     "amp_hi": 12000000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 Mohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120000000.0,
+       "hi": 120000000.0,
+       "unit": "ohm",
+       "text": "-120000000 ohm to 120000000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11,
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.003,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.3000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.004,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.4000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 Mohm",
+     "kind": "OHM",
+     "variant": "4-wire or 2W with math null",
+     "amp_lo": -120000000.0,
+     "amp_hi": 120000000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 Gohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1200000000.0,
+       "hi": 1200000000.0,
+       "unit": "ohm",
+       "text": "-1200000000 ohm to 1200000000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11,
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.02,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(2.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.03,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.04,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(4.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 Gohm",
+     "kind": "OHM",
+     "variant": "4-wire or 2W with math null",
+     "amp_lo": -1200000000.0,
+     "amp_hi": 1200000000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Resistance [2-wire, no math null]",
+   "direction": "input",
+   "page": 15,
+   "ranges": [
+    {
+     "label": "100 ohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "ohm",
+       "text": "-120 ohm to 120 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 5e-05,
+       "fs_rel": 4e-05,
+       "fs_value": 100.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0050 % I.V. + 0.0040 % of range{\"Range\" = 100 ohm} + 0.2 ohm)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 6e-05,
+       "fs_rel": 4e-05,
+       "fs_value": 100.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0060 % I.V. + 0.0040 % of range{\"Range\" = 100 ohm} + 0.2 ohm)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 7e-05,
+       "fs_rel": 4e-05,
+       "fs_value": 100.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0070 % I.V. + 0.0040 % of range{\"Range\" = 100 ohm} + 0.2 ohm)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 ohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 kohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1200.0,
+       "hi": 1200.0,
+       "unit": "ohm",
+       "text": "-1200 ohm to 1200 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 3e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0030 % I.V. + 0.0005 % of range{\"Range\" = 1 kohm} + 0.2 ohm)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 4e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0040 % I.V. + 0.0005 % of range{\"Range\" = 1 kohm} + 0.2 ohm)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0050 % I.V. + 0.0005 % of range{\"Range\" = 1 kohm} + 0.2 ohm)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 kohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -1200.0,
+     "amp_hi": 1200.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 kohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12000.0,
+       "hi": 12000.0,
+       "unit": "ohm",
+       "text": "-12000 ohm to 12000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 3e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 10000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0030 % I.V. + 0.0005 % of range{\"Range\" = 10 kohm} + 0.2 ohm)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 4e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 10000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0040 % I.V. + 0.0005 % of range{\"Range\" = 10 kohm} + 0.2 ohm)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 10000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0050 % I.V. + 0.0005 % of range{\"Range\" = 10 kohm} + 0.2 ohm)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 kohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -12000.0,
+     "amp_hi": 12000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 kohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120000.0,
+       "hi": 120000.0,
+       "unit": "ohm",
+       "text": "-120000 ohm to 120000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 3e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 100000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0030 % I.V. + 0.0005 % of range{\"Range\" = 100 kohm} + 0.2 ohm)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 4e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 100000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0040 % I.V. + 0.0005 % of range{\"Range\" = 100 kohm} + 0.2 ohm)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 5e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 100000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0050 % I.V. + 0.0005 % of range{\"Range\" = 100 kohm} + 0.2 ohm)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 kohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -120000.0,
+     "amp_hi": 120000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 Mohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1200000.0,
+       "hi": 1200000.0,
+       "unit": "ohm",
+       "text": "-1200000 ohm to 1200000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 6e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0060 % I.V. + 0.0005 % of range{\"Range\" = 1 Mohm} + 0.2 ohm)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 7e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0070 % I.V. + 0.0005 % of range{\"Range\" = 1 Mohm} + 0.2 ohm)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 8e-05,
+       "fs_rel": 5e-06,
+       "fs_value": 1000000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0080 % I.V. + 0.0005 % of range{\"Range\" = 1 Mohm} + 0.2 ohm)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 Mohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -1200000.0,
+     "amp_hi": 1200000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 Mohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12000000.0,
+       "hi": 12000000.0,
+       "unit": "ohm",
+       "text": "-12000000 ohm to 12000000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0002,
+       "fs_rel": 1e-05,
+       "fs_value": 10000000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0200 % I.V. + 0.0010 % of range{\"Range\" = 10 Mohm} + 0.2 ohm)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.00025,
+       "fs_rel": 1e-05,
+       "fs_value": 10000000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0250 % I.V. + 0.0010 % of range{\"Range\" = 10 Mohm} + 0.2 ohm)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0003,
+       "fs_rel": 1e-05,
+       "fs_value": 10000000.0,
+       "abs": 0.2,
+       "unit": "ohm",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0300 % I.V. + 0.0010 % of range{\"Range\" = 10 Mohm} + 0.2 ohm)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 Mohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -12000000.0,
+     "amp_hi": 12000000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 Mohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120000000.0,
+       "hi": 120000000.0,
+       "unit": "ohm",
+       "text": "-120000000 ohm to 120000000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11,
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.003,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.3000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.004,
+       "fs_rel": 1e-05,
+       "fs_value": 100000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.4000 % I.V. + 0.0010 % of range{\"Range\" = 100 Mohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 Mohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -120000000.0,
+     "amp_hi": 120000000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 Gohm range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1200000000.0,
+       "hi": 1200000000.0,
+       "unit": "ohm",
+       "text": "-1200000000 ohm to 1200000000 ohm",
+       "annot": "",
+       "notes": [
+        6,
+        11,
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.02,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(2.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.03,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.04,
+       "fs_rel": 1e-05,
+       "fs_value": 1000000000.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(4.0000 % I.V. + 0.0010 % of range{\"Range\" = 1 Gohm})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 Gohm",
+     "kind": "OHM",
+     "variant": "2-wire, no math null",
+     "amp_lo": -1200000000.0,
+     "amp_hi": 1200000000.0,
+     "unit": "ohm",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Current, DC",
+   "direction": "input",
+   "page": 15,
+   "ranges": [
+    {
+     "label": "1 uA range (typical)",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2e-06,
+       "hi": 1.2e-06,
+       "unit": "A",
+       "text": "-1.2 uA to 1.2 uA",
+       "annot": "",
+       "notes": [
+        6,
+        13,
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0003,
+       "fs_rel": 5e-05,
+       "fs_value": 1e-06,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0300 % I.V. + 0.0050 % of range{\"Range\" = 1 uA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 5e-05,
+       "fs_value": 1e-06,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0500 % I.V. + 0.0050 % of range{\"Range\" = 1 uA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 5e-05,
+       "fs_value": 1e-06,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0600 % I.V. + 0.0050 % of range{\"Range\" = 1 uA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 uA",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -1.2e-06,
+     "amp_hi": 1.2e-06,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 uA range (typical)",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2e-05,
+       "hi": 1.2e-05,
+       "unit": "A",
+       "text": "-12 uA to 12 uA",
+       "annot": "",
+       "notes": [
+        6,
+        13,
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0003,
+       "fs_rel": 2e-05,
+       "fs_value": 1e-05,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0300 % I.V. + 0.0020 % of range{\"Range\" = 10 uA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 2e-05,
+       "fs_value": 1e-05,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0500 % I.V. + 0.0020 % of range{\"Range\" = 10 uA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 2e-05,
+       "fs_value": 1e-05,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0600 % I.V. + 0.0020 % of range{\"Range\" = 10 uA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 uA",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -1.2e-05,
+     "amp_hi": 1.2e-05,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 uA range (typical)",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.00012,
+       "hi": 0.00012,
+       "unit": "A",
+       "text": "-120 uA to 120 uA",
+       "annot": "",
+       "notes": [
+        6,
+        13,
+        14
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0003,
+       "fs_rel": 1e-05,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0300 % I.V. + 0.0010 % of range{\"Range\" = 100 uA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 1e-05,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0500 % I.V. + 0.0010 % of range{\"Range\" = 100 uA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 1e-05,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0600 % I.V. + 0.0010 % of range{\"Range\" = 100 uA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 uA",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -0.00012,
+     "amp_hi": 0.00012,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 mA range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.0012,
+       "hi": 0.0012,
+       "unit": "A",
+       "text": "-1.2 mA to 1.2 mA",
+       "annot": "",
+       "notes": [
+        6,
+        13
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0003,
+       "fs_rel": 5e-05,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0300 % I.V. + 0.0050 % of range{\"Range\" = 1 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 5e-05,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0500 % I.V. + 0.0050 % of range{\"Range\" = 1 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 5e-05,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0600 % I.V. + 0.0050 % of range{\"Range\" = 1 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 mA",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -0.0012,
+     "amp_hi": 0.0012,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 mA range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.012,
+       "hi": 0.012,
+       "unit": "A",
+       "text": "-12 mA to 12 mA",
+       "annot": "",
+       "notes": [
+        6,
+        13
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0003,
+       "fs_rel": 0.0002,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0300 % I.V. + 0.0200 % of range{\"Range\" = 10 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0002,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0500 % I.V. + 0.0200 % of range{\"Range\" = 10 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 0.0002,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0600 % I.V. + 0.0200 % of range{\"Range\" = 10 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 mA",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -0.012,
+     "amp_hi": 0.012,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 mA range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "A",
+       "text": "-120 mA to 120 mA",
+       "annot": "",
+       "notes": [
+        6,
+        13
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0003,
+       "fs_rel": 5e-05,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0300 % I.V. + 0.0050 % of range{\"Range\" = 100 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 5e-05,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0500 % I.V. + 0.0050 % of range{\"Range\" = 100 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 5e-05,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.0600 % I.V. + 0.0050 % of range{\"Range\" = 100 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mA",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 A range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "A",
+       "text": "-1.2 A to 1.2 A",
+       "annot": "",
+       "notes": [
+        6,
+        13
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0007,
+       "fs_rel": 0.0001,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.0700 % I.V. + 0.0100 % of range{\"Range\" = 1 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0008,
+       "fs_rel": 0.0001,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.0800 % I.V. + 0.0100 % of range{\"Range\" = 1 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0001,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.1000 % I.V. + 0.0100 % of range{\"Range\" = 1 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 A",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "3 A range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -3.0,
+       "hi": 3.0,
+       "unit": "A",
+       "text": "-3 A to 3 A",
+       "annot": "",
+       "notes": [
+        6,
+        13
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.002,
+       "fs_rel": 0.0002,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.2000 % I.V. + 0.0200 % of range{\"Range\" = 3 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0002,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.2000 % I.V. + 0.0200 % of range{\"Range\" = 3 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0023,
+       "fs_rel": 0.0002,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.2300 % I.V. + 0.0200 % of range{\"Range\" = 3 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "3 A",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -3.0,
+     "amp_hi": 3.0,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 A range",
+     "page": 15,
+     "params": [
+      {
+       "tag": "",
+       "lo": -10.0,
+       "hi": 10.0,
+       "unit": "A",
+       "text": "-10 A to 10 A",
+       "annot": "",
+       "notes": [
+        6,
+        13,
+        15
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0012,
+       "fs_rel": 0.0001,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.1200 % I.V. + 0.0100 % of range{\"Range\" = 10 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0012,
+       "fs_rel": 0.0001,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1200 % I.V. + 0.0100 % of range{\"Range\" = 10 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0001,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.1500 % I.V. + 0.0100 % of range{\"Range\" = 10 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 A",
+     "kind": "DCI",
+     "variant": "",
+     "amp_lo": -10.0,
+     "amp_hi": 10.0,
+     "unit": "A",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Voltage, AC",
+   "direction": "input",
+   "page": 16,
+   "ranges": [
+    {
+     "label": "100 mV range @ 3 Hz to 5 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "V",
+       "text": "-120 mV to 120 mV",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mV",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "V",
+     "freq_lo": 3.0,
+     "freq_hi": 5.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 mV range @ 5 Hz to 10 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "V",
+       "text": "-120 mV to 120 mV",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "5 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0011,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.11 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mV",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "V",
+     "freq_lo": 5.0,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 mV range @ 10 Hz to 20 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "V",
+       "text": "-120 mV to 120 mV",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 20 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0004,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.04 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.05 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 0.0002,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.06 % I.V. + 0.02 % of range{\"Range\" = 100 mV})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mV",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 mV range @ 20 kHz to 50 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "V",
+       "text": "-120 mV to 120 mV",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 50000.0,
+       "unit": "Hz",
+       "text": "20 kHz to 50 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0006,
+       "fs_rel": 0.0003,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.06 % I.V. + 0.03 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0007,
+       "fs_rel": 0.0003,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.07 % I.V. + 0.03 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0008,
+       "fs_rel": 0.0003,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.08 % I.V. + 0.03 % of range{\"Range\" = 100 mV})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mV",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "V",
+     "freq_lo": 20000.0,
+     "freq_hi": 50000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 mV range @ 50 kHz to 100 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "V",
+       "text": "-120 mV to 120 mV",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 50000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "50 kHz to 100 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 100 mV})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mV",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "V",
+     "freq_lo": 50000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 mV range @ 100 kHz to 300 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "V",
+       "text": "-120 mV to 120 mV",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 100000.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "100 kHz to 300 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 100 mV})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 100 mV})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mV",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "V",
+     "freq_lo": 100000.0,
+     "freq_hi": 300000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 V range @ 3 Hz to 5 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "V",
+       "text": "-1.2 V to 1.2 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "V",
+     "freq_lo": 3.0,
+     "freq_hi": 5.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 V range @ 5 Hz to 10 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "V",
+       "text": "-1.2 V to 1.2 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "5 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0011,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.11 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "V",
+     "freq_lo": 5.0,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 V range @ 10 Hz to 20 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "V",
+       "text": "-1.2 V to 1.2 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 20 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0004,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.04 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.05 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 0.0002,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.06 % I.V. + 0.02 % of range{\"Range\" = 1 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 V range @ 20 kHz to 50 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "V",
+       "text": "-1.2 V to 1.2 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 50000.0,
+       "unit": "Hz",
+       "text": "20 kHz to 50 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0006,
+       "fs_rel": 0.0003,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.06 % I.V. + 0.03 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0007,
+       "fs_rel": 0.0003,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.07 % I.V. + 0.03 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0008,
+       "fs_rel": 0.0003,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.08 % I.V. + 0.03 % of range{\"Range\" = 1 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "V",
+     "freq_lo": 20000.0,
+     "freq_hi": 50000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 V range @ 50 kHz to 100 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "V",
+       "text": "-1.2 V to 1.2 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 50000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "50 kHz to 100 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 1 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "V",
+     "freq_lo": 50000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 V range @ 100 kHz to 300 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "V",
+       "text": "-1.2 V to 1.2 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 100000.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "100 kHz to 300 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 1 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 1 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "V",
+     "freq_lo": 100000.0,
+     "freq_hi": 300000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 V range @ 3 Hz to 5 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12.0,
+       "hi": 12.0,
+       "unit": "V",
+       "text": "-12 V to 12 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -12.0,
+     "amp_hi": 12.0,
+     "unit": "V",
+     "freq_lo": 3.0,
+     "freq_hi": 5.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 V range @ 5 Hz to 10 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12.0,
+       "hi": 12.0,
+       "unit": "V",
+       "text": "-12 V to 12 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "5 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0011,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.11 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -12.0,
+     "amp_hi": 12.0,
+     "unit": "V",
+     "freq_lo": 5.0,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 V range @ 10 Hz to 20 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12.0,
+       "hi": 12.0,
+       "unit": "V",
+       "text": "-12 V to 12 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 20 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0004,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.04 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.05 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 0.0002,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.06 % I.V. + 0.02 % of range{\"Range\" = 10 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -12.0,
+     "amp_hi": 12.0,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 V range @ 20 kHz to 50 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12.0,
+       "hi": 12.0,
+       "unit": "V",
+       "text": "-12 V to 12 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 50000.0,
+       "unit": "Hz",
+       "text": "20 kHz to 50 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0006,
+       "fs_rel": 0.0003,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.06 % I.V. + 0.03 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0007,
+       "fs_rel": 0.0003,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.07 % I.V. + 0.03 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0008,
+       "fs_rel": 0.0003,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.08 % I.V. + 0.03 % of range{\"Range\" = 10 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -12.0,
+     "amp_hi": 12.0,
+     "unit": "V",
+     "freq_lo": 20000.0,
+     "freq_hi": 50000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 V range @ 50 kHz to 100 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12.0,
+       "hi": 12.0,
+       "unit": "V",
+       "text": "-12 V to 12 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 50000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "50 kHz to 100 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 10 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -12.0,
+     "amp_hi": 12.0,
+     "unit": "V",
+     "freq_lo": 50000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 V range @ 100 kHz to 300 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -12.0,
+       "hi": 12.0,
+       "unit": "V",
+       "text": "-12 V to 12 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 100000.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "100 kHz to 300 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 10 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 10 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -12.0,
+     "amp_hi": 12.0,
+     "unit": "V",
+     "freq_lo": 100000.0,
+     "freq_hi": 300000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 V range @ 3 Hz to 5 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "V",
+       "text": "-120 V to 120 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "V",
+     "freq_lo": 3.0,
+     "freq_hi": 5.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 V range @ 5 Hz to 10 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "V",
+       "text": "-120 V to 120 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "5 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0011,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.11 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "V",
+     "freq_lo": 5.0,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 V range @ 10 Hz to 20 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "V",
+       "text": "-120 V to 120 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 20 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0004,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.04 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.05 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 0.0002,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.06 % I.V. + 0.02 % of range{\"Range\" = 100 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 V range @ 20 kHz to 50 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "V",
+       "text": "-120 V to 120 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 50000.0,
+       "unit": "Hz",
+       "text": "20 kHz to 50 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0006,
+       "fs_rel": 0.0003,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.06 % I.V. + 0.03 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0007,
+       "fs_rel": 0.0003,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.07 % I.V. + 0.03 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0008,
+       "fs_rel": 0.0003,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.08 % I.V. + 0.03 % of range{\"Range\" = 100 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "V",
+     "freq_lo": 20000.0,
+     "freq_hi": 50000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 V range @ 50 kHz to 100 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "V",
+       "text": "-120 V to 120 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 50000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "50 kHz to 100 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 100 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "V",
+     "freq_lo": 50000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 V range @ 100 kHz to 300 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -120.0,
+       "hi": 120.0,
+       "unit": "V",
+       "text": "-120 V to 120 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 100000.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "100 kHz to 300 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 100 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 100.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 100 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -120.0,
+     "amp_hi": 120.0,
+     "unit": "V",
+     "freq_lo": 100000.0,
+     "freq_hi": 300000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "750 V range @ 3 Hz to 5 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -750.0,
+       "hi": 750.0,
+       "unit": "V",
+       "text": "-750 V to 750 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.005,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.50 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "750 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -750.0,
+     "amp_hi": 750.0,
+     "unit": "V",
+     "freq_lo": 3.0,
+     "freq_hi": 5.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "750 V range @ 5 Hz to 10 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -750.0,
+       "hi": 750.0,
+       "unit": "V",
+       "text": "-750 V to 750 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "5 Hz to 10 Hz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0011,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.11 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "750 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -750.0,
+     "amp_hi": 750.0,
+     "unit": "V",
+     "freq_lo": 5.0,
+     "freq_hi": 10.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "750 V range @ 10 Hz to 20 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -750.0,
+       "hi": 750.0,
+       "unit": "V",
+       "text": "-750 V to 750 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 20 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0004,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.04 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0005,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.05 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0006,
+       "fs_rel": 0.0002,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.06 % I.V. + 0.02 % of range{\"Range\" = 750 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "750 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -750.0,
+     "amp_hi": 750.0,
+     "unit": "V",
+     "freq_lo": 10.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "750 V range @ 20 kHz to 50 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -750.0,
+       "hi": 750.0,
+       "unit": "V",
+       "text": "-750 V to 750 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 20000.0,
+       "hi": 50000.0,
+       "unit": "Hz",
+       "text": "20 kHz to 50 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0006,
+       "fs_rel": 0.0003,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.06 % I.V. + 0.03 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0007,
+       "fs_rel": 0.0003,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.07 % I.V. + 0.03 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0008,
+       "fs_rel": 0.0003,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.08 % I.V. + 0.03 % of range{\"Range\" = 750 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "750 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -750.0,
+     "amp_hi": 750.0,
+     "unit": "V",
+     "freq_lo": 20000.0,
+     "freq_hi": 50000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "750 V range @ 50 kHz to 100 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -750.0,
+       "hi": 750.0,
+       "unit": "V",
+       "text": "-750 V to 750 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 50000.0,
+       "hi": 100000.0,
+       "unit": "Hz",
+       "text": "50 kHz to 100 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0005,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.15 % I.V. + 0.05 % of range{\"Range\" = 750 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "750 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -750.0,
+     "amp_hi": 750.0,
+     "unit": "V",
+     "freq_lo": 50000.0,
+     "freq_hi": 100000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "750 V range @ 100 kHz to 300 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -750.0,
+       "hi": 750.0,
+       "unit": "V",
+       "text": "-750 V to 750 V",
+       "annot": "",
+       "notes": [
+        6,
+        16
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 100000.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "100 kHz to 300 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 750 V})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.01,
+       "fs_rel": 0.001,
+       "fs_value": 750.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(1.00 % I.V. + 0.10 % of range{\"Range\" = 750 V})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "750 V",
+     "kind": "ACV",
+     "variant": "",
+     "amp_lo": -750.0,
+     "amp_hi": 750.0,
+     "unit": "V",
+     "freq_lo": 100000.0,
+     "freq_hi": 300000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Current, AC",
+   "direction": "input",
+   "page": 16,
+   "ranges": [
+    {
+     "label": "100 uA range @ 3 Hz to 5 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.00012,
+       "hi": 0.00012,
+       "unit": "A",
+       "text": "-120 uA to 120 uA",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5000.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0009,
+       "fs_rel": 0.0004,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.09 % I.V. + 0.04 % of range{\"Range\" = 100 uA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 uA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 uA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 uA",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -0.00012,
+     "amp_hi": 0.00012,
+     "unit": "A",
+     "freq_lo": 3.0,
+     "freq_hi": 5000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 uA range @ 5 kHz to 10 kHz (typical)",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.00012,
+       "hi": 0.00012,
+       "unit": "A",
+       "text": "-120 uA to 120 uA",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "5 kHz to 10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 uA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 uA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 uA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 uA",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -0.00012,
+     "amp_hi": 0.00012,
+     "unit": "A",
+     "freq_lo": 5000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 mA range @ 3 Hz to 5 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.0012,
+       "hi": 0.0012,
+       "unit": "A",
+       "text": "-1.2 mA to 1.2 mA",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5000.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0009,
+       "fs_rel": 0.0004,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.09 % I.V. + 0.04 % of range{\"Range\" = 1 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 mA",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -0.0012,
+     "amp_hi": 0.0012,
+     "unit": "A",
+     "freq_lo": 3.0,
+     "freq_hi": 5000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 mA range @ 5 kHz to 10 kHz (typical)",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.0012,
+       "hi": 0.0012,
+       "unit": "A",
+       "text": "-1.2 mA to 1.2 mA",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "5 kHz to 10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 mA",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -0.0012,
+     "amp_hi": 0.0012,
+     "unit": "A",
+     "freq_lo": 5000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 mA range @ 3 Hz to 5 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.012,
+       "hi": 0.012,
+       "unit": "A",
+       "text": "-12 mA to 12 mA",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5000.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0009,
+       "fs_rel": 0.0004,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.09 % I.V. + 0.04 % of range{\"Range\" = 10 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 10 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 10 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 mA",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -0.012,
+     "amp_hi": 0.012,
+     "unit": "A",
+     "freq_lo": 3.0,
+     "freq_hi": 5000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 mA range @ 5 kHz to 10 kHz (typical)",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.012,
+       "hi": 0.012,
+       "unit": "A",
+       "text": "-12 mA to 12 mA",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "5 kHz to 10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 10 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 10 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.01,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 10 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 mA",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -0.012,
+     "amp_hi": 0.012,
+     "unit": "A",
+     "freq_lo": 5000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 mA range @ 3 Hz to 5 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "A",
+       "text": "-120 mA to 120 mA",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5000.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0009,
+       "fs_rel": 0.0004,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.09 % I.V. + 0.04 % of range{\"Range\" = 100 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mA",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "A",
+     "freq_lo": 3.0,
+     "freq_hi": 5000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 mA range @ 5 kHz to 10 kHz (typical)",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.12,
+       "hi": 0.12,
+       "unit": "A",
+       "text": "-120 mA to 120 mA",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "5 kHz to 10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 mA})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 mA})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 0.1,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 100 mA})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 mA",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -0.12,
+     "amp_hi": 0.12,
+     "unit": "A",
+     "freq_lo": 5000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 A range @ 3 Hz to 5 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "A",
+       "text": "-1.2 A to 1.2 A",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5000.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0009,
+       "fs_rel": 0.0004,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.09 % I.V. + 0.04 % of range{\"Range\" = 1 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 A",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "A",
+     "freq_lo": 3.0,
+     "freq_hi": 5000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 A range @ 5 kHz to 10 kHz (typical)",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2,
+       "hi": 1.2,
+       "unit": "A",
+       "text": "-1.2 A to 1.2 A",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "5 kHz to 10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0004,
+       "fs_value": 1.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.10 % I.V. + 0.04 % of range{\"Range\" = 1 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 A",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -1.2,
+     "amp_hi": 1.2,
+     "unit": "A",
+     "freq_lo": 5000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "3 A range @ 3 Hz to 5 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -3.0,
+       "hi": 3.0,
+       "unit": "A",
+       "text": "-3 A to 3 A",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5000.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0023,
+       "fs_rel": 0.0004,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.23 % I.V. + 0.04 % of range{\"Range\" = 3 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0023,
+       "fs_rel": 0.0004,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.23 % I.V. + 0.04 % of range{\"Range\" = 3 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0023,
+       "fs_rel": 0.0004,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.23 % I.V. + 0.04 % of range{\"Range\" = 3 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "3 A",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -3.0,
+     "amp_hi": 3.0,
+     "unit": "A",
+     "freq_lo": 3.0,
+     "freq_hi": 5000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "3 A range @ 5 kHz to 10 kHz (typical)",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -3.0,
+       "hi": 3.0,
+       "unit": "A",
+       "text": "-3 A to 3 A",
+       "annot": "",
+       "notes": [
+        6,
+        17
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "5 kHz to 10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0023,
+       "fs_rel": 0.0004,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.23 % I.V. + 0.04 % of range{\"Range\" = 3 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0023,
+       "fs_rel": 0.0004,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.23 % I.V. + 0.04 % of range{\"Range\" = 3 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0023,
+       "fs_rel": 0.0004,
+       "fs_value": 3.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.23 % I.V. + 0.04 % of range{\"Range\" = 3 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "3 A",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -3.0,
+     "amp_hi": 3.0,
+     "unit": "A",
+     "freq_lo": 5000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 A range @ 3 Hz to 5 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -10.0,
+       "hi": 10.0,
+       "unit": "A",
+       "text": "-10 A to 10 A",
+       "annot": "",
+       "notes": [
+        6,
+        17,
+        15
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 5000.0,
+       "unit": "Hz",
+       "text": "3 Hz to 5 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0015,
+       "fs_rel": 0.0004,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.15 % I.V. + 0.04 % of range{\"Range\" = 10 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0004,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.15 % I.V. + 0.04 % of range{\"Range\" = 10 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0004,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.15 % I.V. + 0.04 % of range{\"Range\" = 10 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 A",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -10.0,
+     "amp_hi": 10.0,
+     "unit": "A",
+     "freq_lo": 3.0,
+     "freq_hi": 5000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 A range @ 5 kHz to 10 kHz (typical)",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -10.0,
+       "hi": 10.0,
+       "unit": "A",
+       "text": "-10 A to 10 A",
+       "annot": "",
+       "notes": [
+        6,
+        17,
+        15
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000.0,
+       "hi": 10000.0,
+       "unit": "Hz",
+       "text": "5 kHz to 10 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0015,
+       "fs_rel": 0.0004,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.15 % I.V. + 0.04 % of range{\"Range\" = 10 A})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0004,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.15 % I.V. + 0.04 % of range{\"Range\" = 10 A})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0015,
+       "fs_rel": 0.0004,
+       "fs_value": 10.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.15 % I.V. + 0.04 % of range{\"Range\" = 10 A})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 A",
+     "kind": "ACI",
+     "variant": "",
+     "amp_lo": -10.0,
+     "amp_hi": 10.0,
+     "unit": "A",
+     "freq_lo": 5000.0,
+     "freq_hi": 10000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Capacitance",
+   "direction": "input",
+   "page": 16,
+   "ranges": [
+    {
+     "label": "1 nF range",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2e-09,
+       "hi": 1.2e-09,
+       "unit": "F",
+       "text": "-1.2 nF to 1.2 nF",
+       "annot": "",
+       "notes": [
+        6,
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.005,
+       "fs_rel": 0.005,
+       "fs_value": 1e-09,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.50 % I.V. + 0.50 % of range{\"Range\" = 1 nF})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.005,
+       "fs_rel": 0.005,
+       "fs_value": 1e-09,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.50 % I.V. + 0.50 % of range{\"Range\" = 1 nF})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.005,
+       "fs_rel": 0.005,
+       "fs_value": 1e-09,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.50 % I.V. + 0.50 % of range{\"Range\" = 1 nF})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 nF",
+     "kind": "CAP",
+     "variant": "",
+     "amp_lo": -1.2e-09,
+     "amp_hi": 1.2e-09,
+     "unit": "F",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 nF range",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2e-08,
+       "hi": 1.2e-08,
+       "unit": "F",
+       "text": "-12 nF to 12 nF",
+       "annot": "",
+       "notes": [
+        6,
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-08,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 10 nF})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-08,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 10 nF})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-08,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 10 nF})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 nF",
+     "kind": "CAP",
+     "variant": "",
+     "amp_lo": -1.2e-08,
+     "amp_hi": 1.2e-08,
+     "unit": "F",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 nF range",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2e-07,
+       "hi": 1.2e-07,
+       "unit": "F",
+       "text": "-120 nF to 120 nF",
+       "annot": "",
+       "notes": [
+        6,
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-07,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 100 nF})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-07,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 100 nF})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-07,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 100 nF})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 nF",
+     "kind": "CAP",
+     "variant": "",
+     "amp_lo": -1.2e-07,
+     "amp_hi": 1.2e-07,
+     "unit": "F",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 uF range",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2e-06,
+       "hi": 1.2e-06,
+       "unit": "F",
+       "text": "-1.2 uF to 1.2 uF",
+       "annot": "",
+       "notes": [
+        6,
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-06,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 1 uF})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-06,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 1 uF})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-06,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 1 uF})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 uF",
+     "kind": "CAP",
+     "variant": "",
+     "amp_lo": -1.2e-06,
+     "amp_hi": 1.2e-06,
+     "unit": "F",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 uF range",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -1.2e-05,
+       "hi": 1.2e-05,
+       "unit": "F",
+       "text": "-12 uF to 12 uF",
+       "annot": "",
+       "notes": [
+        6,
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-05,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 10 uF})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-05,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 10 uF})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 1e-05,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 10 uF})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 uF",
+     "kind": "CAP",
+     "variant": "",
+     "amp_lo": -1.2e-05,
+     "amp_hi": 1.2e-05,
+     "unit": "F",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 uF range",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": -0.00012,
+       "hi": 0.00012,
+       "unit": "F",
+       "text": "-120 uF to 120 uF",
+       "annot": "",
+       "notes": [
+        6,
+        18
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 100 uF})"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 100 uF})"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.004,
+       "fs_rel": 0.001,
+       "fs_value": 0.0001,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.40 % I.V. + 0.10 % of range{\"Range\" = 100 uF})"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 uF",
+     "kind": "CAP",
+     "variant": "",
+     "amp_lo": -0.00012,
+     "amp_hi": 0.00012,
+     "unit": "F",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Frequency",
+   "direction": "input",
+   "page": 16,
+   "ranges": [
+    {
+     "label": "3 Hz to 10 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 10.0,
+       "unit": "Hz",
+       "text": "3 Hz to 10 Hz",
+       "annot": "",
+       "notes": [
+        19
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0007,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.070 % I.V.)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0007,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.070 % I.V.)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0007,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.070 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "3 Hz to 10 Hz",
+     "kind": "FREQ",
+     "variant": "",
+     "amp_lo": 3.0,
+     "amp_hi": 10.0,
+     "unit": "Hz",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "10 Hz to 100 Hz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 100.0,
+       "unit": "Hz",
+       "text": "10 Hz to 100 Hz",
+       "annot": "",
+       "notes": [
+        19
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 0.0003,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.030 % I.V.)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 0.0003,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.030 % I.V.)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0003,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.030 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "10 Hz to 100 Hz",
+     "kind": "FREQ",
+     "variant": "",
+     "amp_lo": 10.0,
+     "amp_hi": 100.0,
+     "unit": "Hz",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "100 Hz to 1 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": 100.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "100 Hz to 1 kHz",
+       "annot": "",
+       "notes": [
+        19
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 6e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.006 % I.V.)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 7e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.007 % I.V.)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 0.0001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.010 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "100 Hz to 1 kHz",
+     "kind": "FREQ",
+     "variant": "",
+     "amp_lo": 100.0,
+     "amp_hi": 1000.0,
+     "unit": "Hz",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "1 kHz to 300 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "1 kHz to 300 kHz",
+       "annot": "",
+       "notes": [
+        19
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 5e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.005 % I.V.)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 7e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.007 % I.V.)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 9e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.009 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "1 kHz to 300 kHz",
+     "kind": "FREQ",
+     "variant": "",
+     "amp_lo": 1000.0,
+     "amp_hi": 300000.0,
+     "unit": "Hz",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Frequency [Square wave]",
+   "direction": "input",
+   "page": 16,
+   "ranges": [
+    {
+     "label": "Square wave 10 Hz to 300 kHz",
+     "page": 16,
+     "params": [
+      {
+       "tag": "",
+       "lo": 10.0,
+       "hi": 300000.0,
+       "unit": "Hz",
+       "text": "10 Hz to 300 kHz",
+       "annot": "",
+       "notes": [
+        19,
+        20
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "90 day",
+       "rel": 4e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[90 day] Accuracy: +/-(0.004 % I.V.)"
+      },
+      {
+       "period": "1 yr",
+       "rel": 6e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.006 % I.V.)"
+      },
+      {
+       "period": "2 yr",
+       "rel": 8e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[2 yr] Accuracy: +/-(0.008 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "Square wave 10 Hz to 300 kHz",
+     "kind": "FREQ",
+     "variant": "Square wave",
+     "amp_lo": 10.0,
+     "amp_hi": 300000.0,
+     "unit": "Hz",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  }
+ ],
+ "problems": [
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "CONFIDENCE LEVEL: the data sheet prints k = 2 (\"compliant to ISO/IEC 17025 for k = 2\"), not a percentage; 95 % (divisor 2) is the repository inference from k = 2."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "The \"% of range\" term is taken against the range NAME (0.1 V on the 100 mV range ...); the data sheet does not define \"range\". UNVERIFIED."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "No resolution is recorded on any row: the budget has no resolution term for this standard."
+  },
+  {
+   "level": "warn",
+   "where": "Voltage, DC / Resistance",
+   "what": "DC voltage and resistance figures assume ACAL run within the last 2 days (footnote 1) and TACAL +/- 2 degC; the lab must run ACAL (or the temperature coefficient applies)."
+  },
+  {
+   "level": "warn",
+   "where": "Resistance [2-wire, no math null] / 100 Mohm, 1 Gohm",
+   "what": "Stored with the same figures as the 4-wire / math-null rows and NO 0.2 ohm adder (owner decision, note 12); the data sheet does not say. The low-power ohms specification is not in the data sheet (\"see the manual\")."
+  },
+  {
+   "level": "warn",
+   "where": "Voltage, DC / 1000 V",
+   "what": "Footnote 9: add 0.02 mV per additional volt above +/-500 V; not in the stored row."
+  },
+  {
+   "level": "warn",
+   "where": "Current, DC / 1 uA, 10 uA, 100 uA",
+   "what": "Typical, not warranted (\"(typ)\")."
+  },
+  {
+   "level": "warn",
+   "where": "Current, DC / Current, AC / 10 A",
+   "what": "Footnote 4: add 2 mA base per amp for inputs greater than 5 Arms; not in the stored 10 A rows."
+  },
+  {
+   "level": "warn",
+   "where": "Current, AC (5 kHz to 10 kHz)",
+   "what": "Typical, not warranted (\"(typ)\")."
+  },
+  {
+   "level": "warn",
+   "where": "Capacitance / Frequency footnotes",
+   "what": "The footnote superscripts of the capacitance and frequency headings (21; 18, 20) do not match the footnote texts (20; 18, 19): the data sheet numbering is shifted; the reading in notes 18-19 is UNVERIFIED."
+  },
+  {
+   "level": "warn",
+   "where": "Temperature",
+   "what": "PT100 / thermistor / thermocouple accuracy is \"probe accuracy (+ reference junction) + 0.05 ... 0.5 degC\": not stored (needs the probe accuracy). Continuity, diode test and DC:DC ratio are not stored either."
+  },
+  {
+   "level": "warn",
+   "where": "Frequency",
+   "what": "Stored by frequency band only; the amplitude conditions and the additional frequency errors by aperture are notes only."
+  }
+ ]
+}
