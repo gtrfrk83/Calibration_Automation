@@ -355,8 +355,11 @@ def build_steps():
                 if table == '4':
                     notes.append('Let the output become stable before the reading (printed p. 12).')
                 if table == '5':
-                    notes.append('The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). The program sets the calibrator to the nominal and does NOT '
-                                 'read or correct with the 8508A (UNVERIFIED: owner decision). Disconnect the jumpers on the three common jacks of the UUT if present.')
+                    step['series_ref'] = dict(kind='DCI', value=a_val)          # owner decision 2026-10-26: the Keysight 3458A in series replaces the manual's 8508A; its typed reading, its 'input' sheet
+                    notes.append('The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). Owner decision: the Keysight 3458A (dc current) '
+                                 'is in series instead. First window: TYPE the 3458A reading (recorded, not judged). Second window: TYPE the UUT display; ONLY the UUT display is compared with the printed limits '
+                                 '(unchanged). The program sets the calibrator to the nominal and sends nothing else: if the 3458A is not at the nominal, adjust the 5522A output on its front panel as the manual does '
+                                 '(UNVERIFIED front-panel step). The uncertainty is the 3458A dc-current specification (input sheet), not the calibrator alone. Disconnect the jumpers on the three common jacks of the UUT if present.')
                 if table == '6':
                     notes.append('Four-wire connection at the 5522A, two wires at the UUT, two-wire compensation ON at the calibrator (printed p. 15, Figure 3): the program does not set the compensation; set it on the front panel (UNVERIFIED command).')
                 if table == '7':
@@ -419,8 +422,8 @@ def groups():
                                      ('UUT', 'Set the UUT to the function and range of the point (the point window says which); lock the range with the Range softkey.')]),
                        caution='Up to 295 V is applied. Use CAT-rated leads and keep clear of the plugs whenever the output is on. Do not force a dual banana plug into two jacks horizontally (printed p. 10).',
                        diagram='diagrams/hook_fluke753_MEAS_V.png'),
-        'MEAS_MA': dict(title='Change the cables: UUT measures dc mA', summary=f'{cal} AUX HI -> 8508A (series, optional) -> UUT mA jack; UUT MEASURE common -> AUX LO (Figure 2).',
-                        steps=common([('Calibrator', 'Calibrator current output (5522A AUX HI / AUX LO) in series with the UUT mA jack (mA Omega RTD, middle top) and the common jack below it (Figure 2). The manual puts an 8508A in series; it is optional here.'),
+        'MEAS_MA': dict(title='Change the cables: UUT measures dc mA', summary=f'{cal} AUX HI -> 3458A (series, reading typed) -> UUT mA jack; UUT MEASURE common -> AUX LO (Figure 2).',
+                        steps=common([('Calibrator', 'Calibrator current output (5522A AUX HI / AUX LO) in series with the UUT mA jack (mA Omega RTD, middle top) and the common jack below it (Figure 2). The manual puts an 8508A in series; here the Keysight 3458A (dc current: calibrator AUX HI to the 3458A I terminal, the 3458A LO terminal to the UUT mA jack; terminals UNVERIFIED) is in series and its reading is typed.'),
                                       ('UUT', 'Disconnect the jumpers on the three common jacks if present (printed p. 13). Set the UUT to dc current, lock the range (30 mA, then 100 mA).')]),
                         caution=None, diagram='diagrams/hook_fluke753_MEAS_MA.png'),
         'MEAS_OHM': dict(title='Change the cables: UUT measures resistance', summary=f'{cal} four-wire output, two-wire at the UUT (both HI leads on the UUT mA Omega RTD jack, both LO leads on the jack below it), two-wire compensation ON (Figure 3).',

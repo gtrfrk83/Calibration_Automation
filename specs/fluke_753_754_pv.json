@@ -66,7 +66,7 @@
   },
   "MEAS_MA": {
    "title": "Change the cables: UUT measures dc mA",
-   "summary": "Fluke 5522A (the manual's calibrator, Table 2; a 5560A or 5520A can be chosen in the window) AUX HI -> 8508A (series, optional) -> UUT mA jack; UUT MEASURE common -> AUX LO (Figure 2).",
+   "summary": "Fluke 5522A (the manual's calibrator, Table 2; a 5560A or 5520A can be chosen in the window) AUX HI -> 3458A (series, reading typed) -> UUT mA jack; UUT MEASURE common -> AUX LO (Figure 2).",
    "steps": [
     [
      "Standby",
@@ -74,7 +74,7 @@
     ],
     [
      "Calibrator",
-     "Calibrator current output (5522A AUX HI / AUX LO) in series with the UUT mA jack (mA Omega RTD, middle top) and the common jack below it (Figure 2). The manual puts an 8508A in series; it is optional here."
+     "Calibrator current output (5522A AUX HI / AUX LO) in series with the UUT mA jack (mA Omega RTD, middle top) and the common jack below it (Figure 2). The manual puts an 8508A in series; here the Keysight 3458A (dc current: calibrator AUX HI to the 3458A I terminal, the 3458A LO terminal to the UUT mA jack; terminals UNVERIFIED) is in series and its reading is typed."
     ],
     [
      "UUT",
@@ -1346,7 +1346,11 @@
    },
    "switch": "DC current (mA) measure: lock the UUT on the 30 mA range",
    "unc_direction": "output",
-   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). The program sets the calibrator to the nominal and does NOT read or correct with the 8508A (UNVERIFIED: owner decision). Disconnect the jumpers on the three common jacks of the UUT if present."
+   "series_ref": {
+    "kind": "DCI",
+    "value": 0.004
+   },
+   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). Owner decision: the Keysight 3458A (dc current) is in series instead. First window: TYPE the 3458A reading (recorded, not judged). Second window: TYPE the UUT display; ONLY the UUT display is compared with the printed limits (unchanged). The program sets the calibrator to the nominal and sends nothing else: if the 3458A is not at the nominal, adjust the 5522A output on its front panel as the manual does (UNVERIFIED front-panel step). The uncertainty is the 3458A dc-current specification (input sheet), not the calibrator alone. Disconnect the jumpers on the three common jacks of the UUT if present."
   },
   {
    "table": "5",
@@ -1381,7 +1385,11 @@
    },
    "switch": "DC current (mA) measure: lock the UUT on the 30 mA range",
    "unc_direction": "output",
-   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). The program sets the calibrator to the nominal and does NOT read or correct with the 8508A (UNVERIFIED: owner decision). Disconnect the jumpers on the three common jacks of the UUT if present."
+   "series_ref": {
+    "kind": "DCI",
+    "value": 0.02
+   },
+   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). Owner decision: the Keysight 3458A (dc current) is in series instead. First window: TYPE the 3458A reading (recorded, not judged). Second window: TYPE the UUT display; ONLY the UUT display is compared with the printed limits (unchanged). The program sets the calibrator to the nominal and sends nothing else: if the 3458A is not at the nominal, adjust the 5522A output on its front panel as the manual does (UNVERIFIED front-panel step). The uncertainty is the 3458A dc-current specification (input sheet), not the calibrator alone. Disconnect the jumpers on the three common jacks of the UUT if present."
   },
   {
    "table": "5",
@@ -1416,7 +1424,11 @@
    },
    "switch": "DC current (mA) measure: lock the UUT on the 30 mA range",
    "unc_direction": "output",
-   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). The program sets the calibrator to the nominal and does NOT read or correct with the 8508A (UNVERIFIED: owner decision). Disconnect the jumpers on the three common jacks of the UUT if present."
+   "series_ref": {
+    "kind": "DCI",
+    "value": 0.03
+   },
+   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). Owner decision: the Keysight 3458A (dc current) is in series instead. First window: TYPE the 3458A reading (recorded, not judged). Second window: TYPE the UUT display; ONLY the UUT display is compared with the printed limits (unchanged). The program sets the calibrator to the nominal and sends nothing else: if the 3458A is not at the nominal, adjust the 5522A output on its front panel as the manual does (UNVERIFIED front-panel step). The uncertainty is the 3458A dc-current specification (input sheet), not the calibrator alone. Disconnect the jumpers on the three common jacks of the UUT if present."
   },
   {
    "table": "5",
@@ -1451,7 +1463,11 @@
    },
    "switch": "DC current (mA) measure: lock the UUT on the 30 mA range",
    "unc_direction": "output",
-   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). The program sets the calibrator to the nominal and does NOT read or correct with the 8508A (UNVERIFIED: owner decision). Disconnect the jumpers on the three common jacks of the UUT if present."
+   "series_ref": {
+    "kind": "DCI",
+    "value": -0.03
+   },
+   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). Owner decision: the Keysight 3458A (dc current) is in series instead. First window: TYPE the 3458A reading (recorded, not judged). Second window: TYPE the UUT display; ONLY the UUT display is compared with the printed limits (unchanged). The program sets the calibrator to the nominal and sends nothing else: if the 3458A is not at the nominal, adjust the 5522A output on its front panel as the manual does (UNVERIFIED front-panel step). The uncertainty is the 3458A dc-current specification (input sheet), not the calibrator alone. Disconnect the jumpers on the three common jacks of the UUT if present."
   },
   {
    "table": "5",
@@ -1486,7 +1502,11 @@
    },
    "switch": "DC current (mA) measure: lock the UUT on the 100 mA range",
    "unc_direction": "output",
-   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). The program sets the calibrator to the nominal and does NOT read or correct with the 8508A (UNVERIFIED: owner decision). Disconnect the jumpers on the three common jacks of the UUT if present."
+   "series_ref": {
+    "kind": "DCI",
+    "value": 0.0
+   },
+   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). Owner decision: the Keysight 3458A (dc current) is in series instead. First window: TYPE the 3458A reading (recorded, not judged). Second window: TYPE the UUT display; ONLY the UUT display is compared with the printed limits (unchanged). The program sets the calibrator to the nominal and sends nothing else: if the 3458A is not at the nominal, adjust the 5522A output on its front panel as the manual does (UNVERIFIED front-panel step). The uncertainty is the 3458A dc-current specification (input sheet), not the calibrator alone. Disconnect the jumpers on the three common jacks of the UUT if present."
   },
   {
    "table": "5",
@@ -1521,7 +1541,11 @@
    },
    "switch": "DC current (mA) measure: lock the UUT on the 100 mA range",
    "unc_direction": "output",
-   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). The program sets the calibrator to the nominal and does NOT read or correct with the 8508A (UNVERIFIED: owner decision). Disconnect the jumpers on the three common jacks of the UUT if present."
+   "series_ref": {
+    "kind": "DCI",
+    "value": 0.1
+   },
+   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). Owner decision: the Keysight 3458A (dc current) is in series instead. First window: TYPE the 3458A reading (recorded, not judged). Second window: TYPE the UUT display; ONLY the UUT display is compared with the printed limits (unchanged). The program sets the calibrator to the nominal and sends nothing else: if the 3458A is not at the nominal, adjust the 5522A output on its front panel as the manual does (UNVERIFIED front-panel step). The uncertainty is the 3458A dc-current specification (input sheet), not the calibrator alone. Disconnect the jumpers on the three common jacks of the UUT if present."
   },
   {
    "table": "5",
@@ -1556,7 +1580,11 @@
    },
    "switch": "DC current (mA) measure: lock the UUT on the 100 mA range",
    "unc_direction": "output",
-   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). The program sets the calibrator to the nominal and does NOT read or correct with the 8508A (UNVERIFIED: owner decision). Disconnect the jumpers on the three common jacks of the UUT if present."
+   "series_ref": {
+    "kind": "DCI",
+    "value": -0.1
+   },
+   "note": "The manual puts a Fluke 8508A in series (Figure 2) and has you edit the 5522A output until the 8508A shows the correct value (printed p. 13). Owner decision: the Keysight 3458A (dc current) is in series instead. First window: TYPE the 3458A reading (recorded, not judged). Second window: TYPE the UUT display; ONLY the UUT display is compared with the printed limits (unchanged). The program sets the calibrator to the nominal and sends nothing else: if the 3458A is not at the nominal, adjust the 5522A output on its front panel as the manual does (UNVERIFIED front-panel step). The uncertainty is the 3458A dc-current specification (input sheet), not the calibrator alone. Disconnect the jumpers on the three common jacks of the UUT if present."
   },
   {
    "table": "6",

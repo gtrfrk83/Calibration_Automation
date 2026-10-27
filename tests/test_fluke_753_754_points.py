@@ -312,7 +312,7 @@ class UncertaintyByDirection(unittest.TestCase):
         import uncertainty_budget as ub
         n = 0
         for p in self.app.points:
-            if p.get('direction') != 'measure':
+            if p.get('direction') != 'measure' or F.is_series(p):
                 continue
             self.assertEqual(F.unc_direction(p), 'output')
             a = p['applied']
@@ -327,7 +327,32 @@ class UncertaintyByDirection(unittest.TestCase):
             self.assertIsNotNone(b.hit, f'{p["id"]}: no sheet row')
             self.assertEqual(b.hit.row['direction'], 'output', p['id'])
             n += 1
-        self.assertEqual(n, 55)                           # 14 + 12 + 7 + 8 + 5 + 3 + 3 + 3
+        self.assertEqual(n, 48)                           # 14 + 12 + 8 + 5 + 3 + 3 + 3  (the 7 dc mA points use the 3458A in series: next test)
+
+    def test_dc_ma_measure_points_take_the_series_3458a_input_sheet(self):
+        """Owner decision 2026-10-26: the 3458A in series replaces the manual's 8508A; the uncertainty is its dc-current INPUT row, and the printed limits are unchanged."""
+        import json
+        with open('specs/' + SPEC_NAME, encoding='utf-8') as fh:
+            raw = {s['id']: s for s in json.load(fh)['steps']}
+        pts = [p for p in self.app.points if F.is_series(p)]
+        self.assertEqual([p['id'] for p in pts], ['5-1', '5-2', '5-3', '5-4', '5-5', '5-6', '5-7'])
+        for p in pts:
+            self.assertEqual(F.unc_direction(p), 'input')
+            b, model, direction = self.app._budget(p)
+            self.assertEqual((model, direction), ('3458A', 'input'))
+            self.assertEqual(b.hit.row['direction'], 'input')
+            self.assertEqual(p['kind'], 'DCI')
+            self.assertEqual(self.app.unc_options(p), ['3458A', '34461A', '34465A'])
+            self.assertEqual((p['low'], p['high']), (raw[p['id']]['low'], raw[p['id']]['high']))
+
+    def test_series_reading_validator_and_progress_record(self):
+        p = next(q for q in self.app.points if F.is_series(q))
+        self.assertIn('3458A', F.SERIES_ACCEPT)
+        with self.assertRaises(ValueError):
+            F.series_validate('abc')
+        F.series_validate('4.0012')
+        self.app.series_read[str(p['id'])] = '4.001'
+        self.assertEqual(self.app.save_fields()['series_read'], {str(p['id']): '4.001'})
 
     def test_the_two_directions_use_different_rows(self):
         """The same quantity read both ways must not give the same sheet row (DC volts: 3458A input row vs 5522A output row)."""
@@ -442,9 +467,49 @@ class EndToEnd(unittest.TestCase):
 
     def test_reading_windows_say_which_instrument_is_read(self):
         app, io = self.run_perfect('753')
-        devs = {d[1]: d[3] for d in self.hn.dialogs if d[0] == 'reading'}
+        devs = {}
+        for d in self.hn.dialogs:
+            if d[0] == 'reading':
+                devs.setdefault(d[1], []).append(d[3])
         for p in app.points:
-            self.assertEqual(devs[p['id']], 'EXTERNAL MEASURING INSTRUMENT' if p['direction'] == 'source' else 'UUT DISPLAY', p['id'])
+            if F.is_series(p):
+                self.assertEqual(devs[p['id']], ['3458A IN SERIES', 'UUT DISPLAY'], p['id'])          # the typed series reading first, then the UUT display
+            else:
+                self.assertEqual(devs[p['id']], ['EXTERNAL MEASURING INSTRUMENT' if p['direction'] == 'source' else 'UUT DISPLAY'], p['id'])
+
+    def _series_run(self, series_text, uut_text):
+        app, io = self.make('753')
+        calls = {}
+
+        def reading(p):
+            if F.is_series(p):
+                calls[p['id']] = calls.get(p['id'], 0) + 1
+                return series_text(p) if calls[p['id']] == 1 else uut_text(p)
+            return H.typed_nominal(p)
+        self.hn.default_reading = reading
+        self.assertTrue(self.hn.run_all())
+        return app
+
+    def test_series_reading_is_recorded_but_only_the_uut_display_is_judged(self):
+        app = self._series_run(lambda p: '9.9999', H.typed_nominal)            # the 3458A is far off, the UUT display is perfect
+        for p in app.points:
+            if F.is_series(p):
+                self.assertEqual(app.found[str(p['id'])]['result'], 'PASS', p['id'])
+                self.assertEqual(app.series_read[str(p['id'])], '9.9999')
+        app.hn = None
+        self.hn.stop(); self.hn = H.Harness().start()
+        app = self._series_run(H.typed_nominal, lambda p: H.typed_nominal(p, 1.0))   # the UUT display is 1 mA out, the 3458A is perfect
+        for p in app.points:
+            if F.is_series(p):
+                self.assertEqual(app.found[str(p['id'])]['result'], 'FAIL', p['id'])
+        self.assertEqual({app.found[str(p['id'])]['result'] for p in app.points if not F.is_series(p)}, {'PASS'})
+
+    def test_report_row_names_the_series_reading(self):
+        app = self._series_run(lambda p: H.typed_nominal(p, 0.001), H.typed_nominal)
+        p = next(q for q in app.points if F.is_series(q))
+        row = app.certificate_row(p, app.found[str(p['id'])])
+        self.assertIn('3458A in series read', row['Description'])
+        self.assertTrue(row['Uncertainty'])
 
     def test_wire_log_no_calibrator_output_for_uut_output_points(self):
         app, io = self.run_perfect('754')
@@ -542,7 +607,7 @@ class EndToEnd(unittest.TestCase):
         self.assertIn('(UUT output)', text)
         note = app.source_note()
         self.assertIn('misprint', note.lower())
-        self.assertIn('3458A (35 point(s))', note)
+        self.assertIn('3458A (42 point(s))', note)               # 35 UUT output points + the 7 dc mA points with the 3458A in series
 
     def test_demo_is_marked_and_never_real(self):
         for meter in MODELS:

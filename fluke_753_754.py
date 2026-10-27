@@ -40,6 +40,17 @@ def is_source(p):
     return p.get('direction') == 'source'
 
 
+def is_series(p):
+    """True for a DC mA MEASURE point (Table 5): the manual puts a reference meter in series with the calibrator and the UUT (an 8508A); the owner's choice is the Keysight 3458A
+    in series, its reading TYPED (no driver).  The point's uncertainty is then that of the series meter (its 'input' sheet), not the calibrator's alone."""
+    return bool(p.get('series_ref')) and not is_source(p)
+
+
+def uses_input_sheet(p):
+    """True when a measuring standard (3458A / 34461A / 34465A, 'input' sheet) gives the point's uncertainty: a UUT OUTPUT point, or a series-metered dc mA point."""
+    return is_source(p) or is_series(p)
+
+
 def is_rtd(p):
     return bool(p.get('rtd')) and not is_source(p)
 
@@ -47,7 +58,7 @@ def is_rtd(p):
 def unc_direction(p):
     """Direction of the standard-sheet row that gives the point's uncertainty: a UUT OUTPUT point is measured by the multimeter standard (its 'input' row);
     a UUT input point is sourced by the calibrator (its 'output' row).  None for a point with no uncertainty (HART)."""
-    if is_source(p):
+    if uses_input_sheet(p):
         return 'input'
     return 'output' if p.get('applied') else None
 
@@ -65,9 +76,21 @@ def have_standard(model):
 
 def source_request(p):
     """(kind, nominal, unit, frequency) the measuring standard reads at a source point (the value the UUT is set to output)."""
-    u = p['uut']
+    u = p.get('uut') or p['series_ref']
     unit = {'DCV': 'V', 'DCI': 'A', 'OHM': 'ohm', 'FREQ': 'Hz'}[u['kind']]
     return ('OHM4' if u['kind'] == 'OHM' else u['kind']), float(u['value']), unit, (u.get('frequency') if u['kind'] == 'FREQ' else None)
+
+
+SERIES_ACCEPT = ('Type the reading of the Keysight 3458A in series with the UUT (dc current), in the unit shown.  It is recorded with the point; it is NOT compared with the limits. '
+                 'The limits judge the UUT display, which you type in the next window.')
+
+
+def series_validate(text):
+    """The 3458A reading must be a number (nothing else is checked)."""
+    try:
+        Decimal(str(text).strip().replace(',', ''))
+    except Exception:
+        raise ValueError('Type the 3458A reading as a number.')
 
 
 def freq_budget(p, calibrator):
@@ -101,6 +124,7 @@ class App(handheld_dmm.App):
 
     # ------------------------------------------------------------------ the measuring-standard choice (source points)
     def __init__(self, *a, **kw):
+        self.series_read = {}                                     # {point id: the 3458A series reading, as typed}: recorded with the dc mA measure points, never judged (the UUT display is)
         self.unc_choice = {}                                      # {point id: measuring standard model} the owner picked; the default is DEFAULT_UNC_STANDARD
         self._unc_cache = {}
         super().__init__(*a, **kw)
@@ -149,7 +173,7 @@ class App(handheld_dmm.App):
     def tree_menu_extras(self, pid):
         """Right-click entries on a source point: the measuring standard of its uncertainty (the existing per-point 'Uncertainty standard' choice)."""
         p = self.by_id.get(pid) or self.by_id.get(str(pid))
-        if p is None or not is_source(p) or not self.has_uncertainty(p):
+        if p is None or not uses_input_sheet(p) or not self.has_uncertainty(p):
             return []
         if self.demo:
             return [('Uncertainty standard...', lambda: None, False, 'A demo run prints no uncertainty.')]
@@ -167,25 +191,52 @@ class App(handheld_dmm.App):
         d = super().save_fields()
         if self.unc_choice:
             d['unc_choice'] = dict(self.unc_choice)             # recorded with the run: the measuring standard picked for a point's uncertainty
+        if self.series_read:
+            d['series_read'] = dict(self.series_read)           # the typed 3458A-in-series readings of the dc mA measure points
         return d
 
     def load_results(self, data):
         super().load_results(data)
         picked = data.get('unc_choice')
         self.unc_choice = {str(k): v for k, v in picked.items() if isinstance(v, str) and v} if isinstance(picked, dict) else {}
+        ser = data.get('series_read')
+        self.series_read = {str(k): v for k, v in ser.items() if isinstance(v, str)} if isinstance(ser, dict) else {}
+
+    # ------------------------------------------------------------------ the 3458A in series (dc mA measure points)
+    def _ask(self, points, i, p, key):
+        """A dc mA measure point (Table 5) first asks for the reading of the 3458A in series (typed, no driver; recorded, NOT judged), then the usual UUT display window.
+        Pass / fail is exactly the engine's: the UUT display against the printed limits."""
+        if is_series(p) and p.get('test') == 'numeric' and not (self.use_ir and p.get('ir')):
+            r = handheld_dmm.ask_reading(self.root, p, len(self.points), handheld_dmm.output_text(p), self._out_note(p, True), SERIES_ACCEPT, 'numeric',
+                                         unit=p['display_unit'], annunciator=False, validate=series_validate, phase='3458A in series',
+                                         device='3458A IN SERIES', source='CALIBRATOR OUTPUT', **self._fill_series(p))
+            if r['action'] == 'stop':
+                self.stop = True
+                if self.io and not self.manual_cal:
+                    self.io.standby()
+                port.after(self.root, 30, lambda: self._next(points, i + 1, key))
+                return
+            if r['action'] == 'record':
+                self.series_read[str(p['id'])] = handheld_dmm.pad_reading(p, r['text'])
+        super()._ask(points, i, p, key)
+
+    def _fill_series(self, p):
+        if not self.virtual:
+            return {}
+        return dict(demo_fill=lambda: f'{p["nominal"] / p["factor"]:.4f}')
 
     # ------------------------------------------------------------------ the uncertainty of one point
     @staticmethod
     def has_uncertainty(p):
         """Points that should carry an uncertainty: the engine's rule for a UUT input point (a calibrator source), and for a UUT OUTPUT point a numeric reading of a
         DC volts / DC current / resistance / frequency standard (the measuring standard's input sheet).  HART: none."""
-        if is_source(p):
-            return p.get('test') == 'numeric' and not p.get('no_uncertainty') and (p.get('uut') or {}).get('kind') in SOURCE_KINDS
+        if uses_input_sheet(p):
+            return p.get('test') == 'numeric' and not p.get('no_uncertainty') and (p.get('uut') or p.get('series_ref') or {}).get('kind') in SOURCE_KINDS
         return handheld_dmm.App.has_uncertainty(p)
 
     def _budget(self, p):
         """(Budget or None, standard model or None, direction) of point p."""
-        if is_source(p):
+        if uses_input_sheet(p):
             m = self.unc_standard_of(p)
             return self._source_budget(p, m), m, 'input'
         cal = self.calibrator_model()
@@ -203,7 +254,7 @@ class App(handheld_dmm.App):
                     and not p.get('no_uncertainty') and self.calibrator_model())
 
     def _custom(self, p):
-        return p.get('test') == 'numeric' and (is_source(p) or is_rtd(p) or self._freq_from_calibrator(p))
+        return p.get('test') == 'numeric' and (uses_input_sheet(p) or is_rtd(p) or self._freq_from_calibrator(p))
 
     def uncertainty_text(self, p):
         import uncertainty
@@ -226,6 +277,9 @@ class App(handheld_dmm.App):
         row = super().certificate_row(dict(p, no_uncertainty=True), r)              # the engine's own row, with its own uncertainty step skipped
         row['Description'] = report_pdf.ascii_unit(row.get('Description', ''))
         row['Uncertainty'] = self.uncertainty_text(p) if self.has_uncertainty(p) else ''
+        ref = self.series_read.get(str(p['id']))
+        if is_series(p) and ref:
+            row['Description'] += f' (3458A in series read {ref} {p["display_unit"]})'
         return row
 
     def certificate_fields(self, p):
@@ -274,10 +328,10 @@ class App(handheld_dmm.App):
         note = super().source_note()
         used = {}
         for p in self.points:
-            if is_source(p) and self.has_uncertainty(p) and (str(p['id']) in self.found or str(p['id']) in self.left):
+            if uses_input_sheet(p) and self.has_uncertainty(p) and (str(p['id']) in self.found or str(p['id']) in self.left):
                 used[self.unc_standard_of(p)] = used.get(self.unc_standard_of(p), 0) + 1
         if used:
-            note = ' '.join(x for x in (note, 'UUT output points (read on an external instrument and typed in): the uncertainty is that of the measuring standard named here, its input-direction '
+            note = ' '.join(x for x in (note, 'UUT output points (read on an external instrument and typed in) and the dc mA measure points (3458A in series, its reading typed in): the uncertainty is that of the measuring standard named here, its input-direction '
                                                'specification divided by its coverage divisor, with the laboratory Measure CMC as the floor: ' +
                                                ', '.join(f'{m} ({n} point(s))' for m, n in sorted(used.items())) + '.') if x)
         return note

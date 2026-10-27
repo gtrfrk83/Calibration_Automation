@@ -45,7 +45,7 @@ GROUPS = {
     'MEAS_V': ('UUT measures dc / ac volts and frequency', 'Figures 1 and 4, printed pp. 11 and 16',
                [('tr', RED, CAL['V']), ('br', BLACK, CAL['V0'])], [], 'Calibrator output to the MEASURE side V jack and its common.'),
     'MEAS_MA': ('UUT measures dc mA', 'Figure 2, printed p. 13',
-                [('tm', BLACK, CAL['I']), ('bm', BLACK, CAL['I0'])], [], 'Calibrator current output in series with the mA jack; the manual adds a Fluke 8508A in the loop (optional here).'),
+                [('tm', BLACK, ('3458A in series', 'UUT mA jack <- 3458A LO;  3458A I <- CAL HI (5522A AUX HI | 5560A VI AUX)')), ('bm', BLACK, CAL['I0'])], [], 'Calibrator current through the 3458A (in place of the manual 8508A) into the mA jack. 3458A terminals UNVERIFIED.'),
     'MEAS_OHM': ('UUT measures resistance', 'Figure 3, printed p. 15',
                  [('tm', RED, CAL['V']), ('tm', RED, CAL['S']), ('bm', BLACK, CAL['V0']), ('bm', BLACK, CAL['S0'])], [], 'Four-wire at the calibrator, two-wire at the UUT: both HI leads on the mA Ω RTD jack, both LO leads on the common below it; calibrator 2-wire compensation ON.'),
     'MEAS_TC': ('UUT measures a Type K thermocouple', 'Figure 10, printed p. 24 (the manual uses dc mV through a lag bath)',
