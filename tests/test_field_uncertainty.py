@@ -268,6 +268,11 @@ class Assigning(Base):
         self.assertEqual(len(rec), 1)
         self.assertEqual(F.status_of(rec[0]), 'withdrawn')
         self.assertEqual(F.all_assignments(include_withdrawn=False), [])
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        F.export_csv(tmp / 'w.csv')
+        rec = list(csv.DictReader(io.StringIO((tmp / 'w.csv').read_text(encoding='utf-8-sig'))))
+        self.assertEqual((rec[0]['status'], rec[0]['withdrawn_by'], rec[0]['withdrawn_reason']), ('withdrawn', WHO, 'Entered on the wrong unit'))
 
     def test_read_back_mismatch_is_an_error_and_not_retried(self):
         s = self.sug()

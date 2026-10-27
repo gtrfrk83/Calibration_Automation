@@ -540,6 +540,7 @@ def annotate(model, app=None, demo=False) -> dict:
         for i, row in enumerate(model.rows):
             a = stored.get(point_id(row.spec.section, row.spec.description, row.spec.nominal_text))
             row.assigned = None
+            row.field_gap = i in model.field_missing
             if a is None:
                 continue
             printed = str(row.spec.printed.get('Uncertainty') or '').strip()

@@ -295,6 +295,7 @@ class Row:
         self.spec = spec
         self.manual = None                     # standard chosen for this row by the person (model key), or None
         self.typed = None                      # a typed uncertainty (dict) for a row the lab scope does not cover, or None
+        self.field_gap = False                 # field_uncertainty.annotate: should carry an uncertainty and prints none
         self.assigned = None                   # an uncertainty assigned in the field (a field_uncertainty row dict) that will print for this point, or None
         self.base = evaluate(spec, spec.default_std)
         self.cur = self.base
@@ -413,7 +414,7 @@ class Row:
 
     @property
     def needs_attention(self) -> bool:
-        return self.cur.status == NOT_IN_SCOPE or self.typed is not None
+        return self.cur.status == NOT_IN_SCOPE or self.typed is not None or bool(self.field_gap and self.assigned is None)       # field_gap: should carry an uncertainty and prints none (field_uncertainty.detect, the readiness rule)
 
 
 class ReviewModel:

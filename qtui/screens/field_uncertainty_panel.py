@@ -32,16 +32,6 @@ SETTINGS = 'field_uncertainty'
 MARK = {'missing': ('✗', 'bad'), 'ok': ('✓', 'good'), 'hint': ('!', 'warn')}
 
 
-def _remembered_name() -> str:
-    return str(core.Settings(SETTINGS).get('who', '') or '')
-
-
-def _remember_name(name: str) -> None:
-    s = core.Settings(SETTINGS)
-    s.set('who', str(name).strip())
-    s.save()
-
-
 class AssignDialog(ModalDialog):
     def __init__(self, parent, model, idx, asset='', demo=False, procedure=None):
         super().__init__(parent, 'Assign uncertainty', width=780)
@@ -162,7 +152,7 @@ class AssignDialog(ModalDialog):
         self.reason_edit = QLineEdit()
         self.reason_edit.setAccessibleName('Reason')
         self.reason_edit.setPlaceholderText('Reason (required for your own value or a replacement; optional for a suggestion)')
-        self.who_edit = QLineEdit(_remembered_name())
+        self.who_edit = QLineEdit()
         self.who_edit.setAccessibleName('Your name')
         self.who_edit.setPlaceholderText('Your name (required)')
         form.addWidget(self.reason_edit)
@@ -531,8 +521,6 @@ class AssignDialog(ModalDialog):
             return False
         self.assigned_ids += ids
         self.touched += len(ids)
-        if not self.demo:
-            _remember_name(who)
         self.outcome = 'assigned'
         self._refresh_rows()
         left = [j for j in self.points if self.model.rows[j].assigned is None]
@@ -625,7 +613,7 @@ class FieldAssignmentsDialog(ModalDialog):
 
     def ask_withdraw(self):
         d = ModalDialog(self, 'Withdraw this assignment', subtitle='The record stays in the list, marked withdrawn.', width=520)
-        who = QLineEdit(_remembered_name())
+        who = QLineEdit()
         why = QLineEdit()
         who.setPlaceholderText('Your name')
         why.setPlaceholderText('Reason')

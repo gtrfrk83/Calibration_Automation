@@ -17,7 +17,7 @@ from unittest import mock
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 _HOME = tempfile.mkdtemp()
-os.environ['HOME'] = _HOME                                   # the throw-away user's saved settings (the remembered technician name)
+os.environ['HOME'] = _HOME                                   # the throw-away user's saved settings
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
@@ -85,7 +85,6 @@ class Base(unittest.TestCase):
     def setUp(self):
         F.clear_session()
         self.addCleanup(F.clear_session)
-        P._remember_name('')                                       # the remembered technician name belongs to one test at a time
         self.app, self.mod = H.gap_app(demo=self.demo, twin=self.twin)
         self.addCleanup(H.drop_gap_points, self.mod)
         stack = contextlib.ExitStack()
@@ -137,7 +136,9 @@ class Panel(Base):
         self.assertEqual(rec[0]['first_asset'], 'A-100')
         self.assertEqual(d.outcome, 'assigned')
         self.assertIsNotNone(self.model.rows[self.idx].assigned)
-        self.assertEqual(P._remembered_name(), WHO)
+        self.assertEqual(d.who_edit.text(), WHO)
+        self.assertEqual(self.dialog(self.idx).who_edit.text(), '', 'the name is never remembered: a new panel starts empty')
+        self.assertFalse(hasattr(P, '_remembered_name'))
 
     def test_enter_my_own_value_with_unit_reason_and_name(self):
         d = self.dialog()
@@ -195,7 +196,6 @@ class Panel(Base):
         type_into(d.value_edit, '12.5')
         click(d.btn_manual)
         self.assertEqual(self.stored(), [])
-        self.assertEqual(P._remembered_name(), '')
 
     def test_scope_choice_shows_the_count_and_is_safe(self):
         d = self.dialog()
@@ -275,6 +275,29 @@ class Panel(Base):
         self.assertEqual(F.status_of(self.stored()[0]), 'withdrawn')
         self.assertIsNone(self.model.rows[self.idx].assigned)
 
+    def test_name_is_not_persisted_anywhere_but_the_record(self):
+        d = self.dialog()
+        type_into(d.who_edit, 'Zed Uniquename')
+        click(d.sug_buttons[0])
+        self.assertEqual(self.stored()[0]['who'], 'Zed Uniquename')
+        for root, _dirs, files in os.walk(_HOME):
+            for f in files:
+                self.assertNotIn(b'Uniquename', (Path(root) / f).read_bytes(), f)
+
+    def test_withdraw_needs_a_reason_and_keeps_the_row(self):
+        d = self.dialog()
+        type_into(d.who_edit, WHO)
+        click(d.sug_buttons[0])
+        d2 = self.dialog(self.idx)
+        d2.ask_withdraw = lambda: (WHO, '')
+        d2.withdraw_current()
+        self.assertTrue(d2.msg.isVisibleTo(d2))
+        self.assertEqual(F.status_of(self.stored()[0]), 'active')
+        d2.ask_withdraw = lambda: (WHO, 'Wrong unit chosen')
+        d2.withdraw_current()
+        rec = self.stored()
+        self.assertEqual((len(rec), F.status_of(rec[0]), rec[0]['withdrawn_reason']), (1, 'withdrawn', 'Wrong unit chosen'))
+
     def test_text_scales(self):
         for pct in (100, 150, 200):
             theme.set_text_scale(pct)
@@ -301,7 +324,7 @@ class DemoPanel(Base):
         self.assertEqual(len(F.all_assignments(demo=True)), 1)
         self.assertFalse(self.reg.exists() and 'field_uncertainty' in __import__('test_field_uncertainty').tables(self.reg))
         self.assertEqual(F.all_assignments(demo=False), [])
-        self.assertEqual(P._remembered_name(), '', 'the name is not remembered in demo mode')
+        self.assertEqual(self.dialog().who_edit.text(), '')
 
 
 class ReviewWindowCta(Base):
@@ -326,12 +349,18 @@ class ReviewWindowCta(Base):
         w2 = self.window(clean)
         self.assertFalse(w2.cta_row.isVisibleTo(w2))
 
-    def test_needs_attention_and_pass_fail_do_not_change(self):
-        plain = H.review_model(self.app)
-        base_counts = plain.counts()
+    def test_needs_attention_counts_points_without_uncertainty(self):
         bare = M.ReviewModel(*M.specs_for(self.app), asset='A-100', procedure='p')
-        self.assertEqual(bare.counts()['attention'], base_counts['attention'])
-        self.assertEqual(bare.counts()['all'], base_counts['all'])
+        self.assertEqual(bare.counts()['attention'], 0)
+        self.assertEqual(self.model.counts()['attention'], 2)
+        self.assertEqual(len(self.model.visible('Needs attention')), 2)
+        self.window()
+        s = F.suggestions(self.model, self.idx)[0]
+        F.add(F.point_info(self.model, self.idx), s.value, source=s.source, reason='', who=WHO)
+        model2 = H.review_model(self.app)
+        self.assertEqual(model2.counts()['attention'], 1, 'an assigned point no longer needs attention')
+        self.assertEqual(model2.counts()['all'], bare.counts()['all'])
+        self.assertEqual({k: v for k, v in model2.counts().items() if k not in ('attention', M.ASSIGNED, M.NO_UNC)}.get('changed'), 0)
 
     def test_assign_from_the_window_updates_the_row(self):
         w = self.window()
