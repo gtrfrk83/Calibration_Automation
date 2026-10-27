@@ -592,10 +592,57 @@ def _manual_standard_spec(app, i, p, row, base, printed):
                      p['base_unit'], mv['unc_standard'], '', printed)
 
 
+def _source_point_spec(app, i, p, row, base, printed):
+    """A point where the UUT itself SOURCES (Fluke 753 / 754 OUTPUT points): its uncertainty is the MEASURING standard's ('input' sheet, default Keysight 3458A, the owner's per-point pick), never
+    the calibrator's.  Reviewed with that standard (changeable among the installed measuring standards that cover the point); the figures are the engine's own (fluke_753_754.source_budget).
+    None for every other point / engine."""
+    if not (hasattr(app, 'unc_standard_of') and hasattr(app, '_source_budget') and hasattr(app, 'unc_options')):
+        return None
+    try:
+        import fluke_753_754 as f75
+        if not (f75.uses_input_sheet(p) and app.has_uncertainty(p)):
+            return None
+        default = app.unc_standard_of(p)
+        options = list(app.unc_options(p)) or [default]
+    except Exception:
+        return None
+    import tartur
+    import uncertainty
+    factor = Decimal(str(p['factor']))
+    low, high = float(Decimal(p['low']) * factor), float(Decimal(p['high']) * factor)
+    unit = p.get('base_unit', '')
+
+    def calc(standard):
+        model = standard or default
+        b = app._source_budget(p, model)
+        if b is None or b.reported is None:
+            return make_evaluation(unit, model, '', None, None, None, '', '', True)
+        fields = {}
+        try:
+            acc = (b.hit.limit, b.hit.row['unit']) if b.hit is not None else (None, None)
+            res = tartur.from_values(tartur.half_width(low, high), b.unit, accuracy=acc[0], accuracy_unit=b.unit if acc[0] is not None else None,
+                                     uncertainty=b.reported, uncertainty_unit=b.unit)
+            fields = tartur.ratio_fields(res)
+        except Exception:
+            pass
+        return make_evaluation(b.unit, model, uncertainty.format_value(b.reported, b.unit), b.emu, b.cmc, b.reported, fields.get('TAR', ''), fields.get('TUR', ''), True)
+
+    plain = dict(kind=p.get('unc_kind') or p.get('kind', ''), nominal=0, unit=unit, frequency=None, range=None, source='none')
+    spec = PointSpec(i, base['step'], base['section'], base['description'], base['nominal'], plain, dict(plain), low, high, unit, default, '', printed)
+    spec.calc = calc
+    spec.options = options
+    spec.expects = True
+    spec.std_label = LABELS.get(default, default)
+    return spec
+
+
 def _handheld_spec(app, i, p, row) -> PointSpec:
     printed = {k: row.get(k, '') for k in ('Uncertainty', 'TAR', 'TUR')}
     base = dict(step=_clean_text(p.get('id', i + 1)), section=row.get('Section', ''), description=row.get('Description', ''), nominal=row.get('Nominal', ''))
     plain = dict(kind=p.get('kind', ''), nominal=0, unit=p.get('base_unit', ''), frequency=None, range=None, source='none')
+    src = _source_point_spec(app, i, p, row, base, printed)
+    if src is not None:
+        return src
     if p.get('test') == 'numeric' and not app.has_uncertainty(p):
         spec = _manual_standard_spec(app, i, p, row, base, printed)
         if spec is not None:

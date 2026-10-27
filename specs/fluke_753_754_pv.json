@@ -31,12 +31,12 @@
   "753": {
    "name": "Fluke 753 Documenting Process Calibrator",
    "brand": "Fluke",
-   "model_note": "Fluke 753: 90 points (no HART)"
+   "model_note": "Fluke 753: 90 points"
   },
   "754": {
    "name": "Fluke 754 Documenting Process Calibrator",
    "brand": "Fluke",
-   "model_note": "Fluke 754: 91 points (adds the HART mode check)"
+   "model_note": "Fluke 754: 90 points (the HART mode check is not part of this procedure)"
   }
  },
  "groups": {
@@ -355,26 +355,6 @@
    ],
    "caution": null,
    "diagram": "diagrams/hook_fluke753_LOOP.png"
-  },
-  "HART": {
-   "title": "Change the cables: HART mode (754 only)",
-   "summary": "UUT mA jack and common -> HART transmitter (Figure 15).",
-   "steps": [
-    [
-     "Standby",
-     "Put the calibrator (or the source) in STANDBY before you rewire (in manual mode, put it in STANDBY yourself)."
-    ],
-    [
-     "UUT",
-     "SETUP, HART Channel, ENTER, select mA Jack, ENTER. Connect to the HART transmitter as Figure 15, push HART (enable Loop Power if needed). The Active Device screen must show the transmitter (printed p. 31)."
-    ],
-    [
-     "Check",
-     "Compare your connections with the picture, then continue."
-    ]
-   ],
-   "caution": null,
-   "diagram": "diagrams/hook_fluke753_HART.png"
   }
  },
  "steps": [
@@ -3911,29 +3891,6 @@
    "dsb_desc": "Loop Power Loop power on (no load)",
    "report_desc": "Output: Loop power on (no load)",
    "note": "The UUT SOURCES this value: manual entry only. Type the reading of the external measuring instrument (the manual: Fluke 8508A DMM; the 12 Hz-50 kHz points: Tektronix FCA3000 counter). The measuring standard whose uncertainty is printed is chosen per point (right-click the point > Uncertainty standard; 3458A is the default). UUT: SETUP, ENTER, select Loop Power, ENTER (printed p. 30). Type the no-load voltage the DMM shows; the limits are 23.4 V to 28.6 V. The uncertainty is the meter's at 26 V (the middle of the window)."
-  },
-  {
-   "table": "H",
-   "step": 91,
-   "id": "H-1",
-   "ref": "HART mode",
-   "page": 31,
-   "section": "HART Mode (754 only)",
-   "models": [
-    "754"
-   ],
-   "direction": "none",
-   "range": "",
-   "switch": "HART mode (754)",
-   "kind": "NONE",
-   "display_unit": "",
-   "factor": 1.0,
-   "base_unit": "",
-   "test": "visual",
-   "applied": null,
-   "group": "HART",
-   "question": "Does the 754 recognize the HART transmitter (the Active Device screen shows the model number and tag, PV, PVAO, PV LRV and PV URV)?  Yes = recognized (pass).  No = not recognized (the test has failed: repair is necessary).",
-   "note": "HART Mode Verification (754 only), printed pp. 31-32: pass / fail only, no calibration. Setup: HART Channel = mA Jack; connect the 754 to a HART transmitter (Rosemount 1151 or 3051, or any HART device) per Figure 15; push HART, enable Loop Power if needed."
   }
  ]
 }

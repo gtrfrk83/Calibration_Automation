@@ -6,7 +6,7 @@ The 753 is itself a calibrator, so each point goes one way or the other (see flu
                      the uncertainty is that of the measuring standard you choose per point (right-click the point; default Keysight 3458A).
 A hook-up dialog is shown whenever the cables change, the result is a PDF 'Calibration Data' report.
 Test points and limits: specs/fluke_753_754_pv.json (built by specs/build_fluke_753_754_spec.py from the Fluke 753/754 Calibration Manual, Performance Verification Tests, printed pp. 9-32);
-the spec is a family spec (753, 754); this launcher runs the 753: 90 points (no HART).
+the spec is a family spec (753, 754); this launcher runs the 753: 90 points.
 Demo (no hardware):  python Procedures/Fluke_753_Verification.py --demo
 """
 import sys

@@ -7,7 +7,7 @@
  "category": "Process Calibrator",
  "version": "1",
  "order": 65,
- "description": "Fluke 753 / 754 Documenting Process Calibrator Performance Verification (family spec): this launcher runs the 754, 91 points",
+ "description": "Fluke 753 / 754 Documenting Process Calibrator Performance Verification (family spec): this launcher runs the 754, 90 points",
  "launcher": "Procedures/Fluke_754_Verification.py",
  "engine": [
   "handheld_dmm.py",
