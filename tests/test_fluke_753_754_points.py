@@ -657,3 +657,11 @@ class EndToEnd(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class PerCalibratorPictures(unittest.TestCase):
+    def test_every_calibrator_group_has_a_picture_for_each_calibrator(self):
+        import hookups
+        for cal in ('5560A', '5522A'):
+            for group in ('MEAS_V', 'MEAS_MA', 'MEAS_OHM', 'MEAS_TC', 'MEAS_RTD4', 'MEAS_RTD3'):
+                self.assertTrue(hookups.image_path('fluke753', cal, group), (cal, group))

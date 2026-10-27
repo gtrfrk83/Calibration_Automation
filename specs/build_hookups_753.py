@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+import sys
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -73,77 +73,310 @@ GROUPS = {
 }
 
 
-def font(size, bold=False):
-    return ImageFont.truetype(FONT + ('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf'), size)
+HERE_ = HERE
+sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(ROOT))
+from draw_kit import Pen, smooth, min_distance        # noqa: E402
+import itertools                                       # noqa: E402
+import build_hookups as bh                             # noqa: E402  (the 5560A / 5522A panel drawers of the handheld pictures)
+import hookups                                         # noqa: E402
+
+W, H = 780, 730
+YEL, FACE, EDGE = '#f3c40f', '#2b2e33', '#8a6d00'
+CABLE = {RED: '#d11a2a', BLACK: '#1b1b1b', GREY: '#e3b800'}
+AMBER = '#ffb300'
+# jacks drawn like the owner's photo: top row V Ohm RTD | mA, mA Ohm RTD | V (red surrounds), bottom row the three commons, TC mini-jack lower left
+DRAW = {'tl': (125, 448), 'tm': (195, 448), 'tr': (265, 448), 'bl': (125, 512), 'bm': (195, 512), 'br': (265, 512), 'tc': (72, 512)}
+LABEL = {'tl': 'V Ω RTD', 'tm': 'mA / mA Ω RTD', 'tr': 'V', 'bl': 'COM 30 V', 'bm': 'COM 50 V', 'br': 'COM CAT II 300 V'}
+TOP_LANES, BOTTOM_LANES = (336, 386), (620, 580)     # a lead from further left takes the lane further out, so no two cables cross
+DEV_X = 470
+
+
+def wrap(pen, text, size, width):
+    lines = []
+    for part in text.split('|'):
+        cur = ''
+        for word in part.strip().split():
+            if cur and pen.text_size(cur + ' ' + word, size, False)[0] > width:
+                lines.append(cur)
+                cur = word
+            else:
+                cur = (cur + ' ' + word).strip()
+        if cur:
+            lines.append(cur)
+    return lines
+
+
+def draw_753(pen, used, jumpers):
+    pen.rect(40, 62, 330, 566, r=34, fill=YEL, outline=EDGE, width=5)
+    pen.rect(54, 76, 316, 552, r=24, fill=FACE)
+    pen.text(185, 96, 'FLUKE', 13, YEL)
+    pen.text(185, 114, '753 / 754  Documenting Process Calibrator', 8.5, '#ffffff', bold=False)
+    pen.rect(72, 128, 298, 252, r=6, fill='#c9d3bf', outline='#16181b', width=2)
+    pen.text(185, 190, '753 / 754', 22, '#8e9a84')
+    for i in range(4):                                                  # soft keys
+        pen.rect(78 + i * 55, 260, 124 + i * 55, 276, r=4, fill='#4a4f57')
+    for r in range(3):                                                  # key block
+        for c in range(6):
+            pen.rect(76 + c * 37, 292 + r * 22, 106 + c * 37, 308 + r * 22, r=4, fill='#3a3f47' if (r + c) % 3 else '#555b66')
+    pen.rect(58, 418, 312, 548, r=14, fill='#d99a0b', outline='#6b4f00', width=2)          # the terminal panel (the owner's photo: orange-yellow plate)
+    for key, (x, y) in DRAW.items():
+        if key == 'tc':
+            pen.rect(x - 22, y - 9, x + 22, y + 9, r=6, fill='#0d0e10', outline='#8b919b' if key in used else '#5c626c', width=2.4)
+            pen.rect(x - 12, y - 3, x + 12, y + 3, r=2, fill='#333840')
+            if key in used:
+                pen.rect(x - 28, y - 15, x + 28, y + 15, r=9, outline=AMBER, width=3.2)
+            continue
+        ring = '#b3121c' if key[0] == 't' else '#1b1b1b'
+        if key in used:
+            pen.circle(x, y, 25, outline=AMBER, width=3.6)
+        pen.circle(x, y, 17, fill=ring, outline='#ffffff', width=1.6)
+        pen.circle(x, y, 11, fill='#0d0e10', outline='#8b919b' if key in used else '#5c626c', width=2.4)
+        pen.circle(x, y, 4, fill='#333840')
+
+
+def draw_labels(pen, used):
+    for key, text in LABEL.items():
+        x, y = DRAW[key]
+        y = y + 26 if key[0] == 't' else y - 26
+        size = 7.6 if len(text) > 8 else 8.4
+        pen.text(x, y, text, size, '#1b1b1b' if key in used else '#4a3300', bold=key in used)
+    pen.text(160, 430, 'SOURCE', 8, '#4a3300')
+    pen.text(230, 430, 'MEASURE', 8, '#4a3300')
+    x, y = DRAW['tc']
+    pen.text(x, y - 22, 'TC', 8.4, '#1b1b1b' if 'tc' in used else '#4a3300')
+
+
+def cable(pen, pts, color, width=7):
+    pts = smooth(pts, 4)
+    pen.line(pts, '#ffffff', width + 4)
+    pen.line(pts, color, width)
 
 
 def draw(group):
     title, figure, leads, jumpers, note = GROUPS[group]
-    photo = Image.open(PHOTO).convert('RGB')
-    pw, ph = photo.width * S, photo.height * S
-    photo = photo.resize((pw, ph), Image.LANCZOS)
-    top, bottom, side = 290, 230, 40
-    W, H = pw + 2 * side, ph + top + bottom
-    im = Image.new('RGB', (W, H), (255, 255, 255))
-    d = ImageDraw.Draw(im)
-    im.paste(photo, (side, top))
-    pos = {k: (side + x * S, top + y * S) for k, (x, y) in JACK.items()}
-    d.text((side, 10), f'Fluke 753 / 754 - {title}', font=font(20, True), fill=(0, 0, 0))
-    d.text((side, 40), figure, font=font(14), fill=(60, 60, 60))
+    pen = Pen(W, H, '#ffffff')
+    pen.text(24, 20, f'Fluke 753 / 754 - {title}', 15, '#000000', anchor='lm')
+    pen.text(24, 40, figure, 10, '#3c3c3c', bold=False, anchor='lm')
     used = {j for j, _c, _t in leads} | {a for a, b in jumpers} | {b for a, b in jumpers}
-    for k, (cx, cy) in pos.items():                                # the jacks not used: a grey cross-hatch ring so the used ones stand out
-        if k not in used:
-            d.ellipse([cx - 34, cy - 34, cx + 34, cy + 34], outline=(150, 150, 150), width=3)
-    # leads: top jacks go up to boxes above, bottom jacks go down; several leads on one jack fan out
-    groups = {}
+    draw_753(pen, used, jumpers)
+    # one plug per lead; leads on the same jack sit side by side
+    per = {}
     for lead in leads:
-        groups.setdefault(lead[0], []).append(lead)
-    boxes = []
-    for jack, items in groups.items():
-        cx, cy = pos[jack]
-        up = jack[0] == 't' and jack != 'tc'
-        for n, (j, colour, (l1, l2)) in enumerate(items):
-            dx = (n - (len(items) - 1) / 2) * 26
-            if jack == 'tc':
-                end = (side + 10 + n * 10, top + ph + 20 + n * 40)
-                start = (cx + (n - 0.5) * 16, cy)
-                bx, by = side, top + ph + 70 + n * 70
-            elif up:
-                start, end = (cx + dx * 0.4, cy - 10), (cx + dx, top - 60 - n * 0)
-                bx, by = cx + dx, top - 130
-            else:
-                start, end = (cx + dx * 0.4, cy + 10), (cx + dx, top + ph + 40)
-                bx, by = cx + dx, top + ph + 60
-            d.line([start, end], fill=colour, width=9)
-            d.ellipse([start[0] - 11, start[1] - 11, start[0] + 11, start[1] + 11], fill=colour, outline=(255, 255, 255), width=2)
-            boxes.append((bx, by, l1, l2, colour, up, jack))
-    for a, b in jumpers:
-        (ax, ay), (bx2, by2) = pos[a], pos[b]
-        d.arc([min(ax, bx2), ay - 10, max(ax, bx2), ay + 70], 0, 180, fill=BLACK, width=7)
-    # text boxes, spaced so they do not overlap
+        per.setdefault(lead[0], []).append(lead)
+    plugs = []
+    for jack, items in per.items():
+        for n, lead in enumerate(items):
+            x = DRAW[jack][0] + (n - (len(items) - 1) / 2) * 20
+            plugs.append((x, jack, lead))
+    plugs.sort(key=lambda t: t[0])
+    top = [p for p in plugs if p[1][0] == 't' and p[1] != 'tc']
+    bottom = [p for p in plugs if p[1][0] == 'b' or p[1] == 'tc']
     placed = []
-    for bx, by, l1, l2, colour, up, jack in sorted(boxes, key=lambda b: (b[5], b[0])):
-        w = max(d.textlength(l1, font=font(14, True)), d.textlength(l2, font=font(11))) + 16
-        x0 = bx - w / 2
-        row = 0
-        x0 = min(max(side - 30, x0), W - w - 4)
-        while any(x0 < px + pw_ + 6 and px < x0 + w + 6 and pr == row and pu == up for px, pw_, pr, pu in placed):
-            row += 1
-        placed.append((x0, w, row, up))
-        y0 = (top - 132 - row * 56) if up else (top + ph + 48 + row * 52)
-        d.rectangle([x0, y0, x0 + w, y0 + 46], fill=(245, 245, 245), outline=colour, width=3)
-        d.text((x0 + 8, y0 + 4), l1, font=font(14, True), fill=colour if colour != GREY else (0, 0, 0))
-        d.text((x0 + 8, y0 + 26), l2, font=font(11), fill=(40, 40, 40))
-    d.text((side, H - 52), note, font=font(13), fill=(0, 0, 0))
-    d.text((side, H - 30), 'Drawn from the supplied photo (jack positions) and the Calibration Manual figure named above. Leads red = high, black = low / common.', font=font(11), fill=(90, 90, 90))
+    for lanes, group_, down in ((TOP_LANES, top, False), (BOTTOM_LANES, bottom, True)):
+        ys = list(lanes[:len(group_)])
+        ys = sorted(ys) if not down else sorted(ys, reverse=True)
+        for (x, jack, lead), lane in zip(group_, ys):
+            placed.append((x, jack, lead, lane, down))
+    dev_lo = min(l for *_a, l, _d in placed) - 52
+    dev_hi = max(l for *_a, l, _d in placed) + 34
+    kind = DEVICE.get(group, ('OTHER END', '#3d4f66'))
+    pen.rect(DEV_X, dev_lo, W - 14, dev_hi, r=14, fill=kind[1], outline='#16181b', width=3)
+    pen.text(DEV_X + 18, dev_lo + 20, kind[0], 12.5, '#ffffff', anchor='lm')
+    titles = {l[2][0] for l in leads}
+    for x, jack, (j, colour, (l1, l2)), lane, down in placed:
+        jy = DRAW[jack][1]
+        c = CABLE[colour]
+        y_end = jy + (34 if down else -34)
+        if jack == 'tc':
+            y_end = jy + 34
+        cable(pen, [(DEV_X + 24, lane), (x, lane), (x, y_end)], c)
+        y0, y1 = (jy + 10, jy + 34) if (down or jack == 'tc') else (jy - 34, jy - 10)
+        pen.rect(x - 7, y0, x + 7, y1, r=4, fill=c, outline='#ffffff', width=1.5)
+        pen.circle(DEV_X + 24, lane, 10, fill='#0d0e10', outline='#8b919b', width=2.2)
+        pen.circle(DEV_X + 24, lane, 6.4, fill=c, outline='#ffffff', width=1.6)
+        if l1 != kind[0]:
+            pen.text(DEV_X + 44, lane - 9, l1, 10.5, '#ffffff', anchor='lm')
+        else:
+            pen.text(DEV_X + 44, lane - 9, {'EXTERNAL DMM': 'DMM input'}.get(l1, l1), 10.5, '#ffffff', anchor='lm')
+        for i, line in enumerate(wrap(pen, l2, 8.6, W - 14 - (DEV_X + 44) - 8)[:3]):
+            pen.text(DEV_X + 44, lane + 5 + i * 11, line, 8.6, '#dfe6ee', bold=False, anchor='lm')
+    for a, b in jumpers:                                                # a jumper plug between two jacks, drawn under them
+        (ax, ay), (bx, by) = DRAW[a], DRAW[b]
+        bx -= 10 * len(per.get(b, ())) if per.get(b) else 0
+        cable(pen, [(ax, ay + 12), (ax, ay + 26), (bx, ay + 26), (bx, ay + 12)], BLACK, 6)
+    draw_labels(pen, used)
+    for n, line in enumerate(wrap(pen, note, 9.5, W - 48)[:3]):
+        pen.text(24, H - 58 + n * 14, line, 9.5, '#000000', bold=False, anchor='lm')
+    pen.text(24, H - 14, 'Jacks drawn from the supplied photo; leads from the Calibration Manual figure named above (red = high, black = low / common).', 8, '#5a6475', bold=False, anchor='lm')
     path = OUT / f'hook_fluke753_{group}.png'
-    im.save(path)
+    pen.save(path)
     return path
+
+
+
+# ------------------------------------------------------------------------------------------------ per-calibrator pictures
+# diagrams/hook_fluke753_<5560A|5522A>_<GROUP>.png for the groups a calibrator drives; the engine picks the file of the chosen calibrator
+CAL_GROUPS = ('MEAS_V', 'MEAS_MA', 'MEAS_OHM', 'MEAS_TC', 'MEAS_RTD4', 'MEAS_RTD3')
+KEY_OF = {id(v): k for k, v in CAL.items()}
+JACKNAME = {'5560A': {'V': 'OUT_HI', 'V0': 'OUT_LO', 'I': 'VI_AUX', 'I0': 'OUT_LO', 'S': 'SEN_HI', 'S0': 'SEN_LO', 'TC': 'TC'},
+            '5522A': {'V': 'NORMAL_HI', 'V0': 'NORMAL_LO', 'I': 'AUX_HI', 'I0': 'AUX_LO', 'S': 'AUX_HI', 'S0': 'AUX_LO', 'TC': 'TC'}}
+VXS = (440, 418, 396, 374, 352)
+
+
+def route_all(cables):
+    """cables: [(start, exit_pts, meter_x, y_end, down)] -> routes that do not touch (searched over the vertical lanes and the horizontal lane order)."""
+    n = len(cables)
+    tops = [i for i, c in enumerate(cables) if not c[4]]
+    bots = [i for i, c in enumerate(cables) if c[4]]
+    best = None
+    for vxs in itertools.permutations(VXS, n):
+        for tl in itertools.permutations(TOP_LANES[:max(len(tops), 1)] if len(tops) <= 2 else TOP_LANES, len(tops)):
+            for bl in itertools.permutations(BOTTOM_LANES if len(bots) else (), len(bots)):
+                lane = {}
+                for i, y in zip(tops, tl):
+                    lane[i] = y
+                for i, y in zip(bots, bl):
+                    lane[i] = y
+                routes = []
+                for i, (start, exit_pts, mx, y_end, down) in enumerate(cables):
+                    ey = exit_pts[-1][1]
+                    pts = [start, *exit_pts, (vxs[i], ey), (vxs[i], lane[i]), (mx, lane[i]), (mx, y_end)]
+                    routes.append(pts)
+                bad = sum(min_distance(a, b) < 13 for a, b in itertools.combinations(routes, 2))
+                length = sum(abs(p[0] - q[0]) + abs(p[1] - q[1]) for r in routes for p, q in zip(r, r[1:]))
+                key = (bad, length)
+                if best is None or key < best[0]:
+                    best = (key, routes)
+        if best and best[0][0] == 0 and n > 3:
+            break
+    return best[1]
+
+
+def draw_cal(group, cal):
+    title, figure, leads, jumpers, note = GROUPS[group]
+    bh.PY = 62                                                          # panel below the title line
+    pen = Pen(W, H, '#ffffff')
+    pen.text(24, 20, f'Fluke 753 / 754 - {title}', 15, '#000000', anchor='lm')
+    pen.text(24, 40, figure + f'   |   calibrator: Fluke {cal}', 10, '#3c3c3c', bold=False, anchor='lm')
+    used = {j for j, _c, _t in leads} | {a for a, b in jumpers} | {b for a, b in jumpers}
+    draw_753(pen, used, jumpers)
+    names = JACKNAME[cal]
+    lit, wanted = {}, []
+    for jack, colour, text in leads:
+        key = KEY_OF.get(id(text))
+        if key:
+            lit[names[key]] = 'blue' if key in ('I', 'I0') and cal == '5560A' else 'green'
+    if cal == '5560A':
+        jacks = bh.draw_5560a(pen, lit, False)
+    else:
+        jacks = bh.draw_5522a(pen, {k: True for k in lit})
+    pen.text(bh.PX + 76 * bh.K, bh.PY + (276 if cal == '5560A' else 196) * bh.K + 18, f'Fluke {cal} front panel' + ('' if cal == '5560A' else ' (output terminals)'), 10.5, '#5a6475', bold=False)
+    per = {}
+    for lead in leads:
+        per.setdefault(lead[0], []).append(lead)
+    plugs = []
+    for jack, items in per.items():
+        for n, lead in enumerate(items):
+            plugs.append((DRAW[jack][0] + (n - (len(items) - 1) / 2) * 20, jack, lead))
+    plugs.sort(key=lambda t: t[0])
+    cables, tags, extra = [], [], []
+    manual = None
+    for x, jack, (j, colour, text) in plugs:
+        down = jack[0] == 'b' or jack == 'tc'
+        jy = DRAW[jack][1]
+        y_end = jy + 34 if down else jy - 34
+        key = KEY_OF.get(id(text))
+        if key is None:
+            if group == 'MEAS_MA' and j == 'tm':
+                manual = (x, jack, colour, y_end)
+            else:
+                tags.append((x, jack, colour, y_end, down, text))
+            continue
+        start, exit_pts = jacks[names[key]]
+        cables.append((start, exit_pts, x, y_end, down, colour, key))
+    routes = route_all([c[:5] for c in cables]) if cables else []
+    drawn = []
+    for r, c in zip(routes, cables):
+        drawn.append((r, c))
+    # the 3458A in series (dc mA): box in the middle, its LO to the UUT mA jack, its I to the calibrator current output
+    if manual:
+        bx0, by0, bx1, by1 = 346, 430, 432, 482
+        pen.rect(bx0, by0, bx1, by1, r=8, fill='#2f5a4a', outline='#16181b', width=2.5)
+        pen.text((bx0 + bx1) / 2, by0 + 14, '3458A', 11, '#ffffff')
+        pen.text((bx0 + bx1) / 2, by0 + 28, 'in series', 8.6, '#dfe6ee', bold=False)
+        pen.text(bx0 + 18, by0 + 42, 'LO', 8.4, '#dfe6ee')
+        pen.text(bx1 - 20, by0 + 42, 'I', 8.4, '#dfe6ee')
+        x, jack, colour, y_end = manual
+        a = [(x, y_end), (x, TOP_LANES[1]), (bx0 + 18, TOP_LANES[1]), (bx0 + 18, by0)]
+        cable(pen, a, CABLE[colour])
+        kI = 'I'
+        start, exit_pts = jacks[names[kI]]
+        lit_note = None
+        b = [start, *exit_pts, (453, 456), (bx1 + 4, 456)]
+        extra.append((b, RED, (x, jack, colour, y_end), a))
+    for r, (c) in drawn:
+        pass
+    # draw: black cables first, red on top
+    order = sorted(range(len(drawn)), key=lambda i: drawn[i][1][5] != BLACK)
+    for i in order:
+        r, c = drawn[i]
+        if manual and c[6] == 'I0':                                      # the return goes around the 3458A: down its left side
+            ey = c[1][-1][1]
+            r = [c[0], *c[1], (446, ey), (446, BOTTOM_LANES[1]), (c[2], BOTTOM_LANES[1]), (c[2], c[3])]
+        cable(pen, r, CABLE[c[5]])
+    for b, col, *_ in extra:
+        cable(pen, b, CABLE[col])
+        pen.rect(bx1 - 2, 450, bx1 + 8, 462, r=3, fill=CABLE[col], outline='#ffffff', width=1.3)
+    for (r, c) in drawn:                                                  # plugs on the UUT jacks and the calibrator ends
+        x, y_end, down, colour = c[2], c[3], c[4], c[5]
+        jy = y_end - 34 if down else y_end + 34
+        y0, y1 = (jy + 10, jy + 34) if down else (jy - 34, jy - 10)
+        pen.rect(x - 7, y0, x + 7, y1, r=4, fill=CABLE[colour], outline='#ffffff', width=1.5)
+        pen.circle(c[0][0], c[0][1], 6.4 * bh.K, fill=CABLE[colour], outline='#ffffff', width=1.8)
+    if manual:
+        x, jack, colour, y_end = manual
+        jy = DRAW[jack][1]
+        pen.rect(x - 7, jy - 34, x + 7, jy - 10, r=4, fill=CABLE[colour], outline='#ffffff', width=1.5)
+        c0 = jacks[names['I']][0]
+        pen.circle(c0[0], c0[1], 6.4 * bh.K, fill=RED_, outline='#ffffff', width=1.8)
+    for x, jack, colour, y_end, down, text in tags:                       # a lead the figure does not tie to a calibrator terminal (UNVERIFIED)
+        ys = TOP_LANES[1] if not down else BOTTOM_LANES[1]
+        cable(pen, [(x, y_end), (x, ys), (x + 36, ys)], CABLE[colour])
+        pen.rect(x + 32, ys - 18, x + 90, ys + 18, r=6, fill='#fff3c4', outline='#b58900', width=2)
+        pen.text(x + 61, ys - 6, 'LEAD 2', 8, '#5a4300')
+        pen.text(x + 61, ys + 8, 'UNVERIFIED', 7, '#b00020')
+        jy = DRAW[jack][1]
+        y0, y1 = (jy + 10, jy + 34) if down else (jy - 34, jy - 10)
+        pen.rect(x - 7, y0, x + 7, y1, r=4, fill=CABLE[colour], outline='#ffffff', width=1.5)
+    for a, b in jumpers:
+        (ax, ay), (bx, by) = DRAW[a], DRAW[b]
+        bx -= 10 * len(per.get(b, ())) if per.get(b) else 0
+        cable(pen, [(ax, ay + 12), (ax, ay + 26), (bx, ay + 26), (bx, ay + 12)], BLACK, 6)
+    draw_labels(pen, used)
+    for n, line in enumerate(wrap(pen, note, 9.5, W - 48)[:3]):
+        pen.text(24, H - 58 + n * 14, line, 9.5, '#000000', bold=False, anchor='lm')
+    pen.text(24, H - 14, 'Jacks drawn from the supplied photo; leads from the Calibration Manual figure named above (red = high, black = low / common).', 8, '#5a6475', bold=False, anchor='lm')
+    path = OUT / f'hook_fluke753_{cal}_{group}.png'
+    pen.save(path)
+    return path
+
+
+RED_ = '#d11a2a'
+
+DEVICE = {'MEAS_V': ('CALIBRATOR', '#3d4f66'), 'MEAS_MA': ('CALIBRATOR + 3458A', '#3d4f66'), 'MEAS_OHM': ('CALIBRATOR', '#3d4f66'),
+          'MEAS_TC': ('CALIBRATOR', '#3d4f66'), 'MEAS_RTD4': ('CALIBRATOR', '#3d4f66'), 'MEAS_RTD3': ('CALIBRATOR', '#3d4f66'),
+          'SRC_V': ('EXTERNAL DMM', '#2f5a4a'), 'SRC_MA': ('EXTERNAL DMM', '#2f5a4a'), 'SRC_SIM': ('CALIBRATOR + DMM', '#3d4f66'),
+          'SRC_OHM': ('EXTERNAL DMM', '#2f5a4a'), 'SRC_FREQ': ('COUNTER / SCOPEMETER', '#5a4a2f'), 'SRC_TC': ('LAG BATH + DMM', '#5a4a2f'),
+          'LOOP': ('EXTERNAL DMM', '#2f5a4a'), 'HART': ('HART TRANSMITTER', '#5a4a2f')}
 
 
 def main():
     for g in GROUPS:
         print('wrote', draw(g).name)
+    for cal in ('5560A', '5522A'):
+        for g in CAL_GROUPS:
+            print('wrote', draw_cal(g, cal).name)
 
 
 if __name__ == '__main__':
