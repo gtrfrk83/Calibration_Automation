@@ -1,0 +1,3971 @@
+{
+ "schema": 3,
+ "kind": "manual-reading",
+ "options": {
+  "hookup_meter": "u1251b",
+  "hv_threshold_v": 30,
+  "hv_once_per_group": true,
+  "auto_ramp": false,
+  "two_wire_comp": false,
+  "function_prompt": true,
+  "report_title": "Calibration Data"
+ },
+ "source": {
+  "document": "Keysight U1251B and U1252B Handheld Digital Multimeter - User's and Service Guide",
+  "pages": "149-151 (Basic Operating Test), 152 (Test Considerations), 154-161 (Performance Verification Tests, Table 6-2 pp. 155-160, notes pp. 160-161); equipment Table 6-1 p. 148; Table 1-1 p. 30; Table 1-10 p. 47",
+  "cite": "Keysight U1251B and U1252B User's and Service Guide, Table 6-2 Verification Test, printed pp. 155-160 (Error from nominal, 1 year)",
+  "limits": "Manufacturer limits, Table 6-2 \"Error from nominal 1 year\", as printed",
+  "report_note": "Limits are those of the manufacturer's Table 6-2 \"Error from nominal 1 year\" (Keysight U1251B and U1252B User's and Service Guide, printed pp. 155-160), unchanged. The frequency counter and square wave output points are set and measured with other instruments by hand and carry no uncertainty.",
+  "note": "Table 6-2 \"Verification Test\" of the Keysight U1251B and U1252B User's and Service Guide (printed pp. 155-160, notes [a]-[p] pp. 160-161): the column \"Error from nominal 1 year\" is the only limit set (no 90 day / 2 year columns). Limits are the plus / minus error around the nominal in Decimal; two models with different errors are two steps of the same row. The table names a Fluke 5520A (Table 6-1, p. 148); the program drives a Fluke 5522A or 5560A, or you set the calibrator by hand. The frequency counter point 12 (Keysight 33250A) and the square wave output points (step 20; Keysight 53131A and 34410A) are set by hand and carry no uncertainty. The meter has no documented remote command set: you type the display reading. The table has no display resolutions: typed readings are padded to the decimals of Table 6-4 for the range. The printed table's misprints and unreadable cells are flagged in the point notes. The calibration adjustment (printed pp. 164-175) is not part of this procedure."
+ },
+ "models": {
+  "U1251B": {
+   "name": "Keysight U1251B",
+   "brand": "Keysight",
+   "model_note": "Keysight U1251B handheld digital multimeter (4.5 digit, 50 000 counts): Table 6-2 plus the functional checks (63 points)."
+  },
+  "U1252B": {
+   "name": "Keysight U1252B",
+   "brand": "Keysight",
+   "model_note": "Keysight U1252B handheld digital multimeter (frequency counter, square wave output, AC+DC): Table 6-2 plus the functional checks (87 points)."
+  }
+ },
+ "groups": {
+  "TEMP": {
+   "title": "Connect the thermocouple",
+   "summary": "Meter: the temperature / capacitance position, Shift for the temperature mode, °C, internal reference (note [h]). K-type thermocouple extension (miniature connector on both ends) from the calibrator TC output to the meter through a TC-to-banana adapter (Ω V mV and COM jacks). The calibrator also on its internal reference. The meter must have been in a controlled environment for at least 1 hour (ambient stable within ±1 °C, away from any ventilation exit), do not touch the thermocouple lead after connecting it, and allow the connection to stabilise for at least another 15 minutes (note [n]).",
+   "steps": [
+    [
+     "Standby",
+     "The calibrator is in STANDBY while you connect."
+    ],
+    [
+     "Meter",
+     "Turn the rotary switch to the temperature / capacitance position and press Shift for the temperature mode (°C). Set the multimeter and the calibrator to internal reference (note [h])."
+    ],
+    [
+     "Connect",
+     "K-type thermocouple extension (miniature thermocouple connector on both ends) from the calibrator TC output to the multimeter via a TC-to-banana adapter (Ω V mV and COM jacks)."
+    ],
+    [
+     "Settle",
+     "Meter in a controlled environment for at least 1 hour, ambient stable within ±1 °C, away from ventilation; do not touch the thermocouple lead; allow another 15 minutes after connecting (note [n])."
+    ]
+   ],
+   "caution": "The error limit does not include the thermocouple extension (note [h]).",
+   "diagram": "diagrams/hook_u1251b_TEMP.png"
+  }
+ },
+ "steps": [
+  {
+   "table": "2",
+   "step": 1,
+   "id": "2-1",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "5 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.9675",
+   "high": "5.0325",
+   "nominal": 5.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 5.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9675 to 5.0325 V (±32.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±32.5 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 2,
+   "id": "2-2",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.9775",
+   "high": "5.0225",
+   "nominal": 5.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 5.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9775 to 5.0225 V (±22.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±22.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 3,
+   "id": "2-3",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "5 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.3305",
+   "high": "4.6695",
+   "nominal": 4.5,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 4.5,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.3305 to 4.6695 V (±169.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±169.5 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 4,
+   "id": "2-4",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.4285",
+   "high": "4.5715",
+   "nominal": 4.5,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 4.5,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.4285 to 4.5715 V (±71.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±71.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 5,
+   "id": "2-5",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.3305",
+   "high": "4.6695",
+   "nominal": 4.5,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 4.5,
+    "frequency": 20000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.3305 to 4.6695 V (±169.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±169.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 6,
+   "id": "2-6",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "5 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.3305",
+   "high": "4.6695",
+   "nominal": 4.5,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 4.5,
+    "frequency": 30000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.3305 to 4.6695 V (±169.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±169.5 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 7,
+   "id": "2-7",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.3305",
+   "high": "4.6695",
+   "nominal": 4.5,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 4.5,
+    "frequency": 100000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.3305 to 4.6695 V (±169.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±169.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 8,
+   "id": "2-8",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "50 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.675",
+   "high": "50.325",
+   "nominal": 50.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 50.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.675 to 50.325 V (±325 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±325 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 9,
+   "id": "2-9",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.775",
+   "high": "50.225",
+   "nominal": 50.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 50.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.775 to 50.225 V (±225 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±225 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 10,
+   "id": "2-10",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "50 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "43.305",
+   "high": "46.695",
+   "nominal": 45.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 45.0,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 43.305 to 46.695 V (±1.695 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.695 V for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 11,
+   "id": "2-11",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "44.285",
+   "high": "45.715",
+   "nominal": 45.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 45.0,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 44.285 to 45.715 V (±715 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±715 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 12,
+   "id": "2-12",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "43.305",
+   "high": "46.695",
+   "nominal": 45.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 45.0,
+    "frequency": 20000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 43.305 to 46.695 V (±1.695 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.695 V for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 13,
+   "id": "2-13",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "50 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "43.305",
+   "high": "46.695",
+   "nominal": 45.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 45.0,
+    "frequency": 30000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 43.305 to 46.695 V (±1.695 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.695 V for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 14,
+   "id": "2-14",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "43.305",
+   "high": "46.695",
+   "nominal": 45.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 45.0,
+    "frequency": 100000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 43.305 to 46.695 V (±1.695 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.695 V for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 15,
+   "id": "2-15",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "500 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "496.75",
+   "high": "503.25",
+   "nominal": 500.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 500.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 496.75 to 503.25 V (±3.25 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.25 V for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 16,
+   "id": "2-16",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "500 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "497.75",
+   "high": "502.25",
+   "nominal": 500.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 500.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 497.75 to 502.25 V (±2.25 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±2.25 V for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 17,
+   "id": "2-17",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "1000 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "990.0",
+   "high": "1010.0",
+   "nominal": 1000.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 990.0 to 1010.0 V (±10 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±10 V for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 18,
+   "id": "2-18",
+   "section": "AC volts",
+   "switch": "V~  (AC volts: turn the rotary switch to the ~V position)",
+   "range": "1000 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "992.0",
+   "high": "1008.0",
+   "nominal": 1000.0,
+   "ref": "T6-2 #1",
+   "kind": "ACV",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 992.0 to 1008.0 V (±8.0 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±8.0 V for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 19,
+   "id": "2-19",
+   "section": "Frequency",
+   "switch": "Hz  (frequency: in the ~V position press the Hz button to go to frequency mode)",
+   "range": "9.9999 kHz",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "0.9995",
+   "high": "1.0005",
+   "nominal": 1000.0,
+   "ref": "T6-2 #2",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.48,
+    "frequency": 1000.0
+   },
+   "unc_kind": "FREQ",
+   "report_desc": "9.9999 kHz range, 0.48 V, 1 kHz",
+   "no_freq_suffix": true,
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 0.9995 to 1.0005 kHz (±500 mHz from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±500 mHz for the U1251B and U1252B. Table 6-1 (printed p. 148) lists a Keysight 33250A for Frequency, Table 6-2 a 5520A output (0.48 V, 1 kHz): Table 6-2 is followed. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 20,
+   "id": "2-20",
+   "section": "Duty cycle",
+   "switch": "% duty  (duty cycle: in the ~V position press the Hz button to go to Duty Cycle mode)",
+   "range": "0.01% – 99.99%",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "%",
+   "factor": 1.0,
+   "base_unit": "%",
+   "low": "49.685",
+   "high": "50.315",
+   "nominal": 50.0,
+   "ref": "T6-2 #3",
+   "kind": "DUTY",
+   "applied": {
+    "value": 5.0,
+    "frequency": 50.0,
+    "duty": 50.0,
+    "offset": 0.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.685 to 50.315 % (±0.315 % from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.315 % for the U1251B and U1252B. Calibrator output (5520A column): 5.0 Vpp square wave at 50 Hz, 50 % duty. Both calibrators are put back to a sine wave after the point. No uncertainty: the suite holds no specification for a square-wave output (listed). No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 21,
+   "id": "2-21",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts: turn the rotary switch to the ⎓V position on the U1251B, to the ≃V position on the U1252B)",
+   "range": "5 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.9980",
+   "high": "5.0020",
+   "nominal": 5.0,
+   "ref": "T6-2 #4",
+   "kind": "DCV",
+   "applied": {
+    "value": 5.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9980 to 5.0020 V (±2 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±2 mV for the U1251B. Printed misprint: the table says \"to ≃V position (for model U1252B), to ⎓V position (for model U1252B)\"; Table 1-1 / Table 1-10 put the ⎓V position on the U1251B and the ≃V position on the U1252B, so the second \"(for model U1252B)\" is read as U1251B. No limit is affected. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 22,
+   "id": "2-22",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts: turn the rotary switch to the ⎓V position on the U1251B, to the ≃V position on the U1252B)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.99825",
+   "high": "5.00175",
+   "nominal": 5.0,
+   "ref": "T6-2 #4",
+   "kind": "DCV",
+   "applied": {
+    "value": 5.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.99825 to 5.00175 V (±1.75 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.75 mV for the U1252B. Printed misprint: the table says \"to ≃V position (for model U1252B), to ⎓V position (for model U1252B)\"; Table 1-1 / Table 1-10 put the ⎓V position on the U1251B and the ≃V position on the U1252B, so the second \"(for model U1252B)\" is read as U1251B. No limit is affected. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 23,
+   "id": "2-23",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts: turn the rotary switch to the ⎓V position on the U1251B, to the ≃V position on the U1252B)",
+   "range": "50 V",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.980",
+   "high": "50.020",
+   "nominal": 50.0,
+   "ref": "T6-2 #4",
+   "kind": "DCV",
+   "applied": {
+    "value": 50.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.980 to 50.020 V (±20 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±20 mV for the U1251B. Printed misprint: the table says \"to ≃V position (for model U1252B), to ⎓V position (for model U1252B)\"; Table 1-1 / Table 1-10 put the ⎓V position on the U1251B and the ≃V position on the U1252B, so the second \"(for model U1252B)\" is read as U1251B. No limit is affected. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 24,
+   "id": "2-24",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts: turn the rotary switch to the ⎓V position on the U1251B, to the ≃V position on the U1252B)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.9825",
+   "high": "50.0175",
+   "nominal": 50.0,
+   "ref": "T6-2 #4",
+   "kind": "DCV",
+   "applied": {
+    "value": 50.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.9825 to 50.0175 V (±17.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±17.5 mV for the U1252B. Printed misprint: the table says \"to ≃V position (for model U1252B), to ⎓V position (for model U1252B)\"; Table 1-1 / Table 1-10 put the ⎓V position on the U1251B and the ≃V position on the U1252B, so the second \"(for model U1252B)\" is read as U1251B. No limit is affected. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 25,
+   "id": "2-25",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts: turn the rotary switch to the ⎓V position on the U1251B, to the ≃V position on the U1252B)",
+   "range": "500 V",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "499.80",
+   "high": "500.20",
+   "nominal": 500.0,
+   "ref": "T6-2 #4",
+   "kind": "DCV",
+   "applied": {
+    "value": 500.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.80 to 500.20 V (±200 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±200 mV for the U1251B and U1252B. Printed misprint: the table says \"to ≃V position (for model U1252B), to ⎓V position (for model U1252B)\"; Table 1-1 / Table 1-10 put the ⎓V position on the U1251B and the ≃V position on the U1252B, so the second \"(for model U1252B)\" is read as U1251B. No limit is affected. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 26,
+   "id": "2-26",
+   "section": "DC volts",
+   "switch": "V⎓  (DC volts: turn the rotary switch to the ⎓V position on the U1251B, to the ≃V position on the U1252B)",
+   "range": "1000 V",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "999.2",
+   "high": "1000.8",
+   "nominal": 1000.0,
+   "ref": "T6-2 #4",
+   "kind": "DCV",
+   "applied": {
+    "value": 1000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 999.2 to 1000.8 V (±800 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±800 mV for the U1251B and U1252B. Printed misprint: the table says \"to ≃V position (for model U1252B), to ⎓V position (for model U1252B)\"; Table 1-1 / Table 1-10 put the ⎓V position on the U1251B and the ≃V position on the U1252B, so the second \"(for model U1252B)\" is read as U1251B. No limit is affected. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 27,
+   "id": "2-27",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.9775",
+   "high": "5.0225",
+   "nominal": 5.0,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 5.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9775 to 5.0225 V (±22.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±22.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 28,
+   "id": "2-28",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.9210",
+   "high": "5.0790",
+   "nominal": 5.0,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 5.0,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9210 to 5.0790 V (±79.0 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±79.0 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 29,
+   "id": "2-29",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.3305",
+   "high": "4.6695",
+   "nominal": 4.5,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 4.5,
+    "frequency": 20000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.3305 to 4.6695 V (±169.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±169.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 30,
+   "id": "2-30",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "5 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "4.3305",
+   "high": "4.6695",
+   "nominal": 4.5,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 4.5,
+    "frequency": 100000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.3305 to 4.6695 V (±169.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±169.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 31,
+   "id": "2-31",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.775",
+   "high": "50.225",
+   "nominal": 50.0,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 50.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.775 to 50.225 V (±225 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±225 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 32,
+   "id": "2-32",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "49.210",
+   "high": "50.790",
+   "nominal": 50.0,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 50.0,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.210 to 50.790 V (±790 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±790 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 33,
+   "id": "2-33",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "43.305",
+   "high": "46.695",
+   "nominal": 45.0,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 45.0,
+    "frequency": 20000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 43.305 to 46.695 V (±1.695 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.695 V for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 34,
+   "id": "2-34",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "50 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "43.305",
+   "high": "46.695",
+   "nominal": 45.0,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 45.0,
+    "frequency": 100000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 43.305 to 46.695 V (±1.695 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.695 V for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 35,
+   "id": "2-35",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "500 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "497.75",
+   "high": "502.25",
+   "nominal": 500.0,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 500.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 497.75 to 502.25 V (±2.25 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±2.25 V for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 36,
+   "id": "2-36",
+   "section": "AC volts (U1252B, Shift mode)",
+   "switch": "V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)",
+   "range": "1000 V",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "992.0",
+   "high": "1008.0",
+   "nominal": 1000.0,
+   "ref": "T6-2 #5",
+   "kind": "ACV",
+   "applied": {
+    "value": 1000.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 992.0 to 1008.0 V (±8.0 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±8.0 V for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 37,
+   "id": "2-37",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "50 mV",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "49.925",
+   "high": "50.075",
+   "nominal": 0.05,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": 0.05,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "prompt": "Before the first reading of this function: Note [b]: The accuracy could be 0.05% + 10, always use relative function to zero thermal effect (short test leads) before measuring the signal.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.925 to 50.075 mV (±75 µV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±75 µV for the U1251B and U1252B. Note [b]: The accuracy could be 0.05% + 10, always use relative function to zero thermal effect (short test leads) before measuring the signal. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.075",
+     "data_sheet": "0.075"
+    },
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.075",
+     "data_sheet": "0.075"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 38,
+   "id": "2-38",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "500 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "499.80",
+   "high": "500.20",
+   "nominal": 0.5,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": 0.5,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.80 to 500.20 mV (±0.2 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.2 mV for the U1251B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.2",
+     "data_sheet": "0.2"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 39,
+   "id": "2-39",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "500 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "499.825",
+   "high": "500.175",
+   "nominal": 0.5,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": 0.5,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.825 to 500.175 mV (±0.175 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.175 mV for the U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.175",
+     "data_sheet": "0.175"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 40,
+   "id": "2-40",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "500 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "-500.20",
+   "high": "-499.80",
+   "nominal": -0.5,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": -0.5,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: -500.20 to -499.80 mV (±0.2 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.2 mV for the U1251B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.2",
+     "data_sheet": "0.2"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 41,
+   "id": "2-41",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "500 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "-500.175",
+   "high": "-499.825",
+   "nominal": -0.5,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": -0.5,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: -500.175 to -499.825 mV (±0.175 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.175 mV for the U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.175",
+     "data_sheet": "0.175"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 42,
+   "id": "2-42",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "1000 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "999.2",
+   "high": "1000.8",
+   "nominal": 1.0,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": 1.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 999.2 to 1000.8 mV (±0.8 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.8 mV for the U1251B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.8",
+     "data_sheet": "0.8"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 43,
+   "id": "2-43",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "1000 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "999.25",
+   "high": "1000.75",
+   "nominal": 1.0,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": 1.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 999.25 to 1000.75 mV (±0.75 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.75 mV for the U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.75",
+     "data_sheet": "0.75"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 44,
+   "id": "2-44",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "1000 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "-1000.8",
+   "high": "-999.2",
+   "nominal": -1.0,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": -1.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: -1000.8 to -999.2 mV (±0.8 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.8 mV for the U1251B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.8",
+     "data_sheet": "0.8"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 45,
+   "id": "2-45",
+   "section": "DC mV",
+   "switch": "mV⎓  (DC millivolts: turn the rotary switch to the ≃mV position)",
+   "range": "1000 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "-1000.75",
+   "high": "-999.25",
+   "nominal": -1.0,
+   "ref": "T6-2 #6",
+   "kind": "DCV",
+   "applied": {
+    "value": -1.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: -1000.75 to -999.25 mV (±0.75 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.75 mV for the U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.75",
+     "data_sheet": "0.75"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 46,
+   "id": "2-46",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "50 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "49.660",
+   "high": "50.340",
+   "nominal": 0.05,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.05,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.660 to 50.340 mV (±0.34 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.34 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 47,
+   "id": "2-47",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "50 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "49.760",
+   "high": "50.240",
+   "nominal": 0.05,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.05,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.760 to 50.240 mV (±0.24 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.24 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 48,
+   "id": "2-48",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "50 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "49.140",
+   "high": "50.860",
+   "nominal": 0.05,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.05,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.140 to 50.860 mV (±0.86 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.86 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 49,
+   "id": "2-49",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "50 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "49.585",
+   "high": "50.415",
+   "nominal": 0.05,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.05,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.585 to 50.415 mV (±0.415 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.415 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 50,
+   "id": "2-50",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "50 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "43.305",
+   "high": "46.695",
+   "nominal": 0.045,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.045,
+    "frequency": 20000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 43.305 to 46.695 mV (±1.695 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.695 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 51,
+   "id": "2-51",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "50 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "49.140",
+   "high": "50.860",
+   "nominal": 0.05,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.05,
+    "frequency": 30000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.140 to 50.860 mV (±0.86 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.86 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 52,
+   "id": "2-52",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "50 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "43.305",
+   "high": "46.695",
+   "nominal": 0.045,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.045,
+    "frequency": 100000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 43.305 to 46.695 mV (±1.695 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.695 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 53,
+   "id": "2-53",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "496.75",
+   "high": "503.25",
+   "nominal": 0.5,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.5,
+    "frequency": 45.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 496.75 to 503.25 mV (±3.25 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.25 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 54,
+   "id": "2-54",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "497.75",
+   "high": "502.25",
+   "nominal": 0.5,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.5,
+    "frequency": 45.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 497.75 to 502.25 mV (±2.25 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±2.25 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 55,
+   "id": "2-55",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "496.75",
+   "high": "503.25",
+   "nominal": 0.5,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.5,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 496.75 to 503.25 mV (±3.25 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.25 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 56,
+   "id": "2-56",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "497.75",
+   "high": "502.25",
+   "nominal": 0.5,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.5,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 497.75 to 502.25 mV (±2.25 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±2.25 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 57,
+   "id": "2-57",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "491.40",
+   "high": "508.60",
+   "nominal": 0.5,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.5,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 491.40 to 508.60 mV (±8.6 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±8.6 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 58,
+   "id": "2-58",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "495.85",
+   "high": "504.15",
+   "nominal": 0.5,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.5,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 495.85 to 504.15 mV (±4.15 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±4.15 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 59,
+   "id": "2-59",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "433.05",
+   "high": "466.95",
+   "nominal": 0.45,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.45,
+    "frequency": 20000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 433.05 to 466.95 mV (±16.95 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±16.95 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 60,
+   "id": "2-60",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "491.40",
+   "high": "508.60",
+   "nominal": 0.5,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.5,
+    "frequency": 30000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 491.40 to 508.60 mV (±8.6 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±8.6 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 61,
+   "id": "2-61",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "500 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "433.05",
+   "high": "466.95",
+   "nominal": 0.45,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.45,
+    "frequency": 100000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 433.05 to 466.95 mV (±16.95 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±16.95 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 62,
+   "id": "2-62",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "1000 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "991.5",
+   "high": "1008.5",
+   "nominal": 1.0,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 1.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 991.5 to 1008.5 mV (±8.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±8.5 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 63,
+   "id": "2-63",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "1000 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "993.5",
+   "high": "1006.5",
+   "nominal": 1.0,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 1.0,
+    "frequency": 1000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 993.5 to 1006.5 mV (±6.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±6.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 64,
+   "id": "2-64",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "1000 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "953.0",
+   "high": "1047.0",
+   "nominal": 1.0,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 1.0,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 953.0 to 1047.0 mV (±47 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±47 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 65,
+   "id": "2-65",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "1000 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "988.5",
+   "high": "1011.5",
+   "nominal": 1.0,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 1.0,
+    "frequency": 10000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 988.5 to 1011.5 mV (±11.5 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±11.5 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 66,
+   "id": "2-66",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "1000 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "953.0",
+   "high": "1047.0",
+   "nominal": 1.0,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 1.0,
+    "frequency": 20000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 953.0 to 1047.0 mV (±47.0 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±47.0 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 67,
+   "id": "2-67",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "1000 mV",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "953.0",
+   "high": "1047.0",
+   "nominal": 1.0,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 1.0,
+    "frequency": 30000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 953.0 to 1047.0 mV (±47 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±47 mV for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 68,
+   "id": "2-68",
+   "section": "AC mV",
+   "switch": "mV~  (AC millivolts: in the ≃mV position press the Shift button to go to the ~mV mode)",
+   "range": "1000 mV",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mV",
+   "factor": 0.001,
+   "base_unit": "V",
+   "low": "953.0",
+   "high": "1047.0",
+   "nominal": 1.0,
+   "ref": "T6-2 #7",
+   "kind": "ACV",
+   "applied": {
+    "value": 1.0,
+    "frequency": 100000.0
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 953.0 to 1047.0 mV (±47.0 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±47.0 mV for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 69,
+   "id": "2-69",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "500 Ω",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "499.50",
+   "high": "500.50",
+   "nominal": 500.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 500.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "prompt": "Before the first reading of this function: Note [c]: The accuracy of 500 Ω and 5 kΩ is specified after the Null function.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.50 to 500.50 Ω (±500 mΩ from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±500 mΩ for the U1251B. Note [c]: The accuracy of 500 Ω and 5 kΩ is specified after the Null function. Note [o]: With a 2-wire connection and compensation enabled at calibrator. (Owner decision 2026-10-27: no 2-wire compensation is commanded by the suite, options.two_wire_comp = false; set it at the calibrator by hand if the lab wants it.) No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.5",
+     "data_sheet": "0.5"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 70,
+   "id": "2-70",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "500 Ω",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "Ω",
+   "factor": 1.0,
+   "base_unit": "ohm",
+   "low": "499.65",
+   "high": "500.35",
+   "nominal": 500.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 500.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "prompt": "Before the first reading of this function: Note [c]: The accuracy of 500 Ω and 5 kΩ is specified after the Null function.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.65 to 500.35 Ω (±350 mΩ from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±350 mΩ for the U1252B. Note [c]: The accuracy of 500 Ω and 5 kΩ is specified after the Null function. Note [o]: With a 2-wire connection and compensation enabled at calibrator. (Owner decision 2026-10-27: no 2-wire compensation is commanded by the suite, options.two_wire_comp = false; set it at the calibrator by hand if the lab wants it.) No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.35",
+     "data_sheet": "0.35"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 71,
+   "id": "2-71",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "5 kΩ",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "4.9955",
+   "high": "5.0045",
+   "nominal": 5000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 5000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9955 to 5.0045 kΩ (±4.5 Ω from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±4.5 Ω for the U1251B. Note [c]: The accuracy of 500 Ω and 5 kΩ is specified after the Null function. Note [o]: With a 2-wire connection and compensation enabled at calibrator. (Owner decision 2026-10-27: no 2-wire compensation is commanded by the suite, options.two_wire_comp = false; set it at the calibrator by hand if the lab wants it.) No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.0045",
+     "data_sheet": "0.0045"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 72,
+   "id": "2-72",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "5 kΩ",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "4.9970",
+   "high": "5.0030",
+   "nominal": 5000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 5000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9970 to 5.0030 kΩ (±3 Ω from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3 Ω for the U1252B. Note [c]: The accuracy of 500 Ω and 5 kΩ is specified after the Null function. Note [o]: With a 2-wire connection and compensation enabled at calibrator. (Owner decision 2026-10-27: no 2-wire compensation is commanded by the suite, options.two_wire_comp = false; set it at the calibrator by hand if the lab wants it.) No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.003",
+     "data_sheet": "0.003"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 73,
+   "id": "2-73",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "50 kΩ",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "49.955",
+   "high": "50.045",
+   "nominal": 50000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 50000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.955 to 50.045 kΩ (±45 Ω from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±45 Ω for the U1251B. Note [o]: With a 2-wire connection and compensation enabled at calibrator. (Owner decision 2026-10-27: no 2-wire compensation is commanded by the suite, options.two_wire_comp = false; set it at the calibrator by hand if the lab wants it.) No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 74,
+   "id": "2-74",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "50 kΩ",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "49.970",
+   "high": "50.030",
+   "nominal": 50000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 50000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.970 to 50.030 kΩ (±30 Ω from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±30 Ω for the U1252B. Note [o]: With a 2-wire connection and compensation enabled at calibrator. (Owner decision 2026-10-27: no 2-wire compensation is commanded by the suite, options.two_wire_comp = false; set it at the calibrator by hand if the lab wants it.) No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 75,
+   "id": "2-75",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "500 kΩ",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "499.55",
+   "high": "500.45",
+   "nominal": 500000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 500000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.55 to 500.45 kΩ (±450 Ω from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±450 Ω for the U1251B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Above 110 kΩ the calibrator does not allow 2-wire compensation: it stays off and the log says so. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 76,
+   "id": "2-76",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "500 kΩ",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "kΩ",
+   "factor": 1000.0,
+   "base_unit": "ohm",
+   "low": "499.70",
+   "high": "500.30",
+   "nominal": 500000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 500000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.70 to 500.30 kΩ (±300 Ω from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±300 Ω for the U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Above 110 kΩ the calibrator does not allow 2-wire compensation: it stays off and the log says so. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 77,
+   "id": "2-77",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "5 MΩ",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "4.9895",
+   "high": "5.0105",
+   "nominal": 5000000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 5000000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9895 to 5.0105 MΩ (±10.5 kΩ from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±10.5 kΩ for the U1251B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Above 110 kΩ the calibrator does not allow 2-wire compensation: it stays off and the log says so. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.0105",
+     "data_sheet": "0.0105"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 78,
+   "id": "2-78",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "5 MΩ",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "4.9920",
+   "high": "5.0080",
+   "nominal": 5000000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 5000000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9920 to 5.0080 MΩ (±8 kΩ from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±8 kΩ for the U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Above 110 kΩ the calibrator does not allow 2-wire compensation: it stays off and the log says so. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.008",
+     "data_sheet": "0.008"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 79,
+   "id": "2-79",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "50 MΩ",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "49.490",
+   "high": "50.510",
+   "nominal": 50000000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 50000000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.490 to 50.510 MΩ (±0.510 MΩ from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.510 MΩ for the U1251B. Note [d]: For range of 50 MΩ / 500 MΩ, the RH is specified for < 60%. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Above 110 kΩ the calibrator does not allow 2-wire compensation: it stays off and the log says so. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.51",
+     "data_sheet": "0.51"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 80,
+   "id": "2-80",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "50 MΩ",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "49.495",
+   "high": "50.505",
+   "nominal": 50000000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 50000000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.495 to 50.505 MΩ (±0.505 MΩ from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.505 MΩ for the U1252B. Note [d]: For range of 50 MΩ / 500 MΩ, the RH is specified for < 60%. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Above 110 kΩ the calibrator does not allow 2-wire compensation: it stays off and the log says so. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.505",
+     "data_sheet": "0.505"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 81,
+   "id": "2-81",
+   "section": "Ohms",
+   "switch": "Ω  (turn the rotary switch to the Ω position)",
+   "range": "500 MΩ",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "MΩ",
+   "factor": 1000000.0,
+   "base_unit": "ohm",
+   "low": "413.9",
+   "high": "486.1",
+   "nominal": 450000000.0,
+   "ref": "T6-2 #8",
+   "kind": "OHM",
+   "applied": {
+    "value": 450000000.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 413.9 to 486.1 MΩ (±36.1 MΩ from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±36.1 MΩ for the U1252B. Note [d]: For range of 50 MΩ / 500 MΩ, the RH is specified for < 60%. The table prints 450 MΩ (not the 500 MΩ range value) as the output. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Above 110 kΩ the calibrator does not allow 2-wire compensation: it stays off and the log says so. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "36.1",
+     "data_sheet": "36.1"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 82,
+   "id": "2-82",
+   "section": "Conductance",
+   "switch": "nS  (conductance: in the Ω position press the Shift button to go to the ns mode)",
+   "range": "500 nS",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "nS",
+   "factor": 1e-09,
+   "base_unit": "S",
+   "low": "49.3",
+   "high": "50.7",
+   "nominal": 5e-08,
+   "ref": "T6-2 #9",
+   "kind": "OHM",
+   "applied": {
+    "value": 20000000.0,
+    "frequency": null
+   },
+   "report_desc": "500 nS range (20 MΩ applied = 50 nS)",
+   "unc_unit": "ohm",
+   "group": "VOHM",
+   "prompt": "Before the first reading of this function: Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.3 to 50.7 nS (±0.7 nS from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.7 nS for the U1251B. 50 nS is sourced as 20 MΩ (1 / 50 nS), the calibrator resistance output. The Uncertainty column carries the calibrator's uncertainty at 20 MΩ in ohms; TAR / TUR are blank (siemens vs ohms). Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.7",
+     "data_sheet": "0.7"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 83,
+   "id": "2-83",
+   "section": "Conductance",
+   "switch": "nS  (conductance: in the Ω position press the Shift button to go to the ns mode)",
+   "range": "500 nS",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "nS",
+   "factor": 1e-09,
+   "base_unit": "S",
+   "low": "49.4",
+   "high": "50.6",
+   "nominal": 5e-08,
+   "ref": "T6-2 #9",
+   "kind": "OHM",
+   "applied": {
+    "value": 20000000.0,
+    "frequency": null
+   },
+   "report_desc": "500 nS range (20 MΩ applied = 50 nS)",
+   "unc_unit": "ohm",
+   "group": "VOHM",
+   "prompt": "Before the first reading of this function: Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.4 to 50.6 nS (±0.6 nS from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.6 nS for the U1252B. 50 nS is sourced as 20 MΩ (1 / 50 nS), the calibrator resistance output. The Uncertainty column carries the calibrator's uncertainty at 20 MΩ in ohms; TAR / TUR are blank (siemens vs ohms). Note [e]: The accuracy is specified for < 50 nS and after Null function as open test lead. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.6",
+     "data_sheet": "0.6"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 84,
+   "id": "2-84",
+   "section": "Diode",
+   "switch": "Diode  (turn the rotary switch to the diode position: Hz/diode on the U1252B, diode on the U1251B)",
+   "range": "Diode",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "0.9990",
+   "high": "1.0010",
+   "nominal": 1.0,
+   "ref": "T6-2 #10",
+   "kind": "DCV",
+   "applied": {
+    "value": 1.0,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 0.9990 to 1.0010 V (±1 mV from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1 mV for the U1251B and U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 85,
+   "id": "2-85",
+   "section": "Frequency counter",
+   "switch": "Hz  (frequency counter, U1252B: turn the rotary switch to the Hz/diode position and press Shift for the frequency counter mode)",
+   "range": "999.99 kHz",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "kHz",
+   "factor": 1000.0,
+   "base_unit": "Hz",
+   "low": "99.9480",
+   "high": "100.0520",
+   "nominal": 100000.0,
+   "ref": "T6-2 #11",
+   "kind": "ACV",
+   "applied": {
+    "value": 0.6,
+    "frequency": 100000.0
+   },
+   "unc_kind": "FREQ",
+   "report_desc": "999.99 kHz range, 0.6 V, 100 kHz",
+   "no_freq_suffix": true,
+   "group": "VOHM",
+   "prompt": "Before the first reading of this function: Meter (U1252B): turn the rotary switch to the Hz/diode position and press Shift for the frequency counter mode (999.99 kHz range). Shield the input from noise (note f). Connection: Ω V mV jack and COM, as for the other voltage points.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 99.9480 to 100.0520 kHz (±52 Hz from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±52 Hz for the U1252B. Note [f]: All frequency counters are susceptible to error when measuring low voltage, low-frequency signals. Shielding inputs from external noise pickup is critical for minimizing measurement errors. Note [p]: Frequency counter performance test point is only applicable to U1252B. Owner decision 2026-10-27: this point is sourced by the calibrator (5522A / 5560A, 600 mV rms at 100 kHz) instead of the Keysight 33250A named in Table 6-2; the limits are the printed ones. The calibrator-frequency uncertainty rule applies. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 86,
+   "id": "2-86",
+   "section": "Frequency counter",
+   "switch": "Frequency counter  (set by hand: see the set-up window)",
+   "range": "99.999 MHz",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "MHz",
+   "factor": 1000000.0,
+   "base_unit": "Hz",
+   "low": "9.9948",
+   "high": "10.0052",
+   "nominal": 10000000.0,
+   "ref": "T6-2 #12",
+   "kind": "NONE",
+   "setup": "Set the Keysight 33250A by hand: sine, 1500 mVrms, 10 MHz, to the meter (Ω V mV jack and COM; the connection and load are not stated in the table: UNVERIFIED) and press Output on. Meter (U1252B): in the frequency counter mode press the Range button to go to frequency counter mode divide by 100 (99.999 MHz range). Switch the 33250A output off after the reading.",
+   "group": "NONE",
+   "no_uncertainty": true,
+   "report_desc": "Frequency counter, 1500 mVrms, 10 MHz (33250A)",
+   "tol_text": "Table 6-2: 9.9948 to 10.0052 MHz (±5.2 kHz from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±5.2 kHz for the U1252B. Set by hand: the standard is not a calibrator the suite drives. NO UNCERTAINTY is printed for this point (the 33250A / 53131A / 34410A specifications are not held by the suite): listed in the report. Note [p]: Frequency counter performance test point is only applicable to U1252B. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 87,
+   "id": "2-87",
+   "section": "Capacitance",
+   "switch": "Capacitance  (turn the rotary switch to the temperature / capacitance position, capacitance function)",
+   "range": "10.000 nF",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "9.892",
+   "high": "10.108",
+   "nominal": 1e-08,
+   "ref": "T6-2 #13",
+   "kind": "CAP",
+   "applied": {
+    "value": 1e-08,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "prompt": "Before the first reading of this function: Note [g]: Use the Null mode to zero residual.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 9.892 to 10.108 nF (±0.108 nF from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.108 nF for the U1251B and U1252B. Note [g]: Use the Null mode to zero residual. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.108",
+     "data_sheet": "0.108"
+    },
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.108",
+     "data_sheet": "0.108"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 88,
+   "id": "2-88",
+   "section": "Capacitance",
+   "switch": "Capacitance  (turn the rotary switch to the temperature / capacitance position, capacitance function)",
+   "range": "100.00 nF",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "98.95",
+   "high": "101.05",
+   "nominal": 1e-07,
+   "ref": "T6-2 #13",
+   "kind": "CAP",
+   "applied": {
+    "value": 1e-07,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 98.95 to 101.05 nF (±1.05 nF from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.05 nF for the U1251B and U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "1.05",
+     "data_sheet": "1.05"
+    },
+    "U1252B": {
+     "verdict": "same",
+     "printed": "1.05",
+     "data_sheet": "1.05"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 89,
+   "id": "2-89",
+   "section": "Capacitance",
+   "switch": "Capacitance  (turn the rotary switch to the temperature / capacitance position, capacitance function)",
+   "range": "1000.0 nF",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "nF",
+   "factor": 1e-09,
+   "base_unit": "F",
+   "low": "989.5",
+   "high": "1010.5",
+   "nominal": 1e-06,
+   "ref": "T6-2 #13",
+   "kind": "CAP",
+   "applied": {
+    "value": 1e-06,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 989.5 to 1010.5 nF (±10.5 nF from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±10.5 nF for the U1251B and U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 90,
+   "id": "2-90",
+   "section": "Capacitance",
+   "switch": "Capacitance  (turn the rotary switch to the temperature / capacitance position, capacitance function)",
+   "range": "10.000 µF",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "9.895",
+   "high": "10.105",
+   "nominal": 1e-05,
+   "ref": "T6-2 #13",
+   "kind": "CAP",
+   "applied": {
+    "value": 1e-05,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 9.895 to 10.105 µF (±0.105 µF from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.105 µF for the U1251B and U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 10 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 91,
+   "id": "2-91",
+   "section": "Capacitance",
+   "switch": "Capacitance  (turn the rotary switch to the temperature / capacitance position, capacitance function)",
+   "range": "100.00 µF",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "98.95",
+   "high": "101.05",
+   "nominal": 0.0001,
+   "ref": "T6-2 #13",
+   "kind": "CAP",
+   "applied": {
+    "value": 0.0001,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 98.95 to 101.05 µF (±1.05 µF from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±1.05 µF for the U1251B and U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 15 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 92,
+   "id": "2-92",
+   "section": "Capacitance",
+   "switch": "Capacitance  (turn the rotary switch to the temperature / capacitance position, capacitance function)",
+   "range": "1000.0 µF",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "µF",
+   "factor": 1e-06,
+   "base_unit": "F",
+   "low": "989.5",
+   "high": "1010.5",
+   "nominal": 0.001,
+   "ref": "T6-2 #13",
+   "kind": "CAP",
+   "applied": {
+    "value": 0.001,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 989.5 to 1010.5 µF (±10.5 µF from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±10.5 µF for the U1251B and U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 15 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 93,
+   "id": "2-93",
+   "section": "Capacitance",
+   "switch": "Capacitance  (turn the rotary switch to the temperature / capacitance position, capacitance function)",
+   "range": "10.00 mF",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mF",
+   "factor": 0.001,
+   "base_unit": "F",
+   "low": "9.895",
+   "high": "10.105",
+   "nominal": 0.01,
+   "ref": "T6-2 #13",
+   "kind": "CAP",
+   "applied": {
+    "value": 0.01,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 9.895 to 10.105 mF (±0.105 mF from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.105 mF for the U1251B and U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 20 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 94,
+   "id": "2-94",
+   "section": "Capacitance",
+   "switch": "Capacitance  (turn the rotary switch to the temperature / capacitance position, capacitance function)",
+   "range": "100.00 mF",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mF",
+   "factor": 0.001,
+   "base_unit": "F",
+   "low": "9.60",
+   "high": "10.40",
+   "nominal": 0.01,
+   "ref": "T6-2 #13",
+   "kind": "CAP",
+   "applied": {
+    "value": 0.01,
+    "frequency": null
+   },
+   "group": "VOHM",
+   "settle": 0,
+   "tol_text": "Table 6-2: 9.60 to 10.40 mF (±0.4 mF from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.4 mF for the U1251B and U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 20 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 95,
+   "id": "2-95",
+   "section": "Temperature",
+   "switch": "Temperature °C  (in the temperature / capacitance position press the Shift button to go to the temperature mode; °C)",
+   "range": "-200 °C until 1372 °C",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "C",
+   "low": "-3.0",
+   "high": "3.0",
+   "nominal": 0.0,
+   "ref": "T6-2 #14",
+   "kind": "TEMP",
+   "applied": {
+    "value": 0.0,
+    "frequency": null
+   },
+   "group": "TEMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: -3.0 to 3.0 °C (±3 °C from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3 °C for the U1251B and U1252B. Note [h]: Set both calibrator and multimeter to internal reference. Connect the K-type thermocouple extension (miniature thermocouple connector on both ends) between the calibrator's TC output and the multimeter via a TC-to-banana adapter. Allow at least 1 hour for the multimeter to stabilize before measurements are taken. The error limit does not include the error contributed by the thermocouple extension; to eliminate it, compensation of the calibrator output through a reference thermometer is recommended. Note [n]: Ensure that the ambient temperature is stable within ± 1 °C. Make sure that the multimeter is placed in a controlled environment for at least 1 hour. Keep the multimeter away from any ventilation exit. Do not touch the thermocouple test lead after connecting it to the calibrator. Allow the connection to stabilize for at least another 15 minutes before performing the measurement. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 900 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "3",
+     "data_sheet": "3"
+    },
+    "U1252B": {
+     "verdict": "same",
+     "printed": "3",
+     "data_sheet": "3"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 96,
+   "id": "2-96",
+   "section": "Temperature",
+   "switch": "Temperature °C  (in the temperature / capacitance position press the Shift button to go to the temperature mode; °C)",
+   "range": "-200 °C until 1372 °C",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "°C",
+   "factor": 1.0,
+   "base_unit": "C",
+   "low": "96.7",
+   "high": "103.3",
+   "nominal": 100.0,
+   "ref": "T6-2 #14",
+   "kind": "TEMP",
+   "applied": {
+    "value": 100.0,
+    "frequency": null
+   },
+   "group": "TEMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 96.7 to 103.3 °C (±3.3 °C from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.3 °C for the U1251B and U1252B. Note [h]: Set both calibrator and multimeter to internal reference. Connect the K-type thermocouple extension (miniature thermocouple connector on both ends) between the calibrator's TC output and the multimeter via a TC-to-banana adapter. Allow at least 1 hour for the multimeter to stabilize before measurements are taken. The error limit does not include the error contributed by the thermocouple extension; to eliminate it, compensation of the calibrator output through a reference thermometer is recommended. Note [n]: Ensure that the ambient temperature is stable within ± 1 °C. Make sure that the multimeter is placed in a controlled environment for at least 1 hour. Keep the multimeter away from any ventilation exit. Do not touch the thermocouple test lead after connecting it to the calibrator. Allow the connection to stabilize for at least another 15 minutes before performing the measurement. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 120 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "3.3",
+     "data_sheet": "3.3"
+    },
+    "U1252B": {
+     "verdict": "same",
+     "printed": "3.3",
+     "data_sheet": "3.3"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 97,
+   "id": "2-97",
+   "section": "DC µA",
+   "switch": "µA⎓  (DC microamps: turn the rotary switch to the µA position)",
+   "range": "500 µA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "499.45",
+   "high": "500.55",
+   "nominal": 0.0005,
+   "ref": "T6-2 #15",
+   "kind": "DCI",
+   "applied": {
+    "value": 0.0005,
+    "frequency": null
+   },
+   "group": "UAMP",
+   "prompt": "Before the first reading of this function: Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.45 to 500.55 µA (±0.55 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.55 µA for the U1251B. Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes. Printed misprint: the U1251B 500 µA cell is marked [j] (10 A continuous); its neighbours are marked [i] (Null / thermal effect): read as [i]. No limit is affected. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.55",
+     "data_sheet": "0.55"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 98,
+   "id": "2-98",
+   "section": "DC µA",
+   "switch": "µA⎓  (DC microamps: turn the rotary switch to the µA position)",
+   "range": "500 µA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "499.70",
+   "high": "500.30",
+   "nominal": 0.0005,
+   "ref": "T6-2 #15",
+   "kind": "DCI",
+   "applied": {
+    "value": 0.0005,
+    "frequency": null
+   },
+   "group": "UAMP",
+   "prompt": "Before the first reading of this function: Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 499.70 to 500.30 µA (±0.3 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.3 µA for the U1252B. Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes. Printed misprint: the U1251B 500 µA cell is marked [j] (10 A continuous); its neighbours are marked [i] (Null / thermal effect): read as [i]. No limit is affected. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.3",
+     "data_sheet": "0.3"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 99,
+   "id": "2-99",
+   "section": "DC µA",
+   "switch": "µA⎓  (DC microamps: turn the rotary switch to the µA position)",
+   "range": "5000 µA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "4994.5",
+   "high": "5005.5",
+   "nominal": 0.005,
+   "ref": "T6-2 #15",
+   "kind": "DCI",
+   "applied": {
+    "value": 0.005,
+    "frequency": null
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4994.5 to 5005.5 µA (±5.5 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±5.5 µA for the U1251B. Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "5.5",
+     "data_sheet": "5.5"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 100,
+   "id": "2-100",
+   "section": "DC µA",
+   "switch": "µA⎓  (DC microamps: turn the rotary switch to the µA position)",
+   "range": "5000 µA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "4997.0",
+   "high": "5003.0",
+   "nominal": 0.005,
+   "ref": "T6-2 #15",
+   "kind": "DCI",
+   "applied": {
+    "value": 0.005,
+    "frequency": null
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4997.0 to 5003.0 µA (±3 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3 µA for the U1252B. Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "3",
+     "data_sheet": "3"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 101,
+   "id": "2-101",
+   "section": "AC µA",
+   "switch": "µA~  (AC microamps: in the µA position press the Shift button to go to the ~µA mode)",
+   "range": "500 µA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "495.80",
+   "high": "504.20",
+   "nominal": 0.0005,
+   "ref": "T6-2 #16",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.0005,
+    "frequency": 1000.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 495.80 to 504.20 µA (±4.2 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±4.2 µA for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 102,
+   "id": "2-102",
+   "section": "AC µA",
+   "switch": "µA~  (AC microamps: in the µA position press the Shift button to go to the ~µA mode)",
+   "range": "500 µA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "496.30",
+   "high": "503.70",
+   "nominal": 0.0005,
+   "ref": "T6-2 #16",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.0005,
+    "frequency": 1000.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 496.30 to 503.70 µA (±3.7 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.7 µA for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 103,
+   "id": "2-103",
+   "section": "AC µA",
+   "switch": "µA~  (AC microamps: in the µA position press the Shift button to go to the ~µA mode)",
+   "range": "5000 µA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "4958.0",
+   "high": "5042.0",
+   "nominal": 0.005,
+   "ref": "T6-2 #16",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.005,
+    "frequency": 1000.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4958.0 to 5042.0 µA (±42 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±42 µA for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 104,
+   "id": "2-104",
+   "section": "AC µA",
+   "switch": "µA~  (AC microamps: in the µA position press the Shift button to go to the ~µA mode)",
+   "range": "5000 µA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "µA",
+   "factor": 1e-06,
+   "base_unit": "A",
+   "low": "4963.0",
+   "high": "5037.0",
+   "nominal": 0.005,
+   "ref": "T6-2 #16",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.005,
+    "frequency": 1000.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4963.0 to 5037.0 µA (±37.0 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±37.0 µA for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 105,
+   "id": "2-105",
+   "section": "DC mA",
+   "switch": "mA⎓  (DC milliamps: turn the rotary switch to the mA·A position, mA input)",
+   "range": "50 mA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "49.895",
+   "high": "50.105",
+   "nominal": 0.05,
+   "ref": "T6-2 #17",
+   "kind": "DCI",
+   "applied": {
+    "value": 0.05,
+    "frequency": null
+   },
+   "group": "UAMP",
+   "prompt": "Before the first reading of this function: Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.895 to 50.105 mA (±0.105 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.105 mA for the U1251B. Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.105",
+     "data_sheet": "0.105"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 106,
+   "id": "2-106",
+   "section": "DC mA",
+   "switch": "mA⎓  (DC milliamps: turn the rotary switch to the mA·A position, mA input)",
+   "range": "50 mA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "49.920",
+   "high": "50.080",
+   "nominal": 0.05,
+   "ref": "T6-2 #17",
+   "kind": "DCI",
+   "applied": {
+    "value": 0.05,
+    "frequency": null
+   },
+   "group": "UAMP",
+   "prompt": "Before the first reading of this function: Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes.",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.920 to 50.080 mA (±80 µA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±80 µA for the U1252B. Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.08",
+     "data_sheet": "0.08"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 107,
+   "id": "2-107",
+   "section": "DC mA",
+   "switch": "mA⎓  (DC milliamps: turn the rotary switch to the mA·A position, mA input)",
+   "range": "440 mA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "399.15",
+   "high": "400.85",
+   "nominal": 0.4,
+   "ref": "T6-2 #17",
+   "kind": "DCI",
+   "applied": {
+    "value": 0.4,
+    "frequency": null
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 399.15 to 400.85 mA (±0.85 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.85 mA for the U1251B. Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.85",
+     "data_sheet": "0.85"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 108,
+   "id": "2-108",
+   "section": "DC mA",
+   "switch": "mA⎓  (DC milliamps: turn the rotary switch to the mA·A position, mA input)",
+   "range": "440 mA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "399.35",
+   "high": "400.65",
+   "nominal": 0.4,
+   "ref": "T6-2 #17",
+   "kind": "DCI",
+   "applied": {
+    "value": 0.4,
+    "frequency": null
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 399.35 to 400.65 mA (±0.65 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.65 mA for the U1252B. Note [i]: Always use relative function to zero the thermal effect with open test lead before measuring the signal. If you do not use Relation function, add 20 digits for accuracy purposes. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.65",
+     "data_sheet": "0.65"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 109,
+   "id": "2-109",
+   "section": "AC mA",
+   "switch": "mA~  (AC milliamps: in the mA·A position press the Shift button to go to the ~mA mode)",
+   "range": "50 mA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "49.580",
+   "high": "50.420",
+   "nominal": 0.05,
+   "ref": "T6-2 #18",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.05,
+    "frequency": 20000.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.580 to 50.420 mA (±0.42 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.42 mA for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 110,
+   "id": "2-110",
+   "section": "AC mA",
+   "switch": "mA~  (AC milliamps: in the mA·A position press the Shift button to go to the ~mA mode)",
+   "range": "50 mA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "49.630",
+   "high": "50.370",
+   "nominal": 0.05,
+   "ref": "T6-2 #18",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.05,
+    "frequency": 20000.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 49.630 to 50.370 mA (±0.37 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.37 mA for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 111,
+   "id": "2-111",
+   "section": "AC mA",
+   "switch": "mA~  (AC milliamps: in the mA·A position press the Shift button to go to the ~mA mode)",
+   "range": "440 mA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "396.60",
+   "high": "403.40",
+   "nominal": 0.4,
+   "ref": "T6-2 #18",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.4,
+    "frequency": 45.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 396.60 to 403.40 mA (±3.4 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.4 mA for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 112,
+   "id": "2-112",
+   "section": "AC mA",
+   "switch": "mA~  (AC milliamps: in the mA·A position press the Shift button to go to the ~mA mode)",
+   "range": "440 mA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "397.00",
+   "high": "403.00",
+   "nominal": 0.4,
+   "ref": "T6-2 #18",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.4,
+    "frequency": 45.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 397.00 to 403.00 mA (±3.0 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.0 mA for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 113,
+   "id": "2-113",
+   "section": "AC mA",
+   "switch": "mA~  (AC milliamps: in the mA·A position press the Shift button to go to the ~mA mode)",
+   "range": "440 mA",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "396.60",
+   "high": "403.40",
+   "nominal": 0.4,
+   "ref": "T6-2 #18",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.4,
+    "frequency": 1000.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 396.60 to 403.40 mA (±3.4 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.4 mA for the U1251B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 114,
+   "id": "2-114",
+   "section": "AC mA",
+   "switch": "mA~  (AC milliamps: in the mA·A position press the Shift button to go to the ~mA mode)",
+   "range": "440 mA",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "mA",
+   "factor": 0.001,
+   "base_unit": "A",
+   "low": "397.00",
+   "high": "403.00",
+   "nominal": 0.4,
+   "ref": "T6-2 #18",
+   "kind": "ACI",
+   "applied": {
+    "value": 0.4,
+    "frequency": 1000.0
+   },
+   "group": "UAMP",
+   "settle": 0,
+   "tol_text": "Table 6-2: 397.00 to 403.00 mA (±3.0 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±3.0 mA for the U1252B. Note [a]: The additional error to be added as frequency > 20 kHz and signal input < 10% of range: 300 counts of LSD per kHz. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 115,
+   "id": "2-115",
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: the mA·A position with the lead in the A input; if Shift is lit from the AC mA step, press Shift to return to DC: not stated in the manual, UNVERIFIED)",
+   "range": "5 A",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "4.9840",
+   "high": "5.0160",
+   "nominal": 5.0,
+   "ref": "T6-2 unnumbered A rows",
+   "kind": "DCI",
+   "applied": {
+    "value": 5.0,
+    "frequency": null
+   },
+   "group": "AMP10",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9840 to 5.0160 A (±16 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±16 mA for the U1251B and U1252B. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (CONFIRMED DC by the owner 2026-10-27; the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 5 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1251B": {
+     "verdict": "same",
+     "printed": "0.016",
+     "data_sheet": "0.016"
+    },
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.016",
+     "data_sheet": "0.016"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 116,
+   "id": "2-116",
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: the mA·A position with the lead in the A input; if Shift is lit from the AC mA step, press Shift to return to DC: not stated in the manual, UNVERIFIED)",
+   "range": "10 A",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.960",
+   "high": "10.040",
+   "nominal": 10.0,
+   "ref": "T6-2 unnumbered A rows",
+   "kind": "DCI",
+   "applied": {
+    "value": 10.0,
+    "frequency": null
+   },
+   "group": "AMP10",
+   "settle": 0,
+   "tol_text": "Table 6-2: 9.960 to 10.040 A (±40 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±40 mA for the U1251B. Note [j]: 10 A continuous, and additional 0.5% to specified accuracy when measuring a signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for twice the measuring time you applied before low current measurement. With a 2-wire connection and compensation enabled at calibrator. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (CONFIRMED DC by the owner 2026-10-27; the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 5 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 117,
+   "id": "2-117",
+   "section": "DC amps",
+   "switch": "A⎓  (DC amps: the mA·A position with the lead in the A input; if Shift is lit from the AC mA step, press Shift to return to DC: not stated in the manual, UNVERIFIED)",
+   "range": "10 A",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.965",
+   "high": "10.035",
+   "nominal": 10.0,
+   "ref": "T6-2 unnumbered A rows",
+   "kind": "DCI",
+   "applied": {
+    "value": 10.0,
+    "frequency": null
+   },
+   "group": "AMP10",
+   "settle": 0,
+   "tol_text": "Table 6-2: 9.965 to 10.035 A (±35 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±35 mA for the U1252B. Note [j]: 10 A continuous, and additional 0.5% to specified accuracy when measuring a signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for twice the measuring time you applied before low current measurement. With a 2-wire connection and compensation enabled at calibrator. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (CONFIRMED DC by the owner 2026-10-27; the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 5 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "check": {
+    "U1252B": {
+     "verdict": "same",
+     "printed": "0.035",
+     "data_sheet": "0.035"
+    }
+   }
+  },
+  {
+   "table": "2",
+   "step": 118,
+   "id": "2-118",
+   "section": "AC amps",
+   "switch": "A~  (AC amps: in the mA·A position press the Shift button to go to the ~A mode)",
+   "range": "5 A",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "4.9580",
+   "high": "5.0420",
+   "nominal": 5.0,
+   "ref": "T6-2 #19",
+   "kind": "ACI",
+   "applied": {
+    "value": 5.0,
+    "frequency": 1000.0
+   },
+   "group": "AMP10",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9580 to 5.0420 A (±42 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±42 mA for the U1251B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 5 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 119,
+   "id": "2-119",
+   "section": "AC amps",
+   "switch": "A~  (AC amps: in the mA·A position press the Shift button to go to the ~A mode)",
+   "range": "5 A",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "4.9630",
+   "high": "5.0370",
+   "nominal": 5.0,
+   "ref": "T6-2 #19",
+   "kind": "ACI",
+   "applied": {
+    "value": 5.0,
+    "frequency": 1000.0
+   },
+   "group": "AMP10",
+   "settle": 0,
+   "tol_text": "Table 6-2: 4.9630 to 5.0370 A (±37 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±37 mA for the U1252B. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 5 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 120,
+   "id": "2-120",
+   "section": "AC amps",
+   "switch": "A~  (AC amps: in the mA·A position press the Shift button to go to the ~A mode)",
+   "range": "10 A",
+   "models": [
+    "U1251B"
+   ],
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.900",
+   "high": "10.100",
+   "nominal": 10.0,
+   "ref": "T6-2 #19",
+   "kind": "ACI",
+   "applied": {
+    "value": 10.0,
+    "frequency": 1000.0
+   },
+   "group": "AMP10",
+   "settle": 0,
+   "tol_text": "Table 6-2: 9.900 to 10.100 A (±100 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±100 mA for the U1251B. Note [l]: The current can be measuring from 2.5 A to 10 A continuous, and the additional of 0.5% to specified accuracy as measure the signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for 2 times of measuring time you applied before low current measurement. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 5 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 121,
+   "id": "2-121",
+   "section": "AC amps",
+   "switch": "A~  (AC amps: in the mA·A position press the Shift button to go to the ~A mode)",
+   "range": "10 A",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "A",
+   "factor": 1.0,
+   "base_unit": "A",
+   "low": "9.910",
+   "high": "10.090",
+   "nominal": 10.0,
+   "ref": "T6-2 #19",
+   "kind": "ACI",
+   "applied": {
+    "value": 10.0,
+    "frequency": 1000.0
+   },
+   "group": "AMP10",
+   "settle": 0,
+   "tol_text": "Table 6-2: 9.910 to 10.090 A (±90 mA from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±90 mA for the U1252B. Note [l]: The current can be measuring from 2.5 A to 10 A continuous, and the additional of 0.5% to specified accuracy as measure the signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for 2 times of measuring time you applied before low current measurement. No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable; the manual-based wait of 5 s was dropped. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 122,
+   "id": "2-122",
+   "section": "Square wave output",
+   "switch": "Square wave output  (set by hand: see the set-up window)",
+   "range": "120 Hz @ 50%",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "119.974",
+   "high": "120.026",
+   "nominal": 120.0,
+   "ref": "T6-2 #20",
+   "kind": "NONE",
+   "setup": "U1252B: turn the rotary switch to the OUT ms (square wave output) position and set the output to 120 Hz at 50 % duty (the Range column). Connect the meter OUT jack and COM to the Keysight 53131A frequency counter (Table 6-2 header \"Use 53131A\"; the connection is not drawn: UNVERIFIED). Type the 53131A frequency reading.",
+   "group": "NONE",
+   "no_uncertainty": true,
+   "report_desc": "Square wave output, 120 Hz @ 50% (53131A)",
+   "tol_text": "Table 6-2: 119.974 to 120.026 Hz (±26 mHz from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±26 mHz for the U1252B. Set by hand: the standard is not a calibrator the suite drives. NO UNCERTAINTY is printed for this point (the 33250A / 53131A / 34410A specifications are not held by the suite): listed in the report. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 123,
+   "id": "2-123",
+   "section": "Square wave output",
+   "switch": "Square wave output  (set by hand: see the set-up window)",
+   "range": "4800 Hz @ 50%",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "Hz",
+   "factor": 1.0,
+   "base_unit": "Hz",
+   "low": "4799.74",
+   "high": "4800.26",
+   "nominal": 4800.0,
+   "ref": "T6-2 #20",
+   "kind": "NONE",
+   "setup": "U1252B: in the OUT ms position set the output to 4800 Hz at 50 % duty. Keep the meter OUT jack and COM on the Keysight 53131A. Type the 53131A frequency reading.",
+   "group": "NONE",
+   "no_uncertainty": true,
+   "report_desc": "Square wave output, 4800 Hz @ 50% (53131A)",
+   "tol_text": "Table 6-2: 4799.74 to 4800.26 Hz (±260 mHz from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±260 mHz for the U1252B. Set by hand: the standard is not a calibrator the suite drives. NO UNCERTAINTY is printed for this point (the 33250A / 53131A / 34410A specifications are not held by the suite): listed in the report. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 124,
+   "id": "2-124",
+   "section": "Square wave output",
+   "switch": "Square wave output  (set by hand: see the set-up window)",
+   "range": "100 Hz @ 50%",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "%",
+   "factor": 1.0,
+   "base_unit": "%",
+   "low": "49.602",
+   "high": "50.398",
+   "nominal": 50.0,
+   "ref": "T6-2 #20",
+   "kind": "NONE",
+   "setup": "U1252B: in the OUT ms position set the output to 100 Hz at 50 % duty (Duty Cycle). Keep the meter OUT jack and COM on the Keysight 53131A, measuring duty cycle (positive duty). Type the 53131A duty-cycle reading.",
+   "group": "NONE",
+   "no_uncertainty": true,
+   "report_desc": "Square wave output, 100 Hz @ 50% (53131A)",
+   "tol_text": "Table 6-2: 49.602 to 50.398 % (±0.398 % from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.398 % for the U1252B. Set by hand: the standard is not a calibrator the suite drives. NO UNCERTAINTY is printed for this point (the 33250A / 53131A / 34410A specifications are not held by the suite): listed in the report. Note [m]: For signal frequency greater than 1 kHz, additional 0.1% per kHz to be added to accuracy. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 125,
+   "id": "2-125",
+   "section": "Square wave output",
+   "switch": "Square wave output  (set by hand: see the set-up window)",
+   "range": "100 Hz @ 25%",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "%",
+   "factor": 1.0,
+   "base_unit": "%",
+   "low": "24.602",
+   "high": "25.398",
+   "nominal": 25.0,
+   "ref": "T6-2 #20",
+   "kind": "NONE",
+   "setup": "U1252B: set the OUT ms output to 100 Hz at 25 % duty. Type the 53131A duty-cycle reading.",
+   "group": "NONE",
+   "no_uncertainty": true,
+   "report_desc": "Square wave output, 100 Hz @ 25% (53131A)",
+   "tol_text": "Table 6-2: 24.602 to 25.398 % (±0.398 % from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.398 % for the U1252B. Set by hand: the standard is not a calibrator the suite drives. NO UNCERTAINTY is printed for this point (the 33250A / 53131A / 34410A specifications are not held by the suite): listed in the report. Note [m]: For signal frequency greater than 1 kHz, additional 0.1% per kHz to be added to accuracy. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 126,
+   "id": "2-126",
+   "section": "Square wave output",
+   "switch": "Square wave output  (set by hand: see the set-up window)",
+   "range": "100 Hz @ 75%",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "%",
+   "factor": 1.0,
+   "base_unit": "%",
+   "low": "74.602",
+   "high": "75.398",
+   "nominal": 75.0,
+   "ref": "T6-2 #20",
+   "kind": "NONE",
+   "setup": "U1252B: set the OUT ms output to 100 Hz at 75 % duty. Type the 53131A duty-cycle reading.",
+   "group": "NONE",
+   "no_uncertainty": true,
+   "report_desc": "Square wave output, 100 Hz @ 75% (53131A)",
+   "tol_text": "Table 6-2: 74.602 to 75.398 % (±0.398 % from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.398 % for the U1252B. Set by hand: the standard is not a calibrator the suite drives. NO UNCERTAINTY is printed for this point (the 33250A / 53131A / 34410A specifications are not held by the suite): listed in the report. Note [m]: For signal frequency greater than 1 kHz, additional 0.1% per kHz to be added to accuracy. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "2",
+   "step": 127,
+   "id": "2-127",
+   "section": "Square wave output",
+   "switch": "Square wave output  (set by hand: see the set-up window)",
+   "range": "4800 Hz @ 99.609%",
+   "models": [
+    "U1252B"
+   ],
+   "test": "numeric",
+   "display_unit": "V",
+   "factor": 1.0,
+   "base_unit": "V",
+   "low": "2.6",
+   "high": "3.0",
+   "nominal": 2.8,
+   "ref": "T6-2 #20",
+   "kind": "NONE",
+   "setup": "U1252B: set the OUT ms output to 4800 Hz at 99.609 % duty (Amplitude). Connect the meter OUT jack and COM to the Keysight 34410A (Table 6-2 header \"Use 34410A\"; Table 6-1 names a 34401A; the connection and the 34410A function are not stated: DC volts is assumed, UNVERIFIED). Type the amplitude reading in volts.",
+   "group": "NONE",
+   "no_uncertainty": true,
+   "report_desc": "Square wave output, 4800 Hz @ 99.609% (34410A)",
+   "tol_text": "Table 6-2: 2.6 to 3.0 V (±0.2 V from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±0.2 V for the U1252B. Set by hand: the standard is not a calibrator the suite drives. NO UNCERTAINTY is printed for this point (the 33250A / 53131A / 34410A specifications are not held by the suite): listed in the report. The table prints only the error (±0.2 V) and no nominal: 2.8 V is from the manufacturer's data sheet (not this manual): UNVERIFIED. The limits 2.6 V to 3.0 V follow from it. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+  },
+  {
+   "table": "F",
+   "step": 1,
+   "id": "F-1",
+   "section": "Functional checks",
+   "switch": "Backlit test",
+   "range": "",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Backlit test",
+   "setup": "Backlit test (printed p. 149): press the Bat button to test the backlight. It will momentarily toggle the backlight ON and OFF.",
+   "question": "The backlight toggled ON and OFF.",
+   "setup_key": "NONE",
+   "ref": "p. 149 functional check",
+   "note": "Basic Operating Test (p. 149); no calibrator output, no limits, no uncertainty (yes / no). Owner rule 2026-10-27: included."
+  },
+  {
+   "table": "F",
+   "step": 2,
+   "id": "F-2",
+   "section": "Functional checks",
+   "switch": "Display test",
+   "range": "",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Display test",
+   "setup": "Testing the display (printed p. 149): press the Hold button and turn on the meter to view all segments of the display. Compare the display with the manual's Figure 6-1 (the text says Table 6-1, which is the equipment table: misprint).",
+   "question": "All display segments are shown, as in Figure 6-1.",
+   "setup_key": "NONE",
+   "ref": "p. 149 functional check",
+   "note": "Basic Operating Test (p. 149); no calibrator output, no limits, no uncertainty (yes / no). Owner rule 2026-10-27: included."
+  },
+  {
+   "table": "F",
+   "step": 3,
+   "id": "F-3",
+   "section": "Functional checks",
+   "switch": "Current terminal test",
+   "range": "",
+   "models": [
+    "U1251B",
+    "U1252B"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Current terminal test",
+   "setup": "Current terminal test (printed p. 150): the beep function must not be disabled in setup. Insert a test lead into the A terminal with the rotary switch NOT set to the mA·A function. The meter sounds an alert beep and the primary display flashes \"A-Err\" until the lead is removed from the A terminal (Figure 6-2).",
+   "question": "The meter beeped and the primary display flashed \"A-Err\" until the lead was removed.",
+   "setup_key": "NONE",
+   "ref": "p. 150 functional check",
+   "note": "Basic Operating Test (p. 150); no calibrator output, no limits, no uncertainty (yes / no). Owner rule 2026-10-27: included."
+  }
+ ]
+}

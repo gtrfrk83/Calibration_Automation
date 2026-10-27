@@ -1,0 +1,46 @@
+{
+ "schema": 1,
+ "id": "Keysight_U1251B_Verification",
+ "name": "Keysight U1251B Handheld Multimeter Performance Verification",
+ "manufacturer": "Keysight",
+ "model": "U1251B",
+ "category": "Digital Multimeter",
+ "version": "1",
+ "order": 71,
+ "description": "Keysight U1251B / U1252B Handheld Digital Multimeter Performance Verification (family spec): this launcher runs the U1251B, 63 points (Table 6-2 plus the Basic Operating Test checks)",
+ "launcher": "Procedures/Keysight_U1251B_Verification.py",
+ "engine": [
+  "handheld_dmm.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/keysight_u1251b_u1252b_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keysight_U1251B_Verification.py",
+   "handheld_dmm.py",
+   "handheld_dmm_view_tk.py",
+   "handheld_dmm_view_qt.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "hookups.py#u1251b",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/keysight_u1251b_u1252b_pv.json#U1251B"
+  ]
+ },
+ "hookup": {
+  "meter": "u1251b",
+  "diagram_prefixes": [
+   "hook_u1251b"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": ["Procedures/Keysight_U1251B_Verification.py", "Procedures/Keysight_U1251B_Verification.procedure.json", "specs/keysight_u1251b_u1252b_pv.json", "specs/build_keysight_u1251b_spec.py", "specs/build_hookups_u1251b.py", "diagrams/keysight_u1252b_terminals.png", "diagrams/README_u1251b.txt", "tests/test_keysight_u1251b_points.py"]
+}

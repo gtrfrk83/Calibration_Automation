@@ -1196,6 +1196,9 @@ class StandardsSpecsPanel(QWidget):
         if self.sel is None:
             return
         self.check_dialog = CheckDialog(self, sm.standard(self.sel))
+        self.check_dialog.show()                   # the window is non-modal and was never shown: the button appeared to do nothing
+        self.check_dialog.raise_()
+        self.check_dialog.activateWindow()
         return self.check_dialog
 
 
