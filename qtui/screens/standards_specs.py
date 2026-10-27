@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QComboBox, QF
 
 import specmanager as sm
 import specmanager_view as view
+import emu_check_model as emu
 import uncertainty_budget as ub
 from qtui import theme
 from qtui.screens import spec_editor as sed
@@ -1195,7 +1196,11 @@ class StandardsSpecsPanel(QWidget):
     def check_emu(self):
         if self.sel is None:
             return
-        self.check_dialog = CheckDialog(self, sm.standard(self.sel))
+        row = None
+        iid = self.selected_id()
+        if iid is not None and iid not in self._group_keys:
+            row = next((r for r in sm.rows_of(self.sel) if str(r['id']) == str(iid)), None)          # the range selected in the table prefills the point
+        self.check_dialog = CheckDialog(self, sm.standard(self.sel), row)
         self.check_dialog.show()                   # the window is non-modal and was never shown: the button appeared to do nothing
         self.check_dialog.raise_()
         self.check_dialog.activateWindow()
@@ -1206,81 +1211,131 @@ SpecManagerPanel = StandardsSpecsPanel          # the Tk class name, so the Mana
 
 
 class CheckDialog(ModalDialog):
-    """Enter an applied point and the EMU that was reported; shows the budget and whether the report is below the scope CMC or the budget."""
+    """Give a nominal test point (with its units); shows the uncertainty that would be REPORTED ON THE CERTIFICATE for it with this standard (emu_check_model: the standard's
+    specification row that covers the point, its resolution, any Type A, k = 2, against the scope CMC, the larger one rounded up).  Optionally an uncertainty somebody already
+    reported can be entered to be audited against the budget.  The point is prefilled from the row selected in the spec table."""
 
-    def __init__(self, parent, standard):
-        super().__init__(parent, f'Check a reported EMU - {standard.model}', width=820, modal=False)
-        self.setWindowTitle(sed._title(f'Check a reported EMU - {standard.model}'))
+    # (label, key, hint, unit family): every value box has its own unit box
+    FIELDS = (('Nominal test point', 'nominal', 'e.g. 250', 'nominal'), ('Frequency', 'freq', 'AC points only', 'freq'),
+              ('Calibrator resolution', 'res', 'optional: blank = from the sheet', 'nominal'), ('Type A std. uncertainty (k = 1)', 'typea', 'optional: repeatability, blank = none', 'nominal'),
+              ('Uncertainty already reported', 'reported', 'optional: check it against the budget', 'nominal'))
+
+    def __init__(self, parent, standard, row=None):
+        super().__init__(parent, f'Reported uncertainty - {standard.model}', width=860, modal=False)
+        self.setWindowTitle(sed._title(f'Reported uncertainty - {standard.model}'))
         self.title_label.hide()
         self.std = standard
-        self.v = {}
+        self.v, self.u, self.rowlabels = {}, {}, {}
         form = QGridLayout()
         form.setHorizontalSpacing(M.md)
         form.setVerticalSpacing(M.sm)
-        for i, (lab, key, hint) in enumerate((('Function', 'kind', ''), ('Nominal (SI: V, A, ohm, F, Hz)', 'nominal', 'e.g. 0.1'), ('Frequency (Hz)', 'freq', 'AC only'),
-                                              ('Reported EMU (SI units, k = 2)', 'reported', 'e.g. 3e-6'), ('Calibrator resolution (SI)', 'res', 'blank = from the sheet'),
-                                              ('Type A std. uncertainty (SI, k = 1)', 'typea', 'repeatability, blank = none'))):
-            form.addWidget(label(lab), i, 0)
-            if key == 'kind':
-                box = QComboBox()
-                box.addItems([k for k in KINDS if k][:7] + ['FREQ'])
-                box.setCurrentText('DCV')
-                self.v[key] = box
-                form.addWidget(box, i, 1)
-            else:
-                ent = QLineEdit()
-                ent.setMinimumWidth(180)
-                self.v[key] = ent
-                form.addWidget(ent, i, 1)
-            form.addWidget(label(hint, 'hint'), i, 2)
-        form.setColumnStretch(3, 1)
+        form.addWidget(label('Function'), 0, 0)
+        self.kind_box = QComboBox()
+        for k in emu.KINDS:
+            self.kind_box.addItem(f'{k}  {emu.KIND_NAMES[k]}', k)
+        self.kind_box.setAccessibleName('Function')
+        self.kind_box.currentIndexChanged.connect(lambda _i: self._kind_changed())
+        form.addWidget(self.kind_box, 0, 1, 1, 2)
+        for r, (lab, key, hint, family) in enumerate(self.FIELDS, start=1):
+            lb = label(lab)
+            form.addWidget(lb, r, 0)
+            ent = QLineEdit()
+            ent.setMinimumWidth(160)
+            ent.setAccessibleName(lab)
+            ent.returnPressed.connect(self.run_check)
+            box = QComboBox()
+            box.setAccessibleName(lab + ' unit')
+            box.setMinimumWidth(90)
+            self.v[key], self.u[key] = ent, box
+            self.rowlabels[key] = lb
+            form.addWidget(ent, r, 1)
+            form.addWidget(box, r, 2)
+            form.addWidget(label(hint, 'hint'), r, 3)
+        form.setColumnStretch(4, 1)
         self.body.addLayout(form)
+        self.big = label('', 'section')
+        self.big.setAccessibleName('Uncertainty to report')
+        self.body.addWidget(self.big)
         self.out = QPlainTextEdit()
         self.out.setReadOnly(True)
-        self.out.setMinimumHeight(260)
+        self.out.setMinimumHeight(220)
         self.body.addWidget(self.out)
         self.add_button('Close', cancel=True)
-        self.run_btn = self.add_button('Check', role='primary', default=True, close=False, callback=self.run_check)
+        self.run_btn = self.add_button('Calculate', role='primary', default=True, close=False, callback=self.run_check)
+        self.result = None
+        pre = emu.prefill_from_row(row) if row else {'kind': 'DCV', 'nominal': '', 'nominal_unit': '', 'frequency': '', 'frequency_unit': 'Hz'}
+        self.kind_box.setCurrentIndex(max(0, self.kind_box.findData(pre['kind'])))
+        self._kind_changed()
+        if pre.get('nominal'):
+            self.set_value('nominal', pre['nominal'])
+            self.set_unit('nominal', pre['nominal_unit'])
+        if pre.get('frequency'):
+            self.set_value('freq', pre['frequency'])
+            self.set_unit('freq', pre['frequency_unit'])
+
+    # ---- the inputs
+    def kind(self) -> str:
+        return self.kind_box.currentData()
+
+    def set_kind(self, kind) -> None:
+        self.kind_box.setCurrentIndex(max(0, self.kind_box.findData(kind)))
+
+    def _kind_changed(self):
+        kind = self.kind()
+        for key in ('nominal', 'res', 'typea', 'reported'):
+            box = self.u[key]
+            box.blockSignals(True)
+            box.clear()
+            for name, _f in emu.unit_choices(kind):
+                box.addItem(name)
+            box.blockSignals(False)
+        freq = self.u['freq']
+        if freq.count() == 0:
+            for name, _f in emu.FREQUENCY_UNITS:
+                freq.addItem(name)
+        ac = kind in emu.AC_KINDS
+        for w in (self.rowlabels['freq'], self.v['freq'], self.u['freq']):
+            w.setVisible(ac)
+        self.out.clear()
+        self.big.setText('')
 
     def value(self, key) -> str:
-        w = self.v[key]
-        return w.currentText() if isinstance(w, QComboBox) else w.text()
+        return self.kind() if key == 'kind' else self.v[key].text()
 
     def set_value(self, key, text) -> None:
-        w = self.v[key]
-        w.setCurrentText(text) if isinstance(w, QComboBox) else w.setText(text)
+        if key == 'kind':
+            self.set_kind(text)
+        else:
+            self.v[key].setText(text)
 
-    def _num(self, key, required=False):
-        t = self.value(key).strip()
-        if not t:
-            if required:
-                raise ValueError(key)
-            return None
-        return float(t)
+    def unit(self, key) -> str:
+        return self.u[key].currentText()
+
+    def set_unit(self, key, text) -> None:
+        i = self.u[key].findText(text)
+        if i >= 0:
+            self.u[key].setCurrentIndex(i)
+
+    def inputs(self) -> emu.Inputs:
+        return emu.Inputs(kind=self.kind(), nominal=self.value('nominal'), nominal_unit=self.unit('nominal'), frequency=self.value('freq'), frequency_unit=self.unit('freq'),
+                          resolution=self.value('res'), resolution_unit=self.unit('res'), type_a=self.value('typea'), type_a_unit=self.unit('typea'),
+                          reported=self.value('reported'), reported_unit=self.unit('reported'))
 
     def run_check(self):
-        try:
-            nominal, reported = self._num('nominal', True), self._num('reported', True)
-            freq, res, ta = self._num('freq'), self._num('res'), self._num('typea')
-        except ValueError:
-            sed.show_error(self, 'Check', 'Enter numbers (nominal and reported are required).')
+        res = self.result = emu.compute(self.std, self.inputs())
+        if res.error:
+            self.big.setText('')
+            self.out.setPlainText(res.error)
+            sed.show_error(self, 'Reported uncertainty', res.error)
             return False
-        kind = self.value('kind')
-        b = ub.build(kind, nominal, UNITS.get(kind, ''), standard=self.std, frequency=freq, resolution=res, type_a=[('Type A', ta, 1.0)] if ta else [])
-        status, text = ub.audit(reported, b)
-        lines = [f'{status}: {text}', '']
-        for c in b.components:
-            lines.append(f'  {c.name:28s} u = {c.u:.4g}   ({c.source})')
-        if b.emu is not None:
-            lines.append(f'  Expanded (k = {b.k:g}): {b.emu:.4g}')
-        lines.append(f'  Scope CMC: {b.cmc:.4g}' if b.cmc is not None else '  Scope CMC: not covered')
-        if b.reported is not None:
-            lines.append(f'  Smallest value that may be reported: {b.reported:.4g}')
-        lines += [f'  Note: {n}' for n in b.notes]
-        self.out.setPlainText('\n'.join(lines))
+        self.big.setText(f'Uncertainty to report on the certificate:  \u00b1 {res.cert_text}' + (f'   ({res.relative})' if res.relative else ''))
+        self.out.setPlainText('\n'.join(res.lines))
         return False
 
     run = run_check            # the Tk method name (ModalDialog.run, the modal loop, is not used by this non-modal window)
 
     def output_text(self) -> str:
         return self.out.toPlainText()
+
+    def cert_text(self) -> str:
+        return self.result.cert_text if self.result is not None else ''
