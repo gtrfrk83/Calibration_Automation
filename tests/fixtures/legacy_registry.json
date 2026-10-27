@@ -50,7 +50,12 @@
     "Fluke 325 Clamp Meter Performance Verification": "Fluke_325_Verification.py",
     "Fluke 381 Clamp Meter Performance Verification": "Fluke_381_Verification.py",
     "Fluke 753 Documenting Process Calibrator Performance Verification": "Fluke_753_Verification.py",
-    "Fluke 754 Documenting Process Calibrator Performance Verification": "Fluke_754_Verification.py"
+    "Fluke 754 Documenting Process Calibrator Performance Verification": "Fluke_754_Verification.py",
+    "Fluke 333 Clamp Meter Performance Verification": "Fluke_333_Verification.py",
+    "Fluke 334 Clamp Meter Performance Verification": "Fluke_334_Verification.py",
+    "Fluke 335 Clamp Meter Performance Verification": "Fluke_335_Verification.py",
+    "Fluke 336 Clamp Meter Performance Verification": "Fluke_336_Verification.py",
+    "Fluke 337 Clamp Meter Performance Verification": "Fluke_337_Verification.py"
   },
   "VERSIONS": {
     "WaveSurfer_WS4104HD.py": "51",
@@ -103,7 +108,12 @@
     "Fluke_325_Verification.py": "1",
     "Fluke_381_Verification.py": "1",
     "Fluke_753_Verification.py": "1",
-    "Fluke_754_Verification.py": "1"
+    "Fluke_754_Verification.py": "1",
+    "Fluke_333_Verification.py": "1",
+    "Fluke_334_Verification.py": "1",
+    "Fluke_335_Verification.py": "1",
+    "Fluke_336_Verification.py": "1",
+    "Fluke_337_Verification.py": "1"
   },
   "records": [
     [
@@ -462,6 +472,41 @@
       "754",
       "Process Calibrator",
       "Fluke_754_Verification.py"
+    ],
+    [
+      "Fluke 333 Clamp Meter Performance Verification",
+      "Fluke",
+      "333",
+      "Clamp Meter",
+      "Fluke_333_Verification.py"
+    ],
+    [
+      "Fluke 334 Clamp Meter Performance Verification",
+      "Fluke",
+      "334",
+      "Clamp Meter",
+      "Fluke_334_Verification.py"
+    ],
+    [
+      "Fluke 335 Clamp Meter Performance Verification",
+      "Fluke",
+      "335",
+      "Clamp Meter",
+      "Fluke_335_Verification.py"
+    ],
+    [
+      "Fluke 336 Clamp Meter Performance Verification",
+      "Fluke",
+      "336",
+      "Clamp Meter",
+      "Fluke_336_Verification.py"
+    ],
+    [
+      "Fluke 337 Clamp Meter Performance Verification",
+      "Fluke",
+      "337",
+      "Clamp Meter",
+      "Fluke_337_Verification.py"
     ]
   ],
   "FILES": {
@@ -1229,6 +1274,111 @@
       ],
       "spec": [
         "specs/fluke_753_754_pv.json"
+      ]
+    },
+    "Fluke_333_Verification.py": {
+      "code": [
+        "Procedures/Fluke_333_Verification.py",
+        "handheld_dmm.py",
+        "handheld_dmm_view_tk.py",
+        "handheld_dmm_view_qt.py",
+        "iflex_option.py",
+        "iflex_option_view_tk.py",
+        "iflex_option_view_qt.py",
+        "coil_rule.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_33x_pv.json"
+      ]
+    },
+    "Fluke_334_Verification.py": {
+      "code": [
+        "Procedures/Fluke_334_Verification.py",
+        "handheld_dmm.py",
+        "handheld_dmm_view_tk.py",
+        "handheld_dmm_view_qt.py",
+        "iflex_option.py",
+        "iflex_option_view_tk.py",
+        "iflex_option_view_qt.py",
+        "coil_rule.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_33x_pv.json"
+      ]
+    },
+    "Fluke_335_Verification.py": {
+      "code": [
+        "Procedures/Fluke_335_Verification.py",
+        "handheld_dmm.py",
+        "handheld_dmm_view_tk.py",
+        "handheld_dmm_view_qt.py",
+        "iflex_option.py",
+        "iflex_option_view_tk.py",
+        "iflex_option_view_qt.py",
+        "coil_rule.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_33x_pv.json"
+      ]
+    },
+    "Fluke_336_Verification.py": {
+      "code": [
+        "Procedures/Fluke_336_Verification.py",
+        "handheld_dmm.py",
+        "handheld_dmm_view_tk.py",
+        "handheld_dmm_view_qt.py",
+        "iflex_option.py",
+        "iflex_option_view_tk.py",
+        "iflex_option_view_qt.py",
+        "coil_rule.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_33x_pv.json"
+      ]
+    },
+    "Fluke_337_Verification.py": {
+      "code": [
+        "Procedures/Fluke_337_Verification.py",
+        "handheld_dmm.py",
+        "handheld_dmm_view_tk.py",
+        "handheld_dmm_view_qt.py",
+        "iflex_option.py",
+        "iflex_option_view_tk.py",
+        "iflex_option_view_qt.py",
+        "coil_rule.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_33x_pv.json"
       ]
     }
   },

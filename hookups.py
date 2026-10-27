@@ -68,6 +68,9 @@ METERS = {
     # Fluke 381 clamp meter: Figure 1 (printed p. 5) shows a small far-left jack (the iFlex 2 mm input of the iFlex paragraph, printed p. 13), COM and VΩ; the current points use the jaw or the iFlex loop on a
     # 50-turn coil (or a single wire for 0 A dc), so only the voltage / ohms hook-up is described here and the other hook-ups are the spec's own groups (specs/fluke_381_pv.json)
     'fluke381': dict(name='Fluke 381', jacks={'vohm': 'VΩ', 'com': 'COM'}),
+    # Fluke 333 / 334 / 335 / 336 / 337 clamp meters: the Calibration Information (printed p. 7, step 1) names the input jacks 'VΩ' and 'COM'; the current, inrush and frequency points use the jaw on a
+    # 50-turn coil (no test leads in the jacks), so only the voltage / ohms / continuity hook-up is described here and the other hook-ups are the spec's own groups (specs/fluke_33x_pv.json)
+    'fluke33x': dict(name='Fluke 333 / 334 / 335 / 336 / 337', jacks={'vohm': 'VΩ', 'com': 'COM'}),
     # Fluke 753 / 754 Documenting Process Calibrator: a 2 x 3 block of jacks (owner's photo, diagrams/fluke_753_754_terminals.png; Calibration Manual Figures 1-13, 15): top row 'VΩ RTD' (SOURCE side),
     # 'mA / mA Ω RTD', 'V' (MEASURE side); bottom row the three commons; TC mini-jack lower left.  The hook-ups are the spec's own groups (specs/fluke_753_754_pv.json, drawn by specs/build_hookups_753.py),
     # so there is no AVAILABLE entry; 'panels' are the owner's instrument reference pictures (front view, terminal close-up) the engine (fluke_753_754.py) shows when a group has no drawn picture
@@ -87,6 +90,7 @@ AVAILABLE = {
     'fluke376': ('VOHM',),
     'fluke323': ('VOHM',),
     'fluke381': ('VOHM',),
+    'fluke33x': ('VOHM',),
 }
 
 # extra text for particular meters
@@ -115,6 +119,9 @@ EXTRA = {
                                        'lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. The Calibration Manual gives no further safety information.'),
     ('fluke381', 'VOHM'): dict(caution='Up to 1000 V ac or dc is applied to the VΩ and COM jacks (the jack panel is marked CAT III 1000 V, CAT IV 600 V, Figure 1). Use CAT III 1000 V leads with the finger guards, connect COM before the live '
                                        'lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. Do not touch more than 30 V ac rms, 42 V ac peak or 60 V dc (Safety Information, printed p. 2).'),
+    ('fluke33x', 'VOHM'): dict(caution='Up to 600 V ac or dc is applied to the VΩ and COM jacks (CAT III 600 V, Pollution Degree II, Specifications printed p. 3; never use the meter above 600 V or 400 Hz, Safety Information printed p. 2). '
+                                       'Use CAT III 600 V leads with the finger guards, connect COM before the live lead and remove the live lead first, and keep clear of the plugs and terminals whenever the output is on. '
+                                       'Use caution above 60 V dc or 30 V ac.'),
     ('fluke170', 'TEMP'): dict(caution='Use the correct cable (Table 3 note 3). The meter and the thermocouple adapter must be at the same temperature: allow 20 minutes before the temperature points (Table 3 note 4).'),
 }
 GENERIC_CAUTION = {

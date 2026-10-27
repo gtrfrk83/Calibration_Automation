@@ -1,0 +1,58 @@
+{
+ "schema": 1,
+ "id": "Fluke_336_Verification",
+ "name": "Fluke 336 Clamp Meter Performance Verification",
+ "manufacturer": "Fluke",
+ "model": "336",
+ "category": "Clamp Meter",
+ "version": "1",
+ "order": 69,
+ "description": "Fluke 333 / 334 / 335 / 336 / 337 Clamp Meter Performance Verification (family spec): this launcher runs the 336, 23 points (Table 2 plus the display / backlight / keypad checks)",
+ "launcher": "Procedures/Fluke_336_Verification.py",
+ "engine": [
+  "handheld_dmm.py",
+  "iflex_option.py"
+ ],
+ "drivers": [
+  "fluke_5560a"
+ ],
+ "specs": [
+  "specs/fluke_33x_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Fluke_336_Verification.py",
+   "handheld_dmm.py",
+   "handheld_dmm_view_tk.py",
+   "handheld_dmm_view_qt.py",
+   "iflex_option.py",
+   "iflex_option_view_tk.py",
+   "iflex_option_view_qt.py",
+   "coil_rule.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "hookups.py#fluke33x",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/fluke_5560a.py"
+  ],
+  "spec": [
+   "specs/fluke_33x_pv.json#336"
+  ]
+ },
+ "hookup": {
+  "meter": "fluke33x",
+  "diagram_prefixes": [
+   "hook_fluke33x"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Fluke_336_Verification.py",
+  "Procedures/Fluke_336_Verification.procedure.json",
+  "specs/fluke_33x_pv.json",
+  "specs/build_fluke_33x_spec.py",
+  "diagrams/README_fluke33x.txt",
+  "tests/test_fluke_33x_points.py"
+ ]
+}
