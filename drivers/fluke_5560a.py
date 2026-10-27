@@ -74,6 +74,13 @@ COMMANDS = {
                        placeholders={'amps': _f(0.001), 'hz': _f(1000.0)}, kind='set', verified=True, ref=_REF),
     'out.ohms': Cmd('OUT {ohms:.9g}OHM', 'Program a resistance (NORMAL terminals)', placeholders={'ohms': _f(1000.0)}, kind='set',
                     verified=True, ref=_REF),
+    # impedance compensation for resistance output (the handheld DMM resistance points use WIRE2: 2-wire compensation).  5560A Remote Programmers Manual pp. 122-123 (ZCOMP,
+    # ZCOMP?): NONE | WIRE2 | WIRE4; "allowed for many impedance values.  For some higher values the compensation is NONE or WIRE4 and other parameters give 'Can't change
+    # compensation now'".  The 5560A manual does not print the resistance limit; the 5522A's (below 110 kohm, Operators Manual p. 6-49) is used and is UNVERIFIED for the 5560A.
+    'zcomp.set': Cmd('ZCOMP {mode}', 'Impedance compensation', 'NONE, WIRE2 or WIRE4', placeholders={'mode': Placeholder('enum', '', 'NONE', enum=('NONE', 'WIRE2', 'WIRE4'))},
+                     kind='set', readback='zcomp.query', verified=True, ref='5560A/5550A/5540A/5530A Remote Programmers Manual p. 122 (ZCOMP); 5522A Operators Manual p. 6-49'),
+    'zcomp.query': Cmd('ZCOMP?', 'Impedance compensation query', 'Returns NONE, WIRE2 or WIRE4', kind='query', verified=True,
+                       ref='5560A/5550A/5540A/5530A Remote Programmers Manual p. 122 (ZCOMP?); 5522A Operators Manual p. 6-49'),
     'out.cap.nf': Cmd('OUT {nf:.9g}NF', 'Program a capacitance (nF)', 'Value in nF; checked through the error queue. Not verified on a 5560A',
                       placeholders={'nf': _f(4.7)}, kind='set', verified=False),
     'out.cap.uf': Cmd('OUT {uf:.9g}UF', 'Program a capacitance (uF)', 'Value in uF; checked through the error queue. Not verified on a 5560A',
@@ -317,6 +324,19 @@ class Fluke5560A(Instrument):
     def set_output_ohms(self, ohms):
         self.send('out.ohms', ohms=ohms)
 
+    ZCOMP_LIMIT_OHMS = 110e3        # 5522A p. 6-49; the 5560A manual gives no number (UNVERIFIED for the 5560A).  False on the 5520A (its manual was not supplied).
+    zcomp_supported = True
+
+    def zcomp_allowed(self, ohms) -> bool:
+        return bool(self.zcomp_supported) and abs(ohms) < self.ZCOMP_LIMIT_OHMS
+
+    def set_zcomp(self, mode: str):
+        """ZCOMP NONE | WIRE2 | WIRE4, read back with ZCOMP? and compared.  Sent once, never retried; the caller reads the error queue (check_error) afterwards."""
+        self.send('zcomp.set', mode=mode)
+        reply = self.ask('zcomp.query').strip().upper()
+        if reply != mode:
+            raise InstrumentError(f'{self.label}: impedance compensation {mode} was not accepted (ZCOMP? answered {reply!r})')
+
     def set_output_capacitance(self, farads):
         """Capacitance output (NORMAL terminals). The command is checked through the error queue (check_error)."""
         if farads < 1e-6:
@@ -533,6 +553,7 @@ class Fluke5520A(Fluke5522A):
     Serial settings: the 5520A Service Manual says only that SERIAL 1 FROM HOST is the host port (pp. 1-4, 1-5) and that the host cable is a Fluke PM8914 (p. 3-28);
     baud, parity, data bits and terminators are NOT stated, so the repository default (9600 8N1, write CR, read CRLF) is UNVERIFIED for the 5520A."""
     MODEL = 'Fluke 5520A'
+    zcomp_supported = False        # ZCOMP not shown in the supplied 5520A manual: left to the operator, not sent
     IDN_MATCH = ('5520',)
     COMMANDS = _commands_5520()
 

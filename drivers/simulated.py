@@ -121,6 +121,14 @@ class SimFlukeTransport(_SimBase):
         if m and f['scope'] == 'MARKER':
             f['period'] = float(m.group(1)); return None
         if u == 'OUT?' and f['scope'] == 'MARKER': return f"{f.get('period', 0.0):.9E},S"
+        if u.startswith('ZCOMP'):                          # 5560A Remote Programmers Manual p. 122; 5522A Operators Manual p. 6-49 (allowed below 110 kohm only)
+            if self.model == '5520A':
+                raise TransportError(f'simulated {self.model}: unknown command {cmd!r}')
+            if u == 'ZCOMP?': return f.get('zcomp', 'NONE')
+            mode = u.split()[1]
+            if mode != 'NONE' and (f.get('unit') != 'OHM' or float(f['volts']) >= 110e3):
+                self.errors = getattr(self, 'errors', []) + ['-221,"Can\'t change compensation now"']; return None
+            f['zcomp'] = mode; return None
         if u.startswith('LCOMP'):                          # 5522A Operators Manual p. 6-23; the 5560A has no LCOMP for its own current output (only LCOMP_52120)
             if self.model == '5560A':
                 raise TransportError(f'simulated {self.model}: unknown command {cmd!r}')
@@ -130,7 +138,7 @@ class SimFlukeTransport(_SimBase):
                 self.errors = getattr(self, 'errors', []) + ['-221,"Settings conflict"']; return None
             f['lcomp'] = mode == 'ON'; return None
         if u == '*RST':
-            f.update(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', wave='SINE', duty=50.0, offset=0.0, lcomp=False, unit='V'); f.pop('period', None)
+            f.update(operate=False, func='NONE', scope='OFF', volts=0.0, freq=0.0, imp='1M', wave='SINE', duty=50.0, offset=0.0, lcomp=False, zcomp='NONE', unit='V'); f.pop('period', None)
             self.errors = []; self.next_error = None; return None
         if u == '*OPC?': return '1'
         if u == 'STBY': f['operate'] = False; return None

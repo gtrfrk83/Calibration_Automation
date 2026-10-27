@@ -245,6 +245,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         straight after (once, read back; a failure is logged and the next point refuses to start, see apply)."""
         self.cal.standby_quiet()
         self._lcomp_off()
+        self._zcomp_off()
         if getattr(self.cal, 'wave_nonsine', False):
             try:
                 self.cal.restore_sine()
@@ -267,6 +268,30 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         except Exception as exc:
             self.log.add('!!', f'LCOMP was NOT confirmed OFF: {exc}', self.cal.label)
         self.cal.standby_quiet()                    # the last command is STBY again: the output is left in standby
+
+    def _zcomp_for(self, ohms, context):
+        """2-wire impedance compensation for a resistance point (5560A / 5522A: ZCOMP WIRE2, set once after the resistance is programmed, read back and compared, then the
+        error queue is read).  Above what the calibrator allows (110 kohm; the 5560A figure is UNVERIFIED) compensation stays NONE and the reason is logged."""
+        if not hasattr(self.cal, 'set_zcomp') or not getattr(self.cal, 'zcomp_supported', False):
+            return
+        if not self.cal.zcomp_allowed(ohms):
+            self.log.add('!!', f'2-wire compensation not set: {_fmt(ohms, "ohm")} is above what the calibrator allows for compensation (it stays NONE)', self.cal.label)
+            return
+        self.cal.set_zcomp('WIRE2')
+        self._zcomp_on = True
+        self.cal.check_error(context)
+
+    def _zcomp_off(self):
+        """ZCOMP NONE after a compensated resistance point (once, read back; a failure is logged, never retried)."""
+        if not getattr(self, '_zcomp_on', False):
+            return
+        self._zcomp_on = False
+        try:
+            self.cal.set_zcomp('NONE')
+            self.cal.check_error('ZCOMP NONE')
+        except Exception as exc:
+            self.log.add('!!', f'2-wire compensation was NOT confirmed OFF: {exc}', self.cal.label)
+        self.cal.standby_quiet()
 
     def _lcomp_for(self, p, amps, hz, context):
         """Inductive load compensation ON for an AC current point through the 50-turn coil (5522A / 5520A: LCOMP ON, read back).  Outside the range the calibrator
@@ -348,6 +373,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                     self._lcomp_for(p, v, f, context)
             elif kind == 'OHM':
                 self.cal.set_output_ohms(v)
+                self._zcomp_for(v, context)
             elif kind == 'CAP':
                 self.cal.set_output_capacitance(v)
             elif kind == 'TEMP':
