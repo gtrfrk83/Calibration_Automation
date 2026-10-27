@@ -383,7 +383,10 @@ def validate_row(r: Row, p: Project | None = None) -> list:
         if r.accuracy.strip():
             try:
                 db.parse_expr(r.accuracy, unit or '')
-                warn('limits_from_accuracy', 'no limits printed: they will be calculated from the printed accuracy statement')
+                if re.search(r'count|digit|\bLSD\b', r.accuracy, re.I):
+                    err('accuracy_counts', 'the accuracy is given in counts / digits and the resolution of the range is not known here: type the printed low and high limits instead')
+                else:
+                    warn('limits_from_accuracy', 'no limits printed: they will be calculated from the printed accuracy statement')
             except db.DsError as exc:
                 err('accuracy_unreadable', f'no limits and the accuracy "{r.accuracy}" cannot be read ({exc})')
         elif not info.get('passfail'):

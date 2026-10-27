@@ -1908,7 +1908,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         return out
 
     def report_title(self):
-        if self.manual_entry:                       # the lab's report name; the datasheet's title and make / model are in the header
+        if self.manual_entry or self.dsb.get('generated'):      # the lab's report name (also for a procedure from the Procedure Generator); the datasheet's title and make / model are in the header
             return 'Calibration Data'
         return f'{self.info["name"]} - {self.dsb.get("title")}'
 

@@ -362,8 +362,9 @@ class Validation(Base):
         self.assertEqual(f['no_limits'].level, 'error')
 
     def test_accuracy_instead_of_limits_is_a_warning_when_readable(self):
-        f = self.flags(low='', high='', accuracy='0.05 % of reading + 2 counts')
+        f = self.flags(low='', high='', accuracy='0.05 % of reading')
         self.assertEqual(f['limits_from_accuracy'].level, 'warn')
+        self.assertEqual(self.flags(low='', high='', accuracy='0.05 % of reading + 2 counts')['accuracy_counts'].level, 'error')       # the resolution is unknown: limits must be typed
         self.assertEqual(self.flags(low='', high='', accuracy='gibberish text')['accuracy_unreadable'].level, 'error')
 
     def test_nominal_outside_its_limits_is_a_warning(self):
