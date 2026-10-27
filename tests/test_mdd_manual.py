@@ -55,6 +55,13 @@ class Convert(Fix):
         self.assertIn((15, 'limit_unit_unknown'), codes)   # unrecognised limit unit: kept as a pass / fail check
         self.assertEqual(self.conv.uncertain, 3)         # 6 (AC/DC inherited), 9 (range as nominal), 15 (unit not recognised)
 
+    def test_at_sign_is_stripped_from_the_label_but_the_condition_is_kept(self):
+        pts = {int(p.id.rsplit('.p', 1)[1]): p for fn, p in self.conv.sheet.all_points()}
+        self.assertNotIn('@', ''.join(p.label for p in pts.values()))
+        self.assertTrue(pts[4].label.startswith('1.000 V 60 Hz'))
+        self.assertTrue(pts[11].label.startswith('1.000 kHz 600 mV'))
+        self.assertEqual(str(pts[4].frequency), '60')                            # the frequency still comes from the condition
+
     def test_kinds_units_frequency_and_limits_as_printed(self):
         pts = {int(p.id.rsplit('.p', 1)[1]): (fn, p) for fn, p in self.conv.sheet.all_points()}
         self.assertEqual([pts[n][0].kind for n in (1, 4, 6, 7, 9, 10, 11, 12, 13, 14)],

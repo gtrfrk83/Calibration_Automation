@@ -8,9 +8,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QAction, QDesktopServices, QKeySequence
-from PySide6.QtWidgets import QFileDialog, QMainWindow
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFileDialog, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSlider, QVBoxLayout
 
 import appdata
 import diagnostics
@@ -104,6 +104,58 @@ def add_help_menu(window: QMainWindow):
     return menu
 
 
+class TextSizeDialog(QDialog):
+    """Appearance > Text size: a slider (80 % to 200 %) that resizes the text live; OK keeps and saves it, Cancel puts back the size it opened with."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle('Text size')
+        self._start = theme.text_scale()
+        lay = QVBoxLayout(self)
+        self.value_label = QLabel()
+        self.value_label.setProperty('role', 'section')
+        lay.addWidget(self.value_label)
+        row = QHBoxLayout()
+        row.addWidget(QLabel('A'))
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider.setRange(theme.TEXT_SCALE_MIN // theme.TEXT_SCALE_STEP, theme.TEXT_SCALE_MAX // theme.TEXT_SCALE_STEP)
+        self.slider.setValue(self._start // theme.TEXT_SCALE_STEP)
+        self.slider.setMinimumWidth(320)
+        row.addWidget(self.slider, 1)
+        big = QLabel('A')
+        big.setStyleSheet('font-size: 24px;')
+        row.addWidget(big)
+        lay.addLayout(row)
+        lay.addWidget(QLabel('The text and the buttons and rows that hold it change as you move the slider.'))
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        self.reset_button = QPushButton('Reset to 100 %')
+        buttons.addButton(self.reset_button, QDialogButtonBox.ButtonRole.ResetRole)
+        lay.addWidget(buttons)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        self.reset_button.clicked.connect(lambda: self.slider.setValue(theme.TEXT_SCALE_DEFAULT // theme.TEXT_SCALE_STEP))
+        self.slider.valueChanged.connect(self._moved)
+        self._show(self._start)
+
+    def percent(self) -> int:
+        return self.slider.value() * theme.TEXT_SCALE_STEP
+
+    def _show(self, pct):
+        self.value_label.setText(f'Text size: {pct} %' + ('  (default)' if pct == theme.TEXT_SCALE_DEFAULT else ''))
+
+    def _moved(self, _v):
+        self._show(self.percent())
+        theme.set_text_scale(self.percent())
+
+    def accept(self):
+        theme.set_text_scale(self.percent(), save=True)
+        super().accept()
+
+    def reject(self):
+        theme.set_text_scale(self._start)
+        super().reject()
+
+
 def add_appearance_menu(window: QMainWindow):
     """A top-level Appearance menu right after File: the theme choices, then the Depth (soft shadows) switch."""
     from PySide6.QtWidgets import QMenu
@@ -122,6 +174,16 @@ def add_appearance_menu(window: QMainWindow):
         dark.setEnabled(False)
     else:
         theme.fill_appearance_menu(menu)
+    menu.addSeparator()
+    size_act = menu.addAction('Text size...')
+    size_act.triggered.connect(lambda: TextSizeDialog(window).exec())
+    bigger = menu.addAction('Larger text')
+    bigger.setShortcut(QKeySequence('Ctrl+='))
+    bigger.triggered.connect(lambda: theme.set_text_scale(theme.text_scale() + theme.TEXT_SCALE_STEP, save=True))
+    smaller = menu.addAction('Smaller text')
+    smaller.setShortcut(QKeySequence('Ctrl+-'))
+    smaller.triggered.connect(lambda: theme.set_text_scale(theme.text_scale() - theme.TEXT_SCALE_STEP, save=True))
+    window.text_size_action = size_act
     menu.addSeparator()
     depth_act = menu.addAction('Depth (soft shadows on cards and buttons)')
     depth_act.setCheckable(True)

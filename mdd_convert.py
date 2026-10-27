@@ -440,7 +440,8 @@ def _candidate0(raw, n, tp, conv, prev_section=''):
     passfail = tol_first.lower().startswith('pass/fail')
     nominal = split_value_unit(nom_first)
     shown = ' | '.join([nom_first] + list(nom_rest))
-    label = nom_first + (' @ ' + ' @ '.join(x.lstrip('@ ').strip() for x in nom_rest if x.strip().startswith('@')) if any(x.strip().startswith('@') for x in nom_rest) else '')
+    conds_txt = ' '.join(x.lstrip('@ ').strip() for x in nom_rest if x.strip().startswith('@'))   # the '@' is dropped from the printed label; the conditions are parsed above
+    label = nom_first + (' ' + conds_txt if conds_txt else '')
     rng_txt = range_text(func_first, *func_rest)
     if rng_txt:
         label += f' ({rng_txt})'

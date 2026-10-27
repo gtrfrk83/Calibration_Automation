@@ -26,12 +26,13 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QFileDialog, QFrame
 import spec_edit_io as eio
 import spec_edit_log as elog
 import spec_editor as se
+import specmanager_view as view
 import ui_theme_core as core
 from qtui import theme
 from qtui.screens._share import ShareWidth
 from qtui.table import CellDelegate, Column, DataTable, TableModel
 from qtui.theme import M
-from qtui.widgets import Badge, Banner, MessageDialog, ModalDialog, PrimaryButton, SecondaryButton, label, make_tab_bar, rule
+from qtui.widgets import Badge, Banner, MessageDialog, ModalDialog, PrimaryButton, SecondaryButton, SegmentedFilter, label, make_tab_bar, rule
 
 COLS = [  # id, heading, width, anchor
     ('function', 'FUNCTION', 150, 'w'), ('label', 'RANGE', 96, 'w'), ('freq', 'FREQUENCY', 104, 'w'), ('period', 'PERIOD', 74, 'w'),
@@ -712,6 +713,15 @@ class EditorWindow(QWidget):
 
     def _build_rows_tab(self):
         lay = self._page_layout('rows')
+        self.row_kind = ''                                   # the function-type chip: '' = All
+        self._kind_specs = None
+        self.kind_filter = None
+        self.kind_scroll = QScrollArea()                      # one row of chips under the tabs; scrolls sideways when there are more than fit
+        self.kind_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.kind_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.kind_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.kind_scroll.setWidgetResizable(False)
+        lay.addWidget(self.kind_scroll)
         self.grid_rows = Grid(self, self, COLS)
         lay.addWidget(self.grid_rows, 1)
         g = self.grid_rows
@@ -930,8 +940,41 @@ class EditorWindow(QWidget):
         t = self.grid_rows.table
         return [c.key for i, c in enumerate(t.source_model.columns) if c.key != '_mark' and not t.isColumnHidden(i)]
 
+    def _range_kind(self, rng) -> str:
+        return str(rng.get('kind') or 'OTHER')
+
+    def _build_kind_chips(self):
+        """All / DCV / ACV ... chips with the number of rows of each, the same chips as the Standards Specs view; rebuilt only when the counts change."""
+        specs = view.kind_chips([{'kind': self._range_kind(r)} for _f, r in self.doc.ranges()])
+        if self.row_kind not in {c[0] for c in specs}:
+            self.row_kind = ''
+        key = (tuple((c[0], c[1], c[2]) for c in specs), self.row_kind)
+        if key == self._kind_specs:
+            return
+        self._kind_specs = key
+        flt = SegmentedFilter([(code, text, n) for code, text, n, _full in specs])
+        for code, _text, _n, full in specs:
+            flt._buttons[code].setToolTip(full)
+        flt.set_current(self.row_kind)
+        flt.currentChanged.connect(self.set_row_kind)
+        self.kind_filter = flt
+        self.kind_scroll.setWidget(flt)
+        flt.adjustSize()
+        self.kind_scroll.setFixedHeight(flt.sizeHint().height() + (self.kind_scroll.horizontalScrollBar().sizeHint().height() if flt.sizeHint().width() > self.kind_scroll.width() > 0 else 2))
+
+    def set_row_kind(self, code: str) -> None:
+        """Show only the rows of one function type ('' = all)."""
+        if code != self.row_kind:
+            self.row_kind = code
+            if self.doc is not None:
+                self._fill_rows()
+
+    def row_kind_codes(self) -> list:
+        return list(self.kind_filter._buttons) if self.kind_filter else []
+
     def _fill_rows(self):
         g, doc, rep = self.grid_rows, self.doc, self.report
+        self._build_kind_chips()
         shown = self._display_cols()
         for i, c in enumerate(g.table.source_model.columns):
             g.table.setColumnHidden(i, c.key not in shown and c.key != '_mark')
@@ -942,6 +985,8 @@ class EditorWindow(QWidget):
         last_r = None
         rows = []
         for ln in doc.lines():
+            if self.row_kind and self._range_kind(ln.rng) != self.row_kind:
+                continue
             ru = doc.uid(ln.rng)
             if ru != last_r:
                 shade += 1

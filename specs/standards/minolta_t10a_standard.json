@@ -1,0 +1,517 @@
+{
+ "schema": 1,
+ "standard": {
+  "manufacturer": "Minolta",
+  "model": "T-10A",
+  "description": "Illuminance meter (white light) and black light, working standard ATS-04959",
+  "confidence_text": "no confidence level printed (divisor 2, laboratory convention)",
+  "confidence_pct": null,
+  "reference": "SpecTrack tree, Minolta T-10A Illumination meter, ID ATS-04959 (owner screenshot 2026-10-26)",
+  "revision": "",
+  "author": "written by specs/build_minolta_t10a_standard.py",
+  "approved_by": "",
+  "approve_date": "",
+  "source_pdf": "",
+  "sheet_generated": "",
+  "built": "2026-10-26T19:03:02"
+ },
+ "notes": {
+  "1": "SOURCE: the owner's SpecTrack tree for the Minolta T-10A Illumination meter (asset ATS-04959), read from a screenshot on 2026-10-26: 1 yr accuracy +/-(2 % I.V. + a fixed term) in five ranges in fc and five in lx. Built by specs/build_minolta_t10a_standard.py.",
+  "2": "PERCENTAGE: \"I.V.\" is the indicated value (the reading); the fixed term is added to 2 % of the reading in that range, in the range's own unit (fc or lx). Nothing is converted between fc and lx.",
+  "3": "BLACK LIGHT: the owner specified a flat 5 % (+/-(5 % I.V.), no fixed term). The range 0 to 3000 uW/cm2 at 365 nm is ASSUMED from the A2LA scope row (not given by the owner). UNVERIFIED: the black light meter, its wavelength and its range; change the range in the builder if it differs.",
+  "4": "CONFIDENCE: no level is printed; stored with no level (divisor 2, laboratory convention). One period, \"1 yr\", as in the tree. Not stored: resolution, stability, spectral mismatch, cosine response and temperature terms (not in the tree).",
+  "5": "NOT TO BE CONFUSED WITH A2LA-LIGHT: that sheet is the lab's own scope CMC (2.9 % white, 5 % black). This sheet is the working standard instrument's accuracy. Nothing selects it yet: a procedure or the uncertainty tools use it only when it is chosen as the standard for a light point."
+ },
+ "limits": [
+  {
+   "function": "Light [White]",
+   "limit": "+/-(2 % I.V. + 0.001 fc ... 10 fc); +/-(2 % I.V. + 0.01 lx ... 100 lx); five ranges each.",
+   "page": ""
+  },
+  {
+   "function": "Light [Black @ 365 nm]",
+   "limit": "+/-(5 % I.V.), flat; range 0 to 3000 uW/cm2 assumed.",
+   "page": ""
+  }
+ ],
+ "functions": [
+  {
+   "name": "Light [White] (FC)",
+   "direction": "output",
+   "page": 0,
+   "ranges": [
+    {
+     "label": "0 to 2.999 FC",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 2.999,
+       "unit": "FC",
+       "text": "0 FC to 2.999 FC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.001,
+       "unit": "FC",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 0.001 FC)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "0 to 2.999 FC",
+     "kind": "FC",
+     "variant": "White",
+     "amp_lo": 0.0,
+     "amp_hi": 2.999,
+     "unit": "FC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "3 to 29.99 FC",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 29.99,
+       "unit": "FC",
+       "text": "3 FC to 29.99 FC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.01,
+       "unit": "FC",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 0.01 FC)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "3 to 29.99 FC",
+     "kind": "FC",
+     "variant": "White",
+     "amp_lo": 3.0,
+     "amp_hi": 29.99,
+     "unit": "FC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "30 to 299.9 FC",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 299.9,
+       "unit": "FC",
+       "text": "30 FC to 299.9 FC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.1,
+       "unit": "FC",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 0.1 FC)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "30 to 299.9 FC",
+     "kind": "FC",
+     "variant": "White",
+     "amp_lo": 30.0,
+     "amp_hi": 299.9,
+     "unit": "FC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "300 to 2999 FC",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 300.0,
+       "hi": 2999.0,
+       "unit": "FC",
+       "text": "300 FC to 2999 FC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "FC",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 1 FC)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "300 to 2999 FC",
+     "kind": "FC",
+     "variant": "White",
+     "amp_lo": 300.0,
+     "amp_hi": 2999.0,
+     "unit": "FC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "3000 to 29990 FC",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3000.0,
+       "hi": 29990.0,
+       "unit": "FC",
+       "text": "3000 FC to 29990 FC",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 10.0,
+       "unit": "FC",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 10 FC)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "3000 to 29990 FC",
+     "kind": "FC",
+     "variant": "White",
+     "amp_lo": 3000.0,
+     "amp_hi": 29990.0,
+     "unit": "FC",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Light [White] (lux)",
+   "direction": "output",
+   "page": 0,
+   "ranges": [
+    {
+     "label": "0 to 29.99 lux",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 29.99,
+       "unit": "lux",
+       "text": "0 lux to 29.99 lux",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.01,
+       "unit": "lux",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 0.01 lux)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "0 to 29.99 lux",
+     "kind": "LUX",
+     "variant": "White",
+     "amp_lo": 0.0,
+     "amp_hi": 29.99,
+     "unit": "lux",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "30 to 299.9 lux",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 30.0,
+       "hi": 299.9,
+       "unit": "lux",
+       "text": "30 lux to 299.9 lux",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.1,
+       "unit": "lux",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 0.1 lux)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "30 to 299.9 lux",
+     "kind": "LUX",
+     "variant": "White",
+     "amp_lo": 30.0,
+     "amp_hi": 299.9,
+     "unit": "lux",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "300 to 2999 lux",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 300.0,
+       "hi": 2999.0,
+       "unit": "lux",
+       "text": "300 lux to 2999 lux",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1.0,
+       "unit": "lux",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 1 lux)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "300 to 2999 lux",
+     "kind": "LUX",
+     "variant": "White",
+     "amp_lo": 300.0,
+     "amp_hi": 2999.0,
+     "unit": "lux",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "3000 to 29990 lux",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3000.0,
+       "hi": 29990.0,
+       "unit": "lux",
+       "text": "3000 lux to 29990 lux",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 10.0,
+       "unit": "lux",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 10 lux)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "3000 to 29990 lux",
+     "kind": "LUX",
+     "variant": "White",
+     "amp_lo": 3000.0,
+     "amp_hi": 29990.0,
+     "unit": "lux",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    },
+    {
+     "label": "30000 to 299900 lux",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 30000.0,
+       "hi": 299900.0,
+       "unit": "lux",
+       "text": "30000 lux to 299900 lux",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 100.0,
+       "unit": "lux",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 100 lux)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "30000 to 299900 lux",
+     "kind": "LUX",
+     "variant": "White",
+     "amp_lo": 30000.0,
+     "amp_hi": 299900.0,
+     "unit": "lux",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  },
+  {
+   "name": "Light [Black @ 365 nm] (uW/cm2)",
+   "direction": "output",
+   "page": 0,
+   "ranges": [
+    {
+     "label": "0 to 3000 uW/cm2",
+     "page": 0,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 3000.0,
+       "unit": "uW/cm2",
+       "text": "0 uW/cm2 to 3000 uW/cm2",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(5 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "printed": "0 to 3000 uW/cm2 (range assumed)",
+     "kind": "UVIRR",
+     "variant": "Black @ 365 nm",
+     "amp_lo": 0.0,
+     "amp_hi": 3000.0,
+     "unit": "uW/cm2",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": ""
+    }
+   ]
+  }
+ ],
+ "problems": [
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Confidence level is not specified on the sheet; set the coverage divisor in the manager before relying on this standard."
+  },
+  {
+   "level": "warn",
+   "where": "Light [Black @ 365 nm]",
+   "what": "Flat 5 % given by the owner; the 0 to 3000 uW/cm2 range is assumed from the A2LA scope. UNVERIFIED."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "No confidence level printed: divisor 2 (laboratory convention). Read from a screenshot, not a manufacturer document."
+  }
+ ]
+}

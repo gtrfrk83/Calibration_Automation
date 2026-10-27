@@ -139,6 +139,11 @@ KINDS = {   # unit = SI base unit of the nominal / limits; legacy = the name the
     'COND': dict(unit='S', name='Conductance', family='dmm', direction='measure', ac=False, switch='nS  (conductance)'),
     'PCT': dict(unit='%', name='Percent reading (duty cycle ...)', family='dmm', direction='measure', ac=False, switch='%  (duty cycle)'),
     'CHECK': dict(unit='', name='Functional check (pass / fail)', family='dmm', direction='measure', ac=False, passfail=True, switch='Functional check'),
+    # light meters (illuminance / UV irradiance): each in its own unit, never converted (the kinds tartur and the A2LA-LIGHT / T-10A sheets use); no automatic source: typed readings
+    'LUX': dict(unit='lux', name='Illuminance (lux)', family='light', direction='measure', ac=False, switch='Light  (lux)'),
+    'FC': dict(unit='FC', name='Illuminance (foot-candle)', family='light', direction='measure', ac=False, switch='Light  (fc)'),
+    'LAMBERT': dict(unit='La', name='Luminance (lambert)', family='light', direction='measure', ac=False, switch='Light  (La)'),
+    'UVIRR': dict(unit='uW/cm2', name='UV irradiance (365 nm)', family='light', direction='measure', ac=False, switch='UV light  (uW/cm2)'),
     'SCOPE_GAIN': dict(unit='V', name='Scope DC gain', family='scope', direction='measure', ac=False, legacy='GAIN', switch='Vertical (DC gain)'),
     'SCOPE_OFFSET': dict(unit='V', name='Scope DC offset', family='scope', direction='measure', ac=False, legacy='OFFSET', switch='Vertical (offset)'),
     'SCOPE_BW': dict(unit='dB', name='Scope bandwidth', family='scope', direction='measure', ac=True, amplitude=True, legacy='BW', switch='Bandwidth'),
@@ -159,9 +164,9 @@ DIRECTIONS = ('measure', 'source')
 PERIOD_PRESETS = [('24h', '24 hours'), ('90d', '90 days'), ('1y', '1 year'), ('2y', '2 years')]
 _PREFIXES = {'p': -12, 'n': -9, 'µ': -6, 'μ': -6, 'u': -6, 'm': -3, '': 0, 'k': 3, 'M': 6, 'G': 9}
 _PREFIX_ORDER = [('p', -12), ('n', -9), ('µ', -6), ('m', -3), ('', 0), ('k', 3), ('M', 6), ('G', 9)]
-_NO_PREFIX = ('degC', 'degF', 'dB', '%', 'ratio', '')
-_SYMBOL = {'ohm': 'Ω', 'degC': '°C', 'degF': '°F'}
-_UNIT_ALIASES = [('S', 'S'), ('ohms', 'ohm'), ('ohm', 'ohm'), ('Ω', 'ohm'), ('Ω', 'ohm'), ('degC', 'degC'), ('°C', 'degC'), ('Hz', 'Hz'), ('hz', 'Hz'),
+_NO_PREFIX = ('degC', 'degF', 'dB', '%', 'ratio', 'lux', 'FC', 'La', 'uW/cm2', '')
+_SYMBOL = {'ohm': 'Ω', 'degC': '°C', 'degF': '°F', 'uW/cm2': 'µW/cm²'}
+_UNIT_ALIASES = [('µW/cm²', 'uW/cm2'), ('uW/cm2', 'uW/cm2'), ('lux', 'lux'), ('lx', 'lux'), ('FC', 'FC'), ('fc', 'FC'), ('La', 'La'), ('S', 'S'), ('ohms', 'ohm'), ('ohm', 'ohm'), ('Ω', 'ohm'), ('Ω', 'ohm'), ('degC', 'degC'), ('°C', 'degC'), ('Hz', 'Hz'), ('hz', 'Hz'),
                  ('dB', 'dB'), ('db', 'dB'), ('sec', 's'), ('V', 'V'), ('A', 'A'), ('F', 'F'), ('s', 's'), ('C', 'degC'), ('degF', 'degF'), ('°F', 'degF'), ('%', '%')]
 
 

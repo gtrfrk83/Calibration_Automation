@@ -132,7 +132,7 @@ class FlowTests(Base):
         kinds = {k['kind']: k for k in ed.kind_choices()}
         self.assertEqual(kinds['DCV']['label'], 'DC volts (V)')
         self.assertEqual(kinds['OHM2']['symbol'], 'Ω')
-        self.assertEqual({k['group'] for k in kinds.values()}, {'dmm', 'scope', 'generator'})
+        self.assertEqual({k['group'] for k in kinds.values()}, {'dmm', 'scope', 'generator', 'light'})
         self.assertTrue(ed.add_function('TEMP'))
         self.assertEqual(ed.setting_fields(ed.fid), [])                # a new temperature section assumes no sensor (it is chosen per point, 'Sourced as')
         self.assertNotIn('tc_type', ed.fn().settings)

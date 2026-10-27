@@ -42,7 +42,7 @@ class Dmm(M):
         cls.res = cls.m.match(cls.ds)
 
     def test_every_standard_is_considered(self):
-        self.assertEqual(self.res.standards, ['34461A', '34465A', '3458A', '5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL', 'A2LA-LIGHT', '53131A', '53132A'])
+        self.assertEqual(self.res.standards, ['34461A', '34465A', '3458A', '5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL', 'A2LA-LIGHT', 'T-10A', '53131A', '53132A'])
 
     def test_dc_volts_all_covered_and_automatable(self):
         s = self.res.summary()['dcv']
@@ -342,7 +342,7 @@ class DriverlessLast(M):
 class Drivers(M):
     def test_driver_table_lists_every_standard_and_what_it_can_do(self):
         rows = {r['model']: r for r in dm.driver_table(DB)}
-        self.assertEqual(set(rows), {'34461A', '34465A', '3458A', '5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A', 'A2LA-LIGHT', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL'})
+        self.assertEqual(set(rows), {'34461A', '34465A', '3458A', '5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A', 'A2LA-LIGHT', 'T-10A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL'})
         self.assertEqual(rows['5522A']['driver'], 'Fluke5522A')
         self.assertEqual(rows['5522A']['scope_driver'], 'Fluke5522AScope')
         self.assertEqual(rows['5522A']['functions']['DCV']['status'], 'ok')
@@ -369,7 +369,7 @@ class Drivers(M):
             for kind in db.KINDS:
                 if db.KINDS[kind]['family'] == 'generator':
                     continue
-                if kind in ('TEMPF', 'COND', 'PCT', 'CHECK'):           # the kinds of the .MDD import: done by hand, no calibrator command exists for them
+                if kind in ('TEMPF', 'COND', 'PCT', 'CHECK', 'LUX', 'FC', 'LAMBERT', 'UVIRR'):           # the kinds of the .MDD import and the light kinds: done by hand, no calibrator command exists for them
                     self.assertEqual(dm.automation_status(model, kind).status, 'manual', (model, kind))
                     continue
                 self.assertIn(dm.automation_status(model, kind).status, ('ok', 'unverified'), (model, kind))
