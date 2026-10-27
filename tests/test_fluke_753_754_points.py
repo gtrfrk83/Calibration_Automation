@@ -665,3 +665,27 @@ class PerCalibratorPictures(unittest.TestCase):
         for cal in ('5560A', '5522A'):
             for group in ('MEAS_V', 'MEAS_MA', 'MEAS_OHM', 'MEAS_TC', 'MEAS_RTD4', 'MEAS_RTD3'):
                 self.assertTrue(hookups.image_path('fluke753', cal, group), (cal, group))
+
+
+class NoRotarySwitchWording(unittest.TestCase):
+    """The 753 / 754 are set from keys and menus: no prompt may tell the operator to turn a rotary switch, knob or dial (owner 2026-10-27)."""
+
+    def test_function_change_prompt(self):
+        me = mock.MagicMock()
+        me.spec = {'options': {'function_prompt': True}}
+        me.points = [{}] * 3
+        me.manual_cal = False
+        me._last_switch = None
+        me._qnote.return_value = ''
+        me._qsteps.return_value = []
+        me._qfacts.side_effect = lambda f: f
+        p = {'group': 'MEAS_V', 'switch': 'DC volts measure: lock the UUT on the 100.000 mV range', 'range': '100.000 mV', 'n': 1, 'section': 'DC Volts Measure',
+             'unit': 'V', 'nominal': D('0.1')}
+        seen = []
+        with mock.patch.object(F.port, 'operator_prompt', side_effect=lambda *a, **k: seen.append((a, k)) or True), \
+                mock.patch.object(F.handheld_dmm, 'describe', return_value='DC volts 100 mV'):
+            self.assertTrue(F.App._prompt_function(me, p))
+        text = repr(seen).lower()
+        self.assertTrue(seen)
+        for word in ('rotary', 'knob', 'dial'):
+            self.assertNotIn(word, text)
