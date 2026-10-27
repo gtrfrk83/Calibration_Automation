@@ -107,7 +107,7 @@ NOTE_TEXT = {
     'l': 'Note [l]: The current can be measuring from 2.5 A to 10 A continuous, and the additional of 0.5% to specified accuracy as measure the signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for 2 times of measuring time you applied before low current measurement.',
     'm': 'Note [m]: For signal frequency greater than 1 kHz, additional 0.1% per kHz to be added to accuracy.',
     'n': 'Note [n]: Ensure that the ambient temperature is stable within ± 1 °C. Make sure that the multimeter is placed in a controlled environment for at least 1 hour. Keep the multimeter away from any ventilation exit. Do not touch the thermocouple test lead after connecting it to the calibrator. Allow the connection to stabilize for at least another 15 minutes before performing the measurement.',
-    'o': 'Note [o]: With a 2-wire connection and compensation enabled at calibrator.',
+    'o': 'Note [o]: With a 2-wire connection and compensation enabled at calibrator. (Owner decision 2026-10-27: no 2-wire compensation is commanded by the suite, options.two_wire_comp = false; set it at the calibrator by hand if the lab wants it.)',
     'p': 'Note [p]: Frequency counter performance test point is only applicable to U1252B.',
 }
 
@@ -413,8 +413,9 @@ def build_rows():
                 notes.append(ex['extra'])
             if ex.get('prompt'):
                 step['prompt'] = 'Before the first reading of this function: ' + ex['prompt']
-            if ex.get('settle'):
-                step['settle'] = ex['settle']
+            if kind != 'HANDSET':
+                step['settle'] = 0                       # owner decision 2026-10-27: no program wait (including temperature); the technician enters the reading once it is stable
+                notes.append('No settle wait is programmed (owner decision 2026-10-27): enter the reading once it is stable' + (f'; the manual-based wait of {ex["settle"]} s was dropped.' if ex.get('settle') else '.'))
             if kind == 'TEMP':
                 step['base_unit'] = 'C'
             if section == 'Ohms' and out_value is not None and out_value >= 110000:
@@ -491,7 +492,7 @@ def build_spec():
         raise SystemExit('Cross-check differences not expected (re-read the table): ' + '; '.join(map(str, unexpected)))
     spec = dict(
         schema=3, kind='manual-reading',
-        options=dict(hookup_meter='u1251b', hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
+        options=dict(hookup_meter='u1251b', hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, two_wire_comp=False, function_prompt=True, report_title='Calibration Data'),
         source=dict(document=DOCUMENT,
                     pages='149-151 (Basic Operating Test), 152 (Test Considerations), 154-161 (Performance Verification Tests, Table 6-2 pp. 155-160, notes pp. 160-161); equipment Table 6-1 p. 148; Table 1-1 p. 30; Table 1-10 p. 47',
                     cite='Keysight U1251B and U1252B User\'s and Service Guide, Table 6-2 Verification Test, printed pp. 155-160 (Error from nominal, 1 year)',

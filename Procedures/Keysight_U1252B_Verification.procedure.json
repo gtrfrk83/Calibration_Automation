@@ -42,12 +42,5 @@
   ]
  },
  "seed_verified": false,
- "own_files": [
-  "Procedures/Keysight_U1252B_Verification.py",
-  "Procedures/Keysight_U1252B_Verification.procedure.json",
-  "specs/keysight_u1251b_u1252b_pv.json",
-  "specs/build_keysight_u1251b_spec.py",
-  "diagrams/README_u1251b.txt",
-  "tests/test_keysight_u1251b_points.py"
- ]
+ "own_files": ["Procedures/Keysight_U1252B_Verification.py", "Procedures/Keysight_U1252B_Verification.procedure.json", "specs/keysight_u1251b_u1252b_pv.json", "specs/build_keysight_u1251b_spec.py", "specs/build_hookups_u1251b.py", "diagrams/keysight_u1252b_terminals.png", "diagrams/README_u1251b.txt", "tests/test_keysight_u1251b_points.py"]
 }

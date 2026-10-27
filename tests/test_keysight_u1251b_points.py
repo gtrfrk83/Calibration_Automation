@@ -369,7 +369,7 @@ class Spec(unittest.TestCase):
         self.assertIs(o['function_prompt'], True)
         self.assertEqual((o['hookup_meter'], o['hv_threshold_v'], o['report_title'], o['hv_once_per_group']), ('u1251b', 30, 'Calibration Data', True))
         self.assertNotIn('ir', o)                           # no documented remote interface: readings are typed
-        self.assertNotIn('two_wire_comp', o)               # the engine default applies (ZCOMP WIRE2 below 110 kohm)
+        self.assertIs(o['two_wire_comp'], False)           # owner 2026-10-27: no ZCOMP WIRE2 on the resistance points (like the Fluke 33x)
         self.assertEqual(set(SPEC['models']), set(MODELS))
 
     def test_every_point_has_a_dial_prompt_text_and_the_function_changes(self):
@@ -379,6 +379,13 @@ class Spec(unittest.TestCase):
                 self.assertTrue(('rotary switch' in s['switch']) or ('Shift' in s['switch']) or ('Hz button' in s['switch']), s['id'])
             if s['kind'] == 'NONE' and s['table'] == '2':
                 self.assertTrue(('rotary switch' in s['setup']) or ('Shift' in s['setup']) or ('Range button' in s['setup']) or ('OUT ms' in s['setup']), s['id'])
+
+    def test_no_settle_wait_on_any_calibrator_point(self):
+        """Owner 2026-10-27: every settle is 0 (temperature included); the technician enters the reading once it is stable."""
+        for s in SPEC['steps']:
+            if s['table'] == '2' and s['kind'] != 'NONE':
+                self.assertEqual(s.get('settle'), 0, s['id'])
+                self.assertIn('enter the reading once it is stable', s['note'], s['id'])
 
     def test_hookups_and_diagrams_readme(self):
         import hookups
@@ -396,8 +403,11 @@ class Spec(unittest.TestCase):
         text = (ROOT / 'diagrams' / 'README_u1251b.txt').read_text(encoding='utf-8')
         for name in [f'hook_u1251b_{c}_{g}.png' for c in ('5560A', '5522A') for g in ('VOHM', 'UAMP', 'AMP10')] + ['hook_u1251b_TEMP.png']:
             self.assertIn(name, text)
-        self.assertIn('hook_fluke28x', text)                                              # the reuse of the 287 / 289 pictures is explained
-        self.assertEqual(list((ROOT / 'diagrams').glob('hook_u1251b*')), [], 'diagrams are owner-supplied; none is invented here')
+        self.assertIn('UNVERIFIED', text)                                                 # the U1251B jack layout is assumed from the U1252B photo
+        for name in [f'hook_u1251b_{c}_{g}.png' for c in ('5560A', '5522A') for g in ('VOHM', 'UAMP', 'AMP10')] + ['hook_u1251b_TEMP.png', 'keysight_u1252b_terminals.png']:
+            f = ROOT / 'diagrams' / name
+            self.assertTrue(f.is_file(), name)
+            self.assertEqual(f.read_bytes()[:8], b'\x89PNG\r\n\x1a\n', name)
 
     def test_sidecars_and_launchers(self):
         for n, m in enumerate(MODELS):
@@ -465,6 +475,7 @@ class EndToEnd(unittest.TestCase):
             bench, _a, _b = make_bench()
             io = h.IO(f'Fluke {cal}', 'sim', transport=Spy(bench, cal))
             io.auto_ramp = False
+            io.two_wire_comp = bool(h.load_spec(SPEC_NAME)['options'].get('two_wire_comp', True))          # what App sets on a real connection
         app = h.App(self.hn.root, meter, demo=demo, spec=h.load_spec(SPEC_NAME), io_factory=(lambda: io) if io else None, fast_demo=demo)
         app.asset.set(f'A-{meter}')
         app.serial.set('S-1')
@@ -551,11 +562,11 @@ class EndToEnd(unittest.TestCase):
         later = texts[sq[0]:]
         self.assertTrue(any(t.startswith('WAVE SINE') for t in later))
 
-    def test_two_wire_compensation_on_the_low_ohms_ranges_only(self):
+    def test_no_two_wire_compensation_is_sent(self):
         for meter in MODELS:
             app, io = self.run_perfect(meter)
             texts = [t for _i, t in H.wire(io)]
-            self.assertEqual(sum(1 for t in texts if t == 'ZCOMP WIRE2'), 3, meter)             # 500 ohm, 5 kohm, 50 kohm (note [o]); above 110 kohm the engine leaves it off
+            self.assertFalse([t for t in texts if t.startswith('ZCOMP')], meter)              # options.two_wire_comp = false
             self.fresh()
 
     def test_cable_change_and_function_prompts(self):
