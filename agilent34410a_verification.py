@@ -284,7 +284,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.test_set = port.var('Full verification')
         self.include_optional = port.var(False, 'bool')
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self._build_ui()
@@ -401,7 +401,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         extra = ('  |  ' + p['note']) if p.get('note') else ''
         flags = ('  |  ' + '; '.join(p['flags'])) if p.get('flags') else ''
         printed = f'  |  Printed in the manual ({self.period.get()}): {p["printed_limits"].get(PERIODS[self.period.get()], "")}' if p.get('printed_limits') else ''
-        self.detail.set(f'{p["description"]}\nAcceptable reading: {v[0]} to {v[1]} {u}  ({self.period.get()} limit)  |  Manual page {p["page"]}{printed}{flags}{extra}\n'
+        self.detail.set(f'{p["description"]}\nManual page {p["page"]}{printed}{flags}{extra}\n'
                         f'Setup: {self.setup_text(p)}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     # ------------------------------------------------------------------ wiring text

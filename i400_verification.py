@@ -316,7 +316,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.test_set = port.var('Full verification')
         self.include_optional = port.var(False, 'bool')
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self._build_ui()
@@ -457,8 +457,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             c = self.dmm_corr[str(p['id'])]
             cv, _r3, cu = ui.si_row([c['correction']], p['unit'])
             corr = f'\nMultimeter pre-calibration correction at this step: {cv[0]} {cu}'
-        self.detail.set(f'{p["description"]}\nAcceptable reading: {v[0]} to {v[1]} {u}  |  Calibrator output {p["applied"]["value"]:g} A at {p["applied"]["frequency"]:g} Hz, '
-                        f'LCOMP {p["lcomp"]}  |  Manual page 6 ({p["ref"]})  |  printed: {p["printed_limits"]["printed"]}\nSetup: {self.setup_text(p)}'
+        self.detail.set(f'{p["description"]}\nCalibrator output {p["applied"]["value"]:g} A at {p["applied"]["frequency"]:g} Hz, '
+                        f'LCOMP {p["lcomp"]}  |  Manual page 6 ({p["ref"]})\nSetup: {self.setup_text(p)}'
                         + corr + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     # ------------------------------------------------------------------ wiring text

@@ -940,7 +940,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.addr = {k: port.var(g(k, d)) for k, d in (
             ('scope', 'USB0::0x0699::0x0415::C000000::INSTR'), ('cal', 'COM9'), ('cal_baud', '9600'), ('rf1', ''), ('rf2', ''), ('gen', ''), ('dmm', ''), ('counter', ''), ('power', ''))}
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self._build_ui()
@@ -1115,7 +1115,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         stim = {'none': 'no input signal', 'cal': 'Fluke 5560A', 'rf': 'Fluke 96270A', 'rf2': 'two RF sources', 'gen': 'function generator'}[p['stim']]
         work = ('\nWorksheet: ' + ', '.join(f'{k} = {v:.6g}' if isinstance(v, float) else f'{k} = {v}' for k, v in raw.items())) if raw else ''
         both = ('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''
-        self.detail.set(f'{p["desc"]}\nLimits: {lo} to {hi} {unit}  |  Stimulus: {stim}  |  Manual page {SECTION_PAGE[p["section"]]}{extra}{work}{both}')
+        self.detail.set(f'{p["desc"]}\nStimulus: {stim}  |  Manual page {SECTION_PAGE[p["section"]]}{extra}{work}{both}')
 
     # ---- connections ----------------------------------------------------------------------------------------------------------------
     def find_instruments(self):

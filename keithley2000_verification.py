@@ -260,7 +260,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.cal_baud = port.var(s.get('cal_baud', '9600'))
         self.period = port.var(s.get('period', PERIOD_LABEL[SPEC['default_period']]))
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self._build_ui()
@@ -370,7 +370,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         v, _r, u = ui.si_row([p['nominal'] - p['error'], p['nominal'] + p['error']], p['unit'])
         extra = ('  |  ' + p['note']) if p.get('note') else ''
         printed = f'  |  Printed in the manual: {p["printed_limits"]}' if p.get('printed_limits') else ''
-        self.detail.set(f'{p["description"]}\nAcceptable reading: {v[0]} to {v[1]} {u}  ({self.period.get()} limit)  |  Manual page {p["page"]}{printed}{extra}\n'
+        self.detail.set(f'{p["description"]}\nManual page {p["page"]}{printed}{extra}\n'
                         f'Setup: {self.setup_text(p)}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     # ------------------------------------------------------------------ wiring text

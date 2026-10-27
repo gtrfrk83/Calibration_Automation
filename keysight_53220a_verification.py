@@ -475,7 +475,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.ext_low = port.var(s.get('ext_low', 'no') == 'yes', 'bool')
         self.test_set = port.var('Full verification')
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self._build_ui()
@@ -637,8 +637,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         why = self.manual_reason(p)
         att = self.plan(p).get('atten_db')
         stim = f'Other standard: {why}' if why else ('Agilent 33250A (set and switched on by the program)' if self.plan(p)['mode'] == 'pulse' else '96270A' + (f' with {att:g} dB external attenuation: {self.plan(p)["reason"]}' if att else '') if p['stimulus']['group'] != 'NONE' else 'none')
-        shown = f'Acceptable reading: {v[0]} to {v[1]} {u}' if p['stat'] != 'sdev' else f'Acceptable Std Dev: below {v[1]} {u}'
-        self.detail.set(f'{p["description"]}\n{shown}  |  Manual page {p["page"]}  |  Printed: {p["printed_limit"]}{flags}\n'
+        self.detail.set(f'{p["description"]}\nManual page {p["page"]}{flags}\n'
                         f'Setup: {self.setup_text(p)}\nStimulus: {stim}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     # ------------------------------------------------------------------ wiring text
