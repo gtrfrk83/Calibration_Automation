@@ -1,4 +1,4 @@
-"""The Qt windows the procedure-modification engine mixin (procmods_engine.ProcModsMixin) attaches (twin of procmods_view_tk.py; same public functions):
+"""The Qt windows the procedure-modification engine mixin (procmods_engine.ProcModsMixin) attaches (port of the removed Tk view procmods_view_tk.py; same public functions):
 the right-click 'Edit' menu of a point list and the in-run 'Edit procedure' action.  Reached through ui_port.get_ui().view('procmods_view').
 
   * `attach_tree_menu(app, tree, resolver=None)`   native here.  `tree` is a qtui.table.DataTable (its `context_provider` hook; `resolver(iid)` gets the row's

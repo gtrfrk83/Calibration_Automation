@@ -1,4 +1,4 @@
-"""Function-generator performance verification (33220A / 33250A / 33210A): the Qt window code, the twin of fgen_view_tk.py (package QT-G2a).
+"""Function-generator performance verification (33220A / 33250A / 33210A): the Qt window code, the port of the removed Tk view fgen_view_tk.py (package QT-G2a).
 
 Same functions, same arguments, same attributes on the engine's App (`self.tree`, `self.btn_run`, `self.entries`, `self.period_combo` ...) as the Tk view; the engine reaches
 it through `ui_port.ui.view('fgen_view')`, which the Qt port resolves to this module.  Every label, button name, order and default is the Tk view's; only the look is

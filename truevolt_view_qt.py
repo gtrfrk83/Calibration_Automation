@@ -1,4 +1,4 @@
-"""Keysight Truevolt (34460A / 34461A / 34465A / 34470A) performance verification: the Qt window code (twin of truevolt_view_tk.py: same functions, same widgets as
+"""Keysight Truevolt (34460A / 34461A / 34465A / 34470A) performance verification: the Qt window code (port of the removed Tk view truevolt_view_tk.py: same functions, same widgets as
 attributes of the App, same texts, same busy / idle button states).
 
 The engine reaches this module through `ui_port.get_ui().view('truevolt_view')`, which resolves to `truevolt_view_qt` under the Qt port.  Every function takes the

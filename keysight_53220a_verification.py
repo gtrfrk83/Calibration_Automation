@@ -22,7 +22,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
 import ui_port
-import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in keysight_53220a_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in keysight_53220a_view_qt.py
 import drivers
 from drivers import keysight_53220a as k53        # not exported by drivers/__init__ (it inherits surprise.SurpriseMixin, which imports the drivers package)
 import appdata
@@ -487,7 +487,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.ui_view.finish_window(self)
 
     # ------------------------------------------------------------------ selection
-    VIEW = 'keysight_53220a_view'                          # the toolkit's window code: keysight_53220a_view_tk (Tk), keysight_53220a_view_qt (Qt)
+    VIEW = 'keysight_53220a_view'                          # window code: keysight_53220a_view_qt.py
 
     @property
     def ui_view(self): return port.view(self.VIEW)

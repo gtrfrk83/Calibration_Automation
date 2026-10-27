@@ -22,7 +22,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
 import ui_port
-import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in agilent34410a_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in agilent34410a_view_qt.py
 import calibrator_fit
 import procspec
 import drivers
@@ -296,7 +296,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.ui_view.finish_window(self)
 
     # ------------------------------------------------------------------ selection
-    VIEW = 'agilent34410a_view'                          # the toolkit's window code: agilent34410a_view_tk (Tk), later _qt
+    VIEW = 'agilent34410a_view'                          # window code: agilent34410a_view_qt.py
 
     @property
     def ui_view(self): return port.view(self.VIEW)

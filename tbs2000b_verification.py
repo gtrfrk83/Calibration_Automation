@@ -23,7 +23,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import ui_port  # noqa: F401
-import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, si, report_filename, Settings); the window code is in tbs2000b_view_tk.py / _qt.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, si, report_filename, Settings); the window code is in tbs2000b_view_qt.py / _qt.py
 from ui_port import ui as port
 import appdata
 import datamode

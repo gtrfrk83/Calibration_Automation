@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 import run_queue as RQ
-import ui_theme_core as ui                     # toolkit-free helpers only (Settings, report_filename); the windows are run_queue_view_tk.py / run_queue_ui.py
+import ui_theme_core as ui                     # toolkit-free helpers only (Settings, report_filename); the windows are run_queue_view_qt.py / run_queue_ui.py
 import virtualbench
 from ui_port import ui as port
 

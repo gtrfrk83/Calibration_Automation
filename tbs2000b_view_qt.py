@@ -1,4 +1,4 @@
-"""Tektronix TBS2000B performance verification: the Qt window code, the twin of tbs2000b_view_tk.py (and of tds2000c_view_qt.py with the TBS2000B titles,
+"""Tektronix TBS2000B performance verification: the Qt window code, the port of the removed Tk view tbs2000b_view_tk.py (and of tds2000c_view_qt.py with the TBS2000B titles,
 model list and address label).  Same functions, arguments and App attributes; built on the shared genscope_support_view_qt helpers.  No Tk import.
 Nothing here decides anything about a calibration.
 """

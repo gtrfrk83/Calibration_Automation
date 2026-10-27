@@ -1,4 +1,4 @@
-"""Keithley Model 2000 guided adjustment: the Qt window code.  The Qt twin of keithley2000_adjust_view_tk.py (same functions, same texts, same step order, same button
+"""Keithley Model 2000 guided adjustment: the Qt window code.  The Qt port of the removed Tk view keithley2000_adjust_view_tk.py (same functions, same texts, same step order, same button
 and pill states); the launcher reaches it through `ui_port.ui.view('keithley2000_adjust_view')`, which QtUiPort resolves to this module.
 
 Every function takes the launcher's App as `self` and keeps its widgets as attributes of it (`btn_*`, `pill_*`, `tree`, `log_table`, `log_box`, `scope_combo`).  `self.root`

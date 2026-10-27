@@ -25,7 +25,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
 import ui_port
-import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in i400_view_tk.py / i400_view_qt.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in i400_view_qt.py / i400_view_qt.py
 import calibrator_fit
 import coil_rule
 import procspec
@@ -328,7 +328,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.ui_view.finish_window(self)
 
     # ------------------------------------------------------------------ selection
-    VIEW = 'i400_view'                          # the toolkit's window code: i400_view_tk (Tk) / i400_view_qt (Qt)
+    VIEW = 'i400_view'                          # window code: i400_view_qt.py
 
     @property
     def ui_view(self): return port.view(self.VIEW)

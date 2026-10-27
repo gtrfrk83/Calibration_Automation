@@ -1,4 +1,4 @@
-"""Tektronix TDS2000C performance verification: the Qt window code, the twin of tds2000c_view_tk.py (package QT-G2a).
+"""Tektronix TDS2000C performance verification: the Qt window code, the port of the removed Tk view tds2000c_view_tk.py (package QT-G2a).
 
 Same functions, arguments and App attributes as the Tk view (`self.tree`, `self.btn_run`, `self.cfg_widgets`, `self.addr_boxes`, `self.btn_read_model` ...); the engine reaches it
 through `ui_port.ui.view('tds2000c_view')`.  The engine's request queue and 50 ms pump are the engine's own and unchanged.  Every label, button name, order and default is

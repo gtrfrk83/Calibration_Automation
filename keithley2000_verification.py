@@ -17,7 +17,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
 import ui_port
-import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in k2000_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in k2000_view_qt.py
 from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import procspec
 import calibrator_fit
@@ -292,7 +292,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self._busy = value
         if hasattr(self, 'btn_run'): self._sync_buttons()
 
-    VIEW = 'k2000_view'                               # the toolkit's window code: k2000_view_tk (Tk), later _qt
+    VIEW = 'k2000_view'                               # window code: k2000_view_qt.py
     @property
     def ui_view(self): return port.view(self.VIEW)
 

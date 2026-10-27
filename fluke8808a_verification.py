@@ -20,7 +20,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))  # ui_theme, procspec and drivers sit next to the Manager
 import ui_port
-import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in f8808a_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, report_filename, Settings); the window code is in f8808a_view_qt.py
 from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import appdata
 import calibrator_fit
@@ -410,7 +410,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self._busy = value
         if hasattr(self, 'btn_run'): self._sync_buttons()
 
-    VIEW = 'f8808a_view'                               # the toolkit's window code: f8808a_view_tk (Tk), later _qt
+    VIEW = 'f8808a_view'                               # window code: f8808a_view_qt.py
     @property
     def ui_view(self): return port.view(self.VIEW)
 

@@ -1,4 +1,4 @@
-"""The Stop / Continue window of surprise.py for Qt (twin of surprise_view_tk.py; same public function `dialog(root, title, s)`).  Reached through
+"""The Stop / Continue window of surprise.py for Qt (port of the removed Tk view surprise_view_tk.py; same public function `dialog(root, title, s)`).  Reached through
 ui_port.get_ui().view('surprise_view').
 
 What stays exactly as in the Tk build:

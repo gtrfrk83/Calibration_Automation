@@ -1,4 +1,4 @@
-"""Fluke 8808A guided adjustment: the Qt window code.  The Qt twin of fluke8808a_adjust_view_tk.py (same functions, same texts, same point order, same button and pill
+"""Fluke 8808A guided adjustment: the Qt window code.  The Qt port of the removed Tk view fluke8808a_adjust_view_tk.py (same functions, same texts, same point order, same button and pill
 states); the launcher reaches it through `ui_port.ui.view('fluke8808a_adjust_view')`, which QtUiPort resolves to this module.
 
 Every function takes the launcher's App as `self` and keeps its widgets as attributes of it.  Nothing here decides anything about a calibration.  No Tk.

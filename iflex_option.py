@@ -41,7 +41,7 @@ def _key(asset):
 
 
 class App(handheld_dmm.App):
-    IFLEX_VIEW = 'iflex_option_view'                        # the toolkit's window code for the include boxes: iflex_option_view_tk (Tk), later _qt
+    IFLEX_VIEW = 'iflex_option_view'                        # the window code of the include boxes: iflex_option_view_qt
 
     @property
     def iflex_view(self): return port.view(self.IFLEX_VIEW)

@@ -1,4 +1,4 @@
-"""The As Found / As Left toggle, its notice and the table heading for Qt (twin of datamode_view_tk.py: same function names, same attributes on the App).
+"""The As Found / As Left toggle, its notice and the table heading for Qt (port of the removed Tk view datamode_view_tk.py: same function names, same attributes on the App).
 Functions whose first parameter is the App (`self`), reached through ui_port.get_ui().view('datamode_view').
 
 The App keeps the attributes datamode.DataModeMixin works with: `mode_var` and `mode_hint` (objects with get() / set() / trace_add(), like a Tk variable),

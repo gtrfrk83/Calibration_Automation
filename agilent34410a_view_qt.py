@@ -1,4 +1,4 @@
-"""Keysight 34410A / 34411A performance verification: the Qt window code (twin of agilent34410a_view_tk.py: same functions, same widgets as attributes of the App, same
+"""Keysight 34410A / 34411A performance verification: the Qt window code (port of the removed Tk view agilent34410a_view_tk.py: same functions, same widgets as attributes of the App, same
 texts, same busy / idle button states).
 
 The engine reaches this module through `ui_port.get_ui().view('agilent34410a_view')`, which resolves to `agilent34410a_view_qt` under the Qt port.  Every function takes the

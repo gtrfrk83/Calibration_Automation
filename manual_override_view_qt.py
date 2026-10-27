@@ -1,4 +1,4 @@
-"""The manual-reading entry window for Qt (twin of manual_override_view_tk.py; same public function `ask_reading_window`).  The window only collects the typed
+"""The manual-reading entry window for Qt (port of the removed Tk view manual_override_view_tk.py; same public function `ask_reading_window`).  The window only collects the typed
 text; `submit(win, typed, clear_error)` (manual_override.ask_manual_reading.done) validates it and asks the short confirmation through the UiPort, so the Use /
 Cancel logic of the prompt stays in the engine-side module.  Reached through ui_port.get_ui().view('manual_override_view').
 

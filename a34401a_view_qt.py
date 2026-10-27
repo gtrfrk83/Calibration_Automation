@@ -1,4 +1,4 @@
-"""34401A one-year verification (Agilent 34401A): the Qt window code (twin of a34401a_view_tk.py: same functions, same widgets as attributes of the App, same texts, same
+"""34401A one-year verification (Agilent 34401A): the Qt window code (port of the removed Tk view a34401a_view_tk.py: same functions, same widgets as attributes of the App, same texts, same
 busy / idle button states).
 
 The engine reaches this module through `ui_port.get_ui().view('a34401a_view')`, which resolves to `a34401a_view_qt` under the Qt port.  Every function takes the engine's App

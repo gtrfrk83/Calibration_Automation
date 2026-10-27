@@ -29,7 +29,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import hookups
 import ui_port
-import ui_theme_core as ui                  # only its toolkit-free helpers here (Settings, report_filename); the window code is in handheld_dmm_view_tk.py
+import ui_theme_core as ui                  # only its toolkit-free helpers here (Settings, report_filename); the window code is in handheld_dmm_view_qt.py
 import appdata
 import calibrator_fit
 import datamode
@@ -574,7 +574,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         return bool(self.ir) and self.read_mode.get() == READ_IR
 
     # ------------------------------------------------------------------ layout
-    VIEW = 'handheld_dmm_view'                             # the toolkit's window code: handheld_dmm_view_tk (Tk), later _qt
+    VIEW = 'handheld_dmm_view'                             # window code: handheld_dmm_view_qt.py
 
     @property
     def ui_view(self): return port.view(self.VIEW)

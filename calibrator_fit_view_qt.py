@@ -1,4 +1,4 @@
-"""The calibrator-model note under the picker for Qt (twin of calibrator_fit_view_tk.py; same `attach_note` signature).  Reached through
+"""The calibrator-model note under the picker for Qt (port of the removed Tk view calibrator_fit_view_tk.py; same `attach_note` signature).  Reached through
 ui_port.get_ui().view('calibrator_fit_view')."""
 from __future__ import annotations
 

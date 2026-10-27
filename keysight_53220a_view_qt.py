@@ -1,4 +1,4 @@
-"""Keysight 53210A / 53220A / 53230A performance verification: the Qt window code (twin of keysight_53220a_view_tk.py: same functions, same widgets as attributes of the App, same
+"""Keysight 53210A / 53220A / 53230A performance verification: the Qt window code (port of the removed Tk view keysight_53220a_view_tk.py: same functions, same widgets as attributes of the App, same
 texts, same busy / idle button states).
 
 The engine reaches this module through `ui_port.get_ui().view('keysight_53220a_view')`, which resolves to `keysight_53220a_view_qt` under the Qt port.  Every function takes the

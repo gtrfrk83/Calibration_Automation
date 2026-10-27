@@ -24,7 +24,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.append(str(HERE))
 import ui_port
-import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, si, report_filename, Settings); the window code is in mdo4000c_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si_row, si, report_filename, Settings); the window code is in mdo4000c_view_qt.py
 from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import appdata
 import datamode
@@ -893,7 +893,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _sync_buttons(self): self.ui_view.sync_buttons(self)
 
     # ---- layout -------------------------------------------------------------------------------------------------------------
-    VIEW = 'mdo3_view'                              # the toolkit's window code: mdo3_view_tk (Tk) / mdo3_view_qt
+    VIEW = 'mdo3_view'                              # window code: mdo3_view_qt.py
 
     @property
     def ui_view(self): return port.view(self.VIEW)

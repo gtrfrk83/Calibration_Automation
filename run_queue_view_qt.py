@@ -1,4 +1,4 @@
-"""The run queue's windows for Qt (twin of run_queue_view_tk.py; same public functions).  The thin seam `ui_port.get_ui().view('run_queue_view')` the toolkit-free
+"""The run queue's windows for Qt (port of the removed Tk view run_queue_view_tk.py; same public functions).  The thin seam `ui_port.get_ui().view('run_queue_view')` the toolkit-free
 engine (run_queue_engine.py) uses, plus the 'Several meters' block of the Connections drawer.
 
   * `build_queue_drawer(self, d, row)`   native here.  `d` is the drawer's QGridLayout (or a widget that has one); the block takes rows row .. row+2 of its two
