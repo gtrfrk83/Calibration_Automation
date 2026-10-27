@@ -983,7 +983,9 @@ class SpecsTab(unittest.TestCase):
         self.assertTrue(dlg.isVisible())
         dlg.set_kind('DCV')
         dlg.set_value('nominal', '250')
+        self.assertEqual(dlg.unit('typea'), 'V')                       # defaults to the base unit, not kV
         dlg.set_unit('nominal', 'mV')
+        self.assertEqual(dlg.unit('typea'), 'mV')                     # Type A / resolution follow the nominal's unit
         dlg.run_check()
         self.assertTrue(dlg.output_text())
         self.assertEqual(dlg.cert_text(), '4.7 \u00b5V')

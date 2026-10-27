@@ -1247,6 +1247,8 @@ class CheckDialog(ModalDialog):
             box.setAccessibleName(lab + ' unit')
             box.setMinimumWidth(90)
             self.v[key], self.u[key] = ent, box
+            if key == 'nominal':
+                box.currentTextChanged.connect(self._follow_nominal_unit)
             self.rowlabels[key] = lb
             form.addWidget(ent, r, 1)
             form.addWidget(box, r, 2)
@@ -1286,8 +1288,11 @@ class CheckDialog(ModalDialog):
             box = self.u[key]
             box.blockSignals(True)
             box.clear()
-            for name, _f in emu.unit_choices(kind):
+            for name, f in emu.unit_choices(kind):
                 box.addItem(name)
+            base = [n for n, f in emu.unit_choices(kind) if f == 1.0]      # default to the base unit (V, A, ohm...), not the biggest one in the list
+            if base:
+                box.setCurrentIndex(max(0, box.findText(base[0])))
             box.blockSignals(False)
         freq = self.u['freq']
         if freq.count() == 0:
@@ -1298,6 +1303,13 @@ class CheckDialog(ModalDialog):
             w.setVisible(ac)
         self.out.clear()
         self.big.setText('')
+
+    def _follow_nominal_unit(self, text):
+        """Resolution, Type A and the reported figure are in the same family as the nominal: they follow its unit until changed by hand."""
+        for key in ('res', 'typea', 'reported'):
+            i = self.u[key].findText(text)
+            if i >= 0:
+                self.u[key].setCurrentIndex(i)
 
     def value(self, key) -> str:
         return self.kind() if key == 'kind' else self.v[key].text()
