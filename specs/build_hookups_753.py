@@ -371,8 +371,14 @@ DEVICE = {'MEAS_V': ('CALIBRATOR', '#3d4f66'), 'MEAS_MA': ('CALIBRATOR + 3458A',
           'LOOP': ('EXTERNAL DMM', '#2f5a4a'), 'HART': ('HART TRANSMITTER', '#5a4a2f')}
 
 
+# pictures the owner supplied (kept as files; never redrawn): SRC_SIM = Figure 7 (simulate transmitter), supplied 2026-10-27
+SUPPLIED = ('SRC_SIM',)
+
+
 def main():
     for g in GROUPS:
+        if g in SUPPLIED:
+            continue
         print('wrote', draw(g).name)
     for cal in ('5560A', '5522A'):
         for g in CAL_GROUPS:

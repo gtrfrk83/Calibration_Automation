@@ -468,6 +468,21 @@ class ManagerCore:
         with self.connect() as conn:
             conn.execute('DELETE FROM procedures WHERE id=?', (int(iid),))
 
+    def remove_user(self, iid, root=None, db=None):
+        """Remove a user-built procedure (every Manual Calibrations row is one) from the list: a SOFT delete (datasheet_builder.delete: the registry row is
+        marked deleted, the runnable spec moves to user_specs/_deleted/, every version file stays; Restore brings it back).  Returns (ok, text):
+        ok False with the reason when it is verified on hardware and locked, or is already gone."""
+        import datasheet_builder
+        u = self.user.get(str(iid))
+        if not u or not u.get('uid'):
+            return False, 'That procedure is no longer in the list.'
+        why = datasheet_builder.lock_reason(u['uid'], db)
+        if why:
+            return False, why
+        if not datasheet_builder.delete(u['uid'], root=root, db=db):
+            return False, 'The procedure could not be removed (the registry could not be written).'
+        return True, f'Removed "{u["name"]}" from the list (its files are kept in user_specs/_deleted; it can be restored in the Datasheet Builder).'
+
     # ------------------------------------------------------------------ library folder
     def library_folder_text(self):
         folder = packages.get_library_dir()

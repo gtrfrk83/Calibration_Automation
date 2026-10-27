@@ -857,7 +857,15 @@ class ManagerWindow(QMainWindow):
     def remove(self):
         iid = self.selected_iid()
         if iid is not None and dsb_manager.is_user_iid(iid):
-            dialogs.message(self, 'info', 'User-built datasheet', 'A user-built datasheet is not part of the library file. Delete it in the Datasheet Builder.')
+            u = self.core.user.get(str(iid)) or {}
+            if not dialogs.ask_yes_no(self, 'Remove procedure', f'Remove "{u.get("name", "this procedure")}" from the list?\n\nIts files are kept and it can be restored in the Datasheet Builder.'):
+                return
+            ok, text = self.core.remove_user(iid)
+            if ok:
+                self.refresh()
+                self.status.set(text)
+            else:
+                dialogs.message(self, 'info', 'Not removed', text)
             return
         rec = self._selected_row()
         if rec:

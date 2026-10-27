@@ -225,3 +225,21 @@ class DamagedFiles(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ManagerRemoveUser(unittest.TestCase):
+    """Manual Calibrations rows are user-built procedures: the Manager's right-click 'Remove from library' soft-deletes them (it used to only show a message)."""
+
+    def test_remove_user_is_a_soft_delete_and_can_be_restored(self):
+        import types
+        import manager_model as mm
+        with tempfile.TemporaryDirectory() as tmp:
+            root, reg = Path(tmp) / 'user_specs', Path(tmp) / 'lab_registry.sqlite3'
+            r = db.save(fx.dmm_34461a_like(), root=root, db=reg)
+            core = types.SimpleNamespace(user={'ds:' + r.uid: dict(uid=r.uid, name='Example')})
+            ok, text = mm.ManagerCore.remove_user(core, 'ds:' + r.uid, root=root, db=reg)
+            self.assertTrue(ok, text)
+            self.assertEqual(db.list_datasheets(root=root, db=reg), [])
+            self.assertFalse(mm.ManagerCore.remove_user(core, 'ds:' + r.uid, root=root, db=reg)[0])      # already gone
+            self.assertTrue(db.restore(r.uid, root=root, db=reg))
+            self.assertFalse(mm.ManagerCore.remove_user(core, 'ds:unknown', root=root, db=reg)[0])
