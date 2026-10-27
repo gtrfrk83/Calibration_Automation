@@ -235,3 +235,20 @@ tektronix_tbs2000b_pv.json (schema 2, the TDS2000C layout; written by build_tbs2
   (source +/- 0.2 div, 4 rows per channel), time base (+/-2.5 div at 10 ns/div, 1 ms marker and delay), DC balance (+/-21 mV at 200 mV/div). models / models_info: 2072B 2074B 2102B 2104B 2202B 2204B
   (channels, bw_mhz, bw_test_hz); points on CH3 / CH4 list the 4-channel models. source.deviations lists where the procedure departs from the manual; point.printed keeps the printed values
   (bandwidth reference 1 kHz / 400 us/div). The builder recomputes every limit in Decimal from the specifications pp. 11-13 and aborts on a disagreement.
+
+keysight_53220a_pv.json (kind 'counter-pv', written by build_53220a_spec.py)
+  Keysight 53210A/53220A/53230A Assembly Level Service Guide, chapter 1 Performance Tests (pp. 28-99; the limits are the record pages 90-99), read from the page images. ONE spec for the
+  three counters: models{} (channels, micro_channel [53210A: Channel 2, others Channel 3], time_tests, burst, gate_resolution_s, idn), options{} (010 / 106 / 115 / 150 / 201), measure{} (100
+  readings, 10 ms gate, DC, 50 ohm, 5 V range, level 0 V, BUS trigger), equipment{} (the standards the manual lists), general{}, datasheet_check{} (the published accuracy ratios; UNVERIFIED mirror).
+  periods: '1y' (counter in operation 1 year or less, default) and 'gt1y' (Test 1 limits halved).
+  A point may carry record_page_printed (7c: the record page's printed minimum 1.348 865 000 GHz; the test-text value 1.348 650 000 GHz is applied, owner 2026-10-27).
+  sections[].points[]
+    ref, test, func           FREQ / SPER / PWID / TINT / BURST / TST; kind FREQ | PERIOD | PWID | TINT | TST (the readings are SI base units: Hz, s)
+    stat                      mean | sdev (parent = the mean point whose 100 readings it shares) | pass (the self-test)
+    channel                   1, 2, 3 (the microwave input) or 12 (time interval Channel 1 to Channel 2)
+    nominal, unit, gate_s     the expected reading (a period for SPER), the gate (None = the CONFigure default)
+    requires                  option codes the point needs (106 / 115 / 150); a point with no limit for the model does not exist on it
+    timebase                  INT (Test 1) or EXT (10 MHz reference on EXT REF IN)
+    stimulus                  group LH (96270A Leveling Head, up to 4.024 GHz) | MW (above that: Microwave O/P) | PULSE | BURST | NONE, frequency, level_dbm, width_s, period_s, delay_s, vpp, burst_width_s, pri_s
+    limits                    per model {low, high, printed} (Mean) or {max, printed} (Std Dev, a strict '<'); Test 1: limits[model][std|010][1y|gt1y] with limits_by = 'timebase_option'
+    quick, page, flags, text_limit    the Q mark, the manual pages, discrepancies noted on the point, the limit as written in the test text where it differs

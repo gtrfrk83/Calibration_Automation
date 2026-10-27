@@ -1,0 +1,3246 @@
+{
+ "entries": [
+  {
+   "call": "",
+   "case": "Keysight53220A.connect[USB]",
+   "log": [
+    "53220A|>>|*CLS",
+    "53220A|>>|*IDN?",
+    "53220A|<<|Agilent Technologies,53220A,MY53000002,3.00-1.19-2.02-5",
+    "53220A|>>|*OPT?",
+    "53220A|<<|010,115,0,0,400",
+    "53220A|>>|SENS:ROSC:SOUR?",
+    "53220A|<<|EXT",
+    "53220A|>>|SENS:ROSC:SOUR:AUTO?",
+    "53220A|<<|1",
+    "53220A|>>|SENS:ROSC:EXT:FREQ?",
+    "53220A|<<|+1.00000000000000E+07"
+   ],
+   "method": "Keysight53220A.connect",
+   "result": "returned <Keysight53220A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,53220A,MY53000002,3.00-1.19-2.02-5"
+    ],
+    [
+     "Q",
+     "*OPT?",
+     "010,115,0,0,400"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR:AUTO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:EXT:FREQ?",
+     "+1.00000000000000E+07"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.read_options[USB]",
+   "log": [
+    "53220A|>>|*OPT?",
+    "53220A|<<|010,115,0,0,400"
+   ],
+   "method": "Keysight53220A.read_options",
+   "result": "returned {'ch3': '115', 'codes': {'010', '115'}, 'pulse': None, 'raw': '010,115,0,0,400', 'timebase': '010', 'unknown': []}",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "010,115,0,0,400"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.local[USB]",
+   "log": [],
+   "method": "Keysight53220A.local",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.cleanup[USB]",
+   "log": [],
+   "method": "Keysight53220A.cleanup",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.connect[GPIB]",
+   "log": [
+    "53220A|>>|*CLS",
+    "53220A|>>|*IDN?",
+    "53220A|<<|Agilent Technologies,53220A,MY53000002,3.00-1.19-2.02-5",
+    "53220A|>>|*OPT?",
+    "53220A|<<|010,115,0,0,400",
+    "53220A|>>|SENS:ROSC:SOUR?",
+    "53220A|<<|EXT",
+    "53220A|>>|SENS:ROSC:SOUR:AUTO?",
+    "53220A|<<|1",
+    "53220A|>>|SENS:ROSC:EXT:FREQ?",
+    "53220A|<<|+1.00000000000000E+07"
+   ],
+   "method": "Keysight53220A.connect",
+   "result": "returned <Keysight53220A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,53220A,MY53000002,3.00-1.19-2.02-5"
+    ],
+    [
+     "Q",
+     "*OPT?",
+     "010,115,0,0,400"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR:AUTO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:EXT:FREQ?",
+     "+1.00000000000000E+07"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.read_options[GPIB]",
+   "log": [
+    "53220A|>>|*OPT?",
+    "53220A|<<|010,115,0,0,400"
+   ],
+   "method": "Keysight53220A.read_options",
+   "result": "returned {'ch3': '115', 'codes': {'010', '115'}, 'pulse': None, 'raw': '010,115,0,0,400', 'timebase': '010', 'unknown': []}",
+   "wire": [
+    [
+     "Q",
+     "*OPT?",
+     "010,115,0,0,400"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.local[GPIB]",
+   "log": [],
+   "method": "Keysight53220A.local",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.cleanup[GPIB]",
+   "log": [],
+   "method": "Keysight53220A.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "ctl",
+     "go_local"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.reset_to_defaults",
+   "log": [
+    "53220A|>>|*RST",
+    "53220A|>>|*CLS",
+    "53220A|>>|*OPC?",
+    "53220A|<<|1",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.reset_to_defaults",
+   "result": "returned ResetReport(instrument='53220A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='inputs, level and trigger known (the next point sets them again)', ok=True, detail='Factory reset state; the reference oscillator is set per test')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.read_reference",
+   "log": [
+    "53220A|>>|SENS:ROSC:SOUR?",
+    "53220A|<<|EXT",
+    "53220A|>>|SENS:ROSC:SOUR:AUTO?",
+    "53220A|<<|1",
+    "53220A|>>|SENS:ROSC:EXT:FREQ?",
+    "53220A|<<|+1.00000000000000E+07"
+   ],
+   "method": "Keysight53220A.read_reference",
+   "result": "returned {'auto': True, 'ext_freq': 10000000.0, 'source': 'EXT'}",
+   "wire": [
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR:AUTO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:EXT:FREQ?",
+     "+1.00000000000000E+07"
+    ]
+   ]
+  },
+  {
+   "call": "'EXT'",
+   "case": "Keysight53220A.set_reference[EXT]",
+   "log": [
+    "53220A|>>|SENS:ROSC:EXT:FREQ 10000000",
+    "53220A|>>|SENS:ROSC:EXT:FREQ?",
+    "53220A|<<|+1.00000000000000E+07",
+    "53220A|>>|SENS:ROSC:SOUR EXT",
+    "53220A|>>|SENS:ROSC:SOUR?",
+    "53220A|<<|EXT",
+    "53220A|>>|SENS:ROSC:EXT:CHEC ONCE",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.set_reference",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SENS:ROSC:EXT:FREQ 10000000"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:EXT:FREQ?",
+     "+1.00000000000000E+07"
+    ],
+    [
+     "W",
+     "SENS:ROSC:SOUR EXT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "W",
+     "SENS:ROSC:EXT:CHEC ONCE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'EXT'",
+   "case": "Keysight53220A.set_reference[EXT unchanged]",
+   "log": [],
+   "method": "Keysight53220A.set_reference",
+   "result": "returned None",
+   "wire": []
+  },
+  {
+   "call": "'INT'",
+   "case": "Keysight53220A.set_reference[INT]",
+   "log": [
+    "53220A|>>|SENS:ROSC:SOUR INT",
+    "53220A|>>|SENS:ROSC:SOUR?",
+    "53220A|<<|INT"
+   ],
+   "method": "Keysight53220A.set_reference",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "SENS:ROSC:SOUR INT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "INT"
+    ]
+   ]
+  },
+  {
+   "call": "'EXT'",
+   "case": "Keysight53220A.set_reference[no 10 MHz]",
+   "log": [
+    "53220A|>>|SENS:ROSC:EXT:FREQ 10000000",
+    "53220A|>>|SENS:ROSC:EXT:FREQ?",
+    "53220A|<<|+1.00000000000000E+07",
+    "53220A|>>|SENS:ROSC:SOUR EXT",
+    "53220A|>>|SENS:ROSC:SOUR?",
+    "53220A|<<|EXT",
+    "53220A|>>|SENS:ROSC:EXT:CHEC ONCE",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+2009,\"No valid external timebase\""
+   ],
+   "method": "Keysight53220A.set_reference",
+   "result": "raised InstrumentError: The counter reports \"No valid external timebase\": connect the 10 MHz reference to Ext Ref In (Test 1 is the only test that uses the internal time base). (53220A: error queue after 'SENS:ROSC:EXT:CHEC ONCE': +2009,\"No valid external timebase\")",
+   "wire": [
+    [
+     "W",
+     "SENS:ROSC:EXT:FREQ 10000000"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:EXT:FREQ?",
+     "+1.00000000000000E+07"
+    ],
+    [
+     "W",
+     "SENS:ROSC:SOUR EXT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "W",
+     "SENS:ROSC:EXT:CHEC ONCE"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+2009,\"No valid external timebase\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.restore_reference",
+   "log": [
+    "53220A|>>|SENS:ROSC:SOUR?",
+    "53220A|<<|EXT",
+    "53220A|>>|SENS:ROSC:SOUR:AUTO?",
+    "53220A|<<|0",
+    "53220A|>>|SENS:ROSC:EXT:FREQ?",
+    "53220A|<<|+1.00000000000000E+07",
+    "53220A|>>|SENS:ROSC:SOUR:AUTO ON",
+    "53220A|>>|SENS:ROSC:SOUR:AUTO?",
+    "53220A|<<|1",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.restore_reference",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR:AUTO?",
+     "0"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:EXT:FREQ?",
+     "+1.00000000000000E+07"
+    ],
+    [
+     "W",
+     "SENS:ROSC:SOUR:AUTO ON"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR:AUTO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "[1, 2]",
+   "case": "Keysight53220A.configure_inputs[1 and 2]",
+   "log": [
+    "53220A|>>|INP1:COUP DC",
+    "53220A|>>|INP1:COUP?",
+    "53220A|<<|DC",
+    "53220A|>>|INP1:IMP 50",
+    "53220A|>>|INP1:IMP?",
+    "53220A|<<|+5.00000000000000E+01",
+    "53220A|>>|INP1:PROB 1",
+    "53220A|>>|INP1:PROB?",
+    "53220A|<<|+1.00000000000000E+00",
+    "53220A|>>|INP1:RANG 5",
+    "53220A|>>|INP1:RANG?",
+    "53220A|<<|+5.00000000000000E+00",
+    "53220A|>>|INP1:FILT OFF",
+    "53220A|>>|INP1:FILT?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:NREJ OFF",
+    "53220A|>>|INP1:NREJ?",
+    "53220A|<<|0",
+    "53220A|>>|INP2:COUP DC",
+    "53220A|>>|INP2:COUP?",
+    "53220A|<<|DC",
+    "53220A|>>|INP2:IMP 50",
+    "53220A|>>|INP2:IMP?",
+    "53220A|<<|+5.00000000000000E+01",
+    "53220A|>>|INP2:PROB 1",
+    "53220A|>>|INP2:PROB?",
+    "53220A|<<|+1.00000000000000E+00",
+    "53220A|>>|INP2:RANG 5",
+    "53220A|>>|INP2:RANG?",
+    "53220A|<<|+5.00000000000000E+00",
+    "53220A|>>|INP2:FILT OFF",
+    "53220A|>>|INP2:FILT?",
+    "53220A|<<|0",
+    "53220A|>>|INP2:NREJ OFF",
+    "53220A|>>|INP2:NREJ?",
+    "53220A|<<|0"
+   ],
+   "method": "Keysight53220A.configure_inputs",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INP1:COUP DC"
+    ],
+    [
+     "Q",
+     "INP1:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     "INP1:IMP 50"
+    ],
+    [
+     "Q",
+     "INP1:IMP?",
+     "+5.00000000000000E+01"
+    ],
+    [
+     "W",
+     "INP1:PROB 1"
+    ],
+    [
+     "Q",
+     "INP1:PROB?",
+     "+1.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:RANG 5"
+    ],
+    [
+     "Q",
+     "INP1:RANG?",
+     "+5.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:FILT OFF"
+    ],
+    [
+     "Q",
+     "INP1:FILT?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:NREJ OFF"
+    ],
+    [
+     "Q",
+     "INP1:NREJ?",
+     "0"
+    ],
+    [
+     "W",
+     "INP2:COUP DC"
+    ],
+    [
+     "Q",
+     "INP2:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     "INP2:IMP 50"
+    ],
+    [
+     "Q",
+     "INP2:IMP?",
+     "+5.00000000000000E+01"
+    ],
+    [
+     "W",
+     "INP2:PROB 1"
+    ],
+    [
+     "Q",
+     "INP2:PROB?",
+     "+1.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP2:RANG 5"
+    ],
+    [
+     "Q",
+     "INP2:RANG?",
+     "+5.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP2:FILT OFF"
+    ],
+    [
+     "Q",
+     "INP2:FILT?",
+     "0"
+    ],
+    [
+     "W",
+     "INP2:NREJ OFF"
+    ],
+    [
+     "Q",
+     "INP2:NREJ?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "{'channel': 1, 'func': 'FREQ', 'gate_s': 0.01, 'nominal': 10000000.0}",
+   "case": "Keysight53220A.configure_point[FREQ ch1]",
+   "log": [
+    "53220A|>>|INP1:COUP DC",
+    "53220A|>>|INP1:COUP?",
+    "53220A|<<|DC",
+    "53220A|>>|INP1:IMP 50",
+    "53220A|>>|INP1:IMP?",
+    "53220A|<<|+5.00000000000000E+01",
+    "53220A|>>|INP1:PROB 1",
+    "53220A|>>|INP1:PROB?",
+    "53220A|<<|+1.00000000000000E+00",
+    "53220A|>>|INP1:RANG 5",
+    "53220A|>>|INP1:RANG?",
+    "53220A|<<|+5.00000000000000E+00",
+    "53220A|>>|INP1:FILT OFF",
+    "53220A|>>|INP1:FILT?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:NREJ OFF",
+    "53220A|>>|INP1:NREJ?",
+    "53220A|<<|0",
+    "53220A|>>|CONF:FREQ 10000000,DEF,(@1)",
+    "53220A|>>|CONF?",
+    "53220A|<<|\"FREQ +1.00000000000000E+07,+1.00000000000000E-03,(@1)\"",
+    "53220A|>>|INP1:LEV:AUTO OFF",
+    "53220A|>>|INP1:LEV:AUTO?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:LEV 0",
+    "53220A|>>|INP1:LEV?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|INP1:SLOP POS",
+    "53220A|>>|INP1:SLOP?",
+    "53220A|<<|POS",
+    "53220A|>>|SENS:FREQ:MODE AUTO",
+    "53220A|>>|SENS:FREQ:MODE?",
+    "53220A|<<|AUTO",
+    "53220A|>>|SENS:FREQ:GATE:SOUR TIME",
+    "53220A|>>|SENS:FREQ:GATE:SOUR?",
+    "53220A|<<|TIME",
+    "53220A|>>|SENS:FREQ:GATE:TIME 0.01",
+    "53220A|>>|SENS:FREQ:GATE:TIME?",
+    "53220A|<<|+1.00000000000000E-02",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INP1:COUP DC"
+    ],
+    [
+     "Q",
+     "INP1:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     "INP1:IMP 50"
+    ],
+    [
+     "Q",
+     "INP1:IMP?",
+     "+5.00000000000000E+01"
+    ],
+    [
+     "W",
+     "INP1:PROB 1"
+    ],
+    [
+     "Q",
+     "INP1:PROB?",
+     "+1.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:RANG 5"
+    ],
+    [
+     "Q",
+     "INP1:RANG?",
+     "+5.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:FILT OFF"
+    ],
+    [
+     "Q",
+     "INP1:FILT?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:NREJ OFF"
+    ],
+    [
+     "Q",
+     "INP1:NREJ?",
+     "0"
+    ],
+    [
+     "W",
+     "CONF:FREQ 10000000,DEF,(@1)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"FREQ +1.00000000000000E+07,+1.00000000000000E-03,(@1)\""
+    ],
+    [
+     "W",
+     "INP1:LEV:AUTO OFF"
+    ],
+    [
+     "Q",
+     "INP1:LEV:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:LEV 0"
+    ],
+    [
+     "Q",
+     "INP1:LEV?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:SLOP POS"
+    ],
+    [
+     "Q",
+     "INP1:SLOP?",
+     "POS"
+    ],
+    [
+     "W",
+     "SENS:FREQ:MODE AUTO"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:MODE?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "SENS:FREQ:GATE:SOUR TIME"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:GATE:SOUR?",
+     "TIME"
+    ],
+    [
+     "W",
+     "SENS:FREQ:GATE:TIME 0.01"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:GATE:TIME?",
+     "+1.00000000000000E-02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'channel': 3, 'func': 'FREQ', 'gate_s': 0.01, 'nominal': 5880000000.0}",
+   "case": "Keysight53220A.configure_point[FREQ ch3 microwave]",
+   "log": [
+    "53220A|>>|CONF:FREQ 5.88e+09,DEF,(@3)",
+    "53220A|>>|CONF?",
+    "53220A|<<|\"FREQ +5.88000000000000E+09,+1.00000000000000E-03,(@3)\"",
+    "53220A|>>|SENS:FREQ:MODE AUTO",
+    "53220A|>>|SENS:FREQ:MODE?",
+    "53220A|<<|AUTO",
+    "53220A|>>|SENS:FREQ:GATE:SOUR TIME",
+    "53220A|>>|SENS:FREQ:GATE:SOUR?",
+    "53220A|<<|TIME",
+    "53220A|>>|SENS:FREQ:GATE:TIME 0.01",
+    "53220A|>>|SENS:FREQ:GATE:TIME?",
+    "53220A|<<|+1.00000000000000E-02",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ 5.88e+09,DEF,(@3)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"FREQ +5.88000000000000E+09,+1.00000000000000E-03,(@3)\""
+    ],
+    [
+     "W",
+     "SENS:FREQ:MODE AUTO"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:MODE?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "SENS:FREQ:GATE:SOUR TIME"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:GATE:SOUR?",
+     "TIME"
+    ],
+    [
+     "W",
+     "SENS:FREQ:GATE:TIME 0.01"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:GATE:TIME?",
+     "+1.00000000000000E-02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'channel': 1, 'func': 'FREQ', 'gate_s': None, 'nominal': 10000000.0}",
+   "case": "Keysight53220A.configure_point[FREQ default gate]",
+   "log": [
+    "53220A|>>|INP1:COUP DC",
+    "53220A|>>|INP1:COUP?",
+    "53220A|<<|DC",
+    "53220A|>>|INP1:IMP 50",
+    "53220A|>>|INP1:IMP?",
+    "53220A|<<|+5.00000000000000E+01",
+    "53220A|>>|INP1:PROB 1",
+    "53220A|>>|INP1:PROB?",
+    "53220A|<<|+1.00000000000000E+00",
+    "53220A|>>|INP1:RANG 5",
+    "53220A|>>|INP1:RANG?",
+    "53220A|<<|+5.00000000000000E+00",
+    "53220A|>>|INP1:FILT OFF",
+    "53220A|>>|INP1:FILT?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:NREJ OFF",
+    "53220A|>>|INP1:NREJ?",
+    "53220A|<<|0",
+    "53220A|>>|CONF:FREQ 10000000,DEF,(@1)",
+    "53220A|>>|CONF?",
+    "53220A|<<|\"FREQ +1.00000000000000E+07,+1.00000000000000E-03,(@1)\"",
+    "53220A|>>|INP1:LEV:AUTO OFF",
+    "53220A|>>|INP1:LEV:AUTO?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:LEV 0",
+    "53220A|>>|INP1:LEV?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|INP1:SLOP POS",
+    "53220A|>>|INP1:SLOP?",
+    "53220A|<<|POS",
+    "53220A|>>|SENS:FREQ:MODE AUTO",
+    "53220A|>>|SENS:FREQ:MODE?",
+    "53220A|<<|AUTO",
+    "53220A|>>|SENS:FREQ:GATE:SOUR TIME",
+    "53220A|>>|SENS:FREQ:GATE:SOUR?",
+    "53220A|<<|TIME",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INP1:COUP DC"
+    ],
+    [
+     "Q",
+     "INP1:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     "INP1:IMP 50"
+    ],
+    [
+     "Q",
+     "INP1:IMP?",
+     "+5.00000000000000E+01"
+    ],
+    [
+     "W",
+     "INP1:PROB 1"
+    ],
+    [
+     "Q",
+     "INP1:PROB?",
+     "+1.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:RANG 5"
+    ],
+    [
+     "Q",
+     "INP1:RANG?",
+     "+5.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:FILT OFF"
+    ],
+    [
+     "Q",
+     "INP1:FILT?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:NREJ OFF"
+    ],
+    [
+     "Q",
+     "INP1:NREJ?",
+     "0"
+    ],
+    [
+     "W",
+     "CONF:FREQ 10000000,DEF,(@1)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"FREQ +1.00000000000000E+07,+1.00000000000000E-03,(@1)\""
+    ],
+    [
+     "W",
+     "INP1:LEV:AUTO OFF"
+    ],
+    [
+     "Q",
+     "INP1:LEV:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:LEV 0"
+    ],
+    [
+     "Q",
+     "INP1:LEV?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:SLOP POS"
+    ],
+    [
+     "Q",
+     "INP1:SLOP?",
+     "POS"
+    ],
+    [
+     "W",
+     "SENS:FREQ:MODE AUTO"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:MODE?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "SENS:FREQ:GATE:SOUR TIME"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:GATE:SOUR?",
+     "TIME"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'channel': 2, 'func': 'SPER', 'nominal': 1e-06}",
+   "case": "Keysight53220A.configure_point[SPER]",
+   "log": [
+    "53220A|>>|INP2:COUP DC",
+    "53220A|>>|INP2:COUP?",
+    "53220A|<<|DC",
+    "53220A|>>|INP2:IMP 50",
+    "53220A|>>|INP2:IMP?",
+    "53220A|<<|+5.00000000000000E+01",
+    "53220A|>>|INP2:PROB 1",
+    "53220A|>>|INP2:PROB?",
+    "53220A|<<|+1.00000000000000E+00",
+    "53220A|>>|INP2:RANG 5",
+    "53220A|>>|INP2:RANG?",
+    "53220A|<<|+5.00000000000000E+00",
+    "53220A|>>|INP2:FILT OFF",
+    "53220A|>>|INP2:FILT?",
+    "53220A|<<|0",
+    "53220A|>>|INP2:NREJ OFF",
+    "53220A|>>|INP2:NREJ?",
+    "53220A|<<|0",
+    "53220A|>>|CONF:SPER (@2)",
+    "53220A|>>|CONF?",
+    "53220A|<<|\"SPER (@2)\"",
+    "53220A|>>|INP2:LEV:AUTO OFF",
+    "53220A|>>|INP2:LEV:AUTO?",
+    "53220A|<<|0",
+    "53220A|>>|INP2:LEV 0",
+    "53220A|>>|INP2:LEV?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|INP2:SLOP POS",
+    "53220A|>>|INP2:SLOP?",
+    "53220A|<<|POS",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INP2:COUP DC"
+    ],
+    [
+     "Q",
+     "INP2:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     "INP2:IMP 50"
+    ],
+    [
+     "Q",
+     "INP2:IMP?",
+     "+5.00000000000000E+01"
+    ],
+    [
+     "W",
+     "INP2:PROB 1"
+    ],
+    [
+     "Q",
+     "INP2:PROB?",
+     "+1.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP2:RANG 5"
+    ],
+    [
+     "Q",
+     "INP2:RANG?",
+     "+5.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP2:FILT OFF"
+    ],
+    [
+     "Q",
+     "INP2:FILT?",
+     "0"
+    ],
+    [
+     "W",
+     "INP2:NREJ OFF"
+    ],
+    [
+     "Q",
+     "INP2:NREJ?",
+     "0"
+    ],
+    [
+     "W",
+     "CONF:SPER (@2)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"SPER (@2)\""
+    ],
+    [
+     "W",
+     "INP2:LEV:AUTO OFF"
+    ],
+    [
+     "Q",
+     "INP2:LEV:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "INP2:LEV 0"
+    ],
+    [
+     "Q",
+     "INP2:LEV?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP2:SLOP POS"
+    ],
+    [
+     "Q",
+     "INP2:SLOP?",
+     "POS"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'channel': 1, 'func': 'PWID', 'nominal': 5e-09}",
+   "case": "Keysight53220A.configure_point[PWID]",
+   "log": [
+    "53220A|>>|INP1:COUP DC",
+    "53220A|>>|INP1:COUP?",
+    "53220A|<<|DC",
+    "53220A|>>|INP1:IMP 50",
+    "53220A|>>|INP1:IMP?",
+    "53220A|<<|+5.00000000000000E+01",
+    "53220A|>>|INP1:PROB 1",
+    "53220A|>>|INP1:PROB?",
+    "53220A|<<|+1.00000000000000E+00",
+    "53220A|>>|INP1:RANG 5",
+    "53220A|>>|INP1:RANG?",
+    "53220A|<<|+5.00000000000000E+00",
+    "53220A|>>|INP1:FILT OFF",
+    "53220A|>>|INP1:FILT?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:NREJ OFF",
+    "53220A|>>|INP1:NREJ?",
+    "53220A|<<|0",
+    "53220A|>>|CONF:PWID 0V,(@1)",
+    "53220A|>>|CONF?",
+    "53220A|<<|\"PWID (@1)\"",
+    "53220A|>>|INP1:LEV:AUTO OFF",
+    "53220A|>>|INP1:LEV:AUTO?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:LEV 0",
+    "53220A|>>|INP1:LEV?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|INP1:SLOP POS",
+    "53220A|>>|INP1:SLOP?",
+    "53220A|<<|POS",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INP1:COUP DC"
+    ],
+    [
+     "Q",
+     "INP1:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     "INP1:IMP 50"
+    ],
+    [
+     "Q",
+     "INP1:IMP?",
+     "+5.00000000000000E+01"
+    ],
+    [
+     "W",
+     "INP1:PROB 1"
+    ],
+    [
+     "Q",
+     "INP1:PROB?",
+     "+1.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:RANG 5"
+    ],
+    [
+     "Q",
+     "INP1:RANG?",
+     "+5.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:FILT OFF"
+    ],
+    [
+     "Q",
+     "INP1:FILT?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:NREJ OFF"
+    ],
+    [
+     "Q",
+     "INP1:NREJ?",
+     "0"
+    ],
+    [
+     "W",
+     "CONF:PWID 0V,(@1)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"PWID (@1)\""
+    ],
+    [
+     "W",
+     "INP1:LEV:AUTO OFF"
+    ],
+    [
+     "Q",
+     "INP1:LEV:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:LEV 0"
+    ],
+    [
+     "Q",
+     "INP1:LEV?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:SLOP POS"
+    ],
+    [
+     "Q",
+     "INP1:SLOP?",
+     "POS"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'channel': 12, 'func': 'TINT', 'nominal': 4.99e-08}",
+   "case": "Keysight53220A.configure_point[TINT]",
+   "log": [
+    "53220A|>>|INP1:COUP DC",
+    "53220A|>>|INP1:COUP?",
+    "53220A|<<|DC",
+    "53220A|>>|INP1:IMP 50",
+    "53220A|>>|INP1:IMP?",
+    "53220A|<<|+5.00000000000000E+01",
+    "53220A|>>|INP1:PROB 1",
+    "53220A|>>|INP1:PROB?",
+    "53220A|<<|+1.00000000000000E+00",
+    "53220A|>>|INP1:RANG 5",
+    "53220A|>>|INP1:RANG?",
+    "53220A|<<|+5.00000000000000E+00",
+    "53220A|>>|INP1:FILT OFF",
+    "53220A|>>|INP1:FILT?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:NREJ OFF",
+    "53220A|>>|INP1:NREJ?",
+    "53220A|<<|0",
+    "53220A|>>|INP2:COUP DC",
+    "53220A|>>|INP2:COUP?",
+    "53220A|<<|DC",
+    "53220A|>>|INP2:IMP 50",
+    "53220A|>>|INP2:IMP?",
+    "53220A|<<|+5.00000000000000E+01",
+    "53220A|>>|INP2:PROB 1",
+    "53220A|>>|INP2:PROB?",
+    "53220A|<<|+1.00000000000000E+00",
+    "53220A|>>|INP2:RANG 5",
+    "53220A|>>|INP2:RANG?",
+    "53220A|<<|+5.00000000000000E+00",
+    "53220A|>>|INP2:FILT OFF",
+    "53220A|>>|INP2:FILT?",
+    "53220A|<<|0",
+    "53220A|>>|INP2:NREJ OFF",
+    "53220A|>>|INP2:NREJ?",
+    "53220A|<<|0",
+    "53220A|>>|CONF:TINT (@1),(@2)",
+    "53220A|>>|CONF?",
+    "53220A|<<|\"TINT (@1),(@2)\"",
+    "53220A|>>|INP1:LEV:AUTO OFF",
+    "53220A|>>|INP1:LEV:AUTO?",
+    "53220A|<<|0",
+    "53220A|>>|INP1:LEV 0",
+    "53220A|>>|INP1:LEV?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|INP1:SLOP POS",
+    "53220A|>>|INP1:SLOP?",
+    "53220A|<<|POS",
+    "53220A|>>|INP2:LEV:AUTO OFF",
+    "53220A|>>|INP2:LEV:AUTO?",
+    "53220A|<<|0",
+    "53220A|>>|INP2:LEV 0",
+    "53220A|>>|INP2:LEV?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|INP2:SLOP POS",
+    "53220A|>>|INP2:SLOP?",
+    "53220A|<<|POS",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "INP1:COUP DC"
+    ],
+    [
+     "Q",
+     "INP1:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     "INP1:IMP 50"
+    ],
+    [
+     "Q",
+     "INP1:IMP?",
+     "+5.00000000000000E+01"
+    ],
+    [
+     "W",
+     "INP1:PROB 1"
+    ],
+    [
+     "Q",
+     "INP1:PROB?",
+     "+1.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:RANG 5"
+    ],
+    [
+     "Q",
+     "INP1:RANG?",
+     "+5.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:FILT OFF"
+    ],
+    [
+     "Q",
+     "INP1:FILT?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:NREJ OFF"
+    ],
+    [
+     "Q",
+     "INP1:NREJ?",
+     "0"
+    ],
+    [
+     "W",
+     "INP2:COUP DC"
+    ],
+    [
+     "Q",
+     "INP2:COUP?",
+     "DC"
+    ],
+    [
+     "W",
+     "INP2:IMP 50"
+    ],
+    [
+     "Q",
+     "INP2:IMP?",
+     "+5.00000000000000E+01"
+    ],
+    [
+     "W",
+     "INP2:PROB 1"
+    ],
+    [
+     "Q",
+     "INP2:PROB?",
+     "+1.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP2:RANG 5"
+    ],
+    [
+     "Q",
+     "INP2:RANG?",
+     "+5.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP2:FILT OFF"
+    ],
+    [
+     "Q",
+     "INP2:FILT?",
+     "0"
+    ],
+    [
+     "W",
+     "INP2:NREJ OFF"
+    ],
+    [
+     "Q",
+     "INP2:NREJ?",
+     "0"
+    ],
+    [
+     "W",
+     "CONF:TINT (@1),(@2)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"TINT (@1),(@2)\""
+    ],
+    [
+     "W",
+     "INP1:LEV:AUTO OFF"
+    ],
+    [
+     "Q",
+     "INP1:LEV:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "INP1:LEV 0"
+    ],
+    [
+     "Q",
+     "INP1:LEV?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP1:SLOP POS"
+    ],
+    [
+     "Q",
+     "INP1:SLOP?",
+     "POS"
+    ],
+    [
+     "W",
+     "INP2:LEV:AUTO OFF"
+    ],
+    [
+     "Q",
+     "INP2:LEV:AUTO?",
+     "0"
+    ],
+    [
+     "W",
+     "INP2:LEV 0"
+    ],
+    [
+     "Q",
+     "INP2:LEV?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "INP2:SLOP POS"
+    ],
+    [
+     "Q",
+     "INP2:SLOP?",
+     "POS"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'channel': 1, 'func': 'TEMP'}",
+   "case": "Keysight53220A.configure_point[unknown function]",
+   "log": [],
+   "method": "Keysight53220A.configure_point",
+   "result": "raised InstrumentError: 53220A: no function 'TEMP'",
+   "wire": []
+  },
+  {
+   "call": "'ctx'",
+   "case": "Keysight53220A.check_errors[ok]",
+   "log": [
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'configuring'",
+   "case": "Keysight53220A.check_errors[two errors]",
+   "log": [
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|-221,\"Settings conflict\"",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|-113,\"Undefined header\"",
+    "53220A|>>|SYST:ERR?",
+    "53220A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53220A.check_errors",
+   "result": "raised InstrumentError: Keysight 53220A reported an error after configuring: -221,\"Settings conflict\" | -113,\"Undefined header\"",
+   "wire": [
+    [
+     "Q",
+     "SYST:ERR?",
+     "-221,\"Settings conflict\""
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "-113,\"Undefined header\""
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.measure_stats[no signal]",
+   "log": [
+    "53220A|>>|SAMP:COUN 100",
+    "53220A|>>|SAMP:COUN?",
+    "53220A|<<|+100",
+    "53220A|>>|TRIG:COUN 1",
+    "53220A|>>|TRIG:COUN?",
+    "53220A|<<|+1",
+    "53220A|>>|TRIG:DEL 0",
+    "53220A|>>|TRIG:DEL?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|TRIG:SOUR BUS",
+    "53220A|>>|TRIG:SOUR?",
+    "53220A|<<|BUS",
+    "53220A|>>|CALC:STAT ON",
+    "53220A|>>|CALC:STAT?",
+    "53220A|<<|1",
+    "53220A|>>|CALC:AVER:STAT ON",
+    "53220A|>>|CALC:AVER:STAT?",
+    "53220A|<<|1",
+    "53220A|>>|INIT",
+    "53220A|>>|*TRG",
+    "53220A|>>|*OPC?",
+    "53220A|<<|1",
+    "53220A|>>|CALC:AVER:COUN:CURR?",
+    "53220A|<<|+100",
+    "53220A|>>|CALC:AVER:AVER?",
+    "53220A|<<|+9.91000000000000E+37",
+    "53220A|>>|CALC:AVER:SDEV?",
+    "53220A|<<|+9.91000000000000E+37"
+   ],
+   "method": "Keysight53220A.measure_stats",
+   "result": "raised InstrumentError: The 53220A returned \"Not a Number\" (9.91E37): no usable signal at the input (level, frequency or connection).",
+   "wire": [
+    [
+     "W",
+     "SAMP:COUN 100"
+    ],
+    [
+     "Q",
+     "SAMP:COUN?",
+     "+100"
+    ],
+    [
+     "W",
+     "TRIG:COUN 1"
+    ],
+    [
+     "Q",
+     "TRIG:COUN?",
+     "+1"
+    ],
+    [
+     "W",
+     "TRIG:DEL 0"
+    ],
+    [
+     "Q",
+     "TRIG:DEL?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "TRIG:SOUR BUS"
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "BUS"
+    ],
+    [
+     "W",
+     "CALC:STAT ON"
+    ],
+    [
+     "Q",
+     "CALC:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "CALC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     "CALC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "INIT"
+    ],
+    [
+     "W",
+     "*TRG"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "CALC:AVER:COUN:CURR?",
+     "+100"
+    ],
+    [
+     "Q",
+     "CALC:AVER:AVER?",
+     "+9.91000000000000E+37"
+    ],
+    [
+     "Q",
+     "CALC:AVER:SDEV?",
+     "+9.91000000000000E+37"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.measure_stats[10 MHz]",
+   "log": [
+    "53220A|>>|SAMP:COUN 100",
+    "53220A|>>|SAMP:COUN?",
+    "53220A|<<|+100",
+    "53220A|>>|TRIG:COUN 1",
+    "53220A|>>|TRIG:COUN?",
+    "53220A|<<|+1",
+    "53220A|>>|TRIG:DEL 0",
+    "53220A|>>|TRIG:DEL?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|TRIG:SOUR BUS",
+    "53220A|>>|TRIG:SOUR?",
+    "53220A|<<|BUS",
+    "53220A|>>|CALC:STAT ON",
+    "53220A|>>|CALC:STAT?",
+    "53220A|<<|1",
+    "53220A|>>|CALC:AVER:STAT ON",
+    "53220A|>>|CALC:AVER:STAT?",
+    "53220A|<<|1",
+    "53220A|>>|INIT",
+    "53220A|>>|*TRG",
+    "53220A|>>|*OPC?",
+    "53220A|<<|1",
+    "53220A|>>|CALC:AVER:COUN:CURR?",
+    "53220A|<<|+100",
+    "53220A|>>|CALC:AVER:AVER?",
+    "53220A|<<|+1.00000000001000E+07",
+    "53220A|>>|CALC:AVER:SDEV?",
+    "53220A|<<|+1.00000000000000E-03"
+   ],
+   "method": "Keysight53220A.measure_stats",
+   "result": "returned {'count': 100, 'mean': 10000000.0001, 'sdev': 0.001}",
+   "wire": [
+    [
+     "W",
+     "SAMP:COUN 100"
+    ],
+    [
+     "Q",
+     "SAMP:COUN?",
+     "+100"
+    ],
+    [
+     "W",
+     "TRIG:COUN 1"
+    ],
+    [
+     "Q",
+     "TRIG:COUN?",
+     "+1"
+    ],
+    [
+     "W",
+     "TRIG:DEL 0"
+    ],
+    [
+     "Q",
+     "TRIG:DEL?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "TRIG:SOUR BUS"
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "BUS"
+    ],
+    [
+     "W",
+     "CALC:STAT ON"
+    ],
+    [
+     "Q",
+     "CALC:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "CALC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     "CALC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "INIT"
+    ],
+    [
+     "W",
+     "*TRG"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "CALC:AVER:COUN:CURR?",
+     "+100"
+    ],
+    [
+     "Q",
+     "CALC:AVER:AVER?",
+     "+1.00000000001000E+07"
+    ],
+    [
+     "Q",
+     "CALC:AVER:SDEV?",
+     "+1.00000000000000E-03"
+    ]
+   ]
+  },
+  {
+   "call": "50",
+   "case": "Keysight53220A.measure_stats[50 readings]",
+   "log": [
+    "53220A|>>|SAMP:COUN 50",
+    "53220A|>>|SAMP:COUN?",
+    "53220A|<<|+50",
+    "53220A|>>|TRIG:COUN 1",
+    "53220A|>>|TRIG:COUN?",
+    "53220A|<<|+1",
+    "53220A|>>|TRIG:DEL 0",
+    "53220A|>>|TRIG:DEL?",
+    "53220A|<<|+0.00000000000000E+00",
+    "53220A|>>|TRIG:SOUR BUS",
+    "53220A|>>|TRIG:SOUR?",
+    "53220A|<<|BUS",
+    "53220A|>>|CALC:STAT ON",
+    "53220A|>>|CALC:STAT?",
+    "53220A|<<|1",
+    "53220A|>>|CALC:AVER:STAT ON",
+    "53220A|>>|CALC:AVER:STAT?",
+    "53220A|<<|1",
+    "53220A|>>|INIT",
+    "53220A|>>|*TRG",
+    "53220A|>>|*OPC?",
+    "53220A|<<|1",
+    "53220A|>>|CALC:AVER:COUN:CURR?",
+    "53220A|<<|+50",
+    "53220A|>>|CALC:AVER:AVER?",
+    "53220A|<<|+1.00000000001000E+07",
+    "53220A|>>|CALC:AVER:SDEV?",
+    "53220A|<<|+1.00000000000000E-03"
+   ],
+   "method": "Keysight53220A.measure_stats",
+   "result": "returned {'count': 50, 'mean': 10000000.0001, 'sdev': 0.001}",
+   "wire": [
+    [
+     "W",
+     "SAMP:COUN 50"
+    ],
+    [
+     "Q",
+     "SAMP:COUN?",
+     "+50"
+    ],
+    [
+     "W",
+     "TRIG:COUN 1"
+    ],
+    [
+     "Q",
+     "TRIG:COUN?",
+     "+1"
+    ],
+    [
+     "W",
+     "TRIG:DEL 0"
+    ],
+    [
+     "Q",
+     "TRIG:DEL?",
+     "+0.00000000000000E+00"
+    ],
+    [
+     "W",
+     "TRIG:SOUR BUS"
+    ],
+    [
+     "Q",
+     "TRIG:SOUR?",
+     "BUS"
+    ],
+    [
+     "W",
+     "CALC:STAT ON"
+    ],
+    [
+     "Q",
+     "CALC:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "CALC:AVER:STAT ON"
+    ],
+    [
+     "Q",
+     "CALC:AVER:STAT?",
+     "1"
+    ],
+    [
+     "W",
+     "INIT"
+    ],
+    [
+     "W",
+     "*TRG"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "Q",
+     "CALC:AVER:COUN:CURR?",
+     "+50"
+    ],
+    [
+     "Q",
+     "CALC:AVER:AVER?",
+     "+1.00000000001000E+07"
+    ],
+    [
+     "Q",
+     "CALC:AVER:SDEV?",
+     "+1.00000000000000E-03"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.self_test[pass]",
+   "log": [
+    "53220A|>>|*TST?",
+    "53220A|<<|+0"
+   ],
+   "method": "Keysight53220A.self_test",
+   "result": "returned 0",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*TST?",
+     "+0"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.self_test[fail]",
+   "log": [
+    "53220A|>>|*TST?",
+    "53220A|<<|+1"
+   ],
+   "method": "Keysight53220A.self_test",
+   "result": "returned 1",
+   "wire": [
+    [
+     "ctl",
+     "set_timeout",
+     60.0
+    ],
+    [
+     "Q",
+     "*TST?",
+     "+1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53220A.connect[wrong model]",
+   "log": [
+    "53220A|>>|*CLS",
+    "53220A|>>|*IDN?",
+    "53220A|<<|Agilent Technologies,53230A,MY1,3.00"
+   ],
+   "method": "Keysight53220A.connect",
+   "result": "raised InstrumentError: Expected a 53220A but the instrument identifies as: 'Agilent Technologies,53230A,MY1,3.00'",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,53230A,MY1,3.00"
+    ],
+    [
+     "ctl",
+     "close"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53230A.connect",
+   "log": [
+    "53230A|>>|*CLS",
+    "53230A|>>|*IDN?",
+    "53230A|<<|Agilent Technologies,53230A,MY53000003,3.00-1.19-2.02-5",
+    "53230A|>>|*OPT?",
+    "53230A|<<|010,115,150,0,400",
+    "53230A|>>|SENS:ROSC:SOUR?",
+    "53230A|<<|EXT",
+    "53230A|>>|SENS:ROSC:SOUR:AUTO?",
+    "53230A|<<|1",
+    "53230A|>>|SENS:ROSC:EXT:FREQ?",
+    "53230A|<<|+1.00000000000000E+07"
+   ],
+   "method": "Keysight53230A.connect",
+   "result": "returned <Keysight53230A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,53230A,MY53000003,3.00-1.19-2.02-5"
+    ],
+    [
+     "Q",
+     "*OPT?",
+     "010,115,150,0,400"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR:AUTO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:EXT:FREQ?",
+     "+1.00000000000000E+07"
+    ]
+   ]
+  },
+  {
+   "call": "{'burst_db': -12, 'channel': 3, 'func': 'BURST', 'narrow': True, 'nominal': 6000000000.0}",
+   "case": "Keysight53230A.configure_point[BURST narrow]",
+   "log": [
+    "53230A|>>|CONF:FREQ:BURS (@3)",
+    "53230A|>>|CONF?",
+    "53230A|<<|\"FREQ:BURS (@3)\"",
+    "53230A|>>|INP3:BURS:LEV -12",
+    "53230A|>>|INP3:BURS:LEV?",
+    "53230A|<<|-1.20000000000000E+01",
+    "53230A|>>|SENS:FREQ:BURS:GATE:NARR ON",
+    "53230A|>>|SENS:FREQ:BURS:GATE:NARR?",
+    "53230A|<<|1",
+    "53230A|>>|SENS:FREQ:BURS:GATE:AUTO ON",
+    "53230A|>>|SENS:FREQ:BURS:GATE:AUTO?",
+    "53230A|<<|1",
+    "53230A|>>|SYST:ERR?",
+    "53230A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53230A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ:BURS (@3)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"FREQ:BURS (@3)\""
+    ],
+    [
+     "W",
+     "INP3:BURS:LEV -12"
+    ],
+    [
+     "Q",
+     "INP3:BURS:LEV?",
+     "-1.20000000000000E+01"
+    ],
+    [
+     "W",
+     "SENS:FREQ:BURS:GATE:NARR ON"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:BURS:GATE:NARR?",
+     "1"
+    ],
+    [
+     "W",
+     "SENS:FREQ:BURS:GATE:AUTO ON"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:BURS:GATE:AUTO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "{'burst_db': -6, 'channel': 3, 'func': 'BURST', 'narrow': False, 'nominal': 6000000000.0}",
+   "case": "Keysight53230A.configure_point[BURST wide]",
+   "log": [
+    "53230A|>>|CONF:FREQ:BURS (@3)",
+    "53230A|>>|CONF?",
+    "53230A|<<|\"FREQ:BURS (@3)\"",
+    "53230A|>>|INP3:BURS:LEV -6",
+    "53230A|>>|INP3:BURS:LEV?",
+    "53230A|<<|-6.00000000000000E+00",
+    "53230A|>>|SENS:FREQ:BURS:GATE:NARR OFF",
+    "53230A|>>|SENS:FREQ:BURS:GATE:NARR?",
+    "53230A|<<|0",
+    "53230A|>>|SENS:FREQ:BURS:GATE:AUTO ON",
+    "53230A|>>|SENS:FREQ:BURS:GATE:AUTO?",
+    "53230A|<<|1",
+    "53230A|>>|SYST:ERR?",
+    "53230A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53230A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ:BURS (@3)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"FREQ:BURS (@3)\""
+    ],
+    [
+     "W",
+     "INP3:BURS:LEV -6"
+    ],
+    [
+     "Q",
+     "INP3:BURS:LEV?",
+     "-6.00000000000000E+00"
+    ],
+    [
+     "W",
+     "SENS:FREQ:BURS:GATE:NARR OFF"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:BURS:GATE:NARR?",
+     "0"
+    ],
+    [
+     "W",
+     "SENS:FREQ:BURS:GATE:AUTO ON"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:BURS:GATE:AUTO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "Keysight53210A.connect",
+   "log": [
+    "53210A|>>|*CLS",
+    "53210A|>>|*IDN?",
+    "53210A|<<|Agilent Technologies,53210A,MY53000001,3.00-1.19-2.02-5",
+    "53210A|>>|*OPT?",
+    "53210A|<<|0,106,0,0,0",
+    "53210A|>>|SENS:ROSC:SOUR?",
+    "53210A|<<|EXT",
+    "53210A|>>|SENS:ROSC:SOUR:AUTO?",
+    "53210A|<<|1",
+    "53210A|>>|SENS:ROSC:EXT:FREQ?",
+    "53210A|<<|+1.00000000000000E+07"
+   ],
+   "method": "Keysight53210A.connect",
+   "result": "returned <Keysight53210A>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     20.0
+    ],
+    [
+     "ctl",
+     "clear"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,53210A,MY53000001,3.00-1.19-2.02-5"
+    ],
+    [
+     "Q",
+     "*OPT?",
+     "0,106,0,0,0"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR?",
+     "EXT"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:SOUR:AUTO?",
+     "1"
+    ],
+    [
+     "Q",
+     "SENS:ROSC:EXT:FREQ?",
+     "+1.00000000000000E+07"
+    ]
+   ]
+  },
+  {
+   "call": "{'channel': 3, 'func': 'FREQ', 'gate_s': 0.01, 'nominal': 5880000000.0}",
+   "case": "Keysight53210A.configure_point[FREQ microwave Channel 2]",
+   "log": [
+    "53210A|>>|CONF:FREQ 5.88e+09,DEF,(@2)",
+    "53210A|>>|CONF?",
+    "53210A|<<|\"FREQ +5.88000000000000E+09,+1.00000000000000E-03,(@2)\"",
+    "53210A|>>|SENS:FREQ:MODE AUTO",
+    "53210A|>>|SENS:FREQ:MODE?",
+    "53210A|<<|AUTO",
+    "53210A|>>|SENS:FREQ:GATE:SOUR TIME",
+    "53210A|>>|SENS:FREQ:GATE:SOUR?",
+    "53210A|<<|TIME",
+    "53210A|>>|SENS:FREQ:GATE:TIME 0.01",
+    "53210A|>>|SENS:FREQ:GATE:TIME?",
+    "53210A|<<|+1.00000000000000E-02",
+    "53210A|>>|SYST:ERR?",
+    "53210A|<<|+0,\"No error\""
+   ],
+   "method": "Keysight53210A.configure_point",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "CONF:FREQ 5.88e+09,DEF,(@2)"
+    ],
+    [
+     "Q",
+     "CONF?",
+     "\"FREQ +5.88000000000000E+09,+1.00000000000000E-03,(@2)\""
+    ],
+    [
+     "W",
+     "SENS:FREQ:MODE AUTO"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:MODE?",
+     "AUTO"
+    ],
+    [
+     "W",
+     "SENS:FREQ:GATE:SOUR TIME"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:GATE:SOUR?",
+     "TIME"
+    ],
+    [
+     "W",
+     "SENS:FREQ:GATE:TIME 0.01"
+    ],
+    [
+     "Q",
+     "SENS:FREQ:GATE:TIME?",
+     "+1.00000000000000E-02"
+    ],
+    [
+     "Q",
+     "SYST:ERR?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFGPulse.connect",
+   "log": [
+    "33250A|>>|*IDN?",
+    "33250A|<<|Agilent Technologies,33250A,SIM0001,1.00-1.00",
+    "33250A|>>|*CLS",
+    "33250A|>>|*IDN?",
+    "33250A|<<|Agilent Technologies,33250A,SIM0001,1.00-1.00"
+   ],
+   "method": "AgilentAFGPulse.connect",
+   "result": "returned <AgilentAFGPulse>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.00-1.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.00-1.00"
+    ]
+   ]
+  },
+  {
+   "call": "6.66e-08, 2e-08, 5e-09, 1.0",
+   "case": "AgilentAFGPulse.pulse[66.6 ns period, 20 ns wide]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0",
+    "33250A|>>|OUTPut:LOAD 50",
+    "33250A|>>|OUTPut:LOAD?",
+    "33250A|<<|5.000000E+01",
+    "33250A|>>|FUNCtion PULSe",
+    "33250A|>>|FUNCtion?",
+    "33250A|<<|PULS",
+    "33250A|>>|VOLTage:UNIT VPP",
+    "33250A|>>|VOLTage:UNIT?",
+    "33250A|<<|VPP",
+    "33250A|>>|VOLTage:OFFSet 0",
+    "33250A|>>|VOLTage:OFFSet?",
+    "33250A|<<|+0.000000E+00",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+1.000000000E-03",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+1.000000000E-04",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|PULSe:WIDTh 2e-08",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+2.000000000E-08",
+    "33250A|>>|PULSe:PERiod 6.66e-08",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+6.660000000E-08",
+    "33250A|>>|PULSe:TRANsition 5e-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|VOLTage 1",
+    "33250A|>>|VOLTage?",
+    "33250A|<<|+1.000000E+00",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTPut:LOAD?",
+     "5.000000E+01"
+    ],
+    [
+     "W",
+     "FUNCtion PULSe"
+    ],
+    [
+     "Q",
+     "FUNCtion?",
+     "PULS"
+    ],
+    [
+     "W",
+     "VOLTage:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLTage:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "VOLTage:OFFSet 0"
+    ],
+    [
+     "Q",
+     "VOLTage:OFFSet?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+1.000000000E-03"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+1.000000000E-04"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:WIDTh 2e-08"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+2.000000000E-08"
+    ],
+    [
+     "W",
+     "PULSe:PERiod 6.66e-08"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+6.660000000E-08"
+    ],
+    [
+     "W",
+     "PULSe:TRANsition 5e-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "VOLTage 1"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "6.66e-08, 8e-09",
+   "case": "AgilentAFGPulse.pulse[8 ns minimum width]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0",
+    "33250A|>>|OUTPut:LOAD 50",
+    "33250A|>>|OUTPut:LOAD?",
+    "33250A|<<|5.000000E+01",
+    "33250A|>>|FUNCtion PULSe",
+    "33250A|>>|FUNCtion?",
+    "33250A|<<|PULS",
+    "33250A|>>|VOLTage:UNIT VPP",
+    "33250A|>>|VOLTage:UNIT?",
+    "33250A|<<|VPP",
+    "33250A|>>|VOLTage:OFFSet 0",
+    "33250A|>>|VOLTage:OFFSet?",
+    "33250A|<<|+0.000000E+00",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+6.660000000E-08",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+2.000000000E-08",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|PULSe:PERiod 6.66e-08",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+6.660000000E-08",
+    "33250A|>>|PULSe:WIDTh 8e-09",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+8.000000000E-09",
+    "33250A|>>|PULSe:TRANsition 5e-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|VOLTage 1",
+    "33250A|>>|VOLTage?",
+    "33250A|<<|+1.000000E+00",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTPut:LOAD?",
+     "5.000000E+01"
+    ],
+    [
+     "W",
+     "FUNCtion PULSe"
+    ],
+    [
+     "Q",
+     "FUNCtion?",
+     "PULS"
+    ],
+    [
+     "W",
+     "VOLTage:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLTage:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "VOLTage:OFFSet 0"
+    ],
+    [
+     "Q",
+     "VOLTage:OFFSet?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+6.660000000E-08"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+2.000000000E-08"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:PERiod 6.66e-08"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+6.660000000E-08"
+    ],
+    [
+     "W",
+     "PULSe:WIDTh 8e-09"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+8.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:TRANsition 5e-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "VOLTage 1"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "0.001, 0.0001, 5e-09, 1.0",
+   "case": "AgilentAFGPulse.pulse[back to a long period]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0",
+    "33250A|>>|OUTPut:LOAD 50",
+    "33250A|>>|OUTPut:LOAD?",
+    "33250A|<<|5.000000E+01",
+    "33250A|>>|FUNCtion PULSe",
+    "33250A|>>|FUNCtion?",
+    "33250A|<<|PULS",
+    "33250A|>>|VOLTage:UNIT VPP",
+    "33250A|>>|VOLTage:UNIT?",
+    "33250A|<<|VPP",
+    "33250A|>>|VOLTage:OFFSet 0",
+    "33250A|>>|VOLTage:OFFSet?",
+    "33250A|<<|+0.000000E+00",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+6.660000000E-08",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+8.000000000E-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|PULSe:PERiod 0.001",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+1.000000000E-03",
+    "33250A|>>|PULSe:WIDTh 0.0001",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+1.000000000E-04",
+    "33250A|>>|PULSe:TRANsition 5e-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|VOLTage 1",
+    "33250A|>>|VOLTage?",
+    "33250A|<<|+1.000000E+00",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTPut:LOAD?",
+     "5.000000E+01"
+    ],
+    [
+     "W",
+     "FUNCtion PULSe"
+    ],
+    [
+     "Q",
+     "FUNCtion?",
+     "PULS"
+    ],
+    [
+     "W",
+     "VOLTage:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLTage:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "VOLTage:OFFSet 0"
+    ],
+    [
+     "Q",
+     "VOLTage:OFFSet?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+6.660000000E-08"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+8.000000000E-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:PERiod 0.001"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+1.000000000E-03"
+    ],
+    [
+     "W",
+     "PULSe:WIDTh 0.0001"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+1.000000000E-04"
+    ],
+    [
+     "W",
+     "PULSe:TRANsition 5e-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "VOLTage 1"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "6.66e-08, 5e-09",
+   "case": "AgilentAFGPulse.pulse[5 ns refused]",
+   "log": [],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "raised InstrumentError: Agilent 33250A (pulse) cannot make this pulse: pulse width 5e-09 s is outside 8e-09 s to 2000 s (p. 167); pulse width 5e-09 s must be at least 1.6 x the edge time (8e-09 s) (p. 167)",
+   "wire": []
+  },
+  {
+   "call": "1e-06, 2e-07, 5e-09, 2.0, 'INF'",
+   "case": "AgilentAFGPulse.pulse[High Z]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0",
+    "33250A|>>|OUTPut:LOAD INFinity",
+    "33250A|>>|OUTPut:LOAD?",
+    "33250A|<<|9.900000E+37",
+    "33250A|>>|FUNCtion PULSe",
+    "33250A|>>|FUNCtion?",
+    "33250A|<<|PULS",
+    "33250A|>>|VOLTage:UNIT VPP",
+    "33250A|>>|VOLTage:UNIT?",
+    "33250A|<<|VPP",
+    "33250A|>>|VOLTage:OFFSet 0",
+    "33250A|>>|VOLTage:OFFSet?",
+    "33250A|<<|+0.000000E+00",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+1.000000000E-03",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+1.000000000E-04",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|PULSe:WIDTh 2e-07",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+2.000000000E-07",
+    "33250A|>>|PULSe:PERiod 1e-06",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+1.000000000E-06",
+    "33250A|>>|PULSe:TRANsition 5e-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|VOLTage 2",
+    "33250A|>>|VOLTage?",
+    "33250A|<<|+2.000000E+00",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD INFinity"
+    ],
+    [
+     "Q",
+     "OUTPut:LOAD?",
+     "9.900000E+37"
+    ],
+    [
+     "W",
+     "FUNCtion PULSe"
+    ],
+    [
+     "Q",
+     "FUNCtion?",
+     "PULS"
+    ],
+    [
+     "W",
+     "VOLTage:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLTage:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "VOLTage:OFFSet 0"
+    ],
+    [
+     "Q",
+     "VOLTage:OFFSet?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+1.000000000E-03"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+1.000000000E-04"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:WIDTh 2e-07"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+2.000000000E-07"
+    ],
+    [
+     "W",
+     "PULSe:PERiod 1e-06"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+1.000000000E-06"
+    ],
+    [
+     "W",
+     "PULSe:TRANsition 5e-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "VOLTage 2"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "+2.000000E+00"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'pulse'",
+   "case": "AgilentAFGPulse.check_errors[error queued]",
+   "log": [
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|-221,\"Settings conflict; pulse width decreased due to period\"",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.check_errors",
+   "result": "raised InstrumentError: Agilent 33250A (pulse) reported an error (pulse): -221,\"Settings conflict; pulse width decreased due to period\"",
+   "wire": [
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "-221,\"Settings conflict; pulse width decreased due to period\""
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'pulse'",
+   "case": "AgilentAFGPulse.check_errors[empty]",
+   "log": [
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "AgilentAFGPulse.output[on]",
+   "log": [
+    "33250A|>>|OUTPut ON",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|1"
+   ],
+   "method": "AgilentAFGPulse.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut ON"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "AgilentAFGPulse.output[off]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0"
+   ],
+   "method": "AgilentAFGPulse.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "AgilentAFGPulse.output[off not confirmed]",
+   "log": [
+    "33250A|>>|OUTPut ON",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|1"
+   ],
+   "method": "AgilentAFGPulse.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut ON"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "AgilentAFGPulse.output[off not confirmed 2]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|1"
+   ],
+   "method": "AgilentAFGPulse.output",
+   "result": "raised SafetyError: Agilent 33250A (pulse) did not confirm output OFF (OUTP? -> '1'); check the front panel",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFGPulse.cleanup[stuck on]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|1"
+   ],
+   "method": "AgilentAFGPulse.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFGPulse.cleanup",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0"
+   ],
+   "method": "AgilentAFGPulse.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFGPulse.reset_to_defaults",
+   "log": [
+    "33250A|>>|*RST",
+    "33250A|>>|*CLS",
+    "33250A|>>|*OPC?",
+    "33250A|<<|1",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\"",
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0"
+   ],
+   "method": "AgilentAFGPulse.reset_to_defaults",
+   "result": "returned ResetReport(instrument='33250A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output OFF confirmed (OUTPut OFF, OUTPut?)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ]
+   ]
+  }
+ ],
+ "name": "keysight_53220a",
+ "schema": 1
+}

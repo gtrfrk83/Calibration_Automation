@@ -57,7 +57,10 @@
     "Fluke 336 Clamp Meter Performance Verification": "Fluke_336_Verification.py",
     "Fluke 337 Clamp Meter Performance Verification": "Fluke_337_Verification.py",
     "Keysight U1251B Handheld Multimeter Performance Verification": "Keysight_U1251B_Verification.py",
-    "Keysight U1252B Handheld Multimeter Performance Verification": "Keysight_U1252B_Verification.py"
+    "Keysight U1252B Handheld Multimeter Performance Verification": "Keysight_U1252B_Verification.py",
+    "Keysight 53220A Performance Verification": "Keysight_53220A_Verification.py",
+    "Keysight 53230A Performance Verification": "Keysight_53230A_Verification.py",
+    "Keysight 53210A Performance Verification": "Keysight_53210A_Verification.py"
   },
   "VERSIONS": {
     "WaveSurfer_WS4104HD.py": "51",
@@ -117,7 +120,10 @@
     "Fluke_336_Verification.py": "1",
     "Fluke_337_Verification.py": "1",
     "Keysight_U1251B_Verification.py": "1",
-    "Keysight_U1252B_Verification.py": "1"
+    "Keysight_U1252B_Verification.py": "1",
+    "Keysight_53220A_Verification.py": "1",
+    "Keysight_53230A_Verification.py": "1",
+    "Keysight_53210A_Verification.py": "1"
   },
   "records": [
     [
@@ -525,6 +531,27 @@
       "U1252B",
       "Digital Multimeter",
       "Keysight_U1252B_Verification.py"
+    ],
+    [
+      "Keysight 53220A Performance Verification",
+      "Keysight",
+      "53220A",
+      "Frequency Counter",
+      "Keysight_53220A_Verification.py"
+    ],
+    [
+      "Keysight 53230A Performance Verification",
+      "Keysight",
+      "53230A",
+      "Frequency Counter",
+      "Keysight_53230A_Verification.py"
+    ],
+    [
+      "Keysight 53210A Performance Verification",
+      "Keysight",
+      "53210A",
+      "Frequency Counter",
+      "Keysight_53210A_Verification.py"
     ]
   ],
   "FILES": {

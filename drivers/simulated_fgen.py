@@ -31,7 +31,7 @@ class FgenBench(SimBench):
         super().__init__()
         self.model = model
         self.gen = dict(func='SIN', freq=1e3, amp=0.1, unit='VPP', load=50.0, offs=0.0, auto=True, on=False, errors=[],
-                        stuck_on=False, selftest_fail=False)
+                        stuck_on=False, selftest_fail=False, per=1e-3, wid=100e-6, tran=5e-9)
         self.std = dict(input='INPUT1', extrig=False, range=7.0, auto=True, errors=[], unsettled_left=0)
         self.std_option = 'WBND'        # *OPT? reply: '0' (none), WBND (30 MHz), WBEX / WBAF (50 MHz)
         self.wbaf_on = False
@@ -71,9 +71,37 @@ class SimGen(_SimBase):
     def __init__(self, bench):
         super().__init__(bench, f'SIM-{bench.model}')
 
+    LONG = (('SYSTEM:ERROR', 'SYST:ERR'), ('VOLTAGE', 'VOLT'), ('OUTPUT', 'OUTP'), ('FUNCTION', 'FUNC'), ('FREQUENCY', 'FREQ'), ('PULSE:PERIOD', 'PULS:PER'),
+            ('PULSE:WIDTH', 'PULS:WIDT'), ('PULSE:TRANSITION', 'PULS:TRAN'), ('OFFSET', 'OFFS'), ('INFINITY', 'INF'))
+
+    def _pulse(self, u, g, err):
+        """PULSe:PERiod / WIDTh / TRANsition set and query, with the User's Guide relations (pp. 166-168, 258-261): the generator adjusts the OTHER parameters and puts an error in the queue."""
+        m = re.match(r'PULS:(PER|WIDT|TRAN)\s+(\S+)$', u)
+        if not m:
+            return False, None
+        key, v = {'PER': 'per', 'WIDT': 'wid', 'TRAN': 'tran'}[m.group(1)], float(m.group(2))
+        lim = {'per': (20e-9, 2000.0), 'wid': (8e-9, 2000.0), 'tran': (5e-9, 1e-3)}[key]
+        if not lim[0] <= v <= lim[1]:
+            err.append('-222,"Data out of range; value clipped to ' + ('lower' if v < lim[0] else 'upper') + ' limit"')
+            v = min(max(v, lim[0]), lim[1])
+        g[key] = v
+        if key == 'tran' and g['tran'] >= 0.625 * g['wid'] * (1 + 1e-9) and not abs(g['tran'] - 0.625 * g['wid']) < 1e-15:
+            g['tran'] = 0.625 * g['wid']; err.append('-222,"Data out of range; pulse edge time limited by width; value clipped to ' + f"{g['tran']:.3E}" + '"')
+        if g['wid'] > g['per'] - 1.6 * g['tran'] + 1e-15:
+            g['wid'] = max(8e-9, g['per'] - 1.6 * g['tran']); err.append('-221,"Settings conflict; pulse width decreased due to period"')
+        if g['wid'] < 1.6 * g['tran'] - 1e-15:
+            g['tran'] = g['wid'] / 1.6; err.append('-221,"Settings conflict; edge time decreased due to pulse width"')
+        return True, None
+
     def handle(self, cmd):
         g, u = self.bench.gen, cmd.upper()
+        for a, b in self.LONG:
+            u = u.replace(a, b)
         err = g['errors']
+        done, _ = self._pulse(u, g, err)
+        if done: return None
+        for key, name in (('per', 'PER'), ('wid', 'WIDT'), ('tran', 'TRAN')):
+            if u == f'PULS:{name}?': return f"{g[key]:+.9E}"
         if u == '*IDN?': return f'Agilent Technologies,{self.bench.model},SIM0001,1.00-1.00'
         if u == '*CLS': err.clear(); return None
         if u == '*RST':
@@ -101,7 +129,7 @@ class SimGen(_SimBase):
             return None
         if u == 'OUTP:LOAD?': return f"{g['load']:.6E}"
         m = re.match(r'FUNC(?:TION)?\s+(\w+)$', u)
-        if m: g['func'] = m.group(1)[:3]; return None
+        if m: g['func'] = 'PULS' if m.group(1).startswith('PULS') else m.group(1)[:3]; return None
         if u == 'FUNC?': return g['func']
         m = re.match(r'VOLT:OFFS\s+(\S+)$', u)
         if m: g['offs'] = float(m.group(1)); return None

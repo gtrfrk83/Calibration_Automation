@@ -60,6 +60,7 @@ MODEL_IDS = {
     'ws': 'WS4104HD',
     'k2000': '2000',
     'a34410a': 'the model, 34410A or 34411A',
+    'a53220a': 'the model, 53210A, 53220A or 53230A',
     'dsb': 'the user-built datasheet (a Datasheet Builder sheet is run by the handheld engine; these are its own settings)',
 }
 
@@ -111,6 +112,9 @@ for _key, _default, _what in (('zero', 1.5, 'settle before a zero-offset reading
                               ('ac', 9.0, 'settle, AC volts and AC current'), ('freq', 3.0, 'settle, frequency points'), ('dci', 3.0, 'settle, DC current'),
                               ('ohm_high', 4.0, 'settle, resistance ranges of 10 Mohm and above'), ('manual', 2.0, 'settle, capacitance standard connected by the technician')):
     _t('a34410a', 'settle.' + _key, _default, 0.2, 120.0, f'Keysight 34410A / 34411A: {_what}')
+_t('a53220a', 'settle.lh', 2.0, 0.2, 120.0, 'Keysight 53210A / 53220A / 53230A: settle after the 96270A output is on (Leveling Head)')
+_t('a53220a', 'settle.mw', 3.0, 0.2, 120.0, 'Keysight 53210A / 53220A / 53230A: settle after the 96270A output is on (Microwave O/P)')
+_t('a53220a', 'settle.manual', 2.0, 0.2, 120.0, 'Keysight 53210A / 53220A / 53230A: settle, stimulus from another standard')
 _t('fgen', 'settle.timebase', 2.0, 0.2, 120.0, 'Function generator: settle, time base')
 _t('fgen', 'settle.acamp', 1.0, 0.2, 120.0, 'Function generator: settle, AC amplitude')
 _t('fgen', 'settle.lfflat', 1.0, 0.2, 120.0, 'Function generator: settle, low-frequency flatness')
