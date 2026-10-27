@@ -122,7 +122,6 @@ def setUpModule():
     import dsb_run_harness as _H
     from tests import test_handheld_options as _o
     h, H, Flow, SPECS, Spy = _h, _H, _o.Flow, _o.SPECS, _o.Spy
-    vars(h.port).pop('view', None)          # test_highlight_follows_point leaves a fake `port.view` on the shared UI port; the class method is the real one
     for m in MODELS:
         SPECS[m] = SPEC_NAME
     SPEC = h.load_spec(SPEC_NAME)
@@ -439,11 +438,14 @@ def expected_out(row):
 class EndToEnd(unittest.TestCase):
     """The real App on the simulated bench; only the modal dialogs are scripted."""
     def setUp(self):
-        vars(h.port).pop('view', None)
+        # test_highlight_follows_point leaves a fake `port.view` on the shared UI port; hide it while these tests run and put it back (other tests' state is not changed)
+        self._leaked = vars(h.port).pop('view', None)
         self.hn = H.Harness().start()
 
     def tearDown(self):
         self.hn.stop()
+        if self._leaked is not None:
+            h.port.view = self._leaked
 
     def make(self, meter, cal='5522A', demo=False):
         io = None
