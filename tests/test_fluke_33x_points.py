@@ -483,3 +483,11 @@ class EndToEnd(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class NoTwoWireCompensation(unittest.TestCase):
+    """Owner 2026-10-27: 2-wire impedance compensation (ZCOMP WIRE2) is NOT used for the Fluke 33x series."""
+
+    def test_spec_opts_out(self):
+        spec = json.loads((ROOT / 'specs' / 'fluke_33x_pv.json').read_text(encoding='utf-8'))
+        self.assertIs(spec['options']['two_wire_comp'], False)

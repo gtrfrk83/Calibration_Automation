@@ -6,6 +6,7 @@
   "hv_threshold_v": 30,
   "hv_once_per_group": true,
   "auto_ramp": false,
+  "two_wire_comp": false,
   "function_prompt": true,
   "report_title": "Calibration Data"
  },

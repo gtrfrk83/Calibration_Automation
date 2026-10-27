@@ -2068,3 +2068,5 @@ Owner request: standards sheets for the 34461A and 34465A as MEASURING standards
 
 ## tkinter is not used (2026-10-27)
 - The suite runs on Qt (PySide6); tkinter is not installed and not needed. `tests/test_beta.py` no longer errors without it: the Tk-only `branding` import is optional and the Titles / Window classes are skipped (the other 8 tests, data folder / diagnostics / report footer, now run). The old "only test_beta fails (tkinter)" caveat no longer applies: a clean run has no failures.
+
+- Fluke 33x series: 2-wire impedance compensation (ZCOMP WIRE2) is NOT used (owner 2026-10-27): the spec sets options.two_wire_comp = false. The engine switch (handheld_dmm.py, default on) arrives with branch handheld-zcomp-wire2; until that is merged the option is ignored and no ZCOMP exists in the engine anyway.

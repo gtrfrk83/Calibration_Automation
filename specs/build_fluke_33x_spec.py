@@ -416,7 +416,7 @@ def build_spec():
         raise SystemExit('Problems:\n  ' + '\n  '.join(problems))
     return dict(
         schema=3, kind='manual-reading',
-        options=dict(hookup_meter='fluke33x', hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, function_prompt=True, report_title='Calibration Data'),
+        options=dict(hookup_meter='fluke33x', hv_threshold_v=30, hv_once_per_group=True, auto_ramp=False, two_wire_comp=False, function_prompt=True, report_title='Calibration Data'),
         source=dict(document=DOCUMENT,
                     pages='8-9 (printed = PDF page): Table 2 pp. 8-9; procedure and Figure 4 p. 7; equipment Table 1 p. 5; Figure 2 p. 5; Specifications p. 3',
                     cite='Fluke 33X ClampMeters Calibration Information, Table 2 Performance Tests, printed pp. 8-9; limits unchanged, rows flagged against the Specifications (printed p. 3)',
