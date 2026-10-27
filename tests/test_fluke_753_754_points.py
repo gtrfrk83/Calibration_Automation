@@ -24,7 +24,7 @@ sys.path.insert(0, str(HERE))
 h = H = F = SPECS = Spy = SPEC = BUILDER = None
 SPEC_NAME = 'fluke_753_754_pv.json'
 MODELS = ('753', '754')
-COUNTS = {'753': 90, '754': 91}
+COUNTS = {'753': 90, '754': 90}      # the 754-only HART mode check was removed 2026-10-27 (owner: nothing here can talk HART)
 
 # The printed tables, as read a second time from the page images: table -> [(input / output as printed, min 1-year, max 1-year, min 2-year, max 2-year)] in table order.
 PRINTED = {
@@ -97,12 +97,10 @@ def by_table(t):
 
 
 class Spec(unittest.TestCase):
-    def test_counts_per_model_and_hart_is_754_only(self):
+    def test_counts_per_model_and_there_is_no_hart_point(self):
         self.assertEqual({m: len(pts(m)) for m in MODELS}, COUNTS)
-        hart = [s for s in SPEC['steps'] if s['table'] == 'H']
-        self.assertEqual([s['models'] for s in hart], [['754']])
-        self.assertEqual(hart[0]['test'], 'visual')
-        self.assertEqual(sum(len(v) for v in PRINTED.values()) + 1, 91)
+        self.assertEqual([s['id'] for s in SPEC['steps'] if s['table'] == 'H' or 'HART' in str(s.get('group', ''))], [])      # removed at the owner's request
+        self.assertEqual(sum(len(v) for v in PRINTED.values()), 90)
 
     def test_every_row_matches_the_second_reading_of_the_tables(self):
         for table, rows in PRINTED.items():
@@ -428,6 +426,48 @@ class UncertaintyByDirection(unittest.TestCase):
         self.assertTrue(f['TUR'], f)
 
 
+class ReviewWindowStandards(unittest.TestCase):
+    """Owner report 2026-10-27: the review window listed the 5560A for every 754 point.  A UUT OUTPUT (source) point is reviewed with its MEASURING standard (3458A by default,
+    the per-point pick offered), the UUT input points with the calibrator."""
+
+    def setUp(self):
+        self.hn = H.Harness().start()
+        self.app = F.App(self.hn.root, '754', demo=False, spec=h.load_spec(SPEC_NAME), io_factory=None)
+        self.app.asset.set('A-1')
+        self.app.cal_mode.set(h.CAL_CHOICES[1])           # the 5522A
+
+    def tearDown(self):
+        self.hn.stop()
+
+    def specs(self):
+        import report_review_model as M
+        for p in self.app.points:
+            self.app.found[str(p['id'])] = dict(result='PASS', reading=p.get('nominal', 0), entered=H.typed_nominal(p) if p.get('test') == 'numeric' else 'y', source='typed', synthetic=False)
+        specs, default = M.specs_for(self.app)
+        return M, specs, default, self.app.certificate_rows_and_points()[1]
+
+    def test_source_points_use_the_measuring_standard_and_the_rest_the_calibrator(self):
+        M, specs, default, pts = self.specs()
+        n_src = 0
+        for spec, p in zip(specs, pts):
+            if F.uses_input_sheet(p) and self.app.has_uncertainty(p):
+                n_src += 1
+                self.assertEqual(spec.default_std, '3458A', p['id'])
+                self.assertIn('3458A', spec.options)
+                ev = M.evaluate(spec, '3458A')
+                self.assertTrue(ev.unc_text and ev.reported, p['id'])
+                self.assertEqual(ev.unc_text, self.app.uncertainty_text(p), p['id'])          # the same figure the report prints
+        self.assertEqual(n_src, 42)                                                         # 35 UUT output points + 7 dc mA points metered in series by the 3458A
+        self.assertEqual(default, '5522A')                                                  # the review's default calibrator is for the UUT input points
+        other = next(s for s, p in zip(specs, pts) if s.default_std == '5522A')
+        self.assertNotEqual(other.default_std, '3458A')
+
+    def test_a_different_measuring_standard_can_be_chosen_for_a_source_point(self):
+        M, specs, _d, pts = self.specs()
+        spec = next(s for s, p in zip(specs, pts) if F.uses_input_sheet(p) and self.app.has_uncertainty(p) and (p.get('uut') or {}).get('kind') == 'DCV')
+        self.assertEqual(M.evaluate(spec, '34465A').standard, '34465A')
+
+
 class EndToEnd(unittest.TestCase):
     def setUp(self):
         self.hn = H.Harness().start()
@@ -586,13 +626,10 @@ class EndToEnd(unittest.TestCase):
         self.assertTrue(self.hn.run_all())
         self.assertEqual(app.found['3-10']['result'], 'FAIL')
 
-    def test_hart_question_is_pass_fail_with_no_uncertainty(self):
+    def test_the_754_runs_the_same_90_points_and_asks_no_hart_question(self):
         app, io = self.run_perfect('754')
-        r = app.found['H-1']
-        self.assertEqual(r['result'], 'PASS')
-        row = [x for p, x in zip(app.certificate_rows_and_points()[1], app.certificate_rows()) if p['id'] == 'H-1'][0]
-        self.assertEqual(row['Uncertainty'], '')
-        self.assertNotIn('H-1', {p['id'] for p in pts('753')})
+        self.assertNotIn('H-1', app.found)
+        self.assertEqual({p['id'] for p in pts('754')}, {p['id'] for p in pts('753')})
 
     def test_report_pdf_is_calibration_data_with_the_notes(self):
         app, io = self.run_perfect('754')

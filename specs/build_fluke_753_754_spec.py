@@ -6,7 +6,7 @@ Source: Fluke 753/754 Calibration Manual (Rev 0, Nov 2011), chapter 'Performance
 temperature type was read from RENDERED PAGE IMAGES (pdftoppm, 150 and 300 dpi) and read twice (second reading: the arithmetic check below against the manual's own accuracy
 specification, printed pp. 5-8 (PDF pages 13-16), plus a comparison with the extracted text in tests/test_fluke_753_754_points.py).  Extracted text was used only to find pages.
 
-ONE FAMILY SPEC, TWO MODELS (as the 110 / 170 / 323 families): 753 = 90 points, 754 = 91 (the HART mode check, 'HART Mode Verification (754 Only)', printed p. 30-31).
+ONE FAMILY SPEC, TWO MODELS (as the 110 / 170 / 323 families): 753 = 90 points, 754 = 90 (the 754-only HART mode check, printed pp. 31-32, was REMOVED 2026-10-27 at the owner's request: no device here can communicate with HART).
 
 TWO DIRECTIONS (owner rule): the calibrator is the UUT here, so a point is either
   direction 'measure'  the UUT MEASURES (its input): the lab calibrator (Fluke 5522A is the one the manual names, Table 2; 5560A / 5520A are offered by the engine) SOURCES the value,
@@ -14,7 +14,6 @@ TWO DIRECTIONS (owner rule): the calibrator is the UUT here, so a point is eithe
   direction 'source'   the UUT SOURCES (its output): MANUAL ENTRY ONLY, the technician types the reading of the external measuring instrument (the manual: Fluke 8508A DMM, Tektronix
                        FCA3000 counter) - no meter driver, no automatic reading.  Uncertainty: the lab's MEASURING standard, whose 'input'-direction sheet gives the standard uncertainty;
                        the owner picks one per point (3458A default; 34461A / 34465A when their sheets exist).  Sections are titled '... Source (UUT output)'.
-  (HART: communication pass / fail, no direction, no uncertainty.)
 
 THERMOCOUPLE: the manual tests Type K only (Table 13 measure, Table 14 source).  The other types in the specification table (E N J T B R S C L U BP XK, printed p. 7) are NOT in any
 verification table, so no point uses them.  Every temperature point carries tc 'K'; the engine sends it to the calibrator as TC_TYPE.
@@ -49,7 +48,7 @@ DOCUMENT = 'Fluke 753/754 Documenting Process Calibrator - Calibration Manual (R
 MODELS = ('753', '754')
 BOTH = ('753', '754')
 ONLY_754 = ('754',)
-EXPECTED = {'753': 90, '754': 91}
+EXPECTED = {'753': 90, '754': 90}      # the HART mode check was removed 2026-10-27 (owner: no device here can talk HART)
 
 UNITS = {'V': ('1', 'V'), 'mV': ('0.001', 'V'), 'A': ('1', 'A'), 'mA': ('0.001', 'A'), 'Ω': ('1', 'ohm'), 'kΩ': ('1000', 'ohm'), 'Hz': ('1', 'Hz'), 'kHz': ('1000', 'Hz'), '°C': ('1', 'degC')}
 SYM = {'V': 'V', 'mV': 'mV', 'A': 'A', 'mA': 'mA', 'Ω': 'ohm', 'kΩ': 'kohm', 'Hz': 'Hz', 'kHz': 'kHz', '°C': 'degC'}   # ASCII names for the report text (report_pdf.ascii_unit does the rest)
@@ -404,11 +403,6 @@ def build_steps():
                 notes.append('The printed limits differ from the accuracy statement: ' + '; '.join(problems) + ' (stored as printed).')
             step['note'] = ' '.join(notes)
             steps.append(step)
-    n += 1
-    steps.append(dict(table='H', step=n, id='H-1', ref='HART mode', page=PAGES['H'], section=SECT['H'], models=list(ONLY_754), direction='none', range='', switch=FN['hart'], kind='NONE', display_unit='', factor=1.0,
-                      base_unit='', test='visual', applied=None, group='HART',
-                      question='Does the 754 recognize the HART transmitter (the Active Device screen shows the model number and tag, PV, PVAO, PV LRV and PV URV)?  Yes = recognized (pass).  No = not recognized (the test has failed: repair is necessary).',
-                      note='HART Mode Verification (754 only), printed pp. 31-32: pass / fail only, no calibration. Setup: HART Channel = mA Jack; connect the 754 to a HART transmitter (Rosemount 1151 or 3051, or any HART device) per Figure 15; push HART, enable Loop Power if needed.'))
     return steps
 
 
@@ -468,9 +462,6 @@ def groups():
         'LOOP': dict(title='Change the cables: loop power', summary='UUT mA jack and common -> external DMM INPUT HI / LO (Figure 13).',
                      steps=common([('Meter', 'External DMM in dc volts.'), ('UUT', 'SETUP, ENTER, select Loop Power, ENTER. When complete, disable Loop Power in the setup menu or turn the UUT off (printed p. 30).')]),
                      caution=None, diagram='diagrams/hook_fluke753_LOOP.png'),
-        'HART': dict(title='Change the cables: HART mode (754 only)', summary='UUT mA jack and common -> HART transmitter (Figure 15).',
-                     steps=common([('UUT', 'SETUP, HART Channel, ENTER, select mA Jack, ENTER. Connect to the HART transmitter as Figure 15, push HART (enable Loop Power if needed). The Active Device screen must show the transmitter (printed p. 31).')]),
-                     caution=None, diagram='diagrams/hook_fluke753_HART.png'),
     }
 
 
@@ -505,8 +496,8 @@ def build_spec():
         source=dict(document=DOCUMENT, pages='9-31 (printed): Tables 2-17, loop power, HART (PDF pages 17-40); specifications pp. 5-8 (PDF 13-16)',
                     cite='Fluke 753/754 Calibration Manual, Performance Verification Tests, printed pp. 9-32; 1-year limits',
                     limits='Manufacturer limits, 1-year column, as printed (one misprint corrected, flagged)', report_note=REPORT_NOTE, note=SOURCE_NOTE),
-        models={'753': dict(name='Fluke 753 Documenting Process Calibrator', brand='Fluke', model_note='Fluke 753: 90 points (no HART)'),
-                '754': dict(name='Fluke 754 Documenting Process Calibrator', brand='Fluke', model_note='Fluke 754: 91 points (adds the HART mode check)')},
+        models={'753': dict(name='Fluke 753 Documenting Process Calibrator', brand='Fluke', model_note='Fluke 753: 90 points'),
+                '754': dict(name='Fluke 754 Documenting Process Calibrator', brand='Fluke', model_note='Fluke 754: 90 points (the HART mode check is not part of this procedure)')},
         groups=groups(), steps=steps)
 
 
