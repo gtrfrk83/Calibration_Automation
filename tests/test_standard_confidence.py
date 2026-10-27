@@ -34,6 +34,7 @@ EXPECTED = {
     '96270A': (None, 2.0),     # no level printed
     '8902A': (None, 2.0),      # no level printed
     '3458A': (None, 2.0),      # no level printed (data sheet 5965-4971E states accuracy relative to calibration standards only)
+    '33250A': (None, 2.0),     # Agilent 33250A User's Guide Chapter 8: no confidence level / k printed (1 year accuracy only)
     '34461A': (95.0, 2.0),     # data sheet 5991-1983EN printed p. 13: 'compliant to ISO/IEC 17025 for k = 2' (no percentage printed; k = 2 -> 95 %)
     '34465A': (95.0, 2.0),     # same statement, printed p. 15
     'T-10A': (None, 2.0),      # Minolta T-10A (owner's tree): no level printed
