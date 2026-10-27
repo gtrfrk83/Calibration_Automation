@@ -89,7 +89,7 @@ class Sim53220ATransport(_SimBase):
         """(kind, frequency, level_dbm, extra) of what is at the counter inputs: the 96270A when its output is on, else the standard the operator connected, else None."""
         b = self.bench
         rf = getattr(b, self.rf_key, None)
-        loss = getattr(b, 'cable_loss_db', 0.0)
+        loss = getattr(b, 'cable_loss_db', 0.0) + getattr(b, 'atten_db', 0.0)       # cable loss plus the external attenuator the operator fitted
         if rf and rf.get('on'):
             return 'CW', float(rf['f']), float(rf['p']) - loss, {}
         ext = getattr(b, 'external_signal', None)
@@ -400,12 +400,13 @@ class SimRF27(SimRF):
 
 def make_53220a_bench(model='53230A', bus='USB', options=None):
     """(bench, 96270A transport, counter transport).  bench.rf1 is the 96270A state, bench.ext_ref_present (default True) the 10 MHz on Ext Ref In, bench.external_signal the standard
-    the operator connects (default None), bench.cable_loss_db (default 0)."""
+    the operator connects (default None), bench.cable_loss_db (default 0), bench.atten_db (external attenuator after the 96270A, default 0)."""
     bench = SimBench()
     bench.ext_ref_present = True
     bench.ref_error = 0.0
     bench.external_signal = None
     bench.cable_loss_db = 0.0
+    bench.atten_db = 0.0
     rf = SimRF27(bench, 'rf1')
     ctr = Sim53220ATransport(bench, model, bus, options)
     return bench, rf, ctr

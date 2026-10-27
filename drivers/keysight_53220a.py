@@ -30,7 +30,7 @@ import cmdreg
 from cmdreg import Cmd, Placeholder
 from surprise import SurpriseMixin
 from .base import Instrument, InstrumentError
-from .reference_instruments import Fluke96270A
+from .reference_instruments import AgilentAFG, Fluke96270A
 from .transport import TransportError, bus_of
 
 PR = "Keysight 53220A/53230A Programmer's Reference"
@@ -481,3 +481,169 @@ class Fluke96270AWide(SurpriseMixin, Fluke96270A):
     Table 3-1) instead of the 6.2 GHz the MDO4000C tests use.  No command is added: which output connector is used (Leveling Head / Microwave O/P) and the reference in / out are set
     on the front panel by the operator (the remote commands for them are UNVERIFIED: the Remote Programmers Manual is not on file)."""
     MAX_HZ = 27e9
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Agilent 33250A as a PULSE generator (owner 2026-10-27).  Commands and limits are from the Agilent 33250A User's Guide (337 pp. PDF; the page numbers below are the PRINTED
+# page numbers = PDF page - 1), the pages read as rendered images.  Not run on hardware.
+#   FUNCtion {PULSe}        p. 153        PULSe:PERiod  p. 166 (20 ns to 2000 s)     OUTPut {ON|OFF}  p. 162        VOLTage:UNIT  p. 165
+#   PULSe:WIDTh   p. 167 (8 ns to 2000 s) PULSe:TRANsition p. 168 (5 ns to 1 ms)     OUTPut:LOAD      p. 163        VOLTage       p. 156
+#   VOLTage:OFFSet p. 158                 SYSTem:ERRor? p. 213                       Specifications   p. 320 (pulse period / width / edge; ONE Output connector + Sync)
+# The 33250A has NO PULSe:DCYCle command and no second pulse output with a delay: the Sync output of a pulse waveform is a 50 % duty square wave (p. 62).
+PULSE_LIMITS = dict(min_period_s=20e-9, max_period_s=2000.0, min_width_s=8e-9, max_width_s=2000.0, min_edge_s=5e-9, max_edge_s=1e-3, min_vpp=0.01, max_vpp=10.0)
+PULSE_PAGES = {'func': 153, 'period': 166, 'width': 167, 'edge': 168, 'output': 162, 'load': 163, 'volt': 156, 'unit': 165, 'offset': 158, 'error': 213, 'specs': 320}
+_UG = "Agilent 33250A User's Guide"
+
+
+def _pg(topic, key):
+    return f'{_UG}: {topic} (p. {PULSE_PAGES[key]})'
+
+
+AFG_PULSE_COMMANDS = {
+    'outp.on': Cmd('OUTPut ON', 'Output on', 'Enables the output (never overridable)', kind='set', readback='outp.query', risk='output', verified=True, ref=_pg('OUTPut', 'output')),
+    'outp.off': Cmd('OUTPut OFF', 'Output off', 'Disables the output (never overridable)', kind='set', readback='outp.query', risk='output', verified=True, ref=_pg('OUTPut', 'output')),
+    'outp.query': Cmd('OUTPut?', 'Output state', 'Returns 0 or 1 (never overridable)', kind='query', risk='output', verified=True, ref=_pg('OUTPut?', 'output')),
+    'load.50': Cmd('OUTPut:LOAD 50', 'Output termination 50 ohm', kind='set', readback='load.query', verified=True, ref=_pg('OUTPut:LOAD', 'load')),
+    'load.inf': Cmd('OUTPut:LOAD INFinity', 'Output termination High Z', 'OUTP:LOAD? returns 9.9E+37 for high impedance', kind='set', readback='load.query', verified=True,
+                    ref=_pg('OUTPut:LOAD', 'load')),
+    'load.query': Cmd('OUTPut:LOAD?', 'Output termination', kind='query', verified=True, ref=_pg('OUTPut:LOAD?', 'load')),
+    'func.pulse': Cmd('FUNCtion PULSe', 'Pulse function', 'FUNC? returns PULS', kind='set', readback='func.query', verified=True, ref=_pg('FUNCtion', 'func')),
+    'func.query': Cmd('FUNCtion?', 'Function', kind='query', verified=True, ref=_pg('FUNCtion?', 'func')),
+    'pulse.per': Cmd('PULSe:PERiod {seconds:.9g}', 'Pulse period', 'Seconds, 20 ns to 2000 s; must exceed width + 1.6 x edge time', placeholders={'seconds': Placeholder('float', '.9g', 1e-3)},
+                     kind='set', readback='pulse.per.query', verified=True, ref=_pg('PULSe:PERiod', 'period')),
+    'pulse.per.query': Cmd('PULSe:PERiod?', 'Pulse period', kind='query', verified=True, ref=_pg('PULSe:PERiod?', 'period')),
+    'pulse.wid': Cmd('PULSe:WIDTh {seconds:.9g}', 'Pulse width', 'Seconds, 8 ns to 2000 s; 50 % to 50 % thresholds; at least 1.6 x edge time',
+                     placeholders={'seconds': Placeholder('float', '.9g', 100e-6)}, kind='set', readback='pulse.wid.query', verified=True, ref=_pg('PULSe:WIDTh', 'width')),
+    'pulse.wid.query': Cmd('PULSe:WIDTh?', 'Pulse width', kind='query', verified=True, ref=_pg('PULSe:WIDTh?', 'width')),
+    'pulse.tran': Cmd('PULSe:TRANsition {seconds:.9g}', 'Edge time', 'Seconds, 5 ns to 1 ms, both edges, 10 % to 90 %; below 0.625 x pulse width',
+                      placeholders={'seconds': Placeholder('float', '.9g', 5e-9)}, kind='set', readback='pulse.tran.query', verified=True, ref=_pg('PULSe:TRANsition', 'edge')),
+    'pulse.tran.query': Cmd('PULSe:TRANsition?', 'Edge time', kind='query', verified=True, ref=_pg('PULSe:TRANsition?', 'edge')),
+    'unit.vpp': Cmd('VOLTage:UNIT VPP', 'Amplitude unit Vpp', kind='set', readback='unit.query', verified=True, ref=_pg('VOLTage:UNIT', 'unit')),
+    'unit.query': Cmd('VOLTage:UNIT?', 'Amplitude unit', kind='query', verified=True, ref=_pg('VOLTage:UNIT?', 'unit')),
+    'volt.set': Cmd('VOLTage {vpp:.6g}', 'Amplitude', 'In the unit set by VOLT:UNIT (Vpp)', placeholders={'vpp': Placeholder('float', '.6g', 1.0)}, kind='set', readback='volt.query',
+                    verified=True, ref=_pg('VOLTage', 'volt')),
+    'volt.query': Cmd('VOLTage?', 'Amplitude', kind='query', verified=True, ref=_pg('VOLTage?', 'volt')),
+    'offs.zero': Cmd('VOLTage:OFFSet 0', 'DC offset 0 V', kind='set', readback='offs.query', verified=True, ref=_pg('VOLTage:OFFSet', 'offset')),
+    'offs.query': Cmd('VOLTage:OFFSet?', 'DC offset', kind='query', verified=True, ref=_pg('VOLTage:OFFSet?', 'offset')),
+    'err.query': Cmd('SYSTem:ERRor?', 'Error queue', "Oldest error; '+0,\"No error\"' when empty (never overridable)", kind='query', risk='locked', verified=True, ref=_pg('SYSTem:ERRor?', 'error')),
+}
+
+
+def pulse_problems(period_s, width_s, edge_s, vpp, limits=PULSE_LIMITS):
+    """Why the 33250A cannot make this pulse (empty list = it can), from the User's Guide limits (pp. 166-168, 320).  Pure arithmetic, nothing is sent."""
+    L, out = limits, []
+    if not L['min_period_s'] <= period_s <= L['max_period_s']:
+        out.append(f'period {period_s:.6g} s is outside {L["min_period_s"]:g} s to {L["max_period_s"]:g} s (p. {PULSE_PAGES["period"]})')
+    if not L['min_edge_s'] <= edge_s <= L['max_edge_s']:
+        out.append(f'edge time {edge_s:.6g} s is outside {L["min_edge_s"]:g} s to {L["max_edge_s"]:g} s (p. {PULSE_PAGES["edge"]})')
+    if not L['min_width_s'] <= width_s <= L['max_width_s']:
+        out.append(f'pulse width {width_s:.6g} s is outside {L["min_width_s"]:g} s to {L["max_width_s"]:g} s (p. {PULSE_PAGES["width"]})')
+    eps = 1e-12
+    if width_s < 1.6 * edge_s * (1 - eps):
+        out.append(f'pulse width {width_s:.6g} s must be at least 1.6 x the edge time ({1.6 * edge_s:.6g} s) (p. {PULSE_PAGES["width"]})')
+    if period_s <= (width_s + 1.6 * edge_s) * (1 - eps):
+        out.append(f'period {period_s:.6g} s must exceed the pulse width + 1.6 x edge time ({width_s + 1.6 * edge_s:.6g} s) (p. {PULSE_PAGES["period"]})')
+    if not L['min_vpp'] <= vpp <= L['max_vpp']:
+        out.append(f'{vpp:g} Vpp is outside {L["min_vpp"]:g} to {L["max_vpp"]:g} Vpp into 50 ohm (p. {PULSE_PAGES["specs"]})')
+    return out
+
+
+class AgilentAFGPulse(SurpriseMixin, AgilentAFG):
+    """The Agilent 33250A as a pulse generator (the AgilentAFG driver plus pulse methods; sine() and square() are unchanged).  Every setting is written once, read back and compared;
+    nothing is retried; the error queue is read after the configuration.  The output stays OFF until output(True), which is confirmed with OUTP?."""
+    MODEL = 'Agilent 33250A (pulse)'
+    IDN_MATCH = ('33250',)
+    COMMANDS = AFG_PULSE_COMMANDS
+
+    def _num(self, key, **vals):
+        return float(self.ask(key, **vals).strip())
+
+    def _set_num(self, key, query, want, what, rel=1e-6, abs_=0.0, **vals):
+        self.send(key, **vals)
+        got = self._num(query)
+        if not math.isclose(got, want, rel_tol=rel, abs_tol=abs_):
+            raise InstrumentError(f'{self.MODEL} {what}: set {want:.9g}, reports {got:.9g}')
+        return got
+
+    def _set_text(self, key, query, want, what):
+        self.send(key)
+        got = self.ask(query).strip().strip('"').upper()
+        if not got.startswith(want):
+            raise InstrumentError(f'{self.MODEL} {what}: set {cmdreg.render(self._registry()[key])!r}, reports {got!r}')
+
+    def check_errors(self, context=''):
+        """SYSTem:ERRor? until '+0,"No error"' (the queue holds 20); raise with what was found.  Reads only, so they may be retried."""
+        found = []
+        for _ in range(21):
+            reply = self.ask('err.query').strip()
+            code = reply.split(',')[0].strip().lstrip('+')
+            try:
+                if int(float(code)) == 0:
+                    break
+            except ValueError:
+                pass
+            found.append(reply)
+        if found:
+            raise InstrumentError(f'{self.MODEL} reported an error{" (" + context + ")" if context else ""}: ' + ' | '.join(found))
+
+    def output(self, on: bool):
+        """OUTPut ON / OFF, confirmed with OUTPut?.  An unconfirmed OFF is a SafetyError."""
+        self.send('outp.on' if on else 'outp.off')
+        state = self.ask('outp.query').strip()
+        if state != ('1' if on else '0'):
+            if on:
+                raise InstrumentError(f'{self.MODEL} did not confirm output ON (OUTP? -> {state!r})')
+            from .base import SafetyError
+            raise SafetyError(f'{self.MODEL} did not confirm output OFF (OUTP? -> {state!r}); check the front panel')
+
+    def cleanup(self):
+        try:
+            self.send('outp.off')
+            self.output_off_confirmed = self.ask('outp.query').strip() == '0'
+        except Exception:
+            self.output_off_confirmed = False
+
+    output_off_confirmed = False
+
+    def _pulse_order(self, new):
+        """The order in which period / width / edge time are written so that no intermediate state breaks the manual's relations (the generator would adjust the others and
+        report 'Settings conflict').  The present values are read (queries); None when no order works."""
+        import itertools
+        cur = dict(period=self._num('pulse.per.query'), width=self._num('pulse.wid.query'), edge=self._num('pulse.tran.query'))
+        for order in itertools.permutations(('period', 'width', 'edge')):
+            state, ok = dict(cur), True
+            for name in order:
+                state[name] = new[name]
+                if pulse_problems(state['period'], state['width'], state['edge'], 1.0, dict(PULSE_LIMITS, min_vpp=0.0)):
+                    ok = False; break
+            if ok:
+                return order
+        return None
+
+    def pulse(self, period_s, width_s, edge_s=None, vpp=1.0, load='50'):
+        """Configure a pulse with the output OFF: 50 ohm (or High Z) termination, PULSe, 0 V offset, Vpp, period, width and edge time (default: the minimum 5 ns), each read back.
+        Refuses (before sending anything) what the User's Guide says the 33250A cannot make.  The output stays OFF."""
+        edge_s = PULSE_LIMITS['min_edge_s'] if edge_s is None else edge_s
+        problems = pulse_problems(period_s, width_s, edge_s, vpp)
+        if problems:
+            raise InstrumentError(f'{self.MODEL} cannot make this pulse: ' + '; '.join(problems))
+        self.output(False)
+        if str(load).upper().startswith('INF'):
+            self.send('load.inf')
+            if self._num('load.query') < 1e37:
+                raise InstrumentError(f'{self.MODEL} output termination: set High Z, reports {self._num("load.query"):g} ohm')
+        else:
+            self._set_num('load.50', 'load.query', 50.0, 'output termination')
+        self._set_text('func.pulse', 'func.query', 'PULS', 'function')
+        self._set_text('unit.vpp', 'unit.query', 'VPP', 'amplitude unit')
+        self._set_num('offs.zero', 'offs.query', 0.0, 'dc offset', abs_=1e-6)
+        order = self._pulse_order(dict(period=period_s, width=width_s, edge=edge_s))
+        if order is None:
+            raise InstrumentError(f'{self.MODEL}: no safe order to write period {period_s:g} s, width {width_s:g} s, edge {edge_s:g} s from the present state')
+        keys = dict(period=('pulse.per', 'pulse.per.query', period_s, 'pulse period'), width=('pulse.wid', 'pulse.wid.query', width_s, 'pulse width'),
+                    edge=('pulse.tran', 'pulse.tran.query', edge_s, 'edge time'))
+        for name in order:
+            key, query, want, what = keys[name]
+            self._set_num(key, query, want, what, rel=1e-6, abs_=1e-12, seconds=want)
+        self._set_num('volt.set', 'volt.query', vpp, 'amplitude', rel=1e-4, abs_=1e-4, vpp=vpp)
+        self.check_errors(f'pulse {width_s:g} s wide, period {period_s:g} s, {vpp:g} Vpp')

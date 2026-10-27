@@ -6,8 +6,8 @@
  "model": "53210A",
  "category": "Frequency Counter",
  "version": "1",
- "order": 73,
- "description": "Standalone calibration procedure",
+ "order": 75,
+ "description": "Automated performance verification of the Keysight 53210A counter (Service Guide chapter 1), 96270A stimulus; SCPI UNVERIFIED (Programmer's Reference does not cover it). Channel 1 only, no pulse or time tests. Points follow the declared options: 8 (no microwave channel), 12 (Option 106), 14 (Option 115); all in the quick check.",
  "launcher": "Procedures/Keysight_53210A_Verification.py",
  "engine": [
   "keysight_53220a_verification.py"

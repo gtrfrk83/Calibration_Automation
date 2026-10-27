@@ -6,8 +6,8 @@
  "model": "53230A",
  "category": "Frequency Counter",
  "version": "1",
- "order": 72,
- "description": "Standalone calibration procedure",
+ "order": 74,
+ "description": "Automated performance verification of the Keysight 53230A counter (Service Guide chapter 1), 96270A stimulus. Points follow the declared options: 28 (no microwave channel), 32 (106), 34 (115), 36 (106 + Option 150), 38 (115 + Option 150); quick check 20 / 24 / 26 / 26 / 28. Option 150 burst tests need a pulse-modulated microwave generator.",
  "launcher": "Procedures/Keysight_53230A_Verification.py",
  "engine": [
   "keysight_53220a_verification.py"

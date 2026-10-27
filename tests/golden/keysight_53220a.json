@@ -2380,6 +2380,865 @@
      "+0,\"No error\""
     ]
    ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFGPulse.connect",
+   "log": [
+    "33250A|>>|*IDN?",
+    "33250A|<<|Agilent Technologies,33250A,SIM0001,1.00-1.00",
+    "33250A|>>|*CLS",
+    "33250A|>>|*IDN?",
+    "33250A|<<|Agilent Technologies,33250A,SIM0001,1.00-1.00"
+   ],
+   "method": "AgilentAFGPulse.connect",
+   "result": "returned <AgilentAFGPulse>",
+   "wire": [
+    [
+     "ctl",
+     "open"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.00-1.00"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "Q",
+     "*IDN?",
+     "Agilent Technologies,33250A,SIM0001,1.00-1.00"
+    ]
+   ]
+  },
+  {
+   "call": "6.66e-08, 2e-08, 5e-09, 1.0",
+   "case": "AgilentAFGPulse.pulse[66.6 ns period, 20 ns wide]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0",
+    "33250A|>>|OUTPut:LOAD 50",
+    "33250A|>>|OUTPut:LOAD?",
+    "33250A|<<|5.000000E+01",
+    "33250A|>>|FUNCtion PULSe",
+    "33250A|>>|FUNCtion?",
+    "33250A|<<|PULS",
+    "33250A|>>|VOLTage:UNIT VPP",
+    "33250A|>>|VOLTage:UNIT?",
+    "33250A|<<|VPP",
+    "33250A|>>|VOLTage:OFFSet 0",
+    "33250A|>>|VOLTage:OFFSet?",
+    "33250A|<<|+0.000000E+00",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+1.000000000E-03",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+1.000000000E-04",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|PULSe:WIDTh 2e-08",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+2.000000000E-08",
+    "33250A|>>|PULSe:PERiod 6.66e-08",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+6.660000000E-08",
+    "33250A|>>|PULSe:TRANsition 5e-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|VOLTage 1",
+    "33250A|>>|VOLTage?",
+    "33250A|<<|+1.000000E+00",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTPut:LOAD?",
+     "5.000000E+01"
+    ],
+    [
+     "W",
+     "FUNCtion PULSe"
+    ],
+    [
+     "Q",
+     "FUNCtion?",
+     "PULS"
+    ],
+    [
+     "W",
+     "VOLTage:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLTage:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "VOLTage:OFFSet 0"
+    ],
+    [
+     "Q",
+     "VOLTage:OFFSet?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+1.000000000E-03"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+1.000000000E-04"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:WIDTh 2e-08"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+2.000000000E-08"
+    ],
+    [
+     "W",
+     "PULSe:PERiod 6.66e-08"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+6.660000000E-08"
+    ],
+    [
+     "W",
+     "PULSe:TRANsition 5e-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "VOLTage 1"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "6.66e-08, 8e-09",
+   "case": "AgilentAFGPulse.pulse[8 ns minimum width]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0",
+    "33250A|>>|OUTPut:LOAD 50",
+    "33250A|>>|OUTPut:LOAD?",
+    "33250A|<<|5.000000E+01",
+    "33250A|>>|FUNCtion PULSe",
+    "33250A|>>|FUNCtion?",
+    "33250A|<<|PULS",
+    "33250A|>>|VOLTage:UNIT VPP",
+    "33250A|>>|VOLTage:UNIT?",
+    "33250A|<<|VPP",
+    "33250A|>>|VOLTage:OFFSet 0",
+    "33250A|>>|VOLTage:OFFSet?",
+    "33250A|<<|+0.000000E+00",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+6.660000000E-08",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+2.000000000E-08",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|PULSe:PERiod 6.66e-08",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+6.660000000E-08",
+    "33250A|>>|PULSe:WIDTh 8e-09",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+8.000000000E-09",
+    "33250A|>>|PULSe:TRANsition 5e-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|VOLTage 1",
+    "33250A|>>|VOLTage?",
+    "33250A|<<|+1.000000E+00",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTPut:LOAD?",
+     "5.000000E+01"
+    ],
+    [
+     "W",
+     "FUNCtion PULSe"
+    ],
+    [
+     "Q",
+     "FUNCtion?",
+     "PULS"
+    ],
+    [
+     "W",
+     "VOLTage:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLTage:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "VOLTage:OFFSet 0"
+    ],
+    [
+     "Q",
+     "VOLTage:OFFSet?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+6.660000000E-08"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+2.000000000E-08"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:PERiod 6.66e-08"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+6.660000000E-08"
+    ],
+    [
+     "W",
+     "PULSe:WIDTh 8e-09"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+8.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:TRANsition 5e-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "VOLTage 1"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "0.001, 0.0001, 5e-09, 1.0",
+   "case": "AgilentAFGPulse.pulse[back to a long period]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0",
+    "33250A|>>|OUTPut:LOAD 50",
+    "33250A|>>|OUTPut:LOAD?",
+    "33250A|<<|5.000000E+01",
+    "33250A|>>|FUNCtion PULSe",
+    "33250A|>>|FUNCtion?",
+    "33250A|<<|PULS",
+    "33250A|>>|VOLTage:UNIT VPP",
+    "33250A|>>|VOLTage:UNIT?",
+    "33250A|<<|VPP",
+    "33250A|>>|VOLTage:OFFSet 0",
+    "33250A|>>|VOLTage:OFFSet?",
+    "33250A|<<|+0.000000E+00",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+6.660000000E-08",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+8.000000000E-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|PULSe:PERiod 0.001",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+1.000000000E-03",
+    "33250A|>>|PULSe:WIDTh 0.0001",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+1.000000000E-04",
+    "33250A|>>|PULSe:TRANsition 5e-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|VOLTage 1",
+    "33250A|>>|VOLTage?",
+    "33250A|<<|+1.000000E+00",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD 50"
+    ],
+    [
+     "Q",
+     "OUTPut:LOAD?",
+     "5.000000E+01"
+    ],
+    [
+     "W",
+     "FUNCtion PULSe"
+    ],
+    [
+     "Q",
+     "FUNCtion?",
+     "PULS"
+    ],
+    [
+     "W",
+     "VOLTage:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLTage:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "VOLTage:OFFSet 0"
+    ],
+    [
+     "Q",
+     "VOLTage:OFFSet?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+6.660000000E-08"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+8.000000000E-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:PERiod 0.001"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+1.000000000E-03"
+    ],
+    [
+     "W",
+     "PULSe:WIDTh 0.0001"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+1.000000000E-04"
+    ],
+    [
+     "W",
+     "PULSe:TRANsition 5e-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "VOLTage 1"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "+1.000000E+00"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "6.66e-08, 5e-09",
+   "case": "AgilentAFGPulse.pulse[5 ns refused]",
+   "log": [],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "raised InstrumentError: Agilent 33250A (pulse) cannot make this pulse: pulse width 5e-09 s is outside 8e-09 s to 2000 s (p. 167); pulse width 5e-09 s must be at least 1.6 x the edge time (8e-09 s) (p. 167)",
+   "wire": []
+  },
+  {
+   "call": "1e-06, 2e-07, 5e-09, 2.0, 'INF'",
+   "case": "AgilentAFGPulse.pulse[High Z]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0",
+    "33250A|>>|OUTPut:LOAD INFinity",
+    "33250A|>>|OUTPut:LOAD?",
+    "33250A|<<|9.900000E+37",
+    "33250A|>>|FUNCtion PULSe",
+    "33250A|>>|FUNCtion?",
+    "33250A|<<|PULS",
+    "33250A|>>|VOLTage:UNIT VPP",
+    "33250A|>>|VOLTage:UNIT?",
+    "33250A|<<|VPP",
+    "33250A|>>|VOLTage:OFFSet 0",
+    "33250A|>>|VOLTage:OFFSet?",
+    "33250A|<<|+0.000000E+00",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+1.000000000E-03",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+1.000000000E-04",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|PULSe:WIDTh 2e-07",
+    "33250A|>>|PULSe:WIDTh?",
+    "33250A|<<|+2.000000000E-07",
+    "33250A|>>|PULSe:PERiod 1e-06",
+    "33250A|>>|PULSe:PERiod?",
+    "33250A|<<|+1.000000000E-06",
+    "33250A|>>|PULSe:TRANsition 5e-09",
+    "33250A|>>|PULSe:TRANsition?",
+    "33250A|<<|+5.000000000E-09",
+    "33250A|>>|VOLTage 2",
+    "33250A|>>|VOLTage?",
+    "33250A|<<|+2.000000E+00",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.pulse",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ],
+    [
+     "W",
+     "OUTPut:LOAD INFinity"
+    ],
+    [
+     "Q",
+     "OUTPut:LOAD?",
+     "9.900000E+37"
+    ],
+    [
+     "W",
+     "FUNCtion PULSe"
+    ],
+    [
+     "Q",
+     "FUNCtion?",
+     "PULS"
+    ],
+    [
+     "W",
+     "VOLTage:UNIT VPP"
+    ],
+    [
+     "Q",
+     "VOLTage:UNIT?",
+     "VPP"
+    ],
+    [
+     "W",
+     "VOLTage:OFFSet 0"
+    ],
+    [
+     "Q",
+     "VOLTage:OFFSet?",
+     "+0.000000E+00"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+1.000000000E-03"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+1.000000000E-04"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "PULSe:WIDTh 2e-07"
+    ],
+    [
+     "Q",
+     "PULSe:WIDTh?",
+     "+2.000000000E-07"
+    ],
+    [
+     "W",
+     "PULSe:PERiod 1e-06"
+    ],
+    [
+     "Q",
+     "PULSe:PERiod?",
+     "+1.000000000E-06"
+    ],
+    [
+     "W",
+     "PULSe:TRANsition 5e-09"
+    ],
+    [
+     "Q",
+     "PULSe:TRANsition?",
+     "+5.000000000E-09"
+    ],
+    [
+     "W",
+     "VOLTage 2"
+    ],
+    [
+     "Q",
+     "VOLTage?",
+     "+2.000000E+00"
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'pulse'",
+   "case": "AgilentAFGPulse.check_errors[error queued]",
+   "log": [
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|-221,\"Settings conflict; pulse width decreased due to period\"",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.check_errors",
+   "result": "raised InstrumentError: Agilent 33250A (pulse) reported an error (pulse): -221,\"Settings conflict; pulse width decreased due to period\"",
+   "wire": [
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "-221,\"Settings conflict; pulse width decreased due to period\""
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "'pulse'",
+   "case": "AgilentAFGPulse.check_errors[empty]",
+   "log": [
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\""
+   ],
+   "method": "AgilentAFGPulse.check_errors",
+   "result": "returned None",
+   "wire": [
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "AgilentAFGPulse.output[on]",
+   "log": [
+    "33250A|>>|OUTPut ON",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|1"
+   ],
+   "method": "AgilentAFGPulse.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut ON"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "AgilentAFGPulse.output[off]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0"
+   ],
+   "method": "AgilentAFGPulse.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "True",
+   "case": "AgilentAFGPulse.output[off not confirmed]",
+   "log": [
+    "33250A|>>|OUTPut ON",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|1"
+   ],
+   "method": "AgilentAFGPulse.output",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut ON"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "False",
+   "case": "AgilentAFGPulse.output[off not confirmed 2]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|1"
+   ],
+   "method": "AgilentAFGPulse.output",
+   "result": "raised SafetyError: Agilent 33250A (pulse) did not confirm output OFF (OUTP? -> '1'); check the front panel",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFGPulse.cleanup[stuck on]",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|1"
+   ],
+   "method": "AgilentAFGPulse.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "1"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFGPulse.cleanup",
+   "log": [
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0"
+   ],
+   "method": "AgilentAFGPulse.cleanup",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ]
+   ]
+  },
+  {
+   "call": "",
+   "case": "AgilentAFGPulse.reset_to_defaults",
+   "log": [
+    "33250A|>>|*RST",
+    "33250A|>>|*CLS",
+    "33250A|>>|*OPC?",
+    "33250A|<<|1",
+    "33250A|>>|SYSTem:ERRor?",
+    "33250A|<<|+0,\"No error\"",
+    "33250A|>>|OUTPut OFF",
+    "33250A|>>|OUTPut?",
+    "33250A|<<|0"
+   ],
+   "method": "AgilentAFGPulse.reset_to_defaults",
+   "result": "returned ResetReport(instrument='33250A', ok=True, exempt=False, steps=[ResetStep(name='reset (*RST)', ok=True, detail=''), ResetStep(name='clear status (*CLS)', ok=True, detail=''), ResetStep(name='wait for completion (*OPC?)', ok=True, detail=''), ResetStep(name='drain error queue', ok=True, detail='queue empty'), ResetStep(name='output OFF confirmed (OUTPut OFF, OUTPut?)', ok=True, detail='')], warnings=[])",
+   "wire": [
+    [
+     "W",
+     "*RST"
+    ],
+    [
+     "W",
+     "*CLS"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     30.0
+    ],
+    [
+     "Q",
+     "*OPC?",
+     "1"
+    ],
+    [
+     "ctl",
+     "set_timeout",
+     10.0
+    ],
+    [
+     "Q",
+     "SYSTem:ERRor?",
+     "+0,\"No error\""
+    ],
+    [
+     "W",
+     "OUTPut OFF"
+    ],
+    [
+     "Q",
+     "OUTPut?",
+     "0"
+    ]
+   ]
   }
  ],
  "name": "keysight_53220a",

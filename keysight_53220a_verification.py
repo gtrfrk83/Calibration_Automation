@@ -43,19 +43,26 @@ DEFAULT_RF_ADDR = 'GPIB0::4::INSTR'                                             
 TB_CHOICES = ('Standard time base', 'Option 010 (OCXO)')
 CH3_CHOICES = ('No microwave channel', 'Option 106 (6 GHz)', 'Option 115 (15 GHz)')
 STIM_CHOICES = ('Fluke 96270A where it can', 'Other standards for every test')
+PULSE_GEN_CHOICES = ('Pulse generator: Keysight 81134A or equivalent', 'Pulse generator: Agilent 33250A')
+# The Agilent 33250A as the pulse generator for Tests 4a, 4b and 5 (owner decision 2026-10-27).  From the Agilent 33250A User's Guide, read as page images (printed pages): pulse width
+# 8 ns minimum (p. 167, p. 320), edge time 5 ns minimum (p. 168), width at least 1.6 x edge time (p. 167), period 20 ns minimum (p. 166), 10 Vpp into 50 ohm (p. 320), ONE Output
+# connector plus a Sync output that is a 50 % duty square wave for pulses (p. 62).  Single source: drivers/keysight_53220a.PULSE_LIMITS.  The pulse automation (AgilentAFGPulse.pulse) exists, but
+# no pulse point of the chapter is within these limits, so no point is routed to it; tests/test_keysight_53220a_points.py fails if a point becomes feasible (it must then be routed).
+GEN_33250A = dict(name='Agilent 33250A', min_width_s=max(k53.PULSE_LIMITS['min_width_s'], 1.6 * k53.PULSE_LIMITS['min_edge_s']), min_edge_s=k53.PULSE_LIMITS['min_edge_s'],
+                  min_period_s=k53.PULSE_LIMITS['min_period_s'], max_vpp=k53.PULSE_LIMITS['max_vpp'], outputs=1)
 REF_CHOICES = ('House 10 MHz standard', '96270A 10 MHz Ref Out')
 # 96270A output routes: Leveling Head 1 mHz to 4.024 GHz, -130 to +24 dBm; Microwave O/P direct to 27 GHz, -4 to +24 dBm (-100 dBm with the Extended Low Level option).  The route is a
 # front-panel choice (no remote command is documented: UNVERIFIED), so the hook-up prompt names it.
 LH_MAX_HZ, MW_MAX_HZ = 4.024e9, 27e9
 LH_MIN_DBM, RF_MAX_DBM = -130.0, 24.0
-MW_MIN_DBM, MW_MIN_DBM_EXT = -4.0, -100.0
+MW_MIN_DBM, MW_MIN_DBM_EXT = -4.0, -100.0     # the owner's 96270A has NO Extended Low Level (2026-10-27): above 4 GHz the Microwave O/P is used and its floor is -4 dBm
 INPUT_CAP_DBM = 10.0           # the level at the counter input is never planned above this (a conservative guard, UNVERIFIED against the input damage level)
 GROUP_TITLE = {'TIMEBASE': 'absolute time base', 'CH1': 'Channel 1', 'CH2': 'Channel 2', 'CH3_LH': 'microwave channel (from the Leveling Head)', 'CH3_MW': 'microwave channel (from the Microwave O/P)',
                'PULSE_CH1': 'pulse width, Channel 1', 'PULSE_CH2': 'pulse width, Channel 2', 'TINT': 'time interval, Channel 1 to Channel 2', 'BURST': 'pulse burst frequency',
                'NONE': 'self-test'}
-STIM_NEEDS = {'PULSE': 'Pulse generator: 5 ns pulse width +/- 40 ps, 1 Vpp, two outputs for the time interval tests (Keysight 81134A in the manual)',
+STIM_NEEDS = {'PULSE': 'Pulse generator: 5 ns pulse width +/- 40 ps, 1 Vpp, period 66.6 ns, two outputs 49.9 ns apart for the time interval test (Keysight 81134A in the manual)',
               'BURST': 'Pulse-modulated microwave signal generator: 100 MHz to 15 GHz, pulse width accuracy +/- 10 %, PRI 1 ms (Keysight E8257D-520-UNW in the manual); the 96270A has no pulse modulation',
-              'MW': 'Microwave source for this level (the 96270A direct Microwave O/P gives -4 dBm at best, -100 dBm with Extended Low Level), or a step attenuator after it',
+              'MW': 'External attenuator after the 96270A Microwave O/P (the Microwave O/P gives -4 dBm at best) and a power meter to verify the level at the counter input, as the manual asks',
               'LH': 'Signal generator (the manual names an SRS CG635)'}
 
 
@@ -214,31 +221,74 @@ def judge(p, reading) -> bool:
     return Decimal(repr(p['low'])) <= x <= Decimal(repr(p['high']))
 
 
+def pulse_shortfalls(st, gen=GEN_33250A):
+    """What the pulse generator cannot do of the settings a pulse point asks for (empty = it can).  st: the point's stimulus dict."""
+    out = []
+    w = st.get('width_s')
+    if w is not None and w < gen['min_width_s']:
+        out.append(f'pulse width {_tm(w)} is below its minimum pulse width ({_tm(gen["min_width_s"])})')
+    if w is not None and w < 1.6 * gen['min_edge_s'] * (1 - 1e-12):
+        out.append(f'the pulse width must be at least 1.6 x the edge time and the edge time is {_tm(gen["min_edge_s"])} at best, so {_tm(1.6 * gen["min_edge_s"])} at least')
+    if st.get('period_s') is not None and st['period_s'] < gen['min_period_s']:
+        out.append(f'period {_tm(st["period_s"])} is below its minimum ({_tm(gen["min_period_s"])})')
+    if st.get('vpp') is not None and st['vpp'] > gen['max_vpp']:
+        out.append(f'{st["vpp"]:g} Vpp is above its maximum ({gen["max_vpp"]:g} Vpp into 50 ohm)')
+    if st.get('delay_s') and gen['outputs'] < 2:
+        out.append(f'the time interval test needs two outputs {_tm(st["delay_s"])} apart and it has one output (plus a Sync output)')
+    return out
+
+
 def plan_stimulus(p, stim):
-    """How a point is stimulated.  stim: dict(mode 'auto' | 'manual', rf True/False (a 96270A is connected), loss_db, ext_low).
-    Returns dict(mode 'rf' | 'manual' | 'none', route 'LH' | 'MW' | None, level_set, reason).  Raises ValueError when the planned level would exceed the input guard."""
+    """How a point is stimulated.  stim: dict(mode 'auto' | 'manual', rf True/False (a 96270A is connected), loss_db, ext_low, pulse_gen '81134A' | '33250A').
+    Returns dict(mode 'rf' | 'manual' | 'none', route 'LH' | 'MW' | None, level_set, atten_db, reason).  atten_db: the external attenuation the technician must fit after the 96270A
+    Microwave O/P when the level at the counter is below what that output can make (the level is kept as printed).  Raises ValueError when the level would exceed the input guard."""
     st = p['stimulus']
     g = st['group']
     if g == 'NONE':
-        return dict(mode='none', route=None, level_set=None, reason='')
+        return dict(mode='none', route=None, level_set=None, atten_db=0.0, reason='')
     target = st.get('level_dbm')
     if target is not None and target > INPUT_CAP_DBM:
         raise ValueError(f'{p["description"]}: {target:g} dBm at the counter is above the {INPUT_CAP_DBM:g} dBm guard')
-    if g in ('PULSE', 'BURST'):
-        return dict(mode='manual', route=None, level_set=None, reason=STIM_NEEDS[g])
+    if g == 'PULSE':
+        if stim.get('pulse_gen') == '33250A':
+            short = pulse_shortfalls(st)
+            why = ('The Agilent 33250A cannot make this signal: ' + '; '.join(short) + '. Use ' + STIM_NEEDS['PULSE']) if short else \
+                  'The Agilent 33250A could make these settings but its pulse output is not automated by this program: set it by hand'
+            return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=why)
+        return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
+    if g == 'BURST':
+        return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
     if stim.get('mode') != 'auto' or not stim.get('rf'):
-        return dict(mode='manual', route=None, level_set=None, reason='The selected stimulus is another standard' if stim.get('mode') != 'auto' else 'No 96270A is connected')
+        return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason='The selected stimulus is another standard' if stim.get('mode') != 'auto' else 'No 96270A is connected')
     f, loss = st['frequency'], float(stim.get('loss_db') or 0.0)
     level = target + loss
     if g == 'LH' and f <= LH_MAX_HZ:
         if LH_MIN_DBM <= level <= RF_MAX_DBM:
-            return dict(mode='rf', route='LH', level_set=level, reason='')
-        return dict(mode='manual', route=None, level_set=None, reason=f'{level:g} dBm is outside the Leveling Head range ({LH_MIN_DBM:g} to {RF_MAX_DBM:g} dBm)')
+            return dict(mode='rf', route='LH', level_set=level, atten_db=0.0, reason='')
+        return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=f'{level:g} dBm is outside the Leveling Head range ({LH_MIN_DBM:g} to {RF_MAX_DBM:g} dBm)')
     floor = MW_MIN_DBM_EXT if stim.get('ext_low') else MW_MIN_DBM
-    if f <= MW_MAX_HZ and floor <= level <= RF_MAX_DBM:
-        return dict(mode='rf', route='MW', level_set=level, reason='')
-    return dict(mode='manual', route=None, level_set=None,
-                reason=f'{level:g} dBm at {f / 1e9:g} GHz is below what the 96270A Microwave O/P can make ({floor:g} dBm' + ('' if stim.get('ext_low') else ', -100 dBm with Extended Low Level') + '): ' + STIM_NEEDS['MW'])
+    if f > MW_MAX_HZ or level > RF_MAX_DBM:
+        return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=f'{f / 1e9:g} GHz at {level:g} dBm is outside the 96270A Microwave O/P range')
+    if level >= floor:
+        return dict(mode='rf', route='MW', level_set=level, atten_db=0.0, reason='')
+    atten = floor - level        # the Microwave O/P is set to its floor; the difference is the attenuation needed between it and the cable to the counter (arithmetic only, not a manual value)
+    return dict(mode='rf', route='MW', level_set=floor, atten_db=atten,
+                reason=f'The 96270A Microwave O/P cannot make {level:g} dBm (its floor is {floor:g} dBm): it is set to {floor:g} dBm and {atten:g} dB of external attenuation is needed before the counter input')
+
+
+def points_for(model, options, quick=False):
+    """The test points that exist for a model with the declared options (the manual's option columns): a point needs a printed limit for the model and every option it lists
+    (201 only changes the hook-up text).  Independent of the window: the window uses the same rule."""
+    have = set(options)
+    return [p for p in POINTS if p['limits'].get(model) is not None and set(p.get('requires', [])) - {'201'} <= have and (p['quick'] or not quick)]
+
+
+def counts_text(model, options):
+    full, quick = points_for(model, options), points_for(model, options, True)
+    tests = {}
+    for p in full:
+        tests[p['test_no']] = tests.get(p['test_no'], 0) + 1
+    return f'{len(full)} test points ({len(quick)} in the quick check): ' + ', '.join(f'{k} x{v}' for k, v in tests.items())
 
 
 class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
@@ -385,6 +435,9 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.pulse_opt = port.var(s.get('pulse_opt', 'no') == 'yes', 'bool')
         self.rear_opt = port.var(s.get('rear_opt', 'no') == 'yes', 'bool')
         self.stim_mode = port.var(pick('stim_mode', STIM_CHOICES, STIM_CHOICES[0]))
+        self.pulse_gen = port.var(pick('pulse_gen', PULSE_GEN_CHOICES, PULSE_GEN_CHOICES[0]))
+        self.opts_declared = False         # True once the technician touched an option selector (or loaded a checkpoint): *OPT? then only warns, the technician's selection decides
+        self.atten = {}
         self.ref_mode = port.var(pick('ref_mode', REF_CHOICES, REF_CHOICES[0]))
         self.loss = port.var(s.get('loss_db', '0'))
         self.ext_low = port.var(s.get('ext_low', 'no') == 'yes', 'bool')
@@ -424,7 +477,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         try: loss = float(str(self.loss.get()).replace(',', '.') or 0)
         except ValueError: loss = 0.0
         rf = (self.io.rf is not None) if self.io is not None else (bool(self.rf_addr.get().strip()) or self.virtual)         # once connected, what is really connected
-        return dict(mode='auto' if self.stim_mode.get() == STIM_CHOICES[0] else 'manual', rf=rf, loss_db=loss, ext_low=bool(self.ext_low.get()))
+        return dict(mode='auto' if self.stim_mode.get() == STIM_CHOICES[0] else 'manual', rf=rf, loss_db=loss, ext_low=bool(self.ext_low.get()),
+                    pulse_gen='33250A' if self.pulse_gen.get() == PULSE_GEN_CHOICES[1] else '81134A')
 
     def plan(self, p):
         try: return plan_stimulus(p, self.stim_state())
@@ -495,7 +549,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _row(self, p):
         cells, tags = self.shell_cells(p['id'], p['nominal'] if p['stat'] == 'mean' else 0.0, p['low'], p['high'], p['unit'])
-        mark = (' ★' if p['quick'] else '') + (' [other standard]' if p['stimulus']['group'] != 'NONE' and self.is_manual(p) else '')
+        mark = (' ★' if p['quick'] else '') + (' [other standard]' if p['stimulus']['group'] != 'NONE' and self.is_manual(p) else '') + (' [+attenuator]' if self.plan(p).get('atten_db') else '')
         return (p['id'], p['description'] + mark, *cells), tags
 
     def refresh(self):
@@ -526,9 +580,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.refresh()
 
     def on_options(self):
-        """An option was declared: the points that need it appear or go; Test 1 changes limits with the time-base option."""
+        """The technician declared an option: the points that need it appear or go; Test 1 changes limits with the time-base option.  From now on *OPT? only warns."""
+        self.opts_declared = True
+        self._options_changed()
+
+    def _options_changed(self):
         self.reset_forget()
         self.on_period()
+        if hasattr(self, 'status'): self.status.set(f'{MODEL} with {", ".join(sorted(self.option_codes())) or "no options"}: ' + counts_text(MODEL, self.option_codes()))
 
     def on_select(self, _event=None):
         sel = self.ui_view.table_selection(self)
@@ -537,7 +596,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         v, _r, u = ui.si_row([p['low'], p['high']], p['unit'])
         flags = ('  |  ' + '; '.join(p['flags'])) if p.get('flags') else ''
         why = self.manual_reason(p)
-        stim = f'Other standard: {why}' if why else ('96270A' if p['stimulus']['group'] != 'NONE' else 'none')
+        att = self.plan(p).get('atten_db')
+        stim = f'Other standard: {why}' if why else ('96270A' + (f' with {att:g} dB external attenuation: {self.plan(p)["reason"]}' if att else '') if p['stimulus']['group'] != 'NONE' else 'none')
         shown = f'Acceptable reading: {v[0]} to {v[1]} {u}' if p['stat'] != 'sdev' else f'Acceptable Std Dev: below {v[1]} {u}'
         self.detail.set(f'{p["description"]}\n{shown}  |  Manual page {p["page"]}  |  Printed: {p["printed_limit"]}{flags}\n'
                         f'Setup: {self.setup_text(p)}\nStimulus: {stim}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
@@ -592,6 +652,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         st = p['stimulus']
         bench.cable_loss_db = self.stim_state()['loss_db']
         bench.ext_ref_present = True
+        bench.atten_db = self.plan(p).get('atten_db', 0.0)           # the external attenuator the technician fits after the Microwave O/P
         if st['group'] == 'NONE' or self.plan(p)['mode'] != 'manual':
             bench.external_signal = None
         elif st['group'] == 'PULSE':
@@ -616,16 +677,21 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         return self._sp_handler
 
     def apply_detected_options(self):
-        """Fill in the options from *OPT? and say so when the operator had declared something else.  Returns the text for the connect message ('' when they agree)."""
+        """*OPT? pre-fills the option selectors, unless the technician already declared them: then a difference is only WARNED and the technician's selection decides.
+        Returns the text for the connect message."""
         o = self.io.ctr.options or {}
         want = (TB_CHOICES[1] if o.get('timebase') == '010' else TB_CHOICES[0],
                 {None: CH3_CHOICES[0], '106': CH3_CHOICES[1], '115': CH3_CHOICES[2]}.get(o.get('ch3'), CH3_CHOICES[0]), bool(o.get('pulse')))
         had = (self.tb_opt.get(), self.ch3_opt.get(), bool(self.pulse_opt.get()))
-        self.tb_opt.set(want[0]); self.ch3_opt.set(want[1]); self.pulse_opt.set(want[2])
         text = f'Options read from the counter (*OPT? {o.get("raw", "")}): {want[0]}; {want[1]}; ' + ('Option 150 pulse' if want[2] else 'no Option 150')
         if o.get('unknown'): text += f'. Unrecognised option fields: {o["unknown"]}'
-        if had != want: text += f'. WARNING: this differs from what was declared ({had[0]}; {had[1]}; {"Option 150" if had[2] else "no Option 150"}); the counter\'s options are used.'
-        self.on_options()
+        names = lambda t: f'{t[0]}; {t[1]}; ' + ('Option 150' if t[2] else 'no Option 150')
+        if self.opts_declared:
+            if had != want: text += f'. WARNING: this differs from what you declared ({names(had)}). YOUR SELECTION IS USED; change the option selectors if the counter is right.'
+            return text
+        self.tb_opt.set(want[0]); self.ch3_opt.set(want[1]); self.pulse_opt.set(want[2])
+        text += '. The option selectors were filled in from this; check them before the run.'
+        self._options_changed()
         return text
 
     def test_connections(self):
@@ -658,7 +724,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         for i in INTERFACES:
             self.settings.set(f'ctr_addr_{i}', self.addrs[i])
         for key, var in (('interface', self.interface), ('rf_addr', self.rf_addr), ('period', self.period), ('tb_opt', self.tb_opt), ('ch3_opt', self.ch3_opt), ('stim_mode', self.stim_mode),
-                         ('ref_mode', self.ref_mode), ('loss_db', self.loss)):
+                         ('ref_mode', self.ref_mode), ('loss_db', self.loss), ('pulse_gen', self.pulse_gen)):
             self.settings.set(key, var.get())
         for key, var in (('pulse_opt', self.pulse_opt), ('rear_opt', self.rear_opt), ('ext_low', self.ext_low)):
             self.settings.set(key, 'yes' if var.get() else 'no')
@@ -679,6 +745,13 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if selected: self.execute(self.points_from(POINTS, selected[0]))
         else: port.message('info', 'Selection', 'Select a test point first.')
 
+    def time_base_text(self): return 'Option 010 time base' if '010' in self.option_codes() else 'standard time base'
+
+    def attenuation_needs(self, points):
+        """[(name, need)] for the points that need external attenuation after the 96270A Microwave O/P."""
+        need = sorted({self.plan(p)['atten_db'] for p in points if self.plan(p).get('atten_db')})
+        return [('External attenuator', STIM_NEEDS['MW'] + ' (' + ' / '.join(f'{a:g} dB' for a in need) + ' for the cable loss set)')] if need else []
+
     def other_standards(self, points):
         """The standards the selected run needs besides the 96270A: [(name, need)] for the manual points."""
         out = {}
@@ -695,12 +768,14 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                  ('10 MHz reference', 'Tests 2 to 7 use the EXTERNAL reference: ' + ('the house 10 MHz standard (better than 1e-10) to EXT REF IN.' if self.ref_mode.get() == REF_CHOICES[0] else
                   'the 96270A 10 MHz REF OUT to EXT REF IN, with the 96270A itself locked to the house standard. Test 1 uses the internal time base.') +
                   ' The program changes the reference setting (stored in non-volatile memory) and puts it back as found when the session ends.')]
-        std = self.other_standards(points)
+        steps.insert(0, ('Installed options', f'Declared: {", ".join(sorted(self.option_codes())) or "none"} ({self.time_base_text()}). This run: ' + counts_text(MODEL, self.option_codes())
+                         + '. Cancel and change the option selectors if this is not what the counter has (the counter reports its own options with *OPT? at connect; your selection decides).'))
+        std = self.other_standards(points) + self.attenuation_needs(points)
         if std:
             steps.append(('Other standards needed', '; '.join(f'{k}: {v}' for k, v in std)))
         return port.operator_prompt('Before the verification', 'Warm-up and conditions', steps,
             facts=[('Limits', f'{self.period.get()}, {self.timebase_opt() == "010" and "Option 010" or "standard time base"}'), ('Options', ', '.join(sorted(self.option_codes())) or 'none'),
-                   ('Stimulus', self.stim_mode.get()), ('Interface', self.interface.get())],
+                   ('Stimulus', self.stim_mode.get()), ('Pulse generator', self.pulse_gen.get()), ('Interface', self.interface.get())],
             caution=f'The program restores the {MODEL} factory defaults (*RST) before the first point, then sets inputs, function, gate and trigger for every point.',
             ok='Conditions met - start', parent=self.root)
 
@@ -736,6 +811,10 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                  ('Wiring', self.setup_text(p))],
                 facts=facts, caution='Check the signal level against the counter input rating before connecting. The program reads the counter itself.', ok='Standard connected - measure', image=image, parent=self.root)
         steps = [('Output off', 'The 96270A output is put in standby before you rewire.'), ('Wiring', self.setup_text(p))]
+        if plan.get('atten_db'):
+            steps.append(('External attenuation', f'{plan["reason"]}. Fit it between the Microwave O/P (or its cable) and the counter input. The level required at the counter input is '
+                          f'{p["stimulus"]["level_dbm"]:g} dBm +/- 0.5 dBm (Service Guide p. 66): verify it with a power meter or use cables / an attenuator of certified loss. The attenuator value is the '
+                          f'difference only; the manual lists no attenuator.'))
         if plan['route'] == 'MW':
             steps.append(('96270A output', 'Select the Microwave O/P (direct output) on the 96270A front panel; the program cannot select the route (no remote command is documented).'))
         elif plan['route'] == 'LH':
@@ -753,6 +832,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         except procmods_engine.LiveApplyError as exc: self._error(exc); return
         if p is None: port.after(self.root, 30, lambda: self._next(points, i + 1, previous)); return     # skipped by an edit made during the run
         plan = self.plan(p)
+        self.atten[p['id']] = plan.get('atten_db', 0.0)
         if plan.get('blocked'):
             self._error(plan['reason']); return
         key = (p['group'], plan['mode']) if plan['mode'] != 'manual' else (p['group'], p.get('parent') or p['ref'])       # an other-standard point is set up for every measurement (its Std Dev shares it)
@@ -792,7 +872,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
 
     def _record(self, p, reading, synthetic, mode='rf'):
         result = 'PASS' if judge(p, reading) else 'FAIL'
-        self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()], stimulus=mode,
+        self.results[str(p['id'])] = dict(reading=reading, result=result, synthetic=synthetic, period=PERIODS[self.period.get()], stimulus=mode, atten_db=self.atten.get(p['id'], 0.0),
                                           timestamp=datetime.now().isoformat(timespec='seconds'), data=self.mode_label, **self.pm_result_fields())
         self._update_row(p); self.save(silent=True)
 
@@ -818,6 +898,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if data.get('tb_opt') in TB_CHOICES: self.tb_opt.set(data['tb_opt'])
         if data.get('ch3_opt') in CH3_CHOICES: self.ch3_opt.set(data['ch3_opt'])
         self.pulse_opt.set(bool(data.get('pulse_opt', self.pulse_opt.get()))); self.rear_opt.set(bool(data.get('rear_opt', self.rear_opt.get())))
+        self.opts_declared = True                                    # the results in the file were taken with these options
         self.load_results(data)
         self.pm_on_checkpoint(data)                                  # a saved modification snapshot is used unless the store has changed
         self.on_period(save=False); self.status.set(f'Loaded progress: {len(self.found)} As Found and {len(self.left)} As Left point(s) restored.')
@@ -855,7 +936,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         import report_pdf
         low, high = p['low'], p['high']
         text = {'mean': None, 'sdev': 'Std Dev (limit is a maximum)', 'pass': 'Self-test result (0 = pass)'}[p['stat']]
-        suffix = ' [other standard]' if r.get('stimulus') == 'manual' else ''
+        suffix = ' [other standard]' if r.get('stimulus') == 'manual' else (f' [{r["atten_db"]:g} dB external attenuator]' if r.get('atten_db') else '')
         return report_pdf.cert_row(p['description'] + suffix, p['nominal'] if p['stat'] == 'mean' else 0.0, low, high, p['unit'], r['reading'], r['result'] == 'FAIL',
                                    section=self.report_section(p), nominal_text=text, uncertainty=self.uncertainty_text(p))
 

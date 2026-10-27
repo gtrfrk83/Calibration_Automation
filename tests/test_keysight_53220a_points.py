@@ -22,6 +22,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT))
 
 A = VH = SPEC = PTS = K = None
+InstrumentError = SafetyError = None
 SCALE = {'mHz': D('0.001'), 'Hz': D(1), 'kHz': D(1000), 'MHz': D(1000000), 'GHz': D(1000000000), 'ns': D('0.000000001'), 'us': D('0.000001')}
 SECTION_SIZES = {'ov': 1, 't1': 1, 't2': 12, 't3': 8, 't4': 4, 't5': 2, 't6a': 4, 't6b': 6, 't7': 8}
 
@@ -60,7 +61,7 @@ OTHER_MEAN = {
     '6b.15GHz': {'53210A': M('14.999 999 850 GHz', '15.000 000 150 GHz'), '53220A': M('14.999 999 985 GHz', '15.000 000 015 GHz'), '53230A': M('14.999 999 985 GHz', '15.000 000 015 GHz')},
     '7a.6GHz.200ns': {'53230A': M('5.994 000 000 GHz', '6.006 000 000 GHz')},
     '7b.6GHz.13us': {'53230A': M('5.999 954 000 GHz', '6.000 046 000 GHz')},
-    '7c.1.35GHz.400ns': {'53230A': M('1.348 865 000 GHz', '1.351 350 000 GHz')},       # the printed record-page minimum (the test text gives 1.348 650 000: flagged)
+    '7c.1.35GHz.400ns': {'53230A': M('1.348 650 000 GHz', '1.351 350 000 GHz')},       # the test-text value (owner 2026-10-27); the printed record-page minimum 1.348 865 000 stays in the flag
     '7d.1.35GHz.13us': {'53230A': M('1.349 979 200 GHz', '1.350 020 800 GHz')},
 }
 OTHER_SDEV = {
@@ -79,7 +80,7 @@ T1 = {'std': {'1y': M('9.999 990 000 MHz', '10.000 010 000 MHz'), 'gt1y': M('9.9
 
 
 def setUpModule():
-    global A, VH, SPEC, PTS, K
+    global A, VH, SPEC, PTS, K, InstrumentError, SafetyError
     import _tk_stub
     _tk_stub.install()
     import ui_port
@@ -89,6 +90,8 @@ def setUpModule():
     import keysight_53220a_verification as _a
     from drivers import keysight_53220a as _k
     K = _k
+    from drivers.base import InstrumentError as _ie, SafetyError as _se
+    InstrumentError, SafetyError = _ie, _se
     A, VH = _a, _vh
     SPEC, PTS = A.SPEC, A.POINTS
 
@@ -186,10 +189,11 @@ class SpecTests(unittest.TestCase):
                     self.assertEqual(D(repr(lim['max'])), D(rules['sdev_time_s'][model]), (p['ref'], model))
 
     def test_documented_exceptions_are_flagged_on_the_points(self):
-        self.assertTrue(any('1.348 650 000' in f for f in by_ref('7c.1.35GHz.400ns.mean')['flags']))
+        self.assertTrue(any('1.348 650 000' in f and '1.348 865 000' in f for f in by_ref('7c.1.35GHz.400ns.mean')['flags']))
+        self.assertIn('1.348 865 000', by_ref('7c.1.35GHz.400ns.mean')['record_page_printed'])
         self.assertTrue(any('truncated' in f for f in by_ref('6a.5.88GHz.sdev')['flags']))
         self.assertTrue(any('Median' in f for f in by_ref('5.ch1-ch2.49.9ns.mean')['flags']))
-        self.assertEqual(by_ref('7c.1.35GHz.400ns.mean')['limits']['53230A']['low'], 1348865000.0)           # the printed value is never changed silently
+        self.assertEqual(by_ref('7c.1.35GHz.400ns.mean')['limits']['53230A']['low'], 1348650000.0)           # owner decision 2026-10-27: the test-text value; the printed one is kept as a note
 
     def test_options_required_per_test(self):
         want = {'6a': {'106'}, '6b': {'115'}, '7a': {'106', '150'}, '7b': {'106', '150'}, '7c': {'115', '150'}, '7d': {'115', '150'}}
@@ -265,7 +269,7 @@ class DriverTests(unittest.TestCase):
         import drivers
         b, rft, ct = bench('53220A')
         d = K.Keysight53230A(ct, drivers.CommandLog(), label='x')
-        with self.assertRaises(drivers.InstrumentError):
+        with self.assertRaises(InstrumentError):
             d.connect()
 
     def test_a_configuration_is_set_read_back_and_compared(self):
@@ -287,7 +291,7 @@ class DriverTests(unittest.TestCase):
             seen.append(cmd)
             return None if cmd.upper().startswith('INP1:IMP 50') else orig(cmd)          # the counter ignores the write
         ct.handle = handle
-        with self.assertRaises(drivers.InstrumentError):
+        with self.assertRaises(InstrumentError):
             d.configure_point(dict(by_ref('2a.10MHz.mean')))
         self.assertEqual([c for c in seen if c.startswith('INP1:IMP 50')], ['INP1:IMP 50'])
 
@@ -295,7 +299,7 @@ class DriverTests(unittest.TestCase):
         import drivers
         d, b, rft, ct = self.make()
         ct.errors.append('-221,"Settings conflict"')
-        with self.assertRaises(drivers.InstrumentError) as cm:
+        with self.assertRaises(InstrumentError) as cm:
             d.check_errors('configuring')
         self.assertIn('-221', str(cm.exception))
 
@@ -303,7 +307,7 @@ class DriverTests(unittest.TestCase):
         import drivers
         d, b, rft, ct = self.make()
         b.ext_ref_present = False
-        with self.assertRaises(drivers.InstrumentError) as cm:
+        with self.assertRaises(InstrumentError) as cm:
             d.set_reference('EXT')
         self.assertIn('2009', str(cm.exception))
 
@@ -329,7 +333,7 @@ class DriverTests(unittest.TestCase):
         d, b, rft, ct = self.make()
         d.set_reference('EXT')
         d.configure_point(dict(by_ref('2a.10MHz.mean')))
-        with self.assertRaises(drivers.InstrumentError) as cm:
+        with self.assertRaises(InstrumentError) as cm:
             d.measure_stats()                                               # the 96270A output is off: 9.91E37
         self.assertIn('9.91', str(cm.exception))
 
@@ -382,19 +386,62 @@ class StimulusRouting(unittest.TestCase):
         pl = A.plan_stimulus(by_ref('6b.3.1GHz.mean'), self.stim())
         self.assertEqual((pl['mode'], pl['route'], pl['level_set']), ('rf', 'LH', -27.0))
 
-    def test_low_level_microwave_needs_another_standard_unless_extended_low_level(self):
+    def test_588_ghz_at_minus_27_uses_the_microwave_output_with_external_attenuation(self):
+        """Owner 2026-10-27: the 96270A has no Extended Low Level.  Above 4 GHz the Microwave O/P is used; at its -4 dBm floor the printed -27 dBm needs 23 dB of attenuation."""
         p = by_ref('6a.5.88GHz.mean')
         pl = A.plan_stimulus(p, self.stim())
-        self.assertEqual(pl['mode'], 'manual')
-        self.assertIn('-4 dBm', pl['reason'])
-        pl = A.plan_stimulus(p, self.stim(ext_low=True))
-        self.assertEqual((pl['mode'], pl['route'], pl['level_set']), ('rf', 'MW', -27.0))
+        self.assertEqual((pl['mode'], pl['route'], pl['level_set'], pl['atten_db']), ('rf', 'MW', -4.0, 23.0))
+        self.assertEqual(p['stimulus']['level_dbm'], -27.0)                      # the printed level stays in the point
+        self.assertIn('cannot make -27 dBm', pl['reason'])
+        pl = A.plan_stimulus(p, self.stim(loss_db=3.0))                           # the cable takes 3 dB of it: 20 dB of attenuation
+        self.assertEqual((pl['level_set'], pl['atten_db']), (-4.0, 20.0))
+        pl = A.plan_stimulus(p, self.stim(ext_low=True))                          # only a 96270A that has the option
+        self.assertEqual((pl['mode'], pl['route'], pl['level_set'], pl['atten_db']), ('rf', 'MW', -27.0, 0.0))
+        self.assertEqual(A.plan_stimulus(by_ref('6a.100MHz.mean'), self.stim())['atten_db'], 0.0)
 
-    def test_15_ghz_is_direct_output_at_minus_4_dbm(self):
-        p = by_ref('6b.15GHz.mean')
-        self.assertEqual(A.plan_stimulus(p, self.stim())['mode'], 'rf')
-        self.assertEqual(A.plan_stimulus(p, self.stim(loss_db=3.0))['level_set'], -1.0)
-        self.assertEqual(A.plan_stimulus(p, self.stim(loss_db=-1.0))['mode'], 'manual')           # a negative "loss" would put the level below the Microwave O/P floor
+    def test_every_point_above_4_ghz_comes_from_the_microwave_output(self):
+        for p in PTS:
+            if p['stimulus']['group'] in ('LH', 'MW') and p['stimulus'].get('frequency', 0) > 4.024e9:
+                pl = A.plan_stimulus(p, self.stim())
+                self.assertEqual((pl['mode'], pl['route']), ('rf', 'MW'), p['ref'])
+            elif p['stimulus']['group'] in ('LH', 'MW'):
+                self.assertEqual(A.plan_stimulus(p, self.stim())['route'], 'LH', p['ref'])
+
+    def test_the_attenuated_point_measures_on_the_simulated_bench(self):
+        from drivers.simulated_53220a import DEFAULT_OPTIONS
+        DEFAULT_OPTS = DEFAULT_OPTIONS['53220A'].replace('115', '106')
+        sim, rf, ct = bench('53220A', 'USB', DEFAULT_OPTS)
+        sim.cable_loss_db = 0.0
+        sim.atten_db = 23.0
+        io = A.IO('sim', 'sim', 'USB', transports=(ct, rf), stim=self.stim(), virtual=True)
+        try:
+            p = by_ref('6a.5.88GHz.mean')
+            reading = io.measure(p)
+            self.assertTrue(p['low'] <= reading <= p['high'])
+        finally:
+            io.close()
+
+    def test_33250a_cannot_meet_any_pulse_point(self):
+        """Owner 2026-10-27 chose the Agilent 33250A as the pulse generator.  Its minimum pulse width / one output mean no pulse point of the chapter can be automated on it."""
+        for p in PTS:
+            if p['stimulus']['group'] != 'PULSE': continue
+            short = A.pulse_shortfalls(p['stimulus'])
+            self.assertTrue(short, p['ref'])
+            self.assertTrue(any('minimum pulse width' in t for t in short), p['ref'])
+            pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A'))
+            self.assertEqual(pl['mode'], 'manual')
+            self.assertIn('Agilent 33250A cannot make this signal', pl['reason'])
+            self.assertIn('81134A', pl['reason'])
+        tint = A.pulse_shortfalls(by_ref('5.ch1-ch2.49.9ns.mean')['stimulus'])
+        self.assertTrue(any('two outputs' in t for t in tint))
+        ch1 = A.pulse_shortfalls(by_ref('4a.ch1.5ns.mean')['stimulus'])
+        self.assertFalse(any('two outputs' in t for t in ch1))                     # a single-output test: only the width stops it
+        self.assertFalse(A.pulse_shortfalls(dict(width_s=20e-9, period_s=66.6e-9, vpp=1.0)))     # the capability check is not a blanket refusal
+        self.assertEqual(A.plan_stimulus(by_ref('4a.ch1.5ns.mean'), self.stim(pulse_gen='81134A'))['reason'], A.STIM_NEEDS['PULSE'])
+
+    def test_the_pulse_generator_is_selectable_in_the_window(self):
+        self.assertEqual(len(A.PULSE_GEN_CHOICES), 2)
+        self.assertIn('33250A', A.PULSE_GEN_CHOICES[1])
 
     def test_pulse_and_burst_are_always_another_standard(self):
         for ref in ('4a.ch1.5ns.mean', '4b.ch2.5ns.mean', '5.ch1-ch2.49.9ns.mean', '7a.6GHz.200ns.mean', '7d.1.35GHz.13us.mean'):
@@ -412,6 +459,104 @@ class StimulusRouting(unittest.TestCase):
         p['stimulus'] = dict(p['stimulus'], level_dbm=13.0)
         with self.assertRaises(ValueError):
             A.plan_stimulus(p, self.stim())
+
+
+class PulseDriver(unittest.TestCase):
+    """AgilentAFGPulse: the 33250A as a pulse generator (Agilent 33250A User's Guide pp. 153-168, 320), on the simulated twin."""
+
+    def gen(self):
+        from drivers.simulated_fgen import make_fgen_bench
+        from drivers import CommandLog
+        from drivers.keysight_53220a import AgilentAFGPulse
+        sim, t = make_fgen_bench('33250A')
+        d = AgilentAFGPulse(t['uut'], CommandLog(), label='33250A')
+        d.connect()
+        return d, sim
+
+    def sent(self, d):
+        return [ln.split('>>', 1)[1].strip() for ln in d.log.lines() if '>>' in ln]
+
+    def test_registry_is_verified_with_printed_pages_and_the_base_driver_is_unchanged(self):
+        import cmdreg
+        from drivers.reference_instruments import AgilentAFG, AFG_COMMANDS
+        for key, cmd in K.AFG_PULSE_COMMANDS.items():
+            self.assertTrue(cmd.verified, key)
+            self.assertRegex(cmd.ref, r"33250A User's Guide: .*\(p\. \d+\)", key)
+        keys = set(AFG_COMMANDS)
+        self.assertEqual(keys, {'status.clear', 'outp.on', 'outp.off', 'load.50', 'load.inf', 'apply.sin', 'apply.squ', 'freq.query', 'volt.query', 'err.query', 'reset', 'opc.query', 'outp.query'})
+        self.assertFalse(AFG_COMMANDS['outp.on'].verified)                                # the MDO procedures' registry is as it was
+        self.assertEqual(set(cmdreg.merge_commands(AgilentAFG)), keys)
+        merged = cmdreg.merge_commands(K.AgilentAFGPulse)
+        self.assertTrue(set(merged) > keys)
+        self.assertEqual(merged['apply.sin'], AFG_COMMANDS['apply.sin'])                  # sine / square keep their commands
+        self.assertEqual(K.PULSE_PAGES, {'func': 153, 'period': 166, 'width': 167, 'edge': 168, 'output': 162, 'load': 163, 'volt': 156, 'unit': 165, 'offset': 158, 'error': 213, 'specs': 320})
+
+    def test_pulse_is_written_once_read_back_and_the_output_stays_off(self):
+        d, sim = self.gen()
+        d.pulse(66.6e-9, 20e-9, 5e-9, 1.0)
+        self.assertEqual((sim.gen['func'], sim.gen['on'], sim.gen['unit'], sim.gen['load'], sim.gen['offs']), ('PULS', False, 'VPP', 50.0, 0.0))
+        self.assertAlmostEqual(sim.gen['per'], 66.6e-9); self.assertAlmostEqual(sim.gen['wid'], 20e-9); self.assertAlmostEqual(sim.gen['tran'], 5e-9); self.assertEqual(sim.gen['amp'], 1.0)
+        sent = self.sent(d)
+        for cmd in ('FUNCtion PULSe', 'PULSe:PERiod 6.66e-08', 'PULSe:WIDTh 2e-08', 'PULSe:TRANsition 5e-09', 'VOLTage 1', 'OUTPut:LOAD 50', 'VOLTage:UNIT VPP', 'VOLTage:OFFSet 0'):
+            self.assertEqual(sent.count(cmd), 1, cmd)                                      # each write is sent once, never retried
+            i = sent.index(cmd)
+            self.assertTrue(sent[i + 1].endswith('?'), (cmd, sent[i + 1]))                 # and read back at once
+        self.assertEqual(sent[-1], 'SYSTem:ERRor?')                                         # the error queue is read at the end
+        d.output(True); self.assertTrue(sim.gen['on'])
+        d.output(False); self.assertFalse(sim.gen['on'])
+
+    def test_order_never_breaks_the_manuals_relations(self):
+        d, sim = self.gen()                                                                # default 1 ms / 100 us / 5 ns
+        d.pulse(66.6e-9, 8e-9)                                                             # shrinking: the width first
+        self.assertEqual(sim.gen['errors'], [])
+        d.pulse(1e-3, 100e-6, 5e-9)                                                         # growing: the period first
+        self.assertEqual(sim.gen['errors'], [])
+        self.assertEqual((sim.gen['per'], sim.gen['wid']), (1e-3, 100e-6))
+
+    def test_what_the_33250a_cannot_make_is_refused_before_anything_is_sent(self):
+        d, sim = self.gen()
+        before = len(self.sent(d))
+        for args in ((66.6e-9, 5e-9, None, 1.0), (66.6e-9, 8e-9, 6e-9, 1.0), (10e-9, 8e-9, None, 1.0), (66.6e-9, 20e-9, None, 11.0), (66.6e-9, 66e-9, None, 1.0)):
+            with self.assertRaises(InstrumentError, msg=args) as cm:
+                d.pulse(*args)
+            self.assertIn('cannot make this pulse', str(cm.exception))
+        self.assertEqual(len(self.sent(d)), before)
+        with self.assertRaises(InstrumentError) as cm:
+            d.pulse(66.6e-9, 5e-9)
+        self.assertIn('8e-09', str(cm.exception)); self.assertIn('p. 167', str(cm.exception))
+        self.assertEqual(K.pulse_problems(66.6e-9, 8e-9, 5e-9, 1.0), [])                    # the minimum pulse of the User's Guide is accepted
+        self.assertEqual(K.pulse_problems(66.6e-9, 5e-9, 5e-9, 1.0)[0][:11], 'pulse width')
+
+    def test_a_readback_mismatch_or_an_error_in_the_queue_stops(self):
+        d, sim = self.gen()
+        sim.gen['errors'].append('-221,"Settings conflict; edge time decreased due to pulse width"')
+        with self.assertRaises(InstrumentError) as cm:
+            d.pulse(66.6e-9, 20e-9)
+        self.assertIn('Settings conflict', str(cm.exception))
+        d, sim = self.gen()
+        orig = d.t.handle
+        d.t.handle = lambda c: ('+9.999E-08' if c.upper().startswith('PULSE:WIDTH?') or c.upper().startswith('PULS:WIDT?') else orig(c))
+        with self.assertRaises(InstrumentError) as cm:
+            d.pulse(66.6e-9, 20e-9)
+        self.assertIn('pulse width', str(cm.exception))
+        self.assertEqual(self.sent(d).count('PULSe:WIDTh 2e-08'), 1)                         # not written again
+
+    def test_output_off_is_confirmed(self):
+        d, sim = self.gen()
+        sim.gen['stuck_on'] = True; sim.gen['on'] = True
+        with self.assertRaises(SafetyError):
+            d.output(False)
+
+    def test_the_simulated_twin_follows_the_pulse_relations(self):
+        d, sim = self.gen()
+        d.send('pulse.per', seconds=50e-9)
+        d.send('pulse.wid', seconds=100e-6)                                                  # longer than the period
+        self.assertTrue(any('-221' in e for e in sim.gen['errors']))
+        self.assertLess(sim.gen['wid'], sim.gen['per'])
+
+    def test_the_engine_limits_come_from_the_driver(self):
+        self.assertEqual(A.GEN_33250A['min_width_s'], 8e-9)
+        self.assertEqual(A.GEN_33250A['outputs'], 1)
 
 
 class Judging(unittest.TestCase):
@@ -436,6 +581,110 @@ class Judging(unittest.TestCase):
         p = by_ref('OV2')
         self.assertTrue(A.judge(p, 0))
         self.assertFalse(A.judge(p, 1))
+
+
+# What the manual's option columns give, typed from the record pages 90-99 (independent of the spec file): test number -> (points, models it applies to, options it needs).
+# A test's points are its Mean and Std Dev points (OV2: the one self-test point).  53210A: Channel 1 only, no pulse width / time interval / single period; burst: 53230A only.
+EXPECTED_TESTS = {'OV2': (1, ('53210A', '53220A', '53230A'), ()), '1': (1, ('53210A', '53220A', '53230A'), ()), '2a': (6, ('53210A', '53220A', '53230A'), ()),
+                  '2b': (6, ('53220A', '53230A'), ()), '3': (8, ('53220A', '53230A'), ()), '4a': (2, ('53220A', '53230A'), ()), '4b': (2, ('53220A', '53230A'), ()),
+                  '5': (2, ('53220A', '53230A'), ()), '6a': (4, ('53210A', '53220A', '53230A'), ('106',)), '6b': (6, ('53210A', '53220A', '53230A'), ('115',)),
+                  '7a': (2, ('53230A',), ('106', '150')), '7b': (2, ('53230A',), ('106', '150')), '7c': (2, ('53230A',), ('115', '150')), '7d': (2, ('53230A',), ('115', '150'))}
+QUICK_TESTS = {'OV2', '1', '2a', '2b', '4a', '4b', '5', '6a', '6b', '7a', '7c'}          # the (Q) tests
+# model -> {(microwave option, Option 150): (full points, quick points)}
+EXPECTED_COUNTS = {'53210A': {(None, False): (8, 8), (None, True): (8, 8), ('106', False): (12, 12), ('106', True): (12, 12), ('115', False): (14, 14), ('115', True): (14, 14)},
+                   '53220A': {(None, False): (28, 20), (None, True): (28, 20), ('106', False): (32, 24), ('106', True): (32, 24), ('115', False): (34, 26), ('115', True): (34, 26)},
+                   '53230A': {(None, False): (28, 20), (None, True): (28, 20), ('106', False): (32, 24), ('106', True): (36, 26), ('115', False): (34, 26), ('115', True): (38, 28)}}
+
+
+def expected_tests(model, options, quick=False):
+    have = set(options)
+    return {t: n for t, (n, models, need) in EXPECTED_TESTS.items() if model in models and set(need) <= have and (t in QUICK_TESTS or not quick)}
+
+
+class OptionCombinations(unittest.TestCase):
+    """The point table follows the declared model and options: every combination gives exactly the points of the manual's option columns."""
+
+    def setUp(self):
+        self.hn = VH.VHarness().start()
+        A.messagebox = VH.hh.messagebox
+
+    def tearDown(self):
+        A.configure('53220A')
+        self.hn.stop()
+
+    def app(self, model):
+        A.configure(model)
+        a = A.App(self.hn.root, demo=True, fast_demo=False)
+        a.asset.set('A-1'); a.serial.set('S-1')
+        return a
+
+    @staticmethod
+    def declare(a, tb, ch3, pulse, rear):
+        a.tb_opt.set(A.TB_CHOICES[1 if tb else 0]); a.ch3_opt.set(A.CH3_CHOICES[{None: 0, '106': 1, '115': 2}[ch3]])
+        a.pulse_opt.set(pulse); a.rear_opt.set(rear)
+        a.on_options()
+
+    def test_every_option_combination_yields_the_expected_point_set(self):
+        import itertools
+        for model in A.MODELS:
+            a = self.app(model)
+            for tb, ch3, pulse, rear, quick in itertools.product((False, True), (None, '106', '115'), (False, True), (False, True), (False, True)):
+                self.declare(a, tb, ch3, pulse, rear)
+                a.test_set.set('Quick check (Q points only)' if quick else 'Full verification')
+                codes = {c for c in (('010' if tb else None), ch3, ('150' if pulse else None), ('201' if rear else None)) if c}
+                self.assertEqual(a.option_codes(), codes)
+                got = {}
+                for p in a.active_points():
+                    got[p['test_no']] = got.get(p['test_no'], 0) + 1
+                want = expected_tests(model, codes, quick)
+                self.assertEqual(got, want, (model, sorted(codes), quick))
+                self.assertEqual(len(a.active_points()), sum(want.values()))
+                self.assertEqual(len(a.active_points()), EXPECTED_COUNTS[model][(ch3, pulse)][1 if quick else 0], (model, sorted(codes), quick))
+                self.assertEqual([p['id'] for p in a.active_points()], [p['id'] for p in A.points_for(model, codes, quick)])
+                for p in a.active_points():                                  # no point is in the run that needs an option that is not selected, or has no limit for the model
+                    self.assertTrue(set(p['requires']) - {'201'} <= codes, p['ref'])
+                    self.assertIsNotNone(p['low']); self.assertIsNotNone(p['high'])
+
+    def test_the_counts_text_follows_the_selection(self):
+        t = A.counts_text('53230A', {'106', '150'})
+        self.assertTrue(t.startswith('36 test points (26 in the quick check)'), t)
+        self.assertIn('7a x2', t)
+        t = A.counts_text('53230A', {'115'})
+        self.assertTrue(t.startswith('34 test points (26 in the quick check)'), t)
+        self.assertNotIn('7a', t); self.assertNotIn('6a', t)
+        self.assertEqual(A.counts_text('53210A', set()), '8 test points (8 in the quick check): OV2 x1, 1 x1, 2a x6')
+
+    def test_the_table_and_the_report_follow_the_selection(self):
+        a = self.app('53230A')
+        self.declare(a, False, '106', True, False)
+        shown = lambda: {str(p['id']) for p in A.POINTS if a._visible(p)}
+        p6a = by_ref('6a.100MHz.mean'); p7a = by_ref('7a.6GHz.200ns.mean'); p6b = by_ref('6b.300MHz.mean')
+        self.assertIn(str(p6a['id']), shown()); self.assertIn(str(p7a['id']), shown()); self.assertNotIn(str(p6b['id']), shown())
+        for p in (p6a, p7a, p6b):
+            a.found[str(p['id'])] = dict(reading=p['nominal'], result='PASS', synthetic=False, timestamp='2026-10-27T00:00:00', data='real')
+        names = lambda: ' '.join(str(r) for r in a.certificate_rows())
+        self.assertIn('Test 6a', names()); self.assertIn('Test 7a', names()); self.assertNotIn('Test 6b', names())
+        self.declare(a, False, None, False, False)                           # no microwave channel, no Option 150: those points are not in the table or the report
+        self.assertEqual(shown() & {str(p6a['id']), str(p7a['id']), str(p6b['id'])}, set())
+        self.assertNotIn('Test 6a', names()); self.assertNotIn('Test 7a', names()); self.assertNotIn('Test 6b', names())
+        a.ch3_opt.set(A.CH3_CHOICES[2]); a.on_options()                      # Option 115 declared: 6b appears, 6a stays out
+        self.assertIn(str(p6b['id']), shown()); self.assertNotIn(str(p6a['id']), shown())
+        self.assertIn('Test 6b', names())
+
+    def test_the_run_never_contains_a_point_whose_option_is_not_selected(self):
+        a = self.app('53230A')
+        self.declare(a, False, '106', False, False)
+        a.io = None
+        pts = a.active_points()
+        self.assertFalse([p for p in pts if p['test_no'] in ('6b', '7a', '7b', '7c', '7d')])
+        self.assertTrue([p for p in pts if p['test_no'] == '6a'])
+
+    def test_the_declaration_decides_and_the_counter_only_prefills(self):
+        a = self.app('53230A')
+        self.assertFalse(a.opts_declared)
+        self.declare(a, False, '115', False, False)
+        self.assertTrue(a.opts_declared)
+        self.assertEqual(len(a.active_points()), 34)
 
 
 class Flow(unittest.TestCase):
@@ -496,8 +745,12 @@ class Flow(unittest.TestCase):
         self.hn.stop(); self.hn = VH.VHarness().start(); A.messagebox = VH.hh.messagebox
         a = self.app('53230A', tb_opt=A.TB_CHOICES[0], ch3_opt=A.CH3_CHOICES[2])
         a.test_connections()
-        a.tb_opt.set(A.TB_CHOICES[0])
+        a.tb_opt.set(A.TB_CHOICES[0]); a.on_options()                          # the technician declared it: *OPT? only warns, the selection decides
         self.assertIn('WARNING', a.apply_detected_options())
+        self.assertEqual(a.tb_opt.get(), A.TB_CHOICES[0])
+        a.ch3_opt.set(A.CH3_CHOICES[2]); a.on_options()
+        self.assertIn('WARNING', a.apply_detected_options())
+        self.assertEqual(a.ch3_opt.get(), A.CH3_CHOICES[2])
 
     def test_points_follow_the_declared_options_and_model(self):
         a = self.app('53230A')
@@ -584,7 +837,7 @@ class Flow(unittest.TestCase):
         io = A.IO('sim', 'sim', 'USB', transports=(ct, rft), stim=dict(mode='auto', loss_db=0.0, ext_low=False))
         io.reset_at_start()
         b.ext_ref_present = False
-        with self.assertRaises(drivers.InstrumentError) as cm:
+        with self.assertRaises(InstrumentError) as cm:
             io.measure(by_ref('2a.10MHz.mean'))
         self.assertIn('2009', str(cm.exception))
         self.assertFalse(b.rf1['on'])

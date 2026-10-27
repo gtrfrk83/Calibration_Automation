@@ -33,7 +33,7 @@ CROSS-CHECK (this script ABORTS if a printed limit disagrees with the pattern be
 
 PRINTED DISCREPANCIES kept as printed and flagged (see 'flags'):
   * Test 7c record page (p. 99) prints a minimum of 1.348 865 000 GHz; the test text (p. 88) says 1.35 GHz +/- 1.35 MHz, which is 1.348 650 000 GHz (the maximum, 1.351 350 000,
-    agrees with the text).  The stricter record-page value is APPLIED (never loosened without the owner), the text value is shown in the flag.
+    agrees with the text).  OWNER DECISION 2026-10-27: the TEST TEXT value 1.348 650 000 GHz is APPLIED; the printed record-page value stays visible in the flag and in 'record_page_printed'.
   * Test 6a 5.88 GHz, 53220A Std Dev: printed 41.100 Hz; 7e-9 x 5.88 GHz = 41.16 Hz (the other printed Std Dev values are truncated the same way: 82.32 -> 82.3, 8.232 -> 8.23).
   * Test 5 step 4 says "Record the Median"; steps 2 and the record say the Mean: the Mean is used.
   * Test 6b header says -23 dBm at 300 MHz; the 3.1 GHz step says -27 dBm; the 15 GHz step says -4 dBm (all three used as printed).
@@ -119,7 +119,7 @@ T6B = {300e6: {'53210A': ('299.999 997 MHz', '300.000 003 MHz', '4.2 Hz'),
 T7 = [  # (id, carrier Hz, level dBm, burst width s, narrow, dB level, option, mean low, mean high, std dev max, text limit)
     ('7a', 6e9, 0.0, 200e-9, True, -12, '106', '5.994 000 000 GHz', '6.006 000 000 GHz', '3.000 MHz', '6 GHz +/- 6 MHz'),
     ('7b', 6e9, 0.0, 13e-6, False, -6, '106', '5.999 954 000 GHz', '6.000 046 000 GHz', '18.500 kHz', '6 GHz +/- 46 kHz'),
-    ('7c', 1.35e9, -6.0, 400e-9, True, -6, '115', '1.348 865 000 GHz', '1.351 350 000 GHz', '338 kHz', '1.35 GHz +/- 1.35 MHz'),
+    ('7c', 1.35e9, -6.0, 400e-9, True, -6, '115', '1.348 650 000 GHz', '1.351 350 000 GHz', '338 kHz', '1.35 GHz +/- 1.35 MHz'),
     ('7d', 1.35e9, -6.0, 13e-6, False, -6, '115', '1.349 979 200 GHz', '1.350 020 800 GHz', '7.79 kHz', '1.35 GHz +/- 20.8 kHz'),
 ]
 
@@ -248,11 +248,15 @@ def build():
     for tid, f, lvl, width, narrow, dbl, opt, lo, hi, sd, text in T7:
         flags = []
         if tid == '7c':
-            flags.append('Record page (p. 99) prints 1.348 865 000 GHz as the minimum; the test text (p. 88) and the maximum give 1.35 GHz +/- 1.35 MHz = 1.348 650 000 GHz.  The stricter printed '
-                         'record-page value is applied; nothing was changed.  Owner to decide.')
+            flags.append('The record page (p. 99) prints 1.348 865 000 GHz as the minimum; the test text (p. 88) and the maximum give 1.35 GHz +/- 1.35 MHz = 1.348 650 000 GHz.  Owner decision '
+                         '2026-10-27: the TEST TEXT value 1.348 650 000 GHz is applied; the printed record-page value is kept here as a visible note.')
+        before = len(pts)
         pts += stat_pair(f'{tid}.{fmt_si(f, "Hz").replace(" ", "")}.{fmt_time(width).replace(" ", "")}', {'53230A': band(lo, hi)}, {'53230A': smax(sd)}, test=tid, func='BURST', kind='FREQ',
                          channel=3, unit='Hz', nominal=f, quick=tid in ('7a', '7c'), requires=[opt, '150'], timebase='EXT', gate_s=None, narrow=narrow, burst_db=dbl,
                          stimulus=dict(group='BURST', frequency=f, level_dbm=lvl, burst_width_s=width, pri_s=1e-3), text_limit=text, page=DOC_PAGES[tid], flags=flags)
+        if tid == '7c':
+            for q in pts[before:]:
+                q['record_page_printed'] = '1.348 865 000 GHz (record p. 99, minimum)'
     sections.append(dict(id='t7', title='Test 7: Pulse burst frequency', page='77-89', setup=(
         '53230A only, Option 150 with Option 106 (7a, 7b) or Option 115 (7c, 7d).  Source: pulse-modulated microwave generator (Keysight E8257D-520-UNW), auto-level control Off, PRI 1 ms, '
         'burst widths 200 ns / 13 us (6 GHz, 0 dBm) and 400 ns / 13 us (1.35 GHz, -6 dBm).  Freq/Period, Pulse/Burst, Burst Freq; dB level -12 (7a) or -6; Narrow On for the 200 ns and 400 ns '
@@ -297,7 +301,7 @@ def build():
             rules=dict(mean_half_width_relative={'53210A': '1e-8', '53220A': '1e-9', '53230A': '1e-9'}, sdev_max_relative={'53210A': '1.4e-8', '53220A': '7e-9', '53230A': '1.4e-9'},
                        single_period_half_width_s={'53220A': '2e-10', '53230A': '1e-10'}, sdev_time_s={'53220A': '1.4e-10', '53230A': '2.8e-11'}),
             exceptions=['6a 5.88 GHz 53220A Std Dev printed 41.1 Hz (7e-9 x 5.88e9 = 41.16 Hz): printed values are truncated, not rounded',
-                        '7c record-page minimum 1.348 865 000 GHz against 1.348 650 000 GHz from the test text and the formula (systematic 400 ps / 400 ns = 1e-3 -> 1.35 MHz)']),
+                        '7c record-page minimum 1.348 865 000 GHz against 1.348 650 000 GHz from the test text and the formula (systematic 400 ps / 400 ns = 1e-3 -> 1.35 MHz); the test-text value is applied (owner 2026-10-27)']),
         sections=sections)
     check(spec)
     return spec
@@ -327,8 +331,8 @@ def check(spec):
                         p.setdefault('flags', []).append(f'{m}: printed Std Dev maximum {lim["printed"]} is the formula value {want:g} truncated, not rounded (no limit changed)')
             if test == '7c' and p['stat'] == 'mean':
                 lim = p['limits']['53230A']
-                if D(repr(lim['low'])) == D('1.35e9') - D('1.35e6'):
-                    raise SystemExit('7c: the record-page misprint is gone: remove the flag')
+                if D(repr(lim['low'])) != D('1.35e9') - D('1.35e6'):
+                    raise SystemExit('7c: the minimum must be the test-text value 1.348 650 000 GHz (owner decision 2026-10-27)')
     return True
 
 

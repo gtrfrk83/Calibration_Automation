@@ -142,7 +142,7 @@
   },
   "exceptions": [
    "6a 5.88 GHz 53220A Std Dev printed 41.1 Hz (7e-9 x 5.88e9 = 41.16 Hz): printed values are truncated, not rounded",
-   "7c record-page minimum 1.348 865 000 GHz against 1.348 650 000 GHz from the test text and the formula (systematic 400 ps / 400 ns = 1e-3 -> 1.35 MHz)"
+   "7c record-page minimum 1.348 865 000 GHz against 1.348 650 000 GHz from the test text and the formula (systematic 400 ps / 400 ns = 1e-3 -> 1.35 MHz); the test-text value is applied (owner 2026-10-27)"
   ]
  },
  "sections": [
@@ -1780,17 +1780,18 @@
      "text_limit": "1.35 GHz +/- 1.35 MHz",
      "page": "84-89 (record p. 99)",
      "flags": [
-      "Record page (p. 99) prints 1.348 865 000 GHz as the minimum; the test text (p. 88) and the maximum give 1.35 GHz +/- 1.35 MHz = 1.348 650 000 GHz.  The stricter printed record-page value is applied; nothing was changed.  Owner to decide."
+      "The record page (p. 99) prints 1.348 865 000 GHz as the minimum; the test text (p. 88) and the maximum give 1.35 GHz +/- 1.35 MHz = 1.348 650 000 GHz.  Owner decision 2026-10-27: the TEST TEXT value 1.348 650 000 GHz is applied; the printed record-page value is kept here as a visible note."
      ],
      "ref": "7c.1.35GHz.400ns.mean",
      "stat": "mean",
      "limits": {
       "53230A": {
-       "low": 1348865000.0,
+       "low": 1348650000.0,
        "high": 1351350000.0,
-       "printed": "1.348 865 000 GHz .. 1.351 350 000 GHz"
+       "printed": "1.348 650 000 GHz .. 1.351 350 000 GHz"
       }
-     }
+     },
+     "record_page_printed": "1.348 865 000 GHz (record p. 99, minimum)"
     },
     {
      "test": "7c",
@@ -1818,7 +1819,7 @@
      "text_limit": "1.35 GHz +/- 1.35 MHz",
      "page": "84-89 (record p. 99)",
      "flags": [
-      "Record page (p. 99) prints 1.348 865 000 GHz as the minimum; the test text (p. 88) and the maximum give 1.35 GHz +/- 1.35 MHz = 1.348 650 000 GHz.  The stricter printed record-page value is applied; nothing was changed.  Owner to decide."
+      "The record page (p. 99) prints 1.348 865 000 GHz as the minimum; the test text (p. 88) and the maximum give 1.35 GHz +/- 1.35 MHz = 1.348 650 000 GHz.  Owner decision 2026-10-27: the TEST TEXT value 1.348 650 000 GHz is applied; the printed record-page value is kept here as a visible note."
      ],
      "ref": "7c.1.35GHz.400ns.sdev",
      "stat": "sdev",
@@ -1828,7 +1829,8 @@
        "printed": "< 338 kHz"
       }
      },
-     "parent": "7c.1.35GHz.400ns.mean"
+     "parent": "7c.1.35GHz.400ns.mean",
+     "record_page_printed": "1.348 865 000 GHz (record p. 99, minimum)"
     },
     {
      "test": "7d",

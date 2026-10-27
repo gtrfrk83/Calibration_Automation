@@ -6,8 +6,8 @@
  "model": "53220A",
  "category": "Frequency Counter",
  "version": "1",
- "order": 71,
- "description": "Standalone calibration procedure",
+ "order": 73,
+ "description": "Automated performance verification of the Keysight 53220A counter (Service Guide chapter 1), 96270A stimulus. Points follow the declared options: 28 (no microwave channel), 32 (Option 106), 34 (Option 115); quick check 20 / 24 / 26. Pulse tests 4 and 5 need a pulse generator (the Agilent 33250A is selectable but cannot make the 5 ns pulse).",
  "launcher": "Procedures/Keysight_53220A_Verification.py",
  "engine": [
   "keysight_53220a_verification.py"

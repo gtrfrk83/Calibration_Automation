@@ -5,7 +5,8 @@ DRIVER_CASES['keysight_53220a'] (cases and resets).  The simulated counter is dr
 """
 from __future__ import annotations
 
-from drivers.keysight_53220a import Keysight53210A, Keysight53220A, Keysight53230A
+from drivers.keysight_53220a import AgilentAFGPulse, Keysight53210A, Keysight53220A, Keysight53230A
+from drivers.simulated_fgen import make_fgen_bench
 from drivers.simulated_53220a import make_53220a_bench
 
 COVERAGE = {
@@ -15,6 +16,7 @@ COVERAGE = {
         no_command=['bus']),                                                # property: derives from the transport
     'Keysight53230A': dict(covered=['connect', 'configure_point'], no_command=[]),         # inherited methods, exercised on the subclass (the burst function is the 53230A's)
     'Keysight53210A': dict(covered=['connect', 'configure_point'], no_command=[]),         # inherited methods on the unverified command set; the microwave input is Channel 2
+    'AgilentAFGPulse': dict(covered=['connect', 'pulse', 'output', 'cleanup', 'check_errors', 'reset_to_defaults'], no_command=[]),      # the 33250A as the pulse generator (User's Guide pp. 153-168)
     'Fluke96270AWide': dict(covered=[], no_command=[]),                                    # only MAX_HZ differs from Fluke96270A (its own fixture covers the commands)
 }
 
@@ -73,3 +75,24 @@ def driver_cases(c):
     m = c.inst(Keysight53210A, ct, opened=False, label='53210A')
     c.run('Keysight53210A.connect', m.connect)
     c.run('Keysight53210A.configure_point[FREQ microwave Channel 2]', m.configure_point, dict(func='FREQ', channel=3, nominal=5.88e9, gate_s=0.01))
+
+    gbench, gt = make_fgen_bench('33250A')                                                      # the 33250A as a pulse generator, on the simulated twin
+    g = c.inst(AgilentAFGPulse, gt['uut'], opened=False, label='33250A')
+    c.run('AgilentAFGPulse.connect', g.connect)
+    c.run('AgilentAFGPulse.pulse[66.6 ns period, 20 ns wide]', g.pulse, 66.6e-9, 20e-9, 5e-9, 1.0)
+    c.run('AgilentAFGPulse.pulse[8 ns minimum width]', g.pulse, 66.6e-9, 8e-9)
+    c.run('AgilentAFGPulse.pulse[back to a long period]', g.pulse, 1e-3, 100e-6, 5e-9, 1.0)
+    c.run('AgilentAFGPulse.pulse[5 ns refused]', g.pulse, 66.6e-9, 5e-9)
+    c.run('AgilentAFGPulse.pulse[High Z]', g.pulse, 1e-6, 200e-9, 5e-9, 2.0, 'INF')
+    gbench.gen['errors'].append('-221,"Settings conflict; pulse width decreased due to period"')
+    c.run('AgilentAFGPulse.check_errors[error queued]', g.check_errors, 'pulse')
+    c.run('AgilentAFGPulse.check_errors[empty]', g.check_errors, 'pulse')
+    c.run('AgilentAFGPulse.output[on]', g.output, True)
+    c.run('AgilentAFGPulse.output[off]', g.output, False)
+    gbench.gen['stuck_on'] = True
+    c.run('AgilentAFGPulse.output[off not confirmed]', g.output, True)
+    c.run('AgilentAFGPulse.output[off not confirmed 2]', g.output, False)
+    c.run('AgilentAFGPulse.cleanup[stuck on]', g.cleanup)
+    gbench.gen['stuck_on'] = False
+    c.run('AgilentAFGPulse.cleanup', g.cleanup)
+    c.run('AgilentAFGPulse.reset_to_defaults', g.reset_to_defaults)

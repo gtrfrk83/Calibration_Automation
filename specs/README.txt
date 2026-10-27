@@ -241,6 +241,7 @@ keysight_53220a_pv.json (kind 'counter-pv', written by build_53220a_spec.py)
   three counters: models{} (channels, micro_channel [53210A: Channel 2, others Channel 3], time_tests, burst, gate_resolution_s, idn), options{} (010 / 106 / 115 / 150 / 201), measure{} (100
   readings, 10 ms gate, DC, 50 ohm, 5 V range, level 0 V, BUS trigger), equipment{} (the standards the manual lists), general{}, datasheet_check{} (the published accuracy ratios; UNVERIFIED mirror).
   periods: '1y' (counter in operation 1 year or less, default) and 'gt1y' (Test 1 limits halved).
+  A point may carry record_page_printed (7c: the record page's printed minimum 1.348 865 000 GHz; the test-text value 1.348 650 000 GHz is applied, owner 2026-10-27).
   sections[].points[]
     ref, test, func           FREQ / SPER / PWID / TINT / BURST / TST; kind FREQ | PERIOD | PWID | TINT | TST (the readings are SI base units: Hz, s)
     stat                      mean | sdev (parent = the mean point whose 100 readings it shares) | pass (the self-test)
