@@ -34,7 +34,7 @@ if errorlevel 1 (
 
 rem The other packages the suite uses (instrument I/O, PDF reports, Excel): install any that are missing, into the same Python.
 rem A failure here does not stop the program; the suite's own diagnostics list what is still missing.
-for %%P in (pyvisa:pyvisa serial:pyserial reportlab:reportlab openpyxl:openpyxl) do for /f "tokens=1,2 delims=:" %%A in ("%%P") do (
+for %%P in (pyvisa:pyvisa serial:pyserial reportlab:reportlab openpyxl:openpyxl pypdfium2:pypdfium2 PIL:pillow anthropic:anthropic) do for /f "tokens=1,2 delims=:" %%A in ("%%P") do (
   %PY% -c "import %%A" >nul 2>&1
   if errorlevel 1 (
     echo Installing %%B ...

@@ -66,6 +66,11 @@ def default_db() -> Path:
 
 @contextmanager
 def _con(db=None, create=True):
+    if create:
+        try:
+            Path(db or default_db()).parent.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            pass
     con = sqlite3.connect(str(db or default_db()), timeout=5)
     try:
         if create:

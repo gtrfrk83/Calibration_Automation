@@ -552,6 +552,10 @@ class Store:
 
     @contextmanager
     def _con(self):
+        try:
+            self.registry.parent.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            pass
         con = sqlite3.connect(str(self.registry), timeout=5)
         try:
             con.executescript(SCHEMA)

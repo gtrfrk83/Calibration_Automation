@@ -2057,3 +2057,15 @@ Owner request: standards sheets for the 34461A and 34465A as MEASURING standards
 
 ## tkinter is not used (2026-10-27)
 - The suite runs on Qt (PySide6); tkinter is not installed and not needed. `tests/test_beta.py` no longer errors without it: the Tk-only `branding` import is optional and the Titles / Window classes are skipped (the other 8 tests, data folder / diagnostics / report footer, now run). The old "only test_beta fails (tkinter)" caveat no longer applies: a clean run has no failures.
+
+## Procedure Generator (branch `procedure-generator`; simulated bench and offscreen Qt only, never a real screen, instrument or live API call)
+- Tab "Procedure Generator" (qtui/screens/procedure_generator.py, procedure_generator_review.py; model procedure_generator.py; reader procedure_generator_ai.py; builder procedure_generator_build.py; draft/approval generated_draft.py).
+- Three modes with their upload requirements: MANUAL (spec sheet/manual), ONE-WAY (same; calibrator/standards driven, readings typed), TWO-WAY (spec + a programming manual for EACH instrument + hook-up photo). Two-way is chosen, enforced and saved, but its BUILDER is not in this release (Build explains "coming"; the project stays saved).
+- Files are copied to <data folder>/generator/<project id>/ (SHA-256, never altered). Table `generator_projects` lives in lab_registry.sqlite3 only; calibration_procedures.sqlite3 is never opened for writing.
+- Reading: page IMAGES (pypdfium2, else PyMuPDF, else pdftoppm) go to the Claude API through the `anthropic` SDK (forced tool `report_table_rows`, default model claude-sonnet-5-5, configurable in Settings). Never extracted text. Key: ANTHROPIC_API_KEY or ~/.calibration_suite/anthropic_api_key (0600); never logged, stored in a project, or echoed (scrubbed). The call is read-only: transient errors retried, 3 attempts at most; nothing else is retried.
+- Review is mandatory: every row accepted/edited/rejected and a per-page "checked against the image" tick (editing or accepting clears it). Uncertain or invalid rows go into the UNVERIFIED list that is stored with the procedure.
+- Build reuses the Datasheet Builder (manual_entry for Manual, function_prompt + the existing matcher for One-way); registered as an ordinary user datasheet with `generated=<project id>` in the spec.
+- DRAFT marking until the owner approves: confirmation at run start (once per window, not in demo), red banner on the run window, banner on EVERY page of the PDF (report_pdf details['draft_note']). Approval = typed name, logged append-only in generated_approvals (no sign-in exists, so this is a record, not authentication). A rebuild is a draft again. If the registry cannot be read the procedure is treated as a draft (fails closed). Generated procedures print the 'Calibration Data' title.
+- tools/readiness_check.py now accepts a user datasheet uid (`python tools/readiness_check.py <uid> --verbose`); sidecar/fingerprint checks are skipped for them (INFO).
+- Packages added to the batch file and diagnostics: pypdfium2, pillow, anthropic.
+- Tests: test_procedure_generator, _ai, _build, test_qt_procedure_generator (all mocked; no network).
