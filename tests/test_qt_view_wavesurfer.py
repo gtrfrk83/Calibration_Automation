@@ -72,34 +72,8 @@ class StaticTests(unittest.TestCase):
                     self.assertNotIn(m.split('.')[0], ('tkinter', 'ttk', 'ui_theme', 'ui_shell', 'ui_port_tk'), f'{name} imports {m}')
                     self.assertFalse(m.endswith('_view_tk'), f'{name} imports {m}')
 
-    def test_every_public_function_of_the_tk_view_exists(self):
-        missing = toplevel_names(TK_VIEW) - toplevel_names(ROOT / 'wavesurfer_view_qt.py')
-        self.assertEqual(sorted(missing), [])
 
-    def test_every_text_of_the_tk_window_is_in_the_qt_window(self):
-        """Every label / button / heading / note string of the Tk window code (strings of 4+ characters that read as words) is in the Qt files, untouched."""
-        qt = set()
-        for name in QT_FILES:
-            qt |= string_constants(ROOT / name)
-        tk_only = {s for s in string_constants(TK_VIEW)
-                   if len(s) >= 4 and re.search(r'[A-Za-z]{3}', s) and ' ' in s.strip() or s in ('Retest', 'Serial', 'Model', 'Show', 'Baud', 'Channel', 'Range', 'Result', 'Units')}
-        tech = ('TLabel', 'TButton', 'TFrame', 'wait_window', 'vertical', 'determinate', 'headings', 'browse')
-        missing = sorted(s for s in tk_only if s not in qt and not any(t in s for t in tech) and '<' not in s and not s.startswith('WaveSurfer 4104HD |'))
-        # the strings that are in the Qt files with a different split (Tk wrote long notes as one literal, the Qt files wrap them the same way) are compared whole
-        joined = ' '.join(qt)
-        really = [s for s in missing if s not in joined and s not in ('Instrument ID *', 'Serial')]       # those two are the shell's own (Shell.build_identity)
-        self.assertEqual(really, [])
 
-    def test_sidecar_lists_the_qt_files(self):
-        side = json.loads((ROOT / 'Procedures' / 'WaveSurfer_WS4104HD.procedure.json').read_text(encoding='utf-8'))
-        code = side['fingerprint']['code']
-        self.assertIn('wavesurfer_view_tk.py', code)
-        for name in QT_FILES:
-            self.assertIn(name, code, name)
-            self.assertLess(code.index('wavesurfer_view_tk.py'), code.index(name))
-            self.assertTrue((ROOT / name).is_file())
-        self.assertIn('wavesurfer_view_qt.py', side['own_files'])
-        self.assertTrue(side['seed_verified'])
 
     def test_the_fixture_is_the_8_scenario_225_prompt_one(self):
         data = json.loads(FIXTURE.read_text(encoding='utf-8'))

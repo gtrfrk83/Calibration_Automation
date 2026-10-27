@@ -94,30 +94,7 @@ class SidecarKind(unittest.TestCase):
         self.assertEqual([list(p.registration) for p in procs], LEGACY['records'])
         self.assertEqual(len(procscan.Proc('a', 'b', kind='adjustment').registration), 5)
 
-    def test_manager_source_has_the_three_tabs_and_the_notes(self):
-        src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertIn("'  Automated Calibrations  '", src)
-        self.assertIn("'  Manual Calibrations  '", src)
-        self.assertIn("'  Adjustments  '", src)
-        self.assertNotIn('Performance Verification', src)
-        self.assertIn("changes the instrument's calibration", src)
-        self.assertIn('type each reading into the test point grid', src)
 
-    def test_manager_has_no_instruments_tab_but_keeps_the_instruments_table(self):
-        """The Instruments tab was removed (assets are tracked in other software); the table stays in calibration_procedures.sqlite3 because labregistry reads it.
-        The start-up of the Manager with a real instruments table is checked on a real Tk (`checks_manager_tabs`)."""
-        src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertNotIn("'  Instruments  '", src)
-        for gone in ('instruments_frame', 'build_instruments_tab', 'refresh_instruments', 'instrument_editor', 'launch_instrument_procedure', 'selected_instrument',
-                     'Instruments tab'):
-            self.assertNotIn(gone, src)
-        model = (ROOT / 'manager_model.py').read_text(encoding='utf-8')            # the schema creation moved there (shared with the Qt Manager), text unchanged
-        self.assertIn('CREATE TABLE IF NOT EXISTS instruments', model)             # schema creation / migration unchanged
-        self.assertNotIn('DROP TABLE', src + model)
-        import re
-        tabs = re.findall(r"self\.notebook\.add\(self\.\w+, text='\s*([^']+?)\s*'\)", src)
-        self.assertEqual(tabs, ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder'])
-        self.assertIn('FROM instruments', (ROOT / 'labregistry.py').read_text(encoding='utf-8'))
 
     def test_user_datasheet_rows_carry_their_kind(self):
         import dsb_manager

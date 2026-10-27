@@ -163,7 +163,7 @@ def group_name(p):
     rng = p['range']
     unit = {'DCV': 'V', 'ACV': 'V', 'DCI': 'A', 'ACI': 'A', 'OHM4': 'ohm', 'OHM2': 'ohm', 'FREQ': 'V'}[k]
     names = {'DCV': 'DC volts', 'ACV': 'AC volts', 'DCI': 'DC current', 'ACI': 'AC current', 'OHM4': '4-wire ohms', 'OHM2': '2-wire ohms', 'FREQ': 'Frequency'}
-    from ui_theme import si_one
+    from ui_theme_core import si_one
     return f'{names[k]} {" ".join(si_one(rng, unit))} range' if k != 'FREQ' else 'Frequency (calibrator AC volts at the test frequency)'
 
 
@@ -201,7 +201,7 @@ def main():
 
 
 def write(rows, documented=()):
-    from ui_theme import si_one
+    from ui_theme_core import si_one
     L = []
     w = L.append
     groups = {}

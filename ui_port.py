@@ -166,6 +166,104 @@ class ScriptedProgress:
         self.closed = True
 
 
+class _NullWidget:
+    """Stands in for any window object a headless run asks a view for: every attribute and call answers another null widget; item access, iteration and
+    len() behave like an empty widget.  Numbers the window code does arithmetic on (sizes) answer real values."""
+    _NUMBERS = {'winfo_reqwidth': 100, 'winfo_reqheight': 20, 'winfo_width': 1, 'winfo_height': 1, 'winfo_ismapped': False, 'yview': (0.0, 1.0)}
+
+    def __init__(self, *a, **k):
+        pass
+
+    def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError(name)
+        if name in self._NUMBERS:
+            return lambda *a, **k: self._NUMBERS[name]
+        return _NullWidget()
+
+    def __call__(self, *a, **k):
+        return _NullWidget()
+
+    def __iter__(self):
+        return iter(())
+
+    def __len__(self):
+        return 0
+
+    def __bool__(self):
+        return True
+
+    def __setitem__(self, key, value):
+        pass
+
+    def __getitem__(self, key):
+        return ''
+
+
+class _NullView:
+    """The window code (module) of an engine as seen by the ScriptedUiPort: `view(name).anything(...)` builds nothing.  A view function that, in the Qt
+    window code, sets attributes on the engine (`self.shell = ...`, `self.tree = ...`: the engine reads them later) sets the same attributes here to null
+    widgets, found by reading that function in `<name>_qt.py` WITHOUT importing it (the module needs PySide6)."""
+    _cache = {}
+
+    def __init__(self, name):
+        self.__name__ = name
+
+    def _attrs(self, fname):
+        key = (self.__name__, fname)
+        if key not in _NullView._cache:
+            _NullView._cache[key] = self._read_attrs(fname)
+        return _NullView._cache[key]
+
+    def _read_attrs(self, fname):
+        import ast
+        import importlib.util
+        try:
+            spec = importlib.util.find_spec(f'{self.__name__}_qt')
+            tree = ast.parse(open(spec.origin, encoding='utf-8').read())
+        except Exception:
+            return None
+        funcs = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+        if fname not in funcs:
+            return None
+        found, seen, todo = set(), set(), [fname]
+        while todo:
+            fn = funcs[todo.pop()]
+            seen.add(fn.name)
+            first = fn.args.args[0].arg if fn.args.args else None
+            for node in ast.walk(fn):
+                if isinstance(node, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
+                    targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                    stack = list(targets)
+                    while stack:
+                        t = stack.pop()
+                        if isinstance(t, (ast.Tuple, ast.List)):
+                            stack.extend(t.elts)
+                        elif isinstance(t, ast.Attribute) and isinstance(t.value, ast.Name) and t.value.id == first:
+                            found.add(t.attr)
+                elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in funcs and node.func.id not in seen:
+                    if node.args and isinstance(node.args[0], ast.Name) and node.args[0].id == first:
+                        todo.append(node.func.id)
+        return sorted(found)
+
+    def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError(name)
+        attrs = self._attrs(name)
+        if not attrs:
+            return _NullWidget()
+
+        def call(target=None, *a, **k):
+            for attr in attrs:
+                if not hasattr(target, attr) or attr in getattr(target, '__dict__', {}) and getattr(target, attr) is None:
+                    try:
+                        setattr(target, attr, _NullWidget())
+                    except Exception:
+                        pass
+            return _NullWidget()
+        return call
+
+
 class ScriptedUiPort:
     """A port for tests: shows nothing, records every prompt in the canonical form (`.prompts`), answers from `answers` (an Answers, or None for the defaults).
 
@@ -273,8 +371,7 @@ class ScriptedUiPort:
         return None                                    # headless: a surprise is a Stop (surprise.py)
 
     def view(self, name):
-        import importlib
-        return importlib.import_module(f'{name}_tk')   # the scripted port builds nothing itself: tests that need a window use the Tk view over the stub
+        return _NullView(name)                         # the scripted port builds no window: every view function is a do-nothing (headless runs and tests)
 
     # ---- APPENDED BY WP-A (adjustment launchers; append-only block)
     def ask_value(self, title, prompt, default, *, parent=None):
@@ -377,31 +474,23 @@ ui = _Proxy()
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
-# APPENDED BY QT-A + QT-F1 (append-only block, merged): the toolkit switch.  CALSUITE_UI = qt | tk, default tk until the cut-over
+# The toolkit: Qt only (the Tk build was removed 2026-10-27).
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
-TOOLKITS = ('tk', 'qt')
-DEFAULT_TOOLKIT = 'tk'                          # the one line to change at the cut-over
+TOOLKITS = ('qt',)
+DEFAULT_TOOLKIT = 'qt'
 
 
 def toolkit_name(name=None):
-    """'tk' or 'qt': `name`, else the CALSUITE_UI environment variable, else DEFAULT_TOOLKIT.  An unknown value means the default."""
+    """Always 'qt' (kept so callers that ask keep working); an unknown CALSUITE_UI value means the default."""
     import os
     value = (name if name is not None else os.environ.get('CALSUITE_UI', '')).strip().lower()
     return value if value in TOOLKITS else DEFAULT_TOOLKIT
 
 
 def _make_port(name):
-    """A new port of toolkit `name`.  A standalone engine's default port (get_ui) falls back to Tk with a note on stderr when the Qt port cannot be imported
-    (for instance PySide6 is not installed); select_toolkit() below does NOT fall back."""
-    if name == 'qt':
-        try:
-            import ui_port_qt
-            return ui_port_qt.QtUiPort()
-        except ImportError as exc:
-            import sys
-            sys.stderr.write(f'CALSUITE_UI=qt: the Qt UiPort is not available ({exc}); using the Tk build.\n')
-    import ui_port_tk
-    return ui_port_tk.TkUiPort()
+    """A new Qt port.  There is no fallback: if PySide6 cannot be imported the ImportError says so (the Tk build no longer exists)."""
+    import ui_port_qt
+    return ui_port_qt.QtUiPort()
 
 
 def _default_port():
@@ -409,18 +498,13 @@ def _default_port():
 
 
 def select_toolkit(name=None):
-    """Install the UiPort of one toolkit and return it.  `name` 'tk' | 'qt'; None -> the environment variable CALSUITE_UI ('qt' | 'tk'), default 'tk'.
-    Call it once, before any window or engine exists (the launchers do).  An unknown value is an error (a typo in CALSUITE_UI must not silently run the
-    other toolkit); 'qt' imports ui_port_qt (PySide6) and raises ImportError if that is not installed."""
+    """Install the Qt UiPort and return it.  Call it once, before any window or engine exists (the launchers do).  An unknown CALSUITE_UI value is an
+    error (a typo must not silently run something else); PySide6 missing raises ImportError."""
     import os
     choice = (name if name is not None else os.environ.get('CALSUITE_UI', '') or DEFAULT_TOOLKIT).strip().lower()
     if choice not in TOOLKITS:
         raise ValueError(f'unknown toolkit {choice!r}: use one of {TOOLKITS} (CALSUITE_UI)')
-    if choice == 'qt':
-        import ui_port_qt
-        port = ui_port_qt.QtUiPort()
-    else:
-        import ui_port_tk
-        port = ui_port_tk.TkUiPort()
+    import ui_port_qt
+    port = ui_port_qt.QtUiPort()
     set_ui(port)
     return port

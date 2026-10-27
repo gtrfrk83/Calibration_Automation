@@ -56,6 +56,7 @@ class ScannedEqualsOldRegistry(unittest.TestCase):
         ui_port_tk.py, <engine>_view_tk.py and its Qt twin <engine>_view_qt.py and the WaveSurfer Qt helper modules wavesurfer_qt_*.py and qtui/bench_view.py: the code that shows its prompts and window; Qt migration, owner-approved)."""
         for key, old in LEGACY['FILES'].items():
             new = verified.FILES[key]
+            old = {**old, 'code': [f for f in old['code'] if f != 'ui_port_tk.py' and not f.endswith('_view_tk.py')]}      # the Tk build was removed 2026-10-27
             added = {'surprise.py'} | {f for f in new['code'] if f in ('ui_port.py', 'ui_port_tk.py') or f.endswith(('_view_tk.py', '_view_qt.py')) or f.startswith('wavesurfer_qt_') or f == 'qtui/bench_view.py'}
             self.assertLessEqual(set(new['code']) - added, set(old['code']), key)
             self.assertEqual(new['spec'], old['spec'], key)
@@ -97,10 +98,6 @@ class ManagerUsesTheScan(unittest.TestCase):
             with sqlite3.connect(M.DB) as conn:
                 self.assertEqual(conn.execute('SELECT name,manufacturer,model,category,script_path,description FROM procedures ORDER BY id').fetchall(), before)
 
-    def test_the_manager_no_longer_lists_procedures_by_hand(self):
-        src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertNotIn('Keysight_34465A_Verification.py', src)
-        self.assertIn('procscan', src)
 
 
 class SidecarRules(unittest.TestCase):

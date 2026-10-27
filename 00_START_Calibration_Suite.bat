@@ -1,6 +1,6 @@
 @echo off
 rem Starts the Calibration Suite in the Qt look. Double-click this file.
-rem The procedure windows follow CALSUITE_UI; set it to tk (or delete the next line) to get the Tk windows back.
+rem The suite is Qt only (the Tk build was removed).
 set CALSUITE_UI=qt
 cd /d "%~dp0"
 

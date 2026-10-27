@@ -23,13 +23,10 @@
   "code": [
    "Procedures/Keysight_34970A_Verification.py",
    "dacq_verification.py",
-   "dacq_view_tk.py",
    "dacq_view_qt.py",
    "qtui/bench_view.py",
    "ui_port.py",
-   "ui_port_tk.py",
    "surprise.py",
-   "surprise_view_tk.py",
    "surprise_view_qt.py",
    "procspec.py",
    "drivers/base.py",

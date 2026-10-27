@@ -619,11 +619,6 @@ class WindowRows(unittest.TestCase):
 
 
 class Wiring(unittest.TestCase):
-    def test_manager_has_the_button_and_the_method(self):
-        text = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertIn("ui.dock_button(root, 'Find instruments...', self.find_instruments)", text)
-        self.assertIn('def find_instruments(self):', text)
-        self.assertIn('instrument_scan_ui.open_find_instruments(self.root)', text)
 
     def test_the_new_modules_are_in_no_procedure_fingerprint(self):
         """Adding / changing them cannot flip a verified procedure to 'Changed since verification'."""

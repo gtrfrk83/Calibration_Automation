@@ -23,13 +23,10 @@
   "code": [
    "Procedures/Keysight_53220A_Verification.py",
    "keysight_53220a_verification.py",
-   "keysight_53220a_view_tk.py",
    "keysight_53220a_view_qt.py",
    "qtui/bench_view.py",
    "ui_port.py",
-   "ui_port_tk.py",
    "surprise.py",
-   "surprise_view_tk.py",
    "surprise_view_qt.py",
    "procspec.py",
    "drivers/base.py",

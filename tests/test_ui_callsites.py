@@ -25,8 +25,7 @@ ENGINES = [
     'Procedures/WaveSurfer_WS4104HD.py', 'Procedures/Fluke_8846A_Verification.py', 'Procedures/Fluke_8846A_Adjustment.py', 'Procedures/Agilent_34401A.py',
     'Procedures/Keithley_2000_Adjustment.py', 'Procedures/Fluke_8808A_Adjustment.py',
 ]
-HELPERS = ['datamode.py', 'reset_startup.py', 'procmods_engine.py', 'manual_override.py', 'run_queue_engine.py', 'procmods_ui.py', 'hookups.py', 'ui_shell.py', 'ui_theme.py',
-           'run_queue_ui.py', 'report_dialog.py', 'labregistry_ui.py']
+HELPERS = ['datamode.py', 'reset_startup.py', 'procmods_engine.py', 'manual_override.py', 'run_queue_engine.py', 'hookups.py']
 
 
 def current():

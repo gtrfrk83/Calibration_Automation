@@ -18,13 +18,11 @@
  "fingerprint": {
   "code": [
    "Procedures/WaveSurfer_WS4104HD.py",
-   "wavesurfer_view_tk.py",
    "wavesurfer_view_qt.py",
    "wavesurfer_qt_common.py",
    "wavesurfer_qt_sections.py",
    "wavesurfer_qt_settings.py",
    "ui_port.py",
-   "ui_port_tk.py",
    "drivers/base.py",
    "drivers/transport.py",
    "drivers/lecroy_ws4104hd.py",
@@ -41,7 +39,6 @@
  "own_files": [
   "Procedures/WaveSurfer_WS4104HD.py",
   "Procedures/WaveSurfer_WS4104HD.procedure.json",
-  "wavesurfer_view_tk.py",
   "wavesurfer_view_qt.py",
   "drivers/lecroy_ws4104hd.py"
  ]
