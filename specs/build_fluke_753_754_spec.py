@@ -396,7 +396,7 @@ def build_steps():
             if kind == 'ACV' and table == '4':
                 step['settle'] = 5
             if table == '3' and row['rng'] == '100.000 mV':
-                notes.append('No 100 mV row in the specification table (p. 5): limits = 0.02 % + 0.005 mV.')
+                notes.append('No 100 mV row in the specification table (p. 5); limit by arithmetic.')
             problems = formula_check(table, row)
             if problems:
                 step.setdefault('check', {}).update(arithmetic=problems)
@@ -466,7 +466,7 @@ def groups():
 
 
 SOURCE_NOTE = (
-    'Fluke 753/754 Calibration Manual, Performance Verification Tests, pp. 9-32; 1-year limits (2-year stored in the spec). '
+    'Fluke 753/754 Calibration Manual, Performance Verification Tests, pp. 9-32. '
     'Where the UUT measures, the lab calibrator sources the value and the display is typed; where it sources, the external meter reading is typed. '
     'Thermocouples: Type K only. Table 3, 30 V row: printed maximum 29.9870 is a misprint; 30.0065 used.')
 REPORT_NOTE = (

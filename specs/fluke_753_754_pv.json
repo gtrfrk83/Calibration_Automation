@@ -25,7 +25,7 @@
   "cite": "Fluke 753/754 Calibration Manual, Performance Verification Tests, printed pp. 9-32; 1-year limits",
   "limits": "Manufacturer limits, 1-year column, as printed (one misprint corrected, flagged)",
   "report_note": "Limits: Fluke 753/754 Calibration Manual, Performance Verification Tests (1-year column), unchanged except the 30 V dc row of Table 3 (printed maximum 29.9870, a misprint; 30.0065 used). Points marked (UUT input) were sourced by the calibrator named in the standards used; points marked (UUT output) were read on an external measuring instrument and typed in, and their Uncertainty is that of the measuring standard named in the row. Thermocouple points are Type K.",
-  "note": "Fluke 753/754 Calibration Manual, Performance Verification Tests, pp. 9-32; 1-year limits (2-year stored in the spec). Where the UUT measures, the lab calibrator sources the value and the display is typed; where it sources, the external meter reading is typed. Thermocouples: Type K only. Table 3, 30 V row: printed maximum 29.9870 is a misprint; 30.0065 used."
+  "note": "Fluke 753/754 Calibration Manual, Performance Verification Tests, pp. 9-32. Where the UUT measures, the lab calibrator sources the value and the display is typed; where it sources, the external meter reading is typed. Thermocouples: Type K only. Table 3, 30 V row: printed maximum 29.9870 is a misprint; 30.0065 used."
  },
  "models": {
   "753": {
@@ -391,7 +391,7 @@
    },
    "switch": "DC volts measure: lock the UUT on the 100.000 mV range",
    "unc_direction": "output",
-   "note": "Lock the UUT range with the Range softkey. No 100 mV row in the specification table (p. 5): limits = 0.02 % + 0.005 mV."
+   "note": "Lock the UUT range with the Range softkey. No 100 mV row in the specification table (p. 5); limit by arithmetic."
   },
   {
    "table": "3",
@@ -426,7 +426,7 @@
    },
    "switch": "DC volts measure: lock the UUT on the 100.000 mV range",
    "unc_direction": "output",
-   "note": "Lock the UUT range with the Range softkey. No 100 mV row in the specification table (p. 5): limits = 0.02 % + 0.005 mV."
+   "note": "Lock the UUT range with the Range softkey. No 100 mV row in the specification table (p. 5); limit by arithmetic."
   },
   {
    "table": "3",
@@ -461,7 +461,7 @@
    },
    "switch": "DC volts measure: lock the UUT on the 100.000 mV range",
    "unc_direction": "output",
-   "note": "Lock the UUT range with the Range softkey. No 100 mV row in the specification table (p. 5): limits = 0.02 % + 0.005 mV."
+   "note": "Lock the UUT range with the Range softkey. No 100 mV row in the specification table (p. 5); limit by arithmetic."
   },
   {
    "table": "3",
