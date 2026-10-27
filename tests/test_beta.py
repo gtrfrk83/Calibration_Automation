@@ -86,10 +86,6 @@ class Titles(unittest.TestCase):
         self.assertEqual(branding.tidy_title('Calibration Procedure Manager').count(suite_info.VERSION), 1)
 
 
-@unittest.skipUnless(HAVE_TK, 'tkinter or a display is not available')
-class Window(unittest.TestCase):
-
-
 class ReportFooter(unittest.TestCase):
     def test_footer_names_software_version(self):
         try:

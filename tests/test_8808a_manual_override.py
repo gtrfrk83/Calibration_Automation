@@ -446,8 +446,5 @@ class OnlyThe8808A(unittest.TestCase):
 
 
 
-class Wiring(Base):
-
-
 if __name__ == '__main__':
     unittest.main()
