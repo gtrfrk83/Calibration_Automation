@@ -34,6 +34,8 @@ PRESETS = (                                            # (menu text, component n
 )
 SHORT_DIST = {'k2': 'Normal k=2', 'k3': 'Normal k=3', 'std': 'Std. unc. (k=1)', 'rect': 'Rectangular', 'tri': 'Triangular', 'u': 'U-shaped'}
 GROUP_ROWS = 8
+STEPS = (('Measurand', 'what is measured'), ('Readings', 'repeatability, reproducibility'), ('Other components', 'Type B'), ('Coverage and CMC', 'k, CMC, tolerance'),
+         ('Budget and export', 'review the working'))        # layout B (owner choice 2026-10-26): steps 1-4 are inputs, step 5 is the full budget
 START_GROUPS = 3
 
 
@@ -81,22 +83,73 @@ class UncertaintyCalculatorPanel(QWidget):
         self._timer.setSingleShot(True)
         self._timer.setInterval(180)
         self._timer.timeout.connect(self.recalc)
-        root = QHBoxLayout(self)
-        root.setContentsMargins(M.page_margin, M.sm, M.page_margin, M.page_margin)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(M.page_margin, M.sm, M.page_margin, M.page_margin)
+        outer.setSpacing(M.md)
+        self.step = 0
+        outer.addWidget(self._build_stepbar())
+        root = QHBoxLayout()
         root.setSpacing(M.lg)
+        outer.addLayout(root, 1)
         self.current_id = None                       # the saved calculation on screen (None = not saved yet)
         self._saved_state = None                     # its state as last saved / opened: differing means unsaved changes
         self._loading = False
         root.addWidget(self._build_rail())
-        root.addWidget(self._build_inputs(), 5)
+        self.inputs_host = self._build_inputs()
+        root.addWidget(self.inputs_host, 5)
         root.addWidget(self._build_results(), 5)
         for _ in range(START_GROUPS):
             self.add_group()
         self._saved_state = self.state()
+        self.set_rail_open(False)                    # layout B: the saved list opens from the "Open saved" button
+        self.go_step(0)
         self.recalc()
         self.refresh()
 
     # ------------------------------------------------------------------------------------------------------------------------------ building
+    def _build_stepbar(self):
+        host = QWidget()
+        row = QHBoxLayout(host)
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(M.sm)
+        self.open_saved_b = SecondaryButton('Open saved')
+        self.open_saved_b.setToolTip('Show or hide the list of saved calculations')
+        self.open_saved_b.clicked.connect(lambda: self.set_rail_open(not self.rail_open))
+        row.addWidget(self.open_saved_b)
+        self.step_buttons = []
+        for i, (name, hint) in enumerate(STEPS):
+            b = SecondaryButton(f'{i + 1}  {name}')
+            b.setToolTip(hint)
+            b.setAccessibleName(f'Step {i + 1}: {name}')
+            b.clicked.connect(lambda _c=False, n=i: self.go_step(n))
+            row.addWidget(b)
+            self.step_buttons.append(b)
+        row.addStretch(1)
+        self.back_b = SecondaryButton('Back')
+        self.back_b.clicked.connect(lambda: self.go_step(self.step - 1))
+        self.next_b = PrimaryButton('Next')
+        self.next_b.clicked.connect(lambda: self.go_step(self.step + 1))
+        row.addWidget(self.back_b)
+        row.addWidget(self.next_b)
+        return host
+
+    def go_step(self, n):
+        """Show step n (0-4).  Nothing is locked: any step can be opened at any time.  Step 5 gives the whole width to the budget."""
+        n = max(0, min(len(STEPS) - 1, int(n)))
+        self.step = n
+        last = n == len(STEPS) - 1
+        if hasattr(self, 'pages'):
+            self.pages.setCurrentIndex(min(n, self.pages.count() - 1))
+        if hasattr(self, 'inputs_host'):
+            self.inputs_host.setVisible(not last)
+        for i, b in enumerate(self.step_buttons):
+            b.setProperty('role', 'primary' if i == n else None)
+            b.style().unpolish(b)
+            b.style().polish(b)
+        self.back_b.setEnabled(n > 0)
+        self.next_b.setEnabled(not last)
+        self.next_b.setText('Next: ' + STEPS[n + 1][0].lower() if not last else 'Next')
+
     def _build_rail(self):
         self.rail = QWidget()
         outer = QVBoxLayout(self.rail)
@@ -159,14 +212,21 @@ class UncertaintyCalculatorPanel(QWidget):
         self.rail_toggle.setText('\u2039' if self.rail_open else '\u203a')
 
     def _build_inputs(self):
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        body = QWidget()
-        lay = QVBoxLayout(body)
-        lay.setContentsMargins(0, 0, M.sm, 0)
-        lay.setSpacing(M.md)
-        scroll.setWidget(body)
+        from PySide6.QtWidgets import QStackedWidget
+        self.pages = QStackedWidget()
+        page_lays = []
+        for _ in range(4):                               # one scrolling page per input step
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+            body = QWidget()
+            pl = QVBoxLayout(body)
+            pl.setContentsMargins(0, 0, M.sm, 0)
+            pl.setSpacing(M.md)
+            scroll.setWidget(body)
+            self.pages.addWidget(scroll)
+            page_lays.append(pl)
+        lay = page_lays[0]
 
         card = Card('What is being measured')
         form = QFormLayout()
@@ -182,6 +242,8 @@ class UncertaintyCalculatorPanel(QWidget):
         form.addRow('Unit of everything below', self.unit_e)
         card.body.addLayout(form) if hasattr(card, 'body') else card.layout().addLayout(form)
         lay.addWidget(card)
+        lay.addStretch(1)
+        lay = page_lays[1]
         for e in (self.title_e, self.nominal_e, self.unit_e):
             e.textChanged.connect(self.changed)
 
@@ -227,6 +289,8 @@ class UncertaintyCalculatorPanel(QWidget):
         self.rpr_stats = label('', 'hint', wrap=True)
         rpr_lay.addWidget(self.rpr_stats)
         lay.addWidget(rpr)
+        lay.addStretch(1)
+        lay = page_lays[2]
 
         tb = Card('Other components (Type B)')
         tb_lay = tb.body if hasattr(tb, 'body') else tb.layout()
@@ -255,6 +319,8 @@ class UncertaintyCalculatorPanel(QWidget):
         row.addStretch(1)
         tb_lay.addLayout(row)
         lay.addWidget(tb)
+        lay.addStretch(1)
+        lay = page_lays[3]
 
         opt = Card('Coverage, CMC and tolerance')
         opt_lay = opt.body if hasattr(opt, 'body') else opt.layout()
@@ -279,7 +345,8 @@ class UncertaintyCalculatorPanel(QWidget):
         opt_lay.addLayout(f2)
         lay.addWidget(opt)
         lay.addStretch(1)
-        return scroll
+        lay.addStretch(1)
+        return self.pages
 
     def _build_results(self):
         host = QWidget()

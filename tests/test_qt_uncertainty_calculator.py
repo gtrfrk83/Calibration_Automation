@@ -40,6 +40,42 @@ class PanelTests(unittest.TestCase):
         p.add_type_b('Resolution', '0.00005', 'rect')
         p.recalc()
 
+    def test_guided_steps_layout_b(self):
+        """Layout B (owner choice 2026-10-26): five steps, any step can be opened at any time, step 5 gives the budget the whole width, the result stays visible."""
+        p = self.p
+        self.assertEqual(len(p.step_buttons), 5)
+        self.assertEqual(p.pages.count(), 4)
+        self.assertEqual(p.step, 0)
+        self.assertFalse(p.back_b.isEnabled())
+        self.assertTrue(p.title_e.isVisibleTo(p) and not p.rep_text.isVisibleTo(p))           # step 1: the measurand only
+        p.next_b.click()
+        self.assertTrue(p.rep_text.isVisibleTo(p) and p.groups.isVisibleTo(p) and not p.title_e.isVisibleTo(p))     # step 2: both kinds of readings
+        p.step_buttons[2].click()                                                             # a step can be jumped to
+        self.assertTrue(p.typeb.isVisibleTo(p))
+        p.step_buttons[3].click()
+        self.assertTrue(p.k_mode.isVisibleTo(p) and p.cmc_e.isVisibleTo(p))
+        for n in range(4):                                                                    # the result is visible on every input step
+            p.go_step(n)
+            self.assertTrue(p.headline.isVisibleTo(p) and p.table.isVisibleTo(p), n)
+        p.go_step(4)
+        self.assertFalse(p.inputs_host.isVisibleTo(p))                                        # step 5: the budget and the export buttons only
+        self.assertTrue(p.table.isVisibleTo(p) and p.export_b.isVisibleTo(p))
+        self.assertFalse(p.next_b.isEnabled())
+        self.assertTrue(p.back_b.isEnabled())
+        p.back_b.click()
+        self.assertEqual(p.step, 3)
+        p.go_step(99)
+        self.assertEqual(p.step, 4)
+        p.go_step(-5)
+        self.assertEqual(p.step, 0)
+
+    def test_typing_on_one_step_updates_the_result_on_another(self):
+        self.p.go_step(1)
+        self.p.rep_text.setPlainText('10.0001\n10.0003\n9.9999')
+        self.p.go_step(3)
+        self.p.recalc()
+        self.assertIsNotNone(self.p.result, self.p.error)
+
     def test_empty_panel_asks_for_data_and_disables_export(self):
         self.assertIsNone(self.p.result)
         self.assertFalse(self.p.export_b.isEnabled())

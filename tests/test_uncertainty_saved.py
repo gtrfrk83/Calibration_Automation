@@ -148,6 +148,8 @@ class PanelSaveTests(TempRegistry):
         self.assertIsNone(self.p.current_id)
 
     def test_the_list_can_be_folded_away_for_room(self):
+        self.assertFalse(self.p.rail_body.isVisibleTo(self.p))           # layout B: the list starts folded; the "Open saved" button opens it
+        self.p.open_saved_b.click()
         self.assertTrue(self.p.rail_body.isVisibleTo(self.p))
         self.p.set_rail_open(False)
         self.assertFalse(self.p.rail_body.isVisibleTo(self.p))
