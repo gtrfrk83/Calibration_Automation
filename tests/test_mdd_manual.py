@@ -258,7 +258,11 @@ class ManualRun(Fix):
         self.h.default_reading = H.typed_nominal
         self.assertTrue(self.h.run_all())
         self.assertTrue(all(r['synthetic'] for r in a.found.values()))
-        self.assertIn('DEMO', self.pdf_text(a).upper())
+        shown, said = [], []
+        with mock.patch.object(rt.port, 'report_details', lambda *x, **k: shown.append(1) or {}), mock.patch.object(rt.port, 'message', lambda *x, **k: said.append(x)):
+            a.export_pdf()                                                             # a demo run never exports: the review is shown, then the export is refused
+        self.assertEqual((len(shown), len(said)), (1, 1))
+        self.assertIn('no PDF is exported', said[0][2])
 
 
 class OwnerFlag(unittest.TestCase):
@@ -545,15 +549,17 @@ class StandardUncertainty(Fix):
         self.assertEqual(lims_a, [(p.get('low'), p.get('high'), p.get('nominal')) for p in b.points])
         self.assertTrue(all(v['standard'] == 'manual' for v in b.found.values()))        # the record still says the technician did it by hand
 
-    def test_demo_mode_never_prints_a_standards_uncertainty(self):
+    def test_demo_mode_shows_the_uncertainties_for_review_but_never_exports(self):
         a = self.app('5522A', demo=True)
         rows, _pts = a.certificate_rows_and_points()
-        self.assertEqual([r['Uncertainty'] for r in rows], [''] * len(rows))
+        self.assertTrue(any(r['Uncertainty'] for r in rows))                           # shown in the review window ...
         self.assertTrue(all(r['synthetic'] for r in a.found.values()))
-        txt = self.pdf_text(a)
-        self.assertIn('DEMO', txt.upper())
-        self.assertNotIn('Uncertainty:', txt)
-        self.assertNotIn('[5522A]', txt)
+        self.assertTrue(all('[demo, 5522A]' in r['Description'] for r in rows if r['Uncertainty']))
+        out = Path(tempfile.mkdtemp()) / 'x.pdf'
+        with mock.patch.object(rt.port, 'report_details', lambda *x, **k: {}), mock.patch.object(rt.port, 'message', lambda *x, **k: None), \
+                mock.patch.object(rt.hh.filedialog, 'asksaveasfilename', lambda **k: str(out)):
+            a.export_pdf()
+        self.assertFalse(out.exists())                                                 # ... and no PDF is ever written
         self.assertEqual(a.manual_uncertainty_line(), '')
 
     def test_a_loaded_demo_result_is_not_given_a_real_uncertainty_either(self):
@@ -710,19 +716,16 @@ class StandardUncertainty(Fix):
         self.assertEqual(a.found[p['id']], found)                                    # reading, result and the 'manual' standard of the record
         self.assertEqual(a.found[p['id']]['standard'], 'manual')
 
-    def test_a_demo_run_offers_no_choice_and_prints_no_figure_even_if_one_is_set(self):
+    def test_a_demo_run_offers_no_choice_menu_and_a_forced_choice_is_review_only(self):
         a = self.app('5522A', demo=True)
         p, entries = self.entries(a, 'p0001')
         self.assertEqual(len(entries), 1)
         self.assertFalse(entries[0][2])
         self.assertIn('demo', entries[0][3].lower())
-        a.set_unc_choice(p, '5560A')                                                   # even if it is forced
+        a.set_unc_choice(p, '5560A')                                                   # a forced choice is shown for review too, never exported
         rows, _pts = a.certificate_rows_and_points()
-        self.assertEqual([r['Uncertainty'] for r in rows], [''] * len(rows))
+        self.assertTrue(any(r['Uncertainty'] for r in rows))
         self.assertEqual(a.manual_uncertainty_line(), '')
-        txt = self.pdf_text(a)
-        self.assertIn('DEMO', txt.upper())
-        self.assertNotIn('[5560A]', txt)
 
     def test_a_frequency_point_carries_the_lab_cmc_and_can_be_changed_to_another_covering_standard(self):
         import report_pdf

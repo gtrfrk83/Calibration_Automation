@@ -1714,6 +1714,18 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         super()._store(p, **fields)
 
     # ---- report ---------------------------------------------------------------------------------------------------------------------
+    def export_pdf(self):
+        """A DEMO run of a manual calibration shows the standard's uncertainties in the review window (so the sheet can be checked) but never exports a PDF: the review is
+        shown, then the export is refused.  Every other run exports as before."""
+        if not (self.demo and self.manual_entry):
+            return super().export_pdf()
+        rows, _pts = self.certificate_rows_and_points()
+        if not rows:
+            port.message('info', 'No results', 'No recorded results to export yet.')
+            return
+        port.report_details(f'{self.info["name"]} performance verification', parent=self.root)
+        port.message('info', 'Demo run', 'This is a demo run: the uncertainties are shown for review only and no PDF is exported. Run it with demo off to generate the report.')
+
     def standard_of(self, p, r=None):
         r = r if r is not None else self._record_for(p)
         return (r or {}).get('standard') or ('demo' if self.demo else 'manual')
@@ -1752,7 +1764,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
                 row['Uncertainty'] = uncertainty.format_value(a['uncertainty'], run.get('unit') or p.get('base_unit'))
         manual_std = (self.manual_values(p, std) or {}).get('unc_standard') if row.get('Uncertainty') else None
         if manual_std:                                                # a manual calibration's row says which standard its uncertainty is from
-            row['Description'] = f'{row["Description"]}  [{manual_std}]'
+            row['Description'] = f'{row["Description"]}  [{"demo, " if self.demo else ""}{manual_std}]'
         elif not (self.manual_entry and std in ('', 'manual')):         # a manual calibration's rows carry no '[manual]' tag (all of it is by hand)
             row['Description'] = f'{row["Description"]}  [{std}{coil_tag}]'
         return row
@@ -1803,7 +1815,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
     def manual_values(self, p, std):
         """The snapshot of the standard whose uncertainty a MANUAL calibration's point carries (see manual_uncertainties), or None: not a manual calibration, a point the chosen
         standard does not cover, a point with no standard chosen, or a DEMO reading (std 'demo': a demo report never prints a standard's uncertainty)."""
-        if not self.manual_entry or std != 'manual' or self.demo:
+        if not self.manual_entry or std != ('demo' if self.demo else 'manual'):        # a demo run shows the figures for review (the export is blocked, export_pdf)
             return None
         a = self.unc_figures(p)
         return a if a.get('unc_standard') and a.get('uncertainty') else None
