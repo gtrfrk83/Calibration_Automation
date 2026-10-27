@@ -33,8 +33,8 @@ from ..theme import M as SP
 from ..widgets import Badge, Banner, ModalDialog, PrimaryButton, SecondaryButton, SegmentedFilter, SectionHeader, label, rule
 from .report_details import StandardsGrid, demo_title
 
-BADGE = {M.AS_BUDGETED: 'good', M.RAISED: 'warn', M.NOT_IN_SCOPE: 'bad', M.CHANGED: 'info', M.MANUAL: 'warn', M.NO_UNC: 'neutral'}
-PILLS = (('As budgeted', 'good'), ('Raised to scope', 'warn'), ('Not in scope', 'bad'), ('Standard changed', 'info'), (M.MANUAL, 'warn'))
+BADGE = {M.AS_BUDGETED: 'good', M.RAISED: 'warn', M.NOT_IN_SCOPE: 'bad', M.CHANGED: 'info', M.MANUAL: 'warn', M.NO_UNC: 'neutral', M.ASSIGNED: 'warn'}
+PILLS = (('As budgeted', 'good'), ('Raised to scope', 'warn'), ('Not in scope', 'bad'), ('Standard changed', 'info'), (M.MANUAL, 'warn'), (M.ASSIGNED, 'warn'))
 NOTE = ('Reported = larger of Budget and Scope minimum, rounded up to 2 significant figures (k = 2), never below the lab’s A2LA scope minimum. '
         'Limits and pass / fail are never touched.')
 DEMO_TEXT = 'DEMO DATA - NOT CALIBRATION EVIDENCE. This is a demo run: the PDF is stamped DEMO and nothing is recorded in Asset History.'
@@ -241,7 +241,24 @@ class ReviewWindow(QDialog):
         self.btn_why.setEnabled(False)
         self.btn_why.clicked.connect(lambda: self.why())
         tools.addWidget(self.btn_why)
+        self.btn_assign = SecondaryButton('Assign uncertainty\u2026')
+        self.btn_assign.setToolTip('For a point with no uncertainty: accept a suggested value with one tap, or enter your own (field_uncertainty.py)')
+        self.btn_assign.setEnabled(False)
+        self.btn_assign.clicked.connect(lambda: self.assign())
+        tools.addWidget(self.btn_assign)
         root.addLayout(tools)
+        cta = QHBoxLayout()                                         # 'No uncertainty for this point: Assign' (only while a point should carry one and has none)
+        cta.setContentsMargins(SP.page_margin, 0, SP.page_margin, SP.sm)
+        cta.setSpacing(SP.sm)
+        self.cta = Banner('', 'warn')
+        self.cta_btn = PrimaryButton('Assign')
+        self.cta_btn.clicked.connect(lambda: self.assign(first=True))
+        cta.addWidget(self.cta, 1)
+        cta.addWidget(self.cta_btn, 0, Qt.AlignmentFlag.AlignVCenter)
+        self.cta_row = QWidget()
+        self.cta_row.setLayout(cta)
+        self.cta_row.hide()
+        root.addWidget(self.cta_row)
 
         # ---- the grid
         cols = [
@@ -343,10 +360,16 @@ class ReviewWindow(QDialog):
             return s.std_label or '—'
         return M.label(r.standard)
 
+    def field_gap(self, r) -> bool:
+        """The point should carry an uncertainty, prints none and has no assignment yet."""
+        return r.spec.idx in (getattr(self.model, 'field_missing', None) or {}) and r.assigned is None and r.typed is None
+
     def _reported_text(self, r) -> str:
         rep = r.reported_text or '—'
         if r.can_type() and r.typed is None:
             rep += '  [type]'                                            # a point the scope does not cover: click to type an uncertainty
+        elif self.field_gap(r):
+            rep += '  [assign]'                                          # no uncertainty for this point: Assign (field_uncertainty)
         return rep
 
     def _status_text(self, r):
@@ -387,6 +410,15 @@ class ReviewWindow(QDialog):
         self.header.set_subtitle(f'{self.subtitle_base} · {with_unc} of {c["all"]} points carry an uncertainty')
         for key, pill in self.pills.items():
             pill.setText(f'{c.get(key, 0)} {SHORT.get(key, key.lower())}')
+            if key == M.ASSIGNED:
+                pill.setVisible(bool(c.get(key, 0)))                  # only while something is assigned in the field
+        gaps = [r for r in m.rows if self.field_gap(r)]
+        self.cta_row.setVisible(bool(gaps))
+        if gaps:
+            self.cta.set_text(('No uncertainty for this point: ' if len(gaps) == 1 else f'No uncertainty for {len(gaps)} points: ') +
+                              ('assign a suggested value or enter your own. ' if not getattr(self.model, 'field_demo', self.demo) else 'assign one (demo: kept for this session only). ') +
+                              'Pass / fail, limits and the run are not affected.')
+            self.cta_btn.setText('Assign' if len(gaps) == 1 else f'Assign ({len(gaps)})')
         for key, text in (('All', f'All {c["all"]}'), ('Needs attention', f'Needs attention {c["attention"]}'), ('Changed by me', f'Changed by me {c["changed"]}')):
             self.filter_bar.set_count(key, {'All': c['all'], 'Needs attention': c['attention'], 'Changed by me': c['changed']}[key])
         n_bad = c.get(M.NOT_IN_SCOPE, 0)
@@ -434,6 +466,7 @@ class ReviewWindow(QDialog):
         self.btn_apply.setEnabled(bool(common))
         one = self.model.rows[idx[0]] if len(idx) == 1 else None
         self.btn_why.setEnabled(bool(one is not None and (one.cur.status == M.NOT_IN_SCOPE or one.typed is not None)))
+        self.btn_assign.setEnabled(bool(one is not None and one.typed is None and (self.field_gap(one) or one.assigned is not None or one.spec.printed.get('Uncertainty'))))
 
     def why(self, idx=None):
         """The 'Why is there no uncertainty?' panel for the selected row (or `idx`).  Returns its outcome ('applied' | 'flagged' | None)."""
@@ -449,6 +482,26 @@ class ReviewWindow(QDialog):
             self._show_hint('')
         elif out == 'flagged':
             self._show_hint('Flagged for quality: it is on the uncertainty issues list.', 'info')
+        return out
+
+    def assign(self, idx=None, first=False):
+        """The 'Assign uncertainty' panel (field_uncertainty) for the selected row, `idx`, or (first=True) the first point that has none.  Returns its outcome."""
+        from .field_uncertainty_panel import AssignDialog
+        if idx is None:
+            if first:
+                gaps = [r.spec.idx for r in self.model.rows if self.field_gap(r)]
+                if not gaps:
+                    return None
+                idx = gaps[0]
+            else:
+                sel = self.selected_indexes()
+                if len(sel) != 1:
+                    return None
+                idx = sel[0]
+        out = AssignDialog(self, self.model, idx, asset=self.model.asset, demo=bool(getattr(self.model, 'field_demo', self.demo))).run()
+        if out in ('assigned', 'withdrawn'):
+            self.refresh()
+            self._show_hint('')
         return out
 
     # ------------------------------------------------------------------------------------------------------------------ editing
@@ -522,6 +575,8 @@ class ReviewWindow(QDialog):
         t = self.table
         key = 'std' if not row.spec.locked else ('reported' if row.can_type() else None)
         if key is None:
+            if self.field_gap(row):
+                QTimer.singleShot(0, lambda: self.assign(row.spec.idx))        # no uncertainty for this point: Assign
             return
         col = t.column_index(key)
         for i in range(t.proxy.rowCount()):

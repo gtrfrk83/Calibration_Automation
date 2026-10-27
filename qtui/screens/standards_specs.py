@@ -421,6 +421,18 @@ class StandardsSpecsPanel(QWidget):
         self.import_btn.clicked.connect(lambda _c=False: self.import_json())
         foot.addWidget(self.import_btn)
         v.addLayout(foot)
+        foot2 = QHBoxLayout()
+        foot2.setContentsMargins(M.lg, 0, M.lg, M.md)
+        self.field_btn = SecondaryButton('Field assignments...')
+        self.field_btn.setToolTip('Every uncertainty a technician assigned in the field: procedure, point, value, basis, reason, who, when; export to CSV.')
+        self.field_btn.clicked.connect(lambda _c=False: self.field_assignments())
+        foot2.addWidget(self.field_btn)
+        v.addLayout(foot2)
+
+    def field_assignments(self):
+        """The lab owner's list of uncertainties assigned in the field (with CSV export)."""
+        from .field_uncertainty_panel import FieldAssignmentsDialog
+        return FieldAssignmentsDialog(self).run()
 
     def _build_pickbar(self):
         """Shown instead of the rail when the window is too narrow for it: a selector of the standards."""
@@ -436,6 +448,9 @@ class StandardsSpecsPanel(QWidget):
         self.pick_import = SecondaryButton('Import spec JSON...')
         self.pick_import.clicked.connect(lambda _c=False: self.import_json())
         h.addWidget(self.pick_import)
+        self.pick_field = SecondaryButton('Field assignments...')
+        self.pick_field.clicked.connect(lambda _c=False: self.field_assignments())
+        h.addWidget(self.pick_field)
         self.right_lay.addWidget(self.pickbar)
         self.pickbar.hide()
 

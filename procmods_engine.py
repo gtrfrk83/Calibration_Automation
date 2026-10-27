@@ -1075,6 +1075,10 @@ class ProcModsMixin:
             from ui_port import ui as port
             hook = port.view('procmods_view').attach_live(self, shell if shell is not None else getattr(self, 'shell', None))
             self.__dict__['_pm_live_hook'] = hook
+            try:                                                       # 'No uncertainty: Assign' (field_uncertainty_view): added only while a recorded point lacks an uncertainty
+                self.__dict__['_field_uncertainty_hook'] = port.view('field_uncertainty_view').attach(self, shell if shell is not None else getattr(self, 'shell', None))
+            except Exception:
+                pass
             return hook
         except Exception as exc:
             if self.pm_state is not None:

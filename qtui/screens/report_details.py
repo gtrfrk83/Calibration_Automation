@@ -42,8 +42,24 @@ def ask_details(parent, procedure=''):
         if report_review is not None:
             out = report_review.ask(parent, procedure)           # never raises; UNAVAILABLE = not covered / cannot be built
             if out is not UNAVAILABLE:
-                return out
-    return ask_details_plain(parent, procedure)
+                return with_field_procedure(parent, out)
+    return with_field_procedure(parent, ask_details_plain(parent, procedure))
+
+
+def with_field_procedure(parent, details):
+    """Tell the report writer which procedure this is, but ONLY when uncertainties were assigned in the field for it (field_uncertainty.py): details['field_procedure'] is the
+    engine-derived name the assignments were stored under.  Without stored assignments nothing is added, so the details (and the saved report record) are as before."""
+    if isinstance(details, dict):
+        try:
+            import field_uncertainty
+            import report_review_flow as flow
+            app = flow.find_app(parent)
+            pid = field_uncertainty.procedure_id_for(app) if app is not None else ''
+            if pid and field_uncertainty.lookup_all(pid, demo=flow.is_demo(app)):
+                details['field_procedure'] = pid
+        except Exception:
+            pass
+    return details
 
 
 class StandardsGrid:
