@@ -214,6 +214,8 @@ class Cancelled(Exception):
 class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """The calibrator: set the output for a point, confirm it was accepted, and never leave it energised."""
     RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the 110-series manual's "ramp up in 50 V increments, 5 s apart"
+    reset_after_hand_set = False                              # the spec's options.reset_after_hand_set (Fluke 287/289: the calibrator is reset after a point the operator set by hand)
+    hand_set_pending = False
     auto_ramp = True                                          # the spec's options.auto_ramp (false: straight to the test value)
     virtual = False                                           # demo on the virtual bench: waits are shortened, nothing is appended to the shared log
 
@@ -251,6 +253,17 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 self.cal.restore_sine()
             except Exception as exc:
                 self.log.add('!!', f'square wave NOT changed back to sine: {exc}', self.cal.label)
+
+    def _reset_after_hand_set(self):
+        """Fluke 287 / 289 (owner request 2026-10-27): the operator set the calibrator by hand for the last point (5 V p-p square wave with 15 % duty, 4 V p-p square with offset,
+        0.707 V p-p at 50 ohm), so before the next point sends any command the calibrator is reset (*RST, *CLS, wait, error queue, standby: the same locked reset as at the start of
+        the run).  Sent once, never retried; if the reset is not confirmed the point is refused."""
+        self.hand_set_pending = False
+        rep = self.cal.reset_to_defaults()
+        if not rep.ok:
+            self.log.add('!!', f'calibrator reset after the hand-set point was NOT confirmed: {rep.text()}', self.cal.label)
+            raise drivers.InstrumentError('The calibrator was not confirmed reset after the point set by hand: output not enabled. ' + rep.text())
+        self.log.add('--', 'calibrator reset after the point set by hand', self.cal.label)
 
     @staticmethod
     def uses_coil(p):
@@ -359,6 +372,8 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         a = p['applied']
         kind, v, f = p['kind'], a['value'], a.get('frequency')
         context = describe(p)
+        if self.hand_set_pending and self.reset_after_hand_set:
+            self._reset_after_hand_set()
         self.standby()
         if getattr(self.cal, 'wave_nonsine', False) and kind not in SQUARE_KINDS:
             raise drivers.InstrumentError('The calibrator is still on a square wave (WAVE SINE was not confirmed after the last square-wave point): '
@@ -634,6 +649,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             bench, _a, _b = make_bench()
             io = IO(self.cal_mode.get(), 'sim', transport=SimFlukeTransport(bench, model), mods=mods)
             io.auto_ramp = auto_ramp
+            io.reset_after_hand_set = bool(self.spec.get('options', {}).get('reset_after_hand_set'))
             return io
 
         def run(io):
@@ -738,6 +754,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         else:
             self.io = IO(self.cal_mode.get(), self._address(), int(self.cal_baud.get()), mods=self.pm_state)
         self.io.auto_ramp = self._auto_ramp()
+        self.io.reset_after_hand_set = bool(self.spec.get('options', {}).get('reset_after_hand_set'))
         self._set_conn(True)
         if not self.demo:
             self._save_settings()                           # a demo never changes the saved connection settings
@@ -1047,6 +1064,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             self._q_hv_note(p)
             if self.spec.get('options', {}).get('hv_once_per_group'):
                 self._hv_ok_key = key
+        if p['kind'] == 'NONE' and not p.get('applied') and 'by hand' in str(p.get('setup', '')).lower() and self.io and self.spec.get('options', {}).get('reset_after_hand_set'):
+            self.io.hand_set_pending = True            # the next point resets the calibrator before it sends anything
         if p.get('applied') and not self.manual_cal:
             self.status.set(f'Point {p["n"]}/{len(self.points)}: setting the calibrator to {output_text(p)} ...')
 

@@ -80,3 +80,34 @@ class Limits(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ResetAfterHandSet(unittest.TestCase):
+    """Fluke 287/289 (owner request 2026-10-27): the calibrator is reset after a point the operator set by hand (steps 25, 29 duty cycle, 41), before the next point's commands."""
+
+    def run_io(self, option, pending=True):
+        import handheld_dmm as hd
+        from drivers.simulated import make_bench
+        spec = hd.load_spec('fluke_287_289_pv.json')
+        self.assertTrue(spec['options'].get('reset_after_hand_set'))
+        hand = [p for p in hd.points_for(spec, '289') if p['kind'] == 'NONE' and 'by hand' in p.get('setup', '')]
+        self.assertEqual(len(hand), 3)
+        nxt = next(p for p in hd.points_for(spec, '289') if p['kind'] == 'DCV')
+        bench, _a, _b = make_bench()
+        io = hd.IO('Fluke 5522A', 'sim', transport=T.Spy(bench, '5522A'))
+        io.auto_ramp = False
+        io.reset_after_hand_set = option
+        io.hand_set_pending = pending
+        io.apply(nxt)
+        return io, [t for _i, t in T.H.wire(io)]
+
+    def test_reset_before_the_next_points_first_output_command(self):
+        io, texts = self.run_io(True)
+        self.assertEqual(texts.count('*RST'), 1)
+        first_out = next(i for i, t in enumerate(texts) if t.startswith('OUT ') and not t.endswith('?'))
+        self.assertLess(texts.index('*RST'), first_out)
+        self.assertFalse(io.hand_set_pending)
+
+    def test_no_reset_when_nothing_was_set_by_hand_or_option_off(self):
+        self.assertNotIn('*RST', self.run_io(True, pending=False)[1])
+        self.assertNotIn('*RST', self.run_io(False)[1])
