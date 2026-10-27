@@ -68,6 +68,10 @@ METERS = {
     # Fluke 381 clamp meter: Figure 1 (printed p. 5) shows a small far-left jack (the iFlex 2 mm input of the iFlex paragraph, printed p. 13), COM and VΩ; the current points use the jaw or the iFlex loop on a
     # 50-turn coil (or a single wire for 0 A dc), so only the voltage / ohms hook-up is described here and the other hook-ups are the spec's own groups (specs/fluke_381_pv.json)
     'fluke381': dict(name='Fluke 381', jacks={'vohm': 'VΩ', 'com': 'COM'}),
+    # Fluke 753 / 754 Documenting Process Calibrator: a 2 x 3 block of jacks (owner's photo, diagrams/fluke_753_754_terminals.png; Calibration Manual Figures 1-13, 15): top row 'VΩ RTD' (SOURCE side),
+    # 'mA / mA Ω RTD', 'V' (MEASURE side); bottom row the three commons; TC mini-jack lower left.  The hook-ups are the spec's own groups (specs/fluke_753_754_pv.json, drawn by specs/build_hookups_753.py),
+    # so there is no AVAILABLE entry; 'panels' are the owner's instrument reference pictures (front view, terminal close-up) the engine (fluke_753_754.py) shows when a group has no drawn picture
+    'fluke753': dict(name='Fluke 753 / 754', jacks={'vohm': 'VΩ RTD', 'ma': 'mA Ω RTD', 'v': 'V', 'com': 'COM'}, panels=('fluke_753_754_terminals.png', 'fluke_753_754_front.png')),
 }
 RED_JACK = {'VOHM': 'vohm', 'UAMP': 'ma', 'AMP10': 'a10'}
 

@@ -48,7 +48,9 @@
     "Fluke 323 Clamp Meter Performance Verification": "Fluke_323_Verification.py",
     "Fluke 324 Clamp Meter Performance Verification": "Fluke_324_Verification.py",
     "Fluke 325 Clamp Meter Performance Verification": "Fluke_325_Verification.py",
-    "Fluke 381 Clamp Meter Performance Verification": "Fluke_381_Verification.py"
+    "Fluke 381 Clamp Meter Performance Verification": "Fluke_381_Verification.py",
+    "Fluke 753 Documenting Process Calibrator Performance Verification": "Fluke_753_Verification.py",
+    "Fluke 754 Documenting Process Calibrator Performance Verification": "Fluke_754_Verification.py"
   },
   "VERSIONS": {
     "WaveSurfer_WS4104HD.py": "51",
@@ -99,7 +101,9 @@
     "Fluke_323_Verification.py": "1",
     "Fluke_324_Verification.py": "1",
     "Fluke_325_Verification.py": "1",
-    "Fluke_381_Verification.py": "1"
+    "Fluke_381_Verification.py": "1",
+    "Fluke_753_Verification.py": "1",
+    "Fluke_754_Verification.py": "1"
   },
   "records": [
     [
@@ -444,6 +448,20 @@
       "381",
       "Clamp Meter",
       "Fluke_381_Verification.py"
+    ],
+    [
+      "Fluke 753 Documenting Process Calibrator Performance Verification",
+      "Fluke",
+      "753",
+      "Process Calibrator",
+      "Fluke_753_Verification.py"
+    ],
+    [
+      "Fluke 754 Documenting Process Calibrator Performance Verification",
+      "Fluke",
+      "754",
+      "Process Calibrator",
+      "Fluke_754_Verification.py"
     ]
   ],
   "FILES": {
@@ -1175,6 +1193,42 @@
       ],
       "spec": [
         "specs/fluke_381_pv.json"
+      ]
+    },
+    "Fluke_753_Verification.py": {
+      "code": [
+        "Procedures/Fluke_753_Verification.py",
+        "handheld_dmm.py",
+        "handheld_dmm_view_tk.py",
+        "handheld_dmm_view_qt.py",
+        "fluke_753_754.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_753_754_pv.json"
+      ]
+    },
+    "Fluke_754_Verification.py": {
+      "code": [
+        "Procedures/Fluke_754_Verification.py",
+        "handheld_dmm.py",
+        "handheld_dmm_view_tk.py",
+        "handheld_dmm_view_qt.py",
+        "fluke_753_754.py",
+        "ui_port.py",
+        "ui_port_tk.py",
+        "hookups.py",
+        "drivers/base.py",
+        "drivers/transport.py",
+        "drivers/fluke_5560a.py"
+      ],
+      "spec": [
+        "specs/fluke_753_754_pv.json"
       ]
     }
   },

@@ -282,7 +282,8 @@ class Specs(unittest.TestCase):
                     self.assertEqual(s['applied']['value'], s['nominal'], s['id'])
         self.assertEqual({k: [s['id'] for s in v] for k, v in found.items()},
                          {'fluke_110_series_pv.json': ['3-36', '3-37'], 'fluke_170_series_pv.json': ['3-52', '3-53', '3-54'],
-                          'fluke_287_289_pv.json': ['3-1', '3-2', '3-3'], 'fluke_323_pv.json': ['4-1', '4-2', '4-3', '4-4'], 'fluke_87v_pv.json': ['1-50', '1-51']})
+                          'fluke_287_289_pv.json': ['3-1', '3-2', '3-3'], 'fluke_323_pv.json': ['4-1', '4-2', '4-3', '4-4'], 'fluke_753_754_pv.json': ['13-1', '13-2', '13-3'],     # the 753 / 754 Type K measure points (the RTD points are sourced as ohms, the Type K source points are UUT outputs)
+                          'fluke_87v_pv.json': ['1-50', '1-51']})
 
     def test_models_without_temperature_points(self):
         for name in ('klein_mm325_pv.json', 'fluke_77iv_pv.json'):
