@@ -5,7 +5,11 @@ from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HERE))
-import appdata, branding, diagnostics, suite_info          # noqa: E402
+import appdata, diagnostics, suite_info          # noqa: E402
+try:
+    import branding                                        # the Tk-era window dressing; the Qt build uses qtui.screens.help_menu, so without tkinter these tests are skipped
+except ImportError:
+    branding = None
 
 try:
     import tkinter as tk
@@ -71,6 +75,7 @@ class Diagnostics(unittest.TestCase):
         self.assertIn('py -m pip install pyserial', msg)
 
 
+@unittest.skipIf(branding is None, 'branding is Tk-only and tkinter is not installed (the suite runs on Qt)')
 class Titles(unittest.TestCase):
     def test_tidy_title(self):
         t = branding.tidy_title('WaveSurfer 4104HD | Calibration Verification v56')
