@@ -94,6 +94,11 @@
    "log": [
     "Fluke 5522A|>>|STBY",
     "Fluke 5522A|>>|OUT 0OHM",
+    "Fluke 5522A|>>|ZCOMP WIRE2",
+    "Fluke 5522A|>>|ZCOMP?",
+    "Fluke 5522A|<<|WIRE2",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
     "Fluke 5522A|>>|ERR?",
     "Fluke 5522A|<<|0,\"No error\"",
     "Fluke 5522A|>>|OPER"
@@ -108,6 +113,20 @@
     [
      "W",
      "OUT 0OHM"
+    ],
+    [
+     "W",
+     "ZCOMP WIRE2"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "WIRE2"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
     ],
     [
      "Q",
@@ -173,6 +192,12 @@
    "case": "handheld_dmm.IO.apply[115 ACV#14]",
    "log": [
     "Fluke 5522A|>>|STBY",
+    "Fluke 5522A|>>|ZCOMP NONE",
+    "Fluke 5522A|>>|ZCOMP?",
+    "Fluke 5522A|<<|NONE",
+    "Fluke 5522A|>>|ERR?",
+    "Fluke 5522A|<<|0,\"No error\"",
+    "Fluke 5522A|>>|STBY",
     "Fluke 5522A|>>|OUT 5V,45Hz",
     "Fluke 5522A|>>|ERR?",
     "Fluke 5522A|<<|0,\"No error\"",
@@ -181,6 +206,24 @@
    "method": "handheld_dmm.IO.apply",
    "result": "returned None",
    "wire": [
+    [
+     "W",
+     "STBY"
+    ],
+    [
+     "W",
+     "ZCOMP NONE"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "NONE"
+    ],
+    [
+     "Q",
+     "ERR?",
+     "0,\"No error\""
+    ],
     [
      "W",
      "STBY"

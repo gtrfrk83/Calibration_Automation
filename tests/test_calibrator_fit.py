@@ -122,12 +122,12 @@ class Fluke5520ADriver(unittest.TestCase):
         c = drivers.Fluke5520A
         ok = {k for k, v in c.COMMANDS.items() if v.verified}
         self.assertEqual(ok, {'status.clear', 'err.query', 'oper.on', 'opc.query', 'out.query', 'out.amps.dc'})
-        self.assertEqual(len(c.COMMANDS), 45)
+        self.assertEqual(len(c.COMMANDS), 47)
         self.assertFalse(c.COMMANDS['reset'].verified)
 
     def test_summary_names_the_unverified_items(self):
         s = drivers.Fluke5520A.unverified_summary()
-        self.assertIn('6 of 45', s)
+        self.assertIn('6 of 47', s)
         self.assertIn('5520A', s)
 
     def test_identity_and_5522a_5560a_registries_untouched(self):

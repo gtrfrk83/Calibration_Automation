@@ -1228,6 +1228,50 @@
    ]
   },
   {
+   "call": "'WIRE2'",
+   "case": "Fluke5560A.set_zcomp[WIRE2]",
+   "log": [
+    "5522A|>>|ZCOMP WIRE2",
+    "5522A|>>|ZCOMP?",
+    "5522A|<<|WIRE2"
+   ],
+   "method": "Fluke5560A.set_zcomp",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "ZCOMP WIRE2"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "WIRE2"
+    ]
+   ]
+  },
+  {
+   "call": "'NONE'",
+   "case": "Fluke5560A.set_zcomp[NONE]",
+   "log": [
+    "5522A|>>|ZCOMP NONE",
+    "5522A|>>|ZCOMP?",
+    "5522A|<<|NONE"
+   ],
+   "method": "Fluke5560A.set_zcomp",
+   "result": "returned None",
+   "wire": [
+    [
+     "W",
+     "ZCOMP NONE"
+    ],
+    [
+     "Q",
+     "ZCOMP?",
+     "NONE"
+    ]
+   ]
+  },
+  {
    "call": "",
    "case": "Fluke5520A.open",
    "log": [

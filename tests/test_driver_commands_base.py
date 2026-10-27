@@ -264,7 +264,7 @@ class Describe(unittest.TestCase):
         by = {}
         for c in reg.values():
             by[(c.risk, c.verified)] = by.get((c.risk, c.verified), 0) + 1
-        self.assertEqual(len(reg), 43)   # + lcomp.set / lcomp.query (2026-10-26; the 5560A TC keys tsens.tc and tc.query are on the 5560A driver, not this registry). main's 33 (incl. the DC out.volts.dc / out.amps.dc keys) + reset, + opc.query (Stage 7), + 6 square-wave keys (87V duty / peak Min Max)
+        self.assertEqual(len(reg), 45)   # + lcomp.set / lcomp.query (2026-10-26; the 5560A TC keys tsens.tc and tc.query are on the 5560A driver, not this registry). main's 33 (incl. the DC out.volts.dc / out.amps.dc keys) + reset, + opc.query (Stage 7), + 6 square-wave keys (87V duty / peak Min Max)
         self.assertEqual(sum(1 for c in reg.values() if not c.verified), 18)   # the 6 square-wave keys are verified only on the 5522A (5560A manual not read)
         self.assertEqual(sum(1 for c in reg.values() if c.risk == 'output'), 3)
         self.assertEqual(sum(1 for c in reg.values() if c.risk == 'locked'), 5)

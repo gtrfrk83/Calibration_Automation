@@ -91,8 +91,8 @@ COVERAGE = {
                      'set_levsine', 'select_scope_square', 'set_square', 'drain_errors', 'select_scope_marker', 'set_marker_period',
                      'select_scope_measure_resistance', 'measure_scope_resistance', 'set_output_volts', 'set_output_amps', 'set_output_ohms',
                      'set_output_capacitance', 'set_output_temperature', 'set_output_square', 'restore_sine', 'read_error', 'check_error', 'clear_status', 'operate_unverified',
-                     'standby_quiet', 'apply_scope_dc'],
-            no_command=[]),
+                     'standby_quiet', 'apply_scope_dc', 'set_zcomp'],
+            no_command=['zcomp_allowed']),
         'Fluke5520A': dict(covered=['open'], no_command=['unverified_summary']),   # reuses the 5522A command set; own registry flags
         'Fluke5522A': dict(covered=['open', 'set_lcomp'], no_command=['lcomp_allowed']),    # inherits the rest; LCOMP ON/OFF with read-back (owner request 2026-10-26)
     },
@@ -579,6 +579,9 @@ def cases_fluke_5560a(c):
     c.run('Fluke5522A.open', cal2.open)
     c.run('Fluke5522A.set_lcomp[ON]', cal2.set_lcomp, True)
     c.run('Fluke5522A.set_lcomp[OFF]', cal2.set_lcomp, False)
+    cal2.set_output_ohms(1000.0)
+    c.run('Fluke5560A.set_zcomp[WIRE2]', cal2.set_zcomp, 'WIRE2')       # 2-wire compensation on handheld resistance points (2026-10-27)
+    c.run('Fluke5560A.set_zcomp[NONE]', cal2.set_zcomp, 'NONE')
     ft3 = make_dacq_bench(cal='5520A')[1]
     cal3 = c.inst(Fluke5520A, ft3, opened=False, label='5520A')
     c.run('Fluke5520A.open', cal3.open)
