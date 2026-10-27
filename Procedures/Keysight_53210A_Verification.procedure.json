@@ -1,0 +1,56 @@
+{
+ "schema": 1,
+ "id": "Keysight_53210A_Verification",
+ "name": "Keysight 53210A Performance Verification",
+ "manufacturer": "Keysight",
+ "model": "53210A",
+ "category": "Frequency Counter",
+ "version": "1",
+ "order": 73,
+ "description": "Standalone calibration procedure",
+ "launcher": "Procedures/Keysight_53210A_Verification.py",
+ "engine": [
+  "keysight_53220a_verification.py"
+ ],
+ "drivers": [
+  "keysight_53220a",
+  "reference_instruments"
+ ],
+ "specs": [
+  "specs/keysight_53220a_pv.json"
+ ],
+ "fingerprint": {
+  "code": [
+   "Procedures/Keysight_53210A_Verification.py",
+   "keysight_53220a_verification.py",
+   "keysight_53220a_view_tk.py",
+   "keysight_53220a_view_qt.py",
+   "qtui/bench_view.py",
+   "ui_port.py",
+   "ui_port_tk.py",
+   "surprise.py",
+   "surprise_view_tk.py",
+   "surprise_view_qt.py",
+   "procspec.py",
+   "drivers/base.py",
+   "drivers/transport.py",
+   "drivers/keysight_53220a.py",
+   "drivers/reference_instruments.py"
+  ],
+  "spec": [
+   "specs/keysight_53220a_pv.json"
+  ]
+ },
+ "hookup": {
+  "meter": null,
+  "diagram_prefixes": [
+   "hook_53210a",
+   "hook_53220a"
+  ]
+ },
+ "seed_verified": false,
+ "own_files": [
+  "Procedures/Keysight_53210A_Verification.py",
+  "Procedures/Keysight_53210A_Verification.procedure.json"
+ ]
+}

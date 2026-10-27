@@ -55,7 +55,10 @@
     "Fluke 334 Clamp Meter Performance Verification": "Fluke_334_Verification.py",
     "Fluke 335 Clamp Meter Performance Verification": "Fluke_335_Verification.py",
     "Fluke 336 Clamp Meter Performance Verification": "Fluke_336_Verification.py",
-    "Fluke 337 Clamp Meter Performance Verification": "Fluke_337_Verification.py"
+    "Fluke 337 Clamp Meter Performance Verification": "Fluke_337_Verification.py",
+    "Keysight 53220A Performance Verification": "Keysight_53220A_Verification.py",
+    "Keysight 53230A Performance Verification": "Keysight_53230A_Verification.py",
+    "Keysight 53210A Performance Verification": "Keysight_53210A_Verification.py"
   },
   "VERSIONS": {
     "WaveSurfer_WS4104HD.py": "51",
@@ -113,7 +116,10 @@
     "Fluke_334_Verification.py": "1",
     "Fluke_335_Verification.py": "1",
     "Fluke_336_Verification.py": "1",
-    "Fluke_337_Verification.py": "1"
+    "Fluke_337_Verification.py": "1",
+    "Keysight_53220A_Verification.py": "1",
+    "Keysight_53230A_Verification.py": "1",
+    "Keysight_53210A_Verification.py": "1"
   },
   "records": [
     [
@@ -507,6 +513,27 @@
       "337",
       "Clamp Meter",
       "Fluke_337_Verification.py"
+    ],
+    [
+      "Keysight 53220A Performance Verification",
+      "Keysight",
+      "53220A",
+      "Frequency Counter",
+      "Keysight_53220A_Verification.py"
+    ],
+    [
+      "Keysight 53230A Performance Verification",
+      "Keysight",
+      "53230A",
+      "Frequency Counter",
+      "Keysight_53230A_Verification.py"
+    ],
+    [
+      "Keysight 53210A Performance Verification",
+      "Keysight",
+      "53210A",
+      "Frequency Counter",
+      "Keysight_53210A_Verification.py"
     ]
   ],
   "FILES": {

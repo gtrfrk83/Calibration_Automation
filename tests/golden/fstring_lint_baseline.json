@@ -104,6 +104,14 @@
    "query_retry_f": 0,
    "write_f": 0
   },
+  "keysight_53220a": {
+   "concat_f": 0,
+   "format_f": 0,
+   "helper_f": 0,
+   "query_f": 0,
+   "query_retry_f": 0,
+   "write_f": 0
+  },
   "keysight_dacq": {
    "concat_f": 0,
    "format_f": 0,
