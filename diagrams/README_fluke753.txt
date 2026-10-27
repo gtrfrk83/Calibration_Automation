@@ -33,3 +33,5 @@ Where each jack came from
   The two agree on the layout in every figure; nothing was assumed from the photo alone.
   Not clear in the PDF (UNVERIFIED, confirm on the bench): the two black leads of Figure 3 / Figure 11 (which common each uses), the lead on the V jack and the jumper in Figure 12,
   and the lead colours at the middle jacks in Figure 7.  Figure 5 / 6 / 8 name the SOURCE jacks only by their position (top-left jack and the common under it).
+
+OWNER-SUPPLIED (2026-10-27): hook_fluke753_SRC_SIM.png is the owner's picture of Figure 7 (simulate transmitter: 75X mA jack + common, DMM, 5522A); specs/build_hookups_753.py skips it (SUPPLIED) so it is never overwritten.
