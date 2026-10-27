@@ -7,7 +7,7 @@
  "category": "Digital Multimeter",
  "version": "1",
  "order": 72,
- "description": "Keysight U1251B / U1252B Handheld Digital Multimeter Performance Verification (family spec): this launcher runs the U1252B, 88 points (Table 6-2 plus the Basic Operating Test checks)",
+ "description": "Keysight U1251B / U1252B Handheld Digital Multimeter Performance Verification (family spec): this launcher runs the U1252B, 87 points (Table 6-2 plus the Basic Operating Test checks)",
  "launcher": "Procedures/Keysight_U1252B_Verification.py",
  "engine": [
   "handheld_dmm.py"

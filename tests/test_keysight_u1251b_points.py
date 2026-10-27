@@ -25,7 +25,7 @@ sys.path.insert(0, str(HERE))
 h = H = Flow = SPECS = Spy = SPEC = BUILDER = None
 SPEC_NAME = 'keysight_u1251b_u1252b_pv.json'
 MODELS = ('U1251B', 'U1252B')
-COUNTS = {'U1251B': 63, 'U1252B': 88}                 # Table 6-2 rows without N/A (60 / 84) + the Basic Operating Test checks (3 / 4)
+COUNTS = {'U1251B': 63, 'U1252B': 87}                 # Table 6-2 rows without N/A (60 / 84) + the Basic Operating Test checks (3 / 3: the charge terminal alert test is not included, owner decision 2026-10-27)
 TABLE_COUNTS = {'U1251B': 60, 'U1252B': 84}
 
 # Table 6-2 as read a second time, in printed order: (step, section, range, 5520A output as printed, U1251B error, U1252B error); 'N/A' = the cell is N/A.
@@ -57,7 +57,7 @@ T = [
     ('8', 'Ohms', '500 MΩ', '450 MΩ', 'N/A', '36.1 MΩ'),
     ('9', 'Conductance', '500 nS', '50 nS', '0.7 nS', '0.6 nS'),
     ('10', 'Diode', 'Diode', '1 V', '1 mV', '1 mV'),
-    ('11', 'Frequency counter', '999.99 kHz', '600 mVrms, 100 kHz', 'N/A', '52 Hz'), ('12', 'Frequency counter', '99.999 MHz', '1500 mVrms, 10 MHz', 'N/A', '5.2 kHz'),
+    ('11', 'Frequency counter', '999.99 kHz', '600 mV, 100 kHz', 'N/A', '52 Hz'), ('12', 'Frequency counter', '99.999 MHz', '1500 mVrms, 10 MHz', 'N/A', '5.2 kHz'),
     ('13', 'Capacitance', '10.000 nF', '10.000 nF', '0.108 nF', '0.108 nF'), ('13', 'Capacitance', '100.00 nF', '100.00 nF', '1.05 nF', '1.05 nF'),
     ('13', 'Capacitance', '1000.0 nF', '1000.0 nF', '10.5 nF', '10.5 nF'), ('13', 'Capacitance', '10.000 µF', '10.000 µF', '0.105 µF', '0.105 µF'),
     ('13', 'Capacitance', '100.00 µF', '100.00 µF', '1.05 µF', '1.05 µF'), ('13', 'Capacitance', '1000.0 µF', '1000.0 µF', '10.5 µF', '10.5 µF'),
@@ -74,10 +74,10 @@ T = [
     ('20', 'Square wave output', '100 Hz @ 75%', '53131A', 'N/A', '0.398%'), ('20', 'Square wave output', '4800 Hz @ 99.609%', '34410A', 'N/A', '0.2 V'),
 ]
 # what the meter should show for rows whose nominal is not the printed output value (display unit text)
-NOMINAL_OVERRIDE = {('2', '0.48 V, 1 kHz'): '1 kHz', ('3', '5.0 Vpp @ 50%, Square Wave, 50 Hz'): '50 %', ('9', '50 nS'): '50 nS', ('11', '600 mVrms, 100 kHz'): '100 kHz',
+NOMINAL_OVERRIDE = {('2', '0.48 V, 1 kHz'): '1 kHz', ('3', '5.0 Vpp @ 50%, Square Wave, 50 Hz'): '50 %', ('9', '50 nS'): '50 nS', ('11', '600 mV, 100 kHz'): '100 kHz',
                     ('12', '1500 mVrms, 10 MHz'): '10 MHz'}
 HAND_NOMINAL = {'120 Hz @ 50%': '120 Hz', '4800 Hz @ 50%': '4800 Hz', '100 Hz @ 50%': '50 %', '100 Hz @ 25%': '25 %', '100 Hz @ 75%': '75 %', '4800 Hz @ 99.609%': '2.8 V'}
-FUNC = [('Backlit', 'XX'), ('Display', 'XX'), ('Current terminal', 'XX'), ('Charge terminal', 'NX')]       # Basic Operating Test, printed pp. 149-151, flags for U1251B U1252B
+FUNC = [('Backlit', 'XX'), ('Display', 'XX'), ('Current terminal', 'XX')]       # Basic Operating Test, printed pp. 149-151, flags for U1251B U1252B
 # display decimals of each range, second reading of Table 6-4 (adjustment table, printed pp. 170-174): the 'Cal Item' formats
 DECIMALS = {('V', '5 V'): 4, ('V', '50 V'): 3, ('V', '500 V'): 2, ('V', '1000 V'): 1, ('mV', '50 mV'): 3, ('mV', '500 mV'): 2, ('mV', '1000 mV'): 1,
             ('Ω', '500 Ω'): 2, ('kΩ', '5 kΩ'): 4, ('kΩ', '50 kΩ'): 3, ('kΩ', '500 kΩ'): 2, ('MΩ', '5 MΩ'): 4, ('MΩ', '50 MΩ'): 3, ('µA', '500 µA'): 2, ('µA', '5000 µA'): 1,
@@ -101,7 +101,7 @@ def qty(text):
 def out_of(row):
     """(value, base, frequency) the calibrator is asked for by printed output text; None for hand-set rows (other instruments) and the square-wave duty row."""
     step, _sec, _rng, out, _e1, _e2 = row
-    if step in ('11', '12', '20') or step == '3':
+    if step in ('12', '20') or step == '3':
         return None
     parts = [x.strip() for x in out.split(',')]
     v, base = qty(parts[0])
@@ -217,7 +217,7 @@ class Spec(unittest.TestCase):
 
     def test_functional_checks_are_yes_no_points_that_run_first(self):
         f = [s for s in SPEC['steps'] if s['table'] == 'F']
-        self.assertEqual([s['id'] for s in f], ['F-1', 'F-2', 'F-3', 'F-4'])
+        self.assertEqual([s['id'] for s in f], ['F-1', 'F-2', 'F-3'])
         for s, (kw, flags) in zip(f, FUNC):
             self.assertIn(kw, s['title'])
             self.assertEqual(''.join('X' if m in s['models'] else 'N' for m in MODELS), flags)
@@ -230,23 +230,22 @@ class Spec(unittest.TestCase):
             self.assertEqual(ids[:n_f], [s['id'] for s in f if m in s['models']], m)
             self.assertTrue(all(p['group'] == 'NONE' for p in pts(m) if p['table'] == 'F'))
         self.assertIn('A-Err', f[2]['setup'])
-        self.assertIn('Ch.Err', f[3]['setup'])
+        self.assertFalse([x for x in SPEC['steps'] if 'Ch.Err' in json.dumps(x)])          # the charge terminal alert test is not included
         self.assertIn('Bat', f[0]['setup'])
         self.assertIn('Hold', f[1]['setup'])
 
     def test_hand_set_points_have_no_calibrator_and_no_uncertainty(self):
         hand = [s for s in SPEC['steps'] if s['table'] == '2' and s['kind'] == 'NONE']
         self.assertEqual([(s['range'], s['models']) for s in hand],
-                         [('999.99 kHz', ['U1252B']), ('99.999 MHz', ['U1252B'])] + [(r[2], ['U1252B']) for r in T if r[0] == '20'])
+                         [('99.999 MHz', ['U1252B'])] + [(r[2], ['U1252B']) for r in T if r[0] == '20'])
         for s in hand:
             self.assertEqual((s['group'], s['test']), ('NONE', 'numeric'))
             self.assertNotIn('applied', s)
             self.assertTrue(s['no_uncertainty'])
             self.assertIn('by hand', s['setup'].lower() if s['section'] == 'Frequency counter' else 'by hand')
         self.assertIn('33250A', hand[0]['setup'])
-        self.assertIn('Shift', hand[0]['setup'])
-        self.assertIn('divide by 100', hand[1]['setup'])
-        self.assertIn('53131A', hand[2]['setup'])
+        self.assertIn('divide by 100', hand[0]['setup'])
+        self.assertIn('53131A', hand[1]['setup'])
         self.assertIn('34410A', hand[-1]['setup'])
         self.assertIn('2.8 V is from the manufacturer', hand[-1]['note'])
         self.assertEqual((hand[-1]['low'], hand[-1]['high'], hand[-1]['display_unit']), ('2.6', '3.0', 'V'))
@@ -274,6 +273,18 @@ class Spec(unittest.TestCase):
             self.assertIn('no step number', s['note'])
         self.assertTrue(all(s['group'] == 'AMP10' for s in SPEC['steps'] if s.get('section') in ('DC amps', 'AC amps')))
         self.assertTrue(all(s['group'] == 'UAMP' for s in SPEC['steps'] if s.get('section') in ('DC µA', 'AC µA', 'DC mA', 'AC mA')))
+
+    def test_step_11_counter_point_is_sourced_by_the_calibrator(self):
+        """Owner answer 2026-10-27: 600 mV rms at 100 kHz from the 5522A / 5560A, frequency uncertainty rule, no 33250A; step 12 stays hand-set."""
+        s = [x for x in SPEC['steps'] if x.get('ref') == 'T6-2 #11']
+        self.assertEqual(len(s), 1)
+        s = s[0]
+        self.assertEqual((s['models'], s['kind'], s['unc_kind'], s['group'], s['applied']['value'], s['applied']['frequency'], s['display_unit'], s['low'], s['high']),
+                         (['U1252B'], 'ACV', 'FREQ', 'VOHM', 0.6, 100000.0, 'kHz', '99.9480', '100.0520'))
+        self.assertNotIn('no_uncertainty', s)
+        self.assertNotIn('33250A', s.get('setup', ''))
+        self.assertIn('Shift', s['prompt'])
+        self.assertEqual([x['range'] for x in SPEC['steps'] if x.get('kind') == 'NONE' and x['table'] == '2'][0], '99.999 MHz')
 
     def test_printed_misprints_are_noted_not_corrected(self):
         d4 = [s for s in SPEC['steps'] if s.get('section') == 'DC volts']
@@ -509,7 +520,7 @@ class EndToEnd(unittest.TestCase):
                 outs = [t for t in texts if t.startswith('OUT ') and not t.endswith('?')]
                 want = []
                 for r in rows_for(meter):
-                    if r[0] in ('3', '11', '12', '20'):
+                    if r[0] in ('3', '12', '20'):
                         continue
                     want += [expected_out(r)] * (2 if (r[0] == '14' and cal == '5560A') else 1)         # the 5560A thermocouple sequence outputs the temperature twice (4b)
                 self.assertEqual(len(outs), len(want), (meter, cal))
@@ -583,13 +594,13 @@ class EndToEnd(unittest.TestCase):
             self.assertIn(fragment, text)
         self.assertFalse(any('hand' in str(p.get('applied')) for p in app.points))
         # nothing is sent to the calibrator for them: the commands of the points before and after are separated by nothing but standby
-        self.assertEqual(len([t for _i, t in H.wire(io) if t.startswith('OUT ') and not t.endswith('?')]), len([r for r in rows_for('U1252B') if r[0] not in ('3', '11', '12', '20')]))
+        self.assertEqual(len([t for _i, t in H.wire(io) if t.startswith('OUT ') and not t.endswith('?')]), len([r for r in rows_for('U1252B') if r[0] not in ('3', '12', '20')]))
 
     def test_points_without_an_uncertainty_are_exactly_the_known_list(self):
         """Owner instruction: a point that should carry an uncertainty and has none is reported, never invented.  Without one: the yes / no checks, the square-wave duty point (the suite holds
         no uncertainty for a square-wave source) and the hand-set points (33250A / 53131A / 34410A standards: the suite holds no specification for them)."""
         want = {'U1251B': ['F-1', 'F-2', 'F-3', '2-20'],
-                'U1252B': ['F-1', 'F-2', 'F-3', 'F-4', '2-20', '2-85', '2-86'] + [f'2-{n}' for n in range(122, 128)]}
+                'U1252B': ['F-1', 'F-2', 'F-3', '2-20', '2-86'] + [f'2-{n}' for n in range(122, 128)]}
         for meter in MODELS:
             for cal in ('5522A', '5560A'):
                 app, io = self.run_perfect(meter, cal)
@@ -687,7 +698,7 @@ class EndToEnd(unittest.TestCase):
 class CalibratorFit(unittest.TestCase):
     def test_every_calibrator_output_is_inside_the_published_specifications_except_the_square_wave(self):
         import calibrator_fit as cf
-        for m, n in (('U1251B', 60), ('U1252B', 76)):
+        for m, n in (('U1251B', 60), ('U1252B', 77)):
             reqs = cf.handheld_requests(pts(m))
             self.assertEqual(len(reqs), n, m)
             for model in ('5522A', '5520A', '5560A'):

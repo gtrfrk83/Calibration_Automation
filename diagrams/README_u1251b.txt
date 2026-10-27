@@ -19,7 +19,7 @@ Files needed (one per calibrator and group; hookups.py, meter key 'u1251b'):
     hook_u1251b_TEMP.png           K-type thermocouple extension (miniature connector on both ends) from the calibrator TC output to the TC-to-banana adapter in the meter Ω V mV and COM jacks
                                    (named in the spec, group TEMP, not looked up per calibrator)
 
-The hand-set points need no picture (the set-up window describes them): the frequency counter points (Keysight 33250A into the meter, U1252B) and the square wave output points (meter OUT jack to a
+The hand-set points need no picture (the set-up window describes them): the 10 MHz frequency counter point (Keysight 33250A into the meter, U1252B; the 100 kHz point uses the calibrator and the VOHM picture) and the square wave output points (meter OUT jack to a
 Keysight 53131A / 34410A, U1252B).
 
 Reuse of existing pictures: the jack ORDER of the Fluke 287 / 289 meter (A, mA uA, COM, V Ohm) is the same as this meter's (A, uA mA, COM, Ohm V mV), so

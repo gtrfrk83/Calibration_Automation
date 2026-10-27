@@ -15,7 +15,7 @@
   "cite": "Keysight U1251B and U1252B User's and Service Guide, Table 6-2 Verification Test, printed pp. 155-160 (Error from nominal, 1 year)",
   "limits": "Manufacturer limits, Table 6-2 \"Error from nominal 1 year\", as printed",
   "report_note": "Limits are those of the manufacturer's Table 6-2 \"Error from nominal 1 year\" (Keysight U1251B and U1252B User's and Service Guide, printed pp. 155-160), unchanged. The frequency counter and square wave output points are set and measured with other instruments by hand and carry no uncertainty.",
-  "note": "Table 6-2 \"Verification Test\" of the Keysight U1251B and U1252B User's and Service Guide (printed pp. 155-160, notes [a]-[p] pp. 160-161): the column \"Error from nominal 1 year\" is the only limit set (no 90 day / 2 year columns). Limits are the plus / minus error around the nominal in Decimal; two models with different errors are two steps of the same row. The table names a Fluke 5520A (Table 6-1, p. 148); the program drives a Fluke 5522A or 5560A, or you set the calibrator by hand. The frequency counter points (steps 11, 12; Keysight 33250A) and the square wave output points (step 20; Keysight 53131A and 34410A) are set by hand and carry no uncertainty. The meter has no documented remote command set: you type the display reading. The table has no display resolutions: typed readings are padded to the decimals of Table 6-4 for the range. The printed table's misprints and unreadable cells are flagged in the point notes. The calibration adjustment (printed pp. 164-175) is not part of this procedure."
+  "note": "Table 6-2 \"Verification Test\" of the Keysight U1251B and U1252B User's and Service Guide (printed pp. 155-160, notes [a]-[p] pp. 160-161): the column \"Error from nominal 1 year\" is the only limit set (no 90 day / 2 year columns). Limits are the plus / minus error around the nominal in Decimal; two models with different errors are two steps of the same row. The table names a Fluke 5520A (Table 6-1, p. 148); the program drives a Fluke 5522A or 5560A, or you set the calibrator by hand. The frequency counter point 12 (Keysight 33250A) and the square wave output points (step 20; Keysight 53131A and 34410A) are set by hand and carry no uncertainty. The meter has no documented remote command set: you type the display reading. The table has no display resolutions: typed readings are padded to the decimals of Table 6-4 for the range. The printed table's misprints and unreadable cells are flagged in the point notes. The calibration adjustment (printed pp. 164-175) is not part of this procedure."
  },
  "models": {
   "U1251B": {
@@ -26,7 +26,7 @@
   "U1252B": {
    "name": "Keysight U1252B",
    "brand": "Keysight",
-   "model_note": "Keysight U1252B handheld digital multimeter (frequency counter, square wave output, AC+DC): Table 6-2 plus the functional checks (88 points)."
+   "model_note": "Keysight U1252B handheld digital multimeter (frequency counter, square wave output, AC+DC): Table 6-2 plus the functional checks (87 points)."
   }
  },
  "groups": {
@@ -2499,7 +2499,7 @@
    "step": 85,
    "id": "2-85",
    "section": "Frequency counter",
-   "switch": "Frequency counter  (set by hand: see the set-up window)",
+   "switch": "Hz  (frequency counter, U1252B: turn the rotary switch to the Hz/diode position and press Shift for the frequency counter mode)",
    "range": "999.99 kHz",
    "models": [
     "U1252B"
@@ -2508,17 +2508,22 @@
    "display_unit": "kHz",
    "factor": 1000.0,
    "base_unit": "Hz",
-   "low": "99.948",
-   "high": "100.052",
+   "low": "99.9480",
+   "high": "100.0520",
    "nominal": 100000.0,
    "ref": "T6-2 #11",
-   "kind": "NONE",
-   "setup": "Set the Keysight 33250A by hand: sine, 600 mVrms, 100 kHz, to the meter (Ω V mV jack and COM; the connection and load are not stated in the table: UNVERIFIED) and press Output on. Meter (U1252B): turn the rotary switch to the Hz/diode position and press Shift for the frequency counter mode (999.99 kHz range). Shield the input from noise (note f). Switch the 33250A output off after the reading.",
-   "group": "NONE",
-   "no_uncertainty": true,
-   "report_desc": "Frequency counter, 600 mVrms, 100 kHz (33250A)",
-   "tol_text": "Table 6-2: 99.948 to 100.052 kHz (±52 Hz from the nominal, 1 year)",
-   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±52 Hz for the U1252B. Set by hand: the standard is not a calibrator the suite drives. NO UNCERTAINTY is printed for this point (the 33250A / 53131A / 34410A specifications are not held by the suite): listed in the report. Note [f]: All frequency counters are susceptible to error when measuring low voltage, low-frequency signals. Shielding inputs from external noise pickup is critical for minimizing measurement errors. Note [p]: Frequency counter performance test point is only applicable to U1252B. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+   "kind": "ACV",
+   "applied": {
+    "value": 0.6,
+    "frequency": 100000.0
+   },
+   "unc_kind": "FREQ",
+   "report_desc": "999.99 kHz range, 0.6 V, 100 kHz",
+   "no_freq_suffix": true,
+   "group": "VOHM",
+   "prompt": "Before the first reading of this function: Meter (U1252B): turn the rotary switch to the Hz/diode position and press Shift for the frequency counter mode (999.99 kHz range). Shield the input from noise (note f). Connection: Ω V mV jack and COM, as for the other voltage points.",
+   "tol_text": "Table 6-2: 99.9480 to 100.0520 kHz (±52 Hz from the nominal, 1 year)",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±52 Hz for the U1252B. Note [f]: All frequency counters are susceptible to error when measuring low voltage, low-frequency signals. Shielding inputs from external noise pickup is critical for minimizing measurement errors. Note [p]: Frequency counter performance test point is only applicable to U1252B. Owner decision 2026-10-27: this point is sourced by the calibrator (5522A / 5560A, 600 mV rms at 100 kHz) instead of the Keysight 33250A named in Table 6-2; the limits are the printed ones. The calibrator-frequency uncertainty rule applies. Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
   },
   {
    "table": "2",
@@ -3458,7 +3463,7 @@
    "group": "AMP10",
    "settle": 5,
    "tol_text": "Table 6-2: 4.9840 to 5.0160 A (±16 mA from the nominal, 1 year)",
-   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±16 mA for the U1251B and U1252B. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±16 mA for the U1251B and U1252B. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (CONFIRMED DC by the owner 2026-10-27; the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
    "check": {
     "U1251B": {
      "verdict": "same",
@@ -3498,7 +3503,7 @@
    "group": "AMP10",
    "settle": 5,
    "tol_text": "Table 6-2: 9.960 to 10.040 A (±40 mA from the nominal, 1 year)",
-   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±40 mA for the U1251B. Note [j]: 10 A continuous, and additional 0.5% to specified accuracy when measuring a signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for twice the measuring time you applied before low current measurement. With a 2-wire connection and compensation enabled at calibrator. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±40 mA for the U1251B. Note [j]: 10 A continuous, and additional 0.5% to specified accuracy when measuring a signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for twice the measuring time you applied before low current measurement. With a 2-wire connection and compensation enabled at calibrator. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (CONFIRMED DC by the owner 2026-10-27; the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand)."
   },
   {
    "table": "2",
@@ -3526,7 +3531,7 @@
    "group": "AMP10",
    "settle": 5,
    "tol_text": "Table 6-2: 9.965 to 10.035 A (±35 mA from the nominal, 1 year)",
-   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±35 mA for the U1252B. Note [j]: 10 A continuous, and additional 0.5% to specified accuracy when measuring a signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for twice the measuring time you applied before low current measurement. With a 2-wire connection and compensation enabled at calibrator. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
+   "note": "Table 6-2 (printed pp. 155-160): \"Error from nominal 1 year\" ±35 mA for the U1252B. Note [j]: 10 A continuous, and additional 0.5% to specified accuracy when measuring a signal greater than 10 A~20 A for 30 seconds maximum. After measured current for > 10 A, cool down the meter for twice the measuring time you applied before low current measurement. With a 2-wire connection and compensation enabled at calibrator. Note [k]: Specification apply with settling time fulfilled. The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (CONFIRMED DC by the owner 2026-10-27; the table prints no frequency for them, step 19 prints \"5 A, 1 kHz\" for AC) and placed in their printed position, after the AC mA rows (UNVERIFIED reading of the table). Display decimals (typed-reading padding) are those of Table 6-4 for this range (UNVERIFIED for the verification table), at least the decimals of the limits. Limits are the printed 1-year error from the nominal: low = nominal - error, high = nominal + error. Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A (or the calibrator is set by hand).",
    "check": {
     "U1252B": {
      "verdict": "same",
@@ -3862,25 +3867,6 @@
    "setup_key": "NONE",
    "ref": "p. 150 functional check",
    "note": "Basic Operating Test (p. 150); no calibrator output, no limits, no uncertainty (yes / no). Owner rule 2026-10-27: included."
-  },
-  {
-   "table": "F",
-   "step": 4,
-   "id": "F-4",
-   "section": "Functional checks",
-   "switch": "Charge terminal alert test",
-   "range": "",
-   "models": [
-    "U1252B"
-   ],
-   "kind": "VISUAL",
-   "test": "visual",
-   "title": "Charge terminal alert test",
-   "setup": "Charge terminal alert test (printed p. 151): the beep function must not be disabled in setup. With a voltage of more than 5 V on the CHG terminal (the manual does not say how it is sourced: set it by hand, UNVERIFIED) and the rotary switch not at the OFF/CHG position, the meter sounds an alert beep and the primary display flashes \"Ch.Err\" until the lead is removed (Figure 6-3). Charge mode is \"U1252B only\" in Table 1-1; this section is not model-marked: applied to the U1252B only (UNVERIFIED).",
-   "question": "The meter beeped and the primary display flashed \"Ch.Err\" until the lead was removed.",
-   "setup_key": "NONE",
-   "ref": "p. 151 functional check",
-   "note": "Basic Operating Test (p. 151); no calibrator output, no limits, no uncertainty (yes / no). Owner rule 2026-10-27: included."
   }
  ]
 }

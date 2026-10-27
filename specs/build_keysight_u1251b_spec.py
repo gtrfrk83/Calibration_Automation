@@ -5,7 +5,7 @@ User's and Service Guide (724 PDF pages; printed page = PDF page; the English ed
 
 Source (read from RENDERED PAGE IMAGES, pdftoppm at 130, 220 and 300 dpi, every number twice, never from extracted text; tests/test_keysight_u1251b_points.py holds the second transcription):
   Table 6-2 "Verification Test", printed pp. 155-160 (columns Step / Test Function / Range / 5520A Output / "Error from nominal 1 year" for U1251B and U1252B), notes [a]-[p] printed pp. 160-161;
-  Basic Operating Test (backlight, display, current terminal, charge terminal alert), printed pp. 149-151; Test Considerations, printed p. 152; Recommended Test Equipment (Table 6-1), printed p. 148;
+  Basic Operating Test (backlight, display, current terminal; the charge terminal alert test is NOT included, owner decision 2026-10-27), printed pp. 149-151; Test Considerations, printed p. 152; Recommended Test Equipment (Table 6-1), printed p. 148;
   Table 1-1 (rotary switch), printed p. 30, Figure 1-9 and Table 1-10 (terminals), printed p. 47; Table 6-4 "Adjustment table" (printed pp. 170-174), used ONLY for the display format of each range.
 The chapter has ONE set of limits (1 year, "Error from nominal"): there is no 90 day / 2 year column, so nothing had to be chosen.  The table prints the ERROR from nominal (plus / minus), not low / high
 limits: low = nominal - error and high = nominal + error, in Decimal, and the builder aborts when the pair is not symmetric about the nominal.
@@ -25,7 +25,7 @@ WHAT THE TABLE DOES NOT SAY AND IS ADDED HERE (shown to the technician):
   * The 5 A and 10 A rows after the 'Caution: connect the calibrator to the A and COM terminals' band have NO step number.  They are placed after the AC mA rows (their print position), kind DC amps (no
     frequency is printed, unlike step 19's '5 A, 1 kHz').  Printed [k] / [j]: see the notes.  UNVERIFIED reading of the table: flagged in the report.
   * Step 15 prints [j] on the U1251B 500 uA cell and [i] on its neighbours: [j] concerns the 10 A range, [i] is the Null / thermal note: treated as a misprint for [i] (visible note; no limit affected).
-  * Hand-set points (kind NONE, a 'by hand' set-up window): the frequency-counter points 11 / 12 (Keysight 33250A) and the square-wave OUTPUT points 20 (the meter is the source; Keysight 53131A and
+  * Hand-set points (kind NONE, a 'by hand' set-up window): the frequency-counter point 12 (Keysight 33250A) and the square-wave OUTPUT points 20 (the meter is the source; Keysight 53131A and
     34410A measure: Table 6-1 says 34401A for 'Square Wave' while the table body says 34410A: flagged).  They carry NO uncertainty: the standard is not a calibrator the suite holds a specification for.
   * Amplitude (step 20, last row) prints only the error (+- 0.2 V), no nominal: 2.8 V is taken from the manufacturer's data sheet (not in this manual): UNVERIFIED, flagged.
   * Functional checks (Basic Operating Test, printed pp. 149-151) have no limits: yes / no points that run first (table F), owner rule of 2026-10-27 (as the 33x family).
@@ -115,6 +115,7 @@ NOTE_TEXT = {
 SW = {
     'ACV': 'V~  (AC volts: turn the rotary switch to the ~V position)',
     'FREQ': 'Hz  (frequency: in the ~V position press the Hz button to go to frequency mode)',
+    'COUNTER': 'Hz  (frequency counter, U1252B: turn the rotary switch to the Hz/diode position and press Shift for the frequency counter mode)',
     'DUTY': '% duty  (duty cycle: in the ~V position press the Hz button to go to Duty Cycle mode)',
     'DCV': 'V⎓  (DC volts: turn the rotary switch to the ⎓V position on the U1251B, to the ≃V position on the U1252B)',
     'ACV2': 'V~  (AC volts, U1252B: in the ≃V position press the Shift button to go to the ~V mode)',
@@ -139,7 +140,7 @@ NOTE_CAL = 'Table 6-2 names a Fluke 5520A; the program drives the 5522A or 5560A
 NOTE_STEP4 = ('Printed misprint: the table says "to ≃V position (for model U1252B), to ⎓V position (for model U1252B)"; Table 1-1 / Table 1-10 put the ⎓V position on the U1251B and the ≃V position on the U1252B, '
               'so the second "(for model U1252B)" is read as U1251B. No limit is affected.')
 NOTE_STEP15J = ('Printed misprint: the U1251B 500 µA cell is marked [j] (10 A continuous); its neighbours are marked [i] (Null / thermal effect): read as [i]. No limit is affected.')
-NOTE_NOSTEP = ('The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (the table prints no frequency for them, step 19 prints "5 A, 1 kHz" for AC) and placed in their printed position, '
+NOTE_NOSTEP = ('The 5 A and 10 A rows below the printed Caution band have no step number: read as DC amps (CONFIRMED DC by the owner 2026-10-27; the table prints no frequency for them, step 19 prints "5 A, 1 kHz" for AC) and placed in their printed position, '
                'after the AC mA rows (UNVERIFIED reading of the table).')
 
 # ROWS: (key, section, switch, range, kind, calibrator output as printed, nominal as printed (None = the output value), U1251B error as printed (None = N/A), U1252B error, display unit, extras)
@@ -213,11 +214,12 @@ ROWS = [
     # ---- step 9: conductance; step 10: diode (printed p. 158)
     ('9', 'Conductance', 'NS', '500 nS', 'COND', '50 nS', None, '0.7 nS', '0.6 nS', 'nS', {'fn': 'e', 'prompt': NOTE_TEXT['e'], 'settle': 10}),
     ('10', 'Diode', 'DIODE', 'Diode', 'DCV', '1 V', None, '1 mV', '1 mV', 'V', {}),
-    # ---- steps 11 and 12: frequency counter (U1252B only), Keysight 33250A, set by hand
-    ('11', 'Frequency counter', 'COUNTER', '999.99 kHz', 'HANDSET', '600 mVrms, 100 kHz (33250A)', '100 kHz', None, '52 Hz', 'kHz',
-     {'fn': 'fp', 'setup': 'Set the Keysight 33250A by hand: sine, 600 mVrms, 100 kHz, to the meter (Ω V mV jack and COM; the connection and load are not stated in the table: UNVERIFIED) and press Output on. '
-                           'Meter (U1252B): turn the rotary switch to the Hz/diode position and press Shift for the frequency counter mode (999.99 kHz range). Shield the input from noise (note f). '
-                           'Switch the 33250A output off after the reading.'}),
+    # ---- step 11: frequency counter (U1252B only), sourced by the CALIBRATOR (owner answer 2026-10-27: not the 33250A); step 12 stays hand-set (33250A)
+    ('11', 'Frequency counter', 'COUNTER', '999.99 kHz', 'FREQ', '0.6 V, 100 kHz', '100 kHz', None, '52 Hz', 'kHz',
+     {'fn': 'fp', 'extra': 'Owner decision 2026-10-27: this point is sourced by the calibrator (5522A / 5560A, 600 mV rms at 100 kHz) instead of the Keysight 33250A named in Table 6-2; the limits are the printed ones. '
+                           'The calibrator-frequency uncertainty rule applies.',
+      'prompt': 'Meter (U1252B): turn the rotary switch to the Hz/diode position and press Shift for the frequency counter mode (999.99 kHz range). Shield the input from noise (note f). '
+                'Connection: Ω V mV jack and COM, as for the other voltage points.'}),
     ('12', 'Frequency counter', 'COUNTER', '99.999 MHz', 'HANDSET', '1500 mVrms, 10 MHz (33250A)', '10 MHz', None, '5.2 kHz', 'MHz',
      {'fn': 'p', 'setup': 'Set the Keysight 33250A by hand: sine, 1500 mVrms, 10 MHz, to the meter (Ω V mV jack and COM; the connection and load are not stated in the table: UNVERIFIED) and press Output on. '
                            'Meter (U1252B): in the frequency counter mode press the Range button to go to frequency counter mode divide by 100 (99.999 MHz range). '
@@ -278,10 +280,6 @@ FUNC = [
     ('Current terminal test', 'Current terminal test (printed p. 150): the beep function must not be disabled in setup. Insert a test lead into the A terminal with the rotary switch NOT set to the mA·A function. '
                               'The meter sounds an alert beep and the primary display flashes "A-Err" until the lead is removed from the A terminal (Figure 6-2).',
      'The meter beeped and the primary display flashed "A-Err" until the lead was removed.', BOTH, 'p. 150'),
-    ('Charge terminal alert test', 'Charge terminal alert test (printed p. 151): the beep function must not be disabled in setup. With a voltage of more than 5 V on the CHG terminal (the manual does not say how it is sourced: '
-                                  'set it by hand, UNVERIFIED) and the rotary switch not at the OFF/CHG position, the meter sounds an alert beep and the primary display flashes "Ch.Err" until the lead is removed (Figure 6-3). '
-                                  'Charge mode is "U1252B only" in Table 1-1; this section is not model-marked: applied to the U1252B only (UNVERIFIED).',
-     'The meter beeped and the primary display flashed "Ch.Err" until the lead was removed.', ['U1252B'], 'p. 151'),
 ]
 
 # CHECKS: published accuracy, recomputed from the DATA SHEET formulas as read from an UNVERIFIED second-hand extraction: ('section', range, output) -> {model: (percent, counts)}; the display step is that of the range
@@ -471,7 +469,7 @@ GROUPS = {
 SOURCE_NOTE = (
     'Table 6-2 "Verification Test" of the Keysight U1251B and U1252B User\'s and Service Guide (printed pp. 155-160, notes [a]-[p] pp. 160-161): the column "Error from nominal 1 year" is the only limit set '
     '(no 90 day / 2 year columns). Limits are the plus / minus error around the nominal in Decimal; two models with different errors are two steps of the same row. '
-    'The table names a Fluke 5520A (Table 6-1, p. 148); the program drives a Fluke 5522A or 5560A, or you set the calibrator by hand. The frequency counter points (steps 11, 12; Keysight 33250A) and the '
+    'The table names a Fluke 5520A (Table 6-1, p. 148); the program drives a Fluke 5522A or 5560A, or you set the calibrator by hand. The frequency counter point 12 (Keysight 33250A) and the '
     'square wave output points (step 20; Keysight 53131A and 34410A) are set by hand and carry no uncertainty. The meter has no documented remote command set: you type the display reading. '
     'The table has no display resolutions: typed readings are padded to the decimals of Table 6-4 for the range. The printed table\'s misprints and unreadable cells are flagged in the point notes. '
     'The calibration adjustment (printed pp. 164-175) is not part of this procedure.')
@@ -507,7 +505,7 @@ def build_spec():
     return spec, flagged
 
 
-EXPECTED_TABLE = {'U1251B': 60, 'U1252B': 84}    # counted by hand from the rendered Table 6-2 (N/A cells removed): 60 + 3 functional checks = 63; 84 + 4 = 88
+EXPECTED_TABLE = {'U1251B': 60, 'U1252B': 84}    # counted by hand from the rendered Table 6-2 (N/A cells removed): 60 + 3 functional checks = 63; 84 + 3 = 87
 EXPECTED_FLAGS = {}
 
 
