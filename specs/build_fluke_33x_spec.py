@@ -13,7 +13,7 @@ The manual has NO X / N/A model columns: the models of a row come from the table
 The meter has NO remote interface: the operator types the display reading, as for the 323 / 365 / 376 / 381.
 
 ONE FAMILY SPEC, FIVE MODELS (as the 110 / 170 / 374-376 / 323 families): every step lists its models.
-  333: 11 points   334: 13   335: 13   336: 20   337: 27.   Registered: Procedures/Fluke_333_Verification.py ... Fluke_337_Verification.py.
+  333: 12 points   334: 16   335: 16   336: 23   337: 30   (Table 2: 11 / 13 / 13 / 20 / 27, plus the functional checks 1 / 3 / 3 / 3 / 3).   Registered: Procedures/Fluke_333_Verification.py ... Fluke_337_Verification.py.
 
 THE 50-TURN COIL (Table 1: 'Fluke 5500A/Coil'; Figure 4; procedure step 4 'make sure LCOMP on the 5520A is ON'):
   * The column '5520A Output' of the amps rows lists the CURRENT THE CLAMP SEES (20 A, 200 A, 600 A, 900 A ...): 600 A and 900 A are not outputs any calibrator can make, and the limits are centred
@@ -29,7 +29,7 @@ THE 50-TURN COIL (Table 1: 'Fluke 5500A/Coil'; Figure 4; procedure step 4 'make 
     current x 50 (coil_rule.py); the frequency rows the calibrator's own output-frequency specification (owner decision 2026-10-26).
 
 Two points are not numeric limits: 'Continuity 25 ohm: Beeper On' (test 'beeper', as the 170 series) and Min/Max '20 V 400 Hz: Reading does not change' (test 'visual' with a calibrator output: a yes / no question).
-The functional checks of the section (display test, backlight test, keypad test; printed pp. 5-6) have no limits and are not part of Table 2: NOT built (as the 323 / 381).  The calibration ADJUSTMENT (printed pp. 10-12) is not built.
+The functional checks of the section (display test, backlight test, keypad test; printed pp. 5-6) have no limits: built as yes / no 'visual' points of table 'F' (owner decision 2026-10-27; display and backlight 334-337, keypad all five).  The calibration ADJUSTMENT (printed pp. 10-12) is not built.
 
 CROSS-CHECK against the PUBLISHED specifications of the same manual (printed p. 3; resolutions are not printed, they are the display step of the printed limits: 0.1 V, 0.1 A, 0.1 ohm / 1 ohm, 0.1 Hz):
   AC volts 1 % + 5 counts (50/60 Hz; 336 / 337 20-100 Hz), 6 % + 5 counts (100-400 Hz); DC volts 1 % + 5; ohms 1 % + 5; AC amps 2 % + 5 (50/60 Hz; 336 / 337 10-100 Hz), 6 % + 5 (10-400 Hz as printed);
@@ -50,7 +50,8 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE / 'fluke_33x_pv.json'
 DOCUMENT = 'Fluke 33X ClampMeters - Calibration Information (PN 1618765, June 2001, Rev. 2, 12/03)'
 MODELS = ('333', '334', '335', '336', '337')
-EXPECTED_COUNTS = {'333': 11, '334': 13, '335': 13, '336': 20, '337': 27}
+EXPECTED_COUNTS = {'333': 12, '334': 16, '335': 16, '336': 23, '337': 30}          # Table 2 rows (11 / 13 / 13 / 20 / 27) + the functional checks (1 / 3 / 3 / 3 / 3)
+TABLE_COUNTS = {'333': 11, '334': 13, '335': 13, '336': 20, '337': 27}
 EXPECTED_TABLE_COUNTS = {'2A': 14, '2B': 27}
 TURNS = 50
 PAGE = {'2A': '8', '2B': '9'}
@@ -165,6 +166,20 @@ ROWS = [
     ('2B', 'Frequency', 'hz', '', 'ACI', 'numeric', '0.2', 300, 'Hz', '300', '298.0', '302.0', 'HZ', '0.1', M337, {'coil': True, 'freq_row': True, 'eff': '10', 'trig300': True}),
 ]
 EXPECTED_COUNT = 41
+
+# Functional checks, printed pp. 5-6 (no calibrator output, no limits, no uncertainty; yes / no, table 'F' runs first as in the 110 / 287 families), in the manual's order:
+# (title, switch, setup, question, models, printed page)
+FUNC = [
+    ('Display test', 'Display test',
+     'Testing the Display (printed p. 5, Figure 2): turn the Meter on while holding down the INRUSH button, then check all segments for clarity and contrast. The 333 is not equipped with this feature.',
+     'All display segments are clear and have good contrast.', ('334', '335', '336', '337'), 'p. 5'),
+    ('Backlight test', 'Backlight test',
+     'Backlight Test (printed p. 6, Figure 3): press the backlight button. The backlight will come on and the unit will beep. Press the button a second time to turn the backlight off.',
+     'The backlight came on with a beep and went off at the second press.', ('334', '335', '336', '337'), 'p. 6'),
+    ('Keypad test', 'Keypad test',
+     'Keypad Test (printed p. 6): turn the Meter on and push each button separately. Each button push will cause the Meter to beep.',
+     'Every button push made the Meter beep.', MODELS, 'p. 6'),
+]
 # rows the check classifies as other than 'full' / 'half' (global step number in table order): anything else that is not full aborts (re-read the table)
 EXPECTED_FLAGS = {8: 'looser', 9: 'looser', 25: 'looser', 26: 'looser', 40: 'rounded'}
 
@@ -234,8 +249,8 @@ def check_rows():
     if tc != EXPECTED_TABLE_COUNTS:
         problems.append(f'rows per table {tc} differ from {EXPECTED_TABLE_COUNTS}')
     counts = {m: sum(1 for r in ROWS if m in r[14]) for m in MODELS}
-    if counts != EXPECTED_COUNTS:
-        problems.append(f'points per model {counts} differ from {EXPECTED_COUNTS}')
+    if counts != TABLE_COUNTS:
+        problems.append(f'Table 2 points per model {counts} differ from {TABLE_COUNTS}')
     return problems
 
 
@@ -329,6 +344,13 @@ def build_steps():
         step['ref'] = f'T{table} #{tn}'
         step['id'] = f'{table}-{n}'          # the step number runs on across the two tables (the engine orders points by it); 'ref' is the printed row
         steps.append(step)
+    for k, (title, switch, setup, question, models, page) in enumerate(FUNC, 1):
+        steps.append(dict(table='F', step=k, section='Functional checks', switch=switch, range='', models=list(models), kind='VISUAL', test='visual', title=title, setup=setup,
+                          question=question, setup_key='NONE', id=f'F-{k}', ref=f'{page} functional check',
+                          note=f'Functional check of the Performance Tests section ({page}); no calibrator output, no limits, no uncertainty (yes / no). Owner decision 2026-10-27: included.'))
+    counts = {m: sum(1 for s in steps if m in s['models']) for m in MODELS}
+    if counts != EXPECTED_COUNTS:
+        problems.append(f'points per model {counts} differ from {EXPECTED_COUNTS}')
     return steps, problems, flagged
 
 
@@ -373,13 +395,13 @@ SOURCE_NOTE = (
     'Table 2 of the 33X Calibration Information (PN 1618765, Rev. 2, 12/03): "Performance Tests 333, 334, 335" (14 rows, printed p. 8) and "Performance Tests 336, 337 (cont.)" (27 rows, printed p. 9) = 41 rows '
     '(AC volts 5, Min/Max 2, DC volts 8, continuity 2, ohms 4, AC amps 9, inrush 2, DC amps 7, frequency 2). The tables have no step numbers and no X / N/A columns: steps are numbered in table order and the number runs on '
     'across the two tables (2A-1 .. 2A-14, then 2B-15 .. 2B-41; the ref T2A #n / T2B #n is the printed row); the models of a row are the table it is printed in (p. 8: 333 334 335; p. 9: 336 337) and the tags printed '
-    'in the rows (333 / 334, 335 / 337 only / 337), so the points per model are 333: 11, 334: 13, 335: 13, 336: 20, 337: 27. '
+    'in the rows (333 / 334, 335 / 337 only / 337), so the Table 2 points per model are 333: 11, 334: 13, 335: 13, 336: 20, 337: 27 (12 / 16 / 16 / 23 / 30 with the functional checks). '
     'Table 1 (printed p. 5) names a Fluke 5520A (the program drives a Fluke 5522A, 5520A or 5560A, or you set the calibrator by hand), any Fluke DMM and the Fluke 5500A/Coil (50 turns). '
     'The "5520A Output" column of the amps rows lists the current the jaw sees; the calibrator drives that / 50 through the coil (the meter reads 50 x the calibrator current; an inference, as for every clamp meter), '
     'the inrush rows (5 A at 60 Hz) and the frequency rows (5 A at 10 Hz, 10 A at 300 Hz) likewise. The meter has no remote interface: you type the display reading. The manual prints one set of limits; they are used as printed. '
     'The four ohms limits (590.5 .. 609.5 and 5905 .. 6095) are looser than the printed Specifications (1 % + 5 counts; the limits are 1.5 % + 5 counts) and the 10 Hz frequency limits are the specification rounded outward: '
-    'both flagged, nothing changed. High-voltage points go straight to the test value (the manual prescribes no ramp). The display, backlight and keypad checks (printed pp. 5-6) and the calibration ADJUSTMENT '
-    '(printed pp. 10-12) are not part of this procedure.')
+    'both flagged, nothing changed. High-voltage points go straight to the test value (the manual prescribes no ramp). The display, backlight and keypad checks (printed pp. 5-6) are yes / no points that run first (table F: 334-337 three, 333 the keypad only); the calibration ADJUSTMENT '
+    '(printed pp. 10-12) is not part of this procedure.')
 REPORT_NOTE = (
     'Limits are those of the manufacturer\'s Table 2 (Fluke 33X ClampMeters Calibration Information, printed pp. 8-9), unchanged. The current, inrush and frequency points are driven through a 50-turn coil '
     '(calibrator current x 50 = the reading shown); the Uncertainty of a coil point is that of the 5500A/COIL scope lines at the effective current where they cover it, otherwise the calibrator\'s at the sourced current x 50; '
@@ -400,11 +422,11 @@ def build_spec():
                     cite='Fluke 33X ClampMeters Calibration Information, Table 2 Performance Tests, printed pp. 8-9; limits unchanged, rows flagged against the Specifications (printed p. 3)',
                     limits='Manufacturer limits, Table 2, as printed (one set, no interval columns)',
                     report_note=REPORT_NOTE, note=SOURCE_NOTE),
-        models={'333': dict(name='Fluke 333', brand='Fluke', model_note='Fluke 333 clamp meter (400 A, average responding): Table 2 p. 8, 11 points (AC volts, DC volts, continuity, 600 ohm, AC amps through the 50-turn coil)'),
-                '334': dict(name='Fluke 334', brand='Fluke', model_note='Fluke 334 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points (adds the 6 kohm and inrush rows)'),
-                '335': dict(name='Fluke 335', brand='Fluke', model_note='Fluke 335 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points (same rows as the 334)'),
-                '336': dict(name='Fluke 336', brand='Fluke', model_note='Fluke 336 true-rms clamp meter (600 A AC / DC, inrush): Table 2 p. 9, 20 points (adds 400 Hz rows and DC amps)'),
-                '337': dict(name='Fluke 337', brand='Fluke', model_note='Fluke 337 true-rms clamp meter (999.9 A AC / DC, inrush, frequency): Table 2 p. 9, 27 points (adds Min/Max, 900 A and frequency rows)')},
+        models={'333': dict(name='Fluke 333', brand='Fluke', model_note='Fluke 333 clamp meter (400 A, average responding): Table 2 p. 8, 11 points + keypad check = 12 (AC volts, DC volts, continuity, 600 ohm, AC amps through the 50-turn coil)'),
+                '334': dict(name='Fluke 334', brand='Fluke', model_note='Fluke 334 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points + 3 functional checks = 16 (adds the 6 kohm and inrush rows)'),
+                '335': dict(name='Fluke 335', brand='Fluke', model_note='Fluke 335 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points + 3 functional checks = 16 (same rows as the 334)'),
+                '336': dict(name='Fluke 336', brand='Fluke', model_note='Fluke 336 true-rms clamp meter (600 A AC / DC, inrush): Table 2 p. 9, 20 points + 3 functional checks = 23 (adds 400 Hz rows and DC amps)'),
+                '337': dict(name='Fluke 337', brand='Fluke', model_note='Fluke 337 true-rms clamp meter (999.9 A AC / DC, inrush, frequency): Table 2 p. 9, 27 points + 3 functional checks = 30 (adds Min/Max, 900 A and frequency rows)')},
         groups=GROUPS,
         steps=steps), flagged
 

@@ -24,7 +24,10 @@ sys.path.insert(0, str(HERE))
 h = H = Flow = SPECS = Spy = SPEC = BUILDER = X = None
 SPEC_NAME = 'fluke_33x_pv.json'
 MODELS = ('333', '334', '335', '336', '337')
-COUNTS = {'333': 11, '334': 13, '335': 13, '336': 20, '337': 27}
+COUNTS = {'333': 12, '334': 16, '335': 16, '336': 23, '337': 30}          # Table 2 rows 11 / 13 / 13 / 20 / 27 + functional checks 1 / 3 / 3 / 3 / 3
+TABLE_COUNTS = {'333': 11, '334': 13, '335': 13, '336': 20, '337': 27}
+# the functional checks of printed pp. 5-6 as read a second time: (title keyword, models as X / N for 333..337) in the manual's order
+FUNC = [('Display', 'NXXXX'), ('Backlight', 'NXXXX'), ('Keypad', 'XXXXX')]
 
 # Table 2 as read a second time: (the '5520A Output' column as printed, models as X / N for 333 334 335 336 337, low, high, what the meter shows) in table order.
 # low / high None: the table prints no numeric limits ('Beeper On', 'Reading does not change').
@@ -100,17 +103,36 @@ def pts(model):
 class Spec(unittest.TestCase):
     def test_41_rows_in_two_tables_and_counts_per_model(self):
         self.assertEqual(len(TABLE), 41)
-        self.assertEqual(len(SPEC['steps']), 41)
-        self.assertEqual([s['step'] for s in SPEC['steps']], list(range(1, 42)))
-        self.assertEqual([s['table'] for s in SPEC['steps']].count('2A'), 14)
-        self.assertEqual([s['table'] for s in SPEC['steps']].count('2B'), 27)
-        self.assertEqual([s['ref'] for s in SPEC['steps']], [f'T2A #{i}' for i in range(1, 15)] + [f'T2B #{i}' for i in range(1, 28)])
-        self.assertEqual(len({s['id'] for s in SPEC['steps']}), 41)
+        self.assertEqual(len(SPEC['steps']), 44)                                  # 41 Table 2 rows + 3 functional checks
+        tb = SPEC['steps'][:41]
+        self.assertEqual([s['step'] for s in tb], list(range(1, 42)))
+        self.assertEqual([s['table'] for s in tb].count('2A'), 14)
+        self.assertEqual([s['table'] for s in tb].count('2B'), 27)
+        self.assertEqual([s['ref'] for s in tb], [f'T2A #{i}' for i in range(1, 15)] + [f'T2B #{i}' for i in range(1, 28)])
+        self.assertEqual(len({s['id'] for s in SPEC['steps']}), 44)
         self.assertEqual({m: len(pts(m)) for m in MODELS}, COUNTS)
-        self.assertEqual({m: sum(1 for r in TABLE if r[1][MODELS.index(m)] == 'X') for m in MODELS}, COUNTS)      # the second transcription gives the same counts
+        self.assertEqual({m: sum(1 for s in tb if m in s['models']) for m in MODELS}, TABLE_COUNTS)
+        self.assertEqual({m: sum(1 for r in TABLE if r[1][MODELS.index(m)] == 'X') for m in MODELS}, TABLE_COUNTS)      # the second transcription gives the same counts
+
+    def test_functional_checks_are_yes_no_points_that_run_first(self):
+        """Owner decision 2026-10-27: display (334-337), backlight (334-337) and keypad (all) checks, printed pp. 5-6, as visual points: no output, no limits, no uncertainty; table F runs first in manual order."""
+        f = SPEC['steps'][41:]
+        self.assertEqual([s['id'] for s in f], ['F-1', 'F-2', 'F-3'])
+        for s, (kw, flags) in zip(f, FUNC):
+            self.assertIn(kw, s['title'])
+            self.assertEqual(''.join('X' if m in s['models'] else 'N' for m in MODELS), flags)
+            self.assertEqual((s['test'], s['kind'], s['table']), ('visual', 'VISUAL', 'F'))
+            self.assertNotIn('applied', s)
+            self.assertNotIn('low', s)
+        for m in MODELS:
+            ids = [p['id'] for p in pts(m)]
+            n_f = sum(1 for p in pts(m) if p['table'] == 'F')
+            self.assertEqual(ids[:n_f], [i for i in ('F-1', 'F-2', 'F-3') if m in SPEC['steps'][41 + int(i[-1]) - 1]['models']], m)
+            self.assertTrue(all(p['group'] == 'NONE' for p in pts(m) if p['table'] == 'F'))
+        self.assertEqual(sum(1 for p in pts('333') if p['table'] == 'F'), 1)          # the 333 has no display test and no backlight
 
     def test_every_row_matches_the_second_transcription(self):
-        for step, (out, flags, low, high, nom) in zip(SPEC['steps'], TABLE):
+        for step, (out, flags, low, high, nom) in zip(SPEC['steps'][:41], TABLE):
             self.assertEqual(''.join('X' if m in step['models'] else 'N' for m in MODELS), flags, out)
             self.assertEqual(D(str(step['nominal'] / step['factor'])).normalize(), D(nom).normalize(), out)
             if low is None:
@@ -121,8 +143,8 @@ class Spec(unittest.TestCase):
                 self.assertEqual(step['test'], 'numeric', out)
 
     def test_sections_and_calibrator_outputs(self):
-        self.assertEqual([s['section'] for s in SPEC['steps']], SECTIONS)
-        for step, (value, freq), (out, *_r) in zip(SPEC['steps'], APPLIED, TABLE):
+        self.assertEqual([s['section'] for s in SPEC['steps'][:41]], SECTIONS)
+        for step, (value, freq), (out, *_r) in zip(SPEC['steps'][:41], APPLIED, TABLE):
             self.assertEqual((step['applied']['value'], step['applied']['frequency']), (value, float(freq) if freq else None), out)
 
     def test_amps_inrush_rows_are_50_turns_of_the_calibrator_current(self):
@@ -149,7 +171,7 @@ class Spec(unittest.TestCase):
         self.assertNotIn('333', [m for s in r for m in s['models']])               # the 333 has no inrush (Specifications: NA)
 
     def test_frequency_rows_through_the_coil(self):
-        f = [s for s in SPEC['steps'] if s['display_unit'] == 'Hz']
+        f = [s for s in SPEC['steps'][:41] if s['display_unit'] == 'Hz']
         self.assertEqual([(s['id'], s['models'], s['applied']['value'], s['applied']['frequency'], s['nominal'], s['unc_kind'], s['group']) for s in f],
                          [('2B-40', ['337'], 0.1, 10.0, 10, 'FREQ', 'COIL_AUX'), ('2B-41', ['337'], 0.2, 300.0, 300, 'FREQ', 'COIL_AUX')])
         for s in f:
@@ -180,9 +202,9 @@ class Spec(unittest.TestCase):
         self.assertIn('MIN/MAX', mm['switch'])
 
     def test_groups(self):
-        self.assertEqual([s['group'] for s in SPEC['steps']], GROUPS)
+        self.assertEqual([s.get('group') for s in SPEC['steps'][:41]], GROUPS)
         self.assertEqual(set(GROUPS), set(SPEC['groups']) | {'VOHM'})
-        high = sorted({(s['applied']['value'], s['applied']['frequency'] or 0.0) for s in SPEC['steps'] if s['group'] == 'COIL_20A'})
+        high = sorted({(s['applied']['value'], s['applied']['frequency'] or 0.0) for s in SPEC['steps'][:41] if s['group'] == 'COIL_20A'})
         self.assertEqual(high, [(-18.0, 0.0), (-12.0, 0.0), (4.0, 50.0), (4.0, 400.0), (8.0, 50.0), (12.0, 0.0), (12.0, 50.0), (18.0, 0.0), (18.0, 50.0)])
 
     def test_published_accuracy_cross_check_flags_but_changes_nothing(self):
@@ -312,13 +334,13 @@ class EndToEnd(unittest.TestCase):
             app, io = self.run_perfect(meter)
             texts = [t for _i, t in H.wire(io)]
             outs = [t for t in texts if t.startswith('OUT ') and not t.endswith('?')]
-            self.assertEqual(len(outs), COUNTS[meter], meter)
+            self.assertEqual(len(outs), TABLE_COUNTS[meter], meter)
             self.assertLess(texts.index('*RST'), texts.index(outs[0]))
             self.assertEqual(texts[-1], 'STBY')
             idx = [i for i, t in enumerate(texts) if t in outs]
             for a, b in zip(idx, idx[1:]):
                 self.assertIn('STBY', texts[a + 1:b], meter)
-            for o, p in zip(outs, pts(meter)):
+            for o, p in zip(outs, [p for p in pts(meter) if p['table'] != 'F']):
                 if p['kind'] in ('DCV', 'DCI'):
                     self.assertTrue(o.endswith(',0Hz'), o)
             self.fresh()
@@ -357,7 +379,7 @@ class EndToEnd(unittest.TestCase):
     def test_cable_change_prompts_follow_the_group_changes(self):
         for meter in MODELS:
             app, io = self.run_perfect(meter)
-            groups = [p['group'] for p in app.points]
+            groups = [p['group'] for p in app.points if p['group'] != 'NONE']          # the yes / no functional checks (group NONE) need no cable change
             cables = [d for d in self.hn.dialogs if d[0] == 'confirm' and d[1] == 'Change the cables']
             self.assertEqual(len(cables), 1 + sum(1 for a, b in zip(groups, groups[1:]) if a != b), meter)
             self.fresh()
@@ -391,7 +413,8 @@ class EndToEnd(unittest.TestCase):
     def test_points_without_an_uncertainty_are_exactly_the_known_list(self):
         """Owner instruction: a point that should carry an uncertainty and has none is reported, never invented.  Without one: the 0 A dc point (336, 337; no_uncertainty, as the 381's 0 A point,
         owner decision 2026-10-26) and the 337's Min/Max 'reading does not change' yes / no check (no numeric reading).  The two continuity beeper points DO carry one (the calibrator's 25 ohm)."""
-        want = {'333': [], '334': [], '335': [], '336': [('2B-33', 'DCI')], '337': [('2B-19', 'ACV'), ('2B-33', 'DCI')]}
+        f3, f13 = [('F-3', 'VISUAL')], [('F-1', 'VISUAL'), ('F-2', 'VISUAL'), ('F-3', 'VISUAL')]          # functional checks: yes / no, no uncertainty (owner 2026-10-27)
+        want = {'333': f3, '334': f13, '335': f13, '336': f13 + [('2B-33', 'DCI')], '337': f13 + [('2B-19', 'ACV'), ('2B-33', 'DCI')]}
         for meter in MODELS:
             for cal in ('5522A', '5560A'):
                 app, io = self.run_perfect(meter, cal)

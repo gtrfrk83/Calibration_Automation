@@ -15,33 +15,33 @@
   "cite": "Fluke 33X ClampMeters Calibration Information, Table 2 Performance Tests, printed pp. 8-9; limits unchanged, rows flagged against the Specifications (printed p. 3)",
   "limits": "Manufacturer limits, Table 2, as printed (one set, no interval columns)",
   "report_note": "Limits are those of the manufacturer's Table 2 (Fluke 33X ClampMeters Calibration Information, printed pp. 8-9), unchanged. The current, inrush and frequency points are driven through a 50-turn coil (calibrator current x 50 = the reading shown); the Uncertainty of a coil point is that of the 5500A/COIL scope lines at the effective current where they cover it, otherwise the calibrator's at the sourced current x 50; the frequency points carry the calibrator's frequency specification. The four ohms limits are looser than the published accuracy of the Specifications (1 % + 5 counts) and are reported as printed.",
-  "note": "Table 2 of the 33X Calibration Information (PN 1618765, Rev. 2, 12/03): \"Performance Tests 333, 334, 335\" (14 rows, printed p. 8) and \"Performance Tests 336, 337 (cont.)\" (27 rows, printed p. 9) = 41 rows (AC volts 5, Min/Max 2, DC volts 8, continuity 2, ohms 4, AC amps 9, inrush 2, DC amps 7, frequency 2). The tables have no step numbers and no X / N/A columns: steps are numbered in table order and the number runs on across the two tables (2A-1 .. 2A-14, then 2B-15 .. 2B-41; the ref T2A #n / T2B #n is the printed row); the models of a row are the table it is printed in (p. 8: 333 334 335; p. 9: 336 337) and the tags printed in the rows (333 / 334, 335 / 337 only / 337), so the points per model are 333: 11, 334: 13, 335: 13, 336: 20, 337: 27. Table 1 (printed p. 5) names a Fluke 5520A (the program drives a Fluke 5522A, 5520A or 5560A, or you set the calibrator by hand), any Fluke DMM and the Fluke 5500A/Coil (50 turns). The \"5520A Output\" column of the amps rows lists the current the jaw sees; the calibrator drives that / 50 through the coil (the meter reads 50 x the calibrator current; an inference, as for every clamp meter), the inrush rows (5 A at 60 Hz) and the frequency rows (5 A at 10 Hz, 10 A at 300 Hz) likewise. The meter has no remote interface: you type the display reading. The manual prints one set of limits; they are used as printed. The four ohms limits (590.5 .. 609.5 and 5905 .. 6095) are looser than the printed Specifications (1 % + 5 counts; the limits are 1.5 % + 5 counts) and the 10 Hz frequency limits are the specification rounded outward: both flagged, nothing changed. High-voltage points go straight to the test value (the manual prescribes no ramp). The display, backlight and keypad checks (printed pp. 5-6) and the calibration ADJUSTMENT (printed pp. 10-12) are not part of this procedure."
+  "note": "Table 2 of the 33X Calibration Information (PN 1618765, Rev. 2, 12/03): \"Performance Tests 333, 334, 335\" (14 rows, printed p. 8) and \"Performance Tests 336, 337 (cont.)\" (27 rows, printed p. 9) = 41 rows (AC volts 5, Min/Max 2, DC volts 8, continuity 2, ohms 4, AC amps 9, inrush 2, DC amps 7, frequency 2). The tables have no step numbers and no X / N/A columns: steps are numbered in table order and the number runs on across the two tables (2A-1 .. 2A-14, then 2B-15 .. 2B-41; the ref T2A #n / T2B #n is the printed row); the models of a row are the table it is printed in (p. 8: 333 334 335; p. 9: 336 337) and the tags printed in the rows (333 / 334, 335 / 337 only / 337), so the Table 2 points per model are 333: 11, 334: 13, 335: 13, 336: 20, 337: 27 (12 / 16 / 16 / 23 / 30 with the functional checks). Table 1 (printed p. 5) names a Fluke 5520A (the program drives a Fluke 5522A, 5520A or 5560A, or you set the calibrator by hand), any Fluke DMM and the Fluke 5500A/Coil (50 turns). The \"5520A Output\" column of the amps rows lists the current the jaw sees; the calibrator drives that / 50 through the coil (the meter reads 50 x the calibrator current; an inference, as for every clamp meter), the inrush rows (5 A at 60 Hz) and the frequency rows (5 A at 10 Hz, 10 A at 300 Hz) likewise. The meter has no remote interface: you type the display reading. The manual prints one set of limits; they are used as printed. The four ohms limits (590.5 .. 609.5 and 5905 .. 6095) are looser than the printed Specifications (1 % + 5 counts; the limits are 1.5 % + 5 counts) and the 10 Hz frequency limits are the specification rounded outward: both flagged, nothing changed. High-voltage points go straight to the test value (the manual prescribes no ramp). The display, backlight and keypad checks (printed pp. 5-6) are yes / no points that run first (table F: 334-337 three, 333 the keypad only); the calibration ADJUSTMENT (printed pp. 10-12) is not part of this procedure."
  },
  "models": {
   "333": {
    "name": "Fluke 333",
    "brand": "Fluke",
-   "model_note": "Fluke 333 clamp meter (400 A, average responding): Table 2 p. 8, 11 points (AC volts, DC volts, continuity, 600 ohm, AC amps through the 50-turn coil)"
+   "model_note": "Fluke 333 clamp meter (400 A, average responding): Table 2 p. 8, 11 points + keypad check = 12 (AC volts, DC volts, continuity, 600 ohm, AC amps through the 50-turn coil)"
   },
   "334": {
    "name": "Fluke 334",
    "brand": "Fluke",
-   "model_note": "Fluke 334 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points (adds the 6 kohm and inrush rows)"
+   "model_note": "Fluke 334 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points + 3 functional checks = 16 (adds the 6 kohm and inrush rows)"
   },
   "335": {
    "name": "Fluke 335",
    "brand": "Fluke",
-   "model_note": "Fluke 335 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points (same rows as the 334)"
+   "model_note": "Fluke 335 true-rms clamp meter (600 A, inrush): Table 2 p. 8, 13 points + 3 functional checks = 16 (same rows as the 334)"
   },
   "336": {
    "name": "Fluke 336",
    "brand": "Fluke",
-   "model_note": "Fluke 336 true-rms clamp meter (600 A AC / DC, inrush): Table 2 p. 9, 20 points (adds 400 Hz rows and DC amps)"
+   "model_note": "Fluke 336 true-rms clamp meter (600 A AC / DC, inrush): Table 2 p. 9, 20 points + 3 functional checks = 23 (adds 400 Hz rows and DC amps)"
   },
   "337": {
    "name": "Fluke 337",
    "brand": "Fluke",
-   "model_note": "Fluke 337 true-rms clamp meter (999.9 A AC / DC, inrush, frequency): Table 2 p. 9, 27 points (adds Min/Max, 900 A and frequency rows)"
+   "model_note": "Fluke 337 true-rms clamp meter (999.9 A AC / DC, inrush, frequency): Table 2 p. 9, 27 points + 3 functional checks = 30 (adds Min/Max, 900 A and frequency rows)"
   }
  },
  "groups": {
@@ -1487,6 +1487,73 @@
    "note": "Table 2 (336, 337), printed p. 9 (\"Table 2. Performance Tests 336, 337 (cont.)\"). Table 2 names no range and no resolution. Range and resolution shown are those of the Specifications (printed p. 3: 600.0 V, 600.0 ohm / 6000 ohm, amps 0.1 A) and the decimals of the printed limits; the meter autoranges (the Specifications print \"0 - 600.00 V\" for AC volts, taken as 600.0 V: UNVERIFIED). Frequency (337): \"10 A 300 Hz\" in Table 2: the current the jaw sees, 0.2 A at 300 Hz through the 50-turn coil (Figure 4 is the \"Amps/Hz Verification Setup\"); the meter shows the FREQUENCY, 300 Hz. The Specifications give the Hz trigger level as 10-100 Hz: 5 A or more, 100-400 Hz: more than 10 A; the 300 Hz point is 10 A, exactly the trigger level printed as \"> 10 A\", so a marginal trigger may need the point repeated (UNVERIFIED). The coil assignment and the x 50 are an INFERENCE (UNVERIFIED). Uncertainty (owner decision, 2026-10-26, all handheld meters): the frequency is the calibrator's own OUTPUT frequency, so the uncertainty is the calibrator's published frequency specification (5522A / 5520A sheet or 5560A sheet, uncertainty_budget FREQ), not the lab Frequency - Measure CMC alone.",
    "ref": "T2B #27",
    "id": "2B-41"
+  },
+  {
+   "table": "F",
+   "step": 1,
+   "section": "Functional checks",
+   "switch": "Display test",
+   "range": "",
+   "models": [
+    "334",
+    "335",
+    "336",
+    "337"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Display test",
+   "setup": "Testing the Display (printed p. 5, Figure 2): turn the Meter on while holding down the INRUSH button, then check all segments for clarity and contrast. The 333 is not equipped with this feature.",
+   "question": "All display segments are clear and have good contrast.",
+   "setup_key": "NONE",
+   "id": "F-1",
+   "ref": "p. 5 functional check",
+   "note": "Functional check of the Performance Tests section (p. 5); no calibrator output, no limits, no uncertainty (yes / no). Owner decision 2026-10-27: included."
+  },
+  {
+   "table": "F",
+   "step": 2,
+   "section": "Functional checks",
+   "switch": "Backlight test",
+   "range": "",
+   "models": [
+    "334",
+    "335",
+    "336",
+    "337"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Backlight test",
+   "setup": "Backlight Test (printed p. 6, Figure 3): press the backlight button. The backlight will come on and the unit will beep. Press the button a second time to turn the backlight off.",
+   "question": "The backlight came on with a beep and went off at the second press.",
+   "setup_key": "NONE",
+   "id": "F-2",
+   "ref": "p. 6 functional check",
+   "note": "Functional check of the Performance Tests section (p. 6); no calibrator output, no limits, no uncertainty (yes / no). Owner decision 2026-10-27: included."
+  },
+  {
+   "table": "F",
+   "step": 3,
+   "section": "Functional checks",
+   "switch": "Keypad test",
+   "range": "",
+   "models": [
+    "333",
+    "334",
+    "335",
+    "336",
+    "337"
+   ],
+   "kind": "VISUAL",
+   "test": "visual",
+   "title": "Keypad test",
+   "setup": "Keypad Test (printed p. 6): turn the Meter on and push each button separately. Each button push will cause the Meter to beep.",
+   "question": "Every button push made the Meter beep.",
+   "setup_key": "NONE",
+   "id": "F-3",
+   "ref": "p. 6 functional check",
+   "note": "Functional check of the Performance Tests section (p. 6); no calibrator output, no limits, no uncertainty (yes / no). Owner decision 2026-10-27: included."
   }
  ]
 }

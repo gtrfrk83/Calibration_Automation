@@ -7,7 +7,7 @@
  "category": "Clamp Meter",
  "version": "1",
  "order": 66,
- "description": "Fluke 333 / 334 / 335 / 336 / 337 Clamp Meter Performance Verification (family spec): this launcher runs the 333, 11 points",
+ "description": "Fluke 333 / 334 / 335 / 336 / 337 Clamp Meter Performance Verification (family spec): this launcher runs the 333, 12 points (Table 2 plus the display / backlight / keypad checks)",
  "launcher": "Procedures/Fluke_333_Verification.py",
  "engine": [
   "handheld_dmm.py",
