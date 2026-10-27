@@ -216,6 +216,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     RAMP_ABOVE, RAMP_STEP, RAMP_DELAY = 100.0, 50.0, 5.0     # the 110-series manual's "ramp up in 50 V increments, 5 s apart"
     reset_after_hand_set = False                              # the spec's options.reset_after_hand_set (Fluke 287/289: the calibrator is reset after a point the operator set by hand)
     hand_set_pending = False
+    two_wire_comp = True                                      # the spec's options.two_wire_comp (false: no ZCOMP WIRE2 on resistance points, e.g. the Fluke 33x clamp meters)
     auto_ramp = True                                          # the spec's options.auto_ramp (false: straight to the test value)
     virtual = False                                           # demo on the virtual bench: waits are shortened, nothing is appended to the shared log
 
@@ -285,7 +286,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     def _zcomp_for(self, ohms, context):
         """2-wire impedance compensation for a resistance point (5560A / 5522A: ZCOMP WIRE2, set once after the resistance is programmed, read back and compared, then the
         error queue is read).  Above what the calibrator allows (110 kohm; the 5560A figure is UNVERIFIED) compensation stays NONE and the reason is logged."""
-        if not hasattr(self.cal, 'set_zcomp') or not getattr(self.cal, 'zcomp_supported', False):
+        if not self.two_wire_comp or not hasattr(self.cal, 'set_zcomp') or not getattr(self.cal, 'zcomp_supported', False):
             return
         if not self.cal.zcomp_allowed(ohms):
             self.log.add('!!', f'2-wire compensation not set: {_fmt(ohms, "ohm")} is above what the calibrator allows for compensation (it stays NONE)', self.cal.label)
@@ -650,6 +651,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             io = IO(self.cal_mode.get(), 'sim', transport=SimFlukeTransport(bench, model), mods=mods)
             io.auto_ramp = auto_ramp
             io.reset_after_hand_set = bool(self.spec.get('options', {}).get('reset_after_hand_set'))
+            io.two_wire_comp = bool(self.spec.get('options', {}).get('two_wire_comp', True))
             return io
 
         def run(io):
@@ -755,6 +757,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             self.io = IO(self.cal_mode.get(), self._address(), int(self.cal_baud.get()), mods=self.pm_state)
         self.io.auto_ramp = self._auto_ramp()
         self.io.reset_after_hand_set = bool(self.spec.get('options', {}).get('reset_after_hand_set'))
+        self.io.two_wire_comp = bool(self.spec.get('options', {}).get('two_wire_comp', True))
         self._set_conn(True)
         if not self.demo:
             self._save_settings()                           # a demo never changes the saved connection settings

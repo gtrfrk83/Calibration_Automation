@@ -111,3 +111,22 @@ class ResetAfterHandSet(unittest.TestCase):
     def test_no_reset_when_nothing_was_set_by_hand_or_option_off(self):
         self.assertNotIn('*RST', self.run_io(True, pending=False)[1])
         self.assertNotIn('*RST', self.run_io(False)[1])
+
+
+class SpecOptOut(unittest.TestCase):
+    """options.two_wire_comp = false (Fluke 33x clamp meters, owner 2026-10-27): no ZCOMP is sent on resistance points."""
+
+    def test_option_off_sends_no_zcomp(self):
+        import handheld_dmm as hd
+        from drivers.simulated import make_bench
+        spec = hd.load_spec('fluke_323_pv.json')
+        p = next(q for q in hd.points_for(spec, '325') if q['kind'] == 'OHM')
+        for on, want in ((True, 1), (False, 0)):
+            bench, _a, _b = make_bench()
+            io = hd.IO('Fluke 5522A', 'sim', transport=T.Spy(bench, '5522A'))
+            io.auto_ramp = False
+            io.two_wire_comp = on
+            io.apply(p); io.standby()
+            texts = [t for _i, t in T.H.wire(io)]
+            self.assertEqual(texts.count('ZCOMP WIRE2'), want)
+            self.assertEqual(texts.count('ZCOMP NONE'), want)
