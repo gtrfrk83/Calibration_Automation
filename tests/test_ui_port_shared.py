@@ -33,9 +33,6 @@ class SharedHelpersAreToolkitFree(unittest.TestCase):
         for f in shared_files():
             self.assertEqual([p for p in problems(ROOT / f) if p != 'does not import ui_port'], [], f)
 
-    def test_the_view_files_exist_next_to_their_helpers(self):
-        for f in ui_ported.entries()['shared']:
-            self.assertTrue((ROOT / f).exists(), f)
 
 
 class PromptsArriveThroughThePort(unittest.TestCase):
@@ -51,40 +48,6 @@ class PromptsArriveThroughThePort(unittest.TestCase):
                     seen += 1
                     self.assertEqual(origin, 'port', f'{name}: {rec["title"]} bypassed the port')
         self.assertGreater(seen, 20)
-
-
-class ThemeSplit(unittest.TestCase):
-    def test_core_imports_no_toolkit(self):
-        tree = ast.parse((ROOT / 'ui_theme_core.py').read_text(encoding='utf-8'))
-        mods = {a.name.split('.')[0] for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
-        mods |= {(n.module or '').split('.')[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
-        self.assertFalse(mods & {'tkinter', 'PySide6', 'PyQt5', 'PyQt6'}, mods)
-
-    def test_ui_theme_reexports_the_same_objects(self):
-        import _tk_stub
-        _tk_stub.install()
-        import ui_theme
-        import ui_theme_core as core
-        for name in ('LIGHT', 'DARK', 'PALETTES', 'C', 'KINDS', 'theme_choice', 'use_palette', 'is_dark', 'px', 'si_scale', 'si_one', 'si_row', 'si', 'fmt_num',
-                     'status_kind', 'Settings', 'report_filename'):
-            self.assertIs(getattr(ui_theme, name), getattr(core, name), name)
-
-    def test_rebound_values_read_through(self):
-        import _tk_stub
-        _tk_stub.install()
-        import ui_theme
-        import ui_theme_core as core
-        old = core.DEMO_SUFFIX, core.THEME, core.SCALE
-        try:
-            core.DEMO_SUFFIX, core.SCALE = ' [DEMO]', 1.5
-            core.use_palette('dark')
-            self.assertEqual((ui_theme.DEMO_SUFFIX, ui_theme.THEME, ui_theme.SCALE, ui_theme.is_dark()), (' [DEMO]', 'dark', 1.5, True))
-            self.assertEqual(ui_theme.px(10), 15)
-        finally:
-            core.DEMO_SUFFIX, core.SCALE = old[0], old[2]
-            core.use_palette(old[1])
-        with self.assertRaises(AttributeError):
-            ui_theme.NO_SUCH_NAME
 
 
 if __name__ == '__main__':

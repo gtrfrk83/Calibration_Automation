@@ -154,12 +154,6 @@ class Listing(unittest.TestCase):
         finally:
             h.stop()
 
-    def test_manager_source_uses_the_listing_additively(self):
-        src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertIn('dsb_manager.user_rows()', src)
-        self.assertIn("'--spec'", src)
-        # the procedures database is only read: no write statements touch it for user rows
-        self.assertNotIn('user_datasheets', src)
 
 
 class Launcher(unittest.TestCase):

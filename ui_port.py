@@ -166,6 +166,153 @@ class ScriptedProgress:
         self.closed = True
 
 
+_NULL_NUMBERS = {'winfo_reqwidth': 100, 'winfo_reqheight': 20, 'winfo_width': 1, 'winfo_height': 1, 'winfo_ismapped': False, 'yview': (0.0, 1.0)}
+_null_cls = []
+
+
+def _NullWidget(*a, **k):
+    """Stands in for any window object a headless run asks a view for: a MagicMock (every attribute and call answers another one; item access, iteration and
+    len() behave like an empty widget; tests set `.return_value` / replace attributes on it), with real numbers for the sizes the window code calculates with."""
+    if not _null_cls:
+        from unittest import mock
+
+        class Null(mock.MagicMock):
+            def __getattr__(self, name):
+                if name in _NULL_NUMBERS:
+                    return lambda *a, **k: _NULL_NUMBERS[name]
+                return super().__getattr__(name)
+        _null_cls.append(Null)
+    return _null_cls[0]()
+
+
+class _NullView:
+    """The window code (module) of an engine as seen by the ScriptedUiPort: `view(name).anything(...)` builds nothing.  A view function that, in the Qt
+    window code, sets attributes on the engine (`self.shell = ...`, `self.tree = ...`: the engine reads them later) sets the same attributes here to null
+    widgets, found by reading that function in `<name>_qt.py` WITHOUT importing it (the module needs PySide6)."""
+    _cache = {}
+
+    def __init__(self, name):
+        self.__name__ = name
+
+    def _attrs(self, fname):
+        key = (self.__name__, fname)
+        if key not in _NullView._cache:
+            _NullView._cache[key] = self._read_attrs(fname)
+        return _NullView._cache[key]
+
+    def _read_attrs(self, fname):
+        import ast
+        import importlib.util
+        trees = {}
+
+        def load(modname):
+            if modname not in trees:
+                try:
+                    spec = importlib.util.find_spec(modname)
+                    with open(spec.origin, encoding='utf-8') as fh:
+                        trees[modname] = ast.parse(fh.read())
+                except Exception:
+                    trees[modname] = None
+            return trees[modname]
+
+        def aliases(tree, modname):
+            """name used in this module -> ('module', dotted) or ('func', dotted module, function name)"""
+            out = {}
+            for n in tree.body:
+                if isinstance(n, ast.Import):
+                    for al in n.names:
+                        out[al.asname or al.name.split('.')[0]] = ('module', al.name if al.asname else al.name.split('.')[0])
+                elif isinstance(n, ast.ImportFrom) and n.module and not n.level:
+                    for al in n.names:
+                        out[al.asname or al.name] = ('from', n.module, al.name)
+            return out
+
+        first_mod = f'{self.__name__}_qt'
+        if load(first_mod) is None:
+            return None
+        found, plain, seen = set(), set(), set()
+
+        def walk(modname, funcname):
+            if (modname, funcname) in seen:
+                return
+            seen.add((modname, funcname))
+            tree = load(modname)
+            if tree is None:
+                return
+            funcs = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+            names = aliases(tree, modname)
+            fn = funcs.get(funcname)
+            if fn is None:                                   # `make_ui, show_dcv = (S.make_ui, S.show_dcv)`: the name is another module's function
+                for n in tree.body:
+                    if isinstance(n, ast.Assign) and len(n.targets) == 1:
+                        tg, val = n.targets[0], n.value
+                        pairs = list(zip(tg.elts, val.elts)) if isinstance(tg, ast.Tuple) and isinstance(val, ast.Tuple) else [(tg, val)]
+                        for t, v in pairs:
+                            if (isinstance(t, ast.Name) and t.id == funcname and isinstance(v, ast.Attribute) and isinstance(v.value, ast.Name)
+                                    and v.value.id in names):
+                                kind = names[v.value.id]
+                                walk(kind[1] if kind[0] == 'module' else f'{kind[1]}.{kind[2]}', v.attr)
+                return
+            first = fn.args.args[0].arg if fn.args.args else None
+            for node in ast.walk(fn):
+                if isinstance(node, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
+                    stack = list(node.targets) if isinstance(node, ast.Assign) else [node.target]
+                    while stack:
+                        t = stack.pop()
+                        if isinstance(t, (ast.Tuple, ast.List)):
+                            stack.extend(t.elts)
+                        elif isinstance(t, ast.Attribute) and isinstance(t.value, ast.Name) and t.value.id == first:
+                            val = getattr(node, 'value', None)
+                            literal = isinstance(val, (ast.Constant, ast.List, ast.Dict, ast.Tuple, ast.Set, ast.JoinedStr)) or (
+                                isinstance(val, ast.Call) and isinstance(val.func, ast.Name) and val.func.id in ('set', 'dict', 'list', 'tuple', 'int', 'str', 'float'))
+                            if literal:
+                                plain.add(t.attr)
+                            else:
+                                found.add(t.attr)
+                elif isinstance(node, ast.Call) and node.args and isinstance(node.args[0], ast.Name) and node.args[0].id == first:
+                    f = node.func
+                    if isinstance(f, ast.Name):
+                        if f.id in funcs:
+                            walk(modname, f.id)
+                        elif f.id in names and names[f.id][0] == 'from':
+                            walk(names[f.id][1], names[f.id][2])
+                    elif isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name) and f.value.id in names:
+                        kind = names[f.value.id]
+                        if kind[0] == 'module':
+                            walk(kind[1], f.attr)
+                        elif kind[0] == 'from':                       # `from qtui import bench_view as B`: B is a module
+                            walk(f'{kind[1]}.{kind[2]}', f.attr)
+        walk(first_mod, fname)
+        found -= set()
+        return (sorted(found), sorted(plain - found)) if (found or plain) else None
+
+    def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError(name)
+        if name == 'table_selection':                                   # the table_* contract of the views: the rows the operator has selected
+            return lambda app, *a, **k: tuple(app.tree.selection())
+        attrs = self._attrs(name)
+        if not attrs:
+            return _NullWidget()
+
+        widgets, plain = attrs
+
+        def call(target=None, *a, **k):
+            for attr in widgets:                                         # the view assigns these to the engine, replacing whatever the engine had
+                try:
+                    setattr(target, attr, _NullWidget())
+                except Exception:
+                    pass
+            for attr in plain:                                           # plain values (counters, lists): only when the engine has not set them
+                if not hasattr(target, attr):
+                    try:
+                        setattr(target, attr, _NullWidget())
+                    except Exception:
+                        pass
+            return _NullWidget()
+        return call
+
+
 class ScriptedUiPort:
     """A port for tests: shows nothing, records every prompt in the canonical form (`.prompts`), answers from `answers` (an Answers, or None for the defaults).
 
@@ -273,8 +420,7 @@ class ScriptedUiPort:
         return None                                    # headless: a surprise is a Stop (surprise.py)
 
     def view(self, name):
-        import importlib
-        return importlib.import_module(f'{name}_tk')   # the scripted port builds nothing itself: tests that need a window use the Tk view over the stub
+        return _NullView(name)                         # the scripted port builds no window: every view function is a do-nothing (headless runs and tests)
 
     # ---- APPENDED BY WP-A (adjustment launchers; append-only block)
     def ask_value(self, title, prompt, default, *, parent=None):
@@ -377,31 +523,23 @@ ui = _Proxy()
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
-# APPENDED BY QT-A + QT-F1 (append-only block, merged): the toolkit switch.  CALSUITE_UI = qt | tk, default tk until the cut-over
+# The toolkit: Qt only (the Tk build was removed 2026-10-27).
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
-TOOLKITS = ('tk', 'qt')
-DEFAULT_TOOLKIT = 'tk'                          # the one line to change at the cut-over
+TOOLKITS = ('qt',)
+DEFAULT_TOOLKIT = 'qt'
 
 
 def toolkit_name(name=None):
-    """'tk' or 'qt': `name`, else the CALSUITE_UI environment variable, else DEFAULT_TOOLKIT.  An unknown value means the default."""
+    """Always 'qt' (kept so callers that ask keep working); an unknown CALSUITE_UI value means the default."""
     import os
     value = (name if name is not None else os.environ.get('CALSUITE_UI', '')).strip().lower()
     return value if value in TOOLKITS else DEFAULT_TOOLKIT
 
 
 def _make_port(name):
-    """A new port of toolkit `name`.  A standalone engine's default port (get_ui) falls back to Tk with a note on stderr when the Qt port cannot be imported
-    (for instance PySide6 is not installed); select_toolkit() below does NOT fall back."""
-    if name == 'qt':
-        try:
-            import ui_port_qt
-            return ui_port_qt.QtUiPort()
-        except ImportError as exc:
-            import sys
-            sys.stderr.write(f'CALSUITE_UI=qt: the Qt UiPort is not available ({exc}); using the Tk build.\n')
-    import ui_port_tk
-    return ui_port_tk.TkUiPort()
+    """A new Qt port.  There is no fallback: if PySide6 cannot be imported the ImportError says so (the Tk build no longer exists)."""
+    import ui_port_qt
+    return ui_port_qt.QtUiPort()
 
 
 def _default_port():
@@ -409,18 +547,13 @@ def _default_port():
 
 
 def select_toolkit(name=None):
-    """Install the UiPort of one toolkit and return it.  `name` 'tk' | 'qt'; None -> the environment variable CALSUITE_UI ('qt' | 'tk'), default 'tk'.
-    Call it once, before any window or engine exists (the launchers do).  An unknown value is an error (a typo in CALSUITE_UI must not silently run the
-    other toolkit); 'qt' imports ui_port_qt (PySide6) and raises ImportError if that is not installed."""
+    """Install the Qt UiPort and return it.  Call it once, before any window or engine exists (the launchers do).  An unknown CALSUITE_UI value is an
+    error (a typo must not silently run something else); PySide6 missing raises ImportError."""
     import os
     choice = (name if name is not None else os.environ.get('CALSUITE_UI', '') or DEFAULT_TOOLKIT).strip().lower()
     if choice not in TOOLKITS:
         raise ValueError(f'unknown toolkit {choice!r}: use one of {TOOLKITS} (CALSUITE_UI)')
-    if choice == 'qt':
-        import ui_port_qt
-        port = ui_port_qt.QtUiPort()
-    else:
-        import ui_port_tk
-        port = ui_port_tk.TkUiPort()
+    import ui_port_qt
+    port = ui_port_qt.QtUiPort()
     set_ui(port)
     return port

@@ -23,13 +23,10 @@
   "code": [
    "Procedures/Keysight_34470A_Verification.py",
    "truevolt_verification.py",
-   "truevolt_view_tk.py",
    "truevolt_view_qt.py",
    "qtui/bench_view.py",
    "ui_port.py",
-   "ui_port_tk.py",
    "surprise.py",
-   "surprise_view_tk.py",
    "surprise_view_qt.py",
    "procspec.py",
    "drivers/base.py",

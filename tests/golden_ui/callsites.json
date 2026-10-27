@@ -3911,80 +3911,6 @@
    "where": "App.on_close"
   }
  ],
- "labregistry_ui.py": [
-  {
-   "args": [
-    "'Regenerate PDF'",
-    "'Select a report in the middle table first.'"
-   ],
-   "kind": "info",
-   "kw": {},
-   "where": "HistoryPanel.regenerate_pdf"
-  },
-  {
-   "args": [],
-   "kind": "save_file",
-   "kw": {},
-   "where": "HistoryPanel.regenerate_pdf.choose"
-  },
-  {
-   "args": [
-    "'Replace file?'",
-    "f'{what}{os.path.basename(path)} already exists. Replace it?'"
-   ],
-   "kind": "ask_yes_no",
-   "kw": {
-    "default": "'no'",
-    "icon": "'warning'"
-   },
-   "where": "HistoryPanel.regenerate_pdf.overwrite"
-  },
-  {
-   "args": [
-    "'Rebuild from history rows'",
-    "text + '\\n\\nContinue?'"
-   ],
-   "kind": "ask_ok_cancel",
-   "kw": {},
-   "where": "HistoryPanel.regenerate_pdf"
-  },
-  {
-   "args": [
-    "'Regenerate PDF'",
-    "result.message"
-   ],
-   "kind": "info",
-   "kw": {},
-   "where": "HistoryPanel.regenerate_pdf"
-  },
-  {
-   "args": [
-    "'Report'",
-    "'The PDF is not at the place it was saved (it may have been moved or deleted).'"
-   ],
-   "kind": "info",
-   "kw": {},
-   "where": "HistoryPanel.open_report"
-  },
-  {
-   "args": [
-    "'Report'",
-    "str(exc)"
-   ],
-   "kind": "error",
-   "kw": {},
-   "where": "HistoryPanel.open_report"
-  },
-  {
-   "args": [
-    "'Drift'",
-    "'Select a test point in the lower table first.'"
-   ],
-   "kind": "info",
-   "kw": {},
-   "where": "HistoryPanel.show_drift"
-  }
- ],
  "manual_override.py": [
   {
    "args": [
@@ -4250,108 +4176,7 @@
    "where": "ProcModsMixin.pm_show_note"
   }
  ],
- "procmods_ui.py": [
-  {
-   "args": [
-    "'Confirm wider change'",
-    "f'{len(need)} change(s) will apply to {where} and stay in effect for later runs:\\n{lines}\\n\\nContinue?'"
-   ],
-   "kind": "ask_yes_no",
-   "kw": {},
-   "where": "ModifyWindow.apply"
-  },
-  {
-   "args": [
-    "'Tolerance change needs a redo'",
-    "f'The tolerance of {names} concerns a point that already has a reading or is in progress. A tolerance can only be changed for a point that is measured again against it, and the reading taken now will be replaced by the new one.\\n\\nSave the change and redo the point?'"
-   ],
-   "kind": "ask_yes_no",
-   "kw": {},
-   "where": "ModifyWindow.apply"
-  },
-  {
-   "args": [
-    "'Measure this point again?'",
-    "f\"Saved. Point {offer['id']} ({offer['desc']}) is in progress and keeps the settings it started with; the change starts at the next point.\\n\\nMeasure point {offer['id']} again with the new settings after it finishes? The reading from the old settings will be replaced by the new one. Nothing is retried automatically.\""
-   ],
-   "kind": "ask_yes_no",
-   "kw": {},
-   "where": "ModifyWindow.apply"
-  },
-  {
-   "args": [
-    "'Reset all to factory'",
-    "'Stage the removal of every modification in effect? You still give a reason and press Apply. Saved rows are kept in the audit trail.'"
-   ],
-   "kind": "ask_yes_no",
-   "kw": {},
-   "where": "ModifyWindow.reset_all"
-  },
-  {
-   "args": [
-    "'Reason'",
-    "'Reason for resetting to factory (required):'"
-   ],
-   "kind": "ask_text",
-   "kw": {},
-   "where": "ModifyWindow.reset_all"
-  },
-  {
-   "args": [],
-   "kind": "save_file",
-   "kw": {
-    "defaultextension": "'.calov.json'",
-    "filetypes": "[('Override set', '*.calov.json *.json')]"
-   },
-   "where": "ModifyWindow.do_export"
-  },
-  {
-   "args": [],
-   "kind": "choose_file",
-   "kw": {
-    "filetypes": "[('Override set', '*.calov.json *.json')]"
-   },
-   "where": "ModifyWindow.do_import"
-  },
-  {
-   "args": [
-    "'Import override set'",
-    "f'These entries will be imported (+) or skipped (-). Imported commands are UNVERIFIED here.\\n{text}\\n\\nImport the {len(accept)} marked +?'"
-   ],
-   "kind": "ask_yes_no",
-   "kw": {},
-   "where": "ModifyWindow.do_import"
-  },
-  {
-   "args": [
-    "'Unsaved changes'",
-    "'Discard the staged changes?'"
-   ],
-   "kind": "ask_yes_no",
-   "kw": {},
-   "where": "ModifyWindow.close"
-  },
-  {
-   "args": [
-    "'Procedure is locked'",
-    "why"
-   ],
-   "kind": "info",
-   "kw": {},
-   "where": "LiveHook.open"
-  },
-  {
-   "args": [
-    "'Edit point'",
-    "'Select a test point in the list first (or right-click a point and choose Edit).'"
-   ],
-   "kind": "info",
-   "kw": {},
-   "where": "LiveHook.open"
-  }
- ],
  "procspec.py": [],
- "report_dialog.py": [],
  "reset_startup.py": [
   {
    "args": [
@@ -4478,7 +4303,6 @@
    "where": "QueueMixin.queue_export_pdfs"
   }
  ],
- "run_queue_ui.py": [],
  "surprise.py": [],
  "tds2000c_verification.py": [
   {
@@ -4864,7 +4688,5 @@
    "kw": {},
    "where": "App.on_close"
   }
- ],
- "ui_shell.py": [],
- "ui_theme.py": []
+ ]
 }

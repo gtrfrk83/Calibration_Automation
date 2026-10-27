@@ -29,46 +29,6 @@ def canon(obj):
     return json.loads(json.dumps(obj))
 
 
-class TkLevel(unittest.TestCase):
-    def check(self, name):
-        want, got = recorded(name), canon(C.capture(name, C.TkLevelHarness))
-        self.assertEqual(sorted(got), sorted(want))
-        for scenario in want:
-            self.assertEqual(got[scenario], want[scenario], f'{name}: scenario {scenario}')
-
-    def test_a34410a(self):
-        self.check('a34410a')
-
-    def test_f8808a(self):
-        self.check('f8808a')
-
-    def test_handheld_families(self):
-        self.check('handheld')
-
-    def test_adjustment_launchers(self):
-        self.check('adjustments')
-
-    def test_handheld_other_families(self):
-        self.check('handheld_families')
-
-    def test_shared_helpers(self):                      # WP-S: run queue, manual override, data mode, note, reset (recorded on the unported helpers)
-        self.check('shared')
-
-    # ---- WP-W (WaveSurfer 4104HD; recorded on the unported engine) -- append-only block
-    def test_wavesurfer(self):
-        self.check('wavesurfer')
-
-    def test_adjustment_launcher_8846a(self):
-        self.check('adj8846a')
-
-    # ---- QT-H (user-built datasheet runtime; recorded on the unported dsb_runtime / dsb_override / dsb_prerun) -- append-only block
-    def test_dsb_runtime(self):
-        self.check('dsb')
-
-    def test_dsb_launcher(self):
-        self.check('dsb_main')
-
-
 class Port(unittest.TestCase):
     def test_every_ported_engine_prompts_only_through_the_port(self):
         for name in PORTED:

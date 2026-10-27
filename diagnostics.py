@@ -87,32 +87,3 @@ def explain_missing(missing) -> str:
               '   py -m pip install ' + ' '.join(p for _m, p, _u in missing), '',
               'Then start the program again. If your company blocks pip, ask IT to install the packages above.']
     return '\n'.join(lines)
-
-
-def install(root, where: str = ''):
-    """Make unexpected errors in this window show a plain message with a 'Save diagnostic log' button."""
-    from tkinter import messagebox
-    state = {'open': False}
-
-    def handler(exc_type, exc, tb):
-        text = ''.join(traceback.format_exception(exc_type, exc, tb))
-        sys.stderr.write(scrub(text))                              # still visible to anyone running from a console
-        if exc_type is KeyboardInterrupt or state['open']:
-            return
-        state['open'] = True
-        try:
-            path = write_log(text, where or root.title())
-            messagebox.showerror(
-                'Something went wrong',
-                'The program hit an unexpected problem. Your saved results are not affected.\n\n'
-                f'{exc_type.__name__}: {scrub(str(exc))[:300]}\n\n'
-                f'A diagnostic log was saved here for support:\n{path}\n\n'
-                'You can usually keep working. If it happens again, send that file to your calibration lab support contact.',
-                parent=root)
-        except Exception:
-            pass
-        finally:
-            state['open'] = False
-
-    root.report_callback_exception = handler
-    return handler

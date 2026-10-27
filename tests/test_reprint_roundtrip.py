@@ -24,6 +24,8 @@ import dsb_run_harness as H  # noqa: E402
 import dsb_fixtures as fx  # noqa: E402
 import test_dsb_runtime_bench as B  # noqa: E402  (spec_of / cal_io helpers only)
 import labregistry  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import report_dialog  # noqa: E402
 import report_pdf  # noqa: E402
 import report_snapshot as rs  # noqa: E402

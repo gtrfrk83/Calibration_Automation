@@ -866,29 +866,7 @@ class FindInstruments(QtCase):
 class ToolkitSwitch(unittest.TestCase):
     """ui_port.select_toolkit / CALSUITE_UI (needs no Qt)."""
 
-    def test_name_from_the_environment_defaults_to_tk(self):
-        with mock.patch.dict(os.environ, {}, clear=False):
-            os.environ.pop('CALSUITE_UI', None)
-            self.assertEqual(ui_port.toolkit_name(), 'tk')
-            os.environ['CALSUITE_UI'] = ' QT '
-            self.assertEqual(ui_port.toolkit_name(), 'qt')
-            os.environ['CALSUITE_UI'] = 'gtk'
-            self.assertEqual(ui_port.toolkit_name(), 'tk')
-        self.assertEqual(ui_port.toolkit_name('qt'), 'qt')
 
-    def test_qt_without_a_qt_port_falls_back_to_tk(self):
-        fake_tk = types.ModuleType('ui_port_tk')
-        fake_tk.TkUiPort = lambda: types.SimpleNamespace(name='tk-port')
-        old = ui_port.set_ui(None)
-        try:
-            with mock.patch.dict(sys.modules, {'ui_port_tk': fake_tk, 'ui_port_qt': None}):
-                with self.assertRaises(ImportError):                                  # select_toolkit is strict: the launcher must know
-                    ui_port.select_toolkit('qt')
-                ui_port.set_ui(None)
-                with mock.patch.dict(os.environ, {'CALSUITE_UI': 'qt'}):              # an engine started on its own falls back to Tk with a note
-                    self.assertEqual(ui_port.get_ui().name, 'tk-port')
-        finally:
-            ui_port.set_ui(old)
 
     def test_qt_port_is_used_when_it_exists(self):
         class QtUiPort:
@@ -918,9 +896,6 @@ class ModelRules(unittest.TestCase):
                     self.assertNotIn(n.split('.')[0], {'tkinter', 'ttk', 'ui_theme', 'ui_shell', 'ui_port_tk', 'branding', 'instrument_scan_ui', 'mdd_import_ui', 'packages_ui',
                                                        'verified_ui'}, f'{path.name} imports {n}')
 
-    def test_the_tk_manager_registers_through_the_shared_init_db(self):
-        src = (ROOT / 'Calibration_Procedure_Manager.py').read_text(encoding='utf-8')
-        self.assertIn('manager_model.init_db(DB, BASE', src)
 
     def test_init_db_registers_the_scan_in_list_order_and_is_repeatable(self):
         with tempfile.TemporaryDirectory() as d:

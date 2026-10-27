@@ -20,6 +20,8 @@ import dsb_run_harness as H  # noqa: E402
 import datasheet_builder_ui_model as DM  # noqa: E402
 import dsb_runtime as rt  # noqa: E402
 import labregistry  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import report_dialog  # noqa: E402
 import ui_theme as ui  # noqa: E402
 

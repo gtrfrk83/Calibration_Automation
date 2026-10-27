@@ -10,9 +10,9 @@ If nothing was adjusted, leave the toggle on As Found: the report prints 'Same' 
 
 Folder layout (same as before, plus one new file):
 
-  Calibration_Procedure_Manager.py   <- start here
+  00_START_Calibration_Suite.bat     <- start here (runs Calibration_Procedure_Manager_qt.py; the suite is Qt only, needs PySide6)
   mdd_importer_v49.py                (unchanged)
-  ui_theme.py                        (shared look and feel; must sit next to the Manager)
+  ui_theme_core.py                   (shared helpers: SI formatting, Settings, report names; no GUI)
   datamode.py                        (NEW - As Found / As Left toggle; must sit next to the Manager)
   labregistry.py, labregistry_ui.py  (NEW - asset history; lab_registry.sqlite3 is created beside them on first use)
   instrument_scan.py, instrument_scan_ui.py  (NEW - 'Find instruments...' button in the Manager: which VISA resource / GPIB channel each instrument is on; read-only identity queries only)

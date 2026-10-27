@@ -26,13 +26,10 @@
   "code": [
    "Procedures/Fluke_i400_Verification.py",
    "i400_verification.py",
-   "i400_view_tk.py",
    "i400_view_qt.py",
    "qtui/bench_view.py",
    "ui_port.py",
-   "ui_port_tk.py",
    "surprise.py",
-   "surprise_view_tk.py",
    "surprise_view_qt.py",
    "procspec.py",
    "drivers/base.py",

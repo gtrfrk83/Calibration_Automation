@@ -23,11 +23,9 @@
   "code": [
    "Procedures/Fluke_754_Verification.py",
    "handheld_dmm.py",
-   "handheld_dmm_view_tk.py",
    "handheld_dmm_view_qt.py",
    "fluke_753_754.py",
    "ui_port.py",
-   "ui_port_tk.py",
    "hookups.py#fluke753",
    "drivers/base.py",
    "drivers/transport.py",

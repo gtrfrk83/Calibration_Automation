@@ -19,6 +19,8 @@ import dsb_fixtures as fx  # noqa: E402
 import datasheet_builder_match as dm  # noqa: E402
 import datasheet_builder_specs as dsp  # noqa: E402
 import dsb_runtime as rt  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import report_dialog  # noqa: E402
 from drivers.simulated import make_bench, SimFlukeTransport  # noqa: E402
 from drivers.simulated_fgen import make_fgen_bench  # noqa: E402

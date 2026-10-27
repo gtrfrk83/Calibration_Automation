@@ -22,10 +22,8 @@
   "code": [
    "Procedures/Keysight_U1251B_Verification.py",
    "handheld_dmm.py",
-   "handheld_dmm_view_tk.py",
    "handheld_dmm_view_qt.py",
    "ui_port.py",
-   "ui_port_tk.py",
    "hookups.py#u1251b",
    "drivers/base.py",
    "drivers/transport.py",
@@ -42,5 +40,14 @@
   ]
  },
  "seed_verified": false,
- "own_files": ["Procedures/Keysight_U1251B_Verification.py", "Procedures/Keysight_U1251B_Verification.procedure.json", "specs/keysight_u1251b_u1252b_pv.json", "specs/build_keysight_u1251b_spec.py", "specs/build_hookups_u1251b.py", "diagrams/keysight_u1252b_terminals.png", "diagrams/README_u1251b.txt", "tests/test_keysight_u1251b_points.py"]
+ "own_files": [
+  "Procedures/Keysight_U1251B_Verification.py",
+  "Procedures/Keysight_U1251B_Verification.procedure.json",
+  "specs/keysight_u1251b_u1252b_pv.json",
+  "specs/build_keysight_u1251b_spec.py",
+  "specs/build_hookups_u1251b.py",
+  "diagrams/keysight_u1252b_terminals.png",
+  "diagrams/README_u1251b.txt",
+  "tests/test_keysight_u1251b_points.py"
+ ]
 }

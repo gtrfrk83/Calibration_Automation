@@ -701,13 +701,6 @@ class Rules(unittest.TestCase):
                     self.assertNotIn(top, ('tkinter', 'ttk', 'ui_theme', 'ui_shell', 'ui_port_tk'), f'{name} imports {m}')
                     self.assertFalse(top.endswith('_view_tk'), f'{name} imports {m}')
 
-    def test_every_twin_has_the_public_names_of_its_tk_view(self):
-        import ast
-        for stem in ('surprise_view', 'datamode_view', 'manual_override_view', 'run_queue_view', 'procmods_view', 'calibrator_fit_view'):
-            def names(path):
-                return {n.name for n in ast.parse(path.read_text(encoding='utf-8')).body if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and not n.name.startswith('_')}
-            tk, qt = names(ROOT / f'{stem}_tk.py'), names(ROOT / f'{stem}_qt.py')
-            self.assertLessEqual(tk, qt, f'{stem}_qt lacks {tk - qt}')
 
 
 if __name__ == '__main__':
