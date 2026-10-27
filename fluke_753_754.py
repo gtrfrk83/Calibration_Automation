@@ -310,6 +310,10 @@ class App(handheld_dmm.App):
 
     def _drawn_image(self, p, image):
         """The group's drawn hook-up picture (diagrams/hook_fluke753_<GROUP>.png); when that file is missing the owner's terminal photo is shown instead (then the front photo)."""
+        import hookups
+        drawn = hookups.image_path('fluke753', hookups.calibrator_key(self.cal_mode.get()), p['group'])
+        if drawn:                                                                   # the picture drawn for the chosen calibrator (5560A / 5522A panel)
+            return drawn
         if image is not None and getattr(image, 'is_file', lambda: False)():
             return image
         pics = self.panel_pictures()
