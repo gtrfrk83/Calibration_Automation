@@ -300,6 +300,34 @@ class App(handheld_dmm.App):
         except Exception:
             return dict(TAR='', TUR='')
 
+    # ------------------------------------------------------------------ the function-change prompt (the 753 / 754 have no rotary switch)
+    def _prompt_function(self, p):
+        """Same flow as handheld_dmm's, but worded for a calibrator that is set from its keys and menus (owner 2026-10-27: there is no rotary knob).
+        Only the wording changes; when the prompt appears, the standby text and the answers are the shared ones."""
+        opts = self.spec.get('options', {})
+        if not opts.get('function_prompt'):
+            return True
+        if p['group'] == 'NONE':
+            self._last_switch = p['switch']
+            return True
+        if p['switch'] == getattr(self, '_last_switch', None):
+            return True
+        standby = ('Keep the calibrator in STANDBY while you change the UUT function.' if self.manual_cal
+                   else 'The calibrator output is OFF (standby) while you change the UUT function.')
+        short, detail = handheld_dmm.split_switch(p['switch'])
+        meter = f'UUT: {short}' + (f'  range {p["range"]}' if p['range'] else '')
+        facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', handheld_dmm.describe(p)), ('UUT', p['switch'] + (f', range {p["range"]}' if p['range'] else ''))]
+        card = dict(n=p['n'], total=len(self.points), test=handheld_dmm.describe(p), meter_line=meter,
+                    steps=[('Standby', standby + self._qnote(), 'todo'),
+                           (f'Set the UUT to {short}', detail + ' (UUT keys / menus)', 'todo'),
+                           (f'Press Done when the UUT is set to {short}', 'The program then goes on with this point.', 'todo')])
+        if not port.operator_prompt('Change the function', p['section'],
+                                    [('UUT function', f'Set the UUT to: {p["switch"]} (keys / menus)'), ('Standby', standby)] + self._qsteps(),
+                                    facts=self._qfacts(facts), ok='Done - continue', layout='function_change', card=card, parent=self.root):
+            return False
+        self._last_switch = p['switch']
+        return True
+
     # ------------------------------------------------------------------ the instrument reference pictures
     @staticmethod
     def panel_pictures():
