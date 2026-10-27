@@ -457,6 +457,9 @@ class MddPreview:
         self.std_box.setMinimumWidth(420)
         self.std_box.currentIndexChanged.connect(lambda _i: self.show_uncertainty())
         stdrow.addWidget(self.std_box, 1)
+        self.drive_box = QCheckBox('Drive this standard as the calibrator (you type the reading)')
+        self.drive_box.setToolTip('Off: a manual calibration, nothing is sourced. On: the program sets the chosen calibrator for every point it covers; you type the reading.')
+        stdrow.addWidget(self.drive_box)
         dlg.body.addLayout(stdrow)
         self.std_text = label('', 'sub')
         self.std_text.setWordWrap(True)
@@ -537,6 +540,10 @@ class MddPreview:
             return ''
         return self.std.models[self.std_box.currentIndex()]
 
+    def drive_calibrator(self) -> bool:
+        box = getattr(self, 'drive_box', None)
+        return bool(box is not None and box.isChecked() and self.selected_standard())
+
     def show_uncertainty(self):
         """The table's Uncertainty column and the sentence under the box for the chosen standard (nothing is saved)."""
         _plan, self.unc_rows, text = self.std.preview(self.selected_standard())
@@ -561,7 +568,7 @@ class MddPreview:
                 self.radio_version.setChecked(True)
         replace = self.found[0].uid if (self.found and self.radio_version is not None and self.radio_version.isChecked()) else None
         res = mc.register(self.conv, self.parsed, self.who(), replace_uid=replace, registry=self.registry, root=self.spec_root, archive_to=self.archive_to,
-                          standard=self.selected_standard())
+                          standard=self.selected_standard(), drive_calibrator=self.drive_calibrator())
         if not res.ok:
             message(self.dialog, 'error', 'Import failed', res.message or 'The procedure could not be created.')
             return False

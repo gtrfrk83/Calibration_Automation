@@ -759,24 +759,34 @@ class RegisterResult:
     message: str = ''
 
 
-def register(conv, parsed, who='', replace_uid=None, registry=None, root=None, archive_to=None, standard='', matcher=None):
+def register(conv, parsed, who='', replace_uid=None, registry=None, root=None, archive_to=None, standard='', matcher=None, drive_calibrator=False):
     """Archive the original .MDD (immutable, named by sha256) and save the sheet as a registered manual procedure.
     replace_uid=None   a NEW procedure (a name already in use gets a '-2' suffix: nothing is overwritten)
     replace_uid='uid'  a NEW VERSION of that procedure (earlier versions are kept, as the Datasheet Builder's save does)
     standard           the standard the technician will use ('' = None: waive).  Each point of a kind the suite can resolve that this standard's sheet covers carries
                        that standard's uncertainty (ds.assignments[pid] = the standard); every other point that should carry one gets its own recorded waiver
                        'manual_calibration' with the reason (Sheet check rule 5).  Never a whole-sheet waiver.
+    drive_calibrator   True = the program drives the calibrator the matcher finds for each point (a calibrator the lab has, from the Standards Specs sheets) and the technician
+                       types the reading, like the handheld procedures: the sheet is an AUTOMATED one (manual_entry off); `standard` is then the CALIBRATOR (it sources every point it covers and
+                       its sheet gives the uncertainty); the points it does not cover stay hand-done with the same recorded waiver.  False (the default) = the manual calibration of before.
     Returns RegisterResult; nothing is registered when the sheet is not runnable (status 'draft' is reported as not ok)."""
     import mdd_importer_v49
     if conv.sheet is None:
         return RegisterResult(False, message='Nothing was converted.')
     ds = conv.sheet.copy()
     ds.uid = replace_uid or ''
-    ds.options['manual_entry'] = True
-    ds.assignments = {p.id: 'MANUAL' for _f, p in ds.all_points()}
+    ds.options['manual_entry'] = not drive_calibrator
+    ds.assignments = {p.id: 'MANUAL' for _f, p in ds.all_points()}          # apply_manual_standard then names the standard for the points it covers
+    if drive_calibrator:
+        ds.options['drive_calibrator'] = True
     try:                                   # fail closed: if this cannot be worked out the sheet has no waiver, rule 5 blocks it and it is saved as a draft, never published unchecked
         import datasheet_builder_rules as _rules
         _rules.apply_manual_standard(ds, standard or '', who=f'import ({who})' if who else 'import', matcher=matcher)
+        if drive_calibrator:                 # frequency / period uncertainties come from the lab CMC only in a manual calibration: here each gets its own recorded waiver (printed N/A), never a blank
+            skip = [p.id for fn, p in ds.all_points() if fn.kind not in _rules.RESOLVABLE_KINDS and _rules.should_have(fn, p) and not _rules.waiver_for(ds, p.id)]
+            if skip:
+                _rules.set_waiver(ds, skip, 'not_implemented', 'calibrator-driven .MDD import: the frequency / period uncertainty is not calculated for a driven sheet yet',
+                                  who=f'import ({who})' if who else 'import')
     except Exception as exc:
         import logging
         logging.getLogger(__name__).error('The .MDD import could not apply the standard %r: %s: %s', standard, type(exc).__name__, exc)
