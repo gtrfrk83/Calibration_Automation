@@ -748,7 +748,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.v_model = port.var(g('model', self.fam.default_model))
         self.addr = {k: port.var(g(k, d)) for k, d in (('scope', ''), ('cal', 'COM9'), ('cal_baud', '9600'), ('cal_model', CAL_CHOICES[0]))}
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self._build_ui()
@@ -860,7 +860,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         if raw:
             work = '\nWorksheet: ' + ', '.join(f'{k} = {v:.6g}' if isinstance(v, float) else f'{k} = {v}' for k, v in raw.items() if not isinstance(v, (list, dict)))
         both = ('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''
-        self.detail.set(f'{p["desc"]}\nLimits: {lo} to {hi} {unit}  |  Stimulus: {"calibrator scope option" if p["stim"] == "cal" else "none"}  |  Manual page {self.fam.section_page[p["section"]]}{extra}{work}{both}')
+        self.detail.set(f'{p["desc"]}\nStimulus: {"calibrator scope option" if p["stim"] == "cal" else "none"}  |  Manual page {self.fam.section_page[p["section"]]}{extra}{work}{both}')
 
     # ---- connections ---------------------------------------------------------------------------------------------------------------------------
     def find_instruments(self):

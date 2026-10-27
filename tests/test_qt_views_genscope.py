@@ -491,7 +491,7 @@ class WindowTests:
         a = self.app
         a.tree.selection_set('2')
         Q.settle()
-        self.assertNotEqual(a.detail.get(), 'Select a test point to see its limits and setup.')
+        self.assertNotEqual(a.detail.get(), 'Select a test point to see its setup.')
         self.assertIn(a.tree.item('2')['values'][1].replace(' ★', ''), a.detail.get() + a.tree.item('2')['values'][1].replace(' ★', ''))
         QTest.keyClick(a.tree, Qt.Key.Key_Down)
         Q.settle()

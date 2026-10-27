@@ -184,7 +184,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.test_set = port.var('Full verification')
         self.include_optional = port.var(False, 'bool')
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self._build_ui()
@@ -282,7 +282,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         v, _r, u = ui.si_row([p['nominal'] - p['error'], p['nominal'] + p['error']], p['unit'])
         extra = ('  |  ' + p['note']) if p.get('note') else ''
         typical = '  |  Typical value (range calibrated internally).' if p.get('typical') else ''
-        self.detail.set(f'{p["description"]}\nAcceptable reading: {v[0]} to {v[1]} {u}  ({self.period.get()} limit)  |  Manual page {p["page"]}{typical}{extra}\n'
+        self.detail.set(f'{p["description"]}\nManual page {p["page"]}{typical}{extra}\n'
                         f'Setup: {self.setup_text(p)}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     def setup_text(self, p):

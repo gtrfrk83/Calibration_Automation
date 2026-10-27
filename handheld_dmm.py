@@ -519,7 +519,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
         self.read_mode = port.var(saved if saved in (READ_TYPED, READ_IR) else READ_TYPED)
         self.ir_addr = port.var(self.settings.get('ir_addr', 'COM5'))
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section, self.show_status = port.var('All sections'), port.var('All points')
         self._build_ui()
         self.status.set(('DEMO MODE (virtual instruments): the windows of a real run appear; commands go to a simulated calibrator. Enter an Instrument ID, then press Run All.' if self.virtual else
@@ -688,8 +688,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, run_queue_engi
             return
         p = self.by_id[sel[0]]
         extra = ('  |  ' + p['note']) if p.get('note') else ''
-        limit = f'\nLimit: {limit_line(p)}' if p.get('tol_text') else ''
-        self.detail.set(f'{describe(p)}\nAccept: {self.accept_text(p)}  |  Meter: {p["switch"]}' + (f', {p["range"]} range' if p['range'] else '') + limit +
+        accept = ('' if p['test'] == 'numeric' else f'Accept: {self.accept_text(p)}  |  ') + ('The AC annunciator must be ON  |  ' if p.get('annunciator') else '')   # the limits are in the point table
+        self.detail.set(f'{describe(p)}\n{accept}Meter: {p["switch"]}' + (f', {p["range"]} range' if p['range'] and p['range'] not in p['switch'] else '') +
                         f'\nSetup: {self.setup_text(p)}{extra}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     def hookup_meter(self):

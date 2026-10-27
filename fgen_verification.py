@@ -672,7 +672,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.period = port.var(g('period', PERIOD_LABEL[SPEC['default_period']]))
         self.test_set = port.var('Full verification')
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self._build_ui()
@@ -801,7 +801,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         lines = [p['desc']]
         if p['kind'] != 'SELFTEST':
             v, _r, u = ui.si_row([p['nominal'] - p['error'], p['nominal'] + p['error']], p['unit'], ref=display_ref(p))
-            lines.append(f'Acceptable reading: {v[0]} to {v[1]} {u}  ({self.period.get()} limit)  |  Manual page {p["page"]}'
+            lines.append(f'Manual page {p["page"]}'
                          + ('  |  Quick check (Q)' if p['quick'] else ''))
         if p.get('typical'): lines.append('Guideline only: ' + p.get('note', ''))
         if p['kind'] in ('ACAMP', 'LFFLAT') and p['nominal'] >= 2.5:

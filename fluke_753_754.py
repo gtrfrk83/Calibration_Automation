@@ -300,17 +300,6 @@ class App(handheld_dmm.App):
         except Exception:
             return dict(TAR='', TUR='')
 
-    def on_select(self, _event=None):
-        """The point-detail text, without repeating the range (the switch text of the measure points already names it) and without the limit line (the point table has the limits)."""
-        sel = self.ui_view.table_selection(self)
-        if not sel:
-            return
-        p = self.by_id[sel[0]]
-        extra = ('  |  ' + p['note']) if p.get('note') else ''
-        meter = p['switch'] + (f', {p["range"]} range' if p['range'] and p['range'] not in p['switch'] else '')
-        self.detail.set(f'{describe(p)}\nAccept: {self.accept_text(p)}  |  Meter: {meter}' +
-                        f'\nSetup: {self.setup_text(p)}{extra}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
-
     # ------------------------------------------------------------------ the function-change prompt (the 753 / 754 have no rotary switch)
     def _prompt_function(self, p):
         """Same flow as handheld_dmm's, but worded for a calibrator that is set from its keys and menus (owner 2026-10-27: there is no rotary knob).

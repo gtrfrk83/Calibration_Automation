@@ -2142,3 +2142,9 @@ Owner decision: the Tk build is gone; the suite is Qt only.
 - 66 comments that named a `*_view_tk.py` as the current window code now name the `*_view_qt.py`; "twin of X_view_tk" reads "port of the removed Tk view". No code line changed.
 - Removed the recorders `tests/record_tk_genscope.py` and `tests/qt_ref/make_tk_state.py` (they imported the deleted Tk port). The fixtures they recorded from real Tk windows (`tests/qt_ref/*.json`, `tests/golden_ui/qt_views_bench_widgets_tk.json`) stay: the Qt window tests compare against them. To regenerate them, check out main at c24c7e0^ (it still has the Tk build).
 - Do this before the bench re-verification: any later edit to an engine file flips its procedures again.
+
+## Procedure window bottom (detail) area  (owner rule 2026-10-27, all procedures)
+- The text under the point table shows only what the table does not: test, function (range named once), setup, operator notes, As Found / As Left. NO limits ('Acceptable reading', 'Limit:', 'Limits:', printed-limit text): the limits are in the point table. Yes/no and annunciator checks still say what must be seen.
+- Setup text is calibrator-neutral (the calibrator is chosen in the window). Never say 'rotary switch' / 'knob' / 'dial' for an instrument that has none (753/754).
+- The source note at the bottom is short: manual + pages, how readings are collected, flagged items only (corrected misprints with both values, UNVERIFIED). Done for the 753/754; the other specs' source notes (specs/*_pv.json source.note) are still the longer ones and carry flags: trim them one procedure at a time with the owner.
+- New procedures follow this (also written into the new-calibration-procedure skill, section 3a).

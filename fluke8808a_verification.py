@@ -360,7 +360,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         self.cal_baud = port.var(s.get('cal_baud', '9600'))
         self.period = port.var(s.get('period', PERIOD_LABEL[SPEC['default_period']]))
         self.status = port.var()
-        self.detail = port.var('Select a test point to see its limits and setup.')
+        self.detail = port.var('Select a test point to see its setup.')
         self.show_section = port.var('All sections')
         self.show_status = port.var('All points')
         self.warm_confirmed = False
@@ -486,7 +486,7 @@ class App(reset_startup.AppResetMixin, datamode.DataModeMixin, procmods_engine.P
         extra = ('  |  ' + p['note']) if p.get('note') else ''
         manual = ('\nYour own standard is used for this point: ' + self.manual_reason(p)) if self.is_manual(p) else ''
         flags = ('\nPrinted-table correction: ' + ' | '.join(f['why'] for f in p['flags'])) if p.get('flags') else ''
-        self.detail.set(f'{p["description"]}\nAcceptable reading: {v[0]} to {v[1]} {u}  ({self.period.get()} limit)  |  Manual page {p["page"]}{extra}\n'
+        self.detail.set(f'{p["description"]}\nManual page {p["page"]}{extra}\n'
                         f'Setup: {self.setup_text(p)}{manual}{flags}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     def setup_text(self, p):

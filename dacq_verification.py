@@ -349,7 +349,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         p = POINTS[int(sel[0]) - 1]
         v, _r, u = ui.si_row([p['nominal'] - p['error'], p['nominal'] + p['error']], p['unit'])
         extra = ('  |  ' + p['note']) if p.get('note') else ''
-        self.detail.set(f'{p["description"]}\nAcceptable reading: {v[0]} to {v[1]} {u}  ({self.period.get()} limit)  |  Manual page {p["page"]}  |  {self.channel_text(p)}{extra}\n'
+        self.detail.set(f'{p["description"]}\nManual page {p["page"]}  |  {self.channel_text(p)}{extra}\n'
                         f'Setup: {self.setup_text(p)}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
 
     def setup_text(self, p):
