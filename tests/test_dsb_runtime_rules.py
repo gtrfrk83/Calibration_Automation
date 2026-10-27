@@ -36,6 +36,8 @@ import dsb_rules as rules  # noqa: E402
 import dsb_runtime as rt  # noqa: E402
 import procmods  # noqa: E402
 import procmods_engine as pe  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import report_dialog  # noqa: E402
 import drivers  # noqa: E402
 from drivers.fluke_8808a import Fluke8808A  # noqa: E402

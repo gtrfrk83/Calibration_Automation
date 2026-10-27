@@ -166,38 +166,23 @@ class ScriptedProgress:
         self.closed = True
 
 
-class _NullWidget:
-    """Stands in for any window object a headless run asks a view for: every attribute and call answers another null widget; item access, iteration and
-    len() behave like an empty widget.  Numbers the window code does arithmetic on (sizes) answer real values."""
-    _NUMBERS = {'winfo_reqwidth': 100, 'winfo_reqheight': 20, 'winfo_width': 1, 'winfo_height': 1, 'winfo_ismapped': False, 'yview': (0.0, 1.0)}
+_NULL_NUMBERS = {'winfo_reqwidth': 100, 'winfo_reqheight': 20, 'winfo_width': 1, 'winfo_height': 1, 'winfo_ismapped': False, 'yview': (0.0, 1.0)}
+_null_cls = []
 
-    def __init__(self, *a, **k):
-        pass
 
-    def __getattr__(self, name):
-        if name.startswith('__'):
-            raise AttributeError(name)
-        if name in self._NUMBERS:
-            return lambda *a, **k: self._NUMBERS[name]
-        return _NullWidget()
+def _NullWidget(*a, **k):
+    """Stands in for any window object a headless run asks a view for: a MagicMock (every attribute and call answers another one; item access, iteration and
+    len() behave like an empty widget; tests set `.return_value` / replace attributes on it), with real numbers for the sizes the window code calculates with."""
+    if not _null_cls:
+        from unittest import mock
 
-    def __call__(self, *a, **k):
-        return _NullWidget()
-
-    def __iter__(self):
-        return iter(())
-
-    def __len__(self):
-        return 0
-
-    def __bool__(self):
-        return True
-
-    def __setitem__(self, key, value):
-        pass
-
-    def __getitem__(self, key):
-        return ''
+        class Null(mock.MagicMock):
+            def __getattr__(self, name):
+                if name in _NULL_NUMBERS:
+                    return lambda *a, **k: _NULL_NUMBERS[name]
+                return super().__getattr__(name)
+        _null_cls.append(Null)
+    return _null_cls[0]()
 
 
 class _NullView:
@@ -218,37 +203,87 @@ class _NullView:
     def _read_attrs(self, fname):
         import ast
         import importlib.util
-        try:
-            spec = importlib.util.find_spec(f'{self.__name__}_qt')
-            tree = ast.parse(open(spec.origin, encoding='utf-8').read())
-        except Exception:
+        trees = {}
+
+        def load(modname):
+            if modname not in trees:
+                try:
+                    spec = importlib.util.find_spec(modname)
+                    with open(spec.origin, encoding='utf-8') as fh:
+                        trees[modname] = ast.parse(fh.read())
+                except Exception:
+                    trees[modname] = None
+            return trees[modname]
+
+        def aliases(tree, modname):
+            """name used in this module -> ('module', dotted) or ('func', dotted module, function name)"""
+            out = {}
+            for n in tree.body:
+                if isinstance(n, ast.Import):
+                    for al in n.names:
+                        out[al.asname or al.name.split('.')[0]] = ('module', al.name if al.asname else al.name.split('.')[0])
+                elif isinstance(n, ast.ImportFrom) and n.module and not n.level:
+                    for al in n.names:
+                        out[al.asname or al.name] = ('from', n.module, al.name)
+            return out
+
+        first_mod = f'{self.__name__}_qt'
+        if load(first_mod) is None:
             return None
-        funcs = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
-        if fname not in funcs:
-            return None
-        found, seen, todo = set(), set(), [fname]
-        while todo:
-            fn = funcs[todo.pop()]
-            seen.add(fn.name)
+        found, seen = set(), set()
+
+        def walk(modname, funcname):
+            if (modname, funcname) in seen:
+                return
+            seen.add((modname, funcname))
+            tree = load(modname)
+            if tree is None:
+                return
+            funcs = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+            names = aliases(tree, modname)
+            fn = funcs.get(funcname)
+            if fn is None:                                   # `make_ui, show_dcv = (S.make_ui, S.show_dcv)`: the name is another module's function
+                for n in tree.body:
+                    if isinstance(n, ast.Assign) and len(n.targets) == 1:
+                        tg, val = n.targets[0], n.value
+                        pairs = list(zip(tg.elts, val.elts)) if isinstance(tg, ast.Tuple) and isinstance(val, ast.Tuple) else [(tg, val)]
+                        for t, v in pairs:
+                            if (isinstance(t, ast.Name) and t.id == funcname and isinstance(v, ast.Attribute) and isinstance(v.value, ast.Name)
+                                    and v.value.id in names):
+                                kind = names[v.value.id]
+                                walk(kind[1] if kind[0] == 'module' else f'{kind[1]}.{kind[2]}', v.attr)
+                return
             first = fn.args.args[0].arg if fn.args.args else None
             for node in ast.walk(fn):
                 if isinstance(node, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
-                    targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-                    stack = list(targets)
+                    stack = list(node.targets) if isinstance(node, ast.Assign) else [node.target]
                     while stack:
                         t = stack.pop()
                         if isinstance(t, (ast.Tuple, ast.List)):
                             stack.extend(t.elts)
                         elif isinstance(t, ast.Attribute) and isinstance(t.value, ast.Name) and t.value.id == first:
                             found.add(t.attr)
-                elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in funcs and node.func.id not in seen:
-                    if node.args and isinstance(node.args[0], ast.Name) and node.args[0].id == first:
-                        todo.append(node.func.id)
-        return sorted(found)
+                elif isinstance(node, ast.Call) and node.args and isinstance(node.args[0], ast.Name) and node.args[0].id == first:
+                    f = node.func
+                    if isinstance(f, ast.Name):
+                        if f.id in funcs:
+                            walk(modname, f.id)
+                        elif f.id in names and names[f.id][0] == 'from':
+                            walk(names[f.id][1], names[f.id][2])
+                    elif isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name) and f.value.id in names:
+                        kind = names[f.value.id]
+                        if kind[0] == 'module':
+                            walk(kind[1], f.attr)
+                        elif kind[0] == 'from':                       # `from qtui import bench_view as B`: B is a module
+                            walk(f'{kind[1]}.{kind[2]}', f.attr)
+        walk(first_mod, fname)
+        return sorted(found) or None
 
     def __getattr__(self, name):
         if name.startswith('__'):
             raise AttributeError(name)
+        if name == 'table_selection':                                   # the table_* contract of the views: the rows the operator has selected
+            return lambda app, *a, **k: tuple(app.tree.selection())
         attrs = self._attrs(name)
         if not attrs:
             return _NullWidget()

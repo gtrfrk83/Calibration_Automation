@@ -33,6 +33,8 @@ for _n in ('messagebox', 'filedialog'):           # handheld_dmm no longer impor
         setattr(hh, _n, sys.modules['tkinter.' + _n])
 import run_queue_engine  # noqa: E402
 import tds2000c_verification as tds  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import ui_shell  # noqa: E402
 import ui_theme as ui  # noqa: E402
 import labregistry  # noqa: E402

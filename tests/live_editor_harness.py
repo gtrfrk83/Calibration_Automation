@@ -29,6 +29,8 @@ import devmode  # noqa: E402
 import procmods  # noqa: E402
 import procmods_engine  # noqa: E402
 import procmods_ui_model as M  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import ui_shell  # noqa: E402
 import ui_theme as ui  # noqa: E402
 import labregistry  # noqa: E402

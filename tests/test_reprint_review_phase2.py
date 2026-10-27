@@ -19,6 +19,8 @@ sys.path.insert(0, str(HERE))
 import reprint_harness as R  # noqa: E402
 import ui_ported  # noqa: E402
 import phase2_apps as P  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import report_dialog  # noqa: E402
 import report_pdf  # noqa: E402
 import report_review  # noqa: E402

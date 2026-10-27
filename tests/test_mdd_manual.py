@@ -22,6 +22,8 @@ import datasheet_builder as db  # noqa: E402
 import datasheet_builder_match as dm  # noqa: E402
 import dsb_manager  # noqa: E402
 import procscan  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import report_dialog  # noqa: E402
 import dsb_runtime as rt  # noqa: E402
 
@@ -366,76 +368,6 @@ class StandardChoicePreview(Fix):
         pv.dialog.close()
 
 
-class TkPreviewLogic(Fix):
-    """mdd_import_ui.Preview (the Tk preview) with its widgets replaced by fakes: the logic of the 'Standard for the uncertainty' box.  The look on a real Tk is not checked here."""
-
-    class Var:
-        def __init__(self, value=''):
-            self.v = value
-
-        def get(self):
-            return self.v
-
-        def set(self, v):
-            self.v = v
-
-    class Grid:
-        def __init__(self):
-            self.rows = []
-
-        def get_children(self):
-            return list(range(len(self.rows)))
-
-        def delete(self, *a):
-            self.rows = []
-
-        def insert(self, parent, where, values=(), tags=()):
-            self.rows.append(values)
-
-    def preview(self):
-        import mdd_import_ui as M
-        V = self.Var
-        pv = M.Preview.__new__(M.Preview)
-        pv.root, pv.parsed, pv.conv, pv.on_created, pv.status = mock.MagicMock(), self.parsed, self.conv, None, None
-        pv.registry, pv.spec_root, pv.archive_to = self.reg, self.us, self.arch
-        pv.make, pv.model, pv.title = V(self.conv.sheet.make), V(self.conv.sheet.model), V(self.conv.sheet.title)
-        pv.choice, pv.std, pv.std_var = V('new'), None, V('')
-        pv.heading, pv.pills, pv.existing, pv.create_btn = (mock.MagicMock() for _ in range(4))
-        pv.pills.winfo_children.return_value = []
-        pv.existing.winfo_children.return_value = []
-        pv.std_box, pv.std_text, pv.win = mock.MagicMock(), mock.MagicMock(), mock.MagicMock()
-        pv.grid = self.Grid()
-        return M, pv
-
-    def test_preselects_shows_and_registers_the_chosen_standard(self):
-        M, pv = self.preview()
-        with mock.patch.object(M, 'ui', mock.MagicMock()), mock.patch.object(M, 'messagebox') as box:
-            pv.fill()
-            self.assertEqual(pv.selected_standard(), '5522A')
-            self.assertTrue(pv.std_var.get().startswith('5522A  (covers '))
-            self.assertIn('5522A', pv.std_text.configure.call_args.kwargs['text'])
-            self.assertTrue(pv.grid.rows[1][7].endswith('(5522A)'))
-            pv.std_var.set(pv.std.label_of(''))                                        # None: waive
-            pv.show_uncertainty()
-            self.assertEqual(pv.grid.rows[1][7], 'none: waived')
-            skipped = next(r for r in pv.grid.rows if r[0] == 16)
-            self.assertEqual(skipped[7], '')
-            pv.std_var.set(pv.std.label_of('5560A'))
-            pv.create()
-            self.assertIn('5560A', box.showinfo.call_args[0][1])
-        row = next(iter(db.list_datasheets(root=self.us, db=self.reg)))
-        self.assertEqual(db.load(row['uid'], root=self.us, db=self.reg).options['manual_standard'], '5560A')
-
-    def test_a_rebuild_keeps_the_persons_choice(self):
-        M, pv = self.preview()
-        with mock.patch.object(M, 'ui', mock.MagicMock()):
-            pv.fill()
-            pv.std_var.set(pv.std.label_of('5520A'))
-            pv.title.set('Another title')
-            pv.rebuild()
-            self.assertEqual(pv.selected_standard(), '5520A')
-
-
 class StandardUncertainty(Fix):
     """A registered manual calibration carries the uncertainty of the standard the author chose; the run window and the PDF print it and say where it is from."""
 
@@ -753,16 +685,6 @@ class StandardUncertainty(Fix):
         s = next(s for s in specs if s.step == p['id'])
         self.assertEqual(s.default_std, '5560A')
         self.assertEqual(RM.evaluate(s, s.default_std).unc_text, rows[s.idx]['Uncertainty'])
-
-
-class GridEntryLogic(unittest.TestCase):
-    """manual_grid.GridEntry with a fake tree and app (the real-Tk behaviour is checked in tests/real_tk_checks.py)."""
-
-    def test_module_has_the_keys(self):
-        import manual_grid
-        src = Path(manual_grid.__file__).read_text()
-        for key in ("'<Return>'", "'<Escape>'", "'<Tab>'", "'<F9>'"):
-            self.assertIn(key, src)
 
 
 if __name__ == '__main__':

@@ -640,9 +640,8 @@ def _run_adj8846a(make_harness):
         hn.answers.rules.append(lambda r: 'COMMIT 8846A' if r['kind'] == 'ask_text' and r['title'] == 'Final confirmation' else None)
         if key == 'fake_meter':
             hn.answers.rules.append(lambda r, _r=resets: next(_r) if r['kind'] == 'ask_ok_cancel' and r['title'] == 'Reset instruments' else None)
-        p = mock.patch.object(__import__('ui_theme'), 'make_table', lambda *a, **k: _FakeTree())          # the step table and the audit table (the stub widgets have no selection)
-        p.start(); hn.patches.append(p)
         app = mod.App(hn.root, demo=(key == 'demo'))
+        app.tree = _FakeTree()                                                   # the step table (the headless view's widgets have no selection)
         hn.app = app
         if key == 'demo':
             import types

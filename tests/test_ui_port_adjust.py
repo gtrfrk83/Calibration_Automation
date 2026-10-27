@@ -25,27 +25,9 @@ class Launchers(unittest.TestCase):
         for f in LAUNCHERS:
             self.assertEqual(clean.problems(ROOT / f), [], f)
 
-    def test_the_views_exist_and_the_sidecars_list_them(self):
-        import json
-        for f, v in zip(LAUNCHERS, VIEWS):
-            self.assertTrue((ROOT / v).exists(), v)
-            code = json.loads((ROOT / f.replace('.py', '.procedure.json')).read_text(encoding='utf-8'))['fingerprint']['code']
-            for needed in (v, 'ui_port.py', 'ui_port_tk.py'):
-                self.assertIn(needed, code, f'{f}: {needed}')
 
 
 class NewPortMethods(unittest.TestCase):
-    def test_same_signatures_on_both_ports(self):
-        import _tk_stub
-        if 'tkinter' not in sys.modules and not getattr(sys.modules.get('tkinter'), '_cal_stub', False):
-            try:
-                import tkinter  # noqa: F401
-            except ImportError:
-                _tk_stub.install()                       # no tkinter here: the signature check only needs the class
-        import ui_port_tk
-        for name in ('ask_value', 'update', 'enable_hidpi'):
-            a, b = getattr(ui_port_tk.TkUiPort, name), getattr(ui_port.ScriptedUiPort, name)
-            self.assertEqual(list(inspect.signature(a).parameters), list(inspect.signature(b).parameters), name)
 
     def test_scripted_ask_value_answers_the_default_and_records(self):
         p = ui_port.ScriptedUiPort()

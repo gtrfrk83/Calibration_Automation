@@ -24,6 +24,8 @@ import generated_draft as gd  # noqa: E402
 import datasheet_builder as db  # noqa: E402
 import dsb_manager  # noqa: E402
 import dsb_runtime as rt  # noqa: E402
+from tests import _tk_stub as _boot  # noqa: E402  (test-only stand-ins for the removed Tk modules)
+_boot.install()  # noqa: E402
 import report_dialog  # noqa: E402
 from drivers.simulated import make_bench, SimFlukeTransport  # noqa: E402
 
