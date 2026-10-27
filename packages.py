@@ -798,7 +798,10 @@ def collect_files(proc, base: Path, extra=(), only=()) -> list:
     `only` (a fix package): just the sidecar (the format needs it) and these files; everything else the procedure uses is listed in `requires`."""
     if only:
         return list(dict.fromkeys([proc.sidecar, *only]))
-    paths = [proc.sidecar, proc.launcher, *proc.own_files, *proc.tests, *extra]
+    # an engine file of the procedure's own that sits at the suite root (fluke_753_754.py ...) cannot be carried (the format allows only the five folders):
+    # it is left out and shows up under `requires`, so the suite that imports the package must already have it
+    own = [p for p in proc.own_files if '/' in p]
+    paths = [proc.sidecar, proc.launcher, *own, *proc.tests, *extra]
     for prefix in proc.diagram_prefixes:
         paths += sorted(f'diagrams/{p.name}' for p in (base / 'diagrams').glob(f'{prefix}_*.png'))
     out = []

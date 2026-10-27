@@ -12,6 +12,8 @@ from collections import namedtuple
 Item = namedtuple('Item', 'key label enabled')
 
 RUN, DEMO, VERIFY, LOCK, RESTORE, REMOVE, COPY_NAME, COPY_PATH, SHOW = 'run', 'demo', 'verify', 'lock', 'restore', 'remove', 'copy_name', 'copy_path', 'show'
+EXPORT = 'export'
+EXPORT_LABEL = 'Export procedure package...'
 READINESS = 'readiness'
 RUN_LABEL = 'Run procedure'
 DEMO_LABEL = 'Try in demo mode (virtual instruments)'
@@ -20,7 +22,7 @@ REMOVE_LABEL = 'Remove from library'
 RESTORE_LABEL = 'Restore previous version...'
 
 
-def items(found, verify, lock, can_show, has_path=True, restorable=False):
+def items(found, verify, lock, can_show, has_path=True, restorable=False, exportable=True):
     """The menu for the selected row.  `verify` / `lock` are (text, enabled) as the card's two buttons show them."""
     return [Item(RUN, RUN_LABEL, bool(found)),
             Item(DEMO, DEMO_LABEL, bool(found)),
@@ -32,6 +34,7 @@ def items(found, verify, lock, can_show, has_path=True, restorable=False):
             Item(RESTORE, RESTORE_LABEL, bool(restorable)),
             Item(REMOVE, REMOVE_LABEL, True),
             None,
+            Item(EXPORT, EXPORT_LABEL, bool(exportable)),
             Item(COPY_NAME, 'Copy procedure name', True),
             Item(COPY_PATH, 'Copy file path', bool(has_path)),
             Item(SHOW, 'Show file location', bool(can_show))]

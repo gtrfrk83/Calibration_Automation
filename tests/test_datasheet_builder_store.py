@@ -243,3 +243,27 @@ class ManagerRemoveUser(unittest.TestCase):
             self.assertFalse(mm.ManagerCore.remove_user(core, 'ds:' + r.uid, root=root, db=reg)[0])      # already gone
             self.assertTrue(db.restore(r.uid, root=root, db=reg))
             self.assertFalse(mm.ManagerCore.remove_user(core, 'ds:unknown', root=root, db=reg)[0])
+
+
+class ManagerExportPackage(unittest.TestCase):
+    """The Manager's 'Export procedure package...' (Library menu and the row's right-click menu) writes the same zip tools/make_package.py does."""
+
+    def test_export_writes_an_inspectable_package_and_refuses_a_user_built_row(self):
+        import types
+        import manager_model as mm
+        import packages
+        import verified
+        root = HERE.parent
+        with tempfile.TemporaryDirectory() as tmp:
+            core = types.SimpleNamespace(user={}, base=root)
+            core.verified = lambda: verified.Registry(Path(tmp) / 'lab_registry.sqlite3', base=root, seed=False)
+            core.exportable = lambda rec: mm.ManagerCore.exportable(core, rec)
+            rec = ('1', 'Fluke 753 Verification', 'Fluke', '753', 'x', 'Procedures/Fluke_753_Verification.py', '')
+            self.assertTrue(mm.ManagerCore.exportable(core, rec))
+            path, digest = mm.ManagerCore.export_package(core, rec, tmp)
+            self.assertTrue(Path(path).is_file() and len(digest) == 64)
+            pv = packages.inspect(path, root, core.verified(), None)
+            self.assertEqual(pv.errors, [] if hasattr(pv, 'errors') else [])
+            self.assertFalse(mm.ManagerCore.exportable(core, ('ds:abc', 'x', '', '', '', '', '')))
+            with self.assertRaises(packages.PackageError):
+                mm.ManagerCore.export_package(core, ('ds:abc', 'x', '', '', '', '', ''), tmp)

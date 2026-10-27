@@ -420,6 +420,20 @@ class ManagerCore:
             return None
         return path if path.suffix.lower() == '.py' else None
 
+    def exportable(self, rec):
+        """True when the row is an installed procedure with a sidecar (a user-built datasheet is exported from the Datasheet Builder)."""
+        if not rec or dsb_manager.is_user_iid(str(rec[0])) or not rec[5]:
+            return False
+        return procscan.find(Path(rec[5]).stem, self.base) is not None
+
+    def export_package(self, rec, out_dir, with_mark=False):
+        """Write the package zip of the row's procedure into out_dir (tools/make_package.py does the same from the command line).  Returns (path, sha256);
+        raises packages.PackageError with the reason when it cannot be exported."""
+        if not self.exportable(rec):
+            raise packages.PackageError('This row is not an installed procedure with a package sidecar; a user-built datasheet is exported from the Datasheet Builder.')
+        path = packages.build_package(Path(rec[5]).stem, self.base, out_dir, registry=self.verified(), with_verified_mark=with_mark)
+        return path, packages.sha256_file(path)
+
     def row_menu_items(self, rec, card, can_show=None):
         """procedure_menu entries for a row (None without one); the enabled rules are the card's buttons' own."""
         if not rec:
@@ -432,7 +446,7 @@ class ManagerCore:
         restorable = bool(managed and managed.is_file() and self.available_backups(record))      # a managed script with at least one saved backup
         can_show = can_show_location() if can_show is None else can_show
         return procedure_menu.items(found, (card.verify_full or card.verify_text, card.verify_enabled), (card.lock_full or card.lock_text, card.lock_enabled),
-                                    can_show and script_file(self.base, script).is_file(), has_path=bool(script), restorable=restorable)
+                                    can_show and script_file(self.base, script).is_file(), has_path=bool(script), restorable=restorable, exportable=self.exportable(rec))
 
     # ------------------------------------------------------------------ launching
     def launch_args(self, script, demo, fast_demo=False, asset=None, extra=None):

@@ -240,6 +240,7 @@ class ManagerWindow(QMainWindow):
             return a
         add('mdd', 'Import Mudcats datasheet (.mdd)...', self.import_mdd_procedure)
         add('package', 'Import procedure package...', self.import_package)
+        add('export', procedure_menu.EXPORT_LABEL, self.export_package)
         add('register', 'Register procedure...', self.add)
         menu.addSeparator()
         self.library_info = QAction('Library folder: ', self)                  # info line (text refreshed when the menu opens)
@@ -256,6 +257,8 @@ class ManagerWindow(QMainWindow):
         """Enabled states when the menu opens: Remove from library needs a selected procedure; the info line shows the current library folder."""
         self.library_info.setText('Library folder: ' + self.core.library_folder_text())
         self.library_actions['remove'].setEnabled(hasattr(self, 'table') and self.selected_iid() is not None)
+        rec = self._selected_row() if hasattr(self, 'table') else None
+        self.library_actions['export'].setEnabled(bool(rec) and self.core.exportable(rec))
 
     # ------------------------------------------------------------------ panels hosted from other modules
     def build_panel(self, key):
@@ -641,7 +644,7 @@ class ManagerWindow(QMainWindow):
         if entries is None:
             return None
         actions = {procedure_menu.RUN: self.run_selected, procedure_menu.DEMO: lambda: self.run_selected(demo=True), procedure_menu.READINESS: self.readiness_check,
-                   procedure_menu.VERIFY: self.mark_verified, procedure_menu.LOCK: self.toggle_lock, procedure_menu.REMOVE: self.remove,
+                   procedure_menu.VERIFY: self.mark_verified, procedure_menu.LOCK: self.toggle_lock, procedure_menu.REMOVE: self.remove, procedure_menu.EXPORT: self.export_package,
                    procedure_menu.RESTORE: self.restore_previous, procedure_menu.COPY_NAME: self.copy_procedure_name,
                    procedure_menu.COPY_PATH: self.copy_procedure_path, procedure_menu.SHOW: self.show_procedure_location}
         menu = QMenu(self.table)
@@ -916,6 +919,29 @@ class ManagerWindow(QMainWindow):
         self.refresh()                                       # the scan finds a new procedure; a verified one that changed shows its state
         self.status.set(f'Imported {result.name} version {result.version} ({len(result.written)} file(s) written).')
         dialogs.show_result(self, result, preview)
+
+    def export_package(self):
+        """Write the selected procedure as a package zip (the same file tools/make_package.py makes) into a folder the person picks."""
+        rec = self._selected_row()
+        if not rec:
+            dialogs.message(self, 'info', 'Select a procedure', 'Select a procedure from the list first.')
+            return
+        if not self.core.exportable(rec):
+            dialogs.message(self, 'info', 'Not exportable here', 'Only an installed procedure can be exported here. A user-built datasheet is exported from the Datasheet Builder.')
+            return
+        folder = packages.get_library_dir()
+        out = dialogs.pick_folder(self, f'Choose the folder for the package of "{rec[1]}"', folder if folder and Path(folder).is_dir() else '')
+        if not out:
+            return
+        entry, status = self.core.ver_status(rec)
+        mark = bool(status.locked) and dialogs.ask_yes_no(self, 'Verified mark', 'Include your verified-on-hardware mark in the package?\n\nThe receiving suite honours it only when its files match.')
+        try:
+            path, digest = self.core.export_package(rec, out, with_mark=mark)
+        except packages.PackageError as exc:
+            dialogs.message(self, 'error', 'Not exported', str(exc))
+            return
+        self.status.set(f'Exported {Path(path).name} to {out} (sha256 {digest[:12]}...).')
+        dialogs.message(self, 'info', 'Package written', f'{path}\n\nsha256 {digest}\n\nIt holds this procedure\'s own files; shared engines are listed as required and are not in it.')
 
     def restore_previous(self):
         rec = self.core.managed_record(self.selected_iid())
