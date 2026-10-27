@@ -9,7 +9,7 @@ from pathlib import Path
 HERE=Path(__file__).resolve().parent
 sys.path.append(str(HERE.parent))  # shared ui_theme.py sits next to the Manager
 import ui_port
-import ui_theme_core as ui                   # only its toolkit-free helpers here (si, si_row, report_filename, Settings); the window code is in f8846a_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (si, si_row, report_filename, Settings); the window code is in f8846a_view_qt.py
 from ui_port import ui as port          # every dialog, variable, scheduler call and window operation goes through the UI port (ui_port.py)
 import appdata
 import datamode
@@ -165,7 +165,7 @@ class App(virtualbench.VirtualMixin,reset_startup.AppResetMixin,datamode.DataMod
         self._busy=value
         if hasattr(self,'btn_run'):self._sync_buttons()
 
-    VIEW = 'f8846a_view'                               # the toolkit's window code: f8846a_view_tk (Tk), later _qt
+    VIEW = 'f8846a_view'                               # window code: f8846a_view_qt.py
     @property
     def ui_view(self): return port.view(self.VIEW)
 

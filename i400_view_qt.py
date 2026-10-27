@@ -1,4 +1,4 @@
-"""Fluke i400 clamp performance verification: the Qt window code (twin of i400_view_tk.py: same functions, same widgets as attributes of the App, same
+"""Fluke i400 clamp performance verification: the Qt window code (port of the removed Tk view i400_view_tk.py: same functions, same widgets as attributes of the App, same
 texts, same busy / idle button states).
 
 The engine reaches this module through `ui_port.get_ui().view('i400_view')`, which resolves to `i400_view_qt` under the Qt port.  Every function takes the

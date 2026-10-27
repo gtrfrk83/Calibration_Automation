@@ -1,4 +1,4 @@
-"""iFlex window option (iflex_option.App): the Qt widgets of the 'iFlex probe supplied' check boxes.  The twin of iflex_option_view_tk.py with the same functions, taking the
+"""iFlex window option (iflex_option.App): the Qt widgets of the 'iFlex probe supplied' check boxes.  The port of the removed Tk view iflex_option_view_tk.py with the same functions, taking the
 engine's App as `self` and keeping the widgets and variables as attributes of it (`_include_vars`, `_include_labels`, `_inc_rows`, ...); reached through
 `ui_port.ui.view('iflex_option_view')`.  Nothing here decides anything about a calibration."""
 from __future__ import annotations

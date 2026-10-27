@@ -1,4 +1,4 @@
-"""Manual override entry window of the user-built datasheet runtime (dsb_override.ask_typed): the Qt dialog.  The twin of dsb_override_view_tk.py with the same function,
+"""Manual override entry window of the user-built datasheet runtime (dsb_override.ask_typed): the Qt dialog.  The port of the removed Tk view dsb_override_view_tk.py with the same function,
 reached through `ui_port.ui.view('dsb_override_view')`.  The typed text is parsed and judged by dsb_override.parse_typed (no toolkit); the short 'Use this reading?'
 confirmation is asked through the UI port, over this window.  Nothing here decides anything about a calibration."""
 from __future__ import annotations

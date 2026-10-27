@@ -1,4 +1,4 @@
-"""Tektronix MDO4000C performance verification: the Qt window code, the twin of mdo4000c_view_tk.py (package QT-G2a).
+"""Tektronix MDO4000C performance verification: the Qt window code, the port of the removed Tk view mdo4000c_view_tk.py (package QT-G2a).
 
 Same functions, arguments and App attributes as the Tk view (`self.tree`, `self.btn_run`, `self.cfg_widgets`, `self.addr_boxes`, `self.btn_read_opts` ...); the engine reaches it
 through `ui_port.ui.view('mdo4000c_view')`.  The engine's request queue and 50 ms pump are the engine's own and unchanged: this view only builds the window.  Every label,

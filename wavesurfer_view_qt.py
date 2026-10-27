@@ -1,4 +1,4 @@
-"""WaveSurfer 4104HD verification: the Qt window code (twin of wavesurfer_view_tk.py: same function names, same attributes on the App).
+"""WaveSurfer 4104HD verification: the Qt window code (port of the removed Tk view wavesurfer_view_tk.py: same function names, same attributes on the App).
 
 The engine reaches this module through `ui_port.ui.view('wavesurfer_view')`, which resolves to `wavesurfer_view_qt` under the Qt UiPort.  Every function that works on the
 window takes the engine's App as `self` and keeps its widgets as attributes of it (`self.tree`, `self.dc_tree`, `self.btn_run`, ... the shared mixins use them too).

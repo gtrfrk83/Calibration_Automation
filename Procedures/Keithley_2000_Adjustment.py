@@ -16,7 +16,7 @@ import drivers
 import keithley2000_adjustment as adj
 import reset_startup
 import ui_port
-import ui_theme_core as ui                   # only its toolkit-free helpers here (Settings); the window code is in keithley2000_adjust_view_tk.py
+import ui_theme_core as ui                   # only its toolkit-free helpers here (Settings); the window code is in keithley2000_adjust_view_qt.py
 import virtualbench
 from ui_port import ui as port          # every dialog, variable and window operation goes through the UI port (ui_port.py)
 
@@ -69,7 +69,7 @@ class App(virtualbench.VirtualMixin):
         port.on_close(root, self.on_close)
 
     # ------------------------------------------------------------------ layout
-    VIEW = 'keithley2000_adjust_view'                    # the toolkit's window code: keithley2000_adjust_view_tk (Tk), later _qt
+    VIEW = 'keithley2000_adjust_view'                    # window code: keithley2000_adjust_view_qt.py
 
     @property
     def ui_view(self): return port.view(self.VIEW)

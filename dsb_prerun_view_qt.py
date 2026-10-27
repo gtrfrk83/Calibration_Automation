@@ -1,4 +1,4 @@
-"""The pre-run list of unverified commands (dsb_prerun.show_list): the Qt dialog.  The twin of dsb_prerun_view_tk.py with the same function, reached through
+"""The pre-run list of unverified commands (dsb_prerun.show_list): the Qt dialog.  The port of the removed Tk view dsb_prerun_view_tk.py with the same function, reached through
 `ui_port.ui.view('dsb_prerun_view')`.  dsb_prerun works out what is listed; this only shows it and returns the operator's choice.  'Accept and run' is not the default
 button: Cancel has the focus and Enter.  Nothing here decides anything about a calibration."""
 from __future__ import annotations

@@ -1,8 +1,8 @@
-"""UiPort: the one seam between the calibration engines and the GUI toolkit.  No toolkit is imported here (tkinter lives in ui_port_tk.py only).
+"""UiPort: the one seam between the calibration engines and the GUI toolkit.  No toolkit is imported here (PySide6 lives in ui_port_qt.py only).
 
-An engine never imports tkinter / PySide6 and never calls a message box itself: it asks the port.
+An engine never imports PySide6 and never calls a message box itself: it asks the port.
 
-    from ui_port import ui as port            # a proxy: every call goes to the port the host installed (set_ui), Tk unless told otherwise
+    from ui_port import ui as port            # a proxy: every call goes to the port the host installed (set_ui), the Qt port unless told otherwise
 
     if not port.ask_yes_no('HIGH VOLTAGE', 'This point outputs 1000 V. ... Enable output?'):
         return
@@ -10,8 +10,8 @@ An engine never imports tkinter / PySide6 and never calls a message box itself: 
     ok = port.operator_prompt('Rewire / verify', 'Connect for DC volts', steps, facts=facts, caution=caution, ok='Connections verified', image=png)
     port.post(self.root, self._done, points, i)        # from a worker thread: run on the UI thread
 
-The host picks the implementation once, before any window exists:   ui_port.set_ui(TkUiPort())  (the default, created on first use)  /  a Qt port later /
-ScriptedUiPort in tests.  What each implementation must do is the contract below; TkUiPort (ui_port_tk.py) is the existing Tk behaviour moved, not redesigned.
+The host picks the implementation once, before any window exists:   ui_port.set_ui(QtUiPort())  (the default, created on first use)  /  ScriptedUiPort in tests.
+What each implementation must do is the contract below.
 
 CONTRACT (every method is called on the UI thread unless the text says otherwise; `win` / `parent` is whatever the host's main window object is: opaque to the engine)
   Messages and questions (modal, blocking, return after the operator answered):
@@ -37,7 +37,7 @@ CONTRACT (every method is called on the UI thread unless the text says otherwise
     set_title(win, text) / on_close(win, fn) / bind_key(win, sequence, fn) / close(win) / flush(win)       window chrome the engines touch
     var(value='', kind='str') -> object with get() / set(v) / trace_add('write', fn)       kind 'str' | 'bool' | 'int' | 'float'
     surprise_handler(win) -> handler          the Stop / Continue dialog of surprise.py, made ON the UI thread (see surprise.tk_handler)
-    view(name) -> module                      the toolkit's window code for an engine: module `<name>_<toolkit>` (agilent34410a_view -> agilent34410a_view_tk)
+    view(name) -> module                      the toolkit's window code for an engine: module `<name>_qt` (agilent34410a_view -> agilent34410a_view_qt)
 
   Handheld reading windows (handheld_dmm.py; modal, blocking, UI thread; `parent` as everywhere is never part of the recorded prompt):
     ask_reading(p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='', limit_s=None, on_expire=None,
@@ -45,31 +45,31 @@ CONTRACT (every method is called on the UI thread unless the text says otherwise
                                         the reading window for point `p` (a handheld_dmm point dict): mode 'numeric' (type the display; `validate(text)` raises ValueError for
                                         an unusable entry, which the window shows and stays open) or 'yesno' (answer `question`); `accept` is the 'ACCEPT IF' line;
                                         `limit_s` / `on_expire`: a countdown after which `on_expire()` is called once; `demo_fill()` (virtual bench only) is the
-                                        'Fill with a simulated reading' button; closing the window = 'stop'.  Tk: handheld_dmm_view_tk.ask_reading
+                                        'Fill with a simulated reading' button; closing the window = 'stop'.  Qt: handheld_dmm_view_qt.ask_reading
     ask_readings(p, total, out_text, out_note, accept, meters, unit='', judge=None, limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT',
                  demo_fill=None, tol_text='', phase='', heading='', *, parent=None) -> dict(action=, texts={key: text|None}, no_reading=[keys])
                                         the run-queue window: one box per meter (`meters` = [(key, asset label, serial)]), each judged live by judge(key, text) ->
-                                        (state, padded_text, note) (ValueError = not a reading); demo_fill(index) fills a box.  Tk: run_queue_ui.ask_readings
+                                        (state, padded_text, note) (ValueError = not a reading); demo_fill(index) fills a box.  Qt: run_queue_view_qt.ask_readings
     ask_range(p, total, dial, standby_text, *, parent=None) -> 'ok' | 'skip' | 'stop'
                                         'Turn the dial to ...' with the dial picture (`dial` = the spec's dial block) and the target position marked
     ask_ir_problem(p, total, problems, shown, *, parent=None) -> 'retry' | 'type' | 'skip' | 'stop'
                                         the meter (read over IR) is not set up as the point needs
     progress_window(win, title='Queue progress', on_show=None, on_export=None) -> object with update(heading, fraction, rows, finished=False, note=''), close(), alive()
-                                        the non-modal run-queue progress window (Tk: run_queue_ui.QueueProgress).  Added to the interface; run_queue_engine still builds it
+                                        the non-modal run-queue progress window (Qt: run_queue_view_qt).  Added to the interface; run_queue_engine still builds it
                                         through its own `queue_progress_factory` until the shared-helpers package routes that through this method.
 
 NOT in the interface yet (each has real call sites; the work package that ports them adds the method AND a ScriptedUiPort implementation, then a line here):
     (ask_reading / ask_readings / ask_range / ask_ir_problem / progress_window are in the interface now: see 'Handheld reading windows' below)
-    result / table windows                    ui_shell.results_table, ui_theme.make_table: today part of the engine's own window (see 'view')
-    custom dialogs                            ui_theme.dialog + Toplevel in Fluke_8808A_Adjustment / Keithley_2000_Adjustment / WaveSurfer; surprise.py's own Toplevel
+    result / table windows                    qtui.shell.results_table: part of the engine's own window (see 'view')
+    custom dialogs                            the dialogs of Fluke_8808A_Adjustment / Keithley_2000_Adjustment / WaveSurfer and surprise.py's own window (all through the port)
 
 APPENDED BY WP-A (adjustment launchers; append-only block):
     ask_value(title, prompt, default, *, parent=None) -> str | None     the adjustment launchers' value-entry window (a custom dialog: prompt text, one entry pre-filled
                                         with `default`, 'Use this value' / 'Cancel'; Enter accepts).  Returns the text typed (not validated here), None = cancelled.
                                         Not a secret entry: a calibration code / password is asked with ask_text(..., show='*') and is never recorded.
-    update(win)                         UI thread only.  Process pending events NOW and return (Tk `win.update()`): the adjustment launchers' busy-wait pump, and the
+    update(win)                         UI thread only.  Process pending events NOW and return: the adjustment launchers' busy-wait pump, and the
                                         'tick' they give a driver to stay responsive during a long instrument wait.  (flush(win) only does the idle tasks.)
-    enable_hidpi()                      Call BEFORE run_app: crisp text on scaled Windows displays (ui_theme.enable_hidpi; a no-op elsewhere).  Qt ports may ignore it.
+    enable_hidpi()                      Call BEFORE run_app: crisp text on scaled Windows displays (a no-op elsewhere).  Qt ports may ignore it.
 """
 from __future__ import annotations
 
@@ -78,7 +78,7 @@ import threading
 from pathlib import Path
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
-# canonical prompt record (what ScriptedUiPort keeps; tests/ui_prompt_capture.py records the same form from the Tk calls of an unported engine)
+# canonical prompt record (what ScriptedUiPort keeps; tests/ui_prompt_capture.py records the same form)
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
 BUTTONS = {
     'info': ['OK'], 'warning': ['OK'], 'error': ['OK'],
@@ -131,7 +131,7 @@ class Answers:
 
 
 class ScriptedVar:
-    """get / set / trace_add like a Tk variable, no toolkit."""
+    """get / set / trace_add like a toolkit variable, no toolkit."""
     CAST = {'str': str, 'bool': bool, 'int': int, 'float': float}
 
     def __init__(self, value='', kind='str'):
@@ -436,7 +436,7 @@ class ScriptedUiPort:
     # ==== APPEND-ONLY BLOCK, WP-H (handheld): the reading windows and the progress window ======================================================
     # The scripted operator answers like tests/virtual_harness.VHarness did: a rule of `answers` (record -> answer) wins; otherwise the 'Fill with a simulated
     # reading' button when the engine offers it (virtual bench), otherwise the window is closed ('stop').  Records: kinds ask_reading / ask_readings / ask_range /
-    # ask_ir_problem (ui_prompt_capture records the same form from the Tk-level harness).
+    # ask_ir_problem (ui_prompt_capture records the same form).
     def ask_reading(self, p, total, out_text, out_note, accept, mode, question=None, unit='', annunciator=False, validate=None, phase='',
                     limit_s=None, on_expire=None, device='METER', source='CALIBRATOR OUTPUT', demo_fill=None, *, parent=None):
         rec = record('ask_reading', f'point {p["id"]}', out_text, None, mode=mode, device=device, source=source, unit=unit, phase=phase or None,
@@ -493,7 +493,7 @@ _lock = threading.Lock()
 
 
 def get_ui():
-    """The installed port; the Tk one is created on first use if the host installed none."""
+    """The installed port; the Qt one is created on first use if the host installed none."""
     global _ui
     if _ui is None:
         with _lock:
@@ -524,36 +524,23 @@ ui = _Proxy()
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
 # The toolkit: Qt only (the Tk build was removed 2026-10-27).
-# ----------------------------------------------------------------------------------------------------------------------------------------------------
 TOOLKITS = ('qt',)
 DEFAULT_TOOLKIT = 'qt'
 
 
-def toolkit_name(name=None):
-    """Always 'qt' (kept so callers that ask keep working); an unknown CALSUITE_UI value means the default."""
-    import os
-    value = (name if name is not None else os.environ.get('CALSUITE_UI', '')).strip().lower()
-    return value if value in TOOLKITS else DEFAULT_TOOLKIT
-
-
-def _make_port(name):
-    """A new Qt port.  There is no fallback: if PySide6 cannot be imported the ImportError says so (the Tk build no longer exists)."""
+def _default_port():
+    """A new Qt port.  There is no fallback: if PySide6 cannot be imported the ImportError says so."""
     import ui_port_qt
     return ui_port_qt.QtUiPort()
 
 
-def _default_port():
-    return _make_port(toolkit_name())
-
-
 def select_toolkit(name=None):
-    """Install the Qt UiPort and return it.  Call it once, before any window or engine exists (the launchers do).  An unknown CALSUITE_UI value is an
-    error (a typo must not silently run something else); PySide6 missing raises ImportError."""
+    """Install the Qt UiPort and return it.  Call it once, before any window or engine exists (the launchers do).  Any `name` (or CALSUITE_UI value)
+    other than 'qt' is an error: a typo must not silently run something else.  PySide6 missing raises ImportError."""
     import os
     choice = (name if name is not None else os.environ.get('CALSUITE_UI', '') or DEFAULT_TOOLKIT).strip().lower()
     if choice not in TOOLKITS:
         raise ValueError(f'unknown toolkit {choice!r}: use one of {TOOLKITS} (CALSUITE_UI)')
-    import ui_port_qt
-    port = ui_port_qt.QtUiPort()
+    port = _default_port()
     set_ui(port)
     return port

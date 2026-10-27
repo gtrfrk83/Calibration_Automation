@@ -1,4 +1,4 @@
-"""Handheld meter engine (handheld_dmm.App, iflex_option.App and the user-built datasheets): the Qt window code.  The twin of handheld_dmm_view_tk.py with the same
+"""Handheld meter engine (handheld_dmm.App, iflex_option.App and the user-built datasheets): the Qt window code.  The port of the removed Tk view handheld_dmm_view_tk.py with the same
 public functions, so the engine reaches either through `ui_port.ui.view('handheld_dmm_view')`:
 
     setup_window(self) / finish_window(self) / build_ui(self) / sync_buttons(self, busy)         the main window (qtui.shell.Shell: header, strip, drawer, results table)

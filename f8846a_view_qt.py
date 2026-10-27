@@ -1,4 +1,4 @@
-"""Fluke 8846A one-year verification: the Qt window code (twin of f8846a_view_tk.py: same functions, same widgets as attributes of the App, same texts, same busy / idle
+"""Fluke 8846A one-year verification: the Qt window code (port of the removed Tk view f8846a_view_tk.py: same functions, same widgets as attributes of the App, same texts, same busy / idle
 button states).
 
 The engine reaches this module through `ui_port.get_ui().view('f8846a_view')`, which resolves to `f8846a_view_qt` under the Qt port.  Every function takes the engine's App

@@ -1,4 +1,4 @@
-"""Keithley Model 2000 performance verification: the Qt window code (twin of k2000_view_tk.py: same functions, same widgets as attributes of the App, same texts, same
+"""Keithley Model 2000 performance verification: the Qt window code (port of the removed Tk view k2000_view_tk.py: same functions, same widgets as attributes of the App, same texts, same
 busy / idle button states).
 
 The engine reaches this module through `ui_port.get_ui().view('k2000_view')`, which resolves to `k2000_view_qt` under the Qt port.  Every function takes the engine's App as

@@ -70,7 +70,7 @@ PM_VARS = (('delay', 'ws.rms_delay', 3, '3'), ('samples', 'ws.rms_samples', 5, '
 class RMSNoiseApp(datamode.DataModeMixin, procmods_engine.ProcModsMixin):
     _cal_choice = CAL_CHOICES[0]                          # the selected calibrator (instances override it from the connections table)
     CAL_CHOICES = CAL_CHOICES                            # the views read the calibrator list from the app
-    VIEW = 'wavesurfer_view'                             # the toolkit's window code: wavesurfer_view_tk (Tk), later _qt
+    VIEW = 'wavesurfer_view'                             # window code: wavesurfer_view_qt.py
 
     @property
     def ui_view(self): return port.view(self.VIEW)

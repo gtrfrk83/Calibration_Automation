@@ -1,4 +1,4 @@
-"""User-built datasheet runtime (dsb_runtime.DsbApp): the Qt widgets of its window.  The twin of dsb_runtime_view_tk.py with the same functions, taking the engine's DsbApp
+"""User-built datasheet runtime (dsb_runtime.DsbApp): the Qt widgets of its window.  The port of the removed Tk view dsb_runtime_view_tk.py with the same functions, taking the engine's DsbApp
 as `self`; reached through `ui_port.ui.view('dsb_runtime_view')`:
 
     build_section_bar(self, labels)       rule 12: the section-mode box next to the Show boxes (self.section_caption / section_mode_var / section_mode_box)
