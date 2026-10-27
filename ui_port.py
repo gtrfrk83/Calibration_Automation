@@ -230,7 +230,7 @@ class _NullView:
         first_mod = f'{self.__name__}_qt'
         if load(first_mod) is None:
             return None
-        found, seen = set(), set()
+        found, plain, seen = set(), set(), set()
 
         def walk(modname, funcname):
             if (modname, funcname) in seen:
@@ -262,7 +262,13 @@ class _NullView:
                         if isinstance(t, (ast.Tuple, ast.List)):
                             stack.extend(t.elts)
                         elif isinstance(t, ast.Attribute) and isinstance(t.value, ast.Name) and t.value.id == first:
-                            found.add(t.attr)
+                            val = getattr(node, 'value', None)
+                            literal = isinstance(val, (ast.Constant, ast.List, ast.Dict, ast.Tuple, ast.Set, ast.JoinedStr)) or (
+                                isinstance(val, ast.Call) and isinstance(val.func, ast.Name) and val.func.id in ('set', 'dict', 'list', 'tuple', 'int', 'str', 'float'))
+                            if literal:
+                                plain.add(t.attr)
+                            else:
+                                found.add(t.attr)
                 elif isinstance(node, ast.Call) and node.args and isinstance(node.args[0], ast.Name) and node.args[0].id == first:
                     f = node.func
                     if isinstance(f, ast.Name):
@@ -277,7 +283,8 @@ class _NullView:
                         elif kind[0] == 'from':                       # `from qtui import bench_view as B`: B is a module
                             walk(f'{kind[1]}.{kind[2]}', f.attr)
         walk(first_mod, fname)
-        return sorted(found) or None
+        found -= set()
+        return (sorted(found), sorted(plain - found)) if (found or plain) else None
 
     def __getattr__(self, name):
         if name.startswith('__'):
@@ -288,9 +295,16 @@ class _NullView:
         if not attrs:
             return _NullWidget()
 
+        widgets, plain = attrs
+
         def call(target=None, *a, **k):
-            for attr in attrs:
-                if not hasattr(target, attr) or attr in getattr(target, '__dict__', {}) and getattr(target, attr) is None:
+            for attr in widgets:                                         # the view assigns these to the engine, replacing whatever the engine had
+                try:
+                    setattr(target, attr, _NullWidget())
+                except Exception:
+                    pass
+            for attr in plain:                                           # plain values (counters, lists): only when the engine has not set them
+                if not hasattr(target, attr):
                     try:
                         setattr(target, attr, _NullWidget())
                     except Exception:

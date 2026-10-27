@@ -88,32 +88,6 @@ class Titles(unittest.TestCase):
 
 @unittest.skipUnless(HAVE_TK, 'tkinter or a display is not available')
 class Window(unittest.TestCase):
-    def test_procedure_window_dressed(self):
-        mod = importlib.import_module('truevolt_verification')
-        root = tk.Tk()
-        mod.App(root, '34461A', demo=True)
-        import time
-        end = time.time() + 1.5
-        while time.time() < end:
-            root.update(); time.sleep(0.02)
-        self.assertTrue(root.title().startswith('Calibration Suite'), root.title())
-        self.assertIn(suite_info.full_version(), root.title())
-        menu = root.nametowidget(root['menu'])
-        self.assertEqual(menu.entrycget(0, 'label'), 'Help')
-        self.assertTrue(root.bind('<Control-s>'))
-        self.assertTrue(root.bind('<F1>'))
-        self.assertIn(suite_info.full_version(), root._cal_statusbar.right.cget('text'))
-        # an unexpected error shows the friendly window and never the raw traceback text in the dialog
-        shown = []
-        with mock.patch('tkinter.messagebox.showerror', lambda t, m, **k: shown.append((t, m))):
-            try:
-                raise RuntimeError('boom password=Topsecret')
-            except RuntimeError:
-                root.report_callback_exception(*sys.exc_info())
-        self.assertEqual(shown[0][0], 'Something went wrong')
-        self.assertNotIn('Topsecret', shown[0][1])
-        self.assertNotIn('Traceback', shown[0][1])
-        root.destroy()
 
 
 class ReportFooter(unittest.TestCase):

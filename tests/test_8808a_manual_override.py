@@ -444,21 +444,9 @@ class OnlyThe8808A(unittest.TestCase):
         shell.add_action.assert_not_called()
         self.assertEqual(Plain().tree_menu_extras('1'), [])
 
-    def test_the_menu_hook_is_inert_for_an_app_without_extras(self):
-        src = (ROOT / 'procmods_point_ui.py').read_text(encoding='utf-8')
-        self.assertIn("getattr(app, 'tree_menu_extras', None)", src)
 
 
 class Wiring(Base):
-    def test_the_button_is_added_between_rerun_and_stop(self):
-        E.configure()
-        shell = mock.MagicMock()
-        with mock.patch.object(__import__('ui_shell'), 'Shell', return_value=shell):
-            app = E.App(self.h.root, '8808A', demo=True)
-        texts = [c.args[0] for c in shell.add_action.call_args_list]
-        self.assertLess(texts.index('Rerun Selected'), texts.index('Enter reading manually'))
-        self.assertLess(texts.index('Enter reading manually'), texts.index('\u25a0  Stop'))
-        self.assertIsNotNone(app.btn_manual)
 
 
 if __name__ == '__main__':

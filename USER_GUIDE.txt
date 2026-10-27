@@ -2,7 +2,7 @@ CALIBRATION SUITE - QUICK START (v70 Beta)
 ===========================================
 
 Starting
-  Double-click Start_Calibration_Suite.bat (or run:  py -3 Calibration_Procedure_Manager.py).
+  Double-click 00_START_Calibration_Suite.bat (or run:  py -3 Calibration_Procedure_Manager_qt.py; needs PySide6).
   If add-on packages are missing, a message tells you exactly what to type to install them.
 
 Your data

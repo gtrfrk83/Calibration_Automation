@@ -116,44 +116,44 @@ def _stub_port_class():
     class StubTkPort(ui_port.ScriptedUiPort):
         """The old TkUiPort calls, over the stub modules: each method makes the call the engines used to make, looked up at call time so patches work."""
         def message(self, kind, title, text, *, parent=None):
-            import tkinter.messagebox as mb
+            mb = sys.modules['tkinter.messagebox']
             {'info': mb.showinfo, 'warning': mb.showwarning, 'error': mb.showerror}[kind](title, text, **_kw(parent=parent))
 
         def ask_yes_no(self, title, text, *, icon=None, default=None, parent=None):
-            import tkinter.messagebox as mb
+            mb = sys.modules['tkinter.messagebox']
             return mb.askyesno(title, text, **_kw(icon=icon, default=default, parent=parent))
 
         def ask_ok_cancel(self, title, text, *, icon=None, parent=None):
-            import tkinter.messagebox as mb
+            mb = sys.modules['tkinter.messagebox']
             return mb.askokcancel(title, text, **_kw(icon=icon, parent=parent))
 
         def ask_retry_cancel(self, title, text, *, icon=None, parent=None):
-            import tkinter.messagebox as mb
+            mb = sys.modules['tkinter.messagebox']
             return mb.askretrycancel(title, text, **_kw(icon=icon, parent=parent))
 
         def ask_yes_no_cancel(self, title, text, *, icon=None, parent=None):
-            import tkinter.messagebox as mb
+            mb = sys.modules['tkinter.messagebox']
             return mb.askyesnocancel(title, text, **_kw(icon=icon, parent=parent))
 
         def ask_text(self, title, prompt, *, initial=None, show=None, parent=None):
-            import tkinter.simpledialog as sd
+            sd = sys.modules['tkinter.simpledialog']
             return sd.askstring(title, prompt, **_kw(initialvalue=initial, show=show, parent=parent))
 
         def ask_number(self, title, prompt, *, initial=None, minvalue=None, maxvalue=None, integer=False, parent=None):
-            import tkinter.simpledialog as sd
+            sd = sys.modules['tkinter.simpledialog']
             ask = sd.askinteger if integer else sd.askfloat
             return ask(title, prompt, **_kw(initialvalue=initial, minvalue=minvalue, maxvalue=maxvalue, parent=parent))
 
         def choose_file(self, *, parent=None, **opts):
-            import tkinter.filedialog as fd
+            fd = sys.modules['tkinter.filedialog']
             return fd.askopenfilename(**_kw(parent=parent, **opts))
 
         def save_file(self, *, parent=None, **opts):
-            import tkinter.filedialog as fd
+            fd = sys.modules['tkinter.filedialog']
             return fd.asksaveasfilename(**_kw(parent=parent, **opts))
 
         def choose_dir(self, *, parent=None, **opts):
-            import tkinter.filedialog as fd
+            fd = sys.modules['tkinter.filedialog']
             return fd.askdirectory(**_kw(parent=parent, **opts))
 
         def operator_prompt(self, title, heading, steps, *, parent=None, **opts):
@@ -177,7 +177,7 @@ def _stub_port_class():
             return box.get('v')
 
         def run_app(self, factory):
-            import tkinter as tk
+            tk = sys.modules['tkinter']
             root = tk.Tk()
             factory(root)
             root.mainloop()
@@ -189,7 +189,7 @@ def _stub_port_class():
             return win.after(ms, fn, *args)
 
         def var(self, value='', kind='str'):
-            import tkinter as tk
+            tk = sys.modules['tkinter']
             return {'str': tk.StringVar, 'bool': tk.BooleanVar, 'int': tk.IntVar, 'float': tk.DoubleVar}[kind](value=value)
 
         def ask_value(self, title, prompt, default, *, parent=None):

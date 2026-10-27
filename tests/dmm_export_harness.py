@@ -32,6 +32,11 @@ def stub_tk():
     except Exception:
         for n in _TK:
             sys.modules.setdefault(n, mock.MagicMock())
+    try:
+        from tests import _tk_stub
+        _tk_stub.install()                                   # the stand-ins for the removed Tk modules (report_dialog, ui_theme, ui_shell ...)
+    except Exception:
+        pass
 
 
 class Var:
@@ -168,6 +173,8 @@ def dump(root, outdir, show, specs=ENGINES, home=None, cal_mode=None):
             app, mod, points = build_engine(spec, root, cal_mode)
             tag = spec.replace(':', '_').replace(' ', '_')
             pdf = outdir / f'{tag}.pdf'
+            from tests import _tk_stub
+            _tk_stub.install()
             import report_dialog
             import report_pdf
             details = {'technician': 'T', 'temperature': '23', 'humidity': '40', 'standards': []}

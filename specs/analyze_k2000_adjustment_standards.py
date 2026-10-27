@@ -23,12 +23,6 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
-try:
-    import tkinter  # noqa: F401
-except ImportError:
-    sys.path.insert(0, str(ROOT / 'tests'))
-    import _tk_stub
-    _tk_stub.install()
 import procspec
 import specmanager as sm
 

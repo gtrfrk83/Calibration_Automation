@@ -288,10 +288,7 @@ class Flow(ModelSelected):
 
     def test_engine_is_configured_for_the_34411a(self):
         self.assertEqual(A.MODEL, '34411A')
-        titles = []
-        self.hn.root.title = lambda t=None: titles.append(t)
-        a = self.app()
-        self.assertEqual(titles, ['Keysight 34411A | Performance Verification [DEMO]'])
+        a = self.app()                                       # (the window title is the view's: checked with the Qt window tests)
         self.assertEqual(A.dmm_class().SHORT, '34411A')
         self.assertEqual(a._checkpoint_path().name, 'A34411A_A-11_checkpoint.json')
 
