@@ -350,7 +350,7 @@ def build_steps():
                 step['switch'] = f'{FN[fn]}: lock the UUT on the {sw_range} range' if table in ('3', '4', '5', '6') else (f'{FN[fn]}: use the {sw_range} range' if table == '7' else FN[fn])
                 step['unc_direction'] = 'output'
                 if table == '3':
-                    notes.append('The manual drives the 5522A (Figure 1); calibrator DC volts at the input value; lock the UUT range with the Range softkey.')
+                    notes.append('Lock the UUT range with the Range softkey.')
                 if table == '4':
                     notes.append('Let the output become stable before the reading (printed p. 12).')
                 if table == '5':
@@ -396,7 +396,7 @@ def build_steps():
             if kind == 'ACV' and table == '4':
                 step['settle'] = 5
             if table == '3' and row['rng'] == '100.000 mV':
-                notes.append('The specification table (printed p. 5) has no 100 mV range row; the limits follow 0.02 % + 0.005 mV (arithmetic).')
+                notes.append('No 100 mV row in the specification table (p. 5): limits = 0.02 % + 0.005 mV.')
             problems = formula_check(table, row)
             if problems:
                 step.setdefault('check', {}).update(arithmetic=problems)
@@ -409,14 +409,14 @@ def build_steps():
 def groups():
     def common(extra):
         return [('Standby', 'Put the calibrator (or the source) in STANDBY before you rewire (in manual mode, put it in STANDBY yourself).')] + extra + [('Check', 'Compare your connections with the picture, then continue.')]
-    cal = 'Fluke 5522A (the manual\'s calibrator, Table 2; a 5560A or 5520A can be chosen in the window)'
+    cal = 'Calibrator'
     return {
-        'MEAS_V': dict(title='Change the cables: UUT measures volts / frequency', summary=f'{cal} NORMAL HI / LO -> UUT V jack and the UUT COM jack on the MEASURE side (Figure 1 and Figure 4).',
+        'MEAS_V': dict(title='Change the cables: UUT measures volts / frequency', summary=f'{cal} HI / LO -> UUT V jack and the COM jack below it (Figures 1, 4).',
                        steps=common([('Calibrator', 'NORMAL HI (red) to the UUT right-hand jack labelled V (CAT II 300 V MAX); NORMAL LO (black) to the UUT jack directly below it (MEASURE common).'),
                                      ('UUT', 'Set the UUT to the function and range of the point (the point window says which); lock the range with the Range softkey.')]),
                        caution='Up to 295 V is applied. Use CAT-rated leads and keep clear of the plugs whenever the output is on. Do not force a dual banana plug into two jacks horizontally (printed p. 10).',
                        diagram='diagrams/hook_fluke753_MEAS_V.png'),
-        'MEAS_MA': dict(title='Change the cables: UUT measures dc mA', summary=f'{cal} AUX HI -> 3458A (series, reading typed) -> UUT mA jack; UUT MEASURE common -> AUX LO (Figure 2).',
+        'MEAS_MA': dict(title='Change the cables: UUT measures dc mA', summary=f'{cal} current HI -> 3458A (in series, reading typed) -> UUT mA jack; UUT common -> calibrator LO (Figure 2).',
                         steps=common([('Calibrator', 'Calibrator current output (5522A AUX HI / AUX LO) in series with the UUT mA jack (mA Omega RTD, middle top) and the common jack below it (Figure 2). The manual puts an 8508A in series; here the Keysight 3458A (dc current: calibrator AUX HI to the 3458A I terminal, the 3458A LO terminal to the UUT mA jack; terminals UNVERIFIED) is in series and its reading is typed.'),
                                       ('UUT', 'Disconnect the jumpers on the three common jacks if present (printed p. 13). Set the UUT to dc current, lock the range (30 mA, then 100 mA).')]),
                         caution=None, diagram='diagrams/hook_fluke753_MEAS_MA.png'),
@@ -466,10 +466,9 @@ def groups():
 
 
 SOURCE_NOTE = (
-    'Fluke 753/754 Calibration Manual, Performance Verification Tests, printed pp. 9-32 (16 tables: 8 measure, 7 source, loop power; plus the 754-only HART check). '
-    'The UUT is itself a calibrator: where it MEASURES (Tables 3-7, 13, 15, 16) the lab calibrator sources the value and the display is typed; where it SOURCES (Tables 8-12, 14, 17, loop power) the reading is '
-    'MANUAL ENTRY of the external meter (the manual: Fluke 8508A DMM, Tektronix FCA3000 counter). 1-year limits are used; 2-year limits are stored in the spec. '
-    'The only thermocouple type the manual verifies is Type K. Table 3 row 30 V prints a 1-year maximum of 29.9870 (misprint): 30.0065 is used.')
+    'Fluke 753/754 Calibration Manual, Performance Verification Tests, pp. 9-32; 1-year limits (2-year stored in the spec). '
+    'Where the UUT measures, the lab calibrator sources the value and the display is typed; where it sources, the external meter reading is typed. '
+    'Thermocouples: Type K only. Table 3, 30 V row: printed maximum 29.9870 is a misprint; 30.0065 used.')
 REPORT_NOTE = (
     'Limits: Fluke 753/754 Calibration Manual, Performance Verification Tests (1-year column), unchanged except the 30 V dc row of Table 3 (printed maximum 29.9870, a misprint; 30.0065 used). '
     'Points marked (UUT input) were sourced by the calibrator named in the standards used; points marked (UUT output) were read on an external measuring instrument and typed in, '
