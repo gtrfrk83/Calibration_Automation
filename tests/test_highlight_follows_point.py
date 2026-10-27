@@ -36,6 +36,7 @@ class WaveSurferGrid(unittest.TestCase):
         a.tree = object()
         for k, v in flags.items():
             setattr(a, k, v)
+        self.addCleanup(setattr, W.port, 'view', W.port.view)   # restore: a leaked patch broke other modules' tests
         W.port.view = lambda name: a.fake
         return a
 
