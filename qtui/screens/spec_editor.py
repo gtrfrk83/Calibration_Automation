@@ -948,18 +948,26 @@ class EditorWindow(QWidget):
         specs = view.kind_chips([{'kind': self._range_kind(r)} for _f, r in self.doc.ranges()])
         if self.row_kind not in {c[0] for c in specs}:
             self.row_kind = ''
-        key = (tuple((c[0], c[1], c[2]) for c in specs), self.row_kind)
-        if key == self._kind_specs:
-            return
+        key = tuple((c[0], c[1], c[2]) for c in specs)
+        if key == self._kind_specs and self.kind_filter is not None:
+            if self.kind_filter.current() != self.row_kind:
+                self.kind_filter.set_current(self.row_kind)
+            return                                   # a click only changes the chosen chip: the chips are NOT rebuilt (that would delete the button being clicked)
         self._kind_specs = key
+        old = self.kind_filter
         flt = SegmentedFilter([(code, text, n) for code, text, n, _full in specs])
         for code, _text, _n, full in specs:
             flt._buttons[code].setToolTip(full)
         flt.set_current(self.row_kind)
         flt.currentChanged.connect(self.set_row_kind)
         self.kind_filter = flt
+        if old is not None:
+            self.kind_scroll.takeWidget()            # released from the scroll area first, then deleted later: never deleted inside its own click handler
+            old.hide()
+            old.deleteLater()
         self.kind_scroll.setWidget(flt)
         flt.adjustSize()
+        flt.show()
         self.kind_scroll.setFixedHeight(flt.sizeHint().height() + (self.kind_scroll.horizontalScrollBar().sizeHint().height() if flt.sizeHint().width() > self.kind_scroll.width() > 0 else 2))
 
     def set_row_kind(self, code: str) -> None:
