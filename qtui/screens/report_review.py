@@ -210,8 +210,12 @@ class ReviewWindow(QDialog):
         self.tar.setChecked(bool(prior.get('show_tar', remembered.tar)))
         self.tur = QCheckBox('TUR on the PDF')
         self.tur.setChecked(bool(prior.get('show_tur', remembered.tur)))
+        self.left_numeric = QCheckBox('As left data as numerical')
+        self.left_numeric.setToolTip('Copy every As Found reading to As Left, so the As Left column is numerical instead of Same')
+        self.left_numeric.setChecked(bool(prior.get('left_numeric', report_pdf.remembered_left_numeric())))
         g.addWidget(self.tar, 0, 2, 1, 2)
         g.addWidget(self.tur, 0, 4, 1, 2)
+        g.addWidget(self.left_numeric, 0, 6, 1, 2)
         self.btn_standards = SecondaryButton('Standards used…')
         self.btn_standards.clicked.connect(self.edit_standards)
         g.addWidget(self.btn_standards, 0, 7, 1, 1, Qt.AlignmentFlag.AlignRight)
@@ -620,11 +624,13 @@ class ReviewWindow(QDialog):
         d['procedure'] = self.procedure
         d['show_tar'], d['show_tur'] = bool(self.tar.isChecked()), bool(self.tur.isChecked())
         d['show_tar_tur'] = report_pdf.TarTur(d['show_tar'], d['show_tur'])
+        d['left_numeric'] = bool(self.left_numeric.isChecked())
         return d
 
     def generate(self):
         d = self.details()
         report_pdf.remember_show_tar_tur(d['show_tar_tur'])
+        report_pdf.remember_left_numeric(d['left_numeric'])
         self.store.set('standards', d['standards'])
         self.store.save()
         self.result = d

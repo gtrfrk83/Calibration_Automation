@@ -80,10 +80,58 @@ def remember_show_tar_tur(value, path=None) -> bool:
         v = as_tar_tur(value)
         p = Path(path or settings_path())
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps({'show_tar': v.tar, 'show_tur': v.tur}, indent=2), encoding='utf-8')
+        data = {'show_tar': v.tar, 'show_tur': v.tur}
+        if remembered_left_numeric(p):
+            data['left_numeric'] = True                  # the 'As left data as numerical' choice lives in the same file and is kept
+        p.write_text(json.dumps(data, indent=2), encoding='utf-8')
         return True
     except Exception:
         return False
+
+
+def remembered_left_numeric(path=None) -> bool:
+    """The last choice of the 'As left data as numerical' checkbox (off on first run or if the file is missing or unreadable). Never raises."""
+    import json
+    try:
+        from pathlib import Path
+        return bool(json.loads(Path(path or settings_path()).read_text(encoding='utf-8')).get('left_numeric', False))
+    except Exception:
+        return False
+
+
+def remember_left_numeric(value, path=None) -> bool:
+    """Store the 'As left data as numerical' choice next to the TAR / TUR choice; returns False if the file cannot be written. Never raises."""
+    import json
+    try:
+        from pathlib import Path
+        p = Path(path or settings_path())
+        try:
+            data = json.loads(p.read_text(encoding='utf-8'))
+        except Exception:
+            data = {}
+        data['left_numeric'] = bool(value)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(data, indent=2), encoding='utf-8')
+        return True
+    except Exception:
+        return False
+
+
+def apply_left_numeric(rows, details):
+    """details['left_numeric'] (the 'As left data as numerical' checkbox): every row with an As Found reading gets that reading as its As Left value (and the same
+    out-of-tolerance flag), so the As Left column is numerical instead of 'Same'.  A row that already carries a real As Left reading (measured after an adjustment)
+    is left alone.  Returns (rows, copied): the rows are new dicts, the input is not changed."""
+    if not (details or {}).get('left_numeric'):
+        return rows, False
+    out, copied = [], False
+    for r in rows:
+        r = dict(r)
+        if str(r.get('As Found') or '').strip() and str(r.get('As Left') or '') in ('', 'Same'):
+            r['As Left'] = r['As Found']
+            r['As Left OOT'] = bool(r.get('OOT'))
+            copied = True
+        out.append(r)
+    return out, copied
 
 
 def tar_tur_definition(show=None) -> str:
@@ -428,6 +476,7 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     rows = sorted(rows, key=lambda r: order[r.get('Section') or ''])
     details = details or {}
     rows, details, field_notes = apply_field_assignments(rows, details, header, demo=demo, reprint=bool(reprint_note or issued_at or not record_history))      # a reprint (note, original issue date, or no history) never looks anything up; uncertainties assigned in the field (marked, with a footnote)
+    rows, left_copied = apply_left_numeric(rows, details)       # 'As left data as numerical': As Found copied to As Left
     columns = COLUMNS
     selected = details_tar_tur(details) if show_tar_tur is None else as_tar_tur(show_tar_tur)
     extra = shown_tar_tur_columns(rows, selected)
@@ -482,7 +531,14 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
             story.append(Paragraph(f'RESULT: PASS — all {total} points within tolerance', verdict_pass))
         story.append(Spacer(1, 6))
     left_rows = [r for r in rows if str(r.get('As Left') or '') not in ('', 'Same')]      # points measured again after an adjustment
-    if left_rows:
+    if left_rows and left_copied:
+        left_bad = [r for r in left_rows if r.get('As Left OOT')]
+        if left_bad:
+            story.append(Paragraph(f'AS LEFT: OUT OF TOLERANCE — {len(left_bad)} of {len(left_rows)} points; the As Left values are the As Found readings (no adjustment made)', verdict_fail))
+        else:
+            story.append(Paragraph(f'AS LEFT: PASS — all {len(left_rows)} points; the As Left values are the As Found readings (no adjustment made)', verdict_pass))
+        story.append(Spacer(1, 6))
+    elif left_rows:
         left_bad = [r for r in left_rows if r.get('As Left OOT')]
         if left_bad:
             story.append(Paragraph(f'AS LEFT: OUT OF TOLERANCE — {len(left_bad)} of {len(left_rows)} points measured after adjustment '

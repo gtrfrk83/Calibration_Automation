@@ -101,6 +101,8 @@ class ReviewWindow:
         self.tur_var = tk.BooleanVar(value=bool(prior.get('show_tur', remembered.tur)))
         ttk.Checkbutton(strip, text='TAR on the PDF', variable=self.tar_var).grid(row=1, column=4, columnspan=2, sticky='w', padx=(0, 8), pady=(6, 0))
         ttk.Checkbutton(strip, text='TUR on the PDF', variable=self.tur_var).grid(row=1, column=6, columnspan=2, sticky='w', padx=(0, 8), pady=(6, 0))
+        self.left_var = tk.BooleanVar(value=bool(prior.get('left_numeric', report_pdf.remembered_left_numeric())))
+        ttk.Checkbutton(strip, text='As left data as numerical', variable=self.left_var).grid(row=1, column=8, columnspan=2, sticky='w', padx=(0, 8), pady=(6, 0))
         ttk.Button(strip, text='Standards used…', command=self.edit_standards).grid(row=0, column=6, columnspan=3, sticky='e')
         strip.columnconfigure(8, weight=1)
         self.standards = prior.get('standards') or self.store.get('standards', []) or []
@@ -330,12 +332,14 @@ class ReviewWindow:
         d['procedure'] = self.procedure
         d['show_tar'], d['show_tur'] = bool(self.tar_var.get()), bool(self.tur_var.get())
         d['show_tar_tur'] = report_pdf.TarTur(d['show_tar'], d['show_tur'])
+        d['left_numeric'] = bool(self.left_var.get())
         return d
 
     def generate(self):
         import report_pdf
         d = self.details()
         report_pdf.remember_show_tar_tur(d['show_tar_tur'])
+        report_pdf.remember_left_numeric(d['left_numeric'])
         for k in ('technician', 'temperature', 'humidity'):
             self.store.set(k, d[k])
         self.store.set('standards', d['standards'])
