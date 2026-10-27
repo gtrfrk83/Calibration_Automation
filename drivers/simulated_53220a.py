@@ -17,6 +17,7 @@ ctr_t.sd_time (s), ctr_t.selftest_fail, bench.ext_ref_present, bench.external_si
 """
 from __future__ import annotations
 
+from drivers.simulated_fgen import FgenBench as _FgenBench, SimGen as _SimGenBase
 import math
 import re
 
@@ -398,6 +399,25 @@ class SimRF27(SimRF):
     """The simulated 96270A of this procedure (the Leveling Head / Microwave O/P route is not modelled: the level range of SimRF applies)."""
 
 
+class SimPulseGen33250A(_SimGenBase):
+    """The simulated Agilent 33250A as a pulse generator, cabled to the simulated counter: when its output is ON in PULSE mode the counter sees a pulse of the generator's own width on
+    bench.external_signal; otherwise nothing.  The command handling is the function-generator twin of drivers/simulated_fgen (SimGen), so the driver's set-read-back-compare is exercised."""
+    def __init__(self, counter_bench):
+        self.counter_bench = counter_bench
+        super().__init__(_FgenBench('33250A'))
+
+    def handle(self, cmd):
+        out = super().handle(cmd)
+        g, cb = self.bench.gen, self.counter_bench
+        if g['on'] and g['func'] == 'PULS':
+            self._signal = cb.external_signal = dict(kind='PULSE', f=0.0, width_s=g['wid'], delay_s=0.0)
+        elif not g['on'] and getattr(self, '_signal', None) is not None:
+            if cb.external_signal is self._signal:                 # only the signal this generator made: a signal the operator connected is not its to clear
+                cb.external_signal = None
+            self._signal = None
+        return out
+
+
 def make_53220a_bench(model='53230A', bus='USB', options=None):
     """(bench, 96270A transport, counter transport).  bench.rf1 is the 96270A state, bench.ext_ref_present (default True) the 10 MHz on Ext Ref In, bench.external_signal the standard
     the operator connects (default None), bench.cable_loss_db (default 0), bench.atten_db (external attenuator after the 96270A, default 0)."""
@@ -409,4 +429,5 @@ def make_53220a_bench(model='53230A', bus='USB', options=None):
     bench.atten_db = 0.0
     rf = SimRF27(bench, 'rf1')
     ctr = Sim53220ATransport(bench, model, bus, options)
+    bench.gen_transport = SimPulseGen33250A(bench)          # the Agilent 33250A as the pulse generator (bench.gen_transport; the return value of this function is unchanged)
     return bench, rf, ctr

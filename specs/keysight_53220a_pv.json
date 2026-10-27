@@ -991,6 +991,7 @@
      "requires": [],
      "timebase": "EXT",
      "gate_s": null,
+     "gen": "81134A",
      "stimulus": {
       "group": "PULSE",
       "width_s": 5e-09,
@@ -1024,6 +1025,7 @@
      "requires": [],
      "timebase": "EXT",
      "gate_s": null,
+     "gen": "81134A",
      "stimulus": {
       "group": "PULSE",
       "width_s": 5e-09,
@@ -1046,6 +1048,79 @@
      "parent": "4a.ch1.5ns.mean"
     },
     {
+     "test": "4a",
+     "func": "PWID",
+     "kind": "PWID",
+     "channel": 1,
+     "unit": "s",
+     "nominal": 8e-09,
+     "quick": true,
+     "requires": [],
+     "timebase": "EXT",
+     "gate_s": null,
+     "gen": "33250A",
+     "stimulus": {
+      "group": "PULSE",
+      "width_s": 8e-09,
+      "period_s": 6.66e-08,
+      "vpp": 1.0
+     },
+     "page": "56-60 (record p. 95)",
+     "flags": [
+      "UNVERIFIED: the Agilent 33250A cannot make the 5 ns pulse (minimum width 8 ns), so with it this test runs at 8 ns (owner decision 2026-10-27). The manual prints limits for 5 ns only: these are the same half-widths centred on 8 ns (the datasheet formula, 2 x time accuracy, does not depend on the width). The 33250A pulse width accuracy is not specified in its User's Guide."
+     ],
+     "ref": "4a.ch1.8ns.mean",
+     "stat": "mean",
+     "limits": {
+      "53220A": {
+       "low": 7.6e-09,
+       "high": 8.4e-09,
+       "printed": "7.600 000 000 nSec .. 8.400 000 000 nSec"
+      },
+      "53230A": {
+       "low": 7.8e-09,
+       "high": 8.2e-09,
+       "printed": "7.800 000 000 nSec .. 8.200 000 000 nSec"
+      }
+     }
+    },
+    {
+     "test": "4a",
+     "func": "PWID",
+     "kind": "PWID",
+     "channel": 1,
+     "unit": "s",
+     "nominal": 8e-09,
+     "quick": true,
+     "requires": [],
+     "timebase": "EXT",
+     "gate_s": null,
+     "gen": "33250A",
+     "stimulus": {
+      "group": "PULSE",
+      "width_s": 8e-09,
+      "period_s": 6.66e-08,
+      "vpp": 1.0
+     },
+     "page": "56-60 (record p. 95)",
+     "flags": [
+      "UNVERIFIED: the Agilent 33250A cannot make the 5 ns pulse (minimum width 8 ns), so with it this test runs at 8 ns (owner decision 2026-10-27). The manual prints limits for 5 ns only: these are the same half-widths centred on 8 ns (the datasheet formula, 2 x time accuracy, does not depend on the width). The 33250A pulse width accuracy is not specified in its User's Guide."
+     ],
+     "ref": "4a.ch1.8ns.sdev",
+     "stat": "sdev",
+     "limits": {
+      "53220A": {
+       "max": 1.4e-10,
+       "printed": "< 0.140 000 000 nSec"
+      },
+      "53230A": {
+       "max": 2.8e-11,
+       "printed": "< 0.028 000 000 nSec"
+      }
+     },
+     "parent": "4a.ch1.8ns.mean"
+    },
+    {
      "test": "4b",
      "func": "PWID",
      "kind": "PWID",
@@ -1056,6 +1131,7 @@
      "requires": [],
      "timebase": "EXT",
      "gate_s": null,
+     "gen": "81134A",
      "stimulus": {
       "group": "PULSE",
       "width_s": 5e-09,
@@ -1089,6 +1165,7 @@
      "requires": [],
      "timebase": "EXT",
      "gate_s": null,
+     "gen": "81134A",
      "stimulus": {
       "group": "PULSE",
       "width_s": 5e-09,
@@ -1109,6 +1186,79 @@
       }
      },
      "parent": "4b.ch2.5ns.mean"
+    },
+    {
+     "test": "4b",
+     "func": "PWID",
+     "kind": "PWID",
+     "channel": 2,
+     "unit": "s",
+     "nominal": 8e-09,
+     "quick": true,
+     "requires": [],
+     "timebase": "EXT",
+     "gate_s": null,
+     "gen": "33250A",
+     "stimulus": {
+      "group": "PULSE",
+      "width_s": 8e-09,
+      "period_s": 6.66e-08,
+      "vpp": 1.0
+     },
+     "page": "56-60 (record p. 95)",
+     "flags": [
+      "UNVERIFIED: the Agilent 33250A cannot make the 5 ns pulse (minimum width 8 ns), so with it this test runs at 8 ns (owner decision 2026-10-27). The manual prints limits for 5 ns only: these are the same half-widths centred on 8 ns (the datasheet formula, 2 x time accuracy, does not depend on the width). The 33250A pulse width accuracy is not specified in its User's Guide."
+     ],
+     "ref": "4b.ch2.8ns.mean",
+     "stat": "mean",
+     "limits": {
+      "53220A": {
+       "low": 7.6e-09,
+       "high": 8.4e-09,
+       "printed": "7.600 000 000 nSec .. 8.400 000 000 nSec"
+      },
+      "53230A": {
+       "low": 7.8e-09,
+       "high": 8.2e-09,
+       "printed": "7.800 000 000 nSec .. 8.200 000 000 nSec"
+      }
+     }
+    },
+    {
+     "test": "4b",
+     "func": "PWID",
+     "kind": "PWID",
+     "channel": 2,
+     "unit": "s",
+     "nominal": 8e-09,
+     "quick": true,
+     "requires": [],
+     "timebase": "EXT",
+     "gate_s": null,
+     "gen": "33250A",
+     "stimulus": {
+      "group": "PULSE",
+      "width_s": 8e-09,
+      "period_s": 6.66e-08,
+      "vpp": 1.0
+     },
+     "page": "56-60 (record p. 95)",
+     "flags": [
+      "UNVERIFIED: the Agilent 33250A cannot make the 5 ns pulse (minimum width 8 ns), so with it this test runs at 8 ns (owner decision 2026-10-27). The manual prints limits for 5 ns only: these are the same half-widths centred on 8 ns (the datasheet formula, 2 x time accuracy, does not depend on the width). The 33250A pulse width accuracy is not specified in its User's Guide."
+     ],
+     "ref": "4b.ch2.8ns.sdev",
+     "stat": "sdev",
+     "limits": {
+      "53220A": {
+       "max": 1.4e-10,
+       "printed": "< 0.140 000 000 nSec"
+      },
+      "53230A": {
+       "max": 2.8e-11,
+       "printed": "< 0.028 000 000 nSec"
+      }
+     },
+     "parent": "4b.ch2.8ns.mean"
     }
    ]
   },

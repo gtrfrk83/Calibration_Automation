@@ -2120,3 +2120,10 @@ AUTOMATED datasheet (manual_entry off, ds.options['drive_calibrator']): the chos
 standby after each point, and the uncertainty comes from the standard's sheet. Points it does not cover stay hand-done with the recorded 'manual_calibration' waiver; frequency / period points
 get a recorded 'not_implemented' waiver (printed N/A). A point the calibrator cannot source (e.g. an AC point with no frequency) makes the import fail closed with that reason. Default is unchanged (manual).
 Demo runs of driven sheets behave like any automated sheet (no standard's uncertainty printed). Qt checkbox only compile-checked (no PySide6 here).
+
+## 53220A family: the Agilent 33250A drives Tests 4a / 4b (2026-10-27)
+Owner decision (option 2): with 'Pulse tests 4 and 5 = Agilent 33250A' and its address entered (new '33250A address / resource' box), the program connects it with the counter, sets the pulse
+(AgilentAFGPulse.pulse: set, read back, compare, error queue; output ON for the Mean point only, OFF in standby) and measures Tests 4a / 4b at 8 ns (the 33250A's minimum pulse width). The 8 ns
+points are separate points (gen='33250A', refs 4a.ch1.8ns.* / 4b.ch2.8ns.*): same half-widths as the printed 5 ns limits centred on 8 ns (53220A +/-0.4 ns, 53230A +/-0.2 ns), Std Dev max
+unchanged - UNVERIFIED (the manual prints 5 ns only; the 33250A's own pulse width accuracy is not specified in its User's Guide). The 5 ns points (gen='81134A') show only with the 81134A choice.
+Test 5 (two outputs 49.9 ns apart) is by hand with either generator (the 33250A has one output). Hook-up pictures for the 33250A are owner-supplied (diagrams/README_53220a.txt).

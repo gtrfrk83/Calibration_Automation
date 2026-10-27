@@ -81,8 +81,8 @@ def build_ui(self):
     self.rear_check = wide(ttk.Checkbutton(d, text='Option 201 rear-panel inputs', variable=self.rear_opt, command=self.on_options))
     rule()
     self.stim_combo = row('Stimulus', combo(self.stim_mode, list(E.STIM_CHOICES), 28, self.refresh))
-    self.pulse_combo = row('Pulse tests 4 and 5', combo(self.pulse_gen, list(E.PULSE_GEN_CHOICES), 40, self.refresh))
-    note('The Agilent 33250A cannot make the 5 ns pulse (minimum pulse width) or the two outputs 49.9 ns apart: those points stay on another pulse generator and the prompt says why.')
+    self.pulse_combo = row('Pulse tests 4 and 5', combo(self.pulse_gen, list(E.PULSE_GEN_CHOICES), 40, self.on_pulse_gen))
+    note('With the Agilent 33250A Tests 4a / 4b run at 8 ns (its minimum pulse width; limits are the same half-widths centred on 8 ns, UNVERIFIED) and the program drives it. Test 5 (two outputs 49.9 ns apart) is set by hand with another pulse generator.')
     self.ref_combo = row('10 MHz reference', combo(self.ref_mode, list(E.REF_CHOICES), 24))
     self.loss_entry = row('Cable loss (dB)', combo(self.loss, ['0', '0.5', '1', '2', '3', '6'], 8, self.refresh, readonly=False))
     self.loss_entry.bind('<FocusOut>', lambda _e: self.refresh())
@@ -94,6 +94,8 @@ def build_ui(self):
     note('USB: USB0::<mfgID>::<modelID>::<serial>::INSTR; LAN: TCPIP0::<ip>::inst0::INSTR; GPIB: GPIB0::<address>::INSTR. The examples are not verified for your bench: use Find instruments.')
     self.rf_entry = row('96270A address / resource', ttk.Combobox(d, textvariable=self.rf_addr, state='normal', width=38), fill=True)
     note('Leave the 96270A address empty to use other standards for every test.')
+    self.gen_entry = row('33250A address / resource', ttk.Combobox(d, textvariable=self.gen_addr, state='normal', width=38), fill=True)
+    note('The Agilent 33250A pulse generator (used when "Agilent 33250A" is chosen above). Leave empty to set the pulse by hand.')
     btns = sh.drawer_footer
     self.btn_find = ttk.Button(btns, text='Find instruments', command=self.find_instruments); self.btn_find.pack(side='left', padx=(0, 8))
     self.btn_test = ttk.Button(btns, text='Test connections', command=self.test_connections, style='Accent.TButton'); self.btn_test.pack(side='left')
@@ -160,5 +162,5 @@ def table_update_row(self, iid, values, tags):
 
 
 def set_choices(self, which, values):
-    """The drop-down values of the counter address ('ctr') or 96270A address ('rf') box."""
-    (self.ctr_entry if which == 'ctr' else self.rf_entry).configure(values=values)
+    """The drop-down values of the counter address ('ctr'), 96270A address ('rf') or 33250A address ('gen') box."""
+    {'ctr': self.ctr_entry, 'rf': self.rf_entry, 'gen': self.gen_entry}[which].configure(values=values)

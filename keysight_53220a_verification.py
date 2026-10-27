@@ -252,9 +252,14 @@ def plan_stimulus(p, stim):
     if g == 'PULSE':
         if stim.get('pulse_gen') == '33250A':
             short = pulse_shortfalls(st)
-            why = ('The Agilent 33250A cannot make this signal: ' + '; '.join(short) + '. Use ' + STIM_NEEDS['PULSE']) if short else \
-                  'The Agilent 33250A could make these settings but its pulse output is not automated by this program: set it by hand'
-            return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=why)
+            if st.get('delay_s'):
+                short.append('it has ONE output and this test needs two outputs ' + _tm(st['delay_s']) + ' apart')
+            if short:
+                return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason='The Agilent 33250A cannot make this signal: ' + '; '.join(short) + '. Use ' + STIM_NEEDS['PULSE'])
+            if stim.get('mode') == 'auto' and stim.get('gen'):
+                return dict(mode='pulse', route=None, level_set=None, atten_db=0.0, reason='')
+            return dict(mode='manual', route=None, level_set=None, atten_db=0.0,
+                        reason='No Agilent 33250A is connected (enter its address and press Test connections), or the stimulus is another standard')
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
     if g == 'BURST':
         return dict(mode='manual', route=None, level_set=None, atten_db=0.0, reason=STIM_NEEDS[g])
@@ -276,15 +281,20 @@ def plan_stimulus(p, stim):
                 reason=f'The 96270A Microwave O/P cannot make {level:g} dBm (its floor is {floor:g} dBm): it is set to {floor:g} dBm and {atten:g} dB of external attenuation is needed before the counter input')
 
 
-def points_for(model, options, quick=False):
+def gen_ok(p, pulse_gen):
+    """A point made for one pulse generator exists only with that generator (the 5 ns pulse points: the 81134A or equivalent; the 8 ns ones: the Agilent 33250A, which cannot make 5 ns)."""
+    return not p.get('gen') or p['gen'] == pulse_gen
+
+
+def points_for(model, options, quick=False, pulse_gen='81134A'):
     """The test points that exist for a model with the declared options (the manual's option columns): a point needs a printed limit for the model and every option it lists
     (201 only changes the hook-up text).  Independent of the window: the window uses the same rule."""
     have = set(options)
-    return [p for p in POINTS if p['limits'].get(model) is not None and set(p.get('requires', [])) - {'201'} <= have and (p['quick'] or not quick)]
+    return [p for p in POINTS if p['limits'].get(model) is not None and set(p.get('requires', [])) - {'201'} <= have and (p['quick'] or not quick) and gen_ok(p, pulse_gen)]
 
 
-def counts_text(model, options):
-    full, quick = points_for(model, options), points_for(model, options, True)
+def counts_text(model, options, pulse_gen='81134A'):
+    full, quick = points_for(model, options, pulse_gen=pulse_gen), points_for(model, options, True, pulse_gen)
     tests = {}
     for p in full:
         tests[p['test_no']] = tests.get(p['test_no'], 0) + 1
@@ -294,18 +304,22 @@ def counts_text(model, options):
 class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
     """Bench I/O: the counter under test and the Fluke 96270A (when used), both through the instrument drivers."""
 
-    def __init__(self, ctr_address, rf_address, interface='USB', transports=None, mods=None, virtual=False, surprise_handler=None, stim=None):
+    def __init__(self, ctr_address, rf_address, interface='USB', transports=None, mods=None, virtual=False, surprise_handler=None, stim=None, gen_address='', gen_transport=None):
         self.log = drivers.CommandLog()
         self.virtual = bool(virtual)
         if self.virtual: virtualbench.mark_log(self.log)
-        self.stim = dict(stim or {}, rf=False)
+        self.stim = dict(stim or {}, rf=False, gen=False)
         self.cache = None                  # (ref, stats) of the last Mean point: the Std Dev point of the same measurement reuses the same 100 readings
         self.rf = None
+        self.gen = None                    # the Agilent 33250A as the pulse generator (Tests 4a / 4b at 8 ns), when its address was given
         if transports:
-            ctr_t, rf_t = transports
+            ctr_t, rf_t = transports[0], transports[1]
+            gen_transport = gen_transport or (transports[2] if len(transports) > 2 else None)
         else:
             ctr_t = drivers.open_visa(to_visa(ctr_address, interface, default_gpib=False), timeout=20)
             rf_t = drivers.open_visa(to_visa(rf_address), timeout=20) if rf_address.strip() else None
+            if gen_transport is None and str(gen_address).strip():
+                gen_transport = drivers.open_visa(to_visa(gen_address), timeout=20)
         self.ctr = counter_class()(ctr_t, self.log, label=MODEL)
         try:
             self.ctr.connect()
@@ -314,6 +328,11 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
                 self.rf = k53.Fluke96270AWide(rf_t, self.log, label='96270A')
                 self.rf.connect()
                 self.stim['rf'] = True
+            if gen_transport is not None:
+                self.gen = k53.AgilentAFGPulse(gen_transport, self.log, label='33250A')
+                self.gen.connect()
+                self.gen.check_errors('connecting')
+                self.stim['gen'] = True
             self.pm_attach(mods, *self.pm_drivers())
         except Exception:
             self.close(); raise
@@ -326,18 +345,21 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         """Stop on surprise (surprise.py, opt-in).  The counter's set-and-read-back mismatch and statistics replies, and the 96270A's error queue, are Stop-only surprises.  A virtual (demo)
         command log is left alone unless force=True (tests)."""
         self.guards = [g for g in (surprise.attach_guard(self.ctr, handler, force, expect={'calc.mean': 'float', 'calc.sdev': 'float', 'calc.count': 'float'}, stop_only=True),
-                                   surprise.attach_guard(self.rf, handler, force, stop_only=True) if self.rf else None) if g]
+                                   surprise.attach_guard(self.rf, handler, force, stop_only=True) if self.rf else None,
+                                   surprise.attach_guard(self.gen, handler, force, stop_only=True) if self.gen else None) if g]
         return self.guards
 
     def reset_roles(self):
-        return ([self.rf] if self.rf else []), [self.ctr]
+        return ([d for d in (self.rf, self.gen) if d]), [self.ctr]
 
     def pm_drivers(self):
-        return tuple(d for d in (self.ctr, self.rf) if d is not None)
+        return tuple(d for d in (self.ctr, self.rf, self.gen) if d is not None)
 
     def standby(self):
         if self.rf is not None:
             self.rf.output(False)
+        if self.gen is not None:
+            self.gen.output(False)
 
     def close(self):
         try: self.standby()
@@ -345,9 +367,12 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         try:
             if self.rf is not None: self.rf.cleanup()
         except Exception: pass
+        try:
+            if self.gen is not None: self.gen.cleanup()
+        except Exception: pass
         try: self.ctr.cleanup()                       # the reference oscillator settings as found, then local (GTL on GPIB)
         except Exception: pass
-        for obj in (self.ctr, self.rf):
+        for obj in (self.ctr, self.rf, self.gen):
             try:
                 if obj is not None: obj.close()
             except Exception: pass
@@ -367,6 +392,7 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
         if p.get('settle_s') is not None: return p['settle_s']           # a per-point modification (procmods)
         if route == 'MW': return self.pm_param('a53220a.settle.mw', 3.0)
         if route == 'LH': return self.pm_param('a53220a.settle.lh', 2.0)
+        if route == 'PULSE': return self.pm_param('a53220a.settle.pulse', 1.0)
         return self.pm_param('a53220a.settle.manual', 2.0)
 
     def meter_point(self, p):
@@ -386,6 +412,11 @@ class IO(reset_startup.IOResetMixin, procmods_engine.ProcModsMixin):
             surprise.checked(self.rf, self.rf.check_error, p['description'], stop_only=True)       # the source refuses what it cannot make; never operate then
             self.rf.output(True)
             time.sleep(virtualbench.scaled(self.settle(p, plan['route']), self.virtual))
+        elif plan['mode'] == 'pulse':
+            st = p['stimulus']
+            self.gen.pulse(st['period_s'], st['width_s'], vpp=st['vpp'])                       # set, read back, compared, error queue read (the driver); the output is still OFF
+            self.gen.output(True)
+            time.sleep(virtualbench.scaled(self.settle(p, 'PULSE'), self.virtual))
         elif plan['mode'] == 'manual':
             time.sleep(virtualbench.scaled(self.settle(p, None), self.virtual))
         res = self.ctr.measure_stats()
@@ -429,6 +460,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self._iface_shown = self.interface.get()
         self.ctr_addr = port.var(self.addrs[self._iface_shown])
         self.rf_addr = port.var(s.get('rf_addr', DEFAULT_RF_ADDR))
+        self.gen_addr = port.var(s.get('gen_addr', ''))                # the Agilent 33250A (pulse generator); empty = another pulse generator, set by hand
         self.period = port.var(pick('period', PERIODS, PERIOD_LABEL[SPEC['default_period']]))
         self.tb_opt = port.var(pick('tb_opt', TB_CHOICES, TB_CHOICES[0]))
         self.ch3_opt = port.var(pick('ch3_opt', CH3_CHOICES, CH3_CHOICES[0]))
@@ -477,7 +509,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         try: loss = float(str(self.loss.get()).replace(',', '.') or 0)
         except ValueError: loss = 0.0
         rf = (self.io.rf is not None) if self.io is not None else (bool(self.rf_addr.get().strip()) or self.virtual)         # once connected, what is really connected
-        return dict(mode='auto' if self.stim_mode.get() == STIM_CHOICES[0] else 'manual', rf=rf, loss_db=loss, ext_low=bool(self.ext_low.get()),
+        gen = (self.io.gen is not None) if self.io is not None else (bool(self.gen_addr.get().strip()) or self.virtual)
+        return dict(mode='auto' if self.stim_mode.get() == STIM_CHOICES[0] else 'manual', rf=rf, gen=gen, loss_db=loss, ext_low=bool(self.ext_low.get()),
                     pulse_gen='33250A' if self.pulse_gen.get() == PULSE_GEN_CHOICES[1] else '81134A')
 
     def plan(self, p):
@@ -491,6 +524,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def applicable(self, p):
         """Does the point exist for this model and these options?"""
         if not p.get('applies_model'): return False
+        if not gen_ok(p, self.stim_state()['pulse_gen']): return False          # the 5 ns points belong to the 81134A, the 8 ns ones to the 33250A
         need = {c for c in p.get('requires', []) if c != '201'}
         return need <= self.option_codes()
 
@@ -587,7 +621,12 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _options_changed(self):
         self.reset_forget()
         self.on_period()
-        if hasattr(self, 'status'): self.status.set(f'{MODEL} with {", ".join(sorted(self.option_codes())) or "no options"}: ' + counts_text(MODEL, self.option_codes()))
+        if hasattr(self, 'status'): self.status.set(f'{MODEL} with {", ".join(sorted(self.option_codes())) or "no options"}: ' + counts_text(MODEL, self.option_codes(), self.stim_state()['pulse_gen']))
+
+    def on_pulse_gen(self):
+        """The pulse generator choice changed: the pulse points that belong to the other generator go and the ones for this one appear (the 33250A runs Tests 4a / 4b at 8 ns)."""
+        self._options_changed()
+        self._save_settings()
 
     def on_select(self, _event=None):
         sel = self.ui_view.table_selection(self)
@@ -597,7 +636,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         flags = ('  |  ' + '; '.join(p['flags'])) if p.get('flags') else ''
         why = self.manual_reason(p)
         att = self.plan(p).get('atten_db')
-        stim = f'Other standard: {why}' if why else ('96270A' + (f' with {att:g} dB external attenuation: {self.plan(p)["reason"]}' if att else '') if p['stimulus']['group'] != 'NONE' else 'none')
+        stim = f'Other standard: {why}' if why else ('Agilent 33250A (set and switched on by the program)' if self.plan(p)['mode'] == 'pulse' else '96270A' + (f' with {att:g} dB external attenuation: {self.plan(p)["reason"]}' if att else '') if p['stimulus']['group'] != 'NONE' else 'none')
         shown = f'Acceptable reading: {v[0]} to {v[1]} {u}' if p['stat'] != 'sdev' else f'Acceptable Std Dev: below {v[1]} {u}'
         self.detail.set(f'{p["description"]}\n{shown}  |  Manual page {p["page"]}  |  Printed: {p["printed_limit"]}{flags}\n'
                         f'Setup: {self.setup_text(p)}\nStimulus: {stim}' + (('\n' + self.found_left_text(p)) if self.found_left_text(p) else ''))
@@ -629,7 +668,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             mw = 'the 96270A Microwave O/P' if g == 'CH3_MW' else 'the 96270A Leveling Head output'
             return base + f'{self.stim_text(p)} from {mw} to the microwave input ({chan_name(p)}); {ref}.' + rear
         if g in ('PULSE_CH1', 'PULSE_CH2'):
-            return base + f'Pulse generator output to Channel {1 if g == "PULSE_CH1" else 2}: {self.stim_text(p)}; {ref}.' + rear
+            return base + f'{"Agilent 33250A" if p.get("gen") == "33250A" else "Pulse generator"} output to Channel {1 if g == "PULSE_CH1" else 2}: {self.stim_text(p)}; {ref}.' + rear
         if g == 'TINT':
             return base + f'Pulse generator: both outputs to Channel 1 and Channel 2 with equal cable lengths: {self.stim_text(p)}; {ref}.' + rear
         return base + f'Pulse-modulated microwave generator to the microwave input: {self.stim_text(p)}; {ref}.' + rear
@@ -644,7 +683,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             self.status.set(f'Instrument search needs pyvisa and a VISA backend ({exc}). You can still type an address.'); return
         want = {'USB': 'USB', 'LAN': 'TCPIP', 'GPIB': 'GPIB'}[self.interface.get()]
         mine = [r for r in found if r.upper().startswith(want)]
-        self.ui_view.set_choices(self, 'ctr', mine or found); self.ui_view.set_choices(self, 'rf', found)
+        self.ui_view.set_choices(self, 'ctr', mine or found); self.ui_view.set_choices(self, 'rf', found); self.ui_view.set_choices(self, 'gen', found)
         self.status.set(f'{len(found)} VISA resource(s) found: ' + (', '.join(found) if found else 'none') + '. Pick the address for each instrument.')
 
     def _prepare_bench(self, bench, p):
@@ -668,8 +707,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
             from drivers.simulated_53220a import make_53220a_bench, DEFAULT_OPTIONS
             self._vb = make_53220a_bench(MODEL, self.interface.get(), getattr(self, 'virtual_options', None) or DEFAULT_OPTIONS[MODEL])
             use_rf = stim['mode'] == 'auto'
-            return IO('virtual', 'virtual', self.interface.get(), transports=(self._vb[2], self._vb[1] if use_rf else None), mods=self.pm_state, virtual=True, stim=stim)
-        return IO(self.ctr_addr.get(), self.rf_addr.get() if stim['mode'] == 'auto' else '', self.interface.get(), mods=self.pm_state, surprise_handler=self._surprise_handler(), stim=stim)
+            use_gen = use_rf and stim['pulse_gen'] == '33250A'
+            return IO('virtual', 'virtual', self.interface.get(), transports=(self._vb[2], self._vb[1] if use_rf else None, self._vb[0].gen_transport if use_gen else None), mods=self.pm_state, virtual=True, stim=stim)
+        use_gen = stim['mode'] == 'auto' and stim['pulse_gen'] == '33250A'
+        return IO(self.ctr_addr.get(), self.rf_addr.get() if stim['mode'] == 'auto' else '', self.interface.get(), mods=self.pm_state, surprise_handler=self._surprise_handler(), stim=stim,
+                  gen_address=self.gen_addr.get() if use_gen else '')
 
     def _surprise_handler(self):
         if self.demo or self.fast_demo: return None
@@ -723,7 +765,7 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
         self.addrs[self.interface.get()] = self.ctr_addr.get()
         for i in INTERFACES:
             self.settings.set(f'ctr_addr_{i}', self.addrs[i])
-        for key, var in (('interface', self.interface), ('rf_addr', self.rf_addr), ('period', self.period), ('tb_opt', self.tb_opt), ('ch3_opt', self.ch3_opt), ('stim_mode', self.stim_mode),
+        for key, var in (('interface', self.interface), ('rf_addr', self.rf_addr), ('gen_addr', self.gen_addr), ('period', self.period), ('tb_opt', self.tb_opt), ('ch3_opt', self.ch3_opt), ('stim_mode', self.stim_mode),
                          ('ref_mode', self.ref_mode), ('loss_db', self.loss), ('pulse_gen', self.pulse_gen)):
             self.settings.set(key, var.get())
         for key, var in (('pulse_opt', self.pulse_opt), ('rear_opt', self.rear_opt), ('ext_low', self.ext_low)):
@@ -796,8 +838,8 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
     def _prompt_setup(self, p, plan):
         """Confirm the physical hook-up when the wiring group changes (with the picture, if installed), or the standard to set for a point on another standard."""
         group, manual = p['group'], plan['mode'] == 'manual'
-        src = 'manual' if manual else '96270A'
-        image = None if group == 'NONE' else find_diagram(src, group)                 # the self-test connects nothing: no picture is expected
+        src = 'manual' if manual else ('33250A' if plan['mode'] == 'pulse' else '96270A')
+        image = None if group == 'NONE' else (find_diagram(src, group) or (find_diagram('manual', group) if src == '33250A' else None))                 # the self-test connects nothing: no picture is expected
         facts = [('Next point', f'{p["id"]} of {len(POINTS)}'), ('Test', p['description']), ('Manual page', p['page'])]
         if image is None and group != 'NONE':
             facts.append(('Diagram', f'not installed (expected diagrams/hook_53220a_{src}_{group}.png)'))
@@ -810,6 +852,11 @@ class App(virtualbench.VirtualMixin, reset_startup.AppResetMixin, datamode.DataM
                 [('Why', plan['reason']), ('Standard', STIM_NEEDS.get(p['stimulus']['group'], STIM_NEEDS['LH'])), ('Set the standard', self.stim_text(p) + f' (cable loss to allow for: {self.stim_state()["loss_db"]:g} dB)'),
                  ('Wiring', self.setup_text(p))],
                 facts=facts, caution='Check the signal level against the counter input rating before connecting. The program reads the counter itself.', ok='Standard connected - measure', image=image, parent=self.root)
+        if plan['mode'] == 'pulse':
+            return port.operator_prompt('Rewire / verify before enabling output', f'Connect for {GROUP_TITLE[group]}',
+                [('Output off', 'The Agilent 33250A output is switched off before you rewire.'), ('Wiring', self.setup_text(p)),
+                 ('33250A', 'Its Output connector goes to the counter input (50 ohm). The program sets the pulse (' + self.stim_text(p) + ', edge time 5 ns), reads every setting back and switches the output on for the measurement only.')],
+                facts=facts, caution='Continue only after physically verifying the connections.', ok='Connections verified - continue', image=image, parent=self.root)
         steps = [('Output off', 'The 96270A output is put in standby before you rewire.'), ('Wiring', self.setup_text(p))]
         if plan.get('atten_db'):
             steps.append(('External attenuation', f'{plan["reason"]}. Fit it between the Microwave O/P (or its cable) and the counter input. The level required at the counter input is '
