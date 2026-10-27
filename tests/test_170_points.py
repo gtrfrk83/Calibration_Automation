@@ -554,10 +554,11 @@ class EndToEnd(unittest.TestCase):
             self.assertNotIn('DEMO', text.upper().replace('DEMONSTRAT', ''))          # a real run is never marked demo
             self.assertRegex(text, r'Uncertainty\s+TAR\s+TUR')
             self.assertNotIn('Cover', text)
-            # frequency readings: no calibrator uncertainty in volts, no TAR / TUR (natural-unit guard)
-            for line in (l for l in text.splitlines() if 'kHz range' in l or '999.9 Hz range' in l or '99.99 Hz range' in l):
-                self.assertNotRegex(line, r'\d+\.\d:1')
-                self.assertNotRegex(line, r'[mµ]Hz')
+            # frequency readings (owner decision 2026-10-26): the calibrator's own frequency spec in Hz, with TAR / TUR (45 Hz point: 5522A 5.8 mHz, limits +-0.06 Hz -> TUR 10.3)
+            line = next(l for l in text.splitlines() if '99.99 Hz range' in l)
+            self.assertIn('5.8 mHz', line)
+            self.assertIn('10.3:1', line)
+            self.assertNotRegex(line, r'[nµp]Hz')
             self.fresh()
 
     def test_temperature_rows_are_in_degrees_c(self):

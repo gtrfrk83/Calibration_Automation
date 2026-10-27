@@ -12,7 +12,7 @@ Numbers come from the same functions the engines use:
     Uncertainty text   report_pdf.point_uncertainty(point, standard)         (= max(budget, scope CMC) rounded UP to 2 figures, k = 2, never below the CMC)
     TAR / TUR text     tartur.row_fields(point, low, high, standard)
     budget / CMC       uncertainty_budget.build(...)  (.emu, .cmc, .reported)
-Frequency rows use the Frequency - Measure CMC alone (no standard): they are shown, never changeable.  Rows with no calibrator (zero offset, a standard
+Frequency rows use the Frequency - Measure CMC alone (no standard): they are shown, never changeable (handheld engines: the calibrator's own frequency spec, 2026-10-26).  Rows with no calibrator (zero offset, a standard
 connected by hand, nothing printed today) are locked and keep their printed text.
 """
 from __future__ import annotations
@@ -108,7 +108,7 @@ def evaluate(spec: PointSpec, standard) -> Evaluation:
     import uncertainty_budget as ub
     q = spec.q
     unit = _unit_of(q)
-    freq_row = q.get('kind') == 'FREQ'
+    freq_row = q.get('kind') == 'FREQ' and not q.get('use_standard')      # use_standard: a handheld frequency point (owner decision 2026-10-26) follows the calibrator like any other row
     std = None if freq_row else standard
     try:
         text = report_pdf.point_uncertainty(q, std)
@@ -597,9 +597,11 @@ def _handheld_spec(app, i, p, row) -> PointSpec:
     locked = ''
     if p.get('unc_kind') == 'FREQ':
         import handheld_dmm
-        q = dict(kind='FREQ', nominal=handheld_dmm.unc_frequency(p), frequency=None, unit='Hz', range=None)
+        from_cal = bool(handheld_dmm.freq_from_calibrator())      # handheld engines, owner decision 2026-10-26: the calibrator's own frequency spec
+        q = dict(kind='FREQ', nominal=handheld_dmm.unc_frequency(p), frequency=None, unit='Hz', range=None, use_standard=from_cal)
         q_tar = dict(q)
-        locked = 'Frequency: measured against the lab standard'
+        if not from_cal:
+            locked = 'Frequency: measured against the lab standard'
     prev = getattr(app, '_row_std', None)
     try:
         if hasattr(app, 'standard_of') and hasattr(app, '_record_for'):      # user-built datasheet: the standard that did the point

@@ -203,7 +203,7 @@ class Exports(unittest.TestCase):
         changed = [l[2:] for l in difflib.ndiff(txt(self.base), txt(self.off)) if l[:2] in ('- ', '+ ')]
         self.assertTrue(changed)
         for l in changed:
-            self.assertRegex(l, r'Min / Max|^\s*6 V range|Type K range|(\u00b5|m|n|p)Hz$', l)
+            self.assertRegex(l, r'Min / Max|^\s*6 V range|Type K range|(\u00b5|m|n|p)?Hz$', l)
         self.assertLessEqual(len(changed), 24)
 
     def check_frequency_rows_only(self, n):
@@ -229,10 +229,10 @@ class Exports(unittest.TestCase):
         self.assertEqual(len(changed), 10, changed)               # 3 temperature rows x 2, 4-24 x 2, 4-25 x 2 (the hand-set 950 kHz point now has the lab frequency CMC)
         for l in changed:
             if re.search(r'950\.\d kHz ', l[2:]):
-                self.assertRegex(l[2:], r'N/A\s*$|Same [\d.]+ (\u00b5|m|n|p)Hz$', l)
+                self.assertRegex(l[2:], r'N/A\s*$|Same [\d.]+ (\u00b5|m|n|p)?Hz$', l)
                 continue
             if not re.match(r'^\s*Temperature\s', l[2:]):          # the 4-24 frequency row: the voltage uncertainty with a Hz unit became the Frequency - Measure CMC
-                self.assertRegex(l[2:], r'45\.\d+ Hz .*Same [\d.]+ (\u00b5|m|n|p)Hz$', l)
+                self.assertRegex(l[2:], r'45\.\d+ Hz .*Same [\d.]+ (\u00b5|m|n|p)?Hz$', l)
                 continue
             self.assertRegex(l[2:], r'N/A\s*$' if l[0] == '-' else r'\d+(\.\d+)? \u00b0C\s*$', l)
 

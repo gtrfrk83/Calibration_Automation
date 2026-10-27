@@ -274,10 +274,44 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(covered['3-35'], 'A2LA-5500A-COIL')            # +10 A dc
 
     def test_points_without_an_uncertainty_are_exactly_the_known_list(self):
-        """Owner instruction: a point that should carry an uncertainty and has none is reported, never invented.  This test pins the list."""
-        app, io = self.run_perfect()
-        missing = [(p['id'], p['kind']) for p, r in zip(app.points, app.certificate_rows()) if not str(r.get('Uncertainty') or '').strip()]
-        self.assertEqual(missing, [], missing)
+        """Owner instruction: a point that should carry an uncertainty and has none is reported, never invented.  The only point without one is the 0 A dc point, by owner decision
+        (no_uncertainty, 2026-10-26)."""
+        for cal in ('5522A', '5560A'):
+            app, io = self.run_perfect(cal)
+            missing = [(p['id'], p['kind']) for p, r in zip(app.points, app.certificate_rows()) if not str(r.get('Uncertainty') or '').strip()]
+            self.assertEqual(missing, [('3-34', 'DCI')], cal)
+            z = [p for p in app.points if p['id'] == '3-34'][0]
+            self.assertTrue(z['no_uncertainty'])
+            self.assertIn('NO UNCERTAINTY', z['note'])
+            self.hn.stop(); self.hn = H.Harness().start()
+
+    def test_frequency_rows_use_the_calibrators_own_frequency_specification(self):
+        """Owner decision 2026-10-26 (all handheld engines): 3-40 and 4-47 are the calibrator's OUTPUT frequency, so its published frequency specification is the uncertainty."""
+        want = {'5522A': '5.8 mHz', '5560A': '130 µHz'}
+        for cal, text in want.items():
+            app, io = self.run_perfect(cal)
+            rows = {p['id']: r for p, r in zip(app.points, app.certificate_rows())}
+            for pid in ('3-40', '4-47'):
+                self.assertEqual(rows[pid]['Uncertainty'], text, (cal, pid))
+            fields = [app.certificate_fields(p) for p in app.points if p['id'] in ('3-40', '4-47')]
+            self.assertTrue(all(f.get('TUR') for f in fields), fields)
+            self.hn.stop(); self.hn = H.Harness().start()
+
+    def test_the_frequency_rule_is_one_switch_and_bench_engines_are_unchanged(self):
+        """The calibrator-frequency rule is the handheld default behind h.FREQ_UNCERTAINTY_FROM_CALIBRATOR; off gives the old CMC-alone figures; report_pdf's default is the old rule."""
+        import report_pdf
+        q = dict(kind='FREQ', nominal=50.0, frequency=None, unit='Hz', range=None)
+        base = report_pdf.point_uncertainty(q, standard='5522A')
+        self.assertEqual(base, report_pdf.point_uncertainty(q))                       # report_pdf default (bench engines): CMC alone, whatever the calibrator
+        self.assertNotEqual(base, report_pdf.point_uncertainty(dict(q, use_standard=True), standard='5522A'))
+        self.assertTrue(h.FREQ_UNCERTAINTY_FROM_CALIBRATOR)
+        h.FREQ_UNCERTAINTY_FROM_CALIBRATOR = False
+        try:
+            app, io = self.run_perfect('5522A')
+            rows = {p['id']: r for p, r in zip(app.points, app.certificate_rows())}
+            self.assertEqual({rows[i]['Uncertainty'] for i in ('3-40', '4-47')}, {base})
+        finally:
+            h.FREQ_UNCERTAINTY_FROM_CALIBRATOR = True
 
     def test_out_of_tolerance_fails_and_exact_limit_passes(self):
         app, io = self.make()
@@ -303,6 +337,36 @@ class EndToEnd(unittest.TestCase):
         text = subprocess.run(['pdftotext', '-layout', out, '-'], capture_output=True, text=True).stdout
         self.assertIn('Calibration Data', text)
         self.assertIn('Tables 3 and 4', app.source_note())
+
+    def test_iflex_option_default_on_and_simulation_points_always_run(self):
+        """Owner 2026-10-26: the procedure has the iFlex window option of the 376 (default ON); turning it OFF removes the 5 iFlex-through-coil points and NEVER the 2 simulation points."""
+        app, io = self.make()
+        self.assertEqual(SPEC['options']['include_toggles'][0]['id'], 'iflex')
+        self.assertTrue(SPEC['options']['include_toggles'][0]['default'])
+        self.assertTrue(app.include_is_on('iflex'))                                  # default ON
+        self.assertEqual(len(app.points), 47)
+        self.assertTrue(app.set_include('iflex', False, ask=False))
+        self.assertFalse(app.include_is_on('iflex'))
+        self.assertEqual(len(app.points), 42)
+        ids = {p['id'] for p in app.points}
+        self.assertTrue({'4-44', '4-46'} <= ids)                                    # the 75 mV / 50 Hz and 750 mV / 500 Hz simulation points stay
+        self.assertEqual({p['id'] for p in SPEC['steps'] if p.get('include') == 'iflex'} & ids, set())
+        self.assertEqual(sorted({p['id'] for p in SPEC['steps'] if p.get('include') == 'iflex'}), ['4-41', '4-42', '4-43', '4-45', '4-47'])
+        self.assertEqual([p['applied']['value'] for p in app.points if p['group'] == 'IFLEX_SIM'], [0.075, 0.75])
+        self.hn.default_reading = H.typed_nominal
+        self.assertTrue(self.hn.run_all())
+        outs = [t for _i, t in H.wire(io) if t.startswith('OUT ') and not t.endswith('?')]
+        self.assertEqual(len(outs), 42)
+        self.assertTrue(any(o.startswith('OUT 0.075V,50Hz') for o in outs), outs)
+        self.assertTrue(any(o.startswith('OUT 0.75V,500Hz') for o in outs), outs)
+        self.assertFalse(any(o in ('OUT 19.9A,50Hz', 'OUT 0.4A,50Hz') for o in outs))
+
+    def test_the_far_left_jack_is_owner_confirmed(self):
+        g = SPEC['groups']['IFLEX_SIM']
+        text = ' '.join(t for _a, t in g['steps'])
+        self.assertIn('owner-confirmed', text)
+        self.assertNotIn('UNVERIFIED', text)
+        self.assertIn('owner-confirmed', [s for s in SPEC['steps'] if s['group'] == 'IFLEX_SIM'][0]['note'])
 
     def test_demo_is_marked_and_never_real(self):
         app, _ = self.make(demo=True)

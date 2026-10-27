@@ -69,7 +69,7 @@ NOTE_OHMS = 'Table 3 does not say whether the limits include test lead resistanc
 NOTE_COIL = ('The calibrator drives the {turns}-turn coil and the meter reads {turns} x the calibrator current: {applied} A in, {nominal} A on the meter. The limits are the meter readings (Table {table}, printed p. {page}). '
              'Uncertainty (owner decision): the 5500A/COIL\'s own scope uncertainty (A2LA-5500A-COIL) at the effective current the jaw sees ({nominal} A), not the calibrator\'s at {applied} A; '
              'where the coil\'s lines do not cover the point (AC below 20.5 A) the calibrator\'s uncertainty at the sourced current x 50 is used. TAR / TUR compare it with the meter-reading tolerance printed in Table {table}.')
-NOTE_IFLEX_SIM = ('iFlex simulation (Table 4 footnote [2], Figure 7, printed p. 14): calibrator VAC output HI to the iFlex 2 mm jack (far left), LO to the black COM jack; the calibrator drives {applied} mV AC at {freq} Hz and the meter '
+NOTE_IFLEX_SIM = ('iFlex simulation (Table 4 footnote [2], Figure 7, printed p. 14): calibrator VAC output HI to the iFlex 2 mm jack (far left; the small far-left jack is the iFlex input, owner-confirmed), LO to the black COM jack; the calibrator drives {applied} mV AC at {freq} Hz and the meter '
                   'reads {nominal} A (the simulated coil voltage is proportional to frequency: 30 uV per A at 50 Hz, 300 uV per A at 500 Hz). Uncertainty (the 376 convention): the regular calibrator AC VOLTS uncertainty at the output as printed; '
                   'TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts).')
 NOTE_IFLEX_COIL = ('Table 4 footnote [1]: the iFlex loop from the 381 is placed around the {turns}-turn coil and the calibrator AAC output drives the coil ({applied} A in, {nominal} {unit} on the meter; Figure 6, printed p. 13). '
@@ -81,9 +81,10 @@ NOTE_POLARITY = ('DC polarity: Figure 4 (printed p. 9) is captioned "Polarity is
                  'Use that connection: a positive calibrator current must read positive and a negative one negative (the typed sign is judged). The orientation of the coil in the jaw is not described: UNVERIFIED.')
 NOTE_WIRE = ('Table 3 footnote [1]: the 0 A dc test is performed with a SINGLE WIRE connected from the calibrator AUX HI to AUX LO (no coil) and the 381 clamped around the wire (Figure 3, printed p. 8). '
              'The calibrator outputs 0 A dc; the point checks the meter zero. UNVERIFIED: whether the output must be in OPERATE with 0 A (the program programs 0 A dc and operates it, as for every point). '
-             'Uncertainty: the calibrator DC current at 0 A (no coil term; the figure is the calibrator floor, see the owner questions).')
+             'NO UNCERTAINTY is printed for this point (owner decision, 2026-10-26: a zero point, the calibrator floor is not a meaningful uncertainty for the meter zero; the step carries no_uncertainty).')
 NOTE_FREQ = ('The calibrator drives {applied} A at 50 Hz through the {turns}-turn coil ({nominal} A in the {tool}) and the meter shows the FREQUENCY. The test current is exactly the trigger level in the Specifications '
-             '({trig}); a marginal trigger may need the point repeated (UNVERIFIED). Uncertainty: the lab\'s Frequency - Measure CMC alone (existing mechanism, as the 323 frequency rows).')
+             '({trig}); a marginal trigger may need the point repeated (UNVERIFIED). Uncertainty (owner decision, 2026-10-26, all handheld meters): the frequency is the calibrator\'s own OUTPUT frequency, so the uncertainty is the calibrator\'s published frequency specification '
+             '(5522A / 5520A sheet or 5560A sheet, uncertainty_budget FREQ), not the lab Frequency - Measure CMC alone.')
 NOTE_HIV = ('The 600 V point sits at the top of the 600.0 V range (full scale 600.0 V): which range the meter uses for 600 V (0.1 V or 1 V resolution) is UNVERIFIED; the limits are shown as printed (one decimal).')
 NOTE_6K = ('6000 ohm is the full scale of the 6 kΩ range: whether the meter stays on that range (1 Ω resolution, as the printed limits imply) or changes to 60 kΩ (10 Ω) is UNVERIFIED.')
 NOTE_DUTY = ('Coil duty (5500A/COIL technical data): 11 A rms continuous, 20 A rms for 2 minutes (above 11 A: 2 minutes ON, 8 minutes OFF); {applied} A is above 11 A: keep the output ON only as long as the reading needs and let the coil rest 8 minutes '
@@ -257,6 +258,7 @@ def build_steps():
         elif extra.get('wire'):
             notes.append(NOTE_WIRE)
             step['report_desc'] = '0 A dc, single wire'
+            step['no_uncertainty'] = True
             step['dsb_desc'] = 'DC amps, 0 A: single wire AUX HI to AUX LO, meter clamped around the wire'
             step['settle'] = 5
         elif extra.get('coil'):
@@ -360,7 +362,7 @@ GROUPS = {
             ('Standby', 'The calibrator is put in STANDBY before you rewire (in manual-calibrator mode, put it in STANDBY yourself).'),
             ('Calibrator', 'Fluke 5522A / 5520A: NORMAL HI and NORMAL LO; Fluke 5560A: OUTPUT V/Ω HI and OUTPUT V/Ω LO (the voltage output, as for the volts points).'),
             ('iFlex input', 'Calibrator HI to the iFlex 2 mm jack on the far left of the meter, calibrator LO to the black COM jack (iFlex paragraph, printed p. 13; Figure 7, printed p. 14). Use the test probe for iFlex '
-                            '(2 mm to 4 mm Slim Reach probe, TP2, PN 650892) and the test lead with retractable sheath (6358, PN 1903307). No iFlex loop is connected. The far-left small jack in Figure 1 is read as the iFlex input (UNVERIFIED: it is not labelled).'),
+                            '(2 mm to 4 mm Slim Reach probe, TP2, PN 650892) and the test lead with retractable sheath (6358, PN 1903307). No iFlex loop is connected. The far-left small jack in Figure 1 (unlabelled in the manual) is the iFlex input (owner-confirmed).'),
             ('Check', 'Compare your connections with the diagram, then continue.')],
         caution='The output is only millivolts (75 and 750 mV). Keep the calibrator in STANDBY while you connect the leads.',
         diagram='diagrams/hook_fluke381_IFLEX_SIM.png'),

@@ -165,7 +165,7 @@
     ],
     [
      "iFlex input",
-     "Calibrator HI to the iFlex 2 mm jack on the far left of the meter, calibrator LO to the black COM jack (iFlex paragraph, printed p. 13; Figure 7, printed p. 14). Use the test probe for iFlex (2 mm to 4 mm Slim Reach probe, TP2, PN 650892) and the test lead with retractable sheath (6358, PN 1903307). No iFlex loop is connected. The far-left small jack in Figure 1 is read as the iFlex input (UNVERIFIED: it is not labelled)."
+     "Calibrator HI to the iFlex 2 mm jack on the far left of the meter, calibrator LO to the black COM jack (iFlex paragraph, printed p. 13; Figure 7, printed p. 14). Use the test probe for iFlex (2 mm to 4 mm Slim Reach probe, TP2, PN 650892) and the test lead with retractable sheath (6358, PN 1903307). No iFlex loop is connected. The far-left small jack in Figure 1 (unlabelled in the manual) is the iFlex input (owner-confirmed)."
     ],
     [
      "Check",
@@ -1269,10 +1269,11 @@
    "accuracy": "±(2 % of reading + 5 digits)",
    "tol_text": "Table 3: -0.5 to 0.5 A   (Calibration Manual Specifications p. 6: ±(2 % of reading + 5 digits of 0.1 A) = ±0.5 A)",
    "report_desc": "0 A dc, single wire",
+   "no_uncertainty": true,
    "dsb_desc": "DC amps, 0 A: single wire AUX HI to AUX LO, meter clamped around the wire",
    "settle": 5,
    "group": "WIRE_0A",
-   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). Table 3 footnote [1]: the 0 A dc test is performed with a SINGLE WIRE connected from the calibrator AUX HI to AUX LO (no coil) and the 381 clamped around the wire (Figure 3, printed p. 8). The calibrator outputs 0 A dc; the point checks the meter zero. UNVERIFIED: whether the output must be in OPERATE with 0 A (the program programs 0 A dc and operates it, as for every point). Uncertainty: the calibrator DC current at 0 A (no coil term; the figure is the calibrator floor, see the owner questions).",
+   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). Table 3 footnote [1]: the 0 A dc test is performed with a SINGLE WIRE connected from the calibrator AUX HI to AUX LO (no coil) and the 381 clamped around the wire (Figure 3, printed p. 8). The calibrator outputs 0 A dc; the point checks the meter zero. UNVERIFIED: whether the output must be in OPERATE with 0 A (the program programs 0 A dc and operates it, as for every point). NO UNCERTAINTY is printed for this point (owner decision, 2026-10-26: a zero point, the calibrator floor is not a meaningful uncertainty for the meter zero; the step carries no_uncertainty).",
    "ref": "T3 #34",
    "id": "3-34"
   },
@@ -1481,7 +1482,7 @@
     "full_spec": "0.75"
    },
    "group": "COIL_AUX",
-   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). The calibrator drives 0.1 A at 50 Hz through the 50-turn coil (5.0 A in the jaw) and the meter shows the FREQUENCY. The test current is exactly the trigger level in the Specifications (jaw 10 to 100 Hz: 5 A or more); a marginal trigger may need the point repeated (UNVERIFIED). Uncertainty: the lab's Frequency - Measure CMC alone (existing mechanism, as the 323 frequency rows). CHECK (printed limit not changed; Calibration Manual Specifications pp. 6-7): the printed limit is the specification value rounded to the display step (high limit ±0.8 from the nominal vs the published ±0.75).",
+   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). The calibrator drives 0.1 A at 50 Hz through the 50-turn coil (5.0 A in the jaw) and the meter shows the FREQUENCY. The test current is exactly the trigger level in the Specifications (jaw 10 to 100 Hz: 5 A or more); a marginal trigger may need the point repeated (UNVERIFIED). Uncertainty (owner decision, 2026-10-26, all handheld meters): the frequency is the calibrator's own OUTPUT frequency, so the uncertainty is the calibrator's published frequency specification (5522A / 5520A sheet or 5560A sheet, uncertainty_budget FREQ), not the lab Frequency - Measure CMC alone. CHECK (printed limit not changed; Calibration Manual Specifications pp. 6-7): the printed limit is the specification value rounded to the display step (high limit ±0.8 from the nominal vs the published ±0.75).",
    "ref": "T3 #40",
    "id": "3-40"
   },
@@ -1631,7 +1632,7 @@
    "dsb_desc": "iFlex simulated, 2500 A range: 75 mV AC @ 50 Hz, meter reads 2500 A",
    "settle": 5,
    "group": "IFLEX_SIM",
-   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). iFlex simulation (Table 4 footnote [2], Figure 7, printed p. 14): calibrator VAC output HI to the iFlex 2 mm jack (far left), LO to the black COM jack; the calibrator drives 75 mV AC at 50 Hz and the meter reads 2500 A (the simulated coil voltage is proportional to frequency: 30 uV per A at 50 Hz, 300 uV per A at 500 Hz). Uncertainty (the 376 convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 999.9 A / 2500 A: 0.1 A resolution up to 999.9 A, 1 A above (Specifications, printed p. 5).",
+   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). iFlex simulation (Table 4 footnote [2], Figure 7, printed p. 14): calibrator VAC output HI to the iFlex 2 mm jack (far left; the small far-left jack is the iFlex input, owner-confirmed), LO to the black COM jack; the calibrator drives 75 mV AC at 50 Hz and the meter reads 2500 A (the simulated coil voltage is proportional to frequency: 30 uV per A at 50 Hz, 300 uV per A at 500 Hz). Uncertainty (the 376 convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 999.9 A / 2500 A: 0.1 A resolution up to 999.9 A, 1 A above (Specifications, printed p. 5).",
    "ref": "T4 #4",
    "id": "4-44"
   },
@@ -1697,7 +1698,7 @@
    "dsb_desc": "iFlex simulated, 2500 A range: 750 mV AC @ 500 Hz, meter reads 2500 A",
    "settle": 5,
    "group": "IFLEX_SIM",
-   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). iFlex simulation (Table 4 footnote [2], Figure 7, printed p. 14): calibrator VAC output HI to the iFlex 2 mm jack (far left), LO to the black COM jack; the calibrator drives 750 mV AC at 500 Hz and the meter reads 2500 A (the simulated coil voltage is proportional to frequency: 30 uV per A at 50 Hz, 300 uV per A at 500 Hz). Uncertainty (the 376 convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 999.9 A / 2500 A: 0.1 A resolution up to 999.9 A, 1 A above (Specifications, printed p. 5).",
+   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). iFlex simulation (Table 4 footnote [2], Figure 7, printed p. 14): calibrator VAC output HI to the iFlex 2 mm jack (far left; the small far-left jack is the iFlex input, owner-confirmed), LO to the black COM jack; the calibrator drives 750 mV AC at 500 Hz and the meter reads 2500 A (the simulated coil voltage is proportional to frequency: 30 uV per A at 50 Hz, 300 uV per A at 500 Hz). Uncertainty (the 376 convention): the regular calibrator AC VOLTS uncertainty at the output as printed; TAR / TUR stay blank (the tolerance is in amps, the uncertainty in volts). iFlex range 999.9 A / 2500 A: 0.1 A resolution up to 999.9 A, 1 A above (Specifications, printed p. 5).",
    "ref": "T4 #6",
    "id": "4-46"
   },
@@ -1742,7 +1743,7 @@
     "full_spec": "0.75"
    },
    "group": "IFLEX_COIL_AUX",
-   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). The calibrator drives 0.4 A at 50 Hz through the 50-turn coil (20.0 A in the iFlex loop) and the meter shows the FREQUENCY. The test current is exactly the trigger level in the Specifications (iFlex 20 to 100 Hz: 20 A or more); a marginal trigger may need the point repeated (UNVERIFIED). Uncertainty: the lab's Frequency - Measure CMC alone (existing mechanism, as the 323 frequency rows). CHECK (printed limit not changed; Calibration Manual Specifications pp. 6-7): the printed limit is the specification value rounded to the display step (high limit ±0.8 from the nominal vs the published ±0.75).",
+   "note": "Tables 3 / 4 name no range: the range shown is the one the published resolutions put this reading in (Specifications, printed pp. 5-7; the meter autoranges). The calibrator drives 0.4 A at 50 Hz through the 50-turn coil (20.0 A in the iFlex loop) and the meter shows the FREQUENCY. The test current is exactly the trigger level in the Specifications (iFlex 20 to 100 Hz: 20 A or more); a marginal trigger may need the point repeated (UNVERIFIED). Uncertainty (owner decision, 2026-10-26, all handheld meters): the frequency is the calibrator's own OUTPUT frequency, so the uncertainty is the calibrator's published frequency specification (5522A / 5520A sheet or 5560A sheet, uncertainty_budget FREQ), not the lab Frequency - Measure CMC alone. CHECK (printed limit not changed; Calibration Manual Specifications pp. 6-7): the printed limit is the specification value rounded to the display step (high limit ±0.8 from the nominal vs the published ±0.75).",
    "ref": "T4 #7",
    "id": "4-47"
   }

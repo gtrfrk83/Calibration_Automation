@@ -91,7 +91,7 @@ def _compute(p, low, high, standard, scope):
 
     u = acc = None
     reason = ''
-    if kind == 'FREQ':
+    if kind == 'FREQ' and not p.get('use_standard'):
         standard = None             # the uncertainty of a frequency is the lab's Frequency - Measure CMC alone (GPS-referenced); no calibrator accuracy is used, so TAR is blank
     if standard:
         b = None
