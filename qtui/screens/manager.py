@@ -38,8 +38,8 @@ from qtui.widgets import (Badge, Banner, EmptyState, GhostButton, PrimaryButton,
 
 TITLE = 'Calibration Procedure Manager'
 SUBTITLE = 'Run, document and maintain your calibration procedures'
-MAIN_TABS = (('procedures', 'Procedures'), ('asset_history', 'Asset History'), ('standards_specs', 'Standards Specs'), ('datasheet_builder', 'Datasheet Builder'), ('uncertainty_calc', 'Uncertainty\nCalculator'))
-PANEL_TITLES = {'asset_history': 'Asset History', 'standards_specs': 'Standards Specs', 'datasheet_builder': 'Datasheet Builder', 'uncertainty_calc': 'Uncertainty Calculator'}
+MAIN_TABS = (('procedures', 'Procedures'), ('asset_history', 'Asset History'), ('standards_specs', 'Standards Specs'), ('datasheet_builder', 'Datasheet Builder'), ('uncertainty_calc', 'Uncertainty\nCalculator'), ('procedure_generator', 'Procedure\nGenerator'))
+PANEL_TITLES = {'asset_history': 'Asset History', 'standards_specs': 'Standards Specs', 'datasheet_builder': 'Datasheet Builder', 'uncertainty_calc': 'Uncertainty Calculator', 'procedure_generator': 'Procedure Generator'}
 
 
 class StatusProxy:
@@ -181,14 +181,14 @@ class ManagerWindow(QMainWindow):
         self.library_page = QWidget()
         self.stack.addWidget(self.library_page)
         self.page_of = {'procedures': self.library_page}
-        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc'):
+        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc', 'procedure_generator'):
             holder = QWidget()
             QVBoxLayout(holder).setContentsMargins(0, M.sm, 0, 0)
             self.stack.addWidget(holder)
             self.page_of[key] = holder
         self.build_menus()
         self.build_library_tab()
-        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc'):
+        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc', 'procedure_generator'):
             self.build_panel(key)
         help_menu.dress(self)
         self.tabs.currentChanged.connect(self._tab_changed)
@@ -276,7 +276,7 @@ class ManagerWindow(QMainWindow):
         else:
             kwargs = {}
             params = inspect.signature(cls.__init__).parameters
-            if 'on_saved' in params and key == 'datasheet_builder':
+            if 'on_saved' in params and key in ('datasheet_builder', 'procedure_generator'):         # a saved / built / approved procedure changes the Procedures list
                 kwargs['on_saved'] = self._dsb_saved
             if 'status' in params:
                 kwargs['status'] = self.status
@@ -478,6 +478,14 @@ class ManagerWindow(QMainWindow):
         ver_btns.addWidget(self.btn_verify, 1)
         ver_btns.addWidget(self.btn_lock, 1)
         pinned.addLayout(ver_btns)
+        gen_btns = QHBoxLayout()                                    # only for a procedure from the Procedure Generator (shown by refresh_details)
+        gen_btns.setSpacing(M.sm)
+        self.btn_approve = PrimaryButton('Approve (owner)...', on_click=self.approve_generated)
+        self.btn_draft_again = SecondaryButton('Mark as draft again...', on_click=self.draft_again_generated)
+        for b in (self.btn_approve, self.btn_draft_again):
+            b.hide()
+            gen_btns.addWidget(b, 1)
+        pinned.addLayout(gen_btns)
         v.addLayout(pinned)
         cv.addWidget(card, 1)
         return column
@@ -563,7 +571,47 @@ class ManagerWindow(QMainWindow):
         if not rec:
             self.btn_verify.setEnabled(False)
             self.btn_lock.setEnabled(False)
+        gen = self.generated_state()
+        self.btn_approve.setVisible(bool(gen and gen[1].draft))              # never offered for a procedure that was not generated
+        self.btn_draft_again.setVisible(bool(gen and not gen[1].draft))
         return c
+
+    # ------------------------------------------------------------------ owner approval of a generated procedure (Procedure Generator)
+    def generated_state(self):
+        """(uid, generated_draft.State) of the selected procedure when it was made by the Procedure Generator, else None."""
+        iid = self.selected_iid()
+        if iid is None or not dsb_manager.is_user_iid(iid):
+            return None
+        import generated_draft
+        uid = str(iid)[len(dsb_manager.IID_PREFIX):]
+        st = generated_draft.state(uid)
+        return (uid, st) if st.generated else None
+
+    def _generated_done(self, st, text):
+        self.refresh()
+        self.status.set(text)
+
+    def approve_generated(self):
+        gen = self.generated_state()
+        if gen is None or not gen[1].draft:
+            return None
+        from qtui.screens import procedure_generator as pgen
+        rec = self._selected_row()
+        new = pgen.run_approve(self, gen[0], str(rec[1]) if rec else '')
+        if new is not None:
+            self._generated_done(new, f'Approved by {new.approved_by}. Later runs and reports no longer carry the draft marking.')
+        return new
+
+    def draft_again_generated(self):
+        gen = self.generated_state()
+        if gen is None or gen[1].draft:
+            return None
+        from qtui.screens import procedure_generator as pgen
+        rec = self._selected_row()
+        new = pgen.run_draft_again(self, gen[0], str(rec[1]) if rec else '')
+        if new is not None:
+            self._generated_done(new, 'Marked as a draft again: later runs ask for confirmation and every report page carries the banner.')
+        return new
 
     # ------------------------------------------------------------------ right-click menu of a procedure row
     def _row_menu_pointer(self, pos):
@@ -605,6 +653,12 @@ class ManagerWindow(QMainWindow):
                 act.setEnabled(bool(e.enabled))
                 act.setData(e.key)
                 act.triggered.connect(lambda _c=False, fn=actions[e.key]: fn())
+        gen = self.generated_state()
+        if gen is not None:                                          # only a procedure from the Procedure Generator
+            menu.addSeparator()
+            act = menu.addAction('Approve (owner)...' if gen[1].draft else 'Mark as draft again...')
+            act.setData('approve' if gen[1].draft else 'draft_again')
+            act.triggered.connect(lambda _c=False: self.approve_generated() if gen[1].draft else self.draft_again_generated())
         menu.addSeparator()
         act = menu.addAction('Open manual...')
         act.setData('open_manual')

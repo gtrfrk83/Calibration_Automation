@@ -21,6 +21,9 @@ PACKAGES = [
     ('serial', 'pyserial', 'talking to instruments over RS-232'),
     ('reportlab', 'reportlab', 'PDF reports'),
     ('openpyxl', 'openpyxl', 'Excel exports (only the 8846A and WaveSurfer use it)'),
+    ('pypdfium2', 'pypdfium2', 'Procedure Generator: page images of manuals'),
+    ('PIL', 'pillow', 'Procedure Generator: page images of manuals'),
+    ('anthropic', 'anthropic', 'Procedure Generator: reading manual pages with Claude'),
 ]
 REQUIRED_FOR_DEMO = ('reportlab',)
 

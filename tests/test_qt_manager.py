@@ -288,9 +288,9 @@ class Menus(QtCase):
         self.assertEqual(self.win.version_label.text(), mm.VERSION)
 
     def test_main_tabs_and_their_status_texts(self):
-        self.assertEqual([self.win.tabs.tabText(i) for i in range(self.win.tabs.count())], ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder', 'Uncertainty\nCalculator'])
+        self.assertEqual([self.win.tabs.tabText(i) for i in range(self.win.tabs.count())], ['Procedures', 'Asset History', 'Standards Specs', 'Datasheet Builder', 'Uncertainty\nCalculator', 'Procedure\nGenerator'])
         self.assertEqual([self.win.view_bar.tabText(i) for i in range(3)], ['Automated Calibrations', 'Manual Calibrations', 'Adjustments'])
-        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc', 'procedures'):
+        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc', 'procedure_generator', 'procedures'):
             self.win.select_tab(key)
             self.assertEqual(self.win.status.get(), mm.TAB_STATUS[key])
         self.assertEqual(mm.TAB_STATUS['asset_history'], 'Every exported PDF report is recorded here. Double-click a test point to see its drift across reports.')
@@ -721,7 +721,8 @@ class HostedPanels(unittest.TestCase):
     def test_registry_names_the_panels(self):
         self.assertEqual(PANELS, {'asset_history': 'qtui.screens.asset_history:AssetHistoryPanel', 'standards_specs': 'qtui.screens.standards_specs:StandardsSpecsPanel',
                                   'datasheet_builder': 'qtui.screens.datasheet_builder:DatasheetBuilderPanel',
-                                  'uncertainty_calc': 'qtui.screens.uncertainty_calculator:UncertaintyCalculatorPanel'})
+                                  'uncertainty_calc': 'qtui.screens.uncertainty_calculator:UncertaintyCalculatorPanel',
+                                  'procedure_generator': 'qtui.screens.procedure_generator:ProcedureGeneratorPanel'})
 
     def test_missing_modules_show_a_not_built_yet_state_and_the_shell_works(self):
         win = self.make({'asset_history': 'qtui.screens.no_such_a:A', 'standards_specs': 'qtui.screens.no_such_b:B', 'datasheet_builder': 'qtui.screens.no_such_c:C'})

@@ -123,13 +123,42 @@ def _load_modules():
     import datasheet_builder_rules as _db
     import drivers  # noqa: F401
     procscan, cmdreg, verified, procmods_engine, hookups, dbr = _ps, _cr, _vf, _pe, _hk, _db
+    global UserProc
+
+    @dataclass(frozen=True)
+    class UserProc(_ps.Proc):
+        """A user-built datasheet: the generic launcher plus its arguments (--spec <file>)."""
+        args: tuple = ()
+        user_spec: str = ''
+    UserProc.__qualname__ = 'UserProc'
 
 
-procscan = cmdreg = verified = procmods_engine = hookups = dbr = None
+procscan = cmdreg = verified = procmods_engine = hookups = dbr = UserProc = None
+
+
+def generated_proc(arg):
+    """A user-built datasheet (Datasheet Builder / Procedure Generator) named by its id ('ds:<uid>' or the bare uid): a Proc for the generic launcher with the runnable spec
+    file as its argument, or None when `arg` is not one.  User datasheets have no sidecar; the sidecar and fingerprint checks do not apply to them."""
+    uid = arg[3:] if str(arg).startswith('ds:') else str(arg)
+    if not uid or any(c in uid for c in '/\\') or uid.endswith(('.py', '.json')):
+        return None
+    try:
+        import dsb_manager
+        rows = [r for r in dsb_manager.user_rows() if r.get('uid') == uid]
+    except Exception:
+        return None
+    if not rows:
+        return None
+    r = rows[0]
+    return UserProc(id=r['uid'], name=r['name'], manufacturer=r.get('manufacturer', ''), model=r.get('model', ''), category=r.get('category', ''), launcher='Procedures/User_Datasheet.py',
+                    engine=('dsb_runtime.py',), kind=r.get('kind') or 'verification', args=('--spec', str(r['spec_path'])), user_spec=str(r['spec_path']))
 
 
 def resolve(arg):
     """The registered procedure for an id, a launcher file name, or a path to the launcher / sidecar."""
+    user = generated_proc(arg)
+    if user is not None:
+        return user
     name = Path(arg).name
     for suffix in ('.procedure.json', '.py'):
         if name.endswith(suffix):
@@ -161,7 +190,7 @@ def file_of(rel):
 # ================================================================================================================ the run
 def run_dynamic(proc, timeout=RUN_TIMEOUT_S):
     """The worker's record (dict).  A crash or a timeout of the worker is a record with 'error' set, not an exception."""
-    spec = dict(id=proc.id, launcher=proc.launcher, engine=list(proc.engine))
+    spec = dict(id=proc.id, launcher=proc.launcher, engine=list(proc.engine), args=list(getattr(proc, 'args', ()) or ()))
     try:
         r = subprocess.run([sys.executable, str(ROOT / 'tools' / 'readiness_run.py'), json.dumps(spec)], capture_output=True, text=True, timeout=timeout, cwd=str(ROOT))
     except subprocess.TimeoutExpired:
@@ -1001,7 +1030,11 @@ def check_procedure(proc, run_it=True, shared=None, timeout=RUN_TIMEOUT_S, base=
         run = run_dynamic(proc, timeout)
     rep.run = run
     timeline = run.get('timeline', [])
-    check_sidecar(rep, proc)
+    user = bool(getattr(proc, 'user_spec', ''))
+    if user:
+        rep.add(INFO, 'sidecar', 'a user-built datasheet (generic launcher + spec file): it has no sidecar; the sidecar and fingerprint checks do not apply. Spec: ' + proc.user_spec)
+    else:
+        check_sidecar(rep, proc)
     if run_it:
         check_run(rep, run, proc, reason)
     regs = registries(run, proc)
@@ -1019,7 +1052,8 @@ def check_procedure(proc, run_it=True, shared=None, timeout=RUN_TIMEOUT_S, base=
     check_tunables(rep, proc, run, files)
     check_housekeeping(rep, regs, {(l, k) for _i, l, k, _w, _c in tr} if timeline else None)
     check_diagrams(rep, proc, run)
-    check_fingerprint(rep, proc, run)
+    if not user:
+        check_fingerprint(rep, proc, run)
     if shared is not None:
         check_shared(rep, shared, proc)
     check_surprise(rep, proc, regs, shared)

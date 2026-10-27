@@ -151,6 +151,42 @@ class SidecarKind(unittest.TestCase):
             self.assertEqual([r['kind'] for r in db.list_datasheets(root=root, db=reg)], ['verification'])
 
 
+class GeneratedProceduresInTheLists(unittest.TestCase):
+    """Procedure Generator: a manual-entry build lists under Manual Calibrations, a one-way build under Automated Calibrations, both marked DRAFT until approved."""
+
+    def test_kinds_and_draft_marking_in_the_manager_rows(self):
+        import dsb_manager
+        import generated_draft as gd
+        import procedure_generator as pg
+        import procedure_generator_ai as ai
+        import procedure_generator_build as bd
+        import pg_fixtures as fx
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            reg, us = d / 'reg.sqlite3', d / 'us'
+            store = pg.Store(root=d / 'gen', registry=reg)
+            uids = {}
+            for mode in (pg.MANUAL, pg.ONEWAY):
+                p = store.create('T ' + mode, 'me')
+                p.make, p.model, p.mode = 'Acme', 'TM' + ('1' if mode == pg.MANUAL else '2'), mode
+                f = store.add_file(p, fx.make_pdf(d / f'{mode}.pdf'), pg.ROLE_SPEC)
+                pg.set_pages(p, f.id, 1, 1)
+                pg.add_rows(p, ai._parse_rows({'rows': fx.good_items()}, [(f.id, 1)], []))
+                for r in p.rows:
+                    pg.set_status(p, r.id, pg.STATUS_ACCEPTED)
+                pg.confirm_page(p, f.id, 1)
+                res = bd.build(p, store, 'me', registry=reg, root=us)
+                self.assertTrue(res.ok, res.message)
+                uids[mode] = res.uid
+            rows = {r['uid']: r for r in dsb_manager.user_rows(root=us, db=reg)}
+            self.assertEqual((rows[uids[pg.MANUAL]]['kind'], rows[uids[pg.ONEWAY]]['kind']), ('manual', 'verification'))
+            self.assertTrue(all(r['draft'] and 'DRAFT: not approved by the owner' in r['description'] for r in rows.values()))
+            gd.approve(uids[pg.MANUAL], 'Owner', db=reg)
+            rows = {r['uid']: r for r in dsb_manager.user_rows(root=us, db=reg)}
+            self.assertFalse(rows[uids[pg.MANUAL]]['draft'])
+            self.assertTrue(rows[uids[pg.ONEWAY]]['draft'])
+
+
 class PackagesKeepKind(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

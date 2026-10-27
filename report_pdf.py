@@ -427,6 +427,7 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
         order.setdefault(row.get('Section') or '', len(order))
     rows = sorted(rows, key=lambda r: order[r.get('Section') or ''])
     details = details or {}
+    draft_note = str(details.get('draft_note') or '')         # a generated procedure that the owner has not approved: a banner on every page
     rows, details, field_notes = apply_field_assignments(rows, details, header, demo=demo, reprint=bool(reprint_note or issued_at or not record_history))      # a reprint (note, original issue date, or no history) never looks anything up; uncertainties assigned in the field (marked, with a footnote)
     columns = COLUMNS
     selected = details_tar_tur(details) if show_tar_tur is None else as_tar_tur(show_tar_tur)
@@ -619,6 +620,13 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
                 self.translate(W / 2, H / 2); self.rotate(45)
                 self.drawCentredString(0, 0, 'DEMO DATA')
             self.restoreState()
+            if draft_note:                             # drawn last, over the page furniture, on EVERY page; the data area is untouched
+                self.saveState()
+                self.setFillColorRGB(0.99, 0.88, 0.89); self.setStrokeColorRGB(0.69, 0, 0.13); self.setLineWidth(0.8)
+                self.rect(margin, H - 0.40 * inch, W - 2 * margin, 0.20 * inch, stroke=1, fill=1)
+                self.setFillColorRGB(0.69, 0, 0.13); self.setFont(BOLD, 8.5)
+                self.drawCentredString(W / 2, H - 0.345 * inch, draft_note.upper())
+                self.restoreState()
             if reprint_note:                           # a reprint: one line in the page footer, drawn last; nothing is added to the data area
                 self.saveState()
                 self.setFont(BOLD, 6.2); self.setFillColorRGB(0.69, 0, 0.13)

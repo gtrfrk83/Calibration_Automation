@@ -62,6 +62,7 @@ TAB_STATUS = {
     'standards_specs': 'Published specifications of the calibrators used as standards; they set the lowest uncertainty that may be reported.',
     'datasheet_builder': 'Build your own datasheet from a manufacturer specification; each save is a new version and a runnable procedure.',
     'uncertainty_calc': 'Work out an uncertainty from spot readings (repeatability, reproducibility) and other components; export the working to Excel.',
+    'procedure_generator': 'Upload a manual, check the verification tables Claude reads from its pages, and build a draft procedure (manual entry or one-way automation).',
 }
 # the stored text of the columns, in order (key, title)
 TABLE_HEADINGS = (('name', 'Procedure'), ('manufacturer', 'Manufacturer'), ('model', 'Model'), ('category', 'Category'), ('ready', 'Status'), ('verified', 'Verified on hardware'))
@@ -343,6 +344,7 @@ class ManagerCore:
             n_mod = mods.get((model or '').casefold(), 0)
             vstat = self._ver_cache.get(entry.proc_key)
             status = ('Ready' if found else 'Missing') + (f'  [{dsb_manager.TAG}]' if dsb_manager.is_user_iid(id_) else '') + \
+                     ('  DRAFT: not approved' if (self.user.get(id_) or {}).get('draft') else '') + \
                      (f'  {procmods_ui_model.chip_text(n_mod)}' if n_mod else '')
             out.append(ProcRow(str(id_), name, mfr, model, cat, script, kinds[id_], found, n_mod, status,
                                vstat.text if vstat is not None else 'Not verified', vstat.kind if vstat is not None else 'none', dsb_manager.is_user_iid(id_)))
