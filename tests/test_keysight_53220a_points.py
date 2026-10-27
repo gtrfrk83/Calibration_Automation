@@ -24,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 A = VH = SPEC = PTS = K = None
 InstrumentError = SafetyError = None
 SCALE = {'mHz': D('0.001'), 'Hz': D(1), 'kHz': D(1000), 'MHz': D(1000000), 'GHz': D(1000000000), 'ns': D('0.000000001'), 'us': D('0.000001')}
-SECTION_SIZES = {'ov': 1, 't1': 1, 't2': 12, 't3': 8, 't4': 4, 't5': 2, 't6a': 4, 't6b': 6, 't7': 8}
+SECTION_SIZES = {'ov': 1, 't1': 1, 't2': 12, 't3': 8, 't4': 8, 't5': 2, 't6a': 4, 't6b': 6, 't7': 8}
 
 
 def V(text):
@@ -103,10 +103,10 @@ def by_ref(ref):
 class SpecTests(unittest.TestCase):
     def test_counts(self):
         self.assertEqual({s['id']: len(s['points']) for s in SPEC['sections']}, SECTION_SIZES)
-        self.assertEqual(len(PTS), 46)
+        self.assertEqual(len(PTS), 50)                                # 46 + the four 8 ns pulse points of the Agilent 33250A (2026-10-27)
         self.assertEqual(SPEC['default_period'], '1y')
         self.assertEqual(set(SPEC['models']), {'53210A', '53220A', '53230A'})
-        self.assertEqual(len({p['ref'] for p in PTS}), 46)
+        self.assertEqual(len({p['ref'] for p in PTS}), 50)
 
     def test_every_mean_limit_matches_the_second_typing(self):
         for table in (MEAN2, OTHER_MEAN):
@@ -421,23 +421,53 @@ class StimulusRouting(unittest.TestCase):
         finally:
             io.close()
 
-    def test_33250a_cannot_meet_any_pulse_point(self):
-        """Owner 2026-10-27 chose the Agilent 33250A as the pulse generator.  Its minimum pulse width / one output mean no pulse point of the chapter can be automated on it."""
+    def test_33250a_cannot_make_the_5ns_points_or_the_two_output_test_but_can_make_the_8ns_points(self):
+        """Owner 2026-10-27 chose the Agilent 33250A as the pulse generator, running Tests 4a / 4b at 8 ns.  The 5 ns points and the two-output time interval test stay by hand."""
         for p in PTS:
             if p['stimulus']['group'] != 'PULSE': continue
             short = A.pulse_shortfalls(p['stimulus'])
+            if p.get('gen') == '33250A':
+                self.assertEqual(short, [], p['ref'])
+                self.assertEqual(p['nominal'], 8e-9)
+                pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A', gen=True))
+                self.assertEqual(pl['mode'], 'pulse', p['ref'])
+                pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A', gen=False))                         # no 33250A connected: by hand, and it says why
+                self.assertEqual(pl['mode'], 'manual')
+                self.assertIn('No Agilent 33250A is connected', pl['reason'])
+                continue
             self.assertTrue(short, p['ref'])
             self.assertTrue(any('minimum pulse width' in t for t in short), p['ref'])
-            pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A'))
+            pl = A.plan_stimulus(p, self.stim(pulse_gen='33250A', gen=True))
             self.assertEqual(pl['mode'], 'manual')
             self.assertIn('Agilent 33250A cannot make this signal', pl['reason'])
             self.assertIn('81134A', pl['reason'])
-        tint = A.pulse_shortfalls(by_ref('5.ch1-ch2.49.9ns.mean')['stimulus'])
-        self.assertTrue(any('two outputs' in t for t in tint))
-        ch1 = A.pulse_shortfalls(by_ref('4a.ch1.5ns.mean')['stimulus'])
-        self.assertFalse(any('two outputs' in t for t in ch1))                     # a single-output test: only the width stops it
+        tint = A.plan_stimulus(by_ref('5.ch1-ch2.49.9ns.mean'), self.stim(pulse_gen='33250A', gen=True))
+        self.assertEqual(tint['mode'], 'manual')
+        self.assertIn('two outputs', tint['reason'])                                                       # one output: Test 5 is run by hand
+        self.assertFalse(any('two outputs' in t for t in A.pulse_shortfalls(by_ref('4a.ch1.8ns.mean')['stimulus'])))
         self.assertFalse(A.pulse_shortfalls(dict(width_s=20e-9, period_s=66.6e-9, vpp=1.0)))     # the capability check is not a blanket refusal
         self.assertEqual(A.plan_stimulus(by_ref('4a.ch1.5ns.mean'), self.stim(pulse_gen='81134A'))['reason'], A.STIM_NEEDS['PULSE'])
+
+    def test_8ns_points_exist_only_with_the_33250a_and_the_5ns_ones_only_without(self):
+        for model in ('53220A', '53230A'):
+            a = A.points_for(model, set())
+            b = A.points_for(model, set(), pulse_gen='33250A')
+            self.assertEqual(sum(1 for p in a if p['test_no'] in ('4a', '4b')), 4)
+            self.assertEqual(sum(1 for p in b if p['test_no'] in ('4a', '4b')), 4)
+            self.assertTrue(all(p['nominal'] == 5e-9 for p in a if p['test_no'] in ('4a', '4b')))
+            self.assertTrue(all(p['nominal'] == 8e-9 for p in b if p['test_no'] in ('4a', '4b')))
+            self.assertEqual(len(a), len(b))                                                                 # Test 5 is in both
+            self.assertIn('5.ch1-ch2.49.9ns.mean', [p['ref'] for p in b])
+        self.assertEqual([p for p in A.points_for('53210A', set(), pulse_gen='33250A') if p['test_no'] in ('4a', '4b')], [])
+
+    def test_the_8ns_limits_are_the_5ns_half_widths_centred_on_8ns_and_flagged_unverified(self):
+        for model, half in (('53220A', 0.4e-9), ('53230A', 0.2e-9)):
+            five, eight = by_ref('4a.ch1.5ns.mean')['limits'][model], by_ref('4a.ch1.8ns.mean')['limits'][model]
+            self.assertAlmostEqual(five['high'] - five['low'], eight['high'] - eight['low'], places=15)
+            self.assertAlmostEqual((eight['low'] + eight['high']) / 2, 8e-9, places=15)
+            self.assertAlmostEqual(eight['high'] - 8e-9, half, places=15)
+            self.assertEqual(by_ref('4a.ch1.5ns.sdev')['limits'][model], by_ref('4a.ch1.8ns.sdev')['limits'][model])
+        self.assertIn('UNVERIFIED', ' '.join(by_ref('4b.ch2.8ns.mean')['flags']))
 
     def test_the_pulse_generator_is_selectable_in_the_window(self):
         self.assertEqual(len(A.PULSE_GEN_CHOICES), 2)
@@ -735,6 +765,37 @@ class Flow(unittest.TestCase):
             self.assertFalse(self.hn.boxes('showerror'), (model, self.hn.boxes('showerror')))
             self.assertEqual(self.hn.titles()[0], 'Before the verification')
             self.hn.stop(); self.hn = VH.VHarness().start(); A.messagebox = VH.hh.messagebox
+
+    def test_the_33250a_is_connected_and_runs_the_8ns_pulse_points_itself(self):
+        a = self.app('53220A', pulse_gen=A.PULSE_GEN_CHOICES[1])
+        self.connect(a)
+        self.assertIsNotNone(a.io.gen)                                                          # the generator is connected with the counter (virtual: the simulated 33250A)
+        a.on_pulse_gen()
+        self.assertEqual([p['nominal'] for p in a.active_points() if p['test_no'] in ('4a', '4b')], [8e-9] * 4)
+        self.assertTrue(self.hn.run_all())
+        pulse = [p for p in a.active_points() if p['test_no'] in ('4a', '4b')]
+        self.assertEqual(len(pulse), 4)
+        for p in pulse:
+            r = a.results[str(p['id'])]
+            self.assertEqual((r['stimulus'], r['result']), ('pulse', 'PASS'), p['ref'])
+        tint = next(p for p in a.active_points() if p['test_no'] == '5' and p['stat'] == 'mean')
+        self.assertEqual(a.results[str(tint['id'])]['stimulus'], 'manual')                      # two outputs: by hand
+        w = [t.upper() for t in self.wire(a, '33250A')]
+        widths = [t for t in w if t.startswith('PULSE:WIDTH ') or t.startswith('PULS:WIDT ')]
+        self.assertTrue(widths and all('8E-09' in t or '8.0E-09' in t or '8E-9' in t for t in widths), widths)      # the width is written (and read back by the driver) at 8 ns
+        outs = [t for t in w if t.startswith('OUTPUT') and not t.endswith('?')]
+        self.assertEqual(outs[-1], 'OUTPUT OFF')                                                  # the generator is left switched off
+        self.assertEqual(outs.count('OUTPUT ON'), 4 // 2)                                         # on for each Mean point only; the Std Dev point reuses its readings (4a, 4b)
+
+    def test_with_the_81134a_nothing_is_sent_to_a_33250a_and_the_5ns_points_are_by_hand(self):
+        a = self.app('53220A')
+        self.connect(a)
+        self.assertIsNone(a.io.gen)
+        self.assertTrue(self.hn.run_all())
+        self.assertEqual(self.wire(a, '33250A'), [])
+        pulse = [p for p in a.active_points() if p['test_no'] in ('4a', '4b')]
+        self.assertEqual([p['nominal'] for p in pulse], [5e-9] * 4)
+        self.assertTrue(all(a.results[str(p['id'])]['stimulus'] == 'manual' for p in pulse))
 
     def test_the_options_come_from_the_counter_and_a_mismatch_is_warned(self):
         a = self.app('53230A', tb_opt=A.TB_CHOICES[0], ch3_opt=A.CH3_CHOICES[2])

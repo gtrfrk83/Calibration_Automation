@@ -98,6 +98,10 @@ T3 = {  # frequency: {model: (low, high, std dev max)}
 }
 # ---- Test 4 pulse width (record p. 95) and Test 5 time interval (record p. 96) ---------------------------------------------------------------------------
 T4 = {'53220A': ('4.600 000 000 nSec', '5.400 000 000 nSec', '0.140 000 000 nSec'), '53230A': ('4.800 000 000 nSec', '5.200 000 000 nSec', '0.028 000 000 nSec')}
+# The Agilent 33250A (owner decision 2026-10-27, option 2) cannot make the 5 ns pulse (its minimum width is 8 ns, User's Guide p. 167 / 320), so the program drives it at 8 ns: the SAME half-widths of
+# the Mean limit (+/-0.4 ns 53220A, +/-0.2 ns 53230A: the datasheet formula for the pulse width, 2 x time accuracy, does not depend on the width) centred on 8 ns, the Std Dev maximum unchanged.
+# UNVERIFIED: the manual prints limits for the 5 ns pulse only.
+T4_8NS = {'53220A': ('7.600 000 000 nSec', '8.400 000 000 nSec', '0.140 000 000 nSec'), '53230A': ('7.800 000 000 nSec', '8.200 000 000 nSec', '0.028 000 000 nSec')}
 T5 = {'53220A': ('49.400 000 000 nSecs', '50.400 000 000 nSec', '0.140 000 000 nSec'), '53230A': ('49.650 000 000 nSecs', '50.150 000 000 nSec', '0.028 000 000 nSec')}
 # ---- Test 6 microwave channel (record pp. 96-98): 6a Option 106, 6b Option 115 ----------------------------------------------------------------------------
 T6A = {100e6: {'53210A': ('99.999 999 000 MHz', '100.000 001 000 MHz', '1 400.000 000 mHz'),
@@ -204,8 +208,13 @@ def build():
     pts = []
     for test, ch in (('4a', 1), ('4b', 2)):
         pts += stat_pair(f'{test}.ch{ch}.5ns', {m: band(r[0], r[1]) for m, r in T4.items()}, {m: smax(r[2]) for m, r in T4.items()}, test=test, func='PWID', kind='PWID', channel=ch,
-                         unit='s', nominal=5e-9, quick=True, requires=[], timebase='EXT', gate_s=None,
+                         unit='s', nominal=5e-9, quick=True, requires=[], timebase='EXT', gate_s=None, gen='81134A',
                          stimulus=dict(group='PULSE', width_s=5e-9, period_s=66.6e-9, vpp=1.0), page=DOC_PAGES[test])
+        pts += stat_pair(f'{test}.ch{ch}.8ns', {m: band(r[0], r[1]) for m, r in T4_8NS.items()}, {m: smax(r[2]) for m, r in T4_8NS.items()}, test=test, func='PWID', kind='PWID', channel=ch,
+                         unit='s', nominal=8e-9, quick=True, requires=[], timebase='EXT', gate_s=None, gen='33250A',
+                         stimulus=dict(group='PULSE', width_s=8e-9, period_s=66.6e-9, vpp=1.0), page=DOC_PAGES[test],
+                         flags=['UNVERIFIED: the Agilent 33250A cannot make the 5 ns pulse (minimum width 8 ns), so with it this test runs at 8 ns (owner decision 2026-10-27). The manual prints limits for 5 ns only: '
+                                'these are the same half-widths centred on 8 ns (the datasheet formula, 2 x time accuracy, does not depend on the width). The 33250A pulse width accuracy is not specified in its User\'s Guide.'])
     sections.append(dict(id='t4', title='Test 4: Pulse width', page='56-61', setup=(
         'Source: pulse generator (Keysight 81134A or equivalent) 1 Vpp, period 66.6 ns, pulse width 5 ns, into Channel 1 then Channel 2 (50 ohm).  External 10 MHz reference.  Pulse Width, '
         'width positive, auto level Off, level 0.00 V, noise rejection Off; channel DC, 50 ohm, 5 V range, bandwidth limit Off; trigger Manual, 100 readings.  53220A and 53230A only.  '
