@@ -1,6 +1,6 @@
 """Procedure Generator: page images and the Claude API call (no Qt).
 
-    renderer_name() / render_page(pdf, page, dpi, out)     rendered PAGE IMAGES (pypdfium2, else PyMuPDF, else pdftoppm): the standing rule is that limit tables are read from
+    renderer_name() / render_page(pdf, page, dpi, out)     rendered PAGE IMAGES (pypdfium2, else pdftoppm): the standing rule is that limit tables are read from
                                                           rendered images, never from extracted text (micro and ohm signs corrupt in text)
     page_png(store, project, fid, page, dpi)               the cached PNG of one page of an uploaded manual (the original PDF is never altered)
     build_request(png_paths, labels, model)                the exact request body: image blocks + one short instruction + a forced tool call; NO extracted text is ever sent
@@ -150,16 +150,11 @@ def scrub(text, key: str = '') -> str:
 
 # ============================================================================================================== page images
 def renderer_name() -> str:
-    """Which renderer this machine uses for page images: 'pypdfium2' | 'pymupdf' | 'pdftoppm' | '' (none)."""
+    """Which renderer this machine uses for page images: 'pypdfium2' | 'pdftoppm' | '' (none)."""
     try:
         import pypdfium2  # noqa: F401
         import PIL  # noqa: F401
         return 'pypdfium2'
-    except Exception:
-        pass
-    try:
-        import fitz  # noqa: F401
-        return 'pymupdf'
     except Exception:
         pass
     return 'pdftoppm' if shutil.which('pdftoppm') else ''
@@ -183,10 +178,6 @@ def render_page(pdf, page: int, dpi: int, out) -> Path:
                 doc[page - 1].render(scale=dpi / 72.0).to_pil().save(tmp, format='PNG')
             finally:
                 doc.close()
-        elif name == 'pymupdf':
-            import fitz
-            with fitz.open(str(pdf)) as d:
-                d[page - 1].get_pixmap(dpi=dpi).save(str(tmp))
         elif name == 'pdftoppm':
             stem = Path(tempfile.mkdtemp(prefix='pgpage_')) / 'p'
             subprocess.run(['pdftoppm', '-png', '-r', str(dpi), '-f', str(page), '-l', str(page), '-singlefile', str(pdf), str(stem)], check=True,

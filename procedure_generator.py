@@ -456,7 +456,7 @@ class UploadError(ValueError):
 
 
 def pdf_page_count(path) -> int:
-    """Pages of a PDF: pypdfium2, else pypdf, else PyMuPDF, else pdfinfo; 0 when none can tell."""
+    """Pages of a PDF: pypdfium2, else pypdf, else pdfinfo; 0 when none can tell."""
     path = str(path)
     try:
         import pypdfium2 as pdfium
@@ -470,12 +470,6 @@ def pdf_page_count(path) -> int:
     try:
         import pypdf
         return len(pypdf.PdfReader(path).pages)
-    except Exception:
-        pass
-    try:
-        import fitz
-        with fitz.open(path) as d:
-            return d.page_count
     except Exception:
         pass
     try:
