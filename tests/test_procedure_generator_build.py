@@ -169,7 +169,7 @@ class BuildOneWay(Fix):
             self.assertIn('DRAFT: NOT APPROVED BY THE OWNER', t.upper(), f'page {n}')
         txt = '\n'.join(pages)
         info = subprocess.run(['pdfinfo', pdf], capture_output=True, text=True).stdout
-        self.assertIn('Title:           Calibration Data', info)                      # the lab's 'Calibration Data' report
+        self.assertIn('Title:           Acme TM100 - Test meter', info)               # the same title as the other automated sheets (Make Model - title)
         import re
         self.assertRegex(self.seen.get('initialfile', ''), r'^A-100-\d{2}-\d{2}-\d{4}\.pdf$')       # named asset#-date (the engine's own file name, unchanged)
         self.assertIn('Procedure status', txt)
@@ -290,6 +290,67 @@ class BuildOneWay(Fix):
         data = json.loads((self.d / 'r.json').read_text())
         self.assertEqual(data['reports'][0]['proc']['id'] if 'proc' in data['reports'][0] else res.uid, res.uid)
         self.assertNotIn('FAIL', [f['level'] for f in data['reports'][0]['findings']])
+
+
+class HookupPhoto(Fix):
+    def photo_project(self, with_photo=True):
+        p = self.project(pg.ONEWAY, name='With photo')
+        if with_photo:
+            self.store.add_file(p, fx.make_png(self.d / 'hook.png'), pg.ROLE_PHOTO)
+        return p
+
+    def test_the_stored_photo_is_the_reference_image_of_the_setup_prompt(self):
+        p = self.photo_project()
+        res = self.build(p)
+        stored = self.store.file_path(p, p.files_of(pg.ROLE_PHOTO)[0].id)
+        self.assertEqual(self.spec_of(res)['dsb']['hookup_photo'], str(stored))
+        a = self.app(res)
+        images = []
+        orig = self.h._confirm
+
+        def spy(parent, title, heading, steps, facts=None, caution=None, ok='OK', cancel='Cancel', image=None, **k):
+            images.append((title, image))
+            return orig(parent, title, heading, steps, facts, caution, ok, cancel, image, **k)
+        with mock.patch.object(H.ui, 'confirm_steps', spy):
+            self.h.default_reading = H.typed_nominal
+            self.assertTrue(self.h.run_all())
+        setups = [img for t, img in images if t in ('Check the setup', 'Change the cables')]
+        self.assertTrue(setups)
+        self.assertTrue(all(Path(img) == stored for img in setups), images)
+        self.assertEqual(len(a.found), 3)
+
+    def test_no_photo_means_no_image_and_nothing_is_invented(self):
+        res = self.build(self.photo_project(with_photo=False))
+        self.assertNotIn('hookup_photo', self.spec_of(res)['dsb'])
+        a = self.app(res)
+        self.assertIsNone(a._reference_image(a.points[0]))
+
+    def test_a_missing_photo_file_is_ignored_and_an_owner_diagram_wins(self):
+        p = self.photo_project()
+        res = self.build(p)
+        a = self.app(res)
+        stored = Path(a.dsb['hookup_photo'])
+        self.assertEqual(Path(a._reference_image(a.points[0])), stored)
+        seen = []
+        with mock.patch.object(rt.port, 'operator_prompt', lambda *x, **k: seen.append(k.get('image')) or True):
+            a._with_reference_image(a.points[0], lambda p: rt.port.operator_prompt('t', 'h', [], image=None))
+            diagram = self.d / 'diagram.png'
+            fx.make_png(diagram)
+            a._with_reference_image(a.points[0], lambda p: rt.port.operator_prompt('t', 'h', [], image=diagram))
+        self.assertEqual([Path(x) for x in seen], [stored, diagram])                       # the owner's drawn diagram always wins
+        self.assertIs(rt.port.operator_prompt.__name__ != 'with_image', True)               # the shared function is put back
+        stored.unlink()
+        self.assertIsNone(a._reference_image(a.points[0]))
+
+    def test_other_procedures_get_no_reference_image(self):
+        import dsb_fixtures as dfx
+        import datasheet_builder_specs as dsp
+        import datasheet_builder_match as dm
+        spec = dsp.export_spec(dfx.dmm_34461a_like(), plan=dm.match_datasheet(dfx.dmm_34461a_like())).spec
+        self.assertNotIn('hookup_photo', spec['dsb'])
+        self.h = H.Harness(home=self.d).start()
+        a = self.h.make_app(spec)
+        self.assertIsNone(a._reference_image(a.points[0]))
 
 
 class BuildManual(Fix):

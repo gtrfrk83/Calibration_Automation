@@ -204,7 +204,7 @@ class ReviewAndBuild(PanelCase):
         self.assertEqual(self.panel.status_badge.text(), gd.DRAFT_TEXT)
         self.assertTrue(self.panel.approve_btn.isEnabled())
         self.assertFalse(self.panel.draft_btn.isEnabled())
-        with mock.patch.object(G, '_ask_approval', lambda parent, name, who, unverified: ('Owner Person', 'looks right')):
+        with mock.patch.object(G, '_ask_approval', lambda parent, name, who, unverified, sources=None: ('Owner Person', 'looks right')):
             st = self.panel.approve()
         self.assertFalse(st.draft)
         self.assertEqual(self.saved, [1, 1])
@@ -296,6 +296,132 @@ class LooksOK(PanelCase):
         rv = R.ReviewPage(self.store, self.panel.p)
         self.addCleanup(rv.close)
         self.assertLessEqual(rv.minimumSizeHint().width(), 1280)
+
+
+if HAVE_QT:
+    import test_qt_manager as tqm
+    import dsb_manager
+    import procedure_generator_build as bd
+    import procedure_generator_ai as ai
+
+    class ManagerApproval(tqm.QtCase):
+        """The owner's Approve / Mark as draft again from the Manager list (same dialog as the tab)."""
+
+        def setUp(self):
+            super().setUp()
+            self.store = pg.Store()                                          # the (throw-away) data folder of test_qt_manager
+            p = self.store.create('Listed job', 'me')
+            p.make, p.model, p.mode = 'Acme', 'TM100', pg.ONEWAY
+            f = self.store.add_file(p, fx.make_pdf(self.t / 'm.pdf'), pg.ROLE_SPEC)
+            pg.set_pages(p, f.id, 1, 1)
+            pg.add_rows(p, ai._parse_rows({'rows': fx.good_items()}, [(f.id, 1)], []))
+            for r in p.rows:
+                pg.set_status(p, r.id, pg.STATUS_ACCEPTED)
+            pg.confirm_page(p, f.id, 1)
+            res = bd.build(p, self.store, 'me')
+            self.assertTrue(res.ok, res.message)
+            self.uid = res.uid
+            self.win.refresh()
+            self.pump()
+            self.asked = []
+            self.answer = ('Owner Person', 'checked')
+            q = mock.patch.object(G, '_ask_approval', lambda parent, name, who, unverified, sources=None: self.asked.append((name, who, list(unverified), dict(sources or {}))) or self.answer)
+            q.start()
+            self.addCleanup(q.stop)
+            self.errors = []
+            q = mock.patch.object(G, '_error', lambda parent, title, text: self.errors.append((title, text)))
+            q.start()
+            self.addCleanup(q.stop)
+            self.confirm = True
+            q = mock.patch.object(G, '_ask', lambda *a, **k: self.confirm)
+            q.start()
+            self.addCleanup(q.stop)
+
+        def select_generated(self):
+            row = next(r for r in self.win.table.rows() if r.iid == dsb_manager.IID_PREFIX + self.uid)
+            self.win.table.select_rows([row])
+            self.pump()
+            return row
+
+        def menu_texts(self):
+            return [a.text() for a in self.win.build_row_menu().actions() if not a.isSeparator()]
+
+        def test_a_draft_row_offers_approve_by_button_and_menu(self):
+            row = self.select_generated()
+            self.assertIn('DRAFT', row.status)
+            self.assertFalse(self.win.btn_approve.isHidden())
+            self.assertTrue(self.win.btn_draft_again.isHidden())
+            self.assertIn('Approve (owner)...', self.menu_texts())
+            self.assertNotIn('Mark as draft again...', self.menu_texts())
+
+        def test_approving_from_the_list_uses_the_same_dialog_logs_and_clears_the_draft(self):
+            self.select_generated()
+            self.win.btn_approve.click()
+            self.pump()
+            name, who, unverified, sources = self.asked[0]
+            self.assertIn('Listed job', name)
+            self.assertTrue(unverified)                                       # the unverified list is shown
+            self.assertTrue(sources)                                          # and the source files with their hashes
+            st = gd.state(self.uid)
+            self.assertFalse(st.draft)
+            hist = st.history[-1]
+            self.assertEqual((hist[0], hist[2], hist[4]), ('approve', 'Owner Person', 'checked'))
+            row = self.select_generated()
+            self.assertNotIn('DRAFT', row.status)
+            self.assertTrue(self.win.btn_approve.isHidden())
+            self.assertFalse(self.win.btn_draft_again.isHidden())
+            self.assertIn('Mark as draft again...', self.menu_texts())
+            self.assertIn('Approved by Owner Person', self.win.status.get())
+
+        def test_cancelling_the_dialog_changes_nothing(self):
+            self.select_generated()
+            self.answer = None
+            self.win.approve_generated()
+            self.assertTrue(gd.state(self.uid).draft)
+            self.answer = ('x', '')
+            self.win.approve_generated()                                     # a one-letter name is refused by the record, not accepted
+            self.assertTrue(gd.state(self.uid).draft)
+            self.assertIn('name', self.errors[-1][1].lower())
+
+        def test_mark_as_draft_again_from_the_list(self):
+            self.select_generated()
+            gd.approve(self.uid, 'Owner Person')
+            self.select_generated()
+            self.win.refresh_details()
+            self.win.btn_draft_again.click()
+            self.pump()
+            self.assertTrue(gd.state(self.uid).draft)
+            self.assertEqual(gd.state(self.uid).history[-1][0], 'draft_again')
+            self.confirm = False
+            gd.approve(self.uid, 'Owner Person')
+            self.select_generated()
+            self.win.draft_again_generated()
+            self.assertFalse(gd.state(self.uid).draft)                       # declined: still approved
+
+        def test_an_open_run_window_sees_the_approval(self):
+            import dsb_run_harness as H
+            import json
+            import dsb_runtime as rt
+            self.select_generated()
+            spec = json.loads((rt.Path(dsb_manager.user_rows()[0]['spec_path'])).read_text())
+            data = os.environ['CALSUITE_DATA']
+            h = H.Harness().start()
+            try:
+                os.environ['CALSUITE_DATA'] = data                       # the run window reads the same registry as the Manager
+                a = h.make_app(spec)
+                self.assertTrue(a.generated_state().draft)
+                self.win.approve_generated()
+                self.assertFalse(a.generated_state().draft)
+            finally:
+                h.stop()
+
+        def test_ordinary_procedures_never_get_the_action(self):
+            self.select('Keithley 2000 Performance Verification')
+            self.assertTrue(self.win.btn_approve.isHidden() and self.win.btn_draft_again.isHidden())
+            self.assertFalse(any('Approve' in t or 'draft again' in t for t in self.menu_texts()))
+            self.assertIsNone(self.win.approve_generated())
+            self.assertIsNone(self.win.draft_again_generated())
+            self.assertTrue(gd.state(self.uid).draft)
 
 
 if __name__ == '__main__':

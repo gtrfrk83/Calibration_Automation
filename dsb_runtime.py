@@ -729,6 +729,15 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             st = gd.State(generated=True, draft=True, project_id=str(self.dsb.get('generated')))
         return st
 
+    def _reference_image(self, p):
+        """The hook-up photo the owner uploaded to the Procedure Generator project (stored in the data folder), shown as the reference image of the setup prompt.
+        Never drawn or invented; nothing is shown when the file is gone."""
+        path = self.dsb.get('hookup_photo')
+        try:
+            return Path(path) if path and Path(path).is_file() else None
+        except (OSError, ValueError):
+            return None
+
     def _draft_banner(self):
         st = self.generated_state()
         if not st.draft:
@@ -1458,10 +1467,28 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         text = (p.get('setup') or '').split(' Read the measuring standard')[0]
         return text or f'Set the unit under test to output {hh._fmt(run["nominal"], run["unit"])}.'
 
+    def _with_reference_image(self, p, prompt):
+        """The engine's own setup prompt, with the owner's hook-up photo (a generated procedure) as its reference image when the prompt has no drawn diagram of its own.
+        Applied around the call only (main thread), so the shared engine file is not touched."""
+        ref = self._reference_image(p)
+        if ref is None:
+            return prompt(p)
+        orig = port.operator_prompt
+
+        def with_image(*a, **k):
+            if k.get('image') is None:
+                k['image'] = ref
+            return orig(*a, **k)
+        port.operator_prompt = with_image
+        try:
+            return prompt(p)
+        finally:
+            port.operator_prompt = orig
+
     def _prompt_setup_driven(self, p):
         run = p.get('run')
         if not run or run['direction'] != 'source':
-            return super()._prompt_setup(p)
+            return self._with_reference_image(p, super()._prompt_setup)
         r = p.get('_route') or Route()
         facts = [('Next point', f'{p["n"]} of {len(self.points)}'), ('Test', hh.describe(p)), ('Unit under test', p['switch'])]
         steps = []
@@ -1908,7 +1935,7 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
         return out
 
     def report_title(self):
-        if self.manual_entry or self.dsb.get('generated'):      # the lab's report name (also for a procedure from the Procedure Generator); the datasheet's title and make / model are in the header
+        if self.manual_entry:                       # the lab's report name; the datasheet's title and make / model are in the header
             return 'Calibration Data'
         return f'{self.info["name"]} - {self.dsb.get("title")}'
 

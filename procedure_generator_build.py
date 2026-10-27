@@ -189,6 +189,9 @@ def build(p: pg.Project, store: pg.Store, who: str, registry=None, root=None, ma
     import datasheet_builder_rules as dsr
     try:
         ds, notes = datasheet_from_project(p)
+        photos = p.files_of(pg.ROLE_PHOTO)
+        if photos and p.mode != pg.MANUAL:                      # the owner's photo of the hook-up: stored with the project, offered as the reference image of the setup prompt
+            ds.options['hookup_photo'] = str(store.file_path(p, photos[-1].id))
     except (db.DsError, KeyError, ValueError) as exc:
         res.message = f'The accepted rows could not be turned into a sheet: {exc}'
         return res

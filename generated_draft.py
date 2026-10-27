@@ -103,6 +103,8 @@ class State:
     approved_version: int = 0
     built_by: str = ''
     unverified: list = field(default_factory=list)
+    sources: dict = field(default_factory=dict)         # {file name: SHA-256} of the manuals the procedure was built from
+    title: str = ''
     history: list = field(default_factory=list)       # [(action, version, who, at, note)]
 
     @property
@@ -128,13 +130,17 @@ def state(uid, db=None) -> State:
         return State()
     try:
         with _con(path, create=False) as con:
-            row = con.execute('SELECT project_id,version,built_by,unverified_json FROM generated_procedures WHERE uid=?', (str(uid),)).fetchone()
+            row = con.execute('SELECT project_id,version,built_by,unverified_json,sources_json,title FROM generated_procedures WHERE uid=?', (str(uid),)).fetchone()
             if row is None:
                 return State()
             events = con.execute('SELECT action,version,who,at,note FROM generated_approvals WHERE uid=? ORDER BY id', (str(uid),)).fetchall()
     except sqlite3.Error:
         return State()
-    st = State(generated=True, project_id=row[0], version=int(row[1]), built_by=row[2], history=[tuple(e) for e in events])
+    st = State(generated=True, project_id=row[0], version=int(row[1]), built_by=row[2], history=[tuple(e) for e in events], title=row[5] or '')
+    try:
+        st.sources = dict(json.loads(row[4] or '{}'))
+    except (ValueError, TypeError):
+        st.sources = {}
     try:
         st.unverified = list(json.loads(row[3]))
     except ValueError:

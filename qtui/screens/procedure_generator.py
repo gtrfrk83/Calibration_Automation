@@ -53,11 +53,17 @@ def _choose_files(parent, title, exts) -> list:
     return list(paths)
 
 
-def _ask_approval(parent, name, who, unverified) -> tuple | None:
+def _ask_approval(parent, name, who, unverified, sources=None) -> tuple | None:
     """(who, note) or None."""
     dlg = ModalDialog(parent, 'Approve this procedure', subtitle=f'"{name}" is a draft generated from a manual.', width=M.dialog_w + 80)
     dlg.add_text('Approving removes the DRAFT marking from later runs and reports. Only approve it after the limits and settings have been checked against the manual '
                  '(and, for an automated one, run on the bench). Who approved and when is recorded and cannot be changed.')
+    if sources:
+        dlg.body.addWidget(label('Built from (file and SHA-256):', 'section'))
+        src = QPlainTextEdit('\n'.join(f'{n}   {h}' for n, h in sorted(sources.items())))
+        src.setReadOnly(True)
+        src.setMaximumHeight(M.row_h * 3)
+        dlg.body.addWidget(src)
     if unverified:
         box = QPlainTextEdit('\n'.join(unverified))
         box.setReadOnly(True)
@@ -83,6 +89,37 @@ def _ask_approval(parent, name, who, unverified) -> tuple | None:
     dlg.add_button('Approve', role='primary', result='approve', default=True, callback=ok)
     dlg.run()
     return out.get('v')
+
+
+def run_approve(parent, uid, name, registry=None):
+    """The owner's approval of a generated procedure: the SAME dialog from the Procedure Generator tab and from the Manager list.  Returns the new gd.State, or None."""
+    st = gd.state(uid, registry)
+    if not st.generated:
+        _error(parent, 'Approve', 'This is not a generated procedure.')
+        return None
+    got = _ask_approval(parent, name or st.title or uid, gd.default_who(), st.unverified, st.sources)
+    if not got:
+        return None
+    try:
+        return gd.approve(uid, got[0], got[1], db=registry)
+    except gd.ApprovalError as exc:
+        _error(parent, 'Approve', str(exc))
+        return None
+
+
+def run_draft_again(parent, uid, name, registry=None):
+    st = gd.state(uid, registry)
+    if not st.generated:
+        _error(parent, 'Mark as draft', 'This is not a generated procedure.')
+        return None
+    if not _ask(parent, 'Mark as draft again', f'Put the DRAFT marking back on "{name or st.title or uid}"? Later runs will ask for confirmation and every report page will carry the banner. This is recorded.',
+                yes='Mark as draft', no='Cancel'):
+        return None
+    try:
+        return gd.mark_draft_again(uid, gd.default_who() or 'owner', 'marked as draft again by the owner', db=registry)
+    except gd.ApprovalError as exc:
+        _error(parent, 'Mark as draft', str(exc))
+        return None
 
 
 class SettingsDialog(ModalDialog):
@@ -805,14 +842,8 @@ class ProcedureGeneratorPanel(QWidget):
         p = self.p
         if p is None or not p.build.get('uid'):
             return None
-        st = gd.state(p.build['uid'], self.store.registry)
-        got = _ask_approval(self, p.name, gd.default_who(), st.unverified)
-        if not got:
-            return None
-        try:
-            new = gd.approve(p.build['uid'], got[0], got[1], db=self.store.registry)
-        except gd.ApprovalError as exc:
-            _error(self, 'Approve', str(exc))
+        new = run_approve(self, p.build['uid'], p.name, self.store.registry)
+        if new is None:
             return None
         self.refresh_project()
         self.reload_list(p.id)
@@ -825,14 +856,8 @@ class ProcedureGeneratorPanel(QWidget):
         p = self.p
         if p is None or not p.build.get('uid'):
             return None
-        who = gd.default_who()
-        if not _ask(self, 'Mark as draft again', f'Put the DRAFT marking back on "{p.name}"? Later runs will ask for confirmation and every report page will carry the banner. This is recorded.',
-                    yes='Mark as draft', no='Cancel'):
-            return None
-        try:
-            new = gd.mark_draft_again(p.build['uid'], who or 'owner', 'marked as draft again from the Procedure Generator', db=self.store.registry)
-        except gd.ApprovalError as exc:
-            _error(self, 'Mark as draft', str(exc))
+        new = run_draft_again(self, p.build['uid'], p.name, self.store.registry)
+        if new is None:
             return None
         self.refresh_project()
         self.reload_list(p.id)
