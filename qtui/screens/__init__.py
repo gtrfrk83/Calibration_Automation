@@ -13,6 +13,7 @@ PANELS = {
     'standards_specs': 'qtui.screens.standards_specs:StandardsSpecsPanel',
     'datasheet_builder': 'qtui.screens.datasheet_builder:DatasheetBuilderPanel',
     'uncertainty_calc': 'qtui.screens.uncertainty_calculator:UncertaintyCalculatorPanel',
+    'procedure_generator': 'qtui.screens.procedure_generator:ProcedureGeneratorPanel',
 }
 
 

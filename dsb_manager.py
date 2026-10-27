@@ -33,14 +33,20 @@ def user_rows(root=None, db=None) -> list:
         entries = datasheet_builder.procedure_entries(root=root, db=db)
     except Exception:
         return []
+    try:
+        import generated_draft
+        drafts = generated_draft.draft_uids(db)              # procedures from the Procedure Generator the owner has not approved yet (empty for everything else)
+    except Exception:
+        drafts = set()
     out = []
     for e in entries:
-        out.append(dict(iid=IID_PREFIX + e['uid'], name=e['name'], manufacturer=e.get('manufacturer', ''), model=e.get('model', ''),
+        out.append(dict(draft=e['uid'] in drafts, iid=IID_PREFIX + e['uid'], name=e['name'], manufacturer=e.get('manufacturer', ''), model=e.get('model', ''),
                         category=e.get('category') or 'User-built', tag=e.get('tag') or TAG, script=LAUNCHER, spec_path=e['spec_path'],
                         version=e.get('version'), status=e.get('status', ''), uid=e['uid'], kind=e.get('kind') or 'verification',
                         description=('Manual calibration (no instrument automation: readings are typed into the grid), ' if (e.get('kind') == 'manual') else 'User-built datasheet (Datasheet Builder), ')
                         + f'saved version {e.get("version")}'
-                                    + ('' if e.get('status') in (None, '', 'ready') else f' - {e.get("status")}')))
+                                    + ('' if e.get('status') in (None, '', 'ready') else f' - {e.get("status")}')
+                                    + (' - DRAFT: not approved by the owner' if e['uid'] in drafts else '')))
     return out
 
 

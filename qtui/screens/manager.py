@@ -38,8 +38,8 @@ from qtui.widgets import (Badge, Banner, EmptyState, GhostButton, PrimaryButton,
 
 TITLE = 'Calibration Procedure Manager'
 SUBTITLE = 'Run, document and maintain your calibration procedures'
-MAIN_TABS = (('procedures', 'Procedures'), ('asset_history', 'Asset History'), ('standards_specs', 'Standards Specs'), ('datasheet_builder', 'Datasheet Builder'), ('uncertainty_calc', 'Uncertainty\nCalculator'))
-PANEL_TITLES = {'asset_history': 'Asset History', 'standards_specs': 'Standards Specs', 'datasheet_builder': 'Datasheet Builder', 'uncertainty_calc': 'Uncertainty Calculator'}
+MAIN_TABS = (('procedures', 'Procedures'), ('asset_history', 'Asset History'), ('standards_specs', 'Standards Specs'), ('datasheet_builder', 'Datasheet Builder'), ('uncertainty_calc', 'Uncertainty\nCalculator'), ('procedure_generator', 'Procedure\nGenerator'))
+PANEL_TITLES = {'asset_history': 'Asset History', 'standards_specs': 'Standards Specs', 'datasheet_builder': 'Datasheet Builder', 'uncertainty_calc': 'Uncertainty Calculator', 'procedure_generator': 'Procedure Generator'}
 
 
 class StatusProxy:
@@ -181,14 +181,14 @@ class ManagerWindow(QMainWindow):
         self.library_page = QWidget()
         self.stack.addWidget(self.library_page)
         self.page_of = {'procedures': self.library_page}
-        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc'):
+        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc', 'procedure_generator'):
             holder = QWidget()
             QVBoxLayout(holder).setContentsMargins(0, M.sm, 0, 0)
             self.stack.addWidget(holder)
             self.page_of[key] = holder
         self.build_menus()
         self.build_library_tab()
-        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc'):
+        for key in ('asset_history', 'standards_specs', 'datasheet_builder', 'uncertainty_calc', 'procedure_generator'):
             self.build_panel(key)
         help_menu.dress(self)
         self.tabs.currentChanged.connect(self._tab_changed)
@@ -276,7 +276,7 @@ class ManagerWindow(QMainWindow):
         else:
             kwargs = {}
             params = inspect.signature(cls.__init__).parameters
-            if 'on_saved' in params and key == 'datasheet_builder':
+            if 'on_saved' in params and key in ('datasheet_builder', 'procedure_generator'):         # a saved / built / approved procedure changes the Procedures list
                 kwargs['on_saved'] = self._dsb_saved
             if 'status' in params:
                 kwargs['status'] = self.status

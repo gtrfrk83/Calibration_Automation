@@ -285,6 +285,8 @@ def export_spec(ds, period=None, plan=None, uid=None, include_datasheet=True):
                 'periods': [p.to_dict() for p in ds.periods], 'default_period': ds.default_period,
                 'engine': {'stock_runnable': hand == 0, 'points': len(steps), 'runnable': ready_n, 'hand_set': hand, 'notes': notes}},
     }
+    if ds.options.get('generated'):                        # a procedure made by the Procedure Generator: the run window and the report read its DRAFT / approved state (generated_draft.py)
+        spec['dsb']['generated'] = ds.options['generated']
     if any(s.get('coil') for s in steps):                  # the cable-change text of the coil rows (the 376 jaw wording); the engine reads spec['groups'][step.group]
         spec['groups'] = {g: v for g, v in dsb_coil.groups().items() if any(s.get('group') == g for s in steps)}
     if include_datasheet:

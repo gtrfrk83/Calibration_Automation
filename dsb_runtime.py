@@ -713,6 +713,51 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             self.pm_proc_key = 'ds:' + str(self.dsb['uid'])      # verified.py: this datasheet's own verified / locked state, not its model's
         super().__init__(root, self.dsb['model'], demo=demo, spec=spec, io_factory=io_factory, fast_demo=fast_demo)
         self.counter_ref.set(self.settings.get('counter_ref', 'EXT'))
+        self._draft_ok = False                                      # the run-start confirmation of a generated DRAFT procedure has not been given in this window yet
+        self._draft_banner()
+
+    # ---- generated procedures (Procedure Generator): the DRAFT marking (generated_draft.py)
+    def generated_state(self):
+        """The draft / approval state of this procedure, read from the registry each time it is needed (an approval made while the window is open is seen).  Fails CLOSED:
+        a procedure whose spec says it was generated is a draft whenever the registry cannot say otherwise.  An ordinary procedure is never affected."""
+        import generated_draft as gd
+        try:
+            st = gd.state(self.dsb.get('uid'))
+        except Exception:
+            st = gd.State()
+        if not st.generated and self.dsb.get('generated'):
+            st = gd.State(generated=True, draft=True, project_id=str(self.dsb.get('generated')))
+        return st
+
+    def _draft_banner(self):
+        st = self.generated_state()
+        if not st.draft:
+            return
+        import generated_draft as gd
+        try:
+            self.shell.notice(gd.DRAFT_TEXT + '. This procedure was generated from a manual and has not been reviewed by the owner: check every limit against the manual. '
+                              'Every page of the report will carry this warning.', 'bad', title=gd.DRAFT_TEXT)
+        except Exception:
+            pass
+        try:
+            self.shell.subtitle.set(gd.DRAFT_TEXT + '  |  ' + str(self.shell.subtitle.get()))
+        except Exception:
+            pass
+
+    def _draft_run_confirmed(self) -> bool:
+        """Starting a run of a DRAFT procedure asks once per window (a demo run asks nothing: it produces no evidence)."""
+        if self.demo or self.fast_demo or self._draft_ok:
+            return True
+        st = self.generated_state()
+        if not st.draft:
+            return True
+        import generated_draft as gd
+        if port.ask_yes_no(gd.RUN_START_TITLE, gd.RUN_START_TEXT):
+            self._draft_ok = True
+            self._log_note('DRAFT procedure (not approved by the owner): the technician confirmed the run start')
+            return True
+        self.status.set('Run cancelled: the procedure is a draft that has not been approved.')
+        return False
 
     # ---- rule 12: per-section modes (Automated / Typed by hand / Not tested) --------------------------------------------------------
     def allowed_modes(self):
@@ -1285,6 +1330,8 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
             return
         if not self.asset.get().strip():
             port.message('warning', 'Instrument ID', 'Enter an instrument ID.')
+            return
+        if not self._draft_run_confirmed():
             return
         if self._offer_resume():
             points = [p for p in points if str(p['id']) not in self.results]            # the points that have a reading in the mode being collected are not run again
@@ -1888,6 +1935,9 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
                              if (rec.get('route') or {}).get('status') == 'unverified'} - {None, ''})
         if unverified:
             header.append(('Unverified', 'Instrument commands not yet confirmed on hardware: ' + ', '.join(unverified)))
+        st = self.generated_state()
+        if st.generated:                                               # a procedure from the Procedure Generator: its approval state is part of the record
+            header.append(('Procedure status', st.text + (f' (project {st.project_id})' if st.project_id else '')))
         if self.demo:
             header.append(('Mode', 'DEMO - synthetic data, not calibration evidence'))
         return header
@@ -1923,6 +1973,10 @@ class DsbApp(hh.App, reset_startup.AppResetMixin, dsb_override.DsbOverrideMixin)
     def report_details(self, details):
         """The 'standards used' list gains the standards that actually did the points (their serial numbers and due dates are the technician's)."""
         details = dict(details or {})
+        st = self.generated_state()
+        if st.draft:                                                   # report_pdf draws this on EVERY page
+            import generated_draft as gd
+            details['draft_note'] = gd.DRAFT_TEXT
         details['limit_labels'] = True                      # the two limit columns print as Low Limit / High Limit (their values are the absolute limits, as always)
         have = list(details.get('standards') or [])
         if not self.demo:
