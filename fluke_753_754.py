@@ -70,6 +70,13 @@ def source_request(p):
     return ('OHM4' if u['kind'] == 'OHM' else u['kind']), float(u['value']), unit, (u.get('frequency') if u['kind'] == 'FREQ' else None)
 
 
+def freq_budget(p, calibrator):
+    """Budget of a frequency-MEASURE point (Table 7): the calibrator's own output frequency specification at the applied frequency, against the lab's Frequency
+    CMC (uncertainty_budget.build('FREQ', ..., direction='output'))."""
+    import uncertainty_budget as ub
+    return ub.build('FREQ', float(handheld_dmm.unc_frequency(p)), 'Hz', standard=calibrator, direction='output')
+
+
 def source_budget(p, standard):
     """uncertainty_budget.Budget of a UUT OUTPUT point for measuring standard `standard`: its 'input' sheet row, against the laboratory's Measure CMC.  None when it cannot be built."""
     import uncertainty_budget as ub
@@ -182,12 +189,21 @@ class App(handheld_dmm.App):
             m = self.unc_standard_of(p)
             return self._source_budget(p, m), m, 'input'
         cal = self.calibrator_model()
+        if self._freq_from_calibrator(p):
+            return freq_budget(p, cal), cal, 'output'
         if is_rtd(p):
             return (rtd_budget(p, cal) if cal else None), cal, 'output'
         return None, cal, 'output'
 
+    FREQ_FROM_CALIBRATOR = True         # per-procedure switch (owner rule 2026-10-26): a frequency-MEASURE point takes its uncertainty from the CALIBRATOR's own output frequency
+                                        # specification (uncertainty_budget.build('FREQ', ..., calibrator model)), not the lab Frequency - Measure CMC alone.  False = the engine's old rule.
+
+    def _freq_from_calibrator(self, p):
+        return bool(self.FREQ_FROM_CALIBRATOR and not is_source(p) and p.get('test') == 'numeric' and p.get('unc_kind') == 'FREQ'
+                    and not p.get('no_uncertainty') and self.calibrator_model())
+
     def _custom(self, p):
-        return p.get('test') == 'numeric' and (is_source(p) or is_rtd(p))
+        return p.get('test') == 'numeric' and (is_source(p) or is_rtd(p) or self._freq_from_calibrator(p))
 
     def uncertainty_text(self, p):
         import uncertainty

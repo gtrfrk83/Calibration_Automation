@@ -273,6 +273,41 @@ class UncertaintyByDirection(unittest.TestCase):
             n += 1
         self.assertEqual(n, 35)                           # 6 + 4 + 2 + 9 + 7 + 3 + 3 + 1
 
+    def test_measuring_standard_list_offers_all_three_sheets_default_3458a(self):
+        self.assertEqual(self.app.unc_models(), ['3458A', '34461A', '34465A'])
+        self.assertEqual(F.DEFAULT_UNC_STANDARD, '3458A')
+        for p in self.app.points:
+            if F.is_source(p):
+                self.assertEqual(self.app.unc_options(p), ['3458A', '34461A', '34465A'], p['id'])
+                self.assertEqual(self.app.unc_standard_of(p), '3458A')
+
+    def test_a_34465a_pick_gives_an_input_direction_row_of_that_sheet(self):
+        p = next(q for q in self.app.points if F.is_source(q) and q['uut']['kind'] == 'DCV')
+        self.app.set_unc_choice(p, '34465A')
+        b, model, direction = self.app._budget(p)
+        self.assertEqual((model, direction), ('34465A', 'input'))
+        self.assertEqual(b.hit.row['direction'], 'input')
+
+    def test_frequency_measure_uncertainty_is_the_calibrators_own_frequency_spec(self):
+        import uncertainty_budget as ub
+        pts = [p for p in self.app.points if p.get('unc_kind') == 'FREQ']
+        self.assertEqual(len(pts), 5)
+        for p in pts:
+            self.assertTrue(self.app._freq_from_calibrator(p))
+            b, model, direction = self.app._budget(p)
+            self.assertEqual((model, direction), ('5522A', 'output'))
+            ref = ub.build('FREQ', float(h.unc_frequency(p)), 'Hz', standard='5522A', direction='output')
+            self.assertEqual(b.reported, ref.reported)
+            self.assertGreaterEqual(b.reported, 0.005)             # a milli-hertz figure, never the pHz / nHz of the CMC alone
+            self.assertNotIn('pHz', self.app.uncertainty_text(p))
+            self.assertNotIn('nHz', self.app.uncertainty_text(p))
+
+    def test_frequency_switch_off_restores_the_cmc_alone_rule(self):
+        p = next(q for q in self.app.points if q.get('unc_kind') == 'FREQ')
+        self.app.FREQ_FROM_CALIBRATOR = False
+        self.assertFalse(self.app._freq_from_calibrator(p))
+        self.assertFalse(self.app._custom(p))
+
     def test_every_measured_point_resolves_to_an_output_direction_sheet(self):
         import uncertainty_budget as ub
         n = 0
