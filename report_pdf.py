@@ -9,6 +9,7 @@ Layout: title, header strip, overall verdict, grouped table (shaded rows, out-of
 """
 from __future__ import annotations
 
+import re
 from collections import namedtuple
 from datetime import datetime
 
@@ -126,8 +127,9 @@ def apply_left_numeric(rows, details):
     out, copied = [], False
     for r in rows:
         r = dict(r)
-        if str(r.get('As Found') or '').strip() and str(r.get('As Left') or '') in ('', 'Same'):
-            r['As Left'] = r['As Found']
+        m = re.match(r'\s*([-+]?\d[\d.,]*(?:[eE][-+]?\d+)?)', str(r.get('As Found') or ''))       # numeric readings only: 'Pass' / 'Fail' / yes-no results stay 'Same'
+        if m and str(r.get('As Left') or '') in ('', 'Same'):
+            r['As Left'] = m.group(1)                    # the number only (an '(AC annunciator on)' note stays with As Found)
             r['As Left OOT'] = bool(r.get('OOT'))
             copied = True
         out.append(r)

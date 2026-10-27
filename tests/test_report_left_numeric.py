@@ -23,6 +23,14 @@ class Copy(unittest.TestCase):
         self.assertEqual(out[1]['As Left'], out[1]['As Found']); self.assertTrue(out[1]['As Left OOT'])
         self.assertEqual(out[2]['As Left'], '')                           # untested row stays empty
 
+    def test_only_numeric_readings_are_copied_and_notes_are_dropped(self):
+        r = rows()
+        r[0]['As Found'] = '1.0004  (AC annunciator on)'
+        r[1]['As Found'] = 'Pass'
+        out, _c = report_pdf.apply_left_numeric(r, {'left_numeric': True})
+        self.assertEqual(out[0]['As Left'], '1.0004')
+        self.assertEqual(out[1]['As Left'], 'Same')                       # a pass/fail result is not a number
+
     def test_off_changes_nothing_and_the_input_is_not_modified(self):
         r = rows()
         out, copied = report_pdf.apply_left_numeric(r, {})
