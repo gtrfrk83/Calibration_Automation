@@ -681,9 +681,10 @@ TC_RESOLUTION = {'5522A': (0.01, '5522A Operators Manual p. 1-17, Temperature Ca
 DEFAULT_VARIANT = {   # preferred / excluded words in the function's bracket text, per kind (the person can pass variant= to override)
     # 'sync, acband <= 2 mhz' (3458A, the best-accuracy AC mode) is preferred in a plain lookup where it covers the point; no other sheet has that text.
     # 'auxiliary' (5520A dual-output AUX rows) and '7 day' (5520A resistance floor with only a 7 day ohms zero) are excluded from a plain lookup; no other sheet has either word.
+    # 'vpp' (33250A sine amplitude, a +/-(% + mVpp) sheet in peak-to-peak) is excluded from a plain AC volts lookup: its rows are in Vpp, a plain lookup value is V rms; ask for variant='Vpp' (or 'Sinewave into 50 Ohm').
     # 'option 002' (3458A high-stability DC volts, the lab's unit per the owner) is preferred in a plain lookup; the standard-stability rows stay selectable with variant='standard stability'.
     'DCV': dict(prefer=('option 002',), exclude=('auxiliary',)),
-    'ACV': dict(prefer=('sinewave', 'sync, acband <= 2 mhz'), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated', 'auxiliary')),
+    'ACV': dict(prefer=('sinewave', 'sync, acband <= 2 mhz'), exclude=('extended', 'triangle', 'squarewave', 'scope', 'truncated', 'auxiliary', 'vpp')),
     'ACI': dict(prefer=('lcomp off',), exclude=('non-sinewave', 'squarewave', 'trianglewave')),
     'OHM': dict(prefer=('4-wire',), exclude=('7 day',)),
     'FREQ': dict(prefer=('field service',), exclude=('scope', 'duty')),

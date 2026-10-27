@@ -1,0 +1,1509 @@
+{
+ "schema": 1,
+ "standard": {
+  "manufacturer": "Agilent",
+  "model": "33250A",
+  "description": "80 MHz function / arbitrary waveform generator (stimulus source: frequency, amplitude, offset, pulse timing)",
+  "confidence_text": "not specified in the manual (divisor 2, laboratory convention)",
+  "confidence_pct": null,
+  "reference": "Agilent 33250A 80 MHz Waveform Generator User's Guide, 33250-90002, Edition 2, March 2003, Chapter 8 Specifications, printed pp. 319-323 (PDF pp. 321-324)",
+  "revision": "Edition 2, March 2003",
+  "author": "built from the manual page images by specs/build_33250a_standard.py",
+  "approved_by": "",
+  "approve_date": "",
+  "source_pdf": "Agilent 33250A User Manual.pdf",
+  "sheet_generated": "",
+  "built": "2026-10-27T00:00:00"
+ },
+ "notes": {
+  "1": "SOURCE: Agilent 33250A 80 MHz Waveform Generator User's Guide, publication number 33250-90002, Edition 2, March 2003, Chapter 8 \"Specifications\", printed pp. 319-323 (PDF pp. 321-324; row \"page\" = PDF page = printed page + 1). Read from rendered page images, each block twice; the readings agree. Built by specs/build_33250a_standard.py.",
+  "2": "PERIOD AND CONFIDENCE: the manual states the frequency accuracy for \"1 year\" and a Calibration Interval of 1 year; every figure on this sheet is stored under \"1 yr\" (default period). The manual states NO confidence level and no k: \"not specified\", stored with no level (divisor 2, laboratory convention, as the 8563E / 3458A / T-10A sheets). The manual also says nothing on whether the figures are warranted limits or typical values except where it writes \"typical\" (phase noise, impedance), which is NOT stored.",
+  "3": "CONDITIONS: output characteristics are into 50 ohm (the open-circuit amplitude range is 20 mVpp to 20 Vpp, printed footnote 2); amplitude and offset accuracy at 1 kHz, above 10 mVpp, Autorange ON (printed p. 321). Warm-up time 1 hour (general specifications, printed p. 323). Printed footnote 1 of Output Characteristics: add 1/10th of the output amplitude AND offset specification per degC for operation outside 18 degC to 28 degC (1-year specification); NOT applied to any stored row (a lab at 18 - 28 degC needs nothing).",
+  "4": "FREQUENCY (printed p. 320): \"Accuracy (1 year): 2 ppm, 18 degC to 28 degC; 3 ppm, 0 degC to 55 degC\". Stored: 2 ppm of the setting (+/-(2 ppm I.V.)), range 1 uHz to 80 MHz (sine and square). The 3 ppm figure for 0 - 55 degC is NOT stored as a row (a plain lookup takes the larger limit of every matching row and would always return 3 ppm). Waveform limits: sine and square 1 uHz - 80 MHz, ramp 1 uHz - 1 MHz, pulse 500 uHz - 50 MHz, arb 1 uHz - 25 MHz (printed p. 320); the 80 MHz row is the maximum. Resolution 1 uHz, pulse 5 digits (not stored). The manual prints NO separate ageing or stability figure for the 10 MHz time base: the 2 ppm one-year accuracy is the only time-base specification.",
+  "5": "AMPLITUDE (printed p. 321): range 10 mVpp to 10 Vpp into 50 ohm. Accuracy (at 1 kHz, >10 mVpp, Autorange On): +/-(1 % of setting + 1 mVpp). Stored in the manual's own unit (Vpp), no conversion to Vrms. \"Setting\" is the amplitude setting in Vpp (units Vpp, Vrms, dBm, High / Low level are all selectable; the spec is printed in Vpp). Resolution 0.1 mV or 4 digits (not stored).",
+  "6": "FLATNESS (printed p. 321): sinewave relative to 1 kHz, Autorange On: below 10 MHz +/-1 % (0.1 dB), 10 MHz to 50 MHz +/-2 % (0.2 dB), 50 MHz to 80 MHz +/-5 % (0.4 dB). Printed footnote 3: dB rounded to 1 digit; the instrument adheres to the \"%\" specification (so the % figures are stored). The lower edge of \"<10 MHz\" is not printed: 1 uHz (the lowest sine frequency) is used.",
+  "7": "DERIVED ROWS (not printed as such): the \"Voltage, AC [Sinewave into 50 Ohm, Vpp]\" rows for frequency bands are the 1 kHz accuracy (1 % + 1 mVpp) PLUS the printed flatness of the band (arithmetic worst-case sum: 2 %, 3 %, 6 % + 1 mVpp); the manual does not say how the two combine. The 1 kHz row is the printed accuracy alone; the bands next to it start / stop 1 uHz away (999.999999 Hz, 1000.000001 Hz, the frequency resolution) so that exactly 1 kHz finds only the printed row. A frequency exactly on 10 MHz or 50 MHz takes the worse (higher) row (NOTES.md \"Frequency band edges\").",
+  "8": "OFFSET (printed p. 321): range +/-5 V peak (ac + dc) into 50 ohm. Accuracy: 1 % of setting + 2 mV + 0.5 % of amplitude. The amplitude term depends on the waveform amplitude, which the schema cannot hold per point: function \"[Offset, DC Volts waveform, 50 Ohm]\" assumes amplitude 0 (+/-(1 % I.V. + 2 mV)); function \"[Offset under a waveform, 50 Ohm]\" bounds the term at the 10 Vpp maximum (0.5 % x 10 Vpp = 50 mV, stored as 0.5 % F.S., Full Scale = 10 Vpp). \"Amplitude\" is taken as the Vpp setting (UNVERIFIED). The plain DCV lookup returns the larger (waveform) row; ask for variant \"DC Volts\" for the amplitude-0 case.",
+  "9": "SQUARE WAVE (printed p. 320): rise / fall time < 8 ns (printed footnote 4: edge time is decreased at higher frequency), overshoot < 5 %, asymmetry 1 % of period + 1 ns, jitter (rms) below 2 MHz 0.01 % + 525 ps and 2 MHz and above 0.1 % + 75 ps; duty cycle 20.0 % to 80.0 % (to 25 MHz), 40.0 % to 60.0 % (25 - 50 MHz), 50.0 % fixed (50 - 80 MHz). \"%\" is taken as per cent of the PERIOD (the manual says \"1% of period\" for asymmetry and nothing for the jitter terms: ASSUMED the same). Rise time is stored as a \"<=\" limit (the manual prints \"<\").",
+  "10": "JITTER IS rms: the figures are a standard deviation (one sigma), not a bound; they are stored as +/-(...) terms so the lookup returns the printed magnitude, but a budget that divides a sheet value by the coverage divisor (2) would halve a quantity that is already a standard deviation. Nothing selects the TIME rows of this sheet today.",
+  "11": "PULSE (printed p. 320): period 20.00 ns to 2000.0 s, pulse width 8.0 ns to 1999.9 s, variable edge time 5.00 ns to 1.00 ms, overshoot < 5 %, jitter (rms) 100 ppm + 50 ps. The manual prints NO accuracy for pulse width, period or edge time (only ranges and resolution digits): none is stored. ARB (printed p. 320): minimum edge time < 10 ns, linearity < 0.1 % of peak output, settling time < 50 ns to 0.5 % of final value, jitter (rms) 30 ppm + 2.5 ns. RAMP: linearity < 0.1 % of peak output, symmetry 0.0 % to 100.0 %.",
+  "12": "SPECTRAL PURITY (printed p. 320), sine, kind OTHER (limits in dBc, \"<=\" rows): harmonic distortion < 3 Vpp / > 3 Vpp: DC - 1 MHz -60 / -55 dBc, 1 - 5 MHz -57 / -45 dBc, 5 - 80 MHz -37 / -30 dBc (footnote 2: low amplitudes limited by a -70 dBm floor); total harmonic distortion DC to 20 kHz < 0.2 % + 0.1 mVrms; spurious (non-harmonic) DC - 1 MHz -60 dBc, 1 - 20 MHz -50 dBc, 20 - 80 MHz -50 dBc + 6 dBc/octave (footnote 3: limited by a -75 dBm floor). The 6 dBc/octave slope is only in the row text; the stored number is -50 dBc. \"3 Vpp\" itself sits in both columns of the printed table (< 3 / > 3): stored as 0 - 3 Vpp and 3 - 10 Vpp.",
+  "13": "TYPICAL ONLY, NOT STORED: phase noise (30 kHz band) < -65 dBc at 10 MHz and < -47 dBc at 80 MHz (printed \"typical\"); waveform output impedance 50 ohm typical. Other printed items not stored: arbitrary waveform length / sample rate / memory, configuration and arb download times, trigger input / output, burst, sweep, modulation, phase offset (range -360 deg to +360 deg, resolution 0.001 deg; no accuracy printed), clock reference (external lock 10 MHz +/- 35 kHz; internal reference output 10 MHz, 632 mVpp), sync output, general specifications."
+ },
+ "limits": [
+  {
+   "function": "Frequency",
+   "limit": "Accuracy (1 year) +/-2 ppm 18 - 28 degC, +/-3 ppm 0 - 55 degC; range sine / square 1 uHz - 80 MHz, ramp 1 MHz, pulse 500 uHz - 50 MHz, arb 25 MHz; resolution 1 uHz (pulse 5 digits).",
+   "page": "321"
+  },
+  {
+   "function": "Voltage, AC / Flatness",
+   "limit": "Into 50 ohm: 10 mVpp to 10 Vpp; accuracy at 1 kHz, >10 mVpp, Autorange On +/-(1 % + 1 mVpp); flatness rel. to 1 kHz <10 MHz +/-1 %, 10 - 50 MHz +/-2 %, 50 - 80 MHz +/-5 %.",
+   "page": "322"
+  },
+  {
+   "function": "Voltage, DC [Offset]",
+   "limit": "+/-5 Vpk ac + dc into 50 ohm; accuracy 1 % of setting + 2 mV + 0.5 % of amplitude.",
+   "page": "322"
+  },
+  {
+   "function": "Pulse",
+   "limit": "Period 20.00 ns to 2000.0 s; width 8.0 ns to 1999.9 s; variable edge time 5.00 ns to 1.00 ms; overshoot < 5 %; jitter (rms) 100 ppm + 50 ps. No accuracy printed for period / width / edge.",
+   "page": "321"
+  },
+  {
+   "function": "Square wave",
+   "limit": "Rise / fall < 8 ns; overshoot < 5 %; asymmetry 1 % of period + 1 ns; duty cycle 20 - 80 % (<= 25 MHz), 40 - 60 % (25 - 50 MHz), 50 % fixed (50 - 80 MHz).",
+   "page": "321"
+  }
+ ],
+ "functions": [
+  {
+   "name": "Frequency",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "1 µHz to 80 MHz (18 °C to 28 °C)",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1e-06,
+       "hi": 80000000.0,
+       "unit": "Hz",
+       "text": "1 µHz to 80 MHz",
+       "annot": "",
+       "notes": [
+        4
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 2e-06,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 ppm I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FREQ",
+     "variant": "",
+     "amp_lo": 1e-06,
+     "amp_hi": 80000000.0,
+     "unit": "Hz",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "1 µHz to 80 MHz (18 °C to 28 °C)"
+    }
+   ]
+  },
+  {
+   "name": "Voltage, AC [Sinewave into 50 Ohm, Vpp]",
+   "direction": "output",
+   "page": 322,
+   "ranges": [
+    {
+     "label": "10 mVpp to 10 Vpp @ 1 kHz (printed accuracy)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "10 mVpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        3,
+        5
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000.0,
+       "hi": 1000.0,
+       "unit": "Hz",
+       "text": "1 kHz to 1 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.001,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1 % I.V. + 1 mVpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Sinewave into 50 Ohm, Vpp",
+     "amp_lo": 0.01,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 1000.0,
+     "freq_hi": 1000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "10 mVpp to 10 Vpp @ 1 kHz (printed accuracy)"
+    },
+    {
+     "label": "10 mVpp to 10 Vpp @ 1 µHz to 999.999999 Hz (accuracy + flatness)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "10 mVpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        3,
+        5,
+        6,
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1e-06,
+       "hi": 999.999999,
+       "unit": "Hz",
+       "text": "1 µHz to 0.999999999 kHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.001,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 1 mVpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Sinewave into 50 Ohm, Vpp",
+     "amp_lo": 0.01,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 1e-06,
+     "freq_hi": 999.999999,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "10 mVpp to 10 Vpp @ 1 µHz to 999.999999 Hz (accuracy + flatness)"
+    },
+    {
+     "label": "10 mVpp to 10 Vpp @ 1000.000001 Hz to 10 MHz (accuracy + flatness)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "10 mVpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        3,
+        5,
+        6,
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000.000001,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "1.000000001 kHz to 10 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.001,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V. + 1 mVpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Sinewave into 50 Ohm, Vpp",
+     "amp_lo": 0.01,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 1000.000001,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "10 mVpp to 10 Vpp @ 1000.000001 Hz to 10 MHz (accuracy + flatness)"
+    },
+    {
+     "label": "10 mVpp to 10 Vpp @ 10 MHz to 50 MHz (accuracy + flatness)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "10 mVpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        3,
+        5,
+        6,
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 50000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 50 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.03,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.001,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(3 % I.V. + 1 mVpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Sinewave into 50 Ohm, Vpp",
+     "amp_lo": 0.01,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 10000000.0,
+     "freq_hi": 50000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "10 mVpp to 10 Vpp @ 10 MHz to 50 MHz (accuracy + flatness)"
+    },
+    {
+     "label": "10 mVpp to 10 Vpp @ 50 MHz to 80 MHz (accuracy + flatness)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "10 mVpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        3,
+        5,
+        6,
+        7
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 50000000.0,
+       "hi": 80000000.0,
+       "unit": "Hz",
+       "text": "50 MHz to 80 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.06,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.001,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(6 % I.V. + 1 mVpp)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "ACV",
+     "variant": "Sinewave into 50 Ohm, Vpp",
+     "amp_lo": 0.01,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 50000000.0,
+     "freq_hi": 80000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "10 mVpp to 10 Vpp @ 50 MHz to 80 MHz (accuracy + flatness)"
+    }
+   ]
+  },
+  {
+   "name": "Flatness [Sinewave relative to 1 kHz, 50 Ohm]",
+   "direction": "output",
+   "page": 322,
+   "ranges": [
+    {
+     "label": "10 mVpp to 10 Vpp, below 10 MHz (0.1 dB)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "10 mVpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1e-06,
+       "hi": 10000000.0,
+       "unit": "Hz",
+       "text": "1 µHz to 10 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Sinewave relative to 1 kHz, 50 Ohm",
+     "amp_lo": 0.01,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 1e-06,
+     "freq_hi": 10000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "10 mVpp to 10 Vpp, below 10 MHz (0.1 dB)"
+    },
+    {
+     "label": "10 mVpp to 10 Vpp, 10 MHz to 50 MHz (0.2 dB)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "10 mVpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 10000000.0,
+       "hi": 50000000.0,
+       "unit": "Hz",
+       "text": "10 MHz to 50 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.02,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(2 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Sinewave relative to 1 kHz, 50 Ohm",
+     "amp_lo": 0.01,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 10000000.0,
+     "freq_hi": 50000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "10 mVpp to 10 Vpp, 10 MHz to 50 MHz (0.2 dB)"
+    },
+    {
+     "label": "10 mVpp to 10 Vpp, 50 MHz to 80 MHz (0.4 dB)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.01,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "10 mVpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        6
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 50000000.0,
+       "hi": 80000000.0,
+       "unit": "Hz",
+       "text": "50 MHz to 80 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0,
+       "unit": "Vpp",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(5 % I.V.)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "FLAT",
+     "variant": "Sinewave relative to 1 kHz, 50 Ohm",
+     "amp_lo": 0.01,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 50000000.0,
+     "freq_hi": 80000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "10 mVpp to 10 Vpp, 50 MHz to 80 MHz (0.4 dB)"
+    }
+   ]
+  },
+  {
+   "name": "Voltage, DC [Offset, DC Volts waveform, 50 Ohm]",
+   "direction": "output",
+   "page": 322,
+   "ranges": [
+    {
+     "label": "-5 V to 5 V (amplitude 0)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": -5.0,
+       "hi": 5.0,
+       "unit": "V",
+       "text": "-5 V to 5 V",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.002,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1 % I.V. + 2 mV)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "DCV",
+     "variant": "Offset, DC Volts waveform, 50 Ohm",
+     "amp_lo": -5.0,
+     "amp_hi": 5.0,
+     "unit": "V",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "-5 V to 5 V (amplitude 0)"
+    }
+   ]
+  },
+  {
+   "name": "Voltage, DC [Offset under a waveform, 50 Ohm]",
+   "direction": "output",
+   "page": 322,
+   "ranges": [
+    {
+     "label": "-5 V to 5 V (amplitude up to 10 Vpp)",
+     "page": 322,
+     "params": [
+      {
+       "tag": "",
+       "lo": -5.0,
+       "hi": 5.0,
+       "unit": "V",
+       "text": "-5 V to 5 V",
+       "annot": "",
+       "notes": [
+        8
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.005,
+       "fs_value": 10.0,
+       "abs": 0.002,
+       "unit": "V",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1 % I.V. + 2 mV + 0.5 % F.S.{\"Full Scale\" = 10 Vpp})"
+      }
+     ],
+     "raw_other": [],
+     "kind": "DCV",
+     "variant": "Offset under a waveform, 50 Ohm",
+     "amp_lo": -5.0,
+     "amp_hi": 5.0,
+     "unit": "V",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "-5 V to 5 V (amplitude up to 10 Vpp)"
+    }
+   ]
+  },
+  {
+   "name": "Rise Time [Square wave into 50 Ohm]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "Rise / fall time, square wave",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 0.0,
+       "unit": "s",
+       "text": "0 s to 0 s",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 8e-09,
+       "unit": "s",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(8 ns)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "RISE",
+     "variant": "Square wave into 50 Ohm",
+     "amp_lo": 0.0,
+     "amp_hi": 0.0,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "Rise / fall time, square wave"
+    }
+   ]
+  },
+  {
+   "name": "Time [Square wave Asymmetry]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "Period 12.5 ns to 1,000,000 s",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.25e-08,
+       "hi": 1000000.0,
+       "unit": "s",
+       "text": "12.5 ns to 1 Ms",
+       "annot": "",
+       "notes": [
+        9
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.01,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 1e-09,
+       "unit": "s",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(1 % I.V. + 1 ns)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Square wave Asymmetry",
+     "amp_lo": 1.25e-08,
+     "amp_hi": 1000000.0,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "Period 12.5 ns to 1,000,000 s"
+    }
+   ]
+  },
+  {
+   "name": "Time [Square wave Jitter (rms), below 2 MHz]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "Period 500 ns to 1,000,000 s (below 2 MHz)",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 5e-07,
+       "hi": 1000000.0,
+       "unit": "s",
+       "text": "500 ns to 1 Ms",
+       "annot": "",
+       "notes": [
+        9,
+        10
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 5.25e-10,
+       "unit": "s",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.01 % I.V. + 525 ps)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Square wave Jitter (rms), below 2 MHz",
+     "amp_lo": 5e-07,
+     "amp_hi": 1000000.0,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "Period 500 ns to 1,000,000 s (below 2 MHz)"
+    }
+   ]
+  },
+  {
+   "name": "Time [Square wave Jitter (rms), 2 MHz and above]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "Period 12.5 ns to 500 ns (2 MHz and above)",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1.25e-08,
+       "hi": 5e-07,
+       "unit": "s",
+       "text": "12.5 ns to 500 ns",
+       "annot": "",
+       "notes": [
+        9,
+        10
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 7.5e-11,
+       "unit": "s",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(0.1 % I.V. + 75 ps)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Square wave Jitter (rms), 2 MHz and above",
+     "amp_lo": 1.25e-08,
+     "amp_hi": 5e-07,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "Period 12.5 ns to 500 ns (2 MHz and above)"
+    }
+   ]
+  },
+  {
+   "name": "Time [Pulse Jitter (rms)]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "Period 20 ns to 2000 s",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 2e-08,
+       "hi": 2000.0,
+       "unit": "s",
+       "text": "20 ns to 2 ks",
+       "annot": "",
+       "notes": [
+        10,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0001,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 5e-11,
+       "unit": "s",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(100 ppm I.V. + 50 ps)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Pulse Jitter (rms)",
+     "amp_lo": 2e-08,
+     "amp_hi": 2000.0,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "Period 20 ns to 2000 s"
+    }
+   ]
+  },
+  {
+   "name": "Time [Arb Jitter (rms)]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "Period 40 ns to 1,000,000 s",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 4e-08,
+       "hi": 1000000.0,
+       "unit": "s",
+       "text": "40 ns to 1 Ms",
+       "annot": "",
+       "notes": [
+        10,
+        11
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 3e-05,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 2.5e-09,
+       "unit": "s",
+       "le": false,
+       "raw": "[1 yr] Accuracy: +/-(30 ppm I.V. + 2.5 ns)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "TIME",
+     "variant": "Arb Jitter (rms)",
+     "amp_lo": 4e-08,
+     "amp_hi": 1000000.0,
+     "unit": "s",
+     "freq_lo": null,
+     "freq_hi": null,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "Period 40 ns to 1,000,000 s"
+    }
+   ]
+  },
+  {
+   "name": "Sinewave Spectral Purity [Harmonic Distortion]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "< 3 Vpp, DC to 1 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 3.0,
+       "unit": "Vpp",
+       "text": "0 Vpp to 3 Vpp",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -60.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-60 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 3.0,
+     "unit": "Vpp",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "< 3 Vpp, DC to 1 MHz"
+    },
+    {
+     "label": "> 3 Vpp, DC to 1 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "3 Vpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -55.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-55 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 3.0,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "> 3 Vpp, DC to 1 MHz"
+    },
+    {
+     "label": "< 3 Vpp, 1 MHz to 5 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 3.0,
+       "unit": "Vpp",
+       "text": "0 Vpp to 3 Vpp",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000000.0,
+       "hi": 5000000.0,
+       "unit": "Hz",
+       "text": "1 MHz to 5 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -57.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-57 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 3.0,
+     "unit": "Vpp",
+     "freq_lo": 1000000.0,
+     "freq_hi": 5000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "< 3 Vpp, 1 MHz to 5 MHz"
+    },
+    {
+     "label": "> 3 Vpp, 1 MHz to 5 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "3 Vpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 1000000.0,
+       "hi": 5000000.0,
+       "unit": "Hz",
+       "text": "1 MHz to 5 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -45.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-45 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 3.0,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 1000000.0,
+     "freq_hi": 5000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "> 3 Vpp, 1 MHz to 5 MHz"
+    },
+    {
+     "label": "< 3 Vpp, 5 MHz to 80 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 3.0,
+       "unit": "Vpp",
+       "text": "0 Vpp to 3 Vpp",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000000.0,
+       "hi": 80000000.0,
+       "unit": "Hz",
+       "text": "5 MHz to 80 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -37.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-37 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 0.0,
+     "amp_hi": 3.0,
+     "unit": "Vpp",
+     "freq_lo": 5000000.0,
+     "freq_hi": 80000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "< 3 Vpp, 5 MHz to 80 MHz"
+    },
+    {
+     "label": "> 3 Vpp, 5 MHz to 80 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 3.0,
+       "hi": 10.0,
+       "unit": "Vpp",
+       "text": "3 Vpp to 10 Vpp",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      },
+      {
+       "tag": "",
+       "lo": 5000000.0,
+       "hi": 80000000.0,
+       "unit": "Hz",
+       "text": "5 MHz to 80 MHz",
+       "annot": "",
+       "notes": []
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -30.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-30 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": 3.0,
+     "amp_hi": 10.0,
+     "unit": "Vpp",
+     "freq_lo": 5000000.0,
+     "freq_hi": 80000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "> 3 Vpp, 5 MHz to 80 MHz"
+    }
+   ]
+  },
+  {
+   "name": "Sinewave Spectral Purity [Total Harmonic Distortion]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "DC to 20 kHz (0.1 mV is rms)",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 20000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 20 kHz",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.002,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": 0.0001,
+       "unit": "V",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(0.2 % I.V. + 0.1 mV)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 0.0,
+     "freq_hi": 20000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "DC to 20 kHz (0.1 mV is rms)"
+    }
+   ]
+  },
+  {
+   "name": "Sinewave Spectral Purity [Spurious (non-harmonic)]",
+   "direction": "output",
+   "page": 321,
+   "ranges": [
+    {
+     "label": "DC to 1 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 0.0,
+       "hi": 1000000.0,
+       "unit": "Hz",
+       "text": "0 Hz to 1 MHz",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -60.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-60 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 0.0,
+     "freq_hi": 1000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "DC to 1 MHz"
+    },
+    {
+     "label": "1 MHz to 20 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 1000000.0,
+       "hi": 20000000.0,
+       "unit": "Hz",
+       "text": "1 MHz to 20 MHz",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -50.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-50 dBc)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 1000000.0,
+     "freq_hi": 20000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "1 MHz to 20 MHz"
+    },
+    {
+     "label": "20 MHz to 80 MHz",
+     "page": 321,
+     "params": [
+      {
+       "tag": "",
+       "lo": 20000000.0,
+       "hi": 80000000.0,
+       "unit": "Hz",
+       "text": "20 MHz to 80 MHz",
+       "annot": "",
+       "notes": [
+        12
+       ]
+      }
+     ],
+     "specs": [
+      {
+       "period": "1 yr",
+       "rel": 0.0,
+       "fs_rel": 0.0,
+       "fs_value": 0.0,
+       "abs": -50.0,
+       "unit": "dBc",
+       "le": true,
+       "raw": "[1 yr] Accuracy: <=(-50 dBc + 6 dBc/octave)"
+      }
+     ],
+     "raw_other": [],
+     "kind": "OTHER",
+     "variant": "",
+     "amp_lo": null,
+     "amp_hi": null,
+     "unit": "",
+     "freq_lo": 20000000.0,
+     "freq_hi": 80000000.0,
+     "qualifiers": [],
+     "range_max": null,
+     "resolution": null,
+     "res_src": "",
+     "printed": "20 MHz to 80 MHz"
+    }
+   ]
+  }
+ ],
+ "problems": [
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Source: Agilent 33250A User's Guide, 33250-90002 Edition 2 (March 2003), Chapter 8, printed pp. 319-323. Row 'page' fields are PDF page numbers (printed page + 1). Read from rendered images, each block twice."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Period \"1 yr\" (the manual states the accuracy for 1 year and a 1 year calibration interval). No confidence level / k is printed: stored with no level, divisor 2 (laboratory convention). ASSUMED."
+  },
+  {
+   "level": "warn",
+   "where": "Frequency",
+   "what": "The manual prints no separate ageing / stability figure for the 10 MHz time base; only \"Accuracy (1 year) 2 ppm, 18 - 28 degC; 3 ppm, 0 - 55 degC\". The 3 ppm figure is in the notes only; the lab temperature range is assumed to be 18 - 28 degC."
+  },
+  {
+   "level": "warn",
+   "where": "Voltage, AC [Sinewave into 50 Ohm, Vpp]",
+   "what": "DERIVED: the frequency-band rows add the printed flatness to the printed 1 kHz accuracy (arithmetic sum, 2 % / 3 % / 6 % + 1 mVpp); the manual does not print the combination. The 1 kHz row is the printed figure."
+  },
+  {
+   "level": "warn",
+   "where": "Voltage, AC [Sinewave into 50 Ohm, Vpp]",
+   "what": "Unit Vpp as printed: the rows are EXCLUDED from a plain AC volts lookup (specmanager.DEFAULT_VARIANT excludes \"vpp\", a value in V rms would match the wrong band); ask for variant \"Vpp\". \">10 mVpp\" is printed for the accuracy; the 10 mVpp lower edge is stored."
+  },
+  {
+   "level": "warn",
+   "where": "Voltage, AC [Sinewave into 50 Ohm, Vpp]",
+   "what": "Band edges 999.999999 Hz and 1000.000001 Hz (1 uHz either side of 1 kHz) keep exactly 1 kHz on the printed row; the lower edge of \"<10 MHz\" is not printed (1 uHz assumed)."
+  },
+  {
+   "level": "warn",
+   "where": "Voltage, DC [Offset under a waveform, 50 Ohm]",
+   "what": "The \"0.5 % of amplitude\" term depends on the waveform amplitude, which the sheet cannot hold per point: bounded at the 10 Vpp maximum (50 mV). UNVERIFIED that \"amplitude\" means the Vpp setting. A plain DCV lookup returns this larger row."
+  },
+  {
+   "level": "warn",
+   "where": "Voltage, DC [Offset, DC Volts waveform, 50 Ohm]",
+   "what": "ASSUMED: the DC Volts waveform has amplitude 0, so the amplitude term is 0. The manual does not say so."
+  },
+  {
+   "level": "warn",
+   "where": "Time",
+   "what": "Jitter (rms) rows are one-sigma standard deviations stored as +/-(...) magnitudes; \"%\" of the period is ASSUMED for the jitter terms (the manual says \"of period\" only for asymmetry). A budget dividing by the divisor would halve an already-standard figure."
+  },
+  {
+   "level": "warn",
+   "where": "Time",
+   "what": "The manual prints NO accuracy for pulse width, period, edge time or duty cycle (ranges and resolution digits only): none stored (see \"limits\"). Owner to say whether a pulse-width accuracy is wanted from the service guide."
+  },
+  {
+   "level": "warn",
+   "where": "Rise Time [Square wave into 50 Ohm]",
+   "what": "Printed \"< 8 ns\" (footnote 4: decreased at higher frequency), stored as \"<=\" 8 ns, value range 0 (the 5522A rise-time convention)."
+  },
+  {
+   "level": "warn",
+   "where": "Sinewave Spectral Purity",
+   "what": "Kind OTHER, \"<=\" limits in dBc (the 8563E convention); the 20 - 80 MHz spurious slope \"+ 6 dBc/octave\" is in the text only; THD stored as 0.2 % + 0.1 mV (rms). Phase noise is \"typical\" in the manual and is NOT stored."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "NOT STORED (printed, no accuracy or typical only): resolution (frequency 1 uHz, pulse 5 digits; amplitude 0.1 mV or 4 digits), phase offset, amplitude / frequency / period / pulse width / edge time ranges, phase noise (typical), impedance (50 ohm typical), trigger, burst, sweep, modulation, reference clock, sync, configuration and download times, general specifications (see notes 11 and 13)."
+  },
+  {
+   "level": "warn",
+   "where": "standard",
+   "what": "Confidence level is not specified on the sheet; set the coverage divisor in the manager before relying on this standard."
+  }
+ ]
+}

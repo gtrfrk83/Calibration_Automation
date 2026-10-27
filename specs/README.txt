@@ -41,6 +41,7 @@ Included
                             standards 'input': DC volts, resistance (4-wire / 2-wire math null; 2-wire without null +0.2 ohm), DC and AC current, AC volts, capacitance, frequency (sine and square wave); '% of reading + % of range'
                             (range = range name); periods 90 day / 1 yr / 2 yr, default 1 yr (the 24 hour column is not stored); printed 'compliant to ISO/IEC 17025 for k = 2' -> stored 95 %, divisor 2;
                             written by build_34461a_standard.py / build_34465a_standard.py on truevolt_standard_engine.py (read from rendered page images). No driver.
+  standards/agilent_33250a_standard.json  Agilent 33250A 80 MHz function / arbitrary waveform generator as a STANDARD (stimulus source), 1 yr, from the User's Guide 33250-90002 Ed. 2 Chapter 8 (printed pp. 319-323), built by build_33250a_standard.py; no confidence level printed (divisor 2)
   standards/a2la_5500a_coil_standard.json  the lab's own A2LA scope CMC lines for the Fluke 5500A/COIL as a standards sheet 'A2LA-5500A-COIL' (cert. 1888.03): DC Current - Generate (2 to 20) A 90 uA/A + 0.1 mA,
                             (20 to 120) A 80 uA/A + 8 mA, (120 to 3000) A 0.8 % + 0.08 A (p. 9, Transconductance amplifier/coil) and AC Current - Generate, Clamp-On Only (20.5 to 1025) A, 45-65 Hz 0.8 %,
                             65-440 Hz 0.99 % (p. 30, Multifunction calibrator/coil); 95 % (k = 2); written by build_coil_standard.py (read from the rendered page images). The coil datasheet

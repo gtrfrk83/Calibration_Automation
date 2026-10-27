@@ -42,7 +42,7 @@ class Dmm(M):
         cls.res = cls.m.match(cls.ds)
 
     def test_every_standard_is_considered(self):
-        self.assertEqual(self.res.standards, ['34461A', '34465A', '3458A', '5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL', 'A2LA-LIGHT', 'T-10A', '53131A', '53132A'])
+        self.assertEqual(self.res.standards, ['33250A', '34461A', '34465A', '3458A', '5520A', '5522A', '5560A', '5790B', '8563E', '8902A', '96270A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL', 'A2LA-LIGHT', 'T-10A', '53131A', '53132A'])
 
     def test_dc_volts_all_covered_and_automatable(self):
         s = self.res.summary()['dcv']
@@ -60,8 +60,8 @@ class Dmm(M):
                 self.assertEqual(cov, [], a.point_id)
                 continue
             self.assertEqual(a.standard, cov[0].standard)
-            buckets = [dm._tur_bucket(c) for c in cov]
-            self.assertEqual(buckets, sorted(buckets, reverse=True), a.point_id)
+            buckets = [(0 if c.driver else 1, -dm._tur_bucket(c)) for c in cov]          # driver-backed first (matcher rule), then the best TUR bucket
+            self.assertEqual(buckets, sorted(buckets), a.point_id)
             self.assertEqual([c.rank for c in cov], list(range(1, len(cov) + 1)))
         # an exact TUR tie falls back to the lab default (5560A before 5522A for multimeters)
         tie = [dm.Candidate('5522A', True, tur=4.21), dm.Candidate('5560A', True, tur=4.24)]
@@ -342,7 +342,7 @@ class DriverlessLast(M):
 class Drivers(M):
     def test_driver_table_lists_every_standard_and_what_it_can_do(self):
         rows = {r['model']: r for r in dm.driver_table(DB)}
-        self.assertEqual(set(rows), {'34461A', '34465A', '3458A', '5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A', 'A2LA-LIGHT', 'T-10A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL'})
+        self.assertEqual(set(rows), {'33250A', '34461A', '34465A', '3458A', '5520A', '5522A', '5560A', '5790B', '53131A', '53132A', '96270A', '8563E', '8902A', 'A2LA-LIGHT', 'T-10A', 'A2LA-5500A-COIL', 'A2LA-CURRENT-AMP-COIL'})
         self.assertEqual(rows['5522A']['driver'], 'Fluke5522A')
         self.assertEqual(rows['5522A']['scope_driver'], 'Fluke5522AScope')
         self.assertEqual(rows['5522A']['functions']['DCV']['status'], 'ok')
