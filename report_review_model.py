@@ -27,6 +27,7 @@ LABELS = {'5560A': 'Fluke 5560A', '5522A': 'Fluke 5522A', '5520A': 'Fluke 5520A'
 LOCKED_FREQUENCY = 'Lab frequency'
 
 AS_BUDGETED, RAISED, NOT_IN_SCOPE, CHANGED, NO_UNC = 'As budgeted', 'Raised to scope', 'Not in scope', 'Standard changed', 'No uncertainty required'
+ASSIGNED = 'Assigned in the field'          # a value the technician assigned in the field (field_uncertainty.py); not part of STATUSES (the Tk window's pills)
 MANUAL = 'Manual (not in scope)'
 STATUSES = (AS_BUDGETED, RAISED, NOT_IN_SCOPE, CHANGED, MANUAL)
 FILTERS = ('All', 'Needs attention', 'Changed by me')
@@ -294,6 +295,7 @@ class Row:
         self.spec = spec
         self.manual = None                     # standard chosen for this row by the person (model key), or None
         self.typed = None                      # a typed uncertainty (dict) for a row the lab scope does not cover, or None
+        self.assigned = None                   # an uncertainty assigned in the field (a field_uncertainty row dict) that will print for this point, or None
         self.base = evaluate(spec, spec.default_std)
         self.cur = self.base
         self.follow(default_std)
@@ -341,6 +343,8 @@ class Row:
     def status(self) -> str:
         if self.typed is not None:
             return MANUAL
+        if self.assigned is not None:
+            return ASSIGNED
         if self.std_changed and self.cur.status != NOT_IN_SCOPE and self.cur.status != NO_UNC:
             return CHANGED
         return self.cur.status
@@ -350,17 +354,34 @@ class Row:
         """What the PDF will print for the Uncertainty cell: the engine's own text for an untouched row."""
         if self.typed is not None:
             return self.typed['display']
+        if self.assigned is not None:
+            return f'{self.assigned["display"]} (assigned in the field)'
         return self.cur.unc_text if self.std_changed else (self.spec.printed.get('Uncertainty', self.cur.unc_text))
 
     @property
     def tur_text(self) -> str:
         if self.typed is not None:
             return self.typed['tur']
+        if self.assigned is not None:
+            return self.assigned_tur()
         return self.cur.tur if self.std_changed else (self.spec.printed.get('TUR') or self.cur.tur)
+
+    def assigned_tur(self) -> str:
+        """TUR of an assigned value: the half-width of this point's limits over the assigned value, in the same unit (else blank)."""
+        try:
+            import field_uncertainty as F
+            import tartur
+            a, s = self.assigned, self.spec
+            tol = tartur.half_width(s.low, s.high)
+            if not tol or F.canon_unit(s.unit) != F.canon_unit(a['unit']):
+                return ''
+            return tartur.format_ratio(tartur.from_values(tol, s.unit, None, None, float(a['value']), s.unit).get('tur'))
+        except Exception:
+            return ''
 
     @property
     def tar_text(self) -> str:
-        if self.typed is not None:
+        if self.typed is not None or self.assigned is not None:
             return ''
         return self.cur.tar if self.std_changed else self.spec.printed.get('TAR', self.cur.tar)
 

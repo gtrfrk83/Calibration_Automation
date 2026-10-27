@@ -184,6 +184,16 @@ def apply_uncertainty_review(rows, details, header=None):
         return rows
 
 
+def apply_field_assignments(rows, details, header=None, demo=False, reprint=False):
+    """(rows, details, notes) with the uncertainties a technician assigned in the field (field_uncertainty.py) put into rows that print none.  The SAME rows and details
+    objects come back when nothing applies, so a report with no assignment is byte-identical to what it always was.  Never raises."""
+    try:
+        import field_uncertainty
+        return field_uncertainty.apply_to_rows(rows, details, header, demo=demo, reprint=reprint)
+    except Exception:
+        return rows, details, []
+
+
 def _fonts():
     """(regular, bold, embedded). Embeds Arial/Liberation/DejaVu when found so the micro sign always prints;
     otherwise falls back to the built-in Helvetica (the viewer substitutes a font for the micro sign)."""
@@ -417,6 +427,7 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
         order.setdefault(row.get('Section') or '', len(order))
     rows = sorted(rows, key=lambda r: order[r.get('Section') or ''])
     details = details or {}
+    rows, details, field_notes = apply_field_assignments(rows, details, header, demo=demo, reprint=bool(reprint_note or issued_at or not record_history))      # a reprint (note, original issue date, or no history) never looks anything up; uncertainties assigned in the field (marked, with a footnote)
     columns = COLUMNS
     selected = details_tar_tur(details) if show_tar_tur is None else as_tar_tur(show_tar_tur)
     extra = shown_tar_tur_columns(rows, selected)
@@ -548,6 +559,11 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
     if show_tar_tur:                                   # only when the optional columns are on
         story += [Spacer(1, 6), Paragraph(clean(tar_tur_definition(shown_sel)), meta)]
 
+    if field_notes:                                    # only when a point carries an uncertainty assigned in the field: other reports are unchanged
+        import field_uncertainty
+        story.append(Spacer(1, 8))
+        for kind, text in field_uncertainty.footnote_lines(field_notes):
+            story.append(Paragraph(clean(text), section_style if kind == 'head' else meta if kind == 'intro' else small))
     if mods:                                           # only when the run had overrides: unmodified reports are unchanged
         story += [Spacer(1, 8), Paragraph('Procedure modifications', section_style)]
         mdata = [[Paragraph(c, head_style) for c in ('Kind', 'Item', 'Factory', 'Used', 'Ver', 'Reason', 'Date')]]
@@ -620,6 +636,12 @@ def write_calibration_pdf(path, rows, header=None, title='Calibration Data', dem
             run_id = labregistry.record_run(header, rows, details, report_file=path)
         except Exception:
             pass
+        if field_notes and run_id is not None:     # the asset and run an assignment was first printed on (set once)
+            try:
+                import field_uncertainty
+                field_uncertainty.mark_used([n['id'] for n in field_notes if n.get('id') is not None], dict(header).get('Instrument ID', ''), run_id)
+            except Exception:
+                pass
         try:                                       # the snapshot that lets Asset History print this report again (report_snapshot.py)
             import report_snapshot
             report_snapshot.record_issued(run_id, header=header, rows=rows, title=title, details=details, footer_note=footer_note,

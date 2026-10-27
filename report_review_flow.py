@@ -16,7 +16,7 @@ import report_review_model as M
 
 UNAVAILABLE = object()
 COVERED = ('certificate_rows_and_points', 'certificate_pairs', 'certificate_source_records')       # multimeters / fgen, MDO4000C, TDS2000C / WaveSurfer
-SHORT = {'As budgeted': 'budgeted', 'Raised to scope': 'raised', 'Not in scope': 'not in scope', 'Standard changed': 'changed', M.MANUAL: 'manual'}
+SHORT = {'As budgeted': 'budgeted', 'Raised to scope': 'raised', 'Not in scope': 'not in scope', 'Standard changed': 'changed', M.MANUAL: 'manual', M.ASSIGNED: 'assigned'}
 
 
 def find_app(parent):
@@ -90,6 +90,7 @@ def build_models(parent, procedure='', app=None):
                 if not specs:
                     return UNAVAILABLE
                 models.append(M.ReviewModel(specs, default, asset=asset_of(app), procedure=procedure))
+                _field_annotate(models[-1], app)
         finally:
             if meters != [None] and keep is not None:
                 app._queue_activate(keep)
@@ -98,6 +99,16 @@ def build_models(parent, procedure='', app=None):
         print(f'report_review: using the plain report dialog ({type(exc).__name__}: {exc})', file=sys.stderr)
         return UNAVAILABLE
     return models, demo
+
+
+def _field_annotate(model, app):
+    """Mark the model for the 'Assign uncertainty' panel (field_uncertainty.annotate: which rows should carry an uncertainty and print none, and the stored assignment of each).
+    Never raises; a model it cannot annotate behaves exactly as before."""
+    try:
+        import field_uncertainty
+        field_uncertainty.annotate(model, app, is_demo(app))
+    except Exception:
+        pass
 
 
 def finish(models, details):
